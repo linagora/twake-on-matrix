@@ -5,20 +5,18 @@ class TwakeLinkView extends StatelessWidget {
   final Widget body;
   final Widget previewItemWidget;
   final String? firstValidUrl;
-  final bool isCaption;
 
   const TwakeLinkView({
     super.key,
     required this.body,
     required this.previewItemWidget,
     this.firstValidUrl,
-    this.isCaption = false,
   });
 
   @override
   Widget build(BuildContext context) {
     if (firstValidUrl == null) {
-      return _buildMessageBody(context);
+      return body;
     }
 
     return _buildMessageWithPreview(context);
@@ -29,24 +27,10 @@ class TwakeLinkView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Padding(
-          padding: isCaption
-              ? EdgeInsets.zero
-              : TwakeLinkViewStyle.previewItemPadding,
-          child: previewItemWidget,
-        ),
+        previewItemWidget,
         const SizedBox(height: TwakeLinkViewStyle.previewToBodySpacing),
-        _buildMessageBody(context),
+        body,
       ],
-    );
-  }
-
-  Widget _buildMessageBody(BuildContext context) {
-    return Padding(
-      padding: isCaption
-          ? EdgeInsets.zero
-          : TwakeLinkViewStyle.paddingMessageBody,
-      child: body,
     );
   }
 }

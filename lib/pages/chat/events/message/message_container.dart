@@ -2,7 +2,6 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/events/message/message.dart';
 import 'package:fluffychat/pages/chat/events/message/message_selected_widget.dart';
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:fluffychat/pages/chat/events/message/swipeable_message.dart';
 import 'package:fluffychat/pages/chat/optional_gesture_detector.dart';
@@ -52,7 +51,6 @@ class MessageContainer extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: ChatViewBodyStyle.chatScreenMaxWidth,
         ),
-        padding: MessageStyle.paddingMessage,
         alignment: Alignment.bottomCenter,
         child: SwipeableMessage(
           event: event,
@@ -68,8 +66,6 @@ class MessageContainer extends StatelessWidget {
                         Message.responsiveUtils.isDesktop(context)
                     ? 8.0
                     : 16.0,
-                top: 1.0,
-                bottom: 1.0,
               ),
               isEnabled: !selected,
               child: MessageSelectedWidget(

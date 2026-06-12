@@ -90,6 +90,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         ),
                       ),
                     ),
+                    const SizedBox(
+                      height: ChatViewBodyStyle.eventListBottomSpacing,
+                    ),
                     if (controller.canSendMessages) ...[
                       Center(
                         child: Container(

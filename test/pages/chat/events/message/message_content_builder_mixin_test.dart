@@ -236,7 +236,7 @@ Future<void> main() async {
           );
 
           const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 421.97491455078125,
+            totalMessageWidth: 388.375,
             isNeedAddNewLine: false,
           );
 
@@ -256,10 +256,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with name -> Done",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with name -&gt; Done</p>",
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -339,7 +339,7 @@ Future<void> main() async {
             room: room,
           );
           const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 421.97491455078125,
+            totalMessageWidth: 388.375,
             isNeedAddNewLine: false,
           );
           await runTest(
@@ -361,10 +361,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with name -> Done",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with name -&gt; Done</p>",
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -452,7 +452,7 @@ Future<void> main() async {
           );
 
           const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 398.12469482421875,
+            totalMessageWidth: 260.875,
             isNeedAddNewLine: false,
           );
 
@@ -472,10 +472,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvement for Printing email",
+                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvements for Printing emails",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvement for Printing email",
+                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvements for Printing emails",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -553,7 +553,7 @@ Future<void> main() async {
           );
 
           const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 398.12469482421875,
+            totalMessageWidth: 260.875,
             isNeedAddNewLine: false,
           );
 
@@ -575,10 +575,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvement for Printing email",
+                  "- Copy/Drop text from LibreOffice files to composer\n- Download PDF file from Chrome viewer\n- Download attachment for mobile\n- Small improvements for Printing emails",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvement for Printing email",
+                  "- Copy/Drop text from LibreOffice files to composer<br/>- Download PDF file from Chrome viewer<br/>- Download attachment for mobile<br/>- Small improvements for Printing emails",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',

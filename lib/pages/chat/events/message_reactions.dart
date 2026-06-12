@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:fluffychat/config/app_config.dart';
@@ -151,7 +152,7 @@ class ReactionsList extends StatelessWidget {
             child: Center(
               child: Text(
                 '+${reactionList.length - 3}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                style: LinagoraTextStyle.material().bodyMedium.copyWith(
                   color: LinagoraRefColors.material().neutral[50],
                 ),
               ),
@@ -431,7 +432,7 @@ class Reaction extends StatelessWidget {
                 '$count',
                 style:
                     countStyle ??
-                    Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    LinagoraTextStyle.material().bodyMedium.copyWith(
                       color: LinagoraRefColors.material().neutral[50],
                     ),
                 textAlign: TextAlign.center,

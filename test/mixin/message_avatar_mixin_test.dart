@@ -126,7 +126,7 @@ Future<void> main() async {
         expect(find.byType(Avatar), findsOneWidget);
       });
 
-      testWidgets('Should display Avatar when Own message in direct chat', (
+      testWidgets('Should return SizedBox when Own message in direct chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -138,11 +138,11 @@ Future<void> main() async {
           screenSize: webSize,
           isDirectChat: true,
         );
-        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
-        expect(find.byType(Avatar), findsOneWidget);
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
       });
 
-      testWidgets('Should return Avatar when Not my message in direct chat', (
+      testWidgets('Should return SizedBox when Not my message in direct chat', (
         WidgetTester tester,
       ) async {
         await runTest(
@@ -154,8 +154,8 @@ Future<void> main() async {
           screenSize: webSize,
           isDirectChat: true,
         );
-        verify(room.requestUser(event.senderId, ignoreErrors: true)).called(1);
-        expect(find.byType(Avatar), findsOneWidget);
+        verifyNever(room.requestUser(event.senderId, ignoreErrors: true));
+        expect(find.byType(SizedBox), findsOneWidget);
       });
 
       testWidgets('Should return Avatar when not my message in group chat', (

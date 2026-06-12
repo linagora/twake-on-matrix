@@ -245,17 +245,28 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
 
+    final hasReactionEvent = widget.event.hasReactionEvent(
+      timeline: widget.timeline,
+    );
     final rowChildren = <Widget>[
       if (!widget.event.shouldAlignOwnMessageInDifferentSide)
-        OptionalSelectionContainerDisabled(
-          isEnabled: PlatformInfos.isWeb,
-          child: placeHolderWidget(
-            widget.onAvatarTap,
-            event: widget.event,
-            sameSender: widget.event.isSameSenderWith(widget.previousEvent),
-            ownMessage: widget.event.isOwnMessage,
-            context: context,
-            selectMode: widget.selectMode,
+        Padding(
+          // Reactions hang below the bubble (overflowing by
+          // kMessageReactionsOverlayHeight). Lift the avatar by that amount so
+          // its bottom aligns with the bubble's bottom, not the reactions'.
+          padding: EdgeInsets.only(
+            bottom: hasReactionEvent ? kMessageReactionsOverlayHeight : 0,
+          ),
+          child: OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isWeb,
+            child: placeHolderWidget(
+              widget.onAvatarTap,
+              event: widget.event,
+              sameSender: widget.event.isSameSenderWith(widget.previousEvent),
+              ownMessage: widget.event.isOwnMessage,
+              context: context,
+              selectMode: widget.selectMode,
+            ),
           ),
         ),
       Expanded(
@@ -263,6 +274,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           event: widget.event,
           matrixState: widget.matrixState,
           nextEvent: widget.nextEvent,
+          previousEvent: widget.previousEvent,
           onSelect: widget.onSelect,
           scrollToEventId: widget.scrollToEventId,
           selected: widget.selected,
