@@ -8,10 +8,19 @@
 ///   actions (reply, forward) are tapped directly from the bar.
 ///
 /// Methods are added here as each `chat/*` test is migrated and validated
-/// web-green. Today only the forward path is covered (PR 9b).
+/// web-green.
 abstract class AbstractMessageMenuRobot {
   /// Opens the action menu for the bubble containing [message], triggers the
   /// Forward action, and waits until the Forward screen (`ForwardView`) is on
   /// screen.
   Future<void> openForward(String message);
+
+  /// Opens the action menu for [message] and taps Reply, leaving the composer
+  /// in reply mode (the caller then sends the reply).
+  Future<void> openReply(String message);
+
+  /// Opens the action menu for [message], taps Delete, and confirms the
+  /// deletion in the follow-up dialog (a native dialog on mobile, a Flutter
+  /// `AlertDialog` on web).
+  Future<void> openDelete(String message);
 }
