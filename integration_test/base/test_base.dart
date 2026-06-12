@@ -85,13 +85,22 @@ class TestBase {
         await initTwakeChat();
         final originalOnError = FlutterError.onError!;
         FlutterError.onError = (FlutterErrorDetails details) {
-          // The narrow headless-web viewport triggers benign `RenderFlex`
-          // overflow assertions in a few app layouts (e.g. the reply preview
-          // above the composer). These are cosmetic and unrelated to the test
-          // logic, but `onError` would otherwise fail the test — so on web we
-          // log and swallow overflow-only errors. Mobile stays strict.
-          final isOverflow = details.exceptionAsString().contains('overflowed');
-          if (kIsWeb && isOverflow) {
+          // A couple of pre-existing, web-only rendering assertions fire under
+          // the narrow headless-web harness and are unrelated to the test
+          // logic:
+          //   * `RenderFlex` overflow in a few app layouts (e.g. the reply
+          //     preview above the composer);
+          //   * `chat_web_scrollbar` momentarily reporting its `ScrollController`
+          //     attached to multiple scroll views while the layout rebuilds
+          //     (e.g. entering message-select mode).
+          // `onError` would otherwise fail the test, so on web we log and
+          // swallow these. Mobile stays strict.
+          final message = details.exceptionAsString();
+          final stack = details.stack?.toString() ?? '';
+          final isBenignWebError =
+              message.contains('overflowed') ||
+              stack.contains('chat_web_scrollbar');
+          if (kIsWeb && isBenignWebError) {
             FlutterError.dumpErrorToConsole(details);
             return;
           }

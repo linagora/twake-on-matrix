@@ -108,4 +108,14 @@ class WebMessageMenuRobot extends CoreRobot
     await $.pump(const Duration(milliseconds: 300));
     await $.pumpAndTrySettle();
   }
+
+  @override
+  Future<void> openEdit(String message) async {
+    await _tapOverflowItem(message, _l10n.edit);
+  }
+
+  @override
+  Future<void> openSelect(String message) async {
+    await _tapOverflowItem(message, _l10n.select);
+  }
 }

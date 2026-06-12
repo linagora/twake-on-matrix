@@ -103,31 +103,17 @@ void main() {
     },
   );
 
+  // Migrated to the cross-platform `scenarioBuilder` API (PR 9b-2b).
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test05"],
     description: 'edit a message with owner level',
-    test: ($) async {
-      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-
-      final editedSender = 'Edit$senderMsg';
-      await ChatScenario($).editMessage(senderMsg, editedSender);
-      await ChatScenario($).verifyMessageIsShown(editedSender, true);
-      await ChatScenario($).verifyMessageIsShown(senderMsg, false);
-    },
+    scenarioBuilder: ($, robots) => ChatGroupEditScenario($, robots),
   );
 
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test06"],
-    description: 'select a message in direct chat',
-    test: ($) async {
-      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-
-      await ChatScenario($).selectMessage(senderMsg);
-      await ChatScenario($).verifyTheDisplayInSelectedTextMode(senderMsg, 1);
-
-      await ChatScenario($).selectMessage(receiverMsg);
-      await ChatScenario($).verifyTheDisplayInSelectedTextMode(receiverMsg, 2);
-    },
+    description: 'select a message in a group chat',
+    scenarioBuilder: ($, robots) => ChatGroupSelectScenario($, robots),
   );
 
   // TestBase().runPatrolTest(
