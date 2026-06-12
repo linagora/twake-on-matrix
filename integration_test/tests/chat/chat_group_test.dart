@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
 import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
+import '../../scenarios/chat_group_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
 import '../../robots/home_robot.dart';
 import 'package:patrol/patrol.dart';
@@ -64,35 +65,17 @@ void main() {
     },
   );
 
+  // Migrated to the cross-platform `scenarioBuilder` API (PR 9b-2a).
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test02"],
-    description: 'reply a message in a direct chat',
-    test: ($) async {
-      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-
-      final replySender = 'reply sender at ${uniqueId()}';
-      final replyReceiver = 'reply receiver at ${uniqueId()}';
-
-      await ChatScenario($).replyMessage(senderMsg, replySender);
-      await ChatScenario($).verifyMessageIsShown(replySender, true);
-
-      await ChatScenario($).replyMessage(receiverMsg, replyReceiver);
-      await ChatScenario($).verifyMessageIsShown(replyReceiver, true);
-    },
+    description: 'reply a message in a group chat',
+    scenarioBuilder: ($, robots) => ChatGroupReplyScenario($, robots),
   );
 
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test03"],
-    description: 'delete a message in a direct chat',
-    test: ($) async {
-      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-
-      await ChatScenario($).deleteMessage(senderMsg);
-      await ChatScenario($).verifyMessageIsShown(senderMsg, false);
-
-      await ChatScenario($).deleteMessage(receiverMsg);
-      await ChatScenario($).verifyMessageIsShown(receiverMsg, false);
-    },
+    description: 'delete a message in a group chat',
+    scenarioBuilder: ($, robots) => ChatGroupDeleteScenario($, robots),
   );
 
   TestBase().runPatrolTest(
