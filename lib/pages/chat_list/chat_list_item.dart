@@ -17,7 +17,7 @@ import 'package:matrix/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
 
-class ChatListItem extends StatelessWidget with ChatListItemMixin {
+class ChatListItem extends StatefulWidget {
   final Room room;
   final bool activeChat;
   final bool isSelectedItem;
@@ -43,8 +43,27 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     super.key,
   });
 
+  @override
+  State<ChatListItem> createState() => _ChatListItemState();
+}
+
+class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
+  Future<List<User>>? _heroUsersFuture;
+
+  Room get room => widget.room;
+
+  bool get _isGroupChat => !room.isDirectChat;
+
+  @override
+  void initState() {
+    super.initState();
+    if (room.name.isEmpty) {
+      _heroUsersFuture = room.loadHeroUsers();
+    }
+  }
+
   void clickAction(BuildContext context) async {
-    if (onTap != null) return onTap!();
+    if (widget.onTap != null) return widget.onTap!();
     switch (room.membership) {
       case Membership.ban:
         TwakeSnackBar.show(
@@ -86,82 +105,89 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     }
   }
 
-  bool get _isGroupChat => !room.isDirectChat;
-
   @override
   Widget build(BuildContext context) {
-    final displayName = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)!),
-    );
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
-        isSelected: activeChat,
+        isSelected: widget.activeChat,
         onTap: () => clickAction(context),
-        onSecondaryTapDown: onSecondaryTapDown,
-        onLongPress: onLongPress,
+        onSecondaryTapDown: widget.onSecondaryTapDown,
+        onLongPress: widget.onLongPress,
         child: TwakeListItem(
-          child: Container(
-            height: ChatListItemStyle.chatItemHeight,
-            padding: ChatListItemStyle.paddingBody,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
-                Padding(
-                  padding: ChatListItemStyle.paddingAvatar,
-                  child: Stack(
-                    children: [
-                      Avatar(
-                        mxContent: room.avatar,
-                        name: displayName,
-                        onTap: onTapAvatar,
-                        keepAlive: true,
-                      ),
-                      if (_isGroupChat)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: ChatListItemStyle.paddingIconGroup,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            child: Icon(
-                              Icons.group,
-                              size: ChatListItemStyle.groupIconSize,
-                              color: room.isUnreadOrInvited
-                                  ? LinagoraSysColors.material()
-                                        .onSurfaceVariant
-                                  : LinagoraRefColors.material().tertiary[30],
-                            ),
+          child: FutureBuilder<List<User>>(
+            future: _heroUsersFuture,
+            builder: (context, _) {
+              final displayName = room.getLocalizedDisplayname(
+                MatrixLocals(L10n.of(context)!),
+              );
+              return Container(
+                height: ChatListItemStyle.chatItemHeight,
+                padding: ChatListItemStyle.paddingBody,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (widget.isEnableSelectMode)
+                      widget.checkBoxWidget ?? const SizedBox(),
+                    Padding(
+                      padding: ChatListItemStyle.paddingAvatar,
+                      child: Stack(
+                        children: [
+                          Avatar(
+                            mxContent: room.avatar,
+                            name: displayName,
+                            onTap: widget.onTapAvatar,
+                            keepAlive: true,
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ChatListItemTitle(
-                        room: room,
-                        originServerTs: switch (previewResult) {
-                          RoomPreviewFound(:final event) =>
-                            event.originServerTs,
-                          _ => null,
-                        },
+                          if (_isGroupChat)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: ChatListItemStyle.paddingIconGroup,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                                child: Icon(
+                                  Icons.group,
+                                  size: ChatListItemStyle.groupIconSize,
+                                  color: room.isUnreadOrInvited
+                                      ? LinagoraSysColors.material()
+                                            .onSurfaceVariant
+                                      : LinagoraRefColors.material()
+                                            .tertiary[30],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      ChatListItemSubtitle(
-                        room: room,
-                        previewResult: previewResult,
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ChatListItemTitle(
+                            room: room,
+                            originServerTs: switch (widget.previewResult) {
+                              RoomPreviewFound(:final event) =>
+                                event.originServerTs,
+                              _ => null,
+                            },
+                          ),
+                          ChatListItemSubtitle(
+                            room: room,
+                            previewResult: widget.previewResult,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
