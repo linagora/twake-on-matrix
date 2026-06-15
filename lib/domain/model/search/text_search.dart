@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+
+import 'normalization/diacritic_strip_step.dart';
 
 // To be used when applying a sequence of normalization steps to a string
 abstract class NormalizationStep {
@@ -12,26 +13,19 @@ class _LowerCaseStep implements NormalizationStep {
   String normalize(String input) => input.toLowerCase();
 }
 
-class _RemoveDiacriticsStep implements NormalizationStep {
-  const _RemoveDiacriticsStep();
-
-  @override
-  String normalize(String input) => input.removeDiacritics();
-}
-
 // This enum can be extended in the future when adding Fuzzy matching for example
 enum SearchMode { exact, substring }
 
 @immutable
 class SearchOptions {
-  final bool caseSensitive; // default: false (current behavior)
-  final bool diacriticSensitive; // default: false  (changed behavior)
-  final SearchMode mode; // default: SearchMode.substring
+  final bool caseSensitive;      // default: false (current behavior)
+  final bool diacriticSensitive; // default: true  (keeps current behavior)
+  final SearchMode mode;         // default: SearchMode.substring
   final List<NormalizationStep>? normalize; // optional override list
 
   const SearchOptions({
     this.caseSensitive = false,
-    this.diacriticSensitive = false,
+    this.diacriticSensitive = true,
     this.mode = SearchMode.substring,
     this.normalize,
   });
@@ -41,8 +35,8 @@ class SearchOptions {
 List<NormalizationStep> _buildPipeline(SearchOptions options) {
   if (options.normalize != null) return options.normalize!;
   return [
+    if (!options.diacriticSensitive) const DiacriticStripStep(),
     if (!options.caseSensitive) const _LowerCaseStep(),
-    if (!options.diacriticSensitive) const _RemoveDiacriticsStep(),
   ];
 }
 

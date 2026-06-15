@@ -65,10 +65,22 @@ void _testMatchAnyFieldDefaults() {
       expect(result, ['John Smith']);
     });
 
-    test('should match regardless of diacritics by default', () {
+    test('should preserve diacritics by default', () {
       final haystack = ['Élie', 'Bob'];
 
       final result = _search('elie', haystack);
+
+      expect(result, isEmpty);
+    });
+
+    test('should match regardless of diacritics when diacriticSensitive is false', () {
+      final haystack = ['Élie', 'Bob'];
+
+      final result = _search(
+        'elie',
+        haystack,
+        options: const SearchOptions(diacriticSensitive: false),
+      );
 
       expect(result, ['Élie']);
     });
@@ -170,8 +182,18 @@ void _testMatchesText() {
       expect(result, isTrue);
     });
 
-    test('should match regardless of diacritics by default', () {
+    test('should preserve diacritics by default', () {
       final result = matchesText('elie', 'Élie');
+
+      expect(result, isFalse);
+    });
+
+    test('should match regardless of diacritics when diacriticSensitive is false', () {
+      final result = matchesText(
+        'elie',
+        'Élie',
+        options: const SearchOptions(diacriticSensitive: false),
+      );
 
       expect(result, isTrue);
     });
