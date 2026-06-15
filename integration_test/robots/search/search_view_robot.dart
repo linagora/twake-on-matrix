@@ -2,11 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 
 import '../../base/core_robot.dart';
+import '../abstract/abstract_search_view_robot.dart';
 import '../search_robot.dart';
 import '../twake_list_item_robot.dart';
 
-class SearchViewRobot extends SearchRobot {
+class SearchViewRobot extends SearchRobot implements AbstractSearchViewRobot {
   SearchViewRobot(super.$);
+
+  @override
+  Future<bool> searchAndOpenRoom(String roomName) async {
+    final room = await searchRoom(roomName);
+    if (room == null) {
+      return false;
+    }
+    await openRoom(room);
+    return true;
+  }
 
   Future<List<TwakeListItemRobot>> getRoomsInSearch() async {
     final List<TwakeListItemRobot> rooms = [];

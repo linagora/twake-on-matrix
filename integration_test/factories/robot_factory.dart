@@ -2,11 +2,14 @@ import 'package:patrol/patrol.dart';
 
 import '../robots/abstract/abstract_chat_group_detail_robot.dart';
 import '../robots/abstract/abstract_chat_list_robot.dart';
+import '../robots/abstract/abstract_chat_profile_info_robot.dart';
 import '../robots/abstract/abstract_contact_list_robot.dart';
+import '../robots/abstract/abstract_group_information_robot.dart';
 import '../robots/abstract/abstract_home_robot.dart';
 import '../robots/abstract/abstract_language_setting_robot.dart';
 import '../robots/abstract/abstract_login_robot.dart';
 import '../robots/abstract/abstract_search_robot.dart';
+import '../robots/abstract/abstract_search_view_robot.dart';
 import '../robots/abstract/abstract_setting_robot.dart';
 
 /// Contract for producing platform-appropriate robot implementations.
@@ -26,6 +29,9 @@ abstract class RobotFactory {
   AbstractChatListRobot chatListRobot();
   AbstractChatGroupDetailRobot chatGroupDetailRobot();
   AbstractSearchRobot searchRobot();
+  AbstractSearchViewRobot searchViewRobot();
+  AbstractGroupInformationRobot groupInformationRobot();
+  AbstractChatProfileInfoRobot chatProfileInfoRobot();
   AbstractContactListRobot contactListRobot();
   AbstractSettingRobot settingRobot();
   AbstractLanguageSettingRobot languageSettingRobot();
