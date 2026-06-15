@@ -66,14 +66,14 @@ class MockDatabase extends Mock implements DatabaseApi {
   }
 }
 
-Future<Client> getClient() async {
+Future<Client> getClient({DatabaseApi? database}) async {
   if (!vod.isInitialized()) {
     await vod.init(libraryPath: './vodozemac/debug/');
   }
   final client = Client(
     'testclient',
     httpClient: FakeMatrixApi(),
-    database: MockDatabase(),
+    database: database ?? MockDatabase(),
   );
   await client.checkHomeserver(
     Uri.parse('https://fakeServer.notExisting'),

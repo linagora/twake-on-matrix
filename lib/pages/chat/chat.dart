@@ -74,6 +74,7 @@ import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/room_member_count_reconciliation_extension.dart';
 import 'package:fluffychat/utils/network_connection_service.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -439,7 +440,7 @@ class ChatController extends State<Chat>
   Future<void> _requestParticipants() async {
     if (room == null) return;
     try {
-      await room!.requestParticipants(
+      await room!.requestParticipantsWithSummaryReconciliation(
         Membership.values
             .whereNot((membership) => membership == Membership.leave)
             .toList(),
