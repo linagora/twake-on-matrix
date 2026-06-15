@@ -22,6 +22,7 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:fluffychat/widgets/right_click_focus.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
@@ -312,27 +313,30 @@ class _ChatSearchAppBar extends StatelessWidget {
             ),
             child: Padding(
               padding: ChatSearchStyle.inputPadding,
-              child: TextField(
-                controller: controller.textEditingController,
-                contextMenuBuilder: mobileTwakeContextMenuBuilder,
+              child: RightClickFocus(
                 focusNode: controller.inputFocus,
-                textInputAction: TextInputAction.search,
-                autofocus: true,
-                decoration: ChatListHeaderStyle.searchInputDecoration(context)
-                    .copyWith(
-                      suffixIcon: ValueListenableBuilder(
-                        valueListenable: controller.textEditingController,
-                        builder: (context, value, child) =>
-                            value.text.isNotEmpty
-                            ? IconButton(
-                                onPressed: () {
-                                  controller.textEditingController.clear();
-                                },
-                                icon: const Icon(Icons.close),
-                              )
-                            : const SizedBox.shrink(),
+                child: TextField(
+                  controller: controller.textEditingController,
+                  contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                  focusNode: controller.inputFocus,
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: ChatListHeaderStyle.searchInputDecoration(context)
+                      .copyWith(
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: controller.textEditingController,
+                          builder: (context, value, child) =>
+                              value.text.isNotEmpty
+                              ? IconButton(
+                                  onPressed: () {
+                                    controller.textEditingController.clear();
+                                  },
+                                  icon: const Icon(Icons.close),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                       ),
-                    ),
+                ),
               ),
             ),
           ),
