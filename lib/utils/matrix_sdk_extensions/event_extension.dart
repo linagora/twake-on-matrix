@@ -83,8 +83,15 @@ extension LocalizedBody on Event {
 
   bool get isCopyable => messageType == MessageTypes.Text;
 
-  bool isContains(String? searchTerm) =>
-      plaintextBody.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+  bool isContains(String? searchTerm) {
+    if (searchTerm == null || searchTerm.isEmpty) return false;
+    // Strip VS16 (U+FE0F) variation selector so that searching ❤️ matches ❤
+    // and vice versa, regardless of how the message was composed.
+    const vs16 = '\uFE0F';
+    final normalizedBody = plaintextBody.replaceAll(vs16, '').toLowerCase();
+    final normalizedTerm = searchTerm.replaceAll(vs16, '').toLowerCase();
+    return normalizedBody.contains(normalizedTerm);
+  }
 
   bool get isSearchable =>
       messageType == MessageTypes.Text || messageType == MessageTypes.File;

@@ -1,3 +1,4 @@
+import 'package:fluffychat/config/themes.dart';
 import 'package:flutter/material.dart';
 
 class InputBarStyle {
@@ -16,7 +17,7 @@ class InputBarStyle {
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
-        fontFamily: 'Inter',
+        fontFamilyFallback: TwakeThemes.fontFamilyFallback,
       );
 
   static const double suggestionTileAvatarTextGap = 8.0;
