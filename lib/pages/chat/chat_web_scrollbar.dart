@@ -50,16 +50,31 @@ class _ChatWebScrollbarState extends State<ChatWebScrollbar> {
     if (mounted) setState(() {});
   }
 
+  /// The single attached [ScrollPosition], or `null` when the controller has
+  /// zero or more than one attached scroll view.
+  ///
+  /// During web layout rebuilds (e.g. entering message multi-select mode) the
+  /// same [ScrollController] can momentarily be attached to two [Scrollable]s.
+  /// Reading [ScrollController.position] in that state trips the framework
+  /// assertion `_positions.length == 1`, so every access goes through here.
+  ScrollPosition? get _attachedPosition {
+    final controller = widget.controller;
+    if (controller.positions.length != 1) return null;
+    return controller.position;
+  }
+
   bool get _hasScrollableContent {
-    if (!widget.controller.hasClients) return false;
-    final position = widget.controller.position;
-    if (!position.hasContentDimensions) return false;
+    final position = _attachedPosition;
+    if (position == null || !position.hasContentDimensions) return false;
     return (position.maxScrollExtent - position.minScrollExtent) > 0;
   }
 
   /// Computes thumb [top] offset and [height] within a track of [trackHeight].
+  ///
+  /// Returns a zero-height thumb when no single scroll position is attached.
   ({double top, double height}) _thumbMetrics(double trackHeight) {
-    final position = widget.controller.position;
+    final position = _attachedPosition;
+    if (position == null) return (top: 0.0, height: 0.0);
     final totalExtent = position.maxScrollExtent - position.minScrollExtent;
 
     // Thumb height proportional to viewport vs total content
@@ -82,8 +97,8 @@ class _ChatWebScrollbarState extends State<ChatWebScrollbar> {
   }
 
   void _onThumbDragUpdate(DragUpdateDetails details, double trackHeight) {
-    if (!widget.controller.hasClients) return;
-    final position = widget.controller.position;
+    final position = _attachedPosition;
+    if (position == null) return;
     final totalExtent = position.maxScrollExtent - position.minScrollExtent;
     if (totalExtent <= 0) return;
 
@@ -100,8 +115,8 @@ class _ChatWebScrollbarState extends State<ChatWebScrollbar> {
   }
 
   void _onTrackTap(TapUpDetails details, double trackHeight) {
-    if (!widget.controller.hasClients) return;
-    final position = widget.controller.position;
+    final position = _attachedPosition;
+    if (position == null) return;
     final totalExtent = position.maxScrollExtent - position.minScrollExtent;
     if (totalExtent <= 0) return;
 
@@ -156,8 +171,8 @@ class _ChatWebScrollbarState extends State<ChatWebScrollbar> {
             // Forward wheel/trackpad scroll events so they reach the
             // underlying scrollable even when the pointer is over the gutter.
             onPointerSignal: (event) {
-              if (event is PointerScrollEvent && widget.controller.hasClients) {
-                final position = widget.controller.position;
+              final position = _attachedPosition;
+              if (event is PointerScrollEvent && position != null) {
                 final newPixels = (position.pixels + event.scrollDelta.dy)
                     .clamp(position.minScrollExtent, position.maxScrollExtent);
                 widget.controller.jumpTo(newPixels);
