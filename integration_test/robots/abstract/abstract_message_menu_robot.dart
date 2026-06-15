@@ -3,9 +3,9 @@
 /// The menu is opened very differently per platform:
 /// - Mobile: long-press the message bubble → `PullDownMenu` overlay.
 /// - Web/desktop: hover the message bubble → horizontal action bar of
-///   `TwakeIconButton`s (reaction / reply / forward / more). The "more"
-///   overflow reuses the same `PullDownMenu` as mobile, but first-class
-///   actions (reply, forward) are tapped directly from the bar.
+///   `TwakeIconButton`s (reaction / reply / forward / more). When collapsed,
+///   "more" opens a context-menu dialog with `ContextMenuActionItemWidget`s;
+///   first-class actions (reply, forward) are tapped directly from the bar.
 ///
 /// Methods are added here as each `chat/*` test is migrated and validated
 /// web-green. Today only the forward path is covered (PR 9b).

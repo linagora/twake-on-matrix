@@ -198,9 +198,15 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   /// the Forward screen then routes to the receiver's [ChatView]).
   @override
   Future<void> verifyOpenedRoom(String roomName) async {
-    await $.waitUntilVisible($(ChatView), timeout: const Duration(seconds: 15));
+    // Wait on the target room title directly: during the route transition the
+    // source chat's ChatView can surface before the receiver's, so gating on
+    // `$(ChatView)` then asserting the title risks reading the wrong room.
+    final roomTitle = $(
+      ChatAppBarTitle,
+    ).containing(find.textContaining(roomName));
+    await $.waitUntilVisible(roomTitle, timeout: const Duration(seconds: 15));
     expect(
-      $(ChatAppBarTitle).containing(find.textContaining(roomName)).exists,
+      roomTitle.exists,
       isTrue,
       reason: 'Expected to open "$roomName" room',
     );
