@@ -9,6 +9,9 @@ const ssssKey = 'EsT9 RzbW VhPW yqNp cC7j ViiW 5TZB LuY4 ryyv 9guN Ysmr WDPH';
 
 class MockDatabase extends Mock implements DatabaseApi {
   @override
+  Future<void> transaction(Future<void> Function() action) => action();
+
+  @override
   Future<Map<String, dynamic>?> getClient(String name) {
     return Future.value(null);
   }
