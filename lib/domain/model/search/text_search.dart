@@ -1,4 +1,4 @@
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 
 // To be used when applying a sequence of normalization steps to a string
