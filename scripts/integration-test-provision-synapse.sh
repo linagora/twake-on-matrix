@@ -102,6 +102,35 @@ create_room() {
   echo "$room_id"
 }
 
+create_named_room() {
+  local owner_token="$1"
+  local name="$2"
+  local invitee="$3"
+  local payload
+  payload=$(jq -nc \
+    --arg name "$name" \
+    --arg invitee "$invitee" \
+    '{
+      name: $name,
+      preset: "private_chat",
+      visibility: "private",
+      invite: [$invitee]
+    }')
+  local response
+  response=$(curl -sS --fail-with-body -X POST \
+    "$BASE_URL/_matrix/client/v3/createRoom" \
+    -H "Authorization: Bearer $owner_token" \
+    -H "Content-Type: application/json" \
+    -d "$payload")
+  local room_id
+  room_id=$(echo "$response" | jq -r '.room_id // empty')
+  if [ -z "$room_id" ]; then
+    log "create_named_room '$name' failed: $response"
+    exit 1
+  fi
+  echo "$room_id"
+}
+
 accept_invite() {
   local token="$1"
   local room_id="$2"
@@ -149,6 +178,17 @@ send_message "$TOKEN1" "$ROOM_ID" "Hello from $USER1"
 send_message "$TOKEN2" "$ROOM_ID" "Reply from $USER2"
 send_message "$TOKEN1" "$ROOM_ID" "Follow-up from $USER1"
 
+# Forward-test receiver rooms — distinct destinations $USER1 can forward to.
+# Non-overlapping names: a textContaining finder on "Receiver Group" would also
+# match "Receiver Group 2", so use names where neither is a prefix of the other.
+RECEIVER1_NAME="${RECEIVER1_NAME:-Receiver Alpha}"
+RECEIVER2_NAME="${RECEIVER2_NAME:-Receiver Beta}"
+log "Creating forward receiver rooms '$RECEIVER1_NAME' and '$RECEIVER2_NAME'..."
+RECEIVER1_ID=$(create_named_room "$TOKEN1" "$RECEIVER1_NAME" "$MXID2")
+RECEIVER2_ID=$(create_named_room "$TOKEN1" "$RECEIVER2_NAME" "$MXID2")
+accept_invite "$TOKEN2" "$RECEIVER1_ID"
+accept_invite "$TOKEN2" "$RECEIVER2_ID"
+
 log "Provisioning complete."
 
 # TEST_USERNAME / TEST_PASSWORD instead of USERNAME / PASSWORD because zsh
@@ -167,4 +207,6 @@ SearchByMatrixAddress=$MXID3
 SearchByTitle=$ROOM_NAME
 TitleOfGroupTest=$ROOM_NAME
 GroupID=$ROOM_ID
+ForwardReceiver1Name="$RECEIVER1_NAME"
+ForwardReceiver2Name="$RECEIVER2_NAME"
 EOF
