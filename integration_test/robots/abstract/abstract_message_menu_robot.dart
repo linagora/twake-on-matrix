@@ -23,4 +23,12 @@ abstract class AbstractMessageMenuRobot {
   /// deletion in the follow-up dialog (a native dialog on mobile, a Flutter
   /// `AlertDialog` on web).
   Future<void> openDelete(String message);
+
+  /// Opens the action menu for [message] and taps Edit, leaving the composer
+  /// in edit mode (the caller then types and sends the new text).
+  Future<void> openEdit(String message);
+
+  /// Opens the action menu for [message] and taps Select, entering the
+  /// multi-select mode.
+  Future<void> openSelect(String message);
 }
