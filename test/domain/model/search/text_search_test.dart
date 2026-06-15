@@ -13,49 +13,111 @@ List<String> _search(
 );
 
 void main() {
-  group('matchAnyField', () {
-    group('default options (case+diacritic insensitive, substring)', () {
-      test(
-        'matches substring',
-        () => expect(_search('ell', ['hello', 'world']), ['hello']),
-      );
-      test(
-        'is case insensitive',
-        () =>
-            expect(_search('JOHN', ['John Smith', 'Jane Doe']), ['John Smith']),
-      );
-      test(
-        'is diacritic insensitive',
-        () => expect(_search('elie', ['Élie', 'Bob']), ['Élie']),
-      );
-      test(
-        'returns empty list for empty needle',
-        () => expect(_search('', ['hello']), isEmpty),
-      );
-      test(
-        'returns empty list when nothing matches',
-        () => expect(_search('xyz', ['hello', 'world']), isEmpty),
-      );
-      test(
-        'returns original items, not normalized ones',
-        () => expect(_search('john', ['John Smith']), ['John Smith']),
-      );
+  _testMatchAnyField();
+  _testMatchesText();
+}
+
+void _testMatchAnyField() {
+  _testMatchAnyFieldDefaults();
+  _testMatchAnyFieldOptions();
+  _testMatchAnyFieldExtractors();
+}
+
+void _testMatchAnyFieldDefaults() {
+  group('matchAnyField default behavior', () {
+    test('should return matching items on substring match', () {
+      final haystack = ['hello', 'world'];
+
+      final result = _search('ell', haystack);
+
+      expect(result, ['hello']);
     });
 
-    group('SearchMode.exact', () {
-      test(
-        'matches exact string',
-        () => expect(
-          _search('hello', [
-            'hello',
-            'hello world',
-          ], options: const SearchOptions(mode: SearchMode.exact)),
-          ['hello'],
-        ),
-      );
+    test('should return empty list when needle is empty', () {
+      final haystack = ['hello'];
+
+      final result = _search('', haystack);
+
+      expect(result, isEmpty);
     });
 
-    group('multiple field extractors', () {
+    test('should return empty list when nothing matches', () {
+      final haystack = ['hello', 'world'];
+
+      final result = _search('xyz', haystack);
+
+      expect(result, isEmpty);
+    });
+
+    test('should return original items, not normalized ones', () {
+      final haystack = ['John Smith'];
+
+      final result = _search('john', haystack);
+
+      expect(result, ['John Smith']);
+    });
+
+    test('should match regardless of case by default', () {
+      final haystack = ['John Smith', 'Jane Doe'];
+
+      final result = _search('JOHN', haystack);
+
+      expect(result, ['John Smith']);
+    });
+
+    test('should match regardless of diacritics by default', () {
+      final haystack = ['Élie', 'Bob'];
+
+      final result = _search('elie', haystack);
+
+      expect(result, ['Élie']);
+    });
+  });
+}
+
+void _testMatchAnyFieldOptions() {
+  group('matchAnyField options', () {
+    test('should not match different case when caseSensitive is true', () {
+      final haystack = ['John'];
+
+      final result = _search(
+        'john',
+        haystack,
+        options: const SearchOptions(caseSensitive: true),
+      );
+
+      expect(result, isEmpty);
+    });
+
+    test('should match exact string only when mode is exact', () {
+      final haystack = ['hello', 'hello world'];
+
+      final result = _search(
+        'hello',
+        haystack,
+        options: const SearchOptions(mode: SearchMode.exact),
+      );
+
+      expect(result, ['hello']);
+    });
+
+    test('should use provided pipeline instead of defaults', () {
+      final haystack = ['HELLO'];
+
+      final result = _search(
+        'hello',
+        haystack,
+        options: const SearchOptions(normalize: []),
+      );
+
+      expect(result, isEmpty);
+    });
+  });
+}
+
+void _testMatchAnyFieldExtractors() {
+  group('matchAnyField field extractors', () {
+    test('should match on any of the provided field extractors', () {
       final items = [
         {'name': 'Alice', 'email': 'alice@example.com'},
         {'name': 'Bob', 'email': 'bob@example.com'},
@@ -65,67 +127,53 @@ void main() {
         (Map<String, String> m) => m['email'],
       ];
 
-      test(
-        'matches on name field',
-        () => expect(
-          matchAnyField('alice', items, fieldExtractors: extractors),
-          [items[0]],
-        ),
+      final resultName = matchAnyField(
+        'alice',
+        items,
+        fieldExtractors: extractors,
       );
-      test(
-        'matches on email field',
-        () => expect(
-          matchAnyField('bob@', items, fieldExtractors: extractors),
-          [items[1]],
-        ),
+      final resultEmail = matchAnyField(
+        'bob@',
+        items,
+        fieldExtractors: extractors,
       );
-    });
 
-    group('caseSensitive: true', () {
-      test(
-        'does not match different case',
-        () => expect(
-          _search('john', [
-            'John',
-          ], options: const SearchOptions(caseSensitive: true)),
-          isEmpty,
-        ),
-      );
-    });
-
-    group('custom pipeline override', () {
-      test(
-        'uses provided steps instead of defaults',
-        () => expect(
-          _search('hello', [
-            'HELLO',
-          ], options: const SearchOptions(normalize: [])),
-          isEmpty,
-        ),
-      );
+      expect(resultName, [items[0]]);
+      expect(resultEmail, [items[1]]);
     });
   });
+}
 
+void _testMatchesText() {
   group('matchesText', () {
-    test(
-      'returns true when needle is found',
-      () => expect(matchesText('ell', 'hello'), isTrue),
-    );
-    test(
-      'returns false when needle is not found',
-      () => expect(matchesText('xyz', 'hello'), isFalse),
-    );
-    test(
-      'is case insensitive by default',
-      () => expect(matchesText('HELLO', 'hello world'), isTrue),
-    );
-    test(
-      'is diacritic insensitive by default',
-      () => expect(matchesText('elie', 'Élie'), isTrue),
-    );
-    test(
-      'returns false for empty needle',
-      () => expect(matchesText('', 'hello'), isFalse),
-    );
+    test('should return true when needle is found in haystack', () {
+      final result = matchesText('ell', 'hello');
+
+      expect(result, isTrue);
+    });
+
+    test('should return false when needle is not found in haystack', () {
+      final result = matchesText('xyz', 'hello');
+
+      expect(result, isFalse);
+    });
+
+    test('should return false when needle is empty', () {
+      final result = matchesText('', 'hello');
+
+      expect(result, isFalse);
+    });
+
+    test('should match regardless of case by default', () {
+      final result = matchesText('HELLO', 'hello world');
+
+      expect(result, isTrue);
+    });
+
+    test('should match regardless of diacritics by default', () {
+      final result = matchesText('elie', 'Élie');
+
+      expect(result, isTrue);
+    });
   });
 }
