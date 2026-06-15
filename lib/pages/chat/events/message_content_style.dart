@@ -4,6 +4,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 
 class MessageContentStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -81,10 +82,8 @@ class MessageContentStyle {
     vertical: 4,
   );
 
-  static const EdgeInsets emojiPadding = EdgeInsets.symmetric(horizontal: 8.0);
-
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
-      Theme.of(context).textTheme.bodyLarge?.copyWith(
+      LinagoraTextStyle.material().bodyMedium3.copyWith(
         color: Theme.of(context).colorScheme.secondary,
       );
 

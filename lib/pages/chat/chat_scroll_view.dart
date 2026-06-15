@@ -3,9 +3,11 @@ import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatScrollView extends StatefulWidget {
@@ -31,16 +33,15 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   bool _wasRequestingFuture = false;
   List<Event> _currentEvents = [];
   late Map<String, int> _eventIndexMap;
+  List<Event> _visibleEvents = const [];
+  Map<String, int> _visiblePosition = const {};
 
   @override
   void initState() {
     super.initState();
     _currentEvents = List<Event>.from(widget.events)
       ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
-    _eventIndexMap = {
-      for (var i = 0; i < _currentEvents.length; i++)
-        _currentEvents[i].eventId: i,
-    };
+    _indexEvents();
     _bottom.addAll(_currentEvents);
   }
 
@@ -70,10 +71,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
 
     // Update the current events
     _currentEvents = newEvents;
-    _eventIndexMap = {
-      for (var i = 0; i < _currentEvents.length; i++)
-        _currentEvents[i].eventId: i,
-    };
+    _indexEvents();
 
     // Update the lists
     _top
@@ -124,24 +122,41 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     });
   }
 
+  void _indexEvents() {
+    _eventIndexMap = {
+      for (var i = 0; i < _currentEvents.length; i++)
+        _currentEvents[i].eventId: i,
+    };
+    _visibleEvents = [
+      for (final event in _currentEvents)
+        if (event.isVisibleInGui) event,
+    ];
+    _visiblePosition = {
+      for (var i = 0; i < _visibleEvents.length; i++)
+        _visibleEvents[i].eventId: i,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final centerKey = ChatKeys.eventListCenter.valueKey;
-    final horizontalPadding = TwakeThemes.isColumnMode(context) ? 16.0 : 0.0;
+    final horizontalPadding = TwakeThemes.isColumnMode(context)
+        ? LinagoraSpacing.base * 2
+        : 0.0;
+    final horizontalPaddingInsets = EdgeInsets.symmetric(
+      horizontal: horizontalPadding,
+    );
 
-    return Padding(
-      padding: EdgeInsets.only(
-        left: horizontalPadding,
-        right: horizontalPadding,
-      ),
-      child: InViewNotifierCustomScrollView(
-        isInViewPortCondition: controller.isInViewPortCondition,
-        center: centerKey,
-        anchor: 1,
-        controller: controller.scrollController,
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          SliverList(
+    return InViewNotifierCustomScrollView(
+      isInViewPortCondition: controller.isInViewPortCondition,
+      center: centerKey,
+      anchor: 1,
+      controller: controller.scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      slivers: [
+        SliverPadding(
+          padding: horizontalPaddingInsets,
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index == _bottom.length) {
                 if (controller.timeline!.isRequestingHistory) {
@@ -166,11 +181,13 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 return const SizedBox.shrink();
               }
 
-              final previousEvent = currentEventIndex > 0
-                  ? _currentEvents[currentEventIndex - 1]
+              final visiblePos = _visiblePosition[currentEvent.eventId];
+              final previousEvent = visiblePos != null && visiblePos > 0
+                  ? _visibleEvents[visiblePos - 1]
                   : null;
-              final nextEvent = currentEventIndex < _currentEvents.length - 1
-                  ? _currentEvents[currentEventIndex + 1]
+              final nextEvent =
+                  visiblePos != null && visiblePos < _visibleEvents.length - 1
+                  ? _visibleEvents[visiblePos + 1]
                   : null;
               return ChatEventListItem(
                 event: currentEvent,
@@ -182,8 +199,11 @@ class _ChatScrollViewState extends State<ChatScrollView> {
               );
             }, childCount: _bottom.length + 1),
           ),
-          SliverList(
-            key: centerKey,
+        ),
+        SliverPadding(
+          key: centerKey,
+          padding: horizontalPaddingInsets,
+          sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index == _top.length) {
                 if (controller.timeline!.isRequestingFuture) {
@@ -208,11 +228,13 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 return const SizedBox.shrink();
               }
 
-              final previousEvent = currentEventIndex > 0
-                  ? _currentEvents[currentEventIndex - 1]
+              final visiblePos = _visiblePosition[currentEvent.eventId];
+              final previousEvent = visiblePos != null && visiblePos > 0
+                  ? _visibleEvents[visiblePos - 1]
                   : null;
-              final nextEvent = currentEventIndex < _currentEvents.length - 1
-                  ? _currentEvents[currentEventIndex + 1]
+              final nextEvent =
+                  visiblePos != null && visiblePos < _visibleEvents.length - 1
+                  ? _visibleEvents[visiblePos + 1]
                   : null;
               return ChatEventListItem(
                 event: currentEvent,
@@ -224,8 +246,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
               );
             }, childCount: _top.length + 1),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

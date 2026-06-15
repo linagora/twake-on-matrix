@@ -132,7 +132,6 @@ class BaseFileTileWidget extends StatelessWidget {
             fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
             linkStyle: MessageContentStyle.linkStyleMessageContent(context),
             richTextStyle: event!.getMessageTextStyle(context),
-            isCaption: event!.isCaptionModeOrReply(),
           ),
         ),
       ];

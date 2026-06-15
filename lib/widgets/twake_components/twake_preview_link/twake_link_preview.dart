@@ -17,7 +17,6 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
   final double fontSize;
   final TextStyle? linkStyle;
   final TextStyle? richTextStyle;
-  final bool isCaption;
 
   const TwakeLinkPreview({
     super.key,
@@ -27,7 +26,6 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
     required this.fontSize,
     this.linkStyle,
     this.richTextStyle,
-    this.isCaption = false,
   });
 
   static ValueKey<String> get twakeLinkViewKey =>
@@ -42,7 +40,6 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
     return TwakeLinkView(
       key: twakeLinkViewKey,
       firstValidUrl: firstValidUrl,
-      isCaption: isCaption,
       body: event.formattedText.isNotEmpty
           ? FormattedTextWidget(
               event: event,

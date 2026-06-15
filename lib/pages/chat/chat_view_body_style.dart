@@ -3,6 +3,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
 
 class ChatViewBodyStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
@@ -13,6 +14,9 @@ class ChatViewBodyStyle {
   static double chatScreenMaxWidth = 800.0;
 
   static double dividerSize = 1.0;
+
+  /// Minimum gap between the last message (or its reactions) and the composer bar.
+  static const double eventListBottomSpacing = LinagoraSpacing.base * 0.5;
 
   static double blockedUserBannerHeight = 40.0;
 

@@ -6,7 +6,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ReplyContentStyle {
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
-  static const double fontSizeDisplayName = AppConfig.messageFontSize * 0.76;
   static const double fontSizeDisplayContent = AppConfig.messageFontSize * 0.88;
   static const double replyContentSize = fontSizeDisplayContent * 2;
 
@@ -45,19 +44,15 @@ class ReplyContentStyle {
   static const double previewedImagePlaceholderPadding = 4.0;
 
   static TextStyle? displayNameTextStyle(BuildContext context) {
-    return Theme.of(context).textTheme.titleSmall?.copyWith(
+    return LinagoraTextStyle.material().titleSmall.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
-      fontWeight: FontWeight.bold,
-      fontSize: fontSizeDisplayName,
     );
   }
 
   static TextStyle? replyBodyTextStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodySmall?.copyWith(
+    return LinagoraTextStyle.material().bodyMedium.copyWith(
       color: LinagoraRefColors.material().neutral[50],
-      fontWeight: FontWeight.w500,
       overflow: TextOverflow.ellipsis,
-      fontSize: fontSizeDisplayContent,
     );
   }
 

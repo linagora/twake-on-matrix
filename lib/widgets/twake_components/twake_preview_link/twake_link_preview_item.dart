@@ -268,7 +268,7 @@ class LinkPreviewBuilder extends StatelessWidget {
                   child: Text(
                     key: LinkPreviewBuilder.titleKey,
                     urlPreviewPresentation.title ?? '',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: LinagoraTextStyle.material().bodyMedium2.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     maxLines: 2,
@@ -281,8 +281,8 @@ class LinkPreviewBuilder extends StatelessWidget {
                   child: Text(
                     key: LinkPreviewBuilder.subtitleKey,
                     urlPreviewPresentation.description ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().neutral[50],
+                    style: LinagoraTextStyle.material().titleSmall.copyWith(
+                      color: LinagoraRefColors.material().tertiary[20],
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
