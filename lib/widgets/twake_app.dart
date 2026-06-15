@@ -111,8 +111,18 @@ class TwakeAppState extends State<TwakeApp> {
               return supportedLocales.first;
             },
             routerConfig: TwakeApp.router,
-            builder: (context, child) =>
-                Matrix(clients: widget.clients, child: child),
+            builder: (context, child) {
+              // Ensure fontFamilyFallback propagates to all text including
+              // third-party widgets that build TextStyles outside the textTheme.
+              final fallback = TwakeThemes.fontFamilyFallback;
+              final base = DefaultTextStyle.of(context).style;
+              return DefaultTextStyle(
+                style: fallback != null
+                    ? base.copyWith(fontFamilyFallback: fallback)
+                    : base,
+                child: Matrix(clients: widget.clients, child: child),
+              );
+            },
           );
         },
       ),

@@ -1,4 +1,5 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +11,37 @@ import 'app_config.dart';
 
 abstract class TwakeThemes {
   static const double columnWidth = 360.0;
+
+  /// Font fallback list for script/language coverage on web.
+  ///
+  /// On mobile the OS provides system fonts and color emoji natively, so no
+  /// explicit fallback list is needed.
+  ///
+  /// On web we list script-coverage fonts (NotoSans*) but intentionally
+  /// exclude monochrome symbol/emoji fonts (NotoEmoji, NotoSansSymbols*).
+  /// Including those would cause the engine's getMissingCodePoints to report
+  /// emoji codepoints as "covered", preventing the automatic download of
+  /// Noto Color Emoji from fonts.gstatic.com (Flutter 3.38+ engine behavior).
+  static List<String>? get fontFamilyFallback =>
+      PlatformInfos.isMobile ? null : _webFontFamilyFallback;
+
+  static const List<String> _webFontFamilyFallback = [
+    'Roboto',
+    'NotoSans',
+    'NotoSansArabic',
+    'NotoSansTamil',
+    'NotoSansThai',
+    'NotoSansKR',
+    'NotoSansSC',
+    'NotoSansMath',
+    'NotoSansEgyptianHieroglyphs',
+    // NotoSansSymbols* are patched to remove emoji-presentation codepoints
+    // so they only cover text-presentation symbols (©, ™, →, etc.)
+    // while color emoji is handled by Noto Color Emoji via engine auto-download.
+    'NotoSansSymbols',
+    'NotoSansSymbols2',
+    'sans-serif',
+  ];
   static const double iconSize = 24.0;
 
   static bool isColumnModeByWidth(double width) => width > columnWidth * 2 + 64;
@@ -22,75 +54,50 @@ abstract class TwakeThemes {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static var fallbackTextTheme = const TextTheme(
-    bodyLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: -0.15,
-    ),
-    bodyMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.25,
-    ),
-    bodySmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.4,
-    ),
-    labelLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    ),
-    labelMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.5,
-    ),
-    labelSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.5,
-    ),
-    displayLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700),
-    displayMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    displaySmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    headlineMedium: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
-    headlineSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    headlineLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      fontSize: 32,
-    ),
-    titleLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: -0.15,
-    ),
-    titleMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.15,
-    ),
-    titleSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    ),
+  static const TextTheme fallbackTextTheme = TextTheme(
+    bodyLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.15),
+    bodyMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.25),
+    bodySmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.4),
+    labelLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
+    labelMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+    labelSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+    displayLarge: TextStyle(fontWeight: FontWeight.w700),
+    displayMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    displaySmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    headlineMedium: TextStyle(fontWeight: FontWeight.w600),
+    headlineSmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    headlineLarge: TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
+    titleLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.15),
+    titleMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.15),
+    titleSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
   );
+
+  /// Applies [fontFamilyFallback] to every style in [theme] so that emoji
+  /// and symbol fallback fonts are honoured even when individual TextStyles
+  /// override [fontFamily].
+  static TextTheme _applyFallback(TextTheme theme) {
+    final fallback = fontFamilyFallback;
+    if (fallback == null) return theme;
+    TextStyle apply(TextStyle? s) =>
+        (s ?? const TextStyle()).copyWith(fontFamilyFallback: fallback);
+    return theme.copyWith(
+      displayLarge: apply(theme.displayLarge),
+      displayMedium: apply(theme.displayMedium),
+      displaySmall: apply(theme.displaySmall),
+      headlineLarge: apply(theme.headlineLarge),
+      headlineMedium: apply(theme.headlineMedium),
+      headlineSmall: apply(theme.headlineSmall),
+      titleLarge: apply(theme.titleLarge),
+      titleMedium: apply(theme.titleMedium),
+      titleSmall: apply(theme.titleSmall),
+      bodyLarge: apply(theme.bodyLarge),
+      bodyMedium: apply(theme.bodyMedium),
+      bodySmall: apply(theme.bodySmall),
+      labelLarge: apply(theme.labelLarge),
+      labelMedium: apply(theme.labelMedium),
+      labelSmall: apply(theme.labelSmall),
+    );
+  }
 
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
@@ -103,9 +110,14 @@ abstract class TwakeThemes {
     visualDensity: VisualDensity.standard,
     useMaterial3: true,
     fontFamily: 'Inter',
+    fontFamilyFallback: fontFamilyFallback,
     textTheme: brightness == Brightness.light
-        ? Typography.material2021().black.merge(fallbackTextTheme)
-        : Typography.material2021().white.merge(fallbackTextTheme),
+        ? _applyFallback(
+            Typography.material2021().black.merge(fallbackTextTheme),
+          )
+        : _applyFallback(
+            Typography.material2021().white.merge(fallbackTextTheme),
+          ),
     snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     scaffoldBackgroundColor: LinagoraSysColors.material().onPrimary,
     dividerColor: brightness == Brightness.light
