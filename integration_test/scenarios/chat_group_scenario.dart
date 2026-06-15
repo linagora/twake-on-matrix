@@ -1,4 +1,7 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
+import 'package:fluffychat/pages/chat/event_info_dialog.dart';
+import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
@@ -131,5 +134,29 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
 
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
+  }
+}
+
+/// Open a message's info dialog and verify it shows the sender avatar and the
+/// raw event source. Indices into the dialog's list tiles are intentionally
+/// avoided — only the stable, meaningful pieces (avatar + source code) are
+/// asserted so the check holds across platforms and layout tweaks.
+class ChatGroupMessageInfoScenario extends BaseTestScenario {
+  ChatGroupMessageInfoScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final (senderMsg, _) = await _prepareTwoMessages(this);
+
+    await robots.messageMenuRobot().openMessageInfo(senderMsg);
+
+    final dialog = $(EventInfoDialog);
+    await $.waitUntilVisible(dialog, timeout: const Duration(seconds: 10));
+    expect(dialog.$(Avatar), findsWidgets);
+    expect(dialog.$(SelectableText), findsWidgets);
+
+    // Close the dialog via its app-bar close button.
+    await dialog.$(AppBar).$(IconButton).tap();
+    await $.pump();
   }
 }

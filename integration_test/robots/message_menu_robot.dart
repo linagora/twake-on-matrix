@@ -9,6 +9,7 @@ import 'package:pull_down_button/pull_down_button.dart';
 import '../base/core_robot.dart';
 import 'abstract/abstract_message_menu_robot.dart';
 import 'menu_robot.dart';
+import 'message_selection_appbar_helper.dart';
 
 /// Mobile message action menu.
 ///
@@ -69,5 +70,11 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await _openMenu(message);
     await _menu.getSelectItem().tap();
     await $.pump(const Duration(milliseconds: 300));
+  }
+
+  @override
+  Future<void> openMessageInfo(String message) async {
+    await openSelect(message);
+    await openMessageInfoFromSelectionAppBar($, _l10n);
   }
 }

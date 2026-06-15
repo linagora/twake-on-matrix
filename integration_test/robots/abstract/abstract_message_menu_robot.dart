@@ -31,4 +31,9 @@ abstract class AbstractMessageMenuRobot {
   /// Opens the action menu for [message] and taps Select, entering the
   /// multi-select mode.
   Future<void> openSelect(String message);
+
+  /// Selects [message] and opens its info from the selection-mode app bar
+  /// ("More" → "Message info"), leaving the `EventInfoDialog` on screen. The
+  /// caller asserts the dialog contents and closes it.
+  Future<void> openMessageInfo(String message);
 }

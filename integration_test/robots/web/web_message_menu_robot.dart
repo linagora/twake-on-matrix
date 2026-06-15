@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../base/core_robot.dart';
 import '../abstract/abstract_message_menu_robot.dart';
+import '../message_selection_appbar_helper.dart';
 
 /// Web/desktop message action menu.
 ///
@@ -117,5 +118,11 @@ class WebMessageMenuRobot extends CoreRobot
   @override
   Future<void> openSelect(String message) async {
     await _tapOverflowItem(message, _l10n.select);
+  }
+
+  @override
+  Future<void> openMessageInfo(String message) async {
+    await openSelect(message);
+    await openMessageInfoFromSelectionAppBar($, _l10n);
   }
 }
