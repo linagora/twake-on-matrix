@@ -66,7 +66,7 @@ extension RoomMemberCountReconciliationExtension on Room {
     await client.database.transaction(() async {
       await client.handleSync(
         SyncUpdate(
-          nextBatch: client.prevBatch ?? '',
+          nextBatch: '',
           rooms: RoomsUpdate(
             join: {
               id: JoinedRoomUpdate(
