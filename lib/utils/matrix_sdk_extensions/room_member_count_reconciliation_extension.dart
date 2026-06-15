@@ -63,20 +63,22 @@ extension RoomMemberCountReconciliationExtension on Room {
     // Feed the corrected counts through the regular sync pipeline, as if the
     // server had sent them: same merge (heroes preserved), same persistence
     // and UI notifications as a real summary update.
-    await client.handleSync(
-      SyncUpdate(
-        nextBatch: client.prevBatch ?? '',
-        rooms: RoomsUpdate(
-          join: {
-            id: JoinedRoomUpdate(
-              summary: RoomSummary.fromJson({
-                'm.joined_member_count': joinedCount,
-                'm.invited_member_count': invitedCount,
-              }),
-            ),
-          },
+    await client.database.transaction(() async {
+      await client.handleSync(
+        SyncUpdate(
+          nextBatch: client.prevBatch ?? '',
+          rooms: RoomsUpdate(
+            join: {
+              id: JoinedRoomUpdate(
+                summary: RoomSummary.fromJson({
+                  'm.joined_member_count': joinedCount,
+                  'm.invited_member_count': invitedCount,
+                }),
+              ),
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
