@@ -17,11 +17,11 @@ abstract class TwakeThemes {
   /// On mobile the OS provides system fonts and color emoji natively, so no
   /// explicit fallback list is needed.
   ///
-  /// On web we list script-coverage fonts (NotoSans*) but intentionally
-  /// exclude monochrome symbol/emoji fonts (NotoEmoji, NotoSansSymbols*).
-  /// Including those would cause the engine's getMissingCodePoints to report
-  /// emoji codepoints as "covered", preventing the automatic download of
-  /// Noto Color Emoji from fonts.gstatic.com (Flutter 3.38+ engine behavior).
+  /// On web we list script-coverage fonts (NotoSans*). NotoEmoji is excluded
+  /// to avoid blocking automatic Noto Color Emoji download (Flutter 3.38+
+  /// engine behavior). NotoSansSymbols and NotoSansSymbols2 are included but
+  /// patched to remove emoji-presentation codepoints, so color emoji is still
+  /// served by the engine's auto-download from fonts.gstatic.com.
   static List<String>? get fontFamilyFallback =>
       PlatformInfos.isMobile ? null : _webFontFamilyFallback;
 
@@ -33,8 +33,6 @@ abstract class TwakeThemes {
     'NotoSansThai',
     'NotoSansKR',
     'NotoSansSC',
-    'NotoSansMath',
-    'NotoSansEgyptianHieroglyphs',
     // NotoSansSymbols* are patched to remove emoji-presentation codepoints
     // so they only cover text-presentation symbols (©, ™, →, etc.)
     // while color emoji is handled by Noto Color Emoji via engine auto-download.
@@ -54,7 +52,7 @@ abstract class TwakeThemes {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const TextTheme fallbackTextTheme = TextTheme(
+  static const fallbackTextTheme = TextTheme(
     bodyLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.15),
     bodyMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.25),
     bodySmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.4),

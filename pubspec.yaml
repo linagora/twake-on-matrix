@@ -315,14 +315,6 @@ flutter:
       fonts:
         - asset: assets/google_fonts/fallback/NotoSansSC-Regular.ttf
 
-    - family: NotoSansMath
-      fonts:
-        - asset: assets/google_fonts/fallback/NotoSansMath-Regular.ttf
-
-    - family: NotoSansEgyptianHieroglyphs
-      fonts:
-        - asset: assets/google_fonts/fallback/NotoSansEgyptianHieroglyphs-Regular.ttf
-
     - family: NotoSansSymbols
       fonts:
         - asset: assets/google_fonts/fallback/NotoSansSymbols-Regular.ttf
