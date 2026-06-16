@@ -13,7 +13,6 @@ import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
-import 'package:fluffychat/widgets/right_click_focus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as service;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
