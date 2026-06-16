@@ -164,6 +164,12 @@ class TestBase {
       ),
       nativeAutomatorConfig: nativeAutomatorConfig ?? NativeAutomatorConfig(),
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
+      // `twakePatrolTest` is the legacy single-platform entry point; the tests
+      // still on it are mobile-only (they reach `$.native.*`, the system
+      // clipboard, or backends the local web harness lacks). Skip them on web
+      // so the web suite stays green while they await migration. Mobile runs
+      // them unchanged.
+      skip: kIsWeb,
       ($) async {
         await initTwakeChat();
         final originalOnError = FlutterError.onError!;
