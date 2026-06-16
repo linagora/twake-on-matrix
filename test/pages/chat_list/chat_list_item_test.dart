@@ -68,35 +68,43 @@ void main() {
     );
   }
 
+  // Pumps a [ChatListItem] inside a parent whose room can be swapped in place,
+  // so one harness covers both plain rebuilds and state recycling. Returns a
+  // setter that replaces the current room and rebuilds the item.
+  Future<void Function(Room)> pumpItem(
+    WidgetTester tester,
+    Room initialRoom,
+  ) async {
+    var current = initialRoom;
+    late StateSetter setItemState;
+    await tester.pumpWidget(
+      wrap(
+        StatefulBuilder(
+          builder: (context, setState) {
+            setItemState = setState;
+            return ChatListItem(current);
+          },
+        ),
+      ),
+    );
+    await tester.pump();
+    return (room) => setItemState(() => current = room);
+  }
+
   testWidgets(
     'loads hero users once for a nameless room and never again on rebuild',
     (tester) async {
       final room = buildRoom(name: '');
+      final rebuild = await pumpItem(tester, room);
 
-      // A parent we can force to rebuild its ChatListItem child.
-      late StateSetter rebuildParent;
-      await tester.pumpWidget(
-        wrap(
-          StatefulBuilder(
-            builder: (context, setState) {
-              rebuildParent = setState;
-              return ChatListItem(room);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-
-      // initState ran once -> exactly one load.
       verify(room.loadHeroUsers()).called(1);
 
-      // Force several parent rebuilds: build() re-runs, initState does not.
+      // Rebuild in place with the same room: build() re-runs, the load does not.
       for (var i = 0; i < 3; i++) {
-        rebuildParent(() {});
+        rebuild(room);
         await tester.pump();
       }
 
-      // No new load was triggered by the rebuilds.
       verifyNever(room.loadHeroUsers());
     },
   );
@@ -106,8 +114,7 @@ void main() {
   ) async {
     final room = buildRoom(name: 'Project Apollo');
 
-    await tester.pumpWidget(wrap(ChatListItem(room)));
-    await tester.pump();
+    await pumpItem(tester, room);
 
     verifyNever(room.loadHeroUsers());
   });
@@ -119,27 +126,12 @@ void main() {
       final roomA = buildRoom(name: '', id: '!a:server.tld');
       final roomB = buildRoom(name: '', id: '!b:server.tld');
 
-      // No per-room key: swapping the room reuses the same State, exactly like
-      // ChatListItem(archive![i]) inside a ListView.builder.
-      late StateSetter swapRoom;
-      var current = roomA;
-      await tester.pumpWidget(
-        wrap(
-          StatefulBuilder(
-            builder: (context, setState) {
-              swapRoom = setState;
-              return ChatListItem(current);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-
+      final recycle = await pumpItem(tester, roomA);
       verify(roomA.loadHeroUsers()).called(1);
       verifyNever(roomB.loadHeroUsers());
 
       // Recycle the state for roomB -> didUpdateWidget must reload its heroes.
-      swapRoom(() => current = roomB);
+      recycle(roomB);
       await tester.pump();
 
       verify(roomB.loadHeroUsers()).called(1);
