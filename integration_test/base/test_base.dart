@@ -17,26 +17,16 @@ class TestBase {
   ///   cross-platform migration.
   void runPatrolTest({
     required String description,
-    Function(PatrolIntegrationTester $)? test,
-    ScenarioBuilder? scenarioBuilder,
+    required ScenarioBuilder scenarioBuilder,
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
-    // Marks a `scenarioBuilder` test that is intentionally mobile-only — it
-    // exercises a capability the web target cannot reach locally (system
-    // clipboard, `$.native.*`, a non-resolvable account, or a backend the
-    // local web harness lacks). Such tests are skipped on web instead of
-    // failing the suite, and run unchanged on mobile. This is the migration
-    // path for the remaining legacy `test:` / `twakePatrolTest` mobile-only
-    // tests once those signatures are dropped.
+    // Marks a test that is intentionally mobile-only — it exercises a
+    // capability the web target cannot reach locally (system clipboard,
+    // `$.native.*`, a non-resolvable account, or a backend the local web
+    // harness lacks). Such tests are skipped on web instead of failing the
+    // suite, and run unchanged on mobile.
     bool mobileOnly = false,
   }) {
-    // Enforced at runtime (not via `assert`) so the contract holds in
-    // profile/release builds too, where assertions are compiled out.
-    if ((test == null) == (scenarioBuilder == null)) {
-      throw ArgumentError(
-        'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
-      );
-    }
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
@@ -82,13 +72,10 @@ class TestBase {
       config: patrolConfig,
       nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
       tags: tags,
-      // On web, skip two kinds of tests so the suite stays green:
-      //   * legacy `test:` entries (mobile-only — they reach `$.native.*` and
-      //     other mobile-only paths), pending migration;
-      //   * `scenarioBuilder` tests explicitly flagged [mobileOnly] (they need
-      //     a capability the local web harness cannot provide).
-      // Everything else runs on both platforms. Mobile runs all of them.
-      skip: kIsWeb && (scenarioBuilder == null || mobileOnly),
+      // On web, skip tests explicitly flagged [mobileOnly] (they need a
+      // capability the local web harness cannot provide). Everything else runs
+      // on both platforms; mobile runs all of them.
+      skip: kIsWeb && mobileOnly,
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
@@ -131,12 +118,8 @@ class TestBase {
           originalOnError(details);
         };
         await loginAndRun($);
-        if (scenarioBuilder != null) {
-          final robots = createRobotFactory($);
-          await scenarioBuilder($, robots).runTestLogic();
-        } else {
-          await test!($);
-        }
+        final robots = createRobotFactory($);
+        await scenarioBuilder($, robots).runTestLogic();
       },
     );
   }
