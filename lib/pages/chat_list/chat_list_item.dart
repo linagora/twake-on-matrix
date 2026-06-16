@@ -57,9 +57,19 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
   @override
   void initState() {
     super.initState();
-    if (room.name.isEmpty) {
-      _heroUsersFuture = room.loadHeroUsers();
+    _loadHeroUsersIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.room.id != room.id) {
+      _loadHeroUsersIfNeeded();
     }
+  }
+
+  void _loadHeroUsersIfNeeded() {
+    _heroUsersFuture = room.name.isEmpty ? room.loadHeroUsers() : null;
   }
 
   void clickAction(BuildContext context) async {

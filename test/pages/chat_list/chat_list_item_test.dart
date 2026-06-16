@@ -25,12 +25,12 @@ void main() {
     }
   });
 
-  MockRoom buildRoom({required String name}) {
+  MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
     final room = MockRoom();
     final client = MockClient();
     when(client.userID).thenReturn('@me:server.tld');
     when(room.client).thenReturn(client);
-    when(room.id).thenReturn('!room:server.tld');
+    when(room.id).thenReturn(id);
     when(room.name).thenReturn(name);
     when(room.membership).thenReturn(Membership.join);
     when(room.isDirectChat).thenReturn(true);
@@ -111,4 +111,38 @@ void main() {
 
     verifyNever(room.loadHeroUsers());
   });
+
+  testWidgets(
+    'reloads hero users when the state is recycled for a different room '
+    '(unkeyed lists like archive / space views)',
+    (tester) async {
+      final roomA = buildRoom(name: '', id: '!a:server.tld');
+      final roomB = buildRoom(name: '', id: '!b:server.tld');
+
+      // No per-room key: swapping the room reuses the same State, exactly like
+      // ChatListItem(archive![i]) inside a ListView.builder.
+      late StateSetter swapRoom;
+      var current = roomA;
+      await tester.pumpWidget(
+        wrap(
+          StatefulBuilder(
+            builder: (context, setState) {
+              swapRoom = setState;
+              return ChatListItem(current);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      verify(roomA.loadHeroUsers()).called(1);
+      verifyNever(roomB.loadHeroUsers());
+
+      // Recycle the state for roomB -> didUpdateWidget must reload its heroes.
+      swapRoom(() => current = roomB);
+      await tester.pump();
+
+      verify(roomB.loadHeroUsers()).called(1);
+    },
+  );
 }
