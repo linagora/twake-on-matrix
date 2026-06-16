@@ -16,6 +16,72 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 import 'chat_list_item_test.mocks.dart';
 
+MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
+  final room = MockRoom();
+  final client = MockClient();
+  when(client.userID).thenReturn('@me:server.tld');
+  when(room.client).thenReturn(client);
+  when(room.id).thenReturn(id);
+  when(room.name).thenReturn(name);
+  when(room.membership).thenReturn(Membership.join);
+  when(room.isDirectChat).thenReturn(true);
+  when(room.encrypted).thenReturn(false);
+  when(room.isFavourite).thenReturn(false);
+  when(room.pushRuleState).thenReturn(PushRuleState.notify);
+  when(room.isUnreadOrInvited).thenReturn(false);
+  when(room.hasNewMessages).thenReturn(false);
+  when(room.notificationCount).thenReturn(0);
+  when(room.lastEvent).thenReturn(null);
+  when(room.latestEventReceivedTime).thenReturn(DateTime(2020, 1, 1));
+  when(
+    room.getLocalizedDisplayname(any),
+  ).thenReturn(name.isEmpty ? 'Resolved Hero Name' : name);
+  when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
+  return room;
+}
+
+Widget wrap(Widget child) {
+  return ThemeBuilder(
+    builder: (context, themeMode, primaryColor) => MaterialApp(
+      locale: const Locale('en'),
+      scrollBehavior: CustomScrollBehavior(),
+      localizationsDelegates: const [
+        LocaleNamesLocalizationsDelegate(),
+        L10n.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: LocalizationService.supportedLocales,
+      theme: TwakeThemes.buildTheme(context, Brightness.light, primaryColor),
+      home: Scaffold(body: child),
+    ),
+  );
+}
+
+// Pumps a [ChatListItem] inside a parent whose room can be swapped in place,
+// so one harness covers both plain rebuilds and state recycling. Returns a
+// setter that replaces the current room and rebuilds the item.
+Future<void Function(Room)> pumpItem(
+  WidgetTester tester,
+  Room initialRoom,
+) async {
+  var current = initialRoom;
+  late StateSetter setItemState;
+  await tester.pumpWidget(
+    wrap(
+      StatefulBuilder(
+        builder: (context, setState) {
+          setItemState = setState;
+          return ChatListItem(current);
+        },
+      ),
+    ),
+  );
+  await tester.pump();
+  return (room) => setItemState(() => current = room);
+}
+
 @GenerateNiceMocks([MockSpec<Room>(), MockSpec<Client>()])
 void main() {
   setUpAll(() {
@@ -24,72 +90,6 @@ void main() {
       getIt.registerSingleton(ResponsiveUtils());
     }
   });
-
-  MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
-    final room = MockRoom();
-    final client = MockClient();
-    when(client.userID).thenReturn('@me:server.tld');
-    when(room.client).thenReturn(client);
-    when(room.id).thenReturn(id);
-    when(room.name).thenReturn(name);
-    when(room.membership).thenReturn(Membership.join);
-    when(room.isDirectChat).thenReturn(true);
-    when(room.encrypted).thenReturn(false);
-    when(room.isFavourite).thenReturn(false);
-    when(room.pushRuleState).thenReturn(PushRuleState.notify);
-    when(room.isUnreadOrInvited).thenReturn(false);
-    when(room.hasNewMessages).thenReturn(false);
-    when(room.notificationCount).thenReturn(0);
-    when(room.lastEvent).thenReturn(null);
-    when(room.latestEventReceivedTime).thenReturn(DateTime(2020, 1, 1));
-    when(
-      room.getLocalizedDisplayname(any),
-    ).thenReturn(name.isEmpty ? 'Resolved Hero Name' : name);
-    when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
-    return room;
-  }
-
-  Widget wrap(Widget child) {
-    return ThemeBuilder(
-      builder: (context, themeMode, primaryColor) => MaterialApp(
-        locale: const Locale('en'),
-        scrollBehavior: CustomScrollBehavior(),
-        localizationsDelegates: const [
-          LocaleNamesLocalizationsDelegate(),
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: LocalizationService.supportedLocales,
-        theme: TwakeThemes.buildTheme(context, Brightness.light, primaryColor),
-        home: Scaffold(body: child),
-      ),
-    );
-  }
-
-  // Pumps a [ChatListItem] inside a parent whose room can be swapped in place,
-  // so one harness covers both plain rebuilds and state recycling. Returns a
-  // setter that replaces the current room and rebuilds the item.
-  Future<void Function(Room)> pumpItem(
-    WidgetTester tester,
-    Room initialRoom,
-  ) async {
-    var current = initialRoom;
-    late StateSetter setItemState;
-    await tester.pumpWidget(
-      wrap(
-        StatefulBuilder(
-          builder: (context, setState) {
-            setItemState = setState;
-            return ChatListItem(current);
-          },
-        ),
-      ),
-    );
-    await tester.pump();
-    return (room) => setItemState(() => current = room);
-  }
 
   testWidgets(
     'loads hero users once for a nameless room and never again on rebuild',
