@@ -18,7 +18,6 @@ class TestBase {
   void runPatrolTest({
     required String description,
     required ScenarioBuilder scenarioBuilder,
-    NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
     // Marks a test that is intentionally mobile-only — it exercises a
     // capability the web target cannot reach locally (system clipboard,
@@ -70,7 +69,7 @@ class TestBase {
       description,
       timeout: testTimeout,
       config: patrolConfig,
-      nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
+      nativeAutomatorConfig: defaultNativeConfig,
       tags: tags,
       // On web, skip tests explicitly flagged [mobileOnly] (they need a
       // capability the local web harness cannot provide). Everything else runs
