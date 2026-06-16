@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
+import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:fluffychat/pages/chat/event_info_dialog.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../robots/chat_group_detail_robot.dart';
+import 'chat_scenario.dart';
 
 const _group = String.fromEnvironment(
   'SearchByTitle',
@@ -134,6 +137,57 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
 
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
+  }
+}
+
+/// Mobile-only: verify the long-press pull-down menu surfaces the right actions
+/// for a sender-owned (owner level) and a receiver-owned (member level)
+/// message. The pull-down menu only exists on mobile, so this is registered
+/// with `mobileOnly: true` and drives concrete robots directly.
+class ChatGroupDisplayMenuScenario extends BaseTestScenario {
+  ChatGroupDisplayMenuScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+
+    await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
+    await ChatScenario(
+      $,
+    ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
+    await ChatGroupDetailRobot($).closePullDownMenu();
+
+    await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
+    await ChatScenario(
+      $,
+    ).verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
+  }
+}
+
+/// Mobile-only: copy a sender-owned and a receiver-owned message and paste them
+/// back into the composer, verifying the pasted text is sent. Uses the system
+/// clipboard via concrete robots, so this is registered with `mobileOnly: true`.
+class ChatGroupCopyScenario extends BaseTestScenario {
+  ChatGroupCopyScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+
+    // copy sender
+    await ChatScenario($).copyMessage(senderMsg);
+    const addedText = 'Copy';
+    await ChatGroupDetailRobot($).inputMessage(addedText);
+    await ChatScenario($).pasteFromClipBoard();
+    await $(ChatInputRowSendBtn).tap();
+    await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
+
+    // copy receiver
+    await ChatScenario($).copyMessage(receiverMsg);
+    await ChatGroupDetailRobot($).inputMessage(addedText);
+    await ChatScenario($).pasteFromClipBoard();
+    await $(ChatInputRowSendBtn).tap();
+    await ChatScenario($).verifyMessageIsShown('$addedText$receiverMsg', true);
   }
 }
 
