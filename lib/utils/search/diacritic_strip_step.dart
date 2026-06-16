@@ -1,8 +1,7 @@
+import 'package:fluffychat/domain/model/search/normalization_step.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 
-import '../text_search.dart';
-
-class DiacriticStripStep implements NormalizationStep {
+class DiacriticStripStep extends NormalizationStep {
   const DiacriticStripStep();
 
   static final _combiningMarks = RegExp(r'\p{Mn}', unicode: true);
