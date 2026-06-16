@@ -1,10 +1,6 @@
 import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
-import 'package:fluffychat/pages/chat/event_info_dialog.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../base/test_base.dart';
-import '../../help/soft_assertion_helper.dart';
 import '../../robots/chat_group_detail_robot.dart';
 import '../../scenarios/chat_group_scenario.dart';
 import '../../scenarios/chat_scenario.dart';
@@ -78,6 +74,12 @@ void main() {
     scenarioBuilder: ($, robots) => ChatGroupDeleteScenario($, robots),
   );
 
+  // Stays mobile-only (legacy `test:`, skipped on web). Copy goes through
+  // `Clipboard.setData`, which the headless-web browser blocks without a user
+  // gesture / clipboard permission — patrol's Chrome throws
+  // `PlatformException(copy_fail, Clipboard.setData failed.)`. This is a real
+  // browser limitation, not a harness gap, so the copy flow cannot be made
+  // web-green; it remains validated on mobile.
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test04"],
     description: 'copy a message in a direct chat',
@@ -144,47 +146,10 @@ void main() {
   //   },
   // );
 
+  // Migrated to the cross-platform `scenarioBuilder` API (PR 9b-2c).
   TestBase().runPatrolTest(
     tags: ["chat_group_test_test09"],
     description: 'See message info',
-    test: ($) async {
-      final (senderMsg, receiverMsg) = await prepareTwoMessages($);
-      final s = SoftAssertHelper();
-      await ChatScenario($).watchMessageInfo(senderMsg);
-      // verify info dialog is shown
-      s.softAssertEquals(
-        $(EventInfoDialog).exists,
-        true,
-        'EventInfoDialog is not shown',
-      );
-      //Verify contains avatar
-      s.softAssertEquals(
-        $(EventInfoDialog).$(ListTile).at(0).$(Avatar).exists,
-        true,
-        'Avatar is not shown',
-      );
-      //Verify contains the time message is sent
-      s.softAssertEquals(
-        $(EventInfoDialog).$(ListTile).at(1).$(Text).at(1).text != "",
-        true,
-        'sent time is not shown',
-      );
-      // verify type is text
-      s.softAssertEquals(
-        $(EventInfoDialog).$(ListTile).at(2).$(Text).at(1).text == "text",
-        true,
-        'type is not text',
-      );
-      // verify source code is shown
-      s.softAssertEquals(
-        $(EventInfoDialog).$(SelectableText).exists,
-        true,
-        'source code is not shown',
-      );
-      //close message info
-      await ChatScenario($).closeMessageInfo();
-
-      s.verifyAll();
-    },
+    scenarioBuilder: ($, robots) => ChatGroupMessageInfoScenario($, robots),
   );
 }
