@@ -33,24 +33,29 @@ class ChatImageRetryScenario extends BaseTestScenario {
     await $.native.disableCellular();
     await $.pumpAndTrySettle();
 
-    // 3. Send an image.
-    await chatScenario.sendImage();
-
-    // 4. Verify the upload failed and the retry button is shown.
     final retryBtn = $(
       SendingImageInfoWidget,
     ).$(IconButton).containing(find.byIcon(Icons.refresh));
-    await $.waitUntilVisible(retryBtn, timeout: const Duration(seconds: 30));
-    expect(
-      retryBtn.exists,
-      isTrue,
-      reason: 'Retry button should be visible after failed upload',
-    );
 
-    // 5. Turn internet back on.
-    await $.native.enableWifi();
-    await $.native.enableCellular();
-    await $.pumpAndSettle();
+    try {
+      // 3. Send an image.
+      await chatScenario.sendImage();
+
+      // 4. Verify the upload failed and the retry button is shown.
+      await $.waitUntilVisible(retryBtn, timeout: const Duration(seconds: 30));
+      expect(
+        retryBtn.exists,
+        isTrue,
+        reason: 'Retry button should be visible after failed upload',
+      );
+    } finally {
+      // 5. Always restore connectivity — even if the offline assertions above
+      // threw — so a failure here cannot leave the device offline and poison
+      // the following tests.
+      await $.native.enableWifi();
+      await $.native.enableCellular();
+      await $.pumpAndSettle();
+    }
     await Future<void>.delayed(const Duration(seconds: 5));
 
     // 6. Hit retry.
