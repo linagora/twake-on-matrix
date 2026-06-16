@@ -3131,5 +3131,26 @@
       "successCount": {},
       "totalCount": {}
     }
+  },
+  "gifAutoplay": "lecture automatique des GIF",
+  "videoCallStartedTitle": "A démarré un appel vidéo",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Démarrer un appel vidéo",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Copier le lien",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Rejoindre l'appel",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
   }
 }
