@@ -22,6 +22,14 @@ class TestBase {
     ScenarioBuilder? scenarioBuilder,
     NativeAutomatorConfig? nativeAutomatorConfig,
     dynamic tags = const [],
+    // Marks a `scenarioBuilder` test that is intentionally mobile-only — it
+    // exercises a capability the web target cannot reach locally (system
+    // clipboard, `$.native.*`, a non-resolvable account, or a backend the
+    // local web harness lacks). Such tests are skipped on web instead of
+    // failing the suite, and run unchanged on mobile. This is the migration
+    // path for the remaining legacy `test:` / `twakePatrolTest` mobile-only
+    // tests once those signatures are dropped.
+    bool mobileOnly = false,
   }) {
     // Enforced at runtime (not via `assert`) so the contract holds in
     // profile/release builds too, where assertions are compiled out.
@@ -75,11 +83,13 @@ class TestBase {
       config: patrolConfig,
       nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
       tags: tags,
-      // Legacy `test:` entries are mobile-only (they reach `$.native.*` and
-      // other mobile-only paths). Skip them on web so a partially-migrated
-      // file stays Patrol-Web-green: the `scenarioBuilder` tests run, the
-      // not-yet-migrated legacy ones are skipped rather than failing.
-      skip: kIsWeb && scenarioBuilder == null,
+      // On web, skip two kinds of tests so the suite stays green:
+      //   * legacy `test:` entries (mobile-only — they reach `$.native.*` and
+      //     other mobile-only paths), pending migration;
+      //   * `scenarioBuilder` tests explicitly flagged [mobileOnly] (they need
+      //     a capability the local web harness cannot provide).
+      // Everything else runs on both platforms. Mobile runs all of them.
+      skip: kIsWeb && (scenarioBuilder == null || mobileOnly),
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
