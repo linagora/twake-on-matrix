@@ -58,11 +58,9 @@ void _testDefaults() {
 void _testOptions() {
   group('matchAnyField options', () {
     test('should not match different case when caseSensitive is true', () {
-      final result = _search(
-        'john',
-        ['John'],
-        options: const SearchOptions(caseSensitive: true),
-      );
+      final result = _search('john', [
+        'John',
+      ], options: const SearchOptions(caseSensitive: true));
 
       expect(result, isEmpty);
     });

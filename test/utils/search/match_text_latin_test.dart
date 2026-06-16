@@ -5,8 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 const _engine = TextSearchEngine();
 const _insensitive = SearchOptions(diacriticSensitive: false);
 
-bool _match(String needle, String haystack, {SearchOptions options = const SearchOptions()}) =>
-    _engine.matchesText(needle, haystack, options: options);
+bool _match(
+  String needle,
+  String haystack, {
+  SearchOptions options = const SearchOptions(),
+}) => _engine.matchesText(needle, haystack, options: options);
 
 void main() {
   _testDefaults();
