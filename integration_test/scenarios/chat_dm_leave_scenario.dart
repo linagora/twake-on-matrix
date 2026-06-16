@@ -89,18 +89,23 @@ class ChatDmLeaveScenario extends BaseTestScenario {
     await searchRobot.enterSearchText(timestampAccount);
 
     // Wait for search results to appear instead of pumpAndSettle
-    // (pumpAndSettle times out due to TextField cursor animation)
-    await $.waitUntilVisible($(TwakeListItem), timeout: _kNavigationTimeout);
+    // (pumpAndSettle times out due to TextField cursor animation).
+    // Match the row for this exact account so we don't open an unrelated chat
+    // if the search ever returns more than one result.
+    final searchResult = $(
+      TwakeListItem,
+    ).containing(find.textContaining(timestampAccount));
+    await $.waitUntilVisible(searchResult.first, timeout: _kNavigationTimeout);
 
-    // Verify search result exists
+    // Verify the search result for this account exists.
     s.softAssertEquals(
-      $(TwakeListItem).exists,
+      searchResult.exists,
       true,
       'Chat is not found in search results',
     );
 
-    // Open the chat from search results
-    await $(TwakeListItem).first.tap();
+    // Open the chat from search results.
+    await searchResult.first.tap();
     await $.waitUntilVisible($(ChatView));
 
     // Open chat profile info (DM-specific method)
