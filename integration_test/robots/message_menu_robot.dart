@@ -56,4 +56,18 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await $.native.tap(Selector(text: _l10n.delete));
     await $.pump(const Duration(milliseconds: 300));
   }
+
+  @override
+  Future<void> openEdit(String message) async {
+    await _openMenu(message);
+    await _menu.getEditItem().tap();
+    await $.pump(const Duration(milliseconds: 300));
+  }
+
+  @override
+  Future<void> openSelect(String message) async {
+    await _openMenu(message);
+    await _menu.getSelectItem().tap();
+    await $.pump(const Duration(milliseconds: 300));
+  }
 }

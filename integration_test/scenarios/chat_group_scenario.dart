@@ -1,3 +1,6 @@
+import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
 
@@ -75,6 +78,42 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitShown(this, replyReceiver);
+  }
+}
+
+/// Edit a sender-owned message in a group chat: the edited text appears and
+/// the original text is gone.
+class ChatGroupEditScenario extends BaseTestScenario {
+  ChatGroupEditScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final (senderMsg, _) = await _prepareTwoMessages(this);
+
+    // Distinct text (not a superstring of [senderMsg]) so the "original is
+    // gone" check can't match the edited bubble under `textContaining`.
+    final edited = 'edited sender at ${_uid()}';
+    await robots.messageMenuRobot().openEdit(senderMsg);
+    await robots.chatGroupDetailRobot().sendMessage(edited);
+
+    await _waitShown(this, edited);
+    await _waitAbsent(this, senderMsg);
+  }
+}
+
+/// Select a message in a group chat and verify the multi-select mode is active
+/// (the selection count surfaces in the chat app-bar title).
+class ChatGroupSelectScenario extends BaseTestScenario {
+  ChatGroupSelectScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final (senderMsg, _) = await _prepareTwoMessages(this);
+
+    await robots.messageMenuRobot().openSelect(senderMsg);
+
+    final count = $(ChatAppBarTitle).$(find.text('1'));
+    await $.waitUntilVisible(count, timeout: const Duration(seconds: 10));
   }
 }
 

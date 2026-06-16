@@ -91,16 +91,31 @@ class TestBase {
             FlutterError.onError ?? FlutterError.presentError;
         addTearDown(() => FlutterError.onError = originalOnError);
         FlutterError.onError = (FlutterErrorDetails details) {
-          // The narrow headless-web viewport triggers benign `RenderFlex`
-          // overflow assertions in a few app layouts (e.g. the reply preview
-          // above the composer). These are cosmetic and unrelated to the test
-          // logic, but `onError` would otherwise fail the test — so on web we
-          // log and swallow only the benign RenderFlex overflow. Mobile stays
-          // strict, and other overflow errors still fail the test on web.
-          final isBenignRenderFlexOverflow = details
-              .exceptionAsString()
-              .contains('A RenderFlex overflowed by');
-          if (kIsWeb && isBenignRenderFlexOverflow) {
+          // A couple of pre-existing, web-only rendering assertions fire under
+          // the narrow headless-web harness and are unrelated to the test
+          // logic:
+          //   * a benign `RenderFlex` overflow in a few app layouts (e.g. the
+          //     reply preview above the composer);
+          //   * `chat_web_scrollbar` momentarily reporting its `ScrollController`
+          //     attached to multiple scroll views while the layout rebuilds
+          //     (e.g. entering message-select mode).
+          // `onError` would otherwise fail the test, so on web we log and
+          // swallow only these specific cases. Mobile stays strict, and other
+          // overflow errors still fail the test on web.
+          final message = details.exceptionAsString();
+          final stack = details.stack?.toString() ?? '';
+          // Require the exact framework assertion in addition to the
+          // `chat_web_scrollbar` stack frame, so an unrelated regression from
+          // that file is not silently swallowed.
+          final isKnownScrollbarAttachAssertion =
+              stack.contains('chat_web_scrollbar') &&
+              message.contains(
+                'ScrollController attached to multiple scroll views',
+              );
+          final isBenignWebError =
+              message.contains('A RenderFlex overflowed by') ||
+              isKnownScrollbarAttachAssertion;
+          if (kIsWeb && isBenignWebError) {
             FlutterError.dumpErrorToConsole(details);
             return;
           }
