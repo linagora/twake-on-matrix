@@ -79,11 +79,6 @@ extension ResultExtension on Result {
       removeMarkdown: true,
     );
 
-    // Strip VS16 (U+FE0F) so searching ❤️ matches ❤ and vice versa.
-    const vs16 = '\uFE0F';
-    return bodyContent
-        .replaceAll(vs16, '')
-        .toLowerCase()
-        .contains(searchWord.replaceAll(vs16, '').toLowerCase());
+    return bodyContent.toLowerCase().contains(searchWord.toLowerCase());
   }
 }
