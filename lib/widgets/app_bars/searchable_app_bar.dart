@@ -187,7 +187,7 @@ class SearchableAppBar extends StatelessWidget {
         contextMenuBuilder: mobileTwakeContextMenuBuilder,
         buildCounter:
             (
-              BuildContext context, {
+              BuildContext _, {
               required int currentLength,
               required int? maxLength,
               required bool isFocused,

@@ -28,7 +28,7 @@ class SearchTextField extends StatelessWidget {
       child: RightClickFocus(
         focusNode: focusNode,
         child: TextField(
-          onTapOutside: (event) {
+          onTapOutside: (_) {
             dismissKeyboard(context);
           },
           controller: textEditingController,
@@ -57,7 +57,7 @@ class SearchTextField extends StatelessWidget {
             ),
             suffixIcon: ValueListenableBuilder(
               valueListenable: textEditingController,
-              builder: (context, value, child) {
+              builder: (_, value, child) {
                 if (value.text.isEmpty) return const SizedBox.shrink();
                 return child!;
               },
