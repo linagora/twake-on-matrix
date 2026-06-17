@@ -327,6 +327,8 @@ docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /pa
 
 - <a href="https://github.com/googlefonts/noto-emoji/">Noto Emoji Font</a> for the awesome emojis.
 
+- **TwakeInter font** (bundled in `assets/google_fonts/`): a derivative of the [Inter](https://github.com/rsms/inter) typeface by Rasmus Andersson, modified to remove emoji glyphs that interfered with color emoji rendering on Flutter web. "Inter" is a Reserved Font Name under the SIL Open Font License. This derivative has been renamed to "TwakeInter" in compliance with that requirement. The font component is licensed under **SIL OFL v1.1** (see `assets/google_fonts/OFL.txt`), independent of the application's AGPL-v3 license.
+
 - <a href="https://github.com/madsrh/WoodenBeaver">WoodenBeaver</a> sound theme for the notification sound.
 
 - The Matrix Foundation for making and maintaining the [emoji translations](https://github.com/matrix-org/matrix-doc/blob/main/data-definitions/sas-emoji.json) used for emoji verification, licensed Apache 2.0

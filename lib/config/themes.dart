@@ -51,7 +51,7 @@ abstract class TwakeThemes {
   ]) => ThemeData(
     visualDensity: VisualDensity.standard,
     useMaterial3: true,
-    fontFamily: 'Inter',
+    fontFamily: 'TwakeInter',
     textTheme: brightness == Brightness.light
         ? Typography.material2021().black.merge(fallbackTextTheme)
         : Typography.material2021().white.merge(fallbackTextTheme),

@@ -276,15 +276,15 @@ flutter:
     - configurations/
     - configurations/icons/
   fonts:
-    - family: Inter
+    - family: TwakeInter
       fonts:
-        - asset: assets/google_fonts/Inter-Medium.ttf
+        - asset: assets/google_fonts/TwakeInter-Medium.ttf
           weight: 500
-        - asset: assets/google_fonts/Inter-Regular.ttf
+        - asset: assets/google_fonts/TwakeInter-Regular.ttf
           weight: 400
-        - asset: assets/google_fonts/Inter-SemiBold.ttf
+        - asset: assets/google_fonts/TwakeInter-SemiBold.ttf
           weight: 600
-        - asset: assets/google_fonts/Inter-Bold.ttf
+        - asset: assets/google_fonts/TwakeInter-Bold.ttf
           weight: 700
 
 msix_config:
