@@ -8,11 +8,11 @@ List<NormalizationStep> _buildPipeline(SearchOptions options) {
 }
 
 List<T> _matchAnyField<T>(
-    String needle,
-    List<T> haystack, {
-      required List<String? Function(T)> fieldExtractors,
-      SearchOptions options = const SearchOptions(),
-    }) {
+  String needle,
+  List<T> haystack, {
+  required List<String? Function(T)> fieldExtractors,
+  SearchOptions options = const SearchOptions(),
+}) {
   if (needle.isEmpty) return <T>[];
   final pipeline = _buildPipeline(options);
   String apply(String input) =>
@@ -29,16 +29,16 @@ List<T> _matchAnyField<T>(
 
   return haystack.where((item) {
     return fieldExtractors.any(
-          (extract) => matches(apply(extract(item) ?? '')),
+      (extract) => matches(apply(extract(item) ?? '')),
     );
   }).toList();
 }
 
 bool _matchesText(
-    String needle,
-    String haystack, {
-      SearchOptions options = const SearchOptions(),
-    }) {
+  String needle,
+  String haystack, {
+  SearchOptions options = const SearchOptions(),
+}) {
   return _matchAnyField(
     needle,
     [haystack],
