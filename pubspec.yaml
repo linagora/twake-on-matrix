@@ -278,6 +278,7 @@ flutter:
   fonts:
     - family: TwakeInter
       fonts:
+        - asset: assets/google_fonts/TwakeInter.ttf
         - asset: assets/google_fonts/TwakeInter-Medium.ttf
           weight: 500
         - asset: assets/google_fonts/TwakeInter-Regular.ttf
