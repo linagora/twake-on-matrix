@@ -68,32 +68,67 @@ jobs:
         env:
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         run: |
-          TARGET_FLAG=()
-          if [ -n "$PATROL_TEST_TARGET" ]; then
-            TARGET_FLAG=(--target "$PATROL_TEST_TARGET")
-          fi
           # shellcheck disable=SC1091
           set -a
           . ./.env.patrol-web
           set +a
-          patrol test \
-            --device chrome \
-            --web-headless=true \
-            --web-timeout 300000 \
-            "${TARGET_FLAG[@]}" \
-            --dart-define=PATROL_WEB=true \
-            --dart-define=MATRIX_URL="$MATRIX_URL" \
-            --dart-define=SERVER_URL="$SERVER_URL" \
-            --dart-define=USERNAME="$TEST_USERNAME" \
-            --dart-define=PASSWORD="$TEST_PASSWORD" \
-            --dart-define=Receiver="$Receiver" \
-            --dart-define=ReceiverPass="$ReceiverPass" \
-            --dart-define=CurrentAccount="$CurrentAccount" \
-            --dart-define=MemberMatrixID="$MemberMatrixID" \
-            --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
-            --dart-define=SearchByTitle="$SearchByTitle" \
-            --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
-            --dart-define=GroupID="$GroupID"
+
+          # Patrol web runs ONE target file per invocation — it does not
+          # enumerate the whole suite when --target is omitted (that yields
+          # "Total: 0"). So run the given target, or every *_test.dart file in
+          # turn, and aggregate. Patrol web also exits 0 even when a test fails,
+          # so the status is derived from the printed summary.
+          if [ -n "$PATROL_TEST_TARGET" ]; then
+            mapfile -t TARGETS <<< "$PATROL_TEST_TARGET"
+          else
+            mapfile -t TARGETS < <(find integration_test/tests -name '*_test.dart' | sort)
+          fi
+          echo "Running ${#TARGETS[@]} Patrol web target(s)."
+
+          run_one() {
+            patrol test \
+              --device chrome \
+              --web-headless=true \
+              --web-timeout 300000 \
+              --target "$1" \
+              --dart-define=PATROL_WEB=true \
+              --dart-define=MATRIX_URL="$MATRIX_URL" \
+              --dart-define=SERVER_URL="$SERVER_URL" \
+              --dart-define=USERNAME="$TEST_USERNAME" \
+              --dart-define=PASSWORD="$TEST_PASSWORD" \
+              --dart-define=Receiver="$Receiver" \
+              --dart-define=ReceiverPass="$ReceiverPass" \
+              --dart-define=CurrentAccount="$CurrentAccount" \
+              --dart-define=MemberMatrixID="$MemberMatrixID" \
+              --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
+              --dart-define=SearchByTitle="$SearchByTitle" \
+              --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
+              --dart-define=GroupID="$GroupID" \
+              2>&1 | tee /tmp/patrol-web.log
+            # Green only when the summary reports zero failures (a file whose
+            # tests are all mobileOnly-skipped is still green). A missing
+            # summary line (crash / build error) counts as a failure.
+            grep -qE '^❌ Failed: 0$' /tmp/patrol-web.log
+          }
+
+          overall=0
+          FAILED=()
+          for t in "${TARGETS[@]}"; do
+            echo "::group::Patrol Web — $t"
+            if run_one "$t"; then
+              echo "PASS: $t"
+            else
+              echo "FAIL: $t"
+              overall=1
+              FAILED+=("$t")
+            fi
+            echo "::endgroup::"
+          done
+
+          if [ "$overall" -ne 0 ]; then
+            echo "::error::Patrol web failures in: ${FAILED[*]}"
+          fi
+          exit "$overall"
 
       - name: Upload Playwright report
         if: always()
