@@ -58,7 +58,8 @@ class SearchTextField extends StatelessWidget {
             suffixIcon: ValueListenableBuilder(
               valueListenable: textEditingController,
               builder: (context, value, child) {
-                return value.text.isNotEmpty ? child! : const SizedBox.shrink();
+                if (value.text.isEmpty) return const SizedBox.shrink();
+                return child!;
               },
               child: TwakeIconButton(
                 tooltip: L10n.of(context)!.close,

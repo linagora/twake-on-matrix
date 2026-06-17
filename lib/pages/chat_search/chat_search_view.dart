@@ -324,14 +324,15 @@ class _ChatSearchAppBar extends StatelessWidget {
                       .copyWith(
                         suffixIcon: ValueListenableBuilder(
                           valueListenable: controller.textEditingController,
-                          builder: (context, value, child) =>
-                              value.text.isNotEmpty
-                              ? IconButton(
-                                  onPressed:
-                                      controller.textEditingController.clear,
-                                  icon: const Icon(Icons.close),
-                                )
-                              : const SizedBox.shrink(),
+                          builder: (context, value, child) {
+                            if (value.text.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return IconButton(
+                              onPressed: controller.textEditingController.clear,
+                              icon: const Icon(Icons.close),
+                            );
+                          },
                         ),
                       ),
                 ),
