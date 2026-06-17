@@ -17,7 +17,7 @@ import 'package:matrix/matrix.dart';
 
 enum ArchivedRoomAction { delete, rejoin }
 
-class ChatListItem extends StatefulWidget {
+class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final Room room;
   final bool activeChat;
   final bool isSelectedItem;
@@ -43,37 +43,8 @@ class ChatListItem extends StatefulWidget {
     super.key,
   });
 
-  @override
-  State<ChatListItem> createState() => _ChatListItemState();
-}
-
-class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
-  Future<List<User>>? _heroUsersFuture;
-
-  Room get room => widget.room;
-
-  bool get _isGroupChat => !room.isDirectChat;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadHeroUsersIfNeeded();
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatListItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.room.id != room.id) {
-      _loadHeroUsersIfNeeded();
-    }
-  }
-
-  void _loadHeroUsersIfNeeded() {
-    _heroUsersFuture = room.name.isEmpty ? room.loadHeroUsers() : null;
-  }
-
   void clickAction(BuildContext context) async {
-    if (widget.onTap != null) return widget.onTap!();
+    if (onTap != null) return onTap!();
     switch (room.membership) {
       case Membership.ban:
         TwakeSnackBar.show(
@@ -115,18 +86,20 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
     }
   }
 
+  bool get _isGroupChat => !room.isDirectChat;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
-        isSelected: widget.activeChat,
+        isSelected: activeChat,
         onTap: () => clickAction(context),
-        onSecondaryTapDown: widget.onSecondaryTapDown,
-        onLongPress: widget.onLongPress,
+        onSecondaryTapDown: onSecondaryTapDown,
+        onLongPress: onLongPress,
         child: TwakeListItem(
-          child: FutureBuilder<List<User>>(
-            future: _heroUsersFuture,
+          child: FutureBuilder(
+            future: room.name.isEmpty ? room.loadHeroUsers() : null,
             builder: (context, _) {
               final displayName = room.getLocalizedDisplayname(
                 MatrixLocals(L10n.of(context)!),
@@ -137,8 +110,7 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (widget.isEnableSelectMode)
-                      widget.checkBoxWidget ?? const SizedBox(),
+                    if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                     Padding(
                       padding: ChatListItemStyle.paddingAvatar,
                       child: Stack(
@@ -146,7 +118,7 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
                           Avatar(
                             mxContent: room.avatar,
                             name: displayName,
-                            onTap: widget.onTapAvatar,
+                            onTap: onTapAvatar,
                             keepAlive: true,
                           ),
                           if (_isGroupChat)
@@ -181,7 +153,7 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
                         children: [
                           ChatListItemTitle(
                             room: room,
-                            originServerTs: switch (widget.previewResult) {
+                            originServerTs: switch (previewResult) {
                               RoomPreviewFound(:final event) =>
                                 event.originServerTs,
                               _ => null,
@@ -189,7 +161,7 @@ class _ChatListItemState extends State<ChatListItem> with ChatListItemMixin {
                           ),
                           ChatListItemSubtitle(
                             room: room,
-                            previewResult: widget.previewResult,
+                            previewResult: previewResult,
                           ),
                         ],
                       ),
