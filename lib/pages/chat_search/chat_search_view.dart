@@ -327,9 +327,8 @@ class _ChatSearchAppBar extends StatelessWidget {
                           builder: (context, value, child) =>
                               value.text.isNotEmpty
                               ? IconButton(
-                                  onPressed: () {
-                                    controller.textEditingController.clear();
-                                  },
+                                  onPressed:
+                                      controller.textEditingController.clear,
                                   icon: const Icon(Icons.close),
                                 )
                               : const SizedBox.shrink(),

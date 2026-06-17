@@ -63,9 +63,7 @@ class SearchTextField extends StatelessWidget {
               child: TwakeIconButton(
                 tooltip: L10n.of(context)!.close,
                 icon: Icons.close,
-                onTap: () {
-                  textEditingController.clear();
-                },
+                onTap: textEditingController.clear,
               ),
             ),
           ),
