@@ -17,26 +17,15 @@ class TestBase {
   ///   cross-platform migration.
   void runPatrolTest({
     required String description,
-    Function(PatrolIntegrationTester $)? test,
-    ScenarioBuilder? scenarioBuilder,
-    NativeAutomatorConfig? nativeAutomatorConfig,
+    required ScenarioBuilder scenarioBuilder,
     dynamic tags = const [],
-    // Marks a `scenarioBuilder` test that is intentionally mobile-only — it
-    // exercises a capability the web target cannot reach locally (system
-    // clipboard, `$.native.*`, a non-resolvable account, or a backend the
-    // local web harness lacks). Such tests are skipped on web instead of
-    // failing the suite, and run unchanged on mobile. This is the migration
-    // path for the remaining legacy `test:` / `twakePatrolTest` mobile-only
-    // tests once those signatures are dropped.
+    // Marks a test that is intentionally mobile-only — it exercises a
+    // capability the web target cannot reach locally (system clipboard,
+    // `$.native.*`, a non-resolvable account, or a backend the local web
+    // harness lacks). Such tests are skipped on web instead of failing the
+    // suite, and run unchanged on mobile.
     bool mobileOnly = false,
   }) {
-    // Enforced at runtime (not via `assert`) so the contract holds in
-    // profile/release builds too, where assertions are compiled out.
-    if ((test == null) == (scenarioBuilder == null)) {
-      throw ArgumentError(
-        'runPatrolTest requires exactly one of `test` or `scenarioBuilder`.',
-      );
-    }
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
@@ -80,65 +69,61 @@ class TestBase {
       description,
       timeout: testTimeout,
       config: patrolConfig,
-      nativeAutomatorConfig: nativeAutomatorConfig ?? defaultNativeConfig,
+      nativeAutomatorConfig: defaultNativeConfig,
       tags: tags,
-      // On web, skip two kinds of tests so the suite stays green:
-      //   * legacy `test:` entries (mobile-only — they reach `$.native.*` and
-      //     other mobile-only paths), pending migration;
-      //   * `scenarioBuilder` tests explicitly flagged [mobileOnly] (they need
-      //     a capability the local web harness cannot provide).
-      // Everything else runs on both platforms. Mobile runs all of them.
-      skip: kIsWeb && (scenarioBuilder == null || mobileOnly),
+      // On web, skip tests explicitly flagged [mobileOnly] (they need a
+      // capability the local web harness cannot provide). Everything else runs
+      // on both platforms; mobile runs all of them.
+      skip: kIsWeb && mobileOnly,
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
-        // `FlutterError.onError` is a global static. Capture the current
-        // handler and restore it on teardown so each test's wrapper does not
-        // stack onto the previous one's, which would compound the filtering
-        // and could hide or duplicate failures across tests.
-        final originalOnError =
-            FlutterError.onError ?? FlutterError.presentError;
-        addTearDown(() => FlutterError.onError = originalOnError);
-        FlutterError.onError = (FlutterErrorDetails details) {
-          // A couple of pre-existing, web-only rendering assertions fire under
-          // the narrow headless-web harness and are unrelated to the test
-          // logic:
-          //   * a benign `RenderFlex` overflow in a few app layouts (e.g. the
-          //     reply preview above the composer);
-          //   * `chat_web_scrollbar` momentarily reporting its `ScrollController`
-          //     attached to multiple scroll views while the layout rebuilds
-          //     (e.g. entering message-select mode).
-          // `onError` would otherwise fail the test, so on web we log and
-          // swallow only these specific cases. Mobile stays strict, and other
-          // overflow errors still fail the test on web.
-          final message = details.exceptionAsString();
-          final stack = details.stack?.toString() ?? '';
-          // Require the exact framework assertion in addition to the
-          // `chat_web_scrollbar` stack frame, so an unrelated regression from
-          // that file is not silently swallowed.
-          final isKnownScrollbarAttachAssertion =
-              stack.contains('chat_web_scrollbar') &&
-              message.contains(
-                'ScrollController attached to multiple scroll views',
-              );
-          final isBenignWebError =
-              message.contains('A RenderFlex overflowed by') ||
-              isKnownScrollbarAttachAssertion;
-          if (kIsWeb && isBenignWebError) {
-            FlutterError.dumpErrorToConsole(details);
-            return;
-          }
-          originalOnError(details);
-        };
+        _installWebBenignErrorFilter();
         await loginAndRun($);
-        if (scenarioBuilder != null) {
-          final robots = createRobotFactory($);
-          await scenarioBuilder($, robots).runTestLogic();
-        } else {
-          await test!($);
-        }
+        final robots = createRobotFactory($);
+        await scenarioBuilder($, robots).runTestLogic();
       },
     );
+  }
+
+  /// On web, swallows a couple of pre-existing, benign rendering assertions
+  /// that fire under the narrow headless-web harness and are unrelated to the
+  /// test logic (see [_isBenignWebError]). Mobile stays strict.
+  ///
+  /// `FlutterError.onError` is a global static, so the previous handler is
+  /// captured and restored on teardown — otherwise each test's wrapper would
+  /// stack onto the last one's, compounding the filtering.
+  void _installWebBenignErrorFilter() {
+    final originalOnError = FlutterError.onError ?? FlutterError.presentError;
+    addTearDown(() => FlutterError.onError = originalOnError);
+    FlutterError.onError = (FlutterErrorDetails details) {
+      if (kIsWeb && _isBenignWebError(details)) {
+        FlutterError.dumpErrorToConsole(details);
+        return;
+      }
+      originalOnError(details);
+    };
+  }
+
+  /// Whether [details] is one of the known, benign web-only rendering
+  /// assertions:
+  ///   * a `RenderFlex` overflow in a few app layouts (e.g. the reply preview
+  ///     above the composer);
+  ///   * `chat_web_scrollbar` momentarily reporting its `ScrollController`
+  ///     attached to multiple scroll views while the layout rebuilds (e.g.
+  ///     entering message-select mode).
+  ///
+  /// The scrollbar case requires the exact framework assertion in addition to
+  /// the `chat_web_scrollbar` stack frame, so an unrelated regression from that
+  /// file is not silently swallowed.
+  static bool _isBenignWebError(FlutterErrorDetails details) {
+    final message = details.exceptionAsString();
+    final stack = details.stack?.toString() ?? '';
+    final isKnownScrollbarAttachAssertion =
+        stack.contains('chat_web_scrollbar') &&
+        message.contains('ScrollController attached to multiple scroll views');
+    return message.contains('A RenderFlex overflowed by') ||
+        isKnownScrollbarAttachAssertion;
   }
 
   Future<void> initTwakeChat() async {
