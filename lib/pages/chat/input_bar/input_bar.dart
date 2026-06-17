@@ -441,9 +441,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               focusNode: focusNode,
               onChanged: (text) {
                 widget.suggestionsController?.open();
-                if (widget.onChanged != null) {
-                  widget.onChanged!(text);
-                }
+                widget.onChanged?.call(text);
               },
               contextMenuBuilder: PlatformInfos.isWeb
                   ? null
