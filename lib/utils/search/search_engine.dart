@@ -1,4 +1,5 @@
 import 'search_options.dart';
+import 'steps/diacritic_strip_step.dart';
 import 'steps/lower_case_step.dart';
 import 'steps/normalization_step.dart';
 

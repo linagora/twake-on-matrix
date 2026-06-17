@@ -1,3 +1,4 @@
+// Tests the matchesText core contract: substring matching, case folding, and empty-needle edge cases.
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';

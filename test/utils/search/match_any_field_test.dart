@@ -1,3 +1,4 @@
+// Tests the matchAnyField API: multi-item filtering, field extractors, and SearchOptions propagation.
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
