@@ -131,6 +131,7 @@ dependencies:
   image_picker_android: ^0.8.13
   image_picker_platform_interface: ^2.11.0
   intl: any
+  unorm_dart: ^0.2.0
   just_audio: 0.10.5
   opus_caf_converter_dart: ^1.0.1
   keyboard_shortcuts: ^0.1.4
