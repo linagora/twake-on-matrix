@@ -44,7 +44,9 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+          style: ListItemStyle.subtitleTextStyle(
+            fontFamily: LinagoraFonts.inter,
+          ),
         );
       },
     );
@@ -54,7 +56,7 @@ mixin ChatListItemMixin {
     final displayedTypingText = "$typingText…";
     return Text(
       displayedTypingText,
-      style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+      style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
       maxLines: 2,
       softWrap: true,
     );
@@ -119,7 +121,7 @@ mixin ChatListItemMixin {
           maxLines: 1,
           softWrap: false,
           style: ListItemStyle.subtitleTextStyle(
-            fontFamily: 'TwakeInter',
+            fontFamily: LinagoraFonts.inter,
           ).copyWith(color: LinagoraSysColors.material().onSurface),
         ),
         event.messageType == MessageTypes.Image ||
@@ -131,7 +133,7 @@ mixin ChatListItemMixin {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: 'TwakeInter',
+                  fontFamily: LinagoraFonts.inter,
                 ),
               ),
       ],
@@ -172,7 +174,9 @@ mixin ChatListItemMixin {
             event?.messageType == MessageTypes.Image
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
-            style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+            style: ListItemStyle.subtitleTextStyle(
+              fontFamily: LinagoraFonts.inter,
+            ),
           ),
         ),
       ],

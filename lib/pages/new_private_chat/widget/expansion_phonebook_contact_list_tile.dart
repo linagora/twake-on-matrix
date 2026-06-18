@@ -165,7 +165,8 @@ class _ExpansionPhonebookContactListTileState
                                                     widget.highlightKeyword,
                                                 style:
                                                     ListItemStyle.titleTextStyle(
-                                                      fontFamily: 'TwakeInter',
+                                                      fontFamily:
+                                                          LinagoraFonts.inter,
                                                     ),
                                               ),
                                             ),
@@ -199,7 +200,7 @@ class _ExpansionPhonebookContactListTileState
                                     text: widget.contact.matrixId!,
                                     searchWord: widget.highlightKeyword,
                                     style: ListItemStyle.subtitleTextStyle(
-                                      fontFamily: 'TwakeInter',
+                                      fontFamily: LinagoraFonts.inter,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -308,13 +309,13 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
       );
     } else if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -327,7 +328,7 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
       );
     }
     return const SizedBox();
@@ -338,7 +339,7 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );

@@ -36,12 +36,12 @@ class ChatAppBarTitleStyle {
       ? Theme.of(context).textTheme.labelMedium?.copyWith(
           color: LinagoraRefColors.material().tertiary[30],
           letterSpacing: ChatAppBarTitleStyle.letterSpacingStatusContent,
-          fontFamily: 'TwakeInter',
+          fontFamily: LinagoraFonts.inter,
         )
       : Theme.of(context).textTheme.bodySmall?.copyWith(
           color: LinagoraRefColors.material().neutral[50],
           letterSpacing: ChatAppBarTitleStyle.letterSpacingRoomName,
-          fontFamily: 'TwakeInter',
+          fontFamily: LinagoraFonts.inter,
         );
 
   static TextStyle? onlineStatusTextStyle(BuildContext context) =>

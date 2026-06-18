@@ -493,7 +493,7 @@ class ChatInputRow extends StatelessWidget {
           color: controller.responsive.isMobile(context)
               ? LinagoraRefColors.material().tertiary[50]
               : LinagoraRefColors.material().tertiary[30],
-          fontFamily: 'TwakeInter',
+          fontFamily: LinagoraFonts.inter,
         ),
       ),
       onChanged: controller.onInputBarChanged,

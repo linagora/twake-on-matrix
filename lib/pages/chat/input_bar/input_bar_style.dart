@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
 
 class InputBarStyle {
   static const double suggestionAvatarSize = 30;
@@ -16,7 +17,7 @@ class InputBarStyle {
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
-        fontFamily: 'TwakeInter',
+        fontFamily: LinagoraFonts.inter,
       );
 
   static const double suggestionTileAvatarTextGap = 8.0;

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
 
 import 'app_config.dart';
 
@@ -50,7 +51,7 @@ abstract class TwakeThemes {
   ]) => ThemeData(
     visualDensity: VisualDensity.standard,
     useMaterial3: true,
-    fontFamily: 'TwakeInter',
+    fontFamily: LinagoraFonts.inter,
     textTheme: brightness == Brightness.light
         ? Typography.material2021().black.merge(fallbackTextTheme)
         : Typography.material2021().white.merge(fallbackTextTheme),
