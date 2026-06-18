@@ -40,9 +40,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         softWrap: false,
-                        style: ListItemStyle.titleTextStyle(
-                          fontFamily: LinagoraFonts.twakeInter,
-                        ),
+                        style: ListItemStyle.titleTextStyle(),
                       ),
                     ),
                   ),

@@ -112,9 +112,7 @@ class _GroupChatInformation extends StatelessWidget {
             children: [
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
-                style: ListItemStyle.titleTextStyle(
-                  fontFamily: LinagoraFonts.twakeInter,
-                ),
+                style: ListItemStyle.titleTextStyle(),
                 searchWord: searchKeyword,
               ),
               Text(
@@ -122,9 +120,7 @@ class _GroupChatInformation extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 softWrap: false,
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: LinagoraFonts.twakeInter,
-                ),
+                style: ListItemStyle.subtitleTextStyle(),
               ),
             ],
           ),
@@ -186,16 +182,12 @@ class _DirectChatInformation extends StatelessWidget {
             children: [
               _SearchHighlightText(
                 text: recentChatPresentationSearch.displayName ?? "",
-                style: ListItemStyle.titleTextStyle(
-                  fontFamily: LinagoraFonts.twakeInter,
-                ),
+                style: ListItemStyle.titleTextStyle(),
                 searchWord: searchKeyword,
               ),
               _SearchHighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: LinagoraFonts.twakeInter,
-                ),
+                style: ListItemStyle.subtitleTextStyle(),
                 searchWord: searchKeyword,
               ),
             ],
@@ -244,9 +236,7 @@ class _ContactInformation extends StatelessWidget {
                   Expanded(
                     child: _SearchHighlightText(
                       text: contactPresentationSearch.displayName ?? "",
-                      style: ListItemStyle.titleTextStyle(
-                        fontFamily: LinagoraFonts.twakeInter,
-                      ),
+                      style: ListItemStyle.titleTextStyle(),
                       searchWord: searchKeyword,
                     ),
                   ),
@@ -269,9 +259,7 @@ class _ContactInformation extends StatelessWidget {
                     if (contactPresentationSearch.matrixId != null)
                       _SearchHighlightText(
                         text: contactPresentationSearch.matrixId ?? "",
-                        style: ListItemStyle.subtitleTextStyle(
-                          fontFamily: LinagoraFonts.twakeInter,
-                        ),
+                        style: ListItemStyle.subtitleTextStyle(),
                         searchWord: searchKeyword,
                       ),
                     if (searchKeyword?.isNotEmpty == true) ...[
@@ -297,9 +285,7 @@ class _ContactInformation extends StatelessWidget {
     }
     return _SearchHighlightText(
       text: contactPresentationSearch.primaryEmail,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: LinagoraFonts.twakeInter,
-      ),
+      style: ListItemStyle.subtitleTextStyle(),
       searchWord: searchKeyword,
     );
   }
@@ -310,9 +296,7 @@ class _ContactInformation extends StatelessWidget {
     }
     return _SearchHighlightText(
       text: contactPresentationSearch.primaryPhoneNumber,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: LinagoraFonts.twakeInter,
-      ),
+      style: ListItemStyle.subtitleTextStyle(),
       searchWord: searchKeyword,
     );
   }

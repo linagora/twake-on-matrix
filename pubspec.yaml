@@ -274,17 +274,6 @@ flutter:
     - assets/js/package/
     - configurations/
     - configurations/icons/
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/google_fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/google_fonts/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/google_fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/google_fonts/Inter-Bold.ttf
-          weight: 700
 
 msix_config:
   display_name: Twake Chat

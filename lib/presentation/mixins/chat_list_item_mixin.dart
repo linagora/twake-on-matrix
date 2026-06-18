@@ -44,9 +44,7 @@ mixin ChatListItemMixin {
           softWrap: false,
           maxLines: isGroup ? 1 : 2,
           overflow: TextOverflow.ellipsis,
-          style: ListItemStyle.subtitleTextStyle(
-            fontFamily: LinagoraFonts.twakeInter,
-          ),
+          style: ListItemStyle.subtitleTextStyle(),
         );
       },
     );
@@ -56,9 +54,7 @@ mixin ChatListItemMixin {
     final displayedTypingText = "$typingText…";
     return Text(
       displayedTypingText,
-      style: ListItemStyle.subtitleTextStyle(
-        fontFamily: LinagoraFonts.twakeInter,
-      ),
+      style: ListItemStyle.subtitleTextStyle(),
       maxLines: 2,
       softWrap: true,
     );
@@ -122,9 +118,9 @@ mixin ChatListItemMixin {
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
           softWrap: false,
-          style: ListItemStyle.subtitleTextStyle(
-            fontFamily: LinagoraFonts.twakeInter,
-          ).copyWith(color: LinagoraSysColors.material().onSurface),
+          style: ListItemStyle.subtitleTextStyle().copyWith(
+            color: LinagoraSysColors.material().onSurface,
+          ),
         ),
         event.messageType == MessageTypes.Image ||
                 event.messageType == MessageTypes.Video
@@ -134,9 +130,7 @@ mixin ChatListItemMixin {
                 softWrap: false,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ListItemStyle.subtitleTextStyle(
-                  fontFamily: LinagoraFonts.twakeInter,
-                ),
+                style: ListItemStyle.subtitleTextStyle(),
               ),
       ],
     );
@@ -176,9 +170,7 @@ mixin ChatListItemMixin {
             event?.messageType == MessageTypes.Image
                 ? L10n.of(context)!.photo
                 : L10n.of(context)!.video,
-            style: ListItemStyle.subtitleTextStyle(
-              fontFamily: LinagoraFonts.twakeInter,
-            ),
+            style: ListItemStyle.subtitleTextStyle(),
           ),
         ),
       ],

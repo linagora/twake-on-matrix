@@ -1,6 +1,5 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
-import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
@@ -266,9 +265,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       style: Theme.of(context).textTheme.bodyLarge,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(16),
-                        hintStyle: const TextStyle(
-                          fontFamily: LinagoraFonts.twakeInter,
-                        ),
+                        hintStyle: const TextStyle(),
                         hintText: L10n.of(context)!.recoveryKey,
                         errorText: _recoveryKeyInputError,
                       ),

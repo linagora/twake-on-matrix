@@ -199,9 +199,7 @@ class _ExpansionPhonebookContactListTileState
                                   HighlightText(
                                     text: widget.contact.matrixId!,
                                     searchWord: widget.highlightKeyword,
-                                    style: ListItemStyle.subtitleTextStyle(
-                                      fontFamily: LinagoraFonts.twakeInter,
-                                    ),
+                                    style: ListItemStyle.subtitleTextStyle(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -309,17 +307,13 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: LinagoraFonts.twakeInter,
-        ),
+        style: ListItemStyle.subtitleTextStyle(),
       );
     } else if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: LinagoraFonts.twakeInter,
-        ),
+        style: ListItemStyle.subtitleTextStyle(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -332,9 +326,7 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: LinagoraFonts.twakeInter,
-        ),
+        style: ListItemStyle.subtitleTextStyle(),
       );
     }
     return const SizedBox();
@@ -345,9 +337,7 @@ class _ExpansionPhonebookContactListTileState
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: LinagoraFonts.twakeInter,
-        ),
+        style: ListItemStyle.subtitleTextStyle(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );

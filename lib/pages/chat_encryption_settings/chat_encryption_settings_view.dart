@@ -1,6 +1,5 @@
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
@@ -165,7 +164,6 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                               deviceKeys[i].ed25519Key?.beautified ??
                                   L10n.of(context)!.unknownEncryptionAlgorithm,
                               style: TextStyle(
-                                fontFamily: LinagoraFonts.twakeInter,
                                 color: Theme.of(context).colorScheme.secondary,
                               ),
                             ),
