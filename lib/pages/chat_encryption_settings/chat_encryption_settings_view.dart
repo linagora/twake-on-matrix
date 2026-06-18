@@ -165,7 +165,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                               deviceKeys[i].ed25519Key?.beautified ??
                                   L10n.of(context)!.unknownEncryptionAlgorithm,
                               style: TextStyle(
-                                fontFamily: LinagoraFonts.inter,
+                                fontFamily: LinagoraFonts.twakeInter,
                                 color: Theme.of(context).colorScheme.secondary,
                               ),
                             ),

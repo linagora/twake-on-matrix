@@ -267,7 +267,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(16),
                         hintStyle: const TextStyle(
-                          fontFamily: LinagoraFonts.inter,
+                          fontFamily: LinagoraFonts.twakeInter,
                         ),
                         hintText: L10n.of(context)!.recoveryKey,
                         errorText: _recoveryKeyInputError,

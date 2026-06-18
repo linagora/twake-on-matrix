@@ -219,7 +219,7 @@ class _SearchItem extends StatelessWidget {
                                     : user.calcDisplayname(),
                                 maxLines: 1,
                                 style: ListItemStyle.titleTextStyle(
-                                  fontFamily: LinagoraFonts.inter,
+                                  fontFamily: LinagoraFonts.twakeInter,
                                 ),
                               ),
                             ),

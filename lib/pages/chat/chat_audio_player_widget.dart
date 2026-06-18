@@ -320,7 +320,7 @@ class _DisplaySenderNameWhenPlayingAudio extends StatelessWidget {
         return Text(
           "${displayName.shortenDisplayName(maxCharacters: DisplayNameWidget.maxCharactersDisplayNameBubble)}  $duration",
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontFamily: LinagoraFonts.inter,
+            fontFamily: LinagoraFonts.twakeInter,
             color: LinagoraRefColors.material().neutral[50],
           ),
           maxLines: 1,

@@ -17,7 +17,7 @@ class InputBarStyle {
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
-        fontFamily: LinagoraFonts.inter,
+        fontFamily: LinagoraFonts.twakeInter,
       );
 
   static const double suggestionTileAvatarTextGap = 8.0;

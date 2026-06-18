@@ -189,7 +189,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                                     text: widget.contact.matrixId!,
                                     searchWord: widget.highlightKeyword,
                                     style: ListItemStyle.subtitleTextStyle(
-                                      fontFamily: LinagoraFonts.inter,
+                                      fontFamily: LinagoraFonts.twakeInter,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -239,7 +239,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       ),
       contactDisplayName: widget.contact.displayName,
       highlightKeyword: widget.highlightKeyword,
-      style: ListItemStyle.titleTextStyle(fontFamily: LinagoraFonts.inter),
+      style: ListItemStyle.titleTextStyle(fontFamily: LinagoraFonts.twakeInter),
     );
   }
 
@@ -317,13 +317,17 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: LinagoraFonts.twakeInter,
+        ),
       );
     } else if (widget.contact.primaryEmail.isNotEmpty) {
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: LinagoraFonts.twakeInter,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
@@ -336,7 +340,9 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryPhoneNumber,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: LinagoraFonts.twakeInter,
+        ),
       );
     }
     return const SizedBox();
@@ -347,7 +353,9 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
       return HighlightText(
         text: widget.contact.primaryEmail,
         searchWord: widget.highlightKeyword,
-        style: ListItemStyle.subtitleTextStyle(fontFamily: LinagoraFonts.inter),
+        style: ListItemStyle.subtitleTextStyle(
+          fontFamily: LinagoraFonts.twakeInter,
+        ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       );
