@@ -52,6 +52,6 @@ class SearchViewRobot extends SearchRobot implements AbstractSearchViewRobot {
 
   Future<void> openRoom(TwakeListItemRobot room) async {
     await room.root.tap();
-    await $.pumpAndSettle();
+    await $.pumpAndTrySettle();
   }
 }
