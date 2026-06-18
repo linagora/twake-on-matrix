@@ -71,7 +71,7 @@ class SettingsItemBuilder extends StatelessWidget {
                             style: LinagoraTextStyle.material().bodyMedium2
                                 .copyWith(
                                   color: titleColor,
-                                  fontFamily: 'Inter',
+                                  fontFamily: 'TwakeInter',
                                 ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -89,7 +89,7 @@ class SettingsItemBuilder extends StatelessWidget {
                                               subtitleColor ??
                                               LinagoraRefColors.material()
                                                   .tertiary[30],
-                                          fontFamily: 'Inter',
+                                          fontFamily: 'TwakeInter',
                                         ),
                                 overflow: TextOverflow.ellipsis,
                               ),

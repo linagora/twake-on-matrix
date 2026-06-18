@@ -26,7 +26,7 @@ class DraftChatViewStyle {
           color: responsive.isMobile(context)
               ? LinagoraRefColors.material().tertiary[50]
               : LinagoraRefColors.material().tertiary[30],
-          fontFamily: 'Inter',
+          fontFamily: 'TwakeInter',
         ),
       );
 

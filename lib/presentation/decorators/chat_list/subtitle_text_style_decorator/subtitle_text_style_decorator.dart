@@ -32,7 +32,7 @@ class ReadChatListSubtitleTextStyleDecorator
   TextStyle textStyle(Room room, BuildContext context) {
     return Theme.of(context).textTheme.bodyMedium!.copyWith(
       color: LinagoraSysColors.material().onSurface,
-      fontFamily: 'Inter',
+      fontFamily: 'TwakeInter',
     );
   }
 }

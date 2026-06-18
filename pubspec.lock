@@ -1810,8 +1810,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.1.1"
-      resolved-ref: "8c9cce723ccea5632a1acaa95bc4916e2ea19004"
+      ref: create-twake-inter-fonts-in-design-system
+      resolved-ref: "814fad0e4da454c0fc44c731c1bad915ddd21ad2"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
     version: "0.1.1"
