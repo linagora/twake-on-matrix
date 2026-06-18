@@ -1,4 +1,6 @@
 import 'package:debounce_throttle/debounce_throttle.dart';
+import 'package:fluffychat/domain/services/search/search_engine.dart';
+import 'package:fluffychat/domain/services/search/search_options.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -25,10 +27,11 @@ mixin SearchRecentChat {
     if (keyword.isNotEmpty) {
       final matchedRooms = filteredRoomsForAll
           .where(
-            (room) => room
-                .getLocalizedDisplayname(MatrixLocals(L10n.of(context)!))
-                .toLowerCase()
-                .contains(keyword.toLowerCase()),
+            (room) => const SearchEngine().matchesText(
+              keyword,
+              room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
+              options: const SearchOptions(diacriticSensitive: false),
+            ),
           )
           .toList();
       recentlyChatsNotifier.value = matchedRooms;
