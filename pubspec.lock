@@ -1811,7 +1811,7 @@ packages:
     description:
       path: "."
       ref: create-twake-inter-fonts-in-design-system
-      resolved-ref: "814fad0e4da454c0fc44c731c1bad915ddd21ad2"
+      resolved-ref: eae648efff9df20df9b99d71b847f5e44c4b85db
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
     version: "0.1.1"
