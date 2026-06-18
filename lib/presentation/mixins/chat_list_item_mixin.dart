@@ -130,7 +130,9 @@ mixin ChatListItemMixin {
                 softWrap: false,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+                style: ListItemStyle.subtitleTextStyle(
+                  fontFamily: 'TwakeInter',
+                ),
               ),
       ],
     );

@@ -120,7 +120,9 @@ class _GroupChatInformation extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 softWrap: false,
-                style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+                style: ListItemStyle.subtitleTextStyle(
+                  fontFamily: 'TwakeInter',
+                ),
               ),
             ],
           ),
@@ -187,7 +189,9 @@ class _DirectChatInformation extends StatelessWidget {
               ),
               _SearchHighlightText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
-                style: ListItemStyle.subtitleTextStyle(fontFamily: 'TwakeInter'),
+                style: ListItemStyle.subtitleTextStyle(
+                  fontFamily: 'TwakeInter',
+                ),
                 searchWord: searchKeyword,
               ),
             ],
@@ -236,7 +240,9 @@ class _ContactInformation extends StatelessWidget {
                   Expanded(
                     child: _SearchHighlightText(
                       text: contactPresentationSearch.displayName ?? "",
-                      style: ListItemStyle.titleTextStyle(fontFamily: 'TwakeInter'),
+                      style: ListItemStyle.titleTextStyle(
+                        fontFamily: 'TwakeInter',
+                      ),
                       searchWord: searchKeyword,
                     ),
                   ),
