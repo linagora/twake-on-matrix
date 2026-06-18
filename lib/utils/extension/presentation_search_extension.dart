@@ -57,6 +57,7 @@ extension PresentationSearchExtension on PresentationSearch {
     if (this is! ContactPresentationSearch) {
       return false;
     }
+    if (keyword.isEmpty) return true;
 
     return _matchedContactInfo(keyword);
   }
