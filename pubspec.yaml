@@ -272,7 +272,6 @@ flutter:
     - assets/sounds/
     - assets/js/
     - assets/js/package/
-    - assets/google_fonts/
     - configurations/
     - configurations/icons/
   fonts:
