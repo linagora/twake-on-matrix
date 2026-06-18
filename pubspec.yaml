@@ -58,7 +58,7 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: https://github.com/linagora/emoji_mart.git
-      ref: master
+      ref: create-twake-inter-fonts-in-design-system
 
   social_media_recorder:
     git:
