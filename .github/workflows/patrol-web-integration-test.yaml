@@ -64,6 +64,17 @@ jobs:
           dart run build_runner build --delete-conflicting-outputs
           dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
 
+      - name: Install Playwright browsers
+        run: |
+          # patrol_cli runs `npx playwright install` (without --with-deps) in
+          # its internal web_runner directory.  ubuntu-24.04 runner images >=
+          # 20260615.205.1 dropped the pre-installed Chromium, so system libs
+          # (libnss3, libatk, etc.) are missing and the install silently exits
+          # with code 1.  Pre-running with --with-deps here installs both the
+          # browser binary and the required OS packages; patrol's subsequent
+          # install is a no-op because ~/.cache/ms-playwright already has it.
+          npx playwright@1.56.0 install --with-deps chromium
+
       - name: Run Patrol Web
         timeout-minutes: 20
         env:
