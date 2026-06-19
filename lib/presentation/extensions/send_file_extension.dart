@@ -233,6 +233,11 @@ extension SendFileExtension on Room {
                 'sendFileEventMobile::Compressed video not smaller, '
                 'using original',
               );
+              try {
+                await compressedFile.delete();
+              } catch (_) {
+                // best-effort cleanup
+              }
             }
           }
         } catch (e, s) {

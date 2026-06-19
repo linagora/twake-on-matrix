@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
 
@@ -220,11 +221,9 @@ class _SendMediaNativeDialogState extends State<SendMediaNativeDialog> {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12,
-                  right: 12,
-                  top: 8,
-                  bottom: 8,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LinagoraSpacing.base * 1.5,
+                  vertical: LinagoraSpacing.base,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
