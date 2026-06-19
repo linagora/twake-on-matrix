@@ -114,6 +114,7 @@ jobs:
           dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
 
       - name: Run Patrol Web
+        timeout-minutes: 20
         env:
           TARGET: ${{ matrix.target }}
         run: |
