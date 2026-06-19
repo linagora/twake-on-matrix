@@ -89,6 +89,7 @@ jobs:
           . ./.env.patrol-web
           set +a
           patrol test \
+            --verbose \
             --device chrome \
             --web-headless=true \
             --web-timeout 300000 \
