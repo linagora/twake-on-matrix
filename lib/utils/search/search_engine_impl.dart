@@ -10,7 +10,6 @@ List<T> _matchAnyField<T>(
   required List<String? Function(T)> fieldExtractors,
   SearchOptions options = const SearchOptions(),
 }) {
-  if (needle.isEmpty) return <T>[];
   final pipeline = _buildPipeline(options);
   String apply(String input) =>
       pipeline.fold<String>(input, (v, step) => step.normalize(v));

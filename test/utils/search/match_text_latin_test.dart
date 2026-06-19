@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/services/search/search_options.dart';
-import 'package:fluffychat/domain/services/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _engine = SearchEngine();
@@ -20,8 +20,8 @@ void main() {
       expect(_match('xyz', 'hello'), isFalse);
     });
 
-    test('should return false when needle is empty', () {
-      expect(_match('', 'hello'), isFalse);
+    test('should return true when needle is empty', () {
+      expect(_match('', 'hello'), isTrue);
     });
 
     test('should match regardless of case by default', () {
