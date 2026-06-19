@@ -929,8 +929,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: create-twake-inter-fonts-in-design-system
-      resolved-ref: "316b45153b157498eca27eddd243f71d197115d8"
+      ref: master
+      resolved-ref: b2a4c9b2e88be2bc92990c8a4f5af62bb484278b
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1810,8 +1810,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: create-twake-inter-fonts-in-design-system
-      resolved-ref: "8345363f425e80ba96e83f40156b2e4c1b89951a"
+      ref: "v0.1.2"
+      resolved-ref: bb36d96363aa03c640d39f44c0af2128baba98a8
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
     version: "0.1.1"

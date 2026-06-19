@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: create-twake-inter-fonts-in-design-system
+      ref:  v0.1.2
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -58,7 +58,7 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: https://github.com/linagora/emoji_mart.git
-      ref: create-twake-inter-fonts-in-design-system
+      ref: master
 
   social_media_recorder:
     git:
