@@ -1841,7 +1841,7 @@
       "type": {}
     }
   },
-  "unmuteChat": "Вкл. уведомления",
+  "unmuteChat": "Вкл. звук",
   "@unmuteChat": {
     "type": "text",
     "placeholders": {}
@@ -2507,7 +2507,7 @@
     "placeholders": {}
   },
   "errorPreviewingFile": "Предварительный просмотр недоступен",
-  "unread": "Не прочитано",
+  "unread": "В новые",
   "company": "Компания",
   "addMembers": "Добавить",
   "email": "Email",
@@ -2520,7 +2520,7 @@
   "privacyAndSecurity": "Конфиденциальность",
   "matrixId": "Matrix ID",
   "roomCreationFailed": "Не удалось создать комнату",
-  "mute": "Откл. уведомления",
+  "mute": "Откл. звук",
   "notInAChatYet": "У вас еще нет чатов",
   "basicInfo": "ИНФОРМАЦИЯ ПРОФИЛЯ",
   "downloadFileInWeb": "Файл сохранен в {directory}",
@@ -2544,7 +2544,7 @@
   "workIdentitiesInfo": "ИДЕНТИФИКАТОРЫ",
   "members": "Участники",
   "errorGettingPdf": "Не удалось загрузить PDF",
-  "unmute": "Вкл. уведомления",
+  "unmute": "Вкл. звук",
   "selectChat": "Выбрать чат",
   "add": "Добавить",
   "cannotUploadKey": "Невозможно сохранить резервную копию ключа.",
@@ -2828,7 +2828,7 @@
     "placeholders": {}
   },
   "message": "Сообщение",
-  "enable_notifications": "Вкл. уведомления",
+  "enable_notifications": "Вкл. звук",
   "fileTooBig": "Выбранный файл слишком большой. Загрузите файл размером менее {maxSize} МБ.",
   "@fileTooBig": {
     "placeholders": {
@@ -2837,7 +2837,7 @@
       }
     }
   },
-  "disable_notifications": "Откл. уведомления",
+  "disable_notifications": "Откл. звук",
   "logoutDialogWarning": "Вы потеряете доступ к зашифрованным сообщениям. Рекомендуем активировать резервную копию чатов перед выходом",
   "callViaCarrier": "Позвонить через Carrier",
   "thisFieldCannotBeBlank": "Это поле не может быть пустым",
@@ -3136,5 +3136,26 @@
       "successCount": {},
       "totalCount": {}
     }
+  },
+  "gifAutoplay": "Проигрывать GIF",
+  "videoCallStartedTitle": "Начал(-а) звонок",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Начать звонок",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Ссылка",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Перейти",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
   }
 }
