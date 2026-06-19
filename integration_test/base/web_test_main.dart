@@ -35,31 +35,42 @@ const _testConfig = <String, dynamic>{
   'enable_logs': true,
 };
 
+bool _initialised = false;
+
 /// Initialise just enough for a web login test, then [runApp].
+///
+/// Guard: each [patrolTest] callback calls this, but within a single test
+/// file all callbacks share the same Dart isolate.  Calling [runApp] again
+/// is fine (it replaces the root widget), but one-shot setup like
+/// [GetItInitializer], [Hive.initFlutter], and the [AppConfig] completer
+/// must only run once — a second call would throw (duplicate GetIt
+/// registrations, double-completed Completer).
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  initMatrixLogger();
+  if (!_initialised) {
+    _initialised = true;
+    WidgetsFlutterBinding.ensureInitialized();
+    initMatrixLogger();
 
-  // Skip: MediaKit.ensureInitialized()  — media player, not needed
-  // Skip: vod.init()                    — vodozemac WASM hangs in test
-  // Skip: CozyConfigManager             — Cozy integration, not needed
+    AppConfig.loadFromJson(_testConfig);
+    AppConfig.initConfigCompleter.complete(true);
 
-  // Pre-populate AppConfig so AutoHomeserverPicker can proceed immediately
-  // without fetching config.json over HTTP.  The isCompleted guard in
-  // initConfigWeb() prevents a double-complete crash.
-  AppConfig.loadFromJson(_testConfig);
-  AppConfig.initConfigCompleter.complete(true);
+    GoRouter.optionURLReflectsImperativeAPIs = true;
+    await Hive.initFlutter();
 
-  GoRouter.optionURLReflectsImperativeAPIs = true;
-  await Hive.initFlutter();
-
-  GetItInitializer().setUp();
+    GetItInitializer().setUp();
+  }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
-  final clients = await ClientManager.getClients();
+  final clients = await ClientManager.getClients(initialize: false);
   final firstClient = clients.firstOrNull;
-  await firstClient?.roomsLoading;
-  await firstClient?.accountDataLoading;
+  if (firstClient != null && !firstClient.isLogged()) {
+    await firstClient
+        .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
+        .timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => Logs().w('web_test_main: client.init() timed out'),
+        );
+  }
 
   Logs().i('web_test_main: starting GUI with ${clients.length} client(s)');
   runApp(TwakeApp(clients: clients));
