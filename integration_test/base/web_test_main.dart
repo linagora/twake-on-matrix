@@ -37,14 +37,23 @@ const _testConfig = <String, dynamic>{
 
 bool _initialised = false;
 
+/// Shared client list — created once per isolate and reused across tests.
+///
+/// Patrol web runs all tests in the same Dart isolate (same headless-Chrome
+/// session).  Creating a new client object per test would re-open the same
+/// Hive boxes on every call, causing Hive to throw "box already open" or
+/// deadlock on the second open attempt.  By creating clients once and
+/// re-running [runApp] with the same objects, we keep the Hive state
+/// consistent while still allowing [TwakeApp] to reset its widget tree.
+List<Client> _testClients = [];
+
 /// Initialise just enough for a web login test, then [runApp].
 ///
 /// Guard: each [patrolTest] callback calls this, but within a single test
 /// file all callbacks share the same Dart isolate.  Calling [runApp] again
 /// is fine (it replaces the root widget), but one-shot setup like
-/// [GetItInitializer], [Hive.initFlutter], and the [AppConfig] completer
-/// must only run once — a second call would throw (duplicate GetIt
-/// registrations, double-completed Completer).
+/// [GetItInitializer], [Hive.initFlutter], [client.init()], and the
+/// [AppConfig] completer must only run once.
 Future<void> main() async {
   if (!_initialised) {
     _initialised = true;
@@ -58,18 +67,20 @@ Future<void> main() async {
     await Hive.initFlutter();
 
     GetItInitializer().setUp();
+
+    _testClients = await ClientManager.getClients(initialize: false);
+    final firstClient = _testClients.firstOrNull;
+    if (firstClient != null && !firstClient.isLogged()) {
+      await firstClient
+          .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
+          .timeout(
+            const Duration(seconds: 15),
+            onTimeout: () =>
+                Logs().w('web_test_main: client.init() timed out after 15s'),
+          );
+    }
   }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
-  final clients = await ClientManager.getClients(initialize: false);
-  final firstClient = clients.firstOrNull;
-  if (firstClient != null && !firstClient.isLogged()) {
-    await firstClient
-        .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
-        .timeout(
-          const Duration(seconds: 15),
-          onTimeout: () => Logs().w('web_test_main: client.init() timed out'),
-        );
-  }
-  runApp(TwakeApp(clients: clients));
+  runApp(TwakeApp(clients: _testClients));
 }
