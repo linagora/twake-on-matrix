@@ -64,6 +64,14 @@ void main() {
         'Searhc by $searchByMatrixAddress.toUpperCase() Expected number of group is 1 , but found != 1',
       );
 
+      // search by title with 'a' replaced by 'à'
+      await ChatScenario($).enterSearchText(searchByTitle.replaceAll('a', 'à'));
+      s.softAssertEquals(
+        (await ChatListRobot($).getListOfChatGroup()).length == 1,
+        true,
+        'Search by ${searchByTitle.replaceAll('a', 'à')} expected 1 group, but found != 1',
+      );
+
       // search by current account
       await ChatScenario($).enterSearchText(currentAccount);
       //verify items displayed on the TwakeListItem

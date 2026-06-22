@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/services/search/search_engine.dart';
-import 'package:fluffychat/domain/services/search/search_options.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
 

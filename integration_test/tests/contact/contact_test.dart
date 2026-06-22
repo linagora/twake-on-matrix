@@ -66,6 +66,16 @@ void main() {
         false,
         'Owner is missing!',
       );
+
+      // search by title with 'a' replaced by 'à'
+      await ContactScenario(
+        $,
+      ).enterSearchText(searchByTitle.replaceAll('a', 'à'));
+      s.softAssertEquals(
+        ((await ContactListRobot($).getListOfContact()).length) == 1,
+        true,
+        'Search by ${searchByTitle.replaceAll('a', 'à')} expected 1 contact, but found != 1',
+      );
       s.softAssertEquals(
         (await (await ContactListRobot(
           $,

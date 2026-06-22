@@ -2,8 +2,8 @@
 // TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
 
 import 'package:emojis/emoji.dart';
-import 'package:fluffychat/domain/services/search/search_engine.dart';
-import 'package:fluffychat/domain/services/search/search_options.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
