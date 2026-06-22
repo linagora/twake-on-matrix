@@ -881,6 +881,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> tryToGetFederationConfigurations() async {
+    if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
     try {
       final federationConfigurationRepository = getIt
