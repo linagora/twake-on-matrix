@@ -32,18 +32,18 @@ class ChatPreviewText extends StatelessWidget {
       ),
       RoomPreviewUnavailable() => Text(
         l10n.chatPreviewUnavailable,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ).copyWith(fontStyle: FontStyle.italic),
+        style: ListItemStyle.subtitleTextStyle().copyWith(
+          fontStyle: FontStyle.italic,
+        ),
         softWrap: false,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
       RoomPreviewEmpty() || RoomPreviewFound() => Text(
         l10n.thisIsANewChat,
-        style: ListItemStyle.subtitleTextStyle(
-          fontFamily: 'Inter',
-        ).copyWith(fontStyle: FontStyle.italic),
+        style: ListItemStyle.subtitleTextStyle().copyWith(
+          fontStyle: FontStyle.italic,
+        ),
         softWrap: false,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
