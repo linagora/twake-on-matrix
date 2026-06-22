@@ -71,7 +71,11 @@ jobs:
     env:
       FLUTTER_VERSION: "3.38.9"
       PATROL_CLI_VERSION: "4.3.1"
-      SYNAPSE_URL: http://localhost
+      # Use explicit IPv4 loopback — Chrome headless on Ubuntu 24 resolves
+      # "localhost" to ::1 (IPv6) but Docker -p 80:80 binds 0.0.0.0:80
+      # (IPv4 only), causing the Flutter web app's checkHomeserver() and
+      # client.login() calls to hang indefinitely.
+      SYNAPSE_URL: http://127.0.0.1
       SERVER_NAME: localhost
       # The headless Chromium launched by Patrol's Playwright runner inherits
       # these, so `navigator.languages` is populated. Without a locale the
