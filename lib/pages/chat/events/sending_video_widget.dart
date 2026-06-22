@@ -56,18 +56,26 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
     );
     if (thumbnail == null || !mounted) return;
 
-    final codec = await ui.instantiateImageCodec(thumbnail.bytes);
-    final frame = await codec.getNextFrame();
-    final image = frame.image;
-    final realSize = Size(image.width.toDouble(), image.height.toDouble());
-    image.dispose();
+    try {
+      final codec = await ui.instantiateImageCodec(thumbnail.bytes);
+      try {
+        final frame = await codec.getNextFrame();
+        final image = frame.image;
+        final realSize = Size(image.width.toDouble(), image.height.toDouble());
+        image.dispose();
 
-    if (!mounted) return;
+        if (!mounted) return;
 
-    setState(() {
-      _thumbnailBytes = thumbnail.bytes;
-      _displayImageInfo = realSize.getDisplayImageInfo(context);
-    });
+        setState(() {
+          _thumbnailBytes = thumbnail.bytes;
+          _displayImageInfo = realSize.getDisplayImageInfo(context);
+        });
+      } finally {
+        codec.dispose();
+      }
+    } catch (e) {
+      Logs().w('Failed to decode video thumbnail: $e');
+    }
   }
 
   @override
