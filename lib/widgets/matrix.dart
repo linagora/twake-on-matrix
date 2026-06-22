@@ -151,6 +151,20 @@ class MatrixState extends State<Matrix>
     return widget.clients[_activeClient];
   }
 
+  /// Null-safe accessor for the active client.
+  ///
+  /// Returns the same client as [client] whenever any account exists, but
+  /// returns null instead of throwing [StateError] (`currentBundle!.first!`
+  /// on an empty list) during a logged-out boot with `clients: []`.
+  /// Gated on [widget.clients.isEmpty] — not on [isValidActiveClient] — so it
+  /// preserves the exact `currentBundle.first` fallback the [client] getter
+  /// uses while `_activeClient` is still -1 in a normal logged-in boot.
+  Client? get clientOrNull => widget.clients.isEmpty ? null : client;
+
+  /// True only when an account exists AND it is logged in.
+  /// Safe to call during a logged-out boot (returns false on empty clients).
+  bool isLoggedInClient() => clientOrNull?.isLogged() ?? false;
+
   // TODO: 28Dec2023 Disable until support voip
   bool get webrtcIsSupported => false;
 

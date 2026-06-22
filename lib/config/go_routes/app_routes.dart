@@ -70,12 +70,12 @@ const double _kWideBackGestureWidth = 100;
 FutureOr<String?> _loggedInRedirect(
   BuildContext context,
   GoRouterState state,
-) => Matrix.of(context).client.isLogged() ? const RoomsRoute().location : null;
+) => Matrix.of(context).isLoggedInClient() ? const RoomsRoute().location : null;
 
 FutureOr<String?> _loggedOutRedirect(
   BuildContext context,
   GoRouterState state,
-) => Matrix.of(context).client.isLogged()
+) => Matrix.of(context).isLoggedInClient()
     ? null
     : const HomeTwakeWelcomeRoute().location;
 
@@ -113,7 +113,7 @@ class RootRoute extends GoRouteData with $RootRoute {
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      Matrix.of(context).client.isLogged()
+      Matrix.of(context).isLoggedInClient()
       ? const RoomsRoute().location
       : const HomeRoute().location;
 
