@@ -1,6 +1,12 @@
 name: Patrol Web Integration Tests
 
 on:
+  # Nightly web E2E run on free GitHub-hosted runners (no FTL cost).
+  # 02:00 UTC — offset from the FTL integration workflow (00:00 UTC) so the
+  # two nightly suites don't contend for runners. Scheduled triggers only fire
+  # on the default branch, so this activates once merged.
+  schedule:
+    - cron: "0 2 * * *"
   # PR trigger disabled until all web integration tests are green.
   # Re-enable the `pull_request` block below once SSH git deps are
   # migrated to HTTPS and the test suite is stable.
