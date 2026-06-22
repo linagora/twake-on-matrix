@@ -33,6 +33,9 @@ jobs:
   discover:
     name: Discover targets
     runs-on: ubuntu-latest
+    # Least privilege: this job only checks out the repo and globs test files.
+    permissions:
+      contents: read
     outputs:
       targets: ${{ steps.list.outputs.targets }}
     steps:
