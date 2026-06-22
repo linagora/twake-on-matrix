@@ -57,20 +57,40 @@ List<Client> _testClients = [];
 Future<void> main() async {
   if (!_initialised) {
     _initialised = true;
+    Logs().i('web_test_main: step 1 - binding');
     WidgetsFlutterBinding.ensureInitialized();
     initMatrixLogger();
 
+    Logs().i('web_test_main: step 2 - AppConfig');
     AppConfig.loadFromJson(_testConfig);
     AppConfig.initConfigCompleter.complete(true);
 
+    Logs().i('web_test_main: step 3 - GoRouter');
     GoRouter.optionURLReflectsImperativeAPIs = true;
-    await Hive.initFlutter();
 
+    Logs().i('web_test_main: step 4 - Hive.initFlutter');
+    await Hive.initFlutter().timeout(
+      const Duration(seconds: 20),
+      onTimeout: () => Logs().w('web_test_main: HANG Hive.initFlutter >20s'),
+    );
+    Logs().i('web_test_main: step 4 done');
+
+    Logs().i('web_test_main: step 5 - GetIt setUp');
     GetItInitializer().setUp();
 
-    _testClients = await ClientManager.getClients(initialize: false);
+    Logs().i('web_test_main: step 6 - getClients');
+    _testClients = await ClientManager.getClients(initialize: false).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () {
+        Logs().w('web_test_main: HANG getClients >30s');
+        return <Client>[];
+      },
+    );
+    Logs().i('web_test_main: step 6 done (${_testClients.length} client(s))');
+
     final firstClient = _testClients.firstOrNull;
     if (firstClient != null && !firstClient.isLogged()) {
+      Logs().i('web_test_main: step 7 - client.init');
       await firstClient
           .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
           .timeout(
@@ -78,9 +98,12 @@ Future<void> main() async {
             onTimeout: () =>
                 Logs().w('web_test_main: client.init() timed out after 15s'),
           );
+      Logs().i('web_test_main: step 7 done');
     }
   }
 
+  Logs().i('web_test_main: step 8 - runApp');
   Logs().nativeColors = !PlatformInfos.isIOS;
   runApp(TwakeApp(clients: _testClients));
+  Logs().i('web_test_main: step 8 runApp called');
 }
