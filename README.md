@@ -69,21 +69,23 @@ flutter doctor -v
 
 If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target _(Flutter being developped by Google)_.
 
-It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can build a version using:
+You must also "prepare" your web setup by building a WASM Port of the Vodozemac lib for dart/flutter required by the matrix-dart-sdk.
 
 ```bash
-docker run -v ./assets/js/package:/package nixos/nix:2.22.1
-
-# within the docker
-nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/3.2.16?host=gitlab.matrix.org\#javascript
-cp /result/javascript/* /package/. -v
-exit
-
-# back on your host
-sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
+./scripts/prepare-web.sh
 ```
 
-#### Android
+Then it can be built and run as follow
+
+```bash
+./scripts/build-web.sh # Build a production ready app under ./web
+```
+
+```bash
+flutter run -d chrome # Run directly in Chrome without packaging the app
+```
+
+#### Android (To be Updated)
 
 - [ ] An implementation of JDK 17 _(tested with openjdk-17.0.13+11)_
 - [ ] (Optional) Android Studio
@@ -96,15 +98,13 @@ sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
 
 _Note: Gradle will try to install the JDK 8. If for any reasons the operation failed, try to install your own and use [this method](https://github.com/pm-McFly/twake-on-matrix/issues/1#issuecomment-2581428804) to tell Gradle where to find it._
 
-#### Linux
+#### Linux (To be Updated)
 
 - [ ] Lib JsonCPP
 - [ ] Lib Secret
 - [ ] Lib RHash
 - [ ] Lib WebKit 2 GTK
 - [ ] Lib OLM
-
-_If needed, a complete list is available in the `flake.nix`._
 
 On Ubuntu, the following command should install all the required elements:
 
@@ -135,12 +135,16 @@ A `devenv.nix` is provided in order to ease the process of setting up your dev e
 Then you can use `devenv shell` to fire up your environment.
 _This can be automated thanks to: `[nix-direnv](https://github.com/nix-community/nix-direnv/)`_
 
+At the moment the provided `devenv.nix` allows you to run or build the web variant of the application.
+
+```bash
+devenv tasks run web:build # Prepare and Package under ./web
+devenv tasks run web:run:chrome # Directly runs the Chrome target (prepare Vodozemac if detected not present)
+```
+
 Supported platforms:
 
 - [x] Linux x86_64
-- [ ] MacOS aarch_64
-- [ ] MacOS x86_64
-- [ ] Windows WSL
 
 ### Configure the app
 
