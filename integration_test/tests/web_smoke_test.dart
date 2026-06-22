@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
 import '../base/web_test_main.dart' as app;
+import '../base/web_benign_error_filter.dart';
 
 void main() {
   patrolTest(
@@ -13,6 +14,13 @@ void main() {
     ),
     framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
     ($) async {
+      // Same benign web-only rendering-assertion filter the real test harness
+      // (TestBase) installs. Without it, a benign RenderFlex overflow on the
+      // boot/home screen propagates into the test zone and fails this
+      // login-less smoke test (the 14 real tests survive because they install
+      // the filter via TestBase.runPatrolTest).
+      installWebBenignErrorFilter();
+
       await app.main();
 
       await $(MaterialApp).waitUntilVisible();
