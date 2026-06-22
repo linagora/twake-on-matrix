@@ -17,7 +17,7 @@
 /// — the Playwright headless-Chrome context does not deliver those macrotask
 /// callbacks until Flutter's rendering pipeline starts (first frame).
 ///
-/// The test therefore boots with `clients: const []` (logged-out state) and
+/// The test therefore boots with `clients: []` (logged-out state) and
 /// logs in through the UI.  The IndexedDB callback fires inside
 /// [Matrix.getLoginClient], which is invoked only after [runApp] and after the
 /// first frame is rendered — at that point everything works correctly.
@@ -78,5 +78,5 @@ Future<void> main() async {
   // Boot with no pre-existing session.  The test logs in via the UI and the
   // IndexedDB database is opened lazily inside Matrix.getLoginClient(),
   // which runs only after runApp() and after the first frame renders.
-  runApp(TwakeApp(clients: const []));
+  runApp(TwakeApp(clients: []));
 }

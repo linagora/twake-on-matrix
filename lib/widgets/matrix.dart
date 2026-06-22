@@ -347,6 +347,7 @@ class MatrixState extends State<Matrix>
   File? wallpaper;
 
   void _initWithStore() async {
+    if (widget.clients.isEmpty) return;
     try {
       if (client.isLogged()) {
         // TODO: Figure out how this works in multi account
@@ -795,6 +796,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _retrieveLocalToMConfiguration() async {
+    if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
