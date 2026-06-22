@@ -1,11 +1,10 @@
 import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:matrix/matrix.dart';
 
-/// Fix stale room summary member counts.
-///
-/// Servers only send `joined_member_count` and `invited_member_count` in
-/// /sync when they change: one missed delta leaves the persisted counts
-/// wrong forever, as nothing ever reconciles them with the member list.
+/// TODO(TW-2968): client-side workaround for a Synapse bug that omits
+/// member-count deltas — https://github.com/element-hq/synapse/issues/19865
+/// Remove this reconciliation once Synapse is fixed (keep the
+/// `Wrong-member-count` Sentry tag to confirm the fix landed).
 extension RoomMemberCountReconciliationExtension on Room {
   /// Only reconciles when [membershipFilter] contains both [Membership.join]
   /// and [Membership.invite]: otherwise the list is not usable.
