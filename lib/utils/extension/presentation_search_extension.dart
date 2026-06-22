@@ -1,3 +1,4 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
@@ -7,7 +8,7 @@ const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 extension PresentationSearchExtension on PresentationSearch {
   bool _matchedMatrixId(String keyword) {
-    return const SearchEngine().matchesText(
+    return getIt.get<SearchEngine>().matchesText(
       keyword,
       id,
       options: _searchOptions,
@@ -15,7 +16,7 @@ extension PresentationSearchExtension on PresentationSearch {
   }
 
   bool _matchedDirectChatMatrixId(String keyword) {
-    return const SearchEngine().matchesText(
+    return getIt.get<SearchEngine>().matchesText(
       keyword,
       directChatMatrixID ?? '',
       options: _searchOptions,
@@ -23,7 +24,7 @@ extension PresentationSearchExtension on PresentationSearch {
   }
 
   bool _matchedName(String keyword) {
-    return const SearchEngine().matchesText(
+    return getIt.get<SearchEngine>().matchesText(
       keyword,
       displayName ?? '',
       options: _searchOptions,

@@ -2,6 +2,7 @@
 // TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
 
 import 'package:emojis/emoji.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
@@ -241,7 +242,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         const roomOpts = SearchOptions(diacriticSensitive: false);
         if ((state != null &&
                 ((alias is String &&
-                        const SearchEngine().matchesText(
+                        getIt.get<SearchEngine>().matchesText(
                           roomSearch,
                           alias.split(':')[0],
                           options: roomOpts,
@@ -250,13 +251,13 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                         altAlias.any(
                           (l) =>
                               l is String &&
-                              const SearchEngine().matchesText(
+                              getIt.get<SearchEngine>().matchesText(
                                 roomSearch,
                                 l.split(':')[0],
                                 options: roomOpts,
                               ),
                         )))) ||
-            const SearchEngine().matchesText(
+            getIt.get<SearchEngine>().matchesText(
               roomSearch,
               r.name,
               options: roomOpts,
