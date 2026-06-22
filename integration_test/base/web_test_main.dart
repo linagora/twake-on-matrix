@@ -78,5 +78,10 @@ Future<void> main() async {
   // Boot with no pre-existing session.  The test logs in via the UI and the
   // IndexedDB database is opened lazily inside Matrix.getLoginClient(),
   // which runs only after runApp() and after the first frame renders.
-  runApp(TwakeApp(clients: []));
+  //
+  // A growable (non-const) list is required: Matrix._handleAddAnotherAccount
+  // calls `widget.clients.add(...)` on a successful login, which would throw
+  // on a const list. Held in a `final` so the analyzer doesn't suggest const.
+  final clients = <Client>[];
+  runApp(TwakeApp(clients: clients));
 }
