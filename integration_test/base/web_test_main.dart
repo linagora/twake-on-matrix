@@ -8,11 +8,23 @@
 /// refused) instead of hitting the real Synapse and leaking a
 /// `MatrixException` from `register(inhibitLogin: true)` into the test zone.
 /// The test itself calls `checkHomeserver` on the real `SERVER_URL`.
+///
+/// ## Why we do NOT pre-create Matrix clients here
+///
+/// [ClientManager.getClients] calls [MatrixSdkDatabase.init] which opens
+/// IndexedDB via [BoxCollection.open].  [BoxCollection.open] uses
+/// `package:web` `.toJS` callbacks that never fire before [runApp] is called
+/// — the Playwright headless-Chrome context does not deliver those macrotask
+/// callbacks until Flutter's rendering pipeline starts (first frame).
+///
+/// The test therefore boots with `clients: const []` (logged-out state) and
+/// logs in through the UI.  The IndexedDB callback fires inside
+/// [Matrix.getLoginClient], which is invoked only after [runApp] and after the
+/// first frame is rendered — at that point everything works correctly.
 library;
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/logging/init_matrix_logger.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -37,73 +49,34 @@ const _testConfig = <String, dynamic>{
 
 bool _initialised = false;
 
-/// Shared client list — created once per isolate and reused across tests.
-///
-/// Patrol web runs all tests in the same Dart isolate (same headless-Chrome
-/// session).  Creating a new client object per test would re-open the same
-/// Hive boxes on every call, causing Hive to throw "box already open" or
-/// deadlock on the second open attempt.  By creating clients once and
-/// re-running [runApp] with the same objects, we keep the Hive state
-/// consistent while still allowing [TwakeApp] to reset its widget tree.
-List<Client> _testClients = [];
-
-/// Initialise just enough for a web login test, then [runApp].
+/// Initialise just enough for a web test, then [runApp].
 ///
 /// Guard: each [patrolTest] callback calls this, but within a single test
 /// file all callbacks share the same Dart isolate.  Calling [runApp] again
 /// is fine (it replaces the root widget), but one-shot setup like
-/// [GetItInitializer], [Hive.initFlutter], [client.init()], and the
-/// [AppConfig] completer must only run once.
+/// [GetItInitializer], [Hive.initFlutter], and the [AppConfig] completer
+/// must only run once.
 Future<void> main() async {
   if (!_initialised) {
     _initialised = true;
-    Logs().i('web_test_main: step 1 - binding');
     WidgetsFlutterBinding.ensureInitialized();
     initMatrixLogger();
 
-    Logs().i('web_test_main: step 2 - AppConfig');
     AppConfig.loadFromJson(_testConfig);
     AppConfig.initConfigCompleter.complete(true);
 
-    Logs().i('web_test_main: step 3 - GoRouter');
     GoRouter.optionURLReflectsImperativeAPIs = true;
 
-    Logs().i('web_test_main: step 4 - Hive.initFlutter');
-    await Hive.initFlutter().timeout(
-      const Duration(seconds: 20),
-      onTimeout: () => Logs().w('web_test_main: HANG Hive.initFlutter >20s'),
-    );
-    Logs().i('web_test_main: step 4 done');
+    // On web kIsWeb is true so this returns immediately; kept for safety
+    // in case this file is ever reused on another target.
+    await Hive.initFlutter();
 
-    Logs().i('web_test_main: step 5 - GetIt setUp');
     GetItInitializer().setUp();
-
-    Logs().i('web_test_main: step 6 - getClients');
-    _testClients = await ClientManager.getClients(initialize: false).timeout(
-      const Duration(seconds: 30),
-      onTimeout: () {
-        Logs().w('web_test_main: HANG getClients >30s');
-        return <Client>[];
-      },
-    );
-    Logs().i('web_test_main: step 6 done (${_testClients.length} client(s))');
-
-    final firstClient = _testClients.firstOrNull;
-    if (firstClient != null && !firstClient.isLogged()) {
-      Logs().i('web_test_main: step 7 - client.init');
-      await firstClient
-          .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
-          .timeout(
-            const Duration(seconds: 15),
-            onTimeout: () =>
-                Logs().w('web_test_main: client.init() timed out after 15s'),
-          );
-      Logs().i('web_test_main: step 7 done');
-    }
   }
 
-  Logs().i('web_test_main: step 8 - runApp');
   Logs().nativeColors = !PlatformInfos.isIOS;
-  runApp(TwakeApp(clients: _testClients));
-  Logs().i('web_test_main: step 8 runApp called');
+  // Boot with no pre-existing session.  The test logs in via the UI and the
+  // IndexedDB database is opened lazily inside Matrix.getLoginClient(),
+  // which runs only after runApp() and after the first frame renders.
+  runApp(TwakeApp(clients: const []));
 }
