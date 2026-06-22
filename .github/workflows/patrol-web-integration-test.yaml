@@ -41,7 +41,22 @@ jobs:
           if [ -n "$PATROL_TEST_TARGET" ]; then
             targets=$(printf '%s' "$PATROL_TEST_TARGET" | jq -R . | jq -s -c .)
           else
-            targets=$(find integration_test/tests -name '*_test.dart' | sort | jq -R . | jq -s -c .)
+            # Exclude files with no web-runnable tests, i.e. every runPatrolTest
+            # is mobileOnly. On web those tests are not registered (see
+            # TestBase.runPatrolTest), so such a file would expose zero tests to
+            # Patrol's Playwright runner — reported as "Total: 0" (job failure)
+            # and prone to the all-skipped runner stall. Keep them mobile-only.
+            web_targets=""
+            for f in $(find integration_test/tests -name '*_test.dart' | sort); do
+              total=$(grep -c 'runPatrolTest(' "$f" || true)
+              mobile=$(grep -c 'mobileOnly: true' "$f" || true)
+              if [ "$total" -gt 0 ] && [ "$total" -eq "$mobile" ]; then
+                echo "Excluding all-mobileOnly file from web matrix: $f" >&2
+                continue
+              fi
+              web_targets="$web_targets$f"$'\n'
+            done
+            targets=$(printf '%s' "$web_targets" | sed '/^$/d' | jq -R . | jq -s -c .)
           fi
           echo "targets=$targets" >> "$GITHUB_OUTPUT"
           echo "Will run these targets:"

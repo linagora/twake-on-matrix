@@ -26,6 +26,17 @@ class TestBase {
     // suite, and run unchanged on mobile.
     bool mobileOnly = false,
   }) {
+    // On web a `mobileOnly` test must not be REGISTERED at all (not merely
+    // skipped). Patrol web's Playwright runner boots the Flutter app
+    // (`page.goto("/")` + `initialise`) for every registered test *before*
+    // evaluating `patrolTest.skip(...)`, so a skipped test still pays a full
+    // app-boot cycle. A file that leads with — or consists only of — skipped
+    // tests then stalls the runner before the first real test starts (the
+    // observed 20-min job hang). Returning here removes the test from
+    // `__patrol__getTests()`, so Playwright never boots a page for it.
+    // Mobile is unaffected (`kIsWeb` is false), so coverage is preserved.
+    if (kIsWeb && mobileOnly) return;
+
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
       defaultValue: 120000,
@@ -71,10 +82,6 @@ class TestBase {
       config: patrolConfig,
       nativeAutomatorConfig: defaultNativeConfig,
       tags: tags,
-      // On web, skip tests explicitly flagged [mobileOnly] (they need a
-      // capability the local web harness cannot provide). Everything else runs
-      // on both platforms; mobile runs all of them.
-      skip: kIsWeb && mobileOnly,
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
