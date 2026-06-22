@@ -61,17 +61,22 @@ Future<void> main() async {
   }
 
   Logs().nativeColors = !PlatformInfos.isIOS;
+  Logs().i('web_test_main: getClients(initialize: false)');
   final clients = await ClientManager.getClients(initialize: false);
+  Logs().i('web_test_main: got ${clients.length} client(s)');
   final firstClient = clients.firstOrNull;
   if (firstClient != null && !firstClient.isLogged()) {
+    Logs().i('web_test_main: client.init()');
     await firstClient
         .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
         .timeout(
           const Duration(seconds: 15),
           onTimeout: () => Logs().w('web_test_main: client.init() timed out'),
         );
+    Logs().i('web_test_main: client.init() done');
+  } else {
+    Logs().i('web_test_main: client already logged in, skipping init');
   }
-
   Logs().i('web_test_main: starting GUI with ${clients.length} client(s)');
   runApp(TwakeApp(clients: clients));
 }

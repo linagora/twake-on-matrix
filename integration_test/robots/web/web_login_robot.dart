@@ -37,17 +37,34 @@ class WebLoginRobot extends CoreRobot implements AbstractLoginRobot {
     // is not reachable (cross-origin XHR blocked).
     final context = $.tester.element(find.byType(AutoHomeserverPicker).first);
     final matrix = Matrix.of(context);
+    Logs().i('WebLoginRobot: getLoginClient()');
     final client = await matrix.getLoginClient();
+    Logs().i('WebLoginRobot: checkHomeserver($serverUrl)');
     matrix.loginHomeserverSummary = await client
         .checkHomeserver(Uri.parse(serverUrl))
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw Exception(
+            'WebLoginRobot: checkHomeserver($serverUrl) timed out after 30s',
+          ),
+        )
         .toHomeserverSummary();
 
-    await client.login(
-      LoginType.mLoginPassword,
-      identifier: AuthenticationUserIdentifier(user: username),
-      password: password,
-      initialDeviceDisplayName: PlatformInfos.clientName,
-    );
+    Logs().i('WebLoginRobot: client.login($username)');
+    await client
+        .login(
+          LoginType.mLoginPassword,
+          identifier: AuthenticationUserIdentifier(user: username),
+          password: password,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        )
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw Exception(
+            'WebLoginRobot: client.login($username) timed out after 30s',
+          ),
+        );
+    Logs().i('WebLoginRobot: login complete');
 
     // Force the router to re-evaluate redirects → lands on ChatList.
     TwakeApp.router.go('/');
