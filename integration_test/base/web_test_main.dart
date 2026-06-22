@@ -71,6 +71,5 @@ Future<void> main() async {
           onTimeout: () => Logs().w('web_test_main: client.init() timed out'),
         );
   }
-  Logs().i('web_test_main: starting GUI with ${clients.length} client(s)');
   runApp(TwakeApp(clients: clients));
 }
