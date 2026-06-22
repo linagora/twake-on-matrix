@@ -113,9 +113,10 @@ class _MobileContextMenuOverlayState extends State<MobileContextMenuOverlay>
                   widget.member.calcDisplayname(),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                    color: LinagoraSysColors.material().onSurface,
-                  ),
+                  style: Theme.of(context)
+                      .extension<LinagoraTextThemeExtension>()!
+                      .bodyMedium2
+                      .copyWith(color: LinagoraSysColors.material().onSurface),
                 ),
                 const SizedBox(height: 4.0),
                 Text(

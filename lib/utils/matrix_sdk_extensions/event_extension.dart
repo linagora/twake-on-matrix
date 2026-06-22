@@ -23,7 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -337,9 +337,10 @@ extension LocalizedBody on Event {
       return textStyleForOnlyEmoji(context);
     }
 
-    return LinagoraTextStyle.material().bodyMedium3.copyWith(
-      color: Theme.of(context).colorScheme.onSurface,
-    );
+    return Theme.of(context)
+        .extension<LinagoraTextThemeExtension>()!
+        .bodyMedium3
+        .copyWith(color: Theme.of(context).colorScheme.onSurface);
   }
 
   List<Client?> currentRoomBundle(MatrixState? matrix) {

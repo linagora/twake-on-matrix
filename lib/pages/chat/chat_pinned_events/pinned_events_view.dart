@@ -226,7 +226,9 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                   return LinkText(
                     text: currentEvent.filename,
                     maxLines: 1,
-                    textStyle: LinagoraTextStyle.material().bodyMedium3
+                    textStyle: Theme.of(context)
+                        .extension<LinagoraTextThemeExtension>()!
+                        .bodyMedium3
                         .copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                           overflow: TextOverflow.ellipsis,
@@ -245,20 +247,26 @@ class _PinnedEventsContentWidget extends StatelessWidget {
                         hideReply: true,
                       ),
                   maxLines: 1,
-                  textStyle: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    overflow: TextOverflow.ellipsis,
-                    decoration: currentEvent.redacted
-                        ? TextDecoration.lineThrough
-                        : null,
-                  ),
-                  linkStyle: LinagoraTextStyle.material().bodyMedium3.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant,
-                  ),
+                  textStyle: Theme.of(context)
+                      .extension<LinagoraTextThemeExtension>()!
+                      .bodyMedium3
+                      .copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        overflow: TextOverflow.ellipsis,
+                        decoration: currentEvent.redacted
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                  linkStyle: Theme.of(context)
+                      .extension<LinagoraTextThemeExtension>()!
+                      .bodyMedium3
+                      .copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant,
+                      ),
                   onLinkTap: (url) =>
                       UrlLauncher(context, url: url.toString()).launchUrl(),
                 );

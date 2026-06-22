@@ -4,7 +4,7 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 
 class MessageContentStyle {
   static ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
@@ -83,9 +83,10 @@ class MessageContentStyle {
   );
 
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
-      LinagoraTextStyle.material().bodyMedium3.copyWith(
-        color: Theme.of(context).colorScheme.secondary,
-      );
+      Theme.of(context)
+          .extension<LinagoraTextThemeExtension>()!
+          .bodyMedium3
+          .copyWith(color: Theme.of(context).colorScheme.secondary);
 
   static const blurhashSize = 32;
 

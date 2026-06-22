@@ -19,7 +19,9 @@ class TwakeHeaderStyle {
 
   static TextStyle? twakeHeaderStyle(BuildContext context) {
     return responsive.isMobile(context)
-        ? LinagoraTextStyle.material().bodyLarge1.copyWith(
+        ? Theme.of(
+            context,
+          ).extension<LinagoraTextThemeExtension>()!.bodyLarge1.copyWith(
             color: Theme.of(context).colorScheme.onSurface,
             height: TwakeHeaderStyle.titleLineHeightMobile,
           )

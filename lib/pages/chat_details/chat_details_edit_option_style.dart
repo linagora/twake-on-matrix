@@ -21,9 +21,10 @@ class ChatDetailsEditOptionStyle {
       EdgeInsetsDirectional.symmetric(horizontal: 8.0);
 
   static TextStyle? titleTextStyle(BuildContext context, Color? titleColor) {
-    return LinagoraTextStyle.material().bodyMedium2.copyWith(
-      color: titleColor ?? Theme.of(context).colorScheme.onSurface,
-    );
+    return Theme.of(context)
+        .extension<LinagoraTextThemeExtension>()!
+        .bodyMedium2
+        .copyWith(color: titleColor ?? Theme.of(context).colorScheme.onSurface);
   }
 
   static TextStyle? subtitleTextStyle(

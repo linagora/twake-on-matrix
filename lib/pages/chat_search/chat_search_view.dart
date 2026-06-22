@@ -278,9 +278,10 @@ class _MessageContent extends StatelessWidget {
               ),
           searchWord: searchWord,
           maxLines: 2,
-          style: LinagoraTextStyle.material().bodyMedium3.copyWith(
-            color: LinagoraSysColors.material().onSurface,
-          ),
+          style: Theme.of(context)
+              .extension<LinagoraTextThemeExtension>()!
+              .bodyMedium3
+              .copyWith(color: LinagoraSysColors.material().onSurface),
         );
     }
   }

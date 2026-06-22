@@ -25,7 +25,7 @@ class DisplayNameWidget extends StatelessWidget {
             displayName.shortenDisplayName(
               maxCharacters: maxCharactersDisplayNameBubble,
             ),
-            style: LinagoraTextStyle.material().labelMedium.copyWith(
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: LinagoraSysColors.material().secondary,
             ),
             maxLines: 2,

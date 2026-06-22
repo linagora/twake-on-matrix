@@ -68,7 +68,9 @@ class SettingsItemBuilder extends StatelessWidget {
                         children: [
                           Text(
                             title,
-                            style: LinagoraTextStyle.material().bodyMedium2
+                            style: Theme.of(context)
+                                .extension<LinagoraTextThemeExtension>()!
+                                .bodyMedium2
                                 .copyWith(color: titleColor),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -80,13 +82,14 @@ class SettingsItemBuilder extends StatelessWidget {
                                 subtitle!,
                                 style:
                                     subtitleStyle ??
-                                    LinagoraTextStyle.material().bodyMedium
-                                        .copyWith(
-                                          color:
-                                              subtitleColor ??
-                                              LinagoraRefColors.material()
-                                                  .tertiary[30],
-                                        ),
+                                    Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          subtitleColor ??
+                                          LinagoraRefColors.material()
+                                              .tertiary[30],
+                                    ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),

@@ -213,7 +213,10 @@ class _MessageReactionsBottomSheetState
                                   Expanded(
                                     child: Text(
                                       reactor.displayName ?? "",
-                                      style: LinagoraTextStyle.material()
+                                      style: Theme.of(context)
+                                          .extension<
+                                            LinagoraTextThemeExtension
+                                          >()!
                                           .bodyMedium2
                                           .copyWith(
                                             color: LinagoraSysColors.material()

@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
-import 'package:linagora_design_flutter/style/linagora_text_style.dart';
 import 'package:matrix/matrix.dart';
 
 class MessageTime extends StatelessWidget {
@@ -65,7 +64,7 @@ class MessageTime extends StatelessWidget {
             Text(
               '${L10n.of(context)!.edited} ',
               textScaler: const TextScaler.linear(1.0),
-              style: LinagoraTextStyle.material().bodySmall.copyWith(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: timelineOverlayMessage
                     ? Colors.white
                     : LinagoraRefColors.material().tertiary[30],
@@ -74,7 +73,7 @@ class MessageTime extends StatelessWidget {
           Text(
             DateFormat("HH:mm").format(event.originServerTs),
             textScaler: const TextScaler.linear(1.0),
-            style: LinagoraTextStyle.material().bodySmall.copyWith(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: timelineOverlayMessage
                   ? Colors.white
                   : LinagoraRefColors.material().tertiary[30],

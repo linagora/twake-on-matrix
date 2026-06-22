@@ -175,7 +175,9 @@ class SettingsBlockedUsersView extends StatelessWidget {
                       Expanded(
                         child: Text(
                           profile.displayName ?? '',
-                          style: LinagoraTextStyle.material().bodyMedium2
+                          style: Theme.of(context)
+                              .extension<LinagoraTextThemeExtension>()!
+                              .bodyMedium2
                               .copyWith(
                                 color: LinagoraSysColors.material().onSurface,
                               ),

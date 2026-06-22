@@ -162,9 +162,10 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
               userInfoModel?.displayName ?? widget.user.calcDisplayname(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: LinagoraTextStyle.material().bodyMedium2.copyWith(
-                color: LinagoraSysColors.material().onSurface,
-              ),
+              style: Theme.of(context)
+                  .extension<LinagoraTextThemeExtension>()!
+                  .bodyMedium2
+                  .copyWith(color: LinagoraSysColors.material().onSurface),
             ),
             if (presence != null) ...[
               const SizedBox(height: 8),
