@@ -2,7 +2,7 @@ enum SentryTrackedEvents {
   // ── Sample (isExample: true → ignored by SentryLogger) ───────────────────
   failedToLoadTimeline('Failed to load timeline', isExample: true),
   // ── Active tracked events ─────────────────────────────────────────────────
-  pushHelperCrashed('Push Helper has crashed'),
+  pushHelperCrashed('Push Helper has crashed!'),
   missingLastMessage('Missing-last-message'),
   wrongMemberCount('Wrong-member-count'),
   notificationGoToRoomFailed('[Push] Failed to open room'),
