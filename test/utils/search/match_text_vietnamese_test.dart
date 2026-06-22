@@ -1,6 +1,6 @@
-// Vietnamese uses tone marks stacked on top of vowel modifications.
-// NFD decomposes these into a base letter + combining marks (category Mn),
-// which are then stripped — so the base letter survives.
+// Stress-tests diacritic stripping with Vietnamese: stacked marks (tone + vowel modification)
+// that NFD decomposes into multiple combining characters, all stripped to the base letter.
+// Also verifies that stripping never collapses distinct base letters into each other.
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,4 +47,25 @@ void main() {
       expect(_match('ha noi', 'Hà Nội'), isTrue);
     });
   });
+
+  group(
+    'matchesText vietnamese — diacriticSensitive: false — should not match',
+    () {
+      test('should not match different final consonant (bam ≠ băn)', () {
+        expect(_match('bam', 'băn'), isFalse);
+      });
+
+      test('should not match different base vowel (ben ≠ bân)', () {
+        expect(_match('ben', 'bân'), isFalse);
+      });
+
+      test('should not match different base consonant (ca ≠ ta)', () {
+        expect(_match('ca', 'ta'), isFalse);
+      });
+
+      test('should not match when needle is longer than haystack word', () {
+        expect(_match('nguyenlan', 'Nguyễn'), isFalse);
+      });
+    },
+  );
 }
