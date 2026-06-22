@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 
 import 'app_config.dart';
 
@@ -23,24 +23,6 @@ abstract class TwakeThemes {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static const fallbackTextTheme = TextTheme(
-    bodyLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.15),
-    bodyMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.25),
-    bodySmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.4),
-    labelLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
-    labelMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
-    labelSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
-    displayLarge: TextStyle(fontWeight: FontWeight.w700),
-    displayMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
-    displaySmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
-    headlineMedium: TextStyle(fontWeight: FontWeight.w600),
-    headlineSmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
-    headlineLarge: TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
-    titleLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.15),
-    titleMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.15),
-    titleSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
-  );
-
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
 
@@ -51,10 +33,8 @@ abstract class TwakeThemes {
   ]) => ThemeData(
     visualDensity: VisualDensity.standard,
     useMaterial3: true,
-    fontFamily: LinagoraFonts.twakeInter,
-    textTheme: brightness == Brightness.light
-        ? Typography.material2021().black.merge(fallbackTextTheme)
-        : Typography.material2021().white.merge(fallbackTextTheme),
+    textTheme: LinagoraTextTheme.material(),
+    extensions: [LinagoraTextThemeExtension.material()],
     snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
     scaffoldBackgroundColor: LinagoraSysColors.material().onPrimary,
     dividerColor: brightness == Brightness.light
@@ -70,7 +50,7 @@ abstract class TwakeThemes {
         borderSide: BorderSide.none,
         borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
       ),
-      hintStyle: fallbackTextTheme.bodyLarge?.merge(
+      hintStyle: LinagoraTextTheme.material().bodyLarge?.merge(
         TextStyle(
           fontSize: 17,
           color: LinagoraRefColors.material().neutralVariant[60],
@@ -280,17 +260,17 @@ abstract class TwakeThemes {
       height: 64,
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return fallbackTextTheme.labelSmall?.copyWith(
+          return LinagoraTextTheme.material().labelSmall?.copyWith(
             fontSize: 11,
             color: LinagoraSysColors.material().primary,
           );
         }
         return responsive.isDesktop(context)
-            ? fallbackTextTheme.labelSmall?.copyWith(
+            ? LinagoraTextTheme.material().labelSmall?.copyWith(
                 fontSize: 11,
                 color: LinagoraRefColors.material().neutral[10],
               )
-            : fallbackTextTheme.labelSmall?.copyWith(
+            : LinagoraTextTheme.material().labelSmall?.copyWith(
                 fontSize: 11,
                 color: LinagoraSysColors.material().tertiary,
               );
@@ -321,11 +301,11 @@ abstract class TwakeThemes {
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: LinagoraSysColors.material().surface,
-      selectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+      selectedLabelStyle: LinagoraTextTheme.material().labelSmall?.copyWith(
         fontSize: 11,
         color: LinagoraSysColors.material().primary,
       ),
-      unselectedLabelStyle: fallbackTextTheme.labelSmall?.copyWith(
+      unselectedLabelStyle: LinagoraTextTheme.material().labelSmall?.copyWith(
         fontSize: 11,
         color: LinagoraSysColors.material().tertiary,
       ),

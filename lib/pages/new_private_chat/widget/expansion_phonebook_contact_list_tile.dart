@@ -164,10 +164,7 @@ class _ExpansionPhonebookContactListTileState
                                                 highlightKeyword:
                                                     widget.highlightKeyword,
                                                 style:
-                                                    ListItemStyle.titleTextStyle(
-                                                      fontFamily: LinagoraFonts
-                                                          .twakeInter,
-                                                    ),
+                                                    ListItemStyle.titleTextStyle(),
                                               ),
                                             ),
                                           ],
