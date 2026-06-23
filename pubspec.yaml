@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref:  v0.1.2
+      ref:  v0.2.0
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -289,11 +289,6 @@ msix_config:
   install_certificate: false
 
 dependency_overrides:
-  # TODO: Update to v0.2.0 once https://github.com/linagora/linagora-design-flutter/pull/79 merged
-  linagora_design_flutter:
-    git:
-      url: https://github.com/linagora/linagora-design-flutter.git
-      ref: b0300e764c840881abd5cff5eb432ee21bc44ad9
   http: 1.2.2
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
   file_selector: ^0.9.2+2
