@@ -23,6 +23,8 @@ import 'package:fluffychat/pages/login/on_auth_redirect.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
 import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat.dart';
+import 'package:fluffychat/pages/onboarding/onboarding.dart';
+import 'package:fluffychat/pages/onboarding/onboarding_payoff_page.dart';
 import 'package:fluffychat/pages/personal_qr/personal_qr.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
@@ -44,6 +46,7 @@ import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
 import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/presentation/model/forward/forward_argument.dart';
+import 'package:fluffychat/utils/onboarding_settings.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold.dart';
@@ -112,10 +115,16 @@ class RootRoute extends GoRouteData with $RootRoute {
   const RootRoute();
 
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      Matrix.of(context).isLoggedInClient()
-      ? const RoomsRoute().location
-      : const HomeRoute().location;
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) async {
+    // Onboarding runs before authentication: show it on first app launch
+    // (mobile only) until completed, then route to auth or the chat list.
+    if (PlatformInfos.isMobile && !await OnboardingSettings.isCompleted()) {
+      return const OnboardingRoute().location;
+    }
+    return Matrix.of(context).isLoggedInClient()
+        ? const RoomsRoute().location
+        : const HomeRoute().location;
+  }
 
   // Never displayed — always redirects.
   @override
@@ -190,6 +199,29 @@ class HomeHomeserverPickerRoute extends GoRouteData
           arg: HomeserverPickerArg(type: HomeserverPickerType.singleAccount),
         ),
       );
+}
+
+@TypedGoRoute<OnboardingRoute>(path: '/onboarding')
+class OnboardingRoute extends GoRouteData with $OnboardingRoute {
+  const OnboardingRoute();
+
+  // Pre-auth: reachable while logged out, no redirect guard.
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const Onboarding());
+}
+
+@TypedGoRoute<OnboardingPayoffRoute>(path: '/onboarding/payoff')
+class OnboardingPayoffRoute extends GoRouteData with $OnboardingPayoffRoute {
+  const OnboardingPayoffRoute();
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const OnboardingPayoffPage());
 }
 
 @TypedGoRoute<OnAuthRedirectRoute>(path: '/onAuthRedirect')
