@@ -1259,6 +1259,7 @@ class MatrixState extends State<Matrix>
 
   @override
   Future<void> onConnect() async {
+    if (widget.clients.isEmpty) return;
     if (client.homeserver != null) return;
     await _refreshHomeserverInformation(client);
   }
@@ -1267,6 +1268,7 @@ class MatrixState extends State<Matrix>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
     Logs().i('didChangeAppLifecycleState: currentTime: ${DateTime.now()}');
+    if (widget.clients.isEmpty) return;
     final foreground =
         state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
@@ -1384,7 +1386,7 @@ class MatrixState extends State<Matrix>
       s.cancel();
     }
     onClientLoginStateChanged.close();
-    client.httpClient.close();
+    clientOrNull?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
     backgroundPush?.clearingPushTimer?.cancel();

@@ -47,32 +47,45 @@ const _testConfig = <String, dynamic>{
   'enable_logs': true,
 };
 
-bool _initialised = false;
+Future<void>? _initialisation;
+
+/// Runs the one-shot setup exactly once per isolate, atomically.
+///
+/// Guard: each [patrolTest] callback calls [main], but within a single test
+/// file all callbacks share the same Dart isolate.  Calling [runApp] again is
+/// fine (it replaces the root widget), but one-shot setup like
+/// [GetItInitializer], [Hive.initFlutter], and the [AppConfig] completer must
+/// only run once.
+///
+/// The future is cached *before* it is awaited so concurrent callers share the
+/// same run; if setup throws, the cached future is cleared so a later call can
+/// retry instead of proceeding on partially initialised global state.
+Future<void> _ensureInitialised() {
+  return _initialisation ??= () async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      initMatrixLogger();
+
+      AppConfig.loadFromJson(_testConfig);
+      AppConfig.initConfigCompleter.complete(true);
+
+      GoRouter.optionURLReflectsImperativeAPIs = true;
+
+      // On web kIsWeb is true so this returns immediately; kept for safety
+      // in case this file is ever reused on another target.
+      await Hive.initFlutter();
+
+      GetItInitializer().setUp();
+    } catch (_) {
+      _initialisation = null;
+      rethrow;
+    }
+  }();
+}
 
 /// Initialise just enough for a web test, then [runApp].
-///
-/// Guard: each [patrolTest] callback calls this, but within a single test
-/// file all callbacks share the same Dart isolate.  Calling [runApp] again
-/// is fine (it replaces the root widget), but one-shot setup like
-/// [GetItInitializer], [Hive.initFlutter], and the [AppConfig] completer
-/// must only run once.
 Future<void> main() async {
-  if (!_initialised) {
-    _initialised = true;
-    WidgetsFlutterBinding.ensureInitialized();
-    initMatrixLogger();
-
-    AppConfig.loadFromJson(_testConfig);
-    AppConfig.initConfigCompleter.complete(true);
-
-    GoRouter.optionURLReflectsImperativeAPIs = true;
-
-    // On web kIsWeb is true so this returns immediately; kept for safety
-    // in case this file is ever reused on another target.
-    await Hive.initFlutter();
-
-    GetItInitializer().setUp();
-  }
+  await _ensureInitialised();
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   // Boot with no pre-existing session.  The test logs in via the UI and the
