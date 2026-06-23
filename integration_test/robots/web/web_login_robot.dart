@@ -40,14 +40,27 @@ class WebLoginRobot extends CoreRobot implements AbstractLoginRobot {
     final client = await matrix.getLoginClient();
     matrix.loginHomeserverSummary = await client
         .checkHomeserver(Uri.parse(serverUrl))
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw Exception(
+            'WebLoginRobot: checkHomeserver($serverUrl) timed out after 30s',
+          ),
+        )
         .toHomeserverSummary();
 
-    await client.login(
-      LoginType.mLoginPassword,
-      identifier: AuthenticationUserIdentifier(user: username),
-      password: password,
-      initialDeviceDisplayName: PlatformInfos.clientName,
-    );
+    await client
+        .login(
+          LoginType.mLoginPassword,
+          identifier: AuthenticationUserIdentifier(user: username),
+          password: password,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        )
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw Exception(
+            'WebLoginRobot: client.login($username) timed out after 30s',
+          ),
+        );
 
     // Force the router to re-evaluate redirects → lands on ChatList.
     TwakeApp.router.go('/');

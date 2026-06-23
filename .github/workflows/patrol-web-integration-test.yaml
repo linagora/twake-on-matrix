@@ -1,6 +1,12 @@
 name: Patrol Web Integration Tests
 
 on:
+  # Nightly web E2E run on free GitHub-hosted runners (no FTL cost).
+  # 02:00 UTC — offset from the FTL integration workflow (00:00 UTC) so the
+  # two nightly suites don't contend for runners. Scheduled triggers only fire
+  # on the default branch, so this activates once merged.
+  schedule:
+    - cron: "0 2 * * *"
   # PR trigger disabled until all web integration tests are green.
   # Re-enable the `pull_request` block below once SSH git deps are
   # migrated to HTTPS and the test suite is stable.
@@ -27,6 +33,9 @@ jobs:
   discover:
     name: Discover targets
     runs-on: ubuntu-latest
+    # Least privilege: this job only checks out the repo and globs test files.
+    permissions:
+      contents: read
     outputs:
       targets: ${{ steps.list.outputs.targets }}
     steps:
@@ -41,7 +50,22 @@ jobs:
           if [ -n "$PATROL_TEST_TARGET" ]; then
             targets=$(printf '%s' "$PATROL_TEST_TARGET" | jq -R . | jq -s -c .)
           else
-            targets=$(find integration_test/tests -name '*_test.dart' | sort | jq -R . | jq -s -c .)
+            # Exclude files with no web-runnable tests, i.e. every runPatrolTest
+            # is mobileOnly. On web those tests are not registered (see
+            # TestBase.runPatrolTest), so such a file would expose zero tests to
+            # Patrol's Playwright runner — reported as "Total: 0" (job failure)
+            # and prone to the all-skipped runner stall. Keep them mobile-only.
+            web_targets=""
+            for f in $(find integration_test/tests -name '*_test.dart' | sort); do
+              total=$(grep -c 'runPatrolTest(' "$f" || true)
+              mobile=$(grep -c 'mobileOnly: true' "$f" || true)
+              if [ "$total" -gt 0 ] && [ "$total" -eq "$mobile" ]; then
+                echo "Excluding all-mobileOnly file from web matrix: $f" >&2
+                continue
+              fi
+              web_targets="$web_targets$f"$'\n'
+            done
+            targets=$(printf '%s' "$web_targets" | sed '/^$/d' | jq -R . | jq -s -c .)
           fi
           echo "targets=$targets" >> "$GITHUB_OUTPUT"
           echo "Will run these targets:"
@@ -71,7 +95,11 @@ jobs:
     env:
       FLUTTER_VERSION: "3.38.9"
       PATROL_CLI_VERSION: "4.3.1"
-      SYNAPSE_URL: http://localhost
+      # Use explicit IPv4 loopback — Chrome headless on Ubuntu 24 resolves
+      # "localhost" to ::1 (IPv6) but Docker -p 80:80 binds 0.0.0.0:80
+      # (IPv4 only), causing the Flutter web app's checkHomeserver() and
+      # client.login() calls to hang indefinitely.
+      SYNAPSE_URL: http://127.0.0.1
       SERVER_NAME: localhost
       # The headless Chromium launched by Patrol's Playwright runner inherits
       # these, so `navigator.languages` is populated. Without a locale the
@@ -114,6 +142,7 @@ jobs:
           dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
 
       - name: Run Patrol Web
+        timeout-minutes: 20
         env:
           TARGET: ${{ matrix.target }}
         run: |

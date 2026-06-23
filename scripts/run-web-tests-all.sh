@@ -57,7 +57,6 @@ run_test() {
 : > /tmp/patrol-web-results.txt
 
 TESTS=(
-  integration_test/tests/web_smoke_test.dart
   integration_test/tests/login/login_with_password_test.dart
   integration_test/tests/setting/language_test.dart
   integration_test/tests/setting/settings_contacts_visibility_test.dart

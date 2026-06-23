@@ -151,6 +151,20 @@ class MatrixState extends State<Matrix>
     return widget.clients[_activeClient];
   }
 
+  /// Null-safe accessor for the active client.
+  ///
+  /// Returns the same client as [client] whenever any account exists, but
+  /// returns null instead of throwing [StateError] (`currentBundle!.first!`
+  /// on an empty list) during a logged-out boot with `clients: []`.
+  /// Gated on [widget.clients.isEmpty] — not on [isValidActiveClient] — so it
+  /// preserves the exact `currentBundle.first` fallback the [client] getter
+  /// uses while `_activeClient` is still -1 in a normal logged-in boot.
+  Client? get clientOrNull => widget.clients.isEmpty ? null : client;
+
+  /// True only when an account exists AND it is logged in.
+  /// Safe to call during a logged-out boot (returns false on empty clients).
+  bool isLoggedInClient() => clientOrNull?.isLogged() ?? false;
+
   // TODO: 28Dec2023 Disable until support voip
   bool get webrtcIsSupported => false;
 
@@ -347,6 +361,7 @@ class MatrixState extends State<Matrix>
   File? wallpaper;
 
   void _initWithStore() async {
+    if (widget.clients.isEmpty) return;
     try {
       if (client.isLogged()) {
         // TODO: Figure out how this works in multi account
@@ -795,6 +810,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> _retrieveLocalToMConfiguration() async {
+    if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
@@ -879,6 +895,7 @@ class MatrixState extends State<Matrix>
   }
 
   Future<void> tryToGetFederationConfigurations() async {
+    if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
     try {
       final federationConfigurationRepository = getIt
@@ -1242,6 +1259,7 @@ class MatrixState extends State<Matrix>
 
   @override
   Future<void> onConnect() async {
+    if (widget.clients.isEmpty) return;
     if (client.homeserver != null) return;
     await _refreshHomeserverInformation(client);
   }
@@ -1250,6 +1268,7 @@ class MatrixState extends State<Matrix>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
     Logs().i('didChangeAppLifecycleState: currentTime: ${DateTime.now()}');
+    if (widget.clients.isEmpty) return;
     final foreground =
         state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
@@ -1367,7 +1386,7 @@ class MatrixState extends State<Matrix>
       s.cancel();
     }
     onClientLoginStateChanged.close();
-    client.httpClient.close();
+    clientOrNull?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
     backgroundPush?.clearingPushTimer?.cancel();
