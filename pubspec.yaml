@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.1.0
+      ref:  v0.1.2
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -272,20 +272,8 @@ flutter:
     - assets/sounds/
     - assets/js/
     - assets/js/package/
-    - assets/google_fonts/
     - configurations/
     - configurations/icons/
-  fonts:
-    - family: Inter
-      fonts:
-        - asset: assets/google_fonts/Inter-Medium.ttf
-          weight: 500
-        - asset: assets/google_fonts/Inter-Regular.ttf
-          weight: 400
-        - asset: assets/google_fonts/Inter-SemiBold.ttf
-          weight: 600
-        - asset: assets/google_fonts/Inter-Bold.ttf
-          weight: 700
 
 msix_config:
   display_name: Twake Chat

@@ -175,40 +175,43 @@ class SearchableAppBar extends StatelessWidget {
   }
 
   Widget _textFieldBuilder(BuildContext context) {
-    return TextField(
-      onTapOutside: (event) {
-        dismissKeyboard(context);
-      },
+    return RightClickFocus(
       focusNode: focusNode,
-      autofocus: true,
-      maxLines: SearchableAppBarStyle.textFieldMaxLines,
-      contextMenuBuilder: mobileTwakeContextMenuBuilder,
-      buildCounter:
-          (
-            BuildContext context, {
-            required int currentLength,
-            required int? maxLength,
-            required bool isFocused,
-          }) => const SizedBox.shrink(),
-      maxLength: SearchableAppBarStyle.textFieldMaxLength,
-      cursorHeight: 26,
-      scrollPadding: const EdgeInsets.all(0),
-      controller: textEditingController,
-      decoration: InputDecoration(
-        contentPadding: SearchableAppBarStyle.textFieldContentPadding,
-        isCollapsed: true,
-        hintText: hintText,
-        prefixIcon: !isFullScreen
-            ? Icon(
-                Icons.search_outlined,
-                // TODO: change to colorSurface when its approved
-                // ignore: deprecated_member_use
-                color: Theme.of(context).colorScheme.onBackground,
-              )
-            : null,
-        suffixIcon: const SizedBox.shrink(),
-        hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: LinagoraRefColors.material().neutral[60],
+      child: TextField(
+        onTapOutside: (event) {
+          dismissKeyboard(context);
+        },
+        focusNode: focusNode,
+        autofocus: true,
+        maxLines: SearchableAppBarStyle.textFieldMaxLines,
+        contextMenuBuilder: mobileTwakeContextMenuBuilder,
+        buildCounter:
+            (
+              BuildContext _, {
+              required int currentLength,
+              required int? maxLength,
+              required bool isFocused,
+            }) => const SizedBox.shrink(),
+        maxLength: SearchableAppBarStyle.textFieldMaxLength,
+        cursorHeight: 26,
+        scrollPadding: const EdgeInsets.all(0),
+        controller: textEditingController,
+        decoration: InputDecoration(
+          contentPadding: SearchableAppBarStyle.textFieldContentPadding,
+          isCollapsed: true,
+          hintText: hintText,
+          prefixIcon: !isFullScreen
+              ? Icon(
+                  Icons.search_outlined,
+                  // TODO: change to colorSurface when its approved
+                  // ignore: deprecated_member_use
+                  color: Theme.of(context).colorScheme.onBackground,
+                )
+              : null,
+          suffixIcon: const SizedBox.shrink(),
+          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: LinagoraRefColors.material().neutral[60],
+          ),
         ),
       ),
     );

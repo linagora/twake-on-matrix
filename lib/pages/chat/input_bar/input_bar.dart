@@ -426,38 +426,39 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           suggestionsController: widget.suggestionsController,
           controller: widget.controller,
           focusNode: widget.typeAheadFocusNode,
-          builder: (context, controller, focusNode) => TextField(
-            minLines: widget.minLines,
-            maxLines: widget.maxLines,
-            keyboardType: widget.keyboardType,
-            textInputAction: widget.textInputAction,
-            scrollController: textFieldScrollController,
-            autofocus: widget.autofocus,
-            style: InputBarStyle.getTypeAheadTextStyle(context),
-            controller: controller,
-            decoration: widget.decoration,
+          builder: (context, controller, focusNode) => RightClickFocus(
             focusNode: focusNode,
-            onChanged: (text) {
-              widget.suggestionsController?.open();
-              if (widget.onChanged != null) {
-                widget.onChanged!(text);
-              }
-            },
-            contextMenuBuilder: PlatformInfos.isWeb
-                ? null
-                : mobileTwakeContextMenuBuilder,
-            onTap: () async {
-              await Future.delayed(InputBar.debounceDurationTap);
-              FocusScope.of(context).requestFocus(focusNode);
-            },
-            onSubmitted: PlatformInfos.isMobile
-                ? (text) {
-                    if (widget.onSubmitted != null) {
-                      widget.onSubmitted!(text);
+            child: TextField(
+              minLines: widget.minLines,
+              maxLines: widget.maxLines,
+              keyboardType: widget.keyboardType,
+              textInputAction: widget.textInputAction,
+              scrollController: textFieldScrollController,
+              autofocus: widget.autofocus,
+              style: InputBarStyle.getTypeAheadTextStyle(context),
+              controller: controller,
+              decoration: widget.decoration,
+              focusNode: focusNode,
+              onChanged: (text) {
+                widget.suggestionsController?.open();
+                widget.onChanged?.call(text);
+              },
+              contextMenuBuilder: PlatformInfos.isWeb
+                  ? null
+                  : mobileTwakeContextMenuBuilder,
+              onTap: () async {
+                await Future.delayed(InputBar.debounceDurationTap);
+                FocusScope.of(context).requestFocus(focusNode);
+              },
+              onSubmitted: PlatformInfos.isMobile
+                  ? (text) {
+                      if (widget.onSubmitted != null) {
+                        widget.onSubmitted!(text);
+                      }
                     }
-                  }
-                : null,
-            textCapitalization: TextCapitalization.sentences,
+                  : null,
+              textCapitalization: TextCapitalization.sentences,
+            ),
           ),
           suggestionsCallback: (text) {
             // In a draft chat the room does not exist yet, so there are no

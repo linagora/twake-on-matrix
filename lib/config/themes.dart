@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/fonts/linagora_fonts.dart';
 
 import 'app_config.dart';
 
@@ -22,74 +23,22 @@ abstract class TwakeThemes {
 
   static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
-  static var fallbackTextTheme = const TextTheme(
-    bodyLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: -0.15,
-    ),
-    bodyMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.25,
-    ),
-    bodySmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.4,
-    ),
-    labelLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    ),
-    labelMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.5,
-    ),
-    labelSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.5,
-    ),
-    displayLarge: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w700),
-    displayMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    displaySmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    headlineMedium: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
-    headlineSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: 0.4,
-    ),
-    headlineLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      fontSize: 32,
-    ),
-    titleLarge: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w600,
-      letterSpacing: -0.15,
-    ),
-    titleMedium: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.15,
-    ),
-    titleSmall: TextStyle(
-      fontFamily: 'Inter',
-      fontWeight: FontWeight.w500,
-      letterSpacing: 0.1,
-    ),
+  static const fallbackTextTheme = TextTheme(
+    bodyLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: -0.15),
+    bodyMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.25),
+    bodySmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.4),
+    labelLarge: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
+    labelMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+    labelSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.5),
+    displayLarge: TextStyle(fontWeight: FontWeight.w700),
+    displayMedium: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    displaySmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    headlineMedium: TextStyle(fontWeight: FontWeight.w600),
+    headlineSmall: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.4),
+    headlineLarge: TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
+    titleLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: -0.15),
+    titleMedium: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.15),
+    titleSmall: TextStyle(fontWeight: FontWeight.w500, letterSpacing: 0.1),
   );
 
   static const Duration animationDuration = Duration(milliseconds: 250);
@@ -102,7 +51,7 @@ abstract class TwakeThemes {
   ]) => ThemeData(
     visualDensity: VisualDensity.standard,
     useMaterial3: true,
-    fontFamily: 'Inter',
+    fontFamily: LinagoraFonts.twakeInter,
     textTheme: brightness == Brightness.light
         ? Typography.material2021().black.merge(fallbackTextTheme)
         : Typography.material2021().white.merge(fallbackTextTheme),

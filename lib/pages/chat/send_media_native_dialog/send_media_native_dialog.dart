@@ -8,7 +8,9 @@ import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:open_file/open_file.dart';
 
 /// Result returned by [SendMediaNativeDialog]. `null` means the user cancelled
 /// (no upload should happen). On send, [files] is the kept list (oversized files
@@ -219,11 +221,9 @@ class _SendMediaNativeDialogState extends State<SendMediaNativeDialog> {
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: EdgeInsets.only(
-                  left: 12,
-                  right: 12,
-                  top: 8,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LinagoraSpacing.base * 1.5,
+                  vertical: LinagoraSpacing.base,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -343,11 +343,14 @@ class _MediaPreview extends StatelessWidget {
             Image.memory(thumbnailBytes, fit: BoxFit.contain)
           else
             const SizedBox.shrink(),
-          const Center(
-            child: Icon(
-              Icons.play_circle_outline,
-              color: Colors.white,
-              size: 72,
+          Center(
+            child: GestureDetector(
+              onTap: path != null ? () => OpenFile.open(path) : null,
+              child: const Icon(
+                Icons.play_circle_outline,
+                color: Colors.white,
+                size: 72,
+              ),
             ),
           ),
         ],

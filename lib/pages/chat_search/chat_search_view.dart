@@ -218,9 +218,7 @@ class _SearchItem extends StatelessWidget {
                                     ? L10n.of(context)!.you
                                     : user.calcDisplayname(),
                                 maxLines: 1,
-                                style: ListItemStyle.titleTextStyle(
-                                  fontFamily: 'Inter',
-                                ),
+                                style: ListItemStyle.titleTextStyle(),
                               ),
                             ),
                             Text(
@@ -312,27 +310,30 @@ class _ChatSearchAppBar extends StatelessWidget {
             ),
             child: Padding(
               padding: ChatSearchStyle.inputPadding,
-              child: TextField(
-                controller: controller.textEditingController,
-                contextMenuBuilder: mobileTwakeContextMenuBuilder,
+              child: RightClickFocus(
                 focusNode: controller.inputFocus,
-                textInputAction: TextInputAction.search,
-                autofocus: true,
-                decoration: ChatListHeaderStyle.searchInputDecoration(context)
-                    .copyWith(
-                      suffixIcon: ValueListenableBuilder(
-                        valueListenable: controller.textEditingController,
-                        builder: (context, value, child) =>
-                            value.text.isNotEmpty
-                            ? IconButton(
-                                onPressed: () {
-                                  controller.textEditingController.clear();
-                                },
-                                icon: const Icon(Icons.close),
-                              )
-                            : const SizedBox.shrink(),
+                child: TextField(
+                  controller: controller.textEditingController,
+                  contextMenuBuilder: mobileTwakeContextMenuBuilder,
+                  focusNode: controller.inputFocus,
+                  textInputAction: TextInputAction.search,
+                  autofocus: true,
+                  decoration: ChatListHeaderStyle.searchInputDecoration(context)
+                      .copyWith(
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: controller.textEditingController,
+                          builder: (_, value, _) {
+                            if (value.text.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return IconButton(
+                              onPressed: controller.textEditingController.clear,
+                              icon: const Icon(Icons.close),
+                            );
+                          },
+                        ),
                       ),
-                    ),
+                ),
               ),
             ),
           ),

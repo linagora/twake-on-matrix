@@ -34,6 +34,7 @@ import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
 import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 typedef TransactionId = String;
@@ -196,6 +197,55 @@ extension SendFileExtension on Room {
         thumbnail = null; // in this case, the thumbnail is not usefull
       }
     } else if (fileInfo is VideoFileInfo) {
+      // Compress video before upload to reduce file size (especially iOS
+      // MOV/HEVC which can be 100 MB+ raw). Falls back to the original file
+      // on any error so the send is never blocked.
+      var videoInfo = fileInfo;
+      final videoPath = videoInfo.filePath;
+      if (videoPath != null) {
+        try {
+          Logs().d(
+            'sendFileEventMobile::Compressing video '
+            '(${videoInfo.fileSize} bytes)',
+          );
+          final mediaInfo = await VideoCompress.compressVideo(
+            videoPath,
+            quality: VideoQuality.MediumQuality,
+            deleteOrigin: false,
+          );
+          final compressedFile = mediaInfo?.file;
+          if (compressedFile != null && await compressedFile.exists()) {
+            final compressedSize = await compressedFile.length();
+            if (compressedSize < videoInfo.fileSize && compressedSize > 0) {
+              Logs().d(
+                'sendFileEventMobile::Video compressed '
+                '${videoInfo.fileSize} → $compressedSize bytes '
+                '(${(100 - compressedSize * 100 ~/ videoInfo.fileSize)}% saved)',
+              );
+              videoInfo = VideoFileInfo(
+                videoInfo.fileName,
+                filePath: compressedFile.path,
+                width: mediaInfo?.width,
+                height: mediaInfo?.height,
+              );
+            } else {
+              Logs().d(
+                'sendFileEventMobile::Compressed video not smaller, '
+                'using original',
+              );
+              try {
+                await compressedFile.delete();
+              } catch (_) {
+                // best-effort cleanup
+              }
+            }
+          }
+        } catch (e, s) {
+          Logs().w('sendFileEventMobile::Video compression failed', e, s);
+        }
+      }
+      fileInfo = videoInfo;
+
       await updateFakeSync(
         fakeImageEvent,
         fileSendingStatusKey,
@@ -205,19 +255,19 @@ extension SendFileExtension on Room {
       if (tempThumbnailFile != null) {
         thumbnail ??= await _getThumbnailVideo(
           tempThumbnailFile,
-          fileInfo,
+          videoInfo,
           txid,
           uploadStreamController: uploadStreamController,
         );
       }
-      if (fileInfo.width == null ||
-          fileInfo.height == null ||
-          fileInfo.width == 0 ||
-          fileInfo.height == 0) {
+      if (videoInfo.width == null ||
+          videoInfo.height == null ||
+          videoInfo.width == 0 ||
+          videoInfo.height == 0) {
         fileInfo = VideoFileInfo(
-          fileInfo.fileName,
-          filePath: fileInfo.filePath,
-          bytes: fileInfo.bytes,
+          videoInfo.fileName,
+          filePath: videoInfo.filePath,
+          bytes: videoInfo.bytes,
           width: thumbnail?.width,
           height: thumbnail?.height,
         );
