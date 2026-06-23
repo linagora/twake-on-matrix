@@ -1,8 +1,18 @@
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/extensions/contact/address_book_extension.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  setUp(() {
+    getIt.registerSingleton(const SearchEngine());
+  });
+
+  tearDown(() {
+    GetIt.instance.reset();
+  });
   group('searchAddressBooks test', () {
     test('should returns all address books when keyword is empty', () {
       final addressBooks = [

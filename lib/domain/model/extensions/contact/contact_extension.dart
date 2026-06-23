@@ -10,7 +10,6 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:collection/collection.dart';
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {
