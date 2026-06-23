@@ -1,12 +1,23 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  setUp(() {
+    getIt.registerSingleton(const SearchEngine());
+  });
+
+  tearDown(() {
+    GetIt.instance.reset();
+  });
+
   group('ContactExtension', () {
     test('toFederationContact should convert Contact to FederationContact', () {
       final contact = Contact(
@@ -358,6 +369,89 @@ void main() {
       // Empty keyword should return all contacts
       results = contacts.searchContacts('');
       expect(results.length, 2);
+    });
+
+    test('searchContacts should filter contacts by email matrixId', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          emails: {
+            Email(address: 'john@example.com', matrixId: '@john:matrix.org'),
+          },
+        ),
+        Contact(id: 'contact2'),
+      ];
+      final results = contacts.searchContacts('@john:matrix');
+      expect(results.length, 1);
+      expect(results.first.id, 'contact1');
+    });
+
+    test('searchContacts should filter contacts by phone matrixId', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          phoneNumbers: {
+            PhoneNumber(number: '+33612345678', matrixId: '@phone:matrix.org'),
+          },
+        ),
+        Contact(id: 'contact2'),
+      ];
+      final results = contacts.searchContacts('@phone:matrix');
+      expect(results.length, 1);
+      expect(results.first.id, 'contact1');
+    });
+
+    test('searchContacts should match despite diacritics', () {
+      final contacts = [
+        Contact(id: 'contact1', displayName: 'Élodie'),
+        Contact(id: 'contact2', displayName: 'Bob'),
+      ];
+      expect(contacts.searchContacts('elodie').length, 1);
+      expect(contacts.searchContacts('Elodie').length, 1);
+    });
+
+    test('searchContacts should not match when keyword matches nothing', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          emails: {Email(address: 'alice@example.com')},
+          phoneNumbers: {PhoneNumber(number: '+33612345678')},
+        ),
+      ];
+      expect(contacts.searchContacts('zzz').length, 0);
+    });
+
+    test('searchContacts should not match contact with empty phone number', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          phoneNumbers: {PhoneNumber(number: '')},
+        ),
+      ];
+      expect(contacts.searchContacts('123').length, 0);
+    });
+
+    test('searchContacts should not match contact with empty email', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          displayName: 'Alice',
+          emails: {Email(address: '')},
+        ),
+      ];
+      expect(contacts.searchContacts('hello').length, 0);
+    });
+
+    test('searchContacts should match phone number ignoring spaces', () {
+      final contacts = [
+        Contact(
+          id: 'contact1',
+          phoneNumbers: {PhoneNumber(number: '+33 6 12 34 56 78')},
+        ),
+      ];
+      expect(contacts.searchContacts('+33612345678').length, 1);
     });
   });
 
