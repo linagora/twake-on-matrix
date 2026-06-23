@@ -379,7 +379,7 @@ void main() {
             Email(address: 'john@example.com', matrixId: '@john:matrix.org'),
           },
         ),
-        Contact(id: 'contact2'),
+        const Contact(id: 'contact2'),
       ];
       final results = contacts.searchContacts('@john:matrix');
       expect(results.length, 1);
@@ -394,7 +394,7 @@ void main() {
             PhoneNumber(number: '+33612345678', matrixId: '@phone:matrix.org'),
           },
         ),
-        Contact(id: 'contact2'),
+        const Contact(id: 'contact2'),
       ];
       final results = contacts.searchContacts('@phone:matrix');
       expect(results.length, 1);
@@ -403,8 +403,8 @@ void main() {
 
     test('searchContacts should match despite diacritics', () {
       final contacts = [
-        Contact(id: 'contact1', displayName: 'Élodie'),
-        Contact(id: 'contact2', displayName: 'Bob'),
+        const Contact(id: 'contact1', displayName: 'Élodie'),
+        const Contact(id: 'contact2', displayName: 'Bob'),
       ];
       expect(contacts.searchContacts('elodie').length, 1);
       expect(contacts.searchContacts('Elodie').length, 1);
