@@ -2,6 +2,9 @@ import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 
 /// Extension methods for searching and filtering collections of AddressBook
@@ -16,18 +19,13 @@ extension IterableAddressBookExtension on Iterable<AddressBook> {
   /// Returns all entries if [keyword] is empty, otherwise returns only
   /// matching entries.
   Iterable<AddressBook> searchAddressBooks(String keyword) {
-    if (keyword.isEmpty) {
-      return this;
-    }
-    final contactsMatched = where((contact) {
-      final supportedFields = [contact.displayName, contact.mxid];
-      final plainTextContains = supportedFields.any(
-        (field) =>
-            field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
-      );
-      return plainTextContains;
-    });
-    return contactsMatched;
+    if (keyword.isEmpty) return this;
+    return getIt.get<SearchEngine>().matchAnyField(
+      keyword,
+      toList(),
+      fieldExtractors: [(c) => c.displayName, (c) => c.mxid],
+      options: const SearchOptions(diacriticSensitive: false),
+    );
   }
 }
 
