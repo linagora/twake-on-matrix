@@ -1,7 +1,8 @@
-import 'package:fluffychat/main.dart' as app;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+
+import '../base/web_test_main.dart' as app;
 
 void main() {
   patrolTest(
@@ -12,7 +13,7 @@ void main() {
     ),
     framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
     ($) async {
-      app.main();
+      await app.main();
 
       await $(MaterialApp).waitUntilVisible();
       expect($(MaterialApp), findsOneWidget);

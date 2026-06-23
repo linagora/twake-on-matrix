@@ -21,19 +21,70 @@ on:
         default: ""
 
 jobs:
-  patrol-web:
-    name: Patrol Web (Chrome headless)
+  # Lists the Patrol test files to run (the single given target, or every
+  # *_test.dart) so the test job can fan them out across a matrix — one
+  # isolated job per file (own Synapse, own build), in parallel.
+  discover:
+    name: Discover targets
     runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.list.outputs.targets }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - id: list
+        env:
+          PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
+        run: |
+          if [ -n "$PATROL_TEST_TARGET" ]; then
+            targets=$(printf '%s' "$PATROL_TEST_TARGET" | jq -R . | jq -s -c .)
+          else
+            targets=$(find integration_test/tests -name '*_test.dart' | sort | jq -R . | jq -s -c .)
+          fi
+          echo "targets=$targets" >> "$GITHUB_OUTPUT"
+          echo "Will run these targets:"
+          printf '%s' "$targets" | jq -r '.[]'
+
+  patrol-web:
+    name: "web — ${{ matrix.target }}"
+    needs: discover
+    runs-on: ubuntu-latest
+    # Hard cap: Patrol's --web-timeout only bounds web-server startup, not test
+    # execution, so a hung test has no effective timeout and would otherwise run
+    # to the 6h default. Fail the job instead.
+    timeout-minutes: 25
     permissions:
       contents: read
       checks: write
       pull-requests: write
+    strategy:
+      # Each file is independent — one failure must not cancel the others.
+      fail-fast: false
+      # Cap concurrency so we don't spin up too many Synapse containers /
+      # runners at once.
+      max-parallel: 6
+      matrix:
+        target: ${{ fromJson(needs.discover.outputs.targets) }}
 
     env:
       FLUTTER_VERSION: "3.38.9"
       PATROL_CLI_VERSION: "4.3.1"
       SYNAPSE_URL: http://localhost
       SERVER_NAME: localhost
+      # The headless Chromium launched by Patrol's Playwright runner inherits
+      # these, so `navigator.languages` is populated. Without a locale the
+      # Flutter engine throws "Incorrect locale information provided" in
+      # `parseBrowserLanguages` during CanvasKit init — the app never boots, no
+      # test registers, and the run reports "Total: 0".
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US:en
+      LC_ALL: en_US.UTF-8
+      # Patrol re-runs `flutter pub get` during its web build. If a git/HTTPS
+      # dependency fetch hits an auth challenge, git would block forever waiting
+      # for credentials (the observed 20+ min hang). Make it fail fast instead.
+      GIT_TERMINAL_PROMPT: "0"
 
     steps:
       - uses: actions/checkout@v4
@@ -51,11 +102,9 @@ jobs:
         run: ./scripts/integration-server-synapse.sh
 
       - name: Provision fixtures
-        id: fixtures
         run: |
           ./scripts/integration-test-provision-synapse.sh > .env.patrol-web
-          # Log variable names without values (passwords are throwaway but
-          # no reason to leak them in CI logs).
+          # Log variable names without values.
           cut -d= -f1 .env.patrol-web
 
       - name: Install dependencies
@@ -66,21 +115,21 @@ jobs:
 
       - name: Run Patrol Web
         env:
-          PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
+          TARGET: ${{ matrix.target }}
         run: |
-          TARGET_FLAG=()
-          if [ -n "$PATROL_TEST_TARGET" ]; then
-            TARGET_FLAG=(--target "$PATROL_TEST_TARGET")
-          fi
           # shellcheck disable=SC1091
           set -a
           . ./.env.patrol-web
           set +a
+
+          # One isolated file per job. Patrol web exits 0 even when a test
+          # fails, so the status is derived from the printed summary.
           patrol test \
             --device chrome \
             --web-headless=true \
-            --web-timeout 300000 \
-            "${TARGET_FLAG[@]}" \
+            --web-timeout 600000 \
+            --verbose \
+            --target "$TARGET" \
             --dart-define=PATROL_WEB=true \
             --dart-define=MATRIX_URL="$MATRIX_URL" \
             --dart-define=SERVER_URL="$SERVER_URL" \
@@ -93,13 +142,30 @@ jobs:
             --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
             --dart-define=SearchByTitle="$SearchByTitle" \
             --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
-            --dart-define=GroupID="$GroupID"
+            --dart-define=GroupTest="$SearchByTitle" \
+            --dart-define=GroupID="$GroupID" \
+            --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
+            --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
+            --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
+            2>&1 | tee /tmp/patrol-web.log
+
+          # Green only when at least one test ran (Total >= 1, so a file whose
+          # tests are all mobileOnly-skipped still passes) and none failed.
+          # "Total: 0" (app crash / nothing discovered) or a missing summary
+          # both fail the job.
+          if grep -qE '^❌ Failed: 0$' /tmp/patrol-web.log \
+            && ! grep -qE '^📝 Total: 0$' /tmp/patrol-web.log; then
+            echo "PASS: $TARGET"
+          else
+            echo "::error::Patrol web failed for $TARGET"
+            exit 1
+          fi
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report/
           retention-days: 7
 
@@ -107,7 +173,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: test-results-${{ strategy.job-index }}
           path: test-results/
           retention-days: 7
 
