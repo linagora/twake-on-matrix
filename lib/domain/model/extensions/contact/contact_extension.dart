@@ -1,4 +1,7 @@
 import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
@@ -7,7 +10,6 @@ import 'package:fluffychat/modules/federation_identity_lookup/domain/models/fede
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:collection/collection.dart';
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {
@@ -329,50 +331,28 @@ extension SetContactExtension on Set<Contact> {
 
 extension IterableContactsExtension on Iterable<Contact> {
   Iterable<Contact> searchContacts(String keyword) {
-    if (keyword.isEmpty) {
-      return this;
-    }
-    final contactsMatched = where((contact) {
-      final supportedFields = [contact.displayName, contact.id];
-      final plainTextContains = supportedFields.any(
-        (field) =>
-            field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
-      );
-      final phoneNumberContains =
+    if (keyword.isEmpty) return this;
+    final engine = getIt.get<SearchEngine>();
+    const options = SearchOptions(diacriticSensitive: false);
+
+    bool matches(String? field) =>
+        engine.matchesText(keyword, field ?? '', options: options);
+
+    return where(
+      (contact) =>
+          matches(contact.displayName) ||
+          matches(contact.id) ||
+          contact.emails?.any(
+                (email) => matches(email.address) || matches(email.matrixId),
+              ) ==
+              true ||
           contact.phoneNumbers?.any(
-            (phoneNumber) =>
-                phoneNumber.number.replaceAll(" ", "").contains(keyword),
-          ) ??
-          false;
-
-      final emailContains =
-          contact.emails?.any((email) => email.address.contains(keyword)) ??
-          false;
-
-      final emailMatrixIdContains =
-          contact.emails
-              ?.firstWhereOrNull(
-                (email) => email.matrixId?.contains(keyword) == true,
-              )
-              ?.matrixId !=
-          null;
-
-      final phoneMatrixIdContains =
-          contact.phoneNumbers
-              ?.firstWhereOrNull(
-                (phone) => phone.matrixId?.contains(keyword) == true,
-              )
-              ?.matrixId !=
-          null;
-
-      return plainTextContains ||
-          phoneNumberContains ||
-          emailContains ||
-          emailMatrixIdContains ||
-          phoneMatrixIdContains ||
-          contact.id.contains(keyword);
-    });
-    return contactsMatched;
+                (phone) =>
+                    matches(phone.number.replaceAll(' ', '')) ||
+                    matches(phone.matrixId),
+              ) ==
+              true,
+    );
   }
 }
 

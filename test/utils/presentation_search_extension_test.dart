@@ -1,14 +1,20 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:get_it/get_it.dart';
 
 void main() {
-  setUpAll(() => GetIt.instance.registerSingleton(const SearchEngine()));
-  tearDownAll(() => GetIt.instance.reset());
+  setUp(() {
+    getIt.registerSingleton(const SearchEngine());
+  });
+
+  tearDown(() {
+    GetIt.instance.reset();
+  });
   group('doesMatchKeyword test with Display name', () {
     test('WHEN displayName is null'
         'THEN returns false', () {
@@ -219,5 +225,102 @@ void main() {
       },
     );
     expect(search.doesMatchKeyword('matrix'), true);
+  });
+
+  group('doesMatchKeyword negative cases', () {
+    test('WHEN email is empty string'
+        'THEN returns false', () {
+      final search = ContactPresentationSearch(
+        matrixId: '@test:server.com',
+        emails: {
+          PresentationEmail(
+            email: '',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.email,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('hello'), false);
+    });
+
+    test('WHEN phone number is empty string'
+        'THEN returns false', () {
+      final search = ContactPresentationSearch(
+        matrixId: '@test:server.com',
+        phoneNumbers: {
+          PresentationPhoneNumber(
+            phoneNumber: '',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.msisdn,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('123'), false);
+    });
+
+    test('WHEN no field matches keyword'
+        'THEN returns false', () {
+      final search = ContactPresentationSearch(
+        matrixId: '@alice:server.com',
+        displayName: 'Alice',
+        emails: {
+          PresentationEmail(
+            email: 'alice@example.com',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.email,
+          ),
+        },
+        phoneNumbers: {
+          PresentationPhoneNumber(
+            phoneNumber: '0612345678',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.msisdn,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('zzz'), false);
+    });
+  });
+
+  group('doesMatchKeyword diacritic-insensitive', () {
+    test('WHEN displayName has accents and keyword has none'
+        'THEN returns true', () {
+      const search = ContactPresentationSearch(
+        matrixId: '@elodie:server.com',
+        displayName: 'Élodie',
+      );
+      expect(search.doesMatchKeyword('Elodie'), true);
+      expect(search.doesMatchKeyword('elodie'), true);
+    });
+
+    test('WHEN email has uppercase and keyword is lowercase'
+        'THEN returns true', () {
+      final search = ContactPresentationSearch(
+        matrixId: '@test:server.com',
+        emails: {
+          PresentationEmail(
+            email: 'Test@Example.com',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.email,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('test@example'), true);
+    });
+
+    test('WHEN phone number has spaces and keyword has none'
+        'THEN returns true', () {
+      final search = ContactPresentationSearch(
+        matrixId: '@test:server.com',
+        phoneNumbers: {
+          PresentationPhoneNumber(
+            phoneNumber: '06 12 34 56 78',
+            thirdPartyId: 'tp',
+            thirdPartyIdType: ThirdPartyIdType.msisdn,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('0612345678'), true);
+    });
   });
 }
