@@ -44,11 +44,16 @@ Future<void> setupWebPush(Client client) async {
   }
 }
 
-/// Unsubscribes the browser and removes the Matrix pusher on logout.
+/// Removes this client's Matrix pusher on logout.
 /// At logout the token is usually already gone, so [client.deletePusher] is
 /// best-effort; the local `unsubscribe()` makes the endpoint invalid and the
 /// gateway drops the stale pusher on the next push (410 Gone).
-Future<void> removeWebPush(Client client) async {
+///
+/// [unsubscribe] must be false for a partial (multi-account) logout: the browser
+/// push subscription is shared across accounts, so unsubscribing would break
+/// notifications for the accounts still signed in. Only the true last-account
+/// logout unsubscribes the browser.
+Future<void> removeWebPush(Client client, {bool unsubscribe = true}) async {
   try {
     final registration = await web.window.navigator.serviceWorker.ready.toDart;
     final subscription = await registration.pushManager
@@ -61,8 +66,14 @@ Future<void> removeWebPush(Client client) async {
       final pusher = pushers?.firstWhereOrNull((p) => p.pushkey == endpoint);
       if (pusher != null) await client.deletePusher(pusher);
     }
-    await subscription.unsubscribe().toDart;
-    Logs().i('[WebPush] Unsubscribed');
+    if (unsubscribe) {
+      await subscription.unsubscribe().toDart;
+      Logs().i('[WebPush] Unsubscribed');
+    } else {
+      Logs().i(
+        '[WebPush] Pusher removed (subscription kept for other accounts)',
+      );
+    }
   } catch (e, s) {
     Logs().w('[WebPush] removeWebPush failed', e, s);
   }
@@ -93,18 +104,9 @@ Future<void> _registerPusher(Client client, String endpoint) async {
     return;
   }
 
-  // Drop stale web pushers for this app whose endpoint rotated
-  // (pushsubscriptionchange while the app was closed).
-  for (final stale
-      in pushers?.where((p) => p.appId == appId && p.pushkey != endpoint) ??
-          <Pusher>[]) {
-    try {
-      await client.deletePusher(stale);
-      Logs().i('[WebPush] Removed stale pusher');
-    } catch (e) {
-      Logs().w('[WebPush] Failed to remove stale pusher', e);
-    }
-  }
+  // Don't sweep other pushers sharing this appId: the same account may be
+  // signed in on another browser/session with a different endpoint. Truly
+  // rotated endpoints age out on the gateway's first 410 Gone response.
 
   await client.postPusher(
     Pusher(

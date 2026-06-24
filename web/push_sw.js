@@ -25,14 +25,26 @@ self.addEventListener('push', function (event) {
   var roomId = notification.room_id || '';
 
   event.waitUntil(
-    self.registration.showNotification('Twake Chat', {
-      body: 'New message',
-      icon: 'icons/Icon-192.png',
-      badge: 'icons/Icon-192.png',
-      tag: roomId || 'twake-message',
-      renotify: true,
-      data: { roomId: roomId },
-    })
+    self.clients
+      .matchAll({ type: 'window', includeUncontrolled: true })
+      .then(function (clientList) {
+        // App already open and visible: the in-app foreground notification
+        // (showLocalNotification) handles it, so skip the SW notification to
+        // avoid a duplicate. Chrome doesn't penalize userVisibleOnly when a
+        // visible window is present.
+        var appVisible = clientList.some(function (c) {
+          return c.visibilityState === 'visible';
+        });
+        if (appVisible) return;
+        return self.registration.showNotification('Twake Chat', {
+          body: 'New message',
+          icon: 'icons/Icon-192.png',
+          badge: 'icons/Icon-192.png',
+          tag: roomId || 'twake-message',
+          renotify: true,
+          data: { roomId: roomId },
+        });
+      })
   );
 });
 

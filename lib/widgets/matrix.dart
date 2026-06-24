@@ -602,6 +602,10 @@ class MatrixState extends State<Matrix>
       await backgroundPush?.removePusherForClient(currentClient);
     }
 
+    // Web: drop just this account's pusher, but keep the shared browser
+    // subscription alive for the accounts still signed in.
+    if (kIsWeb) await removeWebPush(currentClient, unsubscribe: false);
+
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
