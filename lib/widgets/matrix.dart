@@ -530,6 +530,10 @@ class MatrixState extends State<Matrix>
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       currentClient.onSync.stream.first.then((s) async {
         await _requestNotificationPermission();
+        if (kIsWeb) {
+          // ignore: unawaited_futures
+          setupWebPush(currentClient);
+        }
         onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>
@@ -565,10 +569,10 @@ class MatrixState extends State<Matrix>
       if (isInsideCozy) {
         CozyConfigManager().requestNotificationPermission();
       } else {
-        html.Notification.requestPermission();
+        await html.Notification.requestPermission();
       }
     } catch (e) {
-      html.Notification.requestPermission();
+      await html.Notification.requestPermission();
     }
   }
 
@@ -740,8 +744,6 @@ class MatrixState extends State<Matrix>
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
-      // ignore: unawaited_futures
-      setupWebPush(client);
     }
 
     if (PlatformInfos.isMobile) {
