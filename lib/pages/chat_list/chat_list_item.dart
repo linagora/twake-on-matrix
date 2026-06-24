@@ -90,9 +90,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)!),
-    );
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -101,67 +98,78 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
         onSecondaryTapDown: onSecondaryTapDown,
         onLongPress: onLongPress,
         child: TwakeListItem(
-          child: Container(
-            height: ChatListItemStyle.chatItemHeight,
-            padding: ChatListItemStyle.paddingBody,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
-                Padding(
-                  padding: ChatListItemStyle.paddingAvatar,
-                  child: Stack(
-                    children: [
-                      Avatar(
-                        mxContent: room.avatar,
-                        name: displayName,
-                        onTap: onTapAvatar,
-                        keepAlive: true,
-                      ),
-                      if (_isGroupChat)
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: ChatListItemStyle.paddingIconGroup,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            child: Icon(
-                              Icons.group,
-                              size: ChatListItemStyle.groupIconSize,
-                              color: room.isUnreadOrInvited
-                                  ? LinagoraSysColors.material()
-                                        .onSurfaceVariant
-                                  : LinagoraRefColors.material().tertiary[30],
-                            ),
+          child: FutureBuilder(
+            future: room.name.isEmpty ? room.loadHeroUsers() : null,
+            builder: (context, _) {
+              final displayName = room.getLocalizedDisplayname(
+                MatrixLocals(L10n.of(context)!),
+              );
+              return Container(
+                height: ChatListItemStyle.chatItemHeight,
+                padding: ChatListItemStyle.paddingBody,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
+                    Padding(
+                      padding: ChatListItemStyle.paddingAvatar,
+                      child: Stack(
+                        children: [
+                          Avatar(
+                            mxContent: room.avatar,
+                            name: displayName,
+                            onTap: onTapAvatar,
+                            keepAlive: true,
                           ),
-                        ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ChatListItemTitle(
-                        room: room,
-                        originServerTs: switch (previewResult) {
-                          RoomPreviewFound(:final event) =>
-                            event.originServerTs,
-                          _ => null,
-                        },
+                          if (_isGroupChat)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: ChatListItemStyle.paddingIconGroup,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
+                                ),
+                                child: Icon(
+                                  Icons.group,
+                                  size: ChatListItemStyle.groupIconSize,
+                                  color: room.isUnreadOrInvited
+                                      ? LinagoraSysColors.material()
+                                            .onSurfaceVariant
+                                      : LinagoraRefColors.material()
+                                            .tertiary[30],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                      ChatListItemSubtitle(
-                        room: room,
-                        previewResult: previewResult,
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ChatListItemTitle(
+                            room: room,
+                            originServerTs: switch (previewResult) {
+                              RoomPreviewFound(:final event) =>
+                                event.originServerTs,
+                              _ => null,
+                            },
+                          ),
+                          ChatListItemSubtitle(
+                            room: room,
+                            previewResult: previewResult,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
