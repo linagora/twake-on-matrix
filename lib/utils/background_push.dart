@@ -337,6 +337,11 @@ class BackgroundPush {
     final instance = BackgroundPush.clientOnly(client);
     instance._matrixState = matrixState;
     instance.onFcmError = onFcmError;
+    // Trigger push setup immediately once MatrixState is available.
+    // ChatList.initState() calls setupPush() via backgroundPush?, but that
+    // can race with initMatrix assigning backgroundPush — calling here
+    // ensures cold-start notification routing is never skipped.
+    unawaited(instance.setupPush());
     return instance;
   }
 
@@ -460,14 +465,26 @@ class BackgroundPush {
   }
 
   bool _wentToRoomOnStartup = false;
+  bool _setupPushCompleted = false;
 
   Future<void> setupPush() async {
-    Logs().d("SetupPush");
+    Logs().d(
+      'SetupPush: loginState=${client.onLoginStateChanged.value} '
+      'isMobile=${PlatformInfos.isMobile} '
+      'matrixState=${_matrixState != null}',
+    );
     if (client.onLoginStateChanged.value != LoginState.loggedIn ||
         !PlatformInfos.isMobile ||
         _matrixState == null) {
+      Logs().d('SetupPush: early return - conditions not met');
       return;
     }
+    // Guard against double-invocation (factory + ChatList both call setupPush).
+    if (_setupPushCompleted) {
+      Logs().d('SetupPush: already completed, skip');
+      return;
+    }
+    _setupPushCompleted = true;
     // Do not setup unifiedpush if this has been initialized by
     // an unifiedpush action
     if (upAction) {
@@ -480,10 +497,17 @@ class BackgroundPush {
       await setupPushGateway();
     }
 
+    // Use flutter_local_notifications launch details to handle cold-start
     // ignore: unawaited_futures
     _flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((
       details,
     ) {
+      Logs().d(
+        '[Push] getNotificationAppLaunchDetails: '
+        'details=$details '
+        'didLaunch=${details?.didNotificationLaunchApp} '
+        'payload=${details?.notificationResponse?.payload}',
+      );
       if (details == null ||
           !details.didNotificationLaunchApp ||
           _wentToRoomOnStartup ||

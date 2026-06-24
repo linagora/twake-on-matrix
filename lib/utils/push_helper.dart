@@ -95,7 +95,6 @@ Future<void> _tryPushHelper(
       iOS: DarwinInitializationSettings(),
     ),
     onDidReceiveNotificationResponse: onSelectNotification,
-    //onDidReceiveBackgroundNotificationResponse: onSelectNotification,
   );
 
   client ??= (await ClientManager.getClients(initialize: false)).first;
