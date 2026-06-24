@@ -12,7 +12,7 @@ import 'package:matrix/matrix.dart';
 import 'package:crypto/crypto.dart';
 
 extension StringCasingExtension on String {
-  @Deprecated('Use DiacriticStripStep from TextSearch')
+  @Deprecated('Use DiacriticStripStep instead')
   String removeDiacritics() {
     const withDia =
         'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
