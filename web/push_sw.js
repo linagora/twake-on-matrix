@@ -36,6 +36,28 @@ self.addEventListener('push', function (event) {
   );
 });
 
+self.addEventListener('pushsubscriptionchange', function (event) {
+  // Endpoint rotated (expiry/reset). Re-subscribe so pushes keep arriving;
+  // the Matrix pusher is re-synced by setupWebPush on the next app open
+  // (it drops the stale pusher). applicationServerKey accepts the base64url
+  // VAPID string directly. ponytail: read the key from config.json so the SW
+  // stays config-driven without a build step.
+  event.waitUntil(
+    fetch('config.json')
+      .then(function (r) { return r.json(); })
+      .then(function (cfg) {
+        if (!cfg || !cfg.vapid_public_key) return;
+        return self.registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: cfg.vapid_public_key,
+        });
+      })
+      .catch(function (error) {
+        console.log('[Twake Chat] pushsubscriptionchange re-subscribe failed: ', error);
+      })
+  );
+});
+
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
   var roomId = (event.notification.data || {}).roomId || '';

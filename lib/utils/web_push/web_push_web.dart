@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:web/web.dart' as web;
 
@@ -43,6 +44,30 @@ Future<void> setupWebPush(Client client) async {
   }
 }
 
+/// Unsubscribes the browser and removes the Matrix pusher on logout.
+/// At logout the token is usually already gone, so [client.deletePusher] is
+/// best-effort; the local `unsubscribe()` makes the endpoint invalid and the
+/// gateway drops the stale pusher on the next push (410 Gone).
+Future<void> removeWebPush(Client client) async {
+  try {
+    final registration = await web.window.navigator.serviceWorker.ready.toDart;
+    final subscription = await registration.pushManager
+        .getSubscription()
+        .toDart;
+    if (subscription == null) return;
+    final endpoint = subscription.endpoint;
+    if (client.isLogged()) {
+      final pushers = await client.getPushers().catchError((_) => <Pusher>[]);
+      final pusher = pushers?.firstWhereOrNull((p) => p.pushkey == endpoint);
+      if (pusher != null) await client.deletePusher(pusher);
+    }
+    await subscription.unsubscribe().toDart;
+    Logs().i('[WebPush] Unsubscribed');
+  } catch (e, s) {
+    Logs().w('[WebPush] removeWebPush failed', e, s);
+  }
+}
+
 Future<void> _registerPusher(Client client, String endpoint) async {
   final clientName = PlatformInfos.clientName;
   // Plain appId (no device suffix): it must match the Sygnal `app_id`.
@@ -66,6 +91,19 @@ Future<void> _registerPusher(Client client, String endpoint) async {
   if (alreadySet) {
     Logs().i('[WebPush] Pusher already set');
     return;
+  }
+
+  // Drop stale web pushers for this app whose endpoint rotated
+  // (pushsubscriptionchange while the app was closed).
+  for (final stale
+      in pushers?.where((p) => p.appId == appId && p.pushkey != endpoint) ??
+          <Pusher>[]) {
+    try {
+      await client.deletePusher(stale);
+      Logs().i('[WebPush] Removed stale pusher');
+    } catch (e) {
+      Logs().w('[WebPush] Failed to remove stale pusher', e);
+    }
   }
 
   await client.postPusher(

@@ -1215,6 +1215,7 @@ class MatrixState extends State<Matrix>
       await _deletePersistActiveAccount();
       TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     } else {
+      if (kIsWeb) await removeWebPush(client);
       TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();
