@@ -465,7 +465,9 @@ class AssignRolesMemberPickerView extends StatelessWidget {
                     Expanded(
                       child: Text(
                         member.calcDisplayname(),
-                        style: LinagoraTextStyle.material().bodyMedium2
+                        style: Theme.of(context)
+                            .extension<LinagoraTextThemeExtension>()!
+                            .bodyMedium2
                             .copyWith(
                               color: LinagoraSysColors.material().onSurface,
                             ),

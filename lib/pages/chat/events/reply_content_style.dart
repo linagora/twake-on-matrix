@@ -44,13 +44,13 @@ class ReplyContentStyle {
   static const double previewedImagePlaceholderPadding = 4.0;
 
   static TextStyle? displayNameTextStyle(BuildContext context) {
-    return LinagoraTextStyle.material().titleSmall.copyWith(
+    return Theme.of(context).textTheme.titleSmall?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
   }
 
   static TextStyle? replyBodyTextStyle(BuildContext context) {
-    return LinagoraTextStyle.material().bodyMedium.copyWith(
+    return Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: LinagoraRefColors.material().neutral[50],
       overflow: TextOverflow.ellipsis,
     );

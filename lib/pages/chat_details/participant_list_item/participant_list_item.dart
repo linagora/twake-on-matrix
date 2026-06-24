@@ -133,7 +133,8 @@ class _ParticipantListItemState extends State<ParticipantListItem>
                                   widget.member.calcDisplayname(),
                                   overflow: TextOverflow.ellipsis,
                                   maxLines: 1,
-                                  style: LinagoraTextStyle.material()
+                                  style: Theme.of(context)
+                                      .extension<LinagoraTextThemeExtension>()!
                                       .bodyMedium2
                                       .copyWith(
                                         color: LinagoraSysColors.material()

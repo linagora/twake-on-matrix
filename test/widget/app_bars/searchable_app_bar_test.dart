@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 final getIt = GetIt.instance;
 
@@ -21,6 +22,7 @@ void main() {
     getIt.registerSingleton(ResponsiveUtils());
 
     return MaterialApp(
+      theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
       locale: const Locale('en'),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,

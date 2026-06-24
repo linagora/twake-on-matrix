@@ -30,6 +30,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: LinkPreviewBuilder(
               urlPreviewPresentation: urlPreviewPresentation,
@@ -86,6 +87,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: LinkPreviewBuilder(
               urlPreviewPresentation: urlPreviewPresentation,
@@ -140,6 +142,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: LinkPreviewBuilder(
               urlPreviewPresentation: urlPreviewPresentation,
@@ -165,6 +168,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: LinkPreviewBuilder(
               urlPreviewPresentation: urlPreviewPresentation,
@@ -191,6 +195,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: LinkPreviewBuilder(
               urlPreviewPresentation: urlPreviewPresentation,
@@ -262,6 +267,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: TwakeLinkPreviewItem(
               key: TwakeLinkPreview.twakeLinkPreviewItemKey,
@@ -300,6 +306,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           home: Scaffold(
             body: TwakeLinkPreviewItem(
               key: TwakeLinkPreview.twakeLinkPreviewItemKey,

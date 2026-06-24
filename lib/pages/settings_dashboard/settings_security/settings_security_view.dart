@@ -31,7 +31,7 @@ class SettingsSecurityView extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final refColorTertiary30 = LinagoraRefColors.material().tertiary[30];
     final sysColor = LinagoraSysColors.material();
-    final linagoraTextStyleBodyMedium = LinagoraTextStyle.material().bodyMedium;
+    final linagoraTextStyleBodyMedium = Theme.of(context).textTheme.bodyMedium!;
 
     return Scaffold(
       backgroundColor: sysColor.onPrimary,
