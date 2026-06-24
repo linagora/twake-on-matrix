@@ -69,6 +69,7 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
 
@@ -739,6 +740,8 @@ class MatrixState extends State<Matrix>
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
+      // ignore: unawaited_futures
+      setupWebPush(client);
     }
 
     if (PlatformInfos.isMobile) {

@@ -130,7 +130,10 @@ abstract class AppConfig {
   static const String pushNotificationsChannelName = 'Twake Chat push channel';
   static const String pushNotificationsChannelDescription =
       'Push notifications for Twake Chat';
-  static String pushNotificationsAppId = Platform.isIOS
+  // kIsWeb must be the outer ternary: Platform.isIOS throws on web.
+  static String pushNotificationsAppId = kIsWeb
+      ? "app.twake.web.chat"
+      : Platform.isIOS
       ? kReleaseMode
             ? "app.twake.ios.chat"
             : "app.twake.ios.chat.sandbox"
@@ -142,6 +145,17 @@ abstract class AppConfig {
   );
 
   static String pushNotificationsGatewayUrl = _pushNotificationsGatewayUrlEnv;
+
+  /// VAPID public key (base64url, raw P-256 point) for Web Push subscription.
+  /// Public — not a secret. Private key lives on the Sygnal gateway.
+  static const String _vapidPublicKeyEnv = String.fromEnvironment(
+    'VAPID_PUBLIC_KEY',
+  );
+
+  static String vapidPublicKey = _vapidPublicKeyEnv;
+
+  /// Gate Web Push rollout. Flipped via config.json `web_push_enabled`.
+  static bool webPushEnabled = false;
 
   static const String _supportEmailEnv = String.fromEnvironment(
     'SUPPORT_EMAIL',
@@ -326,6 +340,13 @@ abstract class AppConfig {
     if (json['cozy_external_bridge_version'] is String &&
         json['cozy_external_bridge_version'].isNotEmpty) {
       cozyExternalBridgeVersion = json['cozy_external_bridge_version'];
+    }
+    if (json['vapid_public_key'] is String &&
+        json['vapid_public_key'].isNotEmpty) {
+      vapidPublicKey = json['vapid_public_key'];
+    }
+    if (json['web_push_enabled'] is bool) {
+      webPushEnabled = json['web_push_enabled'];
     }
   }
 
