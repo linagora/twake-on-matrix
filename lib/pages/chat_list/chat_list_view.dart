@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_header.dart';
+import 'package:fluffychat/pages/chat_list/get_started_guide/get_started_guide.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
@@ -31,6 +32,46 @@ class ChatListView extends StatelessWidget {
     this.onOpenSearchPageInMultipleColumns,
     required this.onTapBottomNavigation,
   });
+
+  List<GetStartedStep> _getStartedSteps(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    return [
+      GetStartedStep(
+        icon: Icons.sync_outlined,
+        title: l10n.getStartedSyncContactsTitle,
+        description: l10n.getStartedSyncContactsDescription,
+        actionLabel: l10n.getStartedSyncContactsAction,
+        onAction: controller.goToNewPrivateChat,
+      ),
+      GetStartedStep(
+        icon: Icons.person_add_alt_1_outlined,
+        title: l10n.getStartedInviteTitle,
+        description: l10n.getStartedInviteDescription,
+        actionLabel: l10n.getStartedInviteAction,
+        onAction: controller.goToNewPrivateChat,
+      ),
+      GetStartedStep(
+        icon: Icons.send_outlined,
+        title: l10n.getStartedSendMessageTitle,
+        description: l10n.getStartedSendMessageDescription,
+        actionLabel: l10n.getStartedSendMessageAction,
+        onAction: controller.goToNewPrivateChat,
+      ),
+      GetStartedStep(
+        icon: Icons.mark_chat_unread_outlined,
+        title: l10n.getStartedReceiveTitle,
+        description: l10n.getStartedReceiveDescription,
+        actionLabel: '',
+      ),
+      GetStartedStep(
+        icon: Icons.public_outlined,
+        title: l10n.getStartedJoinChannelTitle,
+        description: l10n.getStartedJoinChannelDescription,
+        actionLabel: l10n.getStartedJoinChannelAction,
+        onAction: () => controller.goToNewGroupChat(context),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +110,12 @@ class ChatListView extends StatelessWidget {
           body: StreamBuilder<Client>(
             stream: controller.clientStream,
             builder: (context, snapshot) {
-              return ChatListBodyView(controller);
+              return Column(
+                children: [
+                  GetStartedGuide(steps: _getStartedSteps(context)),
+                  Expanded(child: ChatListBodyView(controller)),
+                ],
+              );
             },
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
