@@ -264,7 +264,11 @@ class MatrixState extends State<Matrix>
         final newTs = cachedPresence.lastActiveTimestamp;
         final oldTs = existing?.lastActiveTimestamp;
         if (existing == null ||
-            (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
+            (newTs != null &&
+                (oldTs == null ||
+                    newTs.isAfter(oldTs) ||
+                    newTs.isAtSameMomentAs(oldTs))) ||
+            (newTs == null && oldTs == null)) {
           latestPerUser[userId] = cachedPresence;
         }
       }

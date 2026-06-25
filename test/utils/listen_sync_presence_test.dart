@@ -22,7 +22,11 @@ StreamSubscription<SyncUpdate> listenSyncPresence(
       final newTs = cachedPresence.lastActiveTimestamp;
       final oldTs = existing?.lastActiveTimestamp;
       if (existing == null ||
-          (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
+          (newTs != null &&
+              (oldTs == null ||
+                  newTs.isAfter(oldTs) ||
+                  newTs.isAtSameMomentAs(oldTs))) ||
+          (newTs == null && oldTs == null)) {
         latestPerUser[userId] = cachedPresence;
       }
     }
@@ -51,11 +55,7 @@ Map<String, Object?> _presenceEvent({
     'presence': presenceType,
     if (lastActiveAgoMs != null) 'last_active_ago': lastActiveAgoMs,
   };
-  return {
-    'type': 'm.presence',
-    'sender': userId,
-    'content': content,
-  };
+  return {'type': 'm.presence', 'sender': userId, 'content': content};
 }
 
 void main() {
@@ -79,55 +79,40 @@ void main() {
       await output.close();
     });
 
-    test(
-      'GIVEN sync contains presence for one user '
-      'THEN emits that user presence',
-      () async {
-        syncController.add(
-          _syncWith([
-            _presenceEvent(
-              userId: '@bob:example.com',
-              presenceType: 'online',
-            ),
-          ]),
-        );
+    test('GIVEN sync contains presence for one user '
+        'THEN emits that user presence', () async {
+      syncController.add(
+        _syncWith([
+          _presenceEvent(userId: '@bob:example.com', presenceType: 'online'),
+        ]),
+      );
 
-        await Future.delayed(Duration.zero);
+      await Future.delayed(Duration.zero);
 
-        expect(emitted, hasLength(1));
-        expect(emitted.first.userid, '@bob:example.com');
-        expect(emitted.first.presence, PresenceType.online);
-      },
-    );
+      expect(emitted, hasLength(1));
+      expect(emitted.first.userid, '@bob:example.com');
+      expect(emitted.first.presence, PresenceType.online);
+    });
 
-    test(
-      'GIVEN sync contains presence for two different users '
-      'THEN emits both — the bug: previously only one was emitted',
-      () async {
-        syncController.add(
-          _syncWith([
-            _presenceEvent(
-              userId: '@bob:example.com',
-              presenceType: 'online',
-            ),
-            _presenceEvent(
-              userId: '@carol:example.com',
-              presenceType: 'offline',
-              lastActiveAgoMs: 5 * 60 * 1000, // 5 min ago
-            ),
-          ]),
-        );
+    test('GIVEN sync contains presence for two different users '
+        'THEN emits both — the bug: previously only one was emitted', () async {
+      syncController.add(
+        _syncWith([
+          _presenceEvent(userId: '@bob:example.com', presenceType: 'online'),
+          _presenceEvent(
+            userId: '@carol:example.com',
+            presenceType: 'offline',
+            lastActiveAgoMs: 5 * 60 * 1000, // 5 min ago
+          ),
+        ]),
+      );
 
-        await Future.delayed(Duration.zero);
+      await Future.delayed(Duration.zero);
 
-        expect(emitted, hasLength(2));
-        final userIds = emitted.map((e) => e.userid).toSet();
-        expect(
-          userIds,
-          containsAll(['@bob:example.com', '@carol:example.com']),
-        );
-      },
-    );
+      expect(emitted, hasLength(2));
+      final userIds = emitted.map((e) => e.userid).toSet();
+      expect(userIds, containsAll(['@bob:example.com', '@carol:example.com']));
+    });
 
     test(
       'GIVEN sync has Bob (offline, 6 min ago) and Carol (online, just now) '
@@ -151,10 +136,12 @@ void main() {
         await Future.delayed(Duration.zero);
 
         expect(emitted, hasLength(2));
-        final bobPresence =
-            emitted.firstWhere((e) => e.userid == '@bob:example.com');
-        final carolPresence =
-            emitted.firstWhere((e) => e.userid == '@carol:example.com');
+        final bobPresence = emitted.firstWhere(
+          (e) => e.userid == '@bob:example.com',
+        );
+        final carolPresence = emitted.firstWhere(
+          (e) => e.userid == '@carol:example.com',
+        );
 
         expect(bobPresence.presence, PresenceType.offline);
         expect(carolPresence.presence, PresenceType.online);
@@ -188,17 +175,33 @@ void main() {
       },
     );
 
-    test(
-      'GIVEN sync has no presence events '
-      'THEN emits nothing',
-      () async {
-        syncController.add(SyncUpdate(nextBatch: 'batch', presence: []));
+    test('GIVEN sync has duplicate events for same user with null timestamps '
+        'THEN keeps the last event (event-order fallback)', () async {
+      syncController.add(
+        _syncWith([
+          _presenceEvent(userId: '@bob:example.com', presenceType: 'offline'),
+          _presenceEvent(
+            userId: '@bob:example.com',
+            presenceType: 'online', // later in array — should win
+          ),
+        ]),
+      );
 
-        await Future.delayed(Duration.zero);
+      await Future.delayed(Duration.zero);
 
-        expect(emitted, isEmpty);
-      },
-    );
+      expect(emitted, hasLength(1));
+      expect(emitted.first.userid, '@bob:example.com');
+      expect(emitted.first.presence, PresenceType.online);
+    });
+
+    test('GIVEN sync has no presence events '
+        'THEN emits nothing', () async {
+      syncController.add(SyncUpdate(nextBatch: 'batch', presence: []));
+
+      await Future.delayed(Duration.zero);
+
+      expect(emitted, isEmpty);
+    });
 
     test(
       'GIVEN multiple syncs arrive '
@@ -206,10 +209,7 @@ void main() {
       () async {
         syncController.add(
           _syncWith([
-            _presenceEvent(
-              userId: '@bob:example.com',
-              presenceType: 'online',
-            ),
+            _presenceEvent(userId: '@bob:example.com', presenceType: 'online'),
           ]),
         );
         await Future.delayed(Duration.zero);
