@@ -1,6 +1,30 @@
 {
   "@@locale": "en",
   "@@last_modified": "2021-08-14 12:38:37.885451",
+  "getStartedTitle": "Get started",
+  "getStartedProgress": "{done} of {total} completed",
+  "@getStartedProgress": {
+    "placeholders": {
+      "done": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "getStartedMarkDone": "Mark as done",
+  "getStartedStepDone": "Done",
+  "getStartedSyncContactsTitle": "Sync your contacts",
+  "getStartedSyncContactsDescription": "Find people you already know on Twake Chat.",
+  "getStartedSyncContactsAction": "Sync contacts",
+  "getStartedInviteTitle": "Invite a contact",
+  "getStartedInviteDescription": "Bring someone you know onto Twake Chat.",
+  "getStartedInviteAction": "Invite",
+  "getStartedSendMessageTitle": "Send a message",
+  "getStartedSendMessageDescription": "Start a conversation with that person.",
+  "getStartedSendMessageAction": "New message",
+  "getStartedReceiveTitle": "Receive a message",
+  "getStartedReceiveDescription": "Wait for a reply to land in your inbox.",
+  "getStartedJoinChannelTitle": "Join a public channel",
+  "getStartedJoinChannelDescription": "Discover and join a public conversation.",
+  "getStartedJoinChannelAction": "Browse channels",
   "passwordsDoNotMatch": "Passwords do not match!",
   "pleaseEnterValidEmail": "Please enter a valid email address.",
   "repeatPassword": "Repeat password",
