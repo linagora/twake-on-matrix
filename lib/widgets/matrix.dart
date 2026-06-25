@@ -252,20 +252,25 @@ class MatrixState extends State<Matrix>
   void _listenSyncPresence(Client client) {
     _presenceSubscription?.cancel();
     _presenceSubscription = client.onSync.stream.listen((sync) {
-      CachedPresence? lastActivePresence;
+      // Deduplicate per user: keep only the most recent presence per userid
+      // to avoid UI flickering when a sync contains multiple events for the
+      // same user, while still emitting updates for every user in the sync.
+      final latestPerUser = <String, CachedPresence>{};
 
       for (final newPresence in sync.presence ?? []) {
         final cachedPresence = CachedPresence.fromMatrixEvent(newPresence);
+        final userId = cachedPresence.userid;
+        final existing = latestPerUser[userId];
         final newTs = cachedPresence.lastActiveTimestamp;
-        final oldTs = lastActivePresence?.lastActiveTimestamp;
-        if (lastActivePresence == null ||
+        final oldTs = existing?.lastActiveTimestamp;
+        if (existing == null ||
             (newTs != null && (oldTs == null || newTs.isAfter(oldTs)))) {
-          lastActivePresence = cachedPresence;
+          latestPerUser[userId] = cachedPresence;
         }
       }
 
-      if (lastActivePresence != null) {
-        onLatestPresenceChanged.add(lastActivePresence);
+      for (final presence in latestPerUser.values) {
+        onLatestPresenceChanged.add(presence);
       }
     });
   }
