@@ -1173,11 +1173,19 @@ class MatrixState extends State<Matrix>
 
   /// Restores focus after a post-frame delay so the Flutter engine finishes
   /// its own focus handling (view-level focus) before we override it.
+  ///
+  /// Re-reads [_lastFocusedNode] inside the callback to avoid overwriting a
+  /// newer focus target that may have been set between the call and execution.
+  /// Only restores if focus is still effectively unset (null or a FocusScopeNode,
+  /// which can't receive keyboard input directly).
   void _restoreFocus() {
-    final node = _lastFocusedNode;
-    if (node == null || !node.canRequestFocus) return;
+    if (_lastFocusedNode == null) return;
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (node.canRequestFocus) {
+      final node = _lastFocusedNode;
+      if (node == null || !node.canRequestFocus) return;
+      // Only restore if no real (leaf) node has taken focus in the meantime.
+      final currentFocus = FocusManager.instance.primaryFocus;
+      if (currentFocus == null || currentFocus is FocusScopeNode) {
         node.requestFocus();
       }
     });
