@@ -1,7 +1,11 @@
 part of 'search_engine.dart';
 
 List<NormalizationStep> _buildPipeline(SearchOptions options) {
-  return [if (!options.caseSensitive) const LowerCaseStep()];
+  return [
+    if (!options.diacriticSensitive)
+      DiacriticStripStep(decomposition: options.diacriticDecomposition),
+    if (!options.caseSensitive) const LowerCaseStep(),
+  ];
 }
 
 List<T> _matchAnyField<T>(
