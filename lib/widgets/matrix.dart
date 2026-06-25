@@ -50,6 +50,7 @@ import 'package:fluffychat/widgets/set_active_client_state.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -429,6 +430,8 @@ class MatrixState extends State<Matrix>
       if (PlatformInfos.isWeb) {
         html.window.addEventListener('focus', onWindowFocus);
         html.window.addEventListener('blur', onWindowBlur);
+        html.document.addEventListener('visibilitychange', onVisibilityChange);
+        FocusManager.instance.addListener(_onFocusManagerChange);
       }
       await initMatrix();
       final emojiRawData = await EmojiData.builtIn();
@@ -1169,12 +1172,55 @@ class MatrixState extends State<Matrix>
     }
   }
 
+  /// Last focusable leaf [FocusNode] that had focus, updated continuously via
+  /// [FocusManager] listener so it stays valid even after the browser clears
+  /// DOM focus on tab switch.
+  FocusNode? _lastFocusedNode;
+
+  /// Called on every Flutter focus change. Saves only leaf nodes that can
+  /// actually receive input (excludes FocusScope and non-focusable nodes).
+  void _onFocusManagerChange() {
+    final current = FocusManager.instance.primaryFocus;
+    if (current != null &&
+        current.canRequestFocus &&
+        current is! FocusScopeNode) {
+      _lastFocusedNode = current;
+    }
+  }
+
+  /// Restores focus after a post-frame delay so the Flutter engine finishes
+  /// its own focus handling (view-level focus) before we override it.
+  ///
+  /// Re-reads [_lastFocusedNode] inside the callback to avoid overwriting a
+  /// newer focus target that may have been set between the call and execution.
+  /// Only restores if focus is still effectively unset (null or a FocusScopeNode,
+  /// which can't receive keyboard input directly).
+  void _restoreFocus() {
+    if (_lastFocusedNode == null) return;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      final node = _lastFocusedNode;
+      if (node == null || !node.canRequestFocus) return;
+      // Only restore if no real (leaf) node has taken focus in the meantime.
+      final currentFocus = FocusManager.instance.primaryFocus;
+      if (currentFocus == null || currentFocus is FocusScopeNode) {
+        node.requestFocus();
+      }
+    });
+  }
+
   void onWindowFocus(html.Event e) {
     didChangeAppLifecycleState(AppLifecycleState.resumed);
+    _restoreFocus();
   }
 
   void onWindowBlur(html.Event e) {
     didChangeAppLifecycleState(AppLifecycleState.paused);
+  }
+
+  void onVisibilityChange(html.Event e) {
+    if (html.document.hidden != true) {
+      _restoreFocus();
+    }
   }
 
   void _setupAuthUrl({String? url}) {
@@ -1367,6 +1413,8 @@ class MatrixState extends State<Matrix>
     if (PlatformInfos.isWeb) {
       html.window.removeEventListener('focus', onWindowFocus);
       html.window.removeEventListener('blur', onWindowBlur);
+      html.document.removeEventListener('visibilitychange', onVisibilityChange);
+      FocusManager.instance.removeListener(_onFocusManagerChange);
     }
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
