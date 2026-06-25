@@ -1,18 +1,34 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
 
+const _searchOptions = SearchOptions(diacriticSensitive: false);
+
 extension PresentationSearchExtension on PresentationSearch {
   bool _matchedMatrixId(String keyword) {
-    return id.toLowerCase().contains(keyword.toLowerCase());
+    return getIt.get<SearchEngine>().matchesText(
+      keyword,
+      id,
+      options: _searchOptions,
+    );
   }
 
   bool _matchedDirectChatMatrixId(String keyword) {
-    return directChatMatrixID?.toLowerCase().contains(keyword.toLowerCase()) ??
-        false;
+    return getIt.get<SearchEngine>().matchesText(
+      keyword,
+      directChatMatrixID ?? '',
+      options: _searchOptions,
+    );
   }
 
   bool _matchedName(String keyword) {
-    return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
+    return getIt.get<SearchEngine>().matchesText(
+      keyword,
+      displayName ?? '',
+      options: _searchOptions,
+    );
   }
 
   bool _matchedEmail(String keyword) {
@@ -42,6 +58,7 @@ extension PresentationSearchExtension on PresentationSearch {
     if (this is! ContactPresentationSearch) {
       return false;
     }
+    if (keyword.isEmpty) return true;
 
     return _matchedContactInfo(keyword);
   }
