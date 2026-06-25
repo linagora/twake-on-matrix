@@ -23,7 +23,6 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:slugify/slugify.dart';
 
 class InputBar extends StatefulWidget {
   final Room? room;
@@ -96,12 +95,14 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     );
     final List<Map<String, String?>> ret = <Map<String, String?>>[];
     const maxResults = 30;
+    final engine = getIt.get<SearchEngine>();
+    const opts = SearchOptions(diacriticSensitive: false);
 
     final commandMatch = RegExp(r'^/(\w*)$').firstMatch(searchText);
     if (commandMatch != null && widget.room != null) {
       final commandSearch = commandMatch[1]!.toLowerCase();
       for (final command in widget.room!.client.commands.keys) {
-        if (command.contains(commandSearch)) {
+        if (engine.matchesText(commandSearch, command, options: opts)) {
           ret.add({'type': 'command', 'name': command});
         }
 
@@ -109,7 +110,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       }
     }
     final emojiMatch = RegExp(
-      r'(?:\s|^):(?:([-\w]+)~)?([-\w]+)$',
+      r'(?:\s|^):(?:([-\w\p{L}]+)~)?([-\w\p{L}]+)$',
+      unicode: true,
     ).firstMatch(searchText);
     if (emojiMatch != null && widget.room != null) {
       final packSearch = emojiMatch[1];
@@ -118,7 +120,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       if (packSearch == null || packSearch.isEmpty) {
         for (final pack in emotePacks.entries) {
           for (final emote in pack.value.images.entries) {
-            if (emote.key.toLowerCase().contains(emoteSearch)) {
+            if (engine.matchesText(emoteSearch, emote.key, options: opts)) {
               ret.add({
                 'type': 'emote',
                 'name': emote.key,
@@ -138,7 +140,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         }
       } else if (emotePacks[packSearch] != null) {
         for (final emote in emotePacks[packSearch]!.images.entries) {
-          if (emote.key.toLowerCase().contains(emoteSearch)) {
+          if (engine.matchesText(emoteSearch, emote.key, options: opts)) {
             ret.add({
               'type': 'emote',
               'name': emote.key,
@@ -161,7 +163,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             (element) => [
               element.name,
               ...element.keywords,
-            ].any((element) => element.toLowerCase().contains(emoteSearch)),
+            ].any((kw) => kw.toLowerCase().contains(emoteSearch)),
           )
           .toList();
       // sort by the index of the search term in the name in order to have
@@ -197,9 +199,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     // It ensures that the username starts with the @ symbol,
     // is preceded by either a space or appears at the beginning of a line,
     // and captures the username (excluding the @ symbol) for further use
-    const userMentionsRegex = r'(?:\s|^)@([-\w]*)$';
-
-    final userMatch = RegExp(userMentionsRegex).firstMatch(searchText);
+    final userMatch = RegExp(
+      r'(?:\s|^)@([-\w\p{L}]*)$',
+      unicode: true,
+    ).firstMatch(searchText);
     if (userMatch != null && widget.room != null) {
       final userSearch = userMatch[1]!.toLowerCase();
       final users = widget.room!
@@ -207,12 +210,16 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           .where((user) => user.senderId != widget.room!.client.userID)
           .toList();
       for (final user in users) {
-        if ((user.displayName != null &&
-                (user.displayName!.toLowerCase().contains(userSearch) ||
-                    slugify(
-                      user.displayName!.toLowerCase(),
-                    ).contains(userSearch))) ||
-            user.id.split(':')[0].toLowerCase().contains(userSearch)) {
+        if (engine.matchesText(
+              userSearch,
+              user.displayName ?? '',
+              options: opts,
+            ) ||
+            engine.matchesText(
+              userSearch,
+              user.id.split(':')[0],
+              options: opts,
+            )) {
           ret.add({
             'type': 'user',
             'mxid': user.id,
@@ -232,8 +239,6 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     ).firstMatch(searchText);
     if (roomMatch != null && widget.room != null) {
       final roomSearch = roomMatch[1]!;
-      const roomOpts = SearchOptions(diacriticSensitive: false);
-      final engine = getIt.get<SearchEngine>();
       final eligibleRooms = widget.room!.client.rooms
           .where((r) => r.getState(EventTypes.RoomTombstone) == null)
           .toList();
@@ -252,7 +257,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           },
           (Room room) => [room.name],
         ],
-        options: roomOpts,
+        options: opts,
       );
       for (final r in matchedRooms) {
         ret.add({
