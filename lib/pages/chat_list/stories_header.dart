@@ -1,4 +1,7 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 
@@ -115,7 +118,11 @@ class StoriesHeader extends StatelessWidget {
           final userId = room.creatorId;
           final displayname = creator.calcDisplayname();
           final avatarUrl = creator.avatarUrl;
-          if (!displayname.toLowerCase().contains(filter.toLowerCase())) {
+          if (!getIt.get<SearchEngine>().matchesText(
+            filter,
+            displayname,
+            options: const SearchOptions(diacriticSensitive: false),
+          )) {
             return Container();
           }
           return _StoryButton(
