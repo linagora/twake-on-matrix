@@ -10,7 +10,6 @@ import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
@@ -536,23 +535,33 @@ class ChatController extends State<Chat>
     }
   }
 
+  /// Whether the user is physically at the bottom of the live timeline
+  bool get _isAtLiveBottom =>
+      timeline?.allowNewEvent == true &&
+      scrollController.hasClients &&
+      (scrollController.position.maxScrollExtent -
+              scrollController.position.pixels) <=
+          2;
+
+  void _markLatestReadIfAtBottom() {
+    if (!_isAtLiveBottom) return;
+    if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
+    timeline?.setReadMarker(eventId: null).ignore();
+  }
+
   void _updateScrollController() async {
     if (!mounted) {
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false) {
-      showScrollDownButtonNotifier.value = true;
-    } else {
-      showScrollDownButtonNotifier.value =
-          scrollController.position.pixels !=
-          scrollController.position.maxScrollExtent;
-    }
+    showScrollDownButtonNotifier.value = !_isAtLiveBottom;
 
     // Skip auto-loading if we're doing programmatic scrolling
     if (_isProgrammaticScrolling) {
       return;
     }
+
+    _markLatestReadIfAtBottom();
 
     if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent ||
@@ -684,6 +693,8 @@ class ChatController extends State<Chat>
     if (!mounted) return;
     setState(() {});
 
+    _markLatestReadIfAtBottom();
+
     // Complete any pending timeline update waiters
     final completer = _timelineUpdateCompleter;
     if (completer != null && !completer.isCompleted) {
@@ -737,16 +748,8 @@ class ChatController extends State<Chat>
       var currentEventId = _pendingReadMarkerEventId;
       _pendingReadMarkerEventId = null;
 
-      // If the event being marked is the last visible event of the room,
-      // advance the read marker to room.lastEvent so that hidden trailing
-      // events don't leave a stale badge.
-      if (timeline.allowNewEvent) {
-        final lastVisibleEventId = timeline.events
-            .firstWhereOrNull(EventVisibilityResolver.isVisibleInTimeline)
-            ?.eventId;
-        if (currentEventId == lastVisibleEventId) {
-          currentEventId = room!.lastEvent!.eventId;
-        }
+      if (_isAtLiveBottom) {
+        currentEventId = null;
       }
 
       Logs().d('Set read marker...', currentEventId);
