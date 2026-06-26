@@ -2,7 +2,6 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:collection/collection.dart';
 
 const _searchOptions = SearchOptions(diacriticSensitive: false);
 
@@ -32,18 +31,25 @@ extension PresentationSearchExtension on PresentationSearch {
   }
 
   bool _matchedEmail(String keyword) {
-    return emails?.firstWhereOrNull(
-          (email) => email.email.contains(keyword) == true,
-        ) !=
-        null;
+    return emails?.any(
+          (email) => getIt.get<SearchEngine>().matchesText(
+            keyword,
+            email.email,
+            options: _searchOptions,
+          ),
+        ) ==
+        true;
   }
 
   bool _matchedPhoneNumber(String keyword) {
-    return phoneNumbers?.firstWhereOrNull(
-          (phone) =>
-              phone.phoneNumber.replaceAll(" ", "").contains(keyword) == true,
-        ) !=
-        null;
+    return phoneNumbers?.any(
+          (phone) => getIt.get<SearchEngine>().matchesText(
+            keyword,
+            phone.phoneNumber.replaceAll(' ', ''),
+            options: _searchOptions,
+          ),
+        ) ==
+        true;
   }
 
   bool _matchedContactInfo(String keyword) {
