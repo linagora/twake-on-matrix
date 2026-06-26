@@ -539,6 +539,8 @@ class ChatController extends State<Chat>
   bool get _isAtLiveBottom =>
       timeline?.allowNewEvent == true &&
       scrollController.hasClients &&
+      // 2px tolerance to absorb sub-pixel rounding so we still count as "at
+      // bottom" when pixels never lands exactly on maxScrollExtent.
       (scrollController.position.maxScrollExtent -
               scrollController.position.pixels) <=
           2;
