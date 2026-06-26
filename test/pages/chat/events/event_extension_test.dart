@@ -1173,4 +1173,152 @@ void main() {
       });
     });
   });
+
+  // Regression guard for TW-3179: the conversation showed the original post
+  // time under an "edited" label while the chat list showed the edit time.
+  // MessageTime now reads `event.getDisplayEvent(timeline).originServerTs`, so
+  // these tests pin the SDK contract that fix relies on.
+  group(
+    'getDisplayEvent timestamp (conversation time for edited messages)',
+    () {
+      late Client client;
+      late Room room;
+
+      setUpAll(() async {
+        client = await getClient();
+        room = Room(
+          client: client,
+          id: '!test:example.com',
+          membership: Membership.join,
+        );
+      });
+
+      Timeline buildTimeline(List<Event> events) {
+        final timeline = Timeline(
+          room: room,
+          chunk: TimelineChunk(events: []),
+        );
+        for (final e in events) {
+          timeline.addAggregatedEvent(e);
+        }
+        return timeline;
+      }
+
+      Event createOriginal({
+        required String eventId,
+        required Map<String, dynamic> content,
+        int timestamp = 1000,
+      }) {
+        return Event(
+          senderId: '@user:example.com',
+          type: EventTypes.Message,
+          room: room,
+          eventId: eventId,
+          content: content,
+          originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+        );
+      }
+
+      Event createEdit({
+        required String originalEventId,
+        required String eventId,
+        required Map<String, dynamic> newContent,
+        int timestamp = 2000,
+      }) {
+        return Event(
+          senderId: '@user:example.com',
+          type: EventTypes.Message,
+          room: room,
+          eventId: eventId,
+          content: {
+            ...newContent,
+            'body': '* ${newContent['body']}',
+            'm.new_content': newContent,
+            'm.relates_to': {
+              'rel_type': RelationshipTypes.edit,
+              'event_id': originalEventId,
+            },
+          },
+          originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+        );
+      }
+
+      test('GIVEN a never-edited message\n'
+          'THEN the displayed time is the original post time', () {
+        final original = createOriginal(
+          eventId: '\$plain',
+          content: {'body': 'hello', 'msgtype': 'm.text'},
+          timestamp: 1000,
+        );
+        final timeline = buildTimeline([original]);
+
+        expect(
+          original.getDisplayEvent(timeline).originServerTs,
+          DateTime.fromMillisecondsSinceEpoch(1000),
+        );
+      });
+
+      test('GIVEN an edited text message\n'
+          'THEN the displayed time is the edit time, not the original', () {
+        final original = createOriginal(
+          eventId: '\$text',
+          content: {'body': 'hello', 'msgtype': 'm.text'},
+          timestamp: 1000,
+        );
+        final edit = createEdit(
+          originalEventId: '\$text',
+          eventId: '\$text_edit',
+          newContent: {'body': 'hello edited', 'msgtype': 'm.text'},
+          timestamp: 2000,
+        );
+        final timeline = buildTimeline([original, edit]);
+
+        expect(
+          original.getDisplayEvent(timeline).originServerTs,
+          DateTime.fromMillisecondsSinceEpoch(2000),
+        );
+      });
+
+      test(
+        'GIVEN an edited media caption\n'
+        'THEN getDisplayEvent gives the edit time\n'
+        'WHEREAS getDisplayEventWithoutEditEvent keeps the original time\n'
+        '(documents why MessageTime uses getDisplayEvent, not the body event)',
+        () {
+          final original = createOriginal(
+            eventId: '\$img',
+            content: {
+              'body': 'My holiday photo',
+              'filename': 'IMG.jpg',
+              'msgtype': 'm.image',
+              'url': 'mxc://example.org/img',
+            },
+            timestamp: 1000,
+          );
+          final edit = createEdit(
+            originalEventId: '\$img',
+            eventId: '\$img_edit',
+            newContent: {
+              'body': 'My holiday photo (edited)',
+              'filename': 'IMG.jpg',
+              'msgtype': 'm.image',
+              'url': 'mxc://example.org/img',
+            },
+            timestamp: 2000,
+          );
+          final timeline = buildTimeline([original, edit]);
+
+          // What MessageTime now reads: the edit time.
+          expect(
+            original.getDisplayEvent(timeline).originServerTs,
+            DateTime.fromMillisecondsSinceEpoch(2000),
+          );
+          expect(
+            original.getDisplayEventWithoutEditEvent(timeline).originServerTs,
+            DateTime.fromMillisecondsSinceEpoch(1000),
+          );
+        },
+      );
+    },
+  );
 }

@@ -71,7 +71,9 @@ class MessageTime extends StatelessWidget {
               ),
             ),
           Text(
-            DateFormat("HH:mm").format(event.originServerTs),
+            DateFormat(
+              "HH:mm",
+            ).format(event.getDisplayEvent(timeline).originServerTs),
             textScaler: const TextScaler.linear(1.0),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: timelineOverlayMessage
