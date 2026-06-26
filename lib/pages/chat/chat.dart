@@ -543,10 +543,16 @@ class ChatController extends State<Chat>
               scrollController.position.pixels) <=
           2;
 
+  bool _markingLatestRead = false;
+
   void _markLatestReadIfAtBottom() {
     if (!_isAtLiveBottom) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
-    timeline?.setReadMarker(eventId: null).ignore();
+    if (_markingLatestRead) return;
+    _markingLatestRead = true;
+    timeline?.setReadMarker(eventId: null).whenComplete(() {
+      _markingLatestRead = false;
+    });
   }
 
   void _updateScrollController() async {
