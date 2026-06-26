@@ -138,6 +138,20 @@ class ChatGroupDetailRobot extends CoreRobot
     await goBack();
   }
 
+  @override
+  Future<void> scrollToLiveBottom() async {
+    // Drag the timeline to its bottom deterministically rather than relying on
+    // the scroll-down FAB (which only shows while scrolled up, and whose
+    // appearance races the async timeline load on web). The list is not
+    // reversed — the live bottom is at `maxScrollExtent` — so dragging up until
+    // the scroll position stops moving lands exactly there, which is the
+    // transition that fires the read marker. A room that already opens at the
+    // bottom needs no movement and exits on the first no-op drag.
+    await isVisible(); // waits for the ChatEventList timeline to mount
+    await scrollToBottom($, root: $(ChatEventList));
+    await $.pump(const Duration(milliseconds: 500));
+  }
+
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {
     await $(MessageContent).containing(find.text(message)).longPress();
     await $.waitUntilVisible($(PullDownMenu));

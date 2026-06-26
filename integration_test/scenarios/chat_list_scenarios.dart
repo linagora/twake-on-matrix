@@ -154,6 +154,73 @@ class UnreadCountScenario extends BaseTestScenario {
   }
 }
 
+/// Cross-platform scenario: the unread badge clears once the room is viewed at
+/// the live bottom.
+///
+/// Guards the read-marker behaviour introduced by this change: arriving at the
+/// bottom of the timeline fires `setReadMarker(eventId: null)`, which must mark
+/// the room read and drop the chat-list badge back to zero. With the
+/// per-message VisibilityDetector logic removed, the at-bottom transition is
+/// now the sole mechanism that clears the badge, so a regression here surfaces
+/// as the badge staying non-zero.
+class UnreadBadgeClearsScenario extends BaseTestScenario {
+  UnreadBadgeClearsScenario(super.$, super.robots);
+
+  static const _groupTest = String.fromEnvironment('TitleOfGroupTest');
+
+  @override
+  Future<void> runTestLogic() async {
+    final now = DateTime.now();
+    // Non-numeric body so the message preview is never mis-read as the count.
+    final body = 'read probe ${now.hour}:${now.minute}:${now.second}';
+
+    await robots.homeRobot().gotoChatListScreen();
+
+    // Make the room unread first, and confirm the badge actually went up —
+    // otherwise the clear-to-zero assertion below would pass vacuously.
+    await sendMessageAsReceiver(message: body);
+    final unread = await _pollUnread((count) => count >= 1);
+    expect(
+      unread >= 1,
+      isTrue,
+      reason: 'expected the unread badge to increment, got $unread',
+    );
+
+    // Open the room and arrive at the live bottom, which is what marks it read.
+    final chatList = robots.chatListRobot();
+    await chatList.openChatByTitle(_groupTest);
+    final detail = robots.chatGroupDetailRobot();
+    await detail.confirmAccessMedia();
+    await detail.scrollToLiveBottom();
+    await detail.clickOnBackIcon();
+
+    // The receipt is sent on the at-bottom transition and the badge only clears
+    // after the next /sync, so poll until it drops to zero.
+    final cleared = await _pollUnread((count) => count == 0);
+    expect(
+      cleared,
+      0,
+      reason:
+          'expected the unread badge to clear after viewing the room at '
+          'the live bottom, got $cleared',
+    );
+  }
+
+  int _readUnread() => robots.chatListRobot().getUnreadMessage(_groupTest);
+
+  /// Polls the unread badge (which only updates after the next /sync) until
+  /// [done] holds or the deadline passes, then returns the last value read.
+  Future<int> _pollUnread(bool Function(int) done) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 15));
+    var current = _readUnread();
+    while (!done(current) && DateTime.now().isBefore(deadline)) {
+      await $.pump(const Duration(milliseconds: 300));
+      current = _readUnread();
+    }
+    return current;
+  }
+}
+
 /// Cross-platform scenario: pin then unpin a chat.
 class PinChatScenario extends BaseTestScenario {
   PinChatScenario(super.$, super.robots);
