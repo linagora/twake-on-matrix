@@ -6,7 +6,7 @@ import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/mixins/download_file_on_mobile_mixin.dart';
@@ -141,7 +141,7 @@ class _MessageVideoDownloadContentState
             await Navigator.of(context).push(
               HeroPageRoute(
                 builder: (context) {
-                  return InteractiveViewerGallery(
+                  return DismissibleMediaView(
                     itemBuilder: MediaViewer(event: event),
                   );
                 },

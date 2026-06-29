@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 
@@ -129,7 +129,7 @@ class _VideoItem extends StatelessWidget {
         await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
           HeroPageRoute(
             builder: (context) {
-              return InteractiveViewerGallery(
+              return DismissibleMediaView(
                 itemBuilder: PlatformInfos.isMobile
                     ? MediaViewer(event: event)
                     : DownloadVideoWidget(event: event),

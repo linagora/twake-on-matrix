@@ -219,9 +219,26 @@ class MediaViewerController extends State<MediaViewer> {
     }
   }
 
-  void togglePageViewScroll(bool stopScroll) {
+  bool _isImageZoomed = false;
+  bool _isPinching = false;
+  bool _pageScrollLocked = false;
+
+  void onPinchChanged(bool pinching) {
+    _isPinching = pinching;
+    _updatePageScrollLock();
+  }
+
+  void onImageZoomChanged(bool isZoomed) {
+    _isImageZoomed = isZoomed;
+    _updatePageScrollLock();
+  }
+
+  void _updatePageScrollLock() {
+    final shouldLock = _isImageZoomed || _isPinching;
+    if (shouldLock == _pageScrollLocked) return;
     setState(() {
-      scrollPhysics = stopScroll ? const NeverScrollableScrollPhysics() : null;
+      _pageScrollLocked = shouldLock;
+      scrollPhysics = shouldLock ? const NeverScrollableScrollPhysics() : null;
     });
   }
 

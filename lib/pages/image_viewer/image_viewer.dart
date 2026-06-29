@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer_view.dart';
 import 'package:fluffychat/widgets/media_viewer_web_overlay.dart';
 import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer_style.dart';
+import 'package:fluffychat/utils/image_zoom_scope.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -46,6 +47,9 @@ class ImageViewerController extends State<ImageViewer> {
   TapDownDetails? tapDownDetails;
   final double zoomScale = 3;
 
+  bool _isZoomed = false;
+  ValueNotifier<bool>? _zoomScopeNotifier;
+
   late final ValueNotifier<bool> showAppbarPreview;
 
   Uint8List? bytes;
@@ -62,6 +66,7 @@ class ImageViewerController extends State<ImageViewer> {
   void initState() {
     super.initState();
     showAppbarPreview = ValueNotifier(widget.showAppBar);
+    transformationController.addListener(_handleZoomChanged);
     if (PlatformInfos.isWeb && widget.event != null) {
       _injectWebImageOverlay(widget.event!);
     }
@@ -159,12 +164,29 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _zoomScopeNotifier = ImageZoomScope.maybeOf(context);
+  }
+
+  @override
   void dispose() {
     _webOverlay.dispose();
     streamSubcription?.cancel();
+    transformationController.removeListener(_handleZoomChanged);
     transformationController.dispose();
     showAppbarPreview.dispose();
     super.dispose();
+  }
+
+  void _handleZoomChanged() {
+    final isZoomed =
+        transformationController.value.getMaxScaleOnAxis() >
+        ImageViewerStyle.minScaleInteractiveViewer;
+    if (isZoomed == _isZoomed) return;
+    _isZoomed = isZoomed;
+    widget.onZoomChanged?.call(isZoomed);
+    _zoomScopeNotifier?.value = isZoomed;
   }
 
   /// Forward this image to another room.
@@ -185,6 +207,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Go back if user swiped it away
   void onInteractionEnds(ScaleEndDetails endDetails) {
+    if (_isZoomed) return;
     if (PlatformInfos.usesTouchscreen == false) {
       if (endDetails.velocity.pixelsPerSecond.dy >
           MediaQuery.sizeOf(context).height * maxScaleFactor) {
@@ -209,8 +232,6 @@ class ImageViewerController extends State<ImageViewer> {
         ? zoomed
         : Matrix4.identity();
     transformationController.value = value;
-
-    widget.onZoomChanged?.call(!transformationController.value.isIdentity());
   }
 
   void onDoubleTapDown(TapDownDetails details) {
