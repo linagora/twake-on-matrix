@@ -586,11 +586,8 @@ mixin class ContactsViewControllerMixin {
   }
 
   void onSelectedContact() {
+    textEditingController.clear();
     searchFocusNode.requestFocus();
-    textEditingController.selection = TextSelection(
-      baseOffset: 0,
-      extentOffset: textEditingController.text.length,
-    );
   }
 
   void closeSearchBar() {
