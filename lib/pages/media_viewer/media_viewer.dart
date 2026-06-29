@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/media_viewer/media_viewer_view.dart';
+import 'package:fluffychat/utils/image_zoom_scope.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
@@ -208,6 +209,8 @@ class MediaViewerController extends State<MediaViewer> {
   void pageChangedListener() {
     if (currentPage.value == -1) return;
 
+    _resetImageZoom();
+
     if (mediaEvents[currentPage.value].messageType == MessageTypes.Video) {
       showAppBarAndPreview.value = true;
     }
@@ -230,6 +233,14 @@ class MediaViewerController extends State<MediaViewer> {
 
   void onImageZoomChanged(bool isZoomed) {
     _isImageZoomed = isZoomed;
+    _updatePageScrollLock();
+  }
+
+  void _resetImageZoom() {
+    if (context.mounted) {
+      ImageZoomScope.maybeOf(context)?.value = false;
+    }
+    _isImageZoomed = false;
     _updatePageScrollLock();
   }
 
