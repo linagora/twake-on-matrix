@@ -2053,11 +2053,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "إخفاء الأحداث المنقحة",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "commandHint_discardsession": "إنهاء الجلسة",
   "@commandHint_discardsession": {
     "type": "text",

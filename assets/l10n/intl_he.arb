@@ -919,11 +919,6 @@
       "targetName": {}
     }
   },
-  "hideRedactedEvents": "הסתר אירועים מצונזרים",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "encryptionNotEnabled": "ההצפנה אינה מופעלת",
   "@encryptionNotEnabled": {
     "type": "text",

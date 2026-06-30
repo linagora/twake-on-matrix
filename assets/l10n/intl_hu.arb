@@ -577,11 +577,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Visszavont események elrejtése",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Ismeretlen események elrejtése",
   "@hideUnknownEvents": {
     "type": "text",

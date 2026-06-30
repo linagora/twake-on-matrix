@@ -1,7 +1,6 @@
 abstract class SettingKeys {
   static const String wallpaper = 'chat.fluffy.wallpaper';
   static const String renderHtml = 'chat.fluffy.renderHtml';
-  static const String hideRedactedEvents = 'chat.fluffy.hideRedactedEvents';
   static const String hideUnknownEvents = 'chat.fluffy.hideUnknownEvents';
   static const String hideUnimportantStateEvents =
       'chat.fluffy.hideUnimportantStateEvents';

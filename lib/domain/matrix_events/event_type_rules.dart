@@ -106,8 +106,8 @@ abstract final class EventTypeRules {
     EventTypes.Reaction: EventTypeRule(
       group: EventVisibilityGroup.neverInTimeline,
     ),
-    // m.room.redaction is a control event. Redacted-message rendering is
-    // handled via shouldHideRedactedEvent() on the *original* event.
+    // m.room.redaction is a control event. The redacted *original* event still
+    // renders as a "Deleted message" bubble in the timeline.
     EventTypes.Redaction: EventTypeRule(
       group: EventVisibilityGroup.neverInTimeline,
     ),

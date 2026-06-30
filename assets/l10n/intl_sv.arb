@@ -689,11 +689,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Göm redigerade händelser",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Göm okända händelser",
   "@hideUnknownEvents": {
     "type": "text",

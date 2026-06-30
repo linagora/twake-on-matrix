@@ -933,11 +933,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "پنهان کردن رویداد های ویرایش شده",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "پنهان کردن رویداد های ناشناخته",
   "@hideUnknownEvents": {
     "type": "text",

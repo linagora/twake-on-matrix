@@ -641,11 +641,6 @@
       "targetName": {}
     }
   },
-  "hideRedactedEvents": "Folaigh teachtaireachtaí scriosta",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "guestsCanJoin": "Is féidir le haíonna páirt a ghlacadh",
   "@guestsCanJoin": {
     "type": "text",

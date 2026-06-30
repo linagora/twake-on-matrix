@@ -1682,11 +1682,6 @@
       "error": {}
     }
   },
-  "hideRedactedEvents": "Сховати змінені події",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "synchronizingPleaseWait": "Синхронізація… Будь ласка, зачекайте.",
   "@synchronizingPleaseWait": {
     "type": "text",

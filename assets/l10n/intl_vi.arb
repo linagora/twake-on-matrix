@@ -1204,11 +1204,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Ẩn tin nhắn đã xoá",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Ẩn các sự kiện không xác định",
   "@hideUnknownEvents": {
     "type": "text",

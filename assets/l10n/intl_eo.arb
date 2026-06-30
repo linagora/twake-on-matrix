@@ -855,11 +855,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Kaŝi obskurigitajn eventojn",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Kaŝi nekonatajn eventojn",
   "@hideUnknownEvents": {
     "type": "text",

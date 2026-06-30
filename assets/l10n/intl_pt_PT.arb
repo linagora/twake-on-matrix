@@ -820,11 +820,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Esconder eventos eliminados",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Esconder eventos desconhecidos",
   "@hideUnknownEvents": {
     "type": "text",

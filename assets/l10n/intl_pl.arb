@@ -761,11 +761,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Ukryj informacje o zredagowaniu",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Ukryj nieznane wdarzenia",
   "@hideUnknownEvents": {
     "type": "text",

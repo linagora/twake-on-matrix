@@ -1,6 +1,5 @@
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Single entry-point for all event visibility decisions.
@@ -89,9 +88,6 @@ abstract final class EventVisibilityResolver {
 
   static bool _passesConfigLayer(Event event) {
     final group = EventTypeRules.getGroup(event.type);
-    if (AppConfig.hideRedactedEvents && event.shouldHideRedactedEvent()) {
-      return false;
-    }
     if (group == EventVisibilityGroup.unknown && AppConfig.hideUnknownEvents) {
       return false;
     }

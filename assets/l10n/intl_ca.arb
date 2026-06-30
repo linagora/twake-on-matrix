@@ -655,11 +655,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Amaga els esdeveniments velats",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Amaga els esdeveniments desconeguts",
   "@hideUnknownEvents": {
     "type": "text",

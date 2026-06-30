@@ -849,11 +849,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Sakrij promijenjene događaje",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Sakrij nepoznate događaje",
   "@hideUnknownEvents": {
     "type": "text",

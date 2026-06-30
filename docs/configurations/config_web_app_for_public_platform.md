@@ -19,7 +19,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "default_homeserver": "matrix.linagora.com",
   "privacy_url": "https://twake.app/en/privacy/",
   "render_html": true,
-  "hide_redacted_events": false,
   "hide_unknown_events": false,
   "issue_id": "",
   "registration_url": "https://example.com/",
@@ -42,7 +41,6 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
 - `default_homeserver`: The default homeserver
 - `privacy_url`: The privacy policy URL
 - `render_html`: Render HTML in messages
-- `hide_redacted_events`: Hide redacted events
 - `hide_unknown_events`: Hide unknown events
 - `issue_id`: Issue ID
 - `registration_url`: Registration URL for public platform

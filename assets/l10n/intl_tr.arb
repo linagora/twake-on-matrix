@@ -868,11 +868,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Düzenlenmiş etkinlikleri gizle",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Bilinmeyen etkinlikleri gizle",
   "@hideUnknownEvents": {
     "type": "text",
