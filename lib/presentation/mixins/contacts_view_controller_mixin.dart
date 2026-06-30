@@ -231,12 +231,10 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    // Contacts permission is asked during onboarding, not via an automatic
+    // dialog on the Contacts page. Returning users who haven't granted access
+    // still see the warning banner (which can re-trigger the request).
+    await _initWarningBanner();
     _refreshAllContacts(
       context: context,
       client: client,
