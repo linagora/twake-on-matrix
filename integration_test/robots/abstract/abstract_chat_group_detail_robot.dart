@@ -23,4 +23,8 @@ abstract class AbstractChatGroupDetailRobot {
 
   Future<void> clickOnBackIcon();
   Future<void> confirmAccessMedia();
+
+  /// Jumps to the live bottom of the timeline (taps the scroll-down button),
+  /// which is what marks the room read. No-op when already at the bottom.
+  Future<void> scrollToLiveBottom();
 }

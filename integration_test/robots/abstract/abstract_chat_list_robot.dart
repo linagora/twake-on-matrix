@@ -8,6 +8,11 @@ import '../twake_list_item_robot.dart';
 /// scenarios call appear here.
 abstract class AbstractChatListRobot {
   Future<void> openChatGroupByIndex(int index);
+
+  /// Opens the chat row whose title matches [title] from the (unfiltered) list.
+  /// Avoids the search screen so callers return to the same list afterwards.
+  Future<void> openChatByTitle(String title);
+
   Future<void> openSearchScreen();
   Future<void> clickOnPenIcon();
   Future<void> clickOnPinIcon();

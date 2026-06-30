@@ -13,6 +13,11 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    description: 'Unread badge clears after viewing at the live bottom',
+    scenarioBuilder: ($, robots) => UnreadBadgeClearsScenario($, robots),
+  );
+
+  TestBase().runPatrolTest(
     description: 'Pin/unpin a chat',
     scenarioBuilder: ($, robots) => PinChatScenario($, robots),
   );
