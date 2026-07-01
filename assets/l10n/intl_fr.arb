@@ -1270,6 +1270,8 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Ouvrez l'application pour lire le message",
+  "newMessage": "Nouveau message",
+  "enableNotificationsExplanation": "Activez les notifications pour être alerté des nouveaux messages, même quand Twake est fermé.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}

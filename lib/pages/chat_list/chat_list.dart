@@ -26,6 +26,7 @@ import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:fluffychat/utils/web_push/web_push.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
@@ -40,6 +41,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../../../utils/account_bundles.dart';
 import '../../widgets/matrix.dart';
@@ -78,6 +80,7 @@ class ChatListController extends State<ChatList>
         GoToGroupChatMixin,
         TwakeContextMenuMixin {
   final responsive = getIt.get<ResponsiveUtils>();
+  bool _webPushPermissionSoftAskShown = false;
 
   final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
 
@@ -450,7 +453,8 @@ class ChatListController extends State<ChatList>
       });
 
       // Process cached sharing intents after first sync
-      matrixState.processCachedSharingIntents();
+      await matrixState.processCachedSharingIntents();
+      await _maybeShowWebPushPermissionSoftAsk();
     });
   }
 
@@ -467,7 +471,58 @@ class ChatListController extends State<ChatList>
     });
 
     // Process cached sharing intents after first sync
-    matrixState.processCachedSharingIntents();
+    await matrixState.processCachedSharingIntents();
+    await _maybeShowWebPushPermissionSoftAsk();
+  }
+
+  Future<void> _maybeShowWebPushPermissionSoftAsk() async {
+    if (!kIsWeb || _webPushPermissionSoftAskShown) return;
+    _webPushPermissionSoftAskShown = true;
+
+    await AppConfig.initConfigCompleter.future;
+    if (!mounted ||
+        !AppConfig.webPushEnabled ||
+        AppConfig.vapidPublicKey.isEmpty ||
+        await isWebPushDisabledByUser()) {
+      return;
+    }
+
+    if (html.Notification.permission == 'granted') {
+      await setupWebPush(activeClient);
+      return;
+    }
+    if (html.Notification.permission != 'default') return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || html.Notification.permission != 'default') return;
+      final granted = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (dialogContext) => AlertDialog(
+          icon: const Icon(Icons.notifications_active_outlined),
+          title: Text(L10n.of(dialogContext)!.notifications),
+          content: Text(L10n.of(dialogContext)!.enableNotificationsExplanation),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(L10n.of(dialogContext)!.deny),
+            ),
+            TextButton(
+              onPressed: () async {
+                final permission = await html.Notification.requestPermission();
+                if (dialogContext.mounted) {
+                  Navigator.of(dialogContext).pop(permission == 'granted');
+                }
+              },
+              child: Text(L10n.of(dialogContext)!.allow),
+            ),
+          ],
+        ),
+      );
+      if (granted == true && mounted) {
+        await setWebPushEnabled(activeClient, true);
+      }
+    });
   }
 
   void editBundlesForAccount(String? userId, String? activeBundle) async {
