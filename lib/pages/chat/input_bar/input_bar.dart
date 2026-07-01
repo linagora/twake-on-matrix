@@ -240,28 +240,20 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         final alias = state?.content['alias'];
         final altAlias = state?.content['alt_aliases'];
         const roomOpts = SearchOptions(diacriticSensitive: false);
-        if ((state != null &&
-                ((alias is String &&
-                        getIt.get<SearchEngine>().matchesText(
-                          roomSearch,
-                          alias.split(':')[0],
-                          options: roomOpts,
-                        )) ||
-                    (altAlias is List &&
-                        altAlias.any(
-                          (l) =>
-                              l is String &&
-                              getIt.get<SearchEngine>().matchesText(
-                                roomSearch,
-                                l.split(':')[0],
-                                options: roomOpts,
-                              ),
-                        )))) ||
-            getIt.get<SearchEngine>().matchesText(
-              roomSearch,
-              r.name,
-              options: roomOpts,
-            )) {
+        final engine = getIt.get<SearchEngine>();
+        bool matchesAlias(String a) =>
+            engine.matchesText(roomSearch, a.split(':')[0], options: roomOpts);
+        final aliasMatches =
+            state != null &&
+            ((alias is String && matchesAlias(alias)) ||
+                (altAlias is List &&
+                    altAlias.any((l) => l is String && matchesAlias(l))));
+        final nameMatches = engine.matchesText(
+          roomSearch,
+          r.name,
+          options: roomOpts,
+        );
+        if (aliasMatches || nameMatches) {
           ret.add({
             'type': 'room',
             'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
@@ -345,7 +337,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     if (suggestion['type'] == 'room') {
       insertText = '${suggestion['mxid']!} ';
       startText = replaceText.replaceAllMapped(
-        RegExp(r'(\s|^)(#[-\w]+)$'),
+        RegExp(r'(\s|^)(#[-\w\p{L}]+)$', unicode: true),
         (Match m) => '${m[1]}$insertText',
       );
     }
