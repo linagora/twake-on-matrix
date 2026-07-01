@@ -52,14 +52,20 @@ class ContactSearchScenario extends BaseTestScenario {
     await _verifyOwnerAndEmail(s, byAccount, ownerVisible: true);
 
     // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
+    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    s.softAssertEquals(
+      diacriticQuery != _searchByTitle,
+      true,
+      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+    );
     final byTitleDiacritic = await _searchAndWait(
-      _searchByTitle.replaceAll('a', 'à'),
+      diacriticQuery,
       expectResults: true,
     );
     s.softAssertEquals(
       byTitleDiacritic.length == 1,
       true,
-      'Search by ${_searchByTitle.replaceAll('a', 'à')} expected 1 contact',
+      'Search by $diacriticQuery expected 1 contact',
     );
     await _verifyOwnerAndEmail(s, byTitleDiacritic, ownerVisible: false);
 

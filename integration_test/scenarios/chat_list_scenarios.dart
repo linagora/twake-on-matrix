@@ -49,11 +49,17 @@ class ChatListSearchScenario extends BaseTestScenario {
     );
 
     // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
-    await _search(_searchByTitle.replaceAll('a', 'à'));
+    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    s.softAssertEquals(
+      diacriticQuery != _searchByTitle,
+      true,
+      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+    );
+    await _search(diacriticQuery);
     s.softAssertEquals(
       (await robots.chatListRobot().getListOfChatGroup()).length == 1,
       true,
-      'Search by ${_searchByTitle.replaceAll('a', 'à')} expected 1 group',
+      'Search by $diacriticQuery expected 1 group',
     );
 
     // Current account -> owner + email visible on the row.
