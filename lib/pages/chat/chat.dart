@@ -1264,6 +1264,67 @@ class ChatController extends State<Chat>
     }
   }
 
+  /// After timeline loads, remove stuck sending file events that can never
+  /// complete because their file data is gone (web page refresh wipes RAM).
+  ///
+  /// Root cause: on web, `matrixFile` bytes live in RAM only
+  /// (`@JsonKey(includeToJson: false)`). After a page refresh the bytes are
+  /// gone but the event stays in the local DB as `sending/error` forever.
+  /// On mobile, `fileInfo` (a file path) IS serialized and can be restored,
+  /// so mobile events are never affected.
+  Future<void> _removeSendingFileEventsWithLostData() async {
+    final room = this.room;
+    final events = timeline?.events;
+    if (events == null || room == null) return;
+
+    final uploadManager = getIt.get<UploadManager>();
+
+    // Collect first, then remove — cancelSend() triggers handleSync/onUpdate
+    // which would mutate the list mid-iteration.
+    final stuckEvents = <Event>[];
+    for (final event in events) {
+      if (!event.status.isSending && event.status != EventStatus.error) {
+        continue;
+      }
+      if (event.messageType != MessageTypes.Video &&
+          event.messageType != MessageTypes.Image &&
+          event.messageType != MessageTypes.File) {
+        continue;
+      }
+
+      // Only remove events tracked by our upload system (have upload_info in
+      // unsigned). Events without upload_info are from before this feature or
+      // from other clients — leave them alone.
+      final hasUploadInfo =
+          event.unsigned?['upload_info'] is Map<String, dynamic>;
+      if (!hasUploadInfo) continue;
+
+      // getUploadFileInfo checks in-memory map first, then falls back to
+      // restoring from unsigned JSON (works for mobile FileInfo paths).
+      // If either fileInfo or matrixFile is available the upload can proceed.
+      final uploadInfo = await uploadManager.getUploadFileInfo(
+        event.eventId,
+        room: room,
+      );
+      if (uploadInfo != null &&
+          (uploadInfo.fileInfo != null || uploadInfo.matrixFile != null)) {
+        continue;
+      }
+
+      // upload_info exists but no usable bytes → stuck web event, safe to remove.
+      stuckEvents.add(event);
+    }
+
+    for (final event in stuckEvents) {
+      Logs().w(
+        'Chat::_removeSendingFileEventsWithLostData(): '
+        'removing stuck event ${event.eventId} (${event.messageType}) — '
+        'file data lost after page refresh',
+      );
+      await event.cancelSend();
+    }
+  }
+
   Future<void> _getTimeline({String? eventContextId}) async {
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
@@ -1287,6 +1348,7 @@ class ChatController extends State<Chat>
     }
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
+    await _removeSendingFileEventsWithLostData();
 
     // Debug: log if room's lastEvent is absent from the freshly loaded timeline
     final lastEvent = room?.lastEvent;
