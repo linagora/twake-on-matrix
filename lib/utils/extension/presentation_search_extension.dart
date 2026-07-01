@@ -37,7 +37,7 @@ extension PresentationSearchExtension on PresentationSearch {
   bool _matchedPhoneNumber(String keyword) =>
       phoneNumbers?.firstWhereOrNull(
         (phone) => _searchEngine.matchesText(
-          keyword,
+          keyword.replaceAll(' ', ''),
           phone.phoneNumber.replaceAll(' ', ''),
           options: _searchOptions,
         ),
