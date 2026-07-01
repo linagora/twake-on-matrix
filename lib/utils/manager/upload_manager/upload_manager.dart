@@ -51,11 +51,18 @@ class UploadManager {
     if (event != null) {
       final uploadInfoMap = event.unsigned?['upload_info'];
       if (uploadInfoMap is Map<String, dynamic>) {
-        final info = UploadFileInfo.fromJson(uploadInfoMap);
-        if (info.fileInfo != null || info.matrixFile != null) {
-          _eventIdMapUploadFileInfo[eventId] = info;
+        try {
+          final info = UploadFileInfo.fromJson(uploadInfoMap);
+          if (info.fileInfo != null || info.matrixFile != null) {
+            _eventIdMapUploadFileInfo[eventId] = info;
+          }
+          return info;
+        } catch (e) {
+          Logs().w(
+            'UploadManager::getUploadFileInfo(): '
+            'failed to parse upload_info for $eventId, ignoring: $e',
+          );
         }
-        return info;
       }
     }
 

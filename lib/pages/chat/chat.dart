@@ -1316,12 +1316,21 @@ class ChatController extends State<Chat>
     }
 
     for (final event in stuckEvents) {
-      Logs().w(
-        'Chat::_removeSendingFileEventsWithLostData(): '
-        'removing stuck event ${event.eventId} (${event.messageType}) — '
-        'file data lost after page refresh',
-      );
-      await event.cancelSend();
+      try {
+        Logs().w(
+          'Chat::_removeSendingFileEventsWithLostData(): '
+          'removing stuck event ${event.eventId} (${event.messageType}) — '
+          'file data lost after page refresh',
+        );
+        await event.cancelSend();
+      } catch (e, s) {
+        Logs().e(
+          'Chat::_removeSendingFileEventsWithLostData(): '
+          'failed to remove event ${event.eventId} (${event.messageType})',
+          e,
+          s,
+        );
+      }
     }
   }
 
