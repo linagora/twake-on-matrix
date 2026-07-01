@@ -38,17 +38,23 @@ class UploadManager {
     String eventId, {
     required Room room,
   }) async {
-    if (_eventIdMapUploadFileInfo.containsKey(eventId)) {
-      return _eventIdMapUploadFileInfo[eventId];
+    final cached = _eventIdMapUploadFileInfo[eventId];
+    if (cached != null &&
+        (cached.fileInfo != null || cached.matrixFile != null)) {
+      return cached;
     }
 
-    // Attempt to restore on-demand from the event's unsigned data
+    // Attempt to restore on-demand from the event's unsigned data.
+    // Only cache the restored entry when it has usable file data — otherwise
+    // a null-byte entry would poison the map and mask the data-lost condition.
     final event = await room.getEventById(eventId);
     if (event != null) {
       final uploadInfoMap = event.unsigned?['upload_info'];
       if (uploadInfoMap is Map<String, dynamic>) {
         final info = UploadFileInfo.fromJson(uploadInfoMap);
-        _eventIdMapUploadFileInfo[eventId] = info;
+        if (info.fileInfo != null || info.matrixFile != null) {
+          _eventIdMapUploadFileInfo[eventId] = info;
+        }
         return info;
       }
     }
@@ -106,6 +112,18 @@ class UploadManager {
       final room = event.room;
       final fileInfo = uploadInfo.fileInfo;
       final matrixFile = uploadInfo.matrixFile;
+
+      // File bytes lost (e.g. web page refresh) — remove the stuck event
+      // instead of throwing, so the user never sees a broken retry button.
+      if (fileInfo == null && matrixFile == null) {
+        Logs().w(
+          'UploadManager::retryUpload(): no file data for $txid, removing event',
+        );
+        await _clearFileTask(txid);
+        await event.cancelSend();
+        return;
+      }
+
       final caption = uploadInfo.captionInfo?.caption;
       final inReplyTo = uploadInfo.inReplyToEventId == null
           ? null
@@ -122,18 +140,14 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else if (matrixFile != null) {
+        } else {
           fakeImageEvent = await room.sendFakeFileEvent(
-            matrixFile,
+            matrixFile!,
             txid: txid,
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        }
-
-        if (fakeImageEvent == null) {
-          throw Exception('Missing required retry data for txid $txid');
         }
       } catch (e) {
         uploadInfo.isFailed = true;
@@ -160,12 +174,12 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else if (matrixFile != null) {
+        } else {
           await _addFileTaskToWorkerQueueWeb(
             txid: txid,
             fakeImageEvent: fakeImageEvent,
             room: room,
-            matrixFile: matrixFile,
+            matrixFile: matrixFile!,
             streamController: streamController,
             cancelToken: cancelToken,
             thumbnail: uploadInfo.thumbnail,
@@ -174,8 +188,6 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else {
-          throw Exception('No file data found for retry with txid $txid');
         }
       } catch (e) {
         uploadInfo.isFailed = true;
