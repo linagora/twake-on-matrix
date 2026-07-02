@@ -669,10 +669,9 @@ class ChatController extends State<Chat>
       });
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
-      if (fullyRead == null || fullyRead.isEmpty || fullyRead == '') {
-        return;
-      }
-      if (room?.hasNewMessages == true) {
+      if (fullyRead != null &&
+          fullyRead.isNotEmpty &&
+          room?.hasNewMessages == true) {
         // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
         final lastEventId = room?.lastEvent?.eventId;
         final lastEventInTimeline =
@@ -690,7 +689,12 @@ class ChatController extends State<Chat>
         }
         _initUnreadLocation(fullyRead);
       }
-      if (!mounted) return;
+      // Mark read on open: a room already at the live bottom fires no scroll
+      // and no timeline update
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _markLatestReadIfAtBottom();
+      });
     } catch (e, s) {
       Logs().wtf('Failed to load timeline', e, s);
       rethrow;
