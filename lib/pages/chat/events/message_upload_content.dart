@@ -177,16 +177,11 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                               if (uploadFileState is UploadingFileUIState &&
                                   uploadFileState.total != null &&
                                   uploadFileState.receive != null) {
-                                final receive = uploadFileState.receive!;
-                                final total = uploadFileState.total!;
-                                // Use MB for large files, KB for small ones so
-                                // sub-1MB uploads still show visible progress
-                                // instead of "0.00 MB / 0.00 MB".
-                                final progressText = total >= IntExtension.oneMB
-                                    ? '${receive.bytesToMB(placeDecimal: 2)} MB / ${total.bytesToMB(placeDecimal: 2)} MB'
-                                    : '${receive.bytesToKB(placeDecimal: 0)} KB / ${total.bytesToKB(placeDecimal: 0)} KB';
                                 return Text(
-                                  progressText,
+                                  IntExtension.formatTransferProgress(
+                                    uploadFileState.receive!,
+                                    uploadFileState.total!,
+                                  ),
                                   style: widget.style.textInformationStyle(
                                     context,
                                   ),
