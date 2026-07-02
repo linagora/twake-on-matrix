@@ -94,7 +94,11 @@
             .getRegistrations()
             .then(async function(registrations) {
               try {
+                // Purge stale Flutter/legacy service workers (cache-busting workaround),
+                // but KEEP our Web Push SW so background notifications survive reloads.
                 await Promise.all(registrations.map(function(registration) {
+                  var url = (registration.active || registration.installing || registration.waiting || {}).scriptURL || '';
+                  if (url.indexOf('push_sw.js') !== -1) return Promise.resolve();
                   return registration.unregister();
                 }));
               } catch (error) {
@@ -105,6 +109,10 @@
                   const appRunner = await engineInitializer.initializeEngine({useColorEmoji: true});
                   await setTimeout( async function () {
                     await appRunner.runApp();
+                    // Register after runApp so this load's unregister sweep can't catch it.
+                    navigator.serviceWorker.register('push_sw.js').catch(function (error) {
+                      console.log('[Twake Chat] Error registering push service worker: ', error);
+                    });
                   }, 2000);
                 }
               });

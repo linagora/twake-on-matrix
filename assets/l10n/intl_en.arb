@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "@@last_modified": "2021-08-14 12:38:37.885451",
+  "enableNotificationsExplanation": "Turn on notifications to be alerted about new messages, even when Twake is closed.",
+  "webPushOnThisBrowser": "Notifications on this browser",
+  "webPushPermissionDeniedHint": "Notifications are blocked. Allow them for this site in your browser settings, then toggle this on.",
   "passwordsDoNotMatch": "Passwords do not match!",
   "pleaseEnterValidEmail": "Please enter a valid email address.",
   "repeatPassword": "Repeat password",
@@ -1461,6 +1464,7 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Open app to read messages",
+  "newMessage": "New message",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}

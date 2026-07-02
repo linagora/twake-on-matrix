@@ -1,5 +1,8 @@
+import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:fluffychat/utils/web_push/web_push.dart';
 import 'package:fluffychat/widgets/matrix.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -90,6 +93,36 @@ class SettingsNotifications extends StatefulWidget {
 }
 
 class SettingsNotificationsController extends State<SettingsNotifications> {
+  /// Web Push on this browser. null while loading; web-only.
+  bool? webPushActive;
+  bool webPushPermissionDenied = false;
+
+  bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    if (showWebPushTile) _loadWebPushStatus();
+  }
+
+  Future<void> _loadWebPushStatus() async {
+    final active = await isWebPushActive();
+    if (!mounted) return;
+    setState(() {
+      webPushActive = active;
+      webPushPermissionDenied = isWebPushPermissionDenied();
+    });
+  }
+
+  /// Single place to enable/disable Web Push: persists the choice (so a disabled
+  /// pusher stays gone) and (re)subscribes or tears down accordingly.
+  Future<void> toggleWebPush(bool enabled) async {
+    await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => setWebPushEnabled(Matrix.of(context).client, enabled),
+    );
+    await _loadWebPushStatus();
+  }
+
   bool? getNotificationSetting(NotificationSettingsItem item) {
     final pushRules = Matrix.of(context).client.globalPushRules;
     if (pushRules == null) return null;
