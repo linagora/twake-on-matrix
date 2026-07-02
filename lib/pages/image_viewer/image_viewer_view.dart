@@ -130,8 +130,11 @@ class _ImageWidget extends StatelessWidget {
         );
       }
       return FutureBuilder(
-        future: event.downloadAndDecryptAttachment(),
+        future: controller.webAttachmentFuture(event),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Icon(Icons.broken_image_outlined, color: Colors.white);
+          }
           if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
             return const CircularProgressIndicator();
           }
