@@ -65,10 +65,13 @@ class TextInformationOfFile extends StatelessWidget {
             builder: ((context, downloadFileState, child) {
               if (downloadFileState is DownloadingPresentationState &&
                   downloadFileState.total != null &&
-                  downloadFileState.receive != null &&
-                  downloadFileState.total! >= IntExtension.oneKB) {
+                  downloadFileState.receive != null) {
                 return Text(
-                  '${downloadFileState.receive!.bytesToMB(placeDecimal: 1)} MB / ',
+                  IntExtension.formatTransferProgress(
+                    downloadFileState.receive!,
+                    downloadFileState.total!,
+                    includeTotal: false,
+                  ),
                   style: style,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

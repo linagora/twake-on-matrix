@@ -108,17 +108,17 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                             shape: BoxShape.circle,
                           ),
                         ),
-                        if (uploadProgress != 0)
-                          SizedBox(
-                            width: widget.style.circularProgressLoadingSize,
-                            height: widget.style.circularProgressLoadingSize,
-                            child: CircularLoadingDownloadWidget(
-                              style: widget.style,
-                              downloadProgress: uploadProgress != 1
-                                  ? uploadProgress
-                                  : null,
-                            ),
+                        SizedBox(
+                          width: widget.style.circularProgressLoadingSize,
+                          height: widget.style.circularProgressLoadingSize,
+                          child: CircularLoadingDownloadWidget(
+                            style: widget.style,
+                            downloadProgress:
+                                (uploadProgress == null || uploadProgress == 1)
+                                ? null
+                                : uploadProgress,
                           ),
+                        ),
                         Container(
                           width: widget.style.downloadIconSize,
                           decoration: BoxDecoration(
@@ -176,11 +176,12 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                             builder: ((context, uploadFileState, child) {
                               if (uploadFileState is UploadingFileUIState &&
                                   uploadFileState.total != null &&
-                                  uploadFileState.receive != null &&
-                                  uploadFileState.total! >=
-                                      IntExtension.oneKB) {
+                                  uploadFileState.receive != null) {
                                 return Text(
-                                  '${uploadFileState.receive!.bytesToMB(placeDecimal: 2)} MB / ${uploadFileState.total!.bytesToMB(placeDecimal: 2)} MB',
+                                  IntExtension.formatTransferProgress(
+                                    uploadFileState.receive!,
+                                    uploadFileState.total!,
+                                  ),
                                   style: widget.style.textInformationStyle(
                                     context,
                                   ),

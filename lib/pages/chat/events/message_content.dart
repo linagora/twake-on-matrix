@@ -261,7 +261,8 @@ class MessageContent extends StatelessWidget
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (!PlatformInfos.isWeb) ...[
-                  if (event.isSending()) ...[
+                  if (event.isSending() ||
+                      event.status == EventStatus.error) ...[
                     MessageUploadingContent(
                       event: event,
                       style: const MessageFileTileStyle(),
@@ -269,7 +270,8 @@ class MessageContent extends StatelessWidget
                   ] else
                     MessageDownloadContent(event),
                 ] else ...[
-                  if (event.isSending()) ...[
+                  if (event.isSending() ||
+                      event.status == EventStatus.error) ...[
                     OptionalSelectionContainerDisabled(
                       isEnabled:
                           PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
