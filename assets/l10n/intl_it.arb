@@ -742,11 +742,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Nascondi gli eventi eliminati",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Nascondi gli eventi sconosciuti",
   "@hideUnknownEvents": {
     "type": "text",

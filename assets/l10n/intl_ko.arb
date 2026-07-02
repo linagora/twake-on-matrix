@@ -839,11 +839,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "지워진 이벤트 숨기기",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hasWithdrawnTheInvitationFor": "{username}이 {targetName}에 대한 초대를 철회함",
   "@hasWithdrawnTheInvitationFor": {
     "type": "text",

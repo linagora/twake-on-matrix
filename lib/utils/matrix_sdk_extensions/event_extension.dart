@@ -391,11 +391,6 @@ extension LocalizedBody on Event {
     return room.canRedactEventSentByOther;
   }
 
-  bool shouldHideRedactedEvent() {
-    return AppConfig.hideRedactedEvents &&
-        (redacted || type == EventTypes.Redaction);
-  }
-
   bool hasReactionEvent({required Timeline timeline}) {
     final allReactionEvents = aggregatedEvents(
       timeline,

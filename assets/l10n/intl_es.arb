@@ -644,11 +644,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Ocultar sucesos censurados",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Ocultar sucesos desconocidos",
   "@hideUnknownEvents": {
     "type": "text",

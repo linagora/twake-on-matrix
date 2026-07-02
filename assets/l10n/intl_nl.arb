@@ -867,11 +867,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Bewerkte gebeurtenissen verbergen",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Onbekende gebeurtenissen verbergen",
   "@hideUnknownEvents": {
     "type": "text",

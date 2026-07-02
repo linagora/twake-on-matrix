@@ -732,11 +732,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "隱藏編輯過的事件",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "隱藏未知事件",
   "@hideUnknownEvents": {
     "type": "text",

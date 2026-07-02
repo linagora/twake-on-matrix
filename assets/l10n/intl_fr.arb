@@ -875,11 +875,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Masquer les messages supprimés",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Masquer les événements inconnus",
   "@hideUnknownEvents": {
     "type": "text",

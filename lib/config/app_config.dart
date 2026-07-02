@@ -107,7 +107,6 @@ abstract class AppConfig {
   static String supportUrl = 'https://twake.app/support';
   static String cozyExternalBridgeVersion = '0.16.1';
   static bool renderHtml = true;
-  static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;
   static bool hideUnimportantStateEvents = true;
   static bool showDirectChatsInSpaces = true;
@@ -287,9 +286,6 @@ abstract class AppConfig {
     }
     if (json['render_html'] is bool) {
       renderHtml = json['render_html'];
-    }
-    if (json['hide_redacted_events'] is bool) {
-      hideRedactedEvents = json['hide_redacted_events'];
     }
     if (json['hide_unknown_events'] is bool) {
       hideUnknownEvents = json['hide_unknown_events'];

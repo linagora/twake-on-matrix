@@ -749,11 +749,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "編集済みイベントを非表示にする",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "不明なイベントを非表示にする",
   "@hideUnknownEvents": {
     "type": "text",

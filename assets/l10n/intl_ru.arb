@@ -868,11 +868,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Скрывать удаленные сообщения",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Скрывать неизвестные события",
   "@hideUnknownEvents": {
     "type": "text",

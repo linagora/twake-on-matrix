@@ -1360,12 +1360,6 @@ class MatrixState extends State<Matrix>
             .then((value) => AppConfig.renderHtml = value),
         store
             .getItemBool(
-              SettingKeys.hideRedactedEvents,
-              AppConfig.hideRedactedEvents,
-            )
-            .then((value) => AppConfig.hideRedactedEvents = value),
-        store
-            .getItemBool(
               SettingKeys.hideUnknownEvents,
               AppConfig.hideUnknownEvents,
             )

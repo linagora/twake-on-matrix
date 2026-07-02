@@ -182,11 +182,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Sembunyikan pesan yang dihapus",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "help": "Bantuan",
   "@help": {
     "type": "text",

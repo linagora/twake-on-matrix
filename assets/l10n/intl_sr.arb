@@ -818,11 +818,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Сакриј редиговане догађаје",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Сакриј непознате догађаје",
   "@hideUnknownEvents": {
     "type": "text",

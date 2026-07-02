@@ -751,11 +751,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Slėpti pašalintus įvykius",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Slėpti nežinomus įvykius",
   "@hideUnknownEvents": {
     "type": "text",

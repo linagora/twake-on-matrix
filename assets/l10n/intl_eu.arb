@@ -1441,11 +1441,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Izkutatu ezabatutako gertaerak",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Izkutatu gertaera ezezagunak",
   "@hideUnknownEvents": {
     "type": "text",

@@ -866,11 +866,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Skrýt redigované události",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Skrýt neznámé události",
   "@hideUnknownEvents": {
     "type": "text",

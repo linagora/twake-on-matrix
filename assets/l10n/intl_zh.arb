@@ -836,11 +836,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "隐藏编辑事件",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "隐藏未知事件",
   "@hideUnknownEvents": {
     "type": "text",

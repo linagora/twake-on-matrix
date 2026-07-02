@@ -706,11 +706,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "hideRedactedEvents": "Skjul tilbaketrukne hendelser",
-  "@hideRedactedEvents": {
-    "type": "text",
-    "placeholders": {}
-  },
   "hideUnknownEvents": "Skjul ukjente hendelser",
   "@hideUnknownEvents": {
     "type": "text",

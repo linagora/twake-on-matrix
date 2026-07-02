@@ -176,21 +176,17 @@ void main() {
     );
   });
 
-  late bool savedHideRedacted;
   late bool savedHideUnknown;
   late bool savedHideUnimportant;
 
   setUp(() {
-    savedHideRedacted = AppConfig.hideRedactedEvents;
     savedHideUnknown = AppConfig.hideUnknownEvents;
     savedHideUnimportant = AppConfig.hideUnimportantStateEvents;
-    AppConfig.hideRedactedEvents = false;
     AppConfig.hideUnknownEvents = true;
     AppConfig.hideUnimportantStateEvents = true;
   });
 
   tearDown(() {
-    AppConfig.hideRedactedEvents = savedHideRedacted;
     AppConfig.hideUnknownEvents = savedHideUnknown;
     AppConfig.hideUnimportantStateEvents = savedHideUnimportant;
   });
@@ -414,14 +410,7 @@ void main() {
       },
     };
 
-    test('redacted message hidden when hideRedactedEvents = true', () {
-      AppConfig.hideRedactedEvents = true;
-      final e = makeEvent(unsigned: redactedUnsigned());
-      expect(e.isVisibleInGui, isFalse);
-    });
-
-    test('redacted message visible when hideRedactedEvents = false', () {
-      AppConfig.hideRedactedEvents = false;
+    test('redacted message is always visible', () {
       final e = makeEvent(unsigned: redactedUnsigned());
       expect(e.isVisibleInGui, isTrue);
     });
