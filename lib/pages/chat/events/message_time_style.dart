@@ -9,7 +9,7 @@ final class MessageTimeStyle {
 
   static double get timelineLetterSpacing => 0.4;
   static double get paddingTimeAndIcon => 8;
-  static double get seenByRowIconSize => 16;
+  static const double seenByRowIconSize = 16;
 
   static Color readReceiptColor(bool seenByOthers) => seenByOthers
       ? LinagoraSysColors.material().secondary

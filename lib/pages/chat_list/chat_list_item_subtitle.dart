@@ -4,7 +4,7 @@ import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/model/room/room_preview_result.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat/events/message_time_style.dart';
+import 'package:fluffychat/pages/chat/seen_by_row.dart';
 import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
 import 'package:fluffychat/pages/chat_list/chat_preview_text.dart';
@@ -81,12 +81,16 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
             }
             final isMentioned = lastEvent.isMention == true;
             return lastEvent.senderId == room.client.userID
-                ? Icon(
-                    Icons.done_all,
-                    color: MessageTimeStyle.readReceiptColor(
-                      room.hasLastEventBeenSeenByOthers,
-                    ),
+                ? SeenByRow(
+                    eventStatus: lastEvent.status,
+                    timelineOverlayMessage: false,
                     size: 20,
+                    getSeenByUsers: lastEvent.receipts
+                        .where(
+                          (receipt) => receipt.user.id != room.client.userID,
+                        )
+                        .map((receipt) => receipt.user)
+                        .toList(),
                   )
                 : AnimatedContainer(
                     duration: TwakeThemes.animationDuration,
