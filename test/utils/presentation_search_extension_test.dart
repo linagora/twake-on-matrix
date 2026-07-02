@@ -3,8 +3,12 @@ import 'package:fluffychat/presentation/model/contact/presentation_contact.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:get_it/get_it.dart';
 
 void main() {
+  setUpAll(() => GetIt.instance.registerSingleton(const SearchEngine()));
+  tearDownAll(() => GetIt.instance.reset());
   group('doesMatchKeyword test with Display name', () {
     test('WHEN displayName is null'
         'THEN returns false', () {

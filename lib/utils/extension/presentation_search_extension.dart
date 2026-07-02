@@ -1,48 +1,59 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
 
+const _searchOptions = SearchOptions(diacriticSensitive: false);
+
 extension PresentationSearchExtension on PresentationSearch {
-  bool _matchedMatrixId(String keyword) {
-    return id.toLowerCase().contains(keyword.toLowerCase());
-  }
+  SearchEngine get _searchEngine => getIt.get<SearchEngine>();
 
-  bool _matchedDirectChatMatrixId(String keyword) {
-    return directChatMatrixID?.toLowerCase().contains(keyword.toLowerCase()) ??
-        false;
-  }
+  bool _matchedMatrixId(String keyword) =>
+      _searchEngine.matchesText(keyword, id, options: _searchOptions);
 
-  bool _matchedName(String keyword) {
-    return displayName?.toLowerCase().contains(keyword.toLowerCase()) ?? false;
-  }
+  bool _matchedDirectChatMatrixId(String keyword) => _searchEngine.matchesText(
+    keyword,
+    directChatMatrixID ?? '',
+    options: _searchOptions,
+  );
 
-  bool _matchedEmail(String keyword) {
-    return emails?.firstWhereOrNull(
-          (email) => email.email.contains(keyword) == true,
-        ) !=
-        null;
-  }
+  bool _matchedName(String keyword) => _searchEngine.matchesText(
+    keyword,
+    displayName ?? '',
+    options: _searchOptions,
+  );
 
-  bool _matchedPhoneNumber(String keyword) {
-    return phoneNumbers?.firstWhereOrNull(
-          (phone) =>
-              phone.phoneNumber.replaceAll(" ", "").contains(keyword) == true,
-        ) !=
-        null;
-  }
+  bool _matchedEmail(String keyword) =>
+      emails?.firstWhereOrNull(
+        (email) => _searchEngine.matchesText(
+          keyword,
+          email.email,
+          options: _searchOptions,
+        ),
+      ) !=
+      null;
 
-  bool _matchedContactInfo(String keyword) {
-    return _matchedName(keyword) ||
-        _matchedEmail(keyword) ||
-        _matchedPhoneNumber(keyword) ||
-        _matchedMatrixId(keyword) ||
-        _matchedDirectChatMatrixId(keyword);
-  }
+  bool _matchedPhoneNumber(String keyword) =>
+      phoneNumbers?.firstWhereOrNull(
+        (phone) => _searchEngine.matchesText(
+          keyword.replaceAll(' ', ''),
+          phone.phoneNumber.replaceAll(' ', ''),
+          options: _searchOptions,
+        ),
+      ) !=
+      null;
+
+  bool _matchedContactInfo(String keyword) =>
+      _matchedName(keyword) ||
+      _matchedEmail(keyword) ||
+      _matchedPhoneNumber(keyword) ||
+      _matchedMatrixId(keyword) ||
+      _matchedDirectChatMatrixId(keyword);
 
   bool doesMatchKeyword(String keyword) {
-    if (this is! ContactPresentationSearch) {
-      return false;
-    }
-
+    if (this is! ContactPresentationSearch) return false;
+    if (keyword.isEmpty) return true;
     return _matchedContactInfo(keyword);
   }
 }

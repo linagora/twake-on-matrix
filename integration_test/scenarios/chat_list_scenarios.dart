@@ -48,6 +48,20 @@ class ChatListSearchScenario extends BaseTestScenario {
       'Search by $_searchByMatrixAddress expected exactly 1 group',
     );
 
+    // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
+    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    s.softAssertEquals(
+      diacriticQuery != _searchByTitle,
+      true,
+      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+    );
+    await _search(diacriticQuery);
+    s.softAssertEquals(
+      (await robots.chatListRobot().getListOfChatGroup()).length == 1,
+      true,
+      'Search by $diacriticQuery expected 1 group',
+    );
+
     // Current account -> owner + email visible on the row.
     await _search(_currentAccount);
     final groups = await robots.chatListRobot().getListOfChatGroup();
