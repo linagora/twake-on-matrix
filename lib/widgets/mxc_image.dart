@@ -7,7 +7,7 @@ import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -281,7 +281,7 @@ class _MxcImageState extends State<MxcImage>
           await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
             HeroPageRoute(
               builder: (context) {
-                return InteractiveViewerGallery(
+                return DismissibleMediaView(
                   itemBuilder: PlatformInfos.isMobile
                       ? MediaViewer(event: widget.event!)
                       : ImageViewer(event: widget.event!),

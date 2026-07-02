@@ -4,7 +4,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
@@ -56,7 +56,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
       await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
           builder: (context) {
-            return InteractiveViewerGallery(
+            return DismissibleMediaView(
               itemBuilder: ImageViewer(event: widget.event),
             );
           },
