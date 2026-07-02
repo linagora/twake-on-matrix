@@ -17,6 +17,7 @@ import 'package:universal_html/js.dart' as js;
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/web_push/web_push.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 extension LocalNotificationsExtension on MatrixState {
@@ -27,8 +28,13 @@ extension LocalNotificationsExtension on MatrixState {
 
   void showLocalNotification(EventUpdate eventUpdate) async {
     final roomId = eventUpdate.roomID;
+    // On web the settings toggle owns all browser notifications for this tab:
+    // active Web Push is handled by push_sw.js; explicit opt-out suppresses the
+    // legacy Notification API fallback too.
+    if (kIsWeb && (isWebPushActiveSync() || await isWebPushDisabledByUser())) {
+      return;
+    }
     if (activeRoomId == roomId) {
-      if (kIsWeb && webHasFocus) return;
       if (PlatformInfos.isLinux && DesktopLifecycle.instance.isActive.value) {
         return;
       }

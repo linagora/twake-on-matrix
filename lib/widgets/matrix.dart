@@ -70,6 +70,7 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
 
@@ -395,6 +396,10 @@ class MatrixState extends State<Matrix>
   final onKeyVerificationRequestSub = <String, StreamSubscription>{};
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
+
+  /// Re-registers the Web Push pusher when the app language changes so its
+  /// (generic) notification text follows the account language.
+  VoidCallback? _webPushLocaleListener;
   final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController.broadcast();
@@ -539,8 +544,24 @@ class MatrixState extends State<Matrix>
       uiaRequestHandler,
     );
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
-      currentClient.onSync.stream.first.then((s) async {
-        await _requestNotificationPermission();
+      Future<void> initWebNotifications() async {
+        if (kIsWeb) {
+          // ignore: unawaited_futures
+          setupWebPush(currentClient);
+          // Re-register on language change (and once the locale resolves after
+          // a cold start) so the generic notification text matches the account
+          // language. removeListener+addListener keeps a single live listener.
+          final listener = _webPushLocaleListener;
+          if (listener != null) {
+            LocalizationService.currentLocale.removeListener(listener);
+          }
+          _webPushLocaleListener = () => setupWebPush(currentClient);
+          LocalizationService.currentLocale.addListener(
+            _webPushLocaleListener!,
+          );
+        } else {
+          await _requestNotificationPermission();
+        }
         onNotification[name] ??= currentClient.onEvent.stream
             .where(
               (e) =>
@@ -551,7 +572,17 @@ class MatrixState extends State<Matrix>
                   e.content['sender'] != currentClient.userID,
             )
             .listen(showLocalNotification);
-      });
+      }
+
+      // On a warm start the first sync may already have happened before this
+      // listener attaches, so onSync.stream.first would never fire and web push
+      // setup would silently be skipped. Run immediately if already synced.
+      if (currentClient.prevBatch != null) {
+        // ignore: unawaited_futures
+        initWebNotifications();
+      } else {
+        currentClient.onSync.stream.first.then((_) => initWebNotifications());
+      }
     }
     currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
       if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
@@ -575,12 +606,11 @@ class MatrixState extends State<Matrix>
       final isInsideCozy = await CozyConfigManager().isInsideCozy;
       if (isInsideCozy) {
         CozyConfigManager().requestNotificationPermission();
-      } else {
-        html.Notification.requestPermission();
+        return;
       }
-    } catch (e) {
-      html.Notification.requestPermission();
-    }
+    } catch (_) {}
+
+    await html.Notification.requestPermission();
   }
 
   void _listenLoginStateChanged(LoginState state, Client client) async {
@@ -608,6 +638,10 @@ class MatrixState extends State<Matrix>
       backgroundPush?.cancelKeychainSyncForClient(currentClient);
       await backgroundPush?.removePusherForClient(currentClient);
     }
+
+    // Web: drop just this account's pusher, but keep the shared browser
+    // subscription alive for the accounts still signed in.
+    if (kIsWeb) await removeWebPush(currentClient, unsubscribe: false);
 
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
@@ -717,6 +751,11 @@ class MatrixState extends State<Matrix>
     onNotification.remove(name);
     await onUiaRequest[name]?.cancel();
     onUiaRequest.remove(name);
+    final webPushListener = _webPushLocaleListener;
+    if (webPushListener != null) {
+      LocalizationService.currentLocale.removeListener(webPushListener);
+      _webPushLocaleListener = null;
+    }
   }
 
   Future<void> initMatrix() async {
@@ -1265,6 +1304,7 @@ class MatrixState extends State<Matrix>
       await _deletePersistActiveAccount();
       TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     } else {
+      if (kIsWeb) await removeWebPush(client);
       TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();

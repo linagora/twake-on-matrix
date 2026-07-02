@@ -1515,6 +1515,8 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Mở ứng dụng để đọc tin nhắn",
+  "newMessage": "Tin nhắn mới",
+  "enableNotificationsExplanation": "Bật thông báo để được nhắc về tin nhắn mới, ngay cả khi Twake đã đóng.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
