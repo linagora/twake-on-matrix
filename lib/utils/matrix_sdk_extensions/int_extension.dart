@@ -11,7 +11,9 @@ extension IntExtension on int {
     return this ~/ (1024 * 1024);
   }
 
-  static const oneKB = 1024 * 1024;
+  static const oneKB = 1024;
+
+  static const oneMB = 1024 * 1024;
 
   String formatNumberAudioDuration() {
     String numberStr = toString();
