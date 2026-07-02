@@ -631,8 +631,7 @@ class MatrixState extends State<Matrix>
     _lastSyncErrorSentAt[throttleKey] = now;
     // ignore: unawaited_futures
     Sentry.captureException(
-      exception,
-      stackTrace: error.stackTrace,
+      Exception('Matrix sync error: $errorType'),
       withScope: (scope) async {
         await scope.setTag('sync_status', update.status.name);
         await scope.setTag('sync_error_type', errorType);
