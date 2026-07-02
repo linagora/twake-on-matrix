@@ -396,6 +396,10 @@ class MatrixState extends State<Matrix>
   final onKeyVerificationRequestSub = <String, StreamSubscription>{};
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
+  final onSyncStatusSub = <String, StreamSubscription>{};
+  final _lastSyncErrorSentAt = <String, DateTime>{};
+
+  static const _syncErrorSentryThrottle = Duration(minutes: 10);
 
   /// Re-registers the Web Push pusher when the app language changes so its
   /// (generic) notification text follows the account language.
@@ -543,6 +547,9 @@ class MatrixState extends State<Matrix>
     onUiaRequest[name] ??= currentClient.onUiaRequest.stream.listen(
       uiaRequestHandler,
     );
+    onSyncStatusSub[name] ??= currentClient.onSyncStatus.stream.listen(
+      (update) => _handleSyncStatusUpdate(currentClient, update),
+    );
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       Future<void> initWebNotifications() async {
         if (kIsWeb) {
@@ -599,6 +606,45 @@ class MatrixState extends State<Matrix>
         }
       }
     });
+  }
+
+  void _handleSyncStatusUpdate(Client client, SyncStatusUpdate update) {
+    if (update.status != SyncStatus.error || update.error == null) return;
+
+    _captureSyncError(client, update);
+  }
+
+  void _captureSyncError(Client client, SyncStatusUpdate update) {
+    final error = update.error;
+    if (error == null) return;
+
+    final exception = error.exception ?? Exception('Unknown Matrix sync error');
+    final errorType = exception.runtimeType.toString();
+    final throttleKey = '${client.clientName}:$errorType';
+    final now = DateTime.now();
+    final lastSentAt = _lastSyncErrorSentAt[throttleKey];
+    if (lastSentAt != null &&
+        now.difference(lastSentAt) < _syncErrorSentryThrottle) {
+      return;
+    }
+
+    _lastSyncErrorSentAt[throttleKey] = now;
+    // ignore: unawaited_futures
+    Sentry.captureException(
+      exception,
+      stackTrace: error.stackTrace,
+      withScope: (scope) async {
+        await scope.setTag('sync_status', update.status.name);
+        await scope.setTag('sync_error_type', errorType);
+        await scope.setContexts('matrix_sync', {
+          'has_prev_batch': client.prevBatch != null,
+          'has_sync_value': client.onSync.value != null,
+          'is_logged': client.isLogged(),
+          'platform': PlatformInfos.clientName,
+          'sync_pending': client.syncPending,
+        });
+      },
+    );
   }
 
   Future<void> _requestNotificationPermission() async {
@@ -751,6 +797,8 @@ class MatrixState extends State<Matrix>
     onNotification.remove(name);
     await onUiaRequest[name]?.cancel();
     onUiaRequest.remove(name);
+    await onSyncStatusSub[name]?.cancel();
+    onSyncStatusSub.remove(name);
     final webPushListener = _webPushLocaleListener;
     if (webPushListener != null) {
       LocalizationService.currentLocale.removeListener(webPushListener);
@@ -1474,6 +1522,9 @@ class MatrixState extends State<Matrix>
       s.cancel();
     }
     for (final s in onUiaRequest.values) {
+      s.cancel();
+    }
+    for (final s in onSyncStatusSub.values) {
       s.cancel();
     }
     onClientLoginStateChanged.close();
