@@ -9,11 +9,14 @@ class SeenByRow extends StatelessWidget {
   final EventStatus? eventStatus;
   final bool timelineOverlayMessage;
 
+  final double size;
+
   const SeenByRow({
     this.eventStatus,
     super.key,
     required this.getSeenByUsers,
     required this.timelineOverlayMessage,
+    this.size = MessageTimeStyle.seenByRowIconSize,
   });
 
   @override
@@ -46,43 +49,22 @@ class SeenByRow extends StatelessWidget {
     List<User> seenByUsers, {
     EventStatus? eventStatus,
   }) {
-    final messageStatus = getMessageStatus(
+    final Color secondaryColor = MessageTimeStyle.seenByRowIconSecondaryColor(
+      timelineOverlayMessage,
+      colorScheme,
+    );
+    final (IconData icon, Color color) = switch (getMessageStatus(
       seenByUsers,
       eventStatus: eventStatus,
-    );
-    switch (messageStatus) {
-      case MessageStatus.sending:
-        return Icon(
-          Icons.schedule,
-          color: MessageTimeStyle.seenByRowIconSecondaryColor(
-            timelineOverlayMessage,
-            colorScheme,
-          ),
-          size: MessageTimeStyle.seenByRowIconSize,
-        );
-      case MessageStatus.sent:
-        return Icon(
-          Icons.done_all,
-          color: MessageTimeStyle.seenByRowIconSecondaryColor(
-            timelineOverlayMessage,
-            colorScheme,
-          ),
-          size: MessageTimeStyle.seenByRowIconSize,
-        );
-      case MessageStatus.hasBeenSeen:
-        return Icon(
-          Icons.done_all,
-          color: MessageTimeStyle.seenByRowIconPrimaryColor(
-            timelineOverlayMessage,
-          ),
-          size: MessageTimeStyle.seenByRowIconSize,
-        );
-      case MessageStatus.error:
-        return Icon(
-          Icons.error,
-          color: colorScheme.error,
-          size: MessageTimeStyle.seenByRowIconSize,
-        );
-    }
+    )) {
+      MessageStatus.sending => (Icons.schedule, secondaryColor),
+      MessageStatus.sent => (Icons.done_all, secondaryColor),
+      MessageStatus.hasBeenSeen => (
+        Icons.done_all,
+        MessageTimeStyle.seenByRowIconPrimaryColor(timelineOverlayMessage),
+      ),
+      MessageStatus.error => (Icons.error, colorScheme.error),
+    };
+    return Icon(icon, color: color, size: size);
   }
 }

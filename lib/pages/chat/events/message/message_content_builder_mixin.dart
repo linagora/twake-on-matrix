@@ -151,7 +151,7 @@ mixin MessageContentBuilderMixin {
     const pushpinIconSize = MessageStyle.pushpinIconSize;
     const paddingAllPushpin = MessageStyle.paddingAllPushpin;
     const paddingToTimeSpacing = 4.0;
-    final seenByRowIconSize = MessageTimeStyle.seenByRowIconSize;
+    const seenByRowIconSize = MessageTimeStyle.seenByRowIconSize;
     final paddingTimeAndIcon = MessageTimeStyle.paddingTimeAndIcon;
 
     double totalWidth = painTimeText.width;
