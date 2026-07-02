@@ -2,6 +2,9 @@
 // TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
 
 import 'package:emojis/emoji.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
@@ -223,9 +226,12 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         }
       }
     }
-    final roomMatch = RegExp(r'(?:\s|^)#([-\w]+)$').firstMatch(searchText);
+    final roomMatch = RegExp(
+      r'(?:\s|^)#([-\w\p{L}]+)$',
+      unicode: true,
+    ).firstMatch(searchText);
     if (roomMatch != null && widget.room != null) {
-      final roomSearch = roomMatch[1]!.toLowerCase();
+      final roomSearch = roomMatch[1]!;
       for (final r in widget.room!.client.rooms) {
         if (r.getState(EventTypes.RoomTombstone) != null) {
           continue; // we don't care about tombstoned rooms
@@ -233,22 +239,21 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         final state = r.getState(EventTypes.RoomCanonicalAlias);
         final alias = state?.content['alias'];
         final altAlias = state?.content['alt_aliases'];
-        if ((state != null &&
-                ((alias is String &&
-                        alias
-                            .split(':')[0]
-                            .toLowerCase()
-                            .contains(roomSearch)) ||
-                    (altAlias is List &&
-                        altAlias.any(
-                          (l) =>
-                              l is String &&
-                              l
-                                  .split(':')[0]
-                                  .toLowerCase()
-                                  .contains(roomSearch),
-                        )))) ||
-            (r.name.toLowerCase().contains(roomSearch))) {
+        const roomOpts = SearchOptions(diacriticSensitive: false);
+        final engine = getIt.get<SearchEngine>();
+        bool matchesAlias(String a) =>
+            engine.matchesText(roomSearch, a.split(':')[0], options: roomOpts);
+        final aliasMatches =
+            state != null &&
+            ((alias is String && matchesAlias(alias)) ||
+                (altAlias is List &&
+                    altAlias.any((l) => l is String && matchesAlias(l))));
+        final nameMatches = engine.matchesText(
+          roomSearch,
+          r.name,
+          options: roomOpts,
+        );
+        if (aliasMatches || nameMatches) {
           ret.add({
             'type': 'room',
             'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
@@ -332,7 +337,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     if (suggestion['type'] == 'room') {
       insertText = '${suggestion['mxid']!} ';
       startText = replaceText.replaceAllMapped(
-        RegExp(r'(\s|^)(#[-\w]+)$'),
+        RegExp(r'(\s|^)(#[-\w\p{L}]+)$', unicode: true),
         (Match m) => '${m[1]}$insertText',
       );
     }

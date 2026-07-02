@@ -24,6 +24,7 @@ class ContactSearchScenario extends BaseTestScenario {
   static const _searchByMatrixAddress = String.fromEnvironment(
     'SearchByMatrixAddress',
   );
+  static const _searchByTitle = String.fromEnvironment('SearchByTitle');
   static const _currentAccount = String.fromEnvironment('CurrentAccount');
 
   @override
@@ -49,6 +50,24 @@ class ContactSearchScenario extends BaseTestScenario {
 
     final byAccount = await _expectSingleResult(s, _currentAccount);
     await _verifyOwnerAndEmail(s, byAccount, ownerVisible: true);
+
+    // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
+    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    s.softAssertEquals(
+      diacriticQuery != _searchByTitle,
+      true,
+      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+    );
+    final byTitleDiacritic = await _searchAndWait(
+      diacriticQuery,
+      expectResults: true,
+    );
+    s.softAssertEquals(
+      byTitleDiacritic.length == 1,
+      true,
+      'Search by $diacriticQuery expected 1 contact',
+    );
+    await _verifyOwnerAndEmail(s, byTitleDiacritic, ownerVisible: false);
 
     await _verifyContactListScreen(s);
 

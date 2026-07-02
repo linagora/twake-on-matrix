@@ -1,18 +1,27 @@
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:matrix/matrix.dart';
+
+const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 extension RoomListExtension on List<Room> {
   bool _matchedMatrixId(RecentChatSearchModel model, String keyword) {
-    return model.directChatMatrixID?.toLowerCase().contains(
-          keyword.toLowerCase(),
-        ) ??
-        false;
+    return getIt.get<SearchEngine>().matchesText(
+      keyword,
+      model.directChatMatrixID ?? '',
+      options: _searchOptions,
+    );
   }
 
   bool _matchedName(RecentChatSearchModel model, String keyword) {
-    return model.displayName?.toLowerCase().contains(keyword.toLowerCase()) ??
-        false;
+    return getIt.get<SearchEngine>().matchesText(
+      keyword,
+      model.displayName ?? '',
+      options: _searchOptions,
+    );
   }
 
   bool _matchedNameOrMatrixId(RecentChatSearchModel model, String keyword) {
