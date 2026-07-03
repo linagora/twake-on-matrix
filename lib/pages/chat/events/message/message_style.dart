@@ -242,7 +242,7 @@ class MessageStyle {
   }
 
   static EdgeInsets get paddingMessageTime =>
-      const EdgeInsets.only(left: 6, right: 8.0, bottom: 4.0);
+      const EdgeInsets.only(bottom: LinagoraSpacing.base * 0.5);
 
   static EdgeInsetsDirectional get paddingSwipeMessage =>
       const EdgeInsetsDirectional.symmetric(horizontal: 16.0);
