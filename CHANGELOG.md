@@ -1,3 +1,39 @@
+## [2.23.0] - 2026-07-02
+### Added
+- Web push notifications via VAPID
+- TW-2893: Multi-account notifications
+- TW-3130: SearchEngine core module
+- TW-3131: Diacritic / NFD normalization in search
+
+### Changed
+- TW-3132: Rewire room/chat search call sites to TextSearch
+- TW-3182: Update group chat creation flow
+- TW-3176: Deduplicate user presence updates via listenSyncPresence
+- TW-3191: Always display deleted messages
+- TW-3052: Apply new design-system changes
+- TW-78: Inherit from design-system LinagoraTextTheme
+- Migrate app font from local Inter to TwakeInter (DS package)
+
+### Fixed
+- TW-2968: Fix wrong member count in group chat
+- TW-3170: Mark last event as read when at room bottom
+- TW-3179: Fix inconsistent edited timestamp in timeline
+- TW-3171: Restore text field focus when switching browser tabs
+- TW-3106: Fix jump to the proper notification on Android
+- TW-3073: Preload hero users so display names show on cold start
+- TW-3055: Focus text field on right click
+- Use actual video dimensions in sending-state preview
+- Prevent filenames from opening a new tab in message captions
+- Fix caption field height, video preview play & upload compression
+- Guard ChatWebScrollbar against multi-attached ScrollController (web)
+
+### Tests
+- Migrate integration tests (chat_group, DM, forward) to scenarioBuilder
+- Migrate profile/ownership + DM/group tests to scenarioBuilder (web-green)
+- Finalize Patrol-web: mobileOnly flag, drop legacy entry points
+- Make Patrol Web CI green (boot, empty-clients, skip-hang)
+- Nightly performance pipeline on Firebase Test Lab
+
 ## [2.22.5] - 2026-06-11
 ### Added
 - TW-3048: Visio link integration
