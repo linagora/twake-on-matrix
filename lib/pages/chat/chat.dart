@@ -693,6 +693,7 @@ class ChatController extends State<Chat>
       // and no timeline update
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
+        if (_isProgrammaticScrolling) return;
         _markLatestReadIfAtBottom();
       });
     } catch (e, s) {
