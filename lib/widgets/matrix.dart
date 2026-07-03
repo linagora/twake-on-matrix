@@ -1369,7 +1369,7 @@ class MatrixState extends State<Matrix>
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
-    client.requestHistoryOnLimitedTimeline = !foreground;
+    client.requestHistoryOnLimitedTimeline = true;
     backgroundPush?.clearAllNotifications();
   }
 
