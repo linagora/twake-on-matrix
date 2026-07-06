@@ -2,7 +2,7 @@ import 'package:fluffychat/pages/chat/events/images_builder/unencrypted_image_bu
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
@@ -87,7 +87,7 @@ class UnencryptedImageBuilderWeb extends StatelessWidget {
           await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
             HeroPageRoute(
               builder: (context) {
-                return InteractiveViewerGallery(
+                return DismissibleMediaView(
                   itemBuilder: ImageViewer(event: event),
                 );
               },

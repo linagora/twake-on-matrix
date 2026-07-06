@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/video_viewer_desktop_theme.dart';
@@ -44,7 +44,7 @@ mixin PlayVideoActionMixin {
     assert(bytes != null || url != null, 'bytes or url must be provided');
     final pageRoute = HeroPageRoute(
       builder: (context) {
-        return InteractiveViewerGallery(
+        return DismissibleMediaView(
           itemBuilder: PlatformInfos.isMobile
               ? VideoViewerMobileTheme(bytes: bytes, url: url, event: event)
               : VideoViewerDesktopTheme(bytes: bytes, url: url, event: event),

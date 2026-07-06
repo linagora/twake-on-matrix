@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:fluffychat/utils/pinch_detector.dart';
 import 'package:fluffychat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -29,7 +30,7 @@ class MediaViewerView extends StatelessWidget {
           return ImageViewer(
             event: event,
             showAppBar: false,
-            onZoomChanged: controller.togglePageViewScroll,
+            onZoomChanged: controller.onImageZoomChanged,
           );
         }
 
@@ -133,7 +134,10 @@ class MediaViewerView extends StatelessWidget {
 
     return Stack(
       children: [
-        pageView,
+        PinchDetector(
+          onPinchChanged: controller.onPinchChanged,
+          child: pageView,
+        ),
         Positioned.fill(child: toggleAppBarAndPreviewOverlay),
         appBar,
         Positioned(

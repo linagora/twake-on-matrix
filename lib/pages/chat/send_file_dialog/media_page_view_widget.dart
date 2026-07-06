@@ -1,7 +1,7 @@
 import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/list_notifier.dart';
-import 'package:fluffychat/utils/interactive_viewer_gallery.dart';
+import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/widgets/hero_page_route.dart';
 import 'package:fluffychat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
@@ -32,7 +32,7 @@ class MediaPageViewWidget extends StatelessWidget {
             Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
               HeroPageRoute(
                 builder: (context) {
-                  return InteractiveViewerGallery(
+                  return DismissibleMediaView(
                     itemBuilder: ImageViewer(imageData: files.first.bytes),
                   );
                 },
