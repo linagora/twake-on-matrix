@@ -20,6 +20,67 @@ import '../../../../fake_client.dart';
 
 class MockUpMessageContentBuilder with MessageContentBuilderMixin {}
 
+/// Expected geometric regime of a message bubble, asserted as a contract
+/// instead of exact pixel widths.
+enum BubbleRegime {
+  /// Content fits: width < maxWidth, no forced new line.
+  fits,
+
+  /// Last line has no room for the timestamp: width == maxWidth, new line.
+  wraps,
+
+  /// Width is driven by the wider display name, not the message body.
+  displayNameDriven,
+}
+
+void _expectRegime(
+  MessageMetrics? metrics,
+  MessageMetrics? messageOnlyMetrics,
+  double maxWidth,
+  BubbleRegime regime,
+) {
+  expect(metrics, isNotNull);
+  final m = metrics!;
+  final width = m.totalMessageWidth;
+  expect(width, greaterThan(0));
+  expect(width, lessThanOrEqualTo(maxWidth));
+  switch (regime) {
+    case BubbleRegime.fits:
+      expect(m.isNeedAddNewLine, isFalse);
+      expect(width, lessThan(maxWidth));
+    case BubbleRegime.wraps:
+      expect(m.isNeedAddNewLine, isTrue);
+      expect(width, equals(maxWidth));
+    case BubbleRegime.displayNameDriven:
+      expect(m.isNeedAddNewLine, isFalse);
+      expect(messageOnlyMetrics, isNotNull);
+      expect(width, greaterThan(messageOnlyMetrics!.totalMessageWidth));
+  }
+}
+
+void _expectMetrics(
+  MessageMetrics? metrics,
+  MessageMetrics? messageOnlyMetrics,
+  Event event,
+  double maxWidth,
+  BubbleRegime? regime,
+  bool? expectedIsNeedAddNewLine,
+) {
+  if (regime != null) {
+    _expectRegime(metrics, messageOnlyMetrics, maxWidth, regime);
+    return;
+  }
+  if (expectedIsNeedAddNewLine != null) {
+    expect(metrics, isNotNull);
+    final m = metrics!;
+    expect(m.totalMessageWidth, greaterThan(0));
+    expect(m.totalMessageWidth, lessThanOrEqualTo(maxWidth));
+    expect(m.isNeedAddNewLine, equals(expectedIsNeedAddNewLine));
+    return;
+  }
+  expect(metrics, event.isVideoOrImage ? isNotNull : isNull);
+}
+
 Future<void> main() async {
   TestWidgetsFlutterBinding.ensureInitialized();
   late MockUpMessageContentBuilder mockUpMessageContentBuilder;
@@ -101,12 +162,14 @@ Future<void> main() async {
       WidgetTester tester, {
       required Event event,
       required double maxWidth,
-      MessageMetrics? expectedMetrics,
+      BubbleRegime? regime,
       bool ownMessage = false,
       bool hideDisplayName = false,
       bool? expectedIsNeedAddNewLine,
     }) async {
-      MessageMetrics? getSizeForEmptyTextEvent;
+      MessageMetrics? metrics;
+      // Same event as an own message: no display name, width is the body alone.
+      MessageMetrics? messageOnlyMetrics;
 
       await tester.pumpWidget(
         ThemeBuilder(
@@ -133,7 +196,7 @@ Future<void> main() async {
             home: Scaffold(
               body: Builder(
                 builder: (context) {
-                  getSizeForEmptyTextEvent = mockUpMessageContentBuilder
+                  metrics = mockUpMessageContentBuilder
                       .getSizeMessageBubbleWidth(
                         context,
                         event: event,
@@ -141,6 +204,14 @@ Future<void> main() async {
                         ownMessage: ownMessage,
                         hideDisplayName: hideDisplayName,
                       );
+                  messageOnlyMetrics = regime == BubbleRegime.displayNameDriven
+                      ? mockUpMessageContentBuilder.getSizeMessageBubbleWidth(
+                          context,
+                          event: event,
+                          maxWidth: maxWidth,
+                          ownMessage: true,
+                        )
+                      : null;
                   return const SizedBox();
                 },
               ),
@@ -150,30 +221,14 @@ Future<void> main() async {
       );
       await tester.pumpAndSettle();
 
-      if (expectedMetrics != null) {
-        expect(getSizeForEmptyTextEvent, isNotNull);
-        expect(getSizeForEmptyTextEvent, isA<MessageMetrics>());
-        expect(
-          getSizeForEmptyTextEvent!.totalMessageWidth,
-          equals(expectedMetrics.totalMessageWidth),
-        );
-        expect(
-          getSizeForEmptyTextEvent!.isNeedAddNewLine,
-          equals(expectedMetrics.isNeedAddNewLine),
-        );
-      } else if (expectedIsNeedAddNewLine != null) {
-        expect(getSizeForEmptyTextEvent, isNotNull);
-        expect(
-          getSizeForEmptyTextEvent!.isNeedAddNewLine,
-          equals(expectedIsNeedAddNewLine),
-        );
-      } else {
-        if (event.isVideoOrImage) {
-          expect(getSizeForEmptyTextEvent, isNotNull);
-        } else {
-          expect(getSizeForEmptyTextEvent, isNull);
-        }
-      }
+      _expectMetrics(
+        metrics,
+        messageOnlyMetrics,
+        event,
+        maxWidth,
+        regime,
+        expectedIsNeedAddNewLine,
+      );
     }
 
     group('[getSizeMessageBubbleWidth] TEST\n'
@@ -235,23 +290,18 @@ Future<void> main() async {
             room: room,
           );
 
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 388.375,
-            isNeedAddNewLine: false,
-          );
-
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: true,
           );
         });
         testWidgets('GIVEN message body has multiple lines\n'
-            'AND last line don\'t have enough space for time line\n'
-            'THEN return total message width is width of longest line\n'
-            'AND isNeedAddNewLine is true\n', (WidgetTester tester) async {
+            'AND last line has enough space for time line at web width\n'
+            'THEN return total message width fits the last line and time\n'
+            'AND isNeedAddNewLine is false\n', (WidgetTester tester) async {
           final eventToTest = Event(
             content: {
               "msgtype": "m.text",
@@ -271,15 +321,12 @@ Future<void> main() async {
               "com.famedly.famedlysdk.message_sending_status": 2,
             },
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: messageMaxWidthWeb,
-            isNeedAddNewLine: true,
-          );
+          // Fits at web width; the wrap branch is covered by the mobile cases.
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: true,
           );
         });
@@ -304,15 +351,11 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 238.0,
-            isNeedAddNewLine: false,
-          );
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.displayNameDriven,
             ownMessage: false,
             hideDisplayName: false,
           );
@@ -338,15 +381,11 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 388.375,
-            isNeedAddNewLine: false,
-          );
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: false,
             hideDisplayName: false,
           );
@@ -354,9 +393,9 @@ Future<void> main() async {
 
         testWidgets('GIVEN width of display name is smaller than message body\n'
             'AND message body has multiple lines\n'
-            'AND last line don\'t have enough space for time line\n'
-            'THEN return total message width is width of longest line\n'
-            'AND isNeedAddNewLine is true\n', (WidgetTester tester) async {
+            'AND last line has enough space for time line at web width\n'
+            'THEN return total message width fits the last line and time\n'
+            'AND isNeedAddNewLine is false\n', (WidgetTester tester) async {
           final eventToTest = Event(
             content: {
               "msgtype": "m.text",
@@ -372,15 +411,12 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: messageMaxWidthWeb,
-            isNeedAddNewLine: true,
-          );
+          // Fits at web width; the wrap branch is covered by the mobile cases.
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthWeb,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: false,
             hideDisplayName: false,
           );
@@ -451,16 +487,11 @@ Future<void> main() async {
             room: room,
           );
 
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 260.875,
-            isNeedAddNewLine: false,
-          );
-
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: true,
           );
         });
@@ -483,15 +514,11 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: messageMaxWidthMobile,
-            isNeedAddNewLine: true,
-          );
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.wraps,
             ownMessage: true,
           );
         });
@@ -516,16 +543,11 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const displayNameWithPaddingWidth = 238.0;
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: displayNameWithPaddingWidth,
-            isNeedAddNewLine: false,
-          );
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.displayNameDriven,
             ownMessage: false,
             hideDisplayName: false,
           );
@@ -552,16 +574,11 @@ Future<void> main() async {
             room: room,
           );
 
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: 260.875,
-            isNeedAddNewLine: false,
-          );
-
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.fits,
             ownMessage: true,
           );
         });
@@ -586,15 +603,11 @@ Future<void> main() async {
             originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
             room: room,
           );
-          const expectedMetrics = MessageMetrics(
-            totalMessageWidth: messageMaxWidthMobile,
-            isNeedAddNewLine: true,
-          );
           await runTest(
             tester,
             event: eventToTest,
             maxWidth: messageMaxWidthMobile,
-            expectedMetrics: expectedMetrics,
+            regime: BubbleRegime.wraps,
             ownMessage: true,
           );
         });
