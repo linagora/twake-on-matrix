@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,9 +48,11 @@ class NewChatRobot extends CoreRobot {
 
   Future<void> clickOnNewGroupChatIcon() async {
     await getNewGroupChatIcon().tap();
-    // The "Add members" AppBar title is mobile-only (absent on web's wide
-    // layout); wait for the add-members search affordance instead.
-    await $.waitUntilVisible($(find.byIcon(Icons.search)).first);
+    // The add-members screen (`ContactsSelectionView`) opens directly in search
+    // mode (`openSearchBar()` in its initState), so the standalone search icon
+    // is gone and the search `TextField` is shown inline. Wait for that field
+    // instead of the removed `Icons.search` affordance.
+    await $.waitUntilVisible($(ContactsSelectionView).$(TextField).first);
   }
 
   List<TwakeListItemRobot> getListOfAccount() {
