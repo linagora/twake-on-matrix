@@ -76,13 +76,34 @@ mixin class ContactsViewControllerMixin {
   bool _canReadPhonebookContacts(PermissionStatus? status) =>
       status == PermissionStatus.granted || status == PermissionStatus.limited;
 
+  bool get enablePhonebookContacts => true;
+
   Future<bool> _isPhonebookContactsAvailable() async {
+    if (!enablePhonebookContacts) {
+      contactsPermissionStatus = null;
+      return false;
+    }
+
     final currentContactsPermissionStatus = PlatformInfos.isMobile
         ? await _permissionHandlerService.contactsPermissionStatus
         : null;
     contactsPermissionStatus = currentContactsPermissionStatus;
     return PlatformInfos.isMobile &&
         _canReadPhonebookContacts(currentContactsPermissionStatus);
+  }
+
+  Future<void> _initPhonebookPermission(BuildContext context) async {
+    if (!enablePhonebookContacts) {
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
+      return;
+    }
+
+    if (PlatformInfos.isMobile &&
+        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      await displayContactPermissionDialog(context);
+    } else {
+      await _initWarningBanner();
+    }
   }
 
   bool get phoneBookFilterSuccess => presentationPhonebookContactNotifier.value
@@ -132,6 +153,10 @@ mixin class ContactsViewControllerMixin {
   bool get enableRecentContacts => true;
 
   Future displayContactPermissionDialog(BuildContext context) async {
+    if (!enablePhonebookContacts) {
+      return;
+    }
+
     final fetchContactsPermissionStatus =
         await _permissionHandlerService.contactsPermissionStatus;
 
@@ -169,6 +194,11 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _initWarningBanner() async {
+    if (!enablePhonebookContacts) {
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
+      return;
+    }
+
     if (!PlatformInfos.isMobile) {
       return;
     }
@@ -195,7 +225,7 @@ mixin class ContactsViewControllerMixin {
     AppLifecycleState state, {
     required Client client,
   }) async {
-    if (!PlatformInfos.isMobile) {
+    if (!enablePhonebookContacts || !PlatformInfos.isMobile) {
       return;
     }
     Logs().i(
@@ -235,12 +265,7 @@ mixin class ContactsViewControllerMixin {
     required MatrixLocalizations matrixLocalizations,
     bool forceRun = false,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    await _initPhonebookPermission(context);
     _refreshAllContacts(
       context: context,
       client: client,
@@ -279,12 +304,7 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    await _initPhonebookPermission(context);
     _refreshAllContacts(
       context: context,
       client: client,
@@ -322,12 +342,7 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    await _initPhonebookPermission(context);
 
     if (client.userID == null) {
       return;
@@ -375,7 +390,13 @@ mixin class ContactsViewControllerMixin {
   }) {
     final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
-    _refreshPhoneBookContacts(keyword);
+    if (enablePhonebookContacts) {
+      _refreshPhoneBookContacts(keyword);
+    } else if (!presentationPhonebookContactNotifier.isDisposed) {
+      presentationPhonebookContactNotifier.value = const Right(
+        GetPhonebookContactsInitial(),
+      );
+    }
     if (enableRecentContacts) {
       _refreshRecentContacts(
         context: context,
@@ -695,6 +716,10 @@ mixin class ContactsViewControllerMixin {
   Future<void> _handleRequestContactsPermission({
     required Client client,
   }) async {
+    if (!enablePhonebookContacts) {
+      return;
+    }
+
     final currentContactsPermissionStatus = await _permissionHandlerService
         .requestContactsPermissionActions();
     if (_canReadPhonebookContacts(currentContactsPermissionStatus)) {
@@ -731,6 +756,10 @@ mixin class ContactsViewControllerMixin {
   }
 
   List<String> _flatMatrixIdsFromPhonebookContacts() {
+    if (!enablePhonebookContacts) {
+      return [];
+    }
+
     final phonebookContacts =
         contactsManager
             .getPhonebookContactsNotifier()

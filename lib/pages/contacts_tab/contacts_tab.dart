@@ -44,6 +44,9 @@ class ContactsTabController extends State<ContactsTab>
   bool get enableRecentContacts => false;
 
   @override
+  bool get enablePhonebookContacts => supportInvitation();
+
+  @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
