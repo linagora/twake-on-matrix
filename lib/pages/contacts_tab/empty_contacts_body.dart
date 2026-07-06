@@ -5,7 +5,9 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class EmptyContactBody extends StatelessWidget {
-  const EmptyContactBody({super.key});
+  const EmptyContactBody({super.key, this.onRetrySyncContacts});
+
+  final VoidCallback? onRetrySyncContacts;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +36,15 @@ class EmptyContactBody extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          if (onRetrySyncContacts != null) ...[
+            const SizedBox(height: 16.0),
+            FilledButton.icon(
+              onPressed: onRetrySyncContacts,
+              icon: const Icon(Icons.sync, size: 20.0),
+              label: Text(L10n.of(context)!.tapToRetry),
+              style: FilledButton.styleFrom(shape: const StadiumBorder()),
+            ),
+          ],
         ],
       ),
     );

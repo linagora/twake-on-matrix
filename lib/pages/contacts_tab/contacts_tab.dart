@@ -32,7 +32,8 @@ class ContactsTabController extends State<ContactsTab>
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         AddressBooksMixin,
-        WidgetsBindingObserver {
+        WidgetsBindingObserver,
+        AutomaticKeepAliveClientMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
   Client get client => Matrix.of(context).client;
@@ -120,6 +121,18 @@ class ContactsTabController extends State<ContactsTab>
     }
   }
 
+  Future<void> retrySynchronizeContacts() async {
+    if (!mounted) {
+      return;
+    }
+
+    await retrySynchronizeContactsOnContactTab(
+      context: context,
+      client: Matrix.of(context).client,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await handleDidChangeAppLifecycleState(state, client: client);
@@ -133,8 +146,14 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   @override
-  Widget build(BuildContext context) => ContactsTabView(
-    contactsController: this,
-    bottomNavigationBar: widget.bottomNavigationBar,
-  );
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return ContactsTabView(
+      contactsController: this,
+      bottomNavigationBar: widget.bottomNavigationBar,
+    );
+  }
 }

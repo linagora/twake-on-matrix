@@ -94,11 +94,15 @@ class GetPhoneBookContactFailure extends Failure {
 
 class GetHashDetailsFailure extends Failure {
   final dynamic exception;
+  final List<Contact> contacts;
 
-  const GetHashDetailsFailure({required this.exception});
+  const GetHashDetailsFailure({
+    required this.exception,
+    this.contacts = const [],
+  });
 
   @override
-  List<Object?> get props => [exception];
+  List<Object?> get props => [exception, contacts];
 }
 
 class LookUpContactFailure extends Failure {

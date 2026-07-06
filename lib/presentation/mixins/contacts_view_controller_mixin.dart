@@ -73,8 +73,57 @@ mixin class ContactsViewControllerMixin {
 
   PermissionStatus? contactsPermissionStatus;
 
+  bool _canReadPhonebookContacts(PermissionStatus? status) =>
+      status == PermissionStatus.granted || status == PermissionStatus.limited;
+
+  Future<bool> _isPhonebookContactsAvailable() async {
+    final currentContactsPermissionStatus = PlatformInfos.isMobile
+        ? await _permissionHandlerService.contactsPermissionStatus
+        : null;
+    contactsPermissionStatus = currentContactsPermissionStatus;
+    return PlatformInfos.isMobile &&
+        _canReadPhonebookContacts(currentContactsPermissionStatus);
+  }
+
   bool get phoneBookFilterSuccess => presentationPhonebookContactNotifier.value
       .fold((_) => false, (success) => success is GetPhonebookContactsSuccess);
+
+  bool get hasVisibleContacts =>
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) =>
+            (success is PresentationContactsSuccess &&
+                success.contacts.isNotEmpty) ||
+            success is PresentationExternalContactSuccess,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) =>
+            success is PresentationContactsSuccess &&
+            success.contacts.isNotEmpty,
+      ) ||
+      presentationRecentContactNotifier.value.isNotEmpty;
+
+  bool get isLoadingContacts =>
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is ContactsLoading,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is GetPhonebookContactsLoading,
+      );
+
+  bool get isWaitingContacts =>
+      isLoadingContacts ||
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is ContactsInitial,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is GetPhonebookContactsInitial,
+      );
 
   /// Whether recent contacts (DMs found by the SDK) are mixed into the
   /// contacts list. The Contacts page must reflect the ToM Address Book only,
@@ -88,7 +137,8 @@ mixin class ContactsViewControllerMixin {
 
     contactsPermissionStatus = fetchContactsPermissionStatus;
 
-    if (PlatformInfos.isMobile && !fetchContactsPermissionStatus.isGranted) {
+    if (PlatformInfos.isMobile &&
+        !_canReadPhonebookContacts(fetchContactsPermissionStatus)) {
       await showDialog(
         useRootNavigator: false,
         context: context,
@@ -128,7 +178,7 @@ mixin class ContactsViewControllerMixin {
       'ContactsViewControllerMixin::_initWarningBanner: Contact Permission $currentContactPermission',
     );
 
-    if (currentContactPermission.isGranted) {
+    if (_canReadPhonebookContacts(currentContactPermission)) {
       contactsPermissionStatus = currentContactPermission;
       warningBannerNotifier.value = WarningContactsBannerState.hide;
       return;
@@ -170,7 +220,7 @@ mixin class ContactsViewControllerMixin {
       }
 
       if (currentContactPermission != contactsPermissionStatus &&
-          currentContactPermission.isGranted) {
+          _canReadPhonebookContacts(currentContactPermission)) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
         contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
@@ -219,9 +269,7 @@ mixin class ContactsViewControllerMixin {
     await contactsManager.initialSynchronizeContacts(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts:
-          PlatformInfos.isMobile &&
-          contactsPermissionStatus != null &&
-          contactsPermissionStatus == PermissionStatus.granted,
+          await _isPhonebookContactsAvailable(),
       forceRun: forceRun,
     );
   }
@@ -265,9 +313,37 @@ mixin class ContactsViewControllerMixin {
     await contactsManager.synchronizeContactsOnContactTab(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts:
-          PlatformInfos.isMobile &&
-          contactsPermissionStatus != null &&
-          contactsPermissionStatus == PermissionStatus.granted,
+          await _isPhonebookContactsAvailable(),
+    );
+  }
+
+  Future<void> retrySynchronizeContactsOnContactTab({
+    required BuildContext context,
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) async {
+    if (PlatformInfos.isMobile &&
+        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      await displayContactPermissionDialog(context);
+    } else {
+      await _initWarningBanner();
+    }
+
+    if (client.userID == null) {
+      return;
+    }
+
+    await contactsManager.cancelAllSubscriptions();
+    await contactsManager.reSyncContacts();
+    _refreshAllContacts(
+      context: context,
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
+    await contactsManager.synchronizeContactsOnContactTab(
+      withMxId: client.userID!,
+      isAvailableSupportPhonebookContacts:
+          await _isPhonebookContactsAvailable(),
     );
   }
 
@@ -453,6 +529,23 @@ mixin class ContactsViewControllerMixin {
               }
             }
 
+            if (failure is GetHashDetailsFailure) {
+              final filteredContacts = failure.contacts
+                  .searchContacts(keyword)
+                  .expand((contact) => contact.toPresentationContacts())
+                  .toList();
+              if (filteredContacts.isEmpty) {
+                return Left(GetPresentationContactsEmpty(keyword: keyword));
+              } else {
+                return Right(
+                  GetPresentationContactsSuccess(
+                    contacts: filteredContacts,
+                    keyword: keyword,
+                  ),
+                );
+              }
+            }
+
             return Left(failure);
           },
           (success) {
@@ -586,8 +679,11 @@ mixin class ContactsViewControllerMixin {
   }
 
   void onSelectedContact() {
-    textEditingController.clear();
     searchFocusNode.requestFocus();
+    textEditingController.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: textEditingController.text.length,
+    );
   }
 
   void closeSearchBar() {
@@ -601,7 +697,7 @@ mixin class ContactsViewControllerMixin {
   }) async {
     final currentContactsPermissionStatus = await _permissionHandlerService
         .requestContactsPermissionActions();
-    if (currentContactsPermissionStatus == PermissionStatus.granted) {
+    if (_canReadPhonebookContacts(currentContactsPermissionStatus)) {
       contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {

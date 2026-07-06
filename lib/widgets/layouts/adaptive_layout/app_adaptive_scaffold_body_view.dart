@@ -241,11 +241,16 @@ class _ColumnPageView extends StatelessWidget {
   }) {
     return ValueListenableBuilder<AdaptiveDestinationEnum>(
       valueListenable: activeNavigationBarNotifier,
+      child: navigatorBarWidget,
       builder: (context, currentNavigatorBar, child) {
-        if (navigatorBarType == currentNavigatorBar) {
-          return navigatorBarWidget;
-        }
-        return const SizedBox();
+        final isActive = navigatorBarType == currentNavigatorBar;
+        return TickerMode(
+          enabled: isActive,
+          child: Offstage(
+            offstage: !isActive,
+            child: child ?? const SizedBox(),
+          ),
+        );
       },
     );
   }

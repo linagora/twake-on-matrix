@@ -148,6 +148,11 @@ class SearchContactsAndChatsController
             .value
             .getFailureOrNull<RegisterTokenFailure>()
             ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<GetHashDetailsFailure>()
+            ?.contacts ??
         [];
     return phoneBookContacts;
   }
