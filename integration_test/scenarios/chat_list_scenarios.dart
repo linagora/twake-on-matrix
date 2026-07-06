@@ -48,12 +48,12 @@ class ChatListSearchScenario extends BaseTestScenario {
       'Search by $_searchByMatrixAddress expected exactly 1 group',
     );
 
-    // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
-    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    // Diacritic-insensitive: title with 'U' replaced by 'Ù' should still match.
+    final diacriticQuery = _searchByTitle.replaceAll('U', 'Ù');
     s.softAssertEquals(
       diacriticQuery != _searchByTitle,
       true,
-      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+      'SearchByTitle must contain "U" to verify diacritic-insensitive search',
     );
     await _search(diacriticQuery);
     s.softAssertEquals(
