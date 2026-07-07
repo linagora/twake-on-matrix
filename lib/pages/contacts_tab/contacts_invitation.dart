@@ -1,24 +1,22 @@
-import 'package:dartz/dartz.dart' hide State;
+import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
-import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
-import 'package:fluffychat/domain/usecase/invitation/generate_invitation_link_interactor.dart';
-import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
-import 'package:fluffychat/domain/usecase/invitation/store_invitation_status_interactor.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view_model.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ContactsInvitation extends StatefulWidget {
+class ContactsInvitation extends ConsumerStatefulWidget {
   final PresentationContact contact;
   final String userId;
   final InvitationStatusResponse? invitationStatus;
@@ -31,87 +29,31 @@ class ContactsInvitation extends StatefulWidget {
   });
 
   @override
-  State<ContactsInvitation> createState() => ContactsInvitationController();
+  ConsumerState<ContactsInvitation> createState() =>
+      _ContactsInvitationScreenState();
 }
 
-class ContactsInvitationController extends State<ContactsInvitation> {
-  final SendInvitationInteractor _sendInvitationInteractor = getIt
-      .get<SendInvitationInteractor>();
+class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
+  bool get _isSelectionLocked =>
+      widget.invitationStatus?.invitation?.medium != null;
 
-  final GenerateInvitationLinkInteractor _generateInvitationLinkInteractor =
-      getIt.get<GenerateInvitationLinkInteractor>();
-
-  final StoreInvitationStatusInteractor _hiveStoreInvitationStatusInteractor =
-      getIt.get<StoreInvitationStatusInteractor>();
-
-  final ValueNotifier<PresentationThirdPartyContact?> selectedContact =
-      ValueNotifier(null);
-
-  final ValueNotifier<Either<Failure, Success>> sendInvitationNotifier =
-      ValueNotifier(const Right(SendInvitationInitial()));
-
-  final ValueNotifier<Either<Failure, Success>> generateInvitationLinkNotifier =
-      ValueNotifier(const Right(GenerateInvitationLinkInitial()));
-
-  void onSelectContact(PresentationThirdPartyContact contact) {
-    if (widget.invitationStatus?.invitation?.medium != null) return;
-    if (selectedContact.value == null) {
-      selectedContact.value = contact;
-    } else {
-      if (selectedContact.value == contact) {
-        selectedContact.value = null;
-      } else {
-        selectedContact.value = contact;
+  void _listenStateEffects() {
+    ref.listen<ContactsInvitationState>(contactsInvitationViewModelProvider, (
+      previous,
+      next,
+    ) {
+      if (previous?.sendInvitationState != next.sendInvitationState) {
+        _onSendInvitationStateChanged(next.sendInvitationState);
       }
-    }
+      if (previous?.generateInvitationLinkState !=
+          next.generateInvitationLinkState) {
+        _onGenerateInvitationLinkStateChanged(next.generateInvitationLinkState);
+      }
+    });
   }
 
-  ({String contact, InvitationMediumEnum medium})? _getInvitationData(
-    PresentationThirdPartyContact contact,
-  ) {
-    return switch (contact) {
-      final PresentationPhoneNumber phoneNumber => (
-        contact: phoneNumber.phoneNumber,
-        medium: InvitationMediumEnum.phone,
-      ),
-      final PresentationEmail email => (
-        contact: email.email,
-        medium: InvitationMediumEnum.email,
-      ),
-      _ => null,
-    };
-  }
-
-  void onSendInvitation(PresentationThirdPartyContact contact) {
-    final invitationData = _getInvitationData(contact);
-
-    if (invitationData != null) {
-      _sendInvitationInteractor
-          .execute(
-            contact: invitationData.contact,
-            medium: invitationData.medium,
-            contactId: widget.contact.id ?? '',
-          )
-          .listen((state) {
-            sendInvitationNotifier.value = state;
-          });
-    }
-  }
-
-  void _onSelectContactDefault(PresentationContact contact) {
-    if (contact.phoneNumbers != null && contact.phoneNumbers!.isNotEmpty) {
-      onSelectContact(contact.phoneNumbers!.first);
-      return;
-    }
-
-    if (contact.emails != null && contact.emails!.isNotEmpty) {
-      onSelectContact(contact.emails!.first);
-      return;
-    }
-  }
-
-  void _onSendInvitationStateListener() {
-    sendInvitationNotifier.value.fold(
+  void _onSendInvitationStateChanged(Either<Failure, Success> state) {
+    state.fold(
       (failure) {
         if (failure is InvitationAlreadySentState) {
           TwakeSnackBar.show(
@@ -135,7 +77,7 @@ class ContactsInvitationController extends State<ContactsInvitation> {
       },
       (success) {
         if (success is SendInvitationSuccessState) {
-          _onStoreInvitationStatusInteractor(
+          _onStoreInvitationStatus(
             userId: widget.userId,
             contactId: widget.contact.id ?? '',
             invitationId: success.sendInvitationResponse.id ?? '',
@@ -151,22 +93,8 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     );
   }
 
-  void onGenerateInvitationLink() {
-    final contact = widget.contact.primaryContact;
-    if (contact == null) {
-      return;
-    }
-    final invitationData = _getInvitationData(contact);
-
-    if (invitationData != null) {
-      _generateInvitationLinkInteractor.execute().listen((state) {
-        generateInvitationLinkNotifier.value = state;
-      });
-    }
-  }
-
-  void _onGenerateInvitationLinkStateListener() {
-    generateInvitationLinkNotifier.value.fold(
+  void _onGenerateInvitationLinkStateChanged(Either<Failure, Success> state) {
+    state.fold(
       (failure) {
         TwakeDialog.hideLoadingDialog(context);
 
@@ -209,42 +137,67 @@ class ContactsInvitationController extends State<ContactsInvitation> {
     );
   }
 
-  void _onStoreInvitationStatusInteractor({
+  void _onStoreInvitationStatus({
     required String userId,
     required String contactId,
     required String invitationId,
   }) {
-    if (contactId.isEmpty || invitationId.isEmpty) {
-      return;
-    }
-    _hiveStoreInvitationStatusInteractor
-        .execute(
+    ref
+        .read(contactsInvitationViewModelProvider.notifier)
+        .storeInvitationStatus(
           userId: userId,
           contactId: contactId,
           invitationId: invitationId,
-        )
-        .listen((state) {
-          Logs().d(
-            'ContactsInvitationController::_onStoreInvitationStatusInteractor',
-            state,
-          );
-        });
+        );
   }
 
   @override
   void initState() {
-    _onSelectContactDefault(widget.contact);
-    sendInvitationNotifier.addListener(() {
-      _onSendInvitationStateListener();
-    });
-    generateInvitationLinkNotifier.addListener(() {
-      _onGenerateInvitationLinkStateListener();
-    });
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      ref
+          .read(contactsInvitationViewModelProvider.notifier)
+          .selectDefaultContact(
+            widget.contact,
+            isSelectionLocked: _isSelectionLocked,
+          );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ContactsInvitationView(controller: this, contact: widget.contact);
+    _listenStateEffects();
+    final state = ref.watch(contactsInvitationViewModelProvider);
+    return ContactsInvitationView(
+      contact: widget.contact,
+      state: state,
+      onGenerateInvitationLink: () {
+        ref
+            .read(contactsInvitationViewModelProvider.notifier)
+            .generateInvitationLink(widget.contact);
+      },
+      onSelectContact: (contact) {
+        ref
+            .read(contactsInvitationViewModelProvider.notifier)
+            .selectContact(contact, isSelectionLocked: _isSelectionLocked);
+      },
+      onSendInvitation: (contact) {
+        Logs().d(
+          'ContactsInvitation::onSendInvitation '
+          'contactId=${widget.contact.id} '
+          'selectedContactType=${contact.runtimeType} '
+          'userIdPresent=${widget.userId.isNotEmpty}',
+        );
+        ref
+            .read(contactsInvitationViewModelProvider.notifier)
+            .sendInvitation(
+              contact: contact,
+              contactId: widget.contact.id ?? '',
+            );
+      },
+    );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_style.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +8,18 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
 class ContactsInvitationView extends StatelessWidget {
   final PresentationContact contact;
-  final ContactsInvitationController controller;
+  final ContactsInvitationState state;
+  final VoidCallback onGenerateInvitationLink;
+  final ValueChanged<PresentationThirdPartyContact> onSelectContact;
+  final ValueChanged<PresentationThirdPartyContact> onSendInvitation;
 
   const ContactsInvitationView({
     super.key,
     required this.contact,
-    required this.controller,
+    required this.state,
+    required this.onGenerateInvitationLink,
+    required this.onSelectContact,
+    required this.onSendInvitation,
   });
 
   @override
@@ -45,7 +51,7 @@ class ContactsInvitationView extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 InkWell(
-                  onTap: () => controller.onGenerateInvitationLink(),
+                  onTap: onGenerateInvitationLink,
                   highlightColor: Colors.transparent,
                   focusColor: Colors.transparent,
                   splashColor: Colors.transparent,
@@ -88,14 +94,14 @@ class ContactsInvitationView extends StatelessWidget {
                               highlightColor: Colors.transparent,
                               focusColor: Colors.transparent,
                               splashColor: Colors.transparent,
-                              onTap: () =>
-                                  controller.onSelectContact(phoneNumber),
-                              child: ValueListenableBuilder(
-                                valueListenable: controller.selectedContact,
-                                builder: (context, contact, _) {
+                              onTap: () => onSelectContact(phoneNumber),
+                              child: Builder(
+                                builder: (context) {
+                                  final selectedContact = state.selectedContact;
                                   final isSelectedContact =
-                                      contact is PresentationPhoneNumber &&
-                                      contact.phoneNumber ==
+                                      selectedContact
+                                          is PresentationPhoneNumber &&
+                                      selectedContact.phoneNumber ==
                                           phoneNumber.phoneNumber;
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -210,13 +216,13 @@ class ContactsInvitationView extends StatelessWidget {
                               highlightColor: Colors.transparent,
                               focusColor: Colors.transparent,
                               splashColor: Colors.transparent,
-                              onTap: () => controller.onSelectContact(email),
-                              child: ValueListenableBuilder(
-                                valueListenable: controller.selectedContact,
-                                builder: (context, contact, _) {
+                              onTap: () => onSelectContact(email),
+                              child: Builder(
+                                builder: (context) {
+                                  final selectedContact = state.selectedContact;
                                   final isSelectedContact =
-                                      contact is PresentationEmail &&
-                                      contact.email == email.email;
+                                      selectedContact is PresentationEmail &&
+                                      selectedContact.email == email.email;
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                       vertical: 8,
@@ -325,82 +331,81 @@ class ContactsInvitationView extends StatelessWidget {
                     ),
                   ),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: controller.selectedContact,
-                  builder: (context, selectedContact, child) {
-                    if (selectedContact == null) {
-                      return const SizedBox.shrink();
-                    }
-                    return InkWell(
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      splashColor: Colors.transparent,
-                      onTap: () => controller.onSendInvitation(selectedContact),
-                      child: Padding(
-                        padding: ContactsInvitationStyle.verticalPadding,
-                        child: Container(
-                          width: double.infinity,
-                          height: ContactsInvitationStyle.heightSendButton,
-                          decoration: BoxDecoration(
-                            color: LinagoraSysColors.material().primary,
-                            borderRadius: ContactsInvitationStyle.borderRadius,
-                          ),
-                          child: ValueListenableBuilder(
-                            valueListenable: controller.sendInvitationNotifier,
-                            builder: (context, state, child) => state.fold(
-                              (failure) => child!,
-                              (success) {
-                                if (success is SendInvitationLoadingState) {
-                                  return Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 28,
-                                        height: 28,
-                                        child:
-                                            CircularProgressIndicator.adaptive(
-                                              strokeWidth: 2,
-                                              backgroundColor:
-                                                  LinagoraSysColors.material()
-                                                      .onPrimary,
-                                            ),
-                                      ),
-                                    ],
-                                  );
-                                }
-                                return child!;
-                              },
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  L10n.of(context)!.sendInvitation,
-                                  style: Theme.of(context).textTheme.labelLarge
-                                      ?.copyWith(
-                                        color: LinagoraSysColors.material()
-                                            .onPrimary,
-                                      ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  Icons.send_outlined,
-                                  color: LinagoraSysColors.material().onPrimary,
-                                ),
-                              ],
-                            ),
-                          ),
+                if (state.selectedContact != null)
+                  InkWell(
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: state.sendInvitationState.fold(
+                      (_) =>
+                          () => onSendInvitation(state.selectedContact!),
+                      (success) => success is SendInvitationLoadingState
+                          ? null
+                          : () => onSendInvitation(state.selectedContact!),
+                    ),
+                    child: Padding(
+                      padding: ContactsInvitationStyle.verticalPadding,
+                      child: Container(
+                        width: double.infinity,
+                        height: ContactsInvitationStyle.heightSendButton,
+                        decoration: BoxDecoration(
+                          color: LinagoraSysColors.material().primary,
+                          borderRadius: ContactsInvitationStyle.borderRadius,
+                        ),
+                        child: state.sendInvitationState.fold(
+                          (failure) => _SendInvitationButtonContent(),
+                          (success) {
+                            if (success is SendInvitationLoadingState) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 28,
+                                    height: 28,
+                                    child: CircularProgressIndicator.adaptive(
+                                      strokeWidth: 2,
+                                      backgroundColor:
+                                          LinagoraSysColors.material()
+                                              .onPrimary,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+                            return _SendInvitationButtonContent();
+                          },
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SendInvitationButtonContent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          L10n.of(context)!.sendInvitation,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: LinagoraSysColors.material().onPrimary,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Icon(
+          Icons.send_outlined,
+          color: LinagoraSysColors.material().onPrimary,
+        ),
+      ],
     );
   }
 }

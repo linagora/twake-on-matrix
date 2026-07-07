@@ -32,7 +32,18 @@ class GenerateInvitationLinkInteractor {
         GenerateInvitationLinkSuccessState(link: res.link, id: res.id),
       );
     } catch (e) {
-      Logs().e('GenerateInvitationLinkInteractor::execute', e);
+      if (e is DioException) {
+        Logs().e(
+          'GenerateInvitationLinkInteractor::execute DioException '
+          'status=${e.response?.statusCode} '
+          'type=${e.type} '
+          'path=${e.requestOptions.path} '
+          'data=${e.response?.data}',
+          e,
+        );
+      } else {
+        Logs().e('GenerateInvitationLinkInteractor::execute', e);
+      }
       if (e is DioException &&
           e.response?.statusCode == 400 &&
           e.response?.data is Map<String, dynamic>) {
