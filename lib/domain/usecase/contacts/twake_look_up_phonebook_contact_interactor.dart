@@ -73,8 +73,11 @@ class TwakeLookupPhonebookContactInteractor {
 
       if (res.lookupPepper?.isEmpty == true &&
           res.algorithms?.isEmpty == true) {
-        yield const Left(
-          GetHashDetailsFailure(exception: 'Hash details is empty'),
+        yield Left(
+          GetHashDetailsFailure(
+            exception: 'Hash details is empty',
+            contacts: contacts,
+          ),
         );
         return;
       }
@@ -84,7 +87,7 @@ class TwakeLookupPhonebookContactInteractor {
       Logs().e(
         'FederationLookUpPhonebookContactInteractor::execute: GetHashDetails: $e',
       );
-      yield Left(GetHashDetailsFailure(exception: e));
+      yield Left(GetHashDetailsFailure(exception: e, contacts: contacts));
       return;
     }
 

@@ -17,7 +17,7 @@ class _SplashState extends State<Splash> {
     Future.delayed(const Duration(seconds: 2), () {
       if (!context.mounted) return;
 
-      context.pushReplacement('/');
+      context.go('/');
     });
   }
 

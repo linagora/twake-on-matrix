@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -124,13 +125,15 @@ Future<void> startGui(List<Client> clients) async {
   // problems on other platforms if we wrap it always.
   await sentryInit(
     runApp: runApp,
-    app: PlatformInfos.isMobile
-        ? AppLock(
-            builder: (args) => TwakeApp(clients: clients),
-            lockScreen: const LockScreen(),
-            enabled: pin?.isNotEmpty ?? false,
-          )
-        : TwakeApp(clients: clients),
+    app: ProviderScope(
+      child: PlatformInfos.isMobile
+          ? AppLock(
+              builder: (args) => TwakeApp(clients: clients),
+              lockScreen: const LockScreen(),
+              enabled: pin?.isNotEmpty ?? false,
+            )
+          : TwakeApp(clients: clients),
+    ),
   );
 }
 

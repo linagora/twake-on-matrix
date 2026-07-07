@@ -17,6 +17,7 @@ import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:fluffychat/presentation/mixins/connectivity_mixin.dart';
 import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
+import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
@@ -1179,17 +1180,24 @@ class MatrixState extends State<Matrix>
     final previousDiscovery =
         loginHomeserverSummary?.discoveryInformation ??
         (db is HiveCollectionsDatabase ? await db.getWellKnown() : null);
+    final discoveredInformation =
+        previousDiscovery ??
+        await WellKnownMixin.discoverFromHomeserver(newClient.homeserver!);
     final newSummary = await newClient
         .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
         .toHomeserverSummary();
-    if (newSummary.discoveryInformation == null && previousDiscovery != null) {
+    if (newSummary.discoveryInformation == null &&
+        discoveredInformation != null) {
       loginHomeserverSummary = HomeserverSummary(
-        discoveryInformation: previousDiscovery,
+        discoveryInformation: discoveredInformation,
         versions: newSummary.versions,
         loginFlows: newSummary.loginFlows,
       );
     } else {
       loginHomeserverSummary = newSummary;
+    }
+    if (db is HiveCollectionsDatabase) {
+      await db.storeWellKnown(loginHomeserverSummary?.discoveryInformation);
     }
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',

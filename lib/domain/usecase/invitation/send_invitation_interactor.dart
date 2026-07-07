@@ -35,7 +35,18 @@ class SendInvitationInteractor {
         ),
       );
     } catch (e) {
-      Logs().e('SendInvitationInteractor::execute', e);
+      if (e is DioException) {
+        Logs().e(
+          'SendInvitationInteractor::execute DioException '
+          'status=${e.response?.statusCode} '
+          'type=${e.type} '
+          'path=${e.requestOptions.path} '
+          'data=${_safeResponseDataSummary(e.response?.data)}',
+          e,
+        );
+      } else {
+        Logs().e('SendInvitationInteractor::execute', e);
+      }
       if (e is DioException &&
           e.response?.statusCode == 400 &&
           e.response?.data is Map<String, dynamic>) {
@@ -77,5 +88,15 @@ class SendInvitationInteractor {
       Logs().e('SendInvitationInteractor::_tryToNormalizePhoneNumber', e);
     }
     return normalizedPhoneNumber;
+  }
+
+  String _safeResponseDataSummary(Object? data) {
+    if (data == null) {
+      return 'null';
+    }
+    if (data is Map) {
+      return 'Map(keys=${data.keys.join(',')})';
+    }
+    return data.runtimeType.toString();
   }
 }

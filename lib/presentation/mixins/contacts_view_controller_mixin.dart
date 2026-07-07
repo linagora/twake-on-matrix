@@ -7,6 +7,7 @@ import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:fluffychat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:fluffychat/domain/app_state/search/search_state.dart';
 import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart' as contact_model;
 import 'package:fluffychat/domain/model/contact/contact_type.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:fluffychat/domain/usecase/search/search_recent_chat_interactor.dart';
@@ -73,8 +74,78 @@ mixin class ContactsViewControllerMixin {
 
   PermissionStatus? contactsPermissionStatus;
 
+  bool _canReadPhonebookContacts(PermissionStatus? status) =>
+      status == PermissionStatus.granted || status == PermissionStatus.limited;
+
+  bool get enablePhonebookContacts => true;
+
+  Future<bool> _isPhonebookContactsAvailable() async {
+    if (!enablePhonebookContacts) {
+      contactsPermissionStatus = null;
+      return false;
+    }
+
+    final currentContactsPermissionStatus = PlatformInfos.isMobile
+        ? await _permissionHandlerService.contactsPermissionStatus
+        : null;
+    contactsPermissionStatus = currentContactsPermissionStatus;
+    return PlatformInfos.isMobile &&
+        _canReadPhonebookContacts(currentContactsPermissionStatus);
+  }
+
+  Future<void> _initPhonebookPermission(BuildContext context) async {
+    if (!enablePhonebookContacts) {
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
+      return;
+    }
+
+    if (PlatformInfos.isMobile &&
+        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+      await displayContactPermissionDialog(context);
+    } else {
+      await _initWarningBanner();
+    }
+  }
+
   bool get phoneBookFilterSuccess => presentationPhonebookContactNotifier.value
       .fold((_) => false, (success) => success is GetPhonebookContactsSuccess);
+
+  bool get hasVisibleContacts =>
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) =>
+            (success is PresentationContactsSuccess &&
+                success.contacts.isNotEmpty) ||
+            success is PresentationExternalContactSuccess,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) =>
+            success is PresentationContactsSuccess &&
+            success.contacts.isNotEmpty,
+      ) ||
+      presentationRecentContactNotifier.value.isNotEmpty;
+
+  bool get isLoadingContacts =>
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is ContactsLoading,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is GetPhonebookContactsLoading,
+      );
+
+  bool get isWaitingContacts =>
+      isLoadingContacts ||
+      presentationContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is ContactsInitial,
+      ) ||
+      presentationPhonebookContactNotifier.value.fold(
+        (_) => false,
+        (success) => success is GetPhonebookContactsInitial,
+      );
 
   /// Whether recent contacts (DMs found by the SDK) are mixed into the
   /// contacts list. The Contacts page must reflect the ToM Address Book only,
@@ -83,12 +154,17 @@ mixin class ContactsViewControllerMixin {
   bool get enableRecentContacts => true;
 
   Future displayContactPermissionDialog(BuildContext context) async {
+    if (!enablePhonebookContacts) {
+      return;
+    }
+
     final fetchContactsPermissionStatus =
         await _permissionHandlerService.contactsPermissionStatus;
 
     contactsPermissionStatus = fetchContactsPermissionStatus;
 
-    if (PlatformInfos.isMobile && !fetchContactsPermissionStatus.isGranted) {
+    if (PlatformInfos.isMobile &&
+        !_canReadPhonebookContacts(fetchContactsPermissionStatus)) {
       await showDialog(
         useRootNavigator: false,
         context: context,
@@ -119,6 +195,11 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _initWarningBanner() async {
+    if (!enablePhonebookContacts) {
+      warningBannerNotifier.value = WarningContactsBannerState.hide;
+      return;
+    }
+
     if (!PlatformInfos.isMobile) {
       return;
     }
@@ -128,7 +209,7 @@ mixin class ContactsViewControllerMixin {
       'ContactsViewControllerMixin::_initWarningBanner: Contact Permission $currentContactPermission',
     );
 
-    if (currentContactPermission.isGranted) {
+    if (_canReadPhonebookContacts(currentContactPermission)) {
       contactsPermissionStatus = currentContactPermission;
       warningBannerNotifier.value = WarningContactsBannerState.hide;
       return;
@@ -145,7 +226,7 @@ mixin class ContactsViewControllerMixin {
     AppLifecycleState state, {
     required Client client,
   }) async {
-    if (!PlatformInfos.isMobile) {
+    if (!enablePhonebookContacts || !PlatformInfos.isMobile) {
       return;
     }
     Logs().i(
@@ -170,7 +251,7 @@ mixin class ContactsViewControllerMixin {
       }
 
       if (currentContactPermission != contactsPermissionStatus &&
-          currentContactPermission.isGranted) {
+          _canReadPhonebookContacts(currentContactPermission)) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
         contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
@@ -185,12 +266,7 @@ mixin class ContactsViewControllerMixin {
     required MatrixLocalizations matrixLocalizations,
     bool forceRun = false,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    await _initPhonebookPermission(context);
     _refreshAllContacts(
       context: context,
       client: client,
@@ -219,9 +295,7 @@ mixin class ContactsViewControllerMixin {
     await contactsManager.initialSynchronizeContacts(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts:
-          PlatformInfos.isMobile &&
-          contactsPermissionStatus != null &&
-          contactsPermissionStatus == PermissionStatus.granted,
+          await _isPhonebookContactsAvailable(),
       forceRun: forceRun,
     );
   }
@@ -231,12 +305,7 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
-      await displayContactPermissionDialog(context);
-    } else {
-      await _initWarningBanner();
-    }
+    await _initPhonebookPermission(context);
     _refreshAllContacts(
       context: context,
       client: client,
@@ -265,9 +334,32 @@ mixin class ContactsViewControllerMixin {
     await contactsManager.synchronizeContactsOnContactTab(
       withMxId: client.userID!,
       isAvailableSupportPhonebookContacts:
-          PlatformInfos.isMobile &&
-          contactsPermissionStatus != null &&
-          contactsPermissionStatus == PermissionStatus.granted,
+          await _isPhonebookContactsAvailable(),
+    );
+  }
+
+  Future<void> retrySynchronizeContactsOnContactTab({
+    required BuildContext context,
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) async {
+    await _initPhonebookPermission(context);
+
+    if (client.userID == null) {
+      return;
+    }
+
+    await contactsManager.cancelAllSubscriptions();
+    await contactsManager.reSyncContacts();
+    _refreshAllContacts(
+      context: context,
+      client: client,
+      matrixLocalizations: matrixLocalizations,
+    );
+    await contactsManager.synchronizeContactsOnContactTab(
+      withMxId: client.userID!,
+      isAvailableSupportPhonebookContacts:
+          await _isPhonebookContactsAvailable(),
     );
   }
 
@@ -299,7 +391,13 @@ mixin class ContactsViewControllerMixin {
   }) {
     final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
-    _refreshPhoneBookContacts(keyword);
+    if (enablePhonebookContacts) {
+      _refreshPhoneBookContacts(keyword);
+    } else if (!presentationPhonebookContactNotifier.isDisposed) {
+      presentationPhonebookContactNotifier.value = const Right(
+        GetPhonebookContactsInitial(),
+      );
+    }
     if (enableRecentContacts) {
       _refreshRecentContacts(
         context: context,
@@ -380,102 +478,71 @@ mixin class ContactsViewControllerMixin {
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
     if (presentationPhonebookContactNotifier.isDisposed) return;
-    presentationPhonebookContactNotifier.value = contactsManager
-        .getPhonebookContactsNotifier()
-        .value
-        .fold(
-          (failure) {
-            if (failure is LookUpPhonebookContactPartialFailed) {
-              final filteredContacts = failure.contacts
-                  .searchContacts(keyword)
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (filteredContacts.isEmpty) {
-                return Left(GetPresentationContactsEmpty(keyword: keyword));
-              } else {
-                return Right(
-                  GetPresentationContactsSuccess(
-                    contacts: filteredContacts,
-                    keyword: keyword,
-                  ),
-                );
-              }
-            }
+    presentationPhonebookContactNotifier
+        .value = contactsManager.getPhonebookContactsNotifier().value.fold(
+      (failure) {
+        if (failure is LookUpPhonebookContactPartialFailed) {
+          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
+        }
 
-            if (failure is GetPhonebookContactsFailure) {
-              final filteredContacts = failure.contacts
-                  .searchContacts(keyword)
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (filteredContacts.isEmpty) {
-                return Left(GetPresentationContactsEmpty(keyword: keyword));
-              } else {
-                return Right(
-                  GetPresentationContactsSuccess(
-                    contacts: filteredContacts,
-                    keyword: keyword,
-                  ),
-                );
-              }
-            }
+        if (failure is GetPhonebookContactsFailure) {
+          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
+        }
 
-            if (failure is RequestTokenFailure) {
-              final filteredContacts = failure.contacts
-                  .searchContacts(keyword)
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (filteredContacts.isEmpty) {
-                return Left(GetPresentationContactsEmpty(keyword: keyword));
-              } else {
-                return Right(
-                  GetPresentationContactsSuccess(
-                    contacts: filteredContacts,
-                    keyword: keyword,
-                  ),
-                );
-              }
-            }
+        if (failure is RequestTokenFailure) {
+          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
+        }
 
-            if (failure is RegisterTokenFailure) {
-              final filteredContacts = failure.contacts
-                  .searchContacts(keyword)
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              if (filteredContacts.isEmpty) {
-                return Left(GetPresentationContactsEmpty(keyword: keyword));
-              } else {
-                return Right(
-                  GetPresentationContactsSuccess(
-                    contacts: filteredContacts,
-                    keyword: keyword,
-                  ),
-                );
-              }
-            }
+        if (failure is RegisterTokenFailure) {
+          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
+        }
 
-            return Left(failure);
-          },
-          (success) {
-            if (success is GetPhonebookContactsSuccess) {
-              final filteredContacts = success.contacts
-                  .searchContacts(keyword)
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
-              _refreshContacts(keyword);
-              if (filteredContacts.isEmpty) {
-                return Left(GetPresentationContactsEmpty(keyword: keyword));
-              } else {
-                return Right(
-                  GetPresentationContactsSuccess(
-                    contacts: filteredContacts,
-                    keyword: keyword,
-                  ),
-                );
-              }
-            }
-            return Right(success);
-          },
-        );
+        if (failure is GetHashDetailsFailure) {
+          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
+        }
+
+        return Left(failure);
+      },
+      (success) {
+        if (success is GetPhonebookContactsSuccess) {
+          final filteredContacts = success.contacts
+              .searchContacts(keyword)
+              .expand((contact) => contact.toPresentationContacts())
+              .toList();
+          _refreshContacts(keyword);
+          if (filteredContacts.isEmpty) {
+            return Left(GetPresentationContactsEmpty(keyword: keyword));
+          } else {
+            return Right(
+              GetPresentationContactsSuccess(
+                contacts: filteredContacts,
+                keyword: keyword,
+              ),
+            );
+          }
+        }
+        return Right(success);
+      },
+    );
+  }
+
+  Either<Failure, Success> _mapPhonebookContactsToPresentation(
+    List<contact_model.Contact> contacts,
+    String keyword,
+  ) {
+    final filteredContacts = contacts
+        .searchContacts(keyword)
+        .expand((contact) => contact.toPresentationContacts())
+        .toList();
+    if (filteredContacts.isEmpty) {
+      return Left(GetPresentationContactsEmpty(keyword: keyword));
+    }
+    return Right(
+      GetPresentationContactsSuccess(
+        contacts: filteredContacts,
+        keyword: keyword,
+      ),
+    );
   }
 
   Either<Failure, Success> _handleSearchExternalContact(
@@ -599,9 +666,13 @@ mixin class ContactsViewControllerMixin {
   Future<void> _handleRequestContactsPermission({
     required Client client,
   }) async {
+    if (!enablePhonebookContacts) {
+      return;
+    }
+
     final currentContactsPermissionStatus = await _permissionHandlerService
         .requestContactsPermissionActions();
-    if (currentContactsPermissionStatus == PermissionStatus.granted) {
+    if (_canReadPhonebookContacts(currentContactsPermissionStatus)) {
       contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
@@ -635,6 +706,10 @@ mixin class ContactsViewControllerMixin {
   }
 
   List<String> _flatMatrixIdsFromPhonebookContacts() {
+    if (!enablePhonebookContacts) {
+      return [];
+    }
+
     final phonebookContacts =
         contactsManager
             .getPhonebookContactsNotifier()

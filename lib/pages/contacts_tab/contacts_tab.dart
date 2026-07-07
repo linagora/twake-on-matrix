@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
 import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
@@ -32,7 +34,8 @@ class ContactsTabController extends State<ContactsTab>
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         AddressBooksMixin,
-        WidgetsBindingObserver {
+        WidgetsBindingObserver,
+        AutomaticKeepAliveClientMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
   Client get client => Matrix.of(context).client;
@@ -43,6 +46,9 @@ class ContactsTabController extends State<ContactsTab>
   bool get enableRecentContacts => false;
 
   @override
+  bool get enablePhonebookContacts => supportInvitation();
+
+  @override
   void initState() {
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
@@ -51,6 +57,9 @@ class ContactsTabController extends State<ContactsTab>
         discoveryInformationNotifier.value = Matrix.of(
           context,
         ).loginHomeserverSummary?.discoveryInformation;
+        if (discoveryInformationNotifier.value == null) {
+          unawaited(_loadWellKnownAndRetryContacts());
+        }
         synchronizeContactsOnContactTab(
           context: context,
           client: Matrix.of(context).client,
@@ -61,6 +70,19 @@ class ContactsTabController extends State<ContactsTab>
 
     _listenFocusTextEditing();
     super.initState();
+  }
+
+  Future<void> _loadWellKnownAndRetryContacts() async {
+    await getWellKnownInformation(client);
+    if (!mounted || !supportInvitation()) {
+      return;
+    }
+
+    await retrySynchronizeContactsOnContactTab(
+      context: context,
+      client: client,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+    );
   }
 
   void _listenFocusTextEditing() {
@@ -120,6 +142,18 @@ class ContactsTabController extends State<ContactsTab>
     }
   }
 
+  Future<void> retrySynchronizeContacts() async {
+    if (!mounted) {
+      return;
+    }
+
+    await retrySynchronizeContactsOnContactTab(
+      context: context,
+      client: Matrix.of(context).client,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await handleDidChangeAppLifecycleState(state, client: client);
@@ -133,8 +167,14 @@ class ContactsTabController extends State<ContactsTab>
   }
 
   @override
-  Widget build(BuildContext context) => ContactsTabView(
-    contactsController: this,
-    bottomNavigationBar: widget.bottomNavigationBar,
-  );
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return ContactsTabView(
+      contactsController: this,
+      bottomNavigationBar: widget.bottomNavigationBar,
+    );
+  }
 }

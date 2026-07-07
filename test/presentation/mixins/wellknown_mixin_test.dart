@@ -1,6 +1,10 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
+import 'dart:convert';
+
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:matrix/matrix.dart';
 
 class DummyController with WellKnownMixin {}
 
@@ -100,6 +104,35 @@ void main() {
       );
 
       expect(controller.supportInvitation(), isFalse);
+    });
+
+    test('discoverFromHomeserver uses homeserver well-known URL', () async {
+      final requests = <Uri>[];
+      final httpClient = MockClient((request) async {
+        requests.add(request.url);
+        return http.Response.bytes(
+          utf8.encode(
+            jsonEncode({
+              'm.homeserver': {'base_url': 'https://matrix.domain.xyz'},
+              'app.twake.chat': {'enable_invitations': true},
+            }),
+          ),
+          200,
+        );
+      });
+
+      final result = await WellKnownMixin.discoverFromHomeserver(
+        Uri.parse('https://matrix.domain.xyz/some/path'),
+        httpClient: httpClient,
+      );
+
+      expect(requests, [
+        Uri.parse('https://matrix.domain.xyz/.well-known/matrix/client'),
+      ]);
+      expect(result, isNotNull);
+      expect(result!.additionalProperties['app.twake.chat'], {
+        'enable_invitations': true,
+      });
     });
   });
 }

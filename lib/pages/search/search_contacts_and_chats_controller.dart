@@ -10,6 +10,7 @@ import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/pages/search/search_mixin.dart';
 import 'package:fluffychat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
+import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search_state_extension.dart';
 import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
@@ -22,7 +23,11 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class SearchContactsAndChatsController
-    with SearchDebouncerMixin, SearchMixin, ContactsViewControllerMixin {
+    with
+        SearchDebouncerMixin,
+        SearchMixin,
+        WellKnownMixin,
+        ContactsViewControllerMixin {
   final BuildContext context;
 
   SearchContactsAndChatsController(this.context);
@@ -38,6 +43,9 @@ class SearchContactsAndChatsController
 
   final isShowChatsAndContactsNotifier = ValueNotifier(false);
 
+  @override
+  bool get enablePhonebookContacts => supportInvitation();
+
   void toggleShowMore() {
     isShowChatsAndContactsNotifier.toggle();
   }
@@ -50,6 +58,9 @@ class SearchContactsAndChatsController
   List<Room> get _rooms => client.rooms;
 
   Future<void> init() async {
+    discoveryInformationNotifier.value = Matrix.of(
+      context,
+    ).loginHomeserverSummary?.discoveryInformation;
     initializeDebouncer((keyword) {
       _searchChatsFromLocal(keyword: keyword);
     });
@@ -147,6 +158,11 @@ class SearchContactsAndChatsController
             .getPhonebookContactsNotifier()
             .value
             .getFailureOrNull<RegisterTokenFailure>()
+            ?.contacts ??
+        contactManger
+            .getPhonebookContactsNotifier()
+            .value
+            .getFailureOrNull<GetHashDetailsFailure>()
             ?.contacts ??
         [];
     return phoneBookContacts;
