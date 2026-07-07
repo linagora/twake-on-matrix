@@ -19,6 +19,8 @@ class TwakeIconButton extends StatelessWidget {
 
   final double? paddingAll;
 
+  final EdgeInsetsGeometry? padding;
+
   final double? size;
 
   final double? fill;
@@ -51,6 +53,7 @@ class TwakeIconButton extends StatelessWidget {
     this.imagePath,
     this.imageSize,
     this.paddingAll,
+    this.padding,
     this.size,
     this.fill,
     this.weight,
@@ -110,12 +113,12 @@ class TwakeIconButton extends StatelessWidget {
                   message: tooltip!,
                   triggerMode: tooltipTriggerMode,
                   child: Padding(
-                    padding: EdgeInsets.all(paddingAll ?? 8.0),
+                    padding: padding ?? EdgeInsets.all(paddingAll ?? 8.0),
                     child: iconWidget,
                   ),
                 )
               : Padding(
-                  padding: EdgeInsets.all(paddingAll ?? 8.0),
+                  padding: padding ?? EdgeInsets.all(paddingAll ?? 8.0),
                   child: iconWidget,
                 ),
         ),
