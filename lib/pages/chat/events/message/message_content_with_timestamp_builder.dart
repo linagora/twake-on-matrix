@@ -647,6 +647,9 @@ class _MessageContentWithTimestampBuilderState
                 },
                 icon: item.action.getIcon(),
                 imagePath: item.action.getImagePath(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: LinagoraSpacing.base,
+                ),
                 tooltip: item.action.getTitle(context),
                 preferBelow: false,
               );
