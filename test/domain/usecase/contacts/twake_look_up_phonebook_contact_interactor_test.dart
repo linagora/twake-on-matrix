@@ -591,7 +591,10 @@ void main() {
           emitsInOrder(<dynamic>[
             const Right<Failure, Success>(GetPhonebookContactsLoading()),
             Left<Failure, Success>(
-              GetHashDetailsFailure(exception: expectedException),
+              GetHashDetailsFailure(
+                exception: expectedException,
+                contacts: contacts,
+              ),
             ),
           ]),
         );

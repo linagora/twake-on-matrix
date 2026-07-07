@@ -232,27 +232,33 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
+    if (isAvailableSupportPhonebookContacts) {
+      unawaited(
+        _lookUpPhonebookContactsInContact(
+          isAvailableSupportPhonebookContacts:
+              isAvailableSupportPhonebookContacts,
+          withMxId: withMxId,
+        ),
+      );
+    }
+
     tomContactsSubscription =
         getTomContactsInteractor.execute().listen((event) {
             _contactsNotifier.value = event;
           })
           ..onDone(() async {
             Logs().d('ContactsManager::_getAllContactsOnContactTab: done');
-            await _lookUpPhonebookContactsInContact(
-              isAvailableSupportPhonebookContacts:
-                  isAvailableSupportPhonebookContacts,
-              withMxId: withMxId,
-            );
+            if (!isAvailableSupportPhonebookContacts) {
+              _isSynchronizing = false;
+            }
           })
           ..onError((error) async {
             Logs().d(
               'ContactsManager::_getAllContactsOnContactTab: error - $error',
             );
-            await _lookUpPhonebookContactsInContact(
-              isAvailableSupportPhonebookContacts:
-                  isAvailableSupportPhonebookContacts,
-              withMxId: withMxId,
-            );
+            if (!isAvailableSupportPhonebookContacts) {
+              _isSynchronizing = false;
+            }
           });
   }
 

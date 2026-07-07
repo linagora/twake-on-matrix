@@ -3,6 +3,7 @@ import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_m
 import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
+import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
 import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
@@ -25,6 +26,7 @@ class NewPrivateChat extends StatefulWidget {
 class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
+        WellKnownMixin,
         ContactsViewControllerMixin,
         GoToDraftChatMixin,
         WidgetsBindingObserver,
@@ -34,6 +36,9 @@ class NewPrivateChatController extends State<NewPrivateChat>
   final scrollController = ScrollController();
 
   @override
+  bool get showPhonebookContacts => supportInvitation();
+
+  @override
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -41,6 +46,9 @@ class NewPrivateChatController extends State<NewPrivateChat>
       if (mounted) {
         final client = Matrix.of(context).client;
         listenAddressBookEvents(client);
+        discoveryInformationNotifier.value = Matrix.of(
+          context,
+        ).loginHomeserverSummary?.discoveryInformation;
         initialFetchContacts(
           context: context,
           client: client,

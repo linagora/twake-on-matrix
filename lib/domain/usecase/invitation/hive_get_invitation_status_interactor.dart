@@ -3,6 +3,7 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/invitation/hive_get_invitation_status_state.dart';
+import 'package:fluffychat/domain/exception/invitation/invitation_status_not_found.dart';
 import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_repository.dart';
 import 'package:matrix/matrix.dart';
 
@@ -34,7 +35,9 @@ class HiveGetInvitationStatusInteractor {
         ),
       );
     } catch (e) {
-      Logs().e('HiveGetInvitationStatusInteractor::execute', e);
+      if (e is! InvitationStatusNotFound) {
+        Logs().e('HiveGetInvitationStatusInteractor::execute', e);
+      }
       yield Left(
         HiveGetInvitationStatusFailureState(
           exception: e,
