@@ -22,4 +22,14 @@ extension ScrollControllerExtension on ScrollController {
       }
     });
   }
+
+  /// Whether [itemContext]'s row has a finite position in this controller's viewport.
+  bool hasFiniteViewportPosition(BuildContext itemContext) {
+    if (!hasClients) return false;
+    final itemBox = itemContext.findRenderObject() as RenderBox?;
+    final scrollBox =
+        position.context.notificationContext?.findRenderObject() as RenderBox?;
+    if (itemBox == null || scrollBox == null) return false;
+    return itemBox.localToGlobal(Offset.zero, ancestor: scrollBox).dy.isFinite;
+  }
 }
