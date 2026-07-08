@@ -7,18 +7,9 @@ on:
   # on the default branch, so this activates once merged.
   schedule:
     - cron: "0 2 * * *"
-  # PR trigger disabled until all web integration tests are green.
-  # Re-enable the `pull_request` block below once SSH git deps are
-  # migrated to HTTPS and the test suite is stable.
-  #
-  # pull_request:
-  #   branches: [main]
-  #   paths:
-  #     - "lib/**"
-  #     - "integration_test/**"
-  #     - "pubspec.yaml"
-  #     - "pubspec.lock"
-  #     - ".github/workflows/patrol-web-integration-test.yaml"
+  pull_request:
+    types: [opened]
+    branches: [main]
   workflow_dispatch:
     inputs:
       patrol_test_target:
