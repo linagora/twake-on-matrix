@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time_style.dart';
@@ -110,7 +109,6 @@ mixin MessageContentBuilderMixin {
     final displayEvent = timeline != null
         ? event.getDisplayEventWithoutEditEvent(timeline)
         : event;
-    final double messageMaxWidth = maxWidth - AppConfig.messagePadding;
     return TextPainter(
       textScaler: MediaQuery.of(context).textScaler,
       text: TextSpan(
@@ -124,7 +122,7 @@ mixin MessageContentBuilderMixin {
         style: displayEvent.getMessageTextStyle(context),
       ),
       textDirection: TextDirection.ltr,
-    )..layout(minWidth: 0, maxWidth: messageMaxWidth);
+    )..layout(minWidth: 0, maxWidth: maxWidth);
   }
 
   double _getWidthMessageTime(
@@ -178,12 +176,9 @@ mixin MessageContentBuilderMixin {
     bool isEdited = false,
     Timeline? timeline,
   }) {
-    const spaceMessageAndTime = 4.0;
+    const spaceMessageAndTime = 8.0;
     final spaceHasEdited = isEdited ? 56.0 : 0.0;
     final spaceHasPinned = event.isPinned ? MessageStyle.pushpinIconSize : 0.0;
-    final paddingMessage = event.isCaptionModeOrReply()
-        ? 0.0
-        : AppConfig.messagePadding;
 
     final paintedMessageText = _paintMessageText(
       context,
@@ -207,9 +202,10 @@ mixin MessageContentBuilderMixin {
       // Use at least the width needed for timestamp + padding
       final minContentWidth = messageTimeAndPaddingWidth;
       final contentWidth = max(messageTextWidth, minContentWidth);
-      final totalWidth = contentWidth + paddingMessage;
 
-      final totalMessageWidth = totalWidth < maxWidth ? totalWidth : maxWidth;
+      final totalMessageWidth = contentWidth < maxWidth
+          ? contentWidth
+          : maxWidth;
 
       return MessageMetrics(
         totalMessageWidth: totalMessageWidth,
@@ -225,13 +221,13 @@ mixin MessageContentBuilderMixin {
     );
     final lastLineWidth = lastLineBoxes.last.right;
 
-    double totalMessageWidth = messageTextWidth + paddingMessage;
+    double totalMessageWidth = messageTextWidth;
     bool isNeedAddNewLine;
 
     if (lastLineWidth < messageTextWidth &&
         messageTextWidth - lastLineWidth >= messageTimeAndPaddingWidth &&
-        messageTextWidth + paddingMessage < maxWidth) {
-      totalMessageWidth = messageTextWidth + paddingMessage;
+        messageTextWidth < maxWidth) {
+      totalMessageWidth = messageTextWidth;
       isNeedAddNewLine =
           event.isCaptionModeOrReply() ||
           (event.status == EventStatus.error &&
@@ -240,7 +236,6 @@ mixin MessageContentBuilderMixin {
       totalMessageWidth = _calculateTotalMessageWidth(
         lastLineWidth,
         messageTimeAndPaddingWidth,
-        paddingMessage,
         maxWidth,
       );
 
@@ -263,11 +258,9 @@ mixin MessageContentBuilderMixin {
   double _calculateTotalMessageWidth(
     double lastLineWidth,
     double messageTimeAndPaddingWidth,
-    double paddingMessage,
     double maxWidth,
   ) {
-    final lastLineWithTimeWidth =
-        lastLineWidth + messageTimeAndPaddingWidth + paddingMessage;
+    final lastLineWithTimeWidth = lastLineWidth + messageTimeAndPaddingWidth;
 
     if (lastLineWithTimeWidth < maxWidth) {
       return lastLineWithTimeWidth;
