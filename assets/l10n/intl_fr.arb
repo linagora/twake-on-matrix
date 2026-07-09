@@ -1265,12 +1265,12 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Ouvrez l'application pour lire le message",
-  "newMessage": "Nouveau message",
-  "enableNotificationsExplanation": "Activez les notifications pour être alerté des nouveaux messages, même quand Twake est fermé.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
   },
+  "newMessage": "Nouveau message",
+  "enableNotificationsExplanation": "Activez les notifications pour être alerté des nouveaux messages, même quand Twake est fermé.",
   "openCamera": "Ouvrir l'appareil photo",
   "@openCamera": {
     "type": "text",
@@ -3152,5 +3152,7 @@
   "@videoCallJoinCall": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "webPushOnThisBrowser": "Notifications sur ce navigateur",
+  "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option."
 }
