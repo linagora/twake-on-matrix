@@ -1253,12 +1253,12 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Открыть приложение для чтения сообщений",
-  "newMessage": "Новое сообщение",
-  "enableNotificationsExplanation": "Включите уведомления, чтобы получать оповещения о новых сообщениях, даже когда Twake закрыт.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
   },
+  "newMessage": "Новое сообщение",
+  "enableNotificationsExplanation": "Включите уведомления, чтобы получать оповещения о новых сообщениях, даже когда Twake закрыт.",
   "openCamera": "Открыть камеру",
   "@openCamera": {
     "type": "text",
@@ -3157,5 +3157,7 @@
   "@videoCallJoinCall": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "webPushOnThisBrowser": "Уведомления в этом браузере",
+  "webPushPermissionDeniedHint": "Уведомления заблокированы. Разрешите их для этого сайта в настройках браузера, затем снова включите этот параметр."
 }
