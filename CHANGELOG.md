@@ -1,22 +1,20 @@
 ## [2.23.1] - 2026-07-09
 ### Added
-- Add Riverpod 3 setup
-- Translated using Weblate (French, Irish, Indonesian, Russian, Vietnamese)
+- #3232: Add Riverpod 3 setup
 
 ### Changed
-- TW-3196: Improve download progress display for files
-- TW-3203: Reuse timeline status icon for chat list last message
-- TW-3213: Change composer style and prevent timestamp overlap
-- TW-3225: Align mentions, deleted messages, and hover action icons
+- #3219: TW-3196: Improve download progress display for files
+- #3204: TW-3203: Reuse timeline status icon for chat list last message
+- #3216: TW-3213: Change composer text style
+- #3231: TW-3225: Mentions and deleted messages style
 
 ### Fixed
-- TW-3170: Send read marker when opening a room already at bottom
-- TW-3189: Fix pinch zoom and pan drag on images
-- Fix web image viewer original asset loading
+- #3202: TW-3170: Send read marker when room opens at bottom
+- #3192: TW-3189: Fix pinch zoom and pan drag on images
+- #3230: Fix web image viewer original asset loading
 
 ### Tests
-- Fix diacritic search probe for the search fixture
-- Await inline search field in new-group flow
+- #3228: Fix Patrol CI
 
 ## [2.23.0] - 2026-07-02
 ### Added
