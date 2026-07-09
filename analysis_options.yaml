@@ -6,15 +6,23 @@ analyzer:
 
   errors:
     close_sinks: ignore
+    deprecated_member_use: ignore
     unrelated_type_equality_checks: warning
     collection_methods_unrelated_type: warning
     missing_return: error
     missing_required_param: error
     record_literal_one_positional_no_trailing_comma: error
+    use_build_context_synchronously: ignore
 
   exclude:
     - test/.test_coverage.dart
     - lib/generated_plugin_registrant.dart
+    - test_bundle.dart
+    - integration_test/test_bundle.dart
+    - lib/l10n/*.dart
+    - "**.g.dart"
+    - docs/migration/snippets/**
+    - docs/migration/snippets_generated/**
 
 formatter:
   trailing_commas: preserve
