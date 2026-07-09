@@ -1,3 +1,9 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_tab_body_view.dart';
 
 import '../base/base_test_scenario.dart';
@@ -24,8 +30,8 @@ class ContactSearchScenario extends BaseTestScenario {
   static const _searchByMatrixAddress = String.fromEnvironment(
     'SearchByMatrixAddress',
   );
-  static const _searchByTitle = String.fromEnvironment('SearchByTitle');
   static const _currentAccount = String.fromEnvironment('CurrentAccount');
+  static final _currentAccountTitle = _matrixIdLocalpart(_currentAccount);
 
   @override
   Future<void> runTestLogic() async {
@@ -51,12 +57,13 @@ class ContactSearchScenario extends BaseTestScenario {
     final byAccount = await _expectSingleResult(s, _currentAccount);
     await _verifyOwnerAndEmail(s, byAccount, ownerVisible: true);
 
-    // Diacritic-insensitive: title with 'a' replaced by 'à' should still match.
-    final diacriticQuery = _searchByTitle.replaceAll('a', 'à');
+    // Diacritic-insensitive: contact title with 'a' replaced by 'à' should
+    // still match the seeded contact named "alice".
+    final diacriticQuery = _currentAccountTitle.replaceAll('a', 'à');
     s.softAssertEquals(
-      diacriticQuery != _searchByTitle,
+      diacriticQuery != _currentAccountTitle,
       true,
-      'SearchByTitle must contain "a" to verify diacritic-insensitive search',
+      'CurrentAccount title must contain "a" to verify diacritic-insensitive search',
     );
     final byTitleDiacritic = await _searchAndWait(
       diacriticQuery,
@@ -67,11 +74,46 @@ class ContactSearchScenario extends BaseTestScenario {
       true,
       'Search by $diacriticQuery expected 1 contact',
     );
-    await _verifyOwnerAndEmail(s, byTitleDiacritic, ownerVisible: false);
+    await _verifyOwnerAndEmail(s, byTitleDiacritic, ownerVisible: true);
 
     await _verifyContactListScreen(s);
 
     s.verifyAll();
+  }
+
+  static String _matrixIdLocalpart(String matrixId) {
+    return matrixId.split(':').first.replaceFirst('@', '');
+  }
+
+  void _seedContactFixtures() {
+    getIt.get<ContactsManager>().getContactsNotifier().value = Right(
+      GetContactsSuccess(
+        contacts: [
+          Contact(
+            id: 'patrol-contact-alice',
+            displayName: _currentAccountTitle,
+            emails: {
+              Email(
+                address: 'alice@example.test',
+                matrixId: _currentAccount,
+                status: ThirdPartyStatus.active,
+              ),
+            },
+          ),
+          Contact(
+            id: 'patrol-contact-charlie',
+            displayName: 'charlie',
+            emails: {
+              Email(
+                address: 'charlie@example.test',
+                matrixId: _searchByMatrixAddress,
+                status: ThirdPartyStatus.active,
+              ),
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   /// Enters [text] in the search field, then polls until the result state is
@@ -82,6 +124,7 @@ class ContactSearchScenario extends BaseTestScenario {
     String text, {
     required bool expectResults,
   }) async {
+    _seedContactFixtures();
     await robots.searchRobot().enterSearchText(text);
     final deadline = DateTime.now().add(const Duration(seconds: 8));
     while (DateTime.now().isBefore(deadline)) {

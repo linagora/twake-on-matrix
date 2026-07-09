@@ -6,8 +6,12 @@ import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-import 'package:collection/collection.dart';
+
+const _contactSearchEngine = SearchEngine();
+const _contactSearchOptions = SearchOptions(diacriticSensitive: false);
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {
@@ -335,44 +339,51 @@ extension IterableContactsExtension on Iterable<Contact> {
     final contactsMatched = where((contact) {
       final supportedFields = [contact.displayName, contact.id];
       final plainTextContains = supportedFields.any(
-        (field) =>
-            field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
+        (field) => _matchesText(keyword, field),
       );
       final phoneNumberContains =
           contact.phoneNumbers?.any(
             (phoneNumber) =>
-                phoneNumber.number.replaceAll(" ", "").contains(keyword),
+                _matchesText(keyword, phoneNumber.number.replaceAll(" ", "")),
           ) ??
           false;
 
       final emailContains =
-          contact.emails?.any((email) => email.address.contains(keyword)) ??
+          contact.emails?.any(
+            (email) => _matchesText(keyword, email.address),
+          ) ??
           false;
 
       final emailMatrixIdContains =
-          contact.emails
-              ?.firstWhereOrNull(
-                (email) => email.matrixId?.contains(keyword) == true,
-              )
-              ?.matrixId !=
-          null;
+          contact.emails?.any(
+            (email) => _matchesText(keyword, email.matrixId),
+          ) ??
+          false;
 
       final phoneMatrixIdContains =
-          contact.phoneNumbers
-              ?.firstWhereOrNull(
-                (phone) => phone.matrixId?.contains(keyword) == true,
-              )
-              ?.matrixId !=
-          null;
+          contact.phoneNumbers?.any(
+            (phone) => _matchesText(keyword, phone.matrixId),
+          ) ??
+          false;
 
       return plainTextContains ||
           phoneNumberContains ||
           emailContains ||
           emailMatrixIdContains ||
-          phoneMatrixIdContains ||
-          contact.id.contains(keyword);
+          phoneMatrixIdContains;
     });
     return contactsMatched;
+  }
+
+  bool _matchesText(String keyword, String? value) {
+    if (value == null) {
+      return false;
+    }
+    return _contactSearchEngine.matchesText(
+      keyword,
+      value,
+      options: _contactSearchOptions,
+    );
   }
 }
 
