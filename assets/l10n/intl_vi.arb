@@ -1,5 +1,7 @@
 {
   "@@last_modified": "2021-08-14 12:41:09.781172",
+  "webPushOnThisBrowser": "Thông báo trên trình duyệt này",
+  "webPushPermissionDeniedHint": "Thông báo đang bị chặn. Hãy cho phép thông báo cho trang web này trong phần cài đặt trình duyệt, rồi bật lại tùy chọn này.",
   "about": "Giới thiệu",
   "@about": {
     "type": "text",

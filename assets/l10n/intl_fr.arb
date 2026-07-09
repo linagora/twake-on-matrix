@@ -1,6 +1,8 @@
 {
   "@@locale": "fr",
   "@@last_modified": "2021-08-14 12:41:10.051787",
+  "webPushOnThisBrowser": "Notifications sur ce navigateur",
+  "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option.",
   "about": "À propos",
   "@about": {
     "type": "text",
