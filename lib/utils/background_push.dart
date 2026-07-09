@@ -689,19 +689,20 @@ class BackgroundPush {
       if (_matrixState == null || roomId == null) {
         return;
       }
-      await client.roomsLoading;
-      await client.accountDataLoading;
+      final activeClient = switchedClient ?? client;
+      await activeClient.roomsLoading;
+      await activeClient.accountDataLoading;
       // ignore: unused_local_variable
       final isStory =
-          client
+          activeClient
               .getRoomById(roomId)
               ?.getState(EventTypes.RoomCreate)
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      if (client.getRoomById(roomId) == null) {
+      if (activeClient.getRoomById(roomId) == null) {
         Logs().v('[Push] Room $roomId not found, syncing...');
-        await client.waitForRoomInSync(roomId);
+        await activeClient.waitForRoomInSync(roomId);
       }
       _handleRedirectRoom(
         roomId,
