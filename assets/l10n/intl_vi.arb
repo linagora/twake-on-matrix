@@ -1515,12 +1515,12 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Mở ứng dụng để đọc tin nhắn",
-  "newMessage": "Tin nhắn mới",
-  "enableNotificationsExplanation": "Bật thông báo để được nhắc về tin nhắn mới, ngay cả khi Twake đã đóng.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
   },
+  "newMessage": "Tin nhắn mới",
+  "enableNotificationsExplanation": "Bật thông báo để được nhắc về tin nhắn mới, ngay cả khi Twake đã đóng.",
   "openCamera": "Mở máy ảnh",
   "@openCamera": {
     "type": "text",
@@ -3124,6 +3124,18 @@
   },
   "videoCallJoinCall": "Tham gia cuộc gọi",
   "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "webPushOnThisBrowser": "Thông báo trên trình duyệt này",
+  "webPushPermissionDeniedHint": "Thông báo đã bị chặn. Vui lòng cho phép nhận thông báo cho trang web này trong cài đặt trình duyệt của bạn, sau đó bật chức năng này lên.",
+  "thisIsANewChat": "Đây là một cuộc trò chuyện mới",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "Nhấp vào đây để xem các tin nhắn mới nhất",
+  "@chatPreviewUnavailable": {
     "type": "text",
     "placeholders": {}
   }
