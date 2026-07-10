@@ -1175,19 +1175,35 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    final previousDiscovery = loginHomeserverSummary?.discoveryInformation;
-    final newSummary = await newClient
-        .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
-        .toHomeserverSummary();
+    final previousSummary = loginHomeserverSummary;
+
+    HomeserverSummary? checkedSummary;
+    try {
+      checkedSummary = await newClient
+          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
+          .toHomeserverSummary();
+    } catch (e) {
+      Logs().w(
+        'Matrix::_getHomeserverInformation: homeserver unreachable, using '
+        'cached discovery information',
+        e,
+      );
+    }
 
     final discovery = await newClient.getWellKnownOrFallback(
-      fallback: previousDiscovery,
+      fallback: previousSummary?.discoveryInformation,
     );
+
+    if (checkedSummary == null && discovery == null) return;
 
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
-      versions: newSummary.versions,
-      loginFlows: newSummary.loginFlows,
+      versions:
+          checkedSummary?.versions ??
+          previousSummary?.versions ??
+          GetVersionsResponse(versions: []),
+      loginFlows:
+          checkedSummary?.loginFlows ?? previousSummary?.loginFlows ?? [],
     );
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',

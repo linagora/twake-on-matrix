@@ -126,6 +126,47 @@ void main() {
       },
     );
 
+    test('serves the persisted well-known without a network attempt when the '
+        'homeserver is unset', () async {
+      final database = CachingDatabase();
+      final recorder = RecordingHttpClient();
+      client = await getClient(database: database, httpClient: recorder);
+      FakeMatrixApi.currentApi!.api['GET']![wellKnownPath] =
+          wellKnownWithLiveKit;
+
+      // Seed the persisted copy with a successful fetch, then age it past
+      // the cache lifetime so freshness alone cannot serve the next call.
+      await client.getWellKnownOrFallback();
+      database.cache['well_known'] = (
+        content: database.cache['well_known']!.content,
+        savedAt: DateTime.now().subtract(const Duration(minutes: 10)),
+      );
+
+      // What checkHomeserver() leaves behind when the server is fully
+      // unreachable at startup.
+      final homeserver = client.homeserver;
+      client.homeserver = null;
+
+      final requestsBefore = recorder.requestedUris
+          .where((uri) => uri.path == wellKnownPath)
+          .length;
+      final discovery = await client.getWellKnownOrFallback();
+      final requestsAfter = recorder.requestedUris
+          .where((uri) => uri.path == wellKnownPath)
+          .length;
+      client.homeserver = homeserver;
+
+      expect(
+        summaryOf(discovery).videoCallBaseUrl,
+        'https://livekit.example.com',
+      );
+      expect(
+        requestsAfter,
+        requestsBefore,
+        reason: 'no network attempt may be made without a homeserver',
+      );
+    });
+
     test('serves the persisted well-known when a later fetch fails', () async {
       final database = CachingDatabase();
       client = await getClient(database: database);
