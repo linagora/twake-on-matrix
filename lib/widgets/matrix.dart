@@ -1196,6 +1196,10 @@ class MatrixState extends State<Matrix>
 
     if (checkedSummary == null && discovery == null) return;
 
+    // The active client may have changed while awaiting: a late result must
+    // not overwrite the newer account's summary.
+    if (clientOrNull != newClient) return;
+
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
       versions:
