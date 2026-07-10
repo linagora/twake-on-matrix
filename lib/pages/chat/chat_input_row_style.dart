@@ -1,14 +1,15 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
 
 class ChatInputRowStyle {
   static final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
 
   static const double chatInputRowWidth = 52.0;
-  static const double chatInputRowHeight = 40.0;
+  static const double chatInputRowHeight = LinagoraSpacing.base * 5;
   static const EdgeInsets chatInputRowPaddingMobile = EdgeInsets.only(
-    left: 8.0,
+    left: LinagoraSpacing.base,
   );
   static const BorderRadius chatInputRowBorderRadius = BorderRadius.all(
     Radius.circular(25),
@@ -26,8 +27,8 @@ class ChatInputRowStyle {
 
   static EdgeInsetsDirectional contentPadding(BuildContext context) =>
       EdgeInsetsDirectional.only(
-        top: responsiveUtils.isMobile(context) ? 7 : 10,
-        bottom: responsiveUtils.isMobile(context) ? 7 : 10,
+        top: responsiveUtils.isMobile(context) ? 7 : 12,
+        bottom: responsiveUtils.isMobile(context) ? 7 : 12,
       );
 
   static const double inputComposerOpacity = 0.38;
