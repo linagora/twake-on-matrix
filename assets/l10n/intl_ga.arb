@@ -3192,5 +3192,26 @@
       "successCount": {},
       "totalCount": {}
     }
+  },
+  "gifAutoplay": "Uathsheinm GIF",
+  "videoCallStartedTitle": "Tá glao físe tosaithe",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Tosaigh glao físe",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Cóipeáil nasc",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Glac páirt sa ghlao",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
   }
 }
