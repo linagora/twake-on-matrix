@@ -56,7 +56,7 @@ class TwakeClient extends Client {
     super.roomPreviewLastEvents,
     super.pinUnreadRooms,
     super.pinInvitedRooms,
-    super.requestHistoryOnLimitedTimeline,
+    super.requestHistoryOnLimitedTimeline = true,
     super.supportedLoginTypes,
     super.mxidLocalPartFallback,
     super.formatLocalpart,
