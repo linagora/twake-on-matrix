@@ -9,6 +9,7 @@ import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dar
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 import 'package:fluffychat/domain/usecase/invitation/constants.dart';
+import 'package:fluffychat/domain/usecase/invitation/safe_response_data_summary.dart';
 import 'package:matrix/matrix.dart';
 
 class GenerateInvitationLinkInteractor {
@@ -38,7 +39,7 @@ class GenerateInvitationLinkInteractor {
           'status=${e.response?.statusCode} '
           'type=${e.type} '
           'path=${e.requestOptions.path} '
-          'data=${e.response?.data}',
+          'data=${safeResponseDataSummary(e.response?.data)}',
           e,
         );
       } else {

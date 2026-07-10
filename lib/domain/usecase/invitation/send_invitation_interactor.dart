@@ -8,6 +8,7 @@ import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dar
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 import 'package:fluffychat/domain/usecase/invitation/constants.dart';
+import 'package:fluffychat/domain/usecase/invitation/safe_response_data_summary.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
@@ -41,7 +42,7 @@ class SendInvitationInteractor {
           'status=${e.response?.statusCode} '
           'type=${e.type} '
           'path=${e.requestOptions.path} '
-          'data=${_safeResponseDataSummary(e.response?.data)}',
+          'data=${safeResponseDataSummary(e.response?.data)}',
           e,
         );
       } else {
@@ -88,15 +89,5 @@ class SendInvitationInteractor {
       Logs().e('SendInvitationInteractor::_tryToNormalizePhoneNumber', e);
     }
     return normalizedPhoneNumber;
-  }
-
-  String _safeResponseDataSummary(Object? data) {
-    if (data == null) {
-      return 'null';
-    }
-    if (data is Map) {
-      return 'Map(keys=${data.keys.join(',')})';
-    }
-    return data.runtimeType.toString();
   }
 }
