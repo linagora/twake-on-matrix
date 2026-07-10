@@ -2909,7 +2909,7 @@
   "invitePeopleToTheRoom": "Inviter des personnes dans le salon",
   "sendReactions": "Réagir",
   "deleteMessagesSentByMe": "Supprimer mes messages",
-  "notifyEveryoneUsingRoom": "Notifier tout le monde en utilisant @salon",
+  "notifyEveryoneUsingRoom": "Notifier tout le monde en utilisant @room",
   "joinCall": "Rejoindre des appels",
   "removeMembers": "Retirer un membre",
   "deleteMessagesSentByOthers": "Supprimer les messages des autres",
