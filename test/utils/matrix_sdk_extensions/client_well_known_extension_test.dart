@@ -167,6 +167,67 @@ void main() {
       );
     });
 
+    test('persists the fallback so it survives a restart', () async {
+      final database = CachingDatabase();
+      client = await getClient(database: database);
+      FakeMatrixApi.currentApi!.api['GET']!.remove(wellKnownPath);
+
+      final previous = DiscoveryInformation.fromJson(
+        wellKnownWithLiveKit(null),
+      );
+
+      final discovery = await client.getWellKnownOrFallback(fallback: previous);
+
+      expect(discovery, same(previous));
+      expect(database.cache['well_known'], isNotNull);
+
+      // As after a restart: no in-memory fallback left and the endpoint is
+      // still down — the seeded copy must be served.
+      final restored = await client.getWellKnownOrFallback();
+      expect(
+        summaryOf(restored).videoCallBaseUrl,
+        'https://livekit.example.com',
+      );
+    });
+
+    test(
+      'does not overwrite a persisted well-known with the fallback',
+      () async {
+        final database = CachingDatabase();
+        client = await getClient(database: database);
+        final fakeApi = FakeMatrixApi.currentApi!;
+        fakeApi.api['GET']![wellKnownPath] = wellKnownWithLiveKit;
+
+        await client.getWellKnownOrFallback();
+
+        // Age the persisted copy so the next call attempts (and fails) a
+        // fetch instead of being served by freshness.
+        final agedSavedAt = DateTime.now().subtract(
+          const Duration(minutes: 10),
+        );
+        database.cache['well_known'] = (
+          content: database.cache['well_known']!.content,
+          savedAt: agedSavedAt,
+        );
+        fakeApi.api['GET']!.remove(wellKnownPath);
+
+        final other = DiscoveryInformation(
+          mHomeserver: HomeserverInformation(
+            baseUrl: Uri.parse('https://other.example.com'),
+          ),
+        );
+        final discovery = await client.getWellKnownOrFallback(fallback: other);
+
+        // The stale persisted copy wins over the in-memory fallback…
+        expect(
+          summaryOf(discovery).videoCallBaseUrl,
+          'https://livekit.example.com',
+        );
+        // …and remains untouched.
+        expect(database.cache['well_known']!.savedAt, agedSavedAt);
+      },
+    );
+
     test('serves the persisted well-known when a later fetch fails', () async {
       final database = CachingDatabase();
       client = await getClient(database: database);

@@ -3,8 +3,11 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/request_and_cache.dart';
 
 extension ClientWellKnownExtension on Client {
+  static const _cacheKey = 'well_known';
+
   /// Fetches the discovery information (`/.well-known/matrix/client`) from
   /// the homeserver host, returning [fallback] when it cannot be fetched.
+  /// A returned fallback is persisted so it survives the next restart.
   Future<DiscoveryInformation?> getWellKnownOrFallback({
     DiscoveryInformation? fallback,
     Duration cacheLifetime = const Duration(minutes: 5),
@@ -17,7 +20,7 @@ extension ClientWellKnownExtension on Client {
         ).getWellknown(),
         fromJson: DiscoveryInformation.fromJson,
         toJson: (wellKnown) => wellKnown.toJson(),
-        cacheKey: 'well_known',
+        cacheKey: _cacheKey,
         cacheLifetime: cacheLifetime,
         throwOnUpdateFailure: false,
       );
@@ -28,6 +31,18 @@ extension ClientWellKnownExtension on Client {
         'information',
         e,
       );
+      if (fallback != null && isLogged()) {
+        // Persist the fallback so it survives the next restart
+        try {
+          await database.cacheCustomObject(_cacheKey, fallback.toJson());
+        } catch (e) {
+          Logs().w(
+            'ClientWellKnownExtension::getWellKnownOrFallback: could not '
+            'persist the fallback well-known',
+            e,
+          );
+        }
+      }
       return fallback;
     }
   }
