@@ -1,6 +1,7 @@
 import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:fluffychat/domain/app_state/invitation/store_invitation_status_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/providers/contacts_invitation_providers.dart';
@@ -175,25 +176,41 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
     }
   }
 
-  Future<void> storeInvitationStatus({
+  Future<bool> storeInvitationStatus({
     required String userId,
     required String contactId,
     required String invitationId,
   }) async {
     if (contactId.isEmpty || invitationId.isEmpty) {
-      return;
+      return false;
     }
 
-    await for (final nextState
-        in ref
-            .read(storeInvitationStatusInteractorProvider)
-            .execute(
-              userId: userId,
-              contactId: contactId,
-              invitationId: invitationId,
-            )) {
-      Logs().d('ContactsInvitationViewModel::storeInvitationStatus', nextState);
+    var isStored = false;
+    try {
+      await for (final nextState
+          in ref
+              .read(storeInvitationStatusInteractorProvider)
+              .execute(
+                userId: userId,
+                contactId: contactId,
+                invitationId: invitationId,
+              )) {
+        nextState.fold(
+          (failure) => Logs().e(
+            'ContactsInvitationViewModel::storeInvitationStatus failed',
+            failure,
+          ),
+          (success) {
+            if (success is StoreInvitationStatusSuccessState) {
+              isStored = true;
+            }
+          },
+        );
+      }
+    } catch (error) {
+      Logs().e('ContactsInvitationViewModel::storeInvitationStatus', error);
     }
+    return isStored;
   }
 
   ({String contact, InvitationMediumEnum medium})? _getInvitationData(

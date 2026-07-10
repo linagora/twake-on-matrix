@@ -3,10 +3,12 @@ import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:fluffychat/domain/app_state/invitation/store_invitation_status_state.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/usecase/invitation/generate_invitation_link_interactor.dart';
 import 'package:fluffychat/domain/usecase/invitation/send_invitation_interactor.dart';
+import 'package:fluffychat/domain/usecase/invitation/store_invitation_status_interactor.dart';
 import 'package:fluffychat/pages/contacts_tab/providers/contacts_invitation_providers.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view_model.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
@@ -36,6 +38,20 @@ class FakeGenerateInvitationLinkInteractor
   Stream<Either<Failure, Success>> execute({
     String? contact,
     InvitationMediumEnum? medium,
+  }) => states;
+}
+
+class FakeStoreInvitationStatusInteractor
+    implements StoreInvitationStatusInteractor {
+  final Stream<Either<Failure, Success>> states;
+
+  FakeStoreInvitationStatusInteractor(this.states);
+
+  @override
+  Stream<Either<Failure, Success>> execute({
+    required String userId,
+    required String contactId,
+    required String invitationId,
   }) => states;
 }
 
@@ -190,5 +206,68 @@ void main() {
           .value,
       Uri.parse('https://example.com/invitation'),
     );
+  });
+
+  test('reports successful invitation status storage', () async {
+    final interactor = FakeStoreInvitationStatusInteractor(
+      Stream<Either<Failure, Success>>.fromIterable([
+        const Right(StoreInvitationStatusLoadingState()),
+        const Right(
+          StoreInvitationStatusSuccessState(
+            contactId: 'contact-id',
+            userId: 'user-id',
+            invitationId: 'invitation-id',
+          ),
+        ),
+      ]),
+    );
+    final testContainer = ProviderContainer(
+      overrides: [
+        storeInvitationStatusInteractorProvider.overrideWithValue(interactor),
+      ],
+    );
+    addTearDown(testContainer.dispose);
+
+    final isStored = await testContainer
+        .read(contactsInvitationViewModelProvider.notifier)
+        .storeInvitationStatus(
+          userId: 'user-id',
+          contactId: 'contact-id',
+          invitationId: 'invitation-id',
+        );
+
+    expect(isStored, isTrue);
+  });
+
+  test('reports failed invitation status storage', () async {
+    final interactor = FakeStoreInvitationStatusInteractor(
+      Stream<Either<Failure, Success>>.fromIterable([
+        const Right(StoreInvitationStatusLoadingState()),
+        const Left(
+          StoreInvitationStatusFailureState(
+            exception: 'storage failed',
+            contactId: 'contact-id',
+            userId: 'user-id',
+            invitationId: 'invitation-id',
+          ),
+        ),
+      ]),
+    );
+    final testContainer = ProviderContainer(
+      overrides: [
+        storeInvitationStatusInteractorProvider.overrideWithValue(interactor),
+      ],
+    );
+    addTearDown(testContainer.dispose);
+
+    final isStored = await testContainer
+        .read(contactsInvitationViewModelProvider.notifier)
+        .storeInvitationStatus(
+          userId: 'user-id',
+          contactId: 'contact-id',
+          invitationId: 'invitation-id',
+        );
+
+    expect(isStored, isFalse);
   });
 }

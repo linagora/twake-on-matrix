@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
 import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
@@ -77,18 +79,42 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
         if (response == null) {
           return;
         }
-        _onStoreInvitationStatus(
-          userId: widget.userId,
-          contactId: widget.contact.id ?? '',
-          invitationId: response.id ?? '',
-        );
-        TwakeSnackBar.show(
-          context,
-          L10n.of(context)!.invitationHasBeenSuccessfullySent,
-        );
-        Navigator.of(context).pop(response.id ?? '');
+        unawaited(_handleInvitationSent(response));
       },
     );
+  }
+
+  Future<void> _handleInvitationSent(SendInvitationResponse response) async {
+    final isStatusStored = await _onStoreInvitationStatus(
+      userId: widget.userId,
+      contactId: widget.contact.id ?? '',
+      invitationId: response.id ?? '',
+    );
+    if (!mounted) {
+      return;
+    }
+    if (!isStatusStored) {
+      Logs().e('ContactsInvitation::_handleInvitationSent status not stored');
+    }
+    TwakeSnackBar.show(
+      context,
+      L10n.of(context)!.invitationHasBeenSuccessfullySent,
+    );
+    Navigator.of(context).pop(response.id ?? '');
+  }
+
+  Future<bool> _onStoreInvitationStatus({
+    required String userId,
+    required String contactId,
+    required String invitationId,
+  }) {
+    return ref
+        .read(contactsInvitationViewModelProvider.notifier)
+        .storeInvitationStatus(
+          userId: userId,
+          contactId: contactId,
+          invitationId: invitationId,
+        );
   }
 
   void _onGenerateInvitationLinkStateChanged(AsyncValue<Uri?> state) {
@@ -100,7 +126,7 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
         if (error is GenerateInvitationLinkFailureState) {
           TwakeSnackBar.show(
             context,
-            error.message ?? L10n.of(context)!.failedToSendFiles,
+            error.message ?? L10n.of(context)!.failedToGenerateInvitationLink,
           );
           return;
         }
@@ -119,31 +145,37 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
           );
           return;
         }
-        TwakeSnackBar.show(context, L10n.of(context)!.failedToSendFiles);
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.failedToGenerateInvitationLink,
+        );
       },
-      data: (link) async {
+      data: (link) {
         TwakeDialog.hideLoadingDialog(context);
         if (link == null) {
           return;
         }
-        await Share.shareUri(link);
-        Navigator.of(context).pop();
+        unawaited(_shareInvitationLink(link));
       },
     );
   }
 
-  void _onStoreInvitationStatus({
-    required String userId,
-    required String contactId,
-    required String invitationId,
-  }) {
-    ref
-        .read(contactsInvitationViewModelProvider.notifier)
-        .storeInvitationStatus(
-          userId: userId,
-          contactId: contactId,
-          invitationId: invitationId,
+  Future<void> _shareInvitationLink(Uri link) async {
+    try {
+      await Share.shareUri(link);
+    } catch (error) {
+      Logs().e('ContactsInvitation::_shareInvitationLink', error);
+      if (mounted) {
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.failedToGenerateInvitationLink,
         );
+      }
+      return;
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
