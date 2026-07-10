@@ -26,15 +26,12 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
     if (state.selectedContact != null) {
       return;
     }
-    final phoneNumbers = contact.phoneNumbers;
-    if (phoneNumbers != null && phoneNumbers.isNotEmpty) {
-      selectContact(phoneNumbers.first, isSelectionLocked: isSelectionLocked);
-      return;
-    }
-
-    final emails = contact.emails;
-    if (emails != null && emails.isNotEmpty) {
-      selectContact(emails.first, isSelectionLocked: isSelectionLocked);
+    final contacts = <PresentationThirdPartyContact>[
+      ...?contact.phoneNumbers,
+      ...?contact.emails,
+    ];
+    if (contacts.isNotEmpty) {
+      selectContact(contacts.first, isSelectionLocked: isSelectionLocked);
     }
   }
 
@@ -45,11 +42,9 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
     if (isSelectionLocked) {
       return;
     }
-    if (state.selectedContact == contact) {
-      state = state.copyWith(selectedContact: null);
-      return;
-    }
-    state = state.copyWith(selectedContact: contact);
+    state = state.copyWith(
+      selectedContact: state.selectedContact == contact ? null : contact,
+    );
   }
 
   Future<void> sendInvitation({
