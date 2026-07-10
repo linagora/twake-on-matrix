@@ -1,44 +1,20 @@
 import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class ContactsInvitationState extends Equatable {
-  final PresentationThirdPartyContact? selectedContact;
-  final Either<Failure, Success> sendInvitationState;
-  final Either<Failure, Success> generateInvitationLinkState;
+part 'contacts_invitation_state.freezed.dart';
 
-  const ContactsInvitationState({
-    this.selectedContact,
-    this.sendInvitationState = const Right(SendInvitationInitial()),
-    this.generateInvitationLinkState = const Right(
-      GenerateInvitationLinkInitial(),
-    ),
-  });
-
-  ContactsInvitationState copyWith({
+@freezed
+abstract class ContactsInvitationState with _$ContactsInvitationState {
+  const factory ContactsInvitationState({
     PresentationThirdPartyContact? selectedContact,
-    bool clearSelectedContact = false,
-    Either<Failure, Success>? sendInvitationState,
-    Either<Failure, Success>? generateInvitationLinkState,
-  }) {
-    return ContactsInvitationState(
-      selectedContact: clearSelectedContact
-          ? null
-          : selectedContact ?? this.selectedContact,
-      sendInvitationState: sendInvitationState ?? this.sendInvitationState,
-      generateInvitationLinkState:
-          generateInvitationLinkState ?? this.generateInvitationLinkState,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    selectedContact,
-    sendInvitationState,
-    generateInvitationLinkState,
-  ];
+    @Default(Right(SendInvitationInitial()))
+    Either<Failure, Success> sendInvitationState,
+    @Default(Right(GenerateInvitationLinkInitial()))
+    Either<Failure, Success> generateInvitationLinkState,
+  }) = _ContactsInvitationState;
 }

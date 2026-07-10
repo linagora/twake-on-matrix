@@ -39,7 +39,7 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
       return;
     }
     if (state.selectedContact == contact) {
-      state = state.copyWith(clearSelectedContact: true);
+      state = state.copyWith(selectedContact: null);
       return;
     }
     state = state.copyWith(selectedContact: contact);

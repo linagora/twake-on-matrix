@@ -35,6 +35,8 @@ config.json
 
 # Flutter/Dart/Pub related
 **/doc/api/
+*.g.dart
+*.freezed.dart
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
