@@ -55,6 +55,29 @@ class FakeStoreInvitationStatusInteractor
   }) => states;
 }
 
+Future<bool> _storeInvitationStatus(
+  Stream<Either<Failure, Success>> states,
+) async {
+  final container = ProviderContainer(
+    overrides: [
+      storeInvitationStatusInteractorProvider.overrideWithValue(
+        FakeStoreInvitationStatusInteractor(states),
+      ),
+    ],
+  );
+  try {
+    return await container
+        .read(contactsInvitationViewModelProvider.notifier)
+        .storeInvitationStatus(
+          userId: 'user-id',
+          contactId: 'contact-id',
+          invitationId: 'invitation-id',
+        );
+  } finally {
+    container.dispose();
+  }
+}
+
 void main() {
   late ProviderContainer container;
 
@@ -209,7 +232,7 @@ void main() {
   });
 
   test('reports successful invitation status storage', () async {
-    final interactor = FakeStoreInvitationStatusInteractor(
+    final isStored = await _storeInvitationStatus(
       Stream<Either<Failure, Success>>.fromIterable([
         const Right(StoreInvitationStatusLoadingState()),
         const Right(
@@ -221,26 +244,12 @@ void main() {
         ),
       ]),
     );
-    final testContainer = ProviderContainer(
-      overrides: [
-        storeInvitationStatusInteractorProvider.overrideWithValue(interactor),
-      ],
-    );
-    addTearDown(testContainer.dispose);
-
-    final isStored = await testContainer
-        .read(contactsInvitationViewModelProvider.notifier)
-        .storeInvitationStatus(
-          userId: 'user-id',
-          contactId: 'contact-id',
-          invitationId: 'invitation-id',
-        );
 
     expect(isStored, isTrue);
   });
 
   test('reports failed invitation status storage', () async {
-    final interactor = FakeStoreInvitationStatusInteractor(
+    final isStored = await _storeInvitationStatus(
       Stream<Either<Failure, Success>>.fromIterable([
         const Right(StoreInvitationStatusLoadingState()),
         const Left(
@@ -253,20 +262,6 @@ void main() {
         ),
       ]),
     );
-    final testContainer = ProviderContainer(
-      overrides: [
-        storeInvitationStatusInteractorProvider.overrideWithValue(interactor),
-      ],
-    );
-    addTearDown(testContainer.dispose);
-
-    final isStored = await testContainer
-        .read(contactsInvitationViewModelProvider.notifier)
-        .storeInvitationStatus(
-          userId: 'user-id',
-          contactId: 'contact-id',
-          invitationId: 'invitation-id',
-        );
 
     expect(isStored, isFalse);
   });

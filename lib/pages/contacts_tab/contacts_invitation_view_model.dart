@@ -1,3 +1,6 @@
+import 'package:dartz/dartz.dart';
+import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
@@ -88,27 +91,7 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
         if (!ref.mounted) {
           return;
         }
-        state = nextState.fold(
-          (failure) => state.copyWith(
-            sendInvitationState: AsyncError<SendInvitationResponse?>(
-              failure,
-              StackTrace.current,
-            ),
-          ),
-          (success) => switch (success) {
-            SendInvitationLoadingState() => state.copyWith(
-              sendInvitationState:
-                  const AsyncLoading<SendInvitationResponse?>(),
-            ),
-            SendInvitationSuccessState(:final sendInvitationResponse) =>
-              state.copyWith(
-                sendInvitationState: AsyncData<SendInvitationResponse?>(
-                  sendInvitationResponse,
-                ),
-              ),
-            _ => state,
-          },
-        );
+        _updateSendInvitationState(nextState);
       }
     } catch (error, stackTrace) {
       if (!ref.mounted) {
@@ -121,6 +104,29 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
         ),
       );
     }
+  }
+
+  void _updateSendInvitationState(Either<Failure, Success> nextState) {
+    state = nextState.fold(
+      (failure) => state.copyWith(
+        sendInvitationState: AsyncError<SendInvitationResponse?>(
+          failure,
+          StackTrace.current,
+        ),
+      ),
+      (success) => switch (success) {
+        SendInvitationLoadingState() => state.copyWith(
+          sendInvitationState: const AsyncLoading<SendInvitationResponse?>(),
+        ),
+        SendInvitationSuccessState(:final sendInvitationResponse) =>
+          state.copyWith(
+            sendInvitationState: AsyncData<SendInvitationResponse?>(
+              sendInvitationResponse,
+            ),
+          ),
+        _ => state,
+      },
+    );
   }
 
   Future<void> generateInvitationLink(PresentationContact contact) async {
