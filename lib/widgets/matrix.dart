@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -42,6 +41,7 @@ import 'package:fluffychat/domain/repository/tom_configurations_repository.dart'
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
@@ -1175,22 +1175,40 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    final db = newClient.database;
-    final previousDiscovery =
-        loginHomeserverSummary?.discoveryInformation ??
-        (db is HiveCollectionsDatabase ? await db.getWellKnown() : null);
-    final newSummary = await newClient
-        .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
-        .toHomeserverSummary();
-    if (newSummary.discoveryInformation == null && previousDiscovery != null) {
-      loginHomeserverSummary = HomeserverSummary(
-        discoveryInformation: previousDiscovery,
-        versions: newSummary.versions,
-        loginFlows: newSummary.loginFlows,
+    final previousSummary = loginHomeserverSummary;
+
+    HomeserverSummary? checkedSummary;
+    try {
+      checkedSummary = await newClient
+          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
+          .toHomeserverSummary();
+    } catch (e) {
+      Logs().w(
+        'Matrix::_getHomeserverInformation: homeserver unreachable, using '
+        'cached discovery information',
+        e,
       );
-    } else {
-      loginHomeserverSummary = newSummary;
     }
+
+    final discovery = await newClient.getWellKnownOrFallback(
+      fallback: previousSummary?.discoveryInformation,
+    );
+
+    if (checkedSummary == null && discovery == null) return;
+
+    // The active client may have changed while awaiting: a late result must
+    // not overwrite the newer account's summary.
+    if (clientOrNull != newClient) return;
+
+    loginHomeserverSummary = HomeserverSummary(
+      discoveryInformation: discovery,
+      versions:
+          checkedSummary?.versions ??
+          previousSummary?.versions ??
+          GetVersionsResponse(versions: []),
+      loginFlows:
+          checkedSummary?.loginFlows ?? previousSummary?.loginFlows ?? [],
+    );
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );

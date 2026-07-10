@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vodozemac/vodozemac.dart' as vod;
@@ -69,13 +70,16 @@ class MockDatabase extends Mock implements DatabaseApi {
   }
 }
 
-Future<Client> getClient({DatabaseApi? database}) async {
+Future<Client> getClient({
+  DatabaseApi? database,
+  http.Client? httpClient,
+}) async {
   if (!vod.isInitialized()) {
     await vod.init(libraryPath: './vodozemac/debug/');
   }
   final client = Client(
     'testclient',
-    httpClient: FakeMatrixApi(),
+    httpClient: httpClient ?? FakeMatrixApi(),
     database: database ?? MockDatabase(),
   );
   await client.checkHomeserver(
