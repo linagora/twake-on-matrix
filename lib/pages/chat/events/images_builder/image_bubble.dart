@@ -109,8 +109,12 @@ class ImageBubble extends StatelessWidget {
                     event: event,
                     width: width,
                     height: height,
-                    cacheWidth: context.getCacheSize(width),
-                    cacheHeight: context.getCacheSize(height),
+                    cacheWidth: noResizeThumbnail
+                        ? null
+                        : context.getCacheSize(width),
+                    cacheHeight: noResizeThumbnail
+                        ? null
+                        : context.getCacheSize(height),
                     fit: fit,
                     animated: animated,
                     isThumbnail: thumbnailOnly,

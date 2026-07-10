@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
 import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -145,16 +146,17 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                       ),
                     )
                   else
-                    Image.memory(
-                      widget.matrixFile.bytes,
+                    Image(
+                      image: MemoryImage(widget.matrixFile.bytes).resizeToFit(
+                        cacheWidth: context.getCacheSize(
+                          widget.displayImageInfo.size.width,
+                        ),
+                        cacheHeight: context.getCacheSize(
+                          widget.displayImageInfo.size.height,
+                        ),
+                      ),
                       width: widget.displayImageInfo.size.width,
                       height: widget.displayImageInfo.size.height,
-                      cacheHeight: context.getCacheSize(
-                        widget.displayImageInfo.size.height,
-                      ),
-                      cacheWidth: context.getCacheSize(
-                        widget.displayImageInfo.size.width,
-                      ),
                       fit: BoxFit.cover,
                       filterQuality: FilterQuality.none,
                     ),
