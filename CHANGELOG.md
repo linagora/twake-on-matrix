@@ -1,3 +1,7 @@
+## [2.23.3] - 2026-07-10
+### Fixed
+- #3251: Keep well-known discovery across restarts by re-fetching host
+
 ## [2.23.1] - 2026-07-09
 ### Added
 - #3232: Add Riverpod 3 setup
