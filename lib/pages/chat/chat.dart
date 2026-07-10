@@ -79,6 +79,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/utils/room_draft_storage.dart';
 import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:fluffychat/utils/scroll_controller_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
 import 'package:fluffychat/widgets/context_menu/context_menu_action_item_widget.dart';
@@ -1546,7 +1547,8 @@ class ChatController extends State<Chat>
     final targetEventId = timeline!.events[targetIndex].eventId;
     final itemContext = GlobalObjectKey(targetEventId).currentContext;
 
-    if (itemContext != null) {
+    if (itemContext != null &&
+        scrollController.hasFiniteViewportPosition(itemContext)) {
       await _centerAndHighlightMessage(
         itemContext: itemContext,
         targetIndex: targetIndex,
@@ -1609,7 +1611,8 @@ class ChatController extends State<Chat>
 
       // Check if widget rendered during the wait
       final recheckContext = GlobalObjectKey(targetEventId).currentContext;
-      if (recheckContext != null) {
+      if (recheckContext != null &&
+          scrollController.hasFiniteViewportPosition(recheckContext)) {
         Logs().d(
           'Chat::_scrollToMessageWithEventId(): Widget rendered after $attempts frames',
         );
@@ -1655,6 +1658,9 @@ class ChatController extends State<Chat>
     final scrollAdjustment =
         itemPosition.dy - (viewportHeight / 2) + (itemHeight / 2);
     final targetOffset = scrollController.offset + scrollAdjustment;
+
+    // localToGlobal yields NaN for mounted but off-screen rows.
+    if (!targetOffset.isFinite) return;
 
     // Calculate duration based on distance and adaptive speed
     final distance = scrollAdjustment.abs();
@@ -2111,11 +2117,14 @@ class ChatController extends State<Chat>
     return null;
   }
 
-  /// Checks if a message at [index] is currently rendered.
+  /// Checks if a message at [index] is rendered with a usable position.
   bool _isMessageRendered(int index) {
     if (index < 0 || index >= timeline!.events.length) return false;
-    final key = GlobalObjectKey(timeline!.events[index].eventId);
-    return key.currentContext != null;
+    final itemContext = GlobalObjectKey(
+      timeline!.events[index].eventId,
+    ).currentContext;
+    return itemContext != null &&
+        scrollController.hasFiniteViewportPosition(itemContext);
   }
 
   void forgetRoom() async {

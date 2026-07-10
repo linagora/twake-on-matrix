@@ -325,22 +325,17 @@ extension LocalizedBody on Event {
   }
 
   TextStyle? getMessageTextStyle(BuildContext context, [Timeline? timeline]) {
-    if (redacted) {
-      return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        fontSize: 17,
-        height: 24 / 17,
-        color: LinagoraRefColors.material().tertiary[30],
-      );
-    }
-
     if (isDisplayOnlyEmoji(timeline)) {
       return textStyleForOnlyEmoji(context);
     }
 
-    return Theme.of(context)
-        .extension<LinagoraTextThemeExtension>()!
-        .bodyMedium3
-        .copyWith(color: Theme.of(context).colorScheme.onSurface);
+    return Theme.of(
+      context,
+    ).extension<LinagoraTextThemeExtension>()!.bodyMedium3.copyWith(
+      color: redacted
+          ? LinagoraRefColors.material().tertiary[30]
+          : Theme.of(context).colorScheme.onSurface,
+    );
   }
 
   List<Client?> currentRoomBundle(MatrixState? matrix) {

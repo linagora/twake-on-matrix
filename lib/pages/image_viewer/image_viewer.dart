@@ -61,6 +61,8 @@ class ImageViewerController extends State<ImageViewer> {
   StreamSubscription? streamSubcription;
 
   final _webOverlay = MediaViewerWebOverlay.image();
+  String? _webAttachmentEventId;
+  Future<MatrixFile>? _webAttachmentFuture;
 
   @override
   void initState() {
@@ -80,7 +82,7 @@ class ImageViewerController extends State<ImageViewer> {
   /// the DOM so the browser's native "Save Image As" context menu works.
   Future<void> _injectWebImageOverlay(Event event) async {
     try {
-      final matrixFile = await event.downloadAndDecryptAttachment();
+      final matrixFile = await webAttachmentFuture(event);
       if (!mounted) return;
       final mimeType = event.mimeType ?? 'image/jpeg';
       _webOverlay.attach(
@@ -91,6 +93,20 @@ class ImageViewerController extends State<ImageViewer> {
     } catch (e) {
       Logs().e('ImageViewerController: failed to inject web overlay', e);
     }
+  }
+
+  Future<MatrixFile> webAttachmentFuture(Event event) {
+    if (_webAttachmentEventId != event.eventId) {
+      _webAttachmentEventId = event.eventId;
+      _webAttachmentFuture = event.downloadAndDecryptAttachment().catchError((
+        e,
+      ) {
+        _webAttachmentEventId = null;
+        _webAttachmentFuture = null;
+        throw e;
+      });
+    }
+    return _webAttachmentFuture!;
   }
 
   Future<void> handleDownloadFile(Event event) async {

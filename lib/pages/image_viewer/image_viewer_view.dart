@@ -130,16 +130,17 @@ class _ImageWidget extends StatelessWidget {
         );
       }
       return FutureBuilder(
-        // Download full image for GIFs to preserve animation
-        future: event.downloadAndDecryptAttachment(
-          getThumbnail: !event.isGifImage,
-        ),
+        future: controller.webAttachmentFuture(event),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Icon(Icons.broken_image_outlined, color: Colors.white);
+          }
           if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
             return const CircularProgressIndicator();
           }
           return Image.memory(
             snapshot.data!.bytes,
+            fit: BoxFit.contain,
             cacheWidth: width != null
                 ? (width! * MediaQuery.devicePixelRatioOf(context)).toInt()
                 : null,

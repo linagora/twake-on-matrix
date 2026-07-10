@@ -215,8 +215,8 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
           onTap: !room.isDirectChat ? onTap : null,
           textStyle: !room.isDirectChat
               ? defaultTextStyle?.copyWith(color: themeData.colorScheme.primary)
-              : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+              : defaultTextStyle?.copyWith(
+                  color: themeData.colorScheme.onSurface,
                 ),
         );
       },
