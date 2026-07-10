@@ -1,8 +1,8 @@
-import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_style.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 
@@ -337,13 +337,9 @@ class ContactsInvitationView extends StatelessWidget {
                     highlightColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     splashColor: Colors.transparent,
-                    onTap: state.sendInvitationState.fold(
-                      (_) =>
-                          () => onSendInvitation(state.selectedContact!),
-                      (success) => success is SendInvitationLoadingState
-                          ? null
-                          : () => onSendInvitation(state.selectedContact!),
-                    ),
+                    onTap: state.sendInvitationState.isLoading
+                        ? null
+                        : () => onSendInvitation(state.selectedContact!),
                     child: Padding(
                       padding: ContactsInvitationStyle.verticalPadding,
                       child: Container(
@@ -353,11 +349,8 @@ class ContactsInvitationView extends StatelessWidget {
                           color: LinagoraSysColors.material().primary,
                           borderRadius: ContactsInvitationStyle.borderRadius,
                         ),
-                        child: state.sendInvitationState.fold(
-                          (failure) => _SendInvitationButtonContent(),
-                          (success) {
-                            if (success is SendInvitationLoadingState) {
-                              return Row(
+                        child: state.sendInvitationState.isLoading
+                            ? Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   SizedBox(
@@ -371,11 +364,8 @@ class ContactsInvitationView extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                              );
-                            }
-                            return _SendInvitationButtonContent();
-                          },
-                        ),
+                              )
+                            : _SendInvitationButtonContent(),
                       ),
                     ),
                   ),

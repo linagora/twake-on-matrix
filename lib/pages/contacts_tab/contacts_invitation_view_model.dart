@@ -1,3 +1,6 @@
+import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
+import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
+import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/providers/contacts_invitation_providers.dart';
@@ -58,6 +61,10 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
       return;
     }
 
+    state = state.copyWith(
+      sendInvitationState: const AsyncLoading<SendInvitationResponse?>(),
+    );
+
     Logs().d(
       'ContactsInvitationViewModel::sendInvitation '
       'contactId=$contactId '
@@ -65,19 +72,53 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
       'contactLength=${invitationData.contact.length}',
     );
 
-    await for (final nextState
-        in ref
-            .read(sendInvitationInteractorProvider)
-            .execute(
-              contact: invitationData.contact,
-              medium: invitationData.medium,
-              contactId: contactId,
-            )) {
-      Logs().d('ContactsInvitationViewModel::sendInvitation state=$nextState');
+    try {
+      await for (final nextState
+          in ref
+              .read(sendInvitationInteractorProvider)
+              .execute(
+                contact: invitationData.contact,
+                medium: invitationData.medium,
+                contactId: contactId,
+              )) {
+        Logs().d(
+          'ContactsInvitationViewModel::sendInvitation state=$nextState',
+        );
+        if (!ref.mounted) {
+          return;
+        }
+        state = nextState.fold(
+          (failure) => state.copyWith(
+            sendInvitationState: AsyncError<SendInvitationResponse?>(
+              failure,
+              StackTrace.current,
+            ),
+          ),
+          (success) => switch (success) {
+            SendInvitationLoadingState() => state.copyWith(
+              sendInvitationState:
+                  const AsyncLoading<SendInvitationResponse?>(),
+            ),
+            SendInvitationSuccessState(:final sendInvitationResponse) =>
+              state.copyWith(
+                sendInvitationState: AsyncData<SendInvitationResponse?>(
+                  sendInvitationResponse,
+                ),
+              ),
+            _ => state,
+          },
+        );
+      }
+    } catch (error, stackTrace) {
       if (!ref.mounted) {
         return;
       }
-      state = state.copyWith(sendInvitationState: nextState);
+      state = state.copyWith(
+        sendInvitationState: AsyncError<SendInvitationResponse?>(
+          error,
+          stackTrace,
+        ),
+      );
     }
   }
 
@@ -91,17 +132,46 @@ class ContactsInvitationViewModel extends _$ContactsInvitationViewModel {
       return;
     }
 
-    await for (final nextState
-        in ref
-            .read(generateInvitationLinkInteractorProvider)
-            .execute(
-              contact: invitationData.contact,
-              medium: invitationData.medium,
-            )) {
+    state = state.copyWith(
+      generateInvitationLinkState: const AsyncLoading<Uri?>(),
+    );
+
+    try {
+      await for (final nextState
+          in ref
+              .read(generateInvitationLinkInteractorProvider)
+              .execute(
+                contact: invitationData.contact,
+                medium: invitationData.medium,
+              )) {
+        if (!ref.mounted) {
+          return;
+        }
+        state = nextState.fold(
+          (failure) => state.copyWith(
+            generateInvitationLinkState: AsyncError<Uri?>(
+              failure,
+              StackTrace.current,
+            ),
+          ),
+          (success) => switch (success) {
+            GenerateInvitationLinkLoadingState() => state.copyWith(
+              generateInvitationLinkState: const AsyncLoading<Uri?>(),
+            ),
+            GenerateInvitationLinkSuccessState(:final link) => state.copyWith(
+              generateInvitationLinkState: AsyncData<Uri?>(Uri.parse(link)),
+            ),
+            _ => state,
+          },
+        );
+      }
+    } catch (error, stackTrace) {
       if (!ref.mounted) {
         return;
       }
-      state = state.copyWith(generateInvitationLinkState: nextState);
+      state = state.copyWith(
+        generateInvitationLinkState: AsyncError<Uri?>(error, stackTrace),
+      );
     }
   }
 

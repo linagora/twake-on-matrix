@@ -1,7 +1,5 @@
-import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
+import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
 import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
@@ -52,87 +50,84 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
     });
   }
 
-  void _onSendInvitationStateChanged(Either<Failure, Success> state) {
-    state.fold(
-      (failure) {
-        if (failure is InvitationAlreadySentState) {
+  void _onSendInvitationStateChanged(
+    AsyncValue<SendInvitationResponse?> state,
+  ) {
+    state.when(
+      loading: () {},
+      error: (error, _) {
+        if (error is InvitationAlreadySentState) {
           TwakeSnackBar.show(
             context,
             L10n.of(context)!.youAlreadySentAnInvitationToThisContact,
           );
           return;
         }
-        if (failure is InvalidPhoneNumberFailureState) {
+        if (error is InvalidPhoneNumberFailureState) {
           TwakeSnackBar.show(context, L10n.of(context)!.invalidPhoneNumber);
           return;
         }
-        if (failure is InvalidEmailFailureState) {
+        if (error is InvalidEmailFailureState) {
           TwakeSnackBar.show(context, L10n.of(context)!.invalidEmail);
           return;
         }
-        if (failure is SendInvitationFailureState) {
-          TwakeSnackBar.show(context, L10n.of(context)!.failedToSendInvitation);
-          return;
-        }
+        TwakeSnackBar.show(context, L10n.of(context)!.failedToSendInvitation);
       },
-      (success) {
-        if (success is SendInvitationSuccessState) {
-          _onStoreInvitationStatus(
-            userId: widget.userId,
-            contactId: widget.contact.id ?? '',
-            invitationId: success.sendInvitationResponse.id ?? '',
-          );
-          TwakeSnackBar.show(
-            context,
-            L10n.of(context)!.invitationHasBeenSuccessfullySent,
-          );
-          Navigator.of(context).pop(success.sendInvitationResponse.id ?? '');
+      data: (response) {
+        if (response == null) {
           return;
         }
+        _onStoreInvitationStatus(
+          userId: widget.userId,
+          contactId: widget.contact.id ?? '',
+          invitationId: response.id ?? '',
+        );
+        TwakeSnackBar.show(
+          context,
+          L10n.of(context)!.invitationHasBeenSuccessfullySent,
+        );
+        Navigator.of(context).pop(response.id ?? '');
       },
     );
   }
 
-  void _onGenerateInvitationLinkStateChanged(Either<Failure, Success> state) {
-    state.fold(
-      (failure) {
+  void _onGenerateInvitationLinkStateChanged(AsyncValue<Uri?> state) {
+    state.when(
+      loading: () => TwakeDialog.showLoadingDialog(context),
+      error: (error, _) {
         TwakeDialog.hideLoadingDialog(context);
 
-        if (failure is GenerateInvitationLinkFailureState) {
+        if (error is GenerateInvitationLinkFailureState) {
           TwakeSnackBar.show(
             context,
-            failure.message ?? L10n.of(context)!.failedToSendFiles,
+            error.message ?? L10n.of(context)!.failedToSendFiles,
           );
           return;
         }
-        if (failure is InvalidPhoneNumberFailureState) {
+        if (error is InvalidPhoneNumberFailureState) {
           TwakeSnackBar.show(context, L10n.of(context)!.invalidPhoneNumber);
           return;
         }
-        if (failure is InvalidEmailFailureState) {
+        if (error is InvalidEmailFailureState) {
           TwakeSnackBar.show(context, L10n.of(context)!.invalidEmail);
           return;
         }
-        if (failure is GenerateInvitationLinkIsEmptyState) {
+        if (error is GenerateInvitationLinkIsEmptyState) {
           TwakeSnackBar.show(
             context,
             L10n.of(context)!.failedToGenerateInvitationLink,
           );
           return;
         }
+        TwakeSnackBar.show(context, L10n.of(context)!.failedToSendFiles);
       },
-      (success) async {
-        if (success is GenerateInvitationLinkLoadingState) {
-          TwakeDialog.showLoadingDialog(context);
-          return;
-        } else {
-          TwakeDialog.hideLoadingDialog(context);
-        }
-        if (success is GenerateInvitationLinkSuccessState) {
-          await Share.shareUri(Uri.parse(success.link));
-          Navigator.of(context).pop();
+      data: (link) async {
+        TwakeDialog.hideLoadingDialog(context);
+        if (link == null) {
           return;
         }
+        await Share.shareUri(link);
+        Navigator.of(context).pop();
       },
     );
   }
