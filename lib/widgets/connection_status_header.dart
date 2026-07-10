@@ -89,7 +89,7 @@ extension on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return l10n!.waitingForResponse;
       case SyncStatus.error:
-        return error?.exception?.toString() ?? l10n!.oopsSomethingWentWrong;
+        return l10n!.oopsSomethingWentWrong;
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:
