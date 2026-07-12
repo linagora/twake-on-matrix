@@ -3213,5 +3213,9 @@
   "@videoCallJoinCall": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "enableNotificationsExplanation": "Cuir fógraí ar siúl chun foláireamh a fháil faoi theachtaireachtaí nua, fiú nuair a bhíonn Twake dúnta.",
+  "webPushOnThisBrowser": "Fógraí ar an mbrabhsálaí seo",
+  "webPushPermissionDeniedHint": "Tá fógraí blocáilte. Ceadaigh iad don suíomh seo i socruithe do bhrabhsálaí, ansin cuir seo ar siúl.",
+  "newMessage": "Teachtaireacht nua"
 }
