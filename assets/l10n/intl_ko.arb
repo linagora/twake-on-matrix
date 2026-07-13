@@ -99,12 +99,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "groups": "그룹",
+  "groups": "그룹 채팅",
   "@groups": {
     "type": "text",
     "placeholders": {}
   },
-  "groupIsPublic": "그룸 공개됨",
+  "groupIsPublic": "공개그룹",
   "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
@@ -218,7 +218,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "enableEncryption": "암호화 켜기",
+  "enableEncryption": "종단 간 암호화 활성화",
   "@enableEncryption": {
     "type": "text",
     "placeholders": {}
@@ -852,7 +852,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupWith": "{displayname} 과의 그룹",
+  "groupWith": "{displayname} 과의 그룹 채팅",
   "@groupWith": {
     "type": "text",
     "placeholders": {
@@ -2188,7 +2188,7 @@
   "unsupportedAndroidVersionLong": "이 기능은 새로운 안드로이드 버전을 요구합니다. Lineage OS 지원이나 업데이트를 확인해주세요.",
   "videoCallsBetaWarning": "영상 통화는 베타임을 확인해주세요. 의도한 대로 작동하지 않거나 모든 플랫폼에서 작동하지 않을 수 있습니다.",
   "emailOrUsername": "이메일이나 유저 이름",
-  "updateAvailable": "FluffyChat 업데이트 이용가능",
+  "updateAvailable": "트웨이크 채팅 업데이트 가능",
   "updateNow": "백그라운드에서 업데이트 시작",
   "confirmMatrixId": "계정을 삭제하려면 Matrix ID를 확인해 주세요.",
   "commandHint_googly": "왕눈이 눈알 보내기",
@@ -2201,5 +2201,139 @@
   },
   "dehydrate": "세션을 내보내고 기기 초기화 하기",
   "dehydrateWarning": "이 동작은 되돌릴 수 없습니다. 백업 파일을 꼭 안전하게 보관하세요.",
-  "dehydrateShare": "FluffyChat 개인 내보내기 파일입니다. 분실하지 않도록 하시고 비공개로 보관하세요."
+  "dehydrateShare": "FluffyChat 개인 내보내기 파일입니다. 분실하지 않도록 하시고 비공개로 보관하세요.",
+  "webPushPermissionDeniedHint": "알림이 차단되어 있습니다. 브라우저 설정에서 이 사이트에 대해 허용한 후 이 기능을 켜세요.",
+  "supposedMxid": "이건 {mxid}",
+  "@supposedMxid": {
+    "type": "text",
+    "placeholders": {
+      "mxid": {}
+    }
+  },
+  "commandHint_cuddle": "포옹 보내줘",
+  "commandHint_hug": "포옹 보내 주세요",
+  "commandHint_sendraw": "서버에 원시 명령어 문자열을 보내 세요",
+  "commandHint_ignore": "지정된 사용자의 메시지를 무시하세요",
+  "commandHint_unignore": "지정된 사용자의 메시지를 무시하는 것을 멈추세요",
+  "commandHint_roomupgrade": "현재 방을 최신 프로토콜/기능으로 업그레이드하세요",
+  "commandHint_logout": "이 기기에서 현재 계정에서 로그아웃하세요",
+  "commandHint_logoutall": "모든 기기에서 이 계정에서 로그아웃하세요",
+  "hasKnocked": "{senderName} 노크",
+  "@hasKnocked": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "acceptedKeyVerification": "🔐 {senderName} 키 검증을 수락했습니다",
+  "@acceptedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "canceledKeyVerification": "🔐 {senderName} 키 검증을 취소했습니다",
+  "@canceledKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "completedKeyVerification": "🔐 {senderName} 키 검증을 완료했습니다",
+  "@completedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "invitedBy": "초대받은 사람 {senderName}",
+  "@invitedBy": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "isReadyForKeyVerification": "🔐 {senderName} 키 검증 준비가 되었습니다",
+  "@isReadyForKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "requestedKeyVerification": "🔐 {senderName} 요청된 키 검증",
+  "@requestedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "startedKeyVerification": "🔐 {senderName} 키 검증 시작",
+  "@startedKeyVerification": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "pollHasBeenEnded": "투표는 종료되었습니다",
+  "@pollHasBeenEnded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startedAPoll": "📊 {senderName} 설문조사를 시작했습니다",
+  "@startedAPoll": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "voiceMessageWithDuration": "🎤 음성 메시지 ({duration}",
+  "@voiceMessageWithDuration": {
+    "type": "text",
+    "placeholders": {
+      "duration": {}
+    }
+  },
+  "cuddleContent": "{senderName} 당신을 껴안고 싶어",
+  "@cuddleContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "hugContent": "{senderName} 안아줘",
+  "@hugContent": {
+    "type": "text",
+    "placeholders": {
+      "senderName": {}
+    }
+  },
+  "commandHint_markasdm": "직접 채팅으로 표시하세요",
+  "commandHint_markasgroup": "채팅으로 표시하세요",
+  "countMembers": "{count, 복수형, =0{구성원 없음} =1{1명의 구성원} 기타{{카운트} 멤버",
+  "@countMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "download": "다운로드",
+  "@download": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "thisIsANewChat": "새로운 채팅",
+  "@thisIsANewChat": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "chatPreviewUnavailable": "최신 메세지를 불러오기 위해 클릭",
+  "@chatPreviewUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterGroupName": "채팅 이름을 입력하세요",
+  "@enterGroupName": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
