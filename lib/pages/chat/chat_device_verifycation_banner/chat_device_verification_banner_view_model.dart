@@ -42,4 +42,8 @@ class ChatDeviceVerificationBannerViewModel
           }),
         );
   }
+
+  void onDismissBanner() {
+    state = DevicesBannerInitialState();
+  }
 }

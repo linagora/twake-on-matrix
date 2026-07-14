@@ -13,15 +13,15 @@ class ChatDeviceVerificationBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(
-      chatDeviceVerificationBannerViewModelProvider(room),
-    );
+    final provider = chatDeviceVerificationBannerViewModelProvider(room);
+    final state = ref.watch(provider);
+    final controller = ref.read(provider.notifier);
     if (state is DisplayWarningBannerState) {
       return LinagoraBanner(
         message: L10n.of(context)!.deviceVerificationWaring,
         actionLabel: L10n.of(context)!.verify,
         onActionPressed: () {},
-        onDismiss: () {},
+        onDismiss: controller.onDismissBanner,
       );
     }
     return const SizedBox.shrink();
