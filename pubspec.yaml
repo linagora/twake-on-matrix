@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref:  v0.2.2
+      ref:  TW-3218-add-new-components-for-device-verification
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -58,7 +58,7 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: https://github.com/linagora/emoji_mart.git
-      ref: master
+      ref: TW-3218-add-new-components-for-device-verification
 
   social_media_recorder:
     git:
@@ -154,6 +154,7 @@ dependencies:
   scroll_to_index: ^3.0.1
   share_plus: 10.0.2
   shared_preferences: ^2.5.3
+  slugify: ^2.0.0
   skeletons:
     # TODO: Remove when https://github.com/badjio/skeletons/pull/9 is merged
     git:
@@ -344,6 +345,12 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/overflow_view.git
       ref: master
+
+  # TODO: Remove when https://github.com/linagora/linagora-design-flutter/pull/67 is merged
+  linagora_design_flutter:
+    git:
+      url: git@github.com:linagora/linagora-design-flutter.git
+      ref: feature/web-link-generator
 
 cider:
   link_template:
