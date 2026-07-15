@@ -35,10 +35,7 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
       if (!mounted) return;
 
       final client = Matrix.of(context).client;
-      final hide =
-          client.onSync.value != null &&
-          update.status != SyncStatus.error &&
-          client.prevBatch != null;
+      final hide = client.onSync.value != null && client.prevBatch != null;
 
       if (_lastStatus?.status != update.status || _lastHideState != hide) {
         setState(() {
@@ -63,10 +60,7 @@ class ConnectionStatusHeaderState extends State<ConnectionStatusHeader> {
         _lastStatus ??
         client.onSyncStatus.value ??
         const SyncStatusUpdate(SyncStatus.waitingForResponse);
-    final hide =
-        client.onSync.value != null &&
-        status.status != SyncStatus.error &&
-        client.prevBatch != null;
+    final hide = client.onSync.value != null && client.prevBatch != null;
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
@@ -95,7 +89,7 @@ extension on SyncStatusUpdate {
       case SyncStatus.waitingForResponse:
         return l10n!.waitingForResponse;
       case SyncStatus.error:
-        return l10n!.waitingForResponse;
+        return l10n!.oopsSomethingWentWrong;
       case SyncStatus.processing:
       case SyncStatus.cleaningUp:
       case SyncStatus.finished:
