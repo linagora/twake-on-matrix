@@ -97,7 +97,7 @@ class UserDeviceListItem extends StatelessWidget {
             ? Colors.grey[700]
             : keys.blocked
             ? Colors.red
-            : keys.verified
+            : keys.encryptToDevice
             ? Colors.green
             : Colors.orange,
         child: Icon(userDevice.icon),
@@ -115,13 +115,13 @@ class UserDeviceListItem extends StatelessWidget {
             Text(
               keys.blocked
                   ? L10n.of(context)!.blocked
-                  : keys.verified
+                  : keys.encryptToDevice
                   ? L10n.of(context)!.verified
                   : L10n.of(context)!.unverified,
               style: TextStyle(
                 color: keys.blocked
                     ? Colors.red
-                    : keys.verified
+                    : keys.encryptToDevice
                     ? Colors.green
                     : Colors.orange,
               ),

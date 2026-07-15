@@ -11,10 +11,10 @@ sealed class DevicesBannerState extends Equatable {
 class DevicesBannerInitialState extends DevicesBannerState {}
 
 class DisplayWarningBannerState extends DevicesBannerState {
-  final Device myDevice;
+  final List<Device> unverifiedDevices;
 
-  const DisplayWarningBannerState({required this.myDevice});
+  const DisplayWarningBannerState({required this.unverifiedDevices});
 
   @override
-  List<Object?> get props => [myDevice];
+  List<Object?> get props => [unverifiedDevices];
 }

@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/device_settings/device_settings_view.dart';
+import 'package:fluffychat/pages/device_settings/device_settings.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
@@ -77,7 +77,7 @@ class SettingRobot extends HomeRobot implements AbstractSettingRobot {
   @override
   Future<void> openDevicesSetting() async {
     await deviceSetting().tap();
-    await $.waitUntilVisible($(DevicesSettingsView));
+    await $.waitUntilVisible($(DevicesSettings));
   }
 
   @override

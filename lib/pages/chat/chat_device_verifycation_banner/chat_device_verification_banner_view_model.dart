@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/device_settings/get_devices_state.dart';
 import 'package:fluffychat/domain/usecase/device_settings/get_devices_interactor.dart';
@@ -20,9 +19,6 @@ class ChatDeviceVerificationBannerViewModel
   final GetDevicesInteractor _getDevicesInteractor = getIt
       .get<GetDevicesInteractor>();
 
-  bool _isOwnDevice(Device userDevice) =>
-      userDevice.deviceId == client.deviceID;
-
   Client get client => room.client;
 
   Future<void> getDevices() async {
@@ -31,12 +27,24 @@ class ChatDeviceVerificationBannerViewModel
         .listen(
           (either) => either.fold((failure) {}, (success) {
             if (success is GetDevicesSuccess) {
-              final myDevice = success.devices.firstWhereOrNull(_isOwnDevice);
-              final myDeviceKeys = client
-                  .userDeviceKeys[client.userID]
-                  ?.deviceKeys[myDevice?.deviceId];
-              if (myDevice != null && myDeviceKeys?.verified == false) {
-                state = DisplayWarningBannerState(myDevice: myDevice);
+              final deviceKeys = client.userDeviceKeys[client.userID]
+                  ?.deviceKeys;
+              // encryptToDevice reflects whether this device will actually
+              // receive room keys and be able to decrypt messages (per
+              // ShareKeysWith policy), unlike directVerified/verified which
+              // the SDK force-trusts for the own device regardless of any
+              // user action.
+              final unverifiedDevices = success.devices
+                  .where(
+                    (device) =>
+                        deviceKeys?[device.deviceId]?.encryptToDevice ==
+                        false,
+                  )
+                  .toList();
+              if (unverifiedDevices.isNotEmpty) {
+                state = DisplayWarningBannerState(
+                  unverifiedDevices: unverifiedDevices,
+                );
               }
             }
           }),
