@@ -3229,5 +3229,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync"
+  "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync",
+  "deviceVerificationWarningOnSettingsScreen": "Some sessions are unverified. Encrypted messages may not decrypt correctly until all sessions are verified or removed."
 }
