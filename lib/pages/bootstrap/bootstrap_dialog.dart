@@ -196,44 +196,34 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         case BootstrapState.loading:
           break;
         case BootstrapState.askWipeSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.wipeSsss(_wipe!);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.wipeSsss(_wipe!);
+          });
           break;
         case BootstrapState.askBadSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.ignoreBadSecrets(true);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.ignoreBadSecrets(true);
+          });
           break;
         case BootstrapState.askUseExistingSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.useExistingSsss(!_wipe!);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.useExistingSsss(!_wipe!);
+          });
           break;
         case BootstrapState.askUnlockSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.unlockedSsss();
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.unlockedSsss();
+          });
           break;
         case BootstrapState.askNewSsss:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.newSsss();
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.newSsss();
+          });
           break;
         case BootstrapState.openExistingSsss:
           _recoveryKeyStored = true;
@@ -410,41 +400,33 @@ class BootstrapDialogState extends State<BootstrapDialog> {
             ),
           );
         case BootstrapState.askWipeCrossSigning:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.wipeCrossSigning(_wipe!);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.wipeCrossSigning(_wipe!);
+          });
           break;
         case BootstrapState.askSetupCrossSigning:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.askSetupCrossSigning(
-                setupMasterKey: true,
-                setupSelfSigningKey: true,
-                setupUserSigningKey: true,
-              );
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.askSetupCrossSigning(
+              setupMasterKey: true,
+              setupSelfSigningKey: true,
+              setupUserSigningKey: true,
+            );
+          });
           break;
         case BootstrapState.askWipeOnlineKeyBackup:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.wipeOnlineKeyBackup(_wipe!);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.wipeOnlineKeyBackup(_wipe!);
+          });
 
           break;
         case BootstrapState.askSetupOnlineKeyBackup:
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) {
-              if (!mounted) return;
-              bootstrap.askSetupOnlineKeyBackup(true);
-            },
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            bootstrap.askSetupOnlineKeyBackup(true);
+          });
           break;
         case BootstrapState.error:
           titleText = L10n.of(context)!.oopsSomethingWentWrong;

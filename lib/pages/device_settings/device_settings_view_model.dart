@@ -15,24 +15,41 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
 
   @override
   DevicesSettingsState build() {
-    return const DevicesSettingsState();
+    return const DevicesSettingsInitial();
   }
 
   bool _isOwnDevice(Device userDevice, Client client) =>
       userDevice.deviceId == client.deviceID;
 
-  Device? thisDevice(Client client) =>
-      state.devices?.firstWhereOrNull((d) => _isOwnDevice(d, client));
+  List<Device>? get _devices => switch (state) {
+    DevicesSettingsLoaded(:final devices) => devices,
+    DevicesSettingsDeletingDevices(:final devices) => devices,
+    DevicesSettingsDeleteDevicesError(:final devices) => devices,
+    _ => null,
+  };
 
-  List<Device> notThisDevice(Client client) =>
-      List<Device>.from(state.devices ?? [])
-        ..removeWhere((d) => _isOwnDevice(d, client))
-        ..sort((a, b) => (b.lastSeenTs ?? 0).compareTo(a.lastSeenTs ?? 0));
+  VerificationBannerVisibility? get _bannerVisibility => switch (state) {
+    DevicesSettingsLoaded(:final bannerVisibility) => bannerVisibility,
+    DevicesSettingsDeletingDevices(:final bannerVisibility) => bannerVisibility,
+    DevicesSettingsDeleteDevicesError(:final bannerVisibility) =>
+      bannerVisibility,
+    _ => null,
+  };
+
+  Device? thisDevice(Client client) =>
+      _devices?.firstWhereOrNull((d) => _isOwnDevice(d, client));
+
+  List<Device> notThisDevice(Client client) => List<Device>.from(_devices ?? [])
+    ..removeWhere((d) => _isOwnDevice(d, client))
+    ..sort((a, b) => (b.lastSeenTs ?? 0).compareTo(a.lastSeenTs ?? 0));
 
   bool showVerificationBanner(Client client) {
-    if (state.verificationBannerDismissed) return false;
-    final devices = state.devices;
-    if (devices == null || devices.isEmpty) return false;
+    final devices = _devices;
+    if (devices == null) return false;
+    if (_bannerVisibility == VerificationBannerVisibility.dismissed) {
+      return false;
+    }
+    if (devices.isEmpty) return false;
     final deviceKeys = client.userDeviceKeys[client.userID]?.deviceKeys;
     // encryptToDevice reflects whether this device will actually receive
     // room keys and be able to decrypt messages (per ShareKeysWith policy),
@@ -44,32 +61,68 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
   }
 
   Future<void> loadUserDevices(Client client) async {
-    if (state.devices != null) return;
-    await _getDevicesInteractor
-        .execute(client: client)
-        .forEach((either) {
-          either.fold((failure) {}, (success) {
-            if (success is GetDevicesSuccess) {
-              state = state.copyWith(devices: success.devices);
-            }
-          });
-        });
+    if (_devices != null) return;
+    await _getDevicesInteractor.execute(client: client).forEach((either) {
+      either.fold(
+        (failure) {
+          if (failure is GetDevicesEmpty) {
+            state = const DevicesSettingsLoaded(devices: []);
+          } else if (failure is GetDevicesFailed) {
+            state = DevicesSettingsError(exception: failure.exception);
+          }
+        },
+        (success) {
+          if (success is GetDevicesSuccess) {
+            state = DevicesSettingsLoaded(devices: success.devices);
+          }
+        },
+      );
+    });
   }
 
-  void reload() => state = state.copyWith(clearDevices: true);
+  void reload() => state = const DevicesSettingsInitial();
 
   void setLoadingDeletingDevices(bool loading) {
-    state = state.copyWith(loadingDeletingDevices: loading);
+    final devices = _devices;
+    if (devices == null) return;
+    final bannerVisibility =
+        _bannerVisibility ?? VerificationBannerVisibility.shown;
+    state = loading
+        ? DevicesSettingsDeletingDevices(
+            devices: devices,
+            bannerVisibility: bannerVisibility,
+          )
+        : DevicesSettingsLoaded(
+            devices: devices,
+            bannerVisibility: bannerVisibility,
+          );
   }
 
   void setErrorDeletingDevices(String? error) {
-    state = state.copyWith(
-      errorDeletingDevices: error,
-      clearErrorDeletingDevices: error == null,
-    );
+    final devices = _devices;
+    if (devices == null) return;
+    final bannerVisibility =
+        _bannerVisibility ?? VerificationBannerVisibility.shown;
+    state = error == null
+        ? DevicesSettingsLoaded(
+            devices: devices,
+            bannerVisibility: bannerVisibility,
+          )
+        : DevicesSettingsDeleteDevicesError(
+            devices: devices,
+            message: error,
+            bannerVisibility: bannerVisibility,
+          );
   }
 
   void refreshDeviceKeys() {
-    state = state.copyWith(devices: List<Device>.from(state.devices ?? []));
+    final devices = _devices;
+    if (devices == null) return;
+    final bannerVisibility =
+        _bannerVisibility ?? VerificationBannerVisibility.shown;
+    state = DevicesSettingsLoaded(
+      devices: List<Device>.from(devices),
+      bannerVisibility: bannerVisibility,
+    );
   }
 }

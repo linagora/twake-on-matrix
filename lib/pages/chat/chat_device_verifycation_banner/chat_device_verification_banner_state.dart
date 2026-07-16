@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:matrix/matrix.dart';
 
 sealed class DevicesBannerState extends Equatable {
   const DevicesBannerState();
@@ -11,10 +10,8 @@ sealed class DevicesBannerState extends Equatable {
 class DevicesBannerInitialState extends DevicesBannerState {}
 
 class DisplayWarningBannerState extends DevicesBannerState {
-  final List<Device> unverifiedDevices;
-
-  const DisplayWarningBannerState({required this.unverifiedDevices});
+  const DisplayWarningBannerState();
 
   @override
-  List<Object?> get props => [unverifiedDevices];
+  List<Object?> get props => [];
 }
