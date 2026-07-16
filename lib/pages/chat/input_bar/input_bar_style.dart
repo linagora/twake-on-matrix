@@ -15,7 +15,7 @@ class InputBarStyle {
   static TextStyle getTypeAheadTextStyle(BuildContext context) =>
       Theme.of(
         context,
-      ).extension<LinagoraTextThemeExtension>()!.bodyMedium3.copyWith(
+      ).extension<LinagoraTextThemeExtension>()!.bodyMedium4.copyWith(
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.black
             : Colors.white,
