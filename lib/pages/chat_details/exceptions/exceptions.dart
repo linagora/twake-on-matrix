@@ -78,7 +78,10 @@ class ExceptionsController extends State<Exceptions>
     final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
       searchTerm,
       exceptionUsers,
-      fieldExtractors: [(user) => user.displayName, (user) => user.id],
+      fieldExtractors: [
+        (user) => [user.displayName ?? ''],
+        (user) => [user.id],
+      ],
       options: const SearchOptions(diacriticSensitive: false),
     );
 

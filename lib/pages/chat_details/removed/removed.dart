@@ -68,7 +68,10 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
     final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
       searchTerm,
       removedMember,
-      fieldExtractors: [(user) => user.displayName, (user) => user.id],
+      fieldExtractors: [
+        (user) => [user.displayName ?? ''],
+        (user) => [user.id],
+      ],
       options: const SearchOptions(diacriticSensitive: false),
     );
 

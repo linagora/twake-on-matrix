@@ -74,7 +74,10 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
     final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
       searchTerm,
       assignedUsers,
-      fieldExtractors: [(user) => user.displayName, (user) => user.id],
+      fieldExtractors: [
+        (user) => [user.displayName ?? ''],
+        (user) => [user.id],
+      ],
       options: const SearchOptions(diacriticSensitive: false),
     );
 
