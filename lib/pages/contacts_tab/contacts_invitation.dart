@@ -6,7 +6,7 @@ import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_
 import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
 import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view_model.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view.dart';
+import 'package:fluffychat/pages/contacts_tab/contacts_invitation_page.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -198,7 +198,7 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
   Widget build(BuildContext context) {
     _listenStateEffects();
     final state = ref.watch(contactsInvitationViewModelProvider);
-    return ContactsInvitationView(
+    return ContactsInvitationPage(
       contact: widget.contact,
       state: state,
       onGenerateInvitationLink: () {
