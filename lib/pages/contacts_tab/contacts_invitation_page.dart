@@ -151,11 +151,10 @@ class ContactsInvitationPage extends StatelessWidget {
                                   SizedBox(
                                     width: 28,
                                     height: 28,
-                                    child: CircularProgressIndicator.adaptive(
+                                    child: CircularProgressIndicator(
                                       strokeWidth: 2,
-                                      backgroundColor:
-                                          LinagoraSysColors.material()
-                                              .onPrimary,
+                                      color: LinagoraSysColors.material()
+                                          .onPrimary,
                                     ),
                                   ),
                                 ],
