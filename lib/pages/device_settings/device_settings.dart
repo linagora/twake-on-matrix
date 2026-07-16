@@ -12,6 +12,7 @@ import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 
+import 'package:fluffychat/pages/device_settings/device_settings_state.dart';
 import 'package:fluffychat/pages/device_settings/device_settings_view_model.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
 import 'package:fluffychat/widgets/layouts/max_width_body.dart';
@@ -51,27 +52,32 @@ class DevicesSettings extends ConsumerWidget {
         future: notifier.loadUserDevices(client),
         builder: (BuildContext context, snapshot) {
           final state = ref.watch(devicesSettingsViewModelProvider);
-          if (snapshot.hasError) {
+          if (snapshot.hasError || state is DevicesSettingsError) {
             return MaxWidthBody(
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     const Icon(Icons.error_outlined),
-                    Text(snapshot.error.toString()),
+                    Text(
+                      state is DevicesSettingsError
+                          ? state.exception.toString()
+                          : snapshot.error.toString(),
+                    ),
                   ],
                 ),
               ),
             );
           }
           if (snapshot.connectionState != ConnectionState.done ||
-              state.devices == null) {
+              state is DevicesSettingsInitial) {
             return const MaxWidthBody(
               child: Center(
                 child: CircularProgressIndicator.adaptive(strokeWidth: 2),
               ),
             );
           }
+          final isMobile = getIt.get<ResponsiveUtils>().isMobile(context);
           return Column(
             children: [
               if (notifier.showVerificationBanner(client))
@@ -81,7 +87,28 @@ class DevicesSettings extends ConsumerWidget {
                   )!.deviceVerificationWarningOnSettingsScreen,
                   actionLabel: L10n.of(context)!.verify,
                 ),
-              const Expanded(child: MaxWidthBody(child: _DevicesList())),
+              Expanded(
+                child: Container(
+                  color: isMobile
+                      ? null
+                      : LinagoraSysColors.material().surfaceVariant,
+                  padding: isMobile
+                      ? EdgeInsets.zero
+                      : const EdgeInsets.all(24),
+                  child: MaxWidthBody(
+                    child: isMobile
+                        ? const _DevicesList()
+                        : Container(
+                            decoration: BoxDecoration(
+                              color: LinagoraSysColors.material().onPrimary,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: const _DevicesList(),
+                          ),
+                  ),
+                ),
+              ),
             ],
           );
         },
@@ -100,8 +127,12 @@ class _DevicesList extends ConsumerWidget {
     final state = ref.watch(devicesSettingsViewModelProvider);
     final thisDevice = notifier.thisDevice(client);
     final notThisDevice = notifier.notThisDevice(client);
-    final errorDeletingDevices = state.errorDeletingDevices;
-    final loadingDeletingDevices = state.loadingDeletingDevices;
+    final errorDeletingDevices = switch (state) {
+      DevicesSettingsDeleteDevicesError(:final message) => message,
+      _ => null,
+    };
+    final loadingDeletingDevices = state is DevicesSettingsDeletingDevices;
+    final isMobile = getIt.get<ResponsiveUtils>().isMobile(context);
 
     return ListView.builder(
       itemCount: notThisDevice.length + 1,
@@ -114,22 +145,30 @@ class _DevicesList extends ConsumerWidget {
                 UserDeviceListItem(
                   thisDevice,
                   rename: (d) => renameDeviceAction(context, notifier, d),
-                  remove: (d) => removeDevicesAction(context, notifier, [d]),
                   verify: (d) => verifyDeviceAction(context, notifier, d),
-                  block: (d) => blockDeviceAction(context, notifier, d),
-                  unblock: (d) => unblockDeviceAction(context, notifier, d),
                 ),
-              const Divider(height: 1),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: isMobile
+                      ? LinagoraSpacing.base * 5
+                      : LinagoraSpacing.base * 2,
+                ),
+                child: Divider(
+                  height: 1,
+                  thickness: LinagoraDividerStyle.material().thickness,
+                  color: LinagoraDividerStyle.material().color,
+                ),
+              ),
               if (notThisDevice.isNotEmpty)
                 ListTile(
                   title: Text(
                     errorDeletingDevices ??
                         L10n.of(context)!.removeAllOtherDevices,
-                    style: const TextStyle(color: Colors.red),
+                    style: Theme.of(context)
+                        .extension<LinagoraTextThemeExtension>()!
+                        .bodyMedium2
+                        .copyWith(color: LinagoraSysColors.material().error),
                   ),
-                  trailing: loadingDeletingDevices
-                      ? const CircularProgressIndicator.adaptive(strokeWidth: 2)
-                      : const Icon(Icons.delete_outline),
                   onTap: loadingDeletingDevices
                       ? null
                       : () => removeDevicesAction(
@@ -145,7 +184,18 @@ class _DevicesList extends ConsumerWidget {
                     child: Text(L10n.of(context)!.noOtherDevicesFound),
                   ),
                 ),
-              const Divider(height: 1),
+              Padding(
+                padding: EdgeInsets.only(
+                  left: isMobile
+                      ? LinagoraSpacing.base * 5
+                      : LinagoraSpacing.base * 2,
+                ),
+                child: Divider(
+                  height: 1,
+                  thickness: LinagoraDividerStyle.material().thickness,
+                  color: LinagoraDividerStyle.material().color,
+                ),
+              ),
             ],
           );
         }
@@ -158,6 +208,7 @@ class _DevicesList extends ConsumerWidget {
           verify: (d) => verifyDeviceAction(context, notifier, d),
           block: (d) => blockDeviceAction(context, notifier, d),
           unblock: (d) => unblockDeviceAction(context, notifier, d),
+          showDivider: isMobile,
         );
       },
     );
