@@ -18,7 +18,7 @@ class SliverEmptyContacts extends StatelessWidget {
         controller.presentationRecentContactNotifier,
       ]),
       builder: (context, _) {
-        if (controller.isWaitingContacts || controller.hasVisibleContacts) {
+        if (controller.isLoadingContacts || controller.hasVisibleContacts) {
           return const SliverToBoxAdapter();
         }
         final keyword = controller.textEditingController.text;
