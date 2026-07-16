@@ -96,7 +96,10 @@ class SettingsIgnoreListController extends State<BlockedUsers>
     final searchResults = getIt.get<SearchEngine>().matchAnyField<Profile>(
       searchTerm,
       blockedUsers,
-      fieldExtractors: [(user) => user.displayName, (user) => user.userId],
+      fieldExtractors: [
+        (user) => [user.displayName ?? ''],
+        (user) => [user.userId],
+      ],
       options: const SearchOptions(diacriticSensitive: false),
     );
 
