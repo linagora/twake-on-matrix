@@ -85,7 +85,7 @@ class DevicesSettings extends ConsumerWidget {
                   message: L10n.of(
                     context,
                   )!.deviceVerificationWarningOnSettingsScreen,
-                  actionLabel: L10n.of(context)!.verify,
+                  onDismiss: notifier.dismissVerificationBanner,
                 ),
               Expanded(
                 child: Container(
