@@ -49,7 +49,16 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
 }
 
 Future<void> _waitShown(BaseTestScenario scenario, String message) async {
-  final finder = await scenario.robots.chatGroupDetailRobot().getText(message);
+  final chatGroupDetailRobot = scenario.robots.chatGroupDetailRobot();
+  final finder = await chatGroupDetailRobot.getText(message);
+  await scenario.$.waitUntilExists(
+    finder,
+    timeout: const Duration(seconds: 60),
+  );
+  // On web the timeline can build a newly sent message just outside the
+  // hit-testable viewport. Move to the live edge after the event exists so the
+  // visibility assertion cannot stall on an off-screen MessageContent.
+  await chatGroupDetailRobot.scrollToLiveBottom();
   await scenario.$.waitUntilVisible(
     finder,
     timeout: const Duration(seconds: 60),
