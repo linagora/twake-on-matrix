@@ -232,35 +232,35 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     ).firstMatch(searchText);
     if (roomMatch != null && widget.room != null) {
       final roomSearch = roomMatch[1]!;
-      for (final r in widget.room!.client.rooms) {
-        if (r.getState(EventTypes.RoomTombstone) != null) {
-          continue; // we don't care about tombstoned rooms
-        }
-        final state = r.getState(EventTypes.RoomCanonicalAlias);
-        final alias = state?.content['alias'];
-        final altAlias = state?.content['alt_aliases'];
-        const roomOpts = SearchOptions(diacriticSensitive: false);
-        final engine = getIt.get<SearchEngine>();
-        bool matchesAlias(String a) =>
-            engine.matchesText(roomSearch, a.split(':')[0], options: roomOpts);
-        final aliasMatches =
-            state != null &&
-            ((alias is String && matchesAlias(alias)) ||
-                (altAlias is List &&
-                    altAlias.any((l) => l is String && matchesAlias(l))));
-        final nameMatches = engine.matchesText(
-          roomSearch,
-          r.name,
-          options: roomOpts,
-        );
-        if (aliasMatches || nameMatches) {
-          ret.add({
-            'type': 'room',
-            'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
-            'displayname': r.getLocalizedDisplayname(),
-            'avatar_url': r.avatar?.toString(),
-          });
-        }
+      const roomOpts = SearchOptions(diacriticSensitive: false);
+      final engine = getIt.get<SearchEngine>();
+      final eligibleRooms = widget.room!.client.rooms
+          .where((r) => r.getState(EventTypes.RoomTombstone) == null)
+          .toList();
+      final matchedRooms = engine.matchAnyField(
+        roomSearch,
+        eligibleRooms,
+        fieldExtractors: [
+          (Room room) {
+            final state = room.getState(EventTypes.RoomCanonicalAlias);
+            final alias = state?.content['alias'];
+            final altAlias = state?.content['alt_aliases'];
+            return [
+              if (alias is String) alias,
+              if (altAlias is List) ...altAlias.whereType<String>(),
+            ];
+          },
+          (Room room) => [room.name],
+        ],
+        options: roomOpts,
+      );
+      for (final r in matchedRooms) {
+        ret.add({
+          'type': 'room',
+          'mxid': (r.canonicalAlias.isNotEmpty) ? r.canonicalAlias : r.id,
+          'displayname': r.getLocalizedDisplayname(),
+          'avatar_url': r.avatar?.toString(),
+        });
         if (ret.length > maxResults) {
           break;
         }

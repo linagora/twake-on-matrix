@@ -14,12 +14,13 @@ class SearchEngine {
     ];
   }
 
-  List<T> matchAnyField<T>(
+  /// Builds the normalize/compare closures for a given `needle` and
+  /// `options`, so callers can reuse the same normalization pipeline across
+  /// multiple values without recomputing it per value.
+  ({String Function(String) apply, bool Function(String) matches}) _matcher(
     String needle,
-    List<T> haystack, {
-    required List<String? Function(T)> fieldExtractors,
-    SearchOptions options = const SearchOptions(),
-  }) {
+    SearchOptions options,
+  ) {
     final pipeline = _buildPipeline(options);
     String apply(String input) =>
         pipeline.fold<String>(input, (v, step) => step.normalize(v));
@@ -33,11 +34,58 @@ class SearchEngine {
       }
     }
 
+    return (apply: apply, matches: matches);
+  }
+
+  List<T> matchAnyField<T>(
+    String needle,
+    List<T> haystack, {
+    required List<Iterable<String> Function(T)> fieldExtractors,
+    SearchOptions options = const SearchOptions(),
+  }) {
+    final matcher = _matcher(needle, options);
+
     return haystack.where((item) {
       return fieldExtractors.any(
-        (extract) => matches(apply(extract(item) ?? '')),
+        (extract) =>
+            extract(item).any((value) => matcher.matches(matcher.apply(value))),
       );
     }).toList();
+  }
+
+  /// Same as [matchAnyField], but `fieldExtractors` is optional: when
+  /// omitted, each item is matched via its `toString()`.
+  List<T> match<T>(
+    String needle,
+    List<T> haystack, {
+    List<Iterable<String> Function(T)>? fieldExtractors,
+    SearchOptions options = const SearchOptions(),
+  }) {
+    return matchAnyField(
+      needle,
+      haystack,
+      fieldExtractors:
+          fieldExtractors ??
+          [
+            (T item) => [item.toString()],
+          ],
+      options: options,
+    );
+  }
+
+  /// Returns `true` if `needle` matches at least one item in `haystack`.
+  bool anyMatch<T>(
+    String needle,
+    List<T> haystack, {
+    List<Iterable<String> Function(T)>? fieldExtractors,
+    SearchOptions options = const SearchOptions(),
+  }) {
+    return match(
+      needle,
+      haystack,
+      fieldExtractors: fieldExtractors,
+      options: options,
+    ).isNotEmpty;
   }
 
   bool matchesText(
@@ -48,7 +96,9 @@ class SearchEngine {
     return matchAnyField(
       needle,
       [haystack],
-      fieldExtractors: [(String s) => s],
+      fieldExtractors: [
+        (String s) => [s],
+      ],
       options: options,
     ).isNotEmpty;
   }

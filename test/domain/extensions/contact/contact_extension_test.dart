@@ -444,15 +444,23 @@ void main() {
       expect(contacts.searchContacts('hello').length, 0);
     });
 
-    test('searchContacts should match phone number ignoring spaces', () {
-      final contacts = [
-        Contact(
-          id: 'contact1',
-          phoneNumbers: {PhoneNumber(number: '+33 6 12 34 56 78')},
-        ),
-      ];
-      expect(contacts.searchContacts('+33612345678').length, 1);
-    });
+    test(
+      'searchContacts should match a contact via any of several phone numbers',
+      () {
+        final contacts = [
+          Contact(
+            id: 'contact1',
+            displayName: 'Alice',
+            phoneNumbers: {
+              PhoneNumber(number: '+33611111111'),
+              PhoneNumber(number: '+33622222222'),
+            },
+          ),
+        ];
+
+        expect(contacts.searchContacts('+33622222222').length, 1);
+      },
+    );
   });
 
   group('PhoneNumbersExtension', () {

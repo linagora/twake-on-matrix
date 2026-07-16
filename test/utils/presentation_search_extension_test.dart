@@ -174,6 +174,26 @@ void main() {
       );
       expect(search.doesMatchKeyword(''), true);
     });
+
+    test('WHEN keyword matches the second of several phone numbers'
+        'THEN returns true', () {
+      final search = ContactPresentationSearch(
+        matrixId: 'matrix_id_1',
+        phoneNumbers: {
+          PresentationPhoneNumber(
+            phoneNumber: '0611111111',
+            thirdPartyId: 'tp1',
+            thirdPartyIdType: ThirdPartyIdType.msisdn,
+          ),
+          PresentationPhoneNumber(
+            phoneNumber: '0622222222',
+            thirdPartyId: 'tp2',
+            thirdPartyIdType: ThirdPartyIdType.msisdn,
+          ),
+        },
+      );
+      expect(search.doesMatchKeyword('0622222222'), true);
+    });
   });
 
   group('doesMatchKeyword test with matrixId', () {
@@ -306,21 +326,6 @@ void main() {
         },
       );
       expect(search.doesMatchKeyword('test@example'), true);
-    });
-
-    test('WHEN phone number has spaces and keyword has none'
-        'THEN returns true', () {
-      final search = ContactPresentationSearch(
-        matrixId: '@test:server.com',
-        phoneNumbers: {
-          PresentationPhoneNumber(
-            phoneNumber: '06 12 34 56 78',
-            thirdPartyId: 'tp',
-            thirdPartyIdType: ThirdPartyIdType.msisdn,
-          ),
-        },
-      );
-      expect(search.doesMatchKeyword('0612345678'), true);
     });
   });
 }

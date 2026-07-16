@@ -49,4 +49,8 @@ void main() {
       expect(_match('u', 'à'), isFalse);
     });
   });
+
+  test('should fold an accented needle, not just an accented haystack', () {
+    expect(_match('Élie', 'elie'), isTrue);
+  });
 }

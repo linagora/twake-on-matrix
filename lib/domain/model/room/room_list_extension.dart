@@ -8,37 +8,25 @@ import 'package:matrix/matrix.dart';
 const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 extension RoomListExtension on List<Room> {
-  bool _matchedMatrixId(RecentChatSearchModel model, String keyword) {
-    return getIt.get<SearchEngine>().matchesText(
-      keyword,
-      model.directChatMatrixID ?? '',
-      options: _searchOptions,
-    );
-  }
-
-  bool _matchedName(RecentChatSearchModel model, String keyword) {
-    return getIt.get<SearchEngine>().matchesText(
-      keyword,
-      model.displayName ?? '',
-      options: _searchOptions,
-    );
-  }
-
-  bool _matchedNameOrMatrixId(RecentChatSearchModel model, String keyword) {
-    return _matchedName(model, keyword) || _matchedMatrixId(model, keyword);
-  }
-
   List<RecentChatSearchModel> searchRecentChat({
     required MatrixLocalizations matrixLocalizations,
     required String keyword,
     int? limit,
   }) {
-    return where(
-          (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
-        )
-        .map((room) => room.toRecentChatSearchModel(matrixLocalizations))
-        .where((model) => _matchedNameOrMatrixId(model, keyword))
-        .take(limit ?? length)
-        .toList();
+    final models = where(
+      (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
+    ).map((room) => room.toRecentChatSearchModel(matrixLocalizations)).toList();
+
+    final matched = getIt.get<SearchEngine>().match(
+      keyword,
+      models,
+      fieldExtractors: [
+        (RecentChatSearchModel m) => [m.displayName ?? ''],
+        (RecentChatSearchModel m) => [m.directChatMatrixID ?? ''],
+      ],
+      options: _searchOptions,
+    );
+
+    return matched.take(limit ?? matched.length).toList();
   }
 }

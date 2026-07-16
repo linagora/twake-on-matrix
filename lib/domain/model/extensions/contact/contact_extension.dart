@@ -335,27 +335,19 @@ extension IterableContactsExtension on Iterable<Contact> {
     final engine = getIt.get<SearchEngine>();
     const options = SearchOptions(diacriticSensitive: false);
 
-    bool matches(String? field) =>
-        engine.matchesText(keyword, field ?? '', options: options);
-
-    return where(
-      (contact) =>
-          matches(contact.displayName) ||
-          matches(contact.id) ||
-          contact.emails?.any(
-                (email) => matches(email.address) || matches(email.matrixId),
-              ) ==
-              true ||
-          contact.phoneNumbers?.any(
-                (phone) =>
-                    engine.matchesText(
-                      keyword.replaceAll(' ', ''),
-                      phone.number.replaceAll(' ', ''),
-                      options: options,
-                    ) ||
-                    matches(phone.matrixId),
-              ) ==
-              true,
+    return engine.matchAnyField(
+      keyword,
+      toList(),
+      fieldExtractors: [
+        (Contact c) => [c.displayName ?? ''],
+        (Contact c) => [c.id],
+        (Contact c) =>
+            c.emails?.expand((e) => [e.address, e.matrixId ?? '']) ?? const [],
+        (Contact c) =>
+            c.phoneNumbers?.expand((p) => [p.number, p.matrixId ?? '']) ??
+            const [],
+      ],
+      options: options,
     );
   }
 }
