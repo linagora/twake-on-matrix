@@ -1,3 +1,25 @@
+## [2.23.3] - 2026-07-10
+### Fixed
+- #3251: Keep well-known discovery across restarts by re-fetching host
+
+## [2.23.1] - 2026-07-09
+### Added
+- #3232: Add Riverpod 3 setup
+
+### Changed
+- #3219: TW-3196: Improve download progress display for files
+- #3204: TW-3203: Reuse timeline status icon for chat list last message
+- #3216: TW-3213: Change composer text style
+- #3231: TW-3225: Mentions and deleted messages style
+
+### Fixed
+- #3202: TW-3170: Send read marker when room opens at bottom
+- #3192: TW-3189: Fix pinch zoom and pan drag on images
+- #3230: Fix web image viewer original asset loading
+
+### Tests
+- #3228: Fix Patrol CI
+
 ## [2.23.0] - 2026-07-02
 ### Added
 - Web push notifications via VAPID

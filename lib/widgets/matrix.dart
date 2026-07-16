@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:fluffychat/config/go_routes/app_routes.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:fluffychat/config/localizations/localization_service.dart';
 import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
 import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
@@ -42,6 +41,7 @@ import 'package:fluffychat/domain/repository/tom_configurations_repository.dart'
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/utils/uia_request_manager.dart';
@@ -396,6 +396,10 @@ class MatrixState extends State<Matrix>
   final onKeyVerificationRequestSub = <String, StreamSubscription>{};
   final onNotification = <String, StreamSubscription>{};
   final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
+  final onSyncStatusSub = <String, StreamSubscription>{};
+  final _lastSyncErrorSentAt = <String, DateTime>{};
+
+  static const _syncErrorSentryThrottle = Duration(minutes: 10);
 
   /// Re-registers the Web Push pusher when the app language changes so its
   /// (generic) notification text follows the account language.
@@ -543,6 +547,9 @@ class MatrixState extends State<Matrix>
     onUiaRequest[name] ??= currentClient.onUiaRequest.stream.listen(
       uiaRequestHandler,
     );
+    onSyncStatusSub[name] ??= currentClient.onSyncStatus.stream.listen(
+      (update) => _handleSyncStatusUpdate(currentClient, update),
+    );
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       Future<void> initWebNotifications() async {
         if (kIsWeb) {
@@ -599,6 +606,44 @@ class MatrixState extends State<Matrix>
         }
       }
     });
+  }
+
+  void _handleSyncStatusUpdate(Client client, SyncStatusUpdate update) {
+    if (update.status != SyncStatus.error || update.error == null) return;
+
+    _captureSyncError(client, update);
+  }
+
+  void _captureSyncError(Client client, SyncStatusUpdate update) {
+    final error = update.error;
+    if (error == null) return;
+
+    final exception = error.exception ?? Exception('Unknown Matrix sync error');
+    final errorType = exception.runtimeType.toString();
+    final throttleKey = '${client.clientName}:$errorType';
+    final now = DateTime.now();
+    final lastSentAt = _lastSyncErrorSentAt[throttleKey];
+    if (lastSentAt != null &&
+        now.difference(lastSentAt) < _syncErrorSentryThrottle) {
+      return;
+    }
+
+    _lastSyncErrorSentAt[throttleKey] = now;
+    // ignore: unawaited_futures
+    Sentry.captureException(
+      Exception('Matrix sync error: $errorType'),
+      withScope: (scope) async {
+        await scope.setTag('sync_status', update.status.name);
+        await scope.setTag('sync_error_type', errorType);
+        await scope.setContexts('matrix_sync', {
+          'has_prev_batch': client.prevBatch != null,
+          'has_sync_value': client.onSync.value != null,
+          'is_logged': client.isLogged(),
+          'platform': PlatformInfos.clientName,
+          'sync_pending': client.syncPending,
+        });
+      },
+    );
   }
 
   Future<void> _requestNotificationPermission() async {
@@ -751,6 +796,8 @@ class MatrixState extends State<Matrix>
     onNotification.remove(name);
     await onUiaRequest[name]?.cancel();
     onUiaRequest.remove(name);
+    await onSyncStatusSub[name]?.cancel();
+    onSyncStatusSub.remove(name);
     final webPushListener = _webPushLocaleListener;
     if (webPushListener != null) {
       LocalizationService.currentLocale.removeListener(webPushListener);
@@ -1175,22 +1222,40 @@ class MatrixState extends State<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
-    final db = newClient.database;
-    final previousDiscovery =
-        loginHomeserverSummary?.discoveryInformation ??
-        (db is HiveCollectionsDatabase ? await db.getWellKnown() : null);
-    final newSummary = await newClient
-        .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
-        .toHomeserverSummary();
-    if (newSummary.discoveryInformation == null && previousDiscovery != null) {
-      loginHomeserverSummary = HomeserverSummary(
-        discoveryInformation: previousDiscovery,
-        versions: newSummary.versions,
-        loginFlows: newSummary.loginFlows,
+    final previousSummary = loginHomeserverSummary;
+
+    HomeserverSummary? checkedSummary;
+    try {
+      checkedSummary = await newClient
+          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
+          .toHomeserverSummary();
+    } catch (e) {
+      Logs().w(
+        'Matrix::_getHomeserverInformation: homeserver unreachable, using '
+        'cached discovery information',
+        e,
       );
-    } else {
-      loginHomeserverSummary = newSummary;
     }
+
+    final discovery = await newClient.getWellKnownOrFallback(
+      fallback: previousSummary?.discoveryInformation,
+    );
+
+    if (checkedSummary == null && discovery == null) return;
+
+    // The active client may have changed while awaiting: a late result must
+    // not overwrite the newer account's summary.
+    if (clientOrNull != newClient) return;
+
+    loginHomeserverSummary = HomeserverSummary(
+      discoveryInformation: discovery,
+      versions:
+          checkedSummary?.versions ??
+          previousSummary?.versions ??
+          GetVersionsResponse(versions: []),
+      loginFlows:
+          checkedSummary?.loginFlows ?? previousSummary?.loginFlows ?? [],
+    );
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
@@ -1369,7 +1434,6 @@ class MatrixState extends State<Matrix>
         state != AppLifecycleState.paused;
     client.backgroundSync = foreground;
     client.syncPresence = foreground ? null : PresenceType.unavailable;
-    client.requestHistoryOnLimitedTimeline = !foreground;
     backgroundPush?.clearAllNotifications();
   }
 
@@ -1474,6 +1538,9 @@ class MatrixState extends State<Matrix>
       s.cancel();
     }
     for (final s in onUiaRequest.values) {
+      s.cancel();
+    }
+    for (final s in onSyncStatusSub.values) {
       s.cancel();
     }
     onClientLoginStateChanged.close();

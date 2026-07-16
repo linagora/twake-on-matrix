@@ -1265,12 +1265,12 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Ouvrez l'application pour lire le message",
-  "newMessage": "Nouveau message",
-  "enableNotificationsExplanation": "Activez les notifications pour être alerté des nouveaux messages, même quand Twake est fermé.",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
   },
+  "newMessage": "Nouveau message",
+  "enableNotificationsExplanation": "Activez les notifications pour être alerté des nouveaux messages, même quand Twake est fermé.",
   "openCamera": "Ouvrir l'appareil photo",
   "@openCamera": {
     "type": "text",
@@ -2904,15 +2904,15 @@
   "selectRole": "Choisissez un rôle",
   "canReadMessages": "Peut lire les messages",
   "canWriteMessagesSendReacts": "Peut envoyer des messages, réagir...",
-  "canRemoveUsersDeleteMessages": "Peut retirer des membres, suprimer des messages...",
+  "canRemoveUsersDeleteMessages": "Peut retirer des membres, supprimer des messages...",
   "canAccessAllFeaturesAndSettings": "Peut accéder a toutes les fonctionnalités et paramétrage",
   "invitePeopleToTheRoom": "Inviter des personnes dans le salon",
   "sendReactions": "Réagir",
-  "deleteMessagesSentByMe": "Suprimer mes messages",
+  "deleteMessagesSentByMe": "Supprimer mes messages",
   "notifyEveryoneUsingRoom": "Notifier tout le monde en utilisant @room",
   "joinCall": "Rejoindre des appels",
   "removeMembers": "Retirer un membre",
-  "deleteMessagesSentByOthers": "Suprimer les messages des autres",
+  "deleteMessagesSentByOthers": "Supprimer les messages des autres",
   "pinMessageForEveryone": "Épingler un message (pour tout le monde)",
   "startCall": "Lancer un appel",
   "changeGroupName": "Modifier le nom du groupe",
@@ -2927,7 +2927,7 @@
   "removeMember": "Retirer des membres",
   "removeMemberSelectionError": "Vous ne pouvez pas supprimer un membre avec un rôle égal ou supérieur que le votre.",
   "downgrade": "Rétrograder",
-  "deletedMessage": "Suprimer un message",
+  "deletedMessage": "Message supprimé",
   "unban": "Deban",
   "permissionErrorUnbanUser": "Vous n'avez pas la permission d'annuler le ban de quiconque. Veuillez contacter votre administrateur pour obtenir de l'aide",
   "transferOwnershipDescription": "Ce membre obtiendra le pouvoir absolu sur ce groupe et vous perdrez vos droits sur celui ci. Cette action est irréversible.",
@@ -3131,5 +3131,28 @@
       "successCount": {},
       "totalCount": {}
     }
-  }
+  },
+  "gifAutoplay": "lecture automatique des GIF",
+  "videoCallStartedTitle": "A démarré un appel vidéo",
+  "@videoCallStartedTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVideoCall": "Démarrer un appel vidéo",
+  "@startVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallCopyLink": "Copier le lien",
+  "@videoCallCopyLink": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "videoCallJoinCall": "Rejoindre l'appel",
+  "@videoCallJoinCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "webPushOnThisBrowser": "Notifications sur ce navigateur",
+  "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option."
 }

@@ -46,7 +46,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
           client: client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
-        openSearchBar();
       }
     });
     super.initState();
