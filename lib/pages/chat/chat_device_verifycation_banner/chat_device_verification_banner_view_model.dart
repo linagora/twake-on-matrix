@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -7,14 +9,29 @@ part 'chat_device_verification_banner_view_model.g.dart';
 @riverpod
 class ChatDeviceVerificationBannerViewModel
     extends _$ChatDeviceVerificationBannerViewModel {
+  StreamSubscription<SyncUpdate>? _onSyncSubscription;
+  bool _dismissed = false;
+
   @override
   DevicesBannerState build(Room room) {
+    // Device keys can still be loading (or change later, e.g. after
+    // completing verification elsewhere), so re-evaluate on every sync
+    // rather than only once at build time.
+    _onSyncSubscription = client.onSync.stream.listen((_) => _refresh());
+    ref.onDispose(() => _onSyncSubscription?.cancel());
+    return _computeState();
+  }
+
+  Client get client => room.client;
+
+  void _refresh() => state = _computeState();
+
+  DevicesBannerState _computeState() {
+    if (_dismissed) return DevicesBannerInitialState();
     return _isCurrentSessionUnverified()
         ? const DisplayWarningBannerState()
         : DevicesBannerInitialState();
   }
-
-  Client get client => room.client;
 
   bool _isCurrentSessionUnverified() {
     final deviceId = client.deviceID;
@@ -28,6 +45,7 @@ class ChatDeviceVerificationBannerViewModel
   }
 
   void onDismissBanner() {
+    _dismissed = true;
     state = DevicesBannerInitialState();
   }
 }

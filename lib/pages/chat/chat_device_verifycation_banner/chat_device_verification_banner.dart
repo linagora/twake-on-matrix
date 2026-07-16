@@ -17,10 +17,11 @@ class ChatDeviceVerificationBanner extends ConsumerWidget {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
     if (state is DisplayWarningBannerState) {
+      // TODO(TW-3218 part II): wire the Verify action to the self-verification
+      // flow for the current session (cross-signing via recovery key, not
+      // device-to-device SAS verification). Action hidden until then.
       return LinagoraBanner(
         message: L10n.of(context)!.deviceVerificationWaring,
-        actionLabel: L10n.of(context)!.verify,
-        onActionPressed: () {},
         onDismiss: controller.onDismissBanner,
       );
     }

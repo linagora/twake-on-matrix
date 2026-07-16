@@ -13,6 +13,8 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
   final GetDevicesInteractor _getDevicesInteractor = getIt
       .get<GetDevicesInteractor>();
 
+  Future<void>? _loadInFlight;
+
   @override
   DevicesSettingsState build() {
     return const DevicesSettingsInitial();
@@ -28,13 +30,44 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     _ => null,
   };
 
-  VerificationBannerVisibility? get _bannerVisibility => switch (state) {
+  VerificationBannerVisibility get _bannerVisibility => switch (state) {
     DevicesSettingsLoaded(:final bannerVisibility) => bannerVisibility,
     DevicesSettingsDeletingDevices(:final bannerVisibility) => bannerVisibility,
     DevicesSettingsDeleteDevicesError(:final bannerVisibility) =>
       bannerVisibility,
-    _ => null,
+    _ => VerificationBannerVisibility.shown,
   };
+
+  /// Transitions to a new "devices loaded" variant, carrying over the
+  /// current [_devices]/[_bannerVisibility] unless overridden. No-op if
+  /// devices haven't loaded yet.
+  void _transition({
+    List<Device>? devices,
+    VerificationBannerVisibility? bannerVisibility,
+    String? deleteError,
+    bool deleting = false,
+  }) {
+    final resolvedDevices = devices ?? _devices;
+    if (resolvedDevices == null) return;
+    final resolvedBannerVisibility = bannerVisibility ?? _bannerVisibility;
+    if (deleting) {
+      state = DevicesSettingsDeletingDevices(
+        devices: resolvedDevices,
+        bannerVisibility: resolvedBannerVisibility,
+      );
+    } else if (deleteError != null) {
+      state = DevicesSettingsDeleteDevicesError(
+        devices: resolvedDevices,
+        message: deleteError,
+        bannerVisibility: resolvedBannerVisibility,
+      );
+    } else {
+      state = DevicesSettingsLoaded(
+        devices: resolvedDevices,
+        bannerVisibility: resolvedBannerVisibility,
+      );
+    }
+  }
 
   Device? thisDevice(Client client) =>
       _devices?.firstWhereOrNull((d) => _isOwnDevice(d, client));
@@ -60,8 +93,18 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     );
   }
 
-  Future<void> loadUserDevices(Client client) async {
-    if (_devices != null) return;
+  void dismissVerificationBanner() {
+    _transition(bannerVisibility: VerificationBannerVisibility.dismissed);
+  }
+
+  Future<void> loadUserDevices(Client client) {
+    if (_devices != null) return Future.value();
+    return _loadInFlight ??= _loadUserDevices(client).whenComplete(() {
+      _loadInFlight = null;
+    });
+  }
+
+  Future<void> _loadUserDevices(Client client) async {
     await _getDevicesInteractor.execute(client: client).forEach((either) {
       either.fold(
         (failure) {
@@ -82,47 +125,15 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
 
   void reload() => state = const DevicesSettingsInitial();
 
-  void setLoadingDeletingDevices(bool loading) {
-    final devices = _devices;
-    if (devices == null) return;
-    final bannerVisibility =
-        _bannerVisibility ?? VerificationBannerVisibility.shown;
-    state = loading
-        ? DevicesSettingsDeletingDevices(
-            devices: devices,
-            bannerVisibility: bannerVisibility,
-          )
-        : DevicesSettingsLoaded(
-            devices: devices,
-            bannerVisibility: bannerVisibility,
-          );
-  }
+  void setLoadingDeletingDevices(bool loading) =>
+      _transition(deleting: loading);
 
-  void setErrorDeletingDevices(String? error) {
-    final devices = _devices;
-    if (devices == null) return;
-    final bannerVisibility =
-        _bannerVisibility ?? VerificationBannerVisibility.shown;
-    state = error == null
-        ? DevicesSettingsLoaded(
-            devices: devices,
-            bannerVisibility: bannerVisibility,
-          )
-        : DevicesSettingsDeleteDevicesError(
-            devices: devices,
-            message: error,
-            bannerVisibility: bannerVisibility,
-          );
-  }
+  void setErrorDeletingDevices(String? error) =>
+      _transition(deleteError: error);
 
   void refreshDeviceKeys() {
     final devices = _devices;
     if (devices == null) return;
-    final bannerVisibility =
-        _bannerVisibility ?? VerificationBannerVisibility.shown;
-    state = DevicesSettingsLoaded(
-      devices: List<Device>.from(devices),
-      bannerVisibility: bannerVisibility,
-    );
+    _transition(devices: List<Device>.from(devices));
   }
 }

@@ -10,11 +10,11 @@ class GetDevicesInteractor {
 
     try {
       final devices = await client.getDevices();
-      if (devices?.isEmpty == true) {
+      if (devices == null || devices.isEmpty) {
         yield Left(GetDevicesEmpty());
         return;
       }
-      yield Right(GetDevicesSuccess(devices: devices ?? []));
+      yield Right(GetDevicesSuccess(devices: devices));
     } catch (e) {
       Logs().e('GetDevicesInteractor::execute', e);
       yield Left(GetDevicesFailed(exception: e));
