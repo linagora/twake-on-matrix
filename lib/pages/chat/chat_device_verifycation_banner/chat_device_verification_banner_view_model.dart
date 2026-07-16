@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -23,6 +25,8 @@ class ChatDeviceVerificationBannerViewModel
   }
 
   Client get client => room.client;
+
+  final responsive = getIt.get<ResponsiveUtils>();
 
   void _refresh() => state = _computeState();
 
