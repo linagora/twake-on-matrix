@@ -331,7 +331,7 @@ extension LocalizedBody on Event {
 
     return Theme.of(
       context,
-    ).extension<LinagoraTextThemeExtension>()!.bodyMedium3.copyWith(
+    ).extension<LinagoraTextThemeExtension>()!.bodyMedium4.copyWith(
       color: redacted
           ? LinagoraRefColors.material().tertiary[30]
           : Theme.of(context).colorScheme.onSurface,

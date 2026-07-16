@@ -58,8 +58,6 @@ class MessageContentStyle {
         : bubbleImageWidget;
   }
 
-  static const double letterSpacingMessageContent = -0.15;
-
   static const double videoCenterButtonSize = 56;
 
   static const double iconInsideVideoButtonSize = 48;
@@ -85,7 +83,7 @@ class MessageContentStyle {
   static TextStyle? linkStyleMessageContent(BuildContext context) =>
       Theme.of(context)
           .extension<LinagoraTextThemeExtension>()!
-          .bodyMedium3
+          .bodyMedium4
           .copyWith(color: Theme.of(context).colorScheme.secondary);
 
   static const blurhashSize = 32;

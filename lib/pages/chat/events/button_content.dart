@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/events/button_content_style.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 
 class ButtonContent extends StatelessWidget {
   final Function onTap;
@@ -46,9 +47,12 @@ class ButtonContent extends StatelessWidget {
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                    style: Theme.of(context)
+                        .extension<LinagoraTextThemeExtension>()!
+                        .bodyMedium4
+                        .copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                   ),
                 ),
               ],

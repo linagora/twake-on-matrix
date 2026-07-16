@@ -50,7 +50,9 @@ class ReplyContentStyle {
   }
 
   static TextStyle? replyBodyTextStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodyMedium?.copyWith(
+    return Theme.of(
+      context,
+    ).extension<LinagoraTextThemeExtension>()!.bodyMedium4.copyWith(
       color: LinagoraRefColors.material().neutral[50],
       overflow: TextOverflow.ellipsis,
     );

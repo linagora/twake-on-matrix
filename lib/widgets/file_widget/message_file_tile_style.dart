@@ -1,4 +1,7 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 
 import 'file_tile_widget_style.dart';
 
@@ -18,11 +21,16 @@ class MessageFileTileStyle extends FileTileWidgetStyle {
   EdgeInsets get paddingFileTileAll =>
       const EdgeInsets.only(left: 8.0, right: 16.0, top: 4.0, bottom: 4.0);
 
+  /// Figma "Bubble message / Files": body/medium on mobile, body/medium2
+  /// (semibold) on desktop.
   @override
   TextStyle? textStyle(BuildContext context) {
-    return Theme.of(context).textTheme.titleSmall?.copyWith(
-      color: Theme.of(context).colorScheme.onSurface,
-    );
+    final theme = Theme.of(context);
+    final themeExtension = theme.extension<LinagoraTextThemeExtension>()!;
+    final style = getIt.get<ResponsiveUtils>().isMobile(context)
+        ? theme.textTheme.bodyMedium
+        : themeExtension.bodyMedium2;
+    return style?.copyWith(color: Theme.of(context).colorScheme.onSurface);
   }
 
   @override

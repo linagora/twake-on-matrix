@@ -306,10 +306,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js -> Done",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
@@ -400,10 +400,10 @@ Future<void> main() async {
             content: {
               "msgtype": "m.text",
               "body":
-                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js to support download with filename -> Done",
+                  "#2730 Fallback value for Always read receipt settings is false -> Done\n\n#2628 Disable view PDF file in mobile -> Done\n\n#2726 Remove logo in printed email -> Done\n\n#2737 View PDF in js -> Done",
               "format": "org.matrix.custom.html",
               "formatted_body":
-                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js to support download with filename -&gt; Done</p>",
+                  "<p>#2730 Fallback value for Always read receipt settings is false -&gt; Done</p><br/><p>#2628 Disable view PDF file in mobile -&gt; Done</p><br/><p>#2726 Remove logo in printed email -&gt; Done</p><br/><p>#2737 View PDF in js -&gt; Done</p>",
             },
             type: 'm.room.message',
             eventId: '\$143273582443PhrSn:example.org',
