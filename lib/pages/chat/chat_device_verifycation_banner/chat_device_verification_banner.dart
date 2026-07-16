@@ -22,7 +22,9 @@ class ChatDeviceVerificationBanner extends ConsumerWidget {
       // device-to-device SAS verification). Action hidden until then.
       return LinagoraBanner(
         message: L10n.of(context)!.deviceVerificationWaring,
-        onDismiss: controller.onDismissBanner,
+        onDismiss: controller.responsive.isMobile(context)
+            ? null
+            : controller.onDismissBanner,
       );
     }
     return const SizedBox.shrink();
