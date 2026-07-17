@@ -5,20 +5,24 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 
 const _searchOptions = SearchOptions(diacriticSensitive: false);
 
+Iterable<String> _nonEmpty(String? value) =>
+    (value == null || value.isEmpty) ? const [] : [value];
+
+final _mainFieldExtractors = <Iterable<String> Function(PresentationSearch)>[
+  (s) => _nonEmpty(s.displayName),
+  (s) => [s.id],
+  (s) => _nonEmpty(s.directChatMatrixID),
+  (s) => s.emails?.map((e) => e.email) ?? const [],
+  (s) => s.phoneNumbers?.map((p) => p.phoneNumber) ?? const [],
+];
+
 extension PresentationSearchExtension on PresentationSearch {
   SearchEngine get _searchEngine => getIt.get<SearchEngine>();
 
   bool _matchesMainFields(String keyword) => _searchEngine.anyMatch(
     keyword,
     [this],
-    fieldExtractors: [
-      (PresentationSearch s) => [s.displayName ?? ''],
-      (PresentationSearch s) => [s.id],
-      (PresentationSearch s) => [s.directChatMatrixID ?? ''],
-      (PresentationSearch s) => s.emails?.map((e) => e.email) ?? const [],
-      (PresentationSearch s) =>
-          s.phoneNumbers?.map((p) => p.phoneNumber) ?? const [],
-    ],
+    fieldExtractors: _mainFieldExtractors,
     options: _searchOptions,
   );
 

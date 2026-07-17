@@ -80,12 +80,19 @@ class SearchEngine {
     List<Iterable<String> Function(T)>? fieldExtractors,
     SearchOptions options = const SearchOptions(),
   }) {
-    return match(
-      needle,
-      haystack,
-      fieldExtractors: fieldExtractors,
-      options: options,
-    ).isNotEmpty;
+    final matcher = _matcher(needle, options);
+    final extractors =
+        fieldExtractors ??
+        [
+          (T item) => [item.toString()],
+        ];
+
+    return haystack.any(
+      (item) => extractors.any(
+        (extract) =>
+            extract(item).any((value) => matcher.matches(matcher.apply(value))),
+      ),
+    );
   }
 
   bool matchesText(
