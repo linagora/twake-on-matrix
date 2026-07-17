@@ -16,7 +16,6 @@ import 'package:fluffychat/domain/app_state/room/report_content_state.dart';
 import 'package:fluffychat/domain/model/chat/message_report_reason.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
 import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/domain/model/file_info/file_info.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
@@ -2365,9 +2364,8 @@ class ChatController extends State<Chat>
       room?.canSendDefaultMessages == true &&
       room?.membership == Membership.join;
 
-  bool get canStartVideoCall =>
-      canSendMessages &&
-      Matrix.of(context).loginHomeserverSummary?.videoCallBaseUrl != null;
+  bool canStartVideoCall(String? videoCallBaseUrl) =>
+      canSendMessages && videoCallBaseUrl != null;
 
   void onPhoneButtonTap() async {
     // VoIP required Android SDK 21

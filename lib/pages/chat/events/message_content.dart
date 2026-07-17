@@ -34,9 +34,7 @@ import 'map_bubble.dart';
 import 'message_download_content.dart';
 import 'sticker.dart';
 import 'video_call_content.dart';
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/utils/voip/video_call_helper.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 
 class MessageContent extends StatelessWidget
     with HandleDownloadAndPreviewFileMixin {
@@ -48,10 +46,12 @@ class MessageContent extends StatelessWidget
   final bool ownMessage;
   final Timeline timeline;
   final double? textWidth;
+  final String? videoCallBaseUrl;
 
   const MessageContent(
     this.event, {
     super.key,
+    required this.videoCallBaseUrl,
     required this.textColor,
     required this.endOfBubbleWidget,
     this.onTapPreview,
@@ -303,7 +303,7 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Emote:
             final videoCallUrl = VideoCallHelper.extractUrl(
               event,
-              Matrix.of(context).loginHomeserverSummary?.videoCallBaseUrl,
+              videoCallBaseUrl,
             );
             if (videoCallUrl != null) {
               return VideoCallContent(callUrl: videoCallUrl);
