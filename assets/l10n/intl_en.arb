@@ -3228,5 +3228,169 @@
   "@videoCallJoinCall": {
     "type": "text",
     "placeholders": {}
+  },
+  "onboardingContinue": "Continue",
+  "@onboardingContinue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingLater": "Maybe later",
+  "@onboardingLater": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingHookTitle": "Welcome to Twake",
+  "@onboardingHookTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingHookSubtitle": "A few quick questions to show you what makes us different.",
+  "@onboardingHookSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingIntentTitle": "What brings you here?",
+  "@onboardingIntentTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingIntentSubtitle": "We'll tailor Twake to the way you use it.",
+  "@onboardingIntentSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingIntentCloseOnes": "My close ones",
+  "@onboardingIntentCloseOnes": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingIntentWork": "Work",
+  "@onboardingIntentWork": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingIntentBoth": "Both",
+  "@onboardingIntentBoth": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingContactsTitle": "Find the people you know already on Twake",
+  "@onboardingContactsTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingContactsSubtitle": "We match your address book privately. Nothing leaves your phone without you, and you can erase it anytime.",
+  "@onboardingContactsSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingContactsAllow": "Allow access to contacts",
+  "@onboardingContactsAllow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffLoading": "Looking for the people you know…",
+  "@onboardingPayoffLoading": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffTitle": "{count, plural, =1{1 of your contacts is already here} other{{count} of your contacts are already here}}",
+  "@onboardingPayoffTitle": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "onboardingPayoffSubtitle": "Your people are waiting for you on Twake.",
+  "@onboardingPayoffSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffMoreContacts": "{count, plural, =1{and 1 more contact} other{and {count} more contacts}}",
+  "@onboardingPayoffMoreContacts": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "onboardingPayoffStartChatting": "Start chatting",
+  "@onboardingPayoffStartChatting": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffEmptyTitle": "You're all set",
+  "@onboardingPayoffEmptyTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffEmptySubtitle": "Invite your close ones to join you on Twake.",
+  "@onboardingPayoffEmptySubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPayoffContinue": "Continue",
+  "@onboardingPayoffContinue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingAnswerDontCare": "I don't care",
+  "@onboardingAnswerDontCare": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingAnswerDontKnow": "I don't really know",
+  "@onboardingAnswerDontKnow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingAnswerConcerned": "It worries me",
+  "@onboardingAnswerConcerned": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPrivacyQuestion": "Who can read your private conversations?",
+  "@onboardingPrivacyQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingPrivacyValue": "On Twake, your messages are end-to-end encrypted and hosted in Europe. No one can read them — not even us.",
+  "@onboardingPrivacyValue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingAiQuestion": "Are you fine with your messages feeding AI models?",
+  "@onboardingAiQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingAiValue": "Twake never trains any AI on your conversations. Your words stay yours.",
+  "@onboardingAiValue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingSovereigntyQuestion": "Does relying on US tech giants for your messages bother you?",
+  "@onboardingSovereigntyQuestion": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingSovereigntyValue": "Twake is open source, sovereign and European. No lock-in: your data belongs to you, and you can leave with it.",
+  "@onboardingSovereigntyValue": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingNotificationsTitle": "Never miss a message",
+  "@onboardingNotificationsTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingNotificationsSubtitle": "Turn on notifications to know when your people message you. You stay in control — switch them off anytime.",
+  "@onboardingNotificationsSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "onboardingNotificationsAllow": "Turn on notifications",
+  "@onboardingNotificationsAllow": {
+    "type": "text",
+    "placeholders": {}
   }
 }

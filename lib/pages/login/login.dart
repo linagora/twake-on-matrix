@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:fluffychat/presentation/model/client_login_state_event.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
@@ -141,10 +142,17 @@ class LoginController extends State<Login> {
     }
   }
 
-  void _handleFirstLoggedIn(Client client) {
+  void _handleFirstLoggedIn(Client client) async {
     if (!mounted) return;
 
     TwakeDialog.hideLoadingDialog(context);
+
+    // If onboarding (pre-auth) got contacts permission, reveal the matched
+    // contacts now that an access token is available.
+    if (PlatformInfos.isMobile && await Permission.contacts.isGranted) {
+      TwakeApp.router.go('/onboarding/payoff');
+      return;
+    }
 
     TwakeApp.router.go(
       '/rooms',
