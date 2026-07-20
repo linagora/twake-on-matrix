@@ -1515,15 +1515,6 @@ class MatrixState extends State<Matrix>
               AppConfig.experimentalVoip,
             )
             .then((value) => AppConfig.experimentalVoip = value),
-        store
-            .getItemBool(
-              SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
-              AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
-            )
-            .then(
-              (value) =>
-                  AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
-            ),
       ]);
     } catch (e, s) {
       Logs().wtf('MatrixState::initSettings: error', e, s);
