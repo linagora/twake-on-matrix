@@ -9,6 +9,7 @@ import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dar
 import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
 import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
 import 'package:fluffychat/domain/usecase/invitation/constants.dart';
+import 'package:fluffychat/domain/usecase/invitation/safe_response_data_summary.dart';
 import 'package:matrix/matrix.dart';
 
 class GenerateInvitationLinkInteractor {
@@ -32,7 +33,18 @@ class GenerateInvitationLinkInteractor {
         GenerateInvitationLinkSuccessState(link: res.link, id: res.id),
       );
     } catch (e) {
-      Logs().e('GenerateInvitationLinkInteractor::execute', e);
+      if (e is DioException) {
+        Logs().e(
+          'GenerateInvitationLinkInteractor::execute DioException '
+          'status=${e.response?.statusCode} '
+          'type=${e.type} '
+          'path=${e.requestOptions.path} '
+          'data=${safeResponseDataSummary(e.response?.data)}',
+          e,
+        );
+      } else {
+        Logs().e('GenerateInvitationLinkInteractor::execute', e);
+      }
       if (e is DioException &&
           e.response?.statusCode == 400 &&
           e.response?.data is Map<String, dynamic>) {
