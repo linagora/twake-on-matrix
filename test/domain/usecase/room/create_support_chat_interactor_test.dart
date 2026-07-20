@@ -1,6 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/data/model/media/upload_file_json.dart';
-import 'package:fluffychat/data/network/media/media_api.dart';
 import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
@@ -13,17 +11,10 @@ import 'package:mockito/mockito.dart';
 
 import 'create_support_chat_interactor_test.mocks.dart';
 
-@GenerateMocks([
-  Client,
-  MediaAPI,
-  PowerLevelManager,
-  DiscoveryInformation,
-  Room,
-])
+@GenerateMocks([Client, PowerLevelManager, DiscoveryInformation, Room])
 void main() {
   late CreateSupportChatInteractor interactor;
   late MockClient mockClient;
-  late MockMediaAPI mockMediaAPI;
   late MockPowerLevelManager mockPowerLevelManager;
   late MockDiscoveryInformation mockDiscovery;
   late MockRoom mockRoom;
@@ -31,18 +22,15 @@ void main() {
   const testUserId = '@test:example.com';
   const testRoomId = '!room123:example.com';
   const testSupportContactId = '@support:example.com';
-  const testAvatarUrl = 'mxc://example.com/avatar123';
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     mockClient = MockClient();
-    mockMediaAPI = MockMediaAPI();
     mockPowerLevelManager = MockPowerLevelManager();
     mockDiscovery = MockDiscoveryInformation();
     mockRoom = MockRoom();
 
-    GetIt.instance.registerSingleton<MediaAPI>(mockMediaAPI);
     GetIt.instance.registerSingleton<PowerLevelManager>(mockPowerLevelManager);
 
     interactor = const CreateSupportChatInteractor();
@@ -66,22 +54,15 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data found'));
-          when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-            (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-          );
           when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
-            mockClient.createGroupChat(
-              groupName: anyNamed('groupName'),
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
-              initialState: anyNamed('initialState'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-          when(
-            mockRoom.invite(testSupportContactId),
-          ).thenAnswer((_) async => {});
           when(
             mockRoom.setPower(testUserId, 0),
           ).thenAnswer((_) async => 'event_id');
@@ -114,14 +95,12 @@ void main() {
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).called(1);
           verify(
-            mockClient.createGroupChat(
-              groupName: 'Support Twake Workplace',
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: false,
               preset: CreateRoomPreset.privateChat,
-              initialState: anyNamed('initialState'),
             ),
           ).called(1);
-          verify(mockRoom.invite(testSupportContactId)).called(1);
           verify(mockRoom.setFavourite(true)).called(1);
           verify(mockRoom.setPower(testUserId, 0)).called(1);
           verify(
@@ -167,11 +146,10 @@ void main() {
           ).called(1);
           verify(mockClient.getRoomById(testRoomId)).called(1);
           verifyNever(
-            mockClient.createGroupChat(
-              groupName: anyNamed('groupName'),
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
-              initialState: anyNamed('initialState'),
             ),
           );
         },
@@ -189,22 +167,15 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data'));
-          when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-            (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-          );
           when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
-            mockClient.createGroupChat(
-              groupName: anyNamed('groupName'),
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
-              initialState: anyNamed('initialState'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-          when(
-            mockRoom.invite(testSupportContactId),
-          ).thenAnswer((_) async => {});
           when(
             mockRoom.setPower(testUserId, 0),
           ).thenAnswer((_) async => 'event_id');
@@ -237,14 +208,12 @@ void main() {
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).called(1);
           verify(
-            mockClient.createGroupChat(
-              groupName: 'Support Twake Workplace',
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: false,
               preset: CreateRoomPreset.privateChat,
-              initialState: anyNamed('initialState'),
             ),
           ).called(1);
-          verify(mockRoom.invite(testSupportContactId)).called(1);
           verify(mockRoom.setPower(testUserId, 0)).called(1);
         },
       );
@@ -296,11 +265,10 @@ void main() {
           );
 
           verifyNever(
-            mockClient.createGroupChat(
-              groupName: anyNamed('groupName'),
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
-              initialState: anyNamed('initialState'),
             ),
           );
         },
@@ -359,55 +327,10 @@ void main() {
         );
 
         verifyNever(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
-          ),
-        );
-      });
-
-      test('should fail when avatar upload fails', () async {
-        when(mockClient.userID).thenReturn(testUserId);
-        when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
-          },
-        });
-        when(
-          mockClient.getAccountData(testUserId, 'app.twake.support_room'),
-        ).thenThrow(Exception('No account data found'));
-        when(
-          mockMediaAPI.uploadFileWeb(file: anyNamed('file')),
-        ).thenThrow(Exception('Upload failed'));
-
-        final result = interactor.execute(
-          mockClient,
-          cachedDiscovery: mockDiscovery,
-        );
-
-        await expectLater(
-          result,
-          emitsInOrder([
-            predicate(
-              (dynamic value) =>
-                  value is Right && value.value is CreatingSupportChat,
-            ),
-            predicate(
-              (dynamic value) =>
-                  value is Left && value.value is CreateSupportChatFailed,
-            ),
-          ]),
-        );
-
-        verify(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).called(1);
-        verifyNever(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
-            enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
           ),
         );
       });
@@ -422,16 +345,12 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-          (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-        );
         when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
           ),
         ).thenThrow(Exception('Room creation failed'));
 
@@ -455,11 +374,10 @@ void main() {
         );
 
         verify(
-          mockClient.createGroupChat(
-            groupName: 'Support Twake Workplace',
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: false,
             preset: CreateRoomPreset.privateChat,
-            initialState: anyNamed('initialState'),
           ),
         ).called(1);
       });
@@ -474,16 +392,12 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-          (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-        );
         when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(null);
@@ -520,20 +434,15 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-          (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-        );
         when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
         when(
           mockClient.setAccountData(testUserId, 'app.twake.support_room', any),
         ).thenAnswer((_) async => {});
@@ -560,7 +469,6 @@ void main() {
           ]),
         );
 
-        verify(mockRoom.invite(testSupportContactId)).called(1);
         verify(mockRoom.setFavourite(true)).called(1);
       });
     });
@@ -578,22 +486,15 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data found'));
-          when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-            (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-          );
           when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
-            mockClient.createGroupChat(
-              groupName: anyNamed('groupName'),
+            mockClient.startDirectChat(
+              testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
               preset: anyNamed('preset'),
-              initialState: anyNamed('initialState'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-          when(
-            mockRoom.invite(testSupportContactId),
-          ).thenAnswer((_) async => {});
           when(
             mockClient.setAccountData(
               testUserId,
@@ -649,20 +550,15 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockMediaAPI.uploadFileWeb(file: anyNamed('file'))).thenAnswer(
-          (_) async => const UploadFileResponse(contentUri: testAvatarUrl),
-        );
         when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
-          mockClient.createGroupChat(
-            groupName: anyNamed('groupName'),
+          mockClient.startDirectChat(
+            testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
             preset: anyNamed('preset'),
-            initialState: anyNamed('initialState'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-        when(mockRoom.invite(testSupportContactId)).thenAnswer((_) async => {});
         when(
           mockClient.setAccountData(testUserId, 'app.twake.support_room', any),
         ).thenAnswer((_) async => {});
