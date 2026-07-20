@@ -409,6 +409,8 @@ class ContactsManager {
 
       if (e is FederationConfigurationNotFound) {
         await _handleTwakeLookUpPhoneBookContacts();
+      } else {
+        _isSynchronizing = false;
       }
     }
   }
