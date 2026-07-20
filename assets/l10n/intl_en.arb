@@ -3229,6 +3229,5 @@
     "type": "text",
     "placeholders": {}
   },
-  "couldNotLaunchUrl": "Could not launch URL",
-  "@downloadQrCode": {}
+  "couldNotLaunchUrl": "Could not launch URL"
 }
