@@ -2,20 +2,17 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'create_support_chat_interactor_test.mocks.dart';
 
-@GenerateMocks([Client, PowerLevelManager, DiscoveryInformation, Room])
+@GenerateMocks([Client, DiscoveryInformation, Room])
 void main() {
   late CreateSupportChatInteractor interactor;
   late MockClient mockClient;
-  late MockPowerLevelManager mockPowerLevelManager;
   late MockDiscoveryInformation mockDiscovery;
   late MockRoom mockRoom;
 
@@ -27,17 +24,10 @@ void main() {
 
   setUp(() {
     mockClient = MockClient();
-    mockPowerLevelManager = MockPowerLevelManager();
     mockDiscovery = MockDiscoveryInformation();
     mockRoom = MockRoom();
 
-    GetIt.instance.registerSingleton<PowerLevelManager>(mockPowerLevelManager);
-
     interactor = const CreateSupportChatInteractor();
-  });
-
-  tearDown(() {
-    GetIt.instance.reset();
   });
 
   group('CreateSupportChatInteractor', () {
@@ -54,7 +44,6 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data found'));
-          when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.startDirectChat(
               testSupportContactId,
@@ -63,9 +52,6 @@ void main() {
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-          when(
-            mockRoom.setPower(testUserId, 0),
-          ).thenAnswer((_) async => 'event_id');
           when(mockRoom.setFavourite(true)).thenAnswer((_) async => {});
           when(
             mockClient.setAccountData(
@@ -102,7 +88,6 @@ void main() {
             ),
           ).called(1);
           verify(mockRoom.setFavourite(true)).called(1);
-          verify(mockRoom.setPower(testUserId, 0)).called(1);
           verify(
             mockClient.setAccountData(testUserId, 'app.twake.support_room', {
               'createdSupportChat': testRoomId,
@@ -167,7 +152,6 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data'));
-          when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.startDirectChat(
               testSupportContactId,
@@ -176,9 +160,6 @@ void main() {
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
-          when(
-            mockRoom.setPower(testUserId, 0),
-          ).thenAnswer((_) async => 'event_id');
           when(mockRoom.setFavourite(true)).thenAnswer((_) async => {});
           when(
             mockClient.setAccountData(
@@ -214,7 +195,6 @@ void main() {
               preset: CreateRoomPreset.privateChat,
             ),
           ).called(1);
-          verify(mockRoom.setPower(testUserId, 0)).called(1);
         },
       );
     });
@@ -345,7 +325,6 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.startDirectChat(
             testSupportContactId,
@@ -392,7 +371,6 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.startDirectChat(
             testSupportContactId,
@@ -434,7 +412,6 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.startDirectChat(
             testSupportContactId,
@@ -486,7 +463,6 @@ void main() {
           when(
             mockClient.getAccountData(testUserId, 'app.twake.support_room'),
           ).thenThrow(Exception('No account data found'));
-          when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
           when(
             mockClient.startDirectChat(
               testSupportContactId,
@@ -550,7 +526,6 @@ void main() {
         when(
           mockClient.getAccountData(testUserId, 'app.twake.support_room'),
         ).thenThrow(Exception('No account data found'));
-        when(mockPowerLevelManager.getUserPowerLevel()).thenReturn(0);
         when(
           mockClient.startDirectChat(
             testSupportContactId,

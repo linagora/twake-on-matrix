@@ -1,11 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:matrix/matrix.dart';
 
 class CreateSupportChatInteractor {
@@ -53,7 +51,6 @@ class CreateSupportChatInteractor {
         return;
       }
 
-      final powerLevelManager = getIt.get<PowerLevelManager>();
       roomId = await client.startDirectChat(
         supportChatTwakeId,
         preset: CreateRoomPreset.privateChat,
@@ -68,7 +65,6 @@ class CreateSupportChatInteractor {
         room.setFavourite(true),
         client.setAccountData(userId, type, {accountDataKey: roomId}),
       ]);
-      await room.setPower(userId, powerLevelManager.getUserPowerLevel());
 
       yield Right(SupportChatCreated(roomId: roomId));
     } catch (e) {
