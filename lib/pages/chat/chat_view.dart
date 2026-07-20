@@ -1,20 +1,17 @@
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/widgets/twake_components/unread_count_badge.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
 import 'package:fluffychat/pages/chat/chat_invitation_body.dart';
+import 'package:fluffychat/pages/chat/chat_video_call_button.dart';
 import 'package:fluffychat/pages/chat/chat_view_body.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
-import 'package:fluffychat/providers/login_homeserver_summary_provider.dart';
-import 'package:fluffychat/utils/voip/video_call_helper.dart';
 import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/stream_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -164,32 +161,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             onPressed: controller.toggleSearch,
                             icon: const Icon(Icons.search),
                           ),
-                          Consumer(
-                            builder: (context, ref, __) {
-                              final videoCallBaseUrl = ref.watch(
-                                loginHomeserverSummaryProvider.select(
-                                  (summary) => summary?.videoCallBaseUrl,
-                                ),
-                              );
-                              if (!controller.canStartVideoCall(
-                                videoCallBaseUrl,
-                              )) {
-                                return const SizedBox.shrink();
-                              }
-                              return TwakeIconButton(
-                                icon: Icons.videocam_outlined,
-                                tooltip: L10n.of(context)!.startVideoCall,
-                                onTap: () => VideoCallHelper.start(
-                                  room: controller.room,
-                                  startedTitle: L10n.of(
-                                    context,
-                                  )!.videoCallStartedTitle,
-                                  baseUrl: videoCallBaseUrl,
-                                ),
-                                preferBelow: false,
-                              );
-                            },
-                          ),
+                          ChatVideoCallButton(controller),
                           if (controller.hasActionAppBarMenu)
                             Builder(
                               builder: (context) => TwakeIconButton(

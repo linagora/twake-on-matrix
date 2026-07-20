@@ -5,16 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 
 void main() {
-  late ProviderContainer container;
-
-  setUp(() {
-    container = ProviderContainer();
-  });
-
-  tearDown(() {
-    container.dispose();
-  });
-
   HomeserverSummary buildSummary() => HomeserverSummary(
     discoveryInformation: DiscoveryInformation(
       mHomeserver: HomeserverInformation(
@@ -26,10 +16,13 @@ void main() {
   );
 
   test('starts with no summary', () {
+    final container = ProviderContainer.test();
+
     expect(container.read(loginHomeserverSummaryProvider), isNull);
   });
 
   test('set publishes the summary to watchers', () {
+    final container = ProviderContainer.test();
     final seen = <HomeserverSummary?>[];
     container.listen(
       loginHomeserverSummaryProvider,
@@ -44,6 +37,7 @@ void main() {
   });
 
   test('summary survives without listeners (keepAlive)', () async {
+    final container = ProviderContainer.test();
     final summary = buildSummary();
     container.read(loginHomeserverSummaryProvider.notifier).set(summary);
 
