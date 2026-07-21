@@ -6,6 +6,7 @@ import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
 import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
 import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/dismissible_media_view.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
@@ -473,20 +474,21 @@ class _ImageWidgetState extends State<_ImageWidget> {
             return widget.placeholder;
           }
 
-          return Image.memory(
-            snapshot.data!.bytes,
+          return Image(
+            image: MemoryImage(snapshot.data!.bytes).resizeToFit(
+              cacheWidth: widget.cacheWidth != null
+                  ? widget.cacheWidth!
+                  : (widget.width != null && widget.needResize)
+                  ? context.getCacheSize(widget.width!)
+                  : null,
+              cacheHeight: widget.cacheHeight != null
+                  ? widget.cacheHeight!
+                  : (widget.height != null && widget.needResize)
+                  ? context.getCacheSize(widget.height!)
+                  : null,
+            ),
             width: widget.width,
             height: widget.height,
-            cacheWidth: widget.cacheWidth != null
-                ? widget.cacheWidth!
-                : (widget.width != null && widget.needResize)
-                ? context.getCacheSize(widget.width!)
-                : null,
-            cacheHeight: widget.cacheHeight != null
-                ? widget.cacheHeight!
-                : (widget.height != null && widget.needResize)
-                ? context.getCacheSize(widget.height!)
-                : null,
             fit: widget.fit,
             filterQuality: FilterQuality.medium,
             errorBuilder: widget.imageErrorWidgetBuilder,
@@ -515,20 +517,21 @@ class _ImageWidgetState extends State<_ImageWidget> {
                   fit: BoxFit.cover,
                   errorBuilder: widget.imageErrorWidgetBuilder,
                 )
-              : Image.memory(
-                  widget.data!,
+              : Image(
+                  image: MemoryImage(widget.data!).resizeToFit(
+                    cacheWidth: widget.cacheWidth != null
+                        ? widget.cacheWidth!
+                        : (widget.width != null && widget.needResize)
+                        ? context.getCacheSize(widget.width!)
+                        : null,
+                    cacheHeight: widget.cacheHeight != null
+                        ? widget.cacheHeight!
+                        : (widget.height != null && widget.needResize)
+                        ? context.getCacheSize(widget.height!)
+                        : null,
+                  ),
                   width: widget.width,
                   height: widget.height,
-                  cacheWidth: widget.cacheWidth != null
-                      ? widget.cacheWidth!
-                      : (widget.width != null && widget.needResize)
-                      ? context.getCacheSize(widget.width!)
-                      : null,
-                  cacheHeight: widget.cacheHeight != null
-                      ? widget.cacheHeight!
-                      : (widget.height != null && widget.needResize)
-                      ? context.getCacheSize(widget.height!)
-                      : null,
                   fit: widget.fit,
                   filterQuality: FilterQuality.medium,
                   errorBuilder: widget.imageErrorWidgetBuilder,
@@ -571,20 +574,21 @@ class _ImageNativeBuilder extends StatelessWidget {
         errorBuilder: imageErrorWidgetBuilder,
       );
     }
-    return Image.file(
-      File(filePath!),
+    return Image(
+      image: FileImage(File(filePath!)).resizeToFit(
+        cacheWidth: cacheWidth != null
+            ? cacheWidth!
+            : (width != null && needResize)
+            ? context.getCacheSize(width!)
+            : null,
+        cacheHeight: cacheHeight != null
+            ? cacheHeight!
+            : (height != null && needResize)
+            ? context.getCacheSize(height!)
+            : null,
+      ),
       width: width,
       height: height,
-      cacheWidth: cacheWidth != null
-          ? cacheWidth!
-          : (width != null && needResize)
-          ? context.getCacheSize(width!)
-          : null,
-      cacheHeight: cacheHeight != null
-          ? cacheHeight!
-          : (height != null && needResize)
-          ? context.getCacheSize(height!)
-          : null,
       fit: fit,
       filterQuality: FilterQuality.medium,
       errorBuilder: imageErrorWidgetBuilder,

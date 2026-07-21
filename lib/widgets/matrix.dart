@@ -911,6 +911,14 @@ class MatrixState extends State<Matrix>
   Future<void> _retrieveLocalToMConfiguration() async {
     if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
+
+    // Matrix APIs must remain available even when no optional ToM
+    // configuration has been stored for the current user yet.
+    setUpAuthorization(client);
+    if (client.homeserver != null) {
+      _setUpHomeServer(client.homeserver!);
+    }
+
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
       if (toMConfigurations == null) {

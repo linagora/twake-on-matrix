@@ -1,5 +1,6 @@
 import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
+import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
@@ -36,12 +37,18 @@ class UnencryptedImageWidget extends StatelessWidget {
         fit: BoxFit.cover,
       );
     }
-    return Image.network(
-      event
-              .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)
-              ?.getDownloadLink(event.room.client)
-              .toString() ??
-          '',
+    final imageUrl =
+        event
+            .attachmentOrThumbnailMxcUrl(getThumbnail: isThumbnail)
+            ?.getDownloadLink(event.room.client)
+            .toString() ??
+        '';
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    return Image(
+      image: NetworkImage(imageUrl).resizeToFit(
+        cacheWidth: (width * devicePixelRatio).round(),
+        cacheHeight: (height * devicePixelRatio).round(),
+      ),
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded) {
           return child;
@@ -61,8 +68,6 @@ class UnencryptedImageWidget extends StatelessWidget {
       fit: fit,
       width: width,
       height: height,
-      cacheWidth: (width * MediaQuery.devicePixelRatioOf(context)).round(),
-      cacheHeight: (height * MediaQuery.devicePixelRatioOf(context)).round(),
       filterQuality: FilterQuality.medium,
       errorBuilder: (context, error, stackTrace) {
         return Stack(
