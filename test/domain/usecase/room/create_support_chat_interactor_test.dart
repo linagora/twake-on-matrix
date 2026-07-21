@@ -48,7 +48,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
-              preset: anyNamed('preset'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
@@ -84,7 +83,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: false,
-              preset: CreateRoomPreset.privateChat,
             ),
           ).called(1);
           verify(mockRoom.setFavourite(true)).called(1);
@@ -134,7 +132,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
-              preset: anyNamed('preset'),
             ),
           );
         },
@@ -156,7 +153,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
-              preset: anyNamed('preset'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
@@ -192,7 +188,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: false,
-              preset: CreateRoomPreset.privateChat,
             ),
           ).called(1);
         },
@@ -248,7 +243,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
-              preset: anyNamed('preset'),
             ),
           );
         },
@@ -310,7 +304,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
           ),
         );
       });
@@ -329,7 +322,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
           ),
         ).thenThrow(Exception('Room creation failed'));
 
@@ -356,7 +348,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: false,
-            preset: CreateRoomPreset.privateChat,
           ),
         ).called(1);
       });
@@ -375,7 +366,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(null);
@@ -416,7 +406,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
@@ -467,7 +456,6 @@ void main() {
             mockClient.startDirectChat(
               testSupportContactId,
               enableEncryption: anyNamed('enableEncryption'),
-              preset: anyNamed('preset'),
             ),
           ).thenAnswer((_) async => testRoomId);
           when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
@@ -530,7 +518,6 @@ void main() {
           mockClient.startDirectChat(
             testSupportContactId,
             enableEncryption: anyNamed('enableEncryption'),
-            preset: anyNamed('preset'),
           ),
         ).thenAnswer((_) async => testRoomId);
         when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
