@@ -53,7 +53,6 @@ class CreateSupportChatInteractor {
 
       roomId = await client.startDirectChat(
         supportChatTwakeId,
-        preset: CreateRoomPreset.privateChat,
         enableEncryption: false,
       );
       room = client.getRoomById(roomId);
