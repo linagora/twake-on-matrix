@@ -265,14 +265,18 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           path: apks/
 
+      # upload-artifact@v4 strips to the least common ancestor of the uploaded
+      # paths (build/app/outputs/apk/), so the layout under apks/ is:
+      #   apks/debug/app-debug.apk
+      #   apks/androidTest/debug/app-debug-androidTest.apk
       - name: Run perf test on virtual device
         run: |
           PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/build/app/outputs/apk/debug/app-debug.apk \
-            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/debug/app-debug.apk \
+            --test apks/androidTest/debug/app-debug-androidTest.apk \
             --device model=MediumPhone.arm,version=34 \
             --timeout 30m \
             --use-orchestrator \
@@ -342,14 +346,15 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           path: apks/
 
+      # See perf_run_virtual: artifact layout is LCA-stripped under apks/.
       - name: Run perf test on physical device
         run: |
           PERF_RUN_ID="perf-physical-${{ github.run_id }}"
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/build/app/outputs/apk/debug/app-debug.apk \
-            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/debug/app-debug.apk \
+            --test apks/androidTest/debug/app-debug-androidTest.apk \
             --device model=oriole,version=33 \
             --timeout 30m \
             --use-orchestrator \
