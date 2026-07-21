@@ -7,13 +7,13 @@ import 'package:linagora_design_flutter/banners/linagora_banner.dart';
 import 'package:matrix/matrix.dart';
 
 class ChatDeviceVerificationBanner extends ConsumerWidget {
-  final Room room;
+  final Client client;
 
-  const ChatDeviceVerificationBanner({super.key, required this.room});
+  const ChatDeviceVerificationBanner({super.key, required this.client});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = chatDeviceVerificationBannerViewModelProvider(room);
+    final provider = chatDeviceVerificationBannerViewModelProvider(client);
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
     if (state is DisplayWarningBannerState) {

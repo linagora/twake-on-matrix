@@ -1859,7 +1859,7 @@ packages:
     description:
       path: "."
       ref: TW-3218-add-new-components-for-device-verification
-      resolved-ref: "3f3dd0251689daef442d6325a3aedb5cee78ed6e"
+      resolved-ref: a9a82011d44ca7e0649a0ea5b340ed9eb276d49a
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
     version: "0.2.0"

@@ -15,7 +15,7 @@ class ChatDeviceVerificationBannerViewModel
   bool _dismissed = false;
 
   @override
-  DevicesBannerState build(Room room) {
+  DevicesBannerState build(Client client) {
     // Device keys can still be loading (or change later, e.g. after
     // completing verification elsewhere), so re-evaluate on every sync
     // rather than only once at build time.
@@ -23,8 +23,6 @@ class ChatDeviceVerificationBannerViewModel
     ref.onDispose(() => _onSyncSubscription?.cancel());
     return _computeState();
   }
-
-  Client get client => room.client;
 
   final responsive = getIt.get<ResponsiveUtils>();
 

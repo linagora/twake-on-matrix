@@ -86,11 +86,11 @@ class UserDeviceListItem extends StatelessWidget {
     final keys =
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;
-    // encryptToDevice reflects whether this device will actually receive
-    // room keys and be able to decrypt messages (per ShareKeysWith policy),
-    // unlike directVerified/verified which the SDK force-trusts for the
-    // own device regardless of any user action.
-    final verified = keys == null || keys.encryptToDevice;
+    // On Matrix you always trust yourself: the current device can't
+    // meaningfully "verify" itself, so it's always shown as verified with
+    // no Verify action. Only remote devices reflect encryptToDevice (whether
+    // this session actually trusts them enough to share room keys).
+    final verified = isOwnDevice || keys == null || keys.encryptToDevice;
 
     return GestureDetector(
       onTap: () => _openActionSheet(context, keys, isOwnDevice),
