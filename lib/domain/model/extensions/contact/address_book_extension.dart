@@ -4,54 +4,6 @@ import 'package:fluffychat/domain/model/contact/contact_status.dart';
 import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
 
-/// Extension methods for searching and filtering collections of AddressBook
-/// entries.
-extension IterableAddressBookExtension on Iterable<AddressBook> {
-  /// Searches address book entries by keyword.
-  ///
-  /// Performs a case-insensitive search across the following fields:
-  /// - Display name
-  /// - Matrix ID
-  ///
-  /// Returns all entries if [keyword] is empty, otherwise returns only
-  /// matching entries.
-  Iterable<AddressBook> searchAddressBooks(String keyword) {
-    if (keyword.isEmpty) {
-      return this;
-    }
-    final contactsMatched = where((contact) {
-      final supportedFields = [contact.displayName, contact.mxid];
-      final plainTextContains = supportedFields.any(
-        (field) =>
-            field?.toLowerCase().contains(keyword.toLowerCase()) ?? false,
-      );
-      return plainTextContains;
-    });
-    return contactsMatched;
-  }
-}
-
-/// Extension methods for deduplicating sets of AddressBook entries.
-extension AddressBookListExtension on Set<AddressBook> {
-  /// Removes duplicate AddressBook entries based on Matrix ID.
-  ///
-  /// Uses the [mxid] field as the unique key. If multiple AddressBook entries
-  /// share the same Matrix ID, only the last one encountered is kept.
-  ///
-  /// Returns a new Set containing only unique AddressBook entries.
-  Set<AddressBook> combineDuplicateAddressBooks() {
-    final Map<String, AddressBook> uniqueAddressBooks = {};
-
-    for (final addressBook in this) {
-      if (addressBook.mxid?.isNotEmpty ?? false) {
-        uniqueAddressBooks[addressBook.mxid!] = addressBook;
-      }
-    }
-
-    return uniqueAddressBooks.values.toSet();
-  }
-}
-
 /// Extension methods for batch converting AddressBook entries to Contacts.
 extension IterableAddressBookToContactExtension on Iterable<AddressBook> {
   /// Converts a collection of AddressBook entries to a list of Contact objects.

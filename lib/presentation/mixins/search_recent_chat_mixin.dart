@@ -26,16 +26,15 @@ mixin SearchRecentChat {
     required String keyword,
   }) {
     if (keyword.isNotEmpty) {
-      final matchedRooms = filteredRoomsForAll
-          .where(
-            (room) => getIt.get<SearchEngine>().matchesText(
-              keyword,
-              room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
-              options: const SearchOptions(diacriticSensitive: false),
-            ),
-          )
-          .toList();
-      recentlyChatsNotifier.value = matchedRooms;
+      final matrixLocals = MatrixLocals(L10n.of(context)!);
+      recentlyChatsNotifier.value = getIt.get<SearchEngine>().match(
+        keyword,
+        filteredRoomsForAll,
+        fieldExtractors: [
+          (Room room) => [room.getLocalizedDisplayname(matrixLocals)],
+        ],
+        options: const SearchOptions(diacriticSensitive: false),
+      );
     } else {
       recentlyChatsNotifier.value = filteredRoomsForAll;
     }
