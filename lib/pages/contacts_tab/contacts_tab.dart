@@ -142,6 +142,18 @@ class ContactsTabController extends State<ContactsTab>
     }
   }
 
+  Future<void> retrySynchronizeContacts() async {
+    if (!mounted) {
+      return;
+    }
+
+    await retrySynchronizeContactsOnContactTab(
+      context: context,
+      client: Matrix.of(context).client,
+      matrixLocalizations: MatrixLocals(L10n.of(context)!),
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await handleDidChangeAppLifecycleState(state, client: client);
