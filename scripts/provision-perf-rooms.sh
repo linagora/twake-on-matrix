@@ -6,8 +6,8 @@
 #   ScrollRoom1 — image-heavy room for the 30s scroll scenario
 #   ScrollRoom2 — second image-heavy room
 #
-# Idempotent: existing rooms (matched by name) are reused, only missing
-# messages/images are topped up.
+# Idempotent: existing rooms (matched by name) are reused unchanged; newly
+# created rooms are seeded once.
 #
 # Usage: ./scripts/provision-perf-rooms.sh [env-file]
 #   env-file defaults to integration_test/.env.local.do-not-commit
@@ -33,7 +33,7 @@ PASSWORD="$(get PASSWORD)"
 
 log() { echo "[perf-provision] $*" >&2; }
 
-api() { # api METHOD PATH [DATA] — retries on 429/5xx with backoff
+api() { # api METHOD PATH [DATA] — retries network errors, 429s, and 5xx
   local method="$1" path="$2" data="${3:-}"
   local attempt=1 max=6 wait=5
   while true; do
@@ -48,11 +48,11 @@ api() { # api METHOD PATH [DATA] — retries on 429/5xx with backoff
     fi
     code=$(printf '%s' "$out" | tail -n1)
     out=$(printf '%s' "$out" | sed '$d')
-    if [ "$code" -lt 400 ] 2>/dev/null; then
+    if [ "$code" -ge 200 ] 2>/dev/null && [ "$code" -lt 400 ] 2>/dev/null; then
       printf '%s' "$out"
       return 0
     fi
-    if { [ "$code" = "429" ] || [ "$code" -ge 500 ] 2>/dev/null; } && [ $attempt -lt $max ]; then
+    if { [ "$code" = "000" ] || [ "$code" = "429" ] || [ "$code" -ge 500 ] 2>/dev/null; } && [ $attempt -lt $max ]; then
       log "HTTP $code on $method $path — retry $attempt/$max in ${wait}s"
       sleep "$wait"
       wait=$((wait * 2))
@@ -72,9 +72,10 @@ for attempt in 1 2 3 4 5; do
     -d "$(jq -nc --arg u "$USER_NAME" --arg p "$PASSWORD" \
           '{type:"m.login.password", identifier:{type:"m.id.user", user:$u}, password:$p}')" \
     || true)
-  TOKEN=$(printf '%s' "$RESP" | jq -r '.access_token // empty')
+  TOKEN=$(printf '%s' "$RESP" | jq -r '.access_token // empty' 2>/dev/null || true)
   if [ -n "$TOKEN" ]; then break; fi
-  log "Login attempt $attempt failed ($(printf '%s' "$RESP" | jq -r '.errcode // "?"')) — waiting..."
+  LOGIN_ERROR=$(printf '%s' "$RESP" | jq -r '.errcode // "?"' 2>/dev/null || printf 'invalid_json')
+  log "Login attempt $attempt failed ($LOGIN_ERROR) — waiting..."
   sleep $((attempt * 15))
 done
 [ -n "$TOKEN" ] || { echo "ERROR: login failed"; exit 1; }
@@ -163,15 +164,26 @@ seed_room() { # seed_room ROOM_ID LABEL
   rm -rf "$tmpdir"
 }
 
+NAV_ROOM_EXISTED=$(find_room_by_name "$NAV_ROOM_NAME")
+SCROLL1_ROOM_EXISTED=$(find_room_by_name "$SCROLL_ROOM_1_NAME")
+SCROLL2_ROOM_EXISTED=$(find_room_by_name "$SCROLL_ROOM_2_NAME")
+
 NAV_ID=$(ensure_room "$NAV_ROOM_NAME")
 SCROLL1_ID=$(ensure_room "$SCROLL_ROOM_1_NAME")
 SCROLL2_ID=$(ensure_room "$SCROLL_ROOM_2_NAME")
 
-# Nav room only needs to exist and open quickly — a few messages are enough.
-send_text "$NAV_ID" "nav fixture message" || true
+if [ -z "$NAV_ROOM_EXISTED" ]; then
+  # Nav room only needs to exist and open quickly — a few messages are enough.
+  send_text "$NAV_ID" "nav fixture message" || true
+fi
 
-seed_room "$SCROLL1_ID" "$SCROLL_ROOM_1_NAME"
-seed_room "$SCROLL2_ID" "$SCROLL_ROOM_2_NAME"
+if [ -z "$SCROLL1_ROOM_EXISTED" ]; then
+  seed_room "$SCROLL1_ID" "$SCROLL_ROOM_1_NAME"
+fi
+
+if [ -z "$SCROLL2_ROOM_EXISTED" ]; then
+  seed_room "$SCROLL2_ID" "$SCROLL_ROOM_2_NAME"
+fi
 
 log "Done. Add these to INTEGRATION_TEST_ENV_BASE64:"
 cat <<EOF

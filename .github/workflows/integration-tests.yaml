@@ -247,8 +247,8 @@ jobs:
     steps:
       - name: Validate FTL bucket name
         run: |
-          if [[ "${{ env.FTL_RESULTS_BUCKET }}" == _* ]]; then
-            echo "ERROR: FTL_RESULTS_BUCKET='${{ env.FTL_RESULTS_BUCKET }}' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+          if [[ "$FTL_RESULTS_BUCKET" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='$FTL_RESULTS_BUCKET' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
             exit 1
           fi
 
@@ -283,14 +283,14 @@ jobs:
             --timeout 30m \
             --use-orchestrator \
             --environment-variables clearPackageData=true \
-            --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
+            --results-bucket "$FTL_RESULTS_BUCKET" \
             --results-dir "$PERF_RUN_ID"
 
       # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
       - name: Download logcat from GCS
         if: always() && env.PERF_RUN_ID != ''
         run: |
-          GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
+          GCS_PATH="gs://$FTL_RESULTS_BUCKET/$PERF_RUN_ID"
           mkdir -p ./perf_gcs_results
           gcloud storage cp -r "${GCS_PATH}/*" ./perf_gcs_results/ \
             || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
@@ -331,8 +331,8 @@ jobs:
     steps:
       - name: Validate FTL bucket name
         run: |
-          if [[ "${{ env.FTL_RESULTS_BUCKET }}" == _* ]]; then
-            echo "ERROR: FTL_RESULTS_BUCKET='${{ env.FTL_RESULTS_BUCKET }}' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+          if [[ "$FTL_RESULTS_BUCKET" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='$FTL_RESULTS_BUCKET' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
             exit 1
           fi
 
@@ -364,14 +364,14 @@ jobs:
             --timeout 30m \
             --use-orchestrator \
             --environment-variables clearPackageData=true \
-            --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
+            --results-bucket "$FTL_RESULTS_BUCKET" \
             --results-dir "$PERF_RUN_ID"
 
       # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
       - name: Download logcat from GCS
         if: always() && env.PERF_RUN_ID != ''
         run: |
-          GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
+          GCS_PATH="gs://$FTL_RESULTS_BUCKET/$PERF_RUN_ID"
           mkdir -p ./perf_gcs_results
           gcloud storage cp -r "${GCS_PATH}/*" ./perf_gcs_results/ \
             || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
