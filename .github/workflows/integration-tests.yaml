@@ -13,6 +13,11 @@ on:
         description: "Also run the performance jobs (build + physical median). Off by default so a functional dispatch only runs the integration tests."
         required: false
         default: "false"
+      publish_perf_history:
+        description: "Publish this performance run to the canonical GitHub Pages history. Only honored on main."
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: "0 0 * * *"
 
@@ -453,3 +458,71 @@ jobs:
           path: |
             perf_median_memory.json
             perf_frame_physical.json
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 5 – Append the successful nightly aggregate to the GitHub Pages history
+  # ────────────────────────────────────────────────────────────────────────────
+  publish_perf_history:
+    name: Publish Perf History
+    if: >-
+      ${{
+        github.ref == 'refs/heads/main' &&
+        (github.event_name == 'schedule' ||
+          (github.event_name == 'workflow_dispatch' && inputs.publish_perf_history == true))
+      }}
+    needs: perf_median
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-writes
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download consolidated performance results
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-results-${{ github.run_id }}
+          path: perf-results/
+
+      - name: Checkout existing GitHub Pages history
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: existing-pages
+
+      - name: Build performance dashboard publication
+        run: |
+          set -euo pipefail
+          mkdir -p performance-site/data
+
+          if [ -d existing-pages/performance/data ]; then
+            cp -R existing-pages/performance/data/. performance-site/data/
+          fi
+          cp -R scripts/perf/dashboard/. performance-site/
+
+          python3 scripts/perf/update_history.py \
+            --memory perf-results/perf_median_memory.json \
+            --physical perf-results/perf_frame_physical.json \
+            --data-directory performance-site/data \
+            --date "$(date -u +%F)" \
+            --generated-at "$(date -u +%FT%TZ)" \
+            --repository "$GITHUB_REPOSITORY" \
+            --sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --flutter-version "$FLUTTER_VERSION" \
+            --summary-file performance-summary.md
+
+      - name: Deploy performance dashboard
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: performance-site
+          destination_dir: performance
+          commit_message: "Publish FTL performance history for ${{ github.sha }}"
+
+      - name: Summarize published performance point
+        run: cat performance-summary.md >> "$GITHUB_STEP_SUMMARY"
