@@ -1,14 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/media/media_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
 import 'package:fluffychat/event/twake_event_types.dart';
 import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/power_level_manager.dart';
-import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
 
 class CreateSupportChatInteractor {
@@ -56,42 +51,19 @@ class CreateSupportChatInteractor {
         return;
       }
 
-      final avatarMatrixFile = MatrixFile.fromMimeType(
-        name: 'logo.png',
-        mimeType: 'image/png',
-        bytes: (await rootBundle.load(
-          ImagePaths.supportAvatarPng,
-        )).buffer.asUint8List(),
-      );
-      final avatarUrl = (await getIt.get<MediaAPI>().uploadFileWeb(
-        file: avatarMatrixFile,
-      )).contentUri;
-
-      final powerLevelManager = getIt.get<PowerLevelManager>();
-      roomId = await client.createGroupChat(
-        groupName: 'Support Twake Workplace',
-        preset: CreateRoomPreset.privateChat,
+      roomId = await client.startDirectChat(
+        supportChatTwakeId,
         enableEncryption: false,
-        initialState: [
-          if (avatarUrl != null)
-            StateEvent(
-              type: EventTypes.RoomAvatar,
-              content: {'url': avatarUrl},
-              stateKey: '',
-            ),
-        ],
       );
       room = client.getRoomById(roomId);
       if (room == null) {
         throw Exception('Failed to create support chat');
       }
 
-      await room.invite(supportChatTwakeId);
       await Future.wait([
         room.setFavourite(true),
         client.setAccountData(userId, type, {accountDataKey: roomId}),
       ]);
-      await room.setPower(userId, powerLevelManager.getUserPowerLevel());
 
       yield Right(SupportChatCreated(roomId: roomId));
     } catch (e) {
