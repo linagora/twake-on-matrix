@@ -26,69 +26,87 @@ class MatrixState:
         self.sent_messages = 0
 
 
-def handler_for(state):
-    class MatrixHandler(BaseHTTPRequestHandler):
-        def log_message(self, _format, *_args):
+class MatrixHandler(BaseHTTPRequestHandler):
+    state = None
+
+    def log_message(self, _format, *_args):
+        return
+
+    def send_json(self, payload, status=200):
+        body = json.dumps(payload).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        self.handle_get()
+
+    def do_POST(self):
+        self.handle_post()
+
+    def do_PUT(self):
+        self.handle_put()
+
+    def handle_get(self):
+        if self.path == "/_matrix/client/v3/joined_rooms":
+            self.state.joined_rooms_requests += 1
+            self.send_json({"joined_rooms": list(self.state.room_names)})
             return
 
-        def send_json(self, payload, status=200):
-            body = json.dumps(payload).encode()
-            self.send_response(status)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-Length", str(len(body)))
+        prefix = "/_matrix/client/v3/rooms/"
+        suffix = "/state/m.room.name"
+        if self.path.startswith(prefix) and self.path.endswith(suffix):
+            room_id = unquote(self.path[len(prefix) : -len(suffix)])
+            self.send_json({"name": self.state.room_names[room_id]})
+            return
+
+        self.send_error(404)
+
+    def handle_post(self):
+        content_length = int(self.headers.get("Content-Length", "0"))
+        body = self.rfile.read(content_length)
+
+        if self.path == "/_matrix/client/v3/login":
+            self.handle_login()
+            return
+
+        if self.path == "/_matrix/client/v3/createRoom":
+            self.handle_create_room(body)
+            return
+
+        self.send_error(404)
+
+    def handle_login(self):
+        self.state.login_attempts += 1
+        if self.state.invalid_login_once and self.state.login_attempts == 1:
+            malformed = b"<html>Bad gateway</html>"
+            self.send_response(502)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(malformed)))
             self.end_headers()
-            self.wfile.write(body)
+            self.wfile.write(malformed)
+            return
+        self.send_json({"access_token": "test-token"})
 
-        def do_GET(self):
-            if self.path == "/_matrix/client/v3/joined_rooms":
-                state.joined_rooms_requests += 1
-                self.send_json({"joined_rooms": list(state.room_names)})
-                return
+    def handle_create_room(self, body):
+        room_name = json.loads(body)["name"]
+        room_id = f"!created{len(self.state.created_room_names)}:test"
+        self.state.created_room_names.append(room_name)
+        self.state.room_names[room_id] = room_name
+        self.send_json({"room_id": room_id})
 
-            prefix = "/_matrix/client/v3/rooms/"
-            suffix = "/state/m.room.name"
-            if self.path.startswith(prefix) and self.path.endswith(suffix):
-                room_id = unquote(self.path[len(prefix) : -len(suffix)])
-                self.send_json({"name": state.room_names[room_id]})
-                return
+    def handle_put(self):
+        if "/send/m.room.message/" in self.path:
+            self.state.sent_messages += 1
+            self.send_json({"event_id": f"$event{self.state.sent_messages}"})
+            return
+        self.send_error(404)
 
-            self.send_error(404)
 
-        def do_POST(self):
-            content_length = int(self.headers.get("Content-Length", "0"))
-            body = self.rfile.read(content_length)
-
-            if self.path == "/_matrix/client/v3/login":
-                state.login_attempts += 1
-                if state.invalid_login_once and state.login_attempts == 1:
-                    malformed = b"<html>Bad gateway</html>"
-                    self.send_response(502)
-                    self.send_header("Content-Type", "text/html")
-                    self.send_header("Content-Length", str(len(malformed)))
-                    self.end_headers()
-                    self.wfile.write(malformed)
-                    return
-                self.send_json({"access_token": "test-token"})
-                return
-
-            if self.path == "/_matrix/client/v3/createRoom":
-                room_name = json.loads(body)["name"]
-                room_id = f"!created{len(state.created_room_names)}:test"
-                state.created_room_names.append(room_name)
-                state.room_names[room_id] = room_name
-                self.send_json({"room_id": room_id})
-                return
-
-            self.send_error(404)
-
-        def do_PUT(self):
-            if "/send/m.room.message/" in self.path:
-                state.sent_messages += 1
-                self.send_json({"event_id": f"$event{state.sent_messages}"})
-                return
-            self.send_error(404)
-
-    return MatrixHandler
+def handler_for(state):
+    return type("BoundMatrixHandler", (MatrixHandler,), {"state": state})
 
 
 class ProvisionPerfRoomsTest(unittest.TestCase):
