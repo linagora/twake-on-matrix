@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_audio_player_widget.dart';
 import 'package:fluffychat/pages/chat/chat_background.dart';
+import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner.dart';
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
 import 'package:fluffychat/pages/chat/chat_loading_view.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
@@ -200,6 +201,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         );
                       },
                     ),
+                    if (controller.room != null &&
+                        controller.room?.encrypted == true)
+                      ChatDeviceVerificationBanner(client: controller.client),
                     PinnedEventsView(controller),
                     if (controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(

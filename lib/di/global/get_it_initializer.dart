@@ -101,6 +101,7 @@ import 'package:fluffychat/domain/usecase/contacts/post_address_book_interactor.
 import 'package:fluffychat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:fluffychat/domain/usecase/create_direct_chat_interactor.dart';
+import 'package:fluffychat/domain/usecase/device_settings/get_devices_interactor.dart';
 import 'package:fluffychat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:fluffychat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:fluffychat/domain/usecase/generate_thumbnails_media_interactor.dart';
@@ -411,6 +412,7 @@ class GetItInitializer {
     getIt.registerSingleton<CreateDirectChatInteractor>(
       CreateDirectChatInteractor(),
     );
+    getIt.registerFactory<GetDevicesInteractor>(() => GetDevicesInteractor());
     getIt.registerSingleton<ForwardMessageInteractor>(
       ForwardMessageInteractor(),
     );

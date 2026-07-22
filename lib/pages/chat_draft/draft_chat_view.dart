@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_background.dart';
+import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
@@ -313,6 +314,7 @@ class DraftChatView extends StatelessWidget {
               show: controller.showAddContactBanner,
             ),
           ),
+          ChatDeviceVerificationBanner(client: Matrix.of(context).client),
         ],
       ),
     );
