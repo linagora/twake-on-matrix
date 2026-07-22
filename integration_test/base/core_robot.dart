@@ -30,7 +30,16 @@ class CoreRobot {
       await $.pumpAndSettle();
       return;
     }
-    await $(AppBar).$(IconButton).first.tap();
+    // The Chat screen's back button is a TwakeIconButton (custom widget,
+    // not a material IconButton); the first material IconButton in that
+    // AppBar is the in-room SEARCH button. Prefer the real back icon and
+    // fall back to the first IconButton for other screens.
+    final backIcon = $(AppBar).$(find.byIcon(Icons.arrow_back_ios));
+    if (backIcon.exists) {
+      await backIcon.first.tap();
+    } else {
+      await $(AppBar).$(IconButton).first.tap();
+    }
     await $.pumpAndSettle();
   }
 

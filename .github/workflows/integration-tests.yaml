@@ -265,14 +265,20 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           path: apks/
 
+      # upload-artifact@v4 strips to the least common ancestor of the uploaded
+      # paths (build/app/outputs/apk/), so the layout under apks/ is:
+      #   apks/debug/app-debug.apk
+      #   apks/androidTest/debug/app-debug-androidTest.apk
       - name: Run perf test on virtual device
         run: |
           PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
+          # Export before FTL so logcat download still works if the test fails.
+          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/build/app/outputs/apk/debug/app-debug.apk \
-            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/debug/app-debug.apk \
+            --test apks/androidTest/debug/app-debug-androidTest.apk \
             --device model=MediumPhone.arm,version=34 \
             --timeout 30m \
             --use-orchestrator \
@@ -280,13 +286,14 @@ jobs:
             --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
             --results-dir "$PERF_RUN_ID"
 
-          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
-
+      # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
       - name: Download logcat from GCS
+        if: always() && env.PERF_RUN_ID != ''
         run: |
           GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
-          gsutil -m cp -r "$GCS_PATH" ./perf_gcs_results/ \
-            || { echo "ERROR: gsutil failed to download results from $GCS_PATH"; exit 1; }
+          mkdir -p ./perf_gcs_results
+          gcloud storage cp -r "${GCS_PATH}/*" ./perf_gcs_results/ \
+            || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
           find ./perf_gcs_results -name "logcat" -exec cat {} + > perf_logcat.txt \
             || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
           if [ ! -s perf_logcat.txt ]; then
@@ -342,14 +349,17 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           path: apks/
 
+      # See perf_run_virtual: artifact layout is LCA-stripped under apks/.
       - name: Run perf test on physical device
         run: |
           PERF_RUN_ID="perf-physical-${{ github.run_id }}"
+          # Export before FTL so logcat download still works if the test fails.
+          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/build/app/outputs/apk/debug/app-debug.apk \
-            --test apks/build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/debug/app-debug.apk \
+            --test apks/androidTest/debug/app-debug-androidTest.apk \
             --device model=oriole,version=33 \
             --timeout 30m \
             --use-orchestrator \
@@ -357,13 +367,14 @@ jobs:
             --results-bucket "${{ env.FTL_RESULTS_BUCKET }}" \
             --results-dir "$PERF_RUN_ID"
 
-          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
-
+      # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
       - name: Download logcat from GCS
+        if: always() && env.PERF_RUN_ID != ''
         run: |
           GCS_PATH="gs://${{ env.FTL_RESULTS_BUCKET }}/$PERF_RUN_ID"
-          gsutil -m cp -r "$GCS_PATH" ./perf_gcs_results/ \
-            || { echo "ERROR: gsutil failed to download results from $GCS_PATH"; exit 1; }
+          mkdir -p ./perf_gcs_results
+          gcloud storage cp -r "${GCS_PATH}/*" ./perf_gcs_results/ \
+            || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
           find ./perf_gcs_results -name "logcat" -exec cat {} + > perf_logcat.txt \
             || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
           if [ ! -s perf_logcat.txt ]; then
