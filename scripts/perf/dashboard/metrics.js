@@ -19,6 +19,26 @@ globalThis.PerfMetrics = (() => {
       : (sorted[middle - 1] + sorted[middle]) / 2;
   }
 
+  function addUtcDays(value, amount) {
+    const next = new Date(`${value}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + amount);
+    return next.toISOString().slice(0, 10);
+  }
+
+  function historyWindow(entries, range) {
+    if (!entries.length) return null;
+    const end = entries.at(-1).date;
+    const start = range === "all"
+      ? entries[0].date
+      : addUtcDays(end, -(Number(range) - 1));
+    return { start, end };
+  }
+
+  function maximumMarkerDelta(markers) {
+    const deltas = markers.map(marker => marker?.delta).filter(isNumber);
+    return deltas.length ? Math.max(...deltas) : null;
+  }
+
   function roomEntryCheckpoints(record, family, scenario) {
     return (record?.[family]?.checkpoints || []).filter(
       checkpoint => checkpoint.scenario === scenario &&
@@ -86,7 +106,9 @@ globalThis.PerfMetrics = (() => {
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
     hasEnoughFrames,
+    historyWindow,
     isProfileRecord,
+    maximumMarkerDelta,
     median,
     summarizeRoomEntries,
   };

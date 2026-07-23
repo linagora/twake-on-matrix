@@ -50,6 +50,7 @@ Map<String, dynamic> computeFrameStats(List<FrameTiming> frames) {
     'build_p99_us': _percentile(buildUs, 99),
     'raster_p50_us': _percentile(rasterUs, 50),
     'raster_p95_us': _percentile(rasterUs, 95),
+    'raster_p99_us': _percentile(rasterUs, 99),
     'jank_count': jankCount,
     'jank_rate': (jankCount / frames.length).toStringAsFixed(3),
   };

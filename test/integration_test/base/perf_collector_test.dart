@@ -48,6 +48,7 @@ void main() {
 
     expect(metrics['jank_count'], 2);
     expect(metrics['jank_rate'], '0.667');
+    expect(metrics['raster_p99_us'], 18000);
   });
 
   test('keeps a zero FPS marker when the sample has no time window', () {

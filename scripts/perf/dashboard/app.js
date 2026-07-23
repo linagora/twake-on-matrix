@@ -6,7 +6,9 @@
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
     hasEnoughFrames,
+    historyWindow,
     isProfileRecord,
+    maximumMarkerDelta,
     median,
   } = globalThis.PerfMetrics;
 
@@ -126,11 +128,9 @@
   function selectedEntries() {
     if (!state.index?.entries.length) return [];
     const range = elements["range-select"].value;
-    const lastRecordedDay = state.index.entries.at(-1).date;
-    state.windowEnd = [lastRecordedDay, isoDay(new Date())].sort().at(-1);
-    state.windowStart = range === "all"
-      ? state.index.entries[0].date
-      : addDays(state.windowEnd, -(Number(range) - 1));
+    const window = historyWindow(state.index.entries, range);
+    state.windowStart = window.start;
+    state.windowEnd = window.end;
     return state.index.entries.filter(entry => entry.date >= state.windowStart && entry.date <= state.windowEnd);
   }
 
@@ -308,10 +308,12 @@
               return `${metric.label} : ${metric.format(realValue)} · indice ${context.raw}`;
             },
             afterBody: contexts => {
-              const marker = contexts
-                .map(context => context.dataset.markers[context.dataIndex])
-                .find(item => item?.delta != null);
-              return marker ? [`Écart défavorable maximal : +${(marker.delta * 100).toFixed(1)} %`] : [];
+              const markers = contexts.map(
+                context => context.dataset.markers[context.dataIndex]
+              );
+              const maximumDelta = maximumMarkerDelta(markers);
+              if (maximumDelta == null) return [];
+              return [`Écart défavorable maximal : +${(maximumDelta * 100).toFixed(1)} %`];
             },
           },
         },

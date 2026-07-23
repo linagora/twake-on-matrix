@@ -8,7 +8,9 @@ const {
   ROOM_ENTRY_SUMMARY,
   checkpointForSelection,
   hasEnoughFrames,
+  historyWindow,
   isProfileRecord,
+  maximumMarkerDelta,
   summarizeRoomEntries,
 } = globalThis.PerfMetrics;
 
@@ -87,4 +89,30 @@ test("rejects legacy debug records from performance comparisons", () => {
   assert.equal(isProfileRecord(record([])), false);
   assert.equal(isProfileRecord({ environment: { build_mode: "debug" } }), false);
   assert.equal(isProfileRecord({ environment: { build_mode: "profile" } }), true);
+});
+
+test("anchors a finite history window to the latest recorded night", () => {
+  const entries = [
+    { date: "2026-05-01" },
+    { date: "2026-05-20" },
+  ];
+
+  assert.deepEqual(historyWindow(entries, "7"), {
+    start: "2026-05-14",
+    end: "2026-05-20",
+  });
+  assert.deepEqual(historyWindow(entries, "all"), {
+    start: "2026-05-01",
+    end: "2026-05-20",
+  });
+});
+
+test("selects the largest available regression delta", () => {
+  assert.equal(maximumMarkerDelta([
+    { delta: 0.11 },
+    { delta: null },
+    { delta: 0.24 },
+    { delta: -0.05 },
+  ]), 0.24);
+  assert.equal(maximumMarkerDelta([{ delta: null }, {}]), null);
 });
