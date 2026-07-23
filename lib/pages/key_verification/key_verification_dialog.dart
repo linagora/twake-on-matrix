@@ -93,6 +93,9 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final theme = Theme.of(context);
+    final linagoraSysColors = LinagoraSysColors.material();
     User? user;
     final directChatId = widget.request.client.getDirectChatFromUserId(
       widget.request.userId,
@@ -104,7 +107,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     }
     final displayName =
         user?.calcDisplayname() ?? widget.request.userId.localpart!;
-    Widget title = Text(L10n.of(context)!.verifyTitle);
+    Widget title = Text(l10n.verifyTitle);
     Widget body;
     final buttons = <Widget>[];
     switch (widget.request.state) {
@@ -120,10 +123,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                L10n.of(context)!.askSSSSSign,
-                style: const TextStyle(fontSize: 20),
-              ),
+              Text(l10n.askSSSSSign, style: const TextStyle(fontSize: 20)),
               Container(height: 10),
               TextField(
                 controller: textEditingController,
@@ -137,9 +137,9 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
                 maxLines: 1,
                 obscureText: true,
                 decoration: InputDecoration(
-                  hintText: L10n.of(context)!.passphraseOrKey,
-                  prefixStyle: TextStyle(color: Theme.of(context).primaryColor),
-                  suffixStyle: TextStyle(color: Theme.of(context).primaryColor),
+                  hintText: l10n.passphraseOrKey,
+                  prefixStyle: TextStyle(color: theme.primaryColor),
+                  suffixStyle: TextStyle(color: theme.primaryColor),
                   border: const OutlineInputBorder(),
                 ),
               ),
@@ -149,14 +149,14 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         buttons.add(
           TwakeTextButton(
             onTap: () => checkInput(textEditingController.text),
-            message: L10n.of(context)!.submit,
+            message: l10n.submit,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
+            styleMessage: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
             ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
-              color: LinagoraSysColors.material().onPrimary,
+              color: linagoraSysColors.onPrimary,
               borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
@@ -164,21 +164,21 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         buttons.add(
           TwakeTextButton(
             onTap: () => widget.request.openSSSS(skip: true),
-            message: L10n.of(context)!.skip,
+            message: l10n.skip,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
+            styleMessage: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
             ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
-              color: LinagoraSysColors.material().onPrimary,
+              color: linagoraSysColors.onPrimary,
               borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
         break;
       case KeyVerificationState.askAccept:
-        title = Text(L10n.of(context)!.newVerificationRequest);
+        title = Text(l10n.newVerificationRequest);
         body = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -189,7 +189,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               size: AvatarStyle.defaultSize * 2,
             ),
             const SizedBox(height: 16),
-            Text(L10n.of(context)!.askVerificationRequest(displayName)),
+            Text(l10n.askVerificationRequest(displayName)),
           ],
         );
         buttons.add(
@@ -197,29 +197,29 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
             onTap: () => widget.request.rejectVerification().then(
               (_) => Navigator.maybePop(context),
             ),
-            message: L10n.of(context)!.reject,
+            message: l10n.reject,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: Theme.of(context).colorScheme.primary,
+            styleMessage: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
             ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
-              color: LinagoraSysColors.material().onPrimary,
+              color: linagoraSysColors.onPrimary,
               borderRadius: const BorderRadius.all(Radius.circular(100)),
             ),
           ),
         );
         buttons.add(
           TwakeTextButton(
-            onTap: () => widget.request.acceptVerification(),
-            message: L10n.of(context)!.accept,
+            onTap: widget.request.acceptVerification,
+            message: l10n.accept,
             borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: LinagoraSysColors.material().onPrimary,
+            styleMessage: theme.textTheme.labelLarge?.copyWith(
+              color: linagoraSysColors.onPrimary,
             ),
             margin: KeyVerificationStyles.marginButtonWarningBanner,
             buttonDecoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(100),
             ),
           ),
@@ -235,11 +235,11 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           title = const SizedBox.shrink();
           body = KeyVerificationEmojiView(
             emojis: widget.request.sasEmojis,
-            onDontMatch: () => widget.request.rejectSas(),
-            onMatch: () => widget.request.acceptSas(),
+            onDontMatch: widget.request.rejectSas,
+            onMatch: widget.request.acceptSas,
           );
         } else {
-          title = Text(L10n.of(context)!.compareNumbersMatch);
+          title = Text(l10n.compareNumbersMatch);
           final numbers = widget.request.sasNumbers;
           final numbstr = '${numbers[0]}-${numbers[1]}-${numbers[2]}';
           body = Column(
@@ -254,15 +254,15 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           );
           buttons.add(
             TwakeTextButton(
-              onTap: () => widget.request.rejectSas(),
-              message: L10n.of(context)!.theyDontMatch,
+              onTap: widget.request.rejectSas,
+              message: l10n.theyDontMatch,
               borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
+              styleMessage: theme.textTheme.labelLarge?.copyWith(
+                color: theme.colorScheme.primary,
               ),
               margin: KeyVerificationStyles.marginButtonWarningBanner,
               buttonDecoration: BoxDecoration(
-                color: LinagoraSysColors.material().onPrimary,
+                color: linagoraSysColors.onPrimary,
                 borderRadius: const BorderRadius.all(Radius.circular(100)),
               ),
               constraints: BoxConstraints(
@@ -272,15 +272,15 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
           );
           buttons.add(
             TwakeTextButton(
-              onTap: () => widget.request.acceptSas(),
-              message: L10n.of(context)!.theyMatch,
+              onTap: widget.request.acceptSas,
+              message: l10n.theyMatch,
               borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: LinagoraSysColors.material().onPrimary,
+              styleMessage: theme.textTheme.labelLarge?.copyWith(
+                color: linagoraSysColors.onPrimary,
               ),
               margin: KeyVerificationStyles.marginButtonWarningBanner,
               buttonDecoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
+                color: theme.colorScheme.primary,
                 borderRadius: BorderRadius.circular(100),
               ),
               constraints: BoxConstraints(
@@ -292,8 +292,8 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         break;
       case KeyVerificationState.waitingSas:
         final acceptText = widget.request.sasTypes.contains('emoji')
-            ? L10n.of(context)!.waitingPartnerEmoji
-            : L10n.of(context)!.waitingPartnerNumbers;
+            ? l10n.waitingPartnerEmoji
+            : l10n.waitingPartnerNumbers;
         body = Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[

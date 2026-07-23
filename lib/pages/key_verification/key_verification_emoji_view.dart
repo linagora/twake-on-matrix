@@ -34,14 +34,22 @@ class KeyVerificationEmojiView extends StatelessWidget {
             for (final emoji in emojis)
               SizedBox(
                 width: KeyVerificationSasStyle.emojiTileSize,
-                height: KeyVerificationSasStyle.emojiTileSize,
-                child: Center(
-                  child: Text(
-                    emoji.emoji,
-                    style: const TextStyle(
-                      fontSize: KeyVerificationSasStyle.emojiFontSize,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      emoji.emoji,
+                      style: const TextStyle(
+                        fontSize: KeyVerificationSasStyle.emojiFontSize,
+                      ),
                     ),
-                  ),
+                    Text(
+                      emoji.name,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: KeyVerificationSasStyle.emojiLabelStyle(context),
+                    ),
+                  ],
                 ),
               ),
           ],

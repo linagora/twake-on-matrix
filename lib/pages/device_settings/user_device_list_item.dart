@@ -88,7 +88,7 @@ class UserDeviceListItem extends StatelessWidget {
     final keys =
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;
-    final verified = isOwnDevice || keys == null || keys.verified;
+    final verified = isOwnDevice || keys?.verified == true;
 
     return GestureDetector(
       onTap: () => _openActionSheet(context, keys, isOwnDevice),

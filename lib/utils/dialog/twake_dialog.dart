@@ -7,7 +7,6 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -223,24 +222,6 @@ class TwakeDialog {
       builder: (context) => builder(),
       barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
-      useRootNavigator: false,
-    );
-  }
-
-  static Future<bool?> showCupertinoDialogFullScreen({
-    required Widget Function() builder,
-  }) {
-    final twakeContext = TwakeApp.routerKey.currentContext;
-    if (twakeContext == null) {
-      Logs().e(
-        'TwakeLoadingDialog()::showCupertinoDialogFullScreen - Twake context is null',
-      );
-      return Future.value(null);
-    }
-    return showCupertinoDialog(
-      context: twakeContext,
-      builder: (context) => builder(),
-      barrierDismissible: true,
       useRootNavigator: false,
     );
   }

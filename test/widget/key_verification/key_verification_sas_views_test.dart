@@ -24,9 +24,14 @@ Widget _wrap(Widget child) {
 }
 
 void main() {
-  testWidgets('KeyVerificationWaitingView renders check-other-device content', (
-    tester,
-  ) async {
+  group('KeyVerificationWaitingView', _waitingViewTests);
+  group('KeyVerificationEmojiView', _emojiViewTests);
+  group('KeyVerificationSuccessView', _successViewTests);
+  group('KeyVerificationErrorView', _errorViewTests);
+}
+
+void _waitingViewTests() {
+  testWidgets('renders check-other-device content', (tester) async {
     await tester.pumpWidget(_wrap(const KeyVerificationWaitingView()));
     await tester.pump();
 
@@ -38,10 +43,10 @@ void main() {
     // LinagoraSysColors.outlineVariant, not the app's accent color.
     expect(spinner.color, const Color(0xFFCAC4D0));
   });
+}
 
-  testWidgets('KeyVerificationEmojiView renders emoji and buttons', (
-    tester,
-  ) async {
+void _emojiViewTests() {
+  testWidgets('renders emoji and buttons', (tester) async {
     var dontMatchTapped = false;
     var matchTapped = false;
 
@@ -70,10 +75,10 @@ void main() {
     expect(dontMatchTapped, isTrue);
     expect(matchTapped, isTrue);
   });
+}
 
-  testWidgets('KeyVerificationSuccessView renders device-verified content', (
-    tester,
-  ) async {
+void _successViewTests() {
+  testWidgets('renders device-verified content', (tester) async {
     var startChattingTapped = false;
 
     await tester.pumpWidget(
@@ -96,10 +101,10 @@ void main() {
     await tester.tap(find.text('Start chatting'));
     expect(startChattingTapped, isTrue);
   });
+}
 
-  testWidgets('KeyVerificationErrorView renders failure content and closes', (
-    tester,
-  ) async {
+void _errorViewTests() {
+  testWidgets('renders failure content and closes', (tester) async {
     var closeTapped = false;
 
     await tester.pumpWidget(

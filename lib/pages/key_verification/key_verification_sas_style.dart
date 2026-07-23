@@ -22,6 +22,7 @@ class KeyVerificationSasStyle {
   static const double emojiTileSize = 50;
   static const double emojiFontSize = 32;
   static const double emojiRadius = 13.009;
+  static const double emojiLabelFontSize = 11;
 
   static const Color titleColor = Color(0xFF1C1B1F);
   static const Color supportingColor = Color(0xFF5C6268);
@@ -52,4 +53,9 @@ class KeyVerificationSasStyle {
       LinagoraTextTheme.material().labelSmall!.copyWith(
         color: LinagoraSysColors.material().onSurface,
       );
+
+  static TextStyle? emojiLabelStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .labelSmall
+      ?.copyWith(color: supportingColor, fontSize: emojiLabelFontSize);
 }
