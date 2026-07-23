@@ -99,7 +99,7 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                       itemBuilder: (BuildContext context, int i) =>
                           SwitchListTile(
                             value: !deviceKeys[i].blocked,
-                            activeColor: deviceKeys[i].encryptToDevice
+                            activeColor: deviceKeys[i].verified
                                 ? Colors.green
                                 : Colors.orange,
                             onChanged: (_) =>
@@ -107,12 +107,12 @@ class ChatEncryptionSettingsView extends StatelessWidget {
                             title: Row(
                               children: [
                                 Icon(
-                                  deviceKeys[i].encryptToDevice
+                                  deviceKeys[i].verified
                                       ? Icons.verified_outlined
                                       : deviceKeys[i].blocked
                                       ? Icons.block_outlined
                                       : Icons.info_outlined,
-                                  color: deviceKeys[i].encryptToDevice
+                                  color: deviceKeys[i].verified
                                       ? Colors.green
                                       : deviceKeys[i].blocked
                                       ? Colors.red
