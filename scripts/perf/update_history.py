@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import statistics
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -14,6 +15,7 @@ from typing import Any
 
 
 SCHEMA_VERSION = 1
+DEFAULT_DASHBOARD_URL = "https://linagora.github.io/twake-on-matrix/performance/"
 HEADLINE_METRICS = (
     "rss_bytes",
     "build_p95_us",
@@ -338,7 +340,7 @@ def _regressions(data_directory: Path, index: dict, current: dict) -> list[dict]
 
 def write_summary(path: Path, data_directory: Path, index: dict, record: dict) -> None:
     findings = _regressions(data_directory, index, record)
-    dashboard_url = "https://linagora.github.io/twake-on-matrix/performance/"
+    dashboard_url = os.environ.get("PERF_DASHBOARD_URL", DEFAULT_DASHBOARD_URL)
     lines = [
         "## FTL performance history",
         "",

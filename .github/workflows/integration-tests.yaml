@@ -14,7 +14,7 @@ on:
         required: false
         default: "false"
       publish_perf_history:
-        description: "Publish this performance run to the canonical GitHub Pages history. Only honored on main."
+        description: "Publish this performance run to Pages. Main uses the canonical history; feat/ftl-performance-pages uses an isolated preview."
         required: false
         type: boolean
         default: false
@@ -495,9 +495,12 @@ jobs:
     name: Publish Perf History
     if: >-
       ${{
-        github.ref == 'refs/heads/main' &&
-        (github.event_name == 'schedule' ||
-          (github.event_name == 'workflow_dispatch' && inputs.publish_perf_history == true))
+        (github.ref == 'refs/heads/main' &&
+          (github.event_name == 'schedule' ||
+            (github.event_name == 'workflow_dispatch' && inputs.publish_perf_history == true))) ||
+        (github.ref == 'refs/heads/feat/ftl-performance-pages' &&
+          github.event_name == 'workflow_dispatch' &&
+          inputs.publish_perf_history == true)
       }}
     needs: perf_median
     runs-on: ubuntu-latest
@@ -526,13 +529,27 @@ jobs:
           ref: gh-pages
           path: existing-pages
 
+      - name: Configure publication destination
+        id: publication
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            echo "directory=performance" >> "$GITHUB_OUTPUT"
+            echo "url=https://linagora.github.io/twake-on-matrix/performance/" >> "$GITHUB_OUTPUT"
+          else
+            echo "directory=performance-previews/feat-ftl-performance-pages" >> "$GITHUB_OUTPUT"
+            echo "url=https://linagora.github.io/twake-on-matrix/performance-previews/feat-ftl-performance-pages/" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build performance dashboard publication
+        env:
+          PERF_DASHBOARD_URL: ${{ steps.publication.outputs.url }}
+          PERF_HISTORY_DIRECTORY: existing-pages/${{ steps.publication.outputs.directory }}/data
         run: |
           set -euo pipefail
           mkdir -p performance-site/data
 
-          if [ -d existing-pages/performance/data ]; then
-            cp -R existing-pages/performance/data/. performance-site/data/
+          if [ -d "$PERF_HISTORY_DIRECTORY" ]; then
+            cp -R "$PERF_HISTORY_DIRECTORY"/. performance-site/data/
           fi
           cp -R scripts/perf/dashboard/. performance-site/
 
@@ -553,7 +570,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: performance-site
-          destination_dir: performance
+          destination_dir: ${{ steps.publication.outputs.directory }}
           commit_message: "Publish FTL performance history for ${{ github.sha }}"
 
       - name: Summarize published performance point

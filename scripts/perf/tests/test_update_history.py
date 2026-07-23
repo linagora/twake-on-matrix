@@ -1,7 +1,9 @@
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts.perf.update_history import (
     HistoryError,
@@ -175,12 +177,15 @@ class UpdateHistoryTest(unittest.TestCase):
             regressed["memory"]["checkpoints"][0]["rss_bytes"] = 125.0
             index = update_history(data_directory, regressed)
             summary_path = data_directory / "summary.md"
-            write_summary(summary_path, data_directory, index, regressed)
+            preview_url = "https://example.test/performance-preview/"
+            with patch.dict(os.environ, {"PERF_DASHBOARD_URL": preview_url}):
+                write_summary(summary_path, data_directory, index, regressed)
 
             summary = summary_path.read_text()
             self.assertIn("critical", summary)
             self.assertIn("+25.0%", summary)
             self.assertIn("Download the consolidated JSON artifact", summary)
+            self.assertIn(preview_url, summary)
 
 
 if __name__ == "__main__":
