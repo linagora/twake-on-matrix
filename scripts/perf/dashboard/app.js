@@ -1,6 +1,15 @@
 (() => {
   "use strict";
 
+  const {
+    MIN_FRAME_SAMPLE,
+    ROOM_ENTRY_SUMMARY,
+    checkpointForSelection,
+    hasEnoughFrames,
+    isProfileRecord,
+    median,
+  } = globalThis.PerfMetrics;
+
   const SCENARIO_LABELS = {
     nav_cycles: "Ouverture répétée d’une conversation",
     scroll_room1: "Scroll d’une conversation riche en images · salle 1",
@@ -30,18 +39,15 @@
       valueElement: "value-rss",
       metaElement: "meta-rss",
     },
-    fps_estimate: {
-      label: "FPS estimés",
+    fps: {
+      label: "FPS mesurés",
       source: "physical",
       color: "#65d9d2",
       lowerIsBetter: false,
+      continuousOnly: true,
       format: value => `${value.toFixed(1)} FPS`,
-      read: checkpointValue => {
-        const build = checkpointValue?.build_p95_us;
-        const raster = checkpointValue?.raster_p95_us;
-        const frameWork = build == null || raster == null ? null : build + raster;
-        return frameWork > 0 ? Math.min(60, 1000000 / frameWork) : null;
-      },
+      read: checkpointValue => hasEnoughFrames(checkpointValue) &&
+        checkpointValue.fps > 0 ? checkpointValue.fps : null,
       valueElement: "value-fps",
       metaElement: "meta-fps",
     },
@@ -51,7 +57,9 @@
       color: "#ffb548",
       lowerIsBetter: true,
       format: value => `${(value * 100).toFixed(1)} %`,
-      read: checkpointValue => checkpointValue?.jank_rate ?? null,
+      read: checkpointValue => hasEnoughFrames(checkpointValue)
+        ? checkpointValue.jank_rate ?? null
+        : null,
       valueElement: "value-jank",
       metaElement: "meta-jank",
     },
@@ -94,12 +102,6 @@
     next.setUTCDate(next.getUTCDate() + amount);
     return isoDay(next);
   };
-
-  function median(values) {
-    const sorted = [...values].sort((left, right) => left - right);
-    const middle = Math.floor(sorted.length / 2);
-    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
-  }
 
   function severityForDelta(delta) {
     if (delta >= 0.2) return "critical";
@@ -161,12 +163,12 @@
   }
 
   function checkpoint(record, family, scenario, label) {
-    return record?.[family]?.checkpoints.find(
-      item => item.scenario === scenario && item.label === label
-    );
+    return checkpointForSelection(record, family, scenario, label);
   }
 
   function metricValue(record, metric, scenario, label) {
+    if (!isProfileRecord(record)) return null;
+    if (metric.continuousOnly && !scenario.includes("scroll")) return null;
     return metric.read(checkpoint(record, metric.source, scenario, label));
   }
 
@@ -175,6 +177,7 @@
   }
 
   function checkpointLabel(value) {
+    if (value === ROOM_ENTRY_SUMMARY) return "Ouverture des conversations · 5 cycles";
     const cycleMatch = value.match(/^room_enter_cycle(\d+)$/);
     if (cycleMatch) return `Conversation ouverte · cycle ${cycleMatch[1]}`;
     const returnMatch = value.match(/^chat_list_after_cycle(\d+)$/);
@@ -210,12 +213,15 @@
         .filter(item => item.scenario === scenario)
         .map(item => item.label)
     ))];
+    if (scenario === "nav_cycles" && labels.some(label => /^room_enter_cycle\d+$/.test(label))) {
+      labels.unshift(ROOM_ENTRY_SUMMARY);
+    }
     const previous = elements["checkpoint-select"].value;
     elements["checkpoint-select"].replaceChildren(
       ...labels.map(value => new Option(checkpointLabel(value), value))
     );
-    const preferred = labels.includes("room_enter_cycle5")
-      ? "room_enter_cycle5"
+    const preferred = labels.includes(ROOM_ENTRY_SUMMARY)
+      ? ROOM_ENTRY_SUMMARY
       : labels.at(-1);
     elements["checkpoint-select"].value = labels.includes(previous)
       ? previous
@@ -346,21 +352,59 @@
     return "Référence en construction";
   }
 
+  function frameSampleCopy(checkpointValue, metricKey, marker, scenario) {
+    if (metricKey === "fps" && !scenario.includes("scroll")) {
+      return "Non applicable sur une transition · choisissez un scénario de scroll";
+    }
+    const frameCount = checkpointValue?.frame_count ?? 0;
+    if (frameCount < MIN_FRAME_SAMPLE) {
+      return `${frameCount} frames · minimum ${MIN_FRAME_SAMPLE} · données insuffisantes`;
+    }
+    if (metricKey === "fps" && !(checkpointValue?.fps > 0)) {
+      return `${frameCount} frames · FPS disponibles dès le prochain run profile`;
+    }
+    return `${frameCount} frames analysées · ${severityCopy(marker)}`;
+  }
+
   function updateMetricCards(latest, scenario, label, latestMarkers) {
     Object.entries(METRICS).forEach(([metricKey, metric]) => {
-      const value = metricValue(latest, metric, scenario, label);
       const valueElement = elements[metric.valueElement];
       const metaElement = elements[metric.metaElement];
       const card = valueElement.closest(".metric-card");
+      if (!isProfileRecord(latest)) {
+        card.classList.remove("warning", "critical");
+        valueElement.classList.add("insufficient");
+        valueElement.textContent = "Prochain nightly";
+        metaElement.textContent = "Ancien run debug ignoré · APK profile requis";
+        return;
+      }
+      const value = metricValue(latest, metric, scenario, label);
       const marker = latestMarkers[metricKey];
       card.classList.remove("warning", "critical");
       if (["warning", "critical"].includes(marker?.severity)) {
         card.classList.add(marker.severity);
       }
-      valueElement.textContent = value == null ? "Non mesuré" : metric.format(value);
       const physicalCheckpoint = checkpoint(latest, "physical", scenario, label);
-      if (metricKey === "fps_estimate" && physicalCheckpoint?.frame_count != null) {
-        metaElement.textContent = `${physicalCheckpoint.frame_count} frames analysées · ${severityCopy(marker)}`;
+      const isFrameMetric = metricKey === "fps" || metricKey === "jank_rate";
+      const isInapplicable = metricKey === "fps" && !scenario.includes("scroll");
+      const awaitsProfileRun = metricKey === "fps" &&
+        hasEnoughFrames(physicalCheckpoint) &&
+        value == null;
+      valueElement.classList.toggle("insufficient", value == null && isFrameMetric);
+      valueElement.textContent = isInapplicable
+        ? "Non applicable"
+        : awaitsProfileRun ? "Prochain nightly"
+        : value == null && isFrameMetric ? "Données insuffisantes"
+        : value == null ? "Non mesuré" : metric.format(value);
+      if (isFrameMetric) {
+        metaElement.textContent = frameSampleCopy(
+          physicalCheckpoint,
+          metricKey,
+          marker,
+          scenario
+        );
+      } else if (label === ROOM_ENTRY_SUMMARY && metricKey === "transition_ms") {
+        metaElement.textContent = `Médiane de ${physicalCheckpoint?.cycle_count || 0} ouvertures · ${severityCopy(marker)}`;
       } else {
         metaElement.textContent = severityCopy(marker);
       }
@@ -375,9 +419,16 @@
   }
 
   function updateVerdict(latest, latestMarkers) {
-    const worst = worstMarker(latestMarkers);
     const verdict = elements.verdict;
     verdict.classList.remove("stable", "critical");
+    elements["latest-date"].textContent = latest.date;
+    elements["latest-sha"].innerHTML = `<a href="${latest.commit.url}">${latest.commit.sha.slice(0, 9)} ↗</a>`;
+    if (!isProfileRecord(latest)) {
+      elements["overall-status"].textContent = "Mesure profile en attente";
+      elements["overall-detail"].textContent = "Le point existant vient d’un APK debug et reste volontairement exclu des comparaisons.";
+      return;
+    }
+    const worst = worstMarker(latestMarkers);
     if (worst?.severity === "critical") {
       verdict.classList.add("critical");
       elements["overall-status"].textContent = "Dégradation détectée";
@@ -393,8 +444,26 @@
       elements["overall-status"].textContent = "Historique en construction";
       elements["overall-detail"].textContent = "Sept nuits précédentes sont nécessaires avant d’émettre un diagnostic automatique.";
     }
-    elements["latest-date"].textContent = latest.date;
-    elements["latest-sha"].innerHTML = `<a href="${latest.commit.url}">${latest.commit.sha.slice(0, 9)} ↗</a>`;
+  }
+
+  function inspectionValue(record, metric, selection) {
+    if (!isProfileRecord(record)) return "Non comparable · ancien APK debug";
+    const value = metricValue(record, metric, selection.scenario, selection.label);
+    if (value != null) return metric.format(value);
+    if (metric.source !== "physical") return "Non mesuré";
+    if (selection.metricKey === "fps" && !selection.scenario.includes("scroll")) {
+      return "Non applicable sur une transition";
+    }
+    const selected = checkpoint(
+      record,
+      "physical",
+      selection.scenario,
+      selection.label
+    );
+    if (["fps", "jank_rate"].includes(selection.metricKey) && !hasEnoughFrames(selected)) {
+      return `Données insuffisantes (${selected?.frame_count || 0}/${MIN_FRAME_SAMPLE} frames)`;
+    }
+    return "Non mesuré";
   }
 
   function inspectPoint(day) {
@@ -406,9 +475,9 @@
     const compareUrl = previous
       ? `https://github.com/linagora/twake-on-matrix/compare/${previous.commit.sha}...${record.commit.sha}`
       : null;
-    const metricDetails = Object.values(METRICS).map(metric => {
-      const value = metricValue(record, metric, scenario, label);
-      return `<dl><dt>${metric.label}</dt><dd>${value == null ? "Non mesuré" : metric.format(value)}</dd></dl>`;
+    const metricDetails = Object.entries(METRICS).map(([metricKey, metric]) => {
+      const value = inspectionValue(record, metric, { scenario, label, metricKey });
+      return `<dl><dt>${metric.label}</dt><dd>${value}</dd></dl>`;
     }).join("");
     elements["inspection-title"].textContent = `${day} · ${checkpointLabel(label)}`;
     elements["inspection-values"].innerHTML = `

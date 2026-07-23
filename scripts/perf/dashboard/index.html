@@ -87,15 +87,15 @@
           <small id="meta-rss">Plus bas est préférable</small>
         </article>
 
-        <article class="metric-card metric-fps" data-metric="fps_estimate">
+        <article class="metric-card metric-fps" data-metric="fps">
           <div class="metric-heading">
             <span class="metric-icon">FPS</span>
             <span class="source-badge physical">1 téléphone physique</span>
           </div>
           <strong id="value-fps">—</strong>
-          <h2>Fluidité estimée</h2>
-          <p>Estimation issue du temps de travail Flutter au 95e percentile, plafonnée à 60 FPS.</p>
-          <small id="meta-fps">Ce n’est pas le simple nombre de frames</small>
+          <h2>Fluidité mesurée</h2>
+          <p>Frames rendues par seconde entre le premier et le dernier signal vertical observé.</p>
+          <small id="meta-fps">Minimum 30 frames · APK profile</small>
         </article>
 
         <article class="metric-card metric-jank" data-metric="jank_rate">
@@ -105,8 +105,8 @@
           </div>
           <strong id="value-jank">—</strong>
           <h2>Frames saccadées</h2>
-          <p>Part des frames dont le travail build + raster dépasse le budget de 16,7 ms.</p>
-          <small id="meta-jank">Plus proche de 0 % est préférable</small>
+          <p>Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.</p>
+          <small id="meta-jank">Minimum 30 frames · plus proche de 0 % est préférable</small>
         </article>
 
         <article class="metric-card metric-transition" data-metric="transition_ms">
@@ -185,6 +185,7 @@
     </footer>
 
     <script src="vendor/chart.umd.min.js"></script>
+    <script src="metrics.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

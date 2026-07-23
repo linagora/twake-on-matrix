@@ -22,6 +22,9 @@ def checkpoint(samples=3, value=100.0):
         "rss_bytes": value,
         "rss_bytes_stddev": 2.5,
         "rss_bytes_range": 5.0,
+        "frame_count": 40.0,
+        "frame_window_ms": 650.0,
+        "fps": 60.0,
         "build_p95_us": 2_000.0,
     }
 
@@ -51,8 +54,11 @@ class BuildDailyRecordTest(unittest.TestCase):
         self.assertEqual(daily["physical"]["aggregation"], "single_run")
         self.assertEqual(daily["memory"]["checkpoints"][0]["rss_bytes_stddev"], 2.5)
         self.assertEqual(daily["memory"]["checkpoints"][0]["rss_bytes_range"], 5.0)
+        self.assertEqual(daily["physical"]["checkpoints"][0]["fps"], 60.0)
+        self.assertEqual(daily["physical"]["checkpoints"][0]["frame_window_ms"], 650.0)
         self.assertEqual(daily["environment"]["virtual_device"]["runs"], 3)
         self.assertEqual(daily["environment"]["physical_device"]["runs"], 1)
+        self.assertEqual(daily["environment"]["build_mode"], "profile")
 
     def test_rejects_invalid_virtual_aggregation(self):
         cases = (
@@ -186,6 +192,23 @@ class UpdateHistoryTest(unittest.TestCase):
             self.assertIn("+25.0%", summary)
             self.assertIn("Download the consolidated JSON artifact", summary)
             self.assertIn(preview_url, summary)
+
+    def test_summary_excludes_incompatible_debug_baseline(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            data_directory = Path(temporary_directory)
+            for day in range(1, 8):
+                daily = record(f"2026-07-{day:02d}", f"baseline-{day}")
+                if day == 1:
+                    daily["environment"]["build_mode"] = "debug"
+                update_history(data_directory, daily)
+
+            current = record("2026-07-08", "current")
+            current["memory"]["checkpoints"][0]["rss_bytes"] = 150.0
+            index = update_history(data_directory, current)
+            summary_path = data_directory / "summary.md"
+            write_summary(summary_path, data_directory, index, current)
+
+            self.assertNotIn("### Largest visual regression markers", summary_path.read_text())
 
 
 if __name__ == "__main__":

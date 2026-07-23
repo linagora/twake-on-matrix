@@ -170,6 +170,7 @@ def build_daily_record(
         },
         "environment": {
             "flutter_version": metadata.flutter_version,
+            "build_mode": "profile",
             "virtual_device": {"model": "MediumPhone.arm", "android": 34, "runs": 3},
             "physical_device": {"model": "oriole", "android": 33, "runs": 1},
         },
@@ -326,14 +327,20 @@ def _family_regressions(
 
 
 def _regressions(data_directory: Path, index: dict, current: dict) -> list[dict]:
-    prior_entries = [item for item in index["entries"] if item["date"] < current["date"]][-7:]
-    if len(prior_entries) < 7:
-        return []
+    prior_entries = [item for item in index["entries"] if item["date"] < current["date"]]
     prior_records = [_load_json(data_directory / item["file"]) for item in prior_entries]
+    build_mode = current.get("environment", {}).get("build_mode")
+    compatible_records = [
+        record
+        for record in prior_records
+        if record.get("environment", {}).get("build_mode") == build_mode
+    ][-7:]
+    if len(compatible_records) < 7:
+        return []
     findings = [
         finding
         for family in ("memory", "physical")
-        for finding in _family_regressions(family, current, prior_records)
+        for finding in _family_regressions(family, current, compatible_records)
     ]
     return sorted(findings, key=lambda item: item["delta"], reverse=True)
 

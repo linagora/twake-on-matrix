@@ -241,6 +241,8 @@ jobs:
 
           patrol build android \
             -v \
+            --profile \
+            --no-label \
             --dart-define-from-file .env.cicd \
             --target integration_test/tests/chat/perf_test.dart
 
@@ -250,8 +252,8 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           retention-days: 1
           path: |
-            build/app/outputs/apk/debug/app-debug.apk
-            build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            build/app/outputs/apk/profile/app-profile.apk
+            build/app/outputs/apk/androidTest/profile/app-profile-androidTest.apk
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 3a – Memory metrics: 3 runs on virtual device (free tier)
@@ -301,8 +303,8 @@ jobs:
 
       # upload-artifact@v4 strips to the least common ancestor of the uploaded
       # paths (build/app/outputs/apk/), so the layout under apks/ is:
-      #   apks/debug/app-debug.apk
-      #   apks/androidTest/debug/app-debug-androidTest.apk
+      #   apks/profile/app-profile.apk
+      #   apks/androidTest/profile/app-profile-androidTest.apk
       - name: Run perf test on virtual device
         run: |
           PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
@@ -311,8 +313,8 @@ jobs:
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/debug/app-debug.apk \
-            --test apks/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/profile/app-profile.apk \
+            --test apks/androidTest/profile/app-profile-androidTest.apk \
             --device model=MediumPhone.arm,version=34 \
             --timeout 30m \
             --use-orchestrator \
@@ -392,8 +394,8 @@ jobs:
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/debug/app-debug.apk \
-            --test apks/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/profile/app-profile.apk \
+            --test apks/androidTest/profile/app-profile-androidTest.apk \
             --device model=oriole,version=33 \
             --timeout 30m \
             --use-orchestrator \

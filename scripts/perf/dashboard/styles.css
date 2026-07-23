@@ -256,6 +256,7 @@ select:focus-visible { box-shadow: 0 2px 0 var(--green); }
 
 .source-badge.physical { color: #b7c5c7; }
 .metric-card > strong { display: block; margin-top: 24px; font: 800 clamp(34px, 3.5vw, 55px)/1 var(--display); letter-spacing: -0.025em; }
+.metric-card > strong.insufficient { max-width: 12ch; font-size: clamp(24px, 2.5vw, 38px); line-height: .95; }
 .metric-card h2 { margin: 10px 0 8px; font: 700 15px var(--body); }
 .metric-card p { min-height: 54px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .metric-card small { display: block; margin-top: 18px; padding-top: 12px; color: var(--metric-color); border-top: 1px solid var(--line); font: 700 9px var(--mono); }
