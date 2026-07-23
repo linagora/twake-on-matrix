@@ -510,6 +510,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Download consolidated performance results
         uses: actions/download-artifact@v4
@@ -520,6 +522,7 @@ jobs:
       - name: Checkout existing GitHub Pages history
         uses: actions/checkout@v4
         with:
+          persist-credentials: false
           ref: gh-pages
           path: existing-pages
 
