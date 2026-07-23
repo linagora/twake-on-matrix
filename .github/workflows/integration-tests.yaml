@@ -570,6 +570,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: performance-site
+          keep_files: true
           destination_dir: ${{ steps.publication.outputs.directory }}
           commit_message: "Publish FTL performance history for ${{ github.sha }}"
 
