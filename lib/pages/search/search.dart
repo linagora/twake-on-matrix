@@ -12,6 +12,7 @@ import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/scroll_controller_extension.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -76,7 +77,11 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
           plaintextBody: true,
           removeMarkdown: true,
         )
-        .substringToHighlight(searchWord, prefixLength: _prefixLengthHighlight);
+        .substringToHighlight(
+          searchWord,
+          prefixLength: _prefixLengthHighlight,
+          searchEngine: getIt.get<SearchEngine>(),
+        );
     return '$senderName: $bodyContent';
   }
 

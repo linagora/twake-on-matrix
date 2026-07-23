@@ -6,7 +6,7 @@ import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
@@ -156,15 +156,12 @@ class FileNameText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
+    return HighlightText(
+      text: filename,
+      searchWord: highlightText,
+      style: style.textStyle(context),
+      highlightStyle: style.highlightTextStyle(context),
       maxLines: 2,
-      text: TextSpan(
-        children: filename.buildHighlightTextSpans(
-          highlightText ?? '',
-          style: style.textStyle(context),
-          highlightStyle: style.highlightTextStyle(context),
-        ),
-      ),
       overflow: TextOverflow.ellipsis,
     );
   }
