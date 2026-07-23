@@ -366,49 +366,75 @@
     return `${frameCount} frames analysées · ${severityCopy(marker)}`;
   }
 
+  function metricValueCopy(metricKey, metric, value, context) {
+    if (value != null) return metric.format(value);
+    if (metricKey === "fps" && !context.scenario.includes("scroll")) {
+      return "Non applicable";
+    }
+    if (metricKey === "fps" && hasEnoughFrames(context.physicalCheckpoint)) {
+      return "Prochain nightly";
+    }
+    if (metricKey === "fps" || metricKey === "jank_rate") {
+      return "Données insuffisantes";
+    }
+    return "Non mesuré";
+  }
+
+  function metricMetaCopy(metricKey, context, marker) {
+    if (metricKey === "fps" || metricKey === "jank_rate") {
+      return frameSampleCopy(
+        context.physicalCheckpoint,
+        metricKey,
+        marker,
+        context.scenario
+      );
+    }
+    if (context.label === ROOM_ENTRY_SUMMARY && metricKey === "transition_ms") {
+      return `Médiane de ${context.physicalCheckpoint?.cycle_count || 0} ouvertures · ${severityCopy(marker)}`;
+    }
+    return severityCopy(marker);
+  }
+
+  function renderMetricCard(metricKey, metric, context) {
+    const valueElement = elements[metric.valueElement];
+    const metaElement = elements[metric.metaElement];
+    const card = valueElement.closest(".metric-card");
+    card.classList.remove("warning", "critical");
+    if (!isProfileRecord(context.latest)) {
+      valueElement.classList.add("insufficient");
+      valueElement.textContent = "Prochain nightly";
+      metaElement.textContent = "Ancien run debug ignoré · APK profile requis";
+      return;
+    }
+
+    const marker = context.latestMarkers[metricKey];
+    const value = metricValue(
+      context.latest,
+      metric,
+      context.scenario,
+      context.label
+    );
+    if (["warning", "critical"].includes(marker?.severity)) {
+      card.classList.add(marker.severity);
+    }
+    const isMissingFrameMetric = value == null &&
+      (metricKey === "fps" || metricKey === "jank_rate");
+    valueElement.classList.toggle("insufficient", isMissingFrameMetric);
+    valueElement.textContent = metricValueCopy(metricKey, metric, value, context);
+    metaElement.textContent = metricMetaCopy(metricKey, context, marker);
+  }
+
   function updateMetricCards(latest, scenario, label, latestMarkers) {
-    Object.entries(METRICS).forEach(([metricKey, metric]) => {
-      const valueElement = elements[metric.valueElement];
-      const metaElement = elements[metric.metaElement];
-      const card = valueElement.closest(".metric-card");
-      if (!isProfileRecord(latest)) {
-        card.classList.remove("warning", "critical");
-        valueElement.classList.add("insufficient");
-        valueElement.textContent = "Prochain nightly";
-        metaElement.textContent = "Ancien run debug ignoré · APK profile requis";
-        return;
-      }
-      const value = metricValue(latest, metric, scenario, label);
-      const marker = latestMarkers[metricKey];
-      card.classList.remove("warning", "critical");
-      if (["warning", "critical"].includes(marker?.severity)) {
-        card.classList.add(marker.severity);
-      }
-      const physicalCheckpoint = checkpoint(latest, "physical", scenario, label);
-      const isFrameMetric = metricKey === "fps" || metricKey === "jank_rate";
-      const isInapplicable = metricKey === "fps" && !scenario.includes("scroll");
-      const awaitsProfileRun = metricKey === "fps" &&
-        hasEnoughFrames(physicalCheckpoint) &&
-        value == null;
-      valueElement.classList.toggle("insufficient", value == null && isFrameMetric);
-      valueElement.textContent = isInapplicable
-        ? "Non applicable"
-        : awaitsProfileRun ? "Prochain nightly"
-        : value == null && isFrameMetric ? "Données insuffisantes"
-        : value == null ? "Non mesuré" : metric.format(value);
-      if (isFrameMetric) {
-        metaElement.textContent = frameSampleCopy(
-          physicalCheckpoint,
-          metricKey,
-          marker,
-          scenario
-        );
-      } else if (label === ROOM_ENTRY_SUMMARY && metricKey === "transition_ms") {
-        metaElement.textContent = `Médiane de ${physicalCheckpoint?.cycle_count || 0} ouvertures · ${severityCopy(marker)}`;
-      } else {
-        metaElement.textContent = severityCopy(marker);
-      }
-    });
+    const context = {
+      latest,
+      scenario,
+      label,
+      latestMarkers,
+      physicalCheckpoint: checkpoint(latest, "physical", scenario, label),
+    };
+    Object.entries(METRICS).forEach(
+      ([metricKey, metric]) => renderMetricCard(metricKey, metric, context)
+    );
   }
 
   function worstMarker(markers) {

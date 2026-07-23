@@ -1,6 +1,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
+require("../dashboard/metrics.js");
+
 const {
   MIN_FRAME_SAMPLE,
   ROOM_ENTRY_SUMMARY,
@@ -8,7 +10,7 @@ const {
   hasEnoughFrames,
   isProfileRecord,
   summarizeRoomEntries,
-} = require("../dashboard/metrics.js");
+} = globalThis.PerfMetrics;
 
 function record(checkpoints) {
   return {

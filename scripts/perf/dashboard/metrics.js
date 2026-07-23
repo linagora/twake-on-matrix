@@ -1,17 +1,14 @@
-(function exposePerfMetrics(root, factory) {
-  const metrics = factory();
-  if (typeof module === "object" && module.exports) {
-    module.exports = metrics;
-  } else {
-    root.PerfMetrics = metrics;
-  }
-})(typeof globalThis === "undefined" ? this : globalThis, () => {
+globalThis.PerfMetrics = (() => {
   "use strict";
 
   const MIN_FRAME_SAMPLE = 30;
   const ROOM_ENTRY_SUMMARY = "room_enter_all";
 
-  const isNumber = value => typeof value === "number" && Number.isFinite(value);
+  const isNumber = value => Number.isFinite(value);
+  const sum = (values, key) => values.reduce(
+    (total, value) => total + (value[key] || 0),
+    0
+  );
 
   function median(values) {
     if (!values.length) return null;
@@ -41,10 +38,7 @@
       (total, checkpoint) => total + checkpoint.frame_count - 1,
       0
     );
-    const windowMs = timed.reduce(
-      (total, checkpoint) => total + checkpoint.frame_window_ms,
-      0
-    );
+    const windowMs = sum(timed, "frame_window_ms");
     return windowMs > 0 ? intervals * 1000 / windowMs : null;
   }
 
@@ -52,14 +46,8 @@
     const checkpoints = roomEntryCheckpoints(record, family, scenario);
     if (!checkpoints.length) return null;
     const last = checkpoints.at(-1);
-    const frameCount = checkpoints.reduce(
-      (total, checkpoint) => total + (checkpoint.frame_count || 0),
-      0
-    );
-    const jankCounts = checkpoints.map(checkpoint => checkpoint.jank_count);
-    const jankCount = jankCounts.every(isNumber)
-      ? jankCounts.reduce((total, value) => total + value, 0)
-      : null;
+    const frameCount = sum(checkpoints, "frame_count");
+    const jankCount = sum(checkpoints, "jank_count");
     const transitions = checkpoints
       .map(checkpoint => checkpoint.transition_ms)
       .filter(isNumber);
@@ -68,13 +56,10 @@
       label: ROOM_ENTRY_SUMMARY,
       cycle_count: checkpoints.length,
       frame_count: frameCount,
-      frame_window_ms: checkpoints.reduce(
-        (total, checkpoint) => total + (checkpoint.frame_window_ms || 0),
-        0
-      ),
+      frame_window_ms: sum(checkpoints, "frame_window_ms"),
       fps: combinedFps(checkpoints),
       jank_count: jankCount,
-      jank_rate: jankCount == null || frameCount <= 0 ? null : jankCount / frameCount,
+      jank_rate: frameCount > 0 ? jankCount / frameCount : null,
       transition_ms: median(transitions),
     };
   }
@@ -85,12 +70,11 @@
     }
     return record?.[family]?.checkpoints.find(
       checkpoint => checkpoint.scenario === scenario && checkpoint.label === label
-    ) || null;
+    ) ?? null;
   }
 
   function hasEnoughFrames(checkpoint) {
-    return isNumber(checkpoint?.frame_count) &&
-      checkpoint.frame_count >= MIN_FRAME_SAMPLE;
+    return Number(checkpoint?.frame_count || 0) >= MIN_FRAME_SAMPLE;
   }
 
   function isProfileRecord(record) {
@@ -106,4 +90,4 @@
     median,
     summarizeRoomEntries,
   };
-});
+})();
