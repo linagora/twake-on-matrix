@@ -110,22 +110,38 @@ def _validate_checkpoints(value: Any, source: str, minimum_samples: int) -> list
     ]
 
 
-def _validate_metadata(metadata: RecordMetadata) -> None:
+def _validate_day(day: str) -> None:
     try:
-        date.fromisoformat(metadata.day)
+        date.fromisoformat(day)
     except ValueError as error:
-        raise HistoryError(f"Invalid UTC date: {metadata.day}") from error
+        raise HistoryError(f"Invalid UTC date: {day}") from error
+
+
+def _validate_timestamp(generated_at: str) -> None:
     try:
-        datetime.fromisoformat(metadata.generated_at.replace("Z", "+00:00"))
+        datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
     except ValueError as error:
         raise HistoryError(
-            f"Invalid generated_at timestamp: {metadata.generated_at}"
+            f"Invalid generated_at timestamp: {generated_at}"
         ) from error
-    if not metadata.repository or "/" not in metadata.repository:
+
+
+def _validate_repository(repository: str) -> None:
+    if not repository or "/" not in repository:
         raise HistoryError("repository must use the owner/name form")
+
+
+def _validate_required_metadata(metadata: RecordMetadata) -> None:
     required = (metadata.sha, metadata.run_id, metadata.flutter_version)
     if not all(required):
         raise HistoryError("sha, run_id and flutter_version are required")
+
+
+def _validate_metadata(metadata: RecordMetadata) -> None:
+    _validate_day(metadata.day)
+    _validate_timestamp(metadata.generated_at)
+    _validate_repository(metadata.repository)
+    _validate_required_metadata(metadata)
 
 
 def build_daily_record(
@@ -176,10 +192,7 @@ def _validate_index_entry(entry: Any, path: Path) -> None:
         raise HistoryError(f"Unsafe history index file in {path}")
 
 
-def _load_index(path: Path) -> dict:
-    if not path.exists():
-        return _empty_index()
-    index = _load_json(path)
+def _validate_index(index: Any, path: Path) -> dict:
     if not isinstance(index, dict):
         raise HistoryError(f"Unsupported history index schema in {path}")
     if index.get("schema_version") != SCHEMA_VERSION:
@@ -189,6 +202,12 @@ def _load_index(path: Path) -> dict:
     for entry in index["entries"]:
         _validate_index_entry(entry, path)
     return index
+
+
+def _load_index(path: Path) -> dict:
+    if not path.exists():
+        return _empty_index()
+    return _validate_index(_load_json(path), path)
 
 
 def _validate_persisted_record(path: Path, expected_day: str) -> None:
