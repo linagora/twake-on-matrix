@@ -121,6 +121,7 @@ class MatrixState extends ConsumerState<Matrix>
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
+  // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
   HomeserverSummary? get loginHomeserverSummary =>
       ref.read(loginHomeserverSummaryProvider);
 
