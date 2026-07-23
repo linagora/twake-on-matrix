@@ -7,6 +7,7 @@ import argparse
 import json
 import math
 import statistics
+from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,18 @@ class HistoryError(ValueError):
     """Raised when inputs or the persisted history are unsafe to publish."""
 
 
+@dataclass(frozen=True)
+class RecordMetadata:
+    """Metadata shared by every measurement in a daily record."""
+
+    day: str
+    generated_at: str
+    repository: str
+    sha: str
+    run_id: str
+    flutter_version: str
+
+
 def _load_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -33,88 +46,112 @@ def _load_json(path: Path) -> Any:
         raise HistoryError(f"Cannot read valid JSON from {path}: {error}") from error
 
 
+def _is_finite_number(value: Any) -> bool:
+    if isinstance(value, bool):
+        return False
+    if not isinstance(value, (int, float)):
+        return False
+    return math.isfinite(value)
+
+
+def _checkpoint_location(source: str, position: int) -> str:
+    return f"{source}[{position}]"
+
+
+def _validate_checkpoint_identity(checkpoint: dict, location: str) -> None:
+    for key in ("scenario", "label"):
+        if not isinstance(checkpoint.get(key), str) or not checkpoint[key]:
+            raise HistoryError(f"{location}.{key} must be a non-empty string")
+
+
+def _validate_sample_count(checkpoint: dict, location: str, minimum_samples: int) -> None:
+    sample_count = checkpoint.get("sample_count")
+    if not _is_finite_number(sample_count):
+        raise HistoryError(f"{location}.sample_count must be a finite number")
+    if sample_count < minimum_samples:
+        raise HistoryError(
+            f"{location} has {sample_count} sample(s); at least {minimum_samples} required"
+        )
+
+
+def _validate_metrics(checkpoint: dict, location: str) -> None:
+    for key, metric in checkpoint.items():
+        if key in {"scenario", "label"}:
+            continue
+        if not _is_finite_number(metric):
+            raise HistoryError(f"{location}.{key} must be a finite number")
+
+
+def _validate_checkpoint(
+    checkpoint: Any,
+    *,
+    location: str,
+    minimum_samples: int,
+) -> dict:
+    if not isinstance(checkpoint, dict):
+        raise HistoryError(f"{location} must be an object")
+    _validate_checkpoint_identity(checkpoint, location)
+    _validate_sample_count(checkpoint, location, minimum_samples)
+    _validate_metrics(checkpoint, location)
+    return checkpoint
+
+
 def _validate_checkpoints(value: Any, source: str, minimum_samples: int) -> list[dict]:
     if not isinstance(value, list) or not value:
         raise HistoryError(f"{source} must contain a non-empty checkpoint list")
 
-    validated: list[dict] = []
-    for position, checkpoint in enumerate(value):
-        if not isinstance(checkpoint, dict):
-            raise HistoryError(f"{source}[{position}] must be an object")
-        for key in ("scenario", "label", "sample_count"):
-            if key not in checkpoint:
-                raise HistoryError(f"{source}[{position}] is missing {key}")
-        if not isinstance(checkpoint["scenario"], str) or not checkpoint["scenario"]:
-            raise HistoryError(f"{source}[{position}].scenario must be a non-empty string")
-        if not isinstance(checkpoint["label"], str) or not checkpoint["label"]:
-            raise HistoryError(f"{source}[{position}].label must be a non-empty string")
-        sample_count = checkpoint["sample_count"]
-        if (
-            isinstance(sample_count, bool)
-            or not isinstance(sample_count, (int, float))
-            or not math.isfinite(sample_count)
-        ):
-            raise HistoryError(f"{source}[{position}].sample_count must be a finite number")
-        if sample_count < minimum_samples:
-            raise HistoryError(
-                f"{source}[{position}] has {sample_count} sample(s); "
-                f"at least {minimum_samples} required"
-            )
-        for key, metric in checkpoint.items():
-            if key in {"scenario", "label"}:
-                continue
-            if (
-                isinstance(metric, bool)
-                or not isinstance(metric, (int, float))
-                or not math.isfinite(metric)
-            ):
-                raise HistoryError(f"{source}[{position}].{key} must be a finite number")
-        validated.append(checkpoint)
-    return validated
+    return [
+        _validate_checkpoint(
+            checkpoint,
+            location=_checkpoint_location(source, position),
+            minimum_samples=minimum_samples,
+        )
+        for position, checkpoint in enumerate(value)
+    ]
+
+
+def _validate_metadata(metadata: RecordMetadata) -> None:
+    try:
+        date.fromisoformat(metadata.day)
+    except ValueError as error:
+        raise HistoryError(f"Invalid UTC date: {metadata.day}") from error
+    try:
+        datetime.fromisoformat(metadata.generated_at.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise HistoryError(
+            f"Invalid generated_at timestamp: {metadata.generated_at}"
+        ) from error
+    if not metadata.repository or "/" not in metadata.repository:
+        raise HistoryError("repository must use the owner/name form")
+    required = (metadata.sha, metadata.run_id, metadata.flutter_version)
+    if not all(required):
+        raise HistoryError("sha, run_id and flutter_version are required")
 
 
 def build_daily_record(
     memory: Any,
     physical: Any,
-    *,
-    day: str,
-    generated_at: str,
-    repository: str,
-    sha: str,
-    run_id: str,
-    flutter_version: str,
+    metadata: RecordMetadata,
 ) -> dict:
-    try:
-        date.fromisoformat(day)
-    except ValueError as error:
-        raise HistoryError(f"Invalid UTC date: {day}") from error
-    if not repository or "/" not in repository:
-        raise HistoryError("repository must use the owner/name form")
-    try:
-        datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
-    except ValueError as error:
-        raise HistoryError(f"Invalid generated_at timestamp: {generated_at}") from error
-    if not sha or not run_id or not flutter_version:
-        raise HistoryError("sha, run_id and flutter_version are required")
-
+    _validate_metadata(metadata)
     memory_checkpoints = _validate_checkpoints(memory, "memory", minimum_samples=3)
     physical_checkpoints = _validate_checkpoints(physical, "physical", minimum_samples=1)
-    repository_url = f"https://github.com/{repository}"
+    repository_url = f"https://github.com/{metadata.repository}"
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "date": day,
-        "generated_at": generated_at,
+        "date": metadata.day,
+        "generated_at": metadata.generated_at,
         "commit": {
-            "sha": sha,
-            "url": f"{repository_url}/commit/{sha}",
+            "sha": metadata.sha,
+            "url": f"{repository_url}/commit/{metadata.sha}",
         },
         "run": {
-            "id": str(run_id),
-            "url": f"{repository_url}/actions/runs/{run_id}",
+            "id": str(metadata.run_id),
+            "url": f"{repository_url}/actions/runs/{metadata.run_id}",
         },
         "environment": {
-            "flutter_version": flutter_version,
+            "flutter_version": metadata.flutter_version,
             "virtual_device": {"model": "MediumPhone.arm", "android": 34, "runs": 3},
             "physical_device": {"model": "oriole", "android": 33, "runs": 1},
         },
@@ -127,24 +164,41 @@ def _empty_index() -> dict:
     return {"schema_version": SCHEMA_VERSION, "updated_at": None, "entries": []}
 
 
+def _validate_index_entry(entry: Any, path: Path) -> None:
+    required_keys = {"date", "file", "sha", "run_id"}
+    if not isinstance(entry, dict) or not required_keys <= entry.keys():
+        raise HistoryError(f"Malformed history index entry in {path}")
+    try:
+        date.fromisoformat(entry["date"])
+    except (TypeError, ValueError) as error:
+        raise HistoryError(f"Malformed history index date in {path}") from error
+    if entry["file"] != f"{entry['date']}.json":
+        raise HistoryError(f"Unsafe history index file in {path}")
+
+
 def _load_index(path: Path) -> dict:
     if not path.exists():
         return _empty_index()
     index = _load_json(path)
-    if not isinstance(index, dict) or index.get("schema_version") != SCHEMA_VERSION:
+    if not isinstance(index, dict):
+        raise HistoryError(f"Unsupported history index schema in {path}")
+    if index.get("schema_version") != SCHEMA_VERSION:
         raise HistoryError(f"Unsupported history index schema in {path}")
     if not isinstance(index.get("entries"), list):
         raise HistoryError(f"History index entries must be a list in {path}")
     for entry in index["entries"]:
-        if not isinstance(entry, dict) or not {"date", "file", "sha", "run_id"} <= entry.keys():
-            raise HistoryError(f"Malformed history index entry in {path}")
-        try:
-            date.fromisoformat(entry["date"])
-        except (TypeError, ValueError) as error:
-            raise HistoryError(f"Malformed history index date in {path}") from error
-        if entry["file"] != f"{entry['date']}.json":
-            raise HistoryError(f"Unsafe history index file in {path}")
+        _validate_index_entry(entry, path)
     return index
+
+
+def _validate_persisted_record(path: Path, expected_day: str) -> None:
+    persisted = _load_json(path)
+    if not isinstance(persisted, dict):
+        raise HistoryError(f"Malformed daily history record in {path}")
+    expected_values = (SCHEMA_VERSION, expected_day)
+    actual_values = (persisted.get("schema_version"), persisted.get("date"))
+    if actual_values != expected_values:
+        raise HistoryError(f"Malformed daily history record in {path}")
 
 
 def update_history(data_directory: Path, record: dict) -> dict:
@@ -153,13 +207,7 @@ def update_history(data_directory: Path, record: dict) -> dict:
     index = _load_index(index_path)
     for entry in index["entries"]:
         persisted_path = data_directory / entry["file"]
-        persisted = _load_json(persisted_path)
-        if (
-            not isinstance(persisted, dict)
-            or persisted.get("schema_version") != SCHEMA_VERSION
-            or persisted.get("date") != entry["date"]
-        ):
-            raise HistoryError(f"Malformed daily history record in {persisted_path}")
+        _validate_persisted_record(persisted_path, entry["date"])
     day = record["date"]
     file_name = f"{day}.json"
 
@@ -187,37 +235,85 @@ def _checkpoint_map(record: dict, family: str) -> dict[tuple[str, str], dict]:
     }
 
 
+def _regression_finding(
+    selection: dict,
+    current_value: Any,
+    baseline_values: list[Any],
+) -> dict | None:
+    if current_value is None:
+        return None
+    if any(value is None for value in baseline_values):
+        return None
+    baseline = statistics.median(baseline_values)
+    if baseline <= 0:
+        return None
+    delta = (current_value - baseline) / baseline
+    if delta < 0.10:
+        return None
+    return {
+        "severity": "critical" if delta >= 0.20 else "warning",
+        **selection,
+        "delta": delta,
+    }
+
+
+def _checkpoint_regressions(
+    family: str,
+    checkpoint_key: tuple[str, str],
+    checkpoint: dict,
+    prior_maps: list[dict],
+) -> list[dict]:
+    findings = []
+    for metric in HEADLINE_METRICS:
+        baseline_values = [
+            mapping.get(checkpoint_key, {}).get(metric) for mapping in prior_maps
+        ]
+        selection = {
+            "family": family,
+            "scenario": checkpoint_key[0],
+            "label": checkpoint_key[1],
+            "metric": metric,
+        }
+        finding = _regression_finding(
+            selection,
+            checkpoint.get(metric),
+            baseline_values,
+        )
+        if finding:
+            findings.append(finding)
+    return findings
+
+
+def _family_regressions(
+    family: str,
+    current: dict,
+    prior_records: list[dict],
+) -> list[dict]:
+    current_map = _checkpoint_map(current, family)
+    prior_maps = [_checkpoint_map(record, family) for record in prior_records]
+    findings = []
+    for checkpoint_key, checkpoint in current_map.items():
+        findings.extend(
+            _checkpoint_regressions(
+                family,
+                checkpoint_key,
+                checkpoint,
+                prior_maps,
+            )
+        )
+    return findings
+
+
 def _regressions(data_directory: Path, index: dict, current: dict) -> list[dict]:
     prior_entries = [item for item in index["entries"] if item["date"] < current["date"]][-7:]
     if len(prior_entries) < 7:
         return []
     prior_records = [_load_json(data_directory / item["file"]) for item in prior_entries]
-    findings: list[dict] = []
-
-    for family in ("memory", "physical"):
-        current_map = _checkpoint_map(current, family)
-        prior_maps = [_checkpoint_map(record, family) for record in prior_records]
-        for checkpoint_key, checkpoint in current_map.items():
-            for metric in HEADLINE_METRICS:
-                current_value = checkpoint.get(metric)
-                baseline_values = [mapping.get(checkpoint_key, {}).get(metric) for mapping in prior_maps]
-                if current_value is None or any(value is None for value in baseline_values):
-                    continue
-                baseline = statistics.median(baseline_values)
-                if baseline <= 0:
-                    continue
-                delta = (current_value - baseline) / baseline
-                if delta >= 0.10:
-                    findings.append(
-                        {
-                            "severity": "critical" if delta >= 0.20 else "warning",
-                            "family": family,
-                            "scenario": checkpoint_key[0],
-                            "label": checkpoint_key[1],
-                            "metric": metric,
-                            "delta": delta,
-                        }
-                    )
+    findings = [
+        finding
+        for family in ("memory", "physical")
+        for finding in _family_regressions(family, current, prior_records)
+    ]
     return sorted(findings, key=lambda item: item["delta"], reverse=True)
 
 
@@ -264,15 +360,18 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = _parse_args()
-    record = build_daily_record(
-        _load_json(args.memory),
-        _load_json(args.physical),
+    metadata = RecordMetadata(
         day=args.date,
         generated_at=args.generated_at,
         repository=args.repository,
         sha=args.sha,
         run_id=args.run_id,
         flutter_version=args.flutter_version,
+    )
+    record = build_daily_record(
+        _load_json(args.memory),
+        _load_json(args.physical),
+        metadata,
     )
     index = update_history(args.data_directory, record)
     if args.summary_file:

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from scripts.perf.update_history import (
     HistoryError,
+    RecordMetadata,
     build_daily_record,
     update_history,
     write_summary,
@@ -24,15 +25,18 @@ def checkpoint(samples=3, value=100.0):
 
 
 def record(day="2026-07-22", sha="abc123"):
-    return build_daily_record(
-        [checkpoint()],
-        [checkpoint(samples=1, value=120.0)],
+    metadata = RecordMetadata(
         day=day,
         generated_at=f"{day}T00:15:00Z",
         repository="linagora/twake-on-matrix",
         sha=sha,
         run_id="12345",
         flutter_version="3.38.9",
+    )
+    return build_daily_record(
+        [checkpoint()],
+        [checkpoint(samples=1, value=120.0)],
+        metadata,
     )
 
 
@@ -48,48 +52,34 @@ class BuildDailyRecordTest(unittest.TestCase):
         self.assertEqual(daily["environment"]["virtual_device"]["runs"], 3)
         self.assertEqual(daily["environment"]["physical_device"]["runs"], 1)
 
-    def test_rejects_partial_virtual_aggregation(self):
-        with self.assertRaisesRegex(HistoryError, "at least 3 required"):
-            build_daily_record(
-                [checkpoint(samples=2)],
-                [checkpoint(samples=1)],
-                day="2026-07-22",
-                generated_at="2026-07-22T00:15:00Z",
-                repository="linagora/twake-on-matrix",
-                sha="abc123",
-                run_id="12345",
-                flutter_version="3.38.9",
-            )
-
-    def test_rejects_invalid_metric(self):
-        invalid = checkpoint()
-        invalid["rss_bytes"] = "unknown"
-        with self.assertRaisesRegex(HistoryError, "finite number"):
-            build_daily_record(
-                [invalid],
-                [checkpoint(samples=1)],
-                day="2026-07-22",
-                generated_at="2026-07-22T00:15:00Z",
-                repository="linagora/twake-on-matrix",
-                sha="abc123",
-                run_id="12345",
-                flutter_version="3.38.9",
-            )
-
-    def test_rejects_non_numeric_sample_count(self):
-        invalid = checkpoint()
-        invalid["sample_count"] = "3"
-        with self.assertRaisesRegex(HistoryError, "sample_count must be a finite number"):
-            build_daily_record(
-                [invalid],
-                [checkpoint(samples=1)],
-                day="2026-07-22",
-                generated_at="2026-07-22T00:15:00Z",
-                repository="linagora/twake-on-matrix",
-                sha="abc123",
-                run_id="12345",
-                flutter_version="3.38.9",
-            )
+    def test_rejects_invalid_virtual_aggregation(self):
+        cases = (
+            ("partial samples", {"sample_count": 2}, "at least 3 required"),
+            ("invalid metric", {"rss_bytes": "unknown"}, "finite number"),
+            (
+                "non-numeric samples",
+                {"sample_count": "3"},
+                "sample_count must be a finite number",
+            ),
+        )
+        metadata = RecordMetadata(
+            day="2026-07-22",
+            generated_at="2026-07-22T00:15:00Z",
+            repository="linagora/twake-on-matrix",
+            sha="abc123",
+            run_id="12345",
+            flutter_version="3.38.9",
+        )
+        for name, changes, expected_error in cases:
+            with self.subTest(name=name):
+                invalid = checkpoint()
+                invalid.update(changes)
+                with self.assertRaisesRegex(HistoryError, expected_error):
+                    build_daily_record(
+                        [invalid],
+                        [checkpoint(samples=1)],
+                        metadata,
+                    )
 
 
 class UpdateHistoryTest(unittest.TestCase):

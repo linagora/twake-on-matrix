@@ -136,7 +136,8 @@
     return markers.map(marker => marker.severity === "critical" ? "#ff5d52" : marker.severity === "warning" ? "#ffb547" : normalColor);
   }
 
-  function markersFor(family, scenario, label, metric, visibleDays) {
+  function markersFor(selection, visibleDays) {
+    const { family, scenario, label, metric } = selection;
     const historyValues = state.historyRecords.map(record => checkpoint(record, family, scenario, label)?.[metric] ?? null);
     const historyMarkers = classify(historyValues);
     const markersByDay = new Map(
@@ -145,17 +146,15 @@
     return visibleDays.map(day => markersByDay.get(day) || { severity: "missing", delta: null });
   }
 
-  function renderChart(existingChart, canvasId, source, labels, values, deviations, metric, markers) {
-    if (existingChart) existingChart.destroy();
-    const normalColor = source === "memory" ? "#b7f34a" : "#70d6d2";
-    const datasets = [];
-    if (source === "memory") {
-      datasets.push(
-        { label: "Median − σ", data: values.map((value, index) => value == null ? null : Math.max(0, value - (deviations[index] || 0))), borderColor: "rgba(183,243,74,.22)", pointRadius: 0, borderDash: [4, 5], tension: 0.22, spanGaps: false },
-        { label: "Median + σ", data: values.map((value, index) => value == null ? null : value + (deviations[index] || 0)), borderColor: "rgba(183,243,74,.22)", backgroundColor: "rgba(183,243,74,.07)", fill: "-1", pointRadius: 0, borderDash: [4, 5], tension: 0.22, spanGaps: false },
-      );
-    }
-    datasets.push({
+  function variabilityDatasets(values, deviations) {
+    return [
+      { label: "Median − σ", data: values.map((value, index) => value == null ? null : Math.max(0, value - (deviations[index] || 0))), borderColor: "rgba(183,243,74,.22)", pointRadius: 0, borderDash: [4, 5], tension: 0.22, spanGaps: false },
+      { label: "Median + σ", data: values.map((value, index) => value == null ? null : value + (deviations[index] || 0)), borderColor: "rgba(183,243,74,.22)", backgroundColor: "rgba(183,243,74,.07)", fill: "-1", pointRadius: 0, borderDash: [4, 5], tension: 0.22, spanGaps: false },
+    ];
+  }
+
+  function measurementDataset(source, values, markers, normalColor) {
+    return {
       label: source === "memory" ? "Virtual median" : "Physical single run",
       data: values,
       borderColor: normalColor,
@@ -168,8 +167,26 @@
       tension: 0.22,
       spanGaps: false,
       markers,
+    };
+  }
+
+  function chartDatasets(source, values, deviations, markers) {
+    const normalColor = source === "memory" ? "#b7f34a" : "#70d6d2";
+    const measurement = measurementDataset(source, values, markers, normalColor);
+    return source === "memory"
+      ? [...variabilityDatasets(values, deviations), measurement]
+      : [measurement];
+  }
+
+  function renderChart(config) {
+    const { existingChart, canvasId, source, labels, values, deviations, metric, markers } = config;
+    existingChart?.destroy();
+    const datasets = chartDatasets(source, values, deviations, markers);
+    const chart = new Chart(document.getElementById(canvasId), {
+      type: "line",
+      data: { labels: labels.map(day => day.slice(5)), datasets },
+      options: chartOptions(metric, source),
     });
-    const chart = new Chart(document.getElementById(canvasId), { type: "line", data: { labels: labels.map(day => day.slice(5)), datasets }, options: chartOptions(metric, source) });
     chart.data.calendarDays = labels;
     chart.data.markers = markers;
     return chart;
@@ -192,24 +209,30 @@
       <dl><dt>Evidence</dt><dd><a href="${record.run.url}">Actions run ${record.run.id} ↗</a>${compareUrl ? ` · <a href="${compareUrl}">Compare ↗</a>` : ""}</dd></dl>`;
   }
 
-  function render() {
-    if (!state.records.length || !elements["scenario-select"].value || !elements["checkpoint-select"].value) return;
-    const records = state.records;
-    const days = calendarDays();
-    const byDay = new Map(records.map(record => [record.date, record]));
-    const scenario = elements["scenario-select"].value;
-    const label = elements["checkpoint-select"].value;
-    const metric = elements["metric-select"].value;
-    const memoryValues = days.map(day => checkpoint(byDay.get(day), "memory", scenario, label)?.[metric] ?? null);
-    const physicalValues = days.map(day => checkpoint(byDay.get(day), "physical", scenario, label)?.[metric] ?? null);
-    const deviations = days.map(day => checkpoint(byDay.get(day), "memory", scenario, label)?.[`${metric}_stddev`] ?? 0);
-    const memoryMarkers = markersFor("memory", scenario, label, metric, days);
-    const physicalMarkers = markersFor("physical", scenario, label, metric, days);
+  function currentSelection() {
+    return {
+      scenario: elements["scenario-select"].value,
+      label: elements["checkpoint-select"].value,
+      metric: elements["metric-select"].value,
+    };
+  }
 
-    state.memoryChart = renderChart(state.memoryChart, "memory-chart", "memory", days, memoryValues, deviations, metric, memoryMarkers);
-    state.physicalChart = renderChart(state.physicalChart, "physical-chart", "physical", days, physicalValues, [], metric, physicalMarkers);
+  function hasRenderableSelection(selection) {
+    return [state.records.length, selection.scenario, selection.label].every(Boolean);
+  }
 
-    const latest = records[records.length - 1];
+  function chartSeries(family, selection, days, recordsByDay) {
+    const { scenario, label, metric } = selection;
+    const checkpoints = days.map(day => checkpoint(recordsByDay.get(day), family, scenario, label));
+    return {
+      values: checkpoints.map(item => item?.[metric] ?? null),
+      deviations: checkpoints.map(item => item?.[`${metric}_stddev`] ?? 0),
+      markers: markersFor({ family, ...selection }, days),
+    };
+  }
+
+  function updateLatestCards(latest, selection) {
+    const { scenario, label, metric } = selection;
     const latestMemory = checkpoint(latest, "memory", scenario, label)?.[metric];
     const latestPhysical = checkpoint(latest, "physical", scenario, label)?.[metric];
     elements["latest-date"].textContent = latest.date;
@@ -218,41 +241,83 @@
     elements["latest-physical"].textContent = latestPhysical == null ? "—" : METRICS[metric].format(latestPhysical);
   }
 
-  async function load() {
-    try {
-      const indexResponse = await fetch("data/index.json", { cache: "no-store" });
-      if (!indexResponse.ok) throw new Error(`Dataset index returned HTTP ${indexResponse.status}`);
-      state.index = await indexResponse.json();
-      if (state.index.schema_version !== 1 || !Array.isArray(state.index.entries)) throw new Error("Unsupported dataset schema");
-      await loadSelectedRecords();
-      if (!state.records.length) throw new Error("The nightly dataset is empty");
-
-      elements["history-depth"].textContent = `${state.index.entries.length} nights`;
-      elements["status-light"].classList.add("ready");
-      elements["status-label"].textContent = "Dataset online";
-      elements["status-meta"].textContent = `Updated ${state.index.updated_at || state.records.at(-1).generated_at}`;
-      populateScenarios();
-    } catch (error) {
-      elements["status-light"].classList.add("error");
-      elements["status-label"].textContent = "Dataset unavailable";
-      elements["status-meta"].textContent = error.message;
-      elements["inspection-title"].textContent = "No performance history available";
-      elements["inspection-values"].innerHTML = `<p>${error.message}. The dashboard will populate after the first successful nightly publication.</p>`;
-    }
+  function replaceChart(family, series, selection, days) {
+    const stateKey = family === "memory" ? "memoryChart" : "physicalChart";
+    state[stateKey] = renderChart({
+      existingChart: state[stateKey],
+      canvasId: `${family}-chart`,
+      source: family,
+      labels: days,
+      metric: selection.metric,
+      ...series,
+    });
   }
 
-  elements["range-select"].addEventListener("change", async () => {
-    try {
-      await loadSelectedRecords();
-      populateScenarios();
-    } catch (error) {
-      elements["status-light"].classList.add("error");
-      elements["status-label"].textContent = "Dataset unavailable";
-      elements["status-meta"].textContent = error.message;
-    }
+  function render() {
+    const selection = currentSelection();
+    if (!hasRenderableSelection(selection)) return;
+    const days = calendarDays();
+    const recordsByDay = new Map(state.records.map(record => [record.date, record]));
+    const memorySeries = chartSeries("memory", selection, days, recordsByDay);
+    const physicalSeries = chartSeries("physical", selection, days, recordsByDay);
+
+    replaceChart("memory", memorySeries, selection, days);
+    replaceChart("physical", physicalSeries, selection, days);
+    updateLatestCards(state.records.at(-1), selection);
+  }
+
+  function validateIndex(index) {
+    if (index.schema_version !== 1) throw new Error("Unsupported dataset schema");
+    if (!Array.isArray(index.entries)) throw new Error("Unsupported dataset schema");
+  }
+
+  function markDatasetReady() {
+    elements["history-depth"].textContent = `${state.index.entries.length} nights`;
+    elements["status-light"].classList.add("ready");
+    elements["status-label"].textContent = "Dataset online";
+    elements["status-meta"].textContent = `Updated ${state.index.updated_at || state.records.at(-1).generated_at}`;
+  }
+
+  function showDatasetError(error) {
+    elements["status-light"].classList.add("error");
+    elements["status-label"].textContent = "Dataset unavailable";
+    elements["status-meta"].textContent = error.message;
+    elements["inspection-title"].textContent = "No performance history available";
+    elements["inspection-values"].innerHTML = `<p>${error.message}. The dashboard will populate after the first successful nightly publication.</p>`;
+  }
+
+  async function fetchIndex() {
+    const response = await fetch("data/index.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Dataset index returned HTTP ${response.status}`);
+    const index = await response.json();
+    validateIndex(index);
+    return index;
+  }
+
+  async function load() {
+    state.index = await fetchIndex();
+    await loadSelectedRecords();
+    if (!state.records.length) throw new Error("The nightly dataset is empty");
+    markDatasetReady();
+    populateScenarios();
+  }
+
+  async function reloadSelectedRange() {
+    await loadSelectedRecords();
+    populateScenarios();
+  }
+
+  function reportRangeError(error) {
+    elements["status-light"].classList.add("error");
+    elements["status-label"].textContent = "Dataset unavailable";
+    elements["status-meta"].textContent = error.message;
+  }
+
+  elements["range-select"].addEventListener("change", () => {
+    reloadSelectedRange().catch(reportRangeError);
   });
   elements["metric-select"].addEventListener("change", render);
   elements["scenario-select"].addEventListener("change", populateCheckpoints);
   elements["checkpoint-select"].addEventListener("change", render);
-  load();
+  load().catch(showDatasetError);
 })();
