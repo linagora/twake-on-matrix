@@ -515,7 +515,9 @@
   function render() {
     const scenario = elements["scenario-select"].value;
     const label = elements["checkpoint-select"].value;
-    if (!state.records.length || !scenario || !label) return;
+    if (!state.records.length) return;
+    if (!scenario) return;
+    if (!label) return;
     const days = calendarDays();
     const recordsByDay = new Map(state.records.map(record => [record.date, record]));
     const selection = { scenario, label };
