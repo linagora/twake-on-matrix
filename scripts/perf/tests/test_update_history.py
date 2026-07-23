@@ -81,6 +81,23 @@ class BuildDailyRecordTest(unittest.TestCase):
                         metadata,
                     )
 
+    def test_rejects_invalid_record_date(self):
+        metadata = RecordMetadata(
+            day="not-a-date",
+            generated_at="2026-07-22T00:15:00Z",
+            repository="linagora/twake-on-matrix",
+            sha="abc123",
+            run_id="12345",
+            flutter_version="3.38.9",
+        )
+
+        with self.assertRaisesRegex(HistoryError, "Invalid UTC date"):
+            build_daily_record(
+                [checkpoint()],
+                [checkpoint(samples=1)],
+                metadata,
+            )
+
 
 class UpdateHistoryTest(unittest.TestCase):
     def test_adds_points_in_chronological_order(self):
