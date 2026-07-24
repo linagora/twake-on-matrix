@@ -258,11 +258,11 @@ def _validate_index_entry(entry: Any, path: Path) -> None:
 
 
 def _validate_index(index: Any, path: Path) -> dict:
-    if (
-        not isinstance(index, dict)
-        or index.get("schema_version") != SCHEMA_VERSION
-        or not isinstance(index.get("entries"), list)
-    ):
+    if not isinstance(index, dict):
+        raise WebHistoryError(f"Unsupported history index schema in {path}")
+    if index.get("schema_version") != SCHEMA_VERSION:
+        raise WebHistoryError(f"Unsupported history index schema in {path}")
+    if not isinstance(index.get("entries"), list):
         raise WebHistoryError(f"Unsupported history index schema in {path}")
     for entry in index["entries"]:
         _validate_index_entry(entry, path)
@@ -275,18 +275,29 @@ def _load_index(path: Path) -> dict:
     return _validate_index(_load_json(path), path)
 
 
+def _validate_persisted_record(
+    data_directory: Path,
+    entry: dict,
+) -> None:
+    persisted = _load_json(data_directory / entry["file"])
+    if not isinstance(persisted, dict):
+        raise WebHistoryError(f"Malformed persisted record {entry['file']}")
+    if persisted.get("schema_version") != SCHEMA_VERSION:
+        raise WebHistoryError(f"Malformed persisted record {entry['file']}")
+    if persisted.get("date") != entry["date"]:
+        raise WebHistoryError(f"Malformed persisted record {entry['file']}")
+
+
+def _validate_persisted_history(data_directory: Path, index: dict) -> None:
+    for entry in index["entries"]:
+        _validate_persisted_record(data_directory, entry)
+
+
 def update_history(data_directory: Path, record: dict) -> dict:
     data_directory.mkdir(parents=True, exist_ok=True)
     index_path = data_directory / "index.json"
     index = _load_index(index_path)
-    for entry in index["entries"]:
-        persisted = _load_json(data_directory / entry["file"])
-        if (
-            not isinstance(persisted, dict)
-            or persisted.get("schema_version") != SCHEMA_VERSION
-            or persisted.get("date") != entry["date"]
-        ):
-            raise WebHistoryError(f"Malformed persisted record {entry['file']}")
+    _validate_persisted_history(data_directory, index)
     day = record["date"]
     file_name = f"{day}.json"
     (data_directory / file_name).write_text(
