@@ -299,10 +299,10 @@ jobs:
             --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
             --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
             --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
-            2>&1 | tee /tmp/patrol-web-perf.log
+            2>&1 | tee patrol-web-perf.log
 
-          if ! grep -qE '^❌ Failed: 0$' /tmp/patrol-web-perf.log \
-            || grep -qE '^📝 Total: 0$' /tmp/patrol-web-perf.log; then
+          if ! grep -qE '^❌ Failed: 0$' patrol-web-perf.log \
+            || grep -qE '^📝 Total: 0$' patrol-web-perf.log; then
             echo "::error::Patrol Web performance scenario failed"
             exit 1
           fi
@@ -311,7 +311,7 @@ jobs:
         run: |
           python3 scripts/perf/compute_median.py \
             --include-values \
-            /tmp/patrol-web-perf.log \
+            patrol-web-perf.log \
             perf_web.json
           python3 - <<'PY'
           import json
@@ -332,7 +332,7 @@ jobs:
         with:
           name: perf-web-${{ github.run_id }}
           path: |
-            /tmp/patrol-web-perf.log
+            patrol-web-perf.log
             perf_web.json
           retention-days: 90
           if-no-files-found: error
