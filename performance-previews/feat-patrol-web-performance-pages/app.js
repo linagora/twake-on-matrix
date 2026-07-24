@@ -14,6 +14,8 @@
     isMetricApplicable,
     isProfileRecord,
     maximumMarkerDelta,
+    metricSelection,
+    normalizeHealthIndex,
     platformDataPaths,
     shouldFallbackToWeb,
   } = globalThis.PerfMetrics;
@@ -91,6 +93,8 @@
     js_heap_used_bytes: {
       label: "Mémoire JavaScript",
       source: "web",
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
       color: "#b8f34b",
       lowerIsBetter: true,
       format: value => `${(value / 1048576).toFixed(1)} Mio`,
@@ -99,12 +103,15 @@
       metaElement: "meta-rss",
     },
     fps: {
-      label: "FPS navigateur",
+      label: "Indice de fluidité CI",
       source: "web",
       color: "#65d9d2",
       lowerIsBetter: false,
       continuousOnly: true,
-      format: value => `${value.toFixed(1)} FPS`,
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
+      displayAsIndex: true,
+      format: value => `Indice ${value.toFixed(0)}`,
       read: checkpointValue => hasEnoughWebFrames(checkpointValue) &&
         checkpointValue.fps > 0
         ? checkpointValue.fps
@@ -115,6 +122,8 @@
     slow_frame_rate: {
       label: "Frames lentes",
       source: "web",
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
       color: "#ffb548",
       lowerIsBetter: true,
       format: value => `${(value * 100).toFixed(1)} %`,
@@ -125,8 +134,10 @@
       metaElement: "meta-jank",
     },
     transition_ms: {
-      label: "Temps d’ouverture",
+      label: "transition_ms",
       source: "web",
+      scenario: "web_navigation",
+      checkpoint: "room_opened",
       color: "#78a9ff",
       lowerIsBetter: true,
       format: value => `${value.toFixed(0)} ms`,
@@ -168,6 +179,7 @@
 
   const elementIds = [
     "platform-select", "range-select", "scenario-select", "checkpoint-select",
+    "filter-scenario", "filter-checkpoint",
     "latest-date", "latest-sha", "history-depth",
     "status-light", "status-label", "status-meta",
     "overall-status", "overall-detail", "verdict",
@@ -175,7 +187,8 @@
     "platform-eyebrow", "web-diagnostic", "value-long-task",
     "footer-source", "workflow-link",
     "source-rss", "source-fps", "source-jank", "source-transition",
-    "title-rss", "description-rss", "title-fps", "description-fps",
+    "title-rss", "description-rss", "metric-icon-fps",
+    "title-fps", "description-fps",
     "title-jank", "description-jank", "title-transition",
     ...Object.values(ANDROID_METRICS).flatMap(metric => [metric.valueElement, metric.metaElement]),
   ];
@@ -235,8 +248,11 @@
 
   function metricValue(record, metric, scenario, label) {
     if (!isProfileRecord(record)) return null;
-    if (!isMetricApplicable(metric, scenario)) return null;
-    return metric.read(checkpoint(record, metric.source, scenario, label));
+    const selection = metricSelection(metric, scenario, label);
+    if (!isMetricApplicable(metric, selection.scenario)) return null;
+    return metric.read(
+      checkpoint(record, metric.source, selection.scenario, selection.label)
+    );
   }
 
   function scenarioLabel(value) {
@@ -311,16 +327,6 @@
     return visibleDays.map(day => byDay.get(day) || { severity: "missing", delta: null });
   }
 
-  function normalize(values, lowerIsBetter) {
-    const reference = values.find(value => value != null && value > 0);
-    if (reference == null) return values.map(() => null);
-    return values.map(value => {
-      if (value == null || value <= 0) return null;
-      const index = lowerIsBetter ? (reference / value) * 100 : (value / reference) * 100;
-      return Number(index.toFixed(1));
-    });
-  }
-
   function pointColors(markers, normalColor) {
     return markers.map(marker => {
       if (marker.severity === "critical") return "#ff6257";
@@ -337,7 +343,7 @@
     const markers = markersFor(metric, selection.scenario, selection.label, days);
     return {
       label: metric.label,
-      data: normalize(realValues, metric.lowerIsBetter),
+      data: normalizeHealthIndex(realValues, metric.lowerIsBetter),
       realValues,
       markers,
       metricKey,
@@ -380,6 +386,9 @@
               const metric = METRICS[context.dataset.metricKey];
               const realValue = context.dataset.realValues[context.dataIndex];
               if (realValue == null) return `${metric.label} : non mesuré`;
+              if (metric.displayAsIndex) {
+                return `${metric.label} : ${metric.format(context.raw)}`;
+              }
               return `${metric.label} : ${metric.format(realValue)} · indice ${context.raw}`;
             },
             afterBody: contexts => {
@@ -459,7 +468,8 @@
 
   function metricValueCopy(metricKey, metric, value, context) {
     if (value != null) return metric.format(value);
-    if (!isMetricApplicable(metric, context.scenario)) {
+    const selection = metricSelection(metric, context.scenario, context.label);
+    if (!isMetricApplicable(metric, selection.scenario)) {
       return "Non applicable";
     }
     if (
@@ -475,14 +485,34 @@
     return "Non mesuré";
   }
 
-  function metricMetaCopy(metricKey, context, marker) {
+  function displayedMetricValue(record, metric, scenario, label) {
+    const rawValue = metricValue(record, metric, scenario, label);
+    if (!metric.displayAsIndex) return rawValue;
+    const values = state.records.map(
+      item => metricValue(item, metric, scenario, label)
+    );
+    const indexes = normalizeHealthIndex(values, metric.lowerIsBetter);
+    return indexes[state.records.indexOf(record)] ?? null;
+  }
+
+  function metricMetaCopy(metricKey, metric, context, marker) {
     if (state.platform === "web") {
       if (["fps", "slow_frame_rate"].includes(metricKey)) {
+        const selection = metricSelection(
+          metric,
+          context.scenario,
+          context.label
+        );
         return webFrameSampleCopy(
-          context.selectedCheckpoint,
+          checkpoint(
+            context.latest,
+            metric.source,
+            selection.scenario,
+            selection.label
+          ),
           metricKey,
           marker,
-          context.scenario
+          selection.scenario
         );
       }
       return severityCopy(marker);
@@ -514,7 +544,7 @@
     }
 
     const marker = context.latestMarkers[metricKey];
-    const value = metricValue(
+    const value = displayedMetricValue(
       context.latest,
       metric,
       context.scenario,
@@ -527,7 +557,7 @@
       ["fps", "jank_rate", "slow_frame_rate"].includes(metricKey);
     valueElement.classList.toggle("insufficient", isMissingFrameMetric);
     valueElement.textContent = metricValueCopy(metricKey, metric, value, context);
-    metaElement.textContent = metricMetaCopy(metricKey, context, marker);
+    metaElement.textContent = metricMetaCopy(metricKey, metric, context, marker);
   }
 
   function updateMetricCards(latest, scenario, label, latestMarkers) {
@@ -587,7 +617,12 @@
 
   function inspectionValue(record, metric, selection) {
     if (!isProfileRecord(record)) return "Non comparable · ancien APK debug";
-    const value = metricValue(record, metric, selection.scenario, selection.label);
+    const value = displayedMetricValue(
+      record,
+      metric,
+      selection.scenario,
+      selection.label
+    );
     if (value != null) return metric.format(value);
     if (metric.source !== "physical") return "Non mesuré";
     if (selection.metricKey === "fps" && !selection.scenario.includes("scroll")) {
@@ -709,22 +744,32 @@
       ? "médiane · 3 répétitions Chrome"
       : "médiane · 3 appareils virtuels";
     elements["source-fps"].textContent = web
+      ? "indice relatif · 3 répétitions Chrome"
+      : "1 téléphone physique";
+    elements["source-jank"].textContent = web
       ? "médiane · 3 répétitions Chrome"
       : "1 téléphone physique";
-    elements["source-jank"].textContent = elements["source-fps"].textContent;
-    elements["source-transition"].textContent = elements["source-fps"].textContent;
+    elements["source-transition"].textContent = web
+      ? "médiane · 3 répétitions Chrome"
+      : "1 téléphone physique";
     elements["title-rss"].textContent = web ? "Mémoire JavaScript" : "Mémoire utilisée";
     elements["description-rss"].textContent = web
       ? "Mémoire du moteur JavaScript exposée par Chrome ; elle n’est jamais comparée à la RAM Android."
       : "Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.";
-    elements["title-fps"].textContent = web ? "Fluidité Chrome CI" : "Fluidité mesurée";
+    elements["metric-icon-fps"].textContent = web ? "CI" : "FPS";
+    elements["title-fps"].textContent = web ? "Indice de fluidité CI" : "Fluidité mesurée";
     elements["description-fps"].textContent = web
-      ? "Cadence requestAnimationFrame du Chrome headless CI : utile pour suivre les régressions, pas comme FPS utilisateur."
+      ? "Indice relatif à la première nuit visible : 100 est la référence, une baisse indique une dégradation."
       : "Frames rendues par seconde entre le premier et le dernier signal vertical observé.";
     elements["title-jank"].textContent = web ? "Frames lentes" : "Frames saccadées";
     elements["description-jank"].textContent = web
       ? "Part des intervalles requestAnimationFrame supérieurs à 1,5 fois la cadence médiane."
       : "Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.";
+    elements["title-transition"].textContent = web
+      ? "Temps d’ouverture · transition_ms"
+      : "Ouverture d’une conversation";
+    elements["filter-scenario"].hidden = web;
+    elements["filter-checkpoint"].hidden = web;
     elements["footer-source"].textContent = web
       ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
       : "Mémoire : médiane de 3 runs virtuels · Fluidité : 1 run physique";

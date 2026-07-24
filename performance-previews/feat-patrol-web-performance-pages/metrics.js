@@ -55,6 +55,25 @@ globalThis.PerfMetrics = (() => {
     return !metric.continuousOnly || scenario.includes("scroll");
   }
 
+  function metricSelection(metric, scenario, label) {
+    return {
+      scenario: metric.scenario || scenario,
+      label: metric.checkpoint || label,
+    };
+  }
+
+  function normalizeHealthIndex(values, lowerIsBetter) {
+    const reference = values.find(value => isNumber(value) && value > 0);
+    if (reference == null) return values.map(() => null);
+    return values.map(value => {
+      if (!isNumber(value) || value <= 0) return null;
+      const index = lowerIsBetter
+        ? (reference / value) * 100
+        : (value / reference) * 100;
+      return Number(index.toFixed(1));
+    });
+  }
+
   function classifySeries(values, lowerIsBetter) {
     return values.map((value, index) => {
       if (!isNumber(value)) return { severity: "missing", delta: null };
@@ -155,6 +174,8 @@ globalThis.PerfMetrics = (() => {
     isMetricApplicable,
     maximumMarkerDelta,
     median,
+    metricSelection,
+    normalizeHealthIndex,
     platformDataPaths,
     shouldFallbackToWeb,
     summarizeRoomEntries,
