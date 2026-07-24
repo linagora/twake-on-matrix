@@ -335,6 +335,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           });
           break;
         case BootstrapState.openExistingSsss:
+          _recoveryKeyStored = true;
           _showVerifyDeviceScreen = true;
           if (_isRetrying && _retrySucceeded == null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
