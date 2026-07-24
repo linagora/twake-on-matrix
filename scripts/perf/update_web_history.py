@@ -213,10 +213,22 @@ def build_daily_record(
     }
 
 
-def _load_index(path: Path) -> dict:
-    if not path.exists():
-        return {"schema_version": SCHEMA_VERSION, "updated_at": None, "entries": []}
-    index = _load_json(path)
+def _empty_index() -> dict:
+    return {"schema_version": SCHEMA_VERSION, "updated_at": None, "entries": []}
+
+
+def _validate_index_entry(entry: Any, path: Path) -> None:
+    if not isinstance(entry, dict):
+        raise WebHistoryError(f"Malformed history index entry in {path}")
+    if entry.get("file") != f"{entry.get('date')}.json":
+        raise WebHistoryError(f"Malformed history index entry in {path}")
+    try:
+        date.fromisoformat(entry["date"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise WebHistoryError(f"Malformed history index date in {path}") from error
+
+
+def _validate_index(index: Any, path: Path) -> dict:
     if (
         not isinstance(index, dict)
         or index.get("schema_version") != SCHEMA_VERSION
@@ -224,16 +236,14 @@ def _load_index(path: Path) -> dict:
     ):
         raise WebHistoryError(f"Unsupported history index schema in {path}")
     for entry in index["entries"]:
-        if (
-            not isinstance(entry, dict)
-            or entry.get("file") != f"{entry.get('date')}.json"
-        ):
-            raise WebHistoryError(f"Malformed history index entry in {path}")
-        try:
-            date.fromisoformat(entry["date"])
-        except (KeyError, TypeError, ValueError) as error:
-            raise WebHistoryError(f"Malformed history index date in {path}") from error
+        _validate_index_entry(entry, path)
     return index
+
+
+def _load_index(path: Path) -> dict:
+    if not path.exists():
+        return _empty_index()
+    return _validate_index(_load_json(path), path)
 
 
 def update_history(data_directory: Path, record: dict) -> dict:
