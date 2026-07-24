@@ -57,16 +57,17 @@ def _finite_number(value: Any) -> bool:
     )
 
 
-def parse_environment(log_path: Path) -> dict:
-    environments = []
-    for line in log_path.read_text(encoding="utf-8", errors="replace").splitlines():
-        marker = line.find(ENV_PREFIX)
-        if marker < 0:
-            continue
-        try:
-            environments.append(json.loads(line[marker + len(ENV_PREFIX) :]))
-        except json.JSONDecodeError as error:
-            raise WebHistoryError("Malformed PERF_WEB_ENV payload") from error
+def _parse_environment_line(line: str) -> Any | None:
+    marker = line.find(ENV_PREFIX)
+    if marker < 0:
+        return None
+    try:
+        return json.loads(line[marker + len(ENV_PREFIX) :])
+    except json.JSONDecodeError as error:
+        raise WebHistoryError("Malformed PERF_WEB_ENV payload") from error
+
+
+def _validate_environment_payloads(environments: list[Any]) -> dict:
     if not environments:
         raise WebHistoryError("Missing PERF_WEB_ENV payload")
     first = environments[0]
@@ -75,6 +76,19 @@ def parse_environment(log_path: Path) -> dict:
     if not isinstance(first, dict):
         raise WebHistoryError("PERF_WEB_ENV must be an object")
     return first
+
+
+def parse_environment(log_path: Path) -> dict:
+    lines = log_path.read_text(
+        encoding="utf-8",
+        errors="replace",
+    ).splitlines()
+    environments = [
+        payload
+        for line in lines
+        if (payload := _parse_environment_line(line)) is not None
+    ]
+    return _validate_environment_payloads(environments)
 
 
 def _browser_version(user_agent: str) -> str:
