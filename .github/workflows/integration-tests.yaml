@@ -220,6 +220,7 @@ jobs:
       - name: Build perf test APK
         env:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+          ORG_GRADLE_PROJECT_patrolTestBuildType: profile
         run: |
           dart pub global activate patrol_cli 4.3.1
           flutter build apk --config-only
