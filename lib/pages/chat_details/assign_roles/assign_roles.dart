@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/config/default_power_level_member.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
@@ -124,14 +125,7 @@ class AssignRolesController extends State<AssignRoles>
       return;
     }
 
-    final assignedUsers = assignRolesMember;
-
-    final searchResults = assignedUsers.where((user) {
-      return (user.displayName ?? '').toLowerCase().contains(
-            searchTerm.toLowerCase(),
-          ) ||
-          (user.id).toLowerCase().contains(searchTerm.toLowerCase());
-    }).toList();
+    final searchResults = assignRolesMember.searchUsers(searchTerm);
 
     Logs().d(
       "AssignRolesController::handleSearchResults: $searchTerm, results: ${searchResults.length}",

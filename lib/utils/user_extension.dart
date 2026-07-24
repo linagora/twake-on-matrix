@@ -3,6 +3,8 @@ import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -90,6 +92,21 @@ extension UserExtension on User {
           ),
         ),
       ),
+    );
+  }
+}
+
+extension IterableUsersExtension on Iterable<User> {
+  List<User> searchUsers(String keyword) {
+    if (keyword.isEmpty) return toList();
+    return getIt.get<SearchEngine>().matchAnyField<User>(
+      keyword,
+      toList(),
+      fieldExtractors: [
+        (user) => [user.displayName ?? ''],
+        (user) => [user.id],
+      ],
+      options: const SearchOptions(diacriticSensitive: false),
     );
   }
 }
