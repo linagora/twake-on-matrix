@@ -13,6 +13,7 @@ import 'package:fluffychat/pages/search/search.dart';
 import 'package:fluffychat/pages/search/search_external_contact.dart';
 import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/theme_builder.dart';
@@ -63,6 +64,7 @@ void main() {
   setUpAll(() {
     final getIt = GetIt.instance;
     getIt.registerSingleton(ResponsiveUtils());
+    getIt.registerSingleton(const SearchEngine());
   });
 
   setUp(() {

@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/search/search_engine.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -242,10 +243,29 @@ void main() {
   });
 
   group("substringToHighlight tests", () {
+    test(
+      'substringToHighlight locates a diacritic-insensitive match beyond the prefix window',
+      () {
+        const text =
+            'Bonjour, je voudrais vous présenter mon ami Élie qui habite ici.';
+        const highlightText = 'elie';
+        final result = text.substringToHighlight(
+          highlightText,
+          prefixLength: 10,
+          searchEngine: const SearchEngine(),
+        );
+
+        expect(result, equals('...r mon ami Élie qui habite ici.'));
+      },
+    );
+
     test('substringToHighlight returns the correct substring', () {
       const text = "Hello, world!";
       const highlightText = "world";
-      final result = text.substringToHighlight(highlightText);
+      final result = text.substringToHighlight(
+        highlightText,
+        searchEngine: const SearchEngine(),
+      );
 
       expect(result, equals("...world!"));
     });
@@ -257,6 +277,7 @@ void main() {
       final result = text.substringToHighlight(
         highlightText,
         prefixLength: prefixLength,
+        searchEngine: const SearchEngine(),
       );
 
       expect(result, equals("...o, world!"));
@@ -267,7 +288,10 @@ void main() {
       () {
         const text = "Hello, world!";
         const highlightText = "";
-        final result = text.substringToHighlight(highlightText);
+        final result = text.substringToHighlight(
+          highlightText,
+          searchEngine: const SearchEngine(),
+        );
 
         expect(result, equals("Hello, world!"));
       },
@@ -278,7 +302,10 @@ void main() {
       () {
         const text = "Hello, world!";
         const highlightText = "foo";
-        final result = text.substringToHighlight(highlightText);
+        final result = text.substringToHighlight(
+          highlightText,
+          searchEngine: const SearchEngine(),
+        );
 
         expect(result, equals("Hello, world!"));
       },
@@ -289,7 +316,10 @@ void main() {
       () {
         const text = "Hello, world!";
         const highlightText = "Hello, world!";
-        final result = text.substringToHighlight(highlightText);
+        final result = text.substringToHighlight(
+          highlightText,
+          searchEngine: const SearchEngine(),
+        );
 
         expect(result, equals(text));
       },
@@ -303,6 +333,7 @@ void main() {
         final result = text.substringToHighlight(
           highlightText,
           prefixLength: 3,
+          searchEngine: const SearchEngine(),
         );
 
         expect(result, equals('...Second\nThird'));
@@ -317,6 +348,7 @@ void main() {
         final result = text.substringToHighlight(
           highlightText,
           prefixLength: 3,
+          searchEngine: const SearchEngine(),
         );
 
         expect(result, equals('...Third'));
@@ -331,6 +363,7 @@ void main() {
         final result = text.substringToHighlight(
           highlightText,
           prefixLength: 20,
+          searchEngine: const SearchEngine(),
         );
 
         expect(result, equals('...Third'));

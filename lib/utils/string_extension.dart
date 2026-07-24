@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -217,38 +218,6 @@ extension StringCasingExtension on String {
     return highlightedContent;
   }
 
-  List<TextSpan> buildHighlightTextSpans(
-    String highlightText, {
-    TextStyle? style,
-    TextStyle? highlightStyle,
-    GestureRecognizer? recognizer,
-  }) {
-    if (highlightText.isEmpty || isEmpty) {
-      return [TextSpan(text: this, style: style, recognizer: recognizer)];
-    }
-
-    // Escape special characters in the highlightText
-    final escapedHighlightText = RegExp.escape(highlightText);
-
-    // Split the text into parts by the search word and create a TextSpan for
-    // each part. The search word is not case sensitive.
-    final List<TextSpan> spans = splitMapJoinToList<TextSpan>(
-      RegExp(escapedHighlightText, caseSensitive: false),
-      onMatch: (Match match) {
-        return TextSpan(
-          text: match.group(0),
-          style: highlightStyle,
-          recognizer: recognizer,
-        );
-      },
-      onNonMatch: (String nonMatch) {
-        return TextSpan(text: nonMatch, style: style, recognizer: recognizer);
-      },
-    );
-
-    return spans;
-  }
-
   List<T> splitMapJoinToList<T>(
     Pattern pattern, {
     required T Function(Match) onMatch,
@@ -274,9 +243,18 @@ extension StringCasingExtension on String {
     return substring(0, maxCharacters);
   }
 
-  String substringToHighlight(String highlightText, {int prefixLength = 0}) {
+  String substringToHighlight(
+    String highlightText, {
+    int prefixLength = 0,
+    required SearchEngine searchEngine,
+  }) {
     if (prefixLength < 0) return this;
-    final index = toLowerCase().indexOf(highlightText.toLowerCase());
+    final ranges = searchEngine.matchRanges(
+      highlightText,
+      this,
+      options: const SearchOptions(diacriticSensitive: false),
+    );
+    final index = ranges.isEmpty ? -1 : ranges.first.start;
     if (index > prefixLength) {
       final enterIndex = substring(
         index - prefixLength,
