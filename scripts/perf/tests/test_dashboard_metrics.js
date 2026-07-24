@@ -13,6 +13,7 @@ const {
   isProfileRecord,
   maximumMarkerDelta,
   platformDataPaths,
+  shouldFallbackToWeb,
   summarizeRoomEntries,
 } = globalThis.PerfMetrics;
 
@@ -130,6 +131,12 @@ test("keeps Android and Web history paths and families separate", () => {
     records: "data/web",
     family: "web",
   });
+});
+
+test("falls back to Web only when the default Android index is missing", () => {
+  assert.equal(shouldFallbackToWeb("android", 404), true);
+  assert.equal(shouldFallbackToWeb("android", 500), false);
+  assert.equal(shouldFallbackToWeb("web", 404), false);
 });
 
 test("uses seven prior points and ignores missing nights for a Web baseline", () => {

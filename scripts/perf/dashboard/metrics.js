@@ -45,6 +45,10 @@ globalThis.PerfMetrics = (() => {
       : { index: "data/index.json", records: "data", family: "memory" };
   }
 
+  function shouldFallbackToWeb(platform, status) {
+    return platform === "android" && status === 404;
+  }
+
   function classifySeries(values, lowerIsBetter) {
     return values.map((value, index) => {
       if (!isNumber(value)) return { severity: "missing", delta: null };
@@ -137,6 +141,7 @@ globalThis.PerfMetrics = (() => {
     maximumMarkerDelta,
     median,
     platformDataPaths,
+    shouldFallbackToWeb,
     summarizeRoomEntries,
   };
 })();
