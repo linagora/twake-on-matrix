@@ -11,12 +11,14 @@
     hasEnoughFrames,
     hasEnoughWebFrames,
     historyWindow,
+    isCurrentPlatformLoad,
     isMetricApplicable,
     isProfileRecord,
     maximumMarkerDelta,
     metricSelection,
     normalizeHealthIndex,
     platformDataPaths,
+    platformRecordCacheKey,
     shouldFallbackToWeb,
   } = globalThis.PerfMetrics;
 
@@ -172,6 +174,7 @@
     records: [],
     historyRecords: [],
     recordCache: new Map(),
+    loadId: 0,
     windowStart: null,
     windowEnd: null,
     overviewChart: null,
@@ -211,27 +214,40 @@
     return state.index.entries.filter(entry => entry.date >= state.windowStart && entry.date <= state.windowEnd);
   }
 
-  async function fetchRecord(entry) {
-    if (state.recordCache.has(entry.date)) return state.recordCache.get(entry.date);
+  async function fetchRecord(entry, platform = state.platform) {
+    const cacheKey = platformRecordCacheKey(platform, entry.date);
+    if (state.recordCache.has(cacheKey)) return state.recordCache.get(cacheKey);
     const response = await fetch(
-      `${PLATFORMS[state.platform].recordRoot}/${entry.file}`,
+      `${PLATFORMS[platform].recordRoot}/${entry.file}`,
       { cache: "no-store" }
     );
     if (!response.ok) throw new Error(`Impossible de charger ${entry.file}`);
     const record = await response.json();
-    state.recordCache.set(entry.date, record);
+    state.recordCache.set(cacheKey, record);
     return record;
   }
 
-  async function loadSelectedRecords() {
+  async function loadSelectedRecords(
+    platform = state.platform,
+    loadId = state.loadId
+  ) {
     const entries = selectedEntries();
     const firstIndex = state.index.entries.findIndex(entry => entry.date === entries[0]?.date);
     const entriesWithBaseline = state.index.entries.slice(Math.max(0, firstIndex - 7));
-    const loaded = (await Promise.all(entriesWithBaseline.map(fetchRecord)))
+    const loaded = (await Promise.all(
+      entriesWithBaseline.map(entry => fetchRecord(entry, platform))
+    ))
       .sort((left, right) => left.date.localeCompare(right.date));
+    if (!isCurrentPlatformLoad(
+      platform,
+      loadId,
+      state.platform,
+      state.loadId
+    )) return false;
     const selectedDates = new Set(entries.map(entry => entry.date));
     state.historyRecords = loaded;
     state.records = loaded.filter(record => selectedDates.has(record.date));
+    return true;
   }
 
   function calendarDays() {
@@ -271,6 +287,8 @@
   }
 
   function populateScenarios() {
+    elements["scenario-select"].disabled = false;
+    elements["checkpoint-select"].disabled = false;
     const family = PLATFORMS[state.platform].family;
     const available = [...new Set(
       state.records.flatMap(
@@ -691,6 +709,7 @@
 
   function markDatasetReady() {
     elements["history-depth"].textContent = `${state.index.entries.length} nuit${state.index.entries.length > 1 ? "s" : ""}`;
+    elements["status-light"].classList.remove("error");
     elements["status-light"].classList.add("ready");
     elements["status-label"].textContent = "Mesures disponibles";
     elements["status-meta"].textContent = state.platform === "web"
@@ -698,7 +717,47 @@
       : `Mise à jour ${state.index.updated_at || state.records.at(-1).generated_at}`;
   }
 
+  function clearRenderedData(message) {
+    state.overviewChart?.destroy();
+    state.overviewChart = null;
+    elements["latest-date"].textContent = "—";
+    elements["latest-sha"].textContent = "—";
+    elements["history-depth"].textContent = "0 nuit";
+    elements["value-long-task"].textContent = "—";
+    elements["scenario-select"].replaceChildren(
+      new Option("Aucune donnée", "", true, true)
+    );
+    elements["checkpoint-select"].replaceChildren(
+      new Option("Aucune donnée", "", true, true)
+    );
+    elements["scenario-select"].disabled = true;
+    elements["checkpoint-select"].disabled = true;
+    Object.values(METRICS).forEach(metric => {
+      const valueElement = elements[metric.valueElement];
+      const card = valueElement.closest(".metric-card");
+      card.classList.remove("warning", "critical");
+      valueElement.classList.add("insufficient");
+      valueElement.textContent = "—";
+      elements[metric.metaElement].textContent = message;
+    });
+  }
+
+  function prepareDatasetLoad() {
+    elements["status-light"].classList.remove("ready", "error");
+    elements["status-label"].textContent = "Chargement des mesures";
+    elements["status-meta"].textContent = state.platform === "web"
+      ? "Lecture de l’historique Chrome"
+      : "Lecture de l’historique Firebase Test Lab";
+    elements["overall-status"].textContent = "Chargement en cours";
+    elements["overall-detail"].textContent = "Les valeurs vont être remplacées par celles de la plateforme sélectionnée.";
+    elements["inspection-title"].textContent = "Chargement de l’historique";
+    elements["inspection-values"].innerHTML = "<p>Lecture des mesures publiées…</p>";
+    clearRenderedData("Chargement…");
+  }
+
   function showDatasetError(error) {
+    clearRenderedData(error.message);
+    elements["status-light"].classList.remove("ready");
     elements["status-light"].classList.add("error");
     elements["status-label"].textContent = "Mesures indisponibles";
     elements["status-meta"].textContent = error.message;
@@ -708,15 +767,15 @@
     elements["inspection-values"].innerHTML = `<p>${error.message}</p>`;
   }
 
-  async function fetchIndex() {
+  async function fetchIndex(platform = state.platform) {
     const response = await fetch(
-      PLATFORMS[state.platform].indexPath,
+      PLATFORMS[platform].indexPath,
       { cache: "no-store" }
     );
     if (!response.ok) {
       const error = new Error(
         response.status === 404
-          ? `Aucun historique ${state.platform === "web" ? "Web" : "Android"} publié pour le moment`
+          ? `Aucun historique ${platform === "web" ? "Web" : "Android"} publié pour le moment`
           : `L’index des mesures répond HTTP ${response.status}`
       );
       error.httpStatus = response.status;
@@ -727,12 +786,24 @@
     return index;
   }
 
-  async function load() {
-    state.index = await fetchIndex();
-    await loadSelectedRecords();
+  async function load(
+    platform = state.platform,
+    loadId = state.loadId
+  ) {
+    const index = await fetchIndex(platform);
+    if (!isCurrentPlatformLoad(
+      platform,
+      loadId,
+      state.platform,
+      state.loadId
+    )) return false;
+    state.index = index;
+    const loaded = await loadSelectedRecords(platform, loadId);
+    if (!loaded) return false;
     if (!state.records.length) throw new Error("L’historique nightly est vide");
     markDatasetReady();
     populateScenarios();
+    return true;
   }
 
   function configurePlatformContent() {
@@ -780,15 +851,29 @@
   }
 
   async function switchPlatform() {
-    state.platform = elements["platform-select"].value;
-    METRICS = PLATFORMS[state.platform].metrics;
+    const platform = elements["platform-select"].value;
+    const loadId = state.loadId + 1;
+    state.loadId = loadId;
+    state.platform = platform;
+    METRICS = PLATFORMS[platform].metrics;
     state.index = null;
     state.records = [];
     state.historyRecords = [];
     state.recordCache = new Map();
-    state.overviewChart?.destroy();
     configurePlatformContent();
-    await load();
+    prepareDatasetLoad();
+    try {
+      await load(platform, loadId);
+    } catch (error) {
+      if (isCurrentPlatformLoad(
+        platform,
+        loadId,
+        state.platform,
+        state.loadId
+      )) {
+        showDatasetError(error);
+      }
+    }
   }
 
   async function loadInitialPlatform() {
@@ -802,8 +887,8 @@
   }
 
   async function reloadSelectedRange() {
-    await loadSelectedRecords();
-    populateScenarios();
+    const loaded = await loadSelectedRecords(state.platform, state.loadId);
+    if (loaded) populateScenarios();
   }
 
   function reportRangeError(error) {
@@ -816,7 +901,7 @@
     reloadSelectedRange().catch(reportRangeError);
   });
   elements["platform-select"].addEventListener("change", () => {
-    switchPlatform().catch(showDatasetError);
+    switchPlatform();
   });
   elements["scenario-select"].addEventListener("change", populateCheckpoints);
   elements["checkpoint-select"].addEventListener("change", render);

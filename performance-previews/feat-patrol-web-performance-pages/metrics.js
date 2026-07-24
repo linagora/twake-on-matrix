@@ -47,6 +47,14 @@ globalThis.PerfMetrics = (() => {
       : { index: "data/index.json", records: "data", family: "memory" };
   }
 
+  function platformRecordCacheKey(platform, date) {
+    return `${platform}:${date}`;
+  }
+
+  function isCurrentPlatformLoad(platform, loadId, currentPlatform, currentLoadId) {
+    return platform === currentPlatform && loadId === currentLoadId;
+  }
+
   function shouldFallbackToWeb(platform, status) {
     return platform === "android" && status === 404;
   }
@@ -177,6 +185,8 @@ globalThis.PerfMetrics = (() => {
     metricSelection,
     normalizeHealthIndex,
     platformDataPaths,
+    platformRecordCacheKey,
+    isCurrentPlatformLoad,
     shouldFallbackToWeb,
     summarizeRoomEntries,
   };
