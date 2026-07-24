@@ -189,7 +189,12 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            Left(GetHashDetailsFailure(exception: expectedException)),
+            Left(
+              GetHashDetailsFailure(
+                exception: expectedException,
+                contacts: testContacts,
+              ),
+            ),
           ]),
         );
       });
@@ -408,8 +413,11 @@ void main() {
           interactor.execute(argument: testArgument),
           emitsInOrder([
             const Right(GetPhonebookContactsLoading()),
-            const Left(
-              GetHashDetailsFailure(exception: 'Hash details is empty'),
+            Left(
+              GetHashDetailsFailure(
+                exception: 'Hash details is empty',
+                contacts: testContacts,
+              ),
             ),
           ]),
         );
