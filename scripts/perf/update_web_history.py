@@ -115,14 +115,13 @@ def _validate_metadata(metadata: WebMetadata) -> None:
 
 def _validate_values(checkpoint: dict, metric: str, location: str) -> None:
     values = checkpoint.get(f"{metric}_values")
-    if (
-        not isinstance(values, list)
-        or len(values) != REPETITIONS
-        or not all(_finite_number(value) for value in values)
-    ):
-        raise WebHistoryError(
-            f"{location}.{metric}_values must contain {REPETITIONS} finite values"
-        )
+    error = f"{location}.{metric}_values must contain {REPETITIONS} finite values"
+    if not isinstance(values, list):
+        raise WebHistoryError(error)
+    if len(values) != REPETITIONS:
+        raise WebHistoryError(error)
+    if not all(_finite_number(value) for value in values):
+        raise WebHistoryError(error)
 
 
 def _validate_identity(checkpoint: dict, identity: str, location: str) -> None:
