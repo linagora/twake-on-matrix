@@ -715,6 +715,9 @@
     elements["status-meta"].textContent = state.platform === "web"
       ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
       : `Mise à jour ${state.index.updated_at || state.records.at(-1).generated_at}`;
+    elements["inspection-title"].textContent = "Cliquez sur un point du graphique";
+    elements["inspection-values"].innerHTML = `
+      <p>Les valeurs exactes, le commit, le run Actions et la comparaison apparaîtront ici.</p>`;
   }
 
   function clearRenderedData(message) {
