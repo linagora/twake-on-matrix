@@ -9,6 +9,6 @@ class WebPerfCollector {
 
   void stop() => throw UnsupportedError('WebPerfCollector requires a browser');
 
-  Future<void> flush() =>
+  Future<void> flush([void Function(String)? logger]) =>
       throw UnsupportedError('WebPerfCollector requires a browser');
 }

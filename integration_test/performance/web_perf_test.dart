@@ -60,7 +60,7 @@ Future<void> _measureNavigation(PatrolIntegrationTester $) async {
     'room_opened',
     extra: {'transition_ms': stopwatch.elapsedMicroseconds / 1000},
   );
-  await collector.flush();
+  await collector.flush($.log);
 }
 
 Future<void> _measureRoomScroll(PatrolIntegrationTester $) async {
@@ -76,5 +76,5 @@ Future<void> _measureRoomScroll(PatrolIntegrationTester $) async {
 
   collector.stop();
   collector.checkpoint('scroll_completed');
-  await collector.flush();
+  await collector.flush($.log);
 }

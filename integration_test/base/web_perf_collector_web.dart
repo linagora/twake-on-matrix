@@ -80,15 +80,22 @@ class WebPerfCollector {
   }
 
   /// Emits environment metadata once and flushes queued metric lines.
-  Future<void> flush() async {
+  Future<void> flush([void Function(String)? logger]) async {
+    void emit(String line) {
+      if (logger != null) {
+        logger(line);
+      } else {
+        // ignore: avoid_print
+        print(line);
+      }
+    }
+
     if (!_environmentEmitted) {
       _environmentEmitted = true;
-      // ignore: avoid_print
-      print('PERF_WEB_ENV | ${jsonEncode(_browserEnvironment())}');
+      emit('PERF_WEB_ENV | ${jsonEncode(_browserEnvironment())}');
     }
     for (final line in _pending) {
-      // ignore: avoid_print
-      print(line);
+      emit(line);
       await Future<void>.delayed(const Duration(milliseconds: 50));
     }
     _pending.clear();
