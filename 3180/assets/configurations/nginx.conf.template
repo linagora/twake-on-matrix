@@ -1,0 +1,13 @@
+server {
+    listen ${TWAKECHAT_LISTEN_PORT};
+
+    location = / {
+       return 301 ${TWAKECHAT_BASE_HREF};
+    }
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
