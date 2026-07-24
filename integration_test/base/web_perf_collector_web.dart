@@ -148,6 +148,15 @@ class WebPerfCollector {
       'height': web.window.innerHeight,
       'device_pixel_ratio': web.window.devicePixelRatio,
     },
-    'renderer': web.document.querySelector('canvas') == null ? 'dom' : 'canvas',
+    'renderer': _usesCanvasRenderer() ? 'canvas' : 'dom',
   };
+
+  bool _usesCanvasRenderer() {
+    if (web.document.querySelector('canvas') != null) return true;
+    return web.document
+            .querySelector('flt-glass-pane')
+            ?.shadowRoot
+            ?.querySelector('canvas') !=
+        null;
+  }
 }
