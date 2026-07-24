@@ -175,7 +175,7 @@
     "platform-eyebrow", "web-diagnostic", "value-long-task",
     "footer-source", "workflow-link",
     "source-rss", "source-fps", "source-jank", "source-transition",
-    "title-rss", "description-rss", "title-fps",
+    "title-rss", "description-rss", "title-fps", "description-fps",
     "title-jank", "description-jank", "title-transition",
     ...Object.values(ANDROID_METRICS).flatMap(metric => [metric.valueElement, metric.metaElement]),
   ];
@@ -717,6 +717,10 @@
     elements["description-rss"].textContent = web
       ? "Mémoire du moteur JavaScript exposée par Chrome ; elle n’est jamais comparée à la RAM Android."
       : "Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.";
+    elements["title-fps"].textContent = web ? "Fluidité Chrome CI" : "Fluidité mesurée";
+    elements["description-fps"].textContent = web
+      ? "Cadence requestAnimationFrame du Chrome headless CI : utile pour suivre les régressions, pas comme FPS utilisateur."
+      : "Frames rendues par seconde entre le premier et le dernier signal vertical observé.";
     elements["title-jank"].textContent = web ? "Frames lentes" : "Frames saccadées";
     elements["description-jank"].textContent = web
       ? "Part des intervalles requestAnimationFrame supérieurs à 1,5 fois la cadence médiane."

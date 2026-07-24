@@ -15,8 +15,8 @@ const _roomTitle = String.fromEnvironment(
 );
 const _repetitions = 3;
 const _scrollDuration = Duration(seconds: 6);
-const _scrollFrameInterval = Duration(milliseconds: 16);
-const _scrollDistancePerFrame = 12.0;
+const _scrollInputInterval = Duration(milliseconds: 100);
+const _scrollDistancePerEvent = 60.0;
 
 void main() {
   TestBase().runPatrolTest(
@@ -71,17 +71,17 @@ Future<void> _measureRoomScroll(PatrolIntegrationTester $) async {
   final collector = WebPerfCollector('web_room_scroll');
   final scrollable = find.byType(ChatEventList);
   final scrollSteps =
-      _scrollDuration.inMilliseconds ~/ _scrollFrameInterval.inMilliseconds;
+      _scrollDuration.inMilliseconds ~/ _scrollInputInterval.inMilliseconds;
   final scrollPosition = $.tester.getCenter(scrollable);
   collector.start();
 
   for (var step = 0; step < scrollSteps; step++) {
     final direction = step < scrollSteps ~/ 2 ? 1.0 : -1.0;
-    await Future<void>.delayed(_scrollFrameInterval);
+    await Future<void>.delayed(_scrollInputInterval);
     await $.tester.sendEventToBinding(
       PointerScrollEvent(
         position: scrollPosition,
-        scrollDelta: Offset(0, direction * _scrollDistancePerFrame),
+        scrollDelta: Offset(0, direction * _scrollDistancePerEvent),
       ),
     );
   }
