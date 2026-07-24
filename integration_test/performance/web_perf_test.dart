@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
@@ -13,6 +14,9 @@ const _roomTitle = String.fromEnvironment(
   defaultValue: 'TEST_GROUP',
 );
 const _repetitions = 3;
+const _scrollDuration = Duration(seconds: 6);
+const _scrollFrameInterval = Duration(milliseconds: 16);
+const _scrollDistancePerFrame = 12.0;
 
 void main() {
   TestBase().runPatrolTest(
@@ -66,12 +70,20 @@ Future<void> _measureNavigation(PatrolIntegrationTester $) async {
 Future<void> _measureRoomScroll(PatrolIntegrationTester $) async {
   final collector = WebPerfCollector('web_room_scroll');
   final scrollable = find.byType(ChatEventList);
+  final scrollSteps =
+      _scrollDuration.inMilliseconds ~/ _scrollFrameInterval.inMilliseconds;
+  final scrollPosition = $.tester.getCenter(scrollable);
   collector.start();
 
-  for (var step = 0; step < 60; step++) {
-    final direction = step < 30 ? 180.0 : -180.0;
-    await $.tester.drag(scrollable, Offset(0, direction));
-    await $.pump(const Duration(milliseconds: 80));
+  for (var step = 0; step < scrollSteps; step++) {
+    final direction = step < scrollSteps ~/ 2 ? 1.0 : -1.0;
+    await Future<void>.delayed(_scrollFrameInterval);
+    await $.tester.sendEventToBinding(
+      PointerScrollEvent(
+        position: scrollPosition,
+        scrollDelta: Offset(0, direction * _scrollDistancePerFrame),
+      ),
+    );
   }
 
   collector.stop();

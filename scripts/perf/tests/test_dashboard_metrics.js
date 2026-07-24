@@ -5,11 +5,15 @@ require("../dashboard/metrics.js");
 
 const {
   MIN_FRAME_SAMPLE,
+  MIN_WEB_FRAME_SAMPLE,
+  MIN_WEB_FRAME_WINDOW_MS,
   ROOM_ENTRY_SUMMARY,
   checkpointForSelection,
   classifySeries,
   hasEnoughFrames,
+  hasEnoughWebFrames,
   historyWindow,
+  isMetricApplicable,
   isProfileRecord,
   maximumMarkerDelta,
   platformDataPaths,
@@ -74,6 +78,30 @@ test("rejects frame metrics below the minimum sample", () => {
   assert.equal(MIN_FRAME_SAMPLE, 30);
   assert.equal(hasEnoughFrames({ frame_count: 29 }), false);
   assert.equal(hasEnoughFrames({ frame_count: 30 }), true);
+});
+
+test("requires a meaningful Web frame count and measurement window", () => {
+  assert.equal(MIN_WEB_FRAME_SAMPLE, 60);
+  assert.equal(MIN_WEB_FRAME_WINDOW_MS, 5000);
+  assert.equal(hasEnoughWebFrames({
+    frame_count: 59,
+    frame_window_ms: 5000,
+  }), false);
+  assert.equal(hasEnoughWebFrames({
+    frame_count: 60,
+    frame_window_ms: 4999,
+  }), false);
+  assert.equal(hasEnoughWebFrames({
+    frame_count: 60,
+    frame_window_ms: 5000,
+  }), true);
+});
+
+test("keeps FPS out of transition scenarios", () => {
+  const fpsMetric = { continuousOnly: true };
+  assert.equal(isMetricApplicable(fpsMetric, "web_navigation"), false);
+  assert.equal(isMetricApplicable(fpsMetric, "web_room_scroll"), true);
+  assert.equal(isMetricApplicable({}, "web_navigation"), true);
 });
 
 test("uses the final cycle RSS for the room-opening summary", () => {
