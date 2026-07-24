@@ -39,6 +39,7 @@ import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:fluffychat/providers/login_homeserver_summary_provider.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
@@ -52,6 +53,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ConsumerState, ConsumerStatefulWidget;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -74,7 +77,7 @@ import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
 
-class Matrix extends StatefulWidget {
+class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
 
   final List<Client> clients;
@@ -98,7 +101,7 @@ class Matrix extends StatefulWidget {
   static MatrixState read(BuildContext context) => context.read<MatrixState>();
 }
 
-class MatrixState extends State<Matrix>
+class MatrixState extends ConsumerState<Matrix>
     with
         WidgetsBindingObserver,
         ReceiveSharingIntentMixin,
@@ -118,7 +121,12 @@ class MatrixState extends State<Matrix>
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
-  HomeserverSummary? loginHomeserverSummary;
+  // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
+  HomeserverSummary? get loginHomeserverSummary =>
+      ref.read(loginHomeserverSummaryProvider);
+
+  set loginHomeserverSummary(HomeserverSummary? summary) =>
+      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
   String? _authUrl;
   XFile? loginAvatar;
   String? loginUsername;

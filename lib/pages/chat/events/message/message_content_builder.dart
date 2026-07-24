@@ -2,20 +2,21 @@ import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions
 import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:fluffychat/pages/chat/events/message/message_style.dart';
 import 'package:fluffychat/pages/chat/events/message_time.dart';
+import 'package:fluffychat/providers/login_homeserver_summary_provider.dart';
 import 'package:fluffychat/utils/voip/video_call_helper.dart';
-import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/pages/chat/optional_padding.dart';
 import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:fluffychat/pages/chat/optional_stack.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluffychat/pages/chat/events/message/reply_content_widget.dart';
 import 'package:fluffychat/pages/chat/events/message_content.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 import 'message.dart';
 
-class MessageContentBuilder extends StatelessWidget
+class MessageContentBuilder extends ConsumerWidget
     with MessageContentBuilderMixin {
   final Event event;
   final Timeline timeline;
@@ -37,7 +38,7 @@ class MessageContentBuilder extends StatelessWidget
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
         // TODO: change to colorSurface when its approved
@@ -64,9 +65,11 @@ class MessageContentBuilder extends StatelessWidget
         final isNeedAddNewLine = sizeMessageBubble?.isNeedAddNewLine ?? false;
         final isTextMessageError =
             event.status.isError && event.messageType == MessageTypes.Text;
-        final videoCallBaseUrl = Matrix.of(
-          context,
-        ).loginHomeserverSummary?.videoCallBaseUrl;
+        final videoCallBaseUrl = ref.watch(
+          loginHomeserverSummaryProvider.select(
+            (summary) => summary?.videoCallBaseUrl,
+          ),
+        );
 
         return OptionalPadding(
           padding: const EdgeInsets.only(bottom: 8),
@@ -95,6 +98,7 @@ class MessageContentBuilder extends StatelessWidget
                   children: [
                     MessageContent(
                       displayEvent,
+                      videoCallBaseUrl: videoCallBaseUrl,
                       textColor: textColor,
                       textWidth: stepWidth,
                       endOfBubbleWidget: Padding(
