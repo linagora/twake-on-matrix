@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Évolution des performances de Twake mesurées chaque nuit dans Firebase Test Lab"
+    />
+    <title>Twake · Santé des performances</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grid-noise" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <a class="wordmark" href="https://github.com/linagora/twake-on-matrix">
+        <span class="wordmark-dot"></span>
+        Twake on Matrix
+      </a>
+      <div class="dataset-status" aria-live="polite">
+        <span class="status-light" id="status-light"></span>
+        <div>
+          <strong id="status-label">Chargement des mesures</strong>
+          <small id="status-meta">Connexion à l’historique FTL…</small>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow" id="platform-eyebrow">Firebase Test Lab · suivi quotidien</p>
+          <h1>Est-ce que Twake<br /><em>reste fluide&nbsp;?</em></h1>
+        </div>
+        <p class="hero-copy">
+          Cette page transforme les mesures techniques en quatre signaux simples.
+          Une baisse durable de l’indice, une hausse de la mémoire ou du jank indique
+          une dégradation à investiguer.
+        </p>
+      </section>
+
+      <section class="control-deck" aria-label="Filtres du graphique">
+        <label>
+          <span>Plateforme mesurée</span>
+          <select id="platform-select">
+            <option value="android" selected>Android FTL</option>
+            <option value="web">Web Chrome</option>
+          </select>
+        </label>
+        <label>
+          <span>Période observée</span>
+          <select id="range-select">
+            <option value="7">7 jours</option>
+            <option value="30" selected>30 jours</option>
+            <option value="90">90 jours</option>
+            <option value="all">Tout l’historique</option>
+          </select>
+        </label>
+        <label>
+          <span>Parcours testé</span>
+          <select id="scenario-select"></select>
+        </label>
+        <label>
+          <span>Moment du parcours</span>
+          <select id="checkpoint-select"></select>
+        </label>
+      </section>
+
+      <section class="verdict" id="verdict" aria-live="polite">
+        <div>
+          <span class="verdict-kicker">Diagnostic actuel</span>
+          <strong id="overall-status">Analyse en cours</strong>
+        </div>
+        <p id="overall-detail">
+          Il faut au moins sept nuits précédentes pour détecter automatiquement une régression.
+        </p>
+        <div class="run-facts">
+          <span>Dernière mesure <strong id="latest-date">—</strong></span>
+          <span>Commit <strong id="latest-sha">—</strong></span>
+          <span>Historique <strong id="history-depth">—</strong></span>
+          <span id="web-diagnostic" hidden>Longues tâches <strong id="value-long-task">—</strong></span>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="Mesures principales">
+        <article class="metric-card metric-memory" data-metric="rss_bytes">
+          <div class="metric-heading">
+            <span class="metric-icon">RAM</span>
+            <span class="source-badge" id="source-rss">médiane · 3 appareils virtuels</span>
+          </div>
+          <strong id="value-rss">—</strong>
+          <h2 id="title-rss">Mémoire utilisée</h2>
+          <p id="description-rss">Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.</p>
+          <small id="meta-rss">Plus bas est préférable</small>
+        </article>
+
+        <article class="metric-card metric-fps" data-metric="fps">
+          <div class="metric-heading">
+            <span class="metric-icon">FPS</span>
+            <span class="source-badge physical" id="source-fps">1 téléphone physique</span>
+          </div>
+          <strong id="value-fps">—</strong>
+          <h2 id="title-fps">Fluidité mesurée</h2>
+          <p>Frames rendues par seconde entre le premier et le dernier signal vertical observé.</p>
+          <small id="meta-fps">Minimum 30 frames · APK profile</small>
+        </article>
+
+        <article class="metric-card metric-jank" data-metric="jank_rate">
+          <div class="metric-heading">
+            <span class="metric-icon">!</span>
+            <span class="source-badge physical" id="source-jank">1 téléphone physique</span>
+          </div>
+          <strong id="value-jank">—</strong>
+          <h2 id="title-jank">Frames saccadées</h2>
+          <p id="description-jank">Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.</p>
+          <small id="meta-jank">Minimum 30 frames · plus proche de 0 % est préférable</small>
+        </article>
+
+        <article class="metric-card metric-transition" data-metric="transition_ms">
+          <div class="metric-heading">
+            <span class="metric-icon">↗</span>
+            <span class="source-badge physical" id="source-transition">1 téléphone physique</span>
+          </div>
+          <strong id="value-transition">—</strong>
+          <h2 id="title-transition">Ouverture d’une conversation</h2>
+          <p>Temps entre l’action utilisateur et l’affichage stabilisé de la conversation.</p>
+          <small id="meta-transition">Disponible sur les checkpoints d’ouverture</small>
+        </article>
+      </section>
+
+      <section class="overview-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Vue combinée</p>
+            <h2>Évolution de la santé performance</h2>
+          </div>
+          <div class="index-guide">
+            <strong>Indice 100</strong>
+            <span>= première mesure visible</span>
+            <span>au-dessus&nbsp;: mieux · en dessous&nbsp;: moins bien</span>
+          </div>
+        </div>
+        <div class="chart-shell">
+          <canvas id="overview-chart"></canvas>
+        </div>
+        <p class="chart-caption">
+          Les quatre courbes partagent un indice comparable, mais les valeurs réelles
+          restent visibles au survol. Les nuits manquantes restent des trous.
+        </p>
+      </section>
+
+      <section class="reading-guide">
+        <div>
+          <p class="eyebrow">Comment lire le résultat</p>
+          <h2>Trois niveaux, une décision</h2>
+        </div>
+        <ol>
+          <li>
+            <span class="guide-dot stable"></span>
+            <strong>Stable</strong>
+            <p>Variation inférieure à 10 % face aux sept nuits précédentes.</p>
+          </li>
+          <li>
+            <span class="guide-dot warning"></span>
+            <strong>À surveiller</strong>
+            <p>Dégradation d’au moins 10 %. Vérifier le commit et la nuit suivante.</p>
+          </li>
+          <li>
+            <span class="guide-dot critical"></span>
+            <strong>Dégradation</strong>
+            <p>Dégradation d’au moins 20 %. Une investigation est recommandée.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="inspection-panel" aria-live="polite">
+        <div>
+          <p class="eyebrow">Détail d’une nuit</p>
+          <h2 id="inspection-title">Cliquez sur un point du graphique</h2>
+        </div>
+        <div class="inspection-values" id="inspection-values">
+          <p>Les valeurs exactes, le commit, le run Actions et la comparaison apparaîtront ici.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span id="footer-source">Mémoire&nbsp;: médiane de 3 runs virtuels · Fluidité&nbsp;: 1 run physique</span>
+      <a id="workflow-link" href="https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml">
+        Voir le workflow nightly ↗
+      </a>
+    </footer>
+
+    <script src="vendor/chart.umd.min.js"></script>
+    <script src="metrics.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
