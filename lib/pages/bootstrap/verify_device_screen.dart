@@ -55,6 +55,7 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
   bool _showResetConfirm = false;
   bool _resetComplete = false;
   bool _isStartingVerification = false;
+  bool _isResetting = false;
 
   @override
   void didUpdateWidget(covariant VerifyDeviceScreen oldWidget) {
@@ -115,10 +116,12 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
 
   Future<void> _resetEncryption() async {
     final onResetEncryption = widget.onResetEncryption;
-    if (onResetEncryption == null) return;
+    if (onResetEncryption == null || _isResetting) return;
+    setState(() => _isResetting = true);
     final success = await onResetEncryption();
     if (!mounted) return;
     setState(() {
+      _isResetting = false;
       if (success) {
         _resetComplete = true;
       } else {
@@ -144,12 +147,17 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
   Widget build(BuildContext context) {
     final isMobile = ResponsiveUtils().isMobile(context);
     final content = _buildContent(context, isMobile: isMobile);
-    if (isMobile) {
-      return _MobileVerifyDeviceSheet(content: content);
-    }
-    return _WebVerifyDeviceModal(
-      content: content,
-      onClose: _webCloseCallback(context),
+    // Blocks back-gesture/Esc/browser-back from dismissing this screen while
+    // a reset is in flight — Cancel/close are already disabled, but without
+    // this, system-level pop routes would still slip past them.
+    return PopScope(
+      canPop: !_isResetting,
+      child: isMobile
+          ? _MobileVerifyDeviceSheet(content: content)
+          : _WebVerifyDeviceModal(
+              content: content,
+              onClose: _webCloseCallback(context),
+            ),
     );
   }
 
@@ -162,7 +170,9 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
       return () => setState(() => _showRecoveryKeyForm = false);
     }
     if (_showResetConfirm) {
-      return () => setState(() => _showResetConfirm = false);
+      return _isResetting
+          ? null
+          : () => setState(() => _showResetConfirm = false);
     }
     return null;
   }
@@ -193,7 +203,10 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
 
     if (_showResetConfirm) {
       return ResetEncryptionConfirmView(
-        onClose: () => setState(() => _showResetConfirm = false),
+        isResetting: _isResetting,
+        onClose: _isResetting
+            ? null
+            : () => setState(() => _showResetConfirm = false),
         onReset: _resetEncryption,
       );
     }

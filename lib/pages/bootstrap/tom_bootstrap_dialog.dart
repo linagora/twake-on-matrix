@@ -136,6 +136,17 @@ class TomBootstrapDialogState extends State<TomBootstrapDialog>
             Navigator.of(context, rootNavigator: false).pop<bool>(false);
           });
         }
+      } else {
+        // Session already known, keyManager and cross-signing already
+        // cached — nothing to bootstrap. Without this, the dialog would
+        // stay stuck on checkingRecoveryWork forever, since none of the
+        // other UploadRecoveryKeyState branches ever get reached.
+        Logs().i(
+          'TomBootstrapDialog::_initializeRecoveryKeyState(): session '
+          'already verified, nothing to do',
+        );
+        Matrix.of(context).showToMBootstrap.value = false;
+        if (mounted) Navigator.of(context, rootNavigator: false).pop<bool>();
       }
     } else {
       Logs().i(

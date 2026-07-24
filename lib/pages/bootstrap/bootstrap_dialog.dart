@@ -1,12 +1,14 @@
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
+import 'package:fluffychat/domain/keychain_sharing/tom_encryption_reset_service.dart';
 import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
 import 'package:fluffychat/pages/bootstrap/verify_device_screen.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,9 +24,7 @@ class BootstrapDialog extends StatefulWidget {
 
   const BootstrapDialog({super.key, this.wipe = false, required this.client});
 
-  Future<bool?> show() => PlatformInfos.isCupertinoStyle
-      ? TwakeDialog.showCupertinoDialogFullScreen(builder: () => this)
-      : TwakeDialog.showDialogFullScreen(builder: () => this);
+  Future<bool?> show() => TwakeDialog.showDialogFullScreen(builder: () => this);
 
   @override
   BootstrapDialogState createState() => BootstrapDialogState();
@@ -81,7 +81,11 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     super.initState();
   }
 
-  void _createBootstrap(bool wipe, {bool isRetry = false}) async {
+  void _createBootstrap(
+    bool wipe, {
+    bool isRetry = false,
+    bool resetToLegacyFlow = false,
+  }) async {
     _wipe = wipe;
     titleText = null;
     _recoveryKeyStored = false;
@@ -89,7 +93,13 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     // keep showing it while bootstrap re-runs — resetting this to false
     // would let the legacy AlertDialog below take over on every build until
     // bootstrap reaches a new state, hiding both progress and any error.
-    _showVerifyDeviceScreen = isRetry || _showVerifyDeviceScreen;
+    // `resetToLegacyFlow` is the one caller that wants the opposite: a
+    // non-ToM "recovery key lost" reset falls back to the legacy dialog
+    // (askNewSsss's own copy-key screen), same as before the verify-device
+    // flow existed.
+    _showVerifyDeviceScreen = resetToLegacyFlow
+        ? false
+        : (isRetry || _showVerifyDeviceScreen);
     _isRetrying = isRetry;
     _retrySucceeded = null;
     bootstrap = widget.client.encryption!.bootstrap(
@@ -121,6 +131,36 @@ class BootstrapDialogState extends State<BootstrapDialog> {
       Logs().w('Unable to unlock SSSS', e, s);
       return false;
     }
+  }
+
+  /// Handles "Not possible to verify?" → Reset, matching the pre-verify-
+  /// device-flow branching: ToM-backed accounts wipe and re-upload the new
+  /// key automatically via [TomEncryptionResetService] — headless, no
+  /// dialog of its own, so the chooser's own Reset button is the only
+  /// loading UI shown until this completes (key is recoverable from the
+  /// vault, no manual copy step); accounts without a ToM backend have
+  /// nowhere to recover a lost key from, so they fall back to the legacy
+  /// local bootstrap flow, which forces the user to see and save their new
+  /// recovery key via the copy-key screen in [build].
+  Future<bool> _resetEncryption(BuildContext context) async {
+    if (Matrix.of(context).twakeSupported) {
+      final result = await TomEncryptionResetService(
+        client: widget.client,
+      ).reset();
+      if (!context.mounted) return result == TomEncryptionResetResult.success;
+      switch (result) {
+        case TomEncryptionResetResult.success:
+          break;
+        case TomEncryptionResetResult.wipeFailed:
+          TwakeSnackBar.show(context, L10n.of(context)!.cannotEnableKeyBackup);
+        case TomEncryptionResetResult.uploadFailed:
+        case TomEncryptionResetResult.bootstrapFailed:
+          TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
+      }
+      return result == TomEncryptionResetResult.success;
+    }
+    _createBootstrap(true, resetToLegacyFlow: true);
+    return false;
   }
 
   /// Auto-attempts unlocking with the cached recovery key when a retry
@@ -162,14 +202,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         }
       },
       onVerifyRecoveryKey: _unlockWithRecoveryKey,
-      onResetEncryption: () async {
-        final result = await TomBootstrapDialog(
-          client: widget.client,
-          wipe: true,
-          wipeRecovery: true,
-        ).show(context);
-        return result == true;
-      },
+      onResetEncryption: () => _resetEncryption(context),
       options: [
         VerifyDeviceOption(
           icon: Icons.smartphone_outlined,

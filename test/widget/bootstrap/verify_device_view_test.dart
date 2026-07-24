@@ -365,6 +365,11 @@ void _resetEncryptionFlowTests() {
     _resetConfirmClosesViaX,
   );
   testWidgets(
+    'VerifyDeviceScreen shows a loading spinner on Reset and blocks '
+    'Cancel/re-tap while onResetEncryption is in flight',
+    _resetEncryptionShowsLoadingAndBlocksActions,
+  );
+  testWidgets(
     'VerifyDeviceScreen returns to chooser when onResetEncryption '
     'resolves to false',
     _resetEncryptionReturnsToChooserWhenFalse,
@@ -427,6 +432,50 @@ Future<void> _resetConfirmClosesViaX(WidgetTester tester) async {
   await tester.pump();
 
   expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _resetEncryptionShowsLoadingAndBlocksActions(
+  WidgetTester tester,
+) async {
+  var resetCallCount = 0;
+  final completer = Completer<bool>();
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onResetEncryption: () {
+            resetCallCount++;
+            return completer.future;
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+
+  await tester.tap(find.text('Reset'));
+  await tester.pump();
+
+  expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  expect(find.text('Reset'), findsNothing);
+
+  // Tapping Reset or Cancel again while in flight must not call
+  // onResetEncryption a second time or close the confirm view.
+  await tester.tap(find.text('Cancel'));
+  await tester.pump();
+  expect(find.text('Reset end-to-end encryption'), findsOneWidget);
+  expect(resetCallCount, 1);
+
+  completer.complete(true);
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.byType(CircularProgressIndicator), findsNothing);
 }
 
 Future<void> _resetEncryptionReturnsToChooserWhenFalse(
