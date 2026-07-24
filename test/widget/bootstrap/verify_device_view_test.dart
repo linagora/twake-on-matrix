@@ -111,334 +111,375 @@ void _chooserContentTests() {
 }
 
 void _startVerificationTests() {
-  testWidgets('VerifyDeviceScreen invokes onStartVerification when '
-      '"Use another device" is tapped', (tester) async {
-    var startVerificationCalled = false;
-
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
-          builder: (context) => VerifyDeviceScreen(
-            options: _testOptions(context),
-            onStartVerification: () async {
-              startVerificationCalled = true;
-              return null;
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('Use another device'));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(startVerificationCalled, isTrue);
-  });
-
+  testWidgets(
+    'VerifyDeviceScreen invokes onStartVerification when '
+    '"Use another device" is tapped',
+    _startVerificationInvokesCallback,
+  );
   testWidgets(
     'VerifyDeviceScreen shows a loading spinner and blocks re-tap while '
     'onStartVerification is in flight',
-    (tester) async {
-      var startVerificationCallCount = 0;
-      final completer = Completer<KeyVerification?>();
-
-      await tester.pumpWidget(
-        _wrap(
-          Builder(
-            builder: (context) => VerifyDeviceScreen(
-              options: _testOptions(context),
-              onStartVerification: () {
-                startVerificationCallCount++;
-                return completer.future;
-              },
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Use another device'));
-      await tester.pump();
-
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
-
-      // Tapping again while in flight must not call onStartVerification a
-      // second time (row + button are both disabled while loading).
-      await tester.tap(find.text('Use another device'));
-      await tester.pump();
-      expect(startVerificationCallCount, 1);
-
-      completer.complete(null);
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(find.byIcon(Icons.chevron_right), findsNWidgets(3));
-    },
+    _startVerificationShowsLoadingAndBlocksRetap,
   );
+  testWidgets(
+    'VerifyDeviceScreen stays on chooser when onStartVerification '
+    'resolves to null',
+    _startVerificationStaysOnChooserWhenNull,
+  );
+}
 
-  testWidgets('VerifyDeviceScreen stays on chooser when onStartVerification '
-      'resolves to null', (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
-          builder: (context) => VerifyDeviceScreen(
-            options: _testOptions(context),
-            onStartVerification: () async => null,
-          ),
+Future<void> _startVerificationInvokesCallback(WidgetTester tester) async {
+  var startVerificationCalled = false;
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onStartVerification: () async {
+            startVerificationCalled = true;
+            return null;
+          },
         ),
       ),
-    );
-    await tester.pump();
+    ),
+  );
+  await tester.pump();
 
-    await tester.tap(find.text('Use another device'));
-    await tester.pump();
+  await tester.tap(find.text('Use another device'));
+  await tester.pump();
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('Verify this device'), findsOneWidget);
-    expect(find.text('Use another device'), findsOneWidget);
-  });
+  expect(tester.takeException(), isNull);
+  expect(startVerificationCalled, isTrue);
+}
+
+Future<void> _startVerificationShowsLoadingAndBlocksRetap(
+  WidgetTester tester,
+) async {
+  var startVerificationCallCount = 0;
+  final completer = Completer<KeyVerification?>();
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onStartVerification: () {
+            startVerificationCallCount++;
+            return completer.future;
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Use another device'));
+  await tester.pump();
+
+  expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  expect(find.byIcon(Icons.chevron_right), findsNWidgets(2));
+
+  // Tapping again while in flight must not call onStartVerification a
+  // second time (row + button are both disabled while loading).
+  await tester.tap(find.text('Use another device'));
+  await tester.pump();
+  expect(startVerificationCallCount, 1);
+
+  completer.complete(null);
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.byType(CircularProgressIndicator), findsNothing);
+  expect(find.byIcon(Icons.chevron_right), findsNWidgets(3));
+}
+
+Future<void> _startVerificationStaysOnChooserWhenNull(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onStartVerification: () async => null,
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Use another device'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Verify this device'), findsOneWidget);
+  expect(find.text('Use another device'), findsOneWidget);
 }
 
 void _recoveryKeyFlowTests() {
-  testWidgets('VerifyDeviceScreen shows recovery key form when '
-      '"Use recovery key" is tapped, and X closes back to chooser '
-      '(web modal only)', (tester) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
-          builder: (context) =>
-              VerifyDeviceScreen(options: _testOptions(context)),
-        ),
-        width: 1024,
-      ),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('Use recovery key'));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Enter recovery key…'), findsOneWidget);
-    expect(find.text('Verify'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.close));
-    await tester.pump();
-
-    expect(find.text('Verify this device'), findsOneWidget);
-  });
-
-  testWidgets('VerifyDeviceScreen shows error text when onVerifyRecoveryKey '
-      'resolves to false', (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
-          builder: (context) => VerifyDeviceScreen(
-            options: _testOptions(context),
-            onVerifyRecoveryKey: (_) async => false,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('Use recovery key'));
-    await tester.pump();
-    await tester.enterText(find.byType(TextField), 'wrong-key');
-    await tester.tap(find.text('Verify'));
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text("Recovery key doesn't match"), findsOneWidget);
-  });
-
-  testWidgets('VerifyDeviceScreen shows required error and does not call '
-      'onVerifyRecoveryKey when Verify is tapped with an empty field', (
-    tester,
-  ) async {
-    var verifyCalled = false;
-
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
-          builder: (context) => VerifyDeviceScreen(
-            options: _testOptions(context),
-            onVerifyRecoveryKey: (_) async {
-              verifyCalled = true;
-              return true;
-            },
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('Use recovery key'));
-    await tester.pump();
-    await tester.tap(find.text('Verify'));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(verifyCalled, isFalse);
-    expect(find.text('Recovery key is required'), findsOneWidget);
-  });
-
+  testWidgets(
+    'VerifyDeviceScreen shows recovery key form when '
+    '"Use recovery key" is tapped, and X closes back to chooser '
+    '(web modal only)',
+    _recoveryKeyFormOpensAndClosesViaX,
+  );
+  testWidgets(
+    'VerifyDeviceScreen shows error text when onVerifyRecoveryKey '
+    'resolves to false',
+    _recoveryKeyShowsErrorWhenInvalid,
+  );
+  testWidgets(
+    'VerifyDeviceScreen shows required error and does not call '
+    'onVerifyRecoveryKey when Verify is tapped with an empty field',
+    _recoveryKeyShowsRequiredErrorWhenEmpty,
+  );
   testWidgets(
     'VerifyDeviceScreen shows success view and pops on Start chatting '
     'when onVerifyRecoveryKey resolves to true',
-    (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          Navigator(
-            onGenerateRoute: (settings) => MaterialPageRoute(
-              builder: (context) => VerifyDeviceScreen(
-                options: _testOptions(context),
-                onVerifyRecoveryKey: (_) async => true,
-              ),
-            ),
+    _recoveryKeyShowsSuccessAndPops,
+  );
+}
+
+Future<void> _recoveryKeyFormOpensAndClosesViaX(WidgetTester tester) async {
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.binding.setSurfaceSize(const Size(1024, 1400));
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) =>
+            VerifyDeviceScreen(options: _testOptions(context)),
+      ),
+      width: 1024,
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Use recovery key'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Enter recovery key…'), findsOneWidget);
+  expect(find.text('Verify'), findsOneWidget);
+
+  await tester.tap(find.byIcon(Icons.close));
+  await tester.pump();
+
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _recoveryKeyShowsErrorWhenInvalid(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onVerifyRecoveryKey: (_) async => false,
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Use recovery key'));
+  await tester.pump();
+  await tester.enterText(find.byType(TextField), 'wrong-key');
+  await tester.tap(find.text('Verify'));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text("Recovery key doesn't match"), findsOneWidget);
+}
+
+Future<void> _recoveryKeyShowsRequiredErrorWhenEmpty(
+  WidgetTester tester,
+) async {
+  var verifyCalled = false;
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onVerifyRecoveryKey: (_) async {
+            verifyCalled = true;
+            return true;
+          },
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Use recovery key'));
+  await tester.pump();
+  await tester.tap(find.text('Verify'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(verifyCalled, isFalse);
+  expect(find.text('Recovery key is required'), findsOneWidget);
+}
+
+Future<void> _recoveryKeyShowsSuccessAndPops(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
+          builder: (context) => VerifyDeviceScreen(
+            options: _testOptions(context),
+            onVerifyRecoveryKey: (_) async => true,
           ),
         ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Use recovery key'));
-      await tester.pump();
-      await tester.enterText(find.byType(TextField), 'correct-key');
-      await tester.tap(find.text('Verify'));
-      await tester.pumpAndSettle();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('Device verified'), findsOneWidget);
-
-      await tester.tap(find.text('Start chatting'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Device verified'), findsNothing);
-    },
+      ),
+    ),
   );
+  await tester.pump();
+
+  await tester.tap(find.text('Use recovery key'));
+  await tester.pump();
+  await tester.enterText(find.byType(TextField), 'correct-key');
+  await tester.tap(find.text('Verify'));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Device verified'), findsOneWidget);
+
+  await tester.tap(find.text('Start chatting'));
+  await tester.pumpAndSettle();
+
+  expect(find.text('Device verified'), findsNothing);
 }
 
 void _resetEncryptionFlowTests() {
   testWidgets(
     'VerifyDeviceScreen shows reset confirm view when '
     '"Not possible to verify?" is tapped, and Cancel closes back to chooser',
-    (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          Builder(
-            builder: (context) =>
-                VerifyDeviceScreen(options: _testOptions(context)),
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Not possible to verify?'));
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('Reset end-to-end encryption'), findsOneWidget);
-      expect(find.text('Reset'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-
-      await tester.tap(find.text('Cancel'));
-      await tester.pump();
-
-      expect(find.text('Verify this device'), findsOneWidget);
-    },
+    _resetConfirmClosesViaCancel,
   );
-
   testWidgets(
     'VerifyDeviceScreen shows reset confirm view when "Not possible to '
     'verify?" is tapped, and the modal\'s own X closes back to chooser '
     '(web modal only)',
-    (tester) async {
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-      await tester.pumpWidget(
-        _wrap(
-          Builder(
-            builder: (context) =>
-                VerifyDeviceScreen(options: _testOptions(context)),
-          ),
-          width: 1024,
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Not possible to verify?'));
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('Reset end-to-end encryption'), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.close));
-      await tester.pump();
-
-      expect(find.text('Verify this device'), findsOneWidget);
-    },
+    _resetConfirmClosesViaX,
   );
+  testWidgets(
+    'VerifyDeviceScreen returns to chooser when onResetEncryption '
+    'resolves to false',
+    _resetEncryptionReturnsToChooserWhenFalse,
+  );
+  testWidgets(
+    'VerifyDeviceScreen shows reset-complete view and pops on Start '
+    'chatting when onResetEncryption resolves to true',
+    _resetEncryptionShowsCompleteAndPops,
+  );
+}
 
-  testWidgets('VerifyDeviceScreen returns to chooser when onResetEncryption '
-      'resolves to false', (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        Builder(
+Future<void> _resetConfirmClosesViaCancel(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) =>
+            VerifyDeviceScreen(options: _testOptions(context)),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Reset end-to-end encryption'), findsOneWidget);
+  expect(find.text('Reset'), findsOneWidget);
+  expect(find.text('Cancel'), findsOneWidget);
+
+  await tester.tap(find.text('Cancel'));
+  await tester.pump();
+
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _resetConfirmClosesViaX(WidgetTester tester) async {
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.binding.setSurfaceSize(const Size(1024, 1400));
+
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) =>
+            VerifyDeviceScreen(options: _testOptions(context)),
+      ),
+      width: 1024,
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Reset end-to-end encryption'), findsOneWidget);
+  expect(find.byIcon(Icons.close), findsOneWidget);
+
+  await tester.tap(find.byIcon(Icons.close));
+  await tester.pump();
+
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _resetEncryptionReturnsToChooserWhenFalse(
+  WidgetTester tester,
+) async {
+  await tester.pumpWidget(
+    _wrap(
+      Builder(
+        builder: (context) => VerifyDeviceScreen(
+          options: _testOptions(context),
+          onResetEncryption: () async => false,
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+  await tester.tap(find.text('Reset'));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _resetEncryptionShowsCompleteAndPops(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      Navigator(
+        onGenerateRoute: (settings) => MaterialPageRoute(
           builder: (context) => VerifyDeviceScreen(
             options: _testOptions(context),
-            onResetEncryption: () async => false,
+            onResetEncryption: () async => true,
           ),
         ),
       ),
-    );
-    await tester.pump();
+    ),
+  );
+  await tester.pump();
 
-    await tester.tap(find.text('Not possible to verify?'));
-    await tester.pump();
-    await tester.tap(find.text('Reset'));
-    await tester.pumpAndSettle();
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+  await tester.tap(find.text('Reset'));
+  await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('Verify this device'), findsOneWidget);
-  });
+  expect(tester.takeException(), isNull);
+  expect(find.text('Reset complete'), findsOneWidget);
 
-  testWidgets('VerifyDeviceScreen shows reset-complete view and pops on Start '
-      'chatting when onResetEncryption resolves to true', (tester) async {
-    await tester.pumpWidget(
-      _wrap(
-        Navigator(
-          onGenerateRoute: (settings) => MaterialPageRoute(
-            builder: (context) => VerifyDeviceScreen(
-              options: _testOptions(context),
-              onResetEncryption: () async => true,
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
+  await tester.tap(find.text('Start chatting'));
+  await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Not possible to verify?'));
-    await tester.pump();
-    await tester.tap(find.text('Reset'));
-    await tester.pumpAndSettle();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Reset complete'), findsOneWidget);
-
-    await tester.tap(find.text('Start chatting'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Reset complete'), findsNothing);
-  });
+  expect(find.text('Reset complete'), findsNothing);
 }
 
 void _initialStateTests() {
