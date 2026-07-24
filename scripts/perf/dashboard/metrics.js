@@ -2,6 +2,8 @@ globalThis.PerfMetrics = (() => {
   "use strict";
 
   const MIN_FRAME_SAMPLE = 30;
+  const MIN_WEB_FRAME_SAMPLE = 60;
+  const MIN_WEB_FRAME_WINDOW_MS = 5000;
   const ROOM_ENTRY_SUMMARY = "room_enter_all";
 
   const isNumber = value => Number.isFinite(value);
@@ -37,6 +39,66 @@ globalThis.PerfMetrics = (() => {
   function maximumMarkerDelta(markers) {
     const deltas = markers.map(marker => marker?.delta).filter(isNumber);
     return deltas.length ? Math.max(...deltas) : null;
+  }
+
+  function platformDataPaths(platform) {
+    return platform === "web"
+      ? { index: "data/web/index.json", records: "data/web", family: "web" }
+      : { index: "data/index.json", records: "data", family: "memory" };
+  }
+
+  function platformRecordCacheKey(platform, date) {
+    return `${platform}:${date}`;
+  }
+
+  function isCurrentPlatformLoad(platform, loadId, currentPlatform, currentLoadId) {
+    return platform === currentPlatform && loadId === currentLoadId;
+  }
+
+  function shouldFallbackToWeb(platform, status) {
+    return platform === "android" && status === 404;
+  }
+
+  function isMetricApplicable(metric, scenario) {
+    return !metric.continuousOnly || scenario.includes("scroll");
+  }
+
+  function metricSelection(metric, scenario, label) {
+    return {
+      scenario: metric.scenario || scenario,
+      label: metric.checkpoint || label,
+    };
+  }
+
+  function normalizeHealthIndex(values, lowerIsBetter) {
+    const reference = values.find(value => isNumber(value) && value > 0);
+    if (reference == null) return values.map(() => null);
+    return values.map(value => {
+      if (!isNumber(value) || value <= 0) return null;
+      const index = lowerIsBetter
+        ? (reference / value) * 100
+        : (value / reference) * 100;
+      return Number(index.toFixed(1));
+    });
+  }
+
+  function classifySeries(values, lowerIsBetter) {
+    return values.map((value, index) => {
+      if (!isNumber(value)) return { severity: "missing", delta: null };
+      const previous = values.slice(0, index).filter(isNumber).slice(-7);
+      if (previous.length < 7) return { severity: "baseline", delta: null };
+      const baseline = median(previous);
+      if (!(baseline > 0)) return { severity: "baseline", delta: null };
+      const delta = lowerIsBetter
+        ? (value - baseline) / baseline
+        : (baseline - value) / baseline;
+      const severity = delta >= 0.2
+        ? "critical"
+        : delta >= 0.1
+          ? "warning"
+          : "normal";
+      return { severity, delta, baseline };
+    });
   }
 
   function roomEntryCheckpoints(record, family, scenario) {
@@ -97,19 +159,35 @@ globalThis.PerfMetrics = (() => {
     return Number(checkpoint?.frame_count || 0) >= MIN_FRAME_SAMPLE;
   }
 
+  function hasEnoughWebFrames(checkpoint) {
+    return Number(checkpoint?.frame_count || 0) >= MIN_WEB_FRAME_SAMPLE &&
+      Number(checkpoint?.frame_window_ms || 0) >= MIN_WEB_FRAME_WINDOW_MS;
+  }
+
   function isProfileRecord(record) {
     return record?.environment?.build_mode === "profile";
   }
 
   return {
     MIN_FRAME_SAMPLE,
+    MIN_WEB_FRAME_SAMPLE,
+    MIN_WEB_FRAME_WINDOW_MS,
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
+    classifySeries,
     hasEnoughFrames,
+    hasEnoughWebFrames,
     historyWindow,
     isProfileRecord,
+    isMetricApplicable,
     maximumMarkerDelta,
     median,
+    metricSelection,
+    normalizeHealthIndex,
+    platformDataPaths,
+    platformRecordCacheKey,
+    isCurrentPlatformLoad,
+    shouldFallbackToWeb,
     summarizeRoomEntries,
   };
 })();

@@ -5,7 +5,7 @@ groups values by (scenario, label, metric_key), and outputs a JSON file
 containing the median value of each metric across all runs.
 
 Usage:
-    python3 compute_median.py logcat1.txt logcat2.txt logcat3.txt output.json
+    python3 compute_median.py [--include-values] logcat1.txt logcat2.txt logcat3.txt output.json
 """
 import json
 import re
@@ -84,6 +84,8 @@ def _aggregate_groups(
 
 def _build_checkpoints(
     groups: dict[tuple, list[float]],
+    *,
+    include_values: bool = False,
 ) -> tuple[list[dict], dict[tuple, dict[str, int]]]:
     """Compute medians and variance indicators for each (scenario, label) checkpoint.
 
@@ -107,6 +109,8 @@ def _build_checkpoints(
         )
         cp['sample_count'] = min(cp['sample_count'], len(values))
         cp[key] = statistics.median(values)
+        if include_values:
+            cp[f'{key}_values'] = values
         if len(values) >= 2:
             cp[f'{key}_stddev'] = round(statistics.stdev(values), 2)
             cp[f'{key}_range'] = round(max(values) - min(values), 2)
@@ -144,9 +148,17 @@ def _emit_warnings(
         )
 
 
-def compute_median(logcat_files: list[str], output_file: str) -> None:
+def compute_median(
+    logcat_files: list[str],
+    output_file: str,
+    *,
+    include_values: bool = False,
+) -> None:
     groups, total_lines = _aggregate_groups(logcat_files)
-    output, cp_key_counts = _build_checkpoints(groups)
+    output, cp_key_counts = _build_checkpoints(
+        groups,
+        include_values=include_values,
+    )
     output.sort(key=lambda x: (x['scenario'], x.get('seq', 0)))
 
     with open(output_file, 'w') as fh:
@@ -161,7 +173,19 @@ def compute_median(logcat_files: list[str], output_file: str) -> None:
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print("Usage: compute_median.py <logcat1> [logcat2 ...] <output.json>")
+    arguments = sys.argv[1:]
+    include_values = False
+    if '--include-values' in arguments:
+        arguments.remove('--include-values')
+        include_values = True
+    if len(arguments) < 2:
+        print(
+            "Usage: compute_median.py [--include-values]"
+            " <logcat1> [logcat2 ...] <output.json>"
+        )
         sys.exit(1)
-    compute_median(sys.argv[1:-1], sys.argv[-1])
+    compute_median(
+        arguments[:-1],
+        arguments[-1],
+        include_values=include_values,
+    )

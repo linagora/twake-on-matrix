@@ -3,13 +3,23 @@
 
   const {
     MIN_FRAME_SAMPLE,
+    MIN_WEB_FRAME_SAMPLE,
+    MIN_WEB_FRAME_WINDOW_MS,
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
+    classifySeries,
     hasEnoughFrames,
+    hasEnoughWebFrames,
     historyWindow,
+    isCurrentPlatformLoad,
+    isMetricApplicable,
     isProfileRecord,
     maximumMarkerDelta,
-    median,
+    metricSelection,
+    normalizeHealthIndex,
+    platformDataPaths,
+    platformRecordCacheKey,
+    shouldFallbackToWeb,
   } = globalThis.PerfMetrics;
 
   const SCENARIO_LABELS = {
@@ -17,6 +27,8 @@
     scroll_room1: "Scroll d’une conversation riche en images · salle 1",
     scroll_room2: "Scroll d’une conversation riche en images · salle 2",
     chat_list_scroll: "Scroll de la liste des conversations",
+    web_navigation: "Ouverture et retour d’une conversation",
+    web_room_scroll: "Scroll continu d’une conversation",
   };
 
   const CHECKPOINT_LABELS = {
@@ -28,9 +40,11 @@
     list_top: "Haut de la liste",
     list_bottom: "Bas de la liste",
     list_top_again: "Retour en haut",
+    room_opened: "Conversation ouverte",
+    scroll_completed: "Scroll terminé",
   };
 
-  const METRICS = {
+  const ANDROID_METRICS = {
     rss_bytes: {
       label: "Mémoire",
       source: "memory",
@@ -77,23 +91,109 @@
     },
   };
 
+  const WEB_METRICS = {
+    js_heap_used_bytes: {
+      label: "Mémoire JavaScript",
+      source: "web",
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
+      color: "#b8f34b",
+      lowerIsBetter: true,
+      format: value => `${(value / 1048576).toFixed(1)} Mio`,
+      read: checkpointValue => checkpointValue?.js_heap_used_bytes ?? null,
+      valueElement: "value-rss",
+      metaElement: "meta-rss",
+    },
+    fps: {
+      label: "Indice de fluidité CI",
+      source: "web",
+      color: "#65d9d2",
+      lowerIsBetter: false,
+      continuousOnly: true,
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
+      displayAsIndex: true,
+      format: value => `Indice ${value.toFixed(0)}`,
+      read: checkpointValue => hasEnoughWebFrames(checkpointValue) &&
+        checkpointValue.fps > 0
+        ? checkpointValue.fps
+        : null,
+      valueElement: "value-fps",
+      metaElement: "meta-fps",
+    },
+    slow_frame_rate: {
+      label: "Frames lentes",
+      source: "web",
+      scenario: "web_room_scroll",
+      checkpoint: "scroll_completed",
+      color: "#ffb548",
+      lowerIsBetter: true,
+      format: value => `${(value * 100).toFixed(1)} %`,
+      read: checkpointValue => hasEnoughWebFrames(checkpointValue)
+        ? checkpointValue.slow_frame_rate
+        : null,
+      valueElement: "value-jank",
+      metaElement: "meta-jank",
+    },
+    transition_ms: {
+      label: "transition_ms",
+      source: "web",
+      scenario: "web_navigation",
+      checkpoint: "room_opened",
+      color: "#78a9ff",
+      lowerIsBetter: true,
+      format: value => `${value.toFixed(0)} ms`,
+      read: checkpointValue => checkpointValue?.transition_ms ?? null,
+      valueElement: "value-transition",
+      metaElement: "meta-transition",
+    },
+  };
+
+  const androidPaths = platformDataPaths("android");
+  const webPaths = platformDataPaths("web");
+  const PLATFORMS = {
+    android: {
+      indexPath: androidPaths.index,
+      recordRoot: androidPaths.records,
+      family: androidPaths.family,
+      metrics: ANDROID_METRICS,
+    },
+    web: {
+      indexPath: webPaths.index,
+      recordRoot: webPaths.records,
+      family: webPaths.family,
+      metrics: WEB_METRICS,
+    },
+  };
+
+  let METRICS = ANDROID_METRICS;
+
   const state = {
+    platform: "android",
     index: null,
     records: [],
     historyRecords: [],
     recordCache: new Map(),
+    loadId: 0,
     windowStart: null,
     windowEnd: null,
     overviewChart: null,
   };
 
   const elementIds = [
-    "range-select", "scenario-select", "checkpoint-select",
+    "platform-select", "range-select", "scenario-select", "checkpoint-select",
+    "filter-scenario", "filter-checkpoint",
     "latest-date", "latest-sha", "history-depth",
     "status-light", "status-label", "status-meta",
     "overall-status", "overall-detail", "verdict",
     "inspection-title", "inspection-values", "overview-chart",
-    ...Object.values(METRICS).flatMap(metric => [metric.valueElement, metric.metaElement]),
+    "platform-eyebrow", "web-diagnostic", "value-long-task",
+    "footer-source", "workflow-link",
+    "source-rss", "source-fps", "source-jank", "source-transition",
+    "title-rss", "description-rss", "metric-icon-fps",
+    "title-fps", "description-fps",
+    "title-jank", "description-jank", "title-transition",
+    ...Object.values(ANDROID_METRICS).flatMap(metric => [metric.valueElement, metric.metaElement]),
   ];
   const elements = Object.fromEntries(elementIds.map(id => [id, document.getElementById(id)]));
 
@@ -105,26 +205,6 @@
     return isoDay(next);
   };
 
-  function severityForDelta(delta) {
-    if (delta >= 0.2) return "critical";
-    if (delta >= 0.1) return "warning";
-    return "normal";
-  }
-
-  function classify(values, lowerIsBetter) {
-    return values.map((value, index) => {
-      if (value == null) return { severity: "missing", delta: null };
-      const previous = values.slice(0, index).filter(item => item != null).slice(-7);
-      if (previous.length < 7) return { severity: "baseline", delta: null };
-      const baseline = median(previous);
-      if (baseline <= 0) return { severity: "baseline", delta: null };
-      const delta = lowerIsBetter
-        ? (value - baseline) / baseline
-        : (baseline - value) / baseline;
-      return { severity: severityForDelta(delta), delta, baseline };
-    });
-  }
-
   function selectedEntries() {
     if (!state.index?.entries.length) return [];
     const range = elements["range-select"].value;
@@ -134,24 +214,40 @@
     return state.index.entries.filter(entry => entry.date >= state.windowStart && entry.date <= state.windowEnd);
   }
 
-  async function fetchRecord(entry) {
-    if (state.recordCache.has(entry.date)) return state.recordCache.get(entry.date);
-    const response = await fetch(`data/${entry.file}`, { cache: "no-store" });
+  async function fetchRecord(entry, platform = state.platform) {
+    const cacheKey = platformRecordCacheKey(platform, entry.date);
+    if (state.recordCache.has(cacheKey)) return state.recordCache.get(cacheKey);
+    const response = await fetch(
+      `${PLATFORMS[platform].recordRoot}/${entry.file}`,
+      { cache: "no-store" }
+    );
     if (!response.ok) throw new Error(`Impossible de charger ${entry.file}`);
     const record = await response.json();
-    state.recordCache.set(entry.date, record);
+    state.recordCache.set(cacheKey, record);
     return record;
   }
 
-  async function loadSelectedRecords() {
+  async function loadSelectedRecords(
+    platform = state.platform,
+    loadId = state.loadId
+  ) {
     const entries = selectedEntries();
     const firstIndex = state.index.entries.findIndex(entry => entry.date === entries[0]?.date);
     const entriesWithBaseline = state.index.entries.slice(Math.max(0, firstIndex - 7));
-    const loaded = (await Promise.all(entriesWithBaseline.map(fetchRecord)))
+    const loaded = (await Promise.all(
+      entriesWithBaseline.map(entry => fetchRecord(entry, platform))
+    ))
       .sort((left, right) => left.date.localeCompare(right.date));
+    if (!isCurrentPlatformLoad(
+      platform,
+      loadId,
+      state.platform,
+      state.loadId
+    )) return false;
     const selectedDates = new Set(entries.map(entry => entry.date));
     state.historyRecords = loaded;
     state.records = loaded.filter(record => selectedDates.has(record.date));
+    return true;
   }
 
   function calendarDays() {
@@ -168,8 +264,11 @@
 
   function metricValue(record, metric, scenario, label) {
     if (!isProfileRecord(record)) return null;
-    if (metric.continuousOnly && !scenario.includes("scroll")) return null;
-    return metric.read(checkpoint(record, metric.source, scenario, label));
+    const selection = metricSelection(metric, scenario, label);
+    if (!isMetricApplicable(metric, selection.scenario)) return null;
+    return metric.read(
+      checkpoint(record, metric.source, selection.scenario, selection.label)
+    );
   }
 
   function scenarioLabel(value) {
@@ -188,8 +287,13 @@
   }
 
   function populateScenarios() {
+    elements["scenario-select"].disabled = false;
+    elements["checkpoint-select"].disabled = false;
+    const family = PLATFORMS[state.platform].family;
     const available = [...new Set(
-      state.records.flatMap(record => record.memory.checkpoints.map(item => item.scenario))
+      state.records.flatMap(
+        record => (record[family]?.checkpoints || []).map(item => item.scenario)
+      )
     )];
     available.sort((left, right) => {
       if (left === "nav_cycles") return -1;
@@ -208,12 +312,17 @@
 
   function populateCheckpoints() {
     const scenario = elements["scenario-select"].value;
+    const family = PLATFORMS[state.platform].family;
     const labels = [...new Set(state.records.flatMap(record =>
-      record.memory.checkpoints
+      (record[family]?.checkpoints || [])
         .filter(item => item.scenario === scenario)
         .map(item => item.label)
     ))];
-    if (scenario === "nav_cycles" && labels.some(label => /^room_enter_cycle\d+$/.test(label))) {
+    if (
+      state.platform === "android" &&
+      scenario === "nav_cycles" &&
+      labels.some(label => /^room_enter_cycle\d+$/.test(label))
+    ) {
       labels.unshift(ROOM_ENTRY_SUMMARY);
     }
     const previous = elements["checkpoint-select"].value;
@@ -231,19 +340,9 @@
 
   function markersFor(metric, scenario, label, visibleDays) {
     const values = state.historyRecords.map(record => metricValue(record, metric, scenario, label));
-    const markers = classify(values, metric.lowerIsBetter);
+    const markers = classifySeries(values, metric.lowerIsBetter);
     const byDay = new Map(state.historyRecords.map((record, index) => [record.date, markers[index]]));
     return visibleDays.map(day => byDay.get(day) || { severity: "missing", delta: null });
-  }
-
-  function normalize(values, lowerIsBetter) {
-    const reference = values.find(value => value != null && value > 0);
-    if (reference == null) return values.map(() => null);
-    return values.map(value => {
-      if (value == null || value <= 0) return null;
-      const index = lowerIsBetter ? (reference / value) * 100 : (value / reference) * 100;
-      return Number(index.toFixed(1));
-    });
   }
 
   function pointColors(markers, normalColor) {
@@ -262,7 +361,7 @@
     const markers = markersFor(metric, selection.scenario, selection.label, days);
     return {
       label: metric.label,
-      data: normalize(realValues, metric.lowerIsBetter),
+      data: normalizeHealthIndex(realValues, metric.lowerIsBetter),
       realValues,
       markers,
       metricKey,
@@ -305,6 +404,9 @@
               const metric = METRICS[context.dataset.metricKey];
               const realValue = context.dataset.realValues[context.dataIndex];
               if (realValue == null) return `${metric.label} : non mesuré`;
+              if (metric.displayAsIndex) {
+                return `${metric.label} : ${metric.format(context.raw)}`;
+              }
               return `${metric.label} : ${metric.format(realValue)} · indice ${context.raw}`;
             },
             afterBody: contexts => {
@@ -368,12 +470,31 @@
     return `${frameCount} frames analysées · ${severityCopy(marker)}`;
   }
 
+  function webFrameSampleCopy(checkpointValue, metricKey, marker, scenario) {
+    if (metricKey === "fps" && !scenario.includes("scroll")) {
+      return "Non applicable sur une transition · utilisez le temps d’ouverture";
+    }
+    const frameCount = checkpointValue?.frame_count ?? 0;
+    const frameWindowMs = checkpointValue?.frame_window_ms ?? 0;
+    if (!hasEnoughWebFrames(checkpointValue)) {
+      return `${frameCount} frames sur ${(frameWindowMs / 1000).toFixed(1)} s · ` +
+        `minimum ${MIN_WEB_FRAME_SAMPLE} frames et ${MIN_WEB_FRAME_WINDOW_MS / 1000} s`;
+    }
+    return `${frameCount} frames analysées sur ${(frameWindowMs / 1000).toFixed(1)} s · ` +
+      severityCopy(marker);
+  }
+
   function metricValueCopy(metricKey, metric, value, context) {
     if (value != null) return metric.format(value);
-    if (metricKey === "fps" && !context.scenario.includes("scroll")) {
+    const selection = metricSelection(metric, context.scenario, context.label);
+    if (!isMetricApplicable(metric, selection.scenario)) {
       return "Non applicable";
     }
-    if (metricKey === "fps" && hasEnoughFrames(context.physicalCheckpoint)) {
+    if (
+      metricKey === "fps" &&
+      state.platform === "android" &&
+      hasEnoughFrames(context.physicalCheckpoint)
+    ) {
       return "Prochain nightly";
     }
     if (metricKey === "fps" || metricKey === "jank_rate") {
@@ -382,7 +503,38 @@
     return "Non mesuré";
   }
 
-  function metricMetaCopy(metricKey, context, marker) {
+  function displayedMetricValue(record, metric, scenario, label) {
+    const rawValue = metricValue(record, metric, scenario, label);
+    if (!metric.displayAsIndex) return rawValue;
+    const values = state.records.map(
+      item => metricValue(item, metric, scenario, label)
+    );
+    const indexes = normalizeHealthIndex(values, metric.lowerIsBetter);
+    return indexes[state.records.indexOf(record)] ?? null;
+  }
+
+  function metricMetaCopy(metricKey, metric, context, marker) {
+    if (state.platform === "web") {
+      if (["fps", "slow_frame_rate"].includes(metricKey)) {
+        const selection = metricSelection(
+          metric,
+          context.scenario,
+          context.label
+        );
+        return webFrameSampleCopy(
+          checkpoint(
+            context.latest,
+            metric.source,
+            selection.scenario,
+            selection.label
+          ),
+          metricKey,
+          marker,
+          selection.scenario
+        );
+      }
+      return severityCopy(marker);
+    }
     if (metricKey === "fps" || metricKey === "jank_rate") {
       return frameSampleCopy(
         context.physicalCheckpoint,
@@ -410,7 +562,7 @@
     }
 
     const marker = context.latestMarkers[metricKey];
-    const value = metricValue(
+    const value = displayedMetricValue(
       context.latest,
       metric,
       context.scenario,
@@ -420,23 +572,30 @@
       card.classList.add(marker.severity);
     }
     const isMissingFrameMetric = value == null &&
-      (metricKey === "fps" || metricKey === "jank_rate");
+      ["fps", "jank_rate", "slow_frame_rate"].includes(metricKey);
     valueElement.classList.toggle("insufficient", isMissingFrameMetric);
     valueElement.textContent = metricValueCopy(metricKey, metric, value, context);
-    metaElement.textContent = metricMetaCopy(metricKey, context, marker);
+    metaElement.textContent = metricMetaCopy(metricKey, metric, context, marker);
   }
 
   function updateMetricCards(latest, scenario, label, latestMarkers) {
+    const selectedFamily = PLATFORMS[state.platform].family;
     const context = {
       latest,
       scenario,
       label,
       latestMarkers,
       physicalCheckpoint: checkpoint(latest, "physical", scenario, label),
+      selectedCheckpoint: checkpoint(latest, selectedFamily, scenario, label),
     };
     Object.entries(METRICS).forEach(
       ([metricKey, metric]) => renderMetricCard(metricKey, metric, context)
     );
+    const longTaskValue = context.selectedCheckpoint?.long_task_total_ms;
+    elements["web-diagnostic"].hidden = state.platform !== "web";
+    elements["value-long-task"].textContent = Number.isFinite(longTaskValue)
+      ? `${longTaskValue.toFixed(0)} ms`
+      : "non mesuré";
   }
 
   function worstMarker(markers) {
@@ -476,7 +635,12 @@
 
   function inspectionValue(record, metric, selection) {
     if (!isProfileRecord(record)) return "Non comparable · ancien APK debug";
-    const value = metricValue(record, metric, selection.scenario, selection.label);
+    const value = displayedMetricValue(
+      record,
+      metric,
+      selection.scenario,
+      selection.label
+    );
     if (value != null) return metric.format(value);
     if (metric.source !== "physical") return "Non mesuré";
     if (selection.metricKey === "fps" && !selection.scenario.includes("scroll")) {
@@ -545,12 +709,58 @@
 
   function markDatasetReady() {
     elements["history-depth"].textContent = `${state.index.entries.length} nuit${state.index.entries.length > 1 ? "s" : ""}`;
+    elements["status-light"].classList.remove("error");
     elements["status-light"].classList.add("ready");
     elements["status-label"].textContent = "Mesures disponibles";
-    elements["status-meta"].textContent = `Mise à jour ${state.index.updated_at || state.records.at(-1).generated_at}`;
+    elements["status-meta"].textContent = state.platform === "web"
+      ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
+      : `Mise à jour ${state.index.updated_at || state.records.at(-1).generated_at}`;
+    elements["inspection-title"].textContent = "Cliquez sur un point du graphique";
+    elements["inspection-values"].innerHTML = `
+      <p>Les valeurs exactes, le commit, le run Actions et la comparaison apparaîtront ici.</p>`;
+  }
+
+  function clearRenderedData(message) {
+    state.overviewChart?.destroy();
+    state.overviewChart = null;
+    elements["latest-date"].textContent = "—";
+    elements["latest-sha"].textContent = "—";
+    elements["history-depth"].textContent = "0 nuit";
+    elements["value-long-task"].textContent = "—";
+    elements["scenario-select"].replaceChildren(
+      new Option("Aucune donnée", "", true, true)
+    );
+    elements["checkpoint-select"].replaceChildren(
+      new Option("Aucune donnée", "", true, true)
+    );
+    elements["scenario-select"].disabled = true;
+    elements["checkpoint-select"].disabled = true;
+    Object.values(METRICS).forEach(metric => {
+      const valueElement = elements[metric.valueElement];
+      const card = valueElement.closest(".metric-card");
+      card.classList.remove("warning", "critical");
+      valueElement.classList.add("insufficient");
+      valueElement.textContent = "—";
+      elements[metric.metaElement].textContent = message;
+    });
+  }
+
+  function prepareDatasetLoad() {
+    elements["status-light"].classList.remove("ready", "error");
+    elements["status-label"].textContent = "Chargement des mesures";
+    elements["status-meta"].textContent = state.platform === "web"
+      ? "Lecture de l’historique Chrome"
+      : "Lecture de l’historique Firebase Test Lab";
+    elements["overall-status"].textContent = "Chargement en cours";
+    elements["overall-detail"].textContent = "Les valeurs vont être remplacées par celles de la plateforme sélectionnée.";
+    elements["inspection-title"].textContent = "Chargement de l’historique";
+    elements["inspection-values"].innerHTML = "<p>Lecture des mesures publiées…</p>";
+    clearRenderedData("Chargement…");
   }
 
   function showDatasetError(error) {
+    clearRenderedData(error.message);
+    elements["status-light"].classList.remove("ready");
     elements["status-light"].classList.add("error");
     elements["status-label"].textContent = "Mesures indisponibles";
     elements["status-meta"].textContent = error.message;
@@ -560,25 +770,128 @@
     elements["inspection-values"].innerHTML = `<p>${error.message}</p>`;
   }
 
-  async function fetchIndex() {
-    const response = await fetch("data/index.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`L’index des mesures répond HTTP ${response.status}`);
+  async function fetchIndex(platform = state.platform) {
+    const response = await fetch(
+      PLATFORMS[platform].indexPath,
+      { cache: "no-store" }
+    );
+    if (!response.ok) {
+      const error = new Error(
+        response.status === 404
+          ? `Aucun historique ${platform === "web" ? "Web" : "Android"} publié pour le moment`
+          : `L’index des mesures répond HTTP ${response.status}`
+      );
+      error.httpStatus = response.status;
+      throw error;
+    }
     const index = await response.json();
     validateIndex(index);
     return index;
   }
 
-  async function load() {
-    state.index = await fetchIndex();
-    await loadSelectedRecords();
+  async function load(
+    platform = state.platform,
+    loadId = state.loadId
+  ) {
+    const index = await fetchIndex(platform);
+    if (!isCurrentPlatformLoad(
+      platform,
+      loadId,
+      state.platform,
+      state.loadId
+    )) return false;
+    state.index = index;
+    const loaded = await loadSelectedRecords(platform, loadId);
+    if (!loaded) return false;
     if (!state.records.length) throw new Error("L’historique nightly est vide");
     markDatasetReady();
     populateScenarios();
+    return true;
+  }
+
+  function configurePlatformContent() {
+    const web = state.platform === "web";
+    elements["platform-eyebrow"].textContent = web
+      ? "Patrol Web · suivi quotidien"
+      : "Firebase Test Lab · suivi quotidien";
+    elements["source-rss"].textContent = web
+      ? "médiane · 3 répétitions Chrome"
+      : "médiane · 3 appareils virtuels";
+    elements["source-fps"].textContent = web
+      ? "indice relatif · 3 répétitions Chrome"
+      : "1 téléphone physique";
+    elements["source-jank"].textContent = web
+      ? "médiane · 3 répétitions Chrome"
+      : "1 téléphone physique";
+    elements["source-transition"].textContent = web
+      ? "médiane · 3 répétitions Chrome"
+      : "1 téléphone physique";
+    elements["title-rss"].textContent = web ? "Mémoire JavaScript" : "Mémoire utilisée";
+    elements["description-rss"].textContent = web
+      ? "Mémoire du moteur JavaScript exposée par Chrome ; elle n’est jamais comparée à la RAM Android."
+      : "Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.";
+    elements["metric-icon-fps"].textContent = web ? "CI" : "FPS";
+    elements["title-fps"].textContent = web ? "Indice de fluidité CI" : "Fluidité mesurée";
+    elements["description-fps"].textContent = web
+      ? "Indice relatif à la première nuit visible : 100 est la référence, une baisse indique une dégradation."
+      : "Frames rendues par seconde entre le premier et le dernier signal vertical observé.";
+    elements["title-jank"].textContent = web ? "Frames lentes" : "Frames saccadées";
+    elements["description-jank"].textContent = web
+      ? "Part des intervalles requestAnimationFrame supérieurs à 1,5 fois la cadence médiane."
+      : "Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.";
+    elements["title-transition"].textContent = web
+      ? "Temps d’ouverture · transition_ms"
+      : "Ouverture d’une conversation";
+    elements["filter-scenario"].hidden = web;
+    elements["filter-checkpoint"].hidden = web;
+    elements["footer-source"].textContent = web
+      ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
+      : "Mémoire : médiane de 3 runs virtuels · Fluidité : 1 run physique";
+    elements["workflow-link"].href = web
+      ? "https://github.com/linagora/twake-on-matrix/actions/workflows/patrol-web-integration-test.yaml"
+      : "https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml";
+    elements["web-diagnostic"].hidden = !web;
+  }
+
+  async function switchPlatform() {
+    const platform = elements["platform-select"].value;
+    const loadId = state.loadId + 1;
+    state.loadId = loadId;
+    state.platform = platform;
+    METRICS = PLATFORMS[platform].metrics;
+    state.index = null;
+    state.records = [];
+    state.historyRecords = [];
+    state.recordCache = new Map();
+    configurePlatformContent();
+    prepareDatasetLoad();
+    try {
+      await load(platform, loadId);
+    } catch (error) {
+      if (isCurrentPlatformLoad(
+        platform,
+        loadId,
+        state.platform,
+        state.loadId
+      )) {
+        showDatasetError(error);
+      }
+    }
+  }
+
+  async function loadInitialPlatform() {
+    try {
+      await load();
+    } catch (error) {
+      if (!shouldFallbackToWeb(state.platform, error.httpStatus)) throw error;
+      elements["platform-select"].value = "web";
+      await switchPlatform();
+    }
   }
 
   async function reloadSelectedRange() {
-    await loadSelectedRecords();
-    populateScenarios();
+    const loaded = await loadSelectedRecords(state.platform, state.loadId);
+    if (loaded) populateScenarios();
   }
 
   function reportRangeError(error) {
@@ -590,7 +903,11 @@
   elements["range-select"].addEventListener("change", () => {
     reloadSelectedRange().catch(reportRangeError);
   });
+  elements["platform-select"].addEventListener("change", () => {
+    switchPlatform();
+  });
   elements["scenario-select"].addEventListener("change", populateCheckpoints);
   elements["checkpoint-select"].addEventListener("change", render);
-  load().catch(showDatasetError);
+  configurePlatformContent();
+  loadInitialPlatform().catch(showDatasetError);
 })();

@@ -26,6 +26,10 @@ class TestBase {
     // harness lacks). Such tests are skipped on web instead of failing the
     // suite, and run unchanged on mobile.
     bool mobileOnly = false,
+    // Marks a test that is intentionally web-only. It is not registered on
+    // mobile, which prevents dedicated browser benchmarks from accidentally
+    // entering Android or iOS suites.
+    bool webOnly = false,
   }) {
     // On web a `mobileOnly` test must not be REGISTERED at all (not merely
     // skipped). Patrol web's Playwright runner boots the Flutter app
@@ -37,6 +41,7 @@ class TestBase {
     // `__patrol__getTests()`, so Playwright never boots a page for it.
     // Mobile is unaffected (`kIsWeb` is false), so coverage is preserved.
     if (kIsWeb && mobileOnly) return;
+    if (!kIsWeb && webOnly) return;
 
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',
