@@ -2,6 +2,8 @@ globalThis.PerfMetrics = (() => {
   "use strict";
 
   const MIN_FRAME_SAMPLE = 30;
+  const MIN_WEB_FRAME_SAMPLE = 60;
+  const MIN_WEB_FRAME_WINDOW_MS = 5000;
   const ROOM_ENTRY_SUMMARY = "room_enter_all";
 
   const isNumber = value => Number.isFinite(value);
@@ -47,6 +49,10 @@ globalThis.PerfMetrics = (() => {
 
   function shouldFallbackToWeb(platform, status) {
     return platform === "android" && status === 404;
+  }
+
+  function isMetricApplicable(metric, scenario) {
+    return !metric.continuousOnly || scenario.includes("scroll");
   }
 
   function classifySeries(values, lowerIsBetter) {
@@ -126,18 +132,27 @@ globalThis.PerfMetrics = (() => {
     return Number(checkpoint?.frame_count || 0) >= MIN_FRAME_SAMPLE;
   }
 
+  function hasEnoughWebFrames(checkpoint) {
+    return Number(checkpoint?.frame_count || 0) >= MIN_WEB_FRAME_SAMPLE &&
+      Number(checkpoint?.frame_window_ms || 0) >= MIN_WEB_FRAME_WINDOW_MS;
+  }
+
   function isProfileRecord(record) {
     return record?.environment?.build_mode === "profile";
   }
 
   return {
     MIN_FRAME_SAMPLE,
+    MIN_WEB_FRAME_SAMPLE,
+    MIN_WEB_FRAME_WINDOW_MS,
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
     classifySeries,
     hasEnoughFrames,
+    hasEnoughWebFrames,
     historyWindow,
     isProfileRecord,
+    isMetricApplicable,
     maximumMarkerDelta,
     median,
     platformDataPaths,

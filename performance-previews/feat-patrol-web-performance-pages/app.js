@@ -3,11 +3,15 @@
 
   const {
     MIN_FRAME_SAMPLE,
+    MIN_WEB_FRAME_SAMPLE,
+    MIN_WEB_FRAME_WINDOW_MS,
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
     classifySeries,
     hasEnoughFrames,
+    hasEnoughWebFrames,
     historyWindow,
+    isMetricApplicable,
     isProfileRecord,
     maximumMarkerDelta,
     platformDataPaths,
@@ -99,8 +103,10 @@
       source: "web",
       color: "#65d9d2",
       lowerIsBetter: false,
+      continuousOnly: true,
       format: value => `${value.toFixed(1)} FPS`,
-      read: checkpointValue => checkpointValue?.fps > 0
+      read: checkpointValue => hasEnoughWebFrames(checkpointValue) &&
+        checkpointValue.fps > 0
         ? checkpointValue.fps
         : null,
       valueElement: "value-fps",
@@ -112,7 +118,9 @@
       color: "#ffb548",
       lowerIsBetter: true,
       format: value => `${(value * 100).toFixed(1)} %`,
-      read: checkpointValue => checkpointValue?.slow_frame_rate ?? null,
+      read: checkpointValue => hasEnoughWebFrames(checkpointValue)
+        ? checkpointValue.slow_frame_rate
+        : null,
       valueElement: "value-jank",
       metaElement: "meta-jank",
     },
@@ -167,7 +175,7 @@
     "platform-eyebrow", "web-diagnostic", "value-long-task",
     "footer-source", "workflow-link",
     "source-rss", "source-fps", "source-jank", "source-transition",
-    "title-rss", "description-rss", "title-fps",
+    "title-rss", "description-rss", "title-fps", "description-fps",
     "title-jank", "description-jank", "title-transition",
     ...Object.values(ANDROID_METRICS).flatMap(metric => [metric.valueElement, metric.metaElement]),
   ];
@@ -227,11 +235,7 @@
 
   function metricValue(record, metric, scenario, label) {
     if (!isProfileRecord(record)) return null;
-    if (
-      state.platform === "android" &&
-      metric.continuousOnly &&
-      !scenario.includes("scroll")
-    ) return null;
+    if (!isMetricApplicable(metric, scenario)) return null;
     return metric.read(checkpoint(record, metric.source, scenario, label));
   }
 
@@ -439,16 +443,30 @@
     return `${frameCount} frames analysées · ${severityCopy(marker)}`;
   }
 
+  function webFrameSampleCopy(checkpointValue, metricKey, marker, scenario) {
+    if (metricKey === "fps" && !scenario.includes("scroll")) {
+      return "Non applicable sur une transition · utilisez le temps d’ouverture";
+    }
+    const frameCount = checkpointValue?.frame_count ?? 0;
+    const frameWindowMs = checkpointValue?.frame_window_ms ?? 0;
+    if (!hasEnoughWebFrames(checkpointValue)) {
+      return `${frameCount} frames sur ${(frameWindowMs / 1000).toFixed(1)} s · ` +
+        `minimum ${MIN_WEB_FRAME_SAMPLE} frames et ${MIN_WEB_FRAME_WINDOW_MS / 1000} s`;
+    }
+    return `${frameCount} frames analysées sur ${(frameWindowMs / 1000).toFixed(1)} s · ` +
+      severityCopy(marker);
+  }
+
   function metricValueCopy(metricKey, metric, value, context) {
     if (value != null) return metric.format(value);
-    if (
-      state.platform === "android" &&
-      metricKey === "fps" &&
-      !context.scenario.includes("scroll")
-    ) {
+    if (!isMetricApplicable(metric, context.scenario)) {
       return "Non applicable";
     }
-    if (metricKey === "fps" && hasEnoughFrames(context.physicalCheckpoint)) {
+    if (
+      metricKey === "fps" &&
+      state.platform === "android" &&
+      hasEnoughFrames(context.physicalCheckpoint)
+    ) {
       return "Prochain nightly";
     }
     if (metricKey === "fps" || metricKey === "jank_rate") {
@@ -460,7 +478,12 @@
   function metricMetaCopy(metricKey, context, marker) {
     if (state.platform === "web") {
       if (["fps", "slow_frame_rate"].includes(metricKey)) {
-        return `${context.selectedCheckpoint?.frame_count || 0} frames analysées · ${severityCopy(marker)}`;
+        return webFrameSampleCopy(
+          context.selectedCheckpoint,
+          metricKey,
+          marker,
+          context.scenario
+        );
       }
       return severityCopy(marker);
     }
@@ -694,6 +717,10 @@
     elements["description-rss"].textContent = web
       ? "Mémoire du moteur JavaScript exposée par Chrome ; elle n’est jamais comparée à la RAM Android."
       : "Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.";
+    elements["title-fps"].textContent = web ? "Fluidité Chrome CI" : "Fluidité mesurée";
+    elements["description-fps"].textContent = web
+      ? "Cadence requestAnimationFrame du Chrome headless CI : utile pour suivre les régressions, pas comme FPS utilisateur."
+      : "Frames rendues par seconde entre le premier et le dernier signal vertical observé.";
     elements["title-jank"].textContent = web ? "Frames lentes" : "Frames saccadées";
     elements["description-jank"].textContent = web
       ? "Part des intervalles requestAnimationFrame supérieurs à 1,5 fois la cadence médiane."
