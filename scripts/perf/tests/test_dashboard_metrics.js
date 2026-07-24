@@ -7,10 +7,12 @@ const {
   MIN_FRAME_SAMPLE,
   ROOM_ENTRY_SUMMARY,
   checkpointForSelection,
+  classifySeries,
   hasEnoughFrames,
   historyWindow,
   isProfileRecord,
   maximumMarkerDelta,
+  platformDataPaths,
   summarizeRoomEntries,
 } = globalThis.PerfMetrics;
 
@@ -115,4 +117,26 @@ test("selects the largest available regression delta", () => {
     { delta: -0.05 },
   ]), 0.24);
   assert.equal(maximumMarkerDelta([{ delta: null }, {}]), null);
+});
+
+test("keeps Android and Web history paths and families separate", () => {
+  assert.deepEqual(platformDataPaths("android"), {
+    index: "data/index.json",
+    records: "data",
+    family: "memory",
+  });
+  assert.deepEqual(platformDataPaths("web"), {
+    index: "data/web/index.json",
+    records: "data/web",
+    family: "web",
+  });
+});
+
+test("uses seven prior points and ignores missing nights for a Web baseline", () => {
+  const values = [100, 100, null, 100, 100, 100, 100, 100, 111];
+  const markers = classifySeries(values, true);
+
+  assert.equal(markers[7].severity, "baseline");
+  assert.equal(markers[8].severity, "warning");
+  assert.ok(Math.abs(markers[8].delta - 0.11) < 0.0001);
 });

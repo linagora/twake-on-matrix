@@ -39,6 +39,31 @@ globalThis.PerfMetrics = (() => {
     return deltas.length ? Math.max(...deltas) : null;
   }
 
+  function platformDataPaths(platform) {
+    return platform === "web"
+      ? { index: "data/web/index.json", records: "data/web", family: "web" }
+      : { index: "data/index.json", records: "data", family: "memory" };
+  }
+
+  function classifySeries(values, lowerIsBetter) {
+    return values.map((value, index) => {
+      if (!isNumber(value)) return { severity: "missing", delta: null };
+      const previous = values.slice(0, index).filter(isNumber).slice(-7);
+      if (previous.length < 7) return { severity: "baseline", delta: null };
+      const baseline = median(previous);
+      if (!(baseline > 0)) return { severity: "baseline", delta: null };
+      const delta = lowerIsBetter
+        ? (value - baseline) / baseline
+        : (baseline - value) / baseline;
+      const severity = delta >= 0.2
+        ? "critical"
+        : delta >= 0.1
+          ? "warning"
+          : "normal";
+      return { severity, delta, baseline };
+    });
+  }
+
   function roomEntryCheckpoints(record, family, scenario) {
     return (record?.[family]?.checkpoints || []).filter(
       checkpoint => checkpoint.scenario === scenario &&
@@ -105,11 +130,13 @@ globalThis.PerfMetrics = (() => {
     MIN_FRAME_SAMPLE,
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
+    classifySeries,
     hasEnoughFrames,
     historyWindow,
     isProfileRecord,
     maximumMarkerDelta,
     median,
+    platformDataPaths,
     summarizeRoomEntries,
   };
 })();

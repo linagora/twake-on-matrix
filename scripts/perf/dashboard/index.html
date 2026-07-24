@@ -30,7 +30,7 @@
     <main>
       <section class="hero">
         <div>
-          <p class="eyebrow">Firebase Test Lab · suivi quotidien</p>
+          <p class="eyebrow" id="platform-eyebrow">Firebase Test Lab · suivi quotidien</p>
           <h1>Est-ce que Twake<br /><em>reste fluide&nbsp;?</em></h1>
         </div>
         <p class="hero-copy">
@@ -41,6 +41,13 @@
       </section>
 
       <section class="control-deck" aria-label="Filtres du graphique">
+        <label>
+          <span>Plateforme mesurée</span>
+          <select id="platform-select">
+            <option value="android" selected>Android FTL</option>
+            <option value="web">Web Chrome</option>
+          </select>
+        </label>
         <label>
           <span>Période observée</span>
           <select id="range-select">
@@ -72,6 +79,7 @@
           <span>Dernière mesure <strong id="latest-date">—</strong></span>
           <span>Commit <strong id="latest-sha">—</strong></span>
           <span>Historique <strong id="history-depth">—</strong></span>
+          <span id="web-diagnostic" hidden>Longues tâches <strong id="value-long-task">—</strong></span>
         </div>
       </section>
 
@@ -79,21 +87,21 @@
         <article class="metric-card metric-memory" data-metric="rss_bytes">
           <div class="metric-heading">
             <span class="metric-icon">RAM</span>
-            <span class="source-badge">médiane · 3 appareils virtuels</span>
+            <span class="source-badge" id="source-rss">médiane · 3 appareils virtuels</span>
           </div>
           <strong id="value-rss">—</strong>
-          <h2>Mémoire utilisée</h2>
-          <p>Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.</p>
+          <h2 id="title-rss">Mémoire utilisée</h2>
+          <p id="description-rss">Une hausse continue après plusieurs cycles peut révéler une fuite mémoire.</p>
           <small id="meta-rss">Plus bas est préférable</small>
         </article>
 
         <article class="metric-card metric-fps" data-metric="fps">
           <div class="metric-heading">
             <span class="metric-icon">FPS</span>
-            <span class="source-badge physical">1 téléphone physique</span>
+            <span class="source-badge physical" id="source-fps">1 téléphone physique</span>
           </div>
           <strong id="value-fps">—</strong>
-          <h2>Fluidité mesurée</h2>
+          <h2 id="title-fps">Fluidité mesurée</h2>
           <p>Frames rendues par seconde entre le premier et le dernier signal vertical observé.</p>
           <small id="meta-fps">Minimum 30 frames · APK profile</small>
         </article>
@@ -101,21 +109,21 @@
         <article class="metric-card metric-jank" data-metric="jank_rate">
           <div class="metric-heading">
             <span class="metric-icon">!</span>
-            <span class="source-badge physical">1 téléphone physique</span>
+            <span class="source-badge physical" id="source-jank">1 téléphone physique</span>
           </div>
           <strong id="value-jank">—</strong>
-          <h2>Frames saccadées</h2>
-          <p>Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.</p>
+          <h2 id="title-jank">Frames saccadées</h2>
+          <p id="description-jank">Part des frames où build ou raster dépasse le budget de 16,7 ms à 60 FPS.</p>
           <small id="meta-jank">Minimum 30 frames · plus proche de 0 % est préférable</small>
         </article>
 
         <article class="metric-card metric-transition" data-metric="transition_ms">
           <div class="metric-heading">
             <span class="metric-icon">↗</span>
-            <span class="source-badge physical">1 téléphone physique</span>
+            <span class="source-badge physical" id="source-transition">1 téléphone physique</span>
           </div>
           <strong id="value-transition">—</strong>
-          <h2>Ouverture d’une conversation</h2>
+          <h2 id="title-transition">Ouverture d’une conversation</h2>
           <p>Temps entre l’action utilisateur et l’affichage stabilisé de la conversation.</p>
           <small id="meta-transition">Disponible sur les checkpoints d’ouverture</small>
         </article>
@@ -178,8 +186,8 @@
     </main>
 
     <footer>
-      <span>Mémoire&nbsp;: médiane de 3 runs virtuels · Fluidité&nbsp;: 1 run physique</span>
-      <a href="https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml">
+      <span id="footer-source">Mémoire&nbsp;: médiane de 3 runs virtuels · Fluidité&nbsp;: 1 run physique</span>
+      <a id="workflow-link" href="https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml">
         Voir le workflow nightly ↗
       </a>
     </footer>

@@ -145,7 +145,7 @@ h1 em {
 
 .control-deck {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   border: 1px solid var(--line);
   background: rgba(13, 25, 28, 0.86);
 }
