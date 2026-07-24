@@ -13,6 +13,11 @@ on:
         description: "Also run the performance jobs (build + physical median). Off by default so a functional dispatch only runs the integration tests."
         required: false
         default: "false"
+      publish_perf_history:
+        description: "Publish this performance run to Pages. Main uses the canonical history; feat/ftl-performance-pages uses an isolated preview."
+        required: false
+        type: boolean
+        default: false
   schedule:
     - cron: "0 0 * * *"
 
@@ -43,6 +48,22 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # Patrol builds a universal Android test APK and compiles the Rust FFI
+      # targets. The standard runner only has 14 GB, so remove toolchains that
+      # this job never uses before restoring Flutter and Gradle dependencies.
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force
+          sudo apt-get clean
+          echo "Disk space after cleanup:"
+          df -h
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -149,6 +170,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force
+          sudo apt-get clean
+          echo "Disk space after cleanup:"
+          df -h
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -207,6 +241,8 @@ jobs:
 
           patrol build android \
             -v \
+            --profile \
+            --no-label \
             --dart-define-from-file .env.cicd \
             --target integration_test/tests/chat/perf_test.dart
 
@@ -216,8 +252,8 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           retention-days: 1
           path: |
-            build/app/outputs/apk/debug/app-debug.apk
-            build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+            build/app/outputs/apk/profile/app-profile.apk
+            build/app/outputs/apk/androidTest/profile/app-profile-androidTest.apk
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 3a – Memory metrics: 3 runs on virtual device (free tier)
@@ -267,8 +303,8 @@ jobs:
 
       # upload-artifact@v4 strips to the least common ancestor of the uploaded
       # paths (build/app/outputs/apk/), so the layout under apks/ is:
-      #   apks/debug/app-debug.apk
-      #   apks/androidTest/debug/app-debug-androidTest.apk
+      #   apks/profile/app-profile.apk
+      #   apks/androidTest/profile/app-profile-androidTest.apk
       - name: Run perf test on virtual device
         run: |
           PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
@@ -277,8 +313,8 @@ jobs:
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/debug/app-debug.apk \
-            --test apks/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/profile/app-profile.apk \
+            --test apks/androidTest/profile/app-profile-androidTest.apk \
             --device model=MediumPhone.arm,version=34 \
             --timeout 30m \
             --use-orchestrator \
@@ -358,8 +394,8 @@ jobs:
 
           gcloud firebase test android run \
             --type instrumentation \
-            --app apks/debug/app-debug.apk \
-            --test apks/androidTest/debug/app-debug-androidTest.apk \
+            --app apks/profile/app-profile.apk \
+            --test apks/androidTest/profile/app-profile-androidTest.apk \
             --device model=oriole,version=33 \
             --timeout 30m \
             --use-orchestrator \
@@ -453,3 +489,92 @@ jobs:
           path: |
             perf_median_memory.json
             perf_frame_physical.json
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 5 – Append the successful nightly aggregate to the GitHub Pages history
+  # ────────────────────────────────────────────────────────────────────────────
+  publish_perf_history:
+    name: Publish Perf History
+    if: >-
+      ${{
+        (github.ref == 'refs/heads/main' &&
+          (github.event_name == 'schedule' ||
+            (github.event_name == 'workflow_dispatch' && inputs.publish_perf_history == true))) ||
+        (github.ref == 'refs/heads/feat/ftl-performance-pages' &&
+          github.event_name == 'workflow_dispatch' &&
+          inputs.publish_perf_history == true)
+      }}
+    needs: perf_median
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-writes
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download consolidated performance results
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-results-${{ github.run_id }}
+          path: perf-results/
+
+      - name: Checkout existing GitHub Pages history
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: gh-pages
+          path: existing-pages
+
+      - name: Configure publication destination
+        id: publication
+        run: |
+          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            echo "directory=performance" >> "$GITHUB_OUTPUT"
+            echo "url=https://linagora.github.io/twake-on-matrix/performance/" >> "$GITHUB_OUTPUT"
+          else
+            echo "directory=performance-previews/feat-ftl-performance-pages" >> "$GITHUB_OUTPUT"
+            echo "url=https://linagora.github.io/twake-on-matrix/performance-previews/feat-ftl-performance-pages/" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build performance dashboard publication
+        env:
+          PERF_DASHBOARD_URL: ${{ steps.publication.outputs.url }}
+          PERF_HISTORY_DIRECTORY: existing-pages/${{ steps.publication.outputs.directory }}/data
+        run: |
+          set -euo pipefail
+          mkdir -p performance-site/data
+
+          if [ -d "$PERF_HISTORY_DIRECTORY" ]; then
+            cp -R "$PERF_HISTORY_DIRECTORY"/. performance-site/data/
+          fi
+          cp -R scripts/perf/dashboard/. performance-site/
+
+          python3 scripts/perf/update_history.py \
+            --memory perf-results/perf_median_memory.json \
+            --physical perf-results/perf_frame_physical.json \
+            --data-directory performance-site/data \
+            --date "$(date -u +%F)" \
+            --generated-at "$(date -u +%FT%TZ)" \
+            --repository "$GITHUB_REPOSITORY" \
+            --sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --flutter-version "$FLUTTER_VERSION" \
+            --summary-file performance-summary.md
+
+      - name: Deploy performance dashboard
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: performance-site
+          keep_files: true
+          destination_dir: ${{ steps.publication.outputs.directory }}
+          commit_message: "Publish FTL performance history for ${{ github.sha }}"
+
+      - name: Summarize published performance point
+        run: cat performance-summary.md >> "$GITHUB_STEP_SUMMARY"

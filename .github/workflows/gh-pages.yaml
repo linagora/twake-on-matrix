@@ -11,7 +11,8 @@ jobs:
     name: Deploy preview versions on pull requests
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
+      group: gh-pages-writes
+      cancel-in-progress: false
     permissions:
       deployments: write
       pull-requests: write
@@ -75,7 +76,7 @@ jobs:
         env:
           FOLDER: ${{ github.event.pull_request.number }}
         run: |
-          echo "URL=https://$GITHUB_REPOSITORY_OWNER.github.io/${GITHUB_REPOSITORY##*/}/$FOLDER" >> $GITHUB_OUTPUT
+          echo "URL=https://$GITHUB_REPOSITORY_OWNER.github.io/${GITHUB_REPOSITORY##*/}/$FOLDER" >> "$GITHUB_OUTPUT"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -84,7 +85,6 @@ jobs:
           publish_dir: build/web
           keep_files: true
           destination_dir: "${{ github.event.pull_request.number }}"
-          force_orphan: true
 
       - name: Find deployment comment
         uses: peter-evans/find-comment@v3
