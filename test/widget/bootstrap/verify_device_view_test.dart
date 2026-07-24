@@ -54,6 +54,15 @@ List<VerifyDeviceOption> _testOptions(BuildContext context) => [
 ];
 
 void main() {
+  group('chooser content', _chooserContentTests);
+  group('start verification', _startVerificationTests);
+  group('recovery key flow', _recoveryKeyFlowTests);
+  group('reset encryption flow', _resetEncryptionFlowTests);
+  group('initial state', _initialStateTests);
+  group('retry', _retryTests);
+}
+
+void _chooserContentTests() {
   testWidgets('VerifyDeviceScreen renders web modal content', (tester) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
@@ -99,7 +108,9 @@ void main() {
     expect(find.text('Not possible to verify?'), findsOneWidget);
     expect(find.text('Retry automatically'), findsOneWidget);
   });
+}
 
+void _startVerificationTests() {
   testWidgets('VerifyDeviceScreen invokes onStartVerification when '
       '"Use another device" is tapped', (tester) async {
     var startVerificationCalled = false;
@@ -190,7 +201,9 @@ void main() {
     expect(find.text('Verify this device'), findsOneWidget);
     expect(find.text('Use another device'), findsOneWidget);
   });
+}
 
+void _recoveryKeyFlowTests() {
   testWidgets('VerifyDeviceScreen shows recovery key form when '
       '"Use recovery key" is tapped, and X closes back to chooser '
       '(web modal only)', (tester) async {
@@ -309,7 +322,9 @@ void main() {
       expect(find.text('Device verified'), findsNothing);
     },
   );
+}
 
+void _resetEncryptionFlowTests() {
   testWidgets(
     'VerifyDeviceScreen shows reset confirm view when '
     '"Not possible to verify?" is tapped, and Cancel closes back to chooser',
@@ -424,7 +439,9 @@ void main() {
 
     expect(find.text('Reset complete'), findsNothing);
   });
+}
 
+void _initialStateTests() {
   testWidgets('VerifyDeviceScreen shows success view immediately when '
       'initialSuccess is true, and pops on Start chatting', (tester) async {
     await tester.pumpWidget(
@@ -478,7 +495,9 @@ void main() {
       expect(find.text('Verify this device'), findsOneWidget);
     },
   );
+}
 
+void _retryTests() {
   testWidgets(
     'VerifyDeviceScreen reacts to initialSuccess flipping to true on an '
     'already-mounted instance, mirroring BootstrapDialog re-rendering the '

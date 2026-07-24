@@ -70,8 +70,7 @@ class _VerifyDeviceScreenState extends State<VerifyDeviceScreen> {
         _showRetryError = false;
       });
     }
-    if (widget.initialError != oldWidget.initialError &&
-        widget.initialError) {
+    if (widget.initialError != oldWidget.initialError && widget.initialError) {
       setState(() => _showRetryError = true);
     }
   }
