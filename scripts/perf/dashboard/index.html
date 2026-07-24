@@ -57,11 +57,11 @@
             <option value="all">Tout l’historique</option>
           </select>
         </label>
-        <label>
+        <label id="filter-scenario">
           <span>Parcours testé</span>
           <select id="scenario-select"></select>
         </label>
-        <label>
+        <label id="filter-checkpoint">
           <span>Moment du parcours</span>
           <select id="checkpoint-select"></select>
         </label>
@@ -97,7 +97,7 @@
 
         <article class="metric-card metric-fps" data-metric="fps">
           <div class="metric-heading">
-            <span class="metric-icon">FPS</span>
+            <span class="metric-icon" id="metric-icon-fps">FPS</span>
             <span class="source-badge physical" id="source-fps">1 téléphone physique</span>
           </div>
           <strong id="value-fps">—</strong>

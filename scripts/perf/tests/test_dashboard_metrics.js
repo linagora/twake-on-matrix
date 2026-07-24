@@ -16,6 +16,8 @@ const {
   isMetricApplicable,
   isProfileRecord,
   maximumMarkerDelta,
+  metricSelection,
+  normalizeHealthIndex,
   platformDataPaths,
   shouldFallbackToWeb,
   summarizeRoomEntries,
@@ -102,6 +104,33 @@ test("keeps FPS out of transition scenarios", () => {
   assert.equal(isMetricApplicable(fpsMetric, "web_navigation"), false);
   assert.equal(isMetricApplicable(fpsMetric, "web_room_scroll"), true);
   assert.equal(isMetricApplicable({}, "web_navigation"), true);
+});
+
+test("normalizes the CI fluidity index without exposing absolute FPS", () => {
+  assert.deepEqual(
+    normalizeHealthIndex([20, null, 22, 18], false),
+    [100, null, 110, 90]
+  );
+  assert.deepEqual(
+    normalizeHealthIndex([800, 880], true),
+    [100, 90.9]
+  );
+  assert.deepEqual(normalizeHealthIndex([null, 0], false), [null, null]);
+});
+
+test("keeps Web fluidity and transition sources independent", () => {
+  assert.deepEqual(
+    metricSelection(
+      { scenario: "web_room_scroll", checkpoint: "scroll_completed" },
+      "web_navigation",
+      "room_opened"
+    ),
+    { scenario: "web_room_scroll", label: "scroll_completed" }
+  );
+  assert.deepEqual(
+    metricSelection({}, "nav_cycles", "room_enter_all"),
+    { scenario: "nav_cycles", label: "room_enter_all" }
+  );
 });
 
 test("uses the final cycle RSS for the room-opening summary", () => {
