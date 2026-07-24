@@ -1,13 +1,44 @@
 import 'dart:async';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:animations/animations.dart';
+import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/url_launcher.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:matrix/matrix.dart';
 
 extension UiaRequestManager on MatrixState {
+  /// Same [ConfirmationDialogBuilder] used by [showConfirmAlertDialog], with
+  /// a password [TextField] as its `additionalWidgetContent` — replaces
+  /// `adaptive_dialog`'s `showTextInputDialog` with the project's own
+  /// dialog design while keeping the exact same input/cancel contract.
+  Future<String?> _showPasswordInputDialog(BuildContext context) async {
+    final l10n = L10n.of(context)!;
+    final controller = TextEditingController();
+    return showModal<String?>(
+      context: context,
+      configuration: const FadeScaleTransitionConfiguration(),
+      builder: (context) => ConfirmationDialogBuilder(
+        title: l10n.pleaseEnterYourPassword,
+        confirmText: l10n.ok,
+        cancelText: l10n.cancel,
+        additionalWidgetContent: TextField(
+          controller: controller,
+          autofocus: true,
+          obscureText: true,
+          minLines: 1,
+          maxLines: 1,
+          decoration: const InputDecoration(hintText: '******'),
+        ),
+        onConfirmButtonAction: () => Navigator.of(context).pop(controller.text),
+        onCancelButtonAction: () => Navigator.of(context).pop(null),
+      ),
+    );
+  }
+
   Future uiaRequestHandler(UiaRequest uiaRequest) async {
     final l10n = L10n.of(context)!;
     try {
@@ -22,20 +53,9 @@ extension UiaRequestManager on MatrixState {
         case AuthenticationTypes.password:
           final input =
               cachedPassword ??
-              (await showTextInputDialog(
-                context: TwakeApp.routerKey.currentContext!,
-                title: l10n.pleaseEnterYourPassword,
-                okLabel: l10n.ok,
-                cancelLabel: l10n.cancel,
-                textFields: [
-                  const DialogTextField(
-                    minLines: 1,
-                    maxLines: 1,
-                    obscureText: true,
-                    hintText: '******',
-                  ),
-                ],
-              ))?.single;
+              await _showPasswordInputDialog(
+                TwakeApp.routerKey.currentContext!,
+              );
           if (input == null || input.isEmpty) {
             return uiaRequest.cancel();
           }
@@ -60,8 +80,8 @@ extension UiaRequestManager on MatrixState {
               clientSecret: currentClientSecret,
             ),
           );
-          if (OkCancelResult.ok ==
-              await showOkCancelAlertDialog(
+          if (ConfirmResult.ok ==
+              await showConfirmAlertDialog(
                 useRootNavigator: false,
                 context: TwakeApp.routerKey.currentContext!,
                 title: l10n.weSentYouAnEmail,
@@ -84,8 +104,8 @@ extension UiaRequestManager on MatrixState {
             '${client.homeserver}/_matrix/client/r0/auth/$stage/fallback/web?session=${uiaRequest.session}',
           );
           UrlLauncher(context, url: url.toString()).openUrlInAppBrowser();
-          if (OkCancelResult.ok ==
-              await showOkCancelAlertDialog(
+          if (ConfirmResult.ok ==
+              await showConfirmAlertDialog(
                 useRootNavigator: false,
                 message: l10n.pleaseFollowInstructionsOnWeb,
                 context: TwakeApp.routerKey.currentContext!,

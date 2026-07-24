@@ -100,6 +100,18 @@ class ImagePaths {
 
   static String get mascotNoChat => _getImagePath('ic_mascot_no_chat.svg');
 
+  static String get mascotVerifyDevices =>
+      _getImagePath('ic_mascot_verify_devices.svg');
+
+  static String get mascotDeviceVerified =>
+      _getImagePath('ic_mascot_device_verified.svg');
+
+  static String get mascotResetEncryption =>
+      _getImagePath('ic_mascot_reset_encryption.svg');
+
+  static String get mascotVerificationFailed =>
+      _getImagePath('ic_mascot_verification_failed.svg');
+
   static String get mascotDataAndStorage =>
       _getImagePath('data-and-storage.svg');
 

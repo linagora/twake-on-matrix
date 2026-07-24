@@ -1,10 +1,11 @@
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/pages/bootstrap/tom_bootstrap_dialog.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
+import 'package:fluffychat/domain/keychain_sharing/tom_encryption_reset_service.dart';
+import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
+import 'package:fluffychat/pages/bootstrap/verify_device_screen.dart';
 import 'package:fluffychat/utils/dialog/twake_dialog.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/twake_snackbar.dart';
 import 'package:fluffychat/widgets/adaptive_flat_button.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -23,32 +24,40 @@ class BootstrapDialog extends StatefulWidget {
 
   const BootstrapDialog({super.key, this.wipe = false, required this.client});
 
-  Future<bool?> show() => PlatformInfos.isCupertinoStyle
-      ? TwakeDialog.showCupertinoDialogFullScreen(builder: () => this)
-      : TwakeDialog.showDialogFullScreen(builder: () => this);
+  Future<bool?> show() => TwakeDialog.showDialogFullScreen(builder: () => this);
 
   @override
   BootstrapDialogState createState() => BootstrapDialogState();
 }
 
 class BootstrapDialogState extends State<BootstrapDialog> {
-  final TextEditingController _recoveryKeyTextEditingController =
-      TextEditingController();
-
   late Bootstrap bootstrap;
-
-  String? _recoveryKeyInputError;
-
-  bool _recoveryKeyInputLoading = false;
 
   String? titleText;
 
   bool _recoveryKeyStored = false;
   bool _recoveryKeyCopied = false;
 
+  /// True once bootstrap has reached [BootstrapState.openExistingSsss] (the
+  /// verify-device flow) — kept true through its later auto-driven states so
+  /// the legacy dialog UI below never takes over mid-flow.
+  bool _showVerifyDeviceScreen = false;
+
+  /// True while re-running bootstrap via "Retry automatically" (issue #3218:
+  /// forces another try of automatic setup) — if it reaches
+  /// [BootstrapState.done], the chooser's own success view is shown instead
+  /// of the legacy dialog, same as the recovery-key/verify-device flows.
+  bool _isRetrying = false;
+
   bool? _storeInSecureStorage = false;
 
   bool? _wipe;
+
+  String? _prefilledRecoveryKey;
+
+  /// Set once a retry's automatic unlock attempt finishes, so the build
+  /// below can show success/error instead of re-asking via the chooser.
+  bool? _retrySucceeded;
 
   String get _secureStorageKey =>
       'ssss_recovery_key_${bootstrap.client.userID}';
@@ -72,16 +81,149 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     super.initState();
   }
 
-  void _createBootstrap(bool wipe) async {
+  void _createBootstrap(
+    bool wipe, {
+    bool isRetry = false,
+    bool resetToLegacyFlow = false,
+  }) async {
     _wipe = wipe;
     titleText = null;
     _recoveryKeyStored = false;
+    // A retry is always triggered from the chooser (VerifyDeviceScreen), so
+    // keep showing it while bootstrap re-runs — resetting this to false
+    // would let the legacy AlertDialog below take over on every build until
+    // bootstrap reaches a new state, hiding both progress and any error.
+    // `resetToLegacyFlow` is the one caller that wants the opposite: a
+    // non-ToM "recovery key lost" reset falls back to the legacy dialog
+    // (askNewSsss's own copy-key screen), same as before the verify-device
+    // flow existed.
+    _showVerifyDeviceScreen = resetToLegacyFlow
+        ? false
+        : (isRetry || _showVerifyDeviceScreen);
+    _isRetrying = isRetry;
+    _retrySucceeded = null;
     bootstrap = widget.client.encryption!.bootstrap(
       onUpdate: (_) => setState(() {}),
     );
     final key = await const FlutterSecureStorage().read(key: _secureStorageKey);
     if (key == null) return;
-    _recoveryKeyTextEditingController.text = key;
+    if (!mounted) return;
+    setState(() => _prefilledRecoveryKey = key);
+  }
+
+  /// Unlocks SSSS with [recoveryKey] and completes cross-signing/key-backup
+  /// setup, shared by the recovery-key form and the automatic retry path.
+  Future<bool> _unlockWithRecoveryKey(String recoveryKey) async {
+    try {
+      await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey);
+      Logs().d('SSSS unlocked');
+      await bootstrap.client.encryption!.crossSigning.selfSign(
+        keyOrPassphrase: recoveryKey,
+      );
+      Logs().d('Successful elfsigned');
+      await bootstrap.openExistingSsss();
+      await KeychainSharingManager.saveRecoveryKey(
+        userId: bootstrap.client.userID,
+        recoveryKey: recoveryKey,
+      );
+      return true;
+    } catch (e, s) {
+      Logs().w('Unable to unlock SSSS', e, s);
+      return false;
+    }
+  }
+
+  /// Handles "Not possible to verify?" → Reset, matching the pre-verify-
+  /// device-flow branching: ToM-backed accounts wipe and re-upload the new
+  /// key automatically via [TomEncryptionResetService] — headless, no
+  /// dialog of its own, so the chooser's own Reset button is the only
+  /// loading UI shown until this completes (key is recoverable from the
+  /// vault, no manual copy step); accounts without a ToM backend have
+  /// nowhere to recover a lost key from, so they fall back to the legacy
+  /// local bootstrap flow, which forces the user to see and save their new
+  /// recovery key via the copy-key screen in [build].
+  Future<bool> _resetEncryption(BuildContext context) async {
+    if (Matrix.of(context).twakeSupported) {
+      final result = await TomEncryptionResetService(
+        client: widget.client,
+      ).reset();
+      if (!context.mounted) return result == TomEncryptionResetResult.success;
+      switch (result) {
+        case TomEncryptionResetResult.success:
+          break;
+        case TomEncryptionResetResult.wipeFailed:
+          TwakeSnackBar.show(context, L10n.of(context)!.cannotEnableKeyBackup);
+        case TomEncryptionResetResult.uploadFailed:
+        case TomEncryptionResetResult.bootstrapFailed:
+          TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
+      }
+      return result == TomEncryptionResetResult.success;
+    }
+    _createBootstrap(true, resetToLegacyFlow: true);
+    return false;
+  }
+
+  /// Auto-attempts unlocking with the cached recovery key when a retry
+  /// reaches [BootstrapState.openExistingSsss] — without this, retry just
+  /// re-lands on the same chooser screen it started from, looking like it
+  /// did nothing. Falls straight to the error view when there's no cached
+  /// key to retry with.
+  void _autoRetryOpenExistingSsss() {
+    final recoveryKey = _prefilledRecoveryKey;
+    if (recoveryKey == null) {
+      setState(() => _retrySucceeded = false);
+      return;
+    }
+    _unlockWithRecoveryKey(recoveryKey).then((success) {
+      if (!mounted) return;
+      setState(() => _retrySucceeded = success);
+    });
+  }
+
+  Widget _buildVerifyDeviceScreen(BuildContext context) {
+    return VerifyDeviceScreen(
+      onRetry: () => _createBootstrap(_wipe ?? false, isRetry: true),
+      initialRecoveryKey: _prefilledRecoveryKey,
+      initialSuccess:
+          _isRetrying &&
+          (_retrySucceeded == true || bootstrap.state == BootstrapState.done),
+      initialError:
+          _isRetrying &&
+          (_retrySucceeded == false || bootstrap.state == BootstrapState.error),
+      onStartVerification: () async {
+        await widget.client.updateUserDeviceKeys();
+        final deviceKeys = widget.client.userDeviceKeys[widget.client.userID];
+        if (deviceKeys == null) return null;
+        try {
+          return await deviceKeys.startVerification();
+        } catch (e, s) {
+          Logs().w('Unable to start verification', e, s);
+          return null;
+        }
+      },
+      onVerifyRecoveryKey: _unlockWithRecoveryKey,
+      onResetEncryption: () => _resetEncryption(context),
+      options: [
+        VerifyDeviceOption(
+          icon: Icons.smartphone_outlined,
+          title: L10n.of(context)!.useAnotherDevice,
+          subtitle: L10n.of(context)!.useAnotherDeviceDescription,
+          isUseAnotherDevice: true,
+        ),
+        VerifyDeviceOption(
+          icon: Icons.key_outlined,
+          title: L10n.of(context)!.useRecoveryKeyTitle,
+          subtitle: L10n.of(context)!.useRecoveryKeyDescription,
+          isUseRecoveryKey: true,
+        ),
+        VerifyDeviceOption(
+          icon: Icons.key_off_outlined,
+          title: L10n.of(context)!.notPossibleToVerify,
+          subtitle: L10n.of(context)!.notPossibleToVerifyDescription,
+          isNotPossibleToVerify: true,
+        ),
+      ],
+    );
   }
 
   @override
@@ -227,178 +369,14 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           break;
         case BootstrapState.openExistingSsss:
           _recoveryKeyStored = true;
-          return Scaffold(
-            appBar: AppBar(
-              centerTitle: true,
-              leading: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              title: Text(L10n.of(context)!.chatBackup),
-            ),
-            body: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: TwakeThemes.columnWidth * 1.5,
-                ),
-                child: ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: [
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                      ),
-                      trailing: Icon(
-                        Icons.info_outlined,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      subtitle: Text(
-                        L10n.of(context)!.pleaseEnterRecoveryKeyDescription,
-                      ),
-                    ),
-                    const Divider(height: 32),
-                    TextField(
-                      minLines: 1,
-                      maxLines: 2,
-                      autocorrect: false,
-                      readOnly: _recoveryKeyInputLoading,
-                      contextMenuBuilder: mobileTwakeContextMenuBuilder,
-                      autofillHints: _recoveryKeyInputLoading
-                          ? null
-                          : [AutofillHints.password],
-                      controller: _recoveryKeyTextEditingController,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.all(16),
-                        hintStyle: const TextStyle(),
-                        hintText: L10n.of(context)!.recoveryKey,
-                        errorText: _recoveryKeyInputError,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).primaryColor,
-                      ),
-                      icon: _recoveryKeyInputLoading
-                          ? const CircularProgressIndicator.adaptive()
-                          : const Icon(Icons.lock_open_outlined),
-                      label: Text(L10n.of(context)!.unlockOldMessages),
-                      onPressed: _recoveryKeyInputLoading
-                          ? null
-                          : () async {
-                              setState(() {
-                                _recoveryKeyInputError = null;
-                                _recoveryKeyInputLoading = true;
-                              });
-                              try {
-                                final key =
-                                    _recoveryKeyTextEditingController.text;
-                                await bootstrap.newSsssKey!.unlock(
-                                  keyOrPassphrase: key,
-                                );
-                                Logs().d('SSSS unlocked');
-                                await bootstrap.client.encryption!.crossSigning
-                                    .selfSign(keyOrPassphrase: key);
-                                Logs().d('Successful elfsigned');
-                                await bootstrap.openExistingSsss();
-                                await KeychainSharingManager.saveRecoveryKey(
-                                  userId: bootstrap.client.userID,
-                                  recoveryKey: key,
-                                );
-                              } catch (e, s) {
-                                Logs().w('Unable to unlock SSSS', e, s);
-                                setState(
-                                  () => _recoveryKeyInputError = L10n.of(
-                                    context,
-                                  )!.oopsSomethingWentWrong,
-                                );
-                              } finally {
-                                setState(
-                                  () => _recoveryKeyInputLoading = false,
-                                );
-                              }
-                            },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Text(L10n.of(context)!.or),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.cast_connected_outlined),
-                      label: Text(L10n.of(context)!.verifyWithAnotherDevice),
-                      onPressed: _recoveryKeyInputLoading
-                          ? null
-                          : () async {
-                              final req =
-                                  await TwakeDialog.showFutureLoadingDialogFullScreen(
-                                    future: () => widget
-                                        .client
-                                        .userDeviceKeys[widget.client.userID!]!
-                                        .startVerification(),
-                                  );
-                              if (req.error != null) return;
-                              await KeyVerificationDialog(
-                                request: req.result!,
-                              ).show(context);
-                              Navigator.of(context, rootNavigator: false).pop();
-                            },
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                      ),
-                      icon: const Icon(Icons.delete_outlined),
-                      label: Text(L10n.of(context)!.recoveryKeyLost),
-                      onPressed: _recoveryKeyInputLoading
-                          ? null
-                          : () async {
-                              if (OkCancelResult.ok ==
-                                  await showOkCancelAlertDialog(
-                                    useRootNavigator: false,
-                                    context: context,
-                                    title: L10n.of(context)!.recoveryKeyLost,
-                                    message: L10n.of(context)!.wipeChatBackup,
-                                    okLabel: L10n.of(context)!.ok,
-                                    cancelLabel: L10n.of(context)!.cancel,
-                                    isDestructiveAction: true,
-                                  )) {
-                                if (Matrix.of(context).twakeSupported) {
-                                  await TomBootstrapDialog(
-                                        client: widget.client,
-                                        wipe: true,
-                                        wipeRecovery: true,
-                                      )
-                                      .show(context)
-                                      .then(
-                                        (value) => Navigator.of(
-                                          context,
-                                          rootNavigator: false,
-                                        ).pop<bool>(false),
-                                      );
-                                } else {
-                                  _createBootstrap(true);
-                                }
-                              }
-                            },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
+          _showVerifyDeviceScreen = true;
+          if (_isRetrying && _retrySucceeded == null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _autoRetryOpenExistingSsss();
+            });
+          }
+          break;
         case BootstrapState.askWipeCrossSigning:
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
@@ -462,6 +440,16 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           );
           break;
       }
+    }
+
+    // Once the verify-device flow has started (or a "Retry automatically"
+    // triggered from it is re-running bootstrap), keep showing this screen
+    // through the rest of bootstrap's auto-driven states (cross-signing
+    // setup, key backup, done/error) — those states advance on their own
+    // via the addPostFrameCallback calls above, but the legacy AlertDialog
+    // below must never take over mid-flow.
+    if (_showVerifyDeviceScreen) {
+      return _buildVerifyDeviceScreen(context);
     }
 
     return AlertDialog(
