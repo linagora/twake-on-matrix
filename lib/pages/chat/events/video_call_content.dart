@@ -24,47 +24,39 @@ class VideoCallContent extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: LinagoraSpacing.base),
-            child: Text(
-              l10n.videoCallStartedTitle,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurface,
-              ),
-            ),
+          Text(
+            l10n.videoCallStartedTitle,
+            style: theme
+                .extension<LinagoraTextThemeExtension>()!
+                .bodyMedium4
+                .copyWith(color: theme.colorScheme.onSurface),
           ),
           const SizedBox(height: LinagoraSpacing.base),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: LinagoraSpacing.base,
-            ),
-            child: OverflowBar(
-              spacing: LinagoraSpacing.base,
-              overflowSpacing: LinagoraSpacing.base,
-              overflowAlignment: OverflowBarAlignment.start,
-              children: [
-                LinagoraButton(
-                  label: l10n.videoCallCopyLink,
-                  icon: Icons.open_in_new,
-                  size: buttonSize,
-                  variant: LinagoraButtonVariant.outlined,
-                  onPressed: () async {
-                    await TwakeClipboard.instance.copyText(callUrl);
-                    if (context.mounted) {
-                      TwakeSnackBar.show(context, l10n.copiedToClipboard);
-                    }
-                  },
-                ),
-                LinagoraButton(
-                  label: l10n.videoCallJoinCall,
-                  icon: Icons.videocam_outlined,
-                  size: buttonSize,
-                  variant: LinagoraButtonVariant.filled,
-                  onPressed: () =>
-                      UrlLauncher(context, url: callUrl).launchUrl(),
-                ),
-              ],
-            ),
+          OverflowBar(
+            spacing: LinagoraSpacing.base,
+            overflowSpacing: LinagoraSpacing.base,
+            overflowAlignment: OverflowBarAlignment.start,
+            children: [
+              LinagoraButton(
+                label: l10n.videoCallCopyLink,
+                icon: Icons.open_in_new,
+                size: buttonSize,
+                variant: LinagoraButtonVariant.outlined,
+                onPressed: () async {
+                  await TwakeClipboard.instance.copyText(callUrl);
+                  if (context.mounted) {
+                    TwakeSnackBar.show(context, l10n.copiedToClipboard);
+                  }
+                },
+              ),
+              LinagoraButton(
+                label: l10n.videoCallJoinCall,
+                icon: Icons.videocam_outlined,
+                size: buttonSize,
+                variant: LinagoraButtonVariant.filled,
+                onPressed: () => UrlLauncher(context, url: callUrl).launchUrl(),
+              ),
+            ],
           ),
         ],
       ),

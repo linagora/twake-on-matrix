@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_matrix_html/flutter_html.dart';
+import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart';
 import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
@@ -69,11 +70,14 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
     final effectiveDefaultTextStyle = ambientStyle.merge(defaultTextStyle);
     final effectiveLinkStyle = ambientStyle.merge(
       linkStyle ??
-          themeData.textTheme.bodyMedium?.copyWith(
-            color: themeData.colorScheme.secondary,
-            decoration: TextDecoration.underline,
-            decorationColor: themeData.colorScheme.secondary,
-          ),
+          themeData
+              .extension<LinagoraTextThemeExtension>()!
+              .bodyMedium4
+              .copyWith(
+                color: themeData.colorScheme.secondary,
+                decoration: TextDecoration.underline,
+                decorationColor: themeData.colorScheme.secondary,
+              ),
     );
     return Html(
       data: renderHtml,
