@@ -153,19 +153,35 @@ def _validate_raw_value_key(checkpoint: dict, key: str, location: str) -> None:
         _validate_values(checkpoint, key.removesuffix("_values"), location)
 
 
+def _validate_identities(checkpoint: dict, location: str) -> None:
+    for identity in ("scenario", "label"):
+        _validate_identity(checkpoint, identity, location)
+
+
+def _validate_numeric_metrics(checkpoint: dict, location: str) -> None:
+    for key, metric in checkpoint.items():
+        _validate_numeric_metric(key, metric, location)
+
+
+def _validate_required_metrics(checkpoint: dict, location: str) -> None:
+    for metric in REQUIRED_METRICS:
+        _validate_required_metric(checkpoint, metric, location)
+
+
+def _validate_raw_values(checkpoint: dict, location: str) -> None:
+    for key in checkpoint:
+        _validate_raw_value_key(checkpoint, key, location)
+
+
 def _validate_checkpoint(checkpoint: Any, location: str) -> dict:
     if not isinstance(checkpoint, dict):
         raise WebHistoryError(f"{location} must be an object")
     if checkpoint.get("sample_count") != REPETITIONS:
         raise WebHistoryError(f"{location} must aggregate exactly 3 repetitions")
-    for identity in ("scenario", "label"):
-        _validate_identity(checkpoint, identity, location)
-    for key, metric in checkpoint.items():
-        _validate_numeric_metric(key, metric, location)
-    for metric in REQUIRED_METRICS:
-        _validate_required_metric(checkpoint, metric, location)
-    for key in checkpoint:
-        _validate_raw_value_key(checkpoint, key, location)
+    _validate_identities(checkpoint, location)
+    _validate_numeric_metrics(checkpoint, location)
+    _validate_required_metrics(checkpoint, location)
+    _validate_raw_values(checkpoint, location)
     return checkpoint
 
 
