@@ -13,12 +13,14 @@ const {
   hasEnoughFrames,
   hasEnoughWebFrames,
   historyWindow,
+  isCurrentPlatformLoad,
   isMetricApplicable,
   isProfileRecord,
   maximumMarkerDelta,
   metricSelection,
   normalizeHealthIndex,
   platformDataPaths,
+  platformRecordCacheKey,
   shouldFallbackToWeb,
   summarizeRoomEntries,
 } = globalThis.PerfMetrics;
@@ -188,6 +190,20 @@ test("keeps Android and Web history paths and families separate", () => {
     records: "data/web",
     family: "web",
   });
+});
+
+test("keeps platform caches and asynchronous loads isolated", () => {
+  assert.equal(
+    platformRecordCacheKey("android", "2026-07-24"),
+    "android:2026-07-24"
+  );
+  assert.equal(
+    platformRecordCacheKey("web", "2026-07-24"),
+    "web:2026-07-24"
+  );
+  assert.equal(isCurrentPlatformLoad("web", 3, "web", 3), true);
+  assert.equal(isCurrentPlatformLoad("android", 3, "web", 3), false);
+  assert.equal(isCurrentPlatformLoad("web", 2, "web", 3), false);
 });
 
 test("falls back to Web only when the default Android index is missing", () => {
