@@ -11,6 +11,7 @@
     isProfileRecord,
     maximumMarkerDelta,
     platformDataPaths,
+    shouldFallbackToWeb,
   } = globalThis.PerfMetrics;
 
   const SCENARIO_LABELS = {
@@ -654,7 +655,15 @@
       PLATFORMS[state.platform].indexPath,
       { cache: "no-store" }
     );
-    if (!response.ok) throw new Error(`L’index des mesures répond HTTP ${response.status}`);
+    if (!response.ok) {
+      const error = new Error(
+        response.status === 404
+          ? `Aucun historique ${state.platform === "web" ? "Web" : "Android"} publié pour le moment`
+          : `L’index des mesures répond HTTP ${response.status}`
+      );
+      error.httpStatus = response.status;
+      throw error;
+    }
     const index = await response.json();
     validateIndex(index);
     return index;
@@ -710,6 +719,16 @@
     await load();
   }
 
+  async function loadInitialPlatform() {
+    try {
+      await load();
+    } catch (error) {
+      if (!shouldFallbackToWeb(state.platform, error.httpStatus)) throw error;
+      elements["platform-select"].value = "web";
+      await switchPlatform();
+    }
+  }
+
   async function reloadSelectedRange() {
     await loadSelectedRecords();
     populateScenarios();
@@ -730,5 +749,5 @@
   elements["scenario-select"].addEventListener("change", populateCheckpoints);
   elements["checkpoint-select"].addEventListener("change", render);
   configurePlatformContent();
-  load().catch(showDatasetError);
+  loadInitialPlatform().catch(showDatasetError);
 })();
