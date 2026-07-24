@@ -1,3 +1,28 @@
+## [2.23.4] - 2026-07-24
+### Changed
+- #2787: TW-2786: Obtain FQDN from UserInfo for profile page edit button
+- #3273: TW-3271: Start direct support chat without avatar upload
+- #3175: TW-3134: Rewire Settings/Blocked Users search to TextSearch (Part 5)
+- #3173: TW-3133: Rewire contacts search call sites to TextSearch (Part 4)
+- #3275: TW-3269: Preload message alignment setting on web for UI consistency
+- #3233: Move contacts invitation to Riverpod view model
+
+### Fixed
+- #3272: Make video call button react to well-known updates
+- #3253: Preserve media aspect ratios
+- #3229: Fix sync error header visibility and Sentry reporting
+- #3256: TW-3254: Remove duplicate search bar when adding group member
+- TW-3277: Mount TextField after tapping search in contacts selection
+- TW-3240: Keep message composer bar height and alignment consistent
+
+### Tests
+- #3241: Enable web E2E on PR creation
+- #3282: Address PR #3279 review feedback
+- #3279: Correct FTL perf APK paths after artifact download
+- #3246: Fix diacritic contact search fixture
+- #3245: Fix contact search E2E title query
+- Stabilize chat group message visibility
+
 ## [2.23.3] - 2026-07-10
 ### Fixed
 - #3251: Keep well-known discovery across restarts by re-fetching host
