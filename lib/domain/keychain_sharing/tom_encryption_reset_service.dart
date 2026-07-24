@@ -102,26 +102,32 @@ class TomEncryptionResetService {
     required bool wipe,
   }) async {
     while (bootstrap.state != BootstrapState.askNewSsss) {
-      switch (bootstrap.state) {
-        case BootstrapState.askWipeSsss:
-          bootstrap.wipeSsss(wipe);
-        case BootstrapState.askBadSsss:
-          bootstrap.ignoreBadSecrets(true);
-        case BootstrapState.askUseExistingSsss:
-          bootstrap.useExistingSsss(!wipe);
-        case BootstrapState.askUnlockSsss:
-          bootstrap.unlockedSsss();
-        case BootstrapState.error:
-          throw BootstrapBadStateException('Bootstrap reached error state');
-        default:
-          throw BootstrapBadStateException(
-            'Unexpected bootstrap state ${bootstrap.state}',
-          );
-      }
+      _advancePreKeyState(bootstrap, wipe: wipe);
     }
     await bootstrap.newSsss();
     if (bootstrap.state == BootstrapState.error) {
       throw BootstrapBadStateException('newSsss() failed');
+    }
+  }
+
+  /// Advances [bootstrap] one step through the states leading up to
+  /// `askNewSsss` (wiping or reusing an existing SSSS key).
+  void _advancePreKeyState(Bootstrap bootstrap, {required bool wipe}) {
+    switch (bootstrap.state) {
+      case BootstrapState.askWipeSsss:
+        bootstrap.wipeSsss(wipe);
+      case BootstrapState.askBadSsss:
+        bootstrap.ignoreBadSecrets(true);
+      case BootstrapState.askUseExistingSsss:
+        bootstrap.useExistingSsss(!wipe);
+      case BootstrapState.askUnlockSsss:
+        bootstrap.unlockedSsss();
+      case BootstrapState.error:
+        throw BootstrapBadStateException('Bootstrap reached error state');
+      default:
+        throw BootstrapBadStateException(
+          'Unexpected bootstrap state ${bootstrap.state}',
+        );
     }
   }
 
