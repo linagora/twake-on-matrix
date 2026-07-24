@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -69,17 +68,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
       return;
     }
 
-    final assignedUsers = members;
-
-    final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
-      searchTerm,
-      assignedUsers,
-      fieldExtractors: [
-        (user) => [user.displayName ?? ''],
-        (user) => [user.id],
-      ],
-      options: const SearchOptions(diacriticSensitive: false),
-    );
+    final searchResults = members.searchUsers(searchTerm);
 
     Logs().d(
       "AssignRolesController::handleSearchResults: $searchTerm, results: ${searchResults.length}",

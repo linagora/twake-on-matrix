@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/room/unban_user_state.dart';
@@ -65,15 +64,7 @@ class RemovedController extends State<Removed> with SearchDebouncerMixin {
       return;
     }
 
-    final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
-      searchTerm,
-      removedMember,
-      fieldExtractors: [
-        (user) => [user.displayName ?? ''],
-        (user) => [user.id],
-      ],
-      options: const SearchOptions(diacriticSensitive: false),
-    );
+    final searchResults = removedMember.searchUsers(searchTerm);
 
     Logs().d(
       "RemovedController::handleSearchResults: $searchTerm, results: ${searchResults.length}",

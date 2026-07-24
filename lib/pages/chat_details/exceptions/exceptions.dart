@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
 import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/user_extension.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -73,17 +72,7 @@ class ExceptionsController extends State<Exceptions>
       return;
     }
 
-    final exceptionUsers = exceptionsMember;
-
-    final searchResults = getIt.get<SearchEngine>().matchAnyField<User>(
-      searchTerm,
-      exceptionUsers,
-      fieldExtractors: [
-        (user) => [user.displayName ?? ''],
-        (user) => [user.id],
-      ],
-      options: const SearchOptions(diacriticSensitive: false),
-    );
+    final searchResults = exceptionsMember.searchUsers(searchTerm);
 
     Logs().d(
       "ExceptionsController::handleSearchResults: $searchTerm, results: ${searchResults.length}",
