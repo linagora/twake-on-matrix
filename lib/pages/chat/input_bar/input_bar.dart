@@ -322,7 +322,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       }
       insertText = ':${isUnique ? '' : '${insertPack!}~'}$insertEmote: ';
       startText = replaceText.replaceAllMapped(
-        RegExp(r'(\s|^)(:(?:[-\w]+~)?[-\w]+)$'),
+        RegExp(r'(\s|^)(:(?:[-\w\p{L}]+~)?[-\w\p{L}]+)$', unicode: true),
         (Match m) => '${m[1]}$insertText',
       );
     }
@@ -332,10 +332,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       // match and capture usernames that start with the @ symbol,
       // where the @ symbol is either preceded by a whitespace character
       // or appears at the beginning of a line.
-      const insertMentionsRegex = r'(\s|^)(@[-\w]*)$';
-
       startText = replaceText.replaceAllMapped(
-        RegExp(insertMentionsRegex),
+        RegExp(r'(\s|^)(@[-\w\p{L}]*)$', unicode: true),
         (Match m) => '${m[1]}$insertText',
       );
     }
