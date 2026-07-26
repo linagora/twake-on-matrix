@@ -1914,12 +1914,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "verify": "Bestätigen",
+  "verify": "Verifizieren",
   "@verify": {
     "type": "text",
     "placeholders": {}
   },
-  "verifyStart": "Starte Verifikation",
+  "verifyStart": "Verifikation starten",
   "@verifyStart": {
     "type": "text",
     "placeholders": {}
@@ -2408,5 +2408,7 @@
   "noMoreResult": "Kein weiteres Ergebnis!",
   "matrixId": "Matrix-ID",
   "loadingStatus": "Status wird geladen ...",
-  "clear": "Leeren"
+  "clear": "Leeren",
+  "sActionPreviewHint": "Vorschau",
+  "phoneNumber": "Telefonnummer"
 }
