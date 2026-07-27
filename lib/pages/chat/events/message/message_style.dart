@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
@@ -68,7 +70,18 @@ class MessageStyle {
   static const double messageBubbleTabletRatioMaxWidth = 0.30;
   static const double iconContextMenuSize = 40;
 
-  static double defaultMessageBubbleWidth(BuildContext context) {
+  static double defaultMessageBubbleWidth(
+    BuildContext context, {
+    Event? event,
+  }) {
+    if (event?.isVideoOrImage == true &&
+        event?.isCaptionModeOrReply() == true) {
+      return min(
+        messageBubbleDesktopMaxWidth,
+        context.width * messageBubbleMobileRatioMaxWidth,
+      );
+    }
+
     return context.responsiveValue<double>(
       desktop: messageBubbleDesktopMaxWidth,
       tablet: context.width * messageBubbleTabletRatioMaxWidth,
@@ -82,7 +95,7 @@ class MessageStyle {
     Event? event,
     double? maxWidthScreen,
   }) {
-    final defaultWidth = defaultMessageBubbleWidth(context);
+    final defaultWidth = defaultMessageBubbleWidth(context, event: event);
 
     if (maxWidthScreen != null) {
       return maxWidthScreen - defaultWidth > 0
