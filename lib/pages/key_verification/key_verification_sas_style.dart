@@ -22,7 +22,8 @@ class KeyVerificationSasStyle {
   /// Figma #5C6268 — no matching token in the design system yet.
   static const Color supportingColor = Color(0xFF5C6268);
 
-  static Color get primaryColor => LinagoraSysColors.material().primary;
+  static Color primaryColor(BuildContext context) =>
+      Theme.of(context).colorScheme.primary;
 
   // Taller vertical padding than VerifyDeviceView's retry button.
   static const EdgeInsets filledButtonPadding = EdgeInsets.symmetric(
@@ -33,18 +34,21 @@ class KeyVerificationSasStyle {
   static const double gapEmojiButtons = 28;
   static const double startChattingButtonWidth = 142;
 
-  static TextStyle? titleStyle(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge?.copyWith(color: titleColor);
+  static TextStyle? titleStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleLarge
+      ?.copyWith(color: Theme.of(context).colorScheme.onSurface);
 
   static TextStyle? supportingStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium?.copyWith(color: supportingColor);
 
-  static TextStyle? textButtonStyle(BuildContext context) =>
-      Theme.of(context).textTheme.labelLarge?.copyWith(color: primaryColor);
+  static TextStyle? textButtonStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.labelLarge?.copyWith(color: primaryColor(context));
 
   static TextStyle? filledButtonTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.labelLarge?.copyWith(
-        color: LinagoraSysColors.material().onPrimary,
+        color: Theme.of(context).colorScheme.onPrimary,
       );
 
   static TextStyle recoveryKeyLabelStyle(BuildContext context) =>

@@ -60,7 +60,7 @@ class KeyVerificationEmojiView extends StatelessWidget {
             ),
             const SizedBox(width: KeyVerificationSasStyle.gapEmojiButtons),
             Material(
-              color: KeyVerificationSasStyle.primaryColor,
+              color: KeyVerificationSasStyle.primaryColor(context),
               borderRadius: BorderRadius.circular(
                 KeyVerificationSasStyle.buttonRadius,
               ),

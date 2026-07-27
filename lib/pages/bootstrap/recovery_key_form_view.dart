@@ -113,7 +113,7 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
         ),
         const SizedBox(height: _gapFieldToButton),
         Material(
-          color: KeyVerificationSasStyle.primaryColor,
+          color: KeyVerificationSasStyle.primaryColor(context),
           borderRadius: BorderRadius.circular(
             KeyVerificationSasStyle.buttonRadius,
           ),
