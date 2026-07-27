@@ -61,6 +61,21 @@ class MockDatabase extends Mock implements DatabaseApi {
   }
 
   @override
+  Future<void> storeAccountData(String type, Map<String, Object?> content) {
+    return Future.value();
+  }
+
+  @override
+  Future storeRoomAccountData(String roomId, BasicEvent event) {
+    return Future.value();
+  }
+
+  @override
+  Future<void> storePresence(String userId, CachedPresence presence) {
+    return Future.value();
+  }
+
+  @override
   Future<void> cacheCustomObject(
     String key,
     Map<String, Object?> content, {
@@ -82,6 +97,13 @@ Future<Client> getClient({
     httpClient: httpClient ?? FakeMatrixApi(),
     database: database ?? MockDatabase(),
   );
+  // Required for FakeMatrixApi's account-data PUT routes (used by SSSS/
+  // Bootstrap) to round-trip through `client.handleSync` instead of 404ing
+  // — only when the default FakeMatrixApi is actually in use, so callers
+  // passing their own httpClient aren't affected.
+  if (httpClient == null) {
+    FakeMatrixApi.client = client;
+  }
   await client.checkHomeserver(
     Uri.parse('https://fakeServer.notExisting'),
     checkWellKnown: false,
