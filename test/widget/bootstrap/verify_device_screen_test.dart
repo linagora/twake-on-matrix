@@ -13,6 +13,70 @@ import 'package:matrix/matrix.dart';
 
 import '../../fake_client.dart';
 
+Widget _wrap(Widget child) {
+  return MaterialApp(
+    // `VerifyDeviceViewStyle.settingTitleStyle` reads
+    // `LinagoraTextThemeExtension` (registered app-wide in `TwakeThemes`) —
+    // without it the style getter silently falls back to null, letting the
+    // option rows render at ambient (much larger) font size and overflow
+    // their fixed-height rows.
+    theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+    locale: const Locale('en'),
+    localizationsDelegates: const [
+      L10n.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+    ],
+    supportedLocales: LocalizationService.supportedLocales,
+    home: child,
+  );
+}
+
+List<VerifyDeviceOption> _testOptions(BuildContext context) => [
+  VerifyDeviceOption(
+    icon: Icons.smartphone_outlined,
+    title: L10n.of(context)!.useAnotherDevice,
+    subtitle: '',
+    isUseAnotherDevice: true,
+  ),
+  VerifyDeviceOption(
+    icon: Icons.key_outlined,
+    title: L10n.of(context)!.useRecoveryKeyTitle,
+    subtitle: '',
+    isUseRecoveryKey: true,
+  ),
+  VerifyDeviceOption(
+    icon: Icons.key_off_outlined,
+    title: L10n.of(context)!.notPossibleToVerify,
+    subtitle: '',
+    isNotPossibleToVerify: true,
+  ),
+];
+
+Widget _buildScreen({
+  required Client client,
+  BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
+  Future<bool> Function()? onResetEncryption,
+}) {
+  return ProviderScope(
+    overrides: [
+      bootstrapViewModelProvider(
+        client,
+        wipe: false,
+      ).overrideWithValue(bootstrapState),
+    ],
+    child: Builder(
+      builder: (context) => VerifyDeviceScreen(
+        client: client,
+        wipe: false,
+        options: _testOptions(context),
+        onResetEncryption: onResetEncryption ?? () async => false,
+      ),
+    ),
+  );
+}
+
 /// Exercises `VerifyDeviceScreen._buildContent`'s mapping from
 /// `VerifyDeviceUiState` to the actual rendered widget — the part a pure
 /// notifier unit test can't catch (e.g. a state added to the switch but
@@ -31,74 +95,11 @@ void main() {
     client = await getClient();
   });
 
-  Widget wrap(Widget child) {
-    return MaterialApp(
-      // `VerifyDeviceViewStyle.settingTitleStyle` reads
-      // `LinagoraTextThemeExtension` (registered app-wide in
-      // `TwakeThemes`) — without it the style getter silently falls back
-      // to null, letting the option rows render at ambient (much larger)
-      // font size and overflow their fixed-height rows.
-      theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-      locale: const Locale('en'),
-      localizationsDelegates: const [
-        L10n.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: LocalizationService.supportedLocales,
-      home: child,
-    );
-  }
-
-  List<VerifyDeviceOption> testOptions(BuildContext context) => [
-    VerifyDeviceOption(
-      icon: Icons.smartphone_outlined,
-      title: L10n.of(context)!.useAnotherDevice,
-      subtitle: '',
-      isUseAnotherDevice: true,
-    ),
-    VerifyDeviceOption(
-      icon: Icons.key_outlined,
-      title: L10n.of(context)!.useRecoveryKeyTitle,
-      subtitle: '',
-      isUseRecoveryKey: true,
-    ),
-    VerifyDeviceOption(
-      icon: Icons.key_off_outlined,
-      title: L10n.of(context)!.notPossibleToVerify,
-      subtitle: '',
-      isNotPossibleToVerify: true,
-    ),
-  ];
-
-  Widget buildScreen({
-    BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
-    Future<bool> Function()? onResetEncryption,
-  }) {
-    return ProviderScope(
-      overrides: [
-        bootstrapViewModelProvider(
-          client,
-          wipe: false,
-        ).overrideWithValue(bootstrapState),
-      ],
-      child: Builder(
-        builder: (context) => VerifyDeviceScreen(
-          client: client,
-          wipe: false,
-          options: testOptions(context),
-          onResetEncryption: onResetEncryption ?? () async => false,
-        ),
-      ),
-    );
-  }
-
   testWidgets('renders the chooser by default', (tester) async {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
-    await tester.pumpWidget(wrap(buildScreen()));
+    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
     await tester.pump();
 
     expect(tester.takeException(), isNull);
@@ -115,7 +116,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
-    await tester.pumpWidget(wrap(buildScreen()));
+    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
     await tester.pump();
 
     await tester.tap(find.text('Use recovery key'));
@@ -133,7 +134,7 @@ void main() {
       addTearDown(() => tester.binding.setSurfaceSize(null));
       await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
-      await tester.pumpWidget(wrap(buildScreen()));
+      await tester.pumpWidget(_wrap(_buildScreen(client: client)));
       await tester.pump();
 
       await tester.tap(find.text('Not possible to verify?'));
@@ -156,7 +157,7 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
     await tester.pumpWidget(
-      wrap(buildScreen(onResetEncryption: () async => true)),
+      _wrap(_buildScreen(client: client, onResetEncryption: () async => true)),
     );
     await tester.pump();
 
@@ -175,8 +176,9 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
     await tester.pumpWidget(
-      wrap(
-        buildScreen(
+      _wrap(
+        _buildScreen(
+          client: client,
           bootstrapState: const BootstrapVerifyDeviceState(retryFailed: true),
         ),
       ),
@@ -205,8 +207,9 @@ void main() {
     await tester.binding.setSurfaceSize(const Size(1024, 1400));
 
     await tester.pumpWidget(
-      wrap(
-        buildScreen(
+      _wrap(
+        _buildScreen(
+          client: client,
           bootstrapState: const BootstrapVerifyDeviceState(
             retrySucceeded: true,
           ),
@@ -225,7 +228,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.binding.setSurfaceSize(const Size(430, 1400));
 
-    await tester.pumpWidget(wrap(buildScreen()));
+    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
     await tester.pump();
 
     expect(tester.takeException(), isNull);
