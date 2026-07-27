@@ -42,6 +42,31 @@ class ComputeMedianTest(unittest.TestCase):
         self.assertEqual(checkpoint["fps_range"], 4.0)
         self.assertEqual(checkpoint["fps_stddev"], 2.0)
 
+    def test_optional_metric_does_not_reduce_checkpoint_sample_count(self) -> None:
+        Path(self.logs[1]).write_text(
+            "PERF_METRIC | web_navigation | room_opened"
+            " | transition_ms=102\n",
+            encoding="utf-8",
+        )
+        output = self.directory / "median.json"
+
+        compute_median(self.logs, str(output), include_values=True)
+
+        checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
+        self.assertEqual(checkpoint["sample_count"], 3)
+        self.assertEqual(checkpoint["fps"], 60.0)
+        self.assertEqual(checkpoint["fps_values"], [58.0, 62.0])
+        self.assertEqual(checkpoint["transition_ms_values"], [101.0, 102.0, 103.0])
+
+    def test_missing_checkpoint_reduces_sample_count(self) -> None:
+        Path(self.logs[1]).write_text("", encoding="utf-8")
+        output = self.directory / "median.json"
+
+        compute_median(self.logs, str(output))
+
+        checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
+        self.assertEqual(checkpoint["sample_count"], 2)
+
 
 if __name__ == "__main__":
     unittest.main()

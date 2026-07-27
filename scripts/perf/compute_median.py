@@ -66,48 +66,53 @@ def _entry_metrics(entry: dict) -> Iterator[tuple[str, str, str, float]]:
 
 def _aggregate_groups(
     logcat_files: list[str],
-) -> tuple[dict[tuple, list[float]], int]:
+) -> tuple[dict[tuple, list[float]], dict[tuple, int], int]:
     """Parse all logcat files and collect numeric values grouped by (scenario, label, key).
 
-    Returns (groups, total_parsed_lines).
+    Returns (groups, checkpoint_counts, total_parsed_lines).
+
+    A checkpoint can legitimately omit frame-derived metrics when no frame is
+    rendered during its measurement window. Count PERF_METRIC lines separately
+    so sample_count represents completed runs rather than the least common
+    optional metric.
     """
     groups: dict[tuple, list[float]] = defaultdict(list)
+    checkpoint_counts: dict[tuple, int] = defaultdict(int)
     total_lines = 0
     for f in logcat_files:
         entries = parse_logcat(f)
         total_lines += len(entries)
         for entry in entries:
+            checkpoint_counts[(entry['scenario'], entry['label'])] += 1
             for scenario, label, k, v in _entry_metrics(entry):
                 groups[(scenario, label, k)].append(v)
-    return groups, total_lines
+    return groups, checkpoint_counts, total_lines
 
 
 def _build_checkpoints(
     groups: dict[tuple, list[float]],
+    checkpoint_counts: dict[tuple, int],
     *,
     include_values: bool = False,
-) -> tuple[list[dict], dict[tuple, dict[str, int]]]:
+) -> list[dict]:
     """Compute medians and variance indicators for each (scenario, label) checkpoint.
 
-    Returns (checkpoints_list, cp_key_counts) where cp_key_counts is used to
-    detect partial runs (diverging sample counts across metric keys).
-
-    Invariant: each PERF_METRIC line emits *all* metrics for a checkpoint in one
-    shot, so all metric keys for a given (scenario, label) should share the same
-    len(values) across runs. sample_count takes the min as a safety net for partial
-    runs (logcat truncated or timeout mid-flush).
+    Optional frame metrics may have fewer values than checkpoint occurrences.
+    The checkpoint sample count therefore comes from PERF_METRIC line
+    occurrences, while each aggregate uses the values available for that metric.
     """
     checkpoints: dict[tuple, dict] = {}
-    cp_key_counts: dict[tuple, dict[str, int]] = defaultdict(dict)
 
     for (scenario, label, key), values in groups.items():
         cp_key = (scenario, label)
-        cp_key_counts[cp_key][key] = len(values)
         cp = checkpoints.setdefault(
             cp_key,
-            {'scenario': scenario, 'label': label, 'sample_count': len(values)},
+            {
+                'scenario': scenario,
+                'label': label,
+                'sample_count': checkpoint_counts[cp_key],
+            },
         )
-        cp['sample_count'] = min(cp['sample_count'], len(values))
         cp[key] = statistics.median(values)
         if include_values:
             cp[f'{key}_values'] = values
@@ -115,24 +120,11 @@ def _build_checkpoints(
             cp[f'{key}_stddev'] = round(statistics.stdev(values), 2)
             cp[f'{key}_range'] = round(max(values) - min(values), 2)
 
-    return list(checkpoints.values()), cp_key_counts
+    return list(checkpoints.values())
 
 
-def _emit_warnings(
-    output: list[dict],
-    cp_key_counts: dict[tuple, dict[str, int]],
-) -> None:
-    """Print warnings to stderr for partial runs and low sample counts."""
-    # Warn when metric counts diverge within a checkpoint — signals a partial run.
-    for cp_key, key_counts in cp_key_counts.items():
-        if len(set(key_counts.values())) > 1:
-            scenario, label = cp_key
-            print(
-                f"WARNING: partial run detected — metric sample counts diverge for"
-                f" {scenario}/{label}: { {k: v for k, v in key_counts.items()} }",
-                file=sys.stderr,
-            )
-
+def _emit_warnings(output: list[dict]) -> None:
+    """Print warnings for checkpoints missing from one or more expected runs."""
     # Warn when fewer than 3 samples: median is a single value, not a real median.
     low_sample_cps = [
         f"{cp['scenario']}/{cp['label']}"
@@ -154,9 +146,10 @@ def compute_median(
     *,
     include_values: bool = False,
 ) -> None:
-    groups, total_lines = _aggregate_groups(logcat_files)
-    output, cp_key_counts = _build_checkpoints(
+    groups, checkpoint_counts, total_lines = _aggregate_groups(logcat_files)
+    output = _build_checkpoints(
         groups,
+        checkpoint_counts,
         include_values=include_values,
     )
     output.sort(key=lambda x: (x['scenario'], x.get('seq', 0)))
@@ -164,7 +157,7 @@ def compute_median(
     with open(output_file, 'w') as fh:
         json.dump(output, fh, indent=2)
 
-    _emit_warnings(output, cp_key_counts)
+    _emit_warnings(output)
 
     print(
         f"Parsed {total_lines} PERF_METRIC lines from {len(logcat_files)} run(s)."
