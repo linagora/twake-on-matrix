@@ -187,7 +187,6 @@ class RoomController extends Notifier<RoomState> {
 // Domain — pure contract
 abstract class RoomRepository {
   Stream<List<MessageEntity>> watchMessages(String roomId);
-  Future<RoomEntity?> findById(String roomId);
 }
 
 // Data — concrete implementation of the contract
@@ -200,10 +199,6 @@ class RoomRepositoryImpl implements RoomRepository {
       _dataSource.watchMessages(roomId).map(
         (models) => models.map((m) => m.toEntity()).toList(),
       );
-
-  @override
-  Future<RoomEntity?> findById(String roomId) async =>
-      (await _dataSource.findById(roomId))?.toEntity();
 }
 
 // Domain — use case uses the interface, not the impl
@@ -1073,7 +1068,7 @@ Future<SharedPreferences> sharedPreferences(Ref ref) =>
     SharedPreferences.getInstance();
 ```
 
-**Startup init + override pattern**: pre-initialize persistence in `main()` and override async providers with `AsyncValue.data`. This avoids reopening resources, but it does **not** change the provider type: consumers still receive `AsyncValue<T>` from `ref.watch(provider)` or await `ref.watch(provider.future)`. If callers require direct synchronous access, declare a synchronous `Provider<T>` instead of a `FutureProvider<T>`.
+**Startup init + override pattern**: to avoid propagating `AsyncValue` through every controller that reads settings, pre-initialize persistence in `main()` and override the providers with already-resolved values. From the controllers' point of view, the instance is synchronously available.
 
 ```dart
 // main.dart
@@ -1086,11 +1081,11 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [
-        sharedPreferencesProvider.overrideWithValue(
-          AsyncValue.data(prefs),
+        sharedPreferencesProvider.overrideWith(
+          (ref) => Future.value(prefs),
         ),
-        invitationsBoxProvider.overrideWithValue(
-          AsyncValue.data(invitationsBox),
+        invitationsBoxProvider.overrideWith(
+          (ref) => Future.value(invitationsBox),
         ),
       ],
       child: const TwakeApp(),
@@ -1147,14 +1142,10 @@ Document the migration in the PR description and add a migration test.
 **Testability**:
 
 ```dart
-late Box<InvitationModel> testBox;
-late Future<void> closeBoxFuture;
-
 setUp(() async {
   // In-memory Hive
   Hive.init(Directory.systemTemp.createTempSync().path);
-  testBox = await Hive.openBox<InvitationModel>('test.invitations');
-  closeBoxFuture = Future.value();
+  final box = await Hive.openBox<InvitationModel>('test.invitations');
 
   // Mocked SharedPreferences
   SharedPreferences.setMockInitialValues({});
@@ -1162,21 +1153,15 @@ setUp(() async {
 
   container = ProviderContainer(
     overrides: [
-      invitationsBoxProvider.overrideWith((ref) {
-        ref.onDispose(() {
-          closeBoxFuture = testBox.close();
-        });
-        return testBox;
-      }),
-      sharedPreferencesProvider.overrideWithValue(AsyncValue.data(prefs)),
+      invitationsBoxProvider.overrideWith((ref) => Future.value(box)),
+      sharedPreferencesProvider.overrideWith((ref) => Future.value(prefs)),
     ],
   );
 });
 
 tearDown(() async {
-  container.dispose();
-  await closeBoxFuture;
   await Hive.deleteFromDisk();
+  container.dispose();
 });
 ```
 
@@ -1215,7 +1200,7 @@ debugPrint('debug: $value');
 | `ConsoleLogger` | Prints to debug console | `kDebugMode` only |
 | `SentryLogger` | Captures `wtf`-level entries as Sentry exceptions | Release builds |
 
-The bridge between `Logs()` (SDK) and `LogOrchestrator` (app) is `initMatrixLogger()`, which maps SDK log levels to `LogLevel` and forwards every `LogEvent` as a `LogEntry`. `SentryLogger` captures only entries mapped to `wtf`; ordinary error entries remain in the application logging pipeline.
+The bridge between `Logs()` (SDK) and `LogOrchestrator` (app) is `initMatrixLogger()`, which maps SDK log levels to `LogLevel` and forwards every `LogEvent` as a `LogEntry`.
 
 **Error capture pattern**:
 
@@ -1229,7 +1214,7 @@ try {
 }
 ```
 
-Errors logged with `.e()` are **not** sent to Sentry by the current `SentryLogger`, even when they include an exception object. For critical / "should never happen" failures, use `Logs().wtf()` to ensure Sentry capture. If the implementation later forwards `.e()` entries with exceptions, update this rule and the logger table together.
+Errors logged at `.e()` level with an exception object are automatically forwarded to Sentry via `SentryLogger` for `wtf`-level entries. For critical / "should never happen" failures, use `Logs().wtf()` to ensure Sentry capture.
 
 **What to NEVER log** — The application handles end-to-end encrypted data. The following must never appear in any log, at any level:
 
@@ -1302,24 +1287,15 @@ class RoomScreen extends ConsumerWidget {
 }
 
 // Controller — receives the function and handles the result
-@riverpod
-class RoomController extends _$RoomController {
-  @override
-  FutureOr<RoomState> build() => RoomState.initial();
-
+class RoomController extends Notifier<RoomState> {
   Future<void> deleteMessage({
     required String messageId,
     required Future<bool?> Function() confirm,
   }) async {
     final confirmed = await confirm(); // call the UI function
     if (confirmed != true) return;    // check in the controller
-    final currentState = state.requireValue;
-    state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () async {
-        await _deleteMessageUseCase.execute(messageId);
-        return currentState;
-      },
+      () => _deleteMessageUseCase.execute(messageId),
     );
   }
 }
@@ -1392,7 +1368,7 @@ int roomUnreadCount(Ref ref, String roomId) {
 }
 ```
 
-**Rebuild granularity for high-frequency lists**: handled on the UI side, not by multiplying Riverpod providers. Do **not** create a `family(itemId)` provider per item when all items come from the same stream source — it multiplies subscriptions and causes thrashing with `autoDispose` during scroll. Use `ListView.builder` with `ValueKey(itemId)` on each item to preserve element identity and state when the list changes. Use const widgets where their inputs are compile-time constants to reduce allocation and let Flutter short-circuit identical subtrees. Neither keys nor const guarantee that an item avoids rebuilding when its parent provider subtree rebuilds; when profiling shows excessive work, use `select` or measured subtree isolation to narrow updates.
+**Rebuild granularity for high-frequency lists**: handled on the UI side, not by multiplying Riverpod providers. Do **not** create a `family(itemId)` provider per item when all items come from the same stream source — it multiplies subscriptions and causes thrashing with `autoDispose` during scroll. Use `ListView.builder` with `ValueKey(itemId)` on each item + const `StatelessWidget` items receiving the `@freezed` entity as a parameter. Flutter diffs the list efficiently via keys; unchanged items don't rebuild.
 
 `family` remains legitimate for cases with **independent sources** (e.g. `userProfileProvider(userId)` fetching REST per user) — not for items of a list sharing the same source.
 
@@ -2203,15 +2179,9 @@ class HomeRoute extends GoRouteData {
 class RoomRoute extends GoRouteData {
   const RoomRoute({required this.id, this.$extra});
   final String id;
-  final RoomEntity? $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      RoomScreen(roomId: id, initialRoom: $extra);
+  final RoomEntity? $extra; // to pass complex objects without serialization
 }
 ```
-
-Prefer URL-safe identifiers and query parameters for portable routing. Complex `$extra` values are not reliably preserved during browser navigation or state restoration unless `GoRouter` is configured with an `extraCodec`; when `$extra` is necessary, document and test the codec for every supported type.
 
 Source: https://pub.dev/packages/go_router#type-safe-routes
 
@@ -2381,9 +2351,7 @@ when(mockRepo.fetchMessages(any)).thenAnswer((_) async => fakeMessages);
 when(mockRepo.watchMessages(any)).thenAnswer((_) => Stream.value(fakeMessages));
 
 // thenThrow — to test error cases
-when(mockRepo.sendMessage(any, any)).thenThrow(
-  SendMessageException(cause: Exception('network failure')),
-);
+when(mockRepo.sendMessage(any, any)).thenThrow(const SendMessageException());
 
 // Verification
 verify(mockRepo.fetchMessages('room-1')).called(1);
@@ -2753,6 +2721,7 @@ analyzer:
     strict-raw-types: true
 
   errors:
+    close_sinks: ignore
     unrelated_type_equality_checks: warning
     collection_methods_unrelated_type: warning
     missing_return: error
