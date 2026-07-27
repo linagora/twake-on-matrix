@@ -14,9 +14,10 @@ import 'package:fluffychat/pages/bootstrap/verify_device_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import '../../fake_client.dart' show MockDatabase;
+import '../../fake_client.dart';
 
 class FakeStartSelfVerificationInteractor
     implements StartSelfVerificationInteractor {
@@ -212,5 +213,183 @@ void main() {
     notifier.closeRecoveryKeyForm();
     options[2].onTap?.call();
     expect(container.read(provider), isA<VerifyDeviceResetConfirmState>());
+  });
+
+  test('bootstrap retrySucceeded surfaces as VerifyDeviceSuccessState', () {
+    final container = _container(
+      client: client,
+      bootstrapState: const BootstrapVerifyDeviceState(retrySucceeded: true),
+    );
+    addTearDown(container.dispose);
+
+    final state = container.read(
+      verifyDeviceViewModelProvider(client, wipe: false),
+    );
+
+    expect(state, isA<VerifyDeviceSuccessState>());
+  });
+
+  test('bootstrap retryFailed surfaces as VerifyDeviceRetryErrorState until '
+      'dismissed', () {
+    final container = _container(
+      client: client,
+      bootstrapState: const BootstrapVerifyDeviceState(retryFailed: true),
+    );
+    addTearDown(container.dispose);
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = container.read(provider.notifier);
+
+    expect(container.read(provider), isA<VerifyDeviceRetryErrorState>());
+
+    notifier.dismissRetryError();
+    expect(container.read(provider), isA<VerifyDeviceChooserState>());
+  });
+
+  test('closeResetConfirm is a no-op while a reset is in flight', () async {
+    final container = _container(client: client);
+    addTearDown(container.dispose);
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = container.read(provider.notifier);
+    final resetStarted = Completer<void>();
+    final releaseReset = Completer<bool>();
+
+    notifier.showResetConfirm();
+    final resetFuture = notifier.resetEncryption(() {
+      resetStarted.complete();
+      return releaseReset.future;
+    });
+    await resetStarted.future;
+
+    notifier.closeResetConfirm();
+    expect(
+      (container.read(provider) as VerifyDeviceResetConfirmState).isResetting,
+      isTrue,
+    );
+
+    releaseReset.complete(true);
+    await resetFuture;
+  });
+
+  test('resetEncryption ignores a second call while one is already in '
+      'flight', () async {
+    final container = _container(client: client);
+    addTearDown(container.dispose);
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = container.read(provider.notifier);
+    var performCount = 0;
+    final releaseReset = Completer<bool>();
+
+    notifier.showResetConfirm();
+    final firstCall = notifier.resetEncryption(() {
+      performCount++;
+      return releaseReset.future;
+    });
+    final secondCall = notifier.resetEncryption(() {
+      performCount++;
+      return Future.value(true);
+    });
+
+    releaseReset.complete(true);
+    await Future.wait([firstCall, secondCall]);
+
+    expect(performCount, 1);
+  });
+
+  test('startVerification ignores a second call while one is already in '
+      'flight', () async {
+    final completer = Completer<Either<Failure, Success>>();
+    var executeCount = 0;
+    final container = ProviderContainer(
+      overrides: [
+        bootstrapViewModelProvider(
+          client,
+          wipe: false,
+        ).overrideWithValue(const BootstrapVerifyDeviceState()),
+        startSelfVerificationInteractorProvider.overrideWithValue(
+          FakeStartSelfVerificationInteractor(
+            Stream.fromFuture(completer.future).map((event) {
+              executeCount++;
+              return event;
+            }),
+          ),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = container.read(provider.notifier);
+
+    final firstCall = notifier.startVerification();
+    final secondCall = notifier.startVerification();
+
+    completer.complete(
+      const Left(StartSelfVerificationFailureState(exception: 'boom')),
+    );
+    await Future.wait([firstCall, secondCall]);
+
+    expect(executeCount, 1);
+  });
+
+  group('with an attached KeyVerification request', () {
+    late Client verifyingClient;
+    late KeyVerification request;
+
+    setUpAll(() async {
+      verifyingClient = await getClient();
+    });
+
+    setUp(() {
+      request = KeyVerification(
+        encryption: verifyingClient.encryption!,
+        userId: verifyingClient.userID!,
+      );
+    });
+
+    test('startVerification success attaches the request as '
+        'VerifyDeviceSasState', () async {
+      final container = _container(
+        client: verifyingClient,
+        startVerificationStates: Stream.value(
+          Right(StartSelfVerificationSuccessState(request: request)),
+        ),
+      );
+      addTearDown(container.dispose);
+      final provider = verifyDeviceViewModelProvider(
+        verifyingClient,
+        wipe: false,
+      );
+      final notifier = container.read(provider.notifier);
+
+      await notifier.startVerification();
+
+      final state = container.read(provider) as VerifyDeviceSasState;
+      expect(state.request, same(request));
+
+      notifier.acceptSas();
+      notifier.rejectSas();
+    });
+
+    test(
+      'disposing the notifier detaches onUpdate from a pending request',
+      () async {
+        final container = _container(
+          client: verifyingClient,
+          startVerificationStates: Stream.value(
+            Right(StartSelfVerificationSuccessState(request: request)),
+          ),
+        );
+        final provider = verifyDeviceViewModelProvider(
+          verifyingClient,
+          wipe: false,
+        );
+        final notifier = container.read(provider.notifier);
+        await notifier.startVerification();
+        expect(request.onUpdate, isNotNull);
+
+        container.dispose();
+
+        expect(request.onUpdate, isNull);
+      },
+    );
   });
 }
