@@ -44,7 +44,7 @@ class KeyVerificationSuccessView extends StatelessWidget {
         ),
         const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
         Material(
-          color: KeyVerificationSasStyle.primaryColor,
+          color: KeyVerificationSasStyle.primaryColor(context),
           borderRadius: BorderRadius.circular(
             KeyVerificationSasStyle.buttonRadius,
           ),
