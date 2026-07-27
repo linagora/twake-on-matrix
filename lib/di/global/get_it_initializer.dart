@@ -92,6 +92,10 @@ import 'package:fluffychat/domain/repository/server_search_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/domain/repository/user_info/user_info_repository.dart';
 import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
+import 'package:fluffychat/domain/usecase/bootstrap/read_cached_recovery_key_interactor.dart';
+import 'package:fluffychat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
+import 'package:fluffychat/domain/usecase/bootstrap/store_recovery_key_interactor.dart';
+import 'package:fluffychat/domain/usecase/bootstrap/unlock_ssss_with_recovery_key_interactor.dart';
 import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:fluffychat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
@@ -486,6 +490,22 @@ class GetItInitializer {
 
     getIt.registerFactory<HiveDeleteInvitationStatusInteractor>(
       () => HiveDeleteInvitationStatusInteractor(),
+    );
+
+    getIt.registerFactory<UnlockSsssWithRecoveryKeyInteractor>(
+      () => UnlockSsssWithRecoveryKeyInteractor(),
+    );
+
+    getIt.registerFactory<ReadCachedRecoveryKeyInteractor>(
+      () => ReadCachedRecoveryKeyInteractor(),
+    );
+
+    getIt.registerFactory<StoreRecoveryKeyInteractor>(
+      () => StoreRecoveryKeyInteractor(),
+    );
+
+    getIt.registerFactory<StartSelfVerificationInteractor>(
+      () => StartSelfVerificationInteractor(),
     );
 
     getIt.registerFactory<DeleteThirdPartyContactBoxInteractor>(
