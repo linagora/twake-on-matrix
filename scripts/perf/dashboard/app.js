@@ -17,6 +17,7 @@
     maximumMarkerDelta,
     metricSelection,
     normalizeHealthIndex,
+    platformDataCandidates,
     platformDataPaths,
     platformRecordCacheKey,
     shouldFallbackToWeb,
@@ -153,12 +154,14 @@
   const webPaths = platformDataPaths("web");
   const PLATFORMS = {
     android: {
+      dataCandidates: platformDataCandidates("android", location.pathname),
       indexPath: androidPaths.index,
       recordRoot: androidPaths.records,
       family: androidPaths.family,
       metrics: ANDROID_METRICS,
     },
     web: {
+      dataCandidates: platformDataCandidates("web", location.pathname),
       indexPath: webPaths.index,
       recordRoot: webPaths.records,
       family: webPaths.family,
@@ -174,6 +177,7 @@
     records: [],
     historyRecords: [],
     recordCache: new Map(),
+    recordRoot: androidPaths.records,
     loadId: 0,
     windowStart: null,
     windowEnd: null,
@@ -218,7 +222,7 @@
     const cacheKey = platformRecordCacheKey(platform, entry.date);
     if (state.recordCache.has(cacheKey)) return state.recordCache.get(cacheKey);
     const response = await fetch(
-      `${PLATFORMS[platform].recordRoot}/${entry.file}`,
+      `${state.recordRoot}/${entry.file}`,
       { cache: "no-store" }
     );
     if (!response.ok) throw new Error(`Impossible de charger ${entry.file}`);
@@ -771,36 +775,38 @@
   }
 
   async function fetchIndex(platform = state.platform) {
-    const response = await fetch(
-      PLATFORMS[platform].indexPath,
-      { cache: "no-store" }
-    );
-    if (!response.ok) {
-      const error = new Error(
-        response.status === 404
-          ? `Aucun historique ${platform === "web" ? "Web" : "Android"} publié pour le moment`
-          : `L’index des mesures répond HTTP ${response.status}`
-      );
-      error.httpStatus = response.status;
-      throw error;
+    let response;
+    for (const candidate of PLATFORMS[platform].dataCandidates) {
+      response = await fetch(candidate.index, { cache: "no-store" });
+      if (response.ok) {
+        const index = await response.json();
+        validateIndex(index);
+        return { index, recordRoot: candidate.records };
+      }
+      if (response.status !== 404) break;
     }
-    const index = await response.json();
-    validateIndex(index);
-    return index;
+    const error = new Error(
+      response.status === 404
+        ? `Aucun historique ${platform === "web" ? "Web" : "Android"} publié pour le moment`
+        : `L’index des mesures répond HTTP ${response.status}`
+    );
+    error.httpStatus = response.status;
+    throw error;
   }
 
   async function load(
     platform = state.platform,
     loadId = state.loadId
   ) {
-    const index = await fetchIndex(platform);
+    const dataset = await fetchIndex(platform);
     if (!isCurrentPlatformLoad(
       platform,
       loadId,
       state.platform,
       state.loadId
     )) return false;
-    state.index = index;
+    state.index = dataset.index;
+    state.recordRoot = dataset.recordRoot;
     const loaded = await loadSelectedRecords(platform, loadId);
     if (!loaded) return false;
     if (!state.records.length) throw new Error("L’historique nightly est vide");
@@ -863,6 +869,7 @@
     state.records = [];
     state.historyRecords = [];
     state.recordCache = new Map();
+    state.recordRoot = PLATFORMS[platform].recordRoot;
     configurePlatformContent();
     prepareDatasetLoad();
     try {

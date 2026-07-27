@@ -19,6 +19,7 @@ const {
   maximumMarkerDelta,
   metricSelection,
   normalizeHealthIndex,
+  platformDataCandidates,
   platformDataPaths,
   platformRecordCacheKey,
   shouldFallbackToWeb,
@@ -190,6 +191,35 @@ test("keeps Android and Web history paths and families separate", () => {
     records: "data/web",
     family: "web",
   });
+});
+
+test("loads canonical Android history when running from a performance preview", () => {
+  assert.deepEqual(
+    platformDataCandidates(
+      "android",
+      "/twake-on-matrix/performance-previews/feat-patrol-web-performance-pages/"
+    ),
+    [
+      {
+        index: "data/index.json",
+        records: "data",
+        family: "memory",
+      },
+      {
+        index: "/twake-on-matrix/performance/data/index.json",
+        records: "/twake-on-matrix/performance/data",
+        family: "memory",
+      },
+    ]
+  );
+  assert.deepEqual(
+    platformDataCandidates("web", "/twake-on-matrix/performance-previews/foo/"),
+    [{
+      index: "data/web/index.json",
+      records: "data/web",
+      family: "web",
+    }]
+  );
 });
 
 test("keeps platform caches and asynchronous loads isolated", () => {

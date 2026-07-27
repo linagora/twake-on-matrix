@@ -47,6 +47,24 @@ globalThis.PerfMetrics = (() => {
       : { index: "data/index.json", records: "data", family: "memory" };
   }
 
+  function platformDataCandidates(platform, pathname = "") {
+    const local = platformDataPaths(platform);
+    if (
+      platform !== "android" ||
+      !pathname.includes("/performance-previews/")
+    ) {
+      return [local];
+    }
+
+    const repository = pathname.split("/").filter(Boolean)[0];
+    if (!repository) return [local];
+    const records = `/${repository}/performance/data`;
+    return [
+      local,
+      { index: `${records}/index.json`, records, family: "memory" },
+    ];
+  }
+
   function platformRecordCacheKey(platform, date) {
     return `${platform}:${date}`;
   }
@@ -184,6 +202,7 @@ globalThis.PerfMetrics = (() => {
     median,
     metricSelection,
     normalizeHealthIndex,
+    platformDataCandidates,
     platformDataPaths,
     platformRecordCacheKey,
     isCurrentPlatformLoad,
