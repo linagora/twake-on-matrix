@@ -17,7 +17,7 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
 
   @override
   DevicesSettingsState build() {
-    return const DevicesSettingsInitial();
+    return const DevicesSettingsState.initial();
   }
 
   bool _isOwnDevice(Device userDevice, Client client) =>
@@ -51,18 +51,18 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     if (resolvedDevices == null) return;
     final resolvedBannerVisibility = bannerVisibility ?? _bannerVisibility;
     if (deleting) {
-      state = DevicesSettingsDeletingDevices(
+      state = DevicesSettingsState.deletingDevices(
         devices: resolvedDevices,
         bannerVisibility: resolvedBannerVisibility,
       );
     } else if (deleteError != null) {
-      state = DevicesSettingsDeleteDevicesError(
+      state = DevicesSettingsState.deleteDevicesError(
         devices: resolvedDevices,
         message: deleteError,
         bannerVisibility: resolvedBannerVisibility,
       );
     } else {
-      state = DevicesSettingsLoaded(
+      state = DevicesSettingsState.loaded(
         devices: resolvedDevices,
         bannerVisibility: resolvedBannerVisibility,
       );
@@ -109,21 +109,21 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
       either.fold(
         (failure) {
           if (failure is GetDevicesEmpty) {
-            state = const DevicesSettingsLoaded(devices: []);
+            state = const DevicesSettingsState.loaded(devices: []);
           } else if (failure is GetDevicesFailed) {
-            state = DevicesSettingsError(exception: failure.exception);
+            state = DevicesSettingsState.error(exception: failure.exception);
           }
         },
         (success) {
           if (success is GetDevicesSuccess) {
-            state = DevicesSettingsLoaded(devices: success.devices);
+            state = DevicesSettingsState.loaded(devices: success.devices);
           }
         },
       );
     });
   }
 
-  void reload() => state = const DevicesSettingsInitial();
+  void reload() => state = const DevicesSettingsState.initial();
 
   void setLoadingDeletingDevices(bool loading) =>
       _transition(deleting: loading);

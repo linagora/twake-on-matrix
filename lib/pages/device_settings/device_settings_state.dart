@@ -1,71 +1,39 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:matrix/matrix.dart';
+
+part 'device_settings_state.freezed.dart';
 
 /// State of the device-verification warning banner shown atop the list.
 enum VerificationBannerVisibility { shown, dismissed }
 
-sealed class DevicesSettingsState extends Equatable {
-  const DevicesSettingsState();
+@freezed
+sealed class DevicesSettingsState with _$DevicesSettingsState {
+  /// Devices have not been fetched yet.
+  const factory DevicesSettingsState.initial() = DevicesSettingsInitial;
 
-  @override
-  List<Object?> get props => [];
-}
+  /// Devices failed to load.
+  const factory DevicesSettingsState.error({dynamic exception}) =
+      DevicesSettingsError;
 
-/// Devices have not been fetched yet.
-class DevicesSettingsInitial extends DevicesSettingsState {
-  const DevicesSettingsInitial();
-}
+  /// Devices loaded and idle.
+  const factory DevicesSettingsState.loaded({
+    required List<Device> devices,
+    @Default(VerificationBannerVisibility.shown)
+    VerificationBannerVisibility bannerVisibility,
+  }) = DevicesSettingsLoaded;
 
-/// Devices failed to load.
-class DevicesSettingsError extends DevicesSettingsState {
-  final dynamic exception;
+  /// The "remove all other devices" action is in flight.
+  const factory DevicesSettingsState.deletingDevices({
+    required List<Device> devices,
+    @Default(VerificationBannerVisibility.shown)
+    VerificationBannerVisibility bannerVisibility,
+  }) = DevicesSettingsDeletingDevices;
 
-  const DevicesSettingsError({this.exception});
-
-  @override
-  List<Object?> get props => [exception];
-}
-
-/// Devices loaded and idle.
-class DevicesSettingsLoaded extends DevicesSettingsState {
-  final List<Device> devices;
-  final VerificationBannerVisibility bannerVisibility;
-
-  const DevicesSettingsLoaded({
-    required this.devices,
-    this.bannerVisibility = VerificationBannerVisibility.shown,
-  });
-
-  @override
-  List<Object?> get props => [devices, bannerVisibility];
-}
-
-/// The "remove all other devices" action is in flight.
-class DevicesSettingsDeletingDevices extends DevicesSettingsState {
-  final List<Device> devices;
-  final VerificationBannerVisibility bannerVisibility;
-
-  const DevicesSettingsDeletingDevices({
-    required this.devices,
-    this.bannerVisibility = VerificationBannerVisibility.shown,
-  });
-
-  @override
-  List<Object?> get props => [devices, bannerVisibility];
-}
-
-/// The "remove all other devices" action failed.
-class DevicesSettingsDeleteDevicesError extends DevicesSettingsState {
-  final List<Device> devices;
-  final VerificationBannerVisibility bannerVisibility;
-  final String message;
-
-  const DevicesSettingsDeleteDevicesError({
-    required this.devices,
-    required this.message,
-    this.bannerVisibility = VerificationBannerVisibility.shown,
-  });
-
-  @override
-  List<Object?> get props => [devices, bannerVisibility, message];
+  /// The "remove all other devices" action failed.
+  const factory DevicesSettingsState.deleteDevicesError({
+    required List<Device> devices,
+    required String message,
+    @Default(VerificationBannerVisibility.shown)
+    VerificationBannerVisibility bannerVisibility,
+  }) = DevicesSettingsDeleteDevicesError;
 }

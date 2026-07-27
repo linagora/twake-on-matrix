@@ -36,25 +36,26 @@ class UserDeviceListItem extends StatelessWidget {
     DeviceKeys? keys,
     bool isOwnDevice,
   ) async {
+    final l10n = L10n.of(context)!;
     final action = await showModalActionSheet<UserDeviceListItemAction>(
       context: context,
       title: '${userDevice.displayName} (${userDevice.deviceId})',
       actions: [
         SheetAction(
           key: UserDeviceListItemAction.rename,
-          label: L10n.of(context)!.changeDeviceName,
+          label: l10n.changeDeviceName,
         ),
         if (!isOwnDevice && keys != null) ...{
           if (!keys.blocked && block != null)
             SheetAction(
               key: UserDeviceListItemAction.block,
-              label: L10n.of(context)!.blockDevice,
+              label: l10n.blockDevice,
               isDestructiveAction: true,
             ),
           if (keys.blocked && unblock != null)
             SheetAction(
               key: UserDeviceListItemAction.unblock,
-              label: L10n.of(context)!.unblockDevice,
+              label: l10n.unblockDevice,
               isDestructiveAction: true,
             ),
         },
@@ -82,6 +83,7 @@ class UserDeviceListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     final client = Matrix.of(context).client;
     final keys =
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
@@ -96,15 +98,15 @@ class UserDeviceListItem extends StatelessWidget {
       onTap: () => _openActionSheet(context, keys, isOwnDevice),
       child: SessionDeviceListItem(
         deviceName: userDevice.displayname,
-        lastActiveText: L10n.of(context)!.lastActiveAgo(
+        lastActiveText: l10n.lastActiveAgo(
           DateTime.fromMillisecondsSinceEpoch(
             userDevice.lastSeenTs ?? 0,
           ).localizedTimeShort(context),
         ),
         platformIcon: userDevice.icon,
         verified: verified,
-        unverifiedLabel: L10n.of(context)!.unverified,
-        verifyLabel: L10n.of(context)!.verify,
+        unverifiedLabel: l10n.unverified,
+        verifyLabel: l10n.verify,
         onVerifyPressed: verified ? null : () => verify(userDevice),
         onDelete: remove == null ? null : () => remove?.call(userDevice),
         showDivider: showDivider,
