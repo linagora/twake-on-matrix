@@ -3260,5 +3260,6 @@
   "resetCompleteDescription": "Your new encryption identity is ready. Previously encrypted messages are no longer available.",
   "verificationFailedTitle": "Verification failed",
   "verificationFailedDescription": "The request was cancelled or rejected. Please try again.",
-  "retryFailedDescription": "Automatic retry didn't work. Try another way to verify this device."
+  "retryFailedDescription": "Automatic retry didn't work. Try another way to verify this device.",
+  "chatBackupSetUpDescription": "Your recovery key is saved. You can use it to restore your encrypted messages on any device."
 }

@@ -57,7 +57,7 @@ class ResetEncryptionConfirmView extends StatelessWidget {
             ),
             const SizedBox(width: KeyVerificationSasStyle.gapEmojiButtons),
             _FilledButton(
-              color: KeyVerificationSasStyle.primaryColor,
+              color: KeyVerificationSasStyle.primaryColor(context),
               label: L10n.of(context)!.cancel,
               onTap: isResetting ? null : onClose,
             ),
