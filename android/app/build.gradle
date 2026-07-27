@@ -86,6 +86,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    // Android only creates instrumentation-test tasks for testBuildType.
+    // Keep debug as the default and let performance CI opt into profile.
+    testBuildType project.findProperty('patrolTestBuildType') ?: 'debug'
     testOptions {
         execution "ANDROIDX_TEST_ORCHESTRATOR"
     }
