@@ -16,6 +16,9 @@ jobs:
   cleanup:
     name: Remove preview deployment
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages-writes
+      cancel-in-progress: false
 
     steps:
       - name: Checkout gh-pages branch
