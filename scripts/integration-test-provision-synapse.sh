@@ -23,6 +23,12 @@ USER3="${USER3:-charlie}"
 PASSWORD3="${PASSWORD3:-charliepassword}"
 ROOM_NAME="${ROOM_NAME:-TEST_GROUP}"
 READY_TIMEOUT="${READY_TIMEOUT:-60}"
+PERF_MESSAGE_COUNT="${PERF_MESSAGE_COUNT:-0}"
+
+if ! [[ "$PERF_MESSAGE_COUNT" =~ ^[0-9]+$ ]]; then
+  echo "PERF_MESSAGE_COUNT must be a non-negative integer" >&2
+  exit 1
+fi
 
 log() { echo "[provision] $*" >&2; }
 
@@ -177,6 +183,15 @@ log "Seeding test messages..."
 send_message "$TOKEN1" "$ROOM_ID" "Hello from $USER1"
 send_message "$TOKEN2" "$ROOM_ID" "Reply from $USER2"
 send_message "$TOKEN1" "$ROOM_ID" "Follow-up from $USER1"
+if [ "$PERF_MESSAGE_COUNT" -gt 0 ]; then
+  log "Seeding $PERF_MESSAGE_COUNT additional performance messages..."
+  for ((message_index = 1; message_index <= PERF_MESSAGE_COUNT; message_index++)); do
+    send_message \
+      "$TOKEN1" \
+      "$ROOM_ID" \
+      "Performance fixture message $message_index — deterministic scroll content"
+  done
+fi
 
 # Forward-test receiver rooms — distinct destinations $USER1 can forward to.
 # Non-overlapping names: a textContaining finder on "Receiver Group" would also

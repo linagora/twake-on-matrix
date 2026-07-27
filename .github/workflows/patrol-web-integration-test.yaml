@@ -16,6 +16,16 @@ on:
         description: "Optional path to a single Patrol integration test Dart file. Leave empty to run the whole suite."
         required: false
         default: ""
+      run_web_perf:
+        description: "Run the Web performance benchmark after the functional E2E jobs."
+        type: boolean
+        required: false
+        default: false
+      publish_web_perf_history:
+        description: "Publish the Web point to Pages (main or the temporary feature preview only)."
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   # Lists the Patrol test files to run (the single given target, or every
@@ -200,3 +210,228 @@ jobs:
       - name: Tear down Synapse
         if: always()
         run: docker rm -f synapse || true
+
+  web-perf:
+    name: Web performance (3 repetitions)
+    needs: patrol-web
+    if: >-
+      ${{
+        github.event_name == 'schedule' ||
+        (github.event_name == 'workflow_dispatch' && inputs.run_web_perf)
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      FLUTTER_VERSION: "3.38.9"
+      PATROL_CLI_VERSION: "4.3.1"
+      SYNAPSE_URL: http://127.0.0.1
+      SERVER_NAME: localhost
+      LANG: en_US.UTF-8
+      LANGUAGE: en_US:en
+      LC_ALL: en_US.UTF-8
+      GIT_TERMINAL_PROMPT: "0"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Start Synapse (Docker)
+        run: ./scripts/integration-server-synapse.sh
+
+      - name: Provision performance fixture
+        env:
+          PERF_MESSAGE_COUNT: "120"
+        run: |
+          ./scripts/integration-test-provision-synapse.sh > .env.patrol-web
+          cut -d= -f1 .env.patrol-web
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          dart pub global activate patrol_cli ${{ env.PATROL_CLI_VERSION }}
+
+      - name: Run Patrol Web benchmark
+        timeout-minutes: 20
+        run: |
+          set -a
+          # shellcheck disable=SC1091
+          . ./.env.patrol-web
+          set +a
+
+          patrol test \
+            --device chrome \
+            --profile \
+            --web-headless=true \
+            --web-workers 1 \
+            --web-retries 0 \
+            --web-timeout 600000 \
+            --web-viewport '{"width":1440,"height":900}' \
+            --web-locale en-US \
+            --web-timezone Europe/Paris \
+            --web-browser-args '["--enable-precise-memory-info"]' \
+            --verbose \
+            --target integration_test/performance/web_perf_test.dart \
+            --dart-define=PATROL_WEB=true \
+            --dart-define=MATRIX_URL="$MATRIX_URL" \
+            --dart-define=SERVER_URL="$SERVER_URL" \
+            --dart-define=USERNAME="$TEST_USERNAME" \
+            --dart-define=PASSWORD="$TEST_PASSWORD" \
+            --dart-define=Receiver="$Receiver" \
+            --dart-define=ReceiverPass="$ReceiverPass" \
+            --dart-define=CurrentAccount="$CurrentAccount" \
+            --dart-define=MemberMatrixID="$MemberMatrixID" \
+            --dart-define=SearchByMatrixAddress="$SearchByMatrixAddress" \
+            --dart-define=SearchByTitle="$SearchByTitle" \
+            --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
+            --dart-define=GroupTest="$SearchByTitle" \
+            --dart-define=GroupID="$GroupID" \
+            --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
+            --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
+            --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
+            2>&1 | tee patrol-web-perf.log
+
+          if ! grep -qE '^❌ Failed: 0$' patrol-web-perf.log \
+            || grep -qE '^📝 Total: 0$' patrol-web-perf.log; then
+            echo "::error::Patrol Web performance scenario failed"
+            exit 1
+          fi
+
+      - name: Aggregate and validate three repetitions
+        run: |
+          python3 scripts/perf/compute_median.py \
+            --include-values \
+            patrol-web-perf.log \
+            perf_web.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.perf.update_web_history import validate_checkpoints
+
+          checkpoints = json.loads(Path("perf_web.json").read_text())
+          validate_checkpoints(checkpoints)
+          if len(checkpoints) != 2:
+              raise SystemExit(
+                  f"Expected 2 Web checkpoints, found {len(checkpoints)}"
+              )
+          print("Validated two checkpoints with three repetitions each.")
+          PY
+
+      - name: Upload Web performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-web-${{ github.run_id }}
+          path: |
+            patrol-web-perf.log
+            perf_web.json
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Tear down Synapse
+        if: always()
+        run: docker rm -f synapse || true
+
+  publish-web-perf:
+    name: Publish Web performance history
+    needs: web-perf
+    if: >-
+      ${{
+        always() &&
+        needs.web-perf.result == 'success' &&
+        (
+          (github.event_name == 'schedule' && github.ref == 'refs/heads/main') ||
+          (
+            github.event_name == 'workflow_dispatch' &&
+            inputs.publish_web_perf_history &&
+            (
+              github.ref == 'refs/heads/main' ||
+              github.ref == 'refs/heads/feat/patrol-web-performance-pages'
+            )
+          )
+        )
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages-writes
+      cancel-in-progress: false
+    env:
+      DESTINATION_DIR: >-
+        ${{
+          github.ref == 'refs/heads/main' &&
+          'performance' ||
+          'performance-previews/feat-patrol-web-performance-pages'
+        }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download Web performance results
+        uses: actions/download-artifact@v4
+        with:
+          name: perf-web-${{ github.run_id }}
+          path: perf-results/
+
+      - name: Checkout existing GitHub Pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: existing-pages
+          persist-credentials: false
+
+      - name: Rebuild dashboard and update Web history
+        run: |
+          mkdir -p performance-site/data/web
+          if [ -d "existing-pages/$DESTINATION_DIR" ]; then
+            cp -R "existing-pages/$DESTINATION_DIR/." performance-site/
+          fi
+          cp -R scripts/perf/dashboard/. performance-site/
+
+          python3 scripts/perf/update_web_history.py \
+            --web perf-results/perf_web.json \
+            --log perf-results/patrol-web-perf.log \
+            --data-directory performance-site/data/web \
+            --date "$(date -u +%F)" \
+            --generated-at "$(date -u +%FT%TZ)" \
+            --repository "$GITHUB_REPOSITORY" \
+            --sha "$GITHUB_SHA" \
+            --run-id "$GITHUB_RUN_ID" \
+            --flutter-version "3.38.9" \
+            --patrol-version "4.3.1" \
+            --runner-image "${ImageOS:-ubuntu}-${ImageVersion:-unknown}"
+
+      - name: Publish dashboard
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: performance-site
+          destination_dir: ${{ env.DESTINATION_DIR }}
+          keep_files: true
+
+      - name: Add dashboard link to summary
+        env:
+          DASHBOARD_URL: >-
+            https://linagora.github.io/twake-on-matrix/${{ env.DESTINATION_DIR }}/
+        run: |
+          {
+            echo "## Patrol Web performance"
+            echo
+            echo "Published the median of 3 Chrome profile repetitions."
+            echo
+            echo "[$DASHBOARD_URL]($DASHBOARD_URL)"
+          } >> "$GITHUB_STEP_SUMMARY"
