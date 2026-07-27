@@ -100,9 +100,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
 
     final commandMatch = RegExp(r'^/(\w*)$').firstMatch(searchText);
     if (commandMatch != null && widget.room != null) {
-      final commandSearch = commandMatch[1]!.toLowerCase();
       for (final command in widget.room!.client.commands.keys) {
-        if (engine.matchesText(commandSearch, command, options: opts)) {
+        if (engine.matchesText(commandMatch[1]!, command, options: opts)) {
           ret.add({'type': 'command', 'name': command});
         }
 
@@ -163,7 +162,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             (element) => [
               element.name,
               ...element.keywords,
-            ].any((kw) => kw.toLowerCase().contains(emoteSearch)),
+            ].any((kw) => engine.matchesText(emoteSearch, kw, options: opts)),
           )
           .toList();
       // sort by the index of the search term in the name in order to have
@@ -204,19 +203,18 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       unicode: true,
     ).firstMatch(searchText);
     if (userMatch != null && widget.room != null) {
-      final userSearch = userMatch[1]!.toLowerCase();
       final users = widget.room!
           .getParticipants()
           .where((user) => user.senderId != widget.room!.client.userID)
           .toList();
       for (final user in users) {
         if (engine.matchesText(
-              userSearch,
+              userMatch[1]!,
               user.displayName ?? '',
               options: opts,
             ) ||
             engine.matchesText(
-              userSearch,
+              userMatch[1]!,
               user.id.split(':')[0],
               options: opts,
             )) {

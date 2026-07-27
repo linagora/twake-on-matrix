@@ -2964,7 +2964,7 @@ packages:
     source: hosted
     version: "0.2.12"
   slugify:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: slugify
       sha256: b272501565cb28050cac2d96b7bf28a2d24c8dae359280361d124f3093d337c3
