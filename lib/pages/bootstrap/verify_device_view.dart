@@ -147,12 +147,12 @@ class _VerifyDeviceItem extends StatelessWidget {
                 ),
               ),
               if (showDivider)
-                const Divider(
+                Divider(
                   height: 1,
                   thickness: 1,
                   indent: VerifyDeviceViewStyle.dividerIndent,
                   endIndent: 0,
-                  color: VerifyDeviceViewStyle.dividerColor,
+                  color: VerifyDeviceViewStyle.dividerColor(context),
                 ),
             ],
           ),
@@ -171,7 +171,7 @@ class _RetryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: VerifyDeviceViewStyle.buttonColor,
+      color: VerifyDeviceViewStyle.buttonColor(context),
       borderRadius: BorderRadius.circular(VerifyDeviceViewStyle.buttonRadius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(

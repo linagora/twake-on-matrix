@@ -56,12 +56,17 @@ class VerifyDeviceViewStyle {
   static const double settingTextGap = 4;
   static const double dividerIndent = 41;
 
-  static const Color titleColor = Color(0xFF1C1B1F);
   static const Color supportingColor = Color(0xFF5C6268);
+
   static const Color subtitleColor = Color(0xFF99A0A9);
-  static const Color dividerColor = Color(0x296750A4);
-  static const Color buttonColor = Color(0xFF0A84FF);
-  static const Color buttonTextColor = Colors.white;
+
+  static Color dividerColor(BuildContext context) => LinagoraStateLayer(
+    Theme.of(context).colorScheme.surfaceTint,
+  ).opacityLayer3;
+
+  static Color buttonColor(BuildContext context) =>
+      Theme.of(context).colorScheme.primary;
+
   static const Color backgroundColor = Colors.white;
 
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
@@ -71,8 +76,10 @@ class VerifyDeviceViewStyle {
   static const double buttonRadius = 100;
   static const double buttonWidth = 180;
 
-  static TextStyle? titleStyle(BuildContext context) =>
-      Theme.of(context).textTheme.titleLarge?.copyWith(color: titleColor);
+  static TextStyle? titleStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .titleLarge
+      ?.copyWith(color: Theme.of(context).colorScheme.onSurface);
 
   static TextStyle? supportingStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium?.copyWith(color: supportingColor);
@@ -80,13 +87,15 @@ class VerifyDeviceViewStyle {
   static TextStyle? settingTitleStyle(BuildContext context) => Theme.of(context)
       .extension<LinagoraTextThemeExtension>()
       ?.bodyMedium2
-      .copyWith(color: titleColor);
+      .copyWith(color: Theme.of(context).colorScheme.onSurface);
 
   static TextStyle? settingSubtitleStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium?.copyWith(color: subtitleColor);
 
-  static TextStyle? buttonTextStyle(BuildContext context) =>
-      Theme.of(context).textTheme.labelLarge?.copyWith(color: buttonTextColor);
+  static TextStyle? buttonTextStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .labelLarge
+      ?.copyWith(color: Theme.of(context).colorScheme.onPrimary);
 
   static Color iconColor(BuildContext context) => subtitleColor;
 }

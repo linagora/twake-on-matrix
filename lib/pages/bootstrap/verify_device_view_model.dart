@@ -1,0 +1,195 @@
+import 'package:fluffychat/domain/app_state/bootstrap/self_verification_state.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_state.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_view_model.dart';
+import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
+import 'package:fluffychat/pages/bootstrap/verify_device_state.dart';
+import 'package:matrix/encryption.dart';
+import 'package:matrix/matrix.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'verify_device_view_model.g.dart';
+
+@riverpod
+class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
+  KeyVerification? _request;
+  bool _showRecoveryKeyForm = false;
+  bool _recoveryKeyVerified = false;
+  bool _showResetConfirm = false;
+  bool _resetComplete = false;
+  bool _isStartingVerification = false;
+  bool _isResetting = false;
+  bool _retryErrorDismissed = false;
+  String? _recoveryKeyError;
+
+  BootstrapViewModel get _bootstrapNotifier =>
+      ref.read(bootstrapViewModelProvider(client, wipe: wipe).notifier);
+
+  BootstrapUiState get _bootstrapState =>
+      ref.watch(bootstrapViewModelProvider(client, wipe: wipe));
+
+  @override
+  VerifyDeviceUiState build(Client client, {required bool wipe}) {
+    ref.onDispose(_cancelPendingRequest);
+    return _computeState();
+  }
+
+  void _cancelPendingRequest() {
+    final request = _request;
+    if (request == null) return;
+    // Detach first so cancel() can't call back into a disposing notifier.
+    request.onUpdate = null;
+    if (![
+      KeyVerificationState.error,
+      KeyVerificationState.done,
+    ].contains(request.state)) {
+      request.cancel('m.user');
+    }
+  }
+
+  void _refresh() => state = _computeState();
+
+  VerifyDeviceUiState _computeState() {
+    if (_recoveryKeyVerified) return const VerifyDeviceSuccessState();
+
+    final bootstrapState = _bootstrapState;
+    if (bootstrapState is BootstrapVerifyDeviceState) {
+      if (bootstrapState.retrySucceeded) {
+        return const VerifyDeviceSuccessState();
+      }
+      if (bootstrapState.retryFailed && !_retryErrorDismissed) {
+        return const VerifyDeviceRetryErrorState();
+      }
+    }
+
+    if (_resetComplete) return const VerifyDeviceResetCompleteState();
+    if (_showResetConfirm) {
+      return VerifyDeviceResetConfirmState(isResetting: _isResetting);
+    }
+    if (_showRecoveryKeyForm) {
+      return VerifyDeviceRecoveryKeyFormState(
+        initialValue: bootstrapState is BootstrapVerifyDeviceState
+            ? bootstrapState.prefilledRecoveryKey
+            : null,
+        errorText: _recoveryKeyError,
+      );
+    }
+
+    final request = _request;
+    if (request != null) return VerifyDeviceSasState(request: request);
+
+    return VerifyDeviceChooserState(
+      isStartingVerification: _isStartingVerification,
+    );
+  }
+
+  void dismissRetryError() {
+    _retryErrorDismissed = true;
+    _showRecoveryKeyForm = false;
+    _showResetConfirm = false;
+    _refresh();
+  }
+
+  Future<void> startVerification() async {
+    if (_isStartingVerification) return;
+    _isStartingVerification = true;
+    _refresh();
+    try {
+      final result = await ref
+          .read(startSelfVerificationInteractorProvider)
+          .execute(client: client)
+          .last;
+      result.fold((_) {}, (success) {
+        if (success is StartSelfVerificationSuccessState) {
+          _attachRequest(success.request);
+        }
+      });
+    } finally {
+      _isStartingVerification = false;
+      _refresh();
+    }
+  }
+
+  void _attachRequest(KeyVerification request) {
+    _request = request;
+    request.onUpdate = _refresh;
+    _refresh();
+  }
+
+  void rejectSas() => _request?.rejectSas();
+
+  void acceptSas() => _request?.acceptSas();
+
+  Future<bool> verifyRecoveryKey(String recoveryKey) async {
+    final success = await _bootstrapNotifier.unlockWithRecoveryKey(recoveryKey);
+    if (success) {
+      _recoveryKeyVerified = true;
+      _recoveryKeyError = null;
+      _refresh();
+    }
+    return success;
+  }
+
+  void setRecoveryKeyError(String message) {
+    _recoveryKeyError = message;
+    _refresh();
+  }
+
+  void showRecoveryKeyForm() {
+    _showRecoveryKeyForm = true;
+    _refresh();
+  }
+
+  void closeRecoveryKeyForm() {
+    _showRecoveryKeyForm = false;
+    _refresh();
+  }
+
+  void showResetConfirm() {
+    _showResetConfirm = true;
+    _refresh();
+  }
+
+  void closeResetConfirm() {
+    if (_isResetting) return;
+    _showResetConfirm = false;
+    _refresh();
+  }
+
+  Future<void> resetEncryption(Future<bool> Function() performReset) async {
+    if (_isResetting) return;
+    _isResetting = true;
+    _refresh();
+    final success = await performReset();
+    _isResetting = false;
+    if (success) {
+      _resetComplete = true;
+    } else {
+      _showResetConfirm = false;
+    }
+    _refresh();
+  }
+
+  void retry() {
+    _retryErrorDismissed = false;
+    _bootstrapNotifier.retry();
+  }
+
+  List<VerifyDeviceOption> resolveOptions(List<VerifyDeviceOption> options) {
+    return options.map((option) {
+      if (option.isUseAnotherDevice) {
+        return option.copyWith(
+          onTap: startVerification,
+          isLoading: _isStartingVerification,
+        );
+      }
+      if (option.isUseRecoveryKey) {
+        return option.copyWith(onTap: showRecoveryKeyForm);
+      }
+      if (option.isNotPossibleToVerify) {
+        return option.copyWith(onTap: showResetConfirm);
+      }
+      return option;
+    }).toList();
+  }
+}
