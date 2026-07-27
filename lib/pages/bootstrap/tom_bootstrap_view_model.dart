@@ -132,6 +132,24 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     final bootstrap = _bootstrap;
     if (bootstrap == null) return;
     switch (bootstrap.state) {
+      case BootstrapState.askNewSsss:
+        bootstrap.newSsss().then((_) => _handleNewRecoveryKeyCreated());
+      case BootstrapState.openExistingSsss:
+        _unlockBackUp();
+      case BootstrapState.error:
+        _refresh(TomBootstrapErrorState.new);
+      case BootstrapState.done:
+        _refresh(TomBootstrapDoneState.new);
+      default:
+        _driveAutoStep(bootstrap);
+    }
+  }
+
+  /// Advances every `Bootstrap` state that just answers the SDK's next
+  /// question (optionally after a UI-visible `_refresh`) and waits for its
+  /// `onUpdate` callback to drive `_handleBootstrapState()` again.
+  void _driveAutoStep(Bootstrap bootstrap) {
+    switch (bootstrap.state) {
       case BootstrapState.loading:
         _refresh(TomBootstrapLoadingState.new);
       case BootstrapState.askWipeSsss:
@@ -142,10 +160,6 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
         bootstrap.useExistingSsss(!_wipe);
       case BootstrapState.askUnlockSsss:
         bootstrap.unlockedSsss();
-      case BootstrapState.askNewSsss:
-        bootstrap.newSsss().then((_) => _handleNewRecoveryKeyCreated());
-      case BootstrapState.openExistingSsss:
-        _unlockBackUp();
       case BootstrapState.askWipeCrossSigning:
         bootstrap.wipeCrossSigning(_wipe);
       case BootstrapState.askSetupCrossSigning:
@@ -159,10 +173,11 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
         bootstrap.wipeOnlineKeyBackup(_wipe);
       case BootstrapState.askSetupOnlineKeyBackup:
         bootstrap.askSetupOnlineKeyBackup(true);
+      case BootstrapState.askNewSsss:
+      case BootstrapState.openExistingSsss:
       case BootstrapState.error:
-        _refresh(TomBootstrapErrorState.new);
       case BootstrapState.done:
-        _refresh(TomBootstrapDoneState.new);
+        break;
     }
   }
 
