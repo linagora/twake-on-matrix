@@ -125,11 +125,11 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
               height: _buttonHeight,
               child: Center(
                 child: _isVerifying
-                    ? const SizedBox.square(
+                    ? SizedBox.square(
                         dimension: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       )
                     : Text(
