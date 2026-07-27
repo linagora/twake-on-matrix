@@ -47,7 +47,7 @@ class RecoveryKeyDisplayView extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(
+        Icon(
           Icons.key_outlined,
           size: KeyVerificationSasStyle.mascotHeight * 0.4,
           color: VerifyDeviceViewStyle.subtitleColor,

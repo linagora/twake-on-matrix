@@ -1,4 +1,5 @@
 import 'package:fluffychat/pages/bootstrap/verify_device_view_style.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -39,7 +40,7 @@ class _WebModal extends StatelessWidget {
               Container(
                 padding: VerifyDeviceViewStyle.webModalPadding,
                 decoration: BoxDecoration(
-                  color: VerifyDeviceViewStyle.backgroundColor,
+                  color: VerifyDeviceViewStyle.backgroundColorOf(context),
                   borderRadius: BorderRadius.circular(
                     VerifyDeviceViewStyle.webModalRadius,
                   ),
@@ -82,12 +83,15 @@ class _MobileSheet extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           width: double.infinity,
-          decoration: const BoxDecoration(
-            color: VerifyDeviceViewStyle.backgroundColor,
+          decoration: BoxDecoration(
+            color: VerifyDeviceViewStyle.backgroundColorOf(context),
             borderRadius: VerifyDeviceViewStyle.sheetRadius,
           ),
           child: SafeArea(
             top: false,
+            // Android needs bottom inset for the system nav bar; iOS home
+            // indicator should not add an empty band under the button.
+            bottom: PlatformInfos.isAndroid,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
