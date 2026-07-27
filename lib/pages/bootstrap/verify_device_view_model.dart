@@ -53,14 +53,8 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
     if (_recoveryKeyVerified) return const VerifyDeviceSuccessState();
 
     final bootstrapState = _bootstrapState;
-    if (bootstrapState is BootstrapVerifyDeviceState) {
-      if (bootstrapState.retrySucceeded) {
-        return const VerifyDeviceSuccessState();
-      }
-      if (bootstrapState.retryFailed && !_retryErrorDismissed) {
-        return const VerifyDeviceRetryErrorState();
-      }
-    }
+    final retryState = _computeRetryState(bootstrapState);
+    if (retryState != null) return retryState;
 
     if (_resetComplete) return const VerifyDeviceResetCompleteState();
     if (_showResetConfirm) {
@@ -81,6 +75,18 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
     return VerifyDeviceChooserState(
       isStartingVerification: _isStartingVerification,
     );
+  }
+
+  /// Surfaces the outcome of the caller's own "Retry automatically" flow,
+  /// read off [BootstrapViewModel]'s state — `null` when there's nothing to
+  /// show (no retry ran, or its failure was already dismissed).
+  VerifyDeviceUiState? _computeRetryState(BootstrapUiState bootstrapState) {
+    if (bootstrapState is! BootstrapVerifyDeviceState) return null;
+    if (bootstrapState.retrySucceeded) return const VerifyDeviceSuccessState();
+    if (bootstrapState.retryFailed && !_retryErrorDismissed) {
+      return const VerifyDeviceRetryErrorState();
+    }
+    return null;
   }
 
   void dismissRetryError() {

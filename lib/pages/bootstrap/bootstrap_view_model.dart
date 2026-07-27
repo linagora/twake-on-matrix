@@ -80,35 +80,58 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     }
 
     switch (bootstrap.state) {
-      case BootstrapState.loading:
+      case BootstrapState.openExistingSsss:
+        return _computeOpenExistingSsssState();
+      case BootstrapState.error:
+        return _isRetrying
+            ? BootstrapVerifyDeviceState(
+                prefilledRecoveryKey: _cachedRecoveryKey,
+                retryFailed: true,
+              )
+            : const BootstrapLegacyErrorState();
+      case BootstrapState.done:
+        return _isRetrying
+            ? BootstrapVerifyDeviceState(
+                prefilledRecoveryKey: _cachedRecoveryKey,
+                retrySucceeded: true,
+              )
+            : const BootstrapLegacyDoneState();
+      default:
+        _driveAutoStep(bootstrap.state);
         return const BootstrapLoadingState();
+    }
+  }
+
+  BootstrapUiState _computeOpenExistingSsssState() {
+    if (_isRetrying && _retryOutcome == null) {
+      _driveNextFrame(_autoRetryOpenExistingSsss);
+    }
+    return BootstrapVerifyDeviceState(
+      prefilledRecoveryKey: _cachedRecoveryKey,
+      retrySucceeded: _retryOutcome == true,
+      retryFailed: _retryOutcome == false,
+    );
+  }
+
+  /// Advances every `Bootstrap` state whose UI is just the loading spinner —
+  /// each one auto-answers the SDK's next question then waits for its
+  /// `onUpdate` callback to drive `_computeState()` again.
+  void _driveAutoStep(BootstrapState step) {
+    switch (step) {
+      case BootstrapState.loading:
+        break;
       case BootstrapState.askWipeSsss:
         _driveNextFrame(() => bootstrap.wipeSsss(_wipe));
-        return const BootstrapLoadingState();
       case BootstrapState.askBadSsss:
         _driveNextFrame(() => bootstrap.ignoreBadSecrets(true));
-        return const BootstrapLoadingState();
       case BootstrapState.askUseExistingSsss:
         _driveNextFrame(() => bootstrap.useExistingSsss(!_wipe));
-        return const BootstrapLoadingState();
       case BootstrapState.askUnlockSsss:
         _driveNextFrame(bootstrap.unlockedSsss);
-        return const BootstrapLoadingState();
       case BootstrapState.askNewSsss:
         _driveNextFrame(bootstrap.newSsss);
-        return const BootstrapLoadingState();
-      case BootstrapState.openExistingSsss:
-        if (_isRetrying && _retryOutcome == null) {
-          _driveNextFrame(_autoRetryOpenExistingSsss);
-        }
-        return BootstrapVerifyDeviceState(
-          prefilledRecoveryKey: _cachedRecoveryKey,
-          retrySucceeded: _retryOutcome == true,
-          retryFailed: _retryOutcome == false,
-        );
       case BootstrapState.askWipeCrossSigning:
         _driveNextFrame(() => bootstrap.wipeCrossSigning(_wipe));
-        return const BootstrapLoadingState();
       case BootstrapState.askSetupCrossSigning:
         _driveNextFrame(
           () => bootstrap.askSetupCrossSigning(
@@ -117,29 +140,14 @@ class BootstrapViewModel extends _$BootstrapViewModel {
             setupUserSigningKey: true,
           ),
         );
-        return const BootstrapLoadingState();
       case BootstrapState.askWipeOnlineKeyBackup:
         _driveNextFrame(() => bootstrap.wipeOnlineKeyBackup(_wipe));
-        return const BootstrapLoadingState();
       case BootstrapState.askSetupOnlineKeyBackup:
         _driveNextFrame(() => bootstrap.askSetupOnlineKeyBackup(true));
-        return const BootstrapLoadingState();
+      case BootstrapState.openExistingSsss:
       case BootstrapState.error:
-        if (_isRetrying) {
-          return BootstrapVerifyDeviceState(
-            prefilledRecoveryKey: _cachedRecoveryKey,
-            retryFailed: true,
-          );
-        }
-        return const BootstrapLegacyErrorState();
       case BootstrapState.done:
-        if (_isRetrying) {
-          return BootstrapVerifyDeviceState(
-            prefilledRecoveryKey: _cachedRecoveryKey,
-            retrySucceeded: true,
-          );
-        }
-        return const BootstrapLegacyDoneState();
+        break;
     }
   }
 
