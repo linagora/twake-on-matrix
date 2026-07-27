@@ -556,6 +556,10 @@ jobs:
           fi
           cp -R scripts/perf/dashboard/. performance-site/
 
+          python3 scripts/perf/version_dashboard_assets.py \
+            --index performance-site/index.html \
+            --version "$GITHUB_SHA"
+
           python3 scripts/perf/update_history.py \
             --memory perf-results/perf_median_memory.json \
             --physical perf-results/perf_frame_physical.json \
