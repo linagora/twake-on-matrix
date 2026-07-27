@@ -145,40 +145,33 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     }
   }
 
-  /// Advances every `Bootstrap` state that just answers the SDK's next
-  /// question (optionally after a UI-visible `_refresh`) and waits for its
-  /// `onUpdate` callback to drive `_handleBootstrapState()` again.
+  /// One auto-answer per `Bootstrap` question that just answers the SDK's
+  /// next question (optionally after a UI-visible `_refresh`) and waits for
+  /// its `onUpdate` callback to drive `_handleBootstrapState()` again. Keyed
+  /// by [BootstrapState] instead of a switch so dispatch in [_driveAutoStep]
+  /// is a lookup, not a branch.
+  late final Map<BootstrapState, void Function(Bootstrap)> _autoStepActions = {
+    BootstrapState.loading: (_) => _refresh(TomBootstrapLoadingState.new),
+    BootstrapState.askWipeSsss: (b) => b.wipeSsss(_wipe),
+    BootstrapState.askBadSsss: (b) => b.ignoreBadSecrets(true),
+    BootstrapState.askUseExistingSsss: (b) => b.useExistingSsss(!_wipe),
+    BootstrapState.askUnlockSsss: (b) => b.unlockedSsss(),
+    BootstrapState.askWipeCrossSigning: (b) => b.wipeCrossSigning(_wipe),
+    BootstrapState.askSetupCrossSigning: (b) {
+      _refresh(TomBootstrapUploadingCrossSigningKeysState.new);
+      b.askSetupCrossSigning(
+        setupMasterKey: true,
+        setupSelfSigningKey: true,
+        setupUserSigningKey: true,
+      );
+    },
+    BootstrapState.askWipeOnlineKeyBackup: (b) => b.wipeOnlineKeyBackup(_wipe),
+    BootstrapState.askSetupOnlineKeyBackup: (b) =>
+        b.askSetupOnlineKeyBackup(true),
+  };
+
   void _driveAutoStep(Bootstrap bootstrap) {
-    switch (bootstrap.state) {
-      case BootstrapState.loading:
-        _refresh(TomBootstrapLoadingState.new);
-      case BootstrapState.askWipeSsss:
-        bootstrap.wipeSsss(_wipe);
-      case BootstrapState.askBadSsss:
-        bootstrap.ignoreBadSecrets(true);
-      case BootstrapState.askUseExistingSsss:
-        bootstrap.useExistingSsss(!_wipe);
-      case BootstrapState.askUnlockSsss:
-        bootstrap.unlockedSsss();
-      case BootstrapState.askWipeCrossSigning:
-        bootstrap.wipeCrossSigning(_wipe);
-      case BootstrapState.askSetupCrossSigning:
-        _refresh(TomBootstrapUploadingCrossSigningKeysState.new);
-        bootstrap.askSetupCrossSigning(
-          setupMasterKey: true,
-          setupSelfSigningKey: true,
-          setupUserSigningKey: true,
-        );
-      case BootstrapState.askWipeOnlineKeyBackup:
-        bootstrap.wipeOnlineKeyBackup(_wipe);
-      case BootstrapState.askSetupOnlineKeyBackup:
-        bootstrap.askSetupOnlineKeyBackup(true);
-      case BootstrapState.askNewSsss:
-      case BootstrapState.openExistingSsss:
-      case BootstrapState.error:
-      case BootstrapState.done:
-        break;
-    }
+    _autoStepActions[bootstrap.state]?.call(bootstrap);
   }
 
   Future<void> _handleNewRecoveryKeyCreated() async {

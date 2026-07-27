@@ -113,42 +113,31 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     );
   }
 
-  /// Advances every `Bootstrap` state whose UI is just the loading spinner —
-  /// each one auto-answers the SDK's next question then waits for its
-  /// `onUpdate` callback to drive `_computeState()` again.
+  /// One auto-answer per `Bootstrap` question whose UI is just the loading
+  /// spinner — each schedules its SDK call then waits for `onUpdate` to
+  /// drive `_computeState()` again. Keyed by [BootstrapState] instead of a
+  /// switch so dispatch in [_driveAutoStep] is a lookup, not a branch.
+  late final Map<BootstrapState, void Function()> _autoStepActions = {
+    BootstrapState.askWipeSsss: () => bootstrap.wipeSsss(_wipe),
+    BootstrapState.askBadSsss: () => bootstrap.ignoreBadSecrets(true),
+    BootstrapState.askUseExistingSsss: () => bootstrap.useExistingSsss(!_wipe),
+    BootstrapState.askUnlockSsss: bootstrap.unlockedSsss,
+    BootstrapState.askNewSsss: bootstrap.newSsss,
+    BootstrapState.askWipeCrossSigning: () => bootstrap.wipeCrossSigning(_wipe),
+    BootstrapState.askSetupCrossSigning: () => bootstrap.askSetupCrossSigning(
+      setupMasterKey: true,
+      setupSelfSigningKey: true,
+      setupUserSigningKey: true,
+    ),
+    BootstrapState.askWipeOnlineKeyBackup: () =>
+        bootstrap.wipeOnlineKeyBackup(_wipe),
+    BootstrapState.askSetupOnlineKeyBackup: () =>
+        bootstrap.askSetupOnlineKeyBackup(true),
+  };
+
   void _driveAutoStep(BootstrapState step) {
-    switch (step) {
-      case BootstrapState.loading:
-        break;
-      case BootstrapState.askWipeSsss:
-        _driveNextFrame(() => bootstrap.wipeSsss(_wipe));
-      case BootstrapState.askBadSsss:
-        _driveNextFrame(() => bootstrap.ignoreBadSecrets(true));
-      case BootstrapState.askUseExistingSsss:
-        _driveNextFrame(() => bootstrap.useExistingSsss(!_wipe));
-      case BootstrapState.askUnlockSsss:
-        _driveNextFrame(bootstrap.unlockedSsss);
-      case BootstrapState.askNewSsss:
-        _driveNextFrame(bootstrap.newSsss);
-      case BootstrapState.askWipeCrossSigning:
-        _driveNextFrame(() => bootstrap.wipeCrossSigning(_wipe));
-      case BootstrapState.askSetupCrossSigning:
-        _driveNextFrame(
-          () => bootstrap.askSetupCrossSigning(
-            setupMasterKey: true,
-            setupSelfSigningKey: true,
-            setupUserSigningKey: true,
-          ),
-        );
-      case BootstrapState.askWipeOnlineKeyBackup:
-        _driveNextFrame(() => bootstrap.wipeOnlineKeyBackup(_wipe));
-      case BootstrapState.askSetupOnlineKeyBackup:
-        _driveNextFrame(() => bootstrap.askSetupOnlineKeyBackup(true));
-      case BootstrapState.openExistingSsss:
-      case BootstrapState.error:
-      case BootstrapState.done:
-        break;
-    }
+    final action = _autoStepActions[step];
+    if (action != null) _driveNextFrame(action);
   }
 
   /// Auto-driven SDK transitions call straight back into `state =` (via
