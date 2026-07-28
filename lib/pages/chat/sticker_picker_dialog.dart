@@ -1,3 +1,6 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +25,8 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
   Widget build(BuildContext context) {
     final stickerPacks = widget.room.getImagePacks(ImagePackUsage.sticker);
     final packSlugs = stickerPacks.keys.toList();
+    final engine = getIt.get<SearchEngine>();
+    const opts = SearchOptions(diacriticSensitive: false);
 
     // ignore: prefer_function_declarations_over_variables
     final packBuilder = (BuildContext context, int packIndex) {
@@ -30,11 +35,12 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       if (searchFilter?.isNotEmpty ?? false) {
         filteredImagePackImageEntried.removeWhere(
           (e) =>
-              !(e.key.toLowerCase().contains(searchFilter!.toLowerCase()) ||
-                  (e.value.body?.toLowerCase().contains(
-                        searchFilter!.toLowerCase(),
-                      ) ??
-                      false)),
+              !engine.matchesText(searchFilter!, e.key, options: opts) &&
+              !engine.matchesText(
+                searchFilter!,
+                e.value.body ?? '',
+                options: opts,
+              ),
         );
       }
       final imageKeys = filteredImagePackImageEntried
