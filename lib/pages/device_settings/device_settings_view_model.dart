@@ -1,8 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/app_state/device_settings/get_devices_state.dart';
-import 'package:fluffychat/domain/usecase/device_settings/get_devices_interactor.dart';
 import 'package:fluffychat/pages/device_settings/device_settings_state.dart';
+import 'package:fluffychat/pages/device_settings/providers/device_settings_providers.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,9 +9,6 @@ part 'device_settings_view_model.g.dart';
 
 @riverpod
 class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
-  final GetDevicesInteractor _getDevicesInteractor = getIt
-      .get<GetDevicesInteractor>();
-
   Future<void>? _loadInFlight;
 
   @override
@@ -105,22 +101,27 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
   }
 
   Future<void> _loadUserDevices(Client client) async {
-    await _getDevicesInteractor.execute(client: client).forEach((either) {
-      either.fold(
-        (failure) {
-          if (failure is GetDevicesEmpty) {
-            state = const DevicesSettingsState.loaded(devices: []);
-          } else if (failure is GetDevicesFailed) {
-            state = DevicesSettingsState.error(exception: failure.exception);
-          }
-        },
-        (success) {
-          if (success is GetDevicesSuccess) {
-            state = DevicesSettingsState.loaded(devices: success.devices);
-          }
-        },
-      );
-    });
+    await ref
+        .read(getDevicesInteractorProvider)
+        .execute(client: client)
+        .forEach((either) {
+          either.fold(
+            (failure) {
+              if (failure is GetDevicesEmpty) {
+                state = const DevicesSettingsState.loaded(devices: []);
+              } else if (failure is GetDevicesFailed) {
+                state = DevicesSettingsState.error(
+                  exception: failure.exception,
+                );
+              }
+            },
+            (success) {
+              if (success is GetDevicesSuccess) {
+                state = DevicesSettingsState.loaded(devices: success.devices);
+              }
+            },
+          );
+        });
   }
 
   void reload() => state = const DevicesSettingsState.initial();

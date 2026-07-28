@@ -1,4 +1,4 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/di/global/get_it_provider.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
 import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_view_model.dart';
@@ -22,7 +22,8 @@ class ChatDeviceVerificationBanner extends ConsumerWidget {
       // TODO(TW-3218 part II): wire the Verify action to the self-verification
       // flow for the current session (cross-signing via recovery key, not
       // device-to-device SAS verification). Action hidden until then.
-      final isMobile = getIt.get<ResponsiveUtils>().isMobile(context);
+      final responsive = ref.read(getItProvider).get<ResponsiveUtils>();
+      final isMobile = responsive.isMobile(context);
       return LinagoraBanner(
         message: L10n.of(context)!.deviceVerificationWaring,
         onDismiss: isMobile ? null : controller.onDismissBanner,
