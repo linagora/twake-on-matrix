@@ -1,3 +1,4 @@
+import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -10,16 +11,12 @@ mixin WellKnownMixin {
       ValueNotifier(null);
 
   Future<void> getWellKnownInformation(Client client) async {
-    try {
-      final result = await client.getWellknown();
-      Logs().d('WellKnownMixin::getWellKnownInformation() well-known $result');
-      discoveryInformationNotifier.value = result;
-    } catch (e) {
-      Logs().e(
-        'WellKnownMixin::getWellKnownInformation() Error checking wellknown '
-        'status (keeping previous value): $e',
-      );
-    }
+    final result = await client.getWellKnownOrFallback(
+      fallback: discoveryInformationNotifier.value,
+    );
+    if (result == null) return;
+    Logs().d('WellKnownMixin::getWellKnownInformation() well-known $result');
+    discoveryInformationNotifier.value = result;
   }
 
   bool supportInvitation() {

@@ -62,6 +62,11 @@ class _ExpansionPhonebookContactListTileState
     required PresentationContact contact,
     InvitationStatusResponse? invitationStatus,
   }) async {
+    Logs().d(
+      'ExpansionPhonebookContactListTile::_handleMatrixIdNull '
+      'hasMatrixId=${widget.contact.matrixId?.isNotEmpty == true} '
+      'hasInvitation=${invitationStatus?.invitation != null}',
+    );
     if (invitationStatus?.invitation != null &&
         invitationStatus!.invitation?.hasMatrixId == true) {
       widget.onContactTap?.call();
@@ -72,7 +77,8 @@ class _ExpansionPhonebookContactListTileState
       widget.onContactTap?.call();
       return;
     }
-    if (client.userID == null && client.userID?.isEmpty == true) return;
+    if (!widget.enableInvitation) return;
+    if (client.userID == null || client.userID!.isEmpty) return;
     final result = await showAdaptiveBottomSheet<String?>(
       context: context,
       builder: (context) => ContactsInvitation(
@@ -118,10 +124,12 @@ class _ExpansionPhonebookContactListTileState
             bottom: 8.0,
           ),
           child: FutureBuilder<Profile?>(
-            key: widget.contact.matrixId != null
+            key: widget.contact.matrixId?.isNotEmpty == true
                 ? Key(widget.contact.matrixId!)
                 : null,
-            future: widget.contact.status == ContactStatus.active
+            future:
+                widget.contact.status == ContactStatus.active &&
+                    widget.contact.matrixId?.isNotEmpty == true
                 ? getProfile(context)
                 : null,
             builder: (context, snapshot) {
@@ -376,6 +384,10 @@ class _ExpansionPhonebookContactListTileState
         contact: contact,
         invitationStatus: invitationStatus,
       );
+    }
+
+    if (contact.matrixId == null || contact.matrixId!.isEmpty) {
+      return null;
     }
 
     if (widget.onContactTap != null) {

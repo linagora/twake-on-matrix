@@ -472,7 +472,10 @@ class FederationLookUpPhonebookContactInteractor {
           hashDetails.algorithms == null ||
           hashDetails.algorithms!.isEmpty) {
         firstFailureRef(
-          const GetHashDetailsFailure(exception: 'Hash details is empty'),
+          GetHashDetailsFailure(
+            exception: 'Hash details is empty',
+            contacts: contacts,
+          ),
         );
         return null;
       }
@@ -488,7 +491,7 @@ class FederationLookUpPhonebookContactInteractor {
         'hash details failed for $federationUrl',
         e,
       );
-      firstFailureRef(GetHashDetailsFailure(exception: e));
+      firstFailureRef(GetHashDetailsFailure(exception: e, contacts: contacts));
       return null;
     }
   }

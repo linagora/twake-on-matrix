@@ -4141,6 +4141,42 @@ void main() {
           ).called(2);
         },
       );
+      test('WHEN federation configuration lookup throws an unexpected error.\n'
+          'AND synchronizeContactsOnContactTab is called again.\n'
+          'THEN contact synchronization is retried.\n', () async {
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
+          (_) => Stream.fromIterable([
+            const Right(ContactsLoading()),
+            const Left(GetContactsIsEmpty()),
+          ]),
+        );
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenThrow(Exception('Unexpected federation lookup error'));
+
+        contactsManager.synchronizeContactsOnContactTab(
+          isAvailableSupportPhonebookContacts: true,
+          withMxId: mxId,
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        contactsManager.synchronizeContactsOnContactTab(
+          isAvailableSupportPhonebookContacts: true,
+          withMxId: mxId,
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).called(2);
+      });
       test(
         '[Account-A] WHEN it is available get Phonebook contact.\n'
         '[Account-A] AND contactsNotifier return GetContactsIsEmpty with contacts is empty.\n'
