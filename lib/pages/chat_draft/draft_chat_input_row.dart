@@ -242,7 +242,7 @@ class DraftChatInputRow extends StatelessWidget {
                 sendVoiceMessageAction?.call(file, time, waveFrom);
               },
               encode: AudioEncoderType.AAC,
-              fullRecordPackageHeight: 50,
+              fullRecordPackageHeight: ChatInputRowStyle.chatInputRowHeight,
               initRecordPackageWidth: 50,
               cancelTextBackGroundColor: Colors.transparent,
               cancelText: L10n.of(context)!.cancel,

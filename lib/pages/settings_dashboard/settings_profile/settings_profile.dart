@@ -706,10 +706,12 @@ class SettingsProfileController extends State<SettingsProfile>
   @override
   Widget build(BuildContext context) {
     return SettingsProfileCapabilityCheck(
-      builder: (capabilities, _) {
+      userId: client.userID,
+      builder: (capabilities, userInfo, _) {
         return SettingsProfileView(
           controller: this,
           capabilities: capabilities,
+          userInfo: userInfo,
         );
       },
     );

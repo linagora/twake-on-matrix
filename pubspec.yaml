@@ -1,7 +1,7 @@
 name: fluffychat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.23.3+2330
+version: 2.23.4+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref:  v0.2.0
+      ref:  v0.2.2
   flutter_matrix_html:
     git:
       url: https://github.com/linagora/flutter_matrix_html.git
@@ -154,7 +154,6 @@ dependencies:
   scroll_to_index: ^3.0.1
   share_plus: 10.0.2
   shared_preferences: ^2.5.3
-  slugify: ^2.0.0
   skeletons:
     # TODO: Remove when https://github.com/badjio/skeletons/pull/9 is merged
     git:

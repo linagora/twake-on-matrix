@@ -1,4 +1,7 @@
 import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
@@ -6,12 +9,7 @@ import 'package:fluffychat/domain/model/contact/third_party_status.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
 import 'package:fluffychat/utils/string_extension.dart';
-
-const _contactSearchEngine = SearchEngine();
-const _contactSearchOptions = SearchOptions(diacriticSensitive: false);
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {
@@ -333,56 +331,23 @@ extension SetContactExtension on Set<Contact> {
 
 extension IterableContactsExtension on Iterable<Contact> {
   Iterable<Contact> searchContacts(String keyword) {
-    if (keyword.isEmpty) {
-      return this;
-    }
-    final contactsMatched = where((contact) {
-      final supportedFields = [contact.displayName, contact.id];
-      final plainTextContains = supportedFields.any(
-        (field) => _matchesText(keyword, field),
-      );
-      final phoneNumberContains =
-          contact.phoneNumbers?.any(
-            (phoneNumber) =>
-                _matchesText(keyword, phoneNumber.number.replaceAll(" ", "")),
-          ) ??
-          false;
+    if (keyword.isEmpty) return this;
+    final engine = getIt.get<SearchEngine>();
+    const options = SearchOptions(diacriticSensitive: false);
 
-      final emailContains =
-          contact.emails?.any(
-            (email) => _matchesText(keyword, email.address),
-          ) ??
-          false;
-
-      final emailMatrixIdContains =
-          contact.emails?.any(
-            (email) => _matchesText(keyword, email.matrixId),
-          ) ??
-          false;
-
-      final phoneMatrixIdContains =
-          contact.phoneNumbers?.any(
-            (phone) => _matchesText(keyword, phone.matrixId),
-          ) ??
-          false;
-
-      return plainTextContains ||
-          phoneNumberContains ||
-          emailContains ||
-          emailMatrixIdContains ||
-          phoneMatrixIdContains;
-    });
-    return contactsMatched;
-  }
-
-  bool _matchesText(String keyword, String? value) {
-    if (value == null) {
-      return false;
-    }
-    return _contactSearchEngine.matchesText(
+    return engine.matchAnyField(
       keyword,
-      value,
-      options: _contactSearchOptions,
+      toList(),
+      fieldExtractors: [
+        (Contact c) => [c.displayName ?? ''],
+        (Contact c) => [c.id],
+        (Contact c) =>
+            c.emails?.expand((e) => [e.address, e.matrixId ?? '']) ?? const [],
+        (Contact c) =>
+            c.phoneNumbers?.expand((p) => [p.number, p.matrixId ?? '']) ??
+            const [],
+      ],
+      options: options,
     );
   }
 }

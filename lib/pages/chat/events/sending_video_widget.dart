@@ -9,6 +9,7 @@ import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:fluffychat/presentation/model/file/display_image_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/extension/image_size_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
@@ -105,14 +106,15 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
             child: const BlurHash(hash: MessageContentStyle.defaultBlurHash),
           ),
           if (_thumbnailBytes != null)
-            Image.memory(
-              _thumbnailBytes!,
+            Image(
+              image: MemoryImage(_thumbnailBytes!).resizeToFit(
+                cacheWidth: context.getCacheSize(
+                  MessageContentStyle.imageBubbleWidth(imageWidth),
+                ),
+                cacheHeight: context.getCacheSize(bubbleHeight),
+              ),
               width: MessageContentStyle.imageBubbleWidth(imageWidth),
               height: bubbleHeight,
-              cacheWidth: context.getCacheSize(
-                MessageContentStyle.imageBubbleWidth(imageWidth),
-              ),
-              cacheHeight: context.getCacheSize(bubbleHeight),
               fit: BoxFit.cover,
               filterQuality: FilterQuality.medium,
             ),

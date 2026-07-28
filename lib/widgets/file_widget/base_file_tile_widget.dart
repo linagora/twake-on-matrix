@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/pages/chat/events/message_content_style.dart';
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:fluffychat/utils/extension/image_provider_extension.dart';
 import 'package:fluffychat/utils/extension/mime_type_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:fluffychat/utils/string_extension.dart';
@@ -68,12 +69,13 @@ class BaseFileTileWidget extends StatelessWidget {
                     padding: style.imagePadding,
                     child: ClipRRect(
                       borderRadius: style.borderRadius,
-                      child: Image.memory(
-                        imageBytes!,
+                      child: Image(
+                        image: MemoryImage(imageBytes!).resizeToFit(
+                          cacheWidth: context.getCacheSize(style.imageSize),
+                          cacheHeight: context.getCacheSize(style.imageSize),
+                        ),
                         width: style.imageSize,
                         height: style.imageSize,
-                        cacheWidth: context.getCacheSize(style.imageSize),
-                        cacheHeight: context.getCacheSize(style.imageSize),
                         fit: BoxFit.cover,
                       ),
                     ),

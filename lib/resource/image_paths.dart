@@ -86,7 +86,6 @@ class ImagePaths {
 
   static String get icAudioSpeed0_5x => _getImagePath('audio_speed_0_5x.svg');
 
-  static String get supportAvatarPng => _getAssetPath('support_avatar.png');
   static String get supportWelcome => _getImagePath('support_welcome.svg');
 
   static String get chatBackground => _getImagePath('chat_background.png');

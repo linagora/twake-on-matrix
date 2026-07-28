@@ -48,11 +48,14 @@ class NewChatRobot extends CoreRobot {
 
   Future<void> clickOnNewGroupChatIcon() async {
     await getNewGroupChatIcon().tap();
-    // The add-members screen (`ContactsSelectionView`) opens directly in search
-    // mode (`openSearchBar()` in its initState), so the standalone search icon
-    // is gone and the search `TextField` is shown inline. Wait for that field
-    // instead of the removed `Icons.search` affordance.
-    await $.waitUntilVisible($(ContactsSelectionView).$(TextField).first);
+    // The add-members screen (`ContactsSelectionView`) mounts its `TextField`
+    // only after `openSearchBar()` runs, which is wired to the search icon's
+    // `onTap` (see `SearchableAppBar`) — it is never triggered automatically.
+    // Tap the icon first, then wait for the field it reveals.
+    final contactsSelectionView = $(ContactsSelectionView);
+    await $.waitUntilVisible(contactsSelectionView);
+    await contactsSelectionView.$(find.byIcon(Icons.search)).first.tap();
+    await $.waitUntilVisible(contactsSelectionView.$(TextField).first);
   }
 
   List<TwakeListItemRobot> getListOfAccount() {

@@ -26,6 +26,7 @@ import 'package:social_media_recorder/screen/social_media_recorder.dart';
 import 'chat.dart';
 import 'chat_actions.dart';
 import 'input_bar/input_bar.dart';
+import 'input_bar/input_bar_style.dart';
 
 class ChatInputRow extends StatelessWidget {
   final ChatController controller;
@@ -282,7 +283,8 @@ class ChatInputRow extends StatelessWidget {
                               }
                             },
                             encode: AudioEncoderType.AAC,
-                            fullRecordPackageHeight: 50,
+                            fullRecordPackageHeight:
+                                ChatInputRowStyle.chatInputRowHeight,
                             initRecordPackageWidth: 50,
                             cancelTextBackGroundColor: Colors.transparent,
                             cancelText: L10n.of(context)!.cancel,
@@ -489,7 +491,7 @@ class ChatInputRow extends StatelessWidget {
         hintText: L10n.of(context)!.message,
         isDense: true,
         hintMaxLines: 1,
-        hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        hintStyle: InputBarStyle.getTypeAheadTextStyle(context).copyWith(
           color: controller.responsive.isMobile(context)
               ? LinagoraRefColors.material().tertiary[50]
               : LinagoraRefColors.material().tertiary[30],

@@ -23,8 +23,6 @@ class TextMessageRetryButton extends StatelessWidget {
         child: Text(
           L10n.of(context)!.tapToRetry,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            fontSize: 12,
-            height: 16 / 12,
             color: LinagoraSysColors.material().primary,
           ),
         ),

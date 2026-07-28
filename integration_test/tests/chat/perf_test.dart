@@ -61,8 +61,8 @@ class PerfScenario extends BaseTestScenario {
   }
 }
 
-/// 3 round-trips without measuring. The Dart JIT needs several cycles to
-/// stabilize — 1 cycle is not enough.
+/// 3 round-trips without measuring to stabilize shaders, caches and room data
+/// before collecting profile-mode timings.
 Future<void> _warmup(PatrolIntegrationTester $) async {
   await HomeRobot($).gotoChatListScreen();
   await $.pumpAndSettle();

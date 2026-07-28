@@ -39,6 +39,7 @@ import 'package:fluffychat/domain/model/tom_server_information.dart';
 import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
 import 'package:fluffychat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:fluffychat/providers/login_homeserver_summary_provider.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/localized_exception_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
@@ -52,6 +53,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ConsumerState, ConsumerStatefulWidget;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -74,7 +77,7 @@ import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
 
-class Matrix extends StatefulWidget {
+class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
 
   final List<Client> clients;
@@ -98,7 +101,7 @@ class Matrix extends StatefulWidget {
   static MatrixState read(BuildContext context) => context.read<MatrixState>();
 }
 
-class MatrixState extends State<Matrix>
+class MatrixState extends ConsumerState<Matrix>
     with
         WidgetsBindingObserver,
         ReceiveSharingIntentMixin,
@@ -118,7 +121,12 @@ class MatrixState extends State<Matrix>
   int _activeClient = -1;
   String? activeBundle;
   Store store = Store();
-  HomeserverSummary? loginHomeserverSummary;
+  // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
+  HomeserverSummary? get loginHomeserverSummary =>
+      ref.read(loginHomeserverSummaryProvider);
+
+  set loginHomeserverSummary(HomeserverSummary? summary) =>
+      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
   String? _authUrl;
   XFile? loginAvatar;
   String? loginUsername;
@@ -443,6 +451,7 @@ class MatrixState extends State<Matrix>
   @override
   void initState() {
     super.initState();
+    _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (PlatformInfos.isWeb) {
@@ -910,6 +919,14 @@ class MatrixState extends State<Matrix>
   Future<void> _retrieveLocalToMConfiguration() async {
     if (widget.clients.isEmpty) return;
     if (client.userID == null) return;
+
+    // Matrix APIs must remain available even when no optional ToM
+    // configuration has been stored for the current user yet.
+    setUpAuthorization(client);
+    if (client.homeserver != null) {
+      _setUpHomeServer(client.homeserver!);
+    }
+
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
       if (toMConfigurations == null) {
@@ -1437,6 +1454,28 @@ class MatrixState extends State<Matrix>
     backgroundPush?.clearAllNotifications();
   }
 
+  void _preloadMessageAlignmentSetting() {
+    store
+        .getItemBool(
+          SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
+          AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
+        )
+        .then((value) {
+          if (!mounted ||
+              AppConfig.enableRightAndLeftMessageAlignmentOnWeb == value) {
+            return;
+          }
+          // The flag is a plain static that nothing listens to, so a rebuild
+          // has to be requested explicitly for already-mounted descendants.
+          setState(() {
+            AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value;
+          });
+        })
+        .catchError((Object e, StackTrace s) {
+          Logs().w('MatrixState::_preloadMessageAlignmentSetting: error', e, s);
+        });
+  }
+
   Future<void> initSettings() async {
     try {
       await Future.wait([
@@ -1492,15 +1531,6 @@ class MatrixState extends State<Matrix>
               AppConfig.experimentalVoip,
             )
             .then((value) => AppConfig.experimentalVoip = value),
-        store
-            .getItemBool(
-              SettingKeys.enableRightAndLeftMessageAlignmentOnWeb,
-              AppConfig.enableRightAndLeftMessageAlignmentOnWeb,
-            )
-            .then(
-              (value) =>
-                  AppConfig.enableRightAndLeftMessageAlignmentOnWeb = value,
-            ),
       ]);
     } catch (e, s) {
       Logs().wtf('MatrixState::initSettings: error', e, s);
