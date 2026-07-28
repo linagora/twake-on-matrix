@@ -58,7 +58,7 @@ dependencies:
   flutter_emoji_mart:
     git:
       url: https://github.com/linagora/emoji_mart.git
-      ref: TW-3218-add-new-components-for-device-verification
+      ref: master
 
   social_media_recorder:
     git:
@@ -350,7 +350,7 @@ dependency_overrides:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: TW-3218-add-new-components-for-device-verification
+      ref: v0.2.3
 
 cider:
   link_template:

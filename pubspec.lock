@@ -961,8 +961,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: TW-3218-add-new-components-for-device-verification
-      resolved-ref: "2016c8be4091703eb7a9fd528a38d16d516b1a31"
+      ref: master
+      resolved-ref: bf3fe8167ac4c3bb599fabaea9690c8074a03c71
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1858,11 +1858,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: TW-3218-add-new-components-for-device-verification
-      resolved-ref: "5ecc5bf38540bfa7692b0c3c5c5a3e75712fb4f2"
+      ref: "v0.2.3"
+      resolved-ref: f71755b994b0e75df1bb5a405a404380a105575c
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.1"
+    version: "0.2.3"
   linkfy_text:
     dependency: "direct main"
     description:
