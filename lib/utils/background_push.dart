@@ -33,6 +33,7 @@ import 'package:fluffychat/presentation/extensions/go_router_extensions.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:fluffychat/utils/push_helper.dart';
 import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
+import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:fluffychat/widgets/matrix.dart';
@@ -610,11 +611,17 @@ class BackgroundPush {
       }
     }
 
-    await _switchAccount(receiverId);
-    await goToRoom(roomId, eventId: eventId);
+    final switchedClient = await _switchAccount(receiverId);
+    await goToRoom(roomId, eventId: eventId, switchedClient: switchedClient);
   }
 
-  Future<void> _switchAccount(String? receiverId) async {
+  /// Switches the active client to the account matching [receiverId], if it
+  /// differs from the current one.
+  ///
+  /// Returns the newly active [Client] when a switch happened, so callers
+  /// can propagate it to navigation and force dependent UI (e.g. the bottom
+  /// bar avatar) to refresh.
+  Future<Client?> _switchAccount(String? receiverId) async {
     Client? targetClient;
     if (receiverId != null && _matrixState != null) {
       targetClient = _matrixState!.widget.clients.firstWhereOrNull(
@@ -628,8 +635,10 @@ class BackgroundPush {
         await _matrixState!.setActiveClient(targetClient);
         await _matrixState!.cancelListenSynchronizeContacts();
         await _matrixState!.reSyncContacts();
+        return targetClient;
       }
     }
+    return null;
   }
 
   void onReceiveNotification(dynamic message) {
@@ -661,32 +670,45 @@ class BackgroundPush {
     Logs().d(
       'BackgroundPush::onSelectNotification() roomId - ${payload.roomId} ||eventId - $eventId',
     );
-    await _switchAccount(payload.receiverId);
-    await goToRoom(payload.roomId, eventId: eventId);
+    final switchedClient = await _switchAccount(payload.receiverId);
+    await goToRoom(
+      payload.roomId,
+      eventId: eventId,
+      switchedClient: switchedClient,
+    );
   }
 
-  Future<void> goToRoom(String? roomId, {String? eventId}) async {
+  Future<void> goToRoom(
+    String? roomId, {
+    String? eventId,
+    Client? switchedClient,
+  }) async {
     try {
       Logs().v('[Push] Attempting to go to room $roomId...');
       await _clearAllNavigatorAvailable(roomId: roomId);
       if (_matrixState == null || roomId == null) {
         return;
       }
-      await client.roomsLoading;
-      await client.accountDataLoading;
+      final activeClient = switchedClient ?? client;
+      await activeClient.roomsLoading;
+      await activeClient.accountDataLoading;
       // ignore: unused_local_variable
       final isStory =
-          client
+          activeClient
               .getRoomById(roomId)
               ?.getState(EventTypes.RoomCreate)
               ?.content
               .tryGet<String>('type') ==
           ClientStoriesExtension.storiesRoomType;
-      if (client.getRoomById(roomId) == null) {
+      if (activeClient.getRoomById(roomId) == null) {
         Logs().v('[Push] Room $roomId not found, syncing...');
-        await client.waitForRoomInSync(roomId);
+        await activeClient.waitForRoomInSync(roomId);
       }
-      _handleRedirectRoom(roomId, eventId: eventId);
+      _handleRedirectRoom(
+        roomId,
+        eventId: eventId,
+        switchedClient: switchedClient,
+      );
     } catch (e, s) {
       Logs().e('[Push] Failed to open room', e, s);
     }
@@ -932,11 +954,18 @@ class BackgroundPush {
     await _handleInnerNavigation();
   }
 
-  void _handleRedirectRoom(String roomId, {String? eventId}) {
+  void _handleRedirectRoom(
+    String roomId, {
+    String? eventId,
+    Client? switchedClient,
+  }) {
+    final extra = switchedClient != null
+        ? SwitchActiveAccountBodyArgs(newActiveClient: switchedClient)
+        : null;
     if (eventId != null) {
-      TwakeApp.router.go('/rooms/$roomId?event=$eventId');
+      TwakeApp.router.go('/rooms/$roomId?event=$eventId', extra: extra);
       return;
     }
-    TwakeApp.router.go('/rooms/$roomId');
+    TwakeApp.router.go('/rooms/$roomId', extra: extra);
   }
 }
