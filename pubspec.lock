@@ -1858,11 +1858,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.3"
-      resolved-ref: f71755b994b0e75df1bb5a405a404380a105575c
+      ref: "v0.2.4"
+      resolved-ref: "7fc29cdb386fc16af3e600482bf3a62849ad683a"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.3"
+    version: "0.2.4"
   linkfy_text:
     dependency: "direct main"
     description:

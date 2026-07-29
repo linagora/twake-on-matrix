@@ -314,7 +314,7 @@ class DraftChatView extends StatelessWidget {
               show: controller.showAddContactBanner,
             ),
           ),
-          ChatDeviceVerificationBanner(client: Matrix.of(context).client),
+          ChatDeviceVerificationBanner(client: controller.client),
         ],
       ),
     );

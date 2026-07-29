@@ -350,7 +350,7 @@ dependency_overrides:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.3
+      ref: v0.2.4
 
 cider:
   link_template:
