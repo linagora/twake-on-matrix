@@ -52,6 +52,73 @@ class ComputeMedianTest(unittest.TestCase):
             },
         )
 
+    def test_android_requirements_exclude_frames_only_from_idle_checkpoints(
+        self,
+    ) -> None:
+        requirements = _load_requirements(
+            str(Path(__file__).parents[1] / "android_requirements.json")
+        )
+        frame_metrics = {
+            "frame_window_ms",
+            "fps",
+            "build_p50_us",
+            "build_p95_us",
+            "build_p99_us",
+            "raster_p50_us",
+            "raster_p95_us",
+            "raster_p99_us",
+            "jank_count",
+            "jank_rate",
+        }
+        idle_checkpoints = {
+            ("scroll_room1", "scroll_end"),
+            ("scroll_room1", "scroll_settled"),
+            ("scroll_room2", "scroll_end"),
+            ("scroll_room2", "scroll_settled"),
+        }
+        expected_checkpoints = {
+            ("nav_cycles", "chat_list_baseline"),
+            *(('nav_cycles', f'room_enter_cycle{cycle}') for cycle in range(1, 6)),
+            *(
+                ('nav_cycles', f'chat_list_after_cycle{cycle}')
+                for cycle in range(1, 6)
+            ),
+            *(
+                (scenario, label)
+                for scenario, room in (("scroll_room1", 1), ("scroll_room2", 2))
+                for label in (
+                    "room_entered",
+                    f"room{room}_scroll_step_5of15",
+                    f"room{room}_scroll_step_10of15",
+                    f"room{room}_scroll_step_15of15",
+                    "scroll_end",
+                    "scroll_settled",
+                    "back_to_list",
+                )
+            ),
+            ("chat_list_scroll", "list_top"),
+            ("chat_list_scroll", "list_bottom"),
+            ("chat_list_scroll", "list_top_again"),
+        }
+        always_required = {
+            "rss_bytes",
+            "cache_bytes",
+            "cache_count",
+            "cache_live",
+            "cache_pending",
+            "frame_count",
+        }
+
+        self.assertEqual(set(requirements), expected_checkpoints)
+        self.assertEqual(len(requirements), 28)
+
+        for checkpoint, metrics in requirements.items():
+            self.assertTrue(always_required.issubset(metrics), checkpoint)
+            if checkpoint in idle_checkpoints:
+                self.assertTrue(frame_metrics.isdisjoint(metrics), checkpoint)
+            else:
+                self.assertTrue(frame_metrics.issubset(metrics), checkpoint)
+
     def test_default_output_keeps_existing_contract(self) -> None:
         output = self.directory / "median.json"
         compute_median(self.logs, str(output))

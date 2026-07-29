@@ -49,7 +49,22 @@
         "jank_rate"
       ]
     },
-    {"scenario": "scroll_room1", "label": "scroll_settled"},
+    {
+      "scenario": "scroll_room1",
+      "label": "scroll_settled",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
     {"scenario": "scroll_room1", "label": "back_to_list"},
     {"scenario": "scroll_room2", "label": "room_entered"},
     {"scenario": "scroll_room2", "label": "room2_scroll_step_5of15"},
@@ -71,7 +86,22 @@
         "jank_rate"
       ]
     },
-    {"scenario": "scroll_room2", "label": "scroll_settled"},
+    {
+      "scenario": "scroll_room2",
+      "label": "scroll_settled",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
     {"scenario": "scroll_room2", "label": "back_to_list"},
     {"scenario": "chat_list_scroll", "label": "list_top"},
     {"scenario": "chat_list_scroll", "label": "list_bottom"},
