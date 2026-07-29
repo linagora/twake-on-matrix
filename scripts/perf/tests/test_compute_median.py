@@ -55,7 +55,9 @@ class ComputeMedianTest(unittest.TestCase):
         checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
         self.assertEqual(checkpoint["sample_count"], 3)
         self.assertEqual(checkpoint["fps"], 60.0)
+        self.assertEqual(checkpoint["fps_sample_count"], 2)
         self.assertEqual(checkpoint["fps_values"], [58.0, 62.0])
+        self.assertEqual(checkpoint["transition_ms_sample_count"], 3)
         self.assertEqual(checkpoint["transition_ms_values"], [101.0, 102.0, 103.0])
 
     def test_missing_checkpoint_reduces_sample_count(self) -> None:

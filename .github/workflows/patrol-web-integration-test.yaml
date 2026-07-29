@@ -1,5 +1,11 @@
 name: Patrol Web Integration Tests
 
+# Shared with integration-tests.yaml so separate workflow runs cannot log in
+# concurrently with the same Matrix CI account.
+concurrency:
+  group: matrix-ci-shared-account
+  cancel-in-progress: false
+
 on:
   # Nightly web E2E run on free GitHub-hosted runners (no FTL cost).
   # 02:00 UTC — offset from the FTL integration workflow (00:00 UTC) so the

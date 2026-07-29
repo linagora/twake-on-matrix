@@ -186,13 +186,25 @@ globalThis.PerfMetrics = (() => {
     return record?.environment?.build_mode === "profile";
   }
 
+  function benchmarkSource(record) {
+    return record?.environment?.benchmark_source || "hybrid";
+  }
+
+  function compatibleBenchmarkRecords(records) {
+    if (!records.length) return [];
+    const source = benchmarkSource(records.at(-1));
+    return records.filter(record => benchmarkSource(record) === source);
+  }
+
   return {
     MIN_FRAME_SAMPLE,
     MIN_WEB_FRAME_SAMPLE,
     MIN_WEB_FRAME_WINDOW_MS,
     ROOM_ENTRY_SUMMARY,
+    benchmarkSource,
     checkpointForSelection,
     classifySeries,
+    compatibleBenchmarkRecords,
     hasEnoughFrames,
     hasEnoughWebFrames,
     historyWindow,

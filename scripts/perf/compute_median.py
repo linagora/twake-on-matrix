@@ -114,6 +114,7 @@ def _build_checkpoints(
             },
         )
         cp[key] = statistics.median(values)
+        cp[f'{key}_sample_count'] = len(values)
         if include_values:
             cp[f'{key}_values'] = values
         if len(values) >= 2:

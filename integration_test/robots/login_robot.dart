@@ -13,6 +13,7 @@ import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import '../base/api_login_helper.dart';
 import '../base/core_robot.dart';
+import '../base/matrix_login_retry.dart';
 import 'abstract/abstract_login_robot.dart';
 
 class LoginRobot extends CoreRobot implements AbstractLoginRobot {
@@ -343,11 +344,14 @@ class LoginRobot extends CoreRobot implements AbstractLoginRobot {
         .checkHomeserver(Uri.parse(serverUrl))
         .toHomeserverSummary();
 
-    await client.login(
-      LoginType.mLoginPassword,
-      identifier: AuthenticationUserIdentifier(user: username),
-      password: password,
-      initialDeviceDisplayName: PlatformInfos.clientName,
+    await loginWithRateLimitRetry(
+      () => client.login(
+        LoginType.mLoginPassword,
+        identifier: AuthenticationUserIdentifier(user: username),
+        password: password,
+        initialDeviceDisplayName: PlatformInfos.clientName,
+      ),
+      log: debugPrint,
     );
 
     // Force the router to re-evaluate redirects so the now-logged-in client

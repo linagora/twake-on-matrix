@@ -29,6 +29,18 @@ def checkpoint(samples=3, value=100.0):
     }
 
 
+def physical_checkpoint(samples=3, value=100.0):
+    result = checkpoint(samples=samples, value=value)
+    for key, metric in list(result.items()):
+        if (
+            key not in {"scenario", "label", "sample_count"}
+            and isinstance(metric, (int, float))
+            and not key.endswith(("_stddev", "_range"))
+        ):
+            result[f"{key}_sample_count"] = samples
+    return result
+
+
 def record(day="2026-07-22", sha="abc123"):
     metadata = RecordMetadata(
         day=day,
@@ -59,6 +71,51 @@ class BuildDailyRecordTest(unittest.TestCase):
         self.assertEqual(daily["environment"]["virtual_device"]["runs"], 3)
         self.assertEqual(daily["environment"]["physical_device"]["runs"], 1)
         self.assertEqual(daily["environment"]["build_mode"], "profile")
+
+    def test_describes_three_run_physical_only_aggregation(self):
+        metadata = RecordMetadata(
+            day="2026-07-22",
+            generated_at="2026-07-22T00:15:00Z",
+            repository="linagora/twake-on-matrix",
+            sha="abc123",
+            run_id="12345",
+            flutter_version="3.38.9",
+        )
+
+        daily = build_daily_record(
+            [physical_checkpoint()],
+            [physical_checkpoint()],
+            metadata,
+            benchmark_source="physical",
+            physical_runs=3,
+        )
+
+        self.assertNotIn("virtual_device", daily["environment"])
+        self.assertEqual(daily["environment"]["benchmark_source"], "physical")
+        self.assertEqual(daily["environment"]["physical_device"]["runs"], 3)
+        self.assertEqual(daily["memory"]["aggregation"], "median")
+        self.assertEqual(daily["physical"]["aggregation"], "median")
+
+    def test_rejects_incomplete_metric_in_physical_median(self):
+        metadata = RecordMetadata(
+            day="2026-07-22",
+            generated_at="2026-07-22T00:15:00Z",
+            repository="linagora/twake-on-matrix",
+            sha="abc123",
+            run_id="12345",
+            flutter_version="3.38.9",
+        )
+        incomplete = physical_checkpoint()
+        incomplete["rss_bytes_sample_count"] = 1
+
+        with self.assertRaisesRegex(HistoryError, "rss_bytes has 1 sample"):
+            build_daily_record(
+                [incomplete],
+                [incomplete],
+                metadata,
+                benchmark_source="physical",
+                physical_runs=3,
+            )
 
     def test_rejects_invalid_virtual_aggregation(self):
         cases = (
@@ -209,6 +266,39 @@ class UpdateHistoryTest(unittest.TestCase):
             write_summary(summary_path, data_directory, index, current)
 
             self.assertNotIn("### Largest visual regression markers", summary_path.read_text())
+
+    def test_summary_excludes_hybrid_baselines_for_physical_only_run(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            data_directory = Path(temporary_directory)
+            for day in range(1, 8):
+                update_history(
+                    data_directory,
+                    record(f"2026-07-{day:02d}", f"hybrid-{day}"),
+                )
+
+            metadata = RecordMetadata(
+                day="2026-07-08",
+                generated_at="2026-07-08T00:15:00Z",
+                repository="linagora/twake-on-matrix",
+                sha="physical",
+                run_id="54321",
+                flutter_version="3.38.9",
+            )
+            current = build_daily_record(
+                [physical_checkpoint(value=150.0)],
+                [physical_checkpoint(value=150.0)],
+                metadata,
+                benchmark_source="physical",
+                physical_runs=3,
+            )
+            index = update_history(data_directory, current)
+            summary_path = data_directory / "summary.md"
+            write_summary(summary_path, data_directory, index, current)
+
+            self.assertNotIn(
+                "### Largest visual regression markers",
+                summary_path.read_text(),
+            )
 
 
 if __name__ == "__main__":

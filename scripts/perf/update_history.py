@@ -112,6 +112,35 @@ def _validate_checkpoints(value: Any, source: str, minimum_samples: int) -> list
     ]
 
 
+def _validate_metric_sample_counts(
+    checkpoints: list[dict],
+    source: str,
+    minimum_samples: int,
+) -> None:
+    derived_suffixes = ("_sample_count", "_stddev", "_range")
+    for position, checkpoint in enumerate(checkpoints):
+        location = _checkpoint_location(source, position)
+        metric_keys = [
+            key
+            for key in checkpoint
+            if key not in {"scenario", "label", "sample_count"}
+            and not key.endswith(derived_suffixes)
+        ]
+        for key in metric_keys:
+            sample_count = checkpoint.get(f"{key}_sample_count")
+            if not _is_finite_number(sample_count):
+                raise HistoryError(f"{location}.{key}_sample_count is required")
+            assert isinstance(sample_count, (int, float)) and not isinstance(
+                sample_count,
+                bool,
+            )
+            if sample_count < minimum_samples:
+                raise HistoryError(
+                    f"{location}.{key} has {sample_count} sample(s); "
+                    f"at least {minimum_samples} required"
+                )
+
+
 def _validate_day(day: str) -> None:
     try:
         date.fromisoformat(day)
@@ -150,11 +179,44 @@ def build_daily_record(
     memory: Any,
     physical: Any,
     metadata: RecordMetadata,
+    *,
+    benchmark_source: str = "hybrid",
+    physical_runs: int = 1,
 ) -> dict:
     _validate_metadata(metadata)
+    if benchmark_source not in {"hybrid", "physical"}:
+        raise HistoryError(f"Unsupported benchmark source: {benchmark_source}")
+    if physical_runs < 1:
+        raise HistoryError("physical_runs must be at least 1")
     memory_checkpoints = _validate_checkpoints(memory, "memory", minimum_samples=3)
-    physical_checkpoints = _validate_checkpoints(physical, "physical", minimum_samples=1)
+    physical_minimum_samples = 3 if benchmark_source == "physical" else 1
+    physical_checkpoints = _validate_checkpoints(
+        physical,
+        "physical",
+        minimum_samples=physical_minimum_samples,
+    )
+    if benchmark_source == "physical":
+        _validate_metric_sample_counts(memory_checkpoints, "memory", physical_runs)
+        _validate_metric_sample_counts(physical_checkpoints, "physical", physical_runs)
     repository_url = f"https://github.com/{metadata.repository}"
+
+    environment = {
+        "flutter_version": metadata.flutter_version,
+        "build_mode": "profile",
+        "physical_device": {
+            "model": "oriole",
+            "android": 33,
+            "runs": physical_runs,
+        },
+    }
+    if benchmark_source == "hybrid":
+        environment["virtual_device"] = {
+            "model": "MediumPhone.arm",
+            "android": 34,
+            "runs": 3,
+        }
+    else:
+        environment["benchmark_source"] = "physical"
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -168,14 +230,12 @@ def build_daily_record(
             "id": str(metadata.run_id),
             "url": f"{repository_url}/actions/runs/{metadata.run_id}",
         },
-        "environment": {
-            "flutter_version": metadata.flutter_version,
-            "build_mode": "profile",
-            "virtual_device": {"model": "MediumPhone.arm", "android": 34, "runs": 3},
-            "physical_device": {"model": "oriole", "android": 33, "runs": 1},
-        },
+        "environment": environment,
         "memory": {"aggregation": "median", "checkpoints": memory_checkpoints},
-        "physical": {"aggregation": "single_run", "checkpoints": physical_checkpoints},
+        "physical": {
+            "aggregation": "median" if physical_runs >= 3 else "single_run",
+            "checkpoints": physical_checkpoints,
+        },
     }
 
 
@@ -330,10 +390,16 @@ def _regressions(data_directory: Path, index: dict, current: dict) -> list[dict]
     prior_entries = [item for item in index["entries"] if item["date"] < current["date"]]
     prior_records = [_load_json(data_directory / item["file"]) for item in prior_entries]
     build_mode = current.get("environment", {}).get("build_mode")
+    benchmark_source = current.get("environment", {}).get(
+        "benchmark_source",
+        "hybrid",
+    )
     compatible_records = [
         record
         for record in prior_records
         if record.get("environment", {}).get("build_mode") == build_mode
+        and record.get("environment", {}).get("benchmark_source", "hybrid")
+        == benchmark_source
     ][-7:]
     if len(compatible_records) < 7:
         return []
@@ -382,6 +448,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--sha", required=True)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--flutter-version", required=True)
+    parser.add_argument(
+        "--benchmark-source",
+        choices=("hybrid", "physical"),
+        default="hybrid",
+    )
+    parser.add_argument("--physical-runs", type=int, default=1)
     parser.add_argument("--summary-file", type=Path)
     return parser.parse_args()
 
@@ -400,6 +472,8 @@ def main() -> None:
         _load_json(args.memory),
         _load_json(args.physical),
         metadata,
+        benchmark_source=args.benchmark_source,
+        physical_runs=args.physical_runs,
     )
     index = update_history(args.data_directory, record)
     if args.summary_file:

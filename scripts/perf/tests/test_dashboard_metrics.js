@@ -8,8 +8,10 @@ const {
   MIN_WEB_FRAME_SAMPLE,
   MIN_WEB_FRAME_WINDOW_MS,
   ROOM_ENTRY_SUMMARY,
+  benchmarkSource,
   checkpointForSelection,
   classifySeries,
+  compatibleBenchmarkRecords,
   hasEnoughFrames,
   hasEnoughWebFrames,
   historyWindow,
@@ -152,6 +154,25 @@ test("rejects legacy debug records from performance comparisons", () => {
   assert.equal(isProfileRecord(record([])), false);
   assert.equal(isProfileRecord({ environment: { build_mode: "debug" } }), false);
   assert.equal(isProfileRecord({ environment: { build_mode: "profile" } }), true);
+});
+
+test("keeps hybrid and physical-only Android histories separate", () => {
+  const hybrid = { date: "2026-07-27", environment: { build_mode: "profile" } };
+  const physical = {
+    date: "2026-07-28",
+    environment: { build_mode: "profile", benchmark_source: "physical" },
+  };
+  const latestPhysical = {
+    date: "2026-07-29",
+    environment: { build_mode: "profile", benchmark_source: "physical" },
+  };
+
+  assert.equal(benchmarkSource(hybrid), "hybrid");
+  assert.equal(benchmarkSource(physical), "physical");
+  assert.deepEqual(
+    compatibleBenchmarkRecords([hybrid, physical, latestPhysical]),
+    [physical, latestPhysical]
+  );
 });
 
 test("anchors a finite history window to the latest recorded night", () => {
