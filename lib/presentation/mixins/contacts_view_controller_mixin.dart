@@ -345,24 +345,32 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) async {
-    await _initPhonebookPermission(context);
+    try {
+      await _initPhonebookPermission(context);
 
-    if (client.userID == null) {
-      return;
+      if (client.userID == null) {
+        return;
+      }
+
+      await contactsManager.cancelAllSubscriptions();
+      await contactsManager.reSyncContacts();
+      _refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: matrixLocalizations,
+      );
+      await contactsManager.synchronizeContactsOnContactTab(
+        withMxId: client.userID!,
+        isAvailableSupportPhonebookContacts:
+            await _isPhonebookContactsAvailable(),
+      );
+    } catch (error, stackTrace) {
+      Logs().e(
+        'ContactsViewControllerMixin::retrySynchronizeContactsOnContactTab',
+        error,
+        stackTrace,
+      );
     }
-
-    await contactsManager.cancelAllSubscriptions();
-    await contactsManager.reSyncContacts();
-    _refreshAllContacts(
-      context: context,
-      client: client,
-      matrixLocalizations: matrixLocalizations,
-    );
-    await contactsManager.synchronizeContactsOnContactTab(
-      withMxId: client.userID!,
-      isAvailableSupportPhonebookContacts:
-          await _isPhonebookContactsAvailable(),
-    );
   }
 
   void _listenContactsDataChange({
