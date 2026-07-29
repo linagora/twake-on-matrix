@@ -381,6 +381,8 @@ jobs:
           echo "Physical logcat files: ${LOGCAT_FILES[*]}"
 
           python3 scripts/perf/compute_median.py \
+            --expected-samples 3 \
+            --requirements scripts/perf/android_requirements.json \
             "${LOGCAT_FILES[@]}" \
             perf_median_physical.json
 

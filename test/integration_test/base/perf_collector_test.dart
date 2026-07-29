@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -24,6 +25,33 @@ FrameTiming frameTiming({
 }
 
 void main() {
+  testWidgets('waits for batched frame timings before checkpointing', (
+    tester,
+  ) async {
+    final waits = <Duration>[];
+    final timingBatchReported = Completer<void>();
+    final collector = PerfCollector(
+      'test',
+      waitForFrameTimings: (duration) {
+        waits.add(duration);
+        return timingBatchReported.future;
+      },
+    );
+
+    var checkpointCompleted = false;
+    final checkpoint = collector.checkpoint('after_transition').then((_) {
+      checkpointCompleted = true;
+    });
+    await tester.pump();
+
+    expect(waits, [const Duration(milliseconds: 200)]);
+    expect(checkpointCompleted, isFalse);
+
+    timingBatchReported.complete();
+    await checkpoint;
+    expect(checkpointCompleted, isTrue);
+  });
+
   test('computes effective FPS from the observed vsync window', () {
     final frames = List.generate(
       31,

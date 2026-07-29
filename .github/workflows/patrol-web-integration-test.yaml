@@ -317,6 +317,7 @@ jobs:
         run: |
           python3 scripts/perf/compute_median.py \
             --include-values \
+            --expected-samples 3 \
             patrol-web-perf.log \
             perf_web.json
           python3 - <<'PY'
