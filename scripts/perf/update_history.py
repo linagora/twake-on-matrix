@@ -203,6 +203,7 @@ def build_daily_record(
     environment = {
         "flutter_version": metadata.flutter_version,
         "build_mode": "profile",
+        "benchmark_source": benchmark_source,
         "physical_device": {
             "model": "oriole",
             "android": 33,
@@ -215,9 +216,6 @@ def build_daily_record(
             "android": 34,
             "runs": 3,
         }
-    else:
-        environment["benchmark_source"] = "physical"
-
     return {
         "schema_version": SCHEMA_VERSION,
         "date": metadata.day,

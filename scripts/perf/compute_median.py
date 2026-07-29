@@ -9,13 +9,14 @@ Usage:
         [--requirements FILE]
         logcat1.txt logcat2.txt logcat3.txt output.json
 """
+import argparse
 import json
 import re
 import statistics
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Sized
 
 
 _PERF_RE = re.compile(r'PERF_METRIC \| ([^|]+) \| ([^|]+) \| (.+)')
@@ -23,7 +24,7 @@ _PERF_RE = re.compile(r'PERF_METRIC \| ([^|]+) \| ([^|]+) \| (.+)')
 _SKIP_KEYS: frozenset[str] = frozenset({'scenario', 'label', 'run', 'seq', 'ts'})
 
 
-def _load_requirements(path: str) -> dict[tuple[str, str], set[str]]:
+def _load_requirements(path: str | Path) -> dict[tuple[str, str], set[str]]:
     """Load common and checkpoint-specific required metrics from JSON."""
     data = json.loads(Path(path).read_text(encoding='utf-8'))
     common_metrics = set(data.get('common_metrics', []))
@@ -178,18 +179,59 @@ def _validate_expected_samples(
 ) -> None:
     """Reject checkpoints or metrics absent from any expected repetition."""
     for (scenario, label), samples in sorted(checkpoint_samples.items()):
-        count = len(samples)
-        if count != expected_samples:
-            raise ValueError(
-                f"{scenario}/{label} has {count} checkpoint sample(s); "
-                f"expected {expected_samples}"
-            )
+        _validate_sample_count(
+            f"{scenario}/{label}",
+            "checkpoint ",
+            samples,
+            expected_samples,
+        )
     for (scenario, label, metric), samples in sorted(groups.items()):
-        if len(samples) != expected_samples:
-            raise ValueError(
-                f"{scenario}/{label}/{metric} has {len(samples)} sample(s); "
-                f"expected {expected_samples}"
-            )
+        _validate_sample_count(
+            f"{scenario}/{label}/{metric}",
+            "",
+            samples,
+            expected_samples,
+        )
+
+
+def _validate_sample_count(
+    location: str,
+    sample_kind: str,
+    samples: Sized,
+    expected_samples: int,
+) -> None:
+    """Reject one checkpoint or metric with an unexpected sample count."""
+    count = len(samples)
+    if count != expected_samples:
+        raise ValueError(
+            f"{location} has {count} {sample_kind}sample(s); expected {expected_samples}"
+        )
+
+
+def _validate_required_checkpoint(
+    checkpoint: tuple[str, str],
+    checkpoint_samples: dict[tuple, set],
+) -> None:
+    """Reject one required checkpoint when it is absent."""
+    if checkpoint not in checkpoint_samples:
+        raise ValueError(
+            f"required checkpoint {checkpoint[0]}/{checkpoint[1]} is missing"
+        )
+
+
+def _validate_required_metrics(
+    checkpoint: tuple[str, str],
+    metrics: set[str],
+    groups: dict[tuple, dict[tuple[int, str], float]],
+) -> None:
+    """Reject the first absent metric for one required checkpoint."""
+    missing_metrics = sorted(
+        metric for metric in metrics if (*checkpoint, metric) not in groups
+    )
+    if missing_metrics:
+        raise ValueError(
+            f"{checkpoint[0]}/{checkpoint[1]}/{missing_metrics[0]} is missing"
+        )
 
 
 def _validate_requirements(
@@ -198,12 +240,9 @@ def _validate_requirements(
     requirements: dict[tuple[str, str], set[str]],
 ) -> None:
     """Reject required checkpoints or metrics absent from every repetition."""
-    for (scenario, label), metrics in sorted(requirements.items()):
-        if (scenario, label) not in checkpoint_samples:
-            raise ValueError(f"required checkpoint {scenario}/{label} is missing")
-        for metric in sorted(metrics):
-            if (scenario, label, metric) not in groups:
-                raise ValueError(f"{scenario}/{label}/{metric} is missing")
+    for checkpoint, metrics in sorted(requirements.items()):
+        _validate_required_checkpoint(checkpoint, checkpoint_samples)
+        _validate_required_metrics(checkpoint, metrics, groups)
 
 
 def compute_median(
@@ -247,48 +286,38 @@ def compute_median(
     )
 
 
+def _positive_integer(raw: str) -> int:
+    """Parse an argparse value that must be a positive integer."""
+    try:
+        value = int(raw)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("must be a positive integer") from error
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return value
+
+
+def _parse_arguments(arguments: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line options and input/output paths."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--include-values", action="store_true")
+    parser.add_argument("--expected-samples", type=_positive_integer)
+    parser.add_argument("--requirements", type=Path, metavar="FILE")
+    parser.add_argument("logcat_files", nargs="+")
+    parser.add_argument("output_file")
+    return parser.parse_intermixed_args(arguments)
+
+
 if __name__ == '__main__':
-    arguments = sys.argv[1:]
-    include_values = False
-    expected_samples = None
-    requirements_file = None
-    if '--include-values' in arguments:
-        arguments.remove('--include-values')
-        include_values = True
-    if '--expected-samples' in arguments:
-        option_index = arguments.index('--expected-samples')
-        try:
-            expected_samples = int(arguments[option_index + 1])
-        except (IndexError, ValueError):
-            print("--expected-samples requires a positive integer", file=sys.stderr)
-            sys.exit(1)
-        if expected_samples < 1:
-            print("--expected-samples requires a positive integer", file=sys.stderr)
-            sys.exit(1)
-        del arguments[option_index:option_index + 2]
-    if '--requirements' in arguments:
-        option_index = arguments.index('--requirements')
-        try:
-            requirements_file = arguments[option_index + 1]
-        except IndexError:
-            print("--requirements requires a JSON file", file=sys.stderr)
-            sys.exit(1)
-        del arguments[option_index:option_index + 2]
-    if len(arguments) < 2:
-        print(
-            "Usage: compute_median.py [--include-values] [--expected-samples N]"
-            " [--requirements FILE]"
-            " <logcat1> [logcat2 ...] <output.json>"
-        )
-        sys.exit(1)
+    arguments = _parse_arguments()
     compute_median(
-        arguments[:-1],
-        arguments[-1],
-        include_values=include_values,
-        expected_samples=expected_samples,
+        arguments.logcat_files,
+        arguments.output_file,
+        include_values=arguments.include_values,
+        expected_samples=arguments.expected_samples,
         requirements=(
-            _load_requirements(requirements_file)
-            if requirements_file is not None
+            _load_requirements(arguments.requirements)
+            if arguments.requirements is not None
             else None
         ),
     )

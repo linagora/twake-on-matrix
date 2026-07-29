@@ -1,9 +1,15 @@
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 
-from scripts.perf.compute_median import _load_requirements, compute_median
+from scripts.perf.compute_median import (
+    _load_requirements,
+    _parse_arguments,
+    compute_median,
+)
 
 
 class ComputeMedianTest(unittest.TestCase):
@@ -51,6 +57,49 @@ class ComputeMedianTest(unittest.TestCase):
                 }
             },
         )
+
+    def test_command_line_parser_accepts_options_between_paths(self) -> None:
+        requirements = self.directory / "requirements.json"
+
+        arguments = _parse_arguments(
+            [
+                self.logs[0],
+                "--include-values",
+                "--expected-samples",
+                "3",
+                "--requirements",
+                str(requirements),
+                self.logs[1],
+                "median.json",
+            ]
+        )
+
+        self.assertTrue(arguments.include_values)
+        self.assertEqual(arguments.expected_samples, 3)
+        self.assertEqual(arguments.requirements, requirements)
+        self.assertEqual(arguments.logcat_files, self.logs[:2])
+        self.assertEqual(arguments.output_file, "median.json")
+
+    def test_command_line_parser_rejects_invalid_option_values(self) -> None:
+        cases = (
+            (["--expected-samples", "0", "run.log", "out.json"], "positive integer"),
+            (
+                ["--expected-samples", "many", "run.log", "out.json"],
+                "positive integer",
+            ),
+            (
+                ["--requirements", "--include-values", "run.log", "out.json"],
+                "expected one argument",
+            ),
+        )
+
+        for arguments, expected_error in cases:
+            with self.subTest(arguments=arguments):
+                stderr = io.StringIO()
+                with redirect_stderr(stderr), self.assertRaises(SystemExit) as error:
+                    _parse_arguments(arguments)
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn(expected_error, stderr.getvalue())
 
     def test_android_requirements_exclude_frames_only_from_idle_checkpoints(
         self,

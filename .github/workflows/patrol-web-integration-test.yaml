@@ -1,10 +1,7 @@
 name: Patrol Web Integration Tests
 
-# Shared with integration-tests.yaml so separate workflow runs cannot log in
-# concurrently with the same Matrix CI account.
-concurrency:
-  group: matrix-ci-shared-account
-  cancel-in-progress: false
+# Every Web job provisions an isolated local Synapse instance, so these jobs do
+# not need the shared-account lock used by the Android FTL workflow.
 
 on:
   # Nightly web E2E run on free GitHub-hosted runners (no FTL cost).

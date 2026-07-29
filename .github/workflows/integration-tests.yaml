@@ -19,12 +19,6 @@ on:
 
 name: Integration Tests
 
-# The Android and Web nightlies use the same Matrix CI account. The matching
-# group in patrol-web-integration-test.yaml prevents cross-workflow overlap.
-concurrency:
-  group: matrix-ci-shared-account
-  cancel-in-progress: false
-
 env:
   FLUTTER_VERSION: "3.38.9"
   JAVA_VERSION: 17
@@ -39,6 +33,10 @@ jobs:
   integration_test:
     name: Integration Test
     runs-on: ubuntu-latest
+    concurrency:
+      group: matrix-ci-shared-account
+      queue: max
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
@@ -272,6 +270,10 @@ jobs:
       }}
     needs: [perf_build, integration_test]
     runs-on: ubuntu-latest
+    concurrency:
+      group: matrix-ci-shared-account
+      queue: max
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read

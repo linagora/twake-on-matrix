@@ -69,6 +69,7 @@ class BuildDailyRecordTest(unittest.TestCase):
         self.assertEqual(daily["physical"]["checkpoints"][0]["fps"], 60.0)
         self.assertEqual(daily["physical"]["checkpoints"][0]["frame_window_ms"], 650.0)
         self.assertEqual(daily["environment"]["virtual_device"]["runs"], 3)
+        self.assertEqual(daily["environment"]["benchmark_source"], "hybrid")
         self.assertEqual(daily["environment"]["physical_device"]["runs"], 1)
         self.assertEqual(daily["environment"]["build_mode"], "profile")
 
