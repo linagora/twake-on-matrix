@@ -2,10 +2,13 @@ import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:linagora_design_flutter/buttons/linagora_button.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 class EmptyContactBody extends StatelessWidget {
-  const EmptyContactBody({super.key});
+  const EmptyContactBody({super.key, this.onRetrySyncContacts});
+
+  final VoidCallback? onRetrySyncContacts;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +37,14 @@ class EmptyContactBody extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
+          if (onRetrySyncContacts != null) ...[
+            const SizedBox(height: 16.0),
+            LinagoraButton(
+              onPressed: onRetrySyncContacts,
+              icon: Icons.sync,
+              label: L10n.of(context)!.tapToRetry,
+            ),
+          ],
         ],
       ),
     );

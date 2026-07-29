@@ -18,23 +18,27 @@ class ContactsTabBodyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        if (controller.client.userID != null)
-          SliverInviteFriendButton(userId: controller.client.userID!),
-        SliverWarningBanner(controller: controller),
-        SliverLoadingContacts(controller: controller),
-        SliverContactsWithMatrixId(controller: controller),
-        if (PlatformInfos.isMobile)
-          SliverPhonebookContactsWithMatrixId(controller: controller),
-        SliverContactsWithoutMatrixId(controller: controller),
-        if (PlatformInfos.isMobile)
-          SliverPhonebookContactsWithoutMatrixId(controller: controller),
-        SliverEmptyContacts(controller: controller),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: ContactsTabViewStyle.padding),
-        ),
-      ],
+    return RefreshIndicator(
+      onRefresh: controller.retrySynchronizeContacts,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          if (controller.client.userID != null)
+            SliverInviteFriendButton(userId: controller.client.userID!),
+          SliverWarningBanner(controller: controller),
+          SliverLoadingContacts(controller: controller),
+          SliverContactsWithMatrixId(controller: controller),
+          if (PlatformInfos.isMobile)
+            SliverPhonebookContactsWithMatrixId(controller: controller),
+          SliverContactsWithoutMatrixId(controller: controller),
+          if (PlatformInfos.isMobile)
+            SliverPhonebookContactsWithoutMatrixId(controller: controller),
+          SliverEmptyContacts(controller: controller),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: ContactsTabViewStyle.padding),
+          ),
+        ],
+      ),
     );
   }
 }
