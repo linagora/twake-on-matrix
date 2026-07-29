@@ -190,6 +190,16 @@ mixin MessageContentBuilderMixin {
     final messageTimeAndPaddingWidth =
         sizeMessageTime + spaceMessageAndTime + spaceHasEdited + spaceHasPinned;
     final messageTextWidth = paintedMessageText.width;
+
+    // A caption that already fills the available width must not shrink to the
+    // width of its final line. The media uses this metric as its target width.
+    if (event.isCaptionModeOrReply() && messageTextWidth >= maxWidth) {
+      return MessageMetrics(
+        totalMessageWidth: maxWidth,
+        isNeedAddNewLine: true,
+      );
+    }
+
     final TextRange lastLineRange = paintedMessageText.getLineBoundary(
       paintedMessageText.getPositionForOffset(
         Offset(paintedMessageText.size.width, paintedMessageText.size.height),

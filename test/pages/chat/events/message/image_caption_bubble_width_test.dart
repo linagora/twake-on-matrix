@@ -1,7 +1,5 @@
 // ignore_for_file: implementation_imports
 
-import 'dart:convert';
-
 import 'package:fluffychat/config/themes.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -34,13 +32,21 @@ class _FakeUploadManager implements UploadManager {
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
+class _FakeClient extends Client {
+  _FakeClient()
+    : super(
+        'image-caption-bubble-test',
+        httpClient: FakeMatrixApi(),
+        database: MockDatabase(),
+      );
+
+  @override
+  String? get userID => '@alice:example.org';
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final client = Client(
-    'image-caption-bubble-test',
-    httpClient: FakeMatrixApi(),
-    database: MockDatabase(),
-  );
+  final client = _FakeClient();
   late _FakeUploadManager uploadManager;
 
   setUp(() {
@@ -54,20 +60,16 @@ void main() {
   });
 
   testWidgets(
-    'uses the available message width for a narrow image with a long caption',
+    'uses the available width for an own image caption with a short final line',
     (tester) async {
       tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(1072, 900);
+      tester.view.physicalSize = const Size(1072, 8000);
       addTearDown(tester.view.reset);
 
       final room = Room(id: '!room:example.org', client: client);
       final event = Event(
         content: {
-          'body':
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-              'Aenean commodo ligula eget dolor. Aenean massa. Cum sociis '
-              'natoque penatibus et magnis dis parturient montes, nascetur '
-              'ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu.',
+          'body': '${List.filled(20, 'long-caption-without-spaces').join()}\na',
           'filename': 'portrait.png',
           'info': {'h': 1600, 'mimetype': 'image/png', 'size': 68, 'w': 400},
           'msgtype': 'm.image',
@@ -78,15 +80,6 @@ void main() {
         senderId: '@alice:example.org',
         originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
         room: room,
-      );
-      uploadManager.matrixFile = MatrixImageFile(
-        bytes: base64Decode(
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-        ),
-        name: 'portrait.png',
-        mimeType: 'image/png',
-        width: 400,
-        height: 1600,
       );
       final timeline = Timeline(
         room: room,
