@@ -69,6 +69,17 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   @override
   Widget build(BuildContext context) {
     final sysColor = LinagoraSysColors.material();
+    final imageWidth = MessageContentStyle.imageBubbleWidth(
+      widget.displayImageInfo.size.width,
+    );
+    final imageHeight = MessageContentStyle.imageBubbleHeight(
+      widget.displayImageInfo.size.height,
+    );
+    final bubbleWidth =
+        MessageContentStyle.combinedBubbleImageWidthWithBubbleMaxWidget(
+          bubbleImageWidget: imageWidth,
+          bubbleMaxWidth: widget.bubbleWidth ?? 0,
+        );
     if (widget.event.status == EventStatus.sent ||
         widget.event.status == EventStatus.synced) {
       sendingFileProgressNotifier.value = 1;
@@ -128,24 +139,16 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  if (widget.matrixFile.bytes.isEmpty)
-                    SizedBox(
-                      width: MessageContentStyle.imageBubbleWidth(
-                        widget.displayImageInfo.size.width <
-                                (widget.bubbleWidth ?? 0)
-                            ? widget.bubbleWidth ?? 0
-                            : widget.displayImageInfo.size.width,
-                      ),
-                      height: MessageContentStyle.imageBubbleHeight(
-                        widget.displayImageInfo.size.height,
-                      ),
-                      child: BlurHash(
-                        hash:
-                            widget.event.blurHash ??
-                            AppConfig.defaultImageBlurHash,
-                      ),
-                    )
-                  else
+                  SizedBox(
+                    width: bubbleWidth,
+                    height: imageHeight,
+                    child: BlurHash(
+                      hash:
+                          widget.event.blurHash ??
+                          AppConfig.defaultImageBlurHash,
+                    ),
+                  ),
+                  if (widget.matrixFile.bytes.isNotEmpty)
                     Image(
                       image: MemoryImage(widget.matrixFile.bytes).resizeToFit(
                         cacheWidth: context.getCacheSize(
@@ -155,8 +158,8 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                           widget.displayImageInfo.size.height,
                         ),
                       ),
-                      width: widget.displayImageInfo.size.width,
-                      height: widget.displayImageInfo.size.height,
+                      width: imageWidth,
+                      height: imageHeight,
                       fit: BoxFit.cover,
                       filterQuality: FilterQuality.none,
                     ),
