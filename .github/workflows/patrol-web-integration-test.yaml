@@ -401,6 +401,10 @@ jobs:
           fi
           cp -R scripts/perf/dashboard/. performance-site/
 
+          python3 scripts/perf/version_dashboard_assets.py \
+            --index performance-site/index.html \
+            --version "$GITHUB_SHA"
+
           python3 scripts/perf/update_web_history.py \
             --web perf-results/perf_web.json \
             --log perf-results/patrol-web-perf.log \
