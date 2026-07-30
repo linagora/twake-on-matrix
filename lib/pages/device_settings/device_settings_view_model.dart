@@ -124,7 +124,12 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
         });
   }
 
-  void reload() => state = const DevicesSettingsState.initial();
+  Future<void> reload(Client client) {
+    state = const DevicesSettingsState.initial();
+    return _loadInFlight ??= _loadUserDevices(client).whenComplete(() {
+      _loadInFlight = null;
+    });
+  }
 
   void setLoadingDeletingDevices(bool loading) =>
       _transition(deleting: loading);

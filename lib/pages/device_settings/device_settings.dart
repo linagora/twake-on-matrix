@@ -21,11 +21,20 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'user_device_list_item.dart';
 import '../../widgets/matrix.dart';
 
-class DevicesSettings extends ConsumerWidget {
+class DevicesSettings extends ConsumerStatefulWidget {
   const DevicesSettings({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DevicesSettings> createState() => _DevicesSettingsState();
+}
+
+class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
+  late final Future<void> _loadDevicesFuture = ref
+      .read(devicesSettingsViewModelProvider.notifier)
+      .loadUserDevices(Matrix.of(context).client);
+
+  @override
+  Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
 
@@ -49,7 +58,7 @@ class DevicesSettings extends ConsumerWidget {
             : const SizedBox.shrink(),
       ),
       body: FutureBuilder<void>(
-        future: notifier.loadUserDevices(client),
+        future: _loadDevicesFuture,
         builder: (BuildContext context, snapshot) {
           final state = ref.watch(devicesSettingsViewModelProvider);
           if (snapshot.hasError || state is DevicesSettingsError) {
@@ -238,7 +247,7 @@ Future<void> removeDevicesAction(
     await client.uiaRequestBackground(
       (auth) => client.deleteDevices(deviceIds, auth: auth),
     );
-    notifier.reload();
+    notifier.reload(client);
   } catch (e, s) {
     Logs().v('Error while deleting devices', e, s);
     notifier.setErrorDeletingDevices(e.toString());
@@ -267,7 +276,7 @@ Future<void> renameDeviceAction(
         client.updateDevice(device.deviceId, displayName: displayName.single),
   );
   if (success.error == null) {
-    notifier.reload();
+    notifier.reload(client);
   }
 }
 
