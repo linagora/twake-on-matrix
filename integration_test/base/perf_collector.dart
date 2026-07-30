@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
 
 const _frameBudgetUs60Fps = 16667;
+const _frameTimingsBatchDrain = Duration(milliseconds: 200);
 
 /// Computes frame metrics for an active rendering window.
 ///
@@ -69,9 +70,9 @@ int _percentile(List<int> sorted, int percentile) {
 /// final perf = PerfCollector('scroll_room');
 /// perf.start();
 /// // ... navigate, interact ...
-/// perf.checkpoint('room_entered');
+/// await perf.checkpoint('room_entered');
 /// // ... scroll ...
-/// perf.checkpoint('after_30s_scroll');
+/// await perf.checkpoint('after_30s_scroll');
 /// perf.stop();
 /// await perf.flush();
 /// ```
@@ -86,10 +87,14 @@ class PerfCollector {
   int _seq = 0;
   final List<String> _pending = [];
   final List<FrameTiming> _frameBuffer = [];
+  final Future<void> Function(Duration) _waitForFrameTimings;
   TimingsCallback? _timingsCallback;
 
-  PerfCollector(this.scenario)
-    : _runId = DateTime.now().millisecondsSinceEpoch.toString();
+  PerfCollector(
+    this.scenario, {
+    Future<void> Function(Duration)? waitForFrameTimings,
+  }) : _waitForFrameTimings = waitForFrameTimings ?? Future<void>.delayed,
+       _runId = DateTime.now().millisecondsSinceEpoch.toString();
 
   /// Starts accumulating frame timings. Call before the first action to measure.
   void start() {
@@ -109,7 +114,16 @@ class PerfCollector {
   /// previous checkpoint.
   ///
   /// [extra] allows adding arbitrary key=value metrics (e.g. latency_ms).
-  void checkpoint(String label, {Map<String, dynamic> extra = const {}}) {
+  Future<void> checkpoint(
+    String label, {
+    Map<String, dynamic> extra = const {},
+  }) async {
+    // In profile mode Flutter batches FrameTiming delivery approximately every
+    // 100 ms. Let the final rasterized frames reach the callback before taking
+    // and clearing the snapshot, otherwise short transitions intermittently
+    // produce frame_count=0 and omit every derived frame metric.
+    await _waitForFrameTimings(_frameTimingsBatchDrain);
+
     final rss = ProcessInfo.currentRss;
     final cache = PaintingBinding.instance.imageCache;
     final frames = List<FrameTiming>.from(_frameBuffer);

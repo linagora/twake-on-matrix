@@ -85,19 +85,19 @@ Future<PerfCollector> _runNavCycles(PatrolIntegrationTester $) async {
 
   await HomeRobot($).gotoChatListScreen();
   await $.pumpAndSettle();
-  perf.checkpoint('chat_list_baseline');
+  await perf.checkpoint('chat_list_baseline');
 
   for (int i = 1; i <= 5; i++) {
     final t0 = DateTime.now().millisecondsSinceEpoch;
     await _openRoomFromList($, _navRoom);
-    perf.checkpoint(
+    await perf.checkpoint(
       'room_enter_cycle$i',
       extra: {'transition_ms': DateTime.now().millisecondsSinceEpoch - t0},
     );
     await ChatGroupDetailRobot($).clickOnBackIcon();
     await $.pumpAndSettle();
     await Future.delayed(const Duration(seconds: 2));
-    perf.checkpoint('chat_list_after_cycle$i');
+    await perf.checkpoint('chat_list_after_cycle$i');
   }
 
   perf.stop();
@@ -118,18 +118,18 @@ Future<void> _runScrollScenario(
   await HomeRobot($).gotoChatListScreen();
   await $.pumpAndSettle();
   await _openRoomFromList($, roomName);
-  perf.checkpoint('room_entered');
+  await perf.checkpoint('room_entered');
 
   await _scrollForDuration($, perf, roomLabel, durationSeconds: 30);
-  perf.checkpoint('scroll_end');
+  await perf.checkpoint('scroll_end');
 
   await Future.delayed(const Duration(seconds: 3));
-  perf.checkpoint('scroll_settled');
+  await perf.checkpoint('scroll_settled');
 
   await ChatGroupDetailRobot($).clickOnBackIcon();
   await $.pumpAndSettle();
   await Future.delayed(const Duration(seconds: 3));
-  perf.checkpoint('back_to_list');
+  await perf.checkpoint('back_to_list');
 
   perf.stop();
   await perf.flush();
@@ -143,14 +143,14 @@ Future<void> _runChatListScroll(PatrolIntegrationTester $) async {
 
   await HomeRobot($).gotoChatListScreen();
   await $.pumpAndSettle();
-  perf.checkpoint('list_top');
+  await perf.checkpoint('list_top');
 
   await CoreRobot($).scrollToBottom($);
-  perf.checkpoint('list_bottom');
+  await perf.checkpoint('list_bottom');
 
   await CoreRobot($).scrollToTop($);
   await Future.delayed(const Duration(seconds: 2));
-  perf.checkpoint('list_top_again');
+  await perf.checkpoint('list_top_again');
 
   perf.stop();
   await perf.flush();
@@ -187,7 +187,7 @@ Future<void> _scrollForDuration(
     await $.pump(Duration(milliseconds: pauseMs));
 
     if ((i + 1) % logEveryNSteps == 0) {
-      perf.checkpoint('${roomLabel}_scroll_step_${i + 1}of$steps');
+      await perf.checkpoint('${roomLabel}_scroll_step_${i + 1}of$steps');
     }
   }
 }

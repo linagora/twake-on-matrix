@@ -1,0 +1,110 @@
+{
+  "common_metrics": [
+    "rss_bytes",
+    "cache_bytes",
+    "cache_count",
+    "cache_live",
+    "cache_pending",
+    "frame_count",
+    "frame_window_ms",
+    "fps",
+    "build_p50_us",
+    "build_p95_us",
+    "build_p99_us",
+    "raster_p50_us",
+    "raster_p95_us",
+    "raster_p99_us",
+    "jank_count",
+    "jank_rate"
+  ],
+  "checkpoints": [
+    {"scenario": "nav_cycles", "label": "chat_list_baseline"},
+    {"scenario": "nav_cycles", "label": "room_enter_cycle1", "extra_metrics": ["transition_ms"]},
+    {"scenario": "nav_cycles", "label": "chat_list_after_cycle1"},
+    {"scenario": "nav_cycles", "label": "room_enter_cycle2", "extra_metrics": ["transition_ms"]},
+    {"scenario": "nav_cycles", "label": "chat_list_after_cycle2"},
+    {"scenario": "nav_cycles", "label": "room_enter_cycle3", "extra_metrics": ["transition_ms"]},
+    {"scenario": "nav_cycles", "label": "chat_list_after_cycle3"},
+    {"scenario": "nav_cycles", "label": "room_enter_cycle4", "extra_metrics": ["transition_ms"]},
+    {"scenario": "nav_cycles", "label": "chat_list_after_cycle4"},
+    {"scenario": "nav_cycles", "label": "room_enter_cycle5", "extra_metrics": ["transition_ms"]},
+    {"scenario": "nav_cycles", "label": "chat_list_after_cycle5"},
+    {"scenario": "scroll_room1", "label": "room_entered"},
+    {"scenario": "scroll_room1", "label": "room1_scroll_step_5of15"},
+    {"scenario": "scroll_room1", "label": "room1_scroll_step_10of15"},
+    {"scenario": "scroll_room1", "label": "room1_scroll_step_15of15"},
+    {
+      "scenario": "scroll_room1",
+      "label": "scroll_end",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
+    {
+      "scenario": "scroll_room1",
+      "label": "scroll_settled",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
+    {"scenario": "scroll_room1", "label": "back_to_list"},
+    {"scenario": "scroll_room2", "label": "room_entered"},
+    {"scenario": "scroll_room2", "label": "room2_scroll_step_5of15"},
+    {"scenario": "scroll_room2", "label": "room2_scroll_step_10of15"},
+    {"scenario": "scroll_room2", "label": "room2_scroll_step_15of15"},
+    {
+      "scenario": "scroll_room2",
+      "label": "scroll_end",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
+    {
+      "scenario": "scroll_room2",
+      "label": "scroll_settled",
+      "excluded_metrics": [
+        "frame_window_ms",
+        "fps",
+        "build_p50_us",
+        "build_p95_us",
+        "build_p99_us",
+        "raster_p50_us",
+        "raster_p95_us",
+        "raster_p99_us",
+        "jank_count",
+        "jank_rate"
+      ]
+    },
+    {"scenario": "scroll_room2", "label": "back_to_list"},
+    {"scenario": "chat_list_scroll", "label": "list_top"},
+    {"scenario": "chat_list_scroll", "label": "list_bottom"},
+    {"scenario": "chat_list_scroll", "label": "list_top_again"}
+  ]
+}

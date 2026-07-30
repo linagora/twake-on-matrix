@@ -5,10 +5,6 @@ on:
         description: "Path to Patrol integration test Dart file. Defaults to the perf test."
         required: false
         default: "integration_test/tests/chat/perf_test.dart"
-      perf_runs:
-        description: "Number of perf test runs for median (3-5 recommended)."
-        required: false
-        default: "3"
       run_perf:
         description: "Also run the performance jobs (build + physical median). Off by default so a functional dispatch only runs the integration tests."
         required: false
@@ -21,7 +17,7 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
-name: Integration
+name: Integration Tests
 
 env:
   FLUTTER_VERSION: "3.38.9"
@@ -37,6 +33,10 @@ jobs:
   integration_test:
     name: Integration Test
     runs-on: ubuntu-latest
+    concurrency:
+      group: matrix-ci-shared-account
+      queue: max
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
@@ -146,7 +146,7 @@ jobs:
             --type instrumentation \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-            --device model=oriole,version=33 \
+            --device model=MediumPhone.arm,version=34 \
             --timeout 45m \
             --use-orchestrator \
             --environment-variables clearPackageData=true
@@ -257,15 +257,23 @@ jobs:
             build/app/outputs/apk/androidTest/profile/app-profile-androidTest.apk
 
   # ────────────────────────────────────────────────────────────────────────────
-  # Job 3a – Memory metrics: 3 runs on virtual device (free tier)
-  # RSS and imageCache are reliable on virtual devices. Running ×3 gives a
-  # median that filters outliers from GC pauses or background activity.
+  # Job 3 – All performance metrics: 3 sequential runs on physical hardware.
+  # Virtual-device performance is not representative. Serial execution also
+  # prevents concurrent Matrix logins with the shared CI account.
   # ────────────────────────────────────────────────────────────────────────────
-  perf_run_virtual:
-    name: Perf Memory Run ${{ matrix.run }}/3
-    if: ${{ github.event_name == 'schedule' || inputs.run_perf == 'true' }}
-    needs: perf_build
+  perf_run_physical:
+    name: Perf Physical Run ${{ matrix.run }}/3
+    if: >-
+      ${{
+        always() && needs.perf_build.result == 'success' &&
+        (github.event_name == 'schedule' || inputs.run_perf == 'true')
+      }}
+    needs: [perf_build, integration_test]
     runs-on: ubuntu-latest
+    concurrency:
+      group: matrix-ci-shared-account
+      queue: max
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
@@ -274,6 +282,7 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         run: [1, 2, 3]
 
@@ -302,94 +311,10 @@ jobs:
           name: perf-apks-${{ github.run_id }}
           path: apks/
 
-      # upload-artifact@v4 strips to the least common ancestor of the uploaded
-      # paths (build/app/outputs/apk/), so the layout under apks/ is:
-      #   apks/profile/app-profile.apk
-      #   apks/androidTest/profile/app-profile-androidTest.apk
-      - name: Run perf test on virtual device
-        run: |
-          PERF_RUN_ID="perf-virtual-${{ github.run_id }}-run${{ matrix.run }}"
-          # Export before FTL so logcat download still works if the test fails.
-          echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
-
-          gcloud firebase test android run \
-            --type instrumentation \
-            --app apks/profile/app-profile.apk \
-            --test apks/androidTest/profile/app-profile-androidTest.apk \
-            --device model=MediumPhone.arm,version=34 \
-            --timeout 30m \
-            --use-orchestrator \
-            --environment-variables clearPackageData=true \
-            --results-bucket "$FTL_RESULTS_BUCKET" \
-            --results-dir "$PERF_RUN_ID"
-
-      # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
-      - name: Download logcat from GCS
-        if: always() && env.PERF_RUN_ID != ''
-        run: |
-          GCS_PATH="gs://$FTL_RESULTS_BUCKET/$PERF_RUN_ID"
-          mkdir -p ./perf_gcs_results
-          gcloud storage cp -r "${GCS_PATH}/*" ./perf_gcs_results/ \
-            || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
-          find ./perf_gcs_results -name "logcat" -exec cat {} + > perf_logcat.txt \
-            || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
-          if [ ! -s perf_logcat.txt ]; then
-            echo "ERROR: logcat is empty"; exit 1
-          fi
-
-      - name: Upload run logcat
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: perf-virtual-logcat-${{ github.run_id }}-run${{ matrix.run }}
-          retention-days: 7
-          path: perf_logcat.txt
-
-  # ────────────────────────────────────────────────────────────────────────────
-  # Job 3b – Frame timing metrics: 1 run on physical device (free tier)
-  # build_p95, jank_rate are only meaningful on real hardware. 1 run within
-  # the 30min/day free tier — no median, but the signal is reliable.
-  # ────────────────────────────────────────────────────────────────────────────
-  perf_run_physical:
-    name: Perf Frame Run (physical)
-    if: ${{ github.event_name == 'schedule' || inputs.run_perf == 'true' }}
-    needs: perf_build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
-
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Validate FTL bucket name
-        run: |
-          if [[ "$FTL_RESULTS_BUCKET" == _* ]]; then
-            echo "ERROR: FTL_RESULTS_BUCKET='$FTL_RESULTS_BUCKET' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
-            exit 1
-          fi
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
-          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
-
-      - name: Download APKs
-        uses: actions/download-artifact@v4
-        with:
-          name: perf-apks-${{ github.run_id }}
-          path: apks/
-
-      # See perf_run_virtual: artifact layout is LCA-stripped under apks/.
+      # upload-artifact@v4 strips the APK paths to their least common ancestor.
       - name: Run perf test on physical device
         run: |
-          PERF_RUN_ID="perf-physical-${{ github.run_id }}"
+          PERF_RUN_ID="perf-physical-${{ github.run_id }}-run${{ matrix.run }}"
           # Export before FTL so logcat download still works if the test fails.
           echo "PERF_RUN_ID=$PERF_RUN_ID" >> "$GITHUB_ENV"
 
@@ -422,17 +347,17 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: perf-physical-logcat-${{ github.run_id }}
+          name: perf-physical-logcat-${{ github.run_id }}-run${{ matrix.run }}
           retention-days: 7
           path: perf_logcat.txt
 
   # ────────────────────────────────────────────────────────────────────────────
-  # Job 4 – Compute median across the 3 virtual runs + annotate physical
+  # Job 4 – Compute a median across the 3 physical runs
   # ────────────────────────────────────────────────────────────────────────────
   perf_median:
     name: Compute Perf Median
     if: ${{ github.event_name == 'schedule' || inputs.run_perf == 'true' }}
-    needs: [perf_run_virtual, perf_run_physical]
+    needs: perf_run_physical
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -445,51 +370,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download virtual run logcats
+      - name: Download physical run logcats
         uses: actions/download-artifact@v4
         with:
-          pattern: perf-virtual-logcat-${{ github.run_id }}-run*
-          path: perf_logcats/virtual/
+          pattern: perf-physical-logcat-${{ github.run_id }}-run*
+          path: perf_logcats/physical/
           merge-multiple: false
 
-      - name: Download physical run logcat
-        uses: actions/download-artifact@v4
-        with:
-          name: perf-physical-logcat-${{ github.run_id }}
-          path: perf_logcats/physical/
-
-      - name: Compute median (memory metrics — virtual ×3)
+      - name: Compute physical median
         run: |
-          mapfile -t LOGCAT_FILES < <(find perf_logcats/virtual/ -name "perf_logcat.txt" | sort)
-          echo "Virtual logcat files: ${LOGCAT_FILES[*]}"
+          mapfile -t LOGCAT_FILES < <(find perf_logcats/physical/ -name "perf_logcat.txt" | sort)
+          echo "Physical logcat files: ${LOGCAT_FILES[*]}"
 
           python3 scripts/perf/compute_median.py \
+            --expected-samples 3 \
+            --requirements scripts/perf/android_requirements.json \
             "${LOGCAT_FILES[@]}" \
-            perf_median_memory.json
+            perf_median_physical.json
 
-          echo "=== Memory Median Results ==="
-          cat perf_median_memory.json
-
-      - name: Extract frame metrics (physical ×1)
-        run: |
-          PHYSICAL_LOGCAT="perf_logcats/physical/perf_logcat.txt"
-          echo "Physical logcat: $PHYSICAL_LOGCAT"
-
-          python3 scripts/perf/compute_median.py \
-            "$PHYSICAL_LOGCAT" \
-            perf_frame_physical.json
-
-          echo "=== Frame Results (physical device) ==="
-          cat perf_frame_physical.json
+          echo "=== Physical Median Results ==="
+          cat perf_median_physical.json
 
       - name: Upload results
         uses: actions/upload-artifact@v4
         with:
           name: perf-results-${{ github.run_id }}
           retention-days: 90
-          path: |
-            perf_median_memory.json
-            perf_frame_physical.json
+          path: perf_median_physical.json
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 5 – Append the successful nightly aggregate to the GitHub Pages history
@@ -561,8 +468,10 @@ jobs:
             --version "$GITHUB_SHA"
 
           python3 scripts/perf/update_history.py \
-            --memory perf-results/perf_median_memory.json \
-            --physical perf-results/perf_frame_physical.json \
+            --memory perf-results/perf_median_physical.json \
+            --physical perf-results/perf_median_physical.json \
+            --benchmark-source physical \
+            --physical-runs 3 \
             --data-directory performance-site/data \
             --date "$(date -u +%F)" \
             --generated-at "$(date -u +%FT%TZ)" \

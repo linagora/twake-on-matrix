@@ -1,5 +1,8 @@
 name: Patrol Web Integration Tests
 
+# Every Web job provisions an isolated local Synapse instance, so these jobs do
+# not need the shared-account lock used by the Android FTL workflow.
+
 on:
   # Nightly web E2E run on free GitHub-hosted runners (no FTL cost).
   # 02:00 UTC — offset from the FTL integration workflow (00:00 UTC) so the
@@ -311,6 +314,7 @@ jobs:
         run: |
           python3 scripts/perf/compute_median.py \
             --include-values \
+            --expected-samples 3 \
             patrol-web-perf.log \
             perf_web.json
           python3 - <<'PY'
