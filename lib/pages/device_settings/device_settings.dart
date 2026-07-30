@@ -247,7 +247,7 @@ Future<void> removeDevicesAction(
     await client.uiaRequestBackground(
       (auth) => client.deleteDevices(deviceIds, auth: auth),
     );
-    notifier.reload(client);
+    await notifier.reload(client);
   } catch (e, s) {
     Logs().v('Error while deleting devices', e, s);
     notifier.setErrorDeletingDevices(e.toString());
@@ -276,7 +276,7 @@ Future<void> renameDeviceAction(
         client.updateDevice(device.deviceId, displayName: displayName.single),
   );
   if (success.error == null) {
-    notifier.reload(client);
+    await notifier.reload(client);
   }
 }
 
