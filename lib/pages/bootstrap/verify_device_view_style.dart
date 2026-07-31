@@ -60,8 +60,6 @@ class VerifyDeviceViewStyle {
   static const double settingGap = spaceXs;
   static const double settingTextGap = spaceXs / 2;
 
-  static const double dividerIndent = 41;
-
   static Color get subtitleColor =>
       LinagoraRefColors.material().tertiary[30] ?? const Color(0xFF99A0A9);
 

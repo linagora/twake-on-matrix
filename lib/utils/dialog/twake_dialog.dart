@@ -209,6 +209,7 @@ class TwakeDialog {
     required Widget Function() builder,
     bool barrierDismissible = true,
     Color? barrierColor,
+    bool useSafeArea = false,
   }) {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -223,6 +224,7 @@ class TwakeDialog {
       barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
       useRootNavigator: false,
+      useSafeArea: useSafeArea,
     );
   }
 }

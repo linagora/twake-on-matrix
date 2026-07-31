@@ -51,7 +51,7 @@ class VerifyDeviceView extends StatelessWidget {
         for (int index = 0; index < options.length; index++)
           _VerifyDeviceItem(
             option: options[index],
-            showDivider: index != options.length - 1,
+            showDivider: index == 0,
             disabled: isBusy,
           ),
         const SizedBox(height: VerifyDeviceViewStyle.gapOptionsToButton),
@@ -84,77 +84,95 @@ class _VerifyDeviceItem extends StatelessWidget {
           constraints: const BoxConstraints(
             minHeight: VerifyDeviceViewStyle.settingItemHeight,
           ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: VerifyDeviceViewStyle.settingItemPadding,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          child: Padding(
+            padding: VerifyDeviceViewStyle.settingItemPadding,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  option.icon,
+                  size: VerifyDeviceViewStyle.settingIconSize,
+                  color: VerifyDeviceViewStyle.iconColor(context),
+                ),
+                const SizedBox(width: VerifyDeviceViewStyle.settingGap),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        option.icon,
-                        size: VerifyDeviceViewStyle.settingIconSize,
-                        color: VerifyDeviceViewStyle.iconColor(context),
-                      ),
-                      const SizedBox(width: VerifyDeviceViewStyle.settingGap),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
+                        child: Row(
                           children: [
-                            Text(
-                              option.title,
-                              style: VerifyDeviceViewStyle.settingTitleStyle(
-                                context,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    option.title,
+                                    style:
+                                        VerifyDeviceViewStyle.settingTitleStyle(
+                                          context,
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(
+                                    height:
+                                        VerifyDeviceViewStyle.settingTextGap,
+                                  ),
+                                  Text(
+                                    option.subtitle,
+                                    style:
+                                        VerifyDeviceViewStyle.settingSubtitleStyle(
+                                          context,
+                                        ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(
-                              height: VerifyDeviceViewStyle.settingTextGap,
+                              width: VerifyDeviceViewStyle.settingGap,
                             ),
-                            Text(
-                              option.subtitle,
-                              style: VerifyDeviceViewStyle.settingSubtitleStyle(
-                                context,
+                            if (option.isLoading)
+                              SizedBox(
+                                width: VerifyDeviceViewStyle.settingIconSize,
+                                height: VerifyDeviceViewStyle.settingIconSize,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: VerifyDeviceViewStyle.iconColor(
+                                    context,
+                                  ),
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.chevron_right,
+                                size: VerifyDeviceViewStyle.settingIconSize,
+                                color: VerifyDeviceViewStyle.iconColor(context),
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: VerifyDeviceViewStyle.settingGap),
-                      if (option.isLoading)
-                        SizedBox(
-                          width: VerifyDeviceViewStyle.settingIconSize,
-                          height: VerifyDeviceViewStyle.settingIconSize,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: VerifyDeviceViewStyle.iconColor(context),
+                      if (showDivider)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: VerifyDeviceViewStyle.spaceS,
                           ),
-                        )
-                      else
-                        Icon(
-                          Icons.chevron_right,
-                          size: VerifyDeviceViewStyle.settingIconSize,
-                          color: VerifyDeviceViewStyle.iconColor(context),
+                          child: Divider(
+                            height: 1,
+                            thickness: 1,
+                            endIndent: 0,
+                            color: VerifyDeviceViewStyle.dividerColor,
+                          ),
                         ),
                     ],
                   ),
                 ),
-              ),
-              if (showDivider)
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  indent: VerifyDeviceViewStyle.dividerIndent,
-                  endIndent: 0,
-                  color: VerifyDeviceViewStyle.dividerColor,
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

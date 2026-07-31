@@ -8,6 +8,7 @@ import 'package:fluffychat/pages/key_verification/key_verification_emoji_view.da
 import 'package:fluffychat/pages/key_verification/key_verification_error_view.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_success_view.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_waiting_view.dart';
+import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -353,6 +354,9 @@ class _MobileVerifyDeviceSheet extends StatelessWidget {
           ),
           child: SafeArea(
             top: false,
+            // Android needs bottom inset for the system nav bar; iOS home
+            // indicator should not add an empty band under the button.
+            bottom: PlatformInfos.isAndroid,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
