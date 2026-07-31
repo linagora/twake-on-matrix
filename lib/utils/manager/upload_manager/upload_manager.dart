@@ -11,6 +11,7 @@ import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:fluffychat/presentation/extensions/send_file_web_extension.dart';
 import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:fluffychat/utils/manager/upload_manager/models/retry_upload_result.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/models/upload_file_info.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
@@ -38,18 +39,31 @@ class UploadManager {
     String eventId, {
     required Room room,
   }) async {
-    if (_eventIdMapUploadFileInfo.containsKey(eventId)) {
-      return _eventIdMapUploadFileInfo[eventId];
+    final cached = _eventIdMapUploadFileInfo[eventId];
+    if (cached != null &&
+        (cached.fileInfo != null || cached.matrixFile != null)) {
+      return cached;
     }
 
-    // Attempt to restore on-demand from the event's unsigned data
+    // Attempt to restore on-demand from the event's unsigned data.
+    // Only cache the restored entry when it has usable file data — otherwise
+    // a null-byte entry would poison the map and mask the data-lost condition.
     final event = await room.getEventById(eventId);
     if (event != null) {
       final uploadInfoMap = event.unsigned?['upload_info'];
       if (uploadInfoMap is Map<String, dynamic>) {
-        final info = UploadFileInfo.fromJson(uploadInfoMap);
-        _eventIdMapUploadFileInfo[eventId] = info;
-        return info;
+        try {
+          final info = UploadFileInfo.fromJson(uploadInfoMap);
+          if (info.fileInfo != null || info.matrixFile != null) {
+            _eventIdMapUploadFileInfo[eventId] = info;
+          }
+          return info;
+        } catch (e) {
+          Logs().w(
+            'UploadManager::getUploadFileInfo(): '
+            'failed to parse upload_info for $eventId, ignoring: $e',
+          );
+        }
       }
     }
 
@@ -84,28 +98,44 @@ class UploadManager {
   }
 
   /// Retries a failed upload
-  Future<void> retryUpload(Event event) async {
+  Future<RetryUploadResult> retryUpload(Event event) async {
     final txid = event.eventId;
     if (_retriesInProgress.contains(txid)) {
       Logs().w('Retry already in progress for txid $txid');
-      return;
+      return RetryUploadResult.alreadyInProgress;
     }
     _retriesInProgress.add(txid);
     try {
       final uploadInfo = await getUploadFileInfo(txid, room: event.room);
 
       if (uploadInfo == null) {
-        throw Exception('Upload with txid $txid not found');
-      }
-
-      if (!uploadInfo.isFailed) {
-        await event.cancelSend();
-        throw Exception('Upload with txid $txid is not in failed state');
+        Logs().w(
+          'UploadManager::retryUpload(): no upload info for $txid, '
+          'the message cannot be resent',
+        );
+        return RetryUploadResult.fileDataUnavailable;
       }
 
       final room = event.room;
       final fileInfo = uploadInfo.fileInfo;
       final matrixFile = uploadInfo.matrixFile;
+
+      // File bytes lost (e.g. web page refresh): keep the event in the timeline
+      // and let the caller tell the user, rather than silently dropping it.
+      if (fileInfo == null && matrixFile == null) {
+        Logs().w(
+          'UploadManager::retryUpload(): no file data for $txid, '
+          'the message cannot be resent',
+        );
+        return RetryUploadResult.fileDataUnavailable;
+      }
+
+      if (!uploadInfo.isFailed) {
+        Logs().w('UploadManager::retryUpload(): $txid is not in failed state');
+        await event.cancelSend();
+        return RetryUploadResult.notFailed;
+      }
+
       final caption = uploadInfo.captionInfo?.caption;
       final inReplyTo = uploadInfo.inReplyToEventId == null
           ? null
@@ -122,18 +152,14 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else if (matrixFile != null) {
+        } else {
           fakeImageEvent = await room.sendFakeFileEvent(
-            matrixFile,
+            matrixFile!,
             txid: txid,
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        }
-
-        if (fakeImageEvent == null) {
-          throw Exception('Missing required retry data for txid $txid');
         }
       } catch (e) {
         uploadInfo.isFailed = true;
@@ -160,12 +186,12 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else if (matrixFile != null) {
+        } else {
           await _addFileTaskToWorkerQueueWeb(
             txid: txid,
             fakeImageEvent: fakeImageEvent,
             room: room,
-            matrixFile: matrixFile,
+            matrixFile: matrixFile!,
             streamController: streamController,
             cancelToken: cancelToken,
             thumbnail: uploadInfo.thumbnail,
@@ -174,8 +200,6 @@ class UploadManager {
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
           );
-        } else {
-          throw Exception('No file data found for retry with txid $txid');
         }
       } catch (e) {
         uploadInfo.isFailed = true;
@@ -189,6 +213,8 @@ class UploadManager {
         );
         rethrow;
       }
+
+      return RetryUploadResult.started;
     } finally {
       _retriesInProgress.remove(txid);
     }
