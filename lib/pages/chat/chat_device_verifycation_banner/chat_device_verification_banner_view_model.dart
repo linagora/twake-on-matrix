@@ -14,9 +14,6 @@ class ChatDeviceVerificationBannerViewModel
 
   @override
   DevicesBannerState build(Client client) {
-    // Device keys can still be loading (or change later, e.g. after
-    // completing verification elsewhere), so re-evaluate on every sync
-    // rather than only once at build time.
     _onSyncSubscription = client.onSync.stream.listen((_) => _refresh());
     ref.onDispose(() => _onSyncSubscription?.cancel());
     return _computeState();
@@ -35,10 +32,6 @@ class ChatDeviceVerificationBannerViewModel
     final deviceId = client.deviceID;
     if (deviceId == null) return false;
     final deviceKeys = client.userDeviceKeys[client.userID]?.deviceKeys;
-    // encryptToDevice reflects whether this device will actually receive
-    // room keys and be able to decrypt messages (per ShareKeysWith policy),
-    // unlike directVerified/verified which the SDK force-trusts for the
-    // own device regardless of any user action.
     return deviceKeys?[deviceId]?.encryptToDevice == false;
   }
 
