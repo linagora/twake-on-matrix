@@ -81,9 +81,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                     children: [
                       if (hasError)
                         IconButton(
-                          onPressed: () {
-                            uploadManager.retryUpload(widget.event);
-                          },
+                          onPressed: onRetryUpload,
                           icon: Icon(
                             Icons.refresh,
                             color: sysColor.primary,
@@ -142,7 +140,7 @@ class _MessageUploadingContentState extends State<MessageUploadingContent>
                             return;
                           }
                           if (hasError) {
-                            uploadManager.retryUpload(event);
+                            onRetryUpload();
                           } else {
                             uploadManager.cancelUpload(event);
                           }

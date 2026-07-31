@@ -3261,5 +3261,10 @@
   "resetCompleteDescription": "Your new encryption identity is ready. Previously encrypted messages are no longer available.",
   "verificationFailedTitle": "Verification failed",
   "verificationFailedDescription": "The request was cancelled or rejected. Please try again.",
-  "retryFailedDescription": "Automatic retry didn't work. Try another way to verify this device."
+  "retryFailedDescription": "Automatic retry didn't work. Try another way to verify this device.",
+  "messageCannotBeResent": "This message can't be resent because its data is unavailable",
+  "@messageCannotBeResent": {
+    "type": "text",
+    "placeholders": {}
+  }
 }

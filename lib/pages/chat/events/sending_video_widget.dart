@@ -121,9 +121,7 @@ class _SendingVideoWidgetState extends State<SendingVideoWidget>
           ...switch (event.status) {
             EventStatus.error => [
               IconButton(
-                onPressed: () {
-                  uploadManager.retryUpload(event);
-                },
+                onPressed: onRetryUpload,
                 icon: Icon(Icons.refresh, color: sysColor.primary, size: 24),
                 padding: const EdgeInsets.all(4),
                 style: IconButton.styleFrom(
