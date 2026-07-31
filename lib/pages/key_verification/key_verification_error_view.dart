@@ -33,7 +33,7 @@ class KeyVerificationErrorView extends StatelessWidget {
           height: KeyVerificationSasStyle.mascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         Padding(
           padding: KeyVerificationSasStyle.headingPadding,
           child: Text(
@@ -42,13 +42,13 @@ class KeyVerificationErrorView extends StatelessWidget {
             style: KeyVerificationSasStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapTitleToSupporting),
+        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
         Text(
           description ?? L10n.of(context)!.verificationFailedDescription,
           textAlign: TextAlign.center,
           style: KeyVerificationSasStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         Material(
           color: KeyVerificationSasStyle.primaryColor,
           borderRadius: BorderRadius.circular(

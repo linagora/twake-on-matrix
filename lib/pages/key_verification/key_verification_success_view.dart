@@ -27,7 +27,7 @@ class KeyVerificationSuccessView extends StatelessWidget {
           height: KeyVerificationSasStyle.verifiedMascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         Padding(
           padding: KeyVerificationSasStyle.headingPadding,
           child: Text(
@@ -36,13 +36,13 @@ class KeyVerificationSuccessView extends StatelessWidget {
             style: KeyVerificationSasStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapTitleToSupporting),
+        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
         Text(
           description ?? L10n.of(context)!.deviceVerifiedDescription,
           textAlign: TextAlign.center,
           style: KeyVerificationSasStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         Material(
           color: KeyVerificationSasStyle.primaryColor,
           borderRadius: BorderRadius.circular(

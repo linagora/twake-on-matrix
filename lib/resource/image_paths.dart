@@ -109,7 +109,7 @@ class ImagePaths {
       _getImagePath('ic_mascot_reset_encryption.svg');
 
   static String get mascotVerificationFailed =>
-      _getImagePath('ic_mascot_verification_failed.svg');
+      _getImagePath('ic_mascot_reset_encryption.svg');
 
   static String get mascotDataAndStorage =>
       _getImagePath('data-and-storage.svg');

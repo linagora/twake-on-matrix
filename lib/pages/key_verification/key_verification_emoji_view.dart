@@ -32,35 +32,21 @@ class KeyVerificationEmojiView extends StatelessWidget {
           alignment: WrapAlignment.center,
           children: [
             for (final emoji in emojis)
-              SizedBox(
-                width: KeyVerificationSasStyle.emojiTileSize,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      emoji.emoji,
-                      style: const TextStyle(
-                        fontSize: KeyVerificationSasStyle.emojiFontSize,
-                      ),
-                    ),
-                    Text(
-                      emoji.name,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: KeyVerificationSasStyle.emojiLabelStyle(context),
-                    ),
-                  ],
+              Text(
+                emoji.emoji,
+                style: const TextStyle(
+                  fontSize: KeyVerificationSasStyle.emojiFontSize,
                 ),
               ),
           ],
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapTitleToSupporting),
+        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
         Text(
           L10n.of(context)!.verifyEmojiDescription,
           textAlign: TextAlign.center,
           style: KeyVerificationSasStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [

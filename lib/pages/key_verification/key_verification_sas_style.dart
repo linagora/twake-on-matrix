@@ -5,24 +5,21 @@ class KeyVerificationSasStyle {
   const KeyVerificationSasStyle._();
 
   static const double mascotWidth = 180;
-  static const double mascotHeight = 168.55;
+  static const double mascotHeight = 168;
   static const double verifiedMascotWidth = 180;
-  static const double verifiedMascotHeight = 179.3;
+  static const double verifiedMascotHeight = 180;
 
   static const double spinnerSize = 68;
   static Color spinnerColor(BuildContext context) =>
       LinagoraSysColors.material().outlineVariant;
 
-  static const double gapMascotToSpinner = 19;
-  static const double gapSpinnerToHeading = 8;
-  static const double gapMascotToHeading = 19;
-  static const double gapTitleToSupporting = 8;
-  static const EdgeInsets headingPadding = EdgeInsets.all(8);
+  static const double spaceXs = LinagoraSpacing.base;
+  static const double spaceS = LinagoraSpacing.base * 2;
+  static const double spaceM = LinagoraSpacing.base * 3;
 
-  static const double emojiTileSize = 50;
+  static const EdgeInsets headingPadding = EdgeInsets.all(spaceXs);
+
   static const double emojiFontSize = 32;
-  static const double emojiRadius = 13.009;
-  static const double emojiLabelFontSize = 11;
 
   static Color get titleColor => LinagoraSysColors.material().onSurface;
 
@@ -33,7 +30,7 @@ class KeyVerificationSasStyle {
 
   // Taller vertical padding than VerifyDeviceView's retry button.
   static const EdgeInsets filledButtonPadding = EdgeInsets.symmetric(
-    horizontal: 24,
+    horizontal: spaceM,
     vertical: 14,
   );
   static const double buttonRadius = 100;
@@ -56,9 +53,4 @@ class KeyVerificationSasStyle {
       LinagoraTextTheme.material().labelSmall!.copyWith(
         color: LinagoraSysColors.material().onSurface,
       );
-
-  static TextStyle? emojiLabelStyle(BuildContext context) => Theme.of(context)
-      .textTheme
-      .labelSmall
-      ?.copyWith(color: supportingColor, fontSize: emojiLabelFontSize);
 }

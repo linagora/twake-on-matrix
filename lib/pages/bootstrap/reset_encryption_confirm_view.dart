@@ -32,7 +32,7 @@ class ResetEncryptionConfirmView extends StatelessWidget {
           height: KeyVerificationSasStyle.mascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceS),
         Padding(
           padding: VerifyDeviceViewStyle.headingPadding,
           child: Text(
@@ -41,17 +41,17 @@ class ResetEncryptionConfirmView extends StatelessWidget {
             style: VerifyDeviceViewStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.gapTitleToSupporting),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceXs),
         Text(
           L10n.of(context)!.resetEndToEndEncryptionDescription,
           textAlign: TextAlign.center,
           style: VerifyDeviceViewStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToHeading),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceS),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: KeyVerificationSasStyle.gapEmojiButtons,
-          runSpacing: LinagoraSpacing.base,
+          runSpacing: VerifyDeviceViewStyle.spaceXs,
           children: [
             _FilledButton(
               color: _resetButtonColor,

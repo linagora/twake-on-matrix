@@ -32,7 +32,7 @@ class VerifyDeviceView extends StatelessWidget {
           height: mascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.gapMascotToHeading),
+        const SizedBox(height: VerifyDeviceViewStyle.gapMascotToSpinner),
         Padding(
           padding: VerifyDeviceViewStyle.headingPadding,
           child: Text(
@@ -41,13 +41,13 @@ class VerifyDeviceView extends StatelessWidget {
             style: VerifyDeviceViewStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.gapTitleToSupporting),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceXs),
         Text(
           L10n.of(context)!.verifyThisDeviceDescription,
           textAlign: TextAlign.center,
           style: VerifyDeviceViewStyle.supportingStyle(context),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.gapHeadingToOptions),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceS),
         for (int index = 0; index < options.length; index++)
           _VerifyDeviceItem(
             option: options[index],

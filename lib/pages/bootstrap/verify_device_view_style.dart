@@ -17,13 +17,17 @@ class VerifyDeviceViewStyle {
     BoxShadow(color: Color(0x4D000000), offset: Offset(0, 1), blurRadius: 1.5),
   ];
 
-  static const double closeButtonInset = 8;
+  static const double spaceXs = LinagoraSpacing.base;
+  static const double spaceS = LinagoraSpacing.base * 2;
+  static const double spaceM = LinagoraSpacing.base * 3;
+
+  static const double closeButtonInset = spaceXs;
 
   static const double webMascotWidth = 180;
-  static const double webMascotHeight = 168.55;
+  static const double webMascotHeight = 168;
 
   static const double mobileMascotWidth = 106;
-  static const double mobileMascotHeight = 99.26;
+  static const double mobileMascotHeight = 96;
 
   static const BorderRadius sheetRadius = BorderRadius.vertical(
     top: Radius.circular(28),
@@ -35,30 +39,27 @@ class VerifyDeviceViewStyle {
     24,
   );
   static const EdgeInsets dragHandlePadding = EdgeInsets.symmetric(
-    vertical: 16,
+    vertical: spaceS,
   );
   static const double dragHandleWidth = 32;
   static const double dragHandleHeight = 4;
 
-  static const double gapMascotToHeading = 20;
-  static const double gapTitleToSupporting = 8;
-  static const double gapHeadingToOptions = 16;
+  static const double gapMascotToSpinner = 20;
   static const double gapOptionsToButton = 1;
-  static const EdgeInsets headingPadding = EdgeInsets.symmetric(horizontal: 8);
+  static const EdgeInsets headingPadding = EdgeInsets.symmetric(
+    horizontal: spaceXs,
+  );
 
   static const double settingItemHeight = 92;
   static const EdgeInsets settingItemPadding = EdgeInsets.only(
-    left: 8,
-    top: 16,
-    bottom: 16,
+    left: spaceXs,
+    top: spaceS,
+    bottom: spaceS,
   );
-  static const double settingIconSize = 24;
-  static const double settingGap = 8;
-  static const double settingTextGap = 4;
+  static const double settingIconSize = spaceM;
+  static const double settingGap = spaceXs;
+  static const double settingTextGap = spaceXs / 2;
 
-  /// Divider inset measured from the Figma spec (node 42229:18112): the
-  /// divider starts 41px from the sheet content edge, i.e. item padding (8)
-  /// + icon (24) + gap (8), aligned with the option title text.
   static const double dividerIndent = 41;
 
   static Color get subtitleColor =>

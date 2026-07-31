@@ -85,7 +85,7 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
             style: VerifyDeviceViewStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.gapTitleToSupporting),
+        const SizedBox(height: VerifyDeviceViewStyle.spaceXs),
         Text(
           l10n.enterRecoveryKeyDescription,
           textAlign: TextAlign.center,

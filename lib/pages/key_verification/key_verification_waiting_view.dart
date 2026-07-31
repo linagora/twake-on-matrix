@@ -18,7 +18,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
           height: KeyVerificationSasStyle.mascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapMascotToSpinner),
+        const SizedBox(height: KeyVerificationSasStyle.spaceS),
         SizedBox(
           width: KeyVerificationSasStyle.spinnerSize,
           height: KeyVerificationSasStyle.spinnerSize,
@@ -27,7 +27,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
             color: KeyVerificationSasStyle.spinnerColor(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapSpinnerToHeading),
+        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
         Padding(
           padding: KeyVerificationSasStyle.headingPadding,
           child: Text(
@@ -36,7 +36,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
             style: KeyVerificationSasStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.gapTitleToSupporting),
+        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
         Text(
           L10n.of(context)!.checkYourOtherDeviceDescription,
           textAlign: TextAlign.center,
