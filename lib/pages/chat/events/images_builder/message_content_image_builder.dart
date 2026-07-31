@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
@@ -95,6 +97,20 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
           return SendingImageInfoWidget(
             key: ValueKey(widget.event.eventId),
             matrixFile: file,
+            event: widget.event,
+            onTapPreview: widget.onTapPreview,
+            displayImageInfo: displayImageInfo,
+            bubbleWidth: widget.maxWidth,
+          );
+        }
+        // Keep the placeholder bubble
+        if (!widget.event.status.isSent) {
+          return SendingImageInfoWidget(
+            key: ValueKey(widget.event.eventId),
+            matrixFile: MatrixImageFile(
+              bytes: Uint8List(0),
+              name: widget.event.filename,
+            ),
             event: widget.event,
             onTapPreview: widget.onTapPreview,
             displayImageInfo: displayImageInfo,

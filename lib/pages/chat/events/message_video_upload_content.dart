@@ -112,7 +112,7 @@ class _MessageVideoUploadContentState extends State<MessageVideoUploadContent>
                   return;
                 }
                 if (hasError) {
-                  uploadManager.retryUpload(event);
+                  onRetryUpload();
                 } else {
                   uploadManager.cancelUpload(event);
                 }

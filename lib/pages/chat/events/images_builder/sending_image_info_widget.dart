@@ -53,6 +53,12 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
   final ValueNotifier<double> sendingFileProgressNotifier = ValueNotifier(0);
 
   Future<void> _onTap(BuildContext context) async {
+    if (!widget.event.status.isSent) {
+      if (uploadFileStateNotifier.value is UploadFileFailedUIState) {
+        await onRetryUpload();
+      }
+      return;
+    }
     if (widget.onTapPreview != null) {
       await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
         HeroPageRoute(
@@ -104,9 +110,7 @@ class _SendingImageInfoWidgetState extends State<SendingImageInfoWidget>
                   ),
                 if (hasError)
                   IconButton(
-                    onPressed: () {
-                      uploadManager.retryUpload(widget.event);
-                    },
+                    onPressed: onRetryUpload,
                     icon: Icon(
                       Icons.refresh,
                       color: sysColor.primary,

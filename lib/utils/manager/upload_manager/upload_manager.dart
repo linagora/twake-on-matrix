@@ -11,6 +11,7 @@ import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_web_extension.dart';
 import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_file_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
@@ -97,38 +98,42 @@ class UploadManager {
   }
 
   /// Retries a failed upload
-  Future<void> retryUpload(Event event) async {
+  Future<RetryUploadResult> retryUpload(Event event) async {
     final txid = event.eventId;
     if (_retriesInProgress.contains(txid)) {
       Logs().w('Retry already in progress for txid $txid');
-      return;
+      return RetryUploadResult.alreadyInProgress;
     }
     _retriesInProgress.add(txid);
     try {
       final uploadInfo = await getUploadFileInfo(txid, room: event.room);
 
       if (uploadInfo == null) {
-        throw Exception('Upload with txid $txid not found');
-      }
-
-      if (!uploadInfo.isFailed) {
-        await event.cancelSend();
-        throw Exception('Upload with txid $txid is not in failed state');
+        Logs().w(
+          'UploadManager::retryUpload(): no upload info for $txid, '
+          'the message cannot be resent',
+        );
+        return RetryUploadResult.fileDataUnavailable;
       }
 
       final room = event.room;
       final fileInfo = uploadInfo.fileInfo;
       final matrixFile = uploadInfo.matrixFile;
 
-      // File bytes lost (e.g. web page refresh) — remove the stuck event
-      // instead of throwing, so the user never sees a broken retry button.
+      // File bytes lost (e.g. web page refresh): keep the event in the timeline
+      // and let the caller tell the user, rather than silently dropping it.
       if (fileInfo == null && matrixFile == null) {
         Logs().w(
-          'UploadManager::retryUpload(): no file data for $txid, removing event',
+          'UploadManager::retryUpload(): no file data for $txid, '
+          'the message cannot be resent',
         );
-        await _clearFileTask(txid);
+        return RetryUploadResult.fileDataUnavailable;
+      }
+
+      if (!uploadInfo.isFailed) {
+        Logs().w('UploadManager::retryUpload(): $txid is not in failed state');
         await event.cancelSend();
-        return;
+        return RetryUploadResult.notFailed;
       }
 
       final caption = uploadInfo.captionInfo?.caption;
@@ -208,6 +213,8 @@ class UploadManager {
         );
         rethrow;
       }
+
+      return RetryUploadResult.started;
     } finally {
       _retriesInProgress.remove(txid);
     }
