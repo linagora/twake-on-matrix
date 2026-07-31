@@ -8,6 +8,7 @@
     ROOM_ENTRY_SUMMARY,
     checkpointForSelection,
     classifySeries,
+    compatibleBenchmarkRecords,
     hasEnoughFrames,
     hasEnoughWebFrames,
     historyWindow,
@@ -249,8 +250,8 @@
       state.loadId
     )) return false;
     const selectedDates = new Set(entries.map(entry => entry.date));
-    state.historyRecords = loaded;
-    state.records = loaded.filter(record => selectedDates.has(record.date));
+    state.historyRecords = compatibleBenchmarkRecords(loaded);
+    state.records = state.historyRecords.filter(record => selectedDates.has(record.date));
     return true;
   }
 
@@ -822,16 +823,16 @@
       : "Firebase Test Lab · suivi quotidien";
     elements["source-rss"].textContent = web
       ? "médiane · 3 répétitions Chrome"
-      : "médiane · 3 appareils virtuels";
+      : "médiane · 3 runs physiques";
     elements["source-fps"].textContent = web
       ? "indice relatif · 3 répétitions Chrome"
-      : "1 téléphone physique";
+      : "médiane · 3 runs physiques";
     elements["source-jank"].textContent = web
       ? "médiane · 3 répétitions Chrome"
-      : "1 téléphone physique";
+      : "médiane · 3 runs physiques";
     elements["source-transition"].textContent = web
       ? "médiane · 3 répétitions Chrome"
-      : "1 téléphone physique";
+      : "médiane · 3 runs physiques";
     elements["title-rss"].textContent = web ? "Mémoire JavaScript" : "Mémoire utilisée";
     elements["description-rss"].textContent = web
       ? "Mémoire du moteur JavaScript exposée par Chrome ; elle n’est jamais comparée à la RAM Android."
@@ -852,7 +853,7 @@
     elements["filter-checkpoint"].hidden = web;
     elements["footer-source"].textContent = web
       ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
-      : "Mémoire : médiane de 3 runs virtuels · Fluidité : 1 run physique";
+      : "Pixel 6 physique · APK profile · médiane de 3 runs séquentiels";
     elements["workflow-link"].href = web
       ? "https://github.com/linagora/twake-on-matrix/actions/workflows/patrol-web-integration-test.yaml"
       : "https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml";
