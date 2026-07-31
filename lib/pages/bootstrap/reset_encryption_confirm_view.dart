@@ -4,9 +4,11 @@ import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dar
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ResetEncryptionConfirmView extends StatelessWidget {
-  static const Color _resetButtonColor = Color(0xFFFF3347);
+  /// Figma #FF3347 ([LinagoraSysColors.error]).
+  static Color get _resetButtonColor => LinagoraSysColors.material().error;
 
   final VoidCallback? onClose;
   final VoidCallback onReset;
@@ -49,7 +51,7 @@ class ResetEncryptionConfirmView extends StatelessWidget {
         Wrap(
           alignment: WrapAlignment.center,
           spacing: KeyVerificationSasStyle.gapEmojiButtons,
-          runSpacing: 8,
+          runSpacing: LinagoraSpacing.base,
           children: [
             _FilledButton(
               color: _resetButtonColor,

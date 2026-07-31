@@ -147,7 +147,7 @@ class _VerifyDeviceItem extends StatelessWidget {
                 ),
               ),
               if (showDivider)
-                const Divider(
+                Divider(
                   height: 1,
                   thickness: 1,
                   indent: VerifyDeviceViewStyle.dividerIndent,

@@ -8,13 +8,10 @@ import 'package:fluffychat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
+import 'package:linagora_design_flutter/text_field/linagora_text_field.dart';
 import 'package:matrix/matrix.dart';
 
 extension UiaRequestManager on MatrixState {
-  /// Same [ConfirmationDialogBuilder] used by [showConfirmAlertDialog], with
-  /// a password [TextField] as its `additionalWidgetContent` — replaces
-  /// `adaptive_dialog`'s `showTextInputDialog` with the project's own
-  /// dialog design while keeping the exact same input/cancel contract.
   Future<String?> _showPasswordInputDialog(BuildContext context) async {
     final l10n = L10n.of(context)!;
     final controller = TextEditingController();
@@ -25,13 +22,14 @@ extension UiaRequestManager on MatrixState {
         title: l10n.pleaseEnterYourPassword,
         confirmText: l10n.ok,
         cancelText: l10n.cancel,
-        additionalWidgetContent: TextField(
+        additionalWidgetContent: LinagoraTextField(
           controller: controller,
+          label: l10n.password,
+          hintText: '******',
           autofocus: true,
           obscureText: true,
-          minLines: 1,
-          maxLines: 1,
-          decoration: const InputDecoration(hintText: '******'),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (value) => Navigator.of(context).pop(value),
         ),
         onConfirmButtonAction: () => Navigator.of(context).pop(controller.text),
         onCancelButtonAction: () => Navigator.of(context).pop(null),

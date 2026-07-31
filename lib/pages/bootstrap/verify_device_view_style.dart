@@ -1,3 +1,4 @@
+import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -54,23 +55,28 @@ class VerifyDeviceViewStyle {
   static const double settingIconSize = 24;
   static const double settingGap = 8;
   static const double settingTextGap = 4;
+
+  /// Divider inset measured from the Figma spec (node 42229:18112): the
+  /// divider starts 41px from the sheet content edge, i.e. item padding (8)
+  /// + icon (24) + gap (8), aligned with the option title text.
   static const double dividerIndent = 41;
 
-  // Light-mode fallbacks; prefer the theme-derived helpers below wherever
-  // BuildContext is available.
-  static const Color titleColor = Color(0xFF1C1B1F);
-  static const Color supportingColor = Color(0xFF5C6268);
-  static const Color subtitleColor = Color(0xFF99A0A9);
-  static const Color dividerColor = Color(0x296750A4);
-  static const Color buttonColor = Color(0xFF0A84FF);
-  static const Color buttonTextColor = Colors.white;
-  static const Color backgroundColor = Colors.white;
+  static Color get subtitleColor =>
+      LinagoraRefColors.material().tertiary[30] ?? const Color(0xFF99A0A9);
+
+  /// Figma: #6750A4 at 16% opacity ([LinagoraSysColors.surfaceTint]).
+  static Color get dividerColor =>
+      LinagoraSysColors.material().surfaceTint.withAlpha(0x29);
+
+  static Color get buttonColor => LinagoraSysColors.material().primary;
+
+  static Color get buttonTextColor => LinagoraSysColors.material().onPrimary;
 
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
     horizontal: 24,
     vertical: 10,
   );
-  static const double buttonRadius = 100;
+  static const double buttonRadius = KeyVerificationSasStyle.buttonRadius;
   static const double buttonWidth = 180;
 
   static Color backgroundColorOf(BuildContext context) =>

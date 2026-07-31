@@ -69,7 +69,7 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox.square(
+        SizedBox.square(
           dimension: 48,
           child: Icon(
             Icons.key_off_outlined,
@@ -108,6 +108,8 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
           onChanged: (_) {
             if (_errorText != null) setState(() => _errorText = null);
           },
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _submit(),
         ),
         const SizedBox(height: _gapFieldToButton),
         Material(

@@ -24,9 +24,12 @@ class KeyVerificationSasStyle {
   static const double emojiRadius = 13.009;
   static const double emojiLabelFontSize = 11;
 
-  static const Color titleColor = Color(0xFF1C1B1F);
+  static Color get titleColor => LinagoraSysColors.material().onSurface;
+
+  /// Figma #5C6268 — no matching token in the design system yet.
   static const Color supportingColor = Color(0xFF5C6268);
-  static const Color primaryColor = Color(0xFF0A84FF);
+
+  static Color get primaryColor => LinagoraSysColors.material().primary;
 
   // Taller vertical padding than VerifyDeviceView's retry button.
   static const EdgeInsets filledButtonPadding = EdgeInsets.symmetric(

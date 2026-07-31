@@ -21,7 +21,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.4
+      ref: v0.2.5
 
   flutter_matrix_html:
     git:
@@ -296,6 +296,12 @@ msix_config:
   install_certificate: false
 
 dependency_overrides:
+  # flutter_emoji_mart still pins the design system at v0.2.4; force v0.2.5
+  # for the new LinagoraTextField input behaviors (autofocus/onSubmitted).
+  linagora_design_flutter:
+    git:
+      url: https://github.com/linagora/linagora-design-flutter.git
+      ref: v0.2.5
   # Required by riverpod_generator 3.0.0 while flutter_emoji_mart still pins
   # freezed_annotation ^2.4.1.
   freezed_annotation: 3.1.0
