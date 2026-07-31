@@ -1,6 +1,7 @@
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/encryption.dart';
 
 class KeyVerificationEmojiView extends StatelessWidget {
@@ -40,13 +41,13 @@ class KeyVerificationEmojiView extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
+        const SizedBox(height: LinagoraSpacing.base),
         Text(
           L10n.of(context)!.verifyEmojiDescription,
           textAlign: TextAlign.center,
           style: KeyVerificationSasStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceS),
+        const SizedBox(height: LinagoraSpacing.base * 2),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [

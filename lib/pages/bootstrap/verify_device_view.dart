@@ -4,6 +4,7 @@ import 'package:fluffychat/pages/bootstrap/verify_device_view_style.dart';
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class VerifyDeviceView extends StatelessWidget {
   final double mascotWidth;
@@ -41,18 +42,22 @@ class VerifyDeviceView extends StatelessWidget {
             style: VerifyDeviceViewStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.spaceXs),
+        const SizedBox(height: LinagoraSpacing.base),
         Text(
           L10n.of(context)!.verifyThisDeviceDescription,
           textAlign: TextAlign.center,
           style: VerifyDeviceViewStyle.supportingStyle(context),
         ),
-        const SizedBox(height: VerifyDeviceViewStyle.spaceS),
+        const SizedBox(height: LinagoraSpacing.base),
         for (int index = 0; index < options.length; index++)
-          _VerifyDeviceItem(
-            option: options[index],
+          LinagoraSettingItem(
+            title: options[index].title,
+            subtitle: options[index].subtitle,
+            leadingIcon: options[index].icon,
+            onTap: options[index].onTap,
+            loading: options[index].isLoading,
             showDivider: index == 0,
-            disabled: isBusy,
+            enabled: !isBusy,
           ),
         const SizedBox(height: VerifyDeviceViewStyle.gapOptionsToButton),
         _RetryButton(
@@ -60,122 +65,6 @@ class VerifyDeviceView extends StatelessWidget {
           onTap: isBusy ? null : onRetry,
         ),
       ],
-    );
-  }
-}
-
-class _VerifyDeviceItem extends StatelessWidget {
-  final VerifyDeviceOption option;
-  final bool showDivider;
-  final bool disabled;
-
-  const _VerifyDeviceItem({
-    required this.option,
-    required this.showDivider,
-    this.disabled = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: disabled ? null : option.onTap,
-      child: IntrinsicHeight(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: VerifyDeviceViewStyle.settingItemHeight,
-          ),
-          child: Padding(
-            padding: VerifyDeviceViewStyle.settingItemPadding,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  option.icon,
-                  size: VerifyDeviceViewStyle.settingIconSize,
-                  color: VerifyDeviceViewStyle.iconColor(context),
-                ),
-                const SizedBox(width: VerifyDeviceViewStyle.settingGap),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    option.title,
-                                    style:
-                                        VerifyDeviceViewStyle.settingTitleStyle(
-                                          context,
-                                        ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(
-                                    height:
-                                        VerifyDeviceViewStyle.settingTextGap,
-                                  ),
-                                  Text(
-                                    option.subtitle,
-                                    style:
-                                        VerifyDeviceViewStyle.settingSubtitleStyle(
-                                          context,
-                                        ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              width: VerifyDeviceViewStyle.settingGap,
-                            ),
-                            if (option.isLoading)
-                              SizedBox(
-                                width: VerifyDeviceViewStyle.settingIconSize,
-                                height: VerifyDeviceViewStyle.settingIconSize,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: VerifyDeviceViewStyle.iconColor(
-                                    context,
-                                  ),
-                                ),
-                              )
-                            else
-                              Icon(
-                                Icons.chevron_right,
-                                size: VerifyDeviceViewStyle.settingIconSize,
-                                color: VerifyDeviceViewStyle.iconColor(context),
-                              ),
-                          ],
-                        ),
-                      ),
-                      if (showDivider)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: VerifyDeviceViewStyle.spaceS,
-                          ),
-                          child: Divider(
-                            height: 1,
-                            thickness: 1,
-                            endIndent: 0,
-                            color: VerifyDeviceViewStyle.dividerColor,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

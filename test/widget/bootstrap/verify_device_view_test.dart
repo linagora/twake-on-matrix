@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/bootstrap/verify_device_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/encryption.dart';
 
 Widget _wrap(Widget child, {double? width}) {
@@ -83,6 +84,7 @@ void _chooserContentTests() {
     expect(find.text('Use recovery key'), findsOneWidget);
     expect(find.text('Not possible to verify?'), findsOneWidget);
     expect(find.text('Retry automatically'), findsOneWidget);
+    expect(find.byType(LinagoraSettingItem), findsNWidgets(3));
   });
 
   testWidgets('VerifyDeviceScreen renders mobile sheet content', (

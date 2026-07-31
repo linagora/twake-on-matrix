@@ -13,11 +13,7 @@ class KeyVerificationSasStyle {
   static Color spinnerColor(BuildContext context) =>
       LinagoraSysColors.material().outlineVariant;
 
-  static const double spaceXs = LinagoraSpacing.base;
-  static const double spaceS = LinagoraSpacing.base * 2;
-  static const double spaceM = LinagoraSpacing.base * 3;
-
-  static const EdgeInsets headingPadding = EdgeInsets.all(spaceXs);
+  static const EdgeInsets headingPadding = EdgeInsets.all(LinagoraSpacing.base);
 
   static const double emojiFontSize = 32;
 
@@ -30,7 +26,7 @@ class KeyVerificationSasStyle {
 
   // Taller vertical padding than VerifyDeviceView's retry button.
   static const EdgeInsets filledButtonPadding = EdgeInsets.symmetric(
-    horizontal: spaceM,
+    horizontal: LinagoraSpacing.base * 3,
     vertical: 14,
   );
   static const double buttonRadius = 100;

@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dar
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class KeyVerificationWaitingView extends StatelessWidget {
   const KeyVerificationWaitingView({super.key});
@@ -18,7 +19,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
           height: KeyVerificationSasStyle.mascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceS),
+        const SizedBox(height: LinagoraSpacing.base * 2),
         SizedBox(
           width: KeyVerificationSasStyle.spinnerSize,
           height: KeyVerificationSasStyle.spinnerSize,
@@ -27,7 +28,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
             color: KeyVerificationSasStyle.spinnerColor(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
+        const SizedBox(height: LinagoraSpacing.base),
         Padding(
           padding: KeyVerificationSasStyle.headingPadding,
           child: Text(
@@ -36,7 +37,7 @@ class KeyVerificationWaitingView extends StatelessWidget {
             style: KeyVerificationSasStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
+        const SizedBox(height: LinagoraSpacing.base),
         Text(
           L10n.of(context)!.checkYourOtherDeviceDescription,
           textAlign: TextAlign.center,

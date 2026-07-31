@@ -3,6 +3,7 @@ import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dar
 import 'package:fluffychat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class KeyVerificationSuccessView extends StatelessWidget {
   final VoidCallback onStartChatting;
@@ -27,7 +28,7 @@ class KeyVerificationSuccessView extends StatelessWidget {
           height: KeyVerificationSasStyle.verifiedMascotHeight,
           fit: BoxFit.contain,
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceS),
+        const SizedBox(height: LinagoraSpacing.base * 2),
         Padding(
           padding: KeyVerificationSasStyle.headingPadding,
           child: Text(
@@ -36,13 +37,13 @@ class KeyVerificationSuccessView extends StatelessWidget {
             style: KeyVerificationSasStyle.titleStyle(context),
           ),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceXs),
+        const SizedBox(height: LinagoraSpacing.base),
         Text(
           description ?? L10n.of(context)!.deviceVerifiedDescription,
           textAlign: TextAlign.center,
           style: KeyVerificationSasStyle.supportingStyle(context),
         ),
-        const SizedBox(height: KeyVerificationSasStyle.spaceS),
+        const SizedBox(height: LinagoraSpacing.base * 2),
         Material(
           color: KeyVerificationSasStyle.primaryColor,
           borderRadius: BorderRadius.circular(

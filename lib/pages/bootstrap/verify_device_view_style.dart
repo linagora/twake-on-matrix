@@ -17,11 +17,7 @@ class VerifyDeviceViewStyle {
     BoxShadow(color: Color(0x4D000000), offset: Offset(0, 1), blurRadius: 1.5),
   ];
 
-  static const double spaceXs = LinagoraSpacing.base;
-  static const double spaceS = LinagoraSpacing.base * 2;
-  static const double spaceM = LinagoraSpacing.base * 3;
-
-  static const double closeButtonInset = spaceXs;
+  static const double closeButtonInset = LinagoraSpacing.base;
 
   static const double webMascotWidth = 180;
   static const double webMascotHeight = 168;
@@ -39,7 +35,7 @@ class VerifyDeviceViewStyle {
     24,
   );
   static const EdgeInsets dragHandlePadding = EdgeInsets.symmetric(
-    vertical: spaceS,
+    vertical: LinagoraSpacing.base * 2,
   );
   static const double dragHandleWidth = 32;
   static const double dragHandleHeight = 4;
@@ -47,25 +43,13 @@ class VerifyDeviceViewStyle {
   static const double gapMascotToSpinner = 20;
   static const double gapOptionsToButton = 1;
   static const EdgeInsets headingPadding = EdgeInsets.symmetric(
-    horizontal: spaceXs,
+    horizontal: LinagoraSpacing.base,
   );
 
-  static const double settingItemHeight = 92;
-  static const EdgeInsets settingItemPadding = EdgeInsets.only(
-    left: spaceXs,
-    top: spaceS,
-    bottom: spaceS,
-  );
-  static const double settingIconSize = spaceM;
-  static const double settingGap = spaceXs;
-  static const double settingTextGap = spaceXs / 2;
+  static const double settingIconSize = LinagoraSpacing.base * 3;
 
   static Color get subtitleColor =>
       LinagoraRefColors.material().tertiary[30] ?? const Color(0xFF99A0A9);
-
-  /// Figma: #6750A4 at 16% opacity ([LinagoraSysColors.surfaceTint]).
-  static Color get dividerColor =>
-      LinagoraSysColors.material().surfaceTint.withAlpha(0x29);
 
   static Color get buttonColor => LinagoraSysColors.material().primary;
 
@@ -95,16 +79,6 @@ class VerifyDeviceViewStyle {
     context,
   ).textTheme.bodyMedium?.copyWith(color: supportingColorOf(context));
 
-  static TextStyle? settingTitleStyle(BuildContext context) => Theme.of(context)
-      .extension<LinagoraTextThemeExtension>()
-      ?.bodyMedium2
-      .copyWith(color: titleColorOf(context));
-
-  static TextStyle? settingSubtitleStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodyMedium?.copyWith(color: subtitleColor);
-
   static TextStyle? buttonTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.labelLarge?.copyWith(color: buttonTextColor);
-
-  static Color iconColor(BuildContext context) => subtitleColor;
 }
