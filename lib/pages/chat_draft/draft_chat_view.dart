@@ -7,6 +7,7 @@ import 'package:fluffychat/pages/chat/blocked_user_banner.dart';
 import 'package:fluffychat/pages/chat/chat.dart';
 import 'package:fluffychat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:fluffychat/pages/chat/chat_background.dart';
+import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner.dart';
 import 'package:fluffychat/pages/chat/chat_view_body_style.dart';
 import 'package:fluffychat/pages/chat/chat_view_style.dart';
 import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
@@ -118,6 +119,52 @@ class DraftChatView extends StatelessWidget {
                   ),
                 ),
               ),
+              ValueListenableBuilder(
+                valueListenable: controller.isBlockedUserNotifier,
+                builder: (context, isBlockedUser, _) {
+                  if (!isBlockedUser) return const SizedBox.shrink();
+                  return Column(
+                    children: [
+                      TwakeInkWell(
+                        onTap: () async => controller.onTapUnblockUser(
+                          context: context,
+                          client: Matrix.of(context).client,
+                          displayName:
+                              controller.presentationContact.matrixId ?? '',
+                          userID: controller.presentationContact.matrixId ?? '',
+                        ),
+                        child: const BlockedUserBanner(),
+                      ),
+                      Divider(
+                        height: ChatViewBodyStyle.dividerSize,
+                        thickness: ChatViewBodyStyle.dividerSize,
+                        color: Theme.of(context).dividerColor,
+                      ),
+                    ],
+                  );
+                },
+              ),
+              ValueListenableBuilder(
+                valueListenable: getIt
+                    .get<ContactsManager>()
+                    .getContactsNotifier(),
+                builder: (context, state, child) {
+                  if (controller.isInsideContactManager(state)) {
+                    return const SizedBox();
+                  }
+
+                  return child ?? const SizedBox();
+                },
+                child: AddContactBanner(
+                  onTap: () => showAddContactDialog(
+                    context,
+                    displayName: controller.widget.contact.displayName,
+                    matrixId: controller.widget.contact.matrixId,
+                  ),
+                  show: controller.showAddContactBanner,
+                ),
+              ),
+              ChatDeviceVerificationBanner(client: controller.client),
               ValueListenableBuilder(
                 valueListenable: controller.isBlockedUserNotifier,
                 builder: (context, isBlocked, child) {
@@ -269,49 +316,6 @@ class DraftChatView extends StatelessWidget {
                 ),
               );
             },
-          ),
-          ValueListenableBuilder(
-            valueListenable: controller.isBlockedUserNotifier,
-            builder: (context, isBlockedUser, _) {
-              if (!isBlockedUser) return const SizedBox.shrink();
-              return Column(
-                children: [
-                  TwakeInkWell(
-                    onTap: () async => controller.onTapUnblockUser(
-                      context: context,
-                      client: Matrix.of(context).client,
-                      displayName:
-                          controller.presentationContact.matrixId ?? '',
-                      userID: controller.presentationContact.matrixId ?? '',
-                    ),
-                    child: const BlockedUserBanner(),
-                  ),
-                  Divider(
-                    height: ChatViewBodyStyle.dividerSize,
-                    thickness: ChatViewBodyStyle.dividerSize,
-                    color: Theme.of(context).dividerColor,
-                  ),
-                ],
-              );
-            },
-          ),
-          ValueListenableBuilder(
-            valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
-            builder: (context, state, child) {
-              if (controller.isInsideContactManager(state)) {
-                return const SizedBox();
-              }
-
-              return child ?? const SizedBox();
-            },
-            child: AddContactBanner(
-              onTap: () => showAddContactDialog(
-                context,
-                displayName: controller.widget.contact.displayName,
-                matrixId: controller.widget.contact.matrixId,
-              ),
-              show: controller.showAddContactBanner,
-            ),
           ),
         ],
       ),

@@ -962,7 +962,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: acb3bbcf8ea9e6663342b67769197849789a0214
+      resolved-ref: "81f5fab958fdc64267bbbe1611ad3c2fe67df0da"
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1858,11 +1858,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.2"
-      resolved-ref: "993f9300943636307a13834ab27c300a268082c8"
+      ref: "v0.2.4"
+      resolved-ref: "7fc29cdb386fc16af3e600482bf3a62849ad683a"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.1"
+    version: "0.2.4"
   linkfy_text:
     dependency: "direct main"
     description:
@@ -2964,7 +2964,7 @@ packages:
     source: hosted
     version: "0.2.12"
   slugify:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: slugify
       sha256: b272501565cb28050cac2d96b7bf28a2d24c8dae359280361d124f3093d337c3

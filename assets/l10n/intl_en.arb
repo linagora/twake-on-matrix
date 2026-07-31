@@ -3229,5 +3229,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "couldNotLaunchUrl": "Could not launch URL"
+  "couldNotLaunchUrl": "Could not launch URL",
+  "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync",
+  "deviceVerificationWarningOnSettingsScreen": "Some sessions may not receive encryption keys. Encrypted messages may be unavailable until the affected sessions receive keys or are removed."
 }

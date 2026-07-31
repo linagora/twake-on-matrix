@@ -1,0 +1,9 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:fluffychat/domain/usecase/device_settings/get_devices_interactor.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'device_settings_providers.g.dart';
+
+@riverpod
+GetDevicesInteractor getDevicesInteractor(Ref ref) =>
+    getIt.get<GetDevicesInteractor>();
