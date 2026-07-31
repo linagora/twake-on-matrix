@@ -47,7 +47,9 @@ class KeyVerificationSasStyle {
       Theme.of(context).textTheme.labelLarge?.copyWith(color: primaryColor);
 
   static TextStyle? filledButtonTextStyle(BuildContext context) =>
-      Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white);
+      Theme.of(context).textTheme.labelLarge?.copyWith(
+        color: LinagoraSysColors.material().onPrimary,
+      );
 
   static TextStyle recoveryKeyLabelStyle(BuildContext context) =>
       LinagoraTextTheme.material().labelSmall!.copyWith(
