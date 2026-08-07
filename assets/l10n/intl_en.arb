@@ -1464,11 +1464,11 @@
     "placeholders": {}
   },
   "openAppToReadMessages": "Open app to read messages",
-  "newMessage": "New message",
   "@openAppToReadMessages": {
     "type": "text",
     "placeholders": {}
   },
+  "newMessage": "New message",
   "openCamera": "Open camera",
   "@openCamera": {
     "type": "text",
@@ -1769,11 +1769,8 @@
     "placeholders": {}
   },
   "recoveryKey": "Recovery key",
-  "@recoveryKey": {},
   "recoveryKeyWarningMessage": "This secret grants access to all your encrypted messages to whomever uses it. Keep it safe and do not share it.",
-  "@recoveryKeyWarningMessage": {},
   "recoveryKeyCopiedToClipboard": "Recovery key copied to clipboard",
-  "@recoveryKeyCopiedToClipboard": {},
   "recoveryKeyLost": "Recovery key lost?",
   "seenByUser": "Seen by {username}",
   "@seenByUser": {
@@ -2541,17 +2538,11 @@
     }
   },
   "noMessageHereYet": "No message here yet",
-  "@noMessageHereYet": {},
   "sendMessageGuide": "Send a message or tap on the greeting",
-  "@sendMessageGuide": {},
   "youCreatedGroupChat": "Congratulations on\nyour new chat!",
-  "@youCreatedGroupChat": {},
   "chatCanHave": "Chat can have:",
-  "@chatCanHave": {},
   "upTo100000Members": "✅ Up to 100,000 members",
-  "@upTo100000Members": {},
   "persistentChatHistory": "✅ Persistent chat history",
-  "@persistentChatHistory": {},
   "addMember": "Add members",
   "profile": "Profile",
   "@profile": {
@@ -2738,7 +2729,7 @@
   "copyImageFailed": "Copy image failed",
   "fileFormatNotSupported": "File format not supported",
   "noResultsFound": "No results found",
-  "encryptionMessage": "Protect your messages from being read by others. Prevents them from being backed up on our servers. You can't disable this later.",
+  "encryptionMessage": "Messages will be encrypted, and their copies won’t be stored on our servers. Once enabled, this feature can’t be turned off.",
   "encryptionWarning": "You might lose your messages if you access Twake app on the another device.",
   "selectedUsers": "Selected users",
   "clearAllSelected": "Clear all selected",
@@ -2760,9 +2751,7 @@
   },
   "copyImageSuccess": "Image copied to clipboard",
   "youNeedToAcceptTheInvitation": "You need to accept the invitation to start chatting",
-  "@youNeedToAcceptTheInvitation": {},
   "hasInvitedYouToAChat": "Has invited you to a chat",
-  "@hasInvitedYouToAChat": {},
   "declineTheInvitation": "Decline the invitation?",
   "doYouReallyWantToDeclineThisInvitation": "Do you really want to decline this invitation and remove the chat? You won't be able to undo this action.",
   "declineAndRemove": "Decline and remove",
@@ -2802,9 +2791,7 @@
   "showLess": "Show Less",
   "showMore": "Show More",
   "unreadMessages": "Unread messages",
-  "@unreadMessages": {},
   "groupInfo": "Group info",
-  "@groupInfo": {},
   "linkInvite": "Link invite",
   "noDescription": "No description",
   "description": "Description",
@@ -2872,7 +2859,7 @@
       }
     }
   },
-  "explainPermissionToAccessContacts": "Twake Chat does not collect your contacts. The app only sends contact hashes to our servers to understand which of your friends already use the service. Your contacts are not synchronized with our server.",
+  "explainPermissionToAccessContacts": "Twake Chat only checks encrypted hashes of phone numbers to find which of your friends are already using the service. Your contacts are not sent to or synchronized with the server.",
   "explainPermissionToAccessMedias": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Photos and Videos permission. You can also deny access to your media library at any time.",
   "explainPermissionToAccessPhotos": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Photos permission. You can also deny access to your media library at any time.",
   "explainPermissionToAccessVideos": "Twake Chat does not synchronize data between your device and our servers. We only store media that you have sent to the chat room. All media files sent to chat are encrypted and stored securely. Go to Settings > Permissions and activate the Storage: Videos permission. You can also deny access to your media library at any time.",
@@ -3096,7 +3083,7 @@
   "other": "Other",
   "enableRightAndLeftMessageAlignment": "Enable right/left message alignment",
   "holdToRecordAudio": "Hold to record audio.",
-  "explainPermissionToAccessMicrophone": "To send voice messages, allow Twake Chat to access the microphone.",
+  "explainPermissionToAccessMicrophone": "Your microphone is needed send voice messages.",
   "allowMicrophoneAccess": "Allow microphone access",
   "later": "Later",
   "couldNotPlayAudioFile": "Could not play audio file",
@@ -3180,7 +3167,6 @@
   "leaveChatTitle": "Are you sure you want to leave this chat?",
   "dataAndStorage": "Data and storage",
   "phoneStorage": "Phone Storage",
-  "@phoneStorage": {},
   "phoneStorageDescription": "Twake Chat is using {percent} of storage on your phone",
   "@phoneStorageDescription": {
     "placeholders": {
@@ -3190,11 +3176,8 @@
     }
   },
   "medias": "Medias",
-  "@medias": {},
   "videos": "Videos",
-  "@videos": {},
   "stickersAndEmojis": "Stickers and emojis",
-  "@stickersAndEmojis": {},
   "clearCacheSize": "Clear cache {size}",
   "@clearCacheSize": {
     "placeholders": {
@@ -3204,15 +3187,10 @@
     }
   },
   "available": "Available",
-  "@available": {},
   "clearCacheConfirmTitle": "Clear cache?",
-  "@clearCacheConfirmTitle": {},
   "clearCacheConfirmMessage": "This will delete all temporary files stored on your device. This action cannot be undone.",
-  "@clearCacheConfirmMessage": {},
   "cacheClearedSuccessfully": "Cache cleared successfully",
-  "@cacheClearedSuccessfully": {},
   "cacheIsScanning": "Cache is scanning. Please wait...",
-  "@cacheIsScanning": {},
   "selectYourServer": "Select your server",
   "welcomeBack": "Welcome back",
   "matrixIdOrUsername": "Matrix Id or username",
