@@ -108,13 +108,12 @@ class VerifyDeviceScreen extends ConsumerWidget {
         :final initialValue,
         :final errorText,
       ):
+        final mismatchMessage = L10n.of(context)!.recoveryKeyDoesntMatch;
         return RecoveryKeyFormView(
           onVerify: (recoveryKey) async {
             final success = await notifier.verifyRecoveryKey(recoveryKey);
             if (!success) {
-              notifier.setRecoveryKeyError(
-                L10n.of(context)!.recoveryKeyDoesntMatch,
-              );
+              notifier.setRecoveryKeyError(mismatchMessage);
             }
             return success;
           },

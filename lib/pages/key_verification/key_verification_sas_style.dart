@@ -19,9 +19,6 @@ class KeyVerificationSasStyle {
 
   static Color get titleColor => LinagoraSysColors.material().onSurface;
 
-  /// Figma #5C6268 — no matching token in the design system yet.
-  static const Color supportingColor = Color(0xFF5C6268);
-
   static Color primaryColor(BuildContext context) =>
       Theme.of(context).colorScheme.primary;
 
@@ -39,8 +36,10 @@ class KeyVerificationSasStyle {
       .titleLarge
       ?.copyWith(color: Theme.of(context).colorScheme.onSurface);
 
-  static TextStyle? supportingStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodyMedium?.copyWith(color: supportingColor);
+  static TextStyle? supportingStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodyMedium
+      ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant);
 
   static TextStyle? textButtonStyle(BuildContext context) => Theme.of(
     context,

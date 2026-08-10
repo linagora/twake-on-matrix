@@ -118,7 +118,7 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
 
     final recoveryWords = await _getRecoveryWords();
     _createBootstrap();
-    _wipe = recoveryWords != null;
+    _wipe = _wipe || recoveryWords != null;
     _recoveryWords = recoveryWords;
     _handleBootstrapState();
   }
@@ -133,7 +133,17 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     if (bootstrap == null) return;
     switch (bootstrap.state) {
       case BootstrapState.askNewSsss:
-        bootstrap.newSsss().then((_) => _handleNewRecoveryKeyCreated());
+        bootstrap
+            .newSsss()
+            .then((_) => _handleNewRecoveryKeyCreated())
+            .catchError((Object e, StackTrace s) {
+              Logs().w(
+                'TomBootstrapViewModel::_handleBootstrapState() newSsss failed',
+                e,
+                s,
+              );
+              _refresh(TomBootstrapErrorState.new);
+            });
       case BootstrapState.openExistingSsss:
         _unlockBackUp();
       case BootstrapState.error:

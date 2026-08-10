@@ -55,6 +55,9 @@ class TomBootstrapNoRecoveryWordsState extends TomBootstrapUiState {
 
   @override
   bool get isTerminal => popValue != null;
+
+  @override
+  List<Object?> get props => [...super.props, popValue];
 }
 
 class TomBootstrapWipeRecoveryFailedState extends TomBootstrapUiState {

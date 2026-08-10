@@ -74,7 +74,7 @@ class _RecoveryKeyFormViewState extends State<RecoveryKeyFormView> {
           child: Icon(
             Icons.key_off_outlined,
             size: VerifyDeviceViewStyle.settingIconSize,
-            color: VerifyDeviceViewStyle.subtitleColor,
+            color: VerifyDeviceViewStyle.subtitleColorOf(context),
           ),
         ),
         Padding(

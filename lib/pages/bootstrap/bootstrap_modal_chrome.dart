@@ -16,7 +16,7 @@ class BootstrapModalChrome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveUtils().isMobile(context)
-        ? _MobileSheet(content: content)
+        ? _MobileSheet(content: content, onClose: onClose)
         : _WebModal(content: content, onClose: onClose);
   }
 }
@@ -70,8 +70,9 @@ class _WebModal extends StatelessWidget {
 
 class _MobileSheet extends StatelessWidget {
   final Widget content;
+  final VoidCallback? onClose;
 
-  const _MobileSheet({required this.content});
+  const _MobileSheet({required this.content, this.onClose});
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +96,7 @@ class _MobileSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const _DragHandle(),
+                _DragHandle(onClose: onClose),
                 Flexible(
                   child: SingleChildScrollView(
                     padding: VerifyDeviceViewStyle.sheetContentPadding,
@@ -112,24 +113,29 @@ class _MobileSheet extends StatelessWidget {
 }
 
 class _DragHandle extends StatelessWidget {
-  const _DragHandle();
+  final VoidCallback? onClose;
+
+  const _DragHandle({this.onClose});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: VerifyDeviceViewStyle.dragHandlePadding,
-      child: Container(
-        width: VerifyDeviceViewStyle.dragHandleWidth,
-        height: VerifyDeviceViewStyle.dragHandleHeight,
-        decoration: BoxDecoration(
-          color: LinagoraStateLayer(
-            LinagoraSysColors.material().surfaceTintDark,
-          ).opacityLayer3,
-          borderRadius: BorderRadius.circular(
-            VerifyDeviceViewStyle.dragHandleHeight,
-          ),
+    final handle = Container(
+      width: VerifyDeviceViewStyle.dragHandleWidth,
+      height: VerifyDeviceViewStyle.dragHandleHeight,
+      decoration: BoxDecoration(
+        color: LinagoraStateLayer(
+          Theme.of(context).colorScheme.surfaceTint,
+        ).opacityLayer3,
+        borderRadius: BorderRadius.circular(
+          VerifyDeviceViewStyle.dragHandleHeight,
         ),
       ),
+    );
+    return Padding(
+      padding: VerifyDeviceViewStyle.dragHandlePadding,
+      child: onClose == null
+          ? handle
+          : GestureDetector(onTap: onClose, child: handle),
     );
   }
 }

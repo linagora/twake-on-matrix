@@ -52,8 +52,8 @@ class VerifyDeviceViewStyle {
   static const double settingGap = LinagoraSpacing.base;
   static const double settingTextGap = 4;
 
-  static Color get subtitleColor =>
-      LinagoraRefColors.material().tertiary[30] ?? const Color(0xFF99A0A9);
+  static Color subtitleColorOf(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurfaceVariant;
 
   static Color buttonColor(BuildContext context) =>
       Theme.of(context).colorScheme.primary;
@@ -87,8 +87,9 @@ class VerifyDeviceViewStyle {
       ?.bodyMedium2
       .copyWith(color: titleColorOf(context));
 
-  static TextStyle? settingSubtitleStyle(BuildContext context) =>
-      Theme.of(context).textTheme.bodyMedium?.copyWith(color: subtitleColor);
+  static TextStyle? settingSubtitleStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.bodyMedium?.copyWith(color: subtitleColorOf(context));
 
   static TextStyle? buttonTextStyle(BuildContext context) => Theme.of(context)
       .textTheme

@@ -29,6 +29,34 @@ class FakeStartSelfVerificationInteractor
   Stream<Either<Failure, Success>> execute({required Client client}) => states;
 }
 
+/// Stands in for the real [BootstrapViewModel] so `retry()` and
+/// `verifyRecoveryKey()` — which read `bootstrapViewModelProvider.notifier`,
+/// not just its state — can be exercised. `overrideWithValue` replaces the
+/// provider with a value-only element that has no real notifier backing it,
+/// so calling `.notifier` on it throws; `overrideWith` keeps a live notifier.
+class FakeBootstrapViewModel extends BootstrapViewModel {
+  final BootstrapUiState initialState;
+  bool retryCalled = false;
+  String? unlockedWithRecoveryKey;
+  bool unlockResult = true;
+
+  FakeBootstrapViewModel(this.initialState);
+
+  @override
+  BootstrapUiState build(Client client, {required bool wipe}) => initialState;
+
+  @override
+  void retry() {
+    retryCalled = true;
+  }
+
+  @override
+  Future<bool> unlockWithRecoveryKey(String recoveryKey) async {
+    unlockedWithRecoveryKey = recoveryKey;
+    return unlockResult;
+  }
+}
+
 ProviderContainer _container({
   required Client client,
   Stream<Either<Failure, Success>>? startVerificationStates,
@@ -46,6 +74,23 @@ ProviderContainer _container({
         ),
     ],
   );
+}
+
+({ProviderContainer container, FakeBootstrapViewModel bootstrapNotifier})
+_containerWithFakeBootstrapNotifier({
+  required Client client,
+  BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
+}) {
+  final fakeBootstrapNotifier = FakeBootstrapViewModel(bootstrapState);
+  final container = ProviderContainer(
+    overrides: [
+      bootstrapViewModelProvider(
+        client,
+        wipe: false,
+      ).overrideWith(() => fakeBootstrapNotifier),
+    ],
+  );
+  return (container: container, bootstrapNotifier: fakeBootstrapNotifier);
 }
 
 void main() {
@@ -213,6 +258,65 @@ void main() {
     notifier.closeRecoveryKeyForm();
     options[2].onTap?.call();
     expect(container.read(provider), isA<VerifyDeviceResetConfirmState>());
+  });
+
+  test('retry() delegates to the bootstrap notifier and re-arms the retry '
+      'error banner for the next failure', () {
+    final setup = _containerWithFakeBootstrapNotifier(
+      client: client,
+      bootstrapState: const BootstrapVerifyDeviceState(retryFailed: true),
+    );
+    addTearDown(setup.container.dispose);
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = setup.container.read(provider.notifier);
+
+    expect(setup.container.read(provider), isA<VerifyDeviceRetryErrorState>());
+    notifier.dismissRetryError();
+    expect(setup.container.read(provider), isA<VerifyDeviceChooserState>());
+
+    notifier.retry();
+
+    expect(setup.bootstrapNotifier.retryCalled, isTrue);
+    // dismissRetryError() suppressed the banner; retry() must clear that
+    // flag so the *next* bootstrap update showing retryFailed re-surfaces
+    // VerifyDeviceRetryErrorState instead of silently staying dismissed.
+    // prefilledRecoveryKey differs from the initial state so Equatable
+    // treats this as a genuinely new value and notifies ref.listen.
+    setup.bootstrapNotifier.state = const BootstrapVerifyDeviceState(
+      prefilledRecoveryKey: 'retried-key',
+      retryFailed: true,
+    );
+    expect(setup.container.read(provider), isA<VerifyDeviceRetryErrorState>());
+  });
+
+  test('verifyRecoveryKey delegates to the bootstrap notifier and surfaces '
+      'VerifyDeviceSuccessState on success', () async {
+    final setup = _containerWithFakeBootstrapNotifier(client: client);
+    addTearDown(setup.container.dispose);
+    setup.bootstrapNotifier.unlockResult = true;
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = setup.container.read(provider.notifier);
+
+    final success = await notifier.verifyRecoveryKey('a-recovery-key');
+
+    expect(success, isTrue);
+    expect(setup.bootstrapNotifier.unlockedWithRecoveryKey, 'a-recovery-key');
+    expect(setup.container.read(provider), isA<VerifyDeviceSuccessState>());
+  });
+
+  test('verifyRecoveryKey returns false and leaves the caller to surface '
+      'the error when unlocking fails', () async {
+    final setup = _containerWithFakeBootstrapNotifier(client: client);
+    addTearDown(setup.container.dispose);
+    setup.bootstrapNotifier.unlockResult = false;
+    final provider = verifyDeviceViewModelProvider(client, wipe: false);
+    final notifier = setup.container.read(provider.notifier);
+
+    final success = await notifier.verifyRecoveryKey('wrong-key');
+
+    expect(success, isFalse);
+    expect(setup.bootstrapNotifier.unlockedWithRecoveryKey, 'wrong-key');
+    expect(setup.container.read(provider), isA<VerifyDeviceChooserState>());
   });
 
   test('bootstrap retrySucceeded surfaces as VerifyDeviceSuccessState', () {

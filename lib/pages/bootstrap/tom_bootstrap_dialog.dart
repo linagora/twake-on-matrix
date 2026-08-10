@@ -115,6 +115,7 @@ class _TomBootstrapDialogState extends ConsumerState<TomBootstrapDialog> {
         }
       case TomBootstrapNoRecoveryWordsState(:final popValue)
           when popValue != null:
+        Matrix.of(context).showToMBootstrap.value = false;
         Navigator.of(context, rootNavigator: false).pop<bool>(popValue);
       default:
         break;

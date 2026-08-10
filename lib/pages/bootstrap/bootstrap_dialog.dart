@@ -110,7 +110,7 @@ class BootstrapDialog extends ConsumerWidget {
           title: L10n.of(context)!.yourChatBackupHasBeenSetUp,
           description: L10n.of(context)!.chatBackupSetUpDescription,
           onStartChatting: () =>
-              Navigator.of(context, rootNavigator: false).pop<bool>(false),
+              Navigator.of(context, rootNavigator: false).pop<bool>(true),
         ),
       ),
       BootstrapLoadingState() => AlertDialog(
@@ -142,10 +142,12 @@ class _RecoveryKeyDisplay extends StatelessWidget {
   const _RecoveryKeyDisplay({required this.state, required this.notifier});
 
   void _copyToClipboard(BuildContext context) {
-    final box = context.findRenderObject() as RenderBox;
+    final box = context.findRenderObject() as RenderBox?;
     Share.share(
       state.recoveryKey,
-      sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size,
+      sharePositionOrigin: box != null && box.hasSize
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null,
     );
     notifier.confirmRecoveryKeyCopied();
   }

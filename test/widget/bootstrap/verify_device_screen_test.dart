@@ -77,6 +77,146 @@ Widget _buildScreen({
   );
 }
 
+/// Pumps [_buildScreen] at [size] (default: wide/web layout) and resets the
+/// surface size on teardown — the setup every test below needs before its
+/// own assertions and interactions.
+Future<void> _pumpScreen(
+  WidgetTester tester, {
+  required Client client,
+  BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
+  Future<bool> Function()? onResetEncryption,
+  Size size = const Size(1024, 1400),
+}) async {
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.binding.setSurfaceSize(size);
+
+  await tester.pumpWidget(
+    _wrap(
+      _buildScreen(
+        client: client,
+        bootstrapState: bootstrapState,
+        onResetEncryption: onResetEncryption,
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
+Future<void> _rendersChooserByDefault(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(tester, client: client);
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Verify this device'), findsOneWidget);
+  expect(find.text('Use another device'), findsOneWidget);
+  expect(find.text('Use recovery key'), findsOneWidget);
+  expect(find.text('Not possible to verify?'), findsOneWidget);
+  expect(find.text('Retry automatically'), findsOneWidget);
+}
+
+Future<void> _tappingUseRecoveryKeyOpensForm(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(tester, client: client);
+
+  await tester.tap(find.text('Use recovery key'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Enter recovery key'), findsOneWidget);
+  expect(find.text('Verify this device'), findsNothing);
+}
+
+Future<void> _tappingNotPossibleToVerifyOpensResetConfirm(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(tester, client: client);
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Reset end-to-end encryption'), findsOneWidget);
+
+  await tester.tap(find.text('Cancel'));
+  await tester.pump();
+
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _resetEncryptionSuccessShowsResetComplete(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(
+    tester,
+    client: client,
+    onResetEncryption: () async => true,
+  );
+
+  await tester.tap(find.text('Not possible to verify?'));
+  await tester.pump();
+  await tester.tap(find.text('Reset'));
+  await tester.pumpAndSettle();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Reset complete'), findsOneWidget);
+}
+
+Future<void> _retryFailedRendersRetryErrorView(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(
+    tester,
+    client: client,
+    bootstrapState: const BootstrapVerifyDeviceState(retryFailed: true),
+  );
+
+  expect(tester.takeException(), isNull);
+  expect(
+    find.text(
+      "Automatic retry didn't work. Try another way to verify this device.",
+    ),
+    findsOneWidget,
+  );
+
+  await tester.tap(find.text('Close'));
+  await tester.pump();
+
+  expect(find.text('Verify this device'), findsOneWidget);
+}
+
+Future<void> _retrySucceededRendersSuccessView(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(
+    tester,
+    client: client,
+    bootstrapState: const BootstrapVerifyDeviceState(retrySucceeded: true),
+  );
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Device verified'), findsOneWidget);
+}
+
+Future<void> _rendersInsideMobileBottomSheet(
+  WidgetTester tester,
+  Client client,
+) async {
+  await _pumpScreen(tester, client: client, size: const Size(430, 1400));
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Verify this device'), findsOneWidget);
+  // Web-only close button (mobile relies on the sheet's own drag handle).
+  expect(find.byIcon(Icons.close), findsNothing);
+}
+
 /// Exercises `VerifyDeviceScreen._buildContent`'s mapping from
 /// `VerifyDeviceUiState` to the actual rendered widget — the part a pure
 /// notifier unit test can't catch (e.g. a state added to the switch but
@@ -95,145 +235,40 @@ void main() {
     client = await getClient();
   });
 
-  testWidgets('renders the chooser by default', (tester) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
+  testWidgets(
+    'renders the chooser by default',
+    (tester) => _rendersChooserByDefault(tester, client),
+  );
 
-    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Verify this device'), findsOneWidget);
-    expect(find.text('Use another device'), findsOneWidget);
-    expect(find.text('Use recovery key'), findsOneWidget);
-    expect(find.text('Not possible to verify?'), findsOneWidget);
-    expect(find.text('Retry automatically'), findsOneWidget);
-  });
-
-  testWidgets('tapping "Use recovery key" opens the recovery-key form', (
-    tester,
-  ) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
-    await tester.pump();
-
-    await tester.tap(find.text('Use recovery key'));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Enter recovery key'), findsOneWidget);
-    expect(find.text('Verify this device'), findsNothing);
-  });
+  testWidgets(
+    'tapping "Use recovery key" opens the recovery-key form',
+    (tester) => _tappingUseRecoveryKeyOpensForm(tester, client),
+  );
 
   testWidgets(
     'tapping "Not possible to verify?" opens the reset-encryption confirm '
     'view, and Cancel returns to the chooser',
-    (tester) async {
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-      await tester.pumpWidget(_wrap(_buildScreen(client: client)));
-      await tester.pump();
-
-      await tester.tap(find.text('Not possible to verify?'));
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('Reset end-to-end encryption'), findsOneWidget);
-
-      await tester.tap(find.text('Cancel'));
-      await tester.pump();
-
-      expect(find.text('Verify this device'), findsOneWidget);
-    },
+    (tester) => _tappingNotPossibleToVerifyOpensResetConfirm(tester, client),
   );
 
-  testWidgets('reset-encryption success shows the reset-complete view', (
-    tester,
-  ) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
+  testWidgets(
+    'reset-encryption success shows the reset-complete view',
+    (tester) => _resetEncryptionSuccessShowsResetComplete(tester, client),
+  );
 
-    await tester.pumpWidget(
-      _wrap(_buildScreen(client: client, onResetEncryption: () async => true)),
-    );
-    await tester.pump();
+  testWidgets(
+    'bootstrap retry-failed state renders the retry-error view, and '
+    'dismissing it returns to the chooser',
+    (tester) => _retryFailedRendersRetryErrorView(tester, client),
+  );
 
-    await tester.tap(find.text('Not possible to verify?'));
-    await tester.pump();
-    await tester.tap(find.text('Reset'));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'bootstrap retry-succeeded state renders the success view',
+    (tester) => _retrySucceededRendersSuccessView(tester, client),
+  );
 
-    expect(tester.takeException(), isNull);
-    expect(find.text('Reset complete'), findsOneWidget);
-  });
-
-  testWidgets('bootstrap retry-failed state renders the retry-error view, and '
-      'dismissing it returns to the chooser', (tester) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-    await tester.pumpWidget(
-      _wrap(
-        _buildScreen(
-          client: client,
-          bootstrapState: const BootstrapVerifyDeviceState(retryFailed: true),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(
-      find.text(
-        "Automatic retry didn't work. Try another way to verify this "
-        'device.',
-      ),
-      findsOneWidget,
-    );
-
-    await tester.tap(find.text('Close'));
-    await tester.pump();
-
-    expect(find.text('Verify this device'), findsOneWidget);
-  });
-
-  testWidgets('bootstrap retry-succeeded state renders the success view', (
-    tester,
-  ) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(1024, 1400));
-
-    await tester.pumpWidget(
-      _wrap(
-        _buildScreen(
-          client: client,
-          bootstrapState: const BootstrapVerifyDeviceState(
-            retrySucceeded: true,
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Device verified'), findsOneWidget);
-  });
-
-  testWidgets('renders inside a mobile bottom sheet on narrow screens', (
-    tester,
-  ) async {
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    await tester.binding.setSurfaceSize(const Size(430, 1400));
-
-    await tester.pumpWidget(_wrap(_buildScreen(client: client)));
-    await tester.pump();
-
-    expect(tester.takeException(), isNull);
-    expect(find.text('Verify this device'), findsOneWidget);
-    // Web-only close button (mobile relies on the sheet's own drag handle).
-    expect(find.byIcon(Icons.close), findsNothing);
-  });
+  testWidgets(
+    'renders inside a mobile bottom sheet on narrow screens',
+    (tester) => _rendersInsideMobileBottomSheet(tester, client),
+  );
 }

@@ -44,8 +44,10 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     final created = client.encryption!.bootstrap(onUpdate: (_) => _refresh());
     _constructing = false;
     _bootstrap = created;
-    if (isRetry) _prefillCachedRecoveryKey();
+    if (isRetry) _cachedRecoveryKeyPrefill = _prefillCachedRecoveryKey();
   }
+
+  Future<void>? _cachedRecoveryKeyPrefill;
 
   Future<void> _prefillCachedRecoveryKey() async {
     final userId = client.userID;
@@ -83,19 +85,23 @@ class BootstrapViewModel extends _$BootstrapViewModel {
       case BootstrapState.openExistingSsss:
         return _computeOpenExistingSsssState();
       case BootstrapState.error:
-        return _isRetrying
-            ? BootstrapVerifyDeviceState(
-                prefilledRecoveryKey: _cachedRecoveryKey,
-                retryFailed: true,
-              )
-            : const BootstrapLegacyErrorState();
+        if (_isRetrying) {
+          _retryInFlight = false;
+          return BootstrapVerifyDeviceState(
+            prefilledRecoveryKey: _cachedRecoveryKey,
+            retryFailed: true,
+          );
+        }
+        return const BootstrapLegacyErrorState();
       case BootstrapState.done:
-        return _isRetrying
-            ? BootstrapVerifyDeviceState(
-                prefilledRecoveryKey: _cachedRecoveryKey,
-                retrySucceeded: true,
-              )
-            : const BootstrapLegacyDoneState();
+        if (_isRetrying) {
+          _retryInFlight = false;
+          return BootstrapVerifyDeviceState(
+            prefilledRecoveryKey: _cachedRecoveryKey,
+            retrySucceeded: true,
+          );
+        }
+        return const BootstrapLegacyDoneState();
       default:
         _driveAutoStep(bootstrap.state);
         return const BootstrapLoadingState();
@@ -189,6 +195,8 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   }
 
   Future<void> _autoRetryOpenExistingSsss() async {
+    await _cachedRecoveryKeyPrefill;
+    if (!ref.mounted) return;
     final recoveryKey = _cachedRecoveryKey;
     if (recoveryKey == null) {
       _retryOutcome = false;

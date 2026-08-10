@@ -50,7 +50,7 @@ class RecoveryKeyDisplayView extends StatelessWidget {
         Icon(
           Icons.key_outlined,
           size: KeyVerificationSasStyle.mascotHeight * 0.4,
-          color: VerifyDeviceViewStyle.subtitleColor,
+          color: VerifyDeviceViewStyle.subtitleColorOf(context),
         ),
         const SizedBox(height: LinagoraSpacing.base * 2),
         Padding(
@@ -68,26 +68,24 @@ class RecoveryKeyDisplayView extends StatelessWidget {
           style: VerifyDeviceViewStyle.supportingStyle(context),
         ),
         const SizedBox(height: LinagoraSpacing.base * 2),
-        TextField(
-          minLines: 2,
-          maxLines: 4,
-          readOnly: true,
-          textAlign: TextAlign.center,
-          style: VerifyDeviceViewStyle.supportingStyle(
-            context,
-          )?.copyWith(color: Theme.of(context).colorScheme.onSurface),
-          contextMenuBuilder: mobileTwakeContextMenuBuilder,
-          controller: TextEditingController(text: recoveryKey),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: LinagoraStateLayer(
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: LinagoraStateLayer(
               Theme.of(context).colorScheme.surfaceTint,
             ).opacityLayer1,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(16),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SelectableText(
+            recoveryKey,
+            minLines: 2,
+            maxLines: 4,
+            textAlign: TextAlign.center,
+            style: VerifyDeviceViewStyle.supportingStyle(
+              context,
+            )?.copyWith(color: Theme.of(context).colorScheme.onSurface),
+            contextMenuBuilder: mobileTwakeContextMenuBuilder,
           ),
         ),
         const SizedBox(height: VerifyDeviceViewStyle.gapHeadingToOptions),

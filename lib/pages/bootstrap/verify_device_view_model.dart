@@ -26,11 +26,17 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
       ref.read(bootstrapViewModelProvider(client, wipe: wipe).notifier);
 
   BootstrapUiState get _bootstrapState =>
-      ref.watch(bootstrapViewModelProvider(client, wipe: wipe));
+      ref.read(bootstrapViewModelProvider(client, wipe: wipe));
 
   @override
   VerifyDeviceUiState build(Client client, {required bool wipe}) {
     ref.onDispose(_cancelPendingRequest);
+    // Keeps ref.watch confined to build (Riverpod 3 requirement) while still
+    // reacting to BootstrapViewModel updates — _bootstrapState below reads
+    // the current value with ref.read from callback contexts instead.
+    ref.listen(bootstrapViewModelProvider(client, wipe: wipe), (_, _) {
+      _refresh();
+    });
     return _computeState();
   }
 
@@ -110,6 +116,8 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
           _attachRequest(success.request);
         }
       });
+    } catch (error, stackTrace) {
+      Logs().e('startVerification failed', error, stackTrace);
     } finally {
       _isStartingVerification = false;
       _refresh();
@@ -174,14 +182,20 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
     if (_isResetting) return;
     _isResetting = true;
     _refresh();
-    final success = await performReset();
-    _isResetting = false;
-    if (success) {
-      _resetComplete = true;
-    } else {
+    try {
+      final success = await performReset();
+      if (success) {
+        _resetComplete = true;
+      } else {
+        _showResetConfirm = false;
+      }
+    } catch (_) {
       _showResetConfirm = false;
+      rethrow;
+    } finally {
+      _isResetting = false;
+      _refresh();
     }
-    _refresh();
   }
 
   void retry() {
