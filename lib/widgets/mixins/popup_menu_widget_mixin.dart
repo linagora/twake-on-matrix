@@ -1,6 +1,6 @@
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

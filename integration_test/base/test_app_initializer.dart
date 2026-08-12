@@ -1,7 +1,7 @@
 /// Conditional boot for integration tests.
 ///
 /// Mobile (`dart:io`) launches the real app entry point
-/// (`package:fluffychat/main.dart`). Web swaps in [web_test_main], which
+/// (`package:twake_chat/main.dart`). Web swaps in [web_test_main], which
 /// skips native-only init (vodozemac WASM, MediaKit, Cozy) that hangs in
 /// headless Chrome and pre-seeds a dead homeserver so `AutoHomeserverPicker`
 /// fails fast and renders instead of redirecting to SSO (which would destroy

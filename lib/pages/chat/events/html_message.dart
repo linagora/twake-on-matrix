@@ -1,22 +1,22 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/domain/model/extensions/string_extension.dart';
-import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
-import 'package:fluffychat/presentation/mixins/linkify_mixin.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/native_link_span.dart';
-import 'package:fluffychat/widgets/mentioned_user.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/setting_keys.dart';
+import 'package:twake_chat/domain/model/extensions/string_extension.dart';
+import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
+import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/native_link_span.dart';
+import 'package:twake_chat/widgets/mentioned_user.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_matrix_html/flutter_html.dart';
 import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 import 'package:linkfy_text/linkfy_text.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
+import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 class HtmlMessage extends StatelessWidget with LinkifyMixin {
   final String html;

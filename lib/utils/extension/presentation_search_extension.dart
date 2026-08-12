@@ -1,7 +1,7 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 
 const _searchOptions = SearchOptions(diacriticSensitive: false);
 

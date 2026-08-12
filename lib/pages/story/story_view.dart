@@ -1,22 +1,22 @@
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_link_text/link_text.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/story/story_page.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/story/story_page.dart';
+import 'package:twake_chat/utils/date_time_extension.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_color.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import '../../config/themes.dart';
 
 class StoryView extends StatelessWidget {

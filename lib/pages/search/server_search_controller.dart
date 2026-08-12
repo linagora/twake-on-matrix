@@ -1,21 +1,21 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/search/server_side_search_categories.dart';
-import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
-import 'package:fluffychat/domain/usecase/search/server_search_interactor.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_state.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/search/server_side_search_categories.dart';
+import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
+import 'package:twake_chat/domain/usecase/search/server_search_interactor.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_state.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_empty_search.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/result_extension.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
+import 'package:twake_chat/domain/app_state/search/server_search_state.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchController with SearchDebouncerMixin {

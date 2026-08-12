@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/app_state/room/create_support_chat_state.dart';
-import 'package:fluffychat/domain/usecase/room/create_support_chat_interactor.dart';
-import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
+import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
+import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
+import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';

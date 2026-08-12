@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

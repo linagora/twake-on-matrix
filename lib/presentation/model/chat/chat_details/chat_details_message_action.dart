@@ -1,6 +1,6 @@
-import 'package:fluffychat/presentation/model/chat/chat_details/chat_details_group_action.dart';
+import 'package:twake_chat/presentation/model/chat/chat_details/chat_details_group_action.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ChatDetailsMessageAction implements ChatDetailsGroupAction {
   ChatDetailsMessageAction({required this.onMessage});

@@ -1,8 +1,8 @@
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/int_extension.dart';
-import 'package:fluffychat/widgets/file_widget/base_file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/int_extension.dart';
+import 'package:twake_chat/widgets/file_widget/base_file_tile_widget.dart';
+import 'package:twake_chat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:flutter/material.dart';
 
 class FileTileWidget extends BaseFileTileWidget {

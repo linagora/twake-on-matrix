@@ -1,15 +1,15 @@
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/chat_encryption_settings/chat_encryption_settings_view.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import '../key_verification/key_verification_dialog.dart';
 
 class ChatEncryptionSettings extends StatefulWidget {

@@ -1,16 +1,16 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/data/datasource_impl/federation_identity_lookup_datasource_impl.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/data/network/federation_identity_endpoint.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/data/network/federation_identity_lookup_api.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/data/repository_impl/federation_identity_lookup_repository_impl.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/data/datasource_impl/federation_identity_lookup_datasource_impl.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/data/network/federation_identity_endpoint.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/data/network/federation_identity_lookup_api.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/data/repository_impl/federation_identity_lookup_repository_impl.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_response.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_register_response.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 import 'package:flutter/foundation.dart';
 
 class IdentityLookupManager {

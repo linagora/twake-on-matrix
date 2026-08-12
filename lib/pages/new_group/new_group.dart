@@ -1,11 +1,11 @@
-import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/new_group/contacts_selection.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/config/first_column_inner_routes.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 class NewGroup extends StatefulWidget {
   const NewGroup({super.key});

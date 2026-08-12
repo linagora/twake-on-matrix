@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/user_info/user_info.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility_request.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
 
 abstract class UserInfoDatasource {
   Future<UserInfo> getUserInfo(String userId);

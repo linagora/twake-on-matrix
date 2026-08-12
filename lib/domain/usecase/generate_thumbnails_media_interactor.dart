@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
-import 'package:fluffychat/domain/repository/server_config_repository.dart';
-import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/send_file_dialog/generate_thumbnails_media_state.dart';
+import 'package:twake_chat/domain/repository/server_config_repository.dart';
+import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnConvertReadStreamToBytesDone =

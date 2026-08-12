@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/datasource/contact/contacts_provider.dart';
-import 'package:fluffychat/data/datasource/contact/sim_country/sim_country_provider.dart';
-import 'package:fluffychat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:twake_chat/data/datasource/contact/contacts_provider.dart';
+import 'package:twake_chat/data/datasource/contact/sim_country/sim_country_provider.dart';
+import 'package:twake_chat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as flutter_contact;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';

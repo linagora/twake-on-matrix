@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 
 abstract class RecoveryWordsDataSource {
   Future<RecoveryWords> getRecoveryWords();

@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/twake_components/twake_loading/status_loading_widget.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/status_loading_widget.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 

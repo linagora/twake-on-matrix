@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/initial.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/search/recent_chat_model.dart';
 
 class SearchInitial extends Initial {
   @override

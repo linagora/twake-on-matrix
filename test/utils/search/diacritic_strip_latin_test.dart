@@ -1,6 +1,6 @@
 // Tests diacritic stripping with Latin script: one combining mark category per test (acute, grave, umlaut, etc.).
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _engine = SearchEngine();

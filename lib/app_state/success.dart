@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/app_state/failure.dart';
+import 'package:twake_chat/app_state/failure.dart';
 
 abstract class Success extends Equatable {
   const Success();

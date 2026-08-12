@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/media_viewer_web_overlay.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/media_viewer_web_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';

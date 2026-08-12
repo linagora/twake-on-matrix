@@ -1,12 +1,12 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ChatQrCode extends StatefulWidget {
   const ChatQrCode({super.key});

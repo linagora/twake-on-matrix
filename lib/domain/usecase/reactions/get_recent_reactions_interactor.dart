@@ -1,5 +1,5 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/reactions/reactions_repository.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/reactions/reactions_repository.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:matrix/matrix.dart';
 

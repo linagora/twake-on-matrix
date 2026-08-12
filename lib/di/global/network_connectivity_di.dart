@@ -1,6 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:fluffychat/di/base_di.dart';
-import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:twake_chat/di/base_di.dart';
+import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:get_it/get_it.dart';
 
 class NetworkConnectivityDI extends BaseDI {

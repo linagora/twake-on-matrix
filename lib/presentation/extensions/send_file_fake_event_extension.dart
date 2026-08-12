@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension SendFileFakeEventExtension on Room {

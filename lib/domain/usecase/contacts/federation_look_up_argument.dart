@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/usecase/contacts/twake_look_up_argument.dart';
+import 'package:twake_chat/domain/usecase/contacts/twake_look_up_argument.dart';
 
 class FederationLookUpArgument extends TwakeLookUpArgument {
   final List<String> federationUrls;

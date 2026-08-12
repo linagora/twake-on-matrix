@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
-import 'package:fluffychat/domain/app_state/invitation/get_invitation_status_state.dart';
-import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
-import 'package:fluffychat/domain/usecase/invitation/get_invitation_status_interactor.dart';
+import 'package:twake_chat/data/model/invitation/invitation_status_response.dart';
+import 'package:twake_chat/domain/app_state/invitation/get_invitation_status_state.dart';
+import 'package:twake_chat/domain/repository/invitation/invitation_repository.dart';
+import 'package:twake_chat/domain/usecase/invitation/get_invitation_status_interactor.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

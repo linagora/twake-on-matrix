@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/settings/update_profile_failure.dart';
-import 'package:fluffychat/domain/app_state/settings/update_profile_loading.dart';
-import 'package:fluffychat/domain/app_state/settings/update_profile_success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/settings/update_profile_failure.dart';
+import 'package:twake_chat/domain/app_state/settings/update_profile_loading.dart';
+import 'package:twake_chat/domain/app_state/settings/update_profile_success.dart';
 import 'package:matrix/matrix.dart';
 
 class UpdateProfileInteractor {

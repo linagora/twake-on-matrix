@@ -1,16 +1,16 @@
 import 'dart:math';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/personal_qr/personal_qr.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/twake_components/twake_qr_code_view.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/personal_qr/personal_qr.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_components/twake_qr_code_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';

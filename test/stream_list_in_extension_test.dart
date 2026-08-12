@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:fluffychat/utils/stream_list_int_extension.dart';
+import 'package:twake_chat/utils/stream_list_int_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

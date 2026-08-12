@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat/event_info_dialog.dart';
+import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

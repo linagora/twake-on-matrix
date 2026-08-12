@@ -1,18 +1,18 @@
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_header_style.dart';
-import 'package:fluffychat/utils/user_extension.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
-import 'package:fluffychat/widgets/search/empty_search_widget.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_search_state.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/assign_roles_member_picker_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
+import 'package:twake_chat/utils/user_extension.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:twake_chat/widgets/search/empty_search_widget.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class AssignRolesMemberPickerView extends StatelessWidget {

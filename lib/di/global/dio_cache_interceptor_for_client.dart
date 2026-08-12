@@ -1,10 +1,10 @@
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
+import 'package:twake_chat/data/network/homeserver_endpoint.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 

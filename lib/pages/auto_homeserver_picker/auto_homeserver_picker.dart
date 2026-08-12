@@ -1,17 +1,17 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/presentation/mixins/init_config_mixin.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/exception/homeserver_exception.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/exception/homeserver_exception.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class AutoHomeserverPicker extends StatefulWidget {
   final bool? loggedOut;

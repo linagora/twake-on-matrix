@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/pages/twake_welcome/twake_welcome_view.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/pages/twake_welcome/twake_welcome_view.dart';
+import 'package:twake_chat/utils/client_manager.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 enum TwakeWelcomeType { firstAccount, otherAccounts }

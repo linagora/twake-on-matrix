@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
-import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
-import 'package:fluffychat/domain/app_state/invitation/generate_invitation_link_state.dart';
-import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation_state.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation_view_model.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_invitation_page.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/data/model/invitation/invitation_status_response.dart';
+import 'package:twake_chat/data/model/invitation/send_invitation_response.dart';
+import 'package:twake_chat/domain/app_state/invitation/generate_invitation_link_state.dart';
+import 'package:twake_chat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_invitation_state.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_invitation_view_model.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_invitation_page.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 

@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/sending_image_info_widget.dart';
+import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

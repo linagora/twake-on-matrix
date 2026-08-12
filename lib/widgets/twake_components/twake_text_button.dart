@@ -1,5 +1,5 @@
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/widgets/twake_components/twake_text_button_style.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/twake_components/twake_text_button_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

@@ -1,14 +1,14 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:fluffychat/presentation/model/chat_list/chat_selection_actions.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mixins/on_account_data_listen_mixin.dart';
-import 'package:fluffychat/widgets/mixins/show_dialog_mixin.dart';
-import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
+import 'package:twake_chat/widgets/mixins/show_dialog_mixin.dart';
+import 'package:twake_chat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 

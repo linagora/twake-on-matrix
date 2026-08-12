@@ -1,6 +1,6 @@
-import 'package:fluffychat/utils/power_level_manager.dart';
+import 'package:twake_chat/utils/power_level_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
 import 'package:matrix/matrix.dart';
 
 void main() {

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/model/contact/contact_type.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
 import 'package:collection/collection.dart';
 
 class PresentationContact extends Equatable {

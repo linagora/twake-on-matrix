@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_app_bar.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_app_bar.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;

@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';

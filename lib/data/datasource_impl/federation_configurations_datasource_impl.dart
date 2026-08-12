@@ -1,10 +1,10 @@
-import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
-import 'package:fluffychat/data/hive/dto/federation_configurations_hive_obj.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/exception/federation_configuration_not_found.dart';
-import 'package:fluffychat/utils/copy_map.dart';
+import 'package:twake_chat/data/datasource/federation_configurations_datasource.dart';
+import 'package:twake_chat/data/hive/dto/federation_configurations_hive_obj.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
+import 'package:twake_chat/utils/copy_map.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveFederationConfigurationsDatasourceImpl

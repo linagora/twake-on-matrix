@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/twake_components/twake_loading/flashing_circle_widget.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/flashing_circle_widget.dart';
 import 'package:flutter/material.dart';
 
 class StatusLoading extends StatelessWidget {

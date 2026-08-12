@@ -1,4 +1,4 @@
-import 'package:fluffychat/main.dart' as app;
+import 'package:twake_chat/main.dart' as app;
 
 /// Mobile/desktop boot — the real application entry point, unchanged from
 /// the pre-migration behaviour.

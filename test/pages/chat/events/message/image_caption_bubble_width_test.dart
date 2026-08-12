@@ -1,14 +1,14 @@
 // ignore_for_file: implementation_imports
 
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

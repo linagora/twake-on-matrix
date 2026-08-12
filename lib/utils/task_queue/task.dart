@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/utils/task_queue/task_state.dart';
+import 'package:twake_chat/utils/task_queue/task_state.dart';
 
 class Task with EquatableMixin {
   final String? id;

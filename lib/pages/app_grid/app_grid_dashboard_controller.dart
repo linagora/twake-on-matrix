@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/app_grid/get_app_grid_configuration_state.dart';
-import 'package:fluffychat/domain/model/app_grid/linagora_applications.dart';
-import 'package:fluffychat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_view.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/app_grid/get_app_grid_configuration_state.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
+import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/presentation/state/success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/presentation/state/success.dart';
 
 class GettingUserInfoVisibility extends LoadingState {}
 

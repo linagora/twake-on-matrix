@@ -1,6 +1,6 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/reactions/reactions_repository.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/reactions/reactions_repository.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class StoreRecentReactionsInteractor {

@@ -1,4 +1,4 @@
-import 'package:fluffychat/app_state/failure.dart';
+import 'package:twake_chat/app_state/failure.dart';
 import 'package:matrix/matrix.dart';
 
 class UpdateGroupChatFailure extends Failure {

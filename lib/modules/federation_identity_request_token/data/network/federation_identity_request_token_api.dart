@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/data/network/federation_identity_request_token_endpoint.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/network/federation_identity_request_token_endpoint.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 
 class FederationIdentityRequestTokenApi {
   final DioClient client;

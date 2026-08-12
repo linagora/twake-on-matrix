@@ -1,10 +1,10 @@
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
-import 'package:fluffychat/utils/localized_camera_picker_text_delegate.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/utils/permission_service.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/presentation/enum/chat/audio_type_enum.dart';
+import 'package:twake_chat/utils/localized_camera_picker_text_delegate.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/utils/permission_service.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';

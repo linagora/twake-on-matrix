@@ -1,17 +1,17 @@
-import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
-import 'package:fluffychat/pages/search/recent_contacts_banner_widget.dart';
-import 'package:fluffychat/pages/search/recent_item_widget.dart';
-import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/pages/search/search_external_contact.dart';
-import 'package:fluffychat/pages/search/search_text_field.dart';
-import 'package:fluffychat/pages/search/search_view_style.dart';
-import 'package:fluffychat/pages/search/server_search_view.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
+import 'package:twake_chat/domain/app_state/search/pre_search_state.dart';
+import 'package:twake_chat/pages/search/recent_contacts_banner_widget.dart';
+import 'package:twake_chat/pages/search/recent_item_widget.dart';
+import 'package:twake_chat/pages/search/search.dart';
+import 'package:twake_chat/pages/search/search_external_contact.dart';
+import 'package:twake_chat/pages/search/search_text_field.dart';
+import 'package:twake_chat/pages/search/search_view_style.dart';
+import 'package:twake_chat/pages/search/server_search_view.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_empty_search.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SearchView extends StatelessWidget {

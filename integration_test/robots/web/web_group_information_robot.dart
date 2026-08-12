@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

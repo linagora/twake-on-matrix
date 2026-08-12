@@ -1,17 +1,17 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/model/media/download_file_response.dart';
-import 'package:fluffychat/data/model/media/upload_file_json.dart';
-import 'package:fluffychat/data/model/media/url_preview_response.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
-import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/data/network/media/cancel_exception.dart';
-import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/data/model/media/download_file_response.dart';
+import 'package:twake_chat/data/model/media/upload_file_json.dart';
+import 'package:twake_chat/data/model/media/url_preview_response.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
+import 'package:twake_chat/data/network/homeserver_endpoint.dart';
+import 'package:twake_chat/data/network/media/cancel_exception.dart';
+import 'package:twake_chat/data/network/media/file_not_exist_exception.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:matrix/matrix.dart';
 
 class MediaAPI {

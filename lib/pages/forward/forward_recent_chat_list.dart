@@ -1,11 +1,11 @@
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
-import 'package:fluffychat/pages/forward/recent_chat_list_style.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
+import 'package:twake_chat/pages/forward/recent_chat_list_style.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ForwardRecentChatList extends StatelessWidget {
   const ForwardRecentChatList({

@@ -1,16 +1,16 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/room/invite_user_state.dart';
-import 'package:fluffychat/domain/usecase/room/unban_and_invite_users_interactor.dart';
-import 'package:fluffychat/pages/new_group/contacts_selection.dart';
-import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/presentation/extensions/invite_user_exception_extension.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
+import 'package:twake_chat/domain/usecase/room/unban_and_invite_users_interactor.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection_view.dart';
+import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
 class InvitationSelection extends StatefulWidget {

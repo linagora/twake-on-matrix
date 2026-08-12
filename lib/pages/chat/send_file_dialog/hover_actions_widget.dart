@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
 class SendFileDialogActionsWidget extends StatelessWidget {

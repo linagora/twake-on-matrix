@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
 
 class VideoFileInfo extends FileInfo {
   final Duration? duration;

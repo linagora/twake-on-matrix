@@ -1,4 +1,4 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 /// This is a temporary helper class until there is a proper solution to this with the new system

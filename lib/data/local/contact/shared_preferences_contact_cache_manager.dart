@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/data/local/contact/enum/chunk_federation_contact_error_enum.dart';
-import 'package:fluffychat/data/local/contact/enum/contacts_hive_error_enum.dart';
-import 'package:fluffychat/data/local/contact/enum/contacts_vault_error_enum.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:twake_chat/data/local/contact/enum/chunk_federation_contact_error_enum.dart';
+import 'package:twake_chat/data/local/contact/enum/contacts_hive_error_enum.dart';
+import 'package:twake_chat/data/local/contact/enum/contacts_vault_error_enum.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 class SharedPreferencesContactCacheManager {
   static SharedPreferencesContactCacheManager instance =

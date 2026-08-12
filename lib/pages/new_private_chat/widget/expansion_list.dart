@@ -1,21 +1,21 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
-import 'package:fluffychat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
-import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
-import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_empty.dart';
-import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_failure.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/loading_contact_widget.dart';
+import 'package:twake_chat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
+import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
+import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_empty.dart';
+import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_failure.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ExpansionList extends StatelessWidget {

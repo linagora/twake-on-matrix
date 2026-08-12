@@ -1,22 +1,22 @@
-import 'package:fluffychat/pages/key_verification/key_verification_emoji_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_error_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_styles.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_success_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_waiting_view.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_styles.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_success_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_waiting_view.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
   Future<void> show(BuildContext context) => showAdaptiveBottomSheet(

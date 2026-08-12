@@ -1,5 +1,5 @@
-import 'package:fluffychat/data/model/addressbook/address_book.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:twake_chat/data/model/addressbook/address_book.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
 
 class ContactFixtures {
   static Contact contact1 = Contact(

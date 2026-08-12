@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
-import 'package:fluffychat/migrate_steps/migrate_steps.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
+import 'package:twake_chat/migrate_steps/migrate_steps.dart';
 import 'package:matrix/matrix.dart';
 
 class MigrateV6ToV7 extends MigrateSteps {

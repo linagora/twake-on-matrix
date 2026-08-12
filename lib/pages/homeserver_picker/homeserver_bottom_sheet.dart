@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';

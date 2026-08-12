@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/capabilities/get_server_capabilities_state.dart';
-import 'package:fluffychat/domain/repository/capabilities/server_capabilities_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/capabilities/get_server_capabilities_state.dart';
+import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class GetServerCapabilitiesInteractor {

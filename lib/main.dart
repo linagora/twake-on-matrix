@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/logging/init_matrix_logger.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/sentry_init.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/setting_keys.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/client_manager.dart';
+import 'package:twake_chat/utils/legacy_settings_migration.dart';
+import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
@@ -56,6 +57,8 @@ Future<void> initializeApp() async {
   }
 
   GetItInitializer().setUp();
+
+  await migrateLegacySettingKeys();
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();

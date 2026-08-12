@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_component.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_component.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

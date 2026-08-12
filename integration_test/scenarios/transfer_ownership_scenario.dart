@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
+import 'package:twake_chat/presentation/enum/profile_info/profile_info_body_enum.dart';
 
 import '../base/base_test_scenario.dart';
 

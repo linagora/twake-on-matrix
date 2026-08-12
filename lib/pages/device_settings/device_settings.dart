@@ -1,21 +1,21 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/device_settings/device_settings_state.dart';
-import 'package:fluffychat/pages/device_settings/device_settings_view_model.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_dialog.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
+import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
+import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'user_device_list_item.dart';

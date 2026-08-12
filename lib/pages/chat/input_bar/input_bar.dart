@@ -2,23 +2,23 @@
 // TODO: When changing from RawKeyboardListener to KeyboardListener, the keyboard up and down not working anymore. We will dive deeper into this issue later.
 
 import 'package:emojis/emoji.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/pages/chat/command_hints.dart';
-import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
-import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar_shortcut.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
-import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/pages/chat/command_hints.dart';
+import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_list.dart';
+import 'package:twake_chat/pages/chat/input_bar/input_bar_shortcut.dart';
+import 'package:twake_chat/pages/chat/input_bar/input_bar_style.dart';
+import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' as service;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

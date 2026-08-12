@@ -1,9 +1,9 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

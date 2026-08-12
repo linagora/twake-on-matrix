@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/datasource/federation_configurations_datasource.dart';
-import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
+import 'package:twake_chat/data/datasource/federation_configurations_datasource.dart';
+import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 
 class FederationConfigurationsRepositoryImpl
     implements FederationConfigurationsRepository {

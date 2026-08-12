@@ -1,14 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/exceptions/federation_identity_lookup_exceptions.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/repository/federation_identity_lookup_repository.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/exceptions/federation_identity_lookup_exceptions.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_arguments.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_lookup_mxid_request.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/repository/federation_identity_lookup_repository.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/state/federation_identity_lookup_state.dart';
 
 class FederationIdentityLookupInteractor {
   final FederationIdentityLookupRepository federationIdentityLookupRepository;

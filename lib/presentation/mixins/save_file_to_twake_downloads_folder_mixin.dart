@@ -2,23 +2,23 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/dialog/downloading_file_dialog.dart';
-import 'package:fluffychat/utils/exception/save_to_downloads_exception.dart';
-import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/utils/permission_service.dart';
-import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/dialog/downloading_file_dialog.dart';
+import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
+import 'package:twake_chat/utils/exception/storage_permission_exception.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_manager.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/utils/permission_service.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 mixin SaveFileToTwakeAndroidDownloadsFolderMixin {

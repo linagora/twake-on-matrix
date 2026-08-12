@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
-import 'package:fluffychat/data/network/interceptor/download_file_interceptor.dart';
+import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
+import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

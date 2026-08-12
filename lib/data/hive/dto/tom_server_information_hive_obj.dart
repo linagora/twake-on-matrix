@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/tom_server_information.dart';
+import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'tom_server_information_hive_obj.g.dart';

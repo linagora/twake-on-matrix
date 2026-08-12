@@ -1,13 +1,13 @@
-import 'package:fluffychat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/layouts/max_width_body.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 class Settings3PidView extends StatelessWidget {
   final Settings3PidController controller;

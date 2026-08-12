@@ -1,5 +1,5 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 
 class GetRecoveryWordsSuccess extends Success {
   final RecoveryWords words;

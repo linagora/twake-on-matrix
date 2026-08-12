@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
+import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

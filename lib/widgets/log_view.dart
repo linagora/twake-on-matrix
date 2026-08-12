@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 import 'package:matrix/matrix.dart';
 

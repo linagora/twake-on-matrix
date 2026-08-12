@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/app_grid/linagora_app.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_app.dart';
 
 extension LinagoraAppExtension on LinagoraApp {
   String getDisplayAppName() {

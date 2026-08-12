@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/common_settings_information.dart';
+import 'package:twake_chat/domain/model/common_settings_information.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'app_twake_information.g.dart';

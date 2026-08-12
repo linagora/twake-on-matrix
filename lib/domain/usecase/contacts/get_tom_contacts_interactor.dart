@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/model/extensions/contact/address_book_extension.dart';
-import 'package:fluffychat/domain/repository/contact/address_book_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/domain/model/extensions/contact/address_book_extension.dart';
+import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 
 class GetTomContactsInteractor {
   final AddressBookRepository addressBookRepository = getIt

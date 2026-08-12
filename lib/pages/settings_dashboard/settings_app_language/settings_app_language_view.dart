@@ -1,13 +1,13 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
-import 'package:fluffychat/presentation/extensions/localizations/locale_extension.dart';
-import 'package:fluffychat/utils/extension/string_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
+import 'package:twake_chat/presentation/extensions/localizations/locale_extension.dart';
+import 'package:twake_chat/utils/extension/string_extension.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
+import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'federation_server_information_hive_obj.g.dart';

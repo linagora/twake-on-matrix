@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/search/recent_contacts_banner_widget_style.dart';
-import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/utils/display_name_widget.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/search/recent_contacts_banner_widget_style.dart';
+import 'package:twake_chat/pages/search/search.dart';
+import 'package:twake_chat/utils/display_name_widget.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class PreSearchRecentContactsContainer extends StatelessWidget {
   final SearchController searchController;

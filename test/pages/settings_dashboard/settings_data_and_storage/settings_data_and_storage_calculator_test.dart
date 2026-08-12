@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_calculator.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_constants.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_calculator.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage_constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

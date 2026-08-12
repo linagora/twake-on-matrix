@@ -1,9 +1,9 @@
-import 'package:fluffychat/data/model/addressbook/address_book_request.dart';
-import 'package:fluffychat/data/model/addressbook/address_book_response.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/tom_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
+import 'package:twake_chat/data/model/addressbook/address_book_request.dart';
+import 'package:twake_chat/data/model/addressbook/address_book_response.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/tom_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 
 class AddressBookApi {
   final DioClient _client = getIt.get<DioClient>(

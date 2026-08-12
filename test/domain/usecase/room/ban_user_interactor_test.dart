@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/default_power_level_member.dart';
-import 'package:fluffychat/domain/app_state/room/ban_user_state.dart';
-import 'package:fluffychat/domain/usecase/room/ban_user_interactor.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/domain/app_state/room/ban_user_state.dart';
+import 'package:twake_chat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';

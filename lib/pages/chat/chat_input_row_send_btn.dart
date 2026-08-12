@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/chat/chat_input_row_style.dart';
-import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
+import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ChatInputRowSendBtn extends StatelessWidget {
   final ValueListenable<String> inputText;

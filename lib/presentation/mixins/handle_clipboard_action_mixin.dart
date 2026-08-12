@@ -1,7 +1,7 @@
-import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
-import 'package:fluffychat/presentation/mixins/paste_image_mixin.dart';
-import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/room_draft_storage.dart';
+import 'package:twake_chat/presentation/extensions/text_editting_controller_extension.dart';
+import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
+import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/room_draft_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:super_clipboard/super_clipboard.dart';

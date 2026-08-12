@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/download/download_file_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/download/download_file_state.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class DownloadMediaFileInteractor {

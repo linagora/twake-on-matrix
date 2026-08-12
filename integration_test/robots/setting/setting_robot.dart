@@ -1,9 +1,9 @@
-import 'package:fluffychat/pages/device_settings/device_settings.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_security/settings_security_view.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
+import 'package:twake_chat/pages/device_settings/device_settings.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_security/settings_security_view.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:patrol/patrol.dart';

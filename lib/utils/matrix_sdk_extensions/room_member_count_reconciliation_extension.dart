@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
+import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:matrix/matrix.dart';
 
 /// TODO(TW-2968): client-side workaround for a Synapse bug that omits

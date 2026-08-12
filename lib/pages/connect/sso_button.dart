@@ -1,11 +1,11 @@
-import 'package:fluffychat/pages/connect/connect_page_view_style.dart';
-import 'package:fluffychat/widgets/identity_provider_icon.dart';
+import 'package:twake_chat/pages/connect/connect_page_view_style.dart';
+import 'package:twake_chat/widgets/identity_provider_icon.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/connect/connect_page.dart';
+import 'package:twake_chat/pages/connect/connect_page.dart';
 
 class SsoButton extends StatelessWidget {
   final IdentityProvider identityProvider;

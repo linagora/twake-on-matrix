@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 

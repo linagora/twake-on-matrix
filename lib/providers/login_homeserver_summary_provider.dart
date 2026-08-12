@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'login_homeserver_summary_provider.g.dart';
 

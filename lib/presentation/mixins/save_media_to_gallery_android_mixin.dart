@@ -1,21 +1,21 @@
 import 'dart:io';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/presentation/extensions/send_file_extension.dart';
-import 'package:fluffychat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
-import 'package:fluffychat/utils/exception/save_to_gallery_exception.dart';
-import 'package:fluffychat/utils/exception/storage_permission_exception.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/utils/permission_service.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/manager/storage_directory_manager.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
+import 'package:twake_chat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
+import 'package:twake_chat/utils/exception/save_to_gallery_exception.dart';
+import 'package:twake_chat/utils/exception/storage_permission_exception.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/utils/permission_service.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:gal/gal.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 mixin SaveMediaToGalleryAndroidMixin

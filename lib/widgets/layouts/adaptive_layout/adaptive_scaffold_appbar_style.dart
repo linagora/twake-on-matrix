@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
 
 class AdaptiveScaffoldAppBarStyle {

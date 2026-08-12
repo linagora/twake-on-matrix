@@ -1,13 +1,13 @@
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/settings_dashboard/settings_multiple_emotes/settings_multiple_emotes.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_multiple_emotes/settings_multiple_emotes.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 class MultipleEmotesSettingsView extends StatelessWidget {
   final MultipleEmotesSettingsController controller;

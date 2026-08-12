@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
-import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
+import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';

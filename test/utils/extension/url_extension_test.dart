@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/extension/url_extension.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

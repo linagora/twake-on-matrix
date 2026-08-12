@@ -1,15 +1,15 @@
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 class InviteStoryPage extends StatefulWidget {
   final Room? storiesRoom;

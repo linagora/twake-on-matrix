@@ -1,11 +1,11 @@
-import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/expansion_phonebook_contact_list_tile.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
-import 'package:fluffychat/widgets/sliver_expandable_list.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab_view_style.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/expansion_phonebook_contact_list_tile.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:twake_chat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class SliverPhonebookContactsWithoutMatrixId extends StatelessWidget {
   const SliverPhonebookContactsWithoutMatrixId({

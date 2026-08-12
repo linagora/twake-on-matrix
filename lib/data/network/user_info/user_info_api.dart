@@ -1,12 +1,12 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/tom_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/model/user_info/user_info.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility_request.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
+import 'package:twake_chat/data/network/tom_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
 
 class UserInfoApi {
   const UserInfoApi();

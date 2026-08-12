@@ -1,16 +1,16 @@
-import 'package:fluffychat/config/default_power_level_member.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/expandable_widget.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
-import 'package:fluffychat/widgets/twake_components/twake_text_button.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/expandable_widget.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class AssignRolesRolePickerView extends StatelessWidget {
   final AssignRolesEditorController controller;

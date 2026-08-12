@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
-import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
+import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
 class VideoAssetEntity extends FileAssetEntity {

@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/presentation/model/contact/get_presentation_contacts_success.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_success.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 
 typedef PresentationContactsSuccess =
     GetPresentationContactsSuccess<PresentationContact>;

@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/room/room_preview_result.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_skeletonizer_style.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_skeletonizer_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';

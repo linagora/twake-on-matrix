@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/dismissible_media_view.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/hero_page_route.dart';
-import 'package:fluffychat/widgets/video_viewer_desktop_theme.dart';
-import 'package:fluffychat/widgets/video_viewer_mobile_theme.dart';
+import 'package:twake_chat/utils/dismissible_media_view.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/hero_page_route.dart';
+import 'package:twake_chat/widgets/video_viewer_desktop_theme.dart';
+import 'package:twake_chat/widgets/video_viewer_mobile_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

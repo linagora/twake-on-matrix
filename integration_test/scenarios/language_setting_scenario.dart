@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_view.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings/settings_view.dart';
 
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';

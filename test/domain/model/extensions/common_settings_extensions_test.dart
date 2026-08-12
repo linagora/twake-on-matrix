@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/domain/model/common_settings_information.dart';
-import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
+import 'package:twake_chat/domain/model/common_settings_information.dart';
+import 'package:twake_chat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 
 void main() {
   group('CommonSettingsInformationExtension', () {

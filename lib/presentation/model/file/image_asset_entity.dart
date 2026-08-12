@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/presentation/extensions/file_extension.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
-import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:twake_chat/presentation/extensions/file_extension.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
+import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 
 class ImageAssetEntity extends FileAssetEntity {

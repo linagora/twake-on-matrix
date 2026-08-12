@@ -1,5 +1,5 @@
-import 'package:fluffychat/data/model/media/url_preview_response.dart';
-import 'package:fluffychat/domain/model/media/url_preview.dart';
+import 'package:twake_chat/data/model/media/url_preview_response.dart';
+import 'package:twake_chat/domain/model/media/url_preview.dart';
 
 extension UrlPreviewResponseExtension on UrlPreviewResponse {
   UrlPreview toUrlPreview() {

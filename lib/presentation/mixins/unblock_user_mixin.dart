@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
-import 'package:fluffychat/domain/usecase/room/unblock_user_interactor.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
+import 'package:twake_chat/domain/usecase/room/unblock_user_interactor.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 mixin UnblockUserMixin {

@@ -1,18 +1,18 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/pages/forward/forward_web_view.dart';
-import 'package:fluffychat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
-import 'package:fluffychat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
-import 'package:fluffychat/presentation/model/pop_result_from_forward.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/pages/forward/forward.dart';
+import 'package:twake_chat/pages/forward/forward_web_view.dart';
+import 'package:twake_chat/presentation/enum/chat/media_viewer_popup_result_enum.dart';
+import 'package:twake_chat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
+import 'package:twake_chat/presentation/model/pop_result_from_forward.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
   final MenuController menuController = MenuController();

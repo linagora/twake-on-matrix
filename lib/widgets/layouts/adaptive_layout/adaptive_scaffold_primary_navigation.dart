@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:fluffychat/event/twake_inapp_event_types.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

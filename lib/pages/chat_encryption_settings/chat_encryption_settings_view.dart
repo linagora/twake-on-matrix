@@ -1,11 +1,11 @@
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_encryption_settings/chat_encryption_settings.dart';
-import 'package:fluffychat/utils/beautify_string_extension.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat_encryption_settings/chat_encryption_settings.dart';
+import 'package:twake_chat/utils/beautify_string_extension.dart';
 
 class ChatEncryptionSettingsView extends StatelessWidget {
   final ChatEncryptionSettingsController controller;

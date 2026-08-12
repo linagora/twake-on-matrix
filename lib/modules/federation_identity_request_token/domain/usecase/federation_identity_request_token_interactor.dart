@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/repository/federation_identity_request_token_repository.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/state/federation_identity_request_token_state.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/repository/federation_identity_request_token_repository.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/state/federation_identity_request_token_state.dart';
 
 class FederationIdentityRequestTokenInteractor {
   final FederationIdentityRequestTokenRepository repository;

@@ -1,7 +1,7 @@
-import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_stories/settings_stories.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsStoriesView extends StatelessWidget {

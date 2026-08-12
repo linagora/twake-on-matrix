@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 
 extension ClientStoriesExtension on Client {
   static const String storiesRoomType = 'msc3588.stories.stories-room';

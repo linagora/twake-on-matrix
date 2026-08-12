@@ -1,5 +1,5 @@
-import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
-import 'package:fluffychat/utils/task_queue/task.dart';
+import 'package:twake_chat/utils/manager/download_manager/downloading_worker_queue.dart';
+import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

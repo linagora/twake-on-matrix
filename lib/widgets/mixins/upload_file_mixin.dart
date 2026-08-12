@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide State, OpenFile;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/media/file_not_exist_exception.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
-import 'package:fluffychat/utils/exception/upload_exception.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/media/file_not_exist_exception.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/model/chat/upload_file_ui_state.dart';
+import 'package:twake_chat/utils/exception/upload_exception.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

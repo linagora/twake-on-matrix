@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_view_style.dart';
+import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_view_style.dart';
 import 'package:flutter/material.dart';
 
 class TwakeLinkView extends StatelessWidget {

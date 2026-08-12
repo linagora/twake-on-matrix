@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

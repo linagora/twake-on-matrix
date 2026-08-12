@@ -1,5 +1,5 @@
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/avatar/round_avatar_style.dart';
 import 'package:linagora_design_flutter/extensions/string_extension.dart';

@@ -1,10 +1,10 @@
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_style.dart';
-import 'package:fluffychat/pages/profile_info/copiable_profile_row/copiable_profile_row_style.dart';
-import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
+import 'package:twake_chat/pages/profile_info/copiable_profile_row/copiable_profile_row_style.dart';
+import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class CopiableProfileRow extends StatelessWidget {

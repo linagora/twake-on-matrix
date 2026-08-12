@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:matrix/matrix.dart';
 
 /// Single entry-point for all event visibility decisions.

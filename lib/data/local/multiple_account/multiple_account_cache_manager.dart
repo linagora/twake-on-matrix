@@ -1,5 +1,5 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 class MultipleAccountCacheManager {
   final pres = getIt.get<Store>();

@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:fluffychat/domain/model/homeserver_summary.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';

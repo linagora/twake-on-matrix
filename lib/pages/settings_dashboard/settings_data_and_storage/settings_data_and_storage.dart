@@ -1,14 +1,14 @@
 import 'dart:io';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:storage_space/storage_space.dart';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 
 import 'settings_data_and_storage_calculator.dart';
 import 'settings_data_and_storage_constants.dart';

@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 class SameTypeEventsBuilder extends StatelessWidget {

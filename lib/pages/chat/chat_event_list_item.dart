@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/events/message/message.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/events/message/message.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

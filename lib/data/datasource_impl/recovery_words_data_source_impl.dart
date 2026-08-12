@@ -1,8 +1,8 @@
-import 'package:fluffychat/data/datasource/recovery_words_data_source.dart';
-import 'package:fluffychat/data/model/recovery_words_json.dart';
-import 'package:fluffychat/data/network/recovery_words/recovery_words_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/data/datasource/recovery_words_data_source.dart';
+import 'package:twake_chat/data/model/recovery_words_json.dart';
+import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 
 class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
   final RecoveryWordsAPI _recoveryWordsAPI = getIt.get<RecoveryWordsAPI>();

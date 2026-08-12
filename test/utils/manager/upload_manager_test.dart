@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/utils/exception/upload_exception.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
+import 'package:twake_chat/utils/exception/upload_exception.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';

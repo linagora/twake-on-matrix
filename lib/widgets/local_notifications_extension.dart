@@ -1,12 +1,12 @@
 import 'dart:io';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/presentation/extensions/event_update_extension.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/presentation/extensions/event_update_extension.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:http/http.dart' as http;
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
@@ -14,11 +14,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:universal_html/js.dart' as js;
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/web_push/web_push.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/web_push/web_push.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 extension LocalNotificationsExtension on MatrixState {
   static final html.AudioElement _audioPlayer = html.AudioElement()

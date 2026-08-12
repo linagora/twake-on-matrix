@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

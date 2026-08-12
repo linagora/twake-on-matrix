@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
-import 'package:fluffychat/pages/homeserver_picker/homeserver_picker.dart';
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_body_view.dart';
+import 'package:twake_chat/pages/homeserver_picker/homeserver_picker.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

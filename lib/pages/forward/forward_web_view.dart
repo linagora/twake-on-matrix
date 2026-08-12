@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/forward/forward.dart';
-import 'package:fluffychat/pages/forward/forward_web_view_style.dart';
+import 'package:twake_chat/pages/forward/forward.dart';
+import 'package:twake_chat/pages/forward/forward_web_view_style.dart';
 import 'package:flutter/material.dart';
 
 class ForwardWebView extends StatelessWidget {

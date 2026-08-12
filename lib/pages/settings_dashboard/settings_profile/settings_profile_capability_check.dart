@@ -1,9 +1,9 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/capabilities/get_server_capabilities_state.dart';
-import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:fluffychat/domain/model/user_info/user_info.dart';
-import 'package:fluffychat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
-import 'package:fluffychat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/capabilities/get_server_capabilities_state.dart';
+import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
+import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 import 'package:rxdart/rxdart.dart';

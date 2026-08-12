@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
+import 'package:twake_chat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

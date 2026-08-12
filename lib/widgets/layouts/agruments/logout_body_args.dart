@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 
 class LogoutBodyArgs extends AbsAppAdaptiveScaffoldBodyArgs {
   const LogoutBodyArgs({required super.newActiveClient});

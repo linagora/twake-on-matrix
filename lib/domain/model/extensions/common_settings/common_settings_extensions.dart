@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/common_settings_information.dart';
+import 'package:twake_chat/domain/model/common_settings_information.dart';
 
 extension CommonSettingsInformationExtension on CommonSettingsInformation {
   String? completedApplicationUrl(String userId) {

@@ -1,9 +1,9 @@
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/config/app_config.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'homeserver_picker.dart';
 
 class HomeserverAppBar extends StatelessWidget {

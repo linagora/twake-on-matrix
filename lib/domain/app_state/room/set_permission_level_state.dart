@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/initial.dart';
+import 'package:twake_chat/app_state/success.dart';
 
 class SetPermissionLevelInitial extends Initial {
   @override

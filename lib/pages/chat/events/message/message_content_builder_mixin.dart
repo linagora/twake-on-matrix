@@ -1,14 +1,14 @@
 import 'dart:math';
 
-import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/pages/chat/events/message_time_style.dart';
-import 'package:fluffychat/presentation/model/chat/events/message/message_metrics.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/pages/chat/events/message_time_style.dart';
+import 'package:twake_chat/presentation/model/chat/events/message/message_metrics.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart' hide Visibility;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';

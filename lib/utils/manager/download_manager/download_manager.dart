@@ -2,17 +2,17 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/exception/downloading_exception.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_info.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/manager/download_manager/downloading_worker_queue.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_web_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/task_queue/task.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/exception/downloading_exception.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_info.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
+import 'package:twake_chat/utils/manager/download_manager/downloading_worker_queue.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_web_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
 
 typedef FutureVoidCallback = Future<void> Function();

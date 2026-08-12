@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Contact _contactWithMatrixId(String id, String matrixId, String displayName) {

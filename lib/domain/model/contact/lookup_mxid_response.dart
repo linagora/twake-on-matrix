@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/contact/tom_contact.dart';
+import 'package:twake_chat/domain/model/contact/tom_contact.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'lookup_mxid_response.g.dart';

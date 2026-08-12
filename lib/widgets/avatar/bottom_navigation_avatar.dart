@@ -1,5 +1,5 @@
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/avatar/bottom_navigation_avatar_style.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/bottom_navigation_avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';

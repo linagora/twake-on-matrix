@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/chat/events/button_content.dart';
-import 'package:fluffychat/pages/chat/events/message_content_mixin.dart';
+import 'package:twake_chat/pages/chat/events/button_content.dart';
+import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class UnknownContent extends StatelessWidget with MessageContentMixin {
   final Event event;

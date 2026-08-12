@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
-import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:twake_chat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:twake_chat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
 
 extension ContactHiveObjExtension on ContactHiveObj {
   Contact toContact() {

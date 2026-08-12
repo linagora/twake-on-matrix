@@ -1,10 +1,10 @@
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
-import 'package:fluffychat/pages/new_group/widget/contacts_selection_list_style.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/new_group/selected_contacts_map_change_notifier.dart';
+import 'package:twake_chat/pages/new_group/widget/contacts_selection_list_style.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';

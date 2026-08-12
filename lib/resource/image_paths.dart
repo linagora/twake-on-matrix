@@ -1,4 +1,4 @@
-import 'package:fluffychat/resource/assets_paths.dart';
+import 'package:twake_chat/resource/assets_paths.dart';
 
 class ImagePaths {
   static String get icAddFile => _getImagePath('ic_add_file.svg');

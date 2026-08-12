@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:fluffychat/presentation/enum/chat/audio_type_enum.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/enum/chat/audio_type_enum.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';

@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';

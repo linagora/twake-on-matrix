@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
+import 'package:twake_chat/pages/chat_list/chat_list.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

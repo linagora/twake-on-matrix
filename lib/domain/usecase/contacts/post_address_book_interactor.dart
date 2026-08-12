@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/local/contact/enum/contacts_vault_error_enum.dart';
-import 'package:fluffychat/data/local/contact/shared_preferences_contact_cache_manager.dart';
-import 'package:fluffychat/data/model/addressbook/address_book.dart';
-import 'package:fluffychat/data/model/addressbook/address_book_request.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
-import 'package:fluffychat/domain/repository/contact/address_book_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/local/contact/enum/contacts_vault_error_enum.dart';
+import 'package:twake_chat/data/local/contact/shared_preferences_contact_cache_manager.dart';
+import 'package:twake_chat/data/model/addressbook/address_book.dart';
+import 'package:twake_chat/data/model/addressbook/address_book_request.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/post_address_book_state.dart';
+import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class PostAddressBookInteractor {

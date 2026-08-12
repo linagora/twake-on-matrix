@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar_style.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 

@@ -1,15 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/model/invitation/invitation_request.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/invitation/send_invitation_state.dart';
-import 'package:fluffychat/domain/model/invitation/invitation_medium_enum.dart';
-import 'package:fluffychat/domain/repository/invitation/invitation_repository.dart';
-import 'package:fluffychat/domain/usecase/invitation/constants.dart';
-import 'package:fluffychat/domain/usecase/invitation/safe_response_data_summary.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/model/invitation/invitation_request.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/invitation/send_invitation_state.dart';
+import 'package:twake_chat/domain/model/invitation/invitation_medium_enum.dart';
+import 'package:twake_chat/domain/repository/invitation/invitation_repository.dart';
+import 'package:twake_chat/domain/usecase/invitation/constants.dart';
+import 'package:twake_chat/domain/usecase/invitation/safe_response_data_summary.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class SendInvitationInteractor {

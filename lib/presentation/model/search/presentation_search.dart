@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/search/contact_search_model.dart';
-import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/domain/model/search/contact_search_model.dart';
+import 'package:twake_chat/domain/model/search/recent_chat_model.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
 

@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/datasource/media/media_data_source.dart';
-import 'package:fluffychat/domain/model/media/url_preview.dart';
-import 'package:fluffychat/domain/repository/media/media_repository.dart';
+import 'package:twake_chat/data/datasource/media/media_data_source.dart';
+import 'package:twake_chat/domain/model/media/url_preview.dart';
+import 'package:twake_chat/domain/repository/media/media_repository.dart';
 
 class MediaRepositoryImpl implements MediaRepository {
   final MediaDataSource _mediaDataSource;

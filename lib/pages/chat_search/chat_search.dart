@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
-import 'package:fluffychat/pages/search/server_search_controller.dart';
-import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/scroll_controller_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat_search/chat_search_view.dart';
+import 'package:twake_chat/pages/search/server_search_controller.dart';
+import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/scroll_controller_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

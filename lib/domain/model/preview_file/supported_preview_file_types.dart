@@ -1,5 +1,5 @@
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 enum SupportedIconFileTypesEnum {
   image,

@@ -1,9 +1,9 @@
-import 'package:fluffychat/domain/model/app_grid/linagora_app.dart';
-import 'package:fluffychat/domain/model/extensions/linagora_app_extensions.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_item_style.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_view_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/widgets/link_browser_widget.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_app.dart';
+import 'package:twake_chat/domain/model/extensions/linagora_app_extensions.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_item_style.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view_style.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/widgets/link_browser_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';

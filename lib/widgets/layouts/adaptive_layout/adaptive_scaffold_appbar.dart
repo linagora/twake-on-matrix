@@ -1,10 +1,10 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_controller.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_controller.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_svg/svg.dart';

@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
+import 'package:twake_chat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:flutter/material.dart';
 
 class CircularLoadingDownloadWidget extends StatefulWidget {

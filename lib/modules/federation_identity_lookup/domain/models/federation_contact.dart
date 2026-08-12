@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
 
 class FederationContact with EquatableMixin {
   final String id;

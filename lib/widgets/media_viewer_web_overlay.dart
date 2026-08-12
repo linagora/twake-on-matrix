@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
+import 'package:twake_chat/utils/extension/web_url_creation_extension.dart';
 import 'package:universal_html/html.dart' as html;
 
 /// Injects a transparent HTML media element into the DOM so the browser's

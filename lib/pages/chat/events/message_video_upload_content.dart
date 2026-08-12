@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:fluffychat/pages/chat/events/event_video_player.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/model/chat/upload_file_ui_state.dart';
-import 'package:fluffychat/widgets/mixins/upload_file_mixin.dart';
+import 'package:twake_chat/pages/chat/events/event_video_player.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/presentation/model/chat/upload_file_ui_state.dart';
+import 'package:twake_chat/widgets/mixins/upload_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';

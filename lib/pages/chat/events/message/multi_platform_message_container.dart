@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

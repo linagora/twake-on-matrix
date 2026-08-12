@@ -1,4 +1,4 @@
-import 'package:fluffychat/di/base_di.dart';
+import 'package:twake_chat/di/base_di.dart';
 import 'package:flutter/material.dart';
 
 mixin ShowDialogMixin {

@@ -3,17 +3,17 @@ import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/media/cancel_exception.dart';
-import 'package:fluffychat/data/network/media/media_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/exception/download_file_web_exception.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/download_file_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/stream_list_int_extension.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/media/cancel_exception.dart';
+import 'package:twake_chat/data/network/media/media_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/exception/download_file_web_exception.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/stream_list_int_extension.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileWebExtension on Event {

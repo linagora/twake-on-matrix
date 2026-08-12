@@ -1,14 +1,14 @@
 import 'package:app_links/app_links.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/presentation/extensions/shared_media_file_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
-import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/event/twake_event_types.dart';
+import 'package:twake_chat/presentation/extensions/shared_media_file_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
+import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 

@@ -1,11 +1,11 @@
 import 'dart:ui';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/pages/chat/events/message/message.dart';
-import 'package:fluffychat/pages/chat/events/message/message_context_menu_action.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/pages/chat/events/message/message.dart';
+import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

@@ -1,6 +1,6 @@
-import 'package:fluffychat/modules/federation_identity_request_token/data/datasource/federation_identity_request_token_datasource.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/repository/federation_identity_request_token_repository.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/datasource/federation_identity_request_token_datasource.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/repository/federation_identity_request_token_repository.dart';
 
 class FederationIdentityRequestTokenRepositoryImpl
     implements FederationIdentityRequestTokenRepository {

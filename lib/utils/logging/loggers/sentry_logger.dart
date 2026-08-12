@@ -1,6 +1,6 @@
-import 'package:fluffychat/utils/logging/log_types.dart';
-import 'package:fluffychat/utils/logging/logger.dart';
-import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
+import 'package:twake_chat/utils/logging/log_types.dart';
+import 'package:twake_chat/utils/logging/logger.dart';
+import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 class SentryLogger implements Logger {

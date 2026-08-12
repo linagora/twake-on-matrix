@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:fluffychat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:matrix/matrix.dart';
 
 mixin OnProfileChangeMixin {

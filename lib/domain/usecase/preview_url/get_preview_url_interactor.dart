@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_failure.dart';
-import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_loading.dart';
-import 'package:fluffychat/domain/app_state/preview_url/get_preview_url_success.dart';
-import 'package:fluffychat/domain/repository/media/media_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/preview_url/get_preview_url_failure.dart';
+import 'package:twake_chat/domain/app_state/preview_url/get_preview_url_loading.dart';
+import 'package:twake_chat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:twake_chat/domain/repository/media/media_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class GetPreviewURLInteractor {

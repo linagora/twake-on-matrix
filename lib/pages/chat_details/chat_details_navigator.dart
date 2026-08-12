@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/chat_details/chat_details.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_edit.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/pages/chat_details/chat_details.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsRoutes {

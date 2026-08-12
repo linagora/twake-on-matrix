@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
 
 void main() {
   group('DurationExtension', () {

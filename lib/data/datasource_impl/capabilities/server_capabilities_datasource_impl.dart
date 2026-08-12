@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/datasource/capabilities/server_capabilities_datasource.dart';
-import 'package:fluffychat/data/network/capabilities/server_capabilities_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/data/datasource/capabilities/server_capabilities_datasource.dart';
+import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {

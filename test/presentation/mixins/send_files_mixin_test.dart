@@ -1,10 +1,10 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/file_info/image_file_info.dart';
-import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
-import 'package:fluffychat/pages/chat/send_media_native_dialog/send_media_native_dialog.dart';
-import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
+import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
+import 'package:twake_chat/pages/chat/send_media_native_dialog/send_media_native_dialog.dart';
+import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

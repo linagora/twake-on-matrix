@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/events/images_builder/sending_image_info_widget.dart';
-import 'package:fluffychat/presentation/model/file/display_image_info.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/sending_image_info_widget.dart';
+import 'package:twake_chat/presentation/model/file/display_image_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';

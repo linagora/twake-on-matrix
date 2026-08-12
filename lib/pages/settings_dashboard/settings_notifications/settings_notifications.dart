@@ -1,13 +1,13 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/web_push/web_push.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/web_push/web_push.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/matrix.dart';
 

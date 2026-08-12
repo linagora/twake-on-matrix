@@ -1,6 +1,6 @@
-import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
-import 'package:fluffychat/utils/mime_type_uitls.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/presentation/extensions/uint8list_extension.dart';
+import 'package:twake_chat/utils/mime_type_uitls.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
 

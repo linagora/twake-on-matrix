@@ -1,19 +1,19 @@
 import 'dart:async';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'settings_blocked_users_view.dart';
 

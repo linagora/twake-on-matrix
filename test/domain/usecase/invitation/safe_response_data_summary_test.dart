@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/usecase/invitation/safe_response_data_summary.dart';
+import 'package:twake_chat/domain/usecase/invitation/safe_response_data_summary.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

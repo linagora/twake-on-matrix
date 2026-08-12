@@ -1,7 +1,7 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/domain/model/contact/tom_contact.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/domain/model/contact/tom_contact.dart';
 
 extension TomContactExtension on TomContact {
   Contact toContact(ContactStatus status) {

@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 extension VisibleEnumExtension on VisibleEnum {

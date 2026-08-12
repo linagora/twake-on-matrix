@@ -1,5 +1,5 @@
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';

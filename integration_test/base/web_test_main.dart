@@ -23,17 +23,17 @@
 /// first frame is rendered — at that point everything works correctly.
 library;
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/logging/init_matrix_logger.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 
 /// Dead homeserver — prevents auto-connect side effects during test init.
 const _testConfig = <String, dynamic>{

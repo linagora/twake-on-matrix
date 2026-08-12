@@ -1,13 +1,13 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/file_widget/base_file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/circular_loading_download_widget.dart';
-import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
-import 'package:fluffychat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/widgets/file_widget/base_file_tile_widget.dart';
+import 'package:twake_chat/widgets/file_widget/circular_loading_download_widget.dart';
+import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
+import 'package:twake_chat/widgets/file_widget/message_file_tile_style.dart';
+import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

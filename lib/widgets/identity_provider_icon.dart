@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/connect/connect_page.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/connect/connect_page.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

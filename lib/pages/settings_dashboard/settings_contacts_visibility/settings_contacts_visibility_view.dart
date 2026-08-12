@@ -1,11 +1,11 @@
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
-import 'package:fluffychat/presentation/extensions/settings/user_info_visibility_extension.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
+import 'package:twake_chat/presentation/extensions/settings/user_info_visibility_extension.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/layouts/max_width_body.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

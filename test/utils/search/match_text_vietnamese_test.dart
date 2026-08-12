@@ -1,8 +1,8 @@
 // Stress-tests diacritic stripping with Vietnamese: stacked marks (tone + vowel modification)
 // that NFD decomposes into multiple combining characters, all stripped to the base letter.
 // Also verifies that stripping never collapses distinct base letters into each other.
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _engine = SearchEngine();

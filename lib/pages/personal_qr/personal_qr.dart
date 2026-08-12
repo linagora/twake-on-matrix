@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/personal_qr/personal_qr_view.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/permission_dialog.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/permission_service.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/personal_qr/personal_qr_view.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/permission_dialog.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/permission_service.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

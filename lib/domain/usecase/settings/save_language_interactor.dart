@@ -2,10 +2,10 @@ import 'dart:core';
 import 'dart:ui';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/localizations/save_language_state.dart';
-import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/localizations/save_language_state.dart';
+import 'package:twake_chat/domain/repository/localizations/localizations_repository.dart';
 
 class SaveLanguageInteractor {
   final LocalizationsRepository localizationsRepository;

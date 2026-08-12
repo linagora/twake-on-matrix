@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/events/reply_content.dart';
-import 'package:fluffychat/pages/chat/reply_display_style.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/events/reply_content.dart';
+import 'package:twake_chat/pages/chat/reply_display_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ReplyDisplay extends StatelessWidget {
   final ChatController controller;

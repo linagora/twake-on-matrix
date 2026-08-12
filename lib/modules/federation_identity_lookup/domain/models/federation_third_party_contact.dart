@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 
 abstract class FederationThirdPartyContact extends ThirdPartyContact {
   FederationThirdPartyContact({

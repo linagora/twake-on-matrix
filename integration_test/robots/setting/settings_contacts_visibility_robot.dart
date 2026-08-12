@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
 import 'package:flutter/material.dart';
 import 'package:patrol/patrol.dart';
 import '../home_robot.dart';

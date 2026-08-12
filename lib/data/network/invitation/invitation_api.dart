@@ -1,13 +1,13 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/model/invitation/generate_invitation_link_response.dart';
-import 'package:fluffychat/data/model/invitation/invitation_request.dart';
-import 'package:fluffychat/data/model/invitation/invitation_status_response.dart';
-import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/tom_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
+import 'package:twake_chat/data/model/invitation/generate_invitation_link_response.dart';
+import 'package:twake_chat/data/model/invitation/invitation_request.dart';
+import 'package:twake_chat/data/model/invitation/invitation_status_response.dart';
+import 'package:twake_chat/data/model/invitation/send_invitation_response.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
+import 'package:twake_chat/data/network/tom_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 
 class InvitationAPI {
   final DioClient _client = getIt.get<DioClient>(

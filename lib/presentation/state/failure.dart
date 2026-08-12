@@ -1,4 +1,4 @@
-import 'package:fluffychat/app_state/failure.dart';
+import 'package:twake_chat/app_state/failure.dart';
 
 abstract class FeatureFailure extends Failure {
   final dynamic exception;

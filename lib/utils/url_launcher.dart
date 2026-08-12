@@ -1,23 +1,23 @@
-import 'package:fluffychat/config/app_constants.dart';
-import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/config/app_constants.dart';
+import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:punycode/punycode.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/profile_bottom_sheet.dart';
-import 'package:fluffychat/widgets/public_room_bottom_sheet.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
+import 'package:twake_chat/widgets/public_room_bottom_sheet.dart';
 import 'platform_infos.dart';
 
 class UrlLauncher with GoToDraftChatMixin {

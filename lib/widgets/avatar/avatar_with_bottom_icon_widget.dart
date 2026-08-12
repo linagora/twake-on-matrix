@@ -1,6 +1,6 @@
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';

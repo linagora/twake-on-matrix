@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/loading_contact_widget.dart';
 import 'package:flutter/material.dart';
 
 class SliverLoadingContacts extends StatelessWidget {

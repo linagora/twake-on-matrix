@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/pages/chat/add_widget_tile.dart';
+import 'package:twake_chat/pages/chat/add_widget_tile.dart';
 
 class AddWidgetTileView extends StatelessWidget {
   final AddWidgetTileState controller;

@@ -1,9 +1,9 @@
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_sort_rooms.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
-import 'package:fluffychat/pages/chat_list/common_chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
-import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/pages/chat_list/chat_list.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_sort_rooms.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
+import 'package:twake_chat/pages/chat_list/common_chat_list_item.dart';
+import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

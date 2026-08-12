@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsFileRowBody extends StatelessWidget {

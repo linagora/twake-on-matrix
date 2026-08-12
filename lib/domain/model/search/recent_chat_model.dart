@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/search/search_model.dart';
+import 'package:twake_chat/domain/model/search/search_model.dart';
 import 'package:matrix/matrix.dart';
 
 class RecentChatSearchModel extends SearchModel {

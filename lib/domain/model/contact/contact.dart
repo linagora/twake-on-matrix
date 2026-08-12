@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:crypto/crypto.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:matrix/encryption/utils/base64_unpadded.dart';
 
 enum ThirdPartyIdType {

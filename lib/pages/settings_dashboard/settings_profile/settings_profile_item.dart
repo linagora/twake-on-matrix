@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
-import 'package:fluffychat/presentation/model/settings/settings_profile_presentation.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_item_style.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
+import 'package:twake_chat/presentation/model/settings/settings_profile_presentation.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

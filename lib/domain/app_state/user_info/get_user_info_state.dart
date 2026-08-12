@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/user_info/user_info.dart';
-import 'package:fluffychat/presentation/state/failure.dart';
-import 'package:fluffychat/presentation/state/success.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/presentation/state/failure.dart';
+import 'package:twake_chat/presentation/state/success.dart';
 
 class GettingUserInfo extends LoadingState {}
 

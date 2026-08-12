@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/search/search_mixin.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/pages/search/search_mixin.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockUpSearchMixin with SearchMixin {}

@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/user_info/get_user_info_visibility_state.dart';
-import 'package:fluffychat/domain/app_state/user_info/update_user_info_visibility_state.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility_request.dart';
-import 'package:fluffychat/domain/usecase/user_info/get_user_info_visibility_interactor.dart';
-import 'package:fluffychat/domain/usecase/user_info/update_user_info_visibility_interactor.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/user_info/get_user_info_visibility_state.dart';
+import 'package:twake_chat/domain/app_state/user_info/update_user_info_visibility_state.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
+import 'package:twake_chat/domain/usecase/user_info/get_user_info_visibility_interactor.dart';
+import 'package:twake_chat/domain/usecase/user_info/update_user_info_visibility_interactor.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 class SettingsContactsVisibility extends StatefulWidget {

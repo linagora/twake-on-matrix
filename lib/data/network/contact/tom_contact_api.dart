@@ -1,10 +1,10 @@
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/identity_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
-import 'package:fluffychat/domain/model/contact/lookup_mxid_response.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/identity_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/domain/model/contact/contact_query.dart';
+import 'package:twake_chat/domain/model/contact/lookup_mxid_request.dart';
+import 'package:twake_chat/domain/model/contact/lookup_mxid_response.dart';
 
 class TomContactAPI {
   final DioClient _client = getIt.get<DioClient>(

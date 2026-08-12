@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/initial.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/model/invitation/send_invitation_response.dart';
 
 class SendInvitationInitial extends Initial {
   const SendInvitationInitial() : super();

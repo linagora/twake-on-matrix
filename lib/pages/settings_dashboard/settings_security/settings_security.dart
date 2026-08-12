@@ -1,28 +1,28 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/utils/beautify_string_extension.dart';
-import 'package:fluffychat/utils/clipboard.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/utils/beautify_string_extension.dart';
+import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/setting_keys.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'settings_security_view.dart';
 
 class SettingsSecurity extends StatefulWidget {

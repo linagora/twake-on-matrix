@@ -1,5 +1,5 @@
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
-import 'package:fluffychat/widgets/context_menu/twake_context_menu.dart';
+import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
+import 'package:twake_chat/widgets/context_menu/twake_context_menu.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

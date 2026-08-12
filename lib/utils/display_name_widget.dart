@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/highlight_text.dart';
+import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 
 class BuildDisplayName extends StatelessWidget {

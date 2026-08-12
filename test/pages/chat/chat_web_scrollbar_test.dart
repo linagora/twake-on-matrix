@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:fluffychat/pages/chat/chat_web_scrollbar.dart';
+import 'package:twake_chat/pages/chat/chat_web_scrollbar.dart';
 
 Widget _wrap(Widget child) => MaterialApp(home: Scaffold(body: child));
 

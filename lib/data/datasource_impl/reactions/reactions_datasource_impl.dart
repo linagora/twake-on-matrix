@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/datasource/reactions/reactions_datasource.dart';
-import 'package:fluffychat/data/local/reaction/reaction_cache_manager.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/data/datasource/reactions/reactions_datasource.dart';
+import 'package:twake_chat/data/local/reaction/reaction_cache_manager.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 
 class ReactionsDatasourceImpl implements ReactionsDatasource {
   final reactionCacheManager = getIt.get<ReactionsCacheManager>();

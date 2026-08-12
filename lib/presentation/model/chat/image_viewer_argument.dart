@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/model/pop_result.dart';
+import 'package:twake_chat/presentation/model/pop_result.dart';
 
 class ImageViewerArgument extends PopResult {
   final String? showInChatEventId;

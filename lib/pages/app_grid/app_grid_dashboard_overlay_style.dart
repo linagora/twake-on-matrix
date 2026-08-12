@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/app_grid/linagora_applications.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_item_style.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_item_style.dart';
 import 'package:flutter/material.dart';
 
 class AppGridDashboardOverlayStyle {

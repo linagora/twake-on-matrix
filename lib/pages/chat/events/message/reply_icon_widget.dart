@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:flutter/material.dart';
 
 class ReplyIconWidget extends StatelessWidget {

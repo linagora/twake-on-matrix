@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/phone_number_normalizer.dart';
+import 'package:twake_chat/utils/phone_number_normalizer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

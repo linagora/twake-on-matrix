@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/utils/manager/upload_manager/converters/cancel_token_converter.dart';
-import 'package:fluffychat/utils/manager/upload_manager/converters/stream_controller_converter.dart';
-import 'package:fluffychat/utils/manager/upload_manager/models/upload_caption_info.dart';
-import 'package:fluffychat/utils/manager/upload_manager/models/upload_info.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/converters/cancel_token_converter.dart';
+import 'package:twake_chat/utils/manager/upload_manager/converters/stream_controller_converter.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/upload_caption_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/upload_info.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:matrix/matrix.dart';
 

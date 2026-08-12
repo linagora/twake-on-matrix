@@ -1,14 +1,14 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_controller.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_overlay.dart';
-import 'package:fluffychat/pages/app_grid/app_grid_dashboard_view_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_controller.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_overlay.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view_style.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class AppGridDashboardView extends StatelessWidget {
   final AppGridDashboardController controller;

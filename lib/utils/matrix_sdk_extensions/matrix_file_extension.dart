@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/utils/stream_list_int_extension.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/stream_list_int_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/size_string.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/size_string.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:mime/mime.dart';
 

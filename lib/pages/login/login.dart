@@ -1,19 +1,19 @@
 import 'dart:async';
 
-import 'package:fluffychat/presentation/model/client_login_state_event.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import '../../utils/platform_infos.dart';
 import 'login_view.dart';
 

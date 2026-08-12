@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/data/hive/dto/federation_server_information_hive_obj.dart';
-import 'package:fluffychat/data/model/federation_server/federation_configuration.dart';
+import 'package:twake_chat/data/hive/dto/federation_server_information_hive_obj.dart';
+import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'federation_configurations_hive_obj.g.dart';

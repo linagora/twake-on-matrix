@@ -1,13 +1,13 @@
-import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog/files_listview_widget.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog/media_page_view_widget.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog.dart';
-import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
-import 'package:fluffychat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/files_listview_widget.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/media_page_view_widget.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
+import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class SendFileDialogView extends StatelessWidget {
   final SendFileDialogController controller;

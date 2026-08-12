@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/app_grid/linagora_applications.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
 
 class LoadingAppGridConfiguration extends Success {
   @override

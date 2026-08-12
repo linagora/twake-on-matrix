@@ -1,10 +1,10 @@
-import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
-import 'package:fluffychat/data/hive/dto/tom_configurations_hive_obj.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/exception/tom_configuration_not_found.dart';
-import 'package:fluffychat/domain/model/tom_configurations.dart';
-import 'package:fluffychat/utils/copy_map.dart';
+import 'package:twake_chat/data/datasource/tom_configurations_datasource.dart';
+import 'package:twake_chat/data/hive/dto/tom_configurations_hive_obj.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/exception/tom_configuration_not_found.dart';
+import 'package:twake_chat/domain/model/tom_configurations.dart';
+import 'package:twake_chat/utils/copy_map.dart';
 import 'package:matrix/matrix.dart';
 
 class HiveToMConfigurationDatasource implements ToMConfigurationsDatasource {

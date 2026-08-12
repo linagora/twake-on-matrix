@@ -1,7 +1,7 @@
-import 'package:fluffychat/utils/custom_dismissable.dart';
-import 'package:fluffychat/utils/image_zoom_scope.dart';
-import 'package:fluffychat/utils/pinch_detector.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/custom_dismissable.dart';
+import 'package:twake_chat/utils/image_zoom_scope.dart';
+import 'package:twake_chat/utils/pinch_detector.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 /// Wraps [itemBuilder] with a swipe-to-dismiss gesture, disabled while the image

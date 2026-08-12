@@ -1,7 +1,7 @@
 // reference to: https://pub.dev/packages/contextmenu
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
-import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:fluffychat/widgets/mixins/twake_context_menu_style.dart';
+import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
+import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:twake_chat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:flutter/material.dart';
 
 import 'twake_context_menu.dart';
