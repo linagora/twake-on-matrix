@@ -5,8 +5,8 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/client_manager.dart';
-import 'package:twake_chat/utils/legacy_settings_migration.dart';
 import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
+import 'package:twake_chat/utils/manager/legacy_settings_migration_manager.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/sentry_init.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +58,7 @@ Future<void> initializeApp() async {
 
   GetItInitializer().setUp();
 
-  await migrateLegacySettingKeys();
+  await LegacySettingsMigrationManager.migrateLegacySettingKeys();
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();

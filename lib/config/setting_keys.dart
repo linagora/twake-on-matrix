@@ -22,8 +22,7 @@ abstract class SettingKeys {
   static const String unifiedPushEndpoint = 'chat.twake.unifiedpush.endpoint';
   static const String notificationCurrentIds = 'chat.twake.notification_ids';
   static const String ownStatusMessage = 'chat.twake.status_msg';
-  static const String dontAskForBootstrapKey =
-      'chat.twake.dont_ask_bootstrap';
+  static const String dontAskForBootstrapKey = 'chat.twake.dont_ask_bootstrap';
   static const String autoplayImages = 'chat.twake.autoplay_images';
   static const String experimentalVoip = 'chat.twake.experimental_voip';
   static const String enableRightAndLeftMessageAlignmentOnWeb =
@@ -34,7 +33,7 @@ abstract class SettingKeys {
 /// Maps each current [SettingKeys] value to its legacy `chat.fluffy.*` (or
 /// `chat.fluffychat.*`) equivalent, for one-time migration on app startup.
 ///
-/// See `lib/utils/legacy_settings_migration.dart`.
+/// See `lib/utils/manager/legacy_settings_migration_manager.dart`.
 const Map<String, String> legacySettingKeys = {
   SettingKeys.wallpaper: 'chat.fluffy.wallpaper',
   SettingKeys.renderHtml: 'chat.fluffy.renderHtml',
