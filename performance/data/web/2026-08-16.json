@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "date": "2026-08-16",
+  "generated_at": "2026-08-16T03:13:53Z",
+  "commit": {
+    "sha": "6f4dd0273305c04df0cb3f85eb1ab6478a0034cf",
+    "url": "https://github.com/linagora/twake-on-matrix/commit/6f4dd0273305c04df0cb3f85eb1ab6478a0034cf"
+  },
+  "run": {
+    "id": "31922929439",
+    "url": "https://github.com/linagora/twake-on-matrix/actions/runs/31922929439"
+  },
+  "environment": {
+    "platform": "web",
+    "build_mode": "profile",
+    "flutter_version": "3.38.9",
+    "patrol_version": "4.3.1",
+    "browser": {
+      "name": "chromium",
+      "version": "141.0.7390.37",
+      "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/141.0.7390.37 Safari/537.36"
+    },
+    "runner": {
+      "image": "ubuntu24-20260810.271.1"
+    },
+    "viewport": {
+      "width": 1440,
+      "height": 900,
+      "device_pixel_ratio": 1
+    },
+    "renderer": "canvas"
+  },
+  "web": {
+    "aggregation": "median",
+    "repetitions": 3,
+    "checkpoints": [
+      {
+        "scenario": "web_navigation",
+        "label": "room_opened",
+        "sample_count": 3,
+        "frame_count": 16.0,
+        "frame_count_sample_count": 3,
+        "frame_count_values": [
+          15.0,
+          16.0,
+          17.0
+        ],
+        "frame_count_stddev": 1.0,
+        "frame_count_range": 2.0,
+        "frame_window_ms": 733.3,
+        "frame_window_ms_sample_count": 3,
+        "frame_window_ms_values": [
+          766.7,
+          733.3,
+          666.7
+        ],
+        "frame_window_ms_stddev": 50.91,
+        "frame_window_ms_range": 100.0,
+        "expected_frame_interval_ms": 33.4,
+        "expected_frame_interval_ms_sample_count": 3,
+        "expected_frame_interval_ms_values": [
+          41.65,
+          33.4,
+          33.35
+        ],
+        "expected_frame_interval_ms_stddev": 4.78,
+        "expected_frame_interval_ms_range": 8.3,
+        "frame_interval_p50_ms": 33.4,
+        "frame_interval_p50_ms_sample_count": 3,
+        "frame_interval_p50_ms_values": [
+          49.9,
+          33.4,
+          33.4
+        ],
+        "frame_interval_p50_ms_stddev": 9.53,
+        "frame_interval_p50_ms_range": 16.5,
+        "frame_interval_p95_ms": 100.0,
+        "frame_interval_p95_ms_sample_count": 3,
+        "frame_interval_p95_ms_values": [
+          100.0,
+          100.0,
+          83.4
+        ],
+        "frame_interval_p95_ms_stddev": 9.58,
+        "frame_interval_p95_ms_range": 16.6,
+        "frame_interval_p99_ms": 166.7,
+        "frame_interval_p99_ms_sample_count": 3,
+        "frame_interval_p99_ms_values": [
+          166.7,
+          166.7,
+          149.9
+        ],
+        "frame_interval_p99_ms_stddev": 9.7,
+        "frame_interval_p99_ms_range": 16.8,
+        "fps": 20.455,
+        "fps_sample_count": 3,
+        "fps_values": [
+          18.26,
+          20.455,
+          23.999
+        ],
+        "fps_stddev": 2.9,
+        "fps_range": 5.74,
+        "slow_frame_count": 3.0,
+        "slow_frame_count_sample_count": 3,
+        "slow_frame_count_values": [
+          3.0,
+          3.0,
+          3.0
+        ],
+        "slow_frame_count_stddev": 0.0,
+        "slow_frame_count_range": 0.0,
+        "slow_frame_rate": 0.2,
+        "slow_frame_rate_sample_count": 3,
+        "slow_frame_rate_values": [
+          0.214,
+          0.2,
+          0.188
+        ],
+        "slow_frame_rate_stddev": 0.01,
+        "slow_frame_rate_range": 0.03,
+        "long_task_count": 4.0,
+        "long_task_count_sample_count": 3,
+        "long_task_count_values": [
+          4.0,
+          4.0,
+          4.0
+        ],
+        "long_task_count_stddev": 0.0,
+        "long_task_count_range": 0.0,
+        "long_task_total_ms": 382.0,
+        "long_task_total_ms_sample_count": 3,
+        "long_task_total_ms_values": [
+          382.0,
+          391.0,
+          323.0
+        ],
+        "long_task_total_ms_stddev": 36.94,
+        "long_task_total_ms_range": 68.0,
+        "long_task_max_ms": 163.0,
+        "long_task_max_ms_sample_count": 3,
+        "long_task_max_ms_values": [
+          177.0,
+          163.0,
+          141.0
+        ],
+        "long_task_max_ms_stddev": 18.15,
+        "long_task_max_ms_range": 36.0,
+        "js_heap_used_bytes": 198799414.0,
+        "js_heap_used_bytes_sample_count": 3,
+        "js_heap_used_bytes_values": [
+          181064752.0,
+          198799414.0,
+          206586129.0
+        ],
+        "js_heap_used_bytes_stddev": 13079830.85,
+        "js_heap_used_bytes_range": 25521377.0,
+        "transition_ms": 797.401,
+        "transition_ms_sample_count": 3,
+        "transition_ms_values": [
+          819.2,
+          797.401,
+          725.2
+        ],
+        "transition_ms_stddev": 49.2,
+        "transition_ms_range": 94.0
+      },
+      {
+        "scenario": "web_room_scroll",
+        "label": "scroll_completed",
+        "sample_count": 3,
+        "frame_count": 214.0,
+        "frame_count_sample_count": 3,
+        "frame_count_values": [
+          211.0,
+          214.0,
+          214.0
+        ],
+        "frame_count_stddev": 1.73,
+        "frame_count_range": 3.0,
+        "frame_window_ms": 9899.502,
+        "frame_window_ms_sample_count": 3,
+        "frame_window_ms_values": [
+          10032.936,
+          9899.502,
+          9732.802
+        ],
+        "frame_window_ms_stddev": 150.37,
+        "frame_window_ms_range": 300.13,
+        "expected_frame_interval_ms": 50.0,
+        "expected_frame_interval_ms_sample_count": 3,
+        "expected_frame_interval_ms_values": [
+          50.0,
+          50.0,
+          50.0
+        ],
+        "expected_frame_interval_ms_stddev": 0.0,
+        "expected_frame_interval_ms_range": 0.0,
+        "frame_interval_p50_ms": 50.0,
+        "frame_interval_p50_ms_sample_count": 3,
+        "frame_interval_p50_ms_values": [
+          50.0,
+          50.0,
+          50.0
+        ],
+        "frame_interval_p50_ms_stddev": 0.0,
+        "frame_interval_p50_ms_range": 0.0,
+        "frame_interval_p95_ms": 66.7,
+        "frame_interval_p95_ms_sample_count": 3,
+        "frame_interval_p95_ms_values": [
+          66.7,
+          66.7,
+          66.7
+        ],
+        "frame_interval_p95_ms_stddev": 0.0,
+        "frame_interval_p95_ms_range": 0.0,
+        "frame_interval_p99_ms": 66.8,
+        "frame_interval_p99_ms_sample_count": 3,
+        "frame_interval_p99_ms_values": [
+          100.0,
+          66.8,
+          66.8
+        ],
+        "frame_interval_p99_ms_stddev": 19.17,
+        "frame_interval_p99_ms_range": 33.2,
+        "fps": 21.516,
+        "fps_sample_count": 3,
+        "fps_values": [
+          20.931,
+          21.516,
+          21.885
+        ],
+        "fps_stddev": 0.48,
+        "fps_range": 0.95,
+        "slow_frame_count": 2.0,
+        "slow_frame_count_sample_count": 3,
+        "slow_frame_count_values": [
+          5.0,
+          2.0,
+          2.0
+        ],
+        "slow_frame_count_stddev": 1.73,
+        "slow_frame_count_range": 3.0,
+        "slow_frame_rate": 0.009,
+        "slow_frame_rate_sample_count": 3,
+        "slow_frame_rate_values": [
+          0.024,
+          0.009,
+          0.009
+        ],
+        "slow_frame_rate_stddev": 0.01,
+        "slow_frame_rate_range": 0.02,
+        "long_task_count": 77.0,
+        "long_task_count_sample_count": 3,
+        "long_task_count_values": [
+          79.0,
+          77.0,
+          71.0
+        ],
+        "long_task_count_stddev": 4.16,
+        "long_task_count_range": 8.0,
+        "long_task_total_ms": 4399.0,
+        "long_task_total_ms_sample_count": 3,
+        "long_task_total_ms_values": [
+          4634.0,
+          4399.0,
+          3984.0
+        ],
+        "long_task_total_ms_stddev": 329.13,
+        "long_task_total_ms_range": 650.0,
+        "long_task_max_ms": 132.0,
+        "long_task_max_ms_sample_count": 3,
+        "long_task_max_ms_values": [
+          138.0,
+          129.0,
+          132.0
+        ],
+        "long_task_max_ms_stddev": 4.58,
+        "long_task_max_ms_range": 9.0,
+        "js_heap_used_bytes": 217698531.0,
+        "js_heap_used_bytes_sample_count": 3,
+        "js_heap_used_bytes_values": [
+          199371458.0,
+          217698531.0,
+          220666619.0
+        ],
+        "js_heap_used_bytes_stddev": 11533827.3,
+        "js_heap_used_bytes_range": 21295161.0
+      }
+    ]
+  }
+}
