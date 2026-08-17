@@ -787,8 +787,9 @@ void main() {
       expect(event.isCaptionModeOrReply(), false);
     });
 
-    test('GIVEN image event with no filename field (body differs from null)\n'
-        'THEN return true\n', () {
+    test('GIVEN image event with no filename field and body equal to the '
+        'implicit filename (e.g. sent from Element without a caption)\n'
+        'THEN return false\n', () {
       final event = createEvent(
         content: {
           'body': 'image.jpg',
@@ -797,7 +798,52 @@ void main() {
         },
       );
 
+      expect(event.isCaptionModeOrReply(), false);
+    });
+
+    test('GIVEN file event WITH a filename field and a different body '
+        '(real caption, matches spec: filename separate from body)\n'
+        'THEN return true\n', () {
+      final event = createEvent(
+        content: {
+          'body': 'Please review this before Friday',
+          'filename': 'report.pdf',
+          'msgtype': 'm.file',
+          'url': 'mxc://example.org/file123',
+        },
+      );
+
       expect(event.isCaptionModeOrReply(), true);
+    });
+
+    test('GIVEN file event sent from Element without a caption '
+        '(filename stored only in body)\n'
+        'THEN return false\n', () {
+      final event = createEvent(
+        content: {
+          'body': 'HuyNQ Remote Weekly Report 2026.xlsx',
+          'msgtype': 'm.file',
+          'url': 'mxc://stg.lin-saas.com/ayJakhwDGwMdCQqXipNwbBMq',
+        },
+      );
+
+      expect(event.isCaptionModeOrReply(), false);
+    });
+
+    test('GIVEN CSV file event sent from Element (issue #3303 payload, no '
+        'filename field)\n'
+        'THEN return false\n', () {
+      final event = createEvent(
+        content: {
+          'body': 'LARES-07-2026.csv',
+          'info': {'mimetype': 'text/csv', 'size': 100},
+          'm.mentions': {},
+          'msgtype': 'm.file',
+          'url': 'mxc://stg.lin-saas.com/YAtVeEBeCCwifqbzrNxzPknZ',
+        },
+      );
+
+      expect(event.isCaptionModeOrReply(), false);
     });
   });
 

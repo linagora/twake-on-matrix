@@ -108,7 +108,8 @@ Future<void> main() async {
   );
   final imageEvent = Event(
     content: {
-      'body': 'filename.jpg',
+      'body': 'My vacation photo',
+      'filename': 'filename.jpg',
       'info': {'h': 398, 'mimetype': 'image/jpeg', 'size': 31037, 'w': 394},
       'msgtype': 'm.image',
       'url': 'mxc://example.org/JWEIFJgwEIhweiWJE',
@@ -122,6 +123,7 @@ Future<void> main() async {
   final videoEvent = Event(
     content: {
       'body': 'Gangnam Style',
+      'filename': 'gangnam_style.mp4',
       'info': {
         'duration': 2140786,
         'h': 320,
