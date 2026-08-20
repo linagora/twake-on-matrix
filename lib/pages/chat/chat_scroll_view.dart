@@ -151,6 +151,9 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       isInViewPortCondition: controller.isInViewPortCondition,
       center: centerKey,
       anchor: 1,
+      // Raised during jump-to-event so off-cache rows mount AutoScrollTags
+      // before layout-aware reveal (see chat_scroll_to_event_mixin.dart).
+      cacheExtent: controller.jumpListCacheExtent,
       controller: controller.scrollController,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [

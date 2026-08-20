@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:equatable/equatable.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
 import 'package:twake_chat/app_state/success.dart';
@@ -78,7 +79,6 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
-import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
@@ -111,6 +111,8 @@ import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
 import 'sticker_picker_dialog.dart';
+
+part 'chat_scroll_to_event_mixin.dart';
 
 typedef OnJumpToMessage = void Function(String eventId);
 
@@ -162,7 +164,39 @@ class ChatController extends State<Chat>
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
 
+  /// See [ChatScrollToEventMixin] in `chat_scroll_to_event_mixin.dart`.
+  int _scrollGeneration = 0;
+  int _programmaticScrollDepth = 0;
+
+  /// When non-null, [ChatScrollView] uses this as `cacheExtent` so jump
+  /// targets outside the normal cache can mount `AutoScrollTag`s.
+  double? jumpListCacheExtent;
+
+  /// Pre-jump `jumpListCacheExtent` captured once for an overlapping jump
+  /// sequence; restored only when the latest generation finishes.
+  ///
+  /// [_hasJumpCacheExtentBaseline] distinguishes "not captured yet" from a
+  /// captured null baseline (`??=` cannot record null).
+  double? _jumpCacheExtentBaseline;
+  bool _hasJumpCacheExtentBaseline = false;
+
+  /// Allows [ChatScrollToEventMixin] (extension in the same library) to
+  /// rebuild; extensions cannot call protected [State.setState].
+  void rebuildChatForJump() {
+    if (mounted) setState(() {});
+  }
+
   Timer? _pinToBottomTimer;
+
+  /// True only for the instant `_pinToBottomTimer` calls `jumpTo` itself.
+  ///
+  /// `jumpTo` emits a `ScrollStartNotification` just like a user gesture
+  /// does (with `dragDetails: null` either way, so that field can't tell
+  /// them apart — e.g. mouse-wheel scroll has no drag details either).
+  /// This flag is the only way `handleScrollStartNotification` can tell
+  /// "the timer's own jumpTo just fired this" from "the user just grabbed
+  /// the scroll view (mouse, trackpad, or touch)".
+  bool _isPinToBottomTick = false;
 
   /// Completer to wait for timeline updates after requesting history
   Completer<void>? _timelineUpdateCompleter;
@@ -273,19 +307,6 @@ class ChatController extends State<Chat>
 
   final AutoScrollController scrollController = AutoScrollController();
 
-  // Scroll speed configuration for adaptive scrolling performance
-  // Base speed for nearby messages (increased from 2000.0 to 4500.0)
-  static const double _scrollSpeed = 4500.0;
-
-  // Fast scroll speed for medium-distance messages
-  static const double _scrollSpeedFast = 9000.0;
-
-  // Distance thresholds (in number of messages) for adaptive behavior:
-  // - >100 messages: Reload timeline centered on target (most efficient)
-  // - 20-100 messages: Fast scroll at 9000 px/s
-  // - <20 messages: Normal scroll at 4500 px/s
-  static const int _instantJumpThreshold = 100; // Reload timeline beyond this
-
   final KeyboardVisibilityController keyboardVisibilityController =
       KeyboardVisibilityController();
 
@@ -343,6 +364,9 @@ class ChatController extends State<Chat>
 
   // Track the last event ID we scrolled to from URL to prevent repeated scrolls
   String? _lastHighlightedEventId;
+
+  /// URL `?event=` currently waiting on timeline (dedupes wait loops).
+  String? _pendingUrlJumpEventId;
 
   bool get canSaveSelectedEvent =>
       selectedEvents.length == 1 &&
@@ -564,12 +588,15 @@ class ChatController extends State<Chat>
     if (!scrollController.hasClients) return;
     showScrollDownButtonNotifier.value = !_isAtLiveBottom;
 
+    // Mark-as-read must still run during jump-to-event: opening an unread
+    // room scrolls to `fullyRead` with `_isProgrammaticScrolling`, and the
+    // user (or tests) may reach the live bottom before that jump finishes.
+    _markLatestReadIfAtBottom();
+
     // Skip auto-loading if we're doing programmatic scrolling
     if (_isProgrammaticScrolling) {
       return;
     }
-
-    _markLatestReadIfAtBottom();
 
     if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent ||
@@ -637,7 +664,9 @@ class ChatController extends State<Chat>
   void _initUnreadLocation(String fullyRead) {
     _markerReadLocation = fullyRead;
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
-    scrollToEventId(fullyRead, highlight: false);
+    // Stay on the live timeline so returning to the bottom can still mark
+    // the room read (`allowNewEvent` must remain true).
+    scrollToEventId(fullyRead, highlight: false, allowContextualReload: false);
   }
 
   void _tryLoadTimeline() async {
@@ -645,28 +674,9 @@ class ChatController extends State<Chat>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
-      // when the scroll controller is attached we want to scroll to an event id, if specified
-      // and update the scroll controller...which will trigger a request history, if the
-      // "load more" button is visible on the screen
-      SchedulerBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-
-        String? eventId;
-
-        if (PlatformInfos.isMobile) {
-          eventId = GoRouterState.of(context).uri.queryParameters['event'];
-        } else {
-          final currentLocation = html.window.location.href;
-
-          eventId = Uri.tryParse(
-            Uri.tryParse(currentLocation)?.fragment ?? '',
-          )?.queryParameters['event'];
-        }
-
-        if (eventId != null) {
-          scrollToEventIdAndHighlight(eventId);
-        }
-      });
+      // URL `?event=` jumps are scheduled from didChangeDependencies /
+      // didUpdateWidget via `_scheduleJumpToUrlEventIfNeeded` — do not
+      // start a second jump here (overlapping cacheExtent / scroll).
       await _tryRequestHistory();
       final fullyRead = room?.fullyRead;
       if (fullyRead != null &&
@@ -1248,10 +1258,6 @@ class ChatController extends State<Chat>
     _requestInputFocus();
   }
 
-  Future<void> scrollToEventIdAndHighlight(String eventId) async {
-    return await scrollToEventId(eventId, highlight: true);
-  }
-
   Future<void>? loadTimelineFuture;
 
   void requestFuture() async {
@@ -1269,27 +1275,54 @@ class ChatController extends State<Chat>
     }
   }
 
-  Future<void> _getTimeline({String? eventContextId}) async {
+  Future<void> _getTimeline({
+    String? eventContextId,
+    int? commitOnlyIfJumpGeneration,
+  }) async {
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
     }
-    if (timeline != null) {
+
+    // Speculative jump loads must not cancel a newer jump's timeline before
+    // the await; the caller already cleared `timeline` when appropriate.
+    if (commitOnlyIfJumpGeneration == null && timeline != null) {
       timeline!.cancelSubscriptions();
     }
+
+    Timeline? loaded;
     try {
-      timeline = await room?.getTimeline(
+      loaded = await room?.getTimeline(
         onUpdate: updateView,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
-      if (!mounted) return;
-      timeline = await room?.getTimeline(onUpdate: updateView);
-      if (!mounted) return;
+      if (!mounted) {
+        loaded?.cancelSubscriptions();
+        return;
+      }
+      loaded = await room?.getTimeline(onUpdate: updateView);
+      if (!mounted) {
+        loaded?.cancelSubscriptions();
+        return;
+      }
     }
+
+    if (commitOnlyIfJumpGeneration != null &&
+        commitOnlyIfJumpGeneration != _scrollGeneration) {
+      // A newer jump superseded this load — discard without touching the
+      // shared timeline the current jump may already own.
+      loaded?.cancelSubscriptions();
+      return;
+    }
+
+    if (timeline != null && !identical(timeline, loaded)) {
+      timeline!.cancelSubscriptions();
+    }
+    timeline = loaded;
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (room!.markedUnread) room?.markUnread(false);
 
@@ -1312,818 +1345,95 @@ class ChatController extends State<Chat>
     return;
   }
 
-  bool verifyEventIdInTimeline(Timeline? timeline, String? eventId) {
-    if (eventId == null) return false;
-    if (timeline == null) return false;
-    if (timeline.events.isEmpty) return false;
-
-    final foundEvent = timeline.events
-        .where((e) => e.isVisibleInGui)
-        .firstWhereOrNull((e) => e.eventId == eventId);
-
-    return foundEvent != null;
-  }
-
   void scrollDown() async {
     if (timeline == null) return;
+    // A contextual jump owns the timeline window; reloading it here would
+    // replace the jump's target window with the live one mid-jump.
+    if (_isProgrammaticScrolling) return;
     if (!timeline!.allowNewEvent) {
       // Cancel subscriptions BEFORE nulling the reference to avoid
       // leaking the old Timeline's 5 stream subscriptions.
       timeline!.cancelSubscriptions();
+      final jumpGeneration = _scrollGeneration;
       setState(() {
         timeline = null;
-        loadTimelineFuture = _getTimeline().onError((e, s) {
-          Logs().wtf('Chat::scrollDown(): Unable to load timeline', e, s);
-        });
+        loadTimelineFuture =
+            _getTimeline(commitOnlyIfJumpGeneration: jumpGeneration).onError((
+              e,
+              s,
+            ) {
+              Logs().wtf('Chat::scrollDown(): Unable to load timeline', e, s);
+            });
       });
       await loadTimelineFuture;
+      // `_getTimeline()` assigns `timeline` directly (no setState) — the
+      // Sliver only picks up the new timeline, and therefore the true
+      // maxScrollExtent, on the next build. Without waiting here, the
+      // jumpTo below can still target the previous (contextual-window)
+      // scroll metrics, landing short of the real bottom by roughly the
+      // height of the last row (e.g. an image+caption bubble).
+      if (!mounted) return;
+      setState(() {});
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
     }
     if (scrollController.positions.isNotEmpty) {
-      while (scrollController.position.pixels !=
-          scrollController.position.maxScrollExtent) {
-        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      _isPinToBottomTick = true;
+      try {
+        while (scrollController.position.pixels !=
+            scrollController.position.maxScrollExtent) {
+          scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        }
+      } finally {
+        _isPinToBottomTick = false;
       }
       _keepScrollPinnedToBottom();
     }
     _handleHideStickyTimestamp();
   }
 
+  /// Cancels the pin-to-bottom timer, if any, and balances the
+  /// `_beginProgrammaticScroll()` it holds.
+  void _cancelPinToBottomTimer() {
+    final timer = _pinToBottomTimer;
+    if (timer == null) return;
+    timer.cancel();
+    _pinToBottomTimer = null;
+    _endProgrammaticScroll();
+  }
+
   void _keepScrollPinnedToBottom({
     Duration duration = const Duration(milliseconds: 1200),
   }) {
-    _pinToBottomTimer?.cancel();
+    // Restarting the pin timer must end the previous begin so depth stays
+    // balanced when nested with jump-to-event.
+    _cancelPinToBottomTimer();
+
     final deadline = DateTime.now().add(duration);
-    // Set flag to prevent scroll listener from triggering auto-loading
-    _isProgrammaticScrolling = true;
+    _beginProgrammaticScroll();
 
     _pinToBottomTimer = Timer.periodic(const Duration(milliseconds: 16), (
       timer,
     ) {
       if (!mounted || scrollController.positions.isEmpty) {
-        timer.cancel();
-        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
-        _isProgrammaticScrolling = false;
+        if (identical(_pinToBottomTimer, timer)) _cancelPinToBottomTimer();
         return;
       }
 
       final position = scrollController.position;
       if (position.pixels < position.maxScrollExtent) {
-        scrollController.jumpTo(position.maxScrollExtent);
+        _isPinToBottomTick = true;
+        try {
+          scrollController.jumpTo(position.maxScrollExtent);
+        } finally {
+          _isPinToBottomTick = false;
+        }
       }
 
       if (DateTime.now().isAfter(deadline)) {
-        timer.cancel();
-        if (identical(_pinToBottomTimer, timer)) _pinToBottomTimer = null;
-        _isProgrammaticScrolling = false;
+        if (identical(_pinToBottomTimer, timer)) _cancelPinToBottomTimer();
       }
     });
-  }
-
-  int getDisplayEventIndex(int eventIndex) {
-    const addedHeadItemsInChat = 1;
-    return eventIndex + addedHeadItemsInChat;
-  }
-
-  int _getEventIndex(String eventId) {
-    if (timeline == null) return -1;
-    final foundEvent = timeline!.events.firstWhereOrNull(
-      (event) => event.eventId == eventId,
-    );
-
-    final eventIndex = foundEvent == null
-        ? -1
-        : timeline!.events.indexWhere(
-            (event) => event.eventId == foundEvent.eventId,
-          );
-
-    return eventIndex;
-  }
-
-  Future<void> scrollToEventId(
-    String eventId, {
-    bool highlight = true,
-    int maxAttempts = 3,
-    int currentAttempt = 0,
-  }) async {
-    final eventIndex = _getEventIndex(eventId);
-    if (eventIndex == -1) {
-      if (currentAttempt >= maxAttempts) {
-        Logs().e(
-          'Chat::scrollToEventId(): Max attempts ($maxAttempts) reached for event $eventId',
-        );
-        return;
-      }
-      // Cancel subscriptions BEFORE nulling the reference to avoid
-      // leaking the old Timeline's 5 stream subscriptions.
-      timeline?.cancelSubscriptions();
-      setState(() {
-        timeline = null;
-        loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
-          e,
-          s,
-        ) {
-          Logs().e('Chat::scrollToEventId(): Unable to load timeline', e, s);
-        });
-      });
-      await loadTimelineFuture;
-
-      // Wait for widget to rebuild with new timeline, then request history and retry
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-        if (timeline == null) {
-          return;
-        }
-
-        // Check if event is already in timeline after reload
-        if (verifyEventIdInTimeline(timeline, eventId)) {
-          // Wait for another frame to ensure messages are rendered
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            scrollToEventId(
-              eventId,
-              highlight: highlight,
-              maxAttempts: maxAttempts,
-              currentAttempt: currentAttempt + 1,
-            );
-          });
-          return;
-        }
-
-        // Event not found yet, request history to load more events
-        // Create a completer to wait for the timeline to update
-        _timelineUpdateCompleter = Completer<void>();
-        await _tryRequestHistory();
-
-        // Wait for timeline to actually update (or timeout after 2 seconds)
-        try {
-          await _timelineUpdateCompleter!.future.timeout(
-            const Duration(seconds: 2),
-            onTimeout: () {
-              Logs().w(
-                'Chat::scrollToEventId(): Timeline update timeout, proceeding anyway',
-              );
-            },
-          );
-        } finally {
-          _timelineUpdateCompleter = null;
-        }
-
-        if (!mounted) return;
-
-        // Check if event is now in timeline
-        if (verifyEventIdInTimeline(timeline, eventId)) {
-          Logs().d(
-            'Chat::scrollToEventId(): Event found in timeline after update',
-          );
-
-          // Poll for widget to be actually rendered in the widget tree
-          // The completer only ensures timeline DATA is updated,
-          // but widgets need time to build via ListView's lazy loading
-          int attempts = 0;
-          const maxRenderAttempts = 20; // ~333ms at 60fps
-          bool widgetRendered = false;
-
-          while (attempts < maxRenderAttempts && mounted) {
-            await SchedulerBinding.instance.endOfFrame;
-
-            // Check if widget is actually rendered by looking up its context
-            if (GlobalObjectKey(eventId).currentContext != null) {
-              widgetRendered = true;
-              break;
-            }
-            attempts++;
-          }
-
-          Logs().d(
-            'Chat::scrollToEventId(): Widget rendered=$widgetRendered after $attempts frames',
-          );
-
-          // Proceed with scroll regardless (if not rendered, next iteration will handle it)
-          scrollToEventId(
-            eventId,
-            highlight: highlight,
-            maxAttempts: maxAttempts,
-            currentAttempt: currentAttempt + 1,
-          );
-        } else {
-          Logs().w(
-            'Chat::scrollToEventId(): Event not found after history request and timeline update',
-          );
-        }
-      });
-      return;
-    }
-    await _scrollToMessageWithEventId(eventId, highlight: highlight);
-    _updateScrollController();
-  }
-
-  /// Scrolls to a message with the given [eventId] and centers it in the viewport.
-  ///
-  /// This method handles three scenarios:
-  /// 1. If the message is already rendered, it centers it immediately
-  /// 2. If message is far away (>100 messages), reload timeline centered on it
-  /// 3. If not rendered but nearby, gradually scrolls towards it until found
-  ///
-  /// **Important**: Due to GlobalObjectKey behavior on mobile, we must create
-  /// fresh key instances from `timeline.events[index].eventId` rather than
-  /// reusing the passed [eventId] parameter to ensure reliable context lookups.
-  Future<void> _scrollToMessageWithEventId(
-    String eventId, {
-    bool highlight = false,
-  }) async {
-    if (timeline == null) {
-      return;
-    }
-
-    final targetIndex = timeline!.events.indexWhere(
-      (event) => event.eventId == eventId,
-    );
-
-    if (targetIndex == -1) {
-      return;
-    }
-
-    // Check if target message is already rendered in viewport
-    // Use event from timeline to ensure reliable GlobalObjectKey lookup
-    final targetEventId = timeline!.events[targetIndex].eventId;
-    final itemContext = GlobalObjectKey(targetEventId).currentContext;
-
-    if (itemContext != null &&
-        scrollController.hasFiniteViewportPosition(itemContext)) {
-      await _centerAndHighlightMessage(
-        itemContext: itemContext,
-        targetIndex: targetIndex,
-        highlight: highlight,
-      );
-      return;
-    }
-
-    // Check if message is very far away - if so, reload timeline
-    final nearestRenderedIndex = _findVisibleEventIndex();
-    if (nearestRenderedIndex != null) {
-      final messageDistance = (targetIndex - nearestRenderedIndex).abs();
-
-      if (messageDistance > _instantJumpThreshold) {
-        // Message is very far - reload timeline centered on target event
-        Logs().d(
-          'Chat::_scrollToMessageWithEventId(): Distance=$messageDistance messages (>$_instantJumpThreshold)',
-        );
-
-        final newTargetIndex = await _reloadTimelineAndWaitForRender(
-          eventId: eventId,
-          logContext: 'Chat::_scrollToMessageWithEventId()',
-        );
-
-        if (newTargetIndex != -1 && timeline != null) {
-          final newTargetEventId = timeline!.events[newTargetIndex].eventId;
-          final newItemContext = GlobalObjectKey(
-            newTargetEventId,
-          ).currentContext;
-
-          if (newItemContext != null) {
-            await _centerAndHighlightMessage(
-              itemContext: newItemContext,
-              targetIndex: newTargetIndex,
-              highlight: highlight,
-            );
-          } else {
-            // Widget still not rendered, try scrolling to it
-            await _scrollTowardsMessage(
-              eventId,
-              newTargetIndex,
-              highlight: highlight,
-            );
-          }
-        }
-        return;
-      }
-    }
-
-    // Message not rendered but nearby - poll for widgets to be rendered
-    // Use frame-based polling instead of arbitrary delay
-    int attempts = 0;
-    const maxRenderAttempts =
-        10; // ~167ms at 60fps (shorter wait for nearby messages)
-
-    while (attempts < maxRenderAttempts &&
-        mounted &&
-        scrollController.hasClients) {
-      await SchedulerBinding.instance.endOfFrame;
-
-      // Check if widget rendered during the wait
-      final recheckContext = GlobalObjectKey(targetEventId).currentContext;
-      if (recheckContext != null &&
-          scrollController.hasFiniteViewportPosition(recheckContext)) {
-        Logs().d(
-          'Chat::_scrollToMessageWithEventId(): Widget rendered after $attempts frames',
-        );
-        await _centerAndHighlightMessage(
-          itemContext: recheckContext,
-          targetIndex: targetIndex,
-          highlight: highlight,
-        );
-        return;
-      }
-
-      attempts++;
-    }
-
-    // Guard against disposed widget after polling
-    if (!mounted || !scrollController.hasClients) return;
-
-    Logs().d(
-      'Chat::_scrollToMessageWithEventId(): Widget not rendered after $attempts frames, proceeding with scroll',
-    );
-
-    // Still not rendered, proceed with scroll-towards approach
-    await _scrollTowardsMessage(eventId, targetIndex, highlight: highlight);
-  }
-
-  /// Centers an already-rendered message in the viewport.
-  Future<void> _centerRenderedMessage(BuildContext itemContext) async {
-    final itemBox = itemContext.findRenderObject() as RenderBox?;
-    final scrollBox =
-        scrollController.position.context.notificationContext
-                ?.findRenderObject()
-            as RenderBox?;
-    if (itemBox == null || scrollBox == null) return;
-
-    final itemPosition = itemBox.localToGlobal(
-      Offset.zero,
-      ancestor: scrollBox,
-    );
-    final viewportHeight = scrollBox.size.height;
-    final itemHeight = itemBox.size.height;
-
-    // Calculate scroll adjustment to center the message
-    final scrollAdjustment =
-        itemPosition.dy - (viewportHeight / 2) + (itemHeight / 2);
-    final targetOffset = scrollController.offset + scrollAdjustment;
-
-    // localToGlobal yields NaN for mounted but off-screen rows.
-    if (!targetOffset.isFinite) return;
-
-    // Calculate duration based on distance and adaptive speed
-    final distance = scrollAdjustment.abs();
-
-    // Use faster speed for larger adjustments (>1000px), normal for small ones
-    final scrollSpeed = distance > 1000 ? _scrollSpeedFast : _scrollSpeed;
-
-    final durationMs = (distance / scrollSpeed * 1000).round();
-    if (durationMs <= 0) {
-      scrollController.jumpTo(targetOffset);
-      return;
-    }
-    final duration = Duration(milliseconds: durationMs);
-    await scrollController.animateTo(
-      targetOffset,
-      duration: duration,
-      curve: Curves.easeInOut, // Smoother curve for centering
-    );
-  }
-
-  /// Helper method to center a message and optionally apply highlight.
-  /// Reduces code duplication across scroll methods.
-  Future<void> _centerAndHighlightMessage({
-    required BuildContext itemContext,
-    required int targetIndex,
-    required bool highlight,
-  }) async {
-    final wasProgrammatic = _isProgrammaticScrolling;
-    if (!wasProgrammatic) _isProgrammaticScrolling = true;
-    try {
-      await _centerRenderedMessage(itemContext);
-      if (highlight) {
-        await scrollController.highlight(getDisplayEventIndex(targetIndex));
-      }
-    } finally {
-      if (!wasProgrammatic) _isProgrammaticScrolling = false;
-    }
-  }
-
-  /// Helper method to reload timeline centered on an event and wait for rendering.
-  /// Returns the new target index if successful, -1 otherwise.
-  /// This eliminates duplication of the timeline reload + render wait pattern.
-  /// Uses frame-based polling to ensure the event is actually present before proceeding.
-  Future<int> _reloadTimelineAndWaitForRender({
-    required String eventId,
-    required String logContext,
-    int maxAttempts = 20, // ~20 frames = ~333ms at 60fps
-  }) async {
-    Logs().d('$logContext: Reloading timeline centered on $eventId');
-
-    // Cancel subscriptions BEFORE nulling the reference to avoid
-    // leaking the old Timeline's 5 stream subscriptions.
-    timeline?.cancelSubscriptions();
-    setState(() {
-      timeline = null;
-      loadTimelineFuture = _getTimeline(eventContextId: eventId).onError((
-        e,
-        s,
-      ) {
-        Logs().wtf('$logContext: Unable to reload timeline', e, s);
-      });
-    });
-    await loadTimelineFuture;
-
-    // Poll for the event to appear in timeline using frame-based waiting
-    int attempts = 0;
-    while (attempts < maxAttempts) {
-      // Wait for the next frame to be rendered
-      await SchedulerBinding.instance.endOfFrame;
-
-      if (!mounted || timeline == null) {
-        Logs().w(
-          '$logContext: Timeline became null or widget unmounted after $attempts frames',
-        );
-        return -1;
-      }
-
-      final targetIndex = timeline!.events.indexWhere(
-        (event) => event.eventId == eventId,
-      );
-
-      if (targetIndex != -1) {
-        Logs().d(
-          '$logContext: Found event at index $targetIndex after $attempts frames',
-        );
-        return targetIndex;
-      }
-
-      attempts++;
-    }
-
-    Logs().w('$logContext: Event not found after $maxAttempts frame attempts');
-    return -1;
-  }
-
-  /// Gradually scrolls towards a message until it becomes rendered.
-  ///
-  /// Uses a continuous scroll animation with periodic checks, eliminating
-  /// the pause-between-steps that occurs with iterative scrolling.
-  ///
-  /// This method will retry scrolling if the target isn't found on the first attempt.
-  Future<void> _scrollTowardsMessage(
-    String eventId,
-    int targetIndex, {
-    int retryCount = 0,
-    bool highlight = false,
-  }) async {
-    const checkIntervalMs = 50;
-    const maxRetries = 15; // Increased from 10 to handle large messages better
-
-    Logs().d(
-      'Chat::_scrollTowardsMessage(): START - eventId=$eventId, targetIndex=$targetIndex, highlight=$highlight, retryCount=$retryCount',
-    );
-
-    final eventsCount = timeline!.events.length;
-    if (eventsCount == 0) return;
-
-    // Set flag to prevent auto-loading during programmatic scroll
-    _isProgrammaticScrolling = true;
-
-    try {
-      // Find nearest rendered message to determine scroll direction
-      final nearestRenderedIndex = _findVisibleEventIndex();
-      if (nearestRenderedIndex == null) {
-        // No rendered messages found - use AutoScrollController to force ListView to build widgets
-        Logs().w(
-          'Chat::_scrollTowardsMessage(): No rendered messages found, using AutoScrollController to force render',
-        );
-
-        // Use AutoScrollController to force ListView to build/render the target widget
-        await scrollController.scrollToIndex(
-          getDisplayEventIndex(targetIndex),
-          preferPosition: AutoScrollPosition.middle,
-          duration: const Duration(milliseconds: 300),
-        );
-
-        // Wait for widgets to be rendered after the scroll
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        // Guard against disposed widget after async delay
-        if (!mounted || !scrollController.hasClients) return;
-
-        // Check if target is now rendered and apply highlight
-        if (_isMessageRendered(targetIndex)) {
-          Logs().d(
-            'Chat::_scrollTowardsMessage(): Message rendered after AutoScrollController',
-          );
-          if (highlight) {
-            await scrollController.highlight(getDisplayEventIndex(targetIndex));
-          }
-        } else if (retryCount < maxRetries) {
-          // Still not rendered, retry
-          Logs().w(
-            'Chat::_scrollTowardsMessage(): Message still not rendered after AutoScrollController, retrying (attempt $retryCount/$maxRetries)',
-          );
-          await Future.delayed(const Duration(milliseconds: 200));
-          // Recursive call will re-set the flag
-          _isProgrammaticScrolling = false;
-          await _scrollTowardsMessage(
-            eventId,
-            targetIndex,
-            retryCount: retryCount + 1,
-            highlight: highlight,
-          );
-          return; // Exit early, flag will be cleared by recursive call
-        } else {
-          Logs().e(
-            'Chat::_scrollTowardsMessage(): Failed to render message after $maxRetries attempts',
-          );
-        }
-        return;
-      }
-
-      // Determine scroll direction
-      final shouldScrollDown = targetIndex < nearestRenderedIndex;
-      final messageDistance = (targetIndex - nearestRenderedIndex).abs();
-
-      // Try to estimate pixel distance based on rendered message positions
-      // This is more accurate than using message count because some events
-      // return SizedBox() when !isVisibleInGui
-      double estimatedPixelDistance;
-
-      final nearestKey = GlobalObjectKey(
-        timeline!.events[nearestRenderedIndex].eventId,
-      );
-      final nearestContext = nearestKey.currentContext;
-
-      if (nearestContext != null) {
-        // Get actual pixel position of nearest rendered message
-        final nearestBox = nearestContext.findRenderObject() as RenderBox?;
-        final scrollBox =
-            scrollController.position.context.notificationContext
-                    ?.findRenderObject()
-                as RenderBox?;
-
-        if (nearestBox != null && scrollBox != null) {
-          // Estimate target position based on visible message count between nearest and target
-          // Count only visible events to get accurate estimate
-          int visibleEventCount = 0;
-          final startIndex = shouldScrollDown
-              ? targetIndex
-              : nearestRenderedIndex;
-          final endIndex = shouldScrollDown
-              ? nearestRenderedIndex
-              : targetIndex;
-
-          for (int i = startIndex; i < endIndex; i++) {
-            if (timeline!.events[i].isVisibleInGui) {
-              visibleEventCount++;
-            }
-          }
-
-          // Use 180px per visible message as estimate (average message height)
-          estimatedPixelDistance = visibleEventCount * 180.0;
-
-          // For retries, add extra distance to account for potentially large messages (3-4x screen)
-          // Add viewport height to ensure large messages enter viewport
-          if (retryCount > 0) {
-            final viewportHeight = scrollBox.size.height;
-            final retryMultiplier =
-                1.0 + (retryCount * 0.3); // 30% more per retry
-            estimatedPixelDistance =
-                estimatedPixelDistance * retryMultiplier + viewportHeight;
-
-            Logs().d(
-              'Chat::_scrollTowardsMessage(): Retry $retryCount - adding extra scroll distance (multiplier=${retryMultiplier.toStringAsFixed(2)}, +${viewportHeight.toInt()}px viewport)',
-            );
-          }
-
-          Logs().d(
-            'Chat::_scrollTowardsMessage(): Counted $visibleEventCount visible events between indices (total messages=$messageDistance)',
-          );
-        } else {
-          // Fallback: estimate based on visible message ratio
-          // Assume ~70% of messages are visible in GUI on average
-          estimatedPixelDistance = messageDistance * 180.0 * 0.7;
-
-          // For retries, add extra distance
-          if (retryCount > 0) {
-            final retryMultiplier = 1.0 + (retryCount * 0.3);
-            estimatedPixelDistance = estimatedPixelDistance * retryMultiplier;
-          }
-        }
-      } else {
-        // Can't get position, use conservative estimate
-        estimatedPixelDistance = messageDistance * 180.0 * 0.7;
-
-        // For retries, add extra distance
-        if (retryCount > 0) {
-          final retryMultiplier = 1.0 + (retryCount * 0.3);
-          estimatedPixelDistance = estimatedPixelDistance * retryMultiplier;
-        }
-      }
-
-      // Adaptive speed based on pixel distance:
-      // - Large distance (>3000px): Fast scroll (9000 px/s)
-      // - Medium distance: Normal scroll (4500 px/s)
-      final scrollSpeed = estimatedPixelDistance > 3000
-          ? _scrollSpeedFast
-          : _scrollSpeed;
-
-      // Calculate target offset for continuous scroll
-      final currentOffset = scrollController.offset;
-      final scrollDirection = shouldScrollDown
-          ? estimatedPixelDistance
-          : -estimatedPixelDistance;
-      final estimatedTargetOffset = (currentOffset + scrollDirection).clamp(
-        scrollController.position.minScrollExtent,
-        scrollController.position.maxScrollExtent,
-      );
-
-      // Start continuous scroll animation
-      final durationMs = (estimatedPixelDistance / scrollSpeed * 1000).toInt();
-      if (durationMs <= 0) {
-        scrollController.jumpTo(estimatedTargetOffset);
-        return;
-      }
-      final scrollDuration = Duration(milliseconds: durationMs);
-
-      Logs().d(
-        'Chat::_scrollTowardsMessage(): Distance=$messageDistance messages (~${estimatedPixelDistance.toInt()}px), speed=$scrollSpeed px/s, duration=${scrollDuration.inMilliseconds}ms',
-      );
-
-      // Start the animation (non-blocking)
-      final animationFuture = scrollController.animateTo(
-        estimatedTargetOffset,
-        duration: scrollDuration,
-        curve: Curves.linear,
-      );
-
-      // Periodically check if target is rendered while scrolling
-      final stopwatch = Stopwatch()..start();
-      bool reachedBoundary = false;
-
-      while (stopwatch.elapsedMilliseconds < scrollDuration.inMilliseconds) {
-        await Future.delayed(const Duration(milliseconds: checkIntervalMs));
-
-        // Guard against disposed widget in scroll loop
-        if (!mounted || !scrollController.hasClients) return;
-
-        final isRendered = _isMessageRendered(targetIndex);
-        final currentPos = scrollController.offset;
-
-        if (isRendered) {
-          // Found it! Stop the animation by jumping to current position
-          scrollController.jumpTo(currentPos);
-          stopwatch.stop();
-
-          // Center the message (this call won't trigger highlight since we handle it here)
-          await _scrollToMessageWithEventId(eventId, highlight: false);
-
-          // Apply highlight if requested
-          if (highlight) {
-            await scrollController.highlight(getDisplayEventIndex(targetIndex));
-          }
-          return;
-        }
-
-        // Check if we've reached scroll boundary
-        if (currentPos == scrollController.position.minScrollExtent ||
-            currentPos == scrollController.position.maxScrollExtent) {
-          stopwatch.stop();
-          reachedBoundary = true;
-          break;
-        }
-      }
-
-      // Wait for animation to complete if message wasn't found
-      await animationFuture;
-      final finalRendered = _isMessageRendered(targetIndex);
-
-      Logs().d(
-        'Chat::_scrollTowardsMessage(): Animation complete - finalRendered=$finalRendered, reachedBoundary=$reachedBoundary, retryCount=$retryCount/$maxRetries',
-      );
-
-      // If target not found and we haven't hit boundary or max retries, continue scrolling
-      if (!finalRendered && !reachedBoundary && retryCount < maxRetries) {
-        Logs().d(
-          'Chat::_scrollTowardsMessage(): Retrying scroll (attempt ${retryCount + 1}/$maxRetries)',
-        );
-        // Recursive call will re-set the flag
-        _isProgrammaticScrolling = false;
-        await _scrollTowardsMessage(
-          eventId,
-          targetIndex,
-          retryCount: retryCount + 1,
-          highlight: highlight,
-        );
-      } else if (finalRendered && highlight) {
-        // Message rendered but we exited the loop - apply highlight
-        Logs().d(
-          'Chat::_scrollTowardsMessage(): Message rendered after animation, applying highlight',
-        );
-        await scrollController.highlight(getDisplayEventIndex(targetIndex));
-      } else if (!finalRendered && reachedBoundary) {
-        // Message not rendered and we hit a scroll boundary
-        // Try reloading timeline centered on the event as a fallback
-        Logs().w(
-          'Chat::_scrollTowardsMessage(): Message not rendered and hit boundary, reloading timeline as fallback',
-        );
-
-        final newTargetIndex = await _reloadTimelineAndWaitForRender(
-          eventId: eventId,
-          logContext: 'Chat::_scrollTowardsMessage() fallback',
-        );
-
-        if (newTargetIndex != -1 && timeline != null) {
-          final newTargetEventId = timeline!.events[newTargetIndex].eventId;
-          final newItemContext = GlobalObjectKey(
-            newTargetEventId,
-          ).currentContext;
-
-          if (newItemContext != null) {
-            Logs().d(
-              'Chat::_scrollTowardsMessage(): Message rendered after timeline reload',
-            );
-            await _centerAndHighlightMessage(
-              itemContext: newItemContext,
-              targetIndex: newTargetIndex,
-              highlight: highlight,
-            );
-          } else {
-            // Still not rendered, use AutoScrollController as final attempt
-            Logs().w(
-              'Chat::_scrollTowardsMessage(): Message still not rendered after timeline reload, using AutoScrollController',
-            );
-            await scrollController.scrollToIndex(
-              getDisplayEventIndex(newTargetIndex),
-              preferPosition: AutoScrollPosition.middle,
-              duration: const Duration(milliseconds: 300),
-            );
-
-            await Future.delayed(const Duration(milliseconds: 500));
-
-            if (!mounted || !scrollController.hasClients) return;
-
-            if (_isMessageRendered(newTargetIndex) && highlight) {
-              await scrollController.highlight(
-                getDisplayEventIndex(newTargetIndex),
-              );
-            }
-          }
-        } else {
-          Logs().e(
-            'Chat::_scrollTowardsMessage(): Event not found even after timeline reload',
-          );
-        }
-      } else if (!finalRendered && retryCount >= maxRetries) {
-        // Exhausted retries without finding the message
-        Logs().e(
-          'Chat::_scrollTowardsMessage(): Failed to render message after $maxRetries retry attempts',
-        );
-      }
-    } finally {
-      // Always clear the flag when done
-      _isProgrammaticScrolling = false;
-    }
-  }
-
-  int? _findVisibleEventIndex() {
-    // First, try to use the tracked visible event
-    if (visibleEventId != null) {
-      final index = timeline!.events.indexWhere(
-        (event) => event.eventId == visibleEventId,
-      );
-      if (index != -1) return index;
-    }
-
-    // Fallback: Find any currently rendered event by scanning the timeline
-    // Start from the middle and work outwards for better performance
-    final eventsCount = timeline!.events.length;
-    final midPoint = eventsCount ~/ 2;
-
-    // Check middle first (most likely to be rendered)
-    if (_isMessageRendered(midPoint)) {
-      return midPoint;
-    }
-
-    // Spiral outwards from middle
-    for (var offset = 1; offset < eventsCount; offset++) {
-      // Check above middle
-      final upperIndex = midPoint - offset;
-      if (upperIndex >= 0 && _isMessageRendered(upperIndex)) {
-        return upperIndex;
-      }
-
-      // Check below middle
-      final lowerIndex = midPoint + offset;
-      if (lowerIndex < eventsCount && _isMessageRendered(lowerIndex)) {
-        return lowerIndex;
-      }
-    }
-
-    return null;
-  }
-
-  /// Checks if a message at [index] is rendered with a usable position.
-  bool _isMessageRendered(int index) {
-    if (index < 0 || index >= timeline!.events.length) return false;
-    final itemContext = GlobalObjectKey(
-      timeline!.events[index].eventId,
-    ).currentContext;
-    return itemContext != null &&
-        scrollController.hasFiniteViewportPosition(itemContext);
   }
 
   void forgetRoom() async {
@@ -3049,12 +2359,18 @@ class ChatController extends State<Chat>
   }
 
   void _resetLocationPath() {
+    // Hover must not strip `?event=` while a jump is in flight, or while
+    // the URL points at a different event than the one we last claimed —
+    // otherwise rapid same-room search clicks lose their target.
+    if (_isProgrammaticScrolling) return;
+
     final currentLocation = html.window.location.href;
 
     final event = Uri.tryParse(
       Uri.tryParse(currentLocation)?.fragment ?? '',
     )?.queryParameters['event'];
     if (event == null) return;
+    if (event != _lastHighlightedEventId) return;
     Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
     final queryIndex = currentLocation.indexOf('?');
     final newLocation = queryIndex != -1
@@ -3146,6 +2462,18 @@ class ChatController extends State<Chat>
     Logs().d('Chat::handleScrollStartNotification() - Start of scroll');
     if (PlatformInfos.isMobile) _timestampTimer?.cancel();
     _currentChatScrollState = ChatScrollState.startScroll;
+
+    // `_pinToBottomTimer`'s own `jumpTo` also emits a ScrollStartNotification
+    // (dragDetails is null either way — e.g. mouse-wheel scroll has none —
+    // so that field can't distinguish "user" from "timer"). `_isPinToBottomTick`
+    // is true only for the instant the timer's jumpTo is on the stack, so any
+    // ScrollStartNotification arriving outside of it means the user grabbed
+    // the scroll view (mouse, trackpad, or touch). Release the pin-to-bottom
+    // lock then, or the timer keeps forcing the list back to the bottom every
+    // 16ms for up to 1200ms after "jump to bottom", producing a glitch.
+    if (!_isPinToBottomTick) {
+      _cancelPinToBottomTimer();
+    }
   }
 
   void handleScrollUpdateNotification() {
@@ -3158,6 +2486,14 @@ class ChatController extends State<Chat>
   Future<void> _tryRequestHistory() async {
     if (timeline == null) return;
 
+    // Jump-to-event owns the timeline window; do not expand history or keep
+    // the opening state on Loading while a programmatic scroll is in flight.
+    if (_isProgrammaticScrolling) {
+      _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+      return;
+    }
+
+    final timelineAtStart = timeline;
     final allMembershipEvents = timeline!.events.every(
       (event) => event.type == EventTypes.RoomMember,
     );
@@ -3183,24 +2519,34 @@ class ChatController extends State<Chat>
 
     if (allMembershipEvents || canRequestHistory) {
       try {
-        await requestHistory(historyCount: _defaultEventCountDisplay).then((
-          response,
-        ) async {
-          Logs().v('Chat::_tryRequestHistory():: Try request history success');
-          if (allMembershipEvents) {
-            await requestHistory(
-              historyCount: _defaultEventCountDisplay,
-              filter: StateFilter(
-                lazyLoadMembers: true,
-                types: getEventTypeToFilterUnnecessaryEvent,
-              ),
-            );
-          }
-        });
+        await requestHistory(historyCount: _defaultEventCountDisplay);
+        Logs().v('Chat::_tryRequestHistory():: Try request history success');
+        // Search jump may have replaced the timeline mid-await. Do not keep
+        // requesting on the new contextual window (room-C failure mode).
+        if (!mounted ||
+            _isProgrammaticScrolling ||
+            timeline == null ||
+            !identical(timeline, timelineAtStart)) {
+          return;
+        }
+        if (allMembershipEvents) {
+          await requestHistory(
+            historyCount: _defaultEventCountDisplay,
+            filter: StateFilter(
+              lazyLoadMembers: true,
+              types: getEventTypeToFilterUnnecessaryEvent,
+            ),
+          );
+        }
       } catch (e) {
         Logs().e('Chat::_tryRequestHistory():: Error - $e');
       } finally {
-        _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+        // Always unblock ChatEventList when history finishes, even if a
+        // jump holds `_isProgrammaticScrolling` (otherwise the view can
+        // stay on Loading while a small-timeline jump waits for Success).
+        if (mounted) {
+          _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+        }
       }
     } else {
       _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
@@ -3825,65 +3171,134 @@ class ChatController extends State<Chat>
   void didChangeDependencies() {
     super.didChangeDependencies();
     matrix = Matrix.of(context);
+    // Depend on GoRouterState so same-room `?event=` navigations notify
+    // this State (web previously only read html.window and never rebuilt).
+    _scheduleJumpToUrlEventIfNeeded(source: 'didChangeDependencies');
   }
 
   @override
   void didUpdateWidget(covariant Chat oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _scheduleJumpToUrlEventIfNeeded(source: 'didUpdateWidget');
+  }
 
-    // Parse event ID from URL (support both mobile and web)
-    String? highlightEventId;
-    if (PlatformInfos.isMobile) {
-      highlightEventId = GoRouterState.of(context).uri.queryParameters['event'];
-    } else {
-      final currentLocation = html.window.location.href;
-      highlightEventId = Uri.tryParse(
-        Uri.tryParse(currentLocation)?.fragment ?? '',
-      )?.queryParameters['event'];
+  /// Jump when the route's `?event=` target is new (search / deep link).
+  ///
+  /// Always resolves the **latest** URL event at jump time so rapid
+  /// same-room clicks coalesce instead of aborting without scrolling.
+  void _scheduleJumpToUrlEventIfNeeded({required String source}) {
+    final highlightEventId = _eventIdFromLocation();
+    if (highlightEventId == null) return;
+    if (highlightEventId == _lastHighlightedEventId) return;
+    // Already waiting / jumping for this URL target.
+    if (highlightEventId == _pendingUrlJumpEventId) return;
+
+    Logs().d(
+      'Chat::_scheduleJumpToUrlEventIfNeeded($source) - Event to '
+      'highlight from URL: $highlightEventId',
+    );
+
+    _pendingUrlJumpEventId = highlightEventId;
+
+    // Timeline already up: jump immediately (no post-frame abort race).
+    if (timeline != null && timeline!.events.isNotEmpty) {
+      unawaited(scrollToEventId(highlightEventId, highlight: true));
+      return;
     }
 
-    // If event ID exists in URL and we haven't scrolled to it yet, scroll to it
-    if (highlightEventId != null &&
-        highlightEventId != _lastHighlightedEventId) {
-      final eventIdToHighlight = highlightEventId; // Capture for closures
-      Logs().d(
-        'Chat::didUpdateWidget() - Event to highlight from URL: $eventIdToHighlight',
-      );
+    unawaited(_waitForTimelineThenJumpToUrlEvent(highlightEventId));
+  }
 
-      // Wait for timeline and widgets to be ready using frame-based polling
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        // Poll for timeline to be loaded and widgets to be rendered
-        int attempts = 0;
-        const maxWaitAttempts = 30; // ~30 frames = ~500ms at 60fps
+  Future<void> _waitForTimelineThenJumpToUrlEvent(
+    String scheduledEventId,
+  ) async {
+    var attempts = 0;
+    const maxWaitAttempts = 30;
 
-        while (attempts < maxWaitAttempts && mounted) {
-          await SchedulerBinding.instance.endOfFrame;
+    while (attempts < maxWaitAttempts && mounted) {
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
 
-          // Check if timeline is loaded and has events
-          if (timeline != null && timeline!.events.isNotEmpty) {
-            Logs().d(
-              'Chat::didUpdateWidget(): Timeline ready after $attempts frames',
-            );
-            await scrollToEventId(eventIdToHighlight, highlight: true);
-            _lastHighlightedEventId = highlightEventId;
-            return;
-          }
+      // A newer URL target replaced this wait loop.
+      if (_pendingUrlJumpEventId != scheduledEventId) return;
 
-          attempts++;
+      final latestUrlEvent = _eventIdFromLocation();
+      if (latestUrlEvent == null) {
+        if (_pendingUrlJumpEventId == scheduledEventId) {
+          _pendingUrlJumpEventId = null;
         }
+        return;
+      }
 
-        if (mounted && attempts >= maxWaitAttempts) {
-          Logs().w(
-            'Chat::didUpdateWidget(): Timeline not ready after $maxWaitAttempts frames',
-          );
-          _lastHighlightedEventId = highlightEventId;
+      // Already jumping / done for the current URL target.
+      if (latestUrlEvent == _lastHighlightedEventId) {
+        if (_pendingUrlJumpEventId == scheduledEventId) {
+          _pendingUrlJumpEventId = null;
         }
-      });
+        return;
+      }
+
+      if (timeline != null && timeline!.events.isNotEmpty) {
+        Logs().d(
+          'Chat::_waitForTimelineThenJumpToUrlEvent(): Timeline ready '
+          'after $attempts frames → $latestUrlEvent',
+        );
+        await scrollToEventId(latestUrlEvent, highlight: true);
+        return;
+      }
+
+      attempts++;
     }
+
+    if (!mounted) return;
+    if (_pendingUrlJumpEventId != scheduledEventId) return;
+
+    // The frame-polling budget ran out — this can happen on a slow network
+    // load. Fall back to the load future itself instead of abandoning the
+    // jump, so the URL's `?event=` still resolves once loading finishes.
+    final pendingLoad = loadTimelineFuture;
+    if (pendingLoad != null) {
+      await pendingLoad.catchError((_) {});
+      if (!mounted || _pendingUrlJumpEventId != scheduledEventId) return;
+      final latestUrlEvent = _eventIdFromLocation();
+      if (latestUrlEvent != null &&
+          timeline != null &&
+          timeline!.events.isNotEmpty) {
+        _pendingUrlJumpEventId = null;
+        Logs().d(
+          'Chat::_waitForTimelineThenJumpToUrlEvent(): Timeline ready '
+          'after load future → $latestUrlEvent',
+        );
+        await scrollToEventId(latestUrlEvent, highlight: true);
+        return;
+      }
+    }
+
+    _pendingUrlJumpEventId = null;
+    final latestUrlEvent = _eventIdFromLocation();
+    Logs().w(
+      'Chat::_waitForTimelineThenJumpToUrlEvent(): Timeline not ready '
+      'after $maxWaitAttempts frames (event=$latestUrlEvent)',
+    );
+  }
+
+  /// Prefers [GoRouterState] so this State rebuilds when `?event=` changes.
+  String? _eventIdFromLocation() {
+    final fromRouter = GoRouterState.of(context).uri.queryParameters['event'];
+    if (fromRouter != null && fromRouter.isNotEmpty) return fromRouter;
+
+    // Fallback for hash-URL edge cases before GoRouter has settled.
+    if (!PlatformInfos.isWeb) return null;
+    return Uri.tryParse(
+      Uri.tryParse(html.window.location.href)?.fragment ?? '',
+    )?.queryParameters['event'];
   }
 
   @override
   void dispose() {
+    // Invalidate in-flight jump/highlight so a slow previous room cannot
+    // complete against a disposed controller after navigating away.
+    _scrollGeneration++;
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
     timeline?.cancelSubscriptions();
