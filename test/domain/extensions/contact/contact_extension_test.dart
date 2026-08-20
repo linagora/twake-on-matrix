@@ -5,13 +5,13 @@ import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dar
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
 import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 
 void main() {
   setUp(() {
-    getIt.registerSingleton(const SearchEngine());
+    getIt.registerSingleton(const SimpleMatcher2());
   });
 
   tearDown(() {

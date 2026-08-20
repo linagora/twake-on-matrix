@@ -1,9 +1,6 @@
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-
-const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 Iterable<String> _nonEmpty(String? value) =>
     (value == null || value.isEmpty) ? const [] : [value];
@@ -17,14 +14,10 @@ final _mainFieldExtractors = <Iterable<String> Function(PresentationSearch)>[
 ];
 
 extension PresentationSearchExtension on PresentationSearch {
-  SearchEngine get _searchEngine => getIt.get<SearchEngine>();
+  SimpleMatcher2 get _matcher => getIt.get<SimpleMatcher2>();
 
-  bool _matchesMainFields(String keyword) => _searchEngine.anyMatch(
-    keyword,
-    [this],
-    fieldExtractors: _mainFieldExtractors,
-    options: _searchOptions,
-  );
+  bool _matchesMainFields(String keyword) =>
+      _matcher.anyMatch(keyword, [this], fieldExtractors: _mainFieldExtractors);
 
   bool doesMatchKeyword(String keyword) {
     if (this is! ContactPresentationSearch) return false;

@@ -3,8 +3,7 @@
 
 import 'package:emojis/emoji.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/pages/chat/command_hints.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_list.dart';
@@ -95,13 +94,12 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     );
     final List<Map<String, String?>> ret = <Map<String, String?>>[];
     const maxResults = 30;
-    final engine = getIt.get<SearchEngine>();
-    const opts = SearchOptions(diacriticSensitive: false);
+    final matcher = getIt.get<SimpleMatcher2>();
 
     final commandMatch = RegExp(r'^/(\w*)$').firstMatch(searchText);
     if (commandMatch != null && widget.room != null) {
       for (final command in widget.room!.client.commands.keys) {
-        if (engine.matchesText(commandMatch[1]!, command, options: opts)) {
+        if (matcher.matchesText(commandMatch[1]!, command)) {
           ret.add({'type': 'command', 'name': command});
         }
 
@@ -119,7 +117,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       if (packSearch == null || packSearch.isEmpty) {
         for (final pack in emotePacks.entries) {
           for (final emote in pack.value.images.entries) {
-            if (engine.matchesText(emoteSearch, emote.key, options: opts)) {
+            if (matcher.matchesText(emoteSearch, emote.key)) {
               ret.add({
                 'type': 'emote',
                 'name': emote.key,
@@ -139,7 +137,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
         }
       } else if (emotePacks[packSearch] != null) {
         for (final emote in emotePacks[packSearch]!.images.entries) {
-          if (engine.matchesText(emoteSearch, emote.key, options: opts)) {
+          if (matcher.matchesText(emoteSearch, emote.key)) {
             ret.add({
               'type': 'emote',
               'name': emote.key,
@@ -162,7 +160,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             (element) => [
               element.name,
               ...element.keywords,
-            ].any((kw) => engine.matchesText(emoteSearch, kw, options: opts)),
+            ].any((kw) => matcher.matchesText(emoteSearch, kw)),
           )
           .toList();
       // sort by the index of the search term in the name in order to have
@@ -208,16 +206,8 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           .where((user) => user.senderId != widget.room!.client.userID)
           .toList();
       for (final user in users) {
-        if (engine.matchesText(
-              userMatch[1]!,
-              user.displayName ?? '',
-              options: opts,
-            ) ||
-            engine.matchesText(
-              userMatch[1]!,
-              user.id.split(':')[0],
-              options: opts,
-            )) {
+        if (matcher.matchesText(userMatch[1]!, user.displayName ?? '') ||
+            matcher.matchesText(userMatch[1]!, user.id.split(':')[0])) {
           ret.add({
             'type': 'user',
             'mxid': user.id,
@@ -240,7 +230,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
       final eligibleRooms = widget.room!.client.rooms
           .where((r) => r.getState(EventTypes.RoomTombstone) == null)
           .toList();
-      final matchedRooms = engine.matchAnyField(
+      final matchedRooms = matcher.matchAnyField(
         roomSearch,
         eligibleRooms,
         fieldExtractors: [
@@ -255,7 +245,6 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           },
           (Room room) => [room.name],
         ],
-        options: opts,
       );
       for (final r in matchedRooms) {
         ret.add({

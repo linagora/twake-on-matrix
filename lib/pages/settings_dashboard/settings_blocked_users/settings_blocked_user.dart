@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
 import 'package:fluffychat/pages/settings_dashboard/settings_blocked_users/settings_blocked_users_search_state.dart';
 import 'package:fluffychat/presentation/extensions/client_extension.dart';
@@ -93,14 +92,13 @@ class SettingsIgnoreListController extends State<BlockedUsers>
       return;
     }
 
-    final searchResults = getIt.get<SearchEngine>().matchAnyField<Profile>(
+    final searchResults = getIt.get<SimpleMatcher2>().matchAnyField<Profile>(
       searchTerm,
       blockedUsers,
       fieldExtractors: [
         (user) => [user.displayName ?? ''],
         (user) => [user.userId],
       ],
-      options: const SearchOptions(diacriticSensitive: false),
     );
 
     Logs().d(

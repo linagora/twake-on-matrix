@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/widgets/matrix.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -12,7 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:crypto/crypto.dart';
 
 extension StringCasingExtension on String {
-  @Deprecated('Use DiacriticStripStep from TextSearch')
+  @Deprecated('Use SimpleMatcher2.fold')
   String removeDiacritics() {
     const withDia =
         'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËèéêëðÇçÐÌÍÎÏìíîïÙÚÛÜùúûüÑñŠšŸÿýŽž';
@@ -200,55 +199,6 @@ extension StringCasingExtension on String {
     return containsWordRegex.hasMatch(this);
   }
 
-  String htmlHighlightText(targetText) {
-    final outsideHtmlTagRegex = RegExp(
-      '(<[^>]*>)|(${RegExp.escape(targetText)})',
-      caseSensitive: false,
-    );
-
-    final highlightedContent = replaceAllMapped(outsideHtmlTagRegex, (match) {
-      if (match.group(1) != null) {
-        return match.group(1)!;
-      } else {
-        return '<span data-mx-bg-color=gold>${match.group(2)}</span>';
-      }
-    });
-
-    return highlightedContent;
-  }
-
-  List<TextSpan> buildHighlightTextSpans(
-    String highlightText, {
-    TextStyle? style,
-    TextStyle? highlightStyle,
-    GestureRecognizer? recognizer,
-  }) {
-    if (highlightText.isEmpty || isEmpty) {
-      return [TextSpan(text: this, style: style, recognizer: recognizer)];
-    }
-
-    // Escape special characters in the highlightText
-    final escapedHighlightText = RegExp.escape(highlightText);
-
-    // Split the text into parts by the search word and create a TextSpan for
-    // each part. The search word is not case sensitive.
-    final List<TextSpan> spans = splitMapJoinToList<TextSpan>(
-      RegExp(escapedHighlightText, caseSensitive: false),
-      onMatch: (Match match) {
-        return TextSpan(
-          text: match.group(0),
-          style: highlightStyle,
-          recognizer: recognizer,
-        );
-      },
-      onNonMatch: (String nonMatch) {
-        return TextSpan(text: nonMatch, style: style, recognizer: recognizer);
-      },
-    );
-
-    return spans;
-  }
-
   List<T> splitMapJoinToList<T>(
     Pattern pattern, {
     required T Function(Match) onMatch,
@@ -274,6 +224,16 @@ extension StringCasingExtension on String {
     return substring(0, maxCharacters);
   }
 
+  /// Crops a message body so the match sits near the top of the search
+  /// snippet.
+  ///
+  /// This locates the match on the *raw* string, so it finds nothing for the
+  /// accent-insensitive matches SimpleMatcher2 buys — searching `cafe` still
+  /// returns the message containing `café`, but the snippet then falls through
+  /// to showing the start of the message rather than the matched region.
+  /// Anchoring it would mean mapping match offsets back through the folding,
+  /// which is the machinery the SimpleMatcher series deliberately does not
+  /// build; an index that reports positions is what fixes this properly.
   String substringToHighlight(String highlightText, {int prefixLength = 0}) {
     if (prefixLength < 0) return this;
     final index = toLowerCase().indexOf(highlightText.toLowerCase());

@@ -1,4 +1,6 @@
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -79,6 +81,6 @@ extension ResultExtension on Result {
       removeMarkdown: true,
     );
 
-    return bodyContent.toLowerCase().contains(searchWord.toLowerCase());
+    return getIt.get<SimpleMatcher2>().matchesText(searchWord, bodyContent);
   }
 }

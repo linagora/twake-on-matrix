@@ -186,61 +186,6 @@ void main() {
     });
   });
 
-  group('Highlight text in HTML tests', () {
-    test('Highlight text in HTML', () {
-      const inputHtml = '<p>Đây là một đoạn văn bản mẫu.</p>';
-      const targetText = 'đoạn văn bản';
-      const expectedOutput =
-          '<p>Đây là một <span data-mx-bg-color=gold>đoạn văn bản</span> mẫu.</p>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-
-    test('Highlight text in HTML with mixed case', () {
-      const inputHtml = '<p>Đây là một đoạn văn bản mẫu.</p>';
-      const targetText = 'Đoạn Văn Bản';
-      const expectedOutput =
-          '<p>Đây là một <span data-mx-bg-color=gold>đoạn văn bản</span> mẫu.</p>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-
-    test('Highlight HTML tag in HTML', () {
-      const inputHtml = '<p>Đây là một <span>đoạn văn bản</span> mẫu.</p>';
-      const targetText = '<span>';
-      const expectedOutput = '<p>Đây là một <span>đoạn văn bản</span> mẫu.</p>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-
-    test('Highlight HTML attribute in HTML', () {
-      const inputHtml = '<a href="https://example.com">Link</a>';
-      const targetText = 'href';
-      const expectedOutput = '<a href="https://example.com">Link</a>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-
-    test('Highlight text in HTML with multiple occurrences', () {
-      const inputHtml =
-          '<p>Đây là một đoạn văn bản mẫu.</p><p>Đây là một đoạn văn bản mẫu.</p>';
-      const targetText = 'đoạn văn bản';
-      const expectedOutput =
-          '<p>Đây là một <span data-mx-bg-color=gold>đoạn văn bản</span> mẫu.</p><p>Đây là một <span data-mx-bg-color=gold>đoạn văn bản</span> mẫu.</p>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-
-    test('HTML without opening tag', () {
-      const String inputHtml = 'Đây là một đoạn văn bản mẫu.</p>';
-      const String targetText = 'đoạn văn bản';
-      const String expectedOutput =
-          'Đây là một <span data-mx-bg-color=gold>đoạn văn bản</span> mẫu.</p>';
-
-      expect(inputHtml.htmlHighlightText(targetText), expectedOutput);
-    });
-  });
-
   group("substringToHighlight tests", () {
     test('substringToHighlight returns the correct substring', () {
       const text = "Hello, world!";

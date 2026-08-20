@@ -20,7 +20,6 @@ import 'package:fluffychat/utils/platform_infos.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
 import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
@@ -263,8 +262,8 @@ class _MessageContent extends StatelessWidget {
           return MessageDownloadContent(event, highlightText: searchWord);
         }
       default:
-        return HighlightText(
-          text: event
+        return Text(
+          event
               .calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)!),
                 hideReply: true,
@@ -276,12 +275,11 @@ class _MessageContent extends StatelessWidget {
                 searchWord,
                 prefixLength: _prefixLengthHighlight,
               ),
-          searchWord: searchWord,
-          maxLines: 2,
           style: Theme.of(context)
               .extension<LinagoraTextThemeExtension>()!
               .bodyMedium3
               .copyWith(color: LinagoraSysColors.material().onSurface),
+          maxLines: 2,
         );
     }
   }

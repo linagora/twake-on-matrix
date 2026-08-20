@@ -1,7 +1,6 @@
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -27,13 +26,12 @@ mixin SearchRecentChat {
   }) {
     if (keyword.isNotEmpty) {
       final matrixLocals = MatrixLocals(L10n.of(context)!);
-      recentlyChatsNotifier.value = getIt.get<SearchEngine>().match(
+      recentlyChatsNotifier.value = getIt.get<SimpleMatcher2>().match(
         keyword,
         filteredRoomsForAll,
         fieldExtractors: [
           (Room room) => [room.getLocalizedDisplayname(matrixLocals)],
         ],
-        options: const SearchOptions(diacriticSensitive: false),
       );
     } else {
       recentlyChatsNotifier.value = filteredRoomsForAll;

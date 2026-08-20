@@ -162,7 +162,7 @@ import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:fluffychat/utils/power_level_manager.dart';
 import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
@@ -203,7 +203,7 @@ class GetItInitializer {
     NetworkDI().bind();
     NetworkConnectivityDI().bind();
     getIt.registerSingleton(ResponsiveUtils());
-    getIt.registerSingleton(const SearchEngine());
+    getIt.registerSingleton(const SimpleMatcher2());
     getIt.registerSingleton(TwakeEventDispatcher());
     getIt.registerLazySingleton<StorageScannerService>(
       () => const IsolateStorageScannerService(),

@@ -4,7 +4,6 @@ import 'package:fluffychat/presentation/extensions/search/presentation_search_ex
 import 'package:fluffychat/presentation/model/search/presentation_search.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:fluffychat/generated/l10n/app_localizations.dart';
@@ -110,7 +109,7 @@ class _GroupChatInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SearchHighlightText(
+              _SearchItemText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: ListItemStyle.titleTextStyle(),
                 searchWord: searchKeyword,
@@ -130,19 +129,22 @@ class _GroupChatInformation extends StatelessWidget {
   }
 }
 
-class _SearchHighlightText extends StatelessWidget {
+/// Was a highlighting widget. SimpleMatcher 2 folds diacritics, which the
+/// raw-string highlighter could not follow, so the marking was removed rather
+/// than left to silently miss exactly the matches folding buys. [searchWord]
+/// stays threaded through for whichever matcher brings match positions back.
+class _SearchItemText extends StatelessWidget {
   final String text;
   final String? searchWord;
   final TextStyle? style;
 
-  const _SearchHighlightText({required this.text, this.searchWord, this.style});
+  const _SearchItemText({required this.text, this.searchWord, this.style});
 
   @override
   Widget build(BuildContext context) {
-    return HighlightText(
-      text: text,
+    return Text(
+      text,
       style: style,
-      searchWord: searchWord,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       softWrap: false,
@@ -180,12 +182,12 @@ class _DirectChatInformation extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _SearchHighlightText(
+              _SearchItemText(
                 text: recentChatPresentationSearch.displayName ?? "",
                 style: ListItemStyle.titleTextStyle(),
                 searchWord: searchKeyword,
               ),
-              _SearchHighlightText(
+              _SearchItemText(
                 text: recentChatPresentationSearch.directChatMatrixID ?? "",
                 style: ListItemStyle.subtitleTextStyle(),
                 searchWord: searchKeyword,
@@ -234,7 +236,7 @@ class _ContactInformation extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _SearchHighlightText(
+                    child: _SearchItemText(
                       text: contactPresentationSearch.displayName ?? "",
                       style: ListItemStyle.titleTextStyle(),
                       searchWord: searchKeyword,
@@ -257,7 +259,7 @@ class _ContactInformation extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (contactPresentationSearch.matrixId != null)
-                      _SearchHighlightText(
+                      _SearchItemText(
                         text: contactPresentationSearch.matrixId ?? "",
                         style: ListItemStyle.subtitleTextStyle(),
                         searchWord: searchKeyword,
@@ -283,7 +285,7 @@ class _ContactInformation extends StatelessWidget {
     if (contactPresentationSearch.primaryEmail.isEmpty) {
       return const SizedBox();
     }
-    return _SearchHighlightText(
+    return _SearchItemText(
       text: contactPresentationSearch.primaryEmail,
       style: ListItemStyle.subtitleTextStyle(),
       searchWord: searchKeyword,
@@ -294,7 +296,7 @@ class _ContactInformation extends StatelessWidget {
     if (contactPresentationSearch.primaryPhoneNumber.isEmpty) {
       return const SizedBox();
     }
-    return _SearchHighlightText(
+    return _SearchItemText(
       text: contactPresentationSearch.primaryPhoneNumber,
       style: ListItemStyle.subtitleTextStyle(),
       searchWord: searchKeyword,

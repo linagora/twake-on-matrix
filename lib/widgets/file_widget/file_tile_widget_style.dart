@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_matrix_html/color_extension.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
@@ -26,16 +25,6 @@ class FileTileWidgetStyle {
   double get imageSize => 40;
 
   Color? get fileInfoColor => LinagoraRefColors.material().tertiary[20];
-
-  TextStyle highlightTextStyle(BuildContext context) {
-    return TextStyle(
-      // TODO: change to colorSurface when its approved
-      // ignore: deprecated_member_use
-      color: Theme.of(context).colorScheme.onBackground,
-      fontWeight: FontWeight.bold,
-      backgroundColor: CssColor.fromCss('gold'),
-    );
-  }
 
   TextStyle? textStyle(BuildContext context) {
     return Theme.of(context)

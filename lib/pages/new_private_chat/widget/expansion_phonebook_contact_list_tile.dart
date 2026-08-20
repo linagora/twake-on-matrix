@@ -12,7 +12,6 @@ import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
 import 'package:fluffychat/utils/display_name_widget.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/cupertino.dart';
@@ -201,9 +200,8 @@ class _ExpansionPhonebookContactListTileState
                                 ),
                                 if (widget.contact.matrixId != null &&
                                     widget.contact.matrixId!.isNotEmpty) ...[
-                                  HighlightText(
-                                    text: widget.contact.matrixId!,
-                                    searchWord: widget.highlightKeyword,
+                                  Text(
+                                    widget.contact.matrixId!,
                                     style: ListItemStyle.subtitleTextStyle(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -309,15 +307,13 @@ class _ExpansionPhonebookContactListTileState
 
   Widget _displayInformationDefault() {
     if (widget.contact.primaryPhoneNumber.isNotEmpty) {
-      return HighlightText(
-        text: widget.contact.primaryPhoneNumber,
-        searchWord: widget.highlightKeyword,
+      return Text(
+        widget.contact.primaryPhoneNumber,
         style: ListItemStyle.subtitleTextStyle(),
       );
     } else if (widget.contact.primaryEmail.isNotEmpty) {
-      return HighlightText(
-        text: widget.contact.primaryEmail,
-        searchWord: widget.highlightKeyword,
+      return Text(
+        widget.contact.primaryEmail,
         style: ListItemStyle.subtitleTextStyle(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -328,9 +324,8 @@ class _ExpansionPhonebookContactListTileState
 
   Widget _displayPhoneNumber() {
     if (widget.contact.primaryPhoneNumber.isNotEmpty) {
-      return HighlightText(
-        text: widget.contact.primaryPhoneNumber,
-        searchWord: widget.highlightKeyword,
+      return Text(
+        widget.contact.primaryPhoneNumber,
         style: ListItemStyle.subtitleTextStyle(),
       );
     }
@@ -339,9 +334,8 @@ class _ExpansionPhonebookContactListTileState
 
   Widget _displayEmail() {
     if (widget.contact.primaryEmail.isNotEmpty) {
-      return HighlightText(
-        text: widget.contact.primaryEmail,
-        searchWord: widget.highlightKeyword,
+      return Text(
+        widget.contact.primaryEmail,
         style: ListItemStyle.subtitleTextStyle(),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,

@@ -1,30 +1,24 @@
 // Tests the matchAnyField/match/anyMatch API: multi-item filtering, single-item
 // boolean checks, field extractors (including variable-length collection
-// fields and the default toString() extractor), SearchOptions propagation,
-// and special/regex-metacharacters in the needle (as opposed to the haystack,
-// which is covered by the other files in this directory).
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+// fields and the default toString() extractor), and special/regex-metacharacters
+// in the query (as opposed to the candidate, which is covered by the other files
+// in this directory).
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _engine = SearchEngine();
+const _matcher = SimpleMatcher2();
 
-List<String> _search(
-  String needle,
-  List<String> haystack, {
-  SearchOptions options = const SearchOptions(),
-}) => _engine.matchAnyField(
-  needle,
-  haystack,
-  fieldExtractors: [
-    (String s) => [s],
-  ],
-  options: options,
-);
+List<String> _search(String query, List<String> haystack) =>
+    _matcher.matchAnyField(
+      query,
+      haystack,
+      fieldExtractors: [
+        (String s) => [s],
+      ],
+    );
 
 void main() {
   _testDefaults();
-  _testOptions();
   _testFieldExtractors();
   _testVariableLengthFields();
   _testMatch();
@@ -33,14 +27,14 @@ void main() {
 }
 
 void _testDefaults() {
-  group('matchAnyField default behavior', () {
+  group('matchAnyField', () {
     test('should return matching items on substring match', () {
       final result = _search('ell', ['hello', 'world']);
 
       expect(result, ['hello']);
     });
 
-    test('should return all items when needle is empty', () {
+    test('should return all items when query is empty', () {
       final result = _search('', ['hello']);
 
       expect(result, ['hello']);
@@ -58,22 +52,10 @@ void _testDefaults() {
       expect(result, ['John Smith']);
     });
 
-    test('should match regardless of case by default', () {
+    test('should match regardless of case', () {
       final result = _search('JOHN', ['John Smith', 'Jane Doe']);
 
       expect(result, ['John Smith']);
-    });
-  });
-}
-
-void _testOptions() {
-  group('matchAnyField options', () {
-    test('should not match different case when caseSensitive is true', () {
-      final result = _search('john', [
-        'John',
-      ], options: const SearchOptions(caseSensitive: true));
-
-      expect(result, isEmpty);
     });
   });
 }
@@ -90,12 +72,12 @@ void _testFieldExtractors() {
         (Map<String, String> m) => [m['email'] ?? ''],
       ];
 
-      final resultName = _engine.matchAnyField(
+      final resultName = _matcher.matchAnyField(
         'alice',
         items,
         fieldExtractors: extractors,
       );
-      final resultEmail = _engine.matchAnyField(
+      final resultEmail = _matcher.matchAnyField(
         'bob@',
         items,
         fieldExtractors: extractors,
@@ -118,7 +100,7 @@ void _testVariableLengthFields() {
         (Map<String, Object> m) => m['tags'] as List<String>,
       ];
 
-      final result = _engine.matchAnyField(
+      final result = _matcher.matchAnyField(
         'urgent',
         items,
         fieldExtractors: extractors,
@@ -143,7 +125,7 @@ void _testVariableLengthFields() {
         (Map<String, Object> m) => m['tags'] as List<String>,
       ];
 
-      final result = _engine.matchAnyField(
+      final result = _matcher.matchAnyField(
         'urgent',
         items,
         fieldExtractors: extractors,
@@ -170,7 +152,7 @@ void _testVariableLengthFields() {
           (Map<String, Object> m) => m['tags'] as List<String>,
         ];
 
-        final result = _engine.matchAnyField(
+        final result = _matcher.matchAnyField(
           'urgent',
           items,
           fieldExtractors: extractors,
@@ -185,7 +167,7 @@ void _testVariableLengthFields() {
 void _testMatch() {
   group('match', () {
     test('should match items via the default toString() extractor', () {
-      final result = _engine.match('ell', ['hello', 'world']);
+      final result = _matcher.match('ell', ['hello', 'world']);
 
       expect(result, ['hello']);
     });
@@ -196,7 +178,7 @@ void _testMatch() {
         {'name': 'Bob', 'email': 'bob@example.com'},
       ];
 
-      final result = _engine.match(
+      final result = _matcher.match(
         'bob@',
         items,
         fieldExtractors: [
@@ -215,7 +197,7 @@ void _testAnyMatch() {
     test('should return true when a scalar field matches', () {
       final item = {'name': 'Alice', 'email': 'alice@example.com'};
 
-      final result = _engine.anyMatch(
+      final result = _matcher.anyMatch(
         'alice',
         [item],
         fieldExtractors: [
@@ -233,7 +215,7 @@ void _testAnyMatch() {
         'tags': ['urgent'],
       };
 
-      final result = _engine.anyMatch(
+      final result = _matcher.anyMatch(
         'urgent',
         [item],
         fieldExtractors: [
@@ -251,7 +233,7 @@ void _testAnyMatch() {
         'tags': ['urgent'],
       };
 
-      final result = _engine.anyMatch(
+      final result = _matcher.anyMatch(
         'zzz',
         [item],
         fieldExtractors: [
@@ -266,7 +248,7 @@ void _testAnyMatch() {
     test(
       'should match via the default toString() extractor when none provided',
       () {
-        final result = _engine.anyMatch('ell', ['hello', 'world']);
+        final result = _matcher.anyMatch('ell', ['hello', 'world']);
 
         expect(result, true);
       },
@@ -275,35 +257,28 @@ void _testAnyMatch() {
 }
 
 void _testSpecialCharacterNeedles() {
-  group('matchAnyField needle with special characters', () {
-    test('should match a needle containing regex metacharacters literally', () {
+  group('matchAnyField query with special characters', () {
+    test('should match a query containing regex metacharacters literally', () {
       final result = _search('a.b', ['a.b.c', 'axbxc']);
 
       expect(result, ['a.b.c']);
     });
 
     test(
-      'should not treat "." or "*" in the needle as regex wildcard/quantifier',
+      'should not treat "." or "*" in the query as regex wildcard/quantifier',
       () {
         expect(_search('.', ['hello', 'world']), isEmpty);
         expect(_search('a*', ['aaa', 'a*b']), ['a*b']);
       },
     );
 
-    test('should fold diacritics on the needle, not just the haystack', () {
-      final result = _engine.matchAnyField(
-        'Élie',
-        ['elie', 'other'],
-        fieldExtractors: [
-          (String s) => [s],
-        ],
-        options: const SearchOptions(diacriticSensitive: false),
-      );
+    test('should fold diacritics on the query, not just the candidate', () {
+      final result = _search('Élie', ['elie', 'other']);
 
       expect(result, ['elie']);
     });
 
-    test('should match an emoji needle literally', () {
+    test('should match an emoji query literally', () {
       final result = _search('🔥', ['urgent 🔥 task', 'calm task']);
 
       expect(result, ['urgent 🔥 task']);

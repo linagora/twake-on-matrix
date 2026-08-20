@@ -6,7 +6,6 @@ import 'package:fluffychat/presentation/model/search/presentation_server_side_se
 import 'package:fluffychat/utils/extension/build_context_extension.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
 import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
 import 'package:fluffychat/widgets/search/empty_search_widget.dart';
 import 'package:flutter/material.dart' hide SearchController;
@@ -76,16 +75,15 @@ class ServerSearchMessagesList extends StatelessWidget {
                                   room: room,
                                   originServerTs: originServerTs,
                                 ),
-                                HighlightText(
-                                  text: searchController.getBodyText(
+                                Text(
+                                  searchController.getBodyText(
                                     event,
                                     searchWord,
                                   ),
-                                  searchWord: searchWord,
-                                  maxLines: 2,
                                   style: ChatListSubSubtitleTextStyleView
                                       .textStyle
                                       .textStyle(room, context),
+                                  maxLines: 2,
                                 ),
                               ],
                             ),

@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fluffychat/config/app_config.dart';
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
 import 'package:fluffychat/domain/model/extensions/string_extension.dart';
 import 'package:fluffychat/domain/model/room/room_extension.dart';
@@ -14,6 +15,7 @@ import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/utils/size_string.dart';
 import 'package:fluffychat/utils/string_extension.dart';
 import 'package:fluffychat/utils/twake_snackbar.dart';
@@ -83,8 +85,11 @@ extension LocalizedBody on Event {
 
   bool get isCopyable => messageType == MessageTypes.Text;
 
+  /// The matching predicate for in-room search of **encrypted** rooms, where
+  /// Synapse cannot help: `ChatSearch` scans the decrypted timeline locally
+  /// with this (see `SameTypeEventsBuilderController.searchFunc`).
   bool isContains(String? searchTerm) =>
-      plaintextBody.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+      getIt.get<SimpleMatcher2>().matchesText(searchTerm ?? '', plaintextBody);
 
   bool get isSearchable =>
       messageType == MessageTypes.Text || messageType == MessageTypes.File;

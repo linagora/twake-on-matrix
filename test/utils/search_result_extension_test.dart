@@ -1,6 +1,8 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'package:fluffychat/di/global/get_it_initializer.dart';
 import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -18,6 +20,9 @@ Future<void> main() async {
 
     setUp(() {
       context = MockBuildContext();
+      if (!getIt.isRegistered<SimpleMatcher2>()) {
+        getIt.registerSingleton(const SimpleMatcher2());
+      }
     });
 
     test('Give search result is not empty\n'

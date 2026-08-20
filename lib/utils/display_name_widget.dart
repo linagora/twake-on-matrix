@@ -1,4 +1,3 @@
-import 'package:fluffychat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 
 class BuildDisplayName extends StatelessWidget {
@@ -20,9 +19,8 @@ class BuildDisplayName extends StatelessWidget {
     if (displayName == null) {
       return const SizedBox.shrink();
     }
-    return HighlightText(
-      text: displayName,
-      searchWord: highlightKeyword,
+    return Text(
+      displayName,
       style:
           style ??
           Theme.of(context).textTheme.bodySmall!.copyWith(

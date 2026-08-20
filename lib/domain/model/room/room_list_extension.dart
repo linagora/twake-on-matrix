@@ -1,11 +1,8 @@
 import 'package:fluffychat/domain/model/room/room_extension.dart';
 import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:matrix/matrix.dart';
-
-const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 extension RoomListExtension on List<Room> {
   List<RecentChatSearchModel> searchRecentChat({
@@ -17,14 +14,13 @@ extension RoomListExtension on List<Room> {
       (room) => room.isNotSpaceAndStoryRoom() && room.isShowInChatList(),
     ).map((room) => room.toRecentChatSearchModel(matrixLocalizations)).toList();
 
-    final matched = getIt.get<SearchEngine>().match(
+    final matched = getIt.get<SimpleMatcher2>().match(
       keyword,
       models,
       fieldExtractors: [
         (RecentChatSearchModel m) => [m.displayName ?? ''],
         (RecentChatSearchModel m) => [m.directChatMatrixID ?? ''],
       ],
-      options: _searchOptions,
     );
 
     return matched.take(limit ?? matched.length).toList();

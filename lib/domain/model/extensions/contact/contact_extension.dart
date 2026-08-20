@@ -1,7 +1,6 @@
 import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
 import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
 import 'package:fluffychat/data/model/addressbook/address_book.dart';
 import 'package:fluffychat/domain/model/contact/contact.dart';
@@ -332,10 +331,9 @@ extension SetContactExtension on Set<Contact> {
 extension IterableContactsExtension on Iterable<Contact> {
   Iterable<Contact> searchContacts(String keyword) {
     if (keyword.isEmpty) return this;
-    final engine = getIt.get<SearchEngine>();
-    const options = SearchOptions(diacriticSensitive: false);
+    final matcher = getIt.get<SimpleMatcher2>();
 
-    return engine.matchAnyField(
+    return matcher.matchAnyField(
       keyword,
       toList(),
       fieldExtractors: [
@@ -347,7 +345,6 @@ extension IterableContactsExtension on Iterable<Contact> {
             c.phoneNumbers?.expand((p) => [p.number, p.matrixId ?? '']) ??
             const [],
       ],
-      options: options,
     );
   }
 }

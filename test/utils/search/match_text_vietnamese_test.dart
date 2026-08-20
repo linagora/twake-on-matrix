@@ -1,18 +1,16 @@
 // Stress-tests diacritic stripping with Vietnamese: stacked marks (tone + vowel modification)
 // that NFD decomposes into multiple combining characters, all stripped to the base letter.
 // Also verifies that stripping never collapses distinct base letters into each other.
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _engine = SearchEngine();
-const _insensitive = SearchOptions(diacriticSensitive: false);
+const _matcher = SimpleMatcher2();
 
-bool _match(String needle, String haystack) =>
-    _engine.matchesText(needle, haystack, options: _insensitive);
+bool _match(String query, String candidate) =>
+    _matcher.matchesText(query, candidate);
 
 void main() {
-  group('matchesText vietnamese — diacriticSensitive: false', () {
+  group('matchesText vietnamese', () {
     test('should match ă and â (a variants)', () {
       expect(_match('ban', 'băn'), isTrue);
       expect(_match('ban', 'bân'), isTrue);
@@ -48,28 +46,25 @@ void main() {
     });
   });
 
-  group(
-    'matchesText vietnamese — diacriticSensitive: false — should not match',
-    () {
-      test('should not match different final consonant (bam ≠ băn)', () {
-        expect(_match('bam', 'băn'), isFalse);
-      });
+  group('matchesText vietnamese — should not match', () {
+    test('should not match different final consonant (bam ≠ băn)', () {
+      expect(_match('bam', 'băn'), isFalse);
+    });
 
-      test('should not match different base vowel (ben ≠ bân)', () {
-        expect(_match('ben', 'bân'), isFalse);
-      });
+    test('should not match different base vowel (ben ≠ bân)', () {
+      expect(_match('ben', 'bân'), isFalse);
+    });
 
-      test('should not match different base consonant (ca ≠ ta)', () {
-        expect(_match('ca', 'ta'), isFalse);
-      });
+    test('should not match different base consonant (ca ≠ ta)', () {
+      expect(_match('ca', 'ta'), isFalse);
+    });
 
-      test('should not match when needle is longer than haystack word', () {
-        expect(_match('nguyenlan', 'Nguyễn'), isFalse);
-      });
-    },
-  );
+    test('should not match when query is longer than candidate word', () {
+      expect(_match('nguyenlan', 'Nguyễn'), isFalse);
+    });
+  });
 
-  test('should fold an accented needle, not just an accented haystack', () {
+  test('should fold an accented query, not just an accented candidate', () {
     expect(_match('Nguyễn', 'nguyen'), isTrue);
   });
 }

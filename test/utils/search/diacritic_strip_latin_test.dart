@@ -1,16 +1,14 @@
 // Tests diacritic stripping with Latin script: one combining mark category per test (acute, grave, umlaut, etc.).
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:fluffychat/utils/search/simple_matcher_2.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const _engine = SearchEngine();
-const _insensitive = SearchOptions(diacriticSensitive: false);
+const _matcher = SimpleMatcher2();
 
-bool _match(String needle, String haystack) =>
-    _engine.matchesText(needle, haystack, options: _insensitive);
+bool _match(String query, String candidate) =>
+    _matcher.matchesText(query, candidate);
 
 void main() {
-  group('matchesText latin with diacriticSensitive: false', () {
+  group('matchesText latin', () {
     test('should match acute accent (é → e)', () {
       expect(_match('elie', 'Élie'), isTrue);
     });
@@ -50,7 +48,7 @@ void main() {
     });
   });
 
-  test('should fold an accented needle, not just an accented haystack', () {
+  test('should fold an accented query, not just an accented candidate', () {
     expect(_match('Élie', 'elie'), isTrue);
   });
 }
