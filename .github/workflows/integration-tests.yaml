@@ -28,10 +28,15 @@ env:
 
 jobs:
   # ────────────────────────────────────────────────────────────────────────────
-  # Job 1 – Functional integration tests (virtual device)
+  # Job 1 – Single-target integration test run (manual dispatch with a
+  # patrol_test_target input). The nightly full suite cannot fit in a single
+  # FTL matrix: ~34 test cases take ~75 min on the virtual device while
+  # gcloud caps --timeout at 60m on virtual devices. The nightly therefore
+  # runs as shards instead (jobs 1b/1c below).
   # ────────────────────────────────────────────────────────────────────────────
   integration_test:
     name: Integration Test
+    if: ${{ inputs.patrol_test_target != '' }}
     runs-on: ubuntu-latest
     concurrency:
       group: matrix-ci-shared-account
@@ -129,27 +134,262 @@ jobs:
           fi
           trap 'rm -f .env.cicd' EXIT
 
-          if [ -n "$PATROL_TEST_TARGET" ]; then
-            echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
-            patrol build android \
-              -v \
-              --dart-define-from-file .env.cicd \
-              --target "$PATROL_TEST_TARGET"
-          else
-            echo "Running full Patrol test suite"
-            patrol build android \
-              -v \
-              --dart-define-from-file .env.cicd
-          fi
+          echo "Running Patrol tests defined in $PATROL_TEST_TARGET"
+          patrol build android \
+            -v \
+            --dart-define-from-file .env.cicd \
+            --target "$PATROL_TEST_TARGET"
 
           gcloud firebase test android run \
             --type instrumentation \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
             --device model=MediumPhone.arm,version=34 \
-            --timeout 45m \
+            --timeout 60m \
             --use-orchestrator \
             --environment-variables clearPackageData=true
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 1b – Nightly functional suite, built as shards. Each shard is one
+  # patrol build with a repeated --target list; patrol bundles the listed
+  # files (plus its standard boilerplate) into one APK pair per shard.
+  # Shards stay well under FTL's 60m virtual-device timeout (~34 test cases
+  # ≈ 75 min on MediumPhone.arm — a single matrix can never finish).
+  # Keep the shard names in sync with the integration_shard_run matrix.
+  # ────────────────────────────────────────────────────────────────────────────
+  integration_shards_build:
+    name: Build Integration Shard APKs
+    if: ${{ inputs.patrol_test_target == '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Patrol builds a universal Android test APK and compiles the Rust FFI
+      # targets. The standard runner only has 14 GB, so remove toolchains that
+      # this job never uses before restoring Flutter and Gradle dependencies.
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force
+          sudo apt-get clean
+          echo "Disk space after cleanup:"
+          df -h
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Add Android SDK tools to PATH
+        run: echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rust targets for Android
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup project
+        run: flutter pub get && flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Build shard APKs
+        env:
+          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+        run: |
+          dart pub global activate patrol_cli 4.3.1
+          flutter build apk --config-only
+
+          # The secret may hold either base64-encoded content or the raw env
+          # file. Try base64 first (CR/LF/spaces stripped); if that yields
+          # env-like `KEY=...` lines use it, otherwise fall back to the raw
+          # secret value.
+          if printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q '='; then
+            printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d > .env.cicd
+          else
+            printf '%s\n' "$INTEGRATION_TEST_ENV_BASE64" > .env.cicd
+          fi
+          if ! grep -q '=' .env.cicd; then
+            echo "::error::INTEGRATION_TEST_ENV_BASE64 is neither valid base64 nor a raw env file."
+            exit 1
+          fi
+          trap 'rm -f .env.cicd' EXIT
+
+          build_shard() {
+            local name="$1"; shift
+            echo "::group::Building $name"
+            local target_args=()
+            local t
+            for t in "$@"; do
+              target_args+=(--target "$t")
+            done
+            patrol build android \
+              -v \
+              --dart-define-from-file .env.cicd \
+              "${target_args[@]}"
+            mkdir -p "build/shards/$name"
+            cp build/app/outputs/apk/debug/app-debug.apk "build/shards/$name/app-debug.apk"
+            cp build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk "build/shards/$name/app-debug-androidTest.apk"
+            echo "::endgroup::"
+          }
+
+          # 11 test cases (~23 min)
+          build_shard shard_1_chat_core \
+            integration_test/tests/chat/chat_group_test.dart \
+            integration_test/tests/chat/chat_list_test.dart
+
+          # 14 test cases (~30 min)
+          build_shard shard_2_chat_rest \
+            integration_test/tests/chat/chat_test.dart \
+            integration_test/tests/chat/forward_message_test.dart \
+            integration_test/tests/chat/chat_dm_leave_test.dart \
+            integration_test/tests/chat/chat_image_retry_test.dart \
+            integration_test/tests/chat/chat_group_open_profile_test.dart \
+            integration_test/tests/chat/create_new_group_chat_test.dart \
+            integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart \
+            integration_test/tests/chat/transfer_ownership_test.dart \
+            integration_test/tests/chat/sending_message_test.dart \
+            integration_test/tests/chat/search_external_mxid_test.dart \
+            integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart \
+            integration_test/tests/chat/perf_test.dart
+
+          # 8 test cases (~17 min)
+          build_shard shard_3_misc \
+            integration_test/tests/contact/contact_test.dart \
+            integration_test/tests/login/login_with_password_test.dart \
+            integration_test/tests/login/web_login_paths_test.dart \
+            integration_test/tests/setting/language_test.dart \
+            integration_test/tests/setting/settings_contacts_visibility_test.dart \
+            integration_test/tests/setting/settings_recovery_key_test.dart
+
+          ls -lR build/shards
+
+      - name: Upload shard APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: shard-apks-${{ github.run_id }}
+          retention-days: 1
+          path: build/shards
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 1c – Run each functional shard on the FTL virtual device. Jobs queue
+  # behind each other (matrix-ci-shared-account) like every other FTL job in
+  # this workflow. Logcat is pulled from GCS so a failed shard is diagnosable.
+  # ────────────────────────────────────────────────────────────────────────────
+  integration_shard_run:
+    name: Integration Test (${{ matrix.shard }})
+    if: ${{ inputs.patrol_test_target == '' }}
+    needs: integration_shards_build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: matrix-ci-shared-account
+      queue: max
+      cancel-in-progress: false
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [shard_1_chat_core, shard_2_chat_rest, shard_3_misc]
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Validate FTL bucket name
+        run: |
+          if [[ "$FTL_RESULTS_BUCKET" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='$FTL_RESULTS_BUCKET' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+            exit 1
+          fi
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Download shard APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: shard-apks-${{ github.run_id }}
+          path: apks/
+
+      - name: Run integration shard on virtual device
+        run: |
+          RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
+          # Export before FTL so logcat download still works if the test fails.
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+
+          gcloud firebase test android run \
+            --type instrumentation \
+            --app "apks/${{ matrix.shard }}/app-debug.apk" \
+            --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
+            --device model=MediumPhone.arm,version=34 \
+            --timeout 60m \
+            --use-orchestrator \
+            --environment-variables clearPackageData=true \
+            --results-bucket "$FTL_RESULTS_BUCKET" \
+            --results-dir "$RUN_ID" \
+            --client-details=matrixLabel="${{ matrix.shard }}"
+
+      # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
+      - name: Download logcat from GCS
+        if: always() && env.RUN_ID != ''
+        run: |
+          GCS_PATH="gs://$FTL_RESULTS_BUCKET/$RUN_ID"
+          mkdir -p ./shard_gcs_results
+          gcloud storage cp -r "${GCS_PATH}/*" ./shard_gcs_results/ \
+            || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
+          find ./shard_gcs_results -name "logcat" -exec cat {} + > shard_logcat.txt \
+            || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
+          if [ ! -s shard_logcat.txt ]; then
+            echo "ERROR: logcat is empty"; exit 1
+          fi
+
+      - name: Upload shard logcat
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logcat-${{ matrix.shard }}-${{ github.run_id }}
+          retention-days: 7
+          path: shard_logcat.txt
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 2 – Build perf APK once, upload as artifact
