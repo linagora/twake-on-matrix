@@ -2,9 +2,9 @@ on:
   workflow_dispatch:
     inputs:
       patrol_test_target:
-        description: "Path to Patrol integration test Dart file. Defaults to the perf test."
+        description: "Path to a Patrol integration test Dart file for a single-target run. Leave empty (default) to run the nightly shard suite."
         required: false
-        default: "integration_test/tests/chat/perf_test.dart"
+        default: ""
       run_perf:
         description: "Also run the performance jobs (build + physical median). Off by default so a functional dispatch only runs the integration tests."
         required: false
@@ -36,7 +36,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   integration_test:
     name: Integration Test
-    if: ${{ inputs.patrol_test_target != '' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.patrol_test_target != '' }}
     runs-on: ubuntu-latest
     concurrency:
       group: matrix-ci-shared-account
@@ -159,7 +159,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   integration_shards_build:
     name: Build Integration Shard APKs
-    if: ${{ inputs.patrol_test_target == '' }}
+    if: ${{ github.event_name == 'schedule' || inputs.patrol_test_target == '' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -308,7 +308,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   integration_shard_run:
     name: Integration Test (${{ matrix.shard }})
-    if: ${{ inputs.patrol_test_target == '' }}
+    if: ${{ github.event_name == 'schedule' || inputs.patrol_test_target == '' }}
     needs: integration_shards_build
     runs-on: ubuntu-latest
     concurrency:
