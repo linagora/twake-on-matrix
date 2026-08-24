@@ -1,71 +1,25 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-sealed class BootstrapUiState extends Equatable {
-  const BootstrapUiState();
+part 'bootstrap_state.freezed.dart';
 
-  @override
-  List<Object?> get props => [];
-}
+@freezed
+sealed class BootstrapUiState with _$BootstrapUiState {
+  const factory BootstrapUiState.loading() = BootstrapLoadingState;
 
-class BootstrapLoadingState extends BootstrapUiState {
-  const BootstrapLoadingState();
-}
+  const factory BootstrapUiState.recoveryKeyDisplay({
+    required String recoveryKey,
+    required bool supportsSecureStorage,
+    @Default(false) bool storeInSecureStorage,
+    @Default(false) bool recoveryKeyCopied,
+  }) = BootstrapRecoveryKeyDisplayState;
 
-class BootstrapRecoveryKeyDisplayState extends BootstrapUiState {
-  final String recoveryKey;
-  final bool supportsSecureStorage;
-  final bool storeInSecureStorage;
-  final bool recoveryKeyCopied;
+  const factory BootstrapUiState.verifyDevice({
+    String? prefilledRecoveryKey,
+    @Default(false) bool retrySucceeded,
+    @Default(false) bool retryFailed,
+  }) = BootstrapVerifyDeviceState;
 
-  const BootstrapRecoveryKeyDisplayState({
-    required this.recoveryKey,
-    required this.supportsSecureStorage,
-    this.storeInSecureStorage = false,
-    this.recoveryKeyCopied = false,
-  });
+  const factory BootstrapUiState.legacyError() = BootstrapLegacyErrorState;
 
-  BootstrapRecoveryKeyDisplayState copyWith({
-    bool? storeInSecureStorage,
-    bool? recoveryKeyCopied,
-  }) => BootstrapRecoveryKeyDisplayState(
-    recoveryKey: recoveryKey,
-    supportsSecureStorage: supportsSecureStorage,
-    storeInSecureStorage: storeInSecureStorage ?? this.storeInSecureStorage,
-    recoveryKeyCopied: recoveryKeyCopied ?? this.recoveryKeyCopied,
-  );
-
-  @override
-  List<Object?> get props => [
-    recoveryKey,
-    supportsSecureStorage,
-    storeInSecureStorage,
-    recoveryKeyCopied,
-  ];
-}
-
-class BootstrapVerifyDeviceState extends BootstrapUiState {
-  final String? prefilledRecoveryKey;
-  final bool retrySucceeded;
-  final bool retryFailed;
-
-  const BootstrapVerifyDeviceState({
-    this.prefilledRecoveryKey,
-    this.retrySucceeded = false,
-    this.retryFailed = false,
-  });
-
-  @override
-  List<Object?> get props => [
-    prefilledRecoveryKey,
-    retrySucceeded,
-    retryFailed,
-  ];
-}
-
-class BootstrapLegacyErrorState extends BootstrapUiState {
-  const BootstrapLegacyErrorState();
-}
-
-class BootstrapLegacyDoneState extends BootstrapUiState {
-  const BootstrapLegacyDoneState();
+  const factory BootstrapUiState.legacyDone() = BootstrapLegacyDoneState;
 }

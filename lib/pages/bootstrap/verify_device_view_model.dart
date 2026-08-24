@@ -76,7 +76,12 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
     }
 
     final request = _request;
-    if (request != null) return VerifyDeviceSasState(request: request);
+    if (request != null) {
+      return VerifyDeviceSasState(
+        request: request,
+        requestState: request.state,
+      );
+    }
 
     return VerifyDeviceChooserState(
       isStartingVerification: _isStartingVerification,

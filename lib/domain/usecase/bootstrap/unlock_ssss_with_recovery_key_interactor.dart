@@ -6,6 +6,10 @@ import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 
+/// Unlocks the user's Secure Secret Storage and Sharing (SSSS) — the
+/// Matrix spec's encrypted key/value store used to back up room keys and
+/// cross-signing keys — using a previously generated recovery key, then
+/// self-signs the current device via cross-signing.
 class UnlockSsssWithRecoveryKeyInteractor {
   Stream<Either<Failure, Success>> execute({
     required Bootstrap bootstrap,

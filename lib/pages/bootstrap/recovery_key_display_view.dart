@@ -32,18 +32,19 @@ class RecoveryKeyDisplayView extends StatelessWidget {
     required this.onContinue,
   });
 
-  String _secureStorageLabel(BuildContext context) {
+  String _secureStorageLabel(L10n l10n) {
     if (PlatformInfos.isAndroid) {
-      return L10n.of(context)!.storeInAndroidKeystore;
+      return l10n.storeInAndroidKeystore;
     }
     if (PlatformInfos.isIOS || PlatformInfos.isMacOS) {
-      return L10n.of(context)!.storeInAppleKeyChain;
+      return l10n.storeInAppleKeyChain;
     }
-    return L10n.of(context)!.storeSecurlyOnThisDevice;
+    return l10n.storeSecurlyOnThisDevice;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -56,14 +57,14 @@ class RecoveryKeyDisplayView extends StatelessWidget {
         Padding(
           padding: VerifyDeviceViewStyle.headingPadding,
           child: Text(
-            L10n.of(context)!.recoveryKey,
+            l10n.recoveryKey,
             textAlign: TextAlign.center,
             style: VerifyDeviceViewStyle.titleStyle(context),
           ),
         ),
         const SizedBox(height: VerifyDeviceViewStyle.gapTitleToSupporting),
         Text(
-          L10n.of(context)!.chatBackupDescription,
+          l10n.chatBackupDescription,
           textAlign: TextAlign.center,
           style: VerifyDeviceViewStyle.supportingStyle(context),
         ),
@@ -93,14 +94,14 @@ class RecoveryKeyDisplayView extends StatelessWidget {
           _CheckRow(
             value: storeInSecureStorage,
             onChanged: onStoreInSecureStorageChanged,
-            title: _secureStorageLabel(context),
-            subtitle: L10n.of(context)!.storeInSecureStorageDescription,
+            title: _secureStorageLabel(l10n),
+            subtitle: l10n.storeInSecureStorageDescription,
           ),
         _CheckRow(
           value: recoveryKeyCopied,
           onChanged: (_) => onCopyToClipboard(),
-          title: L10n.of(context)!.copyToClipboard,
-          subtitle: L10n.of(context)!.saveKeyManuallyDescription,
+          title: l10n.copyToClipboard,
+          subtitle: l10n.saveKeyManuallyDescription,
         ),
         const SizedBox(height: LinagoraSpacing.base * 2),
         Material(
@@ -117,7 +118,7 @@ class RecoveryKeyDisplayView extends StatelessWidget {
                 width: KeyVerificationSasStyle.startChattingButtonWidth,
                 child: Center(
                   child: Text(
-                    L10n.of(context)!.next,
+                    l10n.next,
                     style: KeyVerificationSasStyle.filledButtonTextStyle(
                       context,
                     ),

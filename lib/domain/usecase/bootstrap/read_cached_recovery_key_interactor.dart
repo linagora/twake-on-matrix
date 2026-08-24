@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:fluffychat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
+import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
@@ -22,7 +23,9 @@ class ReadCachedRecoveryKeyInteractor {
             : CachedRecoveryKeyFoundState(recoveryKey: key),
       );
     } catch (e, s) {
-      Logs().w('Unable to read cached recovery key', e, s);
+      // Sent to Sentry: this message matches
+      // SentryTrackedEvents.unableToReadCachedRecoveryKey.
+      Logs().w(SentryTrackedEvents.unableToReadCachedRecoveryKey.message, e, s);
       yield Left(ReadCachedRecoveryKeyFailureState(exception: e));
     }
   }

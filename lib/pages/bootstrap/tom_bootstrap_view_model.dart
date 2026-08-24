@@ -5,6 +5,7 @@ import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
 import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:fluffychat/pages/bootstrap/bootstrap_providers.dart';
 import 'package:fluffychat/pages/bootstrap/tom_bootstrap_state.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
@@ -17,10 +18,9 @@ part 'tom_bootstrap_view_model.g.dart';
 class TomBootstrapViewModel extends _$TomBootstrapViewModel {
   static const noRecoveryWordsCloseDelay = Duration(seconds: 5);
 
-  final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
-  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
-  final _deleteRecoveryWordsInteractor = getIt
-      .get<DeleteRecoveryWordsInteractor>();
+  late final SaveRecoveryWordsInteractor _saveRecoveryWordsInteractor;
+  late final GetRecoveryWordsInteractor _getRecoveryWordsInteractor;
+  late final DeleteRecoveryWordsInteractor _deleteRecoveryWordsInteractor;
 
   Bootstrap? _bootstrap;
   bool _wipe = false;
@@ -34,6 +34,13 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     required bool wipeRecovery,
     required bool twakeSupported,
   }) {
+    _saveRecoveryWordsInteractor = ref.read(
+      saveRecoveryWordsInteractorProvider,
+    );
+    _getRecoveryWordsInteractor = ref.read(getRecoveryWordsInteractorProvider);
+    _deleteRecoveryWordsInteractor = ref.read(
+      deleteRecoveryWordsInteractorProvider,
+    );
     _wipe = wipe;
     if (client.userID != null) {
       DioCacheInterceptorForClient(client.userID!).setup(getIt);

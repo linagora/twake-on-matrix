@@ -2,19 +2,29 @@ import 'package:dartz/dartz.dart';
 import 'package:fluffychat/app_state/failure.dart';
 import 'package:fluffychat/app_state/success.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:matrix/matrix.dart';
 
-class StoreRecoveryKeySuccessState extends Success {
-  const StoreRecoveryKeySuccessState() : super();
+part 'store_recovery_key_interactor.freezed.dart';
+
+@Freezed(equal: false)
+abstract class StoreRecoveryKeySuccessState extends Success
+    with _$StoreRecoveryKeySuccessState {
+  const StoreRecoveryKeySuccessState._();
+
+  const factory StoreRecoveryKeySuccessState() = _StoreRecoveryKeySuccessState;
 
   @override
   List<Object?> get props => [];
 }
 
-class StoreRecoveryKeyFailureState extends Failure {
-  final dynamic exception;
+@Freezed(equal: false)
+abstract class StoreRecoveryKeyFailureState extends Failure
+    with _$StoreRecoveryKeyFailureState {
+  const StoreRecoveryKeyFailureState._();
 
-  const StoreRecoveryKeyFailureState({required this.exception});
+  const factory StoreRecoveryKeyFailureState({required dynamic exception}) =
+      _StoreRecoveryKeyFailureState;
 
   @override
   List<Object?> get props => [exception];
