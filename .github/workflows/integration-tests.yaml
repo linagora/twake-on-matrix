@@ -283,11 +283,13 @@ jobs:
             integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart \
             integration_test/tests/chat/perf_test.dart
 
-          # 8 test cases (~17 min)
+          # 7 test cases (~15 min). Web-only tests (e.g. web_login_paths_test,
+          # which boots web_test_main and expects the web AutoHomeserverPicker
+          # flow) must NOT be listed here — they can never pass on Android and
+          # are covered by the patrol-web nightly workflow.
           build_shard shard_3_misc \
             integration_test/tests/contact/contact_test.dart \
             integration_test/tests/login/login_with_password_test.dart \
-            integration_test/tests/login/web_login_paths_test.dart \
             integration_test/tests/setting/language_test.dart \
             integration_test/tests/setting/settings_contacts_visibility_test.dart \
             integration_test/tests/setting/settings_recovery_key_test.dart

@@ -25,6 +25,23 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     await $.waitUntilVisible(recoveryKeyItem());
   }
 
+  /// Waits for the recovery key item and returns whether it appeared.
+  ///
+  /// The section is rendered only when the ToM server returns recovery words
+  /// (`GET /_twake/recoveryWords`). Accounts without provisioned recovery
+  /// words get a 404 and the section stays hidden — an environment
+  /// precondition, not an app regression.
+  Future<bool> waitForRecoveryKeyVisibleOrNull({
+    Duration timeout = const Duration(seconds: 45),
+  }) async {
+    try {
+      await $.waitUntilVisible(recoveryKeyItem(), timeout: timeout);
+      return true;
+    } on WaitUntilVisibleTimeoutException {
+      return false;
+    }
+  }
+
   /// Taps the copy button, then confirms the warning dialog by tapping "Copy".
   Future<void> tapCopyAndConfirm() async {
     await recoveryKeyCopyButton().tap();
