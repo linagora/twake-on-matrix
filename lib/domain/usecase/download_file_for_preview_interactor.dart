@@ -2,13 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
-import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
-import 'package:fluffychat/domain/app_state/preview_file/download_file_for_preview_success.dart';
-import 'package:fluffychat/domain/model/download_file/download_file_for_preview_response.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/preview_file/download_file_for_preview_failure.dart';
+import 'package:twake_chat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
+import 'package:twake_chat/domain/app_state/preview_file/download_file_for_preview_success.dart';
+import 'package:twake_chat/domain/model/download_file/download_file_for_preview_response.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 

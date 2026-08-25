@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/events/message_reactions_bottom_sheet.dart';
-import 'package:fluffychat/pages/chat/events/message_reactions_style.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/chat/events/message_reactions_bottom_sheet.dart';
+import 'package:twake_chat/pages/chat/events/message_reactions_style.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -10,9 +10,9 @@ import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:overflow_view/overflow_view.dart';
 
 class MessageReactions extends StatelessWidget {

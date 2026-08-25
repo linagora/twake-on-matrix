@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/setting_keys.dart';
+import 'package:twake_chat/widgets/theme_builder.dart';
 import 'settings_style_view.dart';
 
 class SettingsStyle extends StatefulWidget {

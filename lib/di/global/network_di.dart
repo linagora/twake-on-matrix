@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/dio_cache_option.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/data/network/identity_endpoint.dart';
-import 'package:fluffychat/data/network/interceptor/authorization_interceptor.dart';
-import 'package:fluffychat/data/network/interceptor/download_file_interceptor.dart';
-import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/interceptor/dynamic_url_interceptor.dart';
-import 'package:fluffychat/di/base_di.dart';
+import 'package:twake_chat/data/network/dio_cache_option.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/homeserver_endpoint.dart';
+import 'package:twake_chat/data/network/identity_endpoint.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/di/base_di.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 

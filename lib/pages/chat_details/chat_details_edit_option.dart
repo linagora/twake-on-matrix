@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_details/chat_details_edit_option_style.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_edit_option_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

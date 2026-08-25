@@ -1,15 +1,15 @@
 import 'dart:math';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/model/file/display_image_info.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/extension/image_size_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/presentation/model/file/display_image_info.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/extension/image_size_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
 import 'package:matrix/matrix.dart';

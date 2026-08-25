@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 
 class MxcImageCacheManager {
   static final MxcImageCacheManager _instance = MxcImageCacheManager._();

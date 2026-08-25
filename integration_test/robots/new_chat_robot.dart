@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection_view.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

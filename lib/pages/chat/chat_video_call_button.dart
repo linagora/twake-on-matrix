@@ -1,11 +1,11 @@
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/providers/login_homeserver_summary_provider.dart';
-import 'package:fluffychat/utils/voip/video_call_helper.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/utils/voip/video_call_helper.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ChatVideoCallButton extends ConsumerWidget {
   final ChatController controller;

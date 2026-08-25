@@ -1,10 +1,10 @@
-import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_bottom_navigator.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
-import 'package:fluffychat/pages/search/search_view.dart';
-import 'package:fluffychat/pages/chat_list/slidable_chat_list_item.dart';
-import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
+import 'package:twake_chat/pages/chat/chat_view.dart';
+import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
+import 'package:twake_chat/pages/search/search_view.dart';
+import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
+import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';

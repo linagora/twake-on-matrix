@@ -1,8 +1,8 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_subtitle.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_details/participant_list_item/participant_list_item.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_subtitle.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
+import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';

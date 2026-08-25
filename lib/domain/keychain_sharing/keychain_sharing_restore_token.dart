@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'keychain_sharing_restore_token.g.dart';

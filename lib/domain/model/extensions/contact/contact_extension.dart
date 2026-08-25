@@ -1,15 +1,15 @@
-import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
-import 'package:fluffychat/data/model/addressbook/address_book.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/data/hive/dto/contact/third_party_contact_hive_obj.dart';
+import 'package:twake_chat/data/model/addressbook/address_book.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 
 extension ContactExtension on Contact {
   FederationContact toFederationContact() {

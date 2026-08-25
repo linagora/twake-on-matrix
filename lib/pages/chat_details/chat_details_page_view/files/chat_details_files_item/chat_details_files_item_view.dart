@@ -1,9 +1,9 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_download_tile.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloaded_tile.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloading_tile.dart';
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_download_tile.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloaded_tile.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_file_downloading_tile.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

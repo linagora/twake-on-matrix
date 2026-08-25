@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/context_menu/context_menu_action.dart';
+import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/foundation.dart';
 
 class ChatParticipantContextMenuItem extends ContextMenuAction {

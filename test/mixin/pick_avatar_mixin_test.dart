@@ -2,10 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/extensions/xfile/xfile_extension.dart';
-import 'package:fluffychat/presentation/mixins/pick_avatar_mixin.dart';
-import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
+import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
+import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockPickAvatarMixin with PickAvatarMixin {}

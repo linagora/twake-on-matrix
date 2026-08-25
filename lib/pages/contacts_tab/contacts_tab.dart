@@ -1,22 +1,22 @@
 import 'dart:async';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
-import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab_view.dart';
-import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
-import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
+import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab_view.dart';
+import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
+import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class ContactsTab extends StatefulWidget {

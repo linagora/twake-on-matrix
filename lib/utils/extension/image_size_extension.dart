@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/presentation/model/file/display_image_info.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/presentation/model/file/display_image_info.dart';
 
 typedef ImageSize = Size;
 

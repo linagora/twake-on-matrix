@@ -1,7 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:vodozemac/vodozemac.dart' as vod;

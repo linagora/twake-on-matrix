@@ -1,18 +1,18 @@
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_play_extension.dart';
-import 'package:fluffychat/pages/chat/events/audio_message/audio_player_widget.dart';
-import 'package:fluffychat/pages/chat/events/message/display_name_widget.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
+import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
+import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

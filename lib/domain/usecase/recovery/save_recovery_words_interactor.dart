@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/recovery_words/save_recovery_words_failed.dart';
-import 'package:fluffychat/domain/app_state/recovery_words/save_recovery_words_success.dart';
-import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/recovery_words/save_recovery_words_failed.dart';
+import 'package:twake_chat/domain/app_state/recovery_words/save_recovery_words_success.dart';
+import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class SaveRecoveryWordsInteractor {

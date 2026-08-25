@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/localizations/save_language_state.dart';
-import 'package:fluffychat/domain/usecase/settings/save_language_interactor.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_app_language/settings_app_language_view.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/localizations/save_language_state.dart';
+import 'package:twake_chat/domain/usecase/settings/save_language_interactor.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language_view.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

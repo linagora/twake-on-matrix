@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:matrix/matrix.dart';
 
 extension PresentationSearchExtensions on ContactPresentationSearch {

@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/switch_button.dart';
+import 'package:twake_chat/widgets/switch_button.dart';
 import 'package:flutter/material.dart';
 
 class SettingTile extends StatelessWidget {

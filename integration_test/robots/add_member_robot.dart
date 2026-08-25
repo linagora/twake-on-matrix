@@ -1,7 +1,7 @@
-import 'package:fluffychat/pages/new_group/new_group_chat_info_view.dart';
-import 'package:fluffychat/pages/new_group/widget/contact_item.dart';
-import 'package:fluffychat/widgets/twake_components/twake_fab.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
+import 'package:twake_chat/pages/new_group/widget/contact_item.dart';
+import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

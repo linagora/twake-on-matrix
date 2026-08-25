@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
-import 'package:fluffychat/domain/usecase/room/timeline_search_event_interactor.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/room/timeline_search_event_state.dart';
+import 'package:twake_chat/domain/usecase/room/timeline_search_event_interactor.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

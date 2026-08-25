@@ -1,7 +1,7 @@
-import 'package:fluffychat/pages/chat/chat_app_bar_title.dart';
-import 'package:fluffychat/pages/chat/chat_input_row_send_btn.dart';
-import 'package:fluffychat/pages/chat/event_info_dialog.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
+import 'package:twake_chat/pages/chat/event_info_dialog.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

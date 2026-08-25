@@ -1,7 +1,7 @@
-import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/utils/scroll_controller_extension.dart';
+import 'package:twake_chat/utils/scroll_controller_extension.dart';
 
 class TwakeSmartRefresher extends StatefulWidget {
   final TwakeRefreshController controller;

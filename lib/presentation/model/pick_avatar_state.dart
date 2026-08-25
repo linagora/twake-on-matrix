@@ -1,5 +1,5 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/presentation/state/success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/presentation/state/success.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/domain/app_state/device_settings/get_devices_state.dart';
-import 'package:fluffychat/pages/device_settings/device_settings_state.dart';
-import 'package:fluffychat/pages/device_settings/providers/device_settings_providers.dart';
+import 'package:twake_chat/domain/app_state/device_settings/get_devices_state.dart';
+import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
+import 'package:twake_chat/pages/device_settings/providers/device_settings_providers.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

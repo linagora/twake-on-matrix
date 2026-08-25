@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_list/chat_list_body_view.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_body_view.dart';
+import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:flutter/material.dart';
 
 class SliverExpandableList extends StatefulWidget {

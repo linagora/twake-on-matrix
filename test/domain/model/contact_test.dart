@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

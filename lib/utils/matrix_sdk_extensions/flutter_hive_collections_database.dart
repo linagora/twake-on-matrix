@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_session.dart';
-import 'package:fluffychat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/hive_collections_database.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:twake_chat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:flutter/foundation.dart' hide Key;
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -13,7 +13,7 @@ import 'package:hive/hive.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   FlutterHiveCollectionsDatabase(

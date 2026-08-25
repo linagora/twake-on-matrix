@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

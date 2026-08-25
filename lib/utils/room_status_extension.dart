@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 

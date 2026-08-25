@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/media/media_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/room/upload_content_state.dart';
-import 'package:fluffychat/domain/exception/room/can_not_upload_content_exception.dart';
-import 'package:fluffychat/presentation/model/file/file_asset_entity.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/media/media_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
+import 'package:twake_chat/domain/exception/room/can_not_upload_content_exception.dart';
+import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 

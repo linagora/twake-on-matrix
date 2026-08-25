@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/initial.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
 
 class GetPhonebookContactsInitial extends Initial {
   const GetPhonebookContactsInitial() : super();

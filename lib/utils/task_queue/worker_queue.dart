@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:fluffychat/utils/task_queue/task.dart';
+import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
 
 typedef OnTaskCompleted = void Function(String? taskId);

@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/invitation/invitation_status.dart';
+import 'package:twake_chat/domain/model/invitation/invitation_status.dart';
 
 abstract class HiveInvitationStatusDatasource {
   Future<void> storeInvitationStatus({

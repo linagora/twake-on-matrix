@@ -1,15 +1,15 @@
-import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/pages/share/share_view.dart';
-import 'package:fluffychat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/mixins/search_recent_chat_mixin.dart';
-import 'package:fluffychat/presentation/mixins/send_files_mixin.dart';
-import 'package:fluffychat/presentation/model/chat/chat_router_input_argument.dart';
-import 'package:fluffychat/utils/extension/value_notifier_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/event/twake_event_types.dart';
+import 'package:twake_chat/pages/share/share_view.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/presentation/mixins/search_recent_chat_mixin.dart';
+import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
+import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

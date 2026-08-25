@@ -1,8 +1,8 @@
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
-import 'package:fluffychat/utils/search/search_options.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/search/recent_chat_model.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:matrix/matrix.dart';
 
 const _searchOptions = SearchOptions(diacriticSensitive: false);

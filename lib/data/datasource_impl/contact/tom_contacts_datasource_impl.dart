@@ -1,11 +1,11 @@
-import 'package:fluffychat/data/datasource/tom_contacts_datasource.dart';
-import 'package:fluffychat/data/network/contact/tom_contact_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
-import 'package:fluffychat/domain/model/extensions/contact/tom_contact_extension.dart';
+import 'package:twake_chat/data/datasource/tom_contacts_datasource.dart';
+import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_query.dart';
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/model/contact/lookup_mxid_request.dart';
+import 'package:twake_chat/domain/model/extensions/contact/tom_contact_extension.dart';
 
 class TomContactsDatasourceImpl implements TomContactsDatasource {
   final TomContactAPI _tomContactAPI = getIt.get<TomContactAPI>();

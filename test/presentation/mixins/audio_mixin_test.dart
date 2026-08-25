@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/presentation/mixins/audio_mixin.dart';
+import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 
 class MockAudioMixin with AudioMixin {}
 

@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/post_address_book_state.dart';
-import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/post_address_book_state.dart';
+import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:matrix/matrix.dart';
 
 mixin AddressBooksMixin {

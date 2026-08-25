@@ -1,16 +1,16 @@
 import 'package:byte_converter/byte_converter.dart';
 import 'package:dartz/dartz.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/presentation/extensions/value_notifier_custom.dart';
-import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
-import 'package:fluffychat/utils/mime_type_uitls.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
+import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/utils/mime_type_uitls.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 mixin PickAvatarMixin {
   final ValueNotifierCustom<Either<Failure, Success>> pickAvatarUIState =

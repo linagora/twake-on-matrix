@@ -1,7 +1,7 @@
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_route_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:flutter_portal/flutter_portal.dart';

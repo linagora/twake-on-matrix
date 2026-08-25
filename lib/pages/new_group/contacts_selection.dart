@@ -1,15 +1,15 @@
-import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
-import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
-import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
-import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/pages/new_group/contacts_selection_view.dart';
-import 'package:fluffychat/pages/new_group/selected_contacts_map_change_notifier.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
+import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
+import 'package:twake_chat/presentation/mixins/invite_external_contact_mixin.dart';
+import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection_view.dart';
+import 'package:twake_chat/pages/new_group/selected_contacts_map_change_notifier.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 abstract class ContactsSelectionController<T extends StatefulWidget>

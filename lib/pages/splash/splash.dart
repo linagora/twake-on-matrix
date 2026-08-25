@@ -1,4 +1,4 @@
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:twake_chat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie_native/lottie_native.dart';

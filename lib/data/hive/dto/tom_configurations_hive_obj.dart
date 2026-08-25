@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/data/hive/dto/tom_server_information_hive_obj.dart';
-import 'package:fluffychat/domain/model/tom_configurations.dart';
+import 'package:twake_chat/data/hive/dto/tom_server_information_hive_obj.dart';
+import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'tom_configurations_hive_obj.g.dart';

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State, OpenFile;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_manager.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_manager.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

@@ -1,17 +1,17 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/pages/chat_blank/chat_blank_style.dart';
-import 'package:fluffychat/pages/chat_blank/chat_qr_code.dart';
-import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/first_column_inner_routes.dart';
+import 'package:twake_chat/pages/chat_blank/chat_blank_style.dart';
+import 'package:twake_chat/pages/chat_blank/chat_qr_code.dart';
+import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ChatBlank extends StatelessWidget {

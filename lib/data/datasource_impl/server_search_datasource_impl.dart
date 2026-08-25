@@ -1,8 +1,8 @@
-import 'package:fluffychat/data/datasource/server_search_datasource.dart';
-import 'package:fluffychat/data/network/search/server_search_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/data/datasource/server_search_datasource.dart';
+import 'package:twake_chat/data/network/search/server_search_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/data/model/search/server_search_response.dart';
+import 'package:twake_chat/data/model/search/server_search_response.dart';
 
 class ServerSearchDatasourceImpl extends ServerSearchDatasource {
   final ServerSearchAPI _serverSearchAPI = getIt.get<ServerSearchAPI>();

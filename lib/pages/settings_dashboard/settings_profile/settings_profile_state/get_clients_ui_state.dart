@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
 
 class GetClientsInitialUIState extends Success {
   @override

@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/chat/events/html_message.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
+import 'package:twake_chat/pages/chat/events/html_message.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 

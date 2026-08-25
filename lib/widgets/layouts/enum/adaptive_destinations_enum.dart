@@ -1,10 +1,10 @@
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/widgets/avatar/bottom_navigation_avatar.dart';
-import 'package:fluffychat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
-import 'package:fluffychat/widgets/unread_rooms_badge.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/widgets/avatar/bottom_navigation_avatar.dart';
+import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
+import 'package:twake_chat/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 

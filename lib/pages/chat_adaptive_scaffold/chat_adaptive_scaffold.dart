@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_navigator.dart';
-import 'package:fluffychat/pages/chat_search/chat_search.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
-import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_navigator.dart';
+import 'package:twake_chat/pages/chat_search/chat_search.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_navigator.dart';
+import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:matrix/matrix.dart';

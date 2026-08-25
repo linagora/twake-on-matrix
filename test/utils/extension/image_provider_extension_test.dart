@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/extension/image_provider_extension.dart';
+import 'package:twake_chat/utils/extension/image_provider_extension.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

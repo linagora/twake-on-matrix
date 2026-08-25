@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_list/chat_list_view_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 

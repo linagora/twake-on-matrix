@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat_draft/draft_chat_view.dart';
+import 'package:twake_chat/pages/chat/chat_view.dart';
+import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 

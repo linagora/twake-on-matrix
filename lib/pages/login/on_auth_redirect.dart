@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/presentation/model/client_login_state_event.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_body_args.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';

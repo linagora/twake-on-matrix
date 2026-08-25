@@ -1,15 +1,15 @@
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/loading_contact_widget.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_success.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/sliver_expandable_list.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab_view_style.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/loading_contact_widget.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_success.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/sliver_expandable_list.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class SliverContactsWithMatrixId extends StatelessWidget {

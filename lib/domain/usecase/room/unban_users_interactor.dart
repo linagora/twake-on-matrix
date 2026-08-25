@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/unban_users_state.dart';
-import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/room/unban_users_state.dart';
+import 'package:twake_chat/domain/usecase/room/unban_user_interactor.dart';
 import 'package:matrix/matrix.dart';
 
 class UnbanUsersInteractor {

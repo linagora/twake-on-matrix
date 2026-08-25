@@ -1,14 +1,14 @@
-import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/pages/search/server_search_view_style.dart';
-import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_empty_search.dart';
-import 'package:fluffychat/presentation/model/search/presentation_server_side_search.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/result_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_title.dart';
-import 'package:fluffychat/widgets/search/empty_search_widget.dart';
+import 'package:twake_chat/pages/search/search.dart';
+import 'package:twake_chat/pages/search/server_search_view_style.dart';
+import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_empty_search.dart';
+import 'package:twake_chat/presentation/model/search/presentation_server_side_search.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/result_extension.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/highlight_text.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
+import 'package:twake_chat/widgets/search/empty_search_widget.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

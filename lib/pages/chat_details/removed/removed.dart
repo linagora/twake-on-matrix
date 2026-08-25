@@ -1,23 +1,23 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/utils/user_extension.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/room/unban_user_state.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/usecase/room/unban_user_interactor.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_edit_view_style.dart';
-import 'package:fluffychat/pages/chat_details/removed/removed_search_state.dart';
-import 'package:fluffychat/pages/chat_details/removed/removed_view.dart';
-import 'package:fluffychat/pages/search/search_debouncer_mixin.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/utils/twake_snackbar.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/utils/user_extension.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/room/unban_user_state.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/usecase/room/unban_user_interactor.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
+import 'package:twake_chat/pages/chat_details/removed/removed_search_state.dart';
+import 'package:twake_chat/pages/chat_details/removed/removed_view.dart';
+import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class Removed extends StatefulWidget {
   final Room room;

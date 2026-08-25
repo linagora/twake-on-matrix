@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/utils/custom_http_client.dart';
-import 'package:fluffychat/utils/custom_image_resizer.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/twake_client.dart';
-import 'package:fluffychat/utils/open_sqflite_db.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/utils/custom_http_client.dart';
+import 'package:twake_chat/utils/custom_image_resizer.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
+import 'package:twake_chat/utils/open_sqflite_db.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
@@ -15,11 +15,23 @@ import 'package:matrix/matrix.dart';
 import 'famedlysdk_store.dart';
 
 abstract class ClientManager {
-  static const String clientNamespace = 'im.fluffychat.store.clients';
+  static const String clientNamespace = 'im.twake.store.clients';
+
+  /// Legacy key used before the FluffyChat-to-Twake rename.
+  ///
+  /// Read as a fallback so existing installs don't lose their client list
+  /// on upgrade; new writes always go to [clientNamespace].
+  static const String _legacyClientNamespace = 'im.fluffychat.store.clients';
+
   static Future<List<Client>> getClients({bool initialize = true}) async {
     final clientNames = <String>{};
+    var migratedFromLegacyKey = false;
     try {
-      final rawClientNames = await Store().getItem(clientNamespace);
+      var rawClientNames = await Store().getItem(clientNamespace);
+      if (rawClientNames == null) {
+        rawClientNames = await Store().getItem(_legacyClientNamespace);
+        migratedFromLegacyKey = rawClientNames != null;
+      }
       if (rawClientNames != null) {
         final clientNamesList = (jsonDecode(rawClientNames) as List)
             .cast<String>();
@@ -32,6 +44,9 @@ abstract class ClientManager {
     if (clientNames.isEmpty) {
       clientNames.add(PlatformInfos.clientName);
       await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
+    } else if (migratedFromLegacyKey) {
+      await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
+      await Store().deleteItem(_legacyClientNamespace);
     }
     final clients = await Future.wait(clientNames.map(createClient));
     if (initialize) {

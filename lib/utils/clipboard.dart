@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
-import 'package:fluffychat/presentation/model/clipboard/clipboard_image_info.dart';
+import 'package:twake_chat/presentation/extensions/uint8list_extension.dart';
+import 'package:twake_chat/presentation/model/clipboard/clipboard_image_info.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
-import 'package:fluffychat/domain/repository/localizations/localizations_repository.dart';
+import 'package:twake_chat/data/datasource/localizations/localizations_datasource.dart';
+import 'package:twake_chat/domain/repository/localizations/localizations_repository.dart';
 
 class LocalizationsRepositoryImpl extends LocalizationsRepository {
   final LocalizationsDataSource dataSource;

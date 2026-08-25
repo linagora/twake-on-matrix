@@ -1,8 +1,8 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:collection/collection.dart';
 
 extension PresentaionContactExtension on PresentationContact {

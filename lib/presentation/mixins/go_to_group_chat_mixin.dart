@@ -1,7 +1,7 @@
-import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/config/first_column_inner_routes.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 mixin GoToGroupChatMixin {
   void goToNewGroupChat(BuildContext context) {

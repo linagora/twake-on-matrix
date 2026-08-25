@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:universal_html/html.dart' as html;
 
 enum AudioRecordState { initial, recording, recorded, playing, paused }

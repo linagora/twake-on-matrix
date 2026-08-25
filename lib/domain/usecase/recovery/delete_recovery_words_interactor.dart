@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/recovery_words/delete_recovery_states.dart';
-import 'package:fluffychat/domain/repository/recovery_words_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/recovery_words/delete_recovery_states.dart';
+import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class DeleteRecoveryWordsInteractor {

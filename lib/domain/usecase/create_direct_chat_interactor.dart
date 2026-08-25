@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_failed.dart';
-import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
-import 'package:fluffychat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_failed.dart';
+import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
+import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:matrix/matrix.dart';
 
 /// Manually implements direct chat creation instead of using client.startDirectChat()

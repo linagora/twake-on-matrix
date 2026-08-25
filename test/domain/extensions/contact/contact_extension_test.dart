@@ -1,11 +1,11 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
-import 'package:fluffychat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_contact.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_hash_details_response.dart';
+import 'package:twake_chat/modules/federation_identity_lookup/domain/models/federation_third_party_contact.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 

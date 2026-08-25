@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar_style.dart';
+import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

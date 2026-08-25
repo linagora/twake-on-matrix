@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/app_config.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';

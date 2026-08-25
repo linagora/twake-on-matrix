@@ -1,8 +1,8 @@
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/homeserver_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
-import 'package:fluffychat/domain/model/server_config.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/homeserver_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/domain/model/server_config.dart';
 
 class ServerConfigAPI {
   final DioClient _client = getIt.get<DioClient>(

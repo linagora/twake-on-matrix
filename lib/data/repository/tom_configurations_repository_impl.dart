@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/datasource/tom_configurations_datasource.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/tom_configurations.dart';
-import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
+import 'package:twake_chat/data/datasource/tom_configurations_datasource.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/tom_configurations.dart';
+import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 
 class ToMConfigurationsRepositoryImpl implements ToMConfigurationsRepository {
   final ToMConfigurationsDatasource tomConfigurationsDatasource = getIt

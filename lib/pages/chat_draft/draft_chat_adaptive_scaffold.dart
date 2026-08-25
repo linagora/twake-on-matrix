@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/chat_draft/draft_chat.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_navigator.dart';
-import 'package:fluffychat/presentation/enum/chat/right_column_type_enum.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact_constant.dart';
+import 'package:twake_chat/pages/chat_draft/draft_chat.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_navigator.dart';
+import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:fluffychat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
+import 'package:twake_chat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 
 class DraftChatAdaptiveScaffold extends StatelessWidget {
   final GoRouterState state;

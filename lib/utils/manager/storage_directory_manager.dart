@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/exception/save_to_downloads_exception.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:external_path/external_path.dart';

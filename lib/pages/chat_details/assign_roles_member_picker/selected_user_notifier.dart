@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/enums/selection_mode_enum.dart';
+import 'package:twake_chat/domain/enums/selection_mode_enum.dart';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 

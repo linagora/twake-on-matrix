@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/image_viewer/context_menu_item_image_viewer_style.dart';
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:twake_chat/pages/image_viewer/context_menu_item_image_viewer_style.dart';
+import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

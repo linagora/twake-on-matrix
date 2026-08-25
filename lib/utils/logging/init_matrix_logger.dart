@@ -1,5 +1,5 @@
-import 'package:fluffychat/utils/logging/log_orchestrator.dart';
-import 'package:fluffychat/utils/logging/log_types.dart';
+import 'package:twake_chat/utils/logging/log_orchestrator.dart';
+import 'package:twake_chat/utils/logging/log_types.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 void initMatrixLogger() {

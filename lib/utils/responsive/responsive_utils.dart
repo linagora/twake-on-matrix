@@ -1,7 +1,7 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/widgets.dart';
 
 class ResponsiveUtils {

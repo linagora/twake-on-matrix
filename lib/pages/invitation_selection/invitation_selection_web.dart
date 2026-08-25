@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
-import 'package:fluffychat/pages/invitation_selection/invitation_selection_style.dart';
+import 'package:twake_chat/pages/invitation_selection/invitation_selection.dart';
+import 'package:twake_chat/pages/invitation_selection/invitation_selection_style.dart';
 import 'package:flutter/material.dart';
 
 class InvitationSelectionWebView extends StatelessWidget {

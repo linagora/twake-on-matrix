@@ -1,6 +1,6 @@
-import 'package:fluffychat/data/datasource/multiple_account/multiple_account_datasource.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/multiple_account/multiple_account_repository.dart';
+import 'package:twake_chat/data/datasource/multiple_account/multiple_account_datasource.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 
 class MultipleAccountRepositoryImpl extends MultipleAccountRepository {
   final MultipleAccountDatasource _multipleAccountDatasource = getIt

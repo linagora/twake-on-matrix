@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

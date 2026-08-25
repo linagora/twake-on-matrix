@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_info_visibility_request.g.dart';

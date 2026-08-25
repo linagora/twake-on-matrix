@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/network/exception/dio_duplicate_download_exception.dart';
+import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:matrix/matrix.dart';
 
 class DownloadFileInterceptor extends InterceptorsWrapper {

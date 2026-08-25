@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/file_info/video_file_info.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat/input_bar/focus_suggestion_controller.dart';
-import 'package:fluffychat/pages/chat/input_bar/input_bar.dart';
-import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
+import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

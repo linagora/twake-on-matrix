@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/task_queue/worker_queue.dart';
+import 'package:twake_chat/utils/task_queue/worker_queue.dart';
 
 class UploadWorkerQueue extends WorkerQueue {
   @override

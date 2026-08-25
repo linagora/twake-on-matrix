@@ -3,7 +3,7 @@ library window;
 
 import 'dart:js_interop';
 
-import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
+import 'package:twake_chat/utils/js_window/universal_image_bitmap.dart';
 import 'package:universal_html/html.dart';
 import 'dart:typed_data';
 import 'package:web/web.dart' as web;

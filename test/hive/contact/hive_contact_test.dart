@@ -1,10 +1,10 @@
-import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
-import 'package:fluffychat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/repository/contact/hive_contact_repository.dart';
+import 'package:twake_chat/data/datasource/contact/hive_third_party_contact_datasource.dart';
+import 'package:twake_chat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../fake_tom_collection_database.dart';

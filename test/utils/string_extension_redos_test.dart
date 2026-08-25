@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/utils/string_extension.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 
 /// ReDoS unit tests for string extension regex patterns
 /// Reference: ADR 0033 - Fix ReDoS vulnerabilities in regex patterns

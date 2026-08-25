@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/clipboard.dart';
+import 'package:twake_chat/utils/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 

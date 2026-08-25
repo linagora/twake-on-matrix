@@ -1,11 +1,11 @@
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
-import 'package:fluffychat/pages/auto_homeserver_picker/auto_homeserver_picker_view_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
+import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_view_style.dart';
+import 'package:twake_chat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class AutoHomeserverPickerView extends StatelessWidget {
   final AutoHomeserverPickerController controller;

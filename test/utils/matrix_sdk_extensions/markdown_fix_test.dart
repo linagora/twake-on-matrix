@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

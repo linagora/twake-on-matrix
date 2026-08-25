@@ -1,8 +1,8 @@
-import 'package:fluffychat/di/global/get_it_provider.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
-import 'package:fluffychat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_view_model.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/di/global/get_it_provider.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_state.dart';
+import 'package:twake_chat/pages/chat/chat_device_verifycation_banner/chat_device_verification_banner_view_model.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/banners/linagora_banner.dart';

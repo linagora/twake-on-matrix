@@ -1,12 +1,12 @@
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/manager/download_manager/download_file_state.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/file_widget/download_file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
-import 'package:fluffychat/widgets/file_widget/message_file_tile_style.dart';
-import 'package:fluffychat/widgets/mixins/download_file_on_web_mixin.dart';
-import 'package:fluffychat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/widgets/file_widget/download_file_tile_widget.dart';
+import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
+import 'package:twake_chat/widgets/file_widget/message_file_tile_style.dart';
+import 'package:twake_chat/widgets/mixins/download_file_on_web_mixin.dart';
+import 'package:twake_chat/widgets/mixins/handle_download_and_preview_file_mixin.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';

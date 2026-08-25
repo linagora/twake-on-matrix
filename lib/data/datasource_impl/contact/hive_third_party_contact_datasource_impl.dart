@@ -1,11 +1,11 @@
-import 'package:fluffychat/data/datasource/contact/hive_third_party_contact_datasource.dart';
-import 'package:fluffychat/data/hive/dto/contact/contact_hive_obj.dart';
-import 'package:fluffychat/data/hive/extension/contact_hive_obj_extension.dart';
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/extensions/contact/contact_extension.dart';
-import 'package:fluffychat/utils/copy_map.dart';
+import 'package:twake_chat/data/datasource/contact/hive_third_party_contact_datasource.dart';
+import 'package:twake_chat/data/hive/dto/contact/contact_hive_obj.dart';
+import 'package:twake_chat/data/hive/extension/contact_hive_obj_extension.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:twake_chat/utils/copy_map.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class HiveThirdPartyContactDatasourceImpl

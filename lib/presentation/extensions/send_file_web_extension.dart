@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/media/cancel_exception.dart';
-import 'package:fluffychat/data/network/media/media_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/presentation/extensions/media_thumbnail_extension.dart';
-import 'package:fluffychat/presentation/extensions/send_file_fake_event_extension.dart';
-import 'package:fluffychat/utils/exception/upload_exception.dart';
-import 'package:fluffychat/utils/js_window/non_js_window.dart'
-    if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
-import 'package:fluffychat/utils/js_window/universal_image_bitmap.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/media/cancel_exception.dart';
+import 'package:twake_chat/data/network/media/media_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
+import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
+import 'package:twake_chat/utils/exception/upload_exception.dart';
+import 'package:twake_chat/utils/js_window/non_js_window.dart'
+    if (dart.library.js) 'package:twake_chat/utils/js_window/js_window.dart';
+import 'package:twake_chat/utils/js_window/universal_image_bitmap.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
 import 'package:matrix/matrix.dart';
 
 extension SendFileWebExtension on Room {

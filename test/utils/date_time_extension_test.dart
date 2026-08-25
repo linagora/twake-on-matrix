@@ -1,8 +1,8 @@
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {

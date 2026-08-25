@@ -1,5 +1,5 @@
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 
 mixin PopupContextMenuActionMixin {

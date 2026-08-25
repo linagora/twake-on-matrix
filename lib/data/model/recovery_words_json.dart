@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'recovery_words_json.g.dart';

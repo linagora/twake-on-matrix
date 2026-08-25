@@ -1,6 +1,6 @@
 import 'dart:ui';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/famedlysdk_store.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 import 'package:matrix/matrix.dart';
 
 class LanguageCacheManager {

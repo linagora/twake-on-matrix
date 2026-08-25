@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:fluffychat/domain/contact_manager/contacts_manager.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab_body_view.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab_body_view.dart';
 
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';

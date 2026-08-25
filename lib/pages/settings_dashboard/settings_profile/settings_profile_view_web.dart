@@ -1,16 +1,16 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_profile/settings_profile_view_web_style.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/presentation/model/pick_avatar_state.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/mixins/popup_menu_widget_style.dart';
-import 'package:fluffychat/widgets/stream_image_view.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_web_style.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
+import 'package:twake_chat/widgets/stream_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class SettingsProfileViewWeb extends StatelessWidget {

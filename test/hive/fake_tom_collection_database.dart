@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
 import 'package:hive/hive.dart';
 
 bool hiveInitialized = false;

@@ -1,19 +1,19 @@
-import 'package:fluffychat/domain/app_state/room/chat_get_pinned_events_state.dart';
-import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
-import 'package:fluffychat/pages/chat/chat_pinned_events/pinned_events_style.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/domain/app_state/room/chat_get_pinned_events_state.dart';
+import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
+import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_style.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_link_text/link_text.dart';
 
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class PinnedEventsView extends StatelessWidget {

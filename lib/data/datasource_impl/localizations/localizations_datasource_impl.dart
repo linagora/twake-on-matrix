@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:fluffychat/data/datasource/localizations/localizations_datasource.dart';
-import 'package:fluffychat/data/local/localizations/language_cache_manager.dart';
+import 'package:twake_chat/data/datasource/localizations/localizations_datasource.dart';
+import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 
 class LocalizationsDataSourceImpl extends LocalizationsDataSource {
   final LanguageCacheManager _languageCacheManager;

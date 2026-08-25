@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/extension/mime_type_extension.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ChatDetailsFileRowWrapper extends StatelessWidget {

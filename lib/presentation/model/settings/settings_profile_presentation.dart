@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_profile_enum.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
 
 class SettingsProfilePresentation extends Equatable {
   final SettingsProfileType settingsProfileType;

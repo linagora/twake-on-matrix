@@ -1,10 +1,10 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
-import 'package:fluffychat/widgets/avatar/secondary_avatar.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_header.dart';
+import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 

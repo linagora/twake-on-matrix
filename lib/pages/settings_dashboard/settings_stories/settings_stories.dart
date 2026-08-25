@@ -1,10 +1,10 @@
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 class SettingsStories extends StatefulWidget {
   const SettingsStories({super.key});

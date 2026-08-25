@@ -1,9 +1,9 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/settings_dashboard/settings_style/settings_style_twake_view.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_style/settings_style_twake_view.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';

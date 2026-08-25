@@ -1,9 +1,9 @@
-import 'package:fluffychat/presentation/enum/chat/popup_menu_item_web_enum.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/presentation/enum/chat/popup_menu_item_web_enum.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/presentation/extensions/text_editting_controller_extension.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/presentation/extensions/text_editting_controller_extension.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class ContextMenuInputBar extends StatelessWidget {

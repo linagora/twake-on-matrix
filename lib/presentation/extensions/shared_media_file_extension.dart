@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:fluffychat/presentation/extensions/uint8list_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/presentation/extensions/uint8list_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 

@@ -1,10 +1,10 @@
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/events/edit_content.dart';
-import 'package:fluffychat/pages/chat/events/edit_display_style.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/chat/events/edit_content.dart';
+import 'package:twake_chat/pages/chat/events/edit_display_style.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 class EditDisplay extends StatelessWidget {

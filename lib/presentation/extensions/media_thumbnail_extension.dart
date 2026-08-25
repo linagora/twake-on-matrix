@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:dartz/dartz.dart' hide id;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/extension/web_url_creation_extension.dart';
-import 'package:fluffychat/utils/js_window/non_js_window.dart'
-    if (dart.library.js) 'package:fluffychat/utils/js_window/js_window.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_state.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/utils/extension/web_url_creation_extension.dart';
+import 'package:twake_chat/utils/js_window/non_js_window.dart'
+    if (dart.library.js) 'package:twake_chat/utils/js_window/js_window.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as img;

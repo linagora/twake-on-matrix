@@ -1,6 +1,6 @@
-import 'package:fluffychat/widgets/search/empty_search_widget.dart';
+import 'package:twake_chat/widgets/search/empty_search_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class NoContactsFound extends StatelessWidget {
   final String? keyword;

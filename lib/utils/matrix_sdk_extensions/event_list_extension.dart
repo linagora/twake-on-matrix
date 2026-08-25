@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Result of syncing event lists between old and new states.

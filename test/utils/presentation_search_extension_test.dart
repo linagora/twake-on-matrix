@@ -1,10 +1,10 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/extension/presentation_search_extension.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/utils/extension/presentation_search_extension.dart';
 import 'package:get_it/get_it.dart';
 
 void main() {

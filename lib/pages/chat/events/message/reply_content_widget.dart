@@ -1,6 +1,6 @@
-import 'package:fluffychat/pages/chat/events/reply_content.dart';
-import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
-import 'package:fluffychat/pages/chat/optional_ink_well.dart';
+import 'package:twake_chat/pages/chat/events/reply_content.dart';
+import 'package:twake_chat/pages/chat/events/reply_content_style.dart';
+import 'package:twake_chat/pages/chat/optional_ink_well.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

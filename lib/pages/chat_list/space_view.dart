@@ -1,18 +1,18 @@
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/pages/chat_list/chat_list.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item.dart';
-import 'package:fluffychat/pages/chat_list/search_title.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/chat_list/chat_list.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/pages/chat_list/search_title.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../widgets/matrix.dart';
 

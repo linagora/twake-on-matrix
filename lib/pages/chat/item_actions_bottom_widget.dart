@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat/chat_actions.dart';
+import 'package:twake_chat/pages/chat/chat_actions.dart';
 import 'package:flutter/material.dart';
 
 typedef OnPickerTypeTap = void Function(PickerType);

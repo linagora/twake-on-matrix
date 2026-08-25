@@ -1,5 +1,5 @@
-import 'package:fluffychat/data/hive/dto/invitation_status/invitation_status_hive_obj.dart';
-import 'package:fluffychat/domain/model/invitation/invitation_status.dart';
+import 'package:twake_chat/data/hive/dto/invitation_status/invitation_status_hive_obj.dart';
+import 'package:twake_chat/domain/model/invitation/invitation_status.dart';
 
 extension InvitationStatusHiveObjExtension on InvitationStatusHiveObj {
   InvitationStatus toInvitationStatus() {

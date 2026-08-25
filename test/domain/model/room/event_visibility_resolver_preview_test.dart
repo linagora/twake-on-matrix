@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';

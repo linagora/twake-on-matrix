@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/exception/room/invite_user_exception.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 
 class InviteUserInitial extends Success {
   @override

@@ -1,5 +1,5 @@
-import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/domain/model/preview_file/supported_preview_file_types.dart';
+import 'package:twake_chat/utils/extension/mime_type_extension.dart';
 import 'package:mime/mime.dart';
 
 class MimeTypeUitls {

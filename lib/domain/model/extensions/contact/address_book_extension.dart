@@ -1,8 +1,8 @@
-import 'package:fluffychat/data/model/addressbook/address_book.dart';
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_status.dart';
-import 'package:fluffychat/domain/model/contact/third_party_status.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/data/model/addressbook/address_book.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 
 /// Extension methods for batch converting AddressBook entries to Contacts.
 extension IterableAddressBookToContactExtension on Iterable<AddressBook> {

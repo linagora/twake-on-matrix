@@ -1,10 +1,10 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_group_actions_view.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_group_info_background_view.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_group_information_view.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
-import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/widgets/avatar/secondary_avatar.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_group_actions_view.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_group_info_background_view.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_group_information_view.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
+import 'package:twake_chat/presentation/extensions/room_summary_extension.dart';
+import 'package:twake_chat/widgets/avatar/secondary_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

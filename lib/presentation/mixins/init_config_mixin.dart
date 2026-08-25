@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/app_config.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

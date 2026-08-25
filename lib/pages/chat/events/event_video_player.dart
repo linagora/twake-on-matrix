@@ -1,21 +1,21 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/message/message_style.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/extension/image_provider_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/media/chat_details_media_style.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/extension/image_provider_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/pages/chat/events/images_builder/image_bubble.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:linagora_design_flutter/extensions/duration_extension.dart';
 
 typedef DownloadVideoEventCallback = Future<Uint8List?> Function(Event event);

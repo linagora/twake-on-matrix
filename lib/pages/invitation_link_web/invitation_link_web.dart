@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/go_routes/app_routes.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

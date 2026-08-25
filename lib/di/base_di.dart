@@ -1,4 +1,4 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 

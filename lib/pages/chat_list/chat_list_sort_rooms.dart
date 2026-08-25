@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/domain/model/room/room_preview_result.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

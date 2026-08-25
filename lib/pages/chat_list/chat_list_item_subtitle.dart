@@ -1,18 +1,18 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/domain/model/room/room_preview_result.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat/seen_by_row.dart';
-import 'package:fluffychat/pages/chat/typing_timer_wrapper.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_item_style.dart';
-import 'package:fluffychat/pages/chat_list/chat_preview_text.dart';
-import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
-import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/room_status_extension.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/seen_by_row.dart';
+import 'package:twake_chat/pages/chat/typing_timer_wrapper.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_preview_text.dart';
+import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

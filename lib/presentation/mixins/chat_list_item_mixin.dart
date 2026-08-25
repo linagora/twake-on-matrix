@@ -1,11 +1,11 @@
-import 'package:fluffychat/pages/chat/events/images_builder/image_placeholder.dart';
-import 'package:fluffychat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
-import 'package:fluffychat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/image_placeholder.dart';
+import 'package:twake_chat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
+import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 

@@ -1,8 +1,8 @@
-import 'package:fluffychat/pages/new_group/new_group_chat_info.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
 extension NewGroupInfoControllerExtension on NewGroupChatInfoController {

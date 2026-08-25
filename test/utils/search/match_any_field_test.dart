@@ -3,8 +3,8 @@
 // fields and the default toString() extractor), SearchOptions propagation,
 // and special/regex-metacharacters in the needle (as opposed to the haystack,
 // which is covered by the other files in this directory).
-import 'package:fluffychat/utils/search/search_options.dart';
-import 'package:fluffychat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _engine = SearchEngine();

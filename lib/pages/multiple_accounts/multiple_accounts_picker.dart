@@ -1,17 +1,17 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/pages/twake_welcome/twake_welcome.dart';
-import 'package:fluffychat/presentation/multiple_account/twake_chat_presentation_account.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/twake_components/twake_header_style.dart';
+import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
+import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:linagora_design_flutter/multiple_account/models/twake_presentation_account.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 typedef OnGoToAccountSettings = void Function(TwakePresentationAccount account);
 

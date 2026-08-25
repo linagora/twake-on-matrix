@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_view.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings/settings_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';

@@ -1,21 +1,21 @@
 import 'dart:async';
 
-import 'package:fluffychat/domain/model/room/room_extension.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:keyboard_shortcuts/keyboard_shortcuts.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/pages/chat/cupertino_widgets_bottom_sheet.dart';
-import 'package:fluffychat/pages/chat/edit_widgets_dialog.dart';
-import 'package:fluffychat/pages/chat/widgets_bottom_sheet.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
+import 'package:twake_chat/pages/chat/cupertino_widgets_bottom_sheet.dart';
+import 'package:twake_chat/pages/chat/edit_widgets_dialog.dart';
+import 'package:twake_chat/pages/chat/widgets_bottom_sheet.dart';
+import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'matrix.dart';
 
 class ChatSettingsPopupMenu extends StatefulWidget {

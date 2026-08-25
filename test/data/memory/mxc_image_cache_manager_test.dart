@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/data/memory/mxc_image_cache_manager.dart';
+import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
 
 void main() {
   group('MxcImageCacheManager', () {

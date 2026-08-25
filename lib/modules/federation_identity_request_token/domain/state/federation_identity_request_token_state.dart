@@ -1,7 +1,7 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/initial.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/initial.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/models/federation_token_information.dart';
 
 class FederationIdentityRequestTokenInitial extends Initial {
   const FederationIdentityRequestTokenInitial() : super();

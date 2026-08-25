@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/settings_dashboard/settings/settings_view.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings/settings_view.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

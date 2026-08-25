@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:fluffychat/data/model/recovery_words_json.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/data/network/tom_endpoint.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/di/global/network_di.dart';
+import 'package:twake_chat/data/model/recovery_words_json.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/tom_endpoint.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
 
 class RecoveryWordsAPI {

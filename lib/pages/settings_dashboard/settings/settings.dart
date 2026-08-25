@@ -1,29 +1,29 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/app_config.dart';
+import 'package:twake_chat/config/app_config.dart';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/extensions/common_settings/common_settings_extensions.dart';
-import 'package:fluffychat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:fluffychat/domain/repository/federation_configurations_repository.dart';
-import 'package:fluffychat/domain/repository/tom_configurations_repository.dart';
-import 'package:fluffychat/event/twake_inapp_event_types.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_enum.dart';
-import 'package:fluffychat/presentation/extensions/client_extension.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/extensions/common_settings/common_settings_extensions.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
+import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
+import 'package:twake_chat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher.dart';

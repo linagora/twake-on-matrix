@@ -1,10 +1,10 @@
-import 'package:fluffychat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
-import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
-import 'package:fluffychat/presentation/list_notifier.dart';
-import 'package:fluffychat/utils/dismissible_media_view.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/hero_page_route.dart';
-import 'package:fluffychat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
+import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
+import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
+import 'package:twake_chat/presentation/list_notifier.dart';
+import 'package:twake_chat/utils/dismissible_media_view.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/hero_page_route.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/twake_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';

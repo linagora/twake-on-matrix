@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat/chat_event_list.dart';
+import 'package:twake_chat/pages/chat/chat_event_list.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 

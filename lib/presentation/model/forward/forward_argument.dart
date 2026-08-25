@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/go_routes/router_arguments.dart';
+import 'package:twake_chat/config/go_routes/router_arguments.dart';
 
 class ForwardArgument extends RouterArguments {
   final String fromRoomId;

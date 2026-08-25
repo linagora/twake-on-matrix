@@ -1,4 +1,4 @@
-import 'package:fluffychat/presentation/mixins/chat_list_item_mixin.dart';
+import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

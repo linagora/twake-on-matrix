@@ -1,20 +1,20 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/pages/chat/events/message/message_content_builder_mixin.dart';
-import 'package:fluffychat/presentation/model/chat/events/message/message_metrics.dart';
-import 'package:fluffychat/utils/custom_scroll_behaviour.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/pages/chat/events/message/message_content_builder_mixin.dart';
+import 'package:twake_chat/presentation/model/chat/events/message/message_metrics.dart';
+import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import '../../../../fake_client.dart';
 

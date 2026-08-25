@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_view_style.dart';
-import 'package:fluffychat/presentation/model/chat_details/chat_details_page_model.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/chat_details_page_view_style.dart';
+import 'package:twake_chat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

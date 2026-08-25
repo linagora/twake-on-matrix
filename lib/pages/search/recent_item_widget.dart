@@ -1,13 +1,13 @@
-import 'package:fluffychat/pages/search/recent_item_widget_style.dart';
-import 'package:fluffychat/presentation/extensions/room_summary_extension.dart';
-import 'package:fluffychat/presentation/extensions/search/presentation_search_extensions.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/string_extension.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/highlight_text.dart';
-import 'package:fluffychat/widgets/twake_components/twake_chip.dart';
+import 'package:twake_chat/pages/search/recent_item_widget_style.dart';
+import 'package:twake_chat/presentation/extensions/room_summary_extension.dart';
+import 'package:twake_chat/presentation/extensions/search/presentation_search_extensions.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/highlight_text.dart';
+import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 

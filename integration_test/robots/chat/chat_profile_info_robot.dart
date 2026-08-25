@@ -1,13 +1,13 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_profile_info/chat_profile_info_details.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_header.dart';
-import 'package:fluffychat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_details.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_header.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 
-import 'package:fluffychat/presentation/enum/profile_info/profile_info_body_enum.dart';
+import 'package:twake_chat/presentation/enum/profile_info/profile_info_body_enum.dart';
 
 import '../../base/core_robot.dart';
 import '../abstract/abstract_chat_profile_info_robot.dart';

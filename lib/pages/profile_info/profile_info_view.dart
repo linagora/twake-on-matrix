@@ -1,9 +1,9 @@
-import 'package:fluffychat/pages/profile_info/profile_info_page.dart';
-import 'package:fluffychat/pages/profile_info/profile_info_body/profile_info_body.dart';
-import 'package:fluffychat/widgets/app_bars/twake_app_bar.dart';
-import 'package:fluffychat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_page.dart';
+import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
+import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class ProfileInfoView extends StatelessWidget {
   const ProfileInfoView(

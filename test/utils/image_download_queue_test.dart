@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/image_download_queue.dart';
+import 'package:twake_chat/utils/image_download_queue.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Fills all slots in [queue] and returns the granted tickets.

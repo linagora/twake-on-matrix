@@ -1,8 +1,8 @@
 import 'dart:ui' show ImageFilter;
 
-import 'package:fluffychat/pages/chat_details/participant_list_item/chat_participant_context_menu_item.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/mixins/twake_context_menu_mixin.dart';
+import 'package:twake_chat/pages/chat_details/participant_list_item/chat_participant_context_menu_item.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

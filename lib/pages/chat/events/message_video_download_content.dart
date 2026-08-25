@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/pages/chat/events/event_video_player.dart';
-import 'package:fluffychat/pages/chat/events/message_content_style.dart';
-import 'package:fluffychat/pages/media_viewer/media_viewer.dart';
-import 'package:fluffychat/presentation/mixins/play_video_action_mixin.dart';
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/utils/dismissible_media_view.dart';
-import 'package:fluffychat/utils/manager/upload_manager/upload_manager.dart';
-import 'package:fluffychat/widgets/hero_page_route.dart';
-import 'package:fluffychat/widgets/mixins/download_file_on_mobile_mixin.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/chat/events/event_video_player.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/pages/media_viewer/media_viewer.dart';
+import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/dismissible_media_view.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/widgets/hero_page_route.dart';
+import 'package:twake_chat/widgets/mixins/download_file_on_mobile_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';

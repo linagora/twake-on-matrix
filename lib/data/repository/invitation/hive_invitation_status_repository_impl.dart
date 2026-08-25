@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/datasource/invitation/hive_invitation_status_datasource.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/invitation/invitation_status.dart';
-import 'package:fluffychat/domain/repository/invitation/hive_invitation_status_repository.dart';
+import 'package:twake_chat/data/datasource/invitation/hive_invitation_status_datasource.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/invitation/invitation_status.dart';
+import 'package:twake_chat/domain/repository/invitation/hive_invitation_status_repository.dart';
 
 class HiveInvitationStatusRepositoryImpl
     extends HiveInvitationStatusRepository {

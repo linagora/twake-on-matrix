@@ -1,7 +1,7 @@
-import 'package:fluffychat/config/default_power_level_member.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
-import 'package:fluffychat/pages/chat_details/participant_list_item/participant_list_item.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/selected_user_notifier.dart';
+import 'package:twake_chat/pages/chat_details/participant_list_item/participant_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';

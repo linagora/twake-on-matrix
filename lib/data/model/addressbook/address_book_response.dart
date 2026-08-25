@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/data/model/addressbook/address_book.dart';
+import 'package:twake_chat/data/model/addressbook/address_book.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'address_book_response.g.dart';

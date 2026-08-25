@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fluffychat/utils/logging/log_orchestrator.dart';
-import 'package:fluffychat/utils/logging/log_types.dart';
-import 'package:fluffychat/utils/logging/logger.dart';
-import 'package:fluffychat/utils/logging/log_filter.dart';
-import 'package:fluffychat/utils/logging/filters/sensitive_data_filter.dart';
+import 'package:twake_chat/utils/logging/log_orchestrator.dart';
+import 'package:twake_chat/utils/logging/log_types.dart';
+import 'package:twake_chat/utils/logging/logger.dart';
+import 'package:twake_chat/utils/logging/log_filter.dart';
+import 'package:twake_chat/utils/logging/filters/sensitive_data_filter.dart';
 
 // Mock Logger
 class MockLogger implements Logger {

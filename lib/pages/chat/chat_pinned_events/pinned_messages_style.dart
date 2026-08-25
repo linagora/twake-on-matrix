@@ -1,6 +1,6 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 

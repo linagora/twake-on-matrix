@@ -1,5 +1,5 @@
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-import 'package:fluffychat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

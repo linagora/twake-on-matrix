@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/model/verification/composite_name_validator.dart';
-import 'package:fluffychat/domain/model/verification/validator.dart';
+import 'package:twake_chat/domain/model/verification/composite_name_validator.dart';
+import 'package:twake_chat/domain/model/verification/validator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/validator/verify_name_view_state.dart';
-import 'package:fluffychat/domain/model/verification/new_name_request.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
+import 'package:twake_chat/domain/model/verification/new_name_request.dart';
 import 'composite_name_validator_test.mocks.dart';
 
 @GenerateMocks([Validator])

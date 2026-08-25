@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/new_group/contacts_selection.dart';
-import 'package:fluffychat/pages/new_group/widget/selected_participants_list_style.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection.dart';
+import 'package:twake_chat/pages/new_group/widget/selected_participants_list_style.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class SelectedParticipantsList extends StatefulWidget {
   final ContactsSelectionController contactsSelectionController;

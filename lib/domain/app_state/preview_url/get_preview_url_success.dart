@@ -1,5 +1,5 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/model/media/url_preview.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/model/media/url_preview.dart';
 
 class GetPreviewUrlInitial extends Success {
   @override

@@ -1,10 +1,10 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/room/timeline_search_event_state.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/links/chat_details_links_item.dart';
-import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_builder.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/room/timeline_search_event_state.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/links/chat_details_links_item.dart';
+import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
 
 class ChatDetailsLinksPage extends StatelessWidget {
   final SameTypeEventsBuilderController controller;

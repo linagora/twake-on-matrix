@@ -1,9 +1,9 @@
 import 'dart:math';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/search/pre_search_state.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/search/pre_search_state.dart';
 import 'package:matrix/matrix.dart';
 
 class PreSearchRecentContactsInteractor {

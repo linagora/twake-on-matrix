@@ -2,15 +2,15 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/dio_client.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/data/datasource_impl/federation_identity_request_token_datasource_impl.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/data/network/federation_identity_request_token_api.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/data/network/federation_identity_request_token_endpoint.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/data/repository/federation_identity_request_token_repository_impl.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/models/federation_token_request.dart';
-import 'package:fluffychat/modules/federation_identity_request_token/domain/usecase/federation_identity_request_token_interactor.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/datasource_impl/federation_identity_request_token_datasource_impl.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/network/federation_identity_request_token_api.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/network/federation_identity_request_token_endpoint.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/data/repository/federation_identity_request_token_repository_impl.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/models/federation_token_request.dart';
+import 'package:twake_chat/modules/federation_identity_request_token/domain/usecase/federation_identity_request_token_interactor.dart';
 import 'package:flutter/foundation.dart';
 
 class FederationIdentityRequestTokenManager {

@@ -1,5 +1,5 @@
-import 'package:fluffychat/data/hive/hive_collection_tom_database.dart';
-import 'package:fluffychat/di/base_di.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
+import 'package:twake_chat/di/base_di.dart';
 import 'package:get_it/get_it.dart';
 
 class HiveDI extends BaseDI {

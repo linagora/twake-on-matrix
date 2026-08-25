@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsPageModel extends Equatable {

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart'; // Adjust based on where MatrixFile is defined
 

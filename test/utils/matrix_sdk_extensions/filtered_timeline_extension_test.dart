@@ -1,6 +1,6 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 

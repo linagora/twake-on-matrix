@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
 
 abstract class PhonebookContactDatasource {
   Future<List<Contact>> fetchContacts();

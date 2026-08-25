@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/utils/network_connection_service.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 

@@ -1,19 +1,19 @@
-import 'package:fluffychat/presentation/mixins/address_book_mixin.dart';
-import 'package:fluffychat/presentation/mixins/comparable_presentation_contact_mixin.dart';
-import 'package:fluffychat/presentation/mixins/contacts_view_controller_mixin.dart';
-import 'package:fluffychat/presentation/mixins/go_to_group_chat_mixin.dart';
-import 'package:fluffychat/presentation/mixins/invite_external_contact_mixin.dart';
-import 'package:fluffychat/presentation/mixins/wellknown_mixin.dart';
-import 'package:fluffychat/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:fluffychat/presentation/mixins/go_to_direct_chat_mixin.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
+import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
+import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
+import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
+import 'package:twake_chat/presentation/mixins/invite_external_contact_mixin.dart';
+import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
+import 'package:twake_chat/pages/new_private_chat/new_private_chat_view.dart';
+import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
 
 class NewPrivateChat extends StatefulWidget {

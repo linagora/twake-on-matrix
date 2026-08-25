@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_grid_config/app_config_parser.dart';
-import 'package:fluffychat/config/app_grid_config/app_grid_errors.dart';
+import 'package:twake_chat/config/app_grid_config/app_config_parser.dart';
+import 'package:twake_chat/config/app_grid_config/app_grid_errors.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show rootBundle;
 

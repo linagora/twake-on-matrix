@@ -1,21 +1,21 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/reply_content_style.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
-import 'package:fluffychat/pages/chat/optional_selection_container_disabled.dart';
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/utils/extension/event_info_extension.dart';
-import 'package:fluffychat/utils/extension/mime_type_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/chat/events/reply_content_style.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
+import 'package:twake_chat/pages/chat/optional_selection_container_disabled.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/utils/extension/event_info_extension.dart';
+import 'package:twake_chat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'html_message.dart';
 
 class ReplyContent extends StatelessWidget {

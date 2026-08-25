@@ -1,4 +1,4 @@
-import 'package:fluffychat/app_state/success.dart';
+import 'package:twake_chat/app_state/success.dart';
 
 class GetPreviewURLLoading extends Success {
   const GetPreviewURLLoading();

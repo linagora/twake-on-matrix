@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:equatable/equatable.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/presentation/model/file/default_asset_entity.dart';
-import 'package:fluffychat/presentation/model/file/image_asset_entity.dart';
-import 'package:fluffychat/presentation/model/file/video_asset_entity.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/presentation/model/file/default_asset_entity.dart';
+import 'package:twake_chat/presentation/model/file/image_asset_entity.dart';
+import 'package:twake_chat/presentation/model/file/video_asset_entity.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 abstract class FileAssetEntity with EquatableMixin {

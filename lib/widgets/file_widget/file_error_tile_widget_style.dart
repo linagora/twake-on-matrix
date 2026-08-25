@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/file_widget/file_tile_widget_style.dart';
+import 'package:twake_chat/widgets/file_widget/file_tile_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 

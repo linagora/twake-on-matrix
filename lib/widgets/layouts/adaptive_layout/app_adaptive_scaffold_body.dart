@@ -1,20 +1,20 @@
 import 'dart:async';
 
-import 'package:fluffychat/config/first_column_inner_routes.dart';
-import 'package:fluffychat/event/twake_inapp_event_types.dart';
-import 'package:fluffychat/presentation/enum/settings/settings_action_enum.dart';
-import 'package:fluffychat/presentation/mixins/connect_page_mixin.dart';
-import 'package:fluffychat/utils/extension/build_context_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/responsive/responsive_utils.dart';
-import 'package:fluffychat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
-import 'package:fluffychat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/logout_body_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/receive_content_args.dart';
-import 'package:fluffychat/widgets/layouts/agruments/switch_active_account_body_args.dart';
-import 'package:fluffychat/widgets/layouts/enum/adaptive_destinations_enum.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/config/first_column_inner_routes.dart';
+import 'package:twake_chat/event/twake_inapp_event_types.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_action_enum.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/layouts/adaptive_layout/app_adaptive_scaffold_body_view.dart';
+import 'package:twake_chat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/logout_body_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
+import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
+import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

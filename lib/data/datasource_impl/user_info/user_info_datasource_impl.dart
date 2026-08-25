@@ -1,9 +1,9 @@
-import 'package:fluffychat/data/datasource/user_info/user_info_datasource.dart';
-import 'package:fluffychat/data/network/user_info/user_info_api.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/model/user_info/user_info.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility.dart';
-import 'package:fluffychat/domain/model/user_info/user_info_visibility_request.dart';
+import 'package:twake_chat/data/datasource/user_info/user_info_datasource.dart';
+import 'package:twake_chat/data/network/user_info/user_info_api.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
 
 class UserInfoDatasourceImpl implements UserInfoDatasource {
   const UserInfoDatasourceImpl();

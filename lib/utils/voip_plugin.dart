@@ -1,6 +1,6 @@
 // import 'dart:core';
 
-// import 'package:fluffychat/utils/twake_snackbar.dart';
+// import 'package:twake_chat/utils/twake_snackbar.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter/material.dart';
 
@@ -10,10 +10,10 @@
 // import 'package:matrix/matrix.dart';
 // import 'package:webrtc_interface/webrtc_interface.dart' hide Navigator;
 
-// import 'package:fluffychat/pages/chat_list/chat_list.dart';
-// import 'package:fluffychat/pages/dialer/dialer.dart';
-// import 'package:fluffychat/utils/platform_infos.dart';
-// import 'package:fluffychat/widgets/twake_app.dart';
+// import 'package:twake_chat/pages/chat_list/chat_list.dart';
+// import 'package:twake_chat/pages/dialer/dialer.dart';
+// import 'package:twake_chat/utils/platform_infos.dart';
+// import 'package:twake_chat/widgets/twake_app.dart';
 // import '../../utils/famedlysdk_store.dart';
 // import '../../utils/voip/callkeep_manager.dart';
 // import '../../utils/voip/user_media_manager.dart';

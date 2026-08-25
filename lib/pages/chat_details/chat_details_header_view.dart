@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/chat_details/chat_details_actions_enum.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_actions_enum.dart';
 import 'package:flutter/material.dart';
 
 import 'chat_details_actions_button.dart';

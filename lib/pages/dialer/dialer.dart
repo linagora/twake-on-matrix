@@ -23,16 +23,16 @@
 // import 'package:flutter/material.dart';
 
 // import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-// import 'package:fluffychat/generated/l10n/app_localizations.dart';
+// import 'package:twake_chat/generated/l10n/app_localizations.dart';
 // import 'package:flutter_webrtc/flutter_webrtc.dart';
 // import 'package:just_audio/just_audio.dart';
 // import 'package:matrix/matrix.dart';
 // import 'package:vibration/vibration.dart';
 // import 'package:wakelock/wakelock.dart';
 
-// import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-// import 'package:fluffychat/utils/platform_infos.dart';
-// import 'package:fluffychat/widgets/avatar/avatar.dart';
+// import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+// import 'package:twake_chat/utils/platform_infos.dart';
+// import 'package:twake_chat/widgets/avatar/avatar.dart';
 // import 'pip/pip_view.dart';
 
 // class _StreamView extends StatelessWidget {

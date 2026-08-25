@@ -1,4 +1,4 @@
-import 'package:fluffychat/data/network/service_path.dart';
+import 'package:twake_chat/data/network/service_path.dart';
 
 class TomEndpoint {
   static final ServicePath recoveryWordsServicePath = ServicePath(

@@ -1,9 +1,9 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:fluffychat/domain/model/recovery_words/recovery_words.dart';
-import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
-import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 

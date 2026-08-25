@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/presentation/widget_keys/widget_keys.dart';
-import 'package:fluffychat/pages/chat/chat.dart';
-import 'package:fluffychat/pages/chat/chat_event_list_item.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/event_list_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/chat_event_list_item.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';

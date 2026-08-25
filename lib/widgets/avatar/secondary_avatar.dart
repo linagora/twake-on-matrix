@@ -1,7 +1,7 @@
-import 'package:fluffychat/pages/chat_details/chat_details_view_style.dart';
-import 'package:fluffychat/widgets/avatar/avatar_gradient_placeholder.dart';
-import 'package:fluffychat/widgets/avatar/avatar_style.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
+import 'package:twake_chat/widgets/avatar/avatar_gradient_placeholder.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
+import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
 class SecondaryAvatar extends StatelessWidget {

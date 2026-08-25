@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/data/network/exception/ignore_user_exceptions.dart';
-import 'package:fluffychat/domain/app_state/room/unblock_user_state.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/data/network/exception/ignore_user_exceptions.dart';
+import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
 import 'package:matrix/matrix.dart';
 
 class UnblockUserInteractor {

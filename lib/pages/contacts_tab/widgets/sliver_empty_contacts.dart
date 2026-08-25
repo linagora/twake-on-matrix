@@ -1,7 +1,7 @@
-import 'package:fluffychat/pages/contacts_tab/contacts_tab.dart';
-import 'package:fluffychat/pages/contacts_tab/contacts_tab_view_style.dart';
-import 'package:fluffychat/pages/contacts_tab/empty_contacts_body.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/no_contacts_found.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_tab_view_style.dart';
+import 'package:twake_chat/pages/contacts_tab/empty_contacts_body.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/no_contacts_found.dart';
 import 'package:flutter/material.dart';
 
 class SliverEmptyContacts extends StatelessWidget {

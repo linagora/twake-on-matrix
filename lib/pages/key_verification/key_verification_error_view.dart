@@ -1,6 +1,6 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dart';
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_sas_style.dart';
+import 'package:twake_chat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';

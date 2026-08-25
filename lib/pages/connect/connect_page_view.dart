@@ -1,12 +1,12 @@
-import 'package:fluffychat/pages/connect/connect_page_view_style.dart';
-import 'package:fluffychat/widgets/identity_provider_icon.dart';
+import 'package:twake_chat/pages/connect/connect_page_view_style.dart';
+import 'package:twake_chat/widgets/identity_provider_icon.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-import 'package:fluffychat/pages/connect/connect_page.dart';
-import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
+import 'package:twake_chat/pages/connect/connect_page.dart';
+import 'package:twake_chat/widgets/layouts/login_scaffold.dart';
 import 'sso_button.dart';
 
 class ConnectPageView extends StatelessWidget {

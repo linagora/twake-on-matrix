@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/app_constants.dart';
-import 'package:fluffychat/data/model/federation_server/federation_server_information.dart';
-import 'package:fluffychat/domain/model/app_twake_information.dart';
-import 'package:fluffychat/domain/model/homeserver_summary.dart';
-import 'package:fluffychat/domain/model/rtc_focus.dart';
-import 'package:fluffychat/domain/model/tom_server_information.dart';
+import 'package:twake_chat/config/app_constants.dart';
+import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
+import 'package:twake_chat/domain/model/app_twake_information.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/domain/model/rtc_focus.dart';
+import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:matrix/matrix.dart';
 
 extension HomeserverSummaryExtensions on HomeserverSummary {

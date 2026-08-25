@@ -1,6 +1,6 @@
-import 'package:fluffychat/domain/model/contact/contact.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
+import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/contact_query.dart';
+import 'package:twake_chat/domain/model/contact/lookup_mxid_request.dart';
 
 abstract class TomContactsDatasource {
   Future<List<Contact>> fetchContacts({

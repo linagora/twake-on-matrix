@@ -1,6 +1,6 @@
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/presentation/state/failure.dart';
-import 'package:fluffychat/presentation/state/success.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/presentation/state/failure.dart';
+import 'package:twake_chat/presentation/state/success.dart';
 import 'package:matrix/matrix.dart';
 
 class GettingServerCapabilities extends LoadingState {}

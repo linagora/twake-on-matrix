@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/config/themes.dart';
+import 'package:twake_chat/config/themes.dart';
 
 class PIPView extends StatefulWidget {
   final PIPViewCorner initialCorner;

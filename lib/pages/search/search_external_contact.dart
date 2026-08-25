@@ -1,12 +1,12 @@
-import 'package:fluffychat/domain/model/contact/contact_type.dart';
-import 'package:fluffychat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
-import 'package:fluffychat/pages/search/search.dart';
-import 'package:fluffychat/pages/search/search_external_contact_style.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
-import 'package:fluffychat/presentation/model/search/presentation_search.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/search/empty_search_widget.dart';
-import 'package:fluffychat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
+import 'package:twake_chat/domain/model/contact/contact_type.dart';
+import 'package:twake_chat/pages/new_private_chat/widget/expansion_contact_list_tile.dart';
+import 'package:twake_chat/pages/search/search.dart';
+import 'package:twake_chat/pages/search/search_external_contact_style.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/search/empty_search_widget.dart';
+import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:matrix/matrix.dart';
 

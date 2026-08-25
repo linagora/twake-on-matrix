@@ -1,4 +1,4 @@
-import 'package:fluffychat/domain/model/preview_file/supported_preview_file_types.dart';
+import 'package:twake_chat/domain/model/preview_file/supported_preview_file_types.dart';
 
 enum StorageCategory {
   stickers(extensions: {'tgs', 'lottie'}),

@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/twake_app.dart';
+import 'package:twake_chat/utils/url_launcher.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

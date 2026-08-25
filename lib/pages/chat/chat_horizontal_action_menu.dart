@@ -1,7 +1,7 @@
-import 'package:fluffychat/resource/image_paths.dart';
-import 'package:fluffychat/widgets/context_menu/context_menu_action_item.dart';
+import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:flutter/material.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 enum ChatHorizontalActionMenu {
   reaction,

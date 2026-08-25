@@ -1,5 +1,5 @@
-import 'package:fluffychat/data/model/invitation/send_invitation_response.dart';
-import 'package:fluffychat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/data/model/invitation/send_invitation_response.dart';
+import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 

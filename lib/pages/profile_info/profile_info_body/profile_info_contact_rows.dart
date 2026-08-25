@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart' hide State;
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:fluffychat/pages/profile_info/copiable_profile_row/icon_copiable_profile_row.dart';
-import 'package:fluffychat/pages/profile_info/copiable_profile_row/svg_copiable_profile_row.dart';
-import 'package:fluffychat/resource/image_paths.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/pages/profile_info/copiable_profile_row/icon_copiable_profile_row.dart';
+import 'package:twake_chat/pages/profile_info/copiable_profile_row/svg_copiable_profile_row.dart';
+import 'package:twake_chat/resource/image_paths.dart';
 import 'package:flutter/material.dart';
 
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 

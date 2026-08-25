@@ -1,11 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/contact/lookup_match_contact_state.dart';
-import 'package:fluffychat/domain/model/contact/contact_query.dart';
-import 'package:fluffychat/domain/model/contact/lookup_mxid_request.dart';
-import 'package:fluffychat/domain/repository/contact_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/contact/lookup_match_contact_state.dart';
+import 'package:twake_chat/domain/model/contact/contact_query.dart';
+import 'package:twake_chat/domain/model/contact/lookup_mxid_request.dart';
+import 'package:twake_chat/domain/repository/contact_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class LookupMatchContactInteractor {

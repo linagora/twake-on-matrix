@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/forward/forward_message_state.dart';
-import 'package:fluffychat/event/twake_event_types.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/forward/forward_message_state.dart';
+import 'package:twake_chat/event/twake_event_types.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
 class ForwardMessageInteractor {

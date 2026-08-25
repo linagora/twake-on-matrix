@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/default_power_level_member.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
 
 enum RolePickerTypeEnum {
   addAdminOrModerator,

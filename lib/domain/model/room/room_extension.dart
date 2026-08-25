@@ -1,13 +1,13 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/config/default_power_level_member.dart';
-import 'package:fluffychat/domain/matrix_events/event_type_rules.dart';
-import 'package:fluffychat/domain/matrix_events/event_visibility_resolver.dart';
-import 'package:fluffychat/data/network/extensions/file_info_extension.dart';
-import 'package:fluffychat/domain/model/file_info/file_info.dart';
-import 'package:fluffychat/domain/model/room/room_preview_result.dart';
-import 'package:fluffychat/domain/model/search/recent_chat_model.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/client_stories_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/markdown_fix.dart';
+import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:twake_chat/data/network/extensions/file_info_extension.dart';
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/domain/model/search/recent_chat_model.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports

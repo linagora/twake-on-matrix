@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/app_state/search/server_search_state.dart';
-import 'package:fluffychat/domain/model/search/server_side_search_categories.dart';
-import 'package:fluffychat/domain/repository/server_search_repository.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/search/server_search_state.dart';
+import 'package:twake_chat/domain/model/search/server_side_search_categories.dart';
+import 'package:twake_chat/domain/repository/server_search_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchInteractor {

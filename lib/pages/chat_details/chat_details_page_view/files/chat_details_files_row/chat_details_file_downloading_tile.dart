@@ -1,7 +1,7 @@
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
-import 'package:fluffychat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_row_downloading_wrapper.dart';
-import 'package:fluffychat/presentation/model/chat/downloading_state_presentation_model.dart';
-import 'package:fluffychat/widgets/file_widget/file_tile_widget.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item_style.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_row/chat_details_row_downloading_wrapper.dart';
+import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 

@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_emoji_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_error_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_success_view.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_waiting_view.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_success_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_waiting_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';

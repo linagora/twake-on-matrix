@@ -1,7 +1,7 @@
-import 'package:fluffychat/data/datasource/server_search_datasource.dart';
-import 'package:fluffychat/data/model/search/server_search_response.dart';
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/repository/server_search_repository.dart';
+import 'package:twake_chat/data/datasource/server_search_datasource.dart';
+import 'package:twake_chat/data/model/search/server_search_response.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/repository/server_search_repository.dart';
 import 'package:matrix/matrix.dart';
 
 class ServerSearchRepositoryImpl extends ServerSearchRepository {
