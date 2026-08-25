@@ -7,6 +7,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/model/chat/upload_file_ui_state.dart';
 import 'package:twake_chat/utils/exception/upload_exception.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -26,6 +27,14 @@ mixin UploadFileMixin<T extends StatefulWidget> on State<T> {
   _trySetupUploadStreamSubcription() => streamSubscription = uploadManager
       .getUploadStateStream(event.eventId)
       ?.listen(setupUploadProcess);
+
+  Future<void> onRetryUpload() async {
+    final result = await uploadManager.retryUpload(event);
+    if (!mounted) return;
+    if (result == RetryUploadResult.fileDataUnavailable) {
+      TwakeSnackBar.show(context, L10n.of(context)!.messageCannotBeResent);
+    }
+  }
 
   void setupUploadProcess(Either<Failure, Success> state) {
     state.fold(
