@@ -78,7 +78,15 @@ class SendFileDialogController extends State<SendFileDialog> {
       widget.room,
     );
     textEditingController.text = widget.pendingText ?? '';
-    requestFocusCaptions();
+    // Deferred to after the first frame: the caption FocusNode isn't
+    // attached to the FocusScope tree yet inside initState, so requesting
+    // focus here can silently no-op and leave focus on the chat's main
+    // composer underneath. On cold app start (chat composer autofocuses
+    // too) that race lets keystrokes/Enter reach both input bars, sending
+    // the caption a second time as a standalone text message.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) requestFocusCaptions();
+    });
     loadThumbnailsForMedia(filesNotifier.value);
   }
 

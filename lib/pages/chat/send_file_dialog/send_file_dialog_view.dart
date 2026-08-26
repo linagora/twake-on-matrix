@@ -4,7 +4,6 @@ import 'package:twake_chat/pages/chat/send_file_dialog/media_page_view_widget.da
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -111,7 +110,11 @@ class SendFileDialogView extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.multiline,
                   typeAheadFocusNode: controller.captionsFocusNode,
-                  autofocus: !PlatformInfos.isMobile,
+                  // Focus is claimed explicitly via requestFocusCaptions()
+                  // (post-first-frame, see SendFileDialogController.initState)
+                  // instead of autofocus here, to avoid racing with the
+                  // chat composer's own autofocus underneath this dialog.
+                  autofocus: false,
                   onSubmitted: (_) => controller.send(),
                 ),
               ),

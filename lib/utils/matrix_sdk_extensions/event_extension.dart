@@ -432,8 +432,19 @@ extension LocalizedBody on Event {
 
   /// Returns true if the event's body text differs from its filename.
   /// Used to determine if a caption should be displayed for media files.
+  ///
+  /// Per the Matrix media-captions extension to `m.file`/`m.image`/
+  /// `m.video`, `filename` is only set by clients that support captions,
+  /// and only when there IS a caption; `body` then holds the caption while
+  /// `filename` holds the original file name. When `filename` is absent,
+  /// `body` IS the filename (e.g. Element does not support file captions
+  /// and always sends the file name in `body` with no `filename` field),
+  /// so it must not be treated as a caption.
   bool isBodyDiffersFromFilename() {
-    return content["body"] != content["filename"];
+    final rawFilename = content.tryGet<String>('filename');
+    if (rawFilename == null) return false;
+
+    return body != rawFilename;
   }
 
   /// Returns true if this event is a reply to another event.
