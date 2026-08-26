@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/localizations/localization_service.dart';
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_state.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_view_model.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_screen.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_option.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

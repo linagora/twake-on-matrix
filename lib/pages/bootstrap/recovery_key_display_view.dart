@@ -1,8 +1,8 @@
-import 'package:fluffychat/generated/l10n/app_localizations.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_view_style.dart';
-import 'package:fluffychat/pages/key_verification/key_verification_sas_style.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/context_menu_builder_ios_paste_without_permission.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_view_style.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_sas_style.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
@@ -45,6 +45,7 @@ class RecoveryKeyDisplayView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
+    final canContinue = recoveryKeyCopied || storeInSecureStorage;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -105,13 +106,17 @@ class RecoveryKeyDisplayView extends StatelessWidget {
         ),
         const SizedBox(height: LinagoraSpacing.base * 2),
         Material(
-          color: KeyVerificationSasStyle.primaryColor(context),
+          color: canContinue
+              ? KeyVerificationSasStyle.primaryColor(context)
+              : KeyVerificationSasStyle.primaryColor(
+                  context,
+                ).withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(
             KeyVerificationSasStyle.buttonRadius,
           ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
-            onTap: onContinue,
+            onTap: canContinue ? onContinue : null,
             child: Padding(
               padding: KeyVerificationSasStyle.filledButtonPadding,
               child: SizedBox(

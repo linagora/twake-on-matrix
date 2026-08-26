@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
-import 'package:fluffychat/domain/app_state/bootstrap/unlock_ssss_state.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_providers.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_state.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/unlock_ssss_state.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
@@ -38,6 +38,7 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     _bootstrap?.onUpdate = null;
     _wipe = wipe;
     _isRetrying = isRetry;
+    _recoveryKeyStored = false;
     // Bootstrap's constructor calls onUpdate synchronously before this
     // returns; _constructing makes that first call a no-op.
     _constructing = true;
@@ -109,6 +110,8 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   }
 
   BootstrapUiState _computeOpenExistingSsssState() {
+    // Unlocking with an existing key, not one the SDK just generated.
+    _recoveryKeyStored = true;
     if (_isRetrying && _retryOutcome == null) {
       _driveNextFrame(_autoRetryOpenExistingSsss);
     }

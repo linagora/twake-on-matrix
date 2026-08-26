@@ -1,27 +1,46 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:matrix/encryption.dart';
 
-class StartSelfVerificationLoadingState extends Success {
-  const StartSelfVerificationLoadingState() : super();
+part 'self_verification_state.freezed.dart';
+
+// equal: false — Success/Failure already extend Equatable, so equality
+// stays driven by the hand-written `props` below instead of freezed's
+// generated `==`, which would otherwise conflict with it.
+@Freezed(equal: false)
+abstract class StartSelfVerificationLoadingState extends Success
+    with _$StartSelfVerificationLoadingState {
+  const StartSelfVerificationLoadingState._();
+
+  const factory StartSelfVerificationLoadingState() =
+      _StartSelfVerificationLoadingState;
 
   @override
   List<Object?> get props => [];
 }
 
-class StartSelfVerificationSuccessState extends Success {
-  final KeyVerification request;
+@Freezed(equal: false)
+abstract class StartSelfVerificationSuccessState extends Success
+    with _$StartSelfVerificationSuccessState {
+  const StartSelfVerificationSuccessState._();
 
-  const StartSelfVerificationSuccessState({required this.request});
+  const factory StartSelfVerificationSuccessState({
+    required KeyVerification request,
+  }) = _StartSelfVerificationSuccessState;
 
   @override
   List<Object?> get props => [request];
 }
 
-class StartSelfVerificationFailureState extends Failure {
-  final dynamic exception;
+@Freezed(equal: false)
+abstract class StartSelfVerificationFailureState extends Failure
+    with _$StartSelfVerificationFailureState {
+  const StartSelfVerificationFailureState._();
 
-  const StartSelfVerificationFailureState({required this.exception});
+  const factory StartSelfVerificationFailureState({
+    required dynamic exception,
+  }) = _StartSelfVerificationFailureState;
 
   @override
   List<Object?> get props => [exception];

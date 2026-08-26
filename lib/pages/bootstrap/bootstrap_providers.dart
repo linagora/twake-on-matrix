@@ -1,11 +1,11 @@
-import 'package:fluffychat/di/global/get_it_initializer.dart';
-import 'package:fluffychat/domain/usecase/bootstrap/read_cached_recovery_key_interactor.dart';
-import 'package:fluffychat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
-import 'package:fluffychat/domain/usecase/bootstrap/store_recovery_key_interactor.dart';
-import 'package:fluffychat/domain/usecase/bootstrap/unlock_ssss_with_recovery_key_interactor.dart';
-import 'package:fluffychat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
-import 'package:fluffychat/domain/usecase/recovery/get_recovery_words_interactor.dart';
-import 'package:fluffychat/domain/usecase/recovery/save_recovery_words_interactor.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/read_cached_recovery_key_interactor.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/store_recovery_key_interactor.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/unlock_ssss_with_recovery_key_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'bootstrap_providers.g.dart';

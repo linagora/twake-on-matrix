@@ -1,9 +1,9 @@
-import 'package:fluffychat/domain/app_state/bootstrap/self_verification_state.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_providers.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_state.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_view_model.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_state.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/self_verification_state.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_option.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_state.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

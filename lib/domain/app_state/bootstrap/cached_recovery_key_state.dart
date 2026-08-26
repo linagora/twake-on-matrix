@@ -1,5 +1,5 @@
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'cached_recovery_key_state.freezed.dart';

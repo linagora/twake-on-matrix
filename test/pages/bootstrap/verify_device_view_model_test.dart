@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/bootstrap/self_verification_state.dart';
-import 'package:fluffychat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_providers.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_state.dart';
-import 'package:fluffychat/pages/bootstrap/bootstrap_view_model.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_option.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_state.dart';
-import 'package:fluffychat/pages/bootstrap/verify_device_view_model.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/self_verification_state.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
+import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_option.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_state.dart';
+import 'package:twake_chat/pages/bootstrap/verify_device_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

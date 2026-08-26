@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:fluffychat/app_state/failure.dart';
-import 'package:fluffychat/app_state/success.dart';
-import 'package:fluffychat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
-import 'package:fluffychat/utils/logging/sentry_tracked_events.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
+import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
