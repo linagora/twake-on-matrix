@@ -4,9 +4,9 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
 const RESOURCES = {"version.json": "27568c2f13cdafedaa3deb3e083f2f00",
-"pkg/vodozemac_bindings_dart_bg.wasm": "4e9cdaa3aae4844007b789359d67c63a",
+"pkg/vodozemac_bindings_dart_bg.wasm": "3c0ebec6a5c00e1d47621ff31acd23ce",
 "pkg/package.json": "ca5a61ab26f669e8f638b0828947da50",
-"pkg/vodozemac_bindings_dart.js": "6f76f16019ebdd84b0a4fb43a606ef0c",
+"pkg/vodozemac_bindings_dart.js": "307360cdc2629f4f3021ae32fab64c08",
 "i18n/de.json": "d70b5e27288cfa31729f61228ed8dbf8",
 "i18n/vi.json": "8ded529a589ffde357de2ce799ffe597",
 "i18n/fr.json": "6ce3d1967d985f93ef9e11da8e71952c",
@@ -770,12 +770,12 @@ const RESOURCES = {"version.json": "27568c2f13cdafedaa3deb3e083f2f00",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "cc26808b75bd1a5529ce7ade2a2ce8c4",
 "assets/packages/record_web/assets/js/record.fixwebmduration.js": "1f0108ea80c8951ba702ced40cf8cdce",
 "assets/packages/record_web/assets/js/record.worklet.js": "6d247986689d283b7e45ccdf7214c2ff",
-"main.dart.js": "f641f2a7e6f1d8f65043fcc4e82e3242",
+"main.dart.js": "0f02c93271d5c8bc7aa4010289844aff",
 "splash/lottie-chat.json": "70290062de97961a74f8b75b8c52508d",
 "splash/img/icon_twp.png": "5f3bf8fc4a58850bf5dae7b6f33043fc",
 "splash/style.css": "aef88eeb741da0bd13a5cc5b49d90598",
 "style.css": "1273e6902fff3be80d3a34cdb7a05326",
-"flutter_bootstrap.js": "fcd5d4d662db18294799edc8b358a715",
+"flutter_bootstrap.js": "1a83d7781d4e3fb17b999b309cd2f030",
 "manifest.json": "f3c8e18d38224185c23bbca2dc0e3f4a"};
 // The application shell files that are downloaded before a service worker can
 // start.
