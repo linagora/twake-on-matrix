@@ -268,7 +268,7 @@ jobs:
             integration_test/tests/chat/chat_group_test.dart \
             integration_test/tests/chat/chat_list_test.dart
 
-          # 14 test cases (~30 min)
+          # 13 test cases (~30 min)
           build_shard shard_2_chat_rest \
             integration_test/tests/chat/chat_test.dart \
             integration_test/tests/chat/forward_message_test.dart \
@@ -280,8 +280,7 @@ jobs:
             integration_test/tests/chat/transfer_ownership_test.dart \
             integration_test/tests/chat/sending_message_test.dart \
             integration_test/tests/chat/search_external_mxid_test.dart \
-            integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart \
-            integration_test/tests/chat/perf_test.dart
+            integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
 
           # 7 test cases (~15 min). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker

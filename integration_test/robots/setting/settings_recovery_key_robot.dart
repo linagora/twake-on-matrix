@@ -17,6 +17,10 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     return $(SettingsKeys.recoveryKeyItem.key);
   }
 
+  PatrolFinder recoveryKeyUnavailable() {
+    return $(SettingsKeys.recoveryKeyUnavailable.key);
+  }
+
   PatrolFinder recoveryKeyCopyButton() {
     return $(SettingsKeys.recoveryKeyCopyButton.key);
   }
@@ -27,10 +31,9 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
 
   /// Waits for the recovery key item and returns whether it appeared.
   ///
-  /// The section is rendered only when the ToM server returns recovery words
-  /// (`GET /_twake/recoveryWords`). Accounts without provisioned recovery
-  /// words get a 404 and the section stays hidden — an environment
-  /// precondition, not an app regression.
+  /// The section is rendered only when the ToM server returns recovery words.
+  /// A completed fetch without recovery words exposes an explicit unavailable
+  /// state; unrelated visibility timeouts are rethrown.
   Future<bool> waitForRecoveryKeyVisibleOrNull({
     Duration timeout = const Duration(seconds: 45),
   }) async {
@@ -38,7 +41,8 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
       await $.waitUntilVisible(recoveryKeyItem(), timeout: timeout);
       return true;
     } on WaitUntilVisibleTimeoutException {
-      return false;
+      if (recoveryKeyUnavailable().exists) return false;
+      rethrow;
     }
   }
 

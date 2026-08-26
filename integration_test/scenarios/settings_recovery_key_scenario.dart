@@ -23,17 +23,15 @@ class SettingsRecoveryKeyScenario extends BaseTestScenario {
 
     final recoveryKeyRobot = SettingsRecoveryKeyRobot($);
 
-    // Verify recovery key item is visible. It is only rendered when the ToM
-    // server returns recovery words for the account; CI accounts provisioned
-    // without them get a 404 and the section stays hidden. That is an
-    // environment precondition, so skip instead of failing the nightly.
+    // Verify the recovery key item is visible. Skip only when the completed
+    // recovery-words fetch explicitly reports that no key is available.
     final recoveryKeyVisible = await recoveryKeyRobot
         .waitForRecoveryKeyVisibleOrNull();
     if (!recoveryKeyVisible) {
       // ignore: avoid_print
       print(
-        'Recovery key item not shown: no recovery words for this ToM '
-        'account (GET /_twake/recoveryWords → 404). Skipping copy assertions.',
+        'Recovery key unavailable for this ToM account. '
+        'Skipping copy assertions.',
       );
       return;
     }
