@@ -18,7 +18,7 @@ class ChatDetailsFileRowDownloadingWrapper extends StatelessWidget {
     required this.downloadFileStateNotifier,
   });
 
-  final style = const MessageFileTileStyle();
+  static const style = MessageFileTileStyle();
 
   @override
   Widget build(BuildContext context) {
