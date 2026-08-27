@@ -395,9 +395,18 @@ jobs:
               break
             fi
 
-            # gcloud exit 20 is an FTL infrastructure failure. Retry it once;
-            # never retry app failures (exit 10) or watchdog cancellations.
-            if (( ftl_exit == 20 && attempt < MAX_ATTEMPTS )); then
+            # gcloud exit 20 is an FTL infrastructure failure. A watchdog exit
+            # is also retryable when gcloud reported explicit FTL infrastructure
+            # errors before it became stuck. Never retry app failures (exit 10).
+            retry_infrastructure=false
+            if (( ftl_exit == 20 )); then
+              retry_infrastructure=true
+            elif (( ftl_exit == 124 )) \
+              && grep -Fq "Infrastructure error occurred." "ftl-attempt-${attempt}.log"; then
+              retry_infrastructure=true
+            fi
+
+            if [[ "$retry_infrastructure" == true ]] && (( attempt < MAX_ATTEMPTS )); then
               echo "::warning::FTL infrastructure failure; retrying once."
               attempt=$((attempt + 1))
               continue
