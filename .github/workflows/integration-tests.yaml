@@ -354,43 +354,90 @@ jobs:
 
       - name: Run integration shard on virtual device
         run: |
-          RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
-          # Export before FTL so logcat download still works if the test fails.
-          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+          BASE_RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
+          MAX_ATTEMPTS=2
+          FTL_WALL_TIMEOUT=90m
+          attempt=1
+          ftl_exit=0
 
-          gcloud firebase test android run \
-            --type instrumentation \
-            --app "apks/${{ matrix.shard }}/app-debug.apk" \
-            --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
-            --device model=MediumPhone.arm,version=34 \
-            --timeout 60m \
-            --use-orchestrator \
-            --environment-variables clearPackageData=true \
-            --results-bucket "$FTL_RESULTS_BUCKET" \
-            --results-dir "$RUN_ID" \
-            --client-details=matrixLabel="${{ matrix.shard }}"
+          printf 'attempt\trun_id\texit_code\n' > ftl_attempts.tsv
+
+          while (( attempt <= MAX_ATTEMPTS )); do
+            RUN_ID="${BASE_RUN_ID}-attempt${attempt}"
+            # The last attempted directory is used by the diagnostics step.
+            echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+            echo "Starting FTL attempt $attempt/$MAX_ATTEMPTS: $RUN_ID"
+
+            # FTL's --timeout covers device execution only. This wall-clock
+            # watchdog also bounds a matrix stuck waiting for infrastructure.
+            # SIGINT lets gcloud cancel the matrix before timeout escalates.
+            set +e
+            timeout --signal=INT --kill-after=2m "$FTL_WALL_TIMEOUT" \
+              gcloud firebase test android run \
+                --type instrumentation \
+                --app "apks/${{ matrix.shard }}/app-debug.apk" \
+                --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
+                --device model=MediumPhone.arm,version=34 \
+                --timeout 60m \
+                --use-orchestrator \
+                --environment-variables clearPackageData=true \
+                --results-bucket "$FTL_RESULTS_BUCKET" \
+                --results-dir "$RUN_ID" \
+                --client-details=matrixLabel="${{ matrix.shard }}" \
+              2>&1 | tee "ftl-attempt-${attempt}.log"
+            ftl_exit=${PIPESTATUS[0]}
+            set -e
+
+            printf '%s\t%s\t%s\n' "$attempt" "$RUN_ID" "$ftl_exit" \
+              >> ftl_attempts.tsv
+
+            if (( ftl_exit == 0 )); then
+              break
+            fi
+
+            # gcloud exit 20 is an FTL infrastructure failure. Retry it once;
+            # never retry app failures (exit 10) or watchdog cancellations.
+            if (( ftl_exit == 20 && attempt < MAX_ATTEMPTS )); then
+              echo "::warning::FTL infrastructure failure; retrying once."
+              attempt=$((attempt + 1))
+              continue
+            fi
+
+            if (( ftl_exit == 124 )); then
+              echo "::error::FTL wall-clock watchdog expired after $FTL_WALL_TIMEOUT."
+            fi
+            break
+          done
+
+          exit "$ftl_exit"
 
       # gcloud storage (not gsutil): gsutil often ignores WIF/ADC and hits 401 Anonymous.
-      - name: Download logcat from GCS
+      - name: Download FTL diagnostics from GCS
         if: always() && env.RUN_ID != ''
         run: |
           GCS_PATH="gs://$FTL_RESULTS_BUCKET/$RUN_ID"
           mkdir -p ./shard_gcs_results
-          gcloud storage cp -r "${GCS_PATH}/*" ./shard_gcs_results/ \
-            || { echo "ERROR: gcloud storage failed to download results from $GCS_PATH"; exit 1; }
-          find ./shard_gcs_results -name "logcat" -exec cat {} + > shard_logcat.txt \
-            || { echo "ERROR: no logcat file found in GCS results"; exit 1; }
-          if [ ! -s shard_logcat.txt ]; then
-            echo "ERROR: logcat is empty"; exit 1
+          if ! gcloud storage cp -r "${GCS_PATH}/*" ./shard_gcs_results/; then
+            echo "::notice::No downloadable FTL results at $GCS_PATH."
+            exit 0
           fi
 
-      - name: Upload shard logcat
+          find ./shard_gcs_results -name "logcat" -exec cat {} + > shard_logcat.txt
+          if [ ! -s shard_logcat.txt ]; then
+            echo "::notice::FTL produced no logcat; preserving primary test result."
+          fi
+
+      - name: Upload shard diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-logcat-${{ matrix.shard }}-${{ github.run_id }}
           retention-days: 7
-          path: shard_logcat.txt
+          if-no-files-found: ignore
+          path: |
+            shard_logcat.txt
+            ftl_attempts.tsv
+            ftl-attempt-*.log
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 2 – Build perf APK once, upload as artifact
