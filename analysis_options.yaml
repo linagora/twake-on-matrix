@@ -11,6 +11,7 @@ linter:
     - always_declare_return_types
     - avoid_field_initializers_in_const_classes
     - avoid_unused_constructor_parameters
+    - matching_super_parameters
 
 analyzer:
   errors:
