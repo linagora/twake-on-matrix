@@ -10,6 +10,7 @@ linter:
     - require_trailing_commas
     - always_declare_return_types
     - avoid_field_initializers_in_const_classes
+    - avoid_unused_constructor_parameters
 
 analyzer:
   errors:

@@ -3,7 +3,6 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
-import 'package:twake_chat/domain/model/contact/contact_status.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_success.dart';
@@ -24,7 +23,6 @@ class ConcretePresentationSearch extends PresentationSearch {
     required String super.displayName,
     required super.emails,
     required super.phoneNumbers,
-    required ContactStatus status,
   });
 
   @override
@@ -69,7 +67,6 @@ void main() {
           thirdPartyIdType: ThirdPartyIdType.msisdn,
         ),
       },
-      status: ContactStatus.active,
     ),
   ];
 
