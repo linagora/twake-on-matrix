@@ -81,11 +81,9 @@
     </aside>
 
     <script>
-      // Registers the app's service worker (push + precache, see web/push_sw.js).
-      // Awaited before the entrypoint loads, because a first install downloads
-      // main.dart.js itself: letting the app request it in parallel would fetch
-      // the same 3.5 MB twice. The guard timeout keeps a slow or failing
-      // registration from holding the app hostage.
+      // Awaited before the entrypoint loads: a first install downloads
+      // main.dart.js itself, so letting the app request it in parallel would
+      // fetch the same 3.5 MB twice.
       function registerServiceWorker() {
         if (!('serviceWorker' in navigator)) return Promise.resolve();
         return navigator.serviceWorker
