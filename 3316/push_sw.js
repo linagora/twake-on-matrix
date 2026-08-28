@@ -34,17 +34,18 @@ function resourceKey(url) {
 }
 
 // skipWaiting is required: without it a new version stays in `waiting` behind
-// the old worker while any tab is open. CORE uses {cache:'reload'} so a new
-// manifest is never installed against stale bytes.
+// the old worker while any tab is open.
+//
+// CORE is fetched with the default cache mode, NOT {cache:'reload'}: the app is
+// requesting main.dart.js at the same time, and forcing a bypass would download
+// those 3.5 MB twice on a first visit. This is only safe because nginx serves
+// every asset with `Cache-Control: no-cache`, so the HTTP cache always
+// revalidates and can never hand back stale bytes. Keep the two in step.
 self.addEventListener('install', function (event) {
   self.skipWaiting();
   event.waitUntil(
     caches.open(TEMP).then(function (cache) {
-      return cache.addAll(
-        CORE.map(function (value) {
-          return new Request(value, { cache: 'reload' });
-        })
-      );
+      return cache.addAll(CORE);
     })
   );
 });

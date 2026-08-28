@@ -81,31 +81,6 @@
     </aside>
 
     <script>
-      // Awaited before the entrypoint loads: a first install downloads
-      // main.dart.js itself, so letting the app request it in parallel would
-      // fetch the same 3.5 MB twice.
-      function registerServiceWorker() {
-        if (!('serviceWorker' in navigator)) return Promise.resolve();
-        return navigator.serviceWorker
-          .register('push_sw.js')
-          .then(function () {
-            if (navigator.serviceWorker.controller) return;
-            return new Promise(function (resolve) {
-              var done = false;
-              function finish() {
-                if (done) return;
-                done = true;
-                resolve();
-              }
-              navigator.serviceWorker.addEventListener('controllerchange', finish, { once: true });
-              setTimeout(finish, 4000);
-            });
-          })
-          .catch(function (error) {
-            console.log('[Twake Chat] Error registering service worker: ', error);
-          });
-      }
-
       window.addEventListener("load", function (ev) {
         // Download main.dart.js
         (()=>{var _={blink:!0,gecko:!1,webkit:!1,unknown:!1},K=()=>navigator.vendor==="Google Inc."||navigator.userAgent.includes("Edg/")?"blink":navigator.vendor==="Apple Computer, Inc."?"webkit":navigator.vendor===""&&navigator.userAgent.includes("Firefox")?"gecko":"unknown",L=K(),R=()=>typeof ImageDecoder>"u"?!1:L==="blink",B=()=>typeof Intl.v8BreakIterator<"u"&&typeof Intl.Segmenter<"u",z=()=>{let i=[0,97,115,109,1,0,0,0,1,5,1,95,1,120,0];return WebAssembly.validate(new Uint8Array(i))},M=()=>{let i=document.createElement("canvas");return i.width=1,i.height=1,i.getContext("webgl2")!=null?2:i.getContext("webgl")!=null?1:-1},w={browserEngine:L,hasImageCodecs:R(),hasChromiumBreakIterators:B(),supportsWasmGC:z(),crossOriginIsolated:window.crossOriginIsolated,webGLVersion:M()};function c(...i){return new URL(I(...i),document.baseURI).toString()}function I(...i){return i.filter(e=>!!e).map((e,r)=>r===0?C(e):D(C(e))).filter(e=>e.length).join("/")}function D(i){let e=0;for(;e<i.length&&i.charAt(e)==="/";)e++;return i.substring(e)}function C(i){let e=i.length;for(;e>0&&i.charAt(e-1)==="/";)e--;return i.substring(0,e)}function T(i,e){return i.canvasKitBaseUrl?i.canvasKitBaseUrl:e.engineRevision&&!e.useLocalCanvasKit?I("https://www.gstatic.com/flutter-canvaskit",e.engineRevision):"canvaskit"}var h=class{constructor(){this._scriptLoaded=!1}setTrustedTypesPolicy(e){this._ttPolicy=e}async loadEntrypoint(e){let{entrypointUrl:r=c("main.dart.js"),onEntrypointLoaded:t,nonce:n}=e||{};return this._loadJSEntrypoint(r,t,n)}async load(e,r,t,n,s){s??=d=>{d.initializeEngine(t).then(u=>u.runApp())};let{entrypointBaseUrl:a}=t,{entryPointBaseUrl:o}=t;if(!a&&o&&(console.warn("[deprecated] `entryPointBaseUrl` is deprecated and will be removed in a future release. Use `entrypointBaseUrl` instead."),a=o),e.compileTarget==="dart2wasm")return this._loadWasmEntrypoint(e,r,a,s);{let d=e.mainJsPath??"main.dart.js",u=c(a,d);return this._loadJSEntrypoint(u,s,n)}}didCreateEngineInitializer(e){typeof this._didCreateEngineInitializerResolve=="function"&&(this._didCreateEngineInitializerResolve(e),this._didCreateEngineInitializerResolve=null,delete _flutter.loader.didCreateEngineInitializer),typeof this._onEntrypointLoaded=="function"&&this._onEntrypointLoaded(e)}_loadJSEntrypoint(e,r,t){let n=typeof r=="function";if(!this._scriptLoaded){this._scriptLoaded=!0;let s=this._createScriptTag(e,t);if(n)console.debug("Injecting <script> tag. Using callback."),this._onEntrypointLoaded=r,document.head.append(s);else return new Promise((a,o)=>{console.debug("Injecting <script> tag. Using Promises. Use the callback approach instead!"),this._didCreateEngineInitializerResolve=a,s.addEventListener("error",o),document.head.append(s)})}}async _loadWasmEntrypoint(e,r,t,n){if(!this._scriptLoaded){this._scriptLoaded=!0,this._onEntrypointLoaded=n;let{mainWasmPath:s,jsSupportRuntimePath:a}=e,o=c(t,s),d=c(t,a);this._ttPolicy!=null&&(d=this._ttPolicy.createScriptURL(d));let l=(await import(d)).compileStreaming(fetch(o)),p;e.renderer==="skwasm"?p=(async()=>{let v=await r.skwasm;return window._flutter_skwasmInstance=v,{skwasm:v.wasmExports,skwasmWrapper:v,ffi:{memory:v.wasmMemory}}})():p=Promise.resolve({}),await(await(await l).instantiate(await p,{loadDynamicModule:async(v,j)=>{let x=fetch(c(t,v)),S=c(t,j);this._ttPolicy!=null&&(S=this._ttPolicy.createScriptURL(S));let A=import(S);return[await x,await A]}})).invokeMain()}}_createScriptTag(e,r){let t=document.createElement("script");t.type="application/javascript",r&&(t.nonce=r);let n=e;return this._ttPolicy!=null&&(n=this._ttPolicy.createScriptURL(e)),t.src=n,t}};async function U(i,e,r){if(e<0)return i;let t,n=new Promise((s,a)=>{t=setTimeout(()=>{a(new Error(`${r} took more than ${e}ms to resolve. Moving on.`,{cause:U}))},e)});return Promise.race([i,n]).finally(()=>{clearTimeout(t)})}var g=class{setTrustedTypesPolicy(e){this._ttPolicy=e}loadServiceWorker(e){if(!e)return console.debug("Null serviceWorker configuration. Skipping."),Promise.resolve();if(!("serviceWorker"in navigator)){let o="Service Worker API unavailable.";return window.isSecureContext||(o+=`
@@ -149,18 +124,24 @@ _flutter.buildConfig = {"engineRevision":"587c18f873b8ab57330422bce09047420d9c7f
 
         initialTchatApp();
 
-        registerServiceWorker().then(function () {
-          _flutter.loader.load({
-            onEntrypointLoaded: async function (engineInitializer) {
-              const appRunner = await engineInitializer.initializeEngine({
-                useColorEmoji: true,
-              });
-              await setTimeout( async function () {
-                await appRunner.runApp();
-              }, 2000);
-            },
-          });
+        _flutter.loader.load({
+          onEntrypointLoaded: async function (engineInitializer) {
+            const appRunner = await engineInitializer.initializeEngine({
+              useColorEmoji: true,
+            });
+            await setTimeout( async function () {
+              await appRunner.runApp();
+            }, 2000);
+          },
         });
+
+        // Registered after the entrypoint and never awaited: startup must not
+        // depend on the service worker settling.
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('push_sw.js').catch(function (error) {
+            console.log('[Twake Chat] Error registering service worker: ', error);
+          });
+        }
       });
     </script>
     <script src="https://unpkg.com/pica/dist/pica.min.js"></script>
