@@ -140,11 +140,19 @@ function onlineFirst(event) {
         });
       })
       .catch(function (error) {
+        // CORE precaches the shell under index.html, so a root navigation misses
+        // until an online load has stored '/' as well. Fall back to the shell,
+        // or a first offline start would fail with the page already cached.
         return caches.open(CACHE_NAME).then(function (cache) {
-          return cache.match(event.request).then(function (response) {
-            if (response != null) return response;
-            throw error;
-          });
+          return cache
+            .match(event.request)
+            .then(function (response) {
+              return response || cache.match('index.html');
+            })
+            .then(function (response) {
+              if (response != null) return response;
+              throw error;
+            });
         });
       })
   );
