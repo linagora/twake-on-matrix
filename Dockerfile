@@ -31,7 +31,7 @@ ARG YQ_VERSION=4.44.3
 # Single apt layer: install all deps, install Rust, install yq, then clean up
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev openssh-client && \
+      curl pkg-config libssl-dev openssh-client brotli && \
     rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
@@ -66,8 +66,31 @@ RUN --mount=type=ssh,required=true \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null || true) \
     ./scripts/build-web.sh
 
-# Pre-compress all web assets at build time (avoids re-compressing on every container start)
-RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \;
+# Pre-compress all web assets at build time (avoids re-compressing on every container start).
+# Both encodings are produced: nginx picks .br or .gz from Accept-Encoding, and falls back to
+# the plain file. The brotli pass skips the .gz twins the first one just created.
+# brotli -q 11 costs about 6 minutes sequentially, most of it on main.dart.js
+# alone, so the pass is parallelised.
+RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \; && \
+    find /app/build/web -type f ! -name "config.json" ! -name "*.gz" -print0 \
+      | xargs -0 -P 4 -n 1 brotli -k -f -q 11
+
+# ngx_brotli is not packaged for the nginx image: Alpine ships a module built against its
+# own nginx, which the official binary refuses. Build it here against the exact version the
+# final stage runs, so a base image bump rebuilds a matching module instead of silently
+# loading a stale one. Only the static module is kept: assets are pre-compressed above, so
+# on-the-fly compression is never needed.
+FROM nginx:alpine AS brotli-builder
+RUN set -eux; \
+    NGINX_VERSION="$(nginx -v 2>&1 | sed 's|.*/||')"; \
+    apk add --no-cache build-base pcre-dev zlib-dev openssl-dev linux-headers curl git \
+                       brotli-dev brotli-static; \
+    curl -fsSL "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" | tar -xz -C /tmp; \
+    git clone --depth 1 --recurse-submodules https://github.com/google/ngx_brotli.git /tmp/ngx_brotli; \
+    cd "/tmp/nginx-${NGINX_VERSION}"; \
+    ./configure --with-compat --add-dynamic-module=/tmp/ngx_brotli; \
+    make modules; \
+    cp objs/ngx_http_brotli_static_module.so /tmp/
 
 # Final image — lean nginx:alpine with no extra packages needed
 FROM nginx:alpine AS final-image
@@ -75,6 +98,7 @@ ARG TWAKECHAT_BASE_HREF
 ENV TWAKECHAT_BASE_HREF=${TWAKECHAT_BASE_HREF:-/web/}
 ENV TWAKECHAT_LISTEN_PORT="80"
 RUN rm -rf /usr/share/nginx/html
+COPY --from=brotli-builder /tmp/ngx_http_brotli_static_module.so /usr/lib/nginx/modules/
 COPY --from=web-builder /app/server/nginx.conf /etc/nginx
 COPY --from=web-builder /app/build/web /usr/share/nginx/html${TWAKECHAT_BASE_HREF}
 COPY ./configurations/nginx.conf.template /etc/nginx/templates/default.conf.template
