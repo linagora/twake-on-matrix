@@ -81,18 +81,31 @@ RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \; && 
 # loading a stale one. Only the static module is kept: assets are pre-compressed above, so
 # on-the-fly compression is never needed.
 FROM nginx:alpine AS brotli-builder
-# ngx_brotli is pinned to a commit rather than a branch: it is the one input that
-# can change between two otherwise identical builds. The nginx source is fetched
-# over TLS from the vendor whose signed image is already our base and runtime, at
-# the version that image reports. Signature checking was considered and dropped:
-# nginx rotated its release key without updating the bundle it publishes at
-# /keys/, so pinning a fingerprint would break the build at the next rotation.
+# Both inputs compiled into the module are pinned, so two identical builds cannot
+# produce different module code: the nginx source by version and digest, and
+# ngx_brotli by commit rather than a branch. Signature checking was considered
+# and dropped, nginx having rotated its release key without updating the bundle
+# it publishes at /keys/, which would break the build at the next rotation.
+#
+# NGINX_VERSION must match the base image. A base image bump therefore fails the
+# build until both values below are updated, which is deliberate: it turns an
+# unreviewed upstream change into a review point, and a module compiled against
+# the wrong version would be refused at load time anyway.
+ARG NGINX_VERSION=1.29.4
+ARG NGINX_SHA256=5a7d37eee505866fbab5810fa9f78247d6d5d9157a595c4e7a72043141ddab25
 ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 RUN set -eux; \
-    NGINX_VERSION="$(nginx -v 2>&1 | sed 's|.*/||')"; \
+    image_version="$(nginx -v 2>&1 | sed 's|.*/||')"; \
+    if [ "$image_version" != "$NGINX_VERSION" ]; then \
+      echo "base image runs nginx $image_version but NGINX_VERSION pins $NGINX_VERSION;" >&2; \
+      echo "update NGINX_VERSION and NGINX_SHA256 in this Dockerfile" >&2; \
+      exit 1; \
+    fi; \
     apk add --no-cache build-base pcre-dev zlib-dev openssl-dev linux-headers curl git \
                        brotli-dev brotli-static; \
-    curl -fsSL "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" | tar -xz -C /tmp; \
+    curl -fsSL -o /tmp/nginx.tar.gz "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"; \
+    echo "${NGINX_SHA256}  /tmp/nginx.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/nginx.tar.gz -C /tmp; \
     git clone https://github.com/google/ngx_brotli.git /tmp/ngx_brotli; \
     git -C /tmp/ngx_brotli checkout "$NGX_BROTLI_COMMIT"; \
     git -C /tmp/ngx_brotli submodule update --init --recursive; \
