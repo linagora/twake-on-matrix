@@ -81,12 +81,21 @@ RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \; && 
 # loading a stale one. Only the static module is kept: assets are pre-compressed above, so
 # on-the-fly compression is never needed.
 FROM nginx:alpine AS brotli-builder
+# ngx_brotli is pinned to a commit rather than a branch: it is the one input that
+# can change between two otherwise identical builds. The nginx source is fetched
+# over TLS from the vendor whose signed image is already our base and runtime, at
+# the version that image reports. Signature checking was considered and dropped:
+# nginx rotated its release key without updating the bundle it publishes at
+# /keys/, so pinning a fingerprint would break the build at the next rotation.
+ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 RUN set -eux; \
     NGINX_VERSION="$(nginx -v 2>&1 | sed 's|.*/||')"; \
     apk add --no-cache build-base pcre-dev zlib-dev openssl-dev linux-headers curl git \
                        brotli-dev brotli-static; \
     curl -fsSL "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" | tar -xz -C /tmp; \
-    git clone --depth 1 --recurse-submodules https://github.com/google/ngx_brotli.git /tmp/ngx_brotli; \
+    git clone https://github.com/google/ngx_brotli.git /tmp/ngx_brotli; \
+    git -C /tmp/ngx_brotli checkout "$NGX_BROTLI_COMMIT"; \
+    git -C /tmp/ngx_brotli submodule update --init --recursive; \
     cd "/tmp/nginx-${NGINX_VERSION}"; \
     ./configure --with-compat --add-dynamic-module=/tmp/ngx_brotli; \
     make modules; \

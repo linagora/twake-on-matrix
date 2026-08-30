@@ -5,10 +5,19 @@ and so the service worker can precache them.
 
 ## dotlottie
 
-`@dotlottie/player-component@2.7.12`, files copied verbatim from
+`@dotlottie/player-component@2.7.12`, copied verbatim from
 `https://unpkg.com/@dotlottie/player-component@2.7.12/dist/`. Drives the splash
-animation in `index.html`. The chunks are imported by relative name, so all five
-files must stay in the same directory.
+animation in `index.html`.
 
-To update, bump the version in the URL and re-copy every file, then check that
-`dotlottie-player.mjs` references no chunk that was not copied.
+All fourteen files are the full dependency closure and must stay in the same
+directory: four chunks are imported by relative name, and `chunk-TRZ6EGBZ.mjs`
+additionally pulls renderer modules such as `lottie_svg-*.mjs` through dynamic
+`import()`. Only the renderer the player selects is fetched at runtime; the rest
+sit unused until needed.
+
+To update, bump the version in the URL and re-copy, then resolve the closure
+again rather than assuming it is unchanged:
+
+    grep -ohE '[A-Za-z0-9_.-]+\.mjs' *.mjs | sort -u
+
+Every name it prints must exist in this directory.
