@@ -96,7 +96,7 @@ mixin SendFilesMixin {
   /// a bare [FileInfo]) is what lets `sendFileEventMobile` run HEIC→JPG
   /// conversion and thumbnail generation, which are gated on the concrete type.
   FileInfo _xFileToFileInfo(native_picker.XFile file) {
-    final mimeType = MimeTypeUitls.instance.getTwakeMimeType(file.name);
+    final mimeType = MimeTypeUitls().getTwakeMimeType(file.name);
     return switch (mimeType.msgTypeFromMime) {
       MessageTypes.Image => ImageFileInfo(
         file.name,

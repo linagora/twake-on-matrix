@@ -5,7 +5,7 @@ import 'package:mime/mime.dart';
 class MimeTypeUitls {
   MimeTypeUitls._();
 
-  static MimeTypeUitls get instance => MimeTypeUitls._();
+  factory MimeTypeUitls() => MimeTypeUitls._();
 
   String getTwakeMimeType(String path) {
     final mimeType = lookupMimeType(path);
