@@ -103,6 +103,9 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
 }
 
 extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
+  bool get isInvitationEnabled =>
+      this?.appTwakeInformation?.isInvitationEnabled ?? false;
+
   bool get supportSSOLogin {
     return this?.loginFlows.any(
           (flow) => flow.type == AppConstants.ssoLoginType,
