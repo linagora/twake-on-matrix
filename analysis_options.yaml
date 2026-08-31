@@ -12,6 +12,7 @@ linter:
     - avoid_field_initializers_in_const_classes
     - avoid_unused_constructor_parameters
     - matching_super_parameters
+    - prefer_asserts_in_initializer_lists
 
 analyzer:
   errors:
