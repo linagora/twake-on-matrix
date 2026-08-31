@@ -65,7 +65,7 @@ The first `flutter analyze --no-pub` run reports 11,299 diagnostics:
 
 ## Progressive path
 
-1. Fix hard analyzer errors first, especially generated mocks, generated route files, and migration snippets.
+1. Fix hard analyzer errors first, especially generated mocks and generated route files.
 2. Fix strict inference warnings next. Most warnings come from missing generic types and untyped callback parameters.
 3. Split style-only infos by rule and path. Start with mechanical rules (`prefer_single_quotes`, `directives_ordering`, line length) after errors are under control.
 4. Keep the imported rule set unchanged during migration. If a rule must be relaxed, document the reason in a dedicated follow-up PR.
