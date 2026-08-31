@@ -263,32 +263,38 @@ jobs:
             echo "::endgroup::"
           }
 
-          # 11 test cases (~23 min)
-          build_shard shard_1_chat_core \
-            integration_test/tests/chat/chat_group_test.dart \
+          # 7 test cases (~15 min)
+          build_shard shard_1_chat_group \
+            integration_test/tests/chat/chat_group_test.dart
+
+          # 4 test cases (~8 min)
+          build_shard shard_2_chat_list \
             integration_test/tests/chat/chat_list_test.dart
 
-          # 12 repeatable test cases. transfer_ownership_test is intentionally
+          # 7 repeatable message test cases. transfer_ownership_test is intentionally
           # excluded here: it transfers the persistent staging fixture to a
           # different owner and cannot pass again without re-provisioning. It
           # remains covered by the web workflow, whose Synapse is disposable.
-          build_shard shard_2_chat_rest \
+          build_shard shard_3_chat_messages \
             integration_test/tests/chat/chat_test.dart \
             integration_test/tests/chat/forward_message_test.dart \
+            integration_test/tests/chat/sending_message_test.dart \
+            integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
+
+          # 6 stateful chat flows, isolated from the message scenarios above.
+          build_shard shard_4_chat_flows \
             integration_test/tests/chat/chat_dm_leave_test.dart \
             integration_test/tests/chat/chat_image_retry_test.dart \
             integration_test/tests/chat/chat_group_open_profile_test.dart \
             integration_test/tests/chat/create_new_group_chat_test.dart \
             integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart \
-            integration_test/tests/chat/sending_message_test.dart \
-            integration_test/tests/chat/search_external_mxid_test.dart \
-            integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
+            integration_test/tests/chat/search_external_mxid_test.dart
 
           # 7 test cases (~15 min). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker
           # flow) must NOT be listed here — they can never pass on Android and
           # are covered by the patrol-web nightly workflow.
-          build_shard shard_3_misc \
+          build_shard shard_5_misc \
             integration_test/tests/contact/contact_test.dart \
             integration_test/tests/login/login_with_password_test.dart \
             integration_test/tests/setting/language_test.dart \
@@ -325,17 +331,21 @@ jobs:
       FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
 
     strategy:
-      fail-fast: false
+      # Stop queued shards after the first failure. The shared staging account
+      # serializes these jobs, so continuing cannot shorten feedback and can
+      # otherwise keep a failed workflow alive for hours.
+      fail-fast: true
       matrix:
         include:
-          - shard: shard_1_chat_core
+          - shard: shard_1_chat_group
             clear_package_data: true
-          # This shard runs many staging-backed tests with one account. Keep
-          # its authenticated app data between Orchestrator test cases to avoid
-          # one Matrix login per case and the resulting M_LIMIT_EXCEEDED storm.
-          - shard: shard_2_chat_rest
-            clear_package_data: false
-          - shard: shard_3_misc
+          - shard: shard_2_chat_list
+            clear_package_data: true
+          - shard: shard_3_chat_messages
+            clear_package_data: true
+          - shard: shard_4_chat_flows
+            clear_package_data: true
+          - shard: shard_5_misc
             clear_package_data: true
 
     defaults:
@@ -366,80 +376,44 @@ jobs:
       - name: Run integration shard on virtual device
         run: |
           BASE_RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
-          MAX_ATTEMPTS=2
-          FTL_WALL_TIMEOUT=50m
-          attempt=1
+          FTL_WALL_TIMEOUT=25m
+          RUN_ID="${BASE_RUN_ID}-attempt1"
+          DEVICE_MODEL=MediumPhone.arm
+          DEVICE_VERSION=34
           ftl_exit=0
 
           printf 'attempt\trun_id\tdevice\texit_code\n' > ftl_attempts.tsv
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+          echo "Starting FTL run: $RUN_ID ($DEVICE_MODEL/$DEVICE_VERSION)"
 
-          while (( attempt <= MAX_ATTEMPTS )); do
-            RUN_ID="${BASE_RUN_ID}-attempt${attempt}"
-            if (( attempt == 1 )); then
-              DEVICE_MODEL=MediumPhone.arm
-              DEVICE_VERSION=34
-            else
-              # An infrastructure retry must leave the failing device pool.
-              # Pixel2.arm/33 is a supported phone-sized ARM environment, so
-              # the universal APK remains compatible while FTL allocation
-              # uses a different model/API pool.
-              DEVICE_MODEL=Pixel2.arm
-              DEVICE_VERSION=33
-            fi
-            # The last attempted directory is used by the diagnostics step.
-            echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
-            echo "Starting FTL attempt $attempt/$MAX_ATTEMPTS: $RUN_ID ($DEVICE_MODEL/$DEVICE_VERSION)"
+          # FTL's --timeout covers device execution only. This wall-clock
+          # watchdog also bounds a matrix stuck waiting for infrastructure.
+          # Do not auto-retry a stuck provider allocation: the previous retry
+          # doubled the workflow duration without producing a test log.
+          set +e
+          timeout --signal=INT --kill-after=2m "$FTL_WALL_TIMEOUT" \
+            gcloud firebase test android run \
+              --type instrumentation \
+              --app "apks/${{ matrix.shard }}/app-debug.apk" \
+              --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
+              --device model="$DEVICE_MODEL",version="$DEVICE_VERSION" \
+              --timeout 20m \
+              --use-orchestrator \
+              --environment-variables clearPackageData=${{ matrix.clear_package_data }} \
+              --results-bucket "$FTL_RESULTS_BUCKET" \
+              --results-dir "$RUN_ID" \
+              --client-details=matrixLabel="${{ matrix.shard }}-$DEVICE_MODEL-$DEVICE_VERSION" \
+            2>&1 | tee ftl-attempt-1.log
+          ftl_exit=${PIPESTATUS[0]}
+          set -e
 
-            # FTL's --timeout covers device execution only. This wall-clock
-            # watchdog also bounds a matrix stuck waiting for infrastructure.
-            # SIGINT lets gcloud cancel the matrix before timeout escalates.
-            set +e
-            timeout --signal=INT --kill-after=2m "$FTL_WALL_TIMEOUT" \
-              gcloud firebase test android run \
-                --type instrumentation \
-                --app "apks/${{ matrix.shard }}/app-debug.apk" \
-                --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
-                --device model="$DEVICE_MODEL",version="$DEVICE_VERSION" \
-                --timeout 45m \
-                --use-orchestrator \
-                --environment-variables clearPackageData=${{ matrix.clear_package_data }} \
-                --results-bucket "$FTL_RESULTS_BUCKET" \
-                --results-dir "$RUN_ID" \
-                --client-details=matrixLabel="${{ matrix.shard }}-$DEVICE_MODEL-$DEVICE_VERSION" \
-              2>&1 | tee "ftl-attempt-${attempt}.log"
-            ftl_exit=${PIPESTATUS[0]}
-            set -e
+          printf '1\t%s\t%s/%s\t%s\n' \
+            "$RUN_ID" "$DEVICE_MODEL" "$DEVICE_VERSION" "$ftl_exit" \
+            >> ftl_attempts.tsv
 
-            printf '%s\t%s\t%s/%s\t%s\n' \
-              "$attempt" "$RUN_ID" "$DEVICE_MODEL" "$DEVICE_VERSION" "$ftl_exit" \
-              >> ftl_attempts.tsv
-
-            if (( ftl_exit == 0 )); then
-              break
-            fi
-
-            # gcloud exit 20 is an FTL infrastructure failure. A watchdog exit
-            # is also retryable when gcloud reported explicit FTL infrastructure
-            # errors before it became stuck. Never retry app failures (exit 10).
-            retry_infrastructure=false
-            if (( ftl_exit == 20 )); then
-              retry_infrastructure=true
-            elif (( ftl_exit == 124 )) \
-              && grep -Fq "Infrastructure error occurred." "ftl-attempt-${attempt}.log"; then
-              retry_infrastructure=true
-            fi
-
-            if [[ "$retry_infrastructure" == true ]] && (( attempt < MAX_ATTEMPTS )); then
-              echo "::warning::FTL infrastructure failure; retrying once."
-              attempt=$((attempt + 1))
-              continue
-            fi
-
-            if (( ftl_exit == 124 )); then
-              echo "::error::FTL wall-clock watchdog expired after $FTL_WALL_TIMEOUT."
-            fi
-            break
-          done
+          if (( ftl_exit == 124 )); then
+            echo "::error::FTL wall-clock watchdog expired after $FTL_WALL_TIMEOUT."
+          fi
 
           exit "$ftl_exit"
 
