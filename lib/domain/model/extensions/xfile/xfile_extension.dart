@@ -6,7 +6,7 @@ import 'package:matrix/matrix.dart';
 
 extension XFileExtension on XFile {
   Future<MatrixFile> toMatrixFileOnWeb() async {
-    final mime = MimeTypeUitls.instance.getTwakeMimeType(name);
+    final mime = MimeTypeUitls().getTwakeMimeType(name);
     final msgType = mime.msgTypeFromMime;
     final bytes = await readAsBytes();
     final size = msgType == MessageTypes.Image ? await bytes.imageSize : null;

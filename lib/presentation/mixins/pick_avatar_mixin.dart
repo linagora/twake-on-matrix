@@ -30,7 +30,7 @@ mixin PickAvatarMixin {
     final matrixFile = MatrixFile.fromMimeType(
       bytes: bytes,
       name: file.name,
-      mimeType: MimeTypeUitls.instance.getTwakeMimeType(file.name),
+      mimeType: MimeTypeUitls().getTwakeMimeType(file.name),
     );
 
     if (matrixFile.size > AppConfig.defaultMaxUploadAvtarSizeInBytes) {
