@@ -31,7 +31,7 @@ ARG YQ_VERSION=4.44.3
 # Single apt layer: install all deps, install Rust, install yq, then clean up
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev openssh-client && \
+      curl pkg-config libssl-dev openssh-client python3 && \
     rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
