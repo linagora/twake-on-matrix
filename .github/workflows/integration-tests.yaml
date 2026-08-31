@@ -268,7 +268,10 @@ jobs:
             integration_test/tests/chat/chat_group_test.dart \
             integration_test/tests/chat/chat_list_test.dart
 
-          # 13 test cases (~30 min)
+          # 12 repeatable test cases. transfer_ownership_test is intentionally
+          # excluded here: it transfers the persistent staging fixture to a
+          # different owner and cannot pass again without re-provisioning. It
+          # remains covered by the web workflow, whose Synapse is disposable.
           build_shard shard_2_chat_rest \
             integration_test/tests/chat/chat_test.dart \
             integration_test/tests/chat/forward_message_test.dart \
@@ -277,7 +280,6 @@ jobs:
             integration_test/tests/chat/chat_group_open_profile_test.dart \
             integration_test/tests/chat/create_new_group_chat_test.dart \
             integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart \
-            integration_test/tests/chat/transfer_ownership_test.dart \
             integration_test/tests/chat/sending_message_test.dart \
             integration_test/tests/chat/search_external_mxid_test.dart \
             integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
@@ -325,7 +327,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [shard_1_chat_core, shard_2_chat_rest, shard_3_misc]
+        include:
+          - shard: shard_1_chat_core
+            clear_package_data: true
+          # This shard runs many staging-backed tests with one account. Keep
+          # its authenticated app data between Orchestrator test cases to avoid
+          # one Matrix login per case and the resulting M_LIMIT_EXCEEDED storm.
+          - shard: shard_2_chat_rest
+            clear_package_data: false
+          - shard: shard_3_misc
+            clear_package_data: true
 
     defaults:
       run:
@@ -356,17 +367,28 @@ jobs:
         run: |
           BASE_RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
           MAX_ATTEMPTS=2
-          FTL_WALL_TIMEOUT=90m
+          FTL_WALL_TIMEOUT=50m
           attempt=1
           ftl_exit=0
 
-          printf 'attempt\trun_id\texit_code\n' > ftl_attempts.tsv
+          printf 'attempt\trun_id\tdevice\texit_code\n' > ftl_attempts.tsv
 
           while (( attempt <= MAX_ATTEMPTS )); do
             RUN_ID="${BASE_RUN_ID}-attempt${attempt}"
+            if (( attempt == 1 )); then
+              DEVICE_MODEL=MediumPhone.arm
+              DEVICE_VERSION=34
+            else
+              # An infrastructure retry must leave the failing device pool.
+              # Pixel2.arm/33 is a supported phone-sized ARM environment, so
+              # the universal APK remains compatible while FTL allocation
+              # uses a different model/API pool.
+              DEVICE_MODEL=Pixel2.arm
+              DEVICE_VERSION=33
+            fi
             # The last attempted directory is used by the diagnostics step.
             echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
-            echo "Starting FTL attempt $attempt/$MAX_ATTEMPTS: $RUN_ID"
+            echo "Starting FTL attempt $attempt/$MAX_ATTEMPTS: $RUN_ID ($DEVICE_MODEL/$DEVICE_VERSION)"
 
             # FTL's --timeout covers device execution only. This wall-clock
             # watchdog also bounds a matrix stuck waiting for infrastructure.
@@ -377,18 +399,19 @@ jobs:
                 --type instrumentation \
                 --app "apks/${{ matrix.shard }}/app-debug.apk" \
                 --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
-                --device model=MediumPhone.arm,version=34 \
-                --timeout 60m \
+                --device model="$DEVICE_MODEL",version="$DEVICE_VERSION" \
+                --timeout 45m \
                 --use-orchestrator \
-                --environment-variables clearPackageData=true \
+                --environment-variables clearPackageData=${{ matrix.clear_package_data }} \
                 --results-bucket "$FTL_RESULTS_BUCKET" \
                 --results-dir "$RUN_ID" \
-                --client-details=matrixLabel="${{ matrix.shard }}" \
+                --client-details=matrixLabel="${{ matrix.shard }}-$DEVICE_MODEL-$DEVICE_VERSION" \
               2>&1 | tee "ftl-attempt-${attempt}.log"
             ftl_exit=${PIPESTATUS[0]}
             set -e
 
-            printf '%s\t%s\t%s\n' "$attempt" "$RUN_ID" "$ftl_exit" \
+            printf '%s\t%s\t%s/%s\t%s\n' \
+              "$attempt" "$RUN_ID" "$DEVICE_MODEL" "$DEVICE_VERSION" "$ftl_exit" \
               >> ftl_attempts.tsv
 
             if (( ftl_exit == 0 )); then
@@ -434,7 +457,17 @@ jobs:
           find ./shard_gcs_results -name "logcat" -exec cat {} + > shard_logcat.txt
           if [ ! -s shard_logcat.txt ]; then
             echo "::notice::FTL produced no logcat; preserving primary test result."
+            exit 0
           fi
+
+          # Debug builds log request headers and Matrix setup messages. Never
+          # publish bearer/access tokens in the GitHub artifact.
+          sed -E \
+            -e 's/(authorization: Bearer )[[:alnum:]_.~-]+/\1***REDACTED***/Ig' \
+            -e 's/(accessToken:? (Bearer )?)[[:alnum:]_.~-]+/\1***REDACTED***/g' \
+            -e 's/("access_token"[[:space:]]*:[[:space:]]*")[^"]+/\1***REDACTED***/g' \
+            shard_logcat.txt > shard_logcat.redacted.txt
+          mv shard_logcat.redacted.txt shard_logcat.txt
 
       - name: Upload shard diagnostics
         if: always()
