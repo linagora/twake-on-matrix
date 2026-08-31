@@ -1,7 +1,7 @@
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/mixins/invite_external_contact_mixin.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:twake_chat/pages/new_group/contacts_selection_view.dart';
 import 'package:twake_chat/pages/new_group/selected_contacts_map_change_notifier.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
@@ -16,7 +16,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
     extends State<T>
     with
         InviteExternalContactMixin,
-        WellKnownMixin,
         ContactsViewControllerMixin,
         AddressBooksMixin,
         WidgetsBindingObserver {
@@ -36,7 +35,8 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
   bool get isFullScreen => true;
 
   @override
-  bool get showPhonebookContacts => supportInvitation();
+  bool get isInvitationEnabled =>
+      mounted && Matrix.of(context).loginHomeserverSummary.isInvitationEnabled;
 
   Client get client => Matrix.of(context).client;
 
@@ -46,9 +46,6 @@ abstract class ContactsSelectionController<T extends StatefulWidget>
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         listenAddressBookEvents(client);
-        discoveryInformationNotifier.value = Matrix.of(
-          context,
-        ).loginHomeserverSummary?.discoveryInformation;
         initialFetchContacts(
           context: context,
           client: client,

@@ -1,9 +1,9 @@
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
 import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/invite_external_contact_mixin.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
@@ -26,7 +26,6 @@ class NewPrivateChat extends StatefulWidget {
 class NewPrivateChatController extends State<NewPrivateChat>
     with
         ComparablePresentationContactMixin,
-        WellKnownMixin,
         ContactsViewControllerMixin,
         GoToDraftChatMixin,
         WidgetsBindingObserver,
@@ -36,7 +35,8 @@ class NewPrivateChatController extends State<NewPrivateChat>
   final scrollController = ScrollController();
 
   @override
-  bool get showPhonebookContacts => supportInvitation();
+  bool get isInvitationEnabled =>
+      mounted && Matrix.of(context).loginHomeserverSummary.isInvitationEnabled;
 
   @override
   void initState() {
@@ -46,9 +46,6 @@ class NewPrivateChatController extends State<NewPrivateChat>
       if (mounted) {
         final client = Matrix.of(context).client;
         listenAddressBookEvents(client);
-        discoveryInformationNotifier.value = Matrix.of(
-          context,
-        ).loginHomeserverSummary?.discoveryInformation;
         initialFetchContacts(
           context: context,
           client: client,
