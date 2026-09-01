@@ -17,13 +17,25 @@ const _webGroup = String.fromEnvironment(
 );
 const _mobileGroup = 'Support Twake Workplace';
 
-String get _group => kIsWeb ? _webGroup : _mobileGroup;
-
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-/// Opens [_group], posts one message through the UI (sender) and one through
-/// the API as the receiver, waits for both, and returns `(senderMsg,
-/// receiverMsg)`.
+Future<void> _openGroup(BaseTestScenario scenario) async {
+  final robots = scenario.robots;
+  if (!kIsWeb) {
+    await robots.chatListRobot().openChatByTitle(_mobileGroup);
+    return;
+  }
+
+  await robots.chatListRobot().openSearchScreen();
+  final opened = await robots.searchViewRobot().searchAndOpenRoom(_webGroup);
+  if (!opened) {
+    throw Exception('Test failed: Room "$_webGroup" was not found.');
+  }
+}
+
+/// Opens the platform fixture room, posts one message through the UI (sender)
+/// and one through the API as the receiver, waits for both, and returns
+/// `(senderMsg, receiverMsg)`.
 ///
 /// Drives the UI exclusively through the abstract robots; the receiver message
 /// is injected via the cross-platform `sendMessageAsReceiver` API helper so the
@@ -32,11 +44,7 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  await robots.chatListRobot().openSearchScreen();
-  final opened = await robots.searchViewRobot().searchAndOpenRoom(_group);
-  if (!opened) {
-    throw Exception('Test failed: Room "$_group" was not found.');
-  }
+  await _openGroup(scenario);
   await $.pump(const Duration(seconds: 1));
 
   final id = _uid();

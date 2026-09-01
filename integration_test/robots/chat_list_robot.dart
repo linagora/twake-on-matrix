@@ -74,8 +74,9 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
 
   @override
   Future<void> openChatByTitle(String title) async {
-    await $.waitUntilVisible($(TwakeListItem));
-    await getChatGroupByTitle(title).root.tap();
+    final chat = getChatGroupByTitle(title);
+    await $.waitUntilVisible(chat.root, timeout: const Duration(seconds: 60));
+    await chat.root.tap();
     await $.pumpAndSettle();
   }
 
