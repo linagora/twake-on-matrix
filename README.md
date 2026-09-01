@@ -67,21 +67,19 @@ flutter doctor -v
 
 #### Web
 
-If you only plan to work on the `web` target we recommend installing Google Chrome as it is the default supported target _(Flutter being developped by Google)_.
+For web development, install:
 
-It is also **required** to have a web ready version of libolm available in the `assets/js/package` folder. You can build a version using:
+- [Google Chrome](https://www.google.com/chrome/)
+- Rust using [rustup](https://rustup.rs/)
+- [yq](https://github.com/mikefarah/yq)
+
+The web target uses `flutter_vodozemac` for end-to-end encryption. Before running or building the application for the first time, generate the required web package:
 
 ```bash
-docker run -v ./assets/js/package:/package nixos/nix:2.22.1
-
-# within the docker
-nix build -v --extra-experimental-features flakes --extra-experimental-features nix-command gitlab:matrix-org/olm/3.2.16?host=gitlab.matrix.org\#javascript
-cp /result/javascript/* /package/. -v
-exit
-
-# back on your host
-sudo chown $(id -u):$(id -g) ./assets/js/package -Rv
+./scripts/prepare-web.sh
 ```
+
+Run this command again after updating the `flutter_vodozemac` dependency.
 
 #### Android
 
@@ -145,6 +143,11 @@ Supported platforms:
 ### Configure the app
 
 In order to run the web target you must provide a default configuration file. This can be done by copying the `config.sample.json` to `config.json`.
+
+```bash
+cp config.sample.json config.json
+```
+
 Here is an example working with `matrix.org`:
 
 ```json
@@ -155,6 +158,7 @@ Here is an example working with `matrix.org`:
   "privacy_url": "https://twake.app/en/privacy/",
   "render_html": true,
   "hide_unknown_events": true,
+  "hide_redacted_events": false,
   "issue_id": "",
   "app_grid_dashboard_available": false,
   "homeserver": "https://matrix.org/",
@@ -163,6 +167,8 @@ Here is an example working with `matrix.org`:
   "dev_mode": true,
   "qr_code_download_url": "https://sign-up.twake.app/download/chat",
   "enable_logs": true,
+  "vapid_public_key": "",
+  "web_push_enabled": false,
   "support_url": "https://twake.app/support",
   "cozy_external_bridge_version": "0.16.1"
 }
@@ -194,6 +200,7 @@ Please use the helper script corresponding to your target in order to build:
 ### Web
 
 ```bash
+./scripts/prepare-web.sh
 ./scripts/build-web.sh
 ```
 
