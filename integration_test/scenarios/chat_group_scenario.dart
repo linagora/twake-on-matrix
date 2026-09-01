@@ -2,6 +2,7 @@ import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,7 +11,13 @@ import '../base/base_test_scenario.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
-const _group = 'Support Twake Workplace';
+const _webGroup = String.fromEnvironment(
+  'SearchByTitle',
+  defaultValue: 'My Default Group',
+);
+const _mobileGroup = 'Support Twake Workplace';
+
+String get _group => kIsWeb ? _webGroup : _mobileGroup;
 
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
