@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/data/network/extensions/file_info_extension.dart';
@@ -38,6 +39,12 @@ extension RoomExtension on Room {
   bool isNotSpaceAndStoryRoom() {
     return !isSpace && !isStoryRoom;
   }
+
+  /// Drives wording: what a user is able to do in the
+  /// room is set by its power levels
+  bool get isFeed =>
+      getState(EventTypes.RoomCreate)?.content.tryGet<String>('type') ==
+      FeedConfig.roomType;
 
   bool isShowInChatList() {
     return _isDirectChatHaveMessage() || _isGroupChat();
