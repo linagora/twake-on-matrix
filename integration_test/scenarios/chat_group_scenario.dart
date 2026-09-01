@@ -10,10 +10,7 @@ import '../base/base_test_scenario.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
-const _group = String.fromEnvironment(
-  'SearchByTitle',
-  defaultValue: 'My Default Group',
-);
+const _group = 'Support Twake Workplace';
 
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
