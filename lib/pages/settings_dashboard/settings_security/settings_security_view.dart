@@ -130,11 +130,6 @@ class SettingsSecurityView extends StatelessWidget {
                 future: controller.recoveryKeyFuture,
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      return SizedBox.shrink(
-                        key: SettingsKeys.recoveryKeyUnavailable.key,
-                      );
-                    }
                     return const SizedBox.shrink();
                   }
                   return Column(

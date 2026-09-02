@@ -17,33 +17,12 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     return $(SettingsKeys.recoveryKeyItem.key);
   }
 
-  PatrolFinder recoveryKeyUnavailable() {
-    return $(SettingsKeys.recoveryKeyUnavailable.key);
-  }
-
   PatrolFinder recoveryKeyCopyButton() {
     return $(SettingsKeys.recoveryKeyCopyButton.key);
   }
 
   Future<void> waitForRecoveryKeyVisible() async {
     await $.waitUntilVisible(recoveryKeyItem());
-  }
-
-  /// Waits for the recovery key item and returns whether it appeared.
-  ///
-  /// The section is rendered only when the ToM server returns recovery words.
-  /// A completed fetch without recovery words exposes an explicit unavailable
-  /// state; unrelated visibility timeouts are rethrown.
-  Future<bool> waitForRecoveryKeyVisibleOrNull({
-    Duration timeout = const Duration(seconds: 45),
-  }) async {
-    try {
-      await $.waitUntilVisible(recoveryKeyItem(), timeout: timeout);
-      return true;
-    } on WaitUntilVisibleTimeoutException {
-      if (recoveryKeyUnavailable().exists) return false;
-      rethrow;
-    }
   }
 
   /// Taps the copy button, then confirms the warning dialog by tapping "Copy".

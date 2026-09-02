@@ -9,10 +9,6 @@ enum SettingsKeys {
     Key('settings.recoveryKeyItem'),
     ValueKey('settings.recoveryKeyItem'),
   ),
-  recoveryKeyUnavailable(
-    Key('settings.recoveryKeyUnavailable'),
-    ValueKey('settings.recoveryKeyUnavailable'),
-  ),
   recoveryKeyCopyButton(
     Key('settings.recoveryKeyCopyButton'),
     ValueKey('settings.recoveryKeyCopyButton'),

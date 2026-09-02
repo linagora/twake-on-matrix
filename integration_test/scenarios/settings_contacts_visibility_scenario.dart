@@ -5,11 +5,9 @@ import '../robots/home_robot.dart';
 import '../robots/setting/settings_contacts_visibility_robot.dart';
 import '../robots/setting/settings_privacy_and_security_robot.dart';
 
-/// Mobile-only: select the "everyone" contacts-visibility option and verify
-/// the email/phone visibility toggles are offered. Since TW-2778 the toggles
-/// stay available for the "everyone" option — they are hidden only for
-/// "nobody" (private). Drives the concrete settings robots directly, so this
-/// is registered with `mobileOnly: true`.
+/// Mobile-only: select the "everyone" contacts-visibility option and verify the
+/// email/phone fields are hidden. Drives the concrete settings robots directly,
+/// so this is registered with `mobileOnly: true`.
 class SettingsContactsVisibilityEveryoneScenario extends BaseTestScenario {
   SettingsContactsVisibilityEveryoneScenario(super.$, super.robots);
 
@@ -33,10 +31,9 @@ class SettingsContactsVisibilityEveryoneScenario extends BaseTestScenario {
     // Wait for UI to settle after selection
     await $.pumpAndSettle();
 
-    // TW-2778: the visible-field toggles remain available for "everyone" —
-    // the user still chooses which details are visible to other users.
-    await contactsVisibilityRobot.emailFieldOption().waitUntilVisible();
-    await contactsVisibilityRobot.phoneNumberFieldOption().waitUntilVisible();
+    // Verify email and phone fields are NOT visible when everyone is selected
+    expect(contactsVisibilityRobot.emailFieldOption(), findsNothing);
+    expect(contactsVisibilityRobot.phoneNumberFieldOption(), findsNothing);
   }
 }
 
