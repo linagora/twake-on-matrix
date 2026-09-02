@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<title>Authentication complete</title>
+<p>Authentication is complete. If this page does not navigate automatically, please <a href="#" id="manualRedirectLink">click here</a> to continue.</p>
+<script>
+  function postAuthenticationRedirect() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const loginToken = urlParams.get('loginToken');
+      const homeserver = urlParams.get('homeserver');
+      const redirectUrl = getOnAuthRedirectUrl();
+      updateManualRedirectLink(redirectUrl);
+      window.location.href = redirectUrl;
+    } catch (e) {
+      console.error(e);
+      updateManualRedirectLink(redirectUrl);
+    }
+  }
+
+  function getOnAuthRedirectUrl() {
+    let redirectUrl = window.location.href.replace('/auth.html', '/#/onAuthRedirect');
+    return redirectUrl.replace('/web', '');
+  }
+
+  /**
+   * @param {string} url
+   */
+  function updateManualRedirectLink(url) {
+    document.getElementById('manualRedirectLink').href = url;
+  }
+
+  postAuthenticationRedirect();
+</script>
