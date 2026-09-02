@@ -4,9 +4,9 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
 const RESOURCES = {"version.json": "27568c2f13cdafedaa3deb3e083f2f00",
-"pkg/vodozemac_bindings_dart_bg.wasm": "4b74de63b27e4e0d22e5487ab9698498",
+"pkg/vodozemac_bindings_dart_bg.wasm": "76d443bbb53cfa4d982ddb58ff0dddbf",
 "pkg/package.json": "ca5a61ab26f669e8f638b0828947da50",
-"pkg/vodozemac_bindings_dart.js": "dbbdf4fd587ed96047bfa14b9c40c53b",
+"pkg/vodozemac_bindings_dart.js": "e3d3e5a67271eb0d43b62c1727a89a16",
 "i18n/de.json": "d70b5e27288cfa31729f61228ed8dbf8",
 "i18n/vi.json": "8ded529a589ffde357de2ce799ffe597",
 "i18n/fr.json": "6ce3d1967d985f93ef9e11da8e71952c",
@@ -775,7 +775,7 @@ const RESOURCES = {"version.json": "27568c2f13cdafedaa3deb3e083f2f00",
 "splash/img/icon_twp.png": "5f3bf8fc4a58850bf5dae7b6f33043fc",
 "splash/style.css": "aef88eeb741da0bd13a5cc5b49d90598",
 "style.css": "1273e6902fff3be80d3a34cdb7a05326",
-"flutter_bootstrap.js": "7351c6af6dd20e77e9e008fc605d50b2",
+"flutter_bootstrap.js": "49b792d4e8c17a72f0724a37029c881c",
 "manifest.json": "f3c8e18d38224185c23bbca2dc0e3f4a"};
 // The application shell files that are downloaded before a service worker can
 // start.
