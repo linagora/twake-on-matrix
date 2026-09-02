@@ -146,7 +146,7 @@ jobs:
             --type instrumentation \
             --app build/app/outputs/apk/debug/app-debug.apk \
             --test build/app/outputs/apk/androidTest/debug/app-debug-androidTest.apk \
-            --device model=Pixel2.arm,version=33 \
+            --device model=MediumPhone.arm,version=34 \
             --timeout 45m \
             --use-orchestrator \
             --environment-variables clearPackageData=true
