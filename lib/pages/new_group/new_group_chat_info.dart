@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:twake_chat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
@@ -44,7 +45,13 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 class NewGroupChatInfo extends StatefulWidget {
   final Set<PresentationContact> contactsList;
 
-  const NewGroupChatInfo({super.key, required this.contactsList});
+  final bool isFeed;
+
+  const NewGroupChatInfo({
+    super.key,
+    required this.contactsList,
+    this.isFeed = false,
+  });
 
   @override
   State<StatefulWidget> createState() => NewGroupChatInfoController();
@@ -109,6 +116,8 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
     return newContactsList;
   }
 
+  bool get isFeed => widget.isFeed;
+
   void createNewGroup({String? urlAvatar}) {
     final client = Matrix.of(context).client;
     final powerLevelManager = getIt.get<PowerLevelManager>();
@@ -119,13 +128,17 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         invite: getSelectedValidContacts(
           contactsList ?? {},
         ).map((contact) => contact.matrixId).whereNotNull().toList(),
-        enableEncryption: enableEncryptionNotifier.value,
+        enableEncryption: isFeed ? false : enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
-        powerLevelContentOverride: {
-          'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
-          'invite': powerLevelManager.getAdminPowerLevel(),
-          'kick': powerLevelManager.getAdminPowerLevel(),
-        },
+        isFeed: isFeed,
+        powerLevelContentOverride: isFeed
+            ? powerLevelManager.getFeedPowerLevelContentOverride()
+            : {
+                'events': powerLevelManager
+                    .getDefaultPowerLevelEventForMember(),
+                'invite': powerLevelManager.getAdminPowerLevel(),
+                'kick': powerLevelManager.getAdminPowerLevel(),
+              },
       ),
     );
   }
@@ -195,7 +208,9 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         if (failure is CreateNewGroupChatFailed) {
           await showConfirmAlertDialog(
             context: context,
-            message: L10n.of(context)!.inviteUserErrorMessage,
+            message: failure.exception is FeedNotSupportedByHomeserverException
+                ? L10n.of(context)!.feedNotSupportedByHomeserver
+                : L10n.of(context)!.inviteUserErrorMessage,
             isArrangeActionButtonsVertical: true,
             okLabel: L10n.of(context)!.gotIt,
           );

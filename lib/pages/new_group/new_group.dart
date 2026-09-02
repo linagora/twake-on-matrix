@@ -8,7 +8,9 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 class NewGroup extends StatefulWidget {
-  const NewGroup({super.key});
+  final bool isFeed;
+
+  const NewGroup({super.key, this.isFeed = false});
 
   @override
   NewGroupController createState() => NewGroupController();
@@ -35,9 +37,15 @@ class NewGroupController extends ContactsSelectionController<NewGroup> {
   void moveToNewGroupInfoScreen() async {
     if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.pushInner(
-        'innernavigator/newgroupchatinfo',
+        widget.isFeed
+            ? 'innernavigator/newfeedinfo'
+            : 'innernavigator/newgroupchatinfo',
         arguments: contactsList.toSet(),
       );
+    } else if (widget.isFeed) {
+      NewPrivateChatNewFeedInfoRoute(
+        $extra: contactsList.toSet(),
+      ).push(context);
     } else {
       NewPrivateChatNewGroupInfoRoute(
         $extra: contactsList.toSet(),
