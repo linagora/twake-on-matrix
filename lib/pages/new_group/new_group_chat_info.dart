@@ -132,7 +132,7 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         urlAvatar: urlAvatar,
         isFeed: isFeed,
         powerLevelContentOverride: isFeed
-            ? powerLevelManager.getFeedPowerLevelContentOverride()
+            ? null
             : {
                 'events': powerLevelManager
                     .getDefaultPowerLevelEventForMember(),
