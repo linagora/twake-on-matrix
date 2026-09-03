@@ -1,3 +1,4 @@
+import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_styles.dart';
@@ -15,15 +16,18 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
-  Future<void> show(BuildContext context) => showAdaptiveBottomSheet(
-    context: context,
-    builder: (context) => this,
-    isDismissible: false,
-  );
+  /// Shows as a centered modal on web/desktop and a bottom sheet on mobile
+  /// via [BootstrapModalChrome], matching the verify-device design.
+  Future<void> show(BuildContext context) async {
+    await TwakeDialog.showDialogFullScreen(
+      builder: () => this,
+      barrierDismissible: false,
+      useSafeArea: false,
+    );
+  }
 
   final KeyVerification request;
 
@@ -107,7 +111,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     }
     final displayName =
         user?.calcDisplayname() ?? widget.request.userId.localpart!;
-    Widget title = Text(l10n.verifyTitle);
+    Widget? title;
     Widget body;
     final buttons = <Widget>[];
     switch (widget.request.state) {
@@ -118,6 +122,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         // prompt the user for their ssss passphrase / key
         final textEditingController = TextEditingController();
         String input;
+        title = Text(l10n.verifyTitle);
         body = Container(
           margin: const EdgeInsets.only(left: 8.0, right: 8.0),
           child: Column(
@@ -227,12 +232,10 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         break;
       case KeyVerificationState.askChoice:
       case KeyVerificationState.waitingAccept:
-        title = const SizedBox.shrink();
         body = const KeyVerificationWaitingView();
         break;
       case KeyVerificationState.askSas:
         if (widget.request.sasTypes.contains('emoji')) {
-          title = const SizedBox.shrink();
           body = KeyVerificationEmojiView(
             emojis: widget.request.sasEmojis,
             onDontMatch: widget.request.rejectSas,
@@ -304,13 +307,11 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         );
         break;
       case KeyVerificationState.done:
-        title = const SizedBox.shrink();
         body = KeyVerificationSuccessView(
           onStartChatting: () => Navigator.maybePop(context),
         );
         break;
       case KeyVerificationState.error:
-        title = const SizedBox.shrink();
         body = KeyVerificationErrorView(
           canceledCode: widget.request.canceledCode,
           canceledReason: widget.request.canceledReason,
@@ -318,17 +319,25 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         );
         break;
     }
-    return Scaffold(
-      appBar: AppBar(leading: const CloseButton(), title: title),
-      body: ListView(padding: const EdgeInsets.all(12.0), children: [body]),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: buttons,
-          ),
-        ),
+    return BootstrapModalChrome(
+      onClose: () => Navigator.maybePop(context),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (title != null) ...[
+            DefaultTextStyle.merge(
+              style: theme.textTheme.titleLarge,
+              textAlign: TextAlign.center,
+              child: title,
+            ),
+            const SizedBox(height: 12),
+          ],
+          body,
+          if (buttons.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: buttons),
+          ],
+        ],
       ),
     );
   }
