@@ -299,6 +299,7 @@ Future<void> verifyDeviceAction(
     }
   };
   await KeyVerificationDialog(request: req).show(context);
+  notifier.refreshDeviceKeys();
 }
 
 Future<void> blockDeviceAction(
