@@ -5,6 +5,7 @@ import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dar
 import 'package:twake_chat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_feed_extension.dart';
 
 class CreateNewGroupChatInteractor {
   Stream<Either<Failure, Success>> execute({
@@ -29,14 +30,21 @@ class CreateNewGroupChatInteractor {
         stateKey: '',
       );
 
-      final roomId = await matrixClient.createGroupChat(
-        groupName: createNewGroupChatRequest.groupName,
-        enableEncryption: createNewGroupChatRequest.enableEncryption,
-        preset: createNewGroupChatRequest.createRoomPreset,
-        initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
-        powerLevelContentOverride:
-            createNewGroupChatRequest.powerLevelContentOverride,
-      );
+      final roomId = createNewGroupChatRequest.isFeed
+          ? await matrixClient.createFeedRoom(
+              feedName: createNewGroupChatRequest.groupName,
+              initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
+              powerLevelContentOverride:
+                  createNewGroupChatRequest.powerLevelContentOverride,
+            )
+          : await matrixClient.createGroupChat(
+              groupName: createNewGroupChatRequest.groupName,
+              enableEncryption: createNewGroupChatRequest.enableEncryption,
+              preset: createNewGroupChatRequest.createRoomPreset,
+              initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
+              powerLevelContentOverride:
+                  createNewGroupChatRequest.powerLevelContentOverride,
+            );
 
       if (roomId.isNotEmpty) {
         yield Right(
@@ -55,6 +63,16 @@ class CreateNewGroupChatInteractor {
       }
     } catch (exception, stackTrace) {
       Logs().e('CreateNewGroupChatInteractor', exception, stackTrace);
+      if (createNewGroupChatRequest.isFeed &&
+          exception is MatrixException &&
+          exception.errorMessage.toLowerCase().contains('preset')) {
+        yield Left(
+          CreateNewGroupChatFailed(
+            exception: FeedNotSupportedByHomeserverException(),
+          ),
+        );
+        return;
+      }
       if (exception.toString().contains('M_FORBIDDEN: Federation denied')) {
         yield Left(
           CreateNewGroupChatFailed(
