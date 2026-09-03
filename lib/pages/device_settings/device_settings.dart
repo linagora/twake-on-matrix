@@ -286,10 +286,16 @@ Future<void> verifyDeviceAction(
   Device device,
 ) async {
   final client = Matrix.of(context).client;
-  final req = await client
-      .userDeviceKeys[client.userID!]!
-      .deviceKeys[device.deviceId]!
-      .startVerification();
+  // Block the list while the request is set up so Verify can't be re-tapped.
+  final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+    future: () => client
+        .userDeviceKeys[client.userID!]!
+        .deviceKeys[device.deviceId]!
+        .startVerification(),
+  );
+  final req = result.result;
+  if (req == null) return;
+  // Refresh only on a terminal state; a plain dialog close (cancel) is not one.
   req.onUpdate = () {
     if ({
       KeyVerificationState.error,
