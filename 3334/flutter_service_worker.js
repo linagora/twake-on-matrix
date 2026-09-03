@@ -770,12 +770,12 @@ const RESOURCES = {"version.json": "27568c2f13cdafedaa3deb3e083f2f00",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "cc26808b75bd1a5529ce7ade2a2ce8c4",
 "assets/packages/record_web/assets/js/record.fixwebmduration.js": "1f0108ea80c8951ba702ced40cf8cdce",
 "assets/packages/record_web/assets/js/record.worklet.js": "6d247986689d283b7e45ccdf7214c2ff",
-"main.dart.js": "d6d7974ff94dd14de5bf0d09177daea8",
+"main.dart.js": "9fe5b91073feb14b071ff668fb8165bf",
 "splash/lottie-chat.json": "70290062de97961a74f8b75b8c52508d",
 "splash/img/icon_twp.png": "5f3bf8fc4a58850bf5dae7b6f33043fc",
 "splash/style.css": "aef88eeb741da0bd13a5cc5b49d90598",
 "style.css": "1273e6902fff3be80d3a34cdb7a05326",
-"flutter_bootstrap.js": "8f86d04cf5977c92f1c03168579cb531",
+"flutter_bootstrap.js": "a7e5697035c56acb5110b5912080c4f3",
 "manifest.json": "f3c8e18d38224185c23bbca2dc0e3f4a"};
 // The application shell files that are downloaded before a service worker can
 // start.
