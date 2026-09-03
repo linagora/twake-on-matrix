@@ -1,7 +1,10 @@
+import 'package:dartz/dartz.dart';
 import 'package:twake_chat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/app_state/bootstrap/unlock_ssss_state.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/usecase/bootstrap/unlock_ssss_with_recovery_key_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
@@ -21,6 +24,8 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
   late final SaveRecoveryWordsInteractor _saveRecoveryWordsInteractor;
   late final GetRecoveryWordsInteractor _getRecoveryWordsInteractor;
   late final DeleteRecoveryWordsInteractor _deleteRecoveryWordsInteractor;
+  late final UnlockSsssWithRecoveryKeyInteractor
+  _unlockSsssWithRecoveryKeyInteractor;
 
   Bootstrap? _bootstrap;
   bool _wipe = false;
@@ -40,6 +45,9 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     _getRecoveryWordsInteractor = ref.read(getRecoveryWordsInteractorProvider);
     _deleteRecoveryWordsInteractor = ref.read(
       deleteRecoveryWordsInteractorProvider,
+    );
+    _unlockSsssWithRecoveryKeyInteractor = ref.read(
+      unlockSsssWithRecoveryKeyInteractorProvider,
     );
     _wipe = wipe;
     if (client.userID != null) {
@@ -215,33 +223,29 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     );
   }
 
+  /// Delegates the unlock/self-sign/open sequence to
+  /// [UnlockSsssWithRecoveryKeyInteractor] (shared with `BootstrapViewModel`),
+  /// then hands control back to the SDK state machine on success.
   Future<void> _unlockBackUp() async {
     final recoveryWords = _recoveryWords;
-    if (recoveryWords == null) {
+    final bootstrap = _bootstrap;
+    if (recoveryWords == null || bootstrap == null) {
       _refresh(TomBootstrapUnlockErrorState.new);
       return;
     }
-    try {
-      await _bootstrap?.newSsssKey!.unlock(
-        keyOrPassphrase: recoveryWords.words,
-      );
-      await _bootstrap?.client.encryption!.crossSigning.selfSign(
-        keyOrPassphrase: recoveryWords.words,
-      );
-      await _bootstrap?.openExistingSsss();
-      await KeychainSharingManager.saveRecoveryKey(
-        userId: client.userID,
-        recoveryKey: recoveryWords.words,
-      );
-      _handleBootstrapState();
-    } catch (e, s) {
-      Logs().w(
-        'TomBootstrapViewModel::_unlockBackUp() Unable to unlock SSSS',
-        e,
-        s,
-      );
-      _refresh(TomBootstrapUnlockErrorState.new);
+    Either<dynamic, dynamic>? last;
+    await for (final result in _unlockSsssWithRecoveryKeyInteractor.execute(
+      bootstrap: bootstrap,
+      recoveryKey: recoveryWords.words,
+    )) {
+      last = result;
     }
+    last?.fold(
+      (_) => _refresh(TomBootstrapUnlockErrorState.new),
+      (success) => success is UnlockSsssSuccessState
+          ? _handleBootstrapState()
+          : _refresh(TomBootstrapUnlockErrorState.new),
+    );
   }
 
   Future<void> _wipeRecoveryWord({required bool twakeSupported}) async {
