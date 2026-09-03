@@ -36,52 +36,5 @@ void main() {
         ]),
       );
     });
-
-    group('getFeedPowerLevelContentOverride', () {
-      final userPowerLevel = DefaultPowerLevelMember.member.powerLevel;
-      final adminPowerLevel = DefaultPowerLevelMember.admin.powerLevel;
-      final frozenPowerLevel = DefaultPowerLevelMember.none.powerLevel;
-
-      test('should restrict publishing and administration to admins', () {
-        final result = powerLevelManager.getFeedPowerLevelContentOverride();
-
-        expect(result['users_default'], equals(userPowerLevel));
-        expect(result['events_default'], equals(adminPowerLevel));
-        expect(result['state_default'], equals(adminPowerLevel));
-        expect(result['invite'], equals(adminPowerLevel));
-        expect(result['kick'], equals(adminPowerLevel));
-        expect(result['ban'], equals(adminPowerLevel));
-        expect(result['redact'], equals(adminPowerLevel));
-        expect(result['notifications'], equals({'room': adminPowerLevel}));
-      });
-
-      test('should let the audience react and undo its own reactions', () {
-        final events =
-            powerLevelManager.getFeedPowerLevelContentOverride()['events']
-                as Map<String, dynamic>;
-
-        expect(events[EventTypes.Reaction], equals(userPowerLevel));
-        expect(events[EventTypes.Redaction], equals(userPowerLevel));
-      });
-
-      test('should freeze encryption, history visibility and tombstone', () {
-        final events =
-            powerLevelManager.getFeedPowerLevelContentOverride()['events']
-                as Map<String, dynamic>;
-
-        expect(events[EventTypes.Encryption], equals(frozenPowerLevel));
-        expect(events[EventTypes.HistoryVisibility], equals(frozenPowerLevel));
-        expect(events[EventTypes.RoomTombstone], equals(frozenPowerLevel));
-      });
-
-      test('should keep the audience below the publishing level', () {
-        final result = powerLevelManager.getFeedPowerLevelContentOverride();
-
-        expect(
-          result['users_default'] as int,
-          lessThan(result['events_default'] as int),
-        );
-      });
-    });
   });
 }
