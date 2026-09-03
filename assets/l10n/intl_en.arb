@@ -1687,6 +1687,26 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeDeviceConfirmationTitle": "Remove this device?",
+  "@removeDeviceConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeDeviceConfirmationDescription": "This session will be signed out and will no longer receive encrypted messages.",
+  "@removeDeviceConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationTitle": "Remove all other devices?",
+  "@removeAllOtherDevicesConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationDescription": "All other sessions will be signed out and will no longer receive encrypted messages.",
+  "@removeAllOtherDevicesConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
   "unbanFromChat": "Unban from chat",
   "@unbanFromChat": {
     "type": "text",
