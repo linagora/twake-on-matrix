@@ -1,5 +1,6 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
@@ -228,14 +229,24 @@ Future<void> removeDevicesAction(
   DevicesSettingsViewModel notifier,
   List<Device> devices,
 ) async {
-  if (await showOkCancelAlertDialog(
-        useRootNavigator: false,
-        context: context,
-        title: L10n.of(context)!.areYouSure,
-        okLabel: L10n.of(context)!.yes,
-        cancelLabel: L10n.of(context)!.cancel,
-      ) ==
-      OkCancelResult.cancel) {
+  final l10n = L10n.of(context)!;
+  final isBulk = devices.length > 1;
+  final confirmResult = await showConfirmAlertDialog(
+    useRootNavigator: false,
+    context: context,
+    title: isBulk
+        ? l10n.removeAllOtherDevicesConfirmationTitle
+        : l10n.removeDeviceConfirmationTitle,
+    message: isBulk
+        ? l10n.removeAllOtherDevicesConfirmationDescription
+        : l10n.removeDeviceConfirmationDescription,
+    okLabel: isBulk ? l10n.removeAllOtherDevices : l10n.removeDevice,
+    cancelLabel: l10n.cancel,
+    okLabelButtonColor: LinagoraSysColors.material().error,
+    okTextColor: LinagoraSysColors.material().onError,
+    showCloseButton: PlatformInfos.isWeb,
+  );
+  if (confirmResult == ConfirmResult.cancel) {
     return;
   }
   final client = Matrix.of(context).client;
@@ -299,6 +310,7 @@ Future<void> verifyDeviceAction(
     }
   };
   await KeyVerificationDialog(request: req).show(context);
+  notifier.refreshDeviceKeys();
 }
 
 Future<void> blockDeviceAction(
