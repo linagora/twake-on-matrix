@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
+
 import '../base/base_test_scenario.dart';
 
 // ── Configurable via --dart-define ───────────────────────────────────────────
 
-const _sourceRoom = String.fromEnvironment(
+const _webSourceRoom = String.fromEnvironment(
   'SearchByTitle',
   defaultValue: 'My Default Group',
 );
+const _sourceRoom = kIsWeb ? _webSourceRoom : 'Support Twake Workplace';
 
 // Non-overlapping names: a textContaining finder on "Receiver Group" would also
 // match "Receiver Group 2", so neither name is a prefix of the other.

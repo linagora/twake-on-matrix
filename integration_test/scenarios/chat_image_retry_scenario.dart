@@ -15,10 +15,7 @@ import 'chat_scenario.dart';
 class ChatImageRetryScenario extends BaseTestScenario {
   ChatImageRetryScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
+  static const _searchPhrase = 'Support Twake Workplace';
 
   @override
   Future<void> runTestLogic() async {

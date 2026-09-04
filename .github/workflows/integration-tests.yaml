@@ -331,10 +331,10 @@ jobs:
       FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
 
     strategy:
-      # Stop queued shards after the first failure. The shared staging account
-      # serializes these jobs, so continuing cannot shorten feedback and can
-      # otherwise keep a failed workflow alive for hours.
-      fail-fast: true
+      # Run every shard even when one fails so unrelated scenarios still produce
+      # their own FTL result and diagnostics. The shared staging account keeps
+      # execution serialized.
+      fail-fast: false
       matrix:
         include:
           - shard: shard_1_chat_group

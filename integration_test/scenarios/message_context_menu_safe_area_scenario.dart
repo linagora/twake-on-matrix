@@ -12,10 +12,7 @@ import 'chat_scenario.dart';
 class MessageContextMenuSafeAreaScenario extends BaseTestScenario {
   MessageContextMenuSafeAreaScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
+  static const _searchPhrase = 'Support Twake Workplace';
 
   @override
   Future<void> runTestLogic() async {

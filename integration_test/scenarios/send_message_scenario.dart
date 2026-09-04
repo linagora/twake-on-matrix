@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
@@ -14,10 +15,13 @@ import '../base/base_test_scenario.dart';
 class SendMessageScenario extends BaseTestScenario {
   SendMessageScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
+  static const _webSearchPhrase = String.fromEnvironment(
     'SearchByTitle',
     defaultValue: 'My Default Group',
   );
+  static const _searchPhrase = kIsWeb
+      ? _webSearchPhrase
+      : 'Support Twake Workplace';
 
   @override
   Future<void> runTestLogic() async {
