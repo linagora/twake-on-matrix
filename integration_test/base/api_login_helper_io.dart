@@ -48,18 +48,25 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
 
-  final loginToken = await fetchAuthToken(
-    username: receiver,
-    password: passOfReceiver,
-  );
-
   final client = HttpClient()..autoUncompress = true;
   try {
-    final session = await _loginWithMLoginToken(
-      client: client,
-      endpoints: endpoints,
-      loginToken: loginToken,
-    );
+    final session = endpoints.ssoURL.isEmpty
+        ? await _loginWithPassword(
+            client: client,
+            endpoints: endpoints,
+            credentials: const _Credentials(
+              username: receiver,
+              password: passOfReceiver,
+            ),
+          )
+        : await _loginWithMLoginToken(
+            client: client,
+            endpoints: endpoints,
+            loginToken: await fetchAuthToken(
+              username: receiver,
+              password: passOfReceiver,
+            ),
+          );
     await _putMatrixMessage(
       client: client,
       session: session,
@@ -69,6 +76,41 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   } finally {
     client.close(force: true);
   }
+}
+
+Future<_MatrixSession> _loginWithPassword({
+  required HttpClient client,
+  required _SsoEndpoints endpoints,
+  required _Credentials credentials,
+}) async {
+  final loginUri = Uri.https(endpoints.matrixURL, '/_matrix/client/v3/login');
+  final request = await client.postUrl(loginUri);
+  request.headers
+    ..set(HttpHeaders.contentTypeHeader, 'application/json')
+    ..set(HttpHeaders.userAgentHeader, _userAgent)
+    ..set('Origin', 'https://${endpoints.chatURL}');
+  request.write(
+    jsonEncode({
+      'identifier': {'type': 'm.id.user', 'user': credentials.username},
+      'initial_device_display_name': _deviceDisplayName,
+      'password': credentials.password,
+      'type': 'm.login.password',
+    }),
+  );
+  final response = await request.close();
+  final body = await response.transform(utf8.decoder).join();
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception(
+      'Receiver m.login.password failed [status=${response.statusCode}] '
+      'body=${body.substring(0, body.length.clamp(0, 300))}',
+    );
+  }
+  final accessToken =
+      (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+  if (accessToken == null) {
+    throw Exception('Receiver login response missing access_token: $body');
+  }
+  return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
 }
 
 // ---------------------------------------------------------------------------

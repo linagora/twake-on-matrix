@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../base/base_test_scenario.dart';
 
 /// Cross-platform scenario: open a group member's profile and verify the
@@ -12,10 +14,13 @@ import '../base/base_test_scenario.dart';
 class ChatGroupOpenProfileScenario extends BaseTestScenario {
   ChatGroupOpenProfileScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
+  static const _webSearchPhrase = String.fromEnvironment(
     'SearchByTitle',
     defaultValue: 'My Default Group',
   );
+  static const _searchPhrase = kIsWeb
+      ? _webSearchPhrase
+      : 'Support Twake Workplace';
 
   static const _memberMatrixID = String.fromEnvironment(
     'MemberMatrixID',
