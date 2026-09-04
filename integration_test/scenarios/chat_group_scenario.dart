@@ -1,4 +1,5 @@
 import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/chat_event_list.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -80,14 +81,35 @@ Future<(String, String)> _prepareMessages(
 Future<void> _waitShown(BaseTestScenario scenario, String message) async {
   final chatGroupDetailRobot = scenario.robots.chatGroupDetailRobot();
   final finder = await chatGroupDetailRobot.getText(message);
-  await scenario.$.waitUntilExists(
-    finder,
-    timeout: const Duration(seconds: 60),
-  );
-  // On web the timeline can build a newly sent message just outside the
-  // hit-testable viewport. Move to the live edge after the event exists so the
-  // visibility assertion cannot stall on an off-screen MessageContent.
+
+  // Start at the live edge for newly sent messages. Receiver fixture events
+  // can be older than the currently materialized viewport, so search backward
+  // and then forward through the timeline instead of waiting for a lazily-built
+  // widget that will never appear without scrolling.
   await chatGroupDetailRobot.scrollToLiveBottom();
+  if (!finder.visible) {
+    final timeline = find
+        .descendant(
+          of: find.byType(ChatEventList),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    try {
+      await scenario.$.scrollUntilVisible(
+        finder: finder.finder,
+        view: timeline,
+        scrollDirection: AxisDirection.up,
+        maxScrolls: 30,
+      );
+    } on Exception {
+      await scenario.$.scrollUntilVisible(
+        finder: finder.finder,
+        view: timeline,
+        scrollDirection: AxisDirection.down,
+        maxScrolls: 30,
+      );
+    }
+  }
   await scenario.$.waitUntilVisible(
     finder,
     timeout: const Duration(seconds: 60),
