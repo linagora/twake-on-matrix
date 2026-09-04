@@ -2,6 +2,7 @@ import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,16 +11,31 @@ import '../base/base_test_scenario.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
-const _group = String.fromEnvironment(
+const _webGroup = String.fromEnvironment(
   'SearchByTitle',
   defaultValue: 'My Default Group',
 );
+const _mobileGroup = 'Support Twake Workplace';
 
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-/// Opens [_group], posts one message through the UI (sender) and one through
-/// the API as the receiver, waits for both, and returns `(senderMsg,
-/// receiverMsg)`.
+Future<void> _openGroup(BaseTestScenario scenario) async {
+  final robots = scenario.robots;
+  if (!kIsWeb) {
+    await robots.chatListRobot().openChatByTitle(_mobileGroup);
+    return;
+  }
+
+  await robots.chatListRobot().openSearchScreen();
+  final opened = await robots.searchViewRobot().searchAndOpenRoom(_webGroup);
+  if (!opened) {
+    throw Exception('Test failed: Room "$_webGroup" was not found.');
+  }
+}
+
+/// Opens the platform fixture room, posts one message through the UI (sender)
+/// and one through the API as the receiver, waits for both, and returns
+/// `(senderMsg, receiverMsg)`.
 ///
 /// Drives the UI exclusively through the abstract robots; the receiver message
 /// is injected via the cross-platform `sendMessageAsReceiver` API helper so the
@@ -28,11 +44,7 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  await robots.chatListRobot().openSearchScreen();
-  final opened = await robots.searchViewRobot().searchAndOpenRoom(_group);
-  if (!opened) {
-    throw Exception('Test failed: Room "$_group" was not found.');
-  }
+  await _openGroup(scenario);
   await $.pump(const Duration(seconds: 1));
 
   final id = _uid();
