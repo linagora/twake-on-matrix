@@ -47,7 +47,10 @@ Future<String?> _openGroup(BaseTestScenario scenario) async {
 /// Drives the UI exclusively through the abstract robots; the receiver message
 /// is injected via the cross-platform `sendMessageAsReceiver` API helper so the
 /// scenario has a message it does not own to act on.
-Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
+Future<(String, String)> _prepareMessages(
+  BaseTestScenario scenario, {
+  String? receiverFixtureMessage,
+}) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
@@ -56,13 +59,20 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
 
   final id = _uid();
   final senderMsg = 'sender sent at $id';
-  final receiverMsg = 'receiver sent at $id';
+  final receiverMsg = receiverFixtureMessage ?? '';
 
   await robots.chatGroupDetailRobot().sendMessage(senderMsg);
   await _waitShown(scenario, senderMsg);
 
-  await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
-  await _waitShown(scenario, receiverMsg);
+  if (receiverFixtureMessage != null) {
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(scenario);
+      await prepareMobileReceiverMessages(scenario, fixture);
+    } else {
+      await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
+    }
+    await _waitShown(scenario, receiverMsg);
+  }
 
   return (senderMsg, receiverMsg);
 }
@@ -101,7 +111,12 @@ class ChatGroupReplyScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: kIsWeb
+          ? 'receiver sent at ${_uid()}'
+          : mobileReceiverMessageReply,
+    );
 
     final replySender = 'reply sender at ${_uid()}';
     await robots.messageMenuRobot().openReply(senderMsg);
@@ -122,7 +137,7 @@ class ChatGroupEditScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     // Distinct text (not a superstring of [senderMsg]) so the "original is
     // gone" check can't match the edited bubble under `textContaining`.
@@ -142,7 +157,7 @@ class ChatGroupSelectScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     await robots.messageMenuRobot().openSelect(senderMsg);
 
@@ -158,7 +173,12 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: kIsWeb
+          ? 'receiver sent at ${_uid()}'
+          : mobileReceiverMessageDelete,
+    );
 
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
@@ -177,7 +197,10 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: mobileReceiverMessageDisplayMenu,
+    );
 
     await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
     await ChatScenario(
@@ -200,7 +223,10 @@ class ChatGroupCopyScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: mobileReceiverMessageCopy,
+    );
 
     // copy sender
     await ChatScenario($).copyMessage(senderMsg);
@@ -228,7 +254,7 @@ class ChatGroupMessageInfoScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     await robots.messageMenuRobot().openMessageInfo(senderMsg);
 

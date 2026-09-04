@@ -8,6 +8,17 @@ import 'api_login_helper.dart';
 import 'base_test_scenario.dart';
 
 const mobileGroupFixtureTitle = 'FTL Mobile Test Group';
+const mobileReceiverMessageDisplayMenu = 'FTL receiver fixture display menu';
+const mobileReceiverMessageReply = 'FTL receiver fixture reply';
+const mobileReceiverMessageDelete = 'FTL receiver fixture delete';
+const mobileReceiverMessageCopy = 'FTL receiver fixture copy';
+
+const _receiverFixtureMessages = [
+  mobileReceiverMessageDisplayMenu,
+  mobileReceiverMessageReply,
+  mobileReceiverMessageDelete,
+  mobileReceiverMessageCopy,
+];
 
 class MobileGroupFixture {
   const MobileGroupFixture({
@@ -71,13 +82,18 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
     room = await _waitForRoom(client, roomId, scenario);
   }
 
-  final receiverMember = (await room.requestParticipants()).where(
-    (participant) => participant.id == receiverMatrixId,
+  final receiverMember = await room.requestUser(
+    receiverMatrixId,
+    requestProfile: false,
   );
-  if (receiverMember.isEmpty) {
-    await room.invite(receiverMatrixId);
+  if (receiverMember == null || receiverMember.membership == Membership.leave) {
+    try {
+      await room.invite(receiverMatrixId);
+    } on MatrixException catch (exception) {
+      if (!exception.toString().contains('already in the room')) rethrow;
+    }
     await ensureReceiverJoined(roomId: room.id);
-  } else if (receiverMember.first.membership != Membership.join) {
+  } else if (receiverMember.membership != Membership.join) {
     await ensureReceiverJoined(roomId: room.id);
   }
 
@@ -93,6 +109,40 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
     title: mobileGroupFixtureTitle,
     memberMatrixId: receiverMatrixId,
   );
+}
+
+/// Ensures all receiver-owned messages needed by the group scenarios exist,
+/// using at most one receiver login. Each scenario then selects its own stable
+/// message, so later Patrol processes do not need to authenticate again.
+Future<void> prepareMobileReceiverMessages(
+  BaseTestScenario scenario,
+  MobileGroupFixture fixture,
+) async {
+  if (kIsWeb) return;
+
+  final context = scenario.$.tester.element(find.byType(ChatList).first);
+  final client = twake.Matrix.of(context).client;
+  final room = client.getRoomById(fixture.roomId);
+  if (room == null) {
+    throw StateError('Fixture room ${fixture.roomId} is not loaded.');
+  }
+
+  final timeline = await room.getTimeline(limit: 100);
+  try {
+    final existing = timeline.events
+        .where((event) => event.senderId == fixture.memberMatrixId)
+        .map((event) => event.content['body'])
+        .whereType<String>()
+        .toSet();
+    final missing = _receiverFixtureMessages
+        .where((message) => !existing.contains(message))
+        .toList();
+    if (missing.isNotEmpty) {
+      await sendMessagesAsReceiver(messages: missing, roomId: fixture.roomId);
+    }
+  } finally {
+    timeline.cancelSubscriptions();
+  }
 }
 
 String _qualifiedMatrixId(String receiver, String? currentUserId) {

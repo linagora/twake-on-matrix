@@ -56,8 +56,11 @@ Future<String> fetchAuthToken({
 /// Sends a message as the `Receiver` account by first obtaining its access
 /// token via `m.login.password`, then `PUT`-ing the event to the configured
 /// `GroupID`.
-Future<void> sendMessageAsReceiver({
-  required String message,
+Future<void> sendMessageAsReceiver({required String message, String? roomId}) =>
+    sendMessagesAsReceiver(messages: [message], roomId: roomId);
+
+Future<void> sendMessagesAsReceiver({
+  required List<String> messages,
   String? roomId,
 }) async {
   const matrixURL = String.fromEnvironment('MATRIX_URL');
@@ -83,18 +86,22 @@ Future<void> sendMessageAsReceiver({
     '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
     'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
   );
-  final response = await http.put(
-    sendUri,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $accessToken',
-    },
-    body: jsonEncode({'msgtype': 'm.text', 'body': message}),
-  );
-  if (response.statusCode != 200) {
-    throw Exception(
-      'sendMessage failed [${response.statusCode}]: ${response.body}',
+  for (final message in messages) {
+    final response = await http.put(
+      sendUri.replace(
+        path: '${sendUri.path}-${DateTime.now().microsecondsSinceEpoch}',
+      ),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({'msgtype': 'm.text', 'body': message}),
     );
+    if (response.statusCode != 200) {
+      throw Exception(
+        'sendMessage failed [${response.statusCode}]: ${response.body}',
+      );
+    }
   }
 }
 
