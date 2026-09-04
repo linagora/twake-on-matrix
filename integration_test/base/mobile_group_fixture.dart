@@ -49,6 +49,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
   final context = scenario.$.tester.element(find.byType(ChatList).first);
   final client = twake.Matrix.of(context).client;
   await client.roomsLoading;
+  final receiverMatrixId = _qualifiedMatrixId(receiver, client.userID);
 
   Room? room;
   for (final candidate in client.rooms) {
@@ -61,7 +62,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
   if (room == null) {
     final roomId = await client.createRoom(
       name: mobileGroupFixtureTitle,
-      invite: const [receiver],
+      invite: [receiverMatrixId],
       isDirect: false,
       // Keep the creator at owner level and the invited receiver at the
       // regular member level; the menu assertions exercise that distinction.
@@ -71,25 +72,40 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
   }
 
   final receiverMember = (await room.requestParticipants()).where(
-    (participant) => participant.id == receiver,
+    (participant) => participant.id == receiverMatrixId,
   );
   if (receiverMember.isEmpty) {
-    await room.invite(receiver);
+    await room.invite(receiverMatrixId);
     await ensureReceiverJoined(roomId: room.id);
   } else if (receiverMember.first.membership != Membership.join) {
     await ensureReceiverJoined(roomId: room.id);
   }
 
   final joined = await room.requestParticipants([Membership.join]);
-  if (!joined.any((participant) => participant.id == receiver)) {
-    throw StateError('Receiver $receiver did not join room ${room.id}.');
+  if (!joined.any((participant) => participant.id == receiverMatrixId)) {
+    throw StateError(
+      'Receiver $receiverMatrixId did not join room ${room.id}.',
+    );
   }
 
   return MobileGroupFixture(
     roomId: room.id,
     title: mobileGroupFixtureTitle,
-    memberMatrixId: receiver,
+    memberMatrixId: receiverMatrixId,
   );
+}
+
+String _qualifiedMatrixId(String receiver, String? currentUserId) {
+  if (receiver.startsWith('@') && receiver.contains(':')) return receiver;
+
+  final separator = currentUserId?.indexOf(':') ?? -1;
+  if (separator < 0 || separator == currentUserId!.length - 1) {
+    throw StateError(
+      'Cannot qualify Receiver "$receiver" without a valid current Matrix ID.',
+    );
+  }
+  return '@${receiver.replaceFirst(RegExp(r'^@'), '')}:'
+      '${currentUserId.substring(separator + 1)}';
 }
 
 Future<Room> _waitForRoom(
