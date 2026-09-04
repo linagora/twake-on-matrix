@@ -51,7 +51,7 @@ class KeyVerificationErrorView extends StatelessWidget {
         ),
         const SizedBox(height: LinagoraSpacing.base * 2),
         Material(
-          color: KeyVerificationSasStyle.primaryColor,
+          color: KeyVerificationSasStyle.primaryColor(context),
           borderRadius: BorderRadius.circular(
             KeyVerificationSasStyle.buttonRadius,
           ),

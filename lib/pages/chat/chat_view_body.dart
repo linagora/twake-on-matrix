@@ -203,7 +203,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                     ),
                     if (controller.room != null &&
                         controller.room?.encrypted == true)
-                      ChatDeviceVerificationBanner(client: controller.client),
+                      ChatDeviceVerificationBanner(
+                        client: controller.client,
+                        onRequestUndecryptedMessagesRetry: () => controller
+                            .timeline
+                            ?.requestKeys(onlineKeyBackupOnly: false),
+                      ),
                     PinnedEventsView(controller),
                     if (controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
