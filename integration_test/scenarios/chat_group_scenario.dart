@@ -261,7 +261,15 @@ class ChatGroupMessageInfoScenario extends BaseTestScenario {
     final dialog = $(EventInfoDialog);
     await $.waitUntilVisible(dialog, timeout: const Duration(seconds: 10));
     expect(dialog.$(Avatar), findsWidgets);
-    expect(dialog.$(SelectableText), findsWidgets);
+
+    // The source JSON sits below the initially built ListView viewport on
+    // compact FTL devices, so scroll until the lazily-built widget exists.
+    final source = dialog.$(SelectableText);
+    for (var i = 0; i < 5 && !source.exists; i++) {
+      await $.tester.drag(dialog.$(ListView), const Offset(0, -300));
+      await $.pumpAndSettle();
+    }
+    expect(source, findsWidgets);
 
     // Close the dialog via its app-bar close button.
     await dialog.$(AppBar).$(IconButton).tap();

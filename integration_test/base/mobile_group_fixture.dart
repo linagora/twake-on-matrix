@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
@@ -57,7 +58,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
   await scenario
       .$(ChatList)
       .waitUntilVisible(timeout: const Duration(seconds: 60));
-  final context = scenario.$.tester.element(find.byType(ChatList).first);
+  final context = scenario.$.tester.element(find.byType(Scaffold).first);
   final client = twake.Matrix.of(context).client;
   await client.roomsLoading;
   final receiverMatrixId = _qualifiedMatrixId(receiver, client.userID);
@@ -120,7 +121,7 @@ Future<void> prepareMobileReceiverMessages(
 ) async {
   if (kIsWeb) return;
 
-  final context = scenario.$.tester.element(find.byType(ChatList).first);
+  final context = scenario.$.tester.element(find.byType(Scaffold).first);
   final client = twake.Matrix.of(context).client;
   final room = client.getRoomById(fixture.roomId);
   if (room == null) {
