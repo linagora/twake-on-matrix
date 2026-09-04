@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/bootstrap/self_verification_state.dart';
-import 'package:twake_chat/domain/usecase/bootstrap/start_self_verification_interactor.dart';
+import 'package:twake_chat/domain/app_state/recovery/self_verification_state.dart';
+import 'package:twake_chat/domain/usecase/recovery/start_self_verification_interactor.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
@@ -21,12 +18,28 @@ import '../../fake_client.dart';
 
 class FakeStartSelfVerificationInteractor
     implements StartSelfVerificationInteractor {
-  final Stream<Either<Failure, Success>> states;
+  final Future<SelfVerificationState> result;
 
-  FakeStartSelfVerificationInteractor(this.states);
+  FakeStartSelfVerificationInteractor(this.result);
 
   @override
-  Stream<Either<Failure, Success>> execute({required Client client}) => states;
+  Future<SelfVerificationState> execute({required Client client}) => result;
+}
+
+/// Like [FakeStartSelfVerificationInteractor] but records how many times
+/// `execute` was called, to assert re-entrancy guards.
+class CountingStartSelfVerificationInteractor
+    implements StartSelfVerificationInteractor {
+  final Future<SelfVerificationState> result;
+  int executeCount = 0;
+
+  CountingStartSelfVerificationInteractor(this.result);
+
+  @override
+  Future<SelfVerificationState> execute({required Client client}) {
+    executeCount++;
+    return result;
+  }
 }
 
 /// Stands in for the real [BootstrapViewModel] so `retry()` and
@@ -59,7 +72,7 @@ class FakeBootstrapViewModel extends BootstrapViewModel {
 
 ProviderContainer _container({
   required Client client,
-  Stream<Either<Failure, Success>>? startVerificationStates,
+  Future<SelfVerificationState>? startVerificationResult,
   BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
 }) {
   return ProviderContainer(
@@ -68,9 +81,9 @@ ProviderContainer _container({
         client,
         wipe: false,
       ).overrideWithValue(bootstrapState),
-      if (startVerificationStates != null)
+      if (startVerificationResult != null)
         startSelfVerificationInteractorProvider.overrideWithValue(
-          FakeStartSelfVerificationInteractor(startVerificationStates),
+          FakeStartSelfVerificationInteractor(startVerificationResult),
         ),
     ],
   );
@@ -203,10 +216,10 @@ void main() {
 
   test('startVerification sets isStartingVerification while in flight, '
       'then attaches the request on success', () async {
-    final completer = Completer<Either<Failure, Success>>();
+    final completer = Completer<SelfVerificationState>();
     final container = _container(
       client: client,
-      startVerificationStates: Stream.fromFuture(completer.future),
+      startVerificationResult: completer.future,
     );
     addTearDown(container.dispose);
     final provider = verifyDeviceViewModelProvider(client, wipe: false);
@@ -216,9 +229,7 @@ void main() {
     final loadingState = container.read(provider) as VerifyDeviceChooserState;
     expect(loadingState.isStartingVerification, isTrue);
 
-    completer.complete(
-      const Left(StartSelfVerificationFailureState(exception: 'boom')),
-    );
+    completer.complete(const SelfVerificationState.failure(exception: 'boom'));
     await future;
 
     final settledState = container.read(provider) as VerifyDeviceChooserState;
@@ -401,22 +412,15 @@ void main() {
 
   test('startVerification ignores a second call while one is already in '
       'flight', () async {
-    final completer = Completer<Either<Failure, Success>>();
-    var executeCount = 0;
+    final completer = Completer<SelfVerificationState>();
+    final fake = CountingStartSelfVerificationInteractor(completer.future);
     final container = ProviderContainer(
       overrides: [
         bootstrapViewModelProvider(
           client,
           wipe: false,
         ).overrideWithValue(const BootstrapVerifyDeviceState()),
-        startSelfVerificationInteractorProvider.overrideWithValue(
-          FakeStartSelfVerificationInteractor(
-            Stream.fromFuture(completer.future).map((event) {
-              executeCount++;
-              return event;
-            }),
-          ),
-        ),
+        startSelfVerificationInteractorProvider.overrideWithValue(fake),
       ],
     );
     addTearDown(container.dispose);
@@ -426,12 +430,10 @@ void main() {
     final firstCall = notifier.startVerification();
     final secondCall = notifier.startVerification();
 
-    completer.complete(
-      const Left(StartSelfVerificationFailureState(exception: 'boom')),
-    );
+    completer.complete(const SelfVerificationState.failure(exception: 'boom'));
     await Future.wait([firstCall, secondCall]);
 
-    expect(executeCount, 1);
+    expect(fake.executeCount, 1);
   });
 
   group('with an attached KeyVerification request', () {
@@ -453,8 +455,8 @@ void main() {
         'VerifyDeviceSasState', () async {
       final container = _container(
         client: verifyingClient,
-        startVerificationStates: Stream.value(
-          Right(StartSelfVerificationSuccessState(request: request)),
+        startVerificationResult: Future.value(
+          SelfVerificationState.started(request: request),
         ),
       );
       addTearDown(container.dispose);
@@ -478,8 +480,8 @@ void main() {
       () async {
         final container = _container(
           client: verifyingClient,
-          startVerificationStates: Stream.value(
-            Right(StartSelfVerificationSuccessState(request: request)),
+          startVerificationResult: Future.value(
+            SelfVerificationState.started(request: request),
           ),
         );
         final provider = verifyDeviceViewModelProvider(
