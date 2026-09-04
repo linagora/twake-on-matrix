@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 import '../help/soft_assertion_helper.dart';
 
 /// Cross-platform scenario: search the chat list.
@@ -141,9 +143,17 @@ class UnreadCountScenario extends BaseTestScenario {
 
     await robots.homeRobot().gotoChatListScreen();
 
-    final before = _readUnread();
-    await sendMessageAsReceiver(message: body);
-    final after = await _pollUnreadChange(before);
+    var groupTitle = _groupTest;
+    String? roomId;
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(this);
+      groupTitle = fixture.title;
+      roomId = fixture.roomId;
+    }
+
+    final before = _readUnread(groupTitle);
+    await sendMessageAsReceiver(message: body, roomId: roomId);
+    final after = await _pollUnreadChange(before, groupTitle);
 
     expect(
       after - before == 1,
@@ -152,16 +162,17 @@ class UnreadCountScenario extends BaseTestScenario {
     );
   }
 
-  int _readUnread() => robots.chatListRobot().getUnreadMessage(_groupTest);
+  int _readUnread(String groupTitle) =>
+      robots.chatListRobot().getUnreadMessage(groupTitle);
 
   /// Polls until the unread count differs from [from] (the receive is async —
   /// the badge only updates after the next /sync), then returns it.
-  Future<int> _pollUnreadChange(int from) async {
+  Future<int> _pollUnreadChange(int from, String groupTitle) async {
     final deadline = DateTime.now().add(const Duration(seconds: 15));
     var current = from;
     while (DateTime.now().isBefore(deadline)) {
       await $.pump(const Duration(milliseconds: 300));
-      current = _readUnread();
+      current = _readUnread(groupTitle);
       if (current != from) break;
     }
     return current;
@@ -190,10 +201,18 @@ class UnreadBadgeClearsScenario extends BaseTestScenario {
 
     await robots.homeRobot().gotoChatListScreen();
 
+    var groupTitle = _groupTest;
+    String? roomId;
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(this);
+      groupTitle = fixture.title;
+      roomId = fixture.roomId;
+    }
+
     // Make the room unread first, and confirm the badge actually went up —
     // otherwise the clear-to-zero assertion below would pass vacuously.
-    await sendMessageAsReceiver(message: body);
-    final unread = await _pollUnread((count) => count >= 1);
+    await sendMessageAsReceiver(message: body, roomId: roomId);
+    final unread = await _pollUnread(groupTitle, (count) => count >= 1);
     expect(
       unread >= 1,
       isTrue,
@@ -202,7 +221,7 @@ class UnreadBadgeClearsScenario extends BaseTestScenario {
 
     // Open the room and arrive at the live bottom, which is what marks it read.
     final chatList = robots.chatListRobot();
-    await chatList.openChatByTitle(_groupTest);
+    await chatList.openChatByTitle(groupTitle);
     final detail = robots.chatGroupDetailRobot();
     await detail.confirmAccessMedia();
     await detail.scrollToLiveBottom();
@@ -210,7 +229,7 @@ class UnreadBadgeClearsScenario extends BaseTestScenario {
 
     // The receipt is sent on the at-bottom transition and the badge only clears
     // after the next /sync, so poll until it drops to zero.
-    final cleared = await _pollUnread((count) => count == 0);
+    final cleared = await _pollUnread(groupTitle, (count) => count == 0);
     expect(
       cleared,
       0,
@@ -220,16 +239,17 @@ class UnreadBadgeClearsScenario extends BaseTestScenario {
     );
   }
 
-  int _readUnread() => robots.chatListRobot().getUnreadMessage(_groupTest);
+  int _readUnread(String groupTitle) =>
+      robots.chatListRobot().getUnreadMessage(groupTitle);
 
   /// Polls the unread badge (which only updates after the next /sync) until
   /// [done] holds or the deadline passes, then returns the last value read.
-  Future<int> _pollUnread(bool Function(int) done) async {
+  Future<int> _pollUnread(String groupTitle, bool Function(int) done) async {
     final deadline = DateTime.now().add(const Duration(seconds: 15));
-    var current = _readUnread();
+    var current = _readUnread(groupTitle);
     while (!done(current) && DateTime.now().isBefore(deadline)) {
       await $.pump(const Duration(milliseconds: 300));
-      current = _readUnread();
+      current = _readUnread(groupTitle);
     }
     return current;
   }

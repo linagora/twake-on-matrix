@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 
 /// Cross-platform scenario for sending a message in a group chat.
 ///
@@ -19,14 +20,18 @@ class SendMessageScenario extends BaseTestScenario {
     'SearchByTitle',
     defaultValue: 'My Default Group',
   );
-  static const _searchPhrase = kIsWeb
-      ? _webSearchPhrase
-      : 'Support Twake Workplace';
-
   @override
   Future<void> runTestLogic() async {
+    var searchPhrase = _webSearchPhrase;
+    String? roomId;
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(this);
+      searchPhrase = fixture.title;
+      roomId = fixture.roomId;
+    }
+
     await robots.homeRobot().gotoChatListScreen();
-    await robots.searchRobot().enterSearchText(_searchPhrase);
+    await robots.searchRobot().enterSearchText(searchPhrase);
     await $.pump();
     await robots.chatListRobot().openChatGroupByIndex(0);
 
@@ -40,7 +45,7 @@ class SendMessageScenario extends BaseTestScenario {
     await _verifyShown(messageOfSender);
 
     // Send as the receiver via the API and verify it appears.
-    await sendMessageAsReceiver(message: messageOfReceiver);
+    await sendMessageAsReceiver(message: messageOfReceiver, roomId: roomId);
     await _verifyShown(messageOfReceiver);
   }
 
