@@ -63,7 +63,9 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
       name: mobileGroupFixtureTitle,
       invite: const [receiver],
       isDirect: false,
-      preset: CreateRoomPreset.trustedPrivateChat,
+      // Keep the creator at owner level and the invited receiver at the
+      // regular member level; the menu assertions exercise that distinction.
+      preset: CreateRoomPreset.privateChat,
     );
     room = await _waitForRoom(client, roomId, scenario);
   }
