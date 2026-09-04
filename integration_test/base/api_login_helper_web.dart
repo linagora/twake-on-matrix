@@ -56,7 +56,10 @@ Future<String> fetchAuthToken({
 /// Sends a message as the `Receiver` account by first obtaining its access
 /// token via `m.login.password`, then `PUT`-ing the event to the configured
 /// `GroupID`.
-Future<void> sendMessageAsReceiver({required String message}) async {
+Future<void> sendMessageAsReceiver({
+  required String message,
+  String? roomId,
+}) async {
   const matrixURL = String.fromEnvironment('MATRIX_URL');
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
@@ -64,7 +67,7 @@ Future<void> sendMessageAsReceiver({required String message}) async {
   if (matrixURL.isEmpty ||
       receiver.isEmpty ||
       passOfReceiver.isEmpty ||
-      groupID.isEmpty) {
+      (roomId ?? groupID).isEmpty) {
     throw StateError(
       'Missing required dart-defines: MATRIX_URL/Receiver/ReceiverPass/GroupID',
     );
@@ -75,7 +78,7 @@ Future<void> sendMessageAsReceiver({required String message}) async {
     password: passOfReceiver,
   );
 
-  final encodedRoomId = Uri.encodeComponent(groupID);
+  final encodedRoomId = Uri.encodeComponent(roomId ?? groupID);
   final sendUri = Uri.parse(
     '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
     'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
@@ -94,3 +97,8 @@ Future<void> sendMessageAsReceiver({required String message}) async {
     );
   }
 }
+
+Future<void> ensureReceiverJoined({required String roomId}) =>
+    throw UnsupportedError(
+      'Dynamic group fixtures are only provisioned by mobile tests.',
+    );

@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
@@ -15,15 +16,20 @@ const _webGroup = String.fromEnvironment(
   'SearchByTitle',
   defaultValue: 'My Default Group',
 );
-const _mobileGroup = 'Support Twake Workplace';
-
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-Future<void> _openGroup(BaseTestScenario scenario) async {
+Future<String?> _openGroup(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   if (!kIsWeb) {
-    await robots.chatListRobot().openChatByTitle(_mobileGroup);
-    return;
+    final fixture = await prepareMobileGroupFixture(scenario);
+    await robots.chatListRobot().openSearchScreen();
+    final opened = await robots.searchViewRobot().searchAndOpenRoom(
+      fixture.title,
+    );
+    if (!opened) {
+      throw Exception('Test failed: Room "${fixture.title}" was not found.');
+    }
+    return fixture.roomId;
   }
 
   await robots.chatListRobot().openSearchScreen();
@@ -31,6 +37,7 @@ Future<void> _openGroup(BaseTestScenario scenario) async {
   if (!opened) {
     throw Exception('Test failed: Room "$_webGroup" was not found.');
   }
+  return null;
 }
 
 /// Opens the platform fixture room, posts one message through the UI (sender)
@@ -44,7 +51,7 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  await _openGroup(scenario);
+  final roomId = await _openGroup(scenario);
   await $.pump(const Duration(seconds: 1));
 
   final id = _uid();
@@ -54,7 +61,7 @@ Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
   await robots.chatGroupDetailRobot().sendMessage(senderMsg);
   await _waitShown(scenario, senderMsg);
 
-  await sendMessageAsReceiver(message: receiverMsg);
+  await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
   await _waitShown(scenario, receiverMsg);
 
   return (senderMsg, receiverMsg);

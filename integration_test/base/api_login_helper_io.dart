@@ -42,40 +42,88 @@ Future<String> fetchAuthToken({
 /// Sends a Matrix message as the configured receiver account via the
 /// Client-Server API. Used by tests that need the receiving side to emit a
 /// message while the primary account is logged in from the UI.
-Future<void> sendMessageAsReceiver({required String message}) async {
+Future<void> sendMessageAsReceiver({
+  required String message,
+  String? roomId,
+}) async {
   const endpoints = _SsoEndpoints.fromEnvironment();
   const groupID = String.fromEnvironment('GroupID');
-  const receiver = String.fromEnvironment('Receiver');
-  const passOfReceiver = String.fromEnvironment('ReceiverPass');
 
   final client = HttpClient()..autoUncompress = true;
   try {
-    final session = endpoints.ssoURL.isEmpty
-        ? await _loginWithPassword(
-            client: client,
-            endpoints: endpoints,
-            credentials: const _Credentials(
-              username: receiver,
-              password: passOfReceiver,
-            ),
-          )
-        : await _loginWithMLoginToken(
-            client: client,
-            endpoints: endpoints,
-            loginToken: await fetchAuthToken(
-              username: receiver,
-              password: passOfReceiver,
-            ),
-          );
+    final session = await _receiverSession(client, endpoints);
     await _putMatrixMessage(
       client: client,
       session: session,
-      groupID: groupID,
+      groupID: roomId ?? groupID,
       message: message,
     );
   } finally {
     client.close(force: true);
   }
+}
+
+/// Makes the configured receiver join [roomId]. The primary test account must
+/// have invited it first. This is used by mobile group scenarios that create
+/// their own deterministic room instead of depending on stale staging data.
+Future<void> ensureReceiverJoined({required String roomId}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    final encodedRoomId = Uri.encodeComponent(roomId);
+    final joinUri = Uri.https(
+      endpoints.matrixURL,
+      '/_matrix/client/v3/rooms/$encodedRoomId/join',
+    );
+    final request = await client.postUrl(joinUri);
+    request.headers
+      ..set(HttpHeaders.contentTypeHeader, 'application/json')
+      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+      ..set(HttpHeaders.userAgentHeader, _userAgent);
+    request.write('{}');
+    final response = await request.close();
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final body = await utf8.decoder.bind(response).join();
+      throw Exception(
+        'Receiver join failed [status=${response.statusCode}] '
+        'body=${body.substring(0, body.length.clamp(0, 300))}',
+      );
+    }
+  } finally {
+    client.close(force: true);
+  }
+}
+
+_MatrixSession? _cachedReceiverSession;
+
+Future<_MatrixSession> _receiverSession(
+  HttpClient client,
+  _SsoEndpoints endpoints,
+) async {
+  final cached = _cachedReceiverSession;
+  if (cached != null) return cached;
+
+  const receiver = String.fromEnvironment('Receiver');
+  const passOfReceiver = String.fromEnvironment('ReceiverPass');
+  final session = endpoints.ssoURL.isEmpty
+      ? await _loginWithPassword(
+          client: client,
+          endpoints: endpoints,
+          credentials: const _Credentials(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        )
+      : await _loginWithMLoginToken(
+          client: client,
+          endpoints: endpoints,
+          loginToken: await fetchAuthToken(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        );
+  return _cachedReceiverSession = session;
 }
 
 Future<_MatrixSession> _loginWithPassword({

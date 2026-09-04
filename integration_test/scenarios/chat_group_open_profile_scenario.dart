@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 
 /// Cross-platform scenario: open a group member's profile and verify the
 /// displayed identity fields.
@@ -18,10 +19,6 @@ class ChatGroupOpenProfileScenario extends BaseTestScenario {
     'SearchByTitle',
     defaultValue: 'My Default Group',
   );
-  static const _searchPhrase = kIsWeb
-      ? _webSearchPhrase
-      : 'Support Twake Workplace';
-
   static const _memberMatrixID = String.fromEnvironment(
     'MemberMatrixID',
     defaultValue: '@member:localhost',
@@ -29,18 +26,26 @@ class ChatGroupOpenProfileScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
+    var searchPhrase = _webSearchPhrase;
+    var memberMatrixID = _memberMatrixID;
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(this);
+      searchPhrase = fixture.title;
+      memberMatrixID = fixture.memberMatrixId;
+    }
+
     await robots.chatListRobot().openSearchScreen();
 
     final opened = await robots.searchViewRobot().searchAndOpenRoom(
-      _searchPhrase,
+      searchPhrase,
     );
     if (!opened) {
-      throw Exception('Test failed: Room "$_searchPhrase" was not found.');
+      throw Exception('Test failed: Room "$searchPhrase" was not found.');
     }
 
     await robots.chatGroupDetailRobot().tapOnChatBarTitle();
     await robots.groupInformationRobot().openMemberDetail(
-      matrixID: _memberMatrixID,
+      matrixID: memberMatrixID,
     );
 
     final profile = robots.chatProfileInfoRobot();
@@ -52,7 +57,7 @@ class ChatGroupOpenProfileScenario extends BaseTestScenario {
     final phoneNumber = await profile.getPhoneNumber();
 
     await profile.verifyDisplayName(displayName: displayName);
-    await profile.verifyDisplayMatrixId(matrixId: _memberMatrixID);
+    await profile.verifyDisplayMatrixId(matrixId: memberMatrixID);
     await profile.verifyEmail(email: email);
     await profile.verifyPhoneNumber(phoneNumber: phoneNumber);
   }
