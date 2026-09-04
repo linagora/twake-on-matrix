@@ -1,10 +1,9 @@
-import 'package:dartz/dartz.dart';
 import 'package:twake_chat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/bootstrap/unlock_ssss_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/unlock_ssss_state.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
-import 'package:twake_chat/domain/usecase/bootstrap/unlock_ssss_with_recovery_key_interactor.dart';
+import 'package:twake_chat/domain/usecase/recovery/unlock_ssss_with_recovery_key_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
@@ -233,19 +232,15 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
       _refresh(TomBootstrapUnlockErrorState.new);
       return;
     }
-    Either<dynamic, dynamic>? last;
-    await for (final result in _unlockSsssWithRecoveryKeyInteractor.execute(
+    final result = await _unlockSsssWithRecoveryKeyInteractor.execute(
       bootstrap: bootstrap,
       recoveryKey: recoveryWords.words,
-    )) {
-      last = result;
-    }
-    last?.fold(
-      (_) => _refresh(TomBootstrapUnlockErrorState.new),
-      (success) => success is UnlockSsssSuccessState
-          ? _handleBootstrapState()
-          : _refresh(TomBootstrapUnlockErrorState.new),
     );
+    if (result is UnlockSsssSuccessState) {
+      _handleBootstrapState();
+    } else {
+      _refresh(TomBootstrapUnlockErrorState.new);
+    }
   }
 
   Future<void> _wipeRecoveryWord({required bool twakeSupported}) async {

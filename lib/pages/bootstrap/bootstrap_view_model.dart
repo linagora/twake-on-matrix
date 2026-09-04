@@ -1,6 +1,6 @@
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/domain/app_state/bootstrap/cached_recovery_key_state.dart';
-import 'package:twake_chat/domain/app_state/bootstrap/unlock_ssss_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/cached_recovery_key_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/store_recovery_key_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/unlock_ssss_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -53,16 +53,12 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   Future<void> _prefillCachedRecoveryKey() async {
     final userId = client.userID;
     if (userId == null) return;
-    await for (final result
-        in ref
-            .read(readCachedRecoveryKeyInteractorProvider)
-            .execute(userId: userId)) {
-      if (!ref.mounted) return;
-      result.fold((_) {}, (success) {
-        if (success is CachedRecoveryKeyFoundState) {
-          _cachedRecoveryKey = success.recoveryKey;
-        }
-      });
+    final result = await ref
+        .read(readCachedRecoveryKeyInteractorProvider)
+        .execute(userId: userId);
+    if (!ref.mounted) return;
+    if (result is CachedRecoveryKeyFoundState) {
+      _cachedRecoveryKey = result.recoveryKey;
     }
   }
 
@@ -181,16 +177,26 @@ class BootstrapViewModel extends _$BootstrapViewModel {
 
   /// Marks the recovery-key-display screen as handled and stores it in
   /// secure storage if the user opted in — mirrors the legacy "Next" button.
+  ///
+  /// A failed cache write is logged (via Sentry) but doesn't block the
+  /// flow: the user has already seen and copied the key, so trapping them
+  /// on this screen would be worse than proceeding without the cache.
   Future<void> continueFromRecoveryKeyDisplay() async {
     final current = state;
     if (current is! BootstrapRecoveryKeyDisplayState) return;
     if (current.storeInSecureStorage) {
       final userId = client.userID;
       if (userId != null) {
-        await for (final _
-            in ref
-                .read(storeRecoveryKeyInteractorProvider)
-                .execute(userId: userId, recoveryKey: current.recoveryKey)) {}
+        final result = await ref
+            .read(storeRecoveryKeyInteractorProvider)
+            .execute(userId: userId, recoveryKey: current.recoveryKey);
+        if (!ref.mounted) return;
+        if (result is StoreRecoveryKeyFailureState) {
+          Logs().w(
+            'continueFromRecoveryKeyDisplay: recovery key not cached',
+            result.exception,
+          );
+        }
       }
     }
     _recoveryKeyStored = true;
@@ -216,17 +222,10 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   /// Unlocks SSSS with [recoveryKey], shared by the recovery-key form (via
   /// `VerifyDeviceViewModel`) and the automatic-retry path above.
   Future<bool> unlockWithRecoveryKey(String recoveryKey) async {
-    Either<dynamic, dynamic>? last;
-    await for (final result
-        in ref
-            .read(unlockSsssWithRecoveryKeyInteractorProvider)
-            .execute(bootstrap: bootstrap, recoveryKey: recoveryKey)) {
-      last = result;
-    }
-    return last?.fold((_) => false, (success) {
-          return success is UnlockSsssSuccessState;
-        }) ??
-        false;
+    final result = await ref
+        .read(unlockSsssWithRecoveryKeyInteractorProvider)
+        .execute(bootstrap: bootstrap, recoveryKey: recoveryKey);
+    return result is UnlockSsssSuccessState;
   }
 
   void retry() {

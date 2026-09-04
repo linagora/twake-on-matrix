@@ -1,4 +1,4 @@
-import 'package:twake_chat/domain/app_state/bootstrap/self_verification_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/self_verification_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
@@ -114,18 +114,20 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
     try {
       final result = await ref
           .read(startSelfVerificationInteractorProvider)
-          .execute(client: client)
-          .last;
-      result.fold((_) {}, (success) {
-        if (success is StartSelfVerificationSuccessState) {
-          _attachRequest(success.request);
-        }
-      });
+          .execute(client: client);
+      // The provider may have disposed while awaiting; bail before
+      // attaching callbacks or writing state.
+      if (!ref.mounted) return;
+      if (result is StartSelfVerificationSuccessState) {
+        _attachRequest(result.request);
+      }
     } catch (error, stackTrace) {
       Logs().e('startVerification failed', error, stackTrace);
     } finally {
-      _isStartingVerification = false;
-      _refresh();
+      if (ref.mounted) {
+        _isStartingVerification = false;
+        _refresh();
+      }
     }
   }
 

@@ -1,34 +1,30 @@
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/bootstrap/unlock_ssss_state.dart';
+import 'package:twake_chat/domain/app_state/recovery/unlock_ssss_state.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 
 /// Unlocks the user's Secure Secret Storage and Sharing (SSSS) — the
-/// Matrix spec's encrypted key/value store used to back up room keys and
+/// Matrix spec's encrypted key/value store that backs up room keys and
 /// cross-signing keys — using a previously generated recovery key, then
 /// self-signs the current device via cross-signing.
 class UnlockSsssWithRecoveryKeyInteractor {
-  Stream<Either<Failure, Success>> execute({
+  Future<UnlockSsssState> execute({
     required Bootstrap bootstrap,
     required String recoveryKey,
-  }) async* {
-    yield const Right(UnlockSsssLoadingState());
+  }) async {
     try {
+      // `newSsssKey` is the SSSS key handle the SDK exposes for the unlock
+      // step; `encryption` drives cross-signing.
       final ssssKey = bootstrap.newSsssKey;
       final encryption = bootstrap.client.encryption;
       if (ssssKey == null || encryption == null) {
-        yield Left(
-          UnlockSsssFailureState(
-            exception: Exception(
-              'Cannot unlock SSSS: bootstrap is missing newSsssKey or '
-              'client.encryption',
-            ),
+        return UnlockSsssState.failure(
+          exception: Exception(
+            'Cannot unlock SSSS: bootstrap is missing newSsssKey or '
+            'client.encryption',
           ),
         );
-        return;
       }
       await ssssKey.unlock(keyOrPassphrase: recoveryKey);
       Logs().d('SSSS unlocked');
@@ -39,10 +35,10 @@ class UnlockSsssWithRecoveryKeyInteractor {
         userId: bootstrap.client.userID,
         recoveryKey: recoveryKey,
       );
-      yield const Right(UnlockSsssSuccessState());
+      return const UnlockSsssState.success();
     } catch (e, s) {
-      Logs().w('Unable to unlock SSSS', e, s);
-      yield Left(UnlockSsssFailureState(exception: e));
+      Logs().w(SentryTrackedEvents.unableToUnlockSsss.message, e, s);
+      return UnlockSsssState.failure(exception: e);
     }
   }
 }
