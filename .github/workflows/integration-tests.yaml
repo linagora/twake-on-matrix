@@ -45,6 +45,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    env:
+      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
 
     defaults:
       run:
@@ -140,6 +142,8 @@ jobs:
             --dart-define-from-file .env.cicd \
             --target "$PATROL_TEST_TARGET"
 
+          RUN_ID="integration-target-${{ github.run_id }}"
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
           gcloud firebase test android run \
             --type instrumentation \
             --app build/app/outputs/apk/debug/app-debug.apk \
@@ -147,7 +151,41 @@ jobs:
             --device model=MediumPhone.arm,version=34 \
             --timeout 60m \
             --use-orchestrator \
-            --environment-variables clearPackageData=true
+            --environment-variables clearPackageData=true \
+            --results-bucket "$FTL_RESULTS_BUCKET" \
+            --results-dir "$RUN_ID"
+
+      - name: Download FTL diagnostics from GCS
+        if: always() && env.RUN_ID != ''
+        run: |
+          GCS_PATH="gs://$FTL_RESULTS_BUCKET/$RUN_ID"
+          mkdir -p ./target_gcs_results
+          if ! gcloud storage cp -r "${GCS_PATH}/*" ./target_gcs_results/; then
+            echo "::notice::No downloadable FTL results at $GCS_PATH."
+            exit 0
+          fi
+
+          find ./target_gcs_results -name "logcat" -exec cat {} + > target_logcat.txt
+          if [ ! -s target_logcat.txt ]; then
+            echo "::notice::FTL produced no logcat."
+            exit 0
+          fi
+
+          sed -E \
+            -e 's/(authorization: Bearer )[[:alnum:]_.~-]+/\1***REDACTED***/Ig' \
+            -e 's/(accessToken:? (Bearer )?)[[:alnum:]_.~-]+/\1***REDACTED***/g' \
+            -e 's/("access_token"[[:space:]]*:[[:space:]]*")[^"]+/\1***REDACTED***/g' \
+            target_logcat.txt > target_logcat.redacted.txt
+          mv target_logcat.redacted.txt target_logcat.txt
+
+      - name: Upload target diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logcat-target-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: ignore
+          path: target_logcat.txt
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 1b – Nightly functional suite, built as shards. Each shard is one
