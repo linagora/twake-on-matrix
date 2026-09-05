@@ -56,8 +56,9 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await _openMenu(message);
     await _menu.getDeleteItem().tap();
     final dialog = $(find.byKey(TwakeDialog.showConfirmAlertDialogKey));
-    await $.waitUntilVisible(dialog);
-    await dialog.$(find.text(_l10n.delete)).tap();
+    final delete = dialog.$(find.text(_l10n.delete));
+    await $.waitUntilVisible(delete);
+    await delete.tap();
     await $.pump(const Duration(milliseconds: 300));
   }
 

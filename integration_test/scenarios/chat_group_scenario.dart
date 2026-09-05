@@ -92,26 +92,17 @@ Future<void> _waitShown(
   // widget that will never appear without scrolling.
   await chatGroupDetailRobot.scrollToLiveBottom();
   if (searchTimeline && !finder.visible) {
-    final timeline = find
-        .descendant(
-          of: find.byType(ChatEventList),
-          matching: find.byType(Scrollable),
-        )
-        .first;
-    try {
-      await scenario.$.scrollUntilVisible(
-        finder: finder.finder,
-        view: timeline,
-        scrollDirection: AxisDirection.up,
-        maxScrolls: 30,
-      );
-    } on Exception {
-      await scenario.$.scrollUntilVisible(
-        finder: finder.finder,
-        view: timeline,
-        scrollDirection: AxisDirection.down,
-        maxScrolls: 30,
-      );
+    final timeline = find.descendant(
+      of: find.byType(ChatEventList),
+      matching: find.byType(Scrollable),
+    );
+    for (var i = 0; i < 30 && !finder.visible; i++) {
+      if (timeline.evaluate().isEmpty) {
+        await scenario.$.pump(const Duration(milliseconds: 200));
+        continue;
+      }
+      await scenario.$.tester.drag(timeline.first, const Offset(0, 300));
+      await scenario.$.pump(const Duration(milliseconds: 200));
     }
   }
   await scenario.$.waitUntilExists(
