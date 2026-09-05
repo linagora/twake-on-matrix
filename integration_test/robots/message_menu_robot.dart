@@ -1,6 +1,7 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pull_down_button/pull_down_button.dart';
@@ -54,7 +55,7 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   Future<void> openDelete(String message) async {
     await _openMenu(message);
     await _menu.getDeleteItem().tap();
-    final dialog = $(AlertDialog);
+    final dialog = $(find.byKey(TwakeDialog.showConfirmAlertDialogKey));
     await $.waitUntilVisible(dialog);
     await dialog.$(find.text(_l10n.delete)).tap();
     await $.pump(const Duration(milliseconds: 300));

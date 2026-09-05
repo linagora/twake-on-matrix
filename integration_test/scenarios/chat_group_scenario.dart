@@ -139,6 +139,14 @@ Future<void> _waitAbsent(BaseTestScenario scenario, String message) async {
   }
 }
 
+Future<void> _waitExists(BaseTestScenario scenario, String message) async {
+  final finder = await scenario.robots.chatGroupDetailRobot().getText(message);
+  await scenario.$.waitUntilExists(
+    finder,
+    timeout: const Duration(seconds: 60),
+  );
+}
+
 /// Reply to a sender-owned and a receiver-owned message in a group chat.
 class ChatGroupReplyScenario extends BaseTestScenario {
   ChatGroupReplyScenario(super.$, super.robots);
@@ -156,13 +164,13 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openReply(senderMsg);
     await robots.chatGroupDetailRobot().sendMessage(replySender);
-    await _waitShown(this, replySender);
+    await _waitExists(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
     await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
-    await _waitShown(this, replyReceiver);
+    await _waitExists(this, replyReceiver);
   }
 }
 
