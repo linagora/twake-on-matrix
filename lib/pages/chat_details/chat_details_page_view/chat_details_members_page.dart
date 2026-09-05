@@ -44,56 +44,51 @@ class ChatDetailsMembersPage extends StatelessWidget {
       builder: (context, members, child) {
         members ??= [];
         final canRequestMoreMembers = members.length < actualMembersCount;
-        return Column(
-          children: [
-            InkWell(
-              onTap: onAddMembers,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: sysColors.surfaceTint.withValues(alpha: 0.16),
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: InkWell(
+                onTap: onAddMembers,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: sysColors.surfaceTint.withValues(alpha: 0.16),
+                      ),
                     ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        Icons.person_add_outlined,
-                        color: sysColors.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        L10n.of(context)!.addMembers,
-                        style: textTheme.labelLarge?.copyWith(
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.person_add_outlined,
                           color: sysColors.primary,
+                          size: 24,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          L10n.of(context)!.addMembers,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: sysColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              sliver: SliverList.builder(
                 itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
                 itemBuilder: (BuildContext context, int index) {
-                  if (members == null) {
-                    return const SizedBox.shrink();
-                  }
-                  if (index < members.length) {
+                  if (index < members!.length) {
                     return ListenableBuilder(
                       listenable: selectedUsersMapChangeNotifier,
                       builder: (context, child) {
@@ -113,10 +108,6 @@ class ChatDetailsMembersPage extends StatelessWidget {
                         );
                       },
                     );
-                  }
-                  final haveMoreMembers = actualMembersCount > members.length;
-                  if (!haveMoreMembers) {
-                    return const SizedBox.shrink();
                   }
                   return ListTile(
                     title: Text(
