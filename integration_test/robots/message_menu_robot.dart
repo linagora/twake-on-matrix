@@ -54,7 +54,9 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await _openMenu(message);
     await _menu.getDeleteItem().tap();
     // The deletion confirmation surfaces as a native dialog on mobile.
-    await $.native.tap(Selector(text: _l10n.delete));
+    final delete = Selector(text: _l10n.delete);
+    await $.native.waitUntilVisible(delete);
+    await $.native.tap(delete);
     await $.pump(const Duration(milliseconds: 300));
   }
 

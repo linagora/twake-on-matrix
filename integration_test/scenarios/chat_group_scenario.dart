@@ -72,13 +72,21 @@ Future<(String, String)> _prepareMessages(
     } else {
       await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
     }
-    await _waitShown(scenario, receiverMsg);
+    await _waitShown(
+      scenario,
+      receiverMsg,
+      searchTimeline: !kIsWeb,
+    );
   }
 
   return (senderMsg, receiverMsg);
 }
 
-Future<void> _waitShown(BaseTestScenario scenario, String message) async {
+Future<void> _waitShown(
+  BaseTestScenario scenario,
+  String message, {
+  bool searchTimeline = false,
+}) async {
   final chatGroupDetailRobot = scenario.robots.chatGroupDetailRobot();
   final finder = await chatGroupDetailRobot.getText(message);
 
@@ -87,7 +95,7 @@ Future<void> _waitShown(BaseTestScenario scenario, String message) async {
   // and then forward through the timeline instead of waiting for a lazily-built
   // widget that will never appear without scrolling.
   await chatGroupDetailRobot.scrollToLiveBottom();
-  if (!finder.visible) {
+  if (searchTimeline && !finder.visible) {
     final timeline = find
         .descendant(
           of: find.byType(ChatEventList),
@@ -147,7 +155,7 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     await _waitShown(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitShown(this, replyReceiver);
@@ -208,7 +216,7 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
 
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
   }
@@ -235,7 +243,7 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
     ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
     await ChatGroupDetailRobot($).closePullDownMenu();
 
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
     await ChatScenario(
       $,
@@ -266,7 +274,7 @@ class ChatGroupCopyScenario extends BaseTestScenario {
     await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
 
     // copy receiver
-    await _waitShown(this, receiverMsg);
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await ChatScenario($).copyMessage(receiverMsg);
     await ChatGroupDetailRobot($).inputMessage(addedText);
     await ChatScenario($).pasteFromClipBoard();
