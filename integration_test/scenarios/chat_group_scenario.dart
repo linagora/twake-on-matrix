@@ -72,11 +72,7 @@ Future<(String, String)> _prepareMessages(
     } else {
       await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
     }
-    await _waitShown(
-      scenario,
-      receiverMsg,
-      searchTimeline: !kIsWeb,
-    );
+    await _waitShown(scenario, receiverMsg, searchTimeline: !kIsWeb);
   }
 
   return (senderMsg, receiverMsg);
@@ -118,9 +114,17 @@ Future<void> _waitShown(
       );
     }
   }
-  await scenario.$.waitUntilVisible(
+  await scenario.$.waitUntilExists(
     finder,
     timeout: const Duration(seconds: 60),
+  );
+  if (!finder.visible) {
+    await scenario.$.tester.ensureVisible(finder.finder.first);
+    await scenario.$.pumpAndSettle();
+  }
+  await scenario.$.waitUntilVisible(
+    finder,
+    timeout: const Duration(seconds: 30),
   );
 }
 

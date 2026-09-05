@@ -153,7 +153,9 @@ class ChatGroupDetailRobot extends CoreRobot
   }
 
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {
-    await $(MessageContent).containing(find.text(message)).longPress();
+    await $(
+      MessageContent,
+    ).containing(find.textContaining(message)).longPress();
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
     return PullDownMenuRobot($);

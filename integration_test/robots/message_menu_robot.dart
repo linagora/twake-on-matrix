@@ -3,7 +3,6 @@ import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrol/patrol.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../base/core_robot.dart';
@@ -25,7 +24,9 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   PullDownMenuRobot get _menu => PullDownMenuRobot($);
 
   Future<void> _openMenu(String message) async {
-    await $(MessageContent).containing(find.text(message)).longPress();
+    await $(
+      MessageContent,
+    ).containing(find.textContaining(message)).longPress();
     await $.waitUntilVisible($(PullDownMenu));
     await $.pump();
   }
@@ -53,10 +54,9 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   Future<void> openDelete(String message) async {
     await _openMenu(message);
     await _menu.getDeleteItem().tap();
-    // The deletion confirmation surfaces as a native dialog on mobile.
-    final delete = Selector(text: _l10n.delete);
-    await $.native.waitUntilVisible(delete);
-    await $.native.tap(delete);
+    final dialog = $(AlertDialog);
+    await $.waitUntilVisible(dialog);
+    await dialog.$(find.text(_l10n.delete)).tap();
     await $.pump(const Duration(milliseconds: 300));
   }
 
