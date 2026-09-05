@@ -141,11 +141,13 @@ class ChatGroupReplyScenario extends BaseTestScenario {
     );
 
     final replySender = 'reply sender at ${_uid()}';
+    await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openReply(senderMsg);
     await robots.chatGroupDetailRobot().sendMessage(replySender);
     await _waitShown(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
+    await _waitShown(this, receiverMsg);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
     await _waitShown(this, replyReceiver);
@@ -202,9 +204,11 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
           : mobileReceiverMessageDelete,
     );
 
+    await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
 
+    await _waitShown(this, receiverMsg);
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
   }
@@ -224,12 +228,14 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
       receiverFixtureMessage: mobileReceiverMessageDisplayMenu,
     );
 
+    await _waitShown(this, senderMsg);
     await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
     await ChatScenario(
       $,
     ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
     await ChatGroupDetailRobot($).closePullDownMenu();
 
+    await _waitShown(this, receiverMsg);
     await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
     await ChatScenario(
       $,
@@ -251,6 +257,7 @@ class ChatGroupCopyScenario extends BaseTestScenario {
     );
 
     // copy sender
+    await _waitShown(this, senderMsg);
     await ChatScenario($).copyMessage(senderMsg);
     const addedText = 'Copy';
     await ChatGroupDetailRobot($).inputMessage(addedText);
@@ -259,6 +266,7 @@ class ChatGroupCopyScenario extends BaseTestScenario {
     await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
 
     // copy receiver
+    await _waitShown(this, receiverMsg);
     await ChatScenario($).copyMessage(receiverMsg);
     await ChatGroupDetailRobot($).inputMessage(addedText);
     await ChatScenario($).pasteFromClipBoard();
