@@ -18,15 +18,13 @@ class PublicRoomBottomSheet extends StatelessWidget {
   final PublicRoomsChunk? chunk;
   final VoidCallback? onRoomJoined;
 
-  PublicRoomBottomSheet({
+  const PublicRoomBottomSheet({
     this.roomAlias,
     required this.outerContext,
     this.chunk,
     this.onRoomJoined,
     super.key,
-  }) {
-    assert(roomAlias != null || chunk != null);
-  }
+  }) : assert(roomAlias != null || chunk != null);
 
   void _joinRoom(BuildContext context) async {
     final client = Matrix.of(context).client;
