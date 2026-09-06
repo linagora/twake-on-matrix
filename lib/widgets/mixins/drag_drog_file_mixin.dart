@@ -42,7 +42,7 @@ mixin DragDrogFileMixin {
         MatrixFile(
           bytes: bytesList.result![i],
           name: details.files[i].name,
-          mimeType: MimeTypeUitls().getTwakeMimeType(details.files[i].name),
+          mimeType: MimeTypeUitls.getTwakeMimeType(details.files[i].name),
         ).detectFileType,
       );
     }

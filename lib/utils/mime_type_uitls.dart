@@ -5,9 +5,7 @@ import 'package:mime/mime.dart';
 class MimeTypeUitls {
   MimeTypeUitls._();
 
-  factory MimeTypeUitls() => MimeTypeUitls._();
-
-  String getTwakeMimeType(String path) {
+  static String getTwakeMimeType(String path) {
     final mimeType = lookupMimeType(path);
     if (mimeType == null) {
       return 'application/octet-stream';
