@@ -84,10 +84,10 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   final client = HttpClient()..autoUncompress = true;
   try {
     final session = await _receiverSession(client, endpoints);
-    final encodedRoomId = Uri.encodeComponent(roomId);
-    final joinUri = Uri.https(
-      endpoints.matrixURL,
-      '/_matrix/client/v3/rooms/$encodedRoomId/join',
+    final joinUri = Uri(
+      scheme: 'https',
+      host: endpoints.matrixURL,
+      pathSegments: ['_matrix', 'client', 'v3', 'rooms', roomId, 'join'],
     );
     final request = await client.postUrl(joinUri);
     request.headers
@@ -478,20 +478,25 @@ Future<void> _putMatrixMessage({
   final endpoints = session.endpoints;
   // Matrix `PUT /send/{eventType}/{txnId}` uses a per-request transaction ID
   // for idempotency. Format: `<chatURL>: <device> <sep> <epoch_ms>`.
-  final txnId = Uri.encodeComponent(
-    '${endpoints.chatURL}: $_deviceDisplayName $_txnIdSeparator'
-    '${DateTime.now().millisecondsSinceEpoch}',
-  );
-  // `groupID` is expected to be a full Matrix room ID (`!localpart:server`)
-  // so tests work against any homeserver, not only `linagora.com`. Encode
-  // it the same way as `txnId` — `!` and `:` are technically RFC 3986-safe
-  // in path segments but the Matrix C-S spec calls for percent-encoding,
-  // and some reverse proxies (and federation endpoints) do not tolerate
-  // the raw form.
-  final encodedRoomId = Uri.encodeComponent(groupID);
-  final sendUri = Uri.https(
-    endpoints.matrixURL,
-    '/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/$txnId',
+  final txnId =
+      '${endpoints.chatURL}: $_deviceDisplayName $_txnIdSeparator'
+      '${DateTime.now().millisecondsSinceEpoch}';
+  // `groupID` is a full Matrix room ID (`!localpart:server`). Build the
+  // path from segments so `!` and `:` are encoded once, matching the
+  // Client-Server spec without double-encoding.
+  final sendUri = Uri(
+    scheme: 'https',
+    host: endpoints.matrixURL,
+    pathSegments: [
+      '_matrix',
+      'client',
+      'v3',
+      'rooms',
+      groupID,
+      'send',
+      'm.room.message',
+      txnId,
+    ],
   );
   final request = await client.putUrl(sendUri);
   request.headers
