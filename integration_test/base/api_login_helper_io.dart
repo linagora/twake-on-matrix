@@ -42,9 +42,55 @@ Future<String> fetchAuthToken({
 /// Sends a Matrix message as the configured receiver account via the
 /// Client-Server API. Used by tests that need the receiving side to emit a
 /// message while the primary account is logged in from the UI.
-Future<void> sendMessageAsReceiver({required String message}) async {
+///
+/// [roomId] overrides the CICD `GroupID` dart-define so a test-created
+/// fixture room receives the event instead of a stale staging room.
+Future<void> sendMessageAsReceiver({required String message, String? roomId}) =>
+    sendMessagesAsReceiver(messages: [message], roomId: roomId);
+
+/// Sends several events with one receiver login.
+Future<void> sendMessagesAsReceiver({
+  required List<String> messages,
+  String? roomId,
+}) async {
   const endpoints = _SsoEndpoints.fromEnvironment();
   const groupID = String.fromEnvironment('GroupID');
+  const receiver = String.fromEnvironment('Receiver');
+  const passOfReceiver = String.fromEnvironment('ReceiverPass');
+  final targetRoom = roomId ?? groupID;
+  if (targetRoom.isEmpty) {
+    throw StateError('Missing roomId and GroupID dart-define');
+  }
+
+  final loginToken = await fetchAuthToken(
+    username: receiver,
+    password: passOfReceiver,
+  );
+
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _loginWithMLoginToken(
+      client: client,
+      endpoints: endpoints,
+      loginToken: loginToken,
+    );
+    for (final message in messages) {
+      await _putMatrixMessage(
+        client: client,
+        session: session,
+        groupID: targetRoom,
+        message: message,
+      );
+    }
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Makes the configured receiver join [roomId] after the primary account
+/// invited it. Used by mobile group scenarios that create their own room.
+Future<void> ensureReceiverJoined({required String roomId}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
 
@@ -60,12 +106,25 @@ Future<void> sendMessageAsReceiver({required String message}) async {
       endpoints: endpoints,
       loginToken: loginToken,
     );
-    await _putMatrixMessage(
-      client: client,
-      session: session,
-      groupID: groupID,
-      message: message,
+    final encodedRoomId = Uri.encodeComponent(roomId);
+    final joinUri = Uri.https(
+      endpoints.matrixURL,
+      '/_matrix/client/v3/rooms/$encodedRoomId/join',
     );
+    final request = await client.postUrl(joinUri);
+    request.headers
+      ..set(HttpHeaders.contentTypeHeader, 'application/json')
+      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+      ..set(HttpHeaders.userAgentHeader, _userAgent);
+    request.write('{}');
+    final response = await request.close();
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final body = await utf8.decoder.bind(response).join();
+      throw Exception(
+        'Receiver join failed [status=${response.statusCode}] '
+        'body=${body.substring(0, body.length.clamp(0, 300))}',
+      );
+    }
   } finally {
     client.close(force: true);
   }
