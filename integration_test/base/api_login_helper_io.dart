@@ -48,32 +48,22 @@ Future<String> fetchAuthToken({
 Future<void> sendMessageAsReceiver({required String message, String? roomId}) =>
     sendMessagesAsReceiver(messages: [message], roomId: roomId);
 
-/// Sends several events with one receiver login.
+/// Sends several events with one receiver login. Join + send share a cached
+/// access token so a single Patrol process does not hit SSO twice.
 Future<void> sendMessagesAsReceiver({
   required List<String> messages,
   String? roomId,
 }) async {
   const endpoints = _SsoEndpoints.fromEnvironment();
   const groupID = String.fromEnvironment('GroupID');
-  const receiver = String.fromEnvironment('Receiver');
-  const passOfReceiver = String.fromEnvironment('ReceiverPass');
   final targetRoom = roomId ?? groupID;
   if (targetRoom.isEmpty) {
     throw StateError('Missing roomId and GroupID dart-define');
   }
 
-  final loginToken = await fetchAuthToken(
-    username: receiver,
-    password: passOfReceiver,
-  );
-
   final client = HttpClient()..autoUncompress = true;
   try {
-    final session = await _loginWithMLoginToken(
-      client: client,
-      endpoints: endpoints,
-      loginToken: loginToken,
-    );
+    final session = await _receiverSession(client, endpoints);
     for (final message in messages) {
       await _putMatrixMessage(
         client: client,
@@ -91,21 +81,9 @@ Future<void> sendMessagesAsReceiver({
 /// invited it. Used by mobile group scenarios that create their own room.
 Future<void> ensureReceiverJoined({required String roomId}) async {
   const endpoints = _SsoEndpoints.fromEnvironment();
-  const receiver = String.fromEnvironment('Receiver');
-  const passOfReceiver = String.fromEnvironment('ReceiverPass');
-
-  final loginToken = await fetchAuthToken(
-    username: receiver,
-    password: passOfReceiver,
-  );
-
   final client = HttpClient()..autoUncompress = true;
   try {
-    final session = await _loginWithMLoginToken(
-      client: client,
-      endpoints: endpoints,
-      loginToken: loginToken,
-    );
+    final session = await _receiverSession(client, endpoints);
     final encodedRoomId = Uri.encodeComponent(roomId);
     final joinUri = Uri.https(
       endpoints.matrixURL,
@@ -128,6 +106,72 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   } finally {
     client.close(force: true);
   }
+}
+
+_MatrixSession? _cachedReceiverSession;
+
+Future<_MatrixSession> _receiverSession(
+  HttpClient client,
+  _SsoEndpoints endpoints,
+) async {
+  final cached = _cachedReceiverSession;
+  if (cached != null) return cached;
+
+  const receiver = String.fromEnvironment('Receiver');
+  const passOfReceiver = String.fromEnvironment('ReceiverPass');
+  final session = endpoints.ssoURL.isEmpty
+      ? await _loginWithPassword(
+          client: client,
+          endpoints: endpoints,
+          credentials: const _Credentials(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        )
+      : await _loginWithMLoginToken(
+          client: client,
+          endpoints: endpoints,
+          loginToken: await fetchAuthToken(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        );
+  return _cachedReceiverSession = session;
+}
+
+Future<_MatrixSession> _loginWithPassword({
+  required HttpClient client,
+  required _SsoEndpoints endpoints,
+  required _Credentials credentials,
+}) async {
+  final loginUri = Uri.https(endpoints.matrixURL, '/_matrix/client/v3/login');
+  final request = await client.postUrl(loginUri);
+  request.headers
+    ..set(HttpHeaders.contentTypeHeader, 'application/json')
+    ..set(HttpHeaders.userAgentHeader, _userAgent)
+    ..set('Origin', 'https://${endpoints.chatURL}');
+  request.write(
+    jsonEncode({
+      'identifier': {'type': 'm.id.user', 'user': credentials.username},
+      'initial_device_display_name': _deviceDisplayName,
+      'password': credentials.password,
+      'type': 'm.login.password',
+    }),
+  );
+  final response = await request.close();
+  final body = await response.transform(utf8.decoder).join();
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception(
+      'Receiver m.login.password failed [status=${response.statusCode}] '
+      'body=${body.substring(0, body.length.clamp(0, 300))}',
+    );
+  }
+  final accessToken =
+      (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+  if (accessToken == null) {
+    throw Exception('Receiver login response missing access_token: $body');
+  }
+  return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
 }
 
 // ---------------------------------------------------------------------------

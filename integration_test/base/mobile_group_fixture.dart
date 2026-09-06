@@ -93,6 +93,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
     } on MatrixException catch (exception) {
       if (!exception.toString().contains('already in the room')) rethrow;
     }
+    await scenario.$.pump(const Duration(seconds: 2));
     await ensureReceiverJoined(roomId: room.id);
   } else if (receiverMember.membership != Membership.join) {
     await ensureReceiverJoined(roomId: room.id);
