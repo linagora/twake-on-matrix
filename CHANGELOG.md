@@ -1,3 +1,29 @@
+## [2.23.5] - 2026-08-31
+### Added
+- #3257: TW-3218: [Part I] Add device verification warning banner in chat screen
+- #3234: Add contacts pull to refresh
+
+### Changed
+- #3306: TW-2906: Rename package from FluffyChat to Twake Chat
+- #3285: TW-3218: [Part II] Update verify device flow
+- #3307: TW-3303: Improve caption handling for media files without filename
+- #3194: TW-3065: Warn user when not able to retry sending
+- #3184: TW-3137: Rewire input bar sticker picker search to TextSearch (Part 7)
+- #3180: TW-3135: Rewire chat details search call sites to TextSearch (Part 6)
+- TW-3220: Update bubble fonts
+
+### Fixed
+- #3290: Fix long captions on narrow sending images
+- #3236: TW-3223: Fix wrong bottom bar avatar after switching account from notification
+- #3235: Load local contacts from homeserver well-known
+
+### Tests
+- #3301: Stabilize Android FTL performance nightlies
+- #3295: Version performance dashboard assets
+- #3289: Build profile instrumentation APK
+- #3288: Track nightly Patrol Web performance
+- #3283: Publish nightly FTL performance history
+
 ## [2.23.4] - 2026-07-24
 ### Changed
 - #2787: TW-2786: Obtain FQDN from UserInfo for profile page edit button
