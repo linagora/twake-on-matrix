@@ -1858,11 +1858,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.6"
-      resolved-ref: "361d5a222de7d1558881740b92abe2db3c4c1e7f"
+      ref: "fix/cozy-external-bridge-script-url"
+      resolved-ref: c50a05da18de48a9897ce0861a0dd2da58f5de57
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.6"
+    version: "0.3.1"
   linkfy_text:
     dependency: "direct main"
     description:
