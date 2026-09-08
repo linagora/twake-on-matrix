@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/di/global/get_it_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
@@ -12,14 +13,6 @@ import 'package:matrix/matrix.dart';
 class ChatDeviceVerificationBanner extends ConsumerWidget {
   final Client client;
 
-  /// Called after the verify dialog closes, regardless of outcome.
-  ///
-  /// Verifying the session doesn't retroactively push room keys for
-  /// messages already marked undecryptable in an open chat's timeline —
-  /// callers with a live timeline should re-request keys here (e.g. via
-  /// `Timeline.requestKeys`) so those messages get a chance to decrypt.
-  /// Callers without a live timeline (e.g. a draft chat) can leave this
-  /// unset.
   final VoidCallback? onRequestUndecryptedMessagesRetry;
 
   const ChatDeviceVerificationBanner({
@@ -40,7 +33,11 @@ class ChatDeviceVerificationBanner extends ConsumerWidget {
         message: L10n.of(context)!.deviceVerificationWaring,
         actionLabel: L10n.of(context)!.verify,
         onActionPressed: () async {
-          await BootstrapDialog(client: client).show();
+          if (state.isCurrentSessionOutOfSync) {
+            await BootstrapDialog(client: client).show();
+          } else {
+            await const DevicesRoute().push(context);
+          }
           onRequestUndecryptedMessagesRetry?.call();
         },
         onDismiss: isMobile ? null : controller.onDismissBanner,

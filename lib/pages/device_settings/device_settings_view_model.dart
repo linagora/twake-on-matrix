@@ -92,12 +92,6 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     }
     if (devices.isEmpty) return false;
     final deviceKeys = client.userDeviceKeys[client.userID]?.deviceKeys;
-    // Devices settings banner: any session in the `/devices` list that will
-    // not receive room keys (`encryptToDevice == false`), including this
-    // session when it is out of sync.
-    //
-    // Intentionally different from the chat banner, which warns about
-    // *other* unverified sessions via [DeviceKeys.verified].
     return devices.any(
       (device) => deviceKeys?[device.deviceId]?.encryptToDevice == false,
     );
