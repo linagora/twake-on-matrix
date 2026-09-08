@@ -13,7 +13,11 @@ enum SentryTrackedEvents {
   notificationGetInitialFailed('[Push] Failed to get initial notification'),
   iOSNotificationPayloadParseFailed(
     '[Push] iOSUserSelectedNoti: failed to parse payload',
-  );
+  ),
+  unableToReadCachedRecoveryKey('Unable to read cached recovery key'),
+  unableToStoreRecoveryKey('Unable to store recovery key'),
+  unableToStartSelfVerification('Unable to start self verification'),
+  unableToUnlockSsss('Unable to unlock SSSS');
 
   const SentryTrackedEvents(this.message, {this.isExample = false});
 

@@ -60,7 +60,7 @@ class ResetEncryptionConfirmView extends StatelessWidget {
               isLoading: isResetting,
             ),
             _FilledButton(
-              color: KeyVerificationSasStyle.primaryColor,
+              color: KeyVerificationSasStyle.primaryColor(context),
               label: L10n.of(context)!.cancel,
               onTap: isResetting ? null : onClose,
             ),

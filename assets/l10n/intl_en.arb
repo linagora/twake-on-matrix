@@ -3262,6 +3262,7 @@
   "verificationFailedTitle": "Verification failed",
   "verificationFailedDescription": "The request was cancelled or rejected. Please try again.",
   "retryFailedDescription": "Automatic retry didn't work. Try another way to verify this device.",
+  "chatBackupSetUpDescription": "Your recovery key is saved. You can use it to restore your encrypted messages on any device.",
   "messageCannotBeResent": "This message can't be resent because its data is unavailable",
   "@messageCannotBeResent": {
     "type": "text",

@@ -41,19 +41,22 @@ class VerifyDeviceViewStyle {
   static const double dragHandleHeight = 4;
 
   static const double gapMascotToSpinner = 20;
+  static const double gapTitleToSupporting = LinagoraSpacing.base;
+  static const double gapHeadingToOptions = LinagoraSpacing.base * 2;
   static const double gapOptionsToButton = 1;
   static const EdgeInsets headingPadding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base,
   );
 
   static const double settingIconSize = LinagoraSpacing.base * 3;
+  static const double settingGap = LinagoraSpacing.base;
+  static const double settingTextGap = 4;
 
-  static Color get subtitleColor =>
-      LinagoraRefColors.material().tertiary[30] ?? const Color(0xFF99A0A9);
+  static Color subtitleColorOf(BuildContext context) =>
+      Theme.of(context).colorScheme.onSurfaceVariant;
 
-  static Color get buttonColor => LinagoraSysColors.material().primary;
-
-  static Color get buttonTextColor => LinagoraSysColors.material().onPrimary;
+  static Color buttonColor(BuildContext context) =>
+      Theme.of(context).colorScheme.primary;
 
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
     horizontal: 24,
@@ -79,6 +82,17 @@ class VerifyDeviceViewStyle {
     context,
   ).textTheme.bodyMedium?.copyWith(color: supportingColorOf(context));
 
-  static TextStyle? buttonTextStyle(BuildContext context) =>
-      Theme.of(context).textTheme.labelLarge?.copyWith(color: buttonTextColor);
+  static TextStyle? settingTitleStyle(BuildContext context) => Theme.of(context)
+      .extension<LinagoraTextThemeExtension>()
+      ?.bodyMedium2
+      .copyWith(color: titleColorOf(context));
+
+  static TextStyle? settingSubtitleStyle(BuildContext context) => Theme.of(
+    context,
+  ).textTheme.bodyMedium?.copyWith(color: subtitleColorOf(context));
+
+  static TextStyle? buttonTextStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .labelLarge
+      ?.copyWith(color: Theme.of(context).colorScheme.onPrimary);
 }

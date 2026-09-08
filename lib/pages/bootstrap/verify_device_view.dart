@@ -78,7 +78,7 @@ class _RetryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: VerifyDeviceViewStyle.buttonColor,
+      color: VerifyDeviceViewStyle.buttonColor(context),
       borderRadius: BorderRadius.circular(VerifyDeviceViewStyle.buttonRadius),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
