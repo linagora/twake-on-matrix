@@ -10,18 +10,34 @@ class EventListSyncResult extends Equatable {
     required this.top,
     required this.bottom,
     required this.shouldScrollToBottom,
-    required this.hasNewEvents,
+    required this.hasLiveEvents,
+    required this.hasHistoryEvents,
   });
 
   final List<Event> top;
   final List<Event> bottom;
   final bool shouldScrollToBottom;
 
-  /// Whether new events were added during this sync (from any sender).
-  final bool hasNewEvents;
+  /// Newer events prepended toward the live end (`startDiff` / `_top`).
+  final bool hasLiveEvents;
+
+  /// Older events appended toward history (`endDiff` / `_bottom`).
+  ///
+  /// These grow `minScrollExtent` and must not use the live "pin / scroll
+  /// down button" path — restore scroll [pixels] instead.
+  final bool hasHistoryEvents;
+
+  /// Whether any events were added (live or history).
+  bool get hasNewEvents => hasLiveEvents || hasHistoryEvents;
 
   @override
-  List<Object?> get props => [top, bottom, shouldScrollToBottom, hasNewEvents];
+  List<Object?> get props => [
+    top,
+    bottom,
+    shouldScrollToBottom,
+    hasLiveEvents,
+    hasHistoryEvents,
+  ];
 }
 
 /// Extension for managing and syncing lists of Matrix events.
@@ -83,14 +99,18 @@ extension EventListExtension on List<Event> {
           );
         }
       }
+      final replaced =
+          newEvents.isNotEmpty &&
+          (oldEvents.isEmpty ||
+              newEvents.first.eventId != oldEvents.first.eventId);
       return EventListSyncResult(
         top: const [],
         bottom: List.from(newEvents),
         shouldScrollToBottom: false,
-        hasNewEvents:
-            newEvents.isNotEmpty &&
-            (oldEvents.isEmpty ||
-                newEvents.first.eventId != oldEvents.first.eventId),
+        // Full reset — treat as live so callers do not try to restore a
+        // history scroll anchor against a wholly new list.
+        hasLiveEvents: replaced,
+        hasHistoryEvents: false,
       );
     }
 
@@ -137,7 +157,8 @@ extension EventListExtension on List<Event> {
       top: updatedTop,
       bottom: updatedBottom,
       shouldScrollToBottom: shouldScrollToBottom,
-      hasNewEvents: startDiff > 0 || endDiff > 0,
+      hasLiveEvents: startDiff > 0,
+      hasHistoryEvents: endDiff > 0,
     );
   }
 
