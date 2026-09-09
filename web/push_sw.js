@@ -1,27 +1,162 @@
-/* Twake Chat — Web Push service worker (RFC 8030).
+/* Twake Chat — service worker: Web Push (RFC 8030) + precache.
+ *
  * Pusher is event_id_only (same privacy contract as mobile): the push carries
  * NO message content — only event_id/room_id. The SW shows a generic
- * notification; the app fetches the content when the user clicks it. No message
- * content ever transits the push service. Sygnal's events_only flag suppresses
- * content-less count-clear pushes, so every push maps to a real event
- * (satisfies userVisibleOnly).
- * ponytail: no JS test harness in this Flutter repo; covered by the manual
- * chrome://discards freeze repro in the plan's acceptance criteria.
+ * notification; the app fetches the content when the user clicks it. Sygnal's
+ * events_only flag suppresses content-less count-clear pushes, so every push
+ * maps to a real event (satisfies userVisibleOnly).
+ *
+ * A scope can only be controlled by a single service worker, so push and
+ * precache share this file. Do not add a second registration under /web/: it
+ * would silently replace this one.
+ *
+ * ponytail: no JS test harness in this Flutter repo.
  */
 
-// skipWaiting is required: without it a new SW version installs but stays in
-// `waiting` behind the old active worker while any tab is open, so users get
-// stuck on a stale worker until they manually unregister it (DevTools) — the
-// exact problem testers hit. skipWaiting promotes the new version to active on
-// the next load, replacing the old one with no user action.
-// No clients.claim(): a push SW only needs `push`/`notificationclick` on its
-// active worker, never to control app windows. (Verified: claim fires a
-// `controllerchange` but does NOT reload this app — flutter.js registers no SW
-// and has no controllerchange handler. Omitting claim is simply correct, not a
-// reload fix.)
-self.addEventListener('install', function () {
+'use strict';
+
+// Injected at build time by scripts/generate-sw-manifest.py. Empty on purpose:
+// an unbuilt worker falls through to the network rather than breaking.
+const RESOURCES = /*{{TWAKE_PRECACHE_RESOURCES}}*/ {};
+const CORE = /*{{TWAKE_PRECACHE_CORE}}*/ [];
+
+const CACHE_NAME = 'twake-chat-cache';
+const TEMP = 'twake-chat-cache-temp';
+const MANIFEST = 'twake-chat-manifest';
+
+// Keys in RESOURCES are scope-relative: the app is deployed under /web/, not at
+// the origin root.
+function resourceKey(url) {
+  const scope = self.registration.scope;
+  if (!url.startsWith(scope)) return null;
+  const key = url.substring(scope.length);
+  return key === '' ? '/' : key;
+}
+
+// skipWaiting is required: without it a new version stays in `waiting` behind
+// the old worker while any tab is open.
+//
+// CORE is fetched with the default cache mode, NOT {cache:'reload'}: the app is
+// requesting main.dart.js at the same time, and forcing a bypass would download
+// those 3.5 MB twice on a first visit. This is only safe because nginx serves
+// every asset with `Cache-Control: no-cache`, so the HTTP cache always
+// revalidates and can never hand back stale bytes. Keep the two in step.
+self.addEventListener('install', function (event) {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(TEMP).then(function (cache) {
+      return cache.addAll(CORE);
+    })
+  );
 });
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    (async function () {
+      try {
+        var contentCache = await caches.open(CACHE_NAME);
+        const tempCache = await caches.open(TEMP);
+        const manifestCache = await caches.open(MANIFEST);
+        const manifest = await manifestCache.match('manifest');
+
+        if (!manifest) {
+          await caches.delete(CACHE_NAME);
+          contentCache = await caches.open(CACHE_NAME);
+          for (const request of await tempCache.keys()) {
+            const response = await tempCache.match(request);
+            await contentCache.put(request, response);
+          }
+          await caches.delete(TEMP);
+          await manifestCache.put(
+            'manifest',
+            new Response(JSON.stringify(RESOURCES))
+          );
+          await self.clients.claim();
+          return;
+        }
+
+        const oldManifest = await manifest.json();
+        for (const request of await contentCache.keys()) {
+          const key = resourceKey(request.url);
+          if (key === null || !RESOURCES[key] ||
+              RESOURCES[key] !== oldManifest[key]) {
+            await contentCache.delete(request);
+          }
+        }
+        for (const request of await tempCache.keys()) {
+          const response = await tempCache.match(request);
+          await contentCache.put(request, response);
+        }
+        await caches.delete(TEMP);
+        await manifestCache.put(
+          'manifest',
+          new Response(JSON.stringify(RESOURCES))
+        );
+        await self.clients.claim();
+      } catch (error) {
+        // A half-written cache is worse than none.
+        console.log('[Twake Chat] service worker activation failed: ', error);
+        await caches.delete(CACHE_NAME);
+        await caches.delete(TEMP);
+        await caches.delete(MANIFEST);
+      }
+    })()
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  if (event.request.method !== 'GET') return;
+
+  // config.json is deliberately absent from RESOURCES: it is injected at deploy
+  // time, so it must always come from the network.
+  const key = resourceKey(event.request.url);
+  if (key === null || !RESOURCES[key]) return;
+
+  // Serving index.html from cache would hide a deploy.
+  if (key === '/') return onlineFirst(event);
+
+  event.respondWith(
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.match(event.request).then(function (response) {
+        return (
+          response ||
+          fetch(event.request).then(function (fetched) {
+            if (fetched && fetched.ok) cache.put(event.request, fetched.clone());
+            return fetched;
+          })
+        );
+      });
+    })
+  );
+});
+
+function onlineFirst(event) {
+  return event.respondWith(
+    fetch(event.request)
+      .then(function (response) {
+        return caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      })
+      .catch(function (error) {
+        // CORE precaches the shell under index.html, so a root navigation misses
+        // until an online load has stored '/' as well. Fall back to the shell,
+        // or a first offline start would fail with the page already cached.
+        return caches.open(CACHE_NAME).then(function (cache) {
+          return cache
+            .match(event.request)
+            .then(function (response) {
+              return response || cache.match('index.html');
+            })
+            .then(function (response) {
+              if (response != null) return response;
+              throw error;
+            });
+        });
+      })
+  );
+}
 
 self.addEventListener('push', function (event) {
   var data = {};
@@ -59,8 +194,7 @@ self.addEventListener('pushsubscriptionchange', function (event) {
   // Endpoint rotated (expiry/reset). Re-subscribe so pushes keep arriving;
   // the Matrix pusher is re-synced by setupWebPush on the next app open
   // (it drops the stale pusher). applicationServerKey accepts the base64url
-  // VAPID string directly. ponytail: read the key from config.json so the SW
-  // stays config-driven without a build step.
+  // VAPID string directly.
   event.waitUntil(
     fetch('config.json')
       .then(function (r) { return r.json(); })

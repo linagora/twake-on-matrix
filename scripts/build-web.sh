@@ -8,3 +8,6 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter build web --release --verbose --source-maps --base-href="$TWAKECHAT_BASE_HREF"
 cp config.sample.json ./build/web/config.json
 ./scripts/run-sentry.sh
+# Last: sentry_dart_plugin rewrites main.dart.js to inject Debug IDs, and the
+# manifest must hash what is actually served.
+./scripts/generate-sw-manifest.py
