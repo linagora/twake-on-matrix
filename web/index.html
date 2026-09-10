@@ -33,9 +33,6 @@
 
     <title>Twake Chat</title>
     <link rel="manifest" href="manifest.json" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="style.css" />
     <link rel="stylesheet" type="text/css" href="splash/style.css">
     <link rel="stylesheet" type="text/css" href="worker_service/style.css" />
@@ -45,7 +42,7 @@
     />
     <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
-    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <script src="vendor/dotlottie/dotlottie-player.mjs" type="module"></script>
     <script src="i18n/translater.js"></script>
     <script src="worker_service/worker_service.js"></script>
   </head>
@@ -129,7 +126,6 @@
         }
       });
     </script>
-    <script src="https://unpkg.com/pica/dist/pica.min.js"></script>
     <script
       type="application/javascript"
       src="assets/packages/flutter_inappwebview_web/assets/web/web_support.js"
