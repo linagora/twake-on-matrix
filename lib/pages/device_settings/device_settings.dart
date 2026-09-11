@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
@@ -185,6 +186,7 @@ class _DevicesList extends ConsumerWidget {
                           context,
                           notifier,
                           notThisDevice,
+                          removeAll: true,
                         ),
                 )
               else
@@ -228,16 +230,26 @@ class _DevicesList extends ConsumerWidget {
 Future<void> removeDevicesAction(
   BuildContext context,
   DevicesSettingsViewModel notifier,
-  List<Device> devices,
-) async {
-  if (await showOkCancelAlertDialog(
-        useRootNavigator: false,
-        context: context,
-        title: L10n.of(context)!.areYouSure,
-        okLabel: L10n.of(context)!.yes,
-        cancelLabel: L10n.of(context)!.cancel,
-      ) ==
-      OkCancelResult.cancel) {
+  List<Device> devices, {
+  bool removeAll = false,
+}) async {
+  final l10n = L10n.of(context)!;
+  final confirmResult = await showConfirmAlertDialog(
+    useRootNavigator: false,
+    context: context,
+    title: removeAll
+        ? l10n.removeAllOtherDevicesConfirmationTitle
+        : l10n.removeDeviceConfirmationTitle,
+    message: removeAll
+        ? l10n.removeAllOtherDevicesConfirmationDescription
+        : l10n.removeDeviceConfirmationDescription,
+    okLabel: removeAll ? l10n.removeAllOtherDevices : l10n.removeDevice,
+    cancelLabel: l10n.cancel,
+    okLabelButtonColor: LinagoraSysColors.material().error,
+    okTextColor: LinagoraSysColors.material().onError,
+    showCloseButton: PlatformInfos.isWeb,
+  );
+  if (confirmResult != ConfirmResult.ok || !context.mounted) {
     return;
   }
   final client = Matrix.of(context).client;
