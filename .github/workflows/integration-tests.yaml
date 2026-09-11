@@ -908,12 +908,18 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: |
-            set -o pipefail
+            # The emulator-runner executes this with /usr/bin/sh (dash), which
+            # does not support `set -o pipefail`. Redirect to a file instead of
+            # piping, preserve the exit code, then echo the log.
+            export PATH="$PATH:$HOME/.pub-cache/bin"
             patrol test \
               -d emulator-5554 \
               --target "${{ inputs.emulator_spike_target }}" \
               --dart-define-from-file .env.cicd \
-              -v 2>&1 | tee patrol-emulator.log
+              -v > patrol-emulator.log 2>&1
+            status=$?
+            tail -n 300 patrol-emulator.log
+            exit $status
 
       - name: Upload log
         if: always()
