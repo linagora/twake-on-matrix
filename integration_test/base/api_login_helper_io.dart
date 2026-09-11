@@ -42,33 +42,136 @@ Future<String> fetchAuthToken({
 /// Sends a Matrix message as the configured receiver account via the
 /// Client-Server API. Used by tests that need the receiving side to emit a
 /// message while the primary account is logged in from the UI.
-Future<void> sendMessageAsReceiver({required String message}) async {
+///
+/// [roomId] overrides the CICD `GroupID` dart-define so a test-created
+/// fixture room receives the event instead of a stale staging room.
+Future<void> sendMessageAsReceiver({required String message, String? roomId}) =>
+    sendMessagesAsReceiver(messages: [message], roomId: roomId);
+
+/// Sends several events with one receiver login. Join + send share a cached
+/// access token so a single Patrol process does not hit SSO twice.
+Future<void> sendMessagesAsReceiver({
+  required List<String> messages,
+  String? roomId,
+}) async {
   const endpoints = _SsoEndpoints.fromEnvironment();
   const groupID = String.fromEnvironment('GroupID');
-  const receiver = String.fromEnvironment('Receiver');
-  const passOfReceiver = String.fromEnvironment('ReceiverPass');
-
-  final loginToken = await fetchAuthToken(
-    username: receiver,
-    password: passOfReceiver,
-  );
+  final targetRoom = roomId ?? groupID;
+  if (targetRoom.isEmpty) {
+    throw StateError('Missing roomId and GroupID dart-define');
+  }
 
   final client = HttpClient()..autoUncompress = true;
   try {
-    final session = await _loginWithMLoginToken(
-      client: client,
-      endpoints: endpoints,
-      loginToken: loginToken,
-    );
-    await _putMatrixMessage(
-      client: client,
-      session: session,
-      groupID: groupID,
-      message: message,
-    );
+    final session = await _receiverSession(client, endpoints);
+    for (final message in messages) {
+      await _putMatrixMessage(
+        client: client,
+        session: session,
+        groupID: targetRoom,
+        message: message,
+      );
+    }
   } finally {
     client.close(force: true);
   }
+}
+
+/// Makes the configured receiver join [roomId] after the primary account
+/// invited it. Used by mobile group scenarios that create their own room.
+Future<void> ensureReceiverJoined({required String roomId}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    final joinUri = Uri(
+      scheme: 'https',
+      host: endpoints.matrixURL,
+      pathSegments: ['_matrix', 'client', 'v3', 'rooms', roomId, 'join'],
+    );
+    final request = await client.postUrl(joinUri);
+    request.headers
+      ..set(HttpHeaders.contentTypeHeader, 'application/json')
+      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+      ..set(HttpHeaders.userAgentHeader, _userAgent);
+    request.write('{}');
+    final response = await request.close();
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final body = await utf8.decoder.bind(response).join();
+      throw Exception(
+        'Receiver join failed [status=${response.statusCode}] '
+        'body=${body.substring(0, body.length.clamp(0, 300))}',
+      );
+    }
+  } finally {
+    client.close(force: true);
+  }
+}
+
+_MatrixSession? _cachedReceiverSession;
+
+Future<_MatrixSession> _receiverSession(
+  HttpClient client,
+  _SsoEndpoints endpoints,
+) async {
+  final cached = _cachedReceiverSession;
+  if (cached != null) return cached;
+
+  const receiver = String.fromEnvironment('Receiver');
+  const passOfReceiver = String.fromEnvironment('ReceiverPass');
+  final session = endpoints.ssoURL.isEmpty
+      ? await _loginWithPassword(
+          client: client,
+          endpoints: endpoints,
+          credentials: const _Credentials(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        )
+      : await _loginWithMLoginToken(
+          client: client,
+          endpoints: endpoints,
+          loginToken: await fetchAuthToken(
+            username: receiver,
+            password: passOfReceiver,
+          ),
+        );
+  return _cachedReceiverSession = session;
+}
+
+Future<_MatrixSession> _loginWithPassword({
+  required HttpClient client,
+  required _SsoEndpoints endpoints,
+  required _Credentials credentials,
+}) async {
+  final loginUri = Uri.https(endpoints.matrixURL, '/_matrix/client/v3/login');
+  final request = await client.postUrl(loginUri);
+  request.headers
+    ..set(HttpHeaders.contentTypeHeader, 'application/json')
+    ..set(HttpHeaders.userAgentHeader, _userAgent)
+    ..set('Origin', 'https://${endpoints.chatURL}');
+  request.write(
+    jsonEncode({
+      'identifier': {'type': 'm.id.user', 'user': credentials.username},
+      'initial_device_display_name': _deviceDisplayName,
+      'password': credentials.password,
+      'type': 'm.login.password',
+    }),
+  );
+  final response = await request.close();
+  final body = await response.transform(utf8.decoder).join();
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    throw Exception(
+      'Receiver m.login.password failed [status=${response.statusCode}] '
+      'body=${body.substring(0, body.length.clamp(0, 300))}',
+    );
+  }
+  final accessToken =
+      (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+  if (accessToken == null) {
+    throw Exception('Receiver login response missing access_token: $body');
+  }
+  return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
 }
 
 // ---------------------------------------------------------------------------
@@ -375,20 +478,25 @@ Future<void> _putMatrixMessage({
   final endpoints = session.endpoints;
   // Matrix `PUT /send/{eventType}/{txnId}` uses a per-request transaction ID
   // for idempotency. Format: `<chatURL>: <device> <sep> <epoch_ms>`.
-  final txnId = Uri.encodeComponent(
-    '${endpoints.chatURL}: $_deviceDisplayName $_txnIdSeparator'
-    '${DateTime.now().millisecondsSinceEpoch}',
-  );
-  // `groupID` is expected to be a full Matrix room ID (`!localpart:server`)
-  // so tests work against any homeserver, not only `linagora.com`. Encode
-  // it the same way as `txnId` — `!` and `:` are technically RFC 3986-safe
-  // in path segments but the Matrix C-S spec calls for percent-encoding,
-  // and some reverse proxies (and federation endpoints) do not tolerate
-  // the raw form.
-  final encodedRoomId = Uri.encodeComponent(groupID);
-  final sendUri = Uri.https(
-    endpoints.matrixURL,
-    '/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/$txnId',
+  final txnId =
+      '${endpoints.chatURL}: $_deviceDisplayName $_txnIdSeparator'
+      '${DateTime.now().millisecondsSinceEpoch}';
+  // `groupID` is a full Matrix room ID (`!localpart:server`). Build the
+  // path from segments so `!` and `:` are encoded once, matching the
+  // Client-Server spec without double-encoding.
+  final sendUri = Uri(
+    scheme: 'https',
+    host: endpoints.matrixURL,
+    pathSegments: [
+      '_matrix',
+      'client',
+      'v3',
+      'rooms',
+      groupID,
+      'send',
+      'm.room.message',
+      txnId,
+    ],
   );
   final request = await client.putUrl(sendUri);
   request.headers

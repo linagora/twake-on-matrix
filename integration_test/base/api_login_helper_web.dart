@@ -54,17 +54,21 @@ Future<String> fetchAuthToken({
 }
 
 /// Sends a message as the `Receiver` account by first obtaining its access
-/// token via `m.login.password`, then `PUT`-ing the event to the configured
-/// `GroupID`.
-Future<void> sendMessageAsReceiver({required String message}) async {
+/// token via `m.login.password`, then `PUT`-ing the event to [roomId] or
+/// the configured `GroupID`.
+Future<void> sendMessageAsReceiver({
+  required String message,
+  String? roomId,
+}) async {
   const matrixURL = String.fromEnvironment('MATRIX_URL');
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
   const groupID = String.fromEnvironment('GroupID');
+  final targetRoom = roomId ?? groupID;
   if (matrixURL.isEmpty ||
       receiver.isEmpty ||
       passOfReceiver.isEmpty ||
-      groupID.isEmpty) {
+      targetRoom.isEmpty) {
     throw StateError(
       'Missing required dart-defines: MATRIX_URL/Receiver/ReceiverPass/GroupID',
     );
@@ -75,7 +79,7 @@ Future<void> sendMessageAsReceiver({required String message}) async {
     password: passOfReceiver,
   );
 
-  final encodedRoomId = Uri.encodeComponent(groupID);
+  final encodedRoomId = Uri.encodeComponent(targetRoom);
   final sendUri = Uri.parse(
     '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
     'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
@@ -93,4 +97,21 @@ Future<void> sendMessageAsReceiver({required String message}) async {
       'sendMessage failed [${response.statusCode}]: ${response.body}',
     );
   }
+}
+
+Future<void> sendMessagesAsReceiver({
+  required List<String> messages,
+  String? roomId,
+}) async {
+  for (final message in messages) {
+    await sendMessageAsReceiver(message: message, roomId: roomId);
+  }
+}
+
+/// Mobile group fixtures create rooms on the device client. Web tests use
+/// the pre-provisioned Synapse [GroupID] and never invite the receiver.
+Future<void> ensureReceiverJoined({required String roomId}) async {
+  throw UnsupportedError(
+    'ensureReceiverJoined is only used by mobile group fixtures',
+  );
 }

@@ -1,67 +1,121 @@
 import 'package:twake_chat/pages/chat/chat_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/chat_event_list.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/event_info_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 import '../robots/chat_group_detail_robot.dart';
 import 'chat_scenario.dart';
 
-const _group = String.fromEnvironment(
+const _webGroup = String.fromEnvironment(
   'SearchByTitle',
   defaultValue: 'My Default Group',
 );
-
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-/// Opens [_group], posts one message through the UI (sender) and one through
-/// the API as the receiver, waits for both, and returns `(senderMsg,
-/// receiverMsg)`.
+Future<String?> _openGroup(BaseTestScenario scenario) async {
+  final robots = scenario.robots;
+  if (!kIsWeb) {
+    final fixture = await prepareMobileGroupFixture(scenario);
+    await robots.chatListRobot().openSearchScreen();
+    final opened = await robots.searchViewRobot().searchAndOpenRoom(
+      fixture.title,
+    );
+    if (!opened) {
+      throw Exception('Test failed: Room "${fixture.title}" was not found.');
+    }
+    return fixture.roomId;
+  }
+
+  await robots.chatListRobot().openSearchScreen();
+  final opened = await robots.searchViewRobot().searchAndOpenRoom(_webGroup);
+  if (!opened) {
+    throw Exception('Test failed: Room "$_webGroup" was not found.');
+  }
+  return null;
+}
+
+/// Opens the platform fixture room, posts one message through the UI (sender)
+/// and one through the API as the receiver, waits for both, and returns
+/// `(senderMsg, receiverMsg)`.
 ///
 /// Drives the UI exclusively through the abstract robots; the receiver message
 /// is injected via the cross-platform `sendMessageAsReceiver` API helper so the
 /// scenario has a message it does not own to act on.
-Future<(String, String)> _prepareTwoMessages(BaseTestScenario scenario) async {
+Future<(String, String)> _prepareMessages(
+  BaseTestScenario scenario, {
+  String? receiverFixtureMessage,
+}) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
-  await robots.chatListRobot().openSearchScreen();
-  final opened = await robots.searchViewRobot().searchAndOpenRoom(_group);
-  if (!opened) {
-    throw Exception('Test failed: Room "$_group" was not found.');
-  }
+  final roomId = await _openGroup(scenario);
   await $.pump(const Duration(seconds: 1));
 
   final id = _uid();
   final senderMsg = 'sender sent at $id';
-  final receiverMsg = 'receiver sent at $id';
+  final receiverMsg = receiverFixtureMessage ?? '';
 
   await robots.chatGroupDetailRobot().sendMessage(senderMsg);
   await _waitShown(scenario, senderMsg);
 
-  await sendMessageAsReceiver(message: receiverMsg);
-  await _waitShown(scenario, receiverMsg);
+  if (receiverFixtureMessage != null) {
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(scenario);
+      await prepareMobileReceiverMessages(scenario, fixture);
+    } else {
+      await sendMessageAsReceiver(message: receiverMsg, roomId: roomId);
+    }
+    await _waitShown(scenario, receiverMsg, searchTimeline: !kIsWeb);
+  }
 
   return (senderMsg, receiverMsg);
 }
 
-Future<void> _waitShown(BaseTestScenario scenario, String message) async {
+Future<void> _waitShown(
+  BaseTestScenario scenario,
+  String message, {
+  bool searchTimeline = false,
+}) async {
   final chatGroupDetailRobot = scenario.robots.chatGroupDetailRobot();
   final finder = await chatGroupDetailRobot.getText(message);
+
+  // Start at the live edge for newly sent messages. Receiver fixture events
+  // can be older than the currently materialized viewport, so search backward
+  // and then forward through the timeline instead of waiting for a lazily-built
+  // widget that will never appear without scrolling.
+  await chatGroupDetailRobot.scrollToLiveBottom();
+  if (searchTimeline && !finder.visible) {
+    final timeline = find.descendant(
+      of: find.byType(ChatEventList),
+      matching: find.byType(Scrollable),
+    );
+    for (var i = 0; i < 30 && !finder.visible; i++) {
+      if (timeline.evaluate().isEmpty) {
+        await scenario.$.pump(const Duration(milliseconds: 200));
+        continue;
+      }
+      await scenario.$.tester.drag(timeline.first, const Offset(0, 300));
+      await scenario.$.pump(const Duration(milliseconds: 200));
+    }
+  }
   await scenario.$.waitUntilExists(
     finder,
     timeout: const Duration(seconds: 60),
   );
-  // On web the timeline can build a newly sent message just outside the
-  // hit-testable viewport. Move to the live edge after the event exists so the
-  // visibility assertion cannot stall on an off-screen MessageContent.
-  await chatGroupDetailRobot.scrollToLiveBottom();
+  if (!finder.visible) {
+    await scenario.$.tester.ensureVisible(finder.finder.first);
+    await scenario.$.pumpAndSettle();
+  }
   await scenario.$.waitUntilVisible(
     finder,
-    timeout: const Duration(seconds: 60),
+    timeout: const Duration(seconds: 30),
   );
 }
 
@@ -76,23 +130,38 @@ Future<void> _waitAbsent(BaseTestScenario scenario, String message) async {
   }
 }
 
+Future<void> _waitExists(BaseTestScenario scenario, String message) async {
+  final finder = await scenario.robots.chatGroupDetailRobot().getText(message);
+  await scenario.$.waitUntilExists(
+    finder,
+    timeout: const Duration(seconds: 60),
+  );
+}
+
 /// Reply to a sender-owned and a receiver-owned message in a group chat.
 class ChatGroupReplyScenario extends BaseTestScenario {
   ChatGroupReplyScenario(super.$, super.robots);
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: kIsWeb
+          ? 'receiver sent at ${_uid()}'
+          : mobileReceiverMessageReply,
+    );
 
     final replySender = 'reply sender at ${_uid()}';
+    await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openReply(senderMsg);
     await robots.chatGroupDetailRobot().sendMessage(replySender);
-    await _waitShown(this, replySender);
+    await _waitExists(this, replySender);
 
     final replyReceiver = 'reply receiver at ${_uid()}';
+    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
     await robots.messageMenuRobot().openReply(receiverMsg);
     await robots.chatGroupDetailRobot().sendMessage(replyReceiver);
-    await _waitShown(this, replyReceiver);
+    await _waitExists(this, replyReceiver);
   }
 }
 
@@ -103,7 +172,7 @@ class ChatGroupEditScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     // Distinct text (not a superstring of [senderMsg]) so the "original is
     // gone" check can't match the edited bubble under `textContaining`.
@@ -123,7 +192,7 @@ class ChatGroupSelectScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     await robots.messageMenuRobot().openSelect(senderMsg);
 
@@ -139,11 +208,18 @@ class ChatGroupDeleteScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: kIsWeb
+          ? 'receiver sent at ${_uid()}'
+          : mobileReceiverMessageDelete,
+    );
 
+    await _waitShown(this, senderMsg);
     await robots.messageMenuRobot().openDelete(senderMsg);
     await _waitAbsent(this, senderMsg);
 
+    await _waitShown(this, receiverMsg, searchTimeline: !kIsWeb);
     await robots.messageMenuRobot().openDelete(receiverMsg);
     await _waitAbsent(this, receiverMsg);
   }
@@ -158,14 +234,19 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: mobileReceiverMessageDisplayMenu,
+    );
 
+    await _waitShown(this, senderMsg);
     await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
     await ChatScenario(
       $,
     ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
     await ChatGroupDetailRobot($).closePullDownMenu();
 
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
     await ChatScenario(
       $,
@@ -181,9 +262,13 @@ class ChatGroupCopyScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, receiverMsg) = await _prepareTwoMessages(this);
+    final (senderMsg, receiverMsg) = await _prepareMessages(
+      this,
+      receiverFixtureMessage: mobileReceiverMessageCopy,
+    );
 
     // copy sender
+    await _waitShown(this, senderMsg);
     await ChatScenario($).copyMessage(senderMsg);
     const addedText = 'Copy';
     await ChatGroupDetailRobot($).inputMessage(addedText);
@@ -192,6 +277,7 @@ class ChatGroupCopyScenario extends BaseTestScenario {
     await ChatScenario($).verifyMessageIsShown('$addedText$senderMsg', true);
 
     // copy receiver
+    await _waitShown(this, receiverMsg, searchTimeline: true);
     await ChatScenario($).copyMessage(receiverMsg);
     await ChatGroupDetailRobot($).inputMessage(addedText);
     await ChatScenario($).pasteFromClipBoard();
@@ -209,14 +295,22 @@ class ChatGroupMessageInfoScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final (senderMsg, _) = await _prepareTwoMessages(this);
+    final (senderMsg, _) = await _prepareMessages(this);
 
     await robots.messageMenuRobot().openMessageInfo(senderMsg);
 
     final dialog = $(EventInfoDialog);
     await $.waitUntilVisible(dialog, timeout: const Duration(seconds: 10));
     expect(dialog.$(Avatar), findsWidgets);
-    expect(dialog.$(SelectableText), findsWidgets);
+
+    // The source JSON sits below the initially built ListView viewport on
+    // compact FTL devices, so scroll until the lazily-built widget exists.
+    final source = dialog.$(SelectableText);
+    for (var i = 0; i < 5 && !source.exists; i++) {
+      await $.tester.drag(dialog.$(ListView), const Offset(0, -300));
+      await $.pumpAndSettle();
+    }
+    expect(source, findsWidgets);
 
     // Close the dialog via its app-bar close button.
     await dialog.$(AppBar).$(IconButton).tap();
