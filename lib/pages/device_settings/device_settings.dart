@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -286,10 +288,28 @@ Future<void> verifyDeviceAction(
   Device device,
 ) async {
   final client = Matrix.of(context).client;
-  final req = await client
+  // Keep a handle so a dismissed loading dialog cannot orphan the request.
+  final verificationFuture = client
       .userDeviceKeys[client.userID!]!
       .deviceKeys[device.deviceId]!
       .startVerification();
+  // Block the list while the request is set up so Verify can't be re-tapped.
+  final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+    future: () => verificationFuture,
+  );
+  final req = result.result;
+  if (req == null) {
+    // System back (or other pop) can dismiss while startVerification is still
+    // in flight; cancel when it completes so KeyVerification is not orphaned.
+    unawaited(
+      verificationFuture.then(
+        (pending) => pending.cancel('m.user'),
+        onError: (_, __) {},
+      ),
+    );
+    return;
+  }
+  // Refresh only on a terminal state; a plain dialog close (cancel) is not one.
   req.onUpdate = () {
     if ({
       KeyVerificationState.error,
