@@ -149,7 +149,7 @@ class _ExternalContactTileState extends State<_ExternalContactTile> {
             child: ExpansionContactListTile(
               contact: validatedContact,
               highlightKeyword: widget.controller.textEditingController.text,
-              enableInvitation: widget.controller.supportInvitation(),
+              enableInvitation: widget.controller.isInvitationEnabled,
               onContactTap: () => widget.controller.onContactTap(
                 context: context,
                 path: 'rooms',
@@ -178,7 +178,7 @@ class _ContactTile extends StatelessWidget {
       child: ExpansionContactListTile(
         contact: contact,
         highlightKeyword: controller.textEditingController.text,
-        enableInvitation: controller.supportInvitation(),
+        enableInvitation: controller.isInvitationEnabled,
         onContactTap: () => controller.onContactTap(
           context: context,
           path: 'rooms',

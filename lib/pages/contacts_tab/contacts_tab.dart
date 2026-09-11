@@ -1,36 +1,37 @@
 import 'dart:async';
 
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
 import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
-class ContactsTab extends StatefulWidget {
+class ContactsTab extends ConsumerStatefulWidget {
   final Widget? bottomNavigationBar;
 
   const ContactsTab({super.key, this.bottomNavigationBar});
 
   @override
-  State<StatefulWidget> createState() => ContactsTabController();
+  ConsumerState<ContactsTab> createState() => ContactsTabController();
 }
 
-class ContactsTabController extends State<ContactsTab>
+class ContactsTabController extends ConsumerState<ContactsTab>
     with
-        WellKnownMixin,
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         AddressBooksMixin,
@@ -46,20 +47,27 @@ class ContactsTabController extends State<ContactsTab>
   bool get enableRecentContacts => false;
 
   @override
-  bool get showPhonebookContacts => supportInvitation();
+  bool get isInvitationEnabled =>
+      mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
 
   @override
   void initState() {
+    // The well-known can land after the first synchronization skipped the
+    // phonebook.
+    ref.listenManual(
+      loginHomeserverSummaryProvider.select(
+        (summary) => summary.isInvitationEnabled,
+      ),
+      (previous, next) {
+        if (next) {
+          unawaited(retrySynchronizeContacts());
+        }
+      },
+    );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         listenAddressBookEvents(client);
-        discoveryInformationNotifier.value = Matrix.of(
-          context,
-        ).loginHomeserverSummary?.discoveryInformation;
-        if (discoveryInformationNotifier.value == null) {
-          unawaited(_loadWellKnownAndRetryContacts());
-        }
         synchronizeContactsOnContactTab(
           context: context,
           client: Matrix.of(context).client,
@@ -70,19 +78,6 @@ class ContactsTabController extends State<ContactsTab>
 
     _listenFocusTextEditing();
     super.initState();
-  }
-
-  Future<void> _loadWellKnownAndRetryContacts() async {
-    await getWellKnownInformation(client);
-    if (!mounted || !supportInvitation()) {
-      return;
-    }
-
-    await retrySynchronizeContactsOnContactTab(
-      context: context,
-      client: client,
-      matrixLocalizations: MatrixLocals(L10n.of(context)!),
-    );
   }
 
   void _listenFocusTextEditing() {

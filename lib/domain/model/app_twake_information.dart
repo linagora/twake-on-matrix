@@ -8,10 +8,18 @@ part 'app_twake_information.g.dart';
 class AppTwakeInformation with EquatableMixin {
   static const String appTwakeInformationKey = 'app.twake.chat';
 
+  static const String supportContactKey = 'support_contact';
+
   @JsonKey(name: 'common_settings')
   CommonSettingsInformation? commonSettingsInformation;
 
-  AppTwakeInformation({this.commonSettingsInformation});
+  @JsonKey(name: 'enable_invitations')
+  final bool? isInvitationEnabled;
+
+  AppTwakeInformation({
+    this.commonSettingsInformation,
+    this.isInvitationEnabled,
+  });
 
   factory AppTwakeInformation.fromJson(Map<String, dynamic> json) =>
       _$AppTwakeInformationFromJson(json);
@@ -19,5 +27,5 @@ class AppTwakeInformation with EquatableMixin {
   Map<String, dynamic> toJson() => _$AppTwakeInformationToJson(this);
 
   @override
-  List<Object?> get props => [commonSettingsInformation];
+  List<Object?> get props => [commonSettingsInformation, isInvitationEnabled];
 }

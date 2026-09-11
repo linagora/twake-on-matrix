@@ -63,7 +63,7 @@ class _PhonebookContactTile extends StatelessWidget {
       child: ExpansionPhonebookContactListTile(
         contact: contact,
         highlightKeyword: controller.textEditingController.text,
-        enableInvitation: controller.supportInvitation(),
+        enableInvitation: controller.isInvitationEnabled,
         onContactTap: () => controller.onContactTap(
           context: context,
           path: 'rooms',

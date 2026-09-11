@@ -4,13 +4,13 @@ import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
 import 'package:twake_chat/pages/search/search_mixin.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search_state_extension.dart';
 import 'package:twake_chat/utils/extension/presentation_search_extension.dart';
@@ -23,11 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 
 class SearchContactsAndChatsController
-    with
-        SearchDebouncerMixin,
-        SearchMixin,
-        WellKnownMixin,
-        ContactsViewControllerMixin {
+    with SearchDebouncerMixin, SearchMixin, ContactsViewControllerMixin {
   final BuildContext context;
 
   SearchContactsAndChatsController(this.context);
@@ -44,7 +40,9 @@ class SearchContactsAndChatsController
   final isShowChatsAndContactsNotifier = ValueNotifier(false);
 
   @override
-  bool get showPhonebookContacts => supportInvitation();
+  bool get isInvitationEnabled =>
+      context.mounted &&
+      Matrix.of(context).loginHomeserverSummary.isInvitationEnabled;
 
   void toggleShowMore() {
     isShowChatsAndContactsNotifier.toggle();
@@ -58,9 +56,6 @@ class SearchContactsAndChatsController
   List<Room> get _rooms => client.rooms;
 
   Future<void> init() async {
-    discoveryInformationNotifier.value = Matrix.of(
-      context,
-    ).loginHomeserverSummary?.discoveryInformation;
     initializeDebouncer((keyword) {
       _searchChatsFromLocal(keyword: keyword);
     });

@@ -79,7 +79,9 @@ mixin class ContactsViewControllerMixin {
 
   bool get enablePhonebookLookup => true;
 
-  bool get showPhonebookContacts => true;
+  bool get isInvitationEnabled => true;
+
+  bool get showPhonebookContacts => isInvitationEnabled;
 
   Future<bool> _isPhonebookContactsAvailable() async {
     if (!enablePhonebookLookup) {
