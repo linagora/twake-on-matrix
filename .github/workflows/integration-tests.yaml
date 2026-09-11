@@ -14,6 +14,10 @@ on:
         required: false
         type: boolean
         default: false
+      emulator_spike_target:
+        description: "SPIKE: run a single Patrol test file on a GitHub-hosted x86_64 emulator instead of FTL. Leave empty for normal runs."
+        required: false
+        default: ""
   schedule:
     - cron: "0 0 * * *"
 
@@ -159,7 +163,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   integration_shards_build:
     name: Build Integration Shard APKs
-    if: ${{ github.event_name == 'schedule' || inputs.patrol_test_target == '' }}
+    if: ${{ (github.event_name == 'schedule' || inputs.patrol_test_target == '') && inputs.emulator_spike_target == '' }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -317,7 +321,7 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   integration_shard_run:
     name: Integration Test (${{ matrix.shard }})
-    if: ${{ github.event_name == 'schedule' || inputs.patrol_test_target == '' }}
+    if: ${{ (github.event_name == 'schedule' || inputs.patrol_test_target == '') && inputs.emulator_spike_target == '' }}
     needs: integration_shards_build
     runs-on: ubuntu-latest
     concurrency:
@@ -800,3 +804,122 @@ jobs:
 
       - name: Summarize published performance point
         run: cat performance-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # SPIKE – Run a single Patrol target on a GitHub-hosted x86_64 emulator as an
+  # alternative to FTL's ARM virtual devices. GitHub Linux runners have KVM, so
+  # the AVD runs the same functional tests faster/more reliably (still an
+  # emulator, still not a real device). Enabled only when `emulator_spike_target`
+  # is set, so normal runs are unaffected.
+  # ────────────────────────────────────────────────────────────────────────────
+  android_emulator_spike:
+    name: "SPIKE x86_64 emulator — ${{ inputs.emulator_spike_target }}"
+    if: ${{ inputs.emulator_spike_target != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk space before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo docker image prune --all --force
+          sudo apt-get clean
+          echo "Disk space after cleanup:"
+          df -h
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: "stable"
+          cache: true
+
+      - name: Add Android SDK tools to PATH
+        run: echo "${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | sdkmanager --licenses || echo "Warning: License acceptance failed"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Rust targets for Android
+        run: |
+          rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Setup project
+        run: |
+          flutter pub get
+          flutter pub run build_runner build --delete-conflicting-outputs
+          dart pub global activate patrol_cli 4.3.1
+
+      - name: Write integration env file
+        env:
+          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+        run: |
+          if printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q '='; then
+            printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d > .env.cicd
+          else
+            printf '%s\n' "$INTEGRATION_TEST_ENV_BASE64" > .env.cicd
+          fi
+          if ! grep -q '=' .env.cicd; then
+            echo "::error::INTEGRATION_TEST_ENV_BASE64 is neither valid base64 nor a raw env file."
+            exit 1
+          fi
+          cut -d= -f1 .env.cicd
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Patrol on x86_64 emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            set -o pipefail
+            patrol test \
+              -d emulator-5554 \
+              --target "${{ inputs.emulator_spike_target }}" \
+              --dart-define-from-file .env.cicd \
+              -v 2>&1 | tee patrol-emulator.log
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patrol-emulator-log
+          path: patrol-emulator.log
+          retention-days: 7
+          if-no-files-found: ignore
