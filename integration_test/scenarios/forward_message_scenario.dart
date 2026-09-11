@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
+
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 
 // ── Configurable via --dart-define ───────────────────────────────────────────
 
-const _sourceRoom = String.fromEnvironment(
+const _webSourceRoom = String.fromEnvironment(
   'SearchByTitle',
   defaultValue: 'My Default Group',
 );
@@ -21,9 +24,13 @@ const _receiver2 = String.fromEnvironment(
 
 int _uid() => DateTime.now().microsecondsSinceEpoch;
 
-/// Opens [_sourceRoom], sends a unique message, waits for it to appear, then
+/// Opens the source room, sends a unique message, waits for it to appear, then
 /// opens the message action menu and triggers Forward — leaving `ForwardView`
 /// on screen. Returns the sent message text.
+///
+/// The staged `SearchByTitle` room is not available on the shared mobile
+/// account, so mobile opens the in-app group fixture and creates the two
+/// receiver destination rooms from the app instead.
 ///
 /// Drives the UI exclusively through the abstract robots; the menu-opening
 /// gesture (mobile long-press vs web hover) lives in the message-menu robot.
@@ -31,10 +38,23 @@ Future<String> _sendAndOpenForward(BaseTestScenario scenario) async {
   final robots = scenario.robots;
   final $ = scenario.$;
 
+  final String sourceRoom;
+  if (!kIsWeb) {
+    // Prepare every room before navigating away from the chat list: the
+    // fixture helper needs the chat list mounted. The two receiver rooms are
+    // what the forward picker searches for as destinations.
+    final fixture = await prepareMobileGroupFixture(scenario);
+    await prepareMobileRoomFixture(scenario, _receiver1);
+    await prepareMobileRoomFixture(scenario, _receiver2);
+    sourceRoom = fixture.title;
+  } else {
+    sourceRoom = _webSourceRoom;
+  }
+
   await robots.chatListRobot().openSearchScreen();
-  final opened = await robots.searchViewRobot().searchAndOpenRoom(_sourceRoom);
+  final opened = await robots.searchViewRobot().searchAndOpenRoom(sourceRoom);
   if (!opened) {
-    throw Exception('Test failed: Room "$_sourceRoom" was not found.');
+    throw Exception('Test failed: Room "$sourceRoom" was not found.');
   }
   // Extra settle time so the chat view and composer are fully ready.
   await $.pump(const Duration(seconds: 1));

@@ -1,41 +1,59 @@
+import 'package:flutter/foundation.dart';
+
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 
 /// Cross-platform scenario: open a group member's profile and verify the
 /// displayed identity fields.
 ///
-/// Searches the group named by `SearchByTitle`, opens its group info,
-/// drills into the member identified by `MemberMatrixID` and checks that
-/// the display name, matrix id, email and phone number render consistently.
+/// On web it searches the group named by `SearchByTitle` and drills into the
+/// member identified by `MemberMatrixID`. On mobile the staged `SearchByTitle`
+/// room does not exist — the app runs against a shared account — so it opens
+/// the in-app group fixture and its invited receiver instead.
 ///
 /// Drives the UI exclusively through the abstract robots exposed by the
 /// `RobotFactory`.
 class ChatGroupOpenProfileScenario extends BaseTestScenario {
   ChatGroupOpenProfileScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
+  static const _webSearchPhrase = String.fromEnvironment(
     'SearchByTitle',
     defaultValue: 'My Default Group',
   );
 
-  static const _memberMatrixID = String.fromEnvironment(
+  static const _webMemberMatrixId = String.fromEnvironment(
     'MemberMatrixID',
     defaultValue: '@member:localhost',
   );
 
   @override
   Future<void> runTestLogic() async {
-    await robots.chatListRobot().openSearchScreen();
+    final String memberMatrixId;
 
-    final opened = await robots.searchViewRobot().searchAndOpenRoom(
-      _searchPhrase,
-    );
-    if (!opened) {
-      throw Exception('Test failed: Room "$_searchPhrase" was not found.');
+    if (!kIsWeb) {
+      final fixture = await prepareMobileGroupFixture(this);
+      await robots.chatListRobot().openSearchScreen();
+      final opened = await robots.searchViewRobot().searchAndOpenRoom(
+        fixture.title,
+      );
+      if (!opened) {
+        throw Exception('Test failed: Room "${fixture.title}" was not found.');
+      }
+      memberMatrixId = fixture.memberMatrixId;
+    } else {
+      await robots.chatListRobot().openSearchScreen();
+      final opened = await robots.searchViewRobot().searchAndOpenRoom(
+        _webSearchPhrase,
+      );
+      if (!opened) {
+        throw Exception('Test failed: Room "$_webSearchPhrase" was not found.');
+      }
+      memberMatrixId = _webMemberMatrixId;
     }
 
     await robots.chatGroupDetailRobot().tapOnChatBarTitle();
     await robots.groupInformationRobot().openMemberDetail(
-      matrixID: _memberMatrixID,
+      matrixID: memberMatrixId,
     );
 
     final profile = robots.chatProfileInfoRobot();
@@ -47,7 +65,7 @@ class ChatGroupOpenProfileScenario extends BaseTestScenario {
     final phoneNumber = await profile.getPhoneNumber();
 
     await profile.verifyDisplayName(displayName: displayName);
-    await profile.verifyDisplayMatrixId(matrixId: _memberMatrixID);
+    await profile.verifyDisplayMatrixId(matrixId: memberMatrixId);
     await profile.verifyEmail(email: email);
     await profile.verifyPhoneNumber(phoneNumber: phoneNumber);
   }
