@@ -23,16 +23,24 @@ class ChatDeviceVerificationBannerViewModel
 
   DevicesBannerState _computeState() {
     if (_dismissed) return DevicesBannerInitialState();
-    return _isCurrentSessionUnverified()
-        ? const DisplayWarningBannerState()
-        : DevicesBannerInitialState();
+    final deviceKeys = client.userDeviceKeys[client.userID]?.deviceKeys;
+    if (deviceKeys == null || deviceKeys.isEmpty) {
+      return DevicesBannerInitialState();
+    }
+    final hasAnyOutOfSyncOwnSession = deviceKeys.values.any(
+      (keys) => keys.encryptToDevice == false,
+    );
+    if (!hasAnyOutOfSyncOwnSession) return DevicesBannerInitialState();
+
+    return DisplayWarningBannerState(
+      isCurrentSessionOutOfSync: _isCurrentSessionOutOfSync(deviceKeys),
+    );
   }
 
-  bool _isCurrentSessionUnverified() {
+  bool _isCurrentSessionOutOfSync(Map<String, DeviceKeys> deviceKeys) {
     final deviceId = client.deviceID;
     if (deviceId == null) return false;
-    final deviceKeys = client.userDeviceKeys[client.userID]?.deviceKeys;
-    return deviceKeys?[deviceId]?.encryptToDevice == false;
+    return deviceKeys[deviceId]?.encryptToDevice == false;
   }
 
   void onDismissBanner() {
