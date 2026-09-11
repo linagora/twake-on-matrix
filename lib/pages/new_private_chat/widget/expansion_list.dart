@@ -24,6 +24,7 @@ class ExpansionList extends StatelessWidget {
   final ValueNotifierCustom<Either<Failure, Success>>
   presentationPhonebookContactNotifier;
   final Function() goToNewGroupChat;
+  final Function() goToNewFeed;
   final Function(BuildContext context, PresentationContact contact)
   onExternalContactTap;
   final Function(BuildContext context, PresentationContact contact)
@@ -39,6 +40,7 @@ class ExpansionList extends StatelessWidget {
     super.key,
     required this.presentationContactsNotifier,
     required this.goToNewGroupChat,
+    required this.goToNewFeed,
     required this.onExternalContactTap,
     required this.onContactTap,
     required this.textEditingController,
@@ -211,6 +213,7 @@ class ExpansionList extends StatelessWidget {
 
     return [
       _NewGroupButton(onPressed: goToNewGroupChat),
+      _NewFeedButton(onPressed: goToNewFeed),
       if (PlatformInfos.isMobile)
         _CreateContactButton(onPressed: goToCreateContact),
     ];
@@ -278,6 +281,22 @@ class _NewGroupButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: Icons.supervisor_account_outlined,
       text: L10n.of(context)!.newGroupChat,
+    );
+  }
+}
+
+class _NewFeedButton extends StatelessWidget {
+  final Function() onPressed;
+
+  const _NewFeedButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconTextTileButton(
+      context: context,
+      onPressed: onPressed,
+      iconData: Icons.campaign_outlined,
+      text: L10n.of(context)!.newFeed,
     );
   }
 }

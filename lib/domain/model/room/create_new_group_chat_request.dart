@@ -8,6 +8,7 @@ class CreateNewGroupChatRequest extends Equatable {
   final CreateRoomPreset createRoomPreset;
   final String? urlAvatar;
   final Map<String, dynamic>? powerLevelContentOverride;
+  final bool isFeed;
 
   const CreateNewGroupChatRequest({
     this.groupName,
@@ -16,6 +17,7 @@ class CreateNewGroupChatRequest extends Equatable {
     this.createRoomPreset = CreateRoomPreset.privateChat,
     this.urlAvatar,
     this.powerLevelContentOverride,
+    this.isFeed = false,
   });
 
   @override
@@ -26,5 +28,6 @@ class CreateNewGroupChatRequest extends Equatable {
     createRoomPreset,
     urlAvatar,
     powerLevelContentOverride,
+    isFeed,
   ];
 }

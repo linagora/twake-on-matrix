@@ -65,14 +65,16 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
-                    const SizedBox(height: 16),
-                    _EncryptionSettingTile(
-                      enableEncryptionNotifier:
-                          newGroupInfoController.enableEncryptionNotifier,
-                      onChanged: (value) {
-                        newGroupInfoController.toggleEnableEncryption();
-                      },
-                    ),
+                    if (!newGroupInfoController.isFeed) ...[
+                      const SizedBox(height: 16),
+                      _EncryptionSettingTile(
+                        enableEncryptionNotifier:
+                            newGroupInfoController.enableEncryptionNotifier,
+                        onChanged: (value) {
+                          newGroupInfoController.toggleEnableEncryption();
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -121,7 +123,9 @@ class NewGroupChatInfoView extends StatelessWidget {
     return PreferredSize(
       preferredSize: const Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight),
       child: TwakeAppBar(
-        title: L10n.of(context)!.newGroupChat,
+        title: newGroupInfoController.isFeed
+            ? L10n.of(context)!.newFeed
+            : L10n.of(context)!.newGroupChat,
         context: context,
         centerTitle: true,
         withDivider: true,
@@ -201,7 +205,9 @@ class NewGroupChatInfoView extends StatelessWidget {
                   labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  hintText: L10n.of(context)!.enterGroupName,
+                  hintText: newGroupInfoController.isFeed
+                      ? L10n.of(context)!.enterFeedName
+                      : L10n.of(context)!.enterGroupName,
                   hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: LinagoraRefColors.material().neutral[60],
                   ),

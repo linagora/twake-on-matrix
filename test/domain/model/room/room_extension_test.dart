@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -132,6 +133,64 @@ void main() {
 
       // Assert
       expect(result, true);
+    });
+  });
+
+  group('RoomExtension.isFeed', () {
+    StrippedStateEvent createEvent({String? roomType}) => StrippedStateEvent(
+      type: EventTypes.RoomCreate,
+      senderId: '@alice:example.com',
+      stateKey: '',
+      content: {
+        'creator': '@alice:example.com',
+        if (roomType != null) 'type': roomType,
+      },
+    );
+
+    test('isFeed_whenCreateEventCarriesTheFeedType_returnsTrue', () {
+      // Arrange
+      final room = MockRoom();
+      when(
+        room.getState(EventTypes.RoomCreate, ''),
+      ).thenReturn(createEvent(roomType: FeedConfig.roomType));
+
+      // Act
+      final result = room.isFeed;
+
+      // Assert
+      expect(result, true);
+    });
+
+    test('isFeed_whenCreateEventHasNoType_returnsFalse', () {
+      // Arrange
+      final room = MockRoom();
+      when(room.getState(EventTypes.RoomCreate, '')).thenReturn(createEvent());
+
+      // Act
+      final result = room.isFeed;
+
+      // Assert
+      expect(result, false);
+    });
+
+    test('isFeed_whenCreateEventCarriesAnotherType_returnsFalse', () {
+      // Arrange
+      final room = MockRoom();
+      when(
+        room.getState(EventTypes.RoomCreate, ''),
+      ).thenReturn(createEvent(roomType: RoomCreationTypes.mSpace));
+
+      // Assert
+      expect(room.isFeed, false);
+    });
+
+    test('isFeed_whenTheRoomHasNoCreateEvent_returnsFalse', () {
+      // Arrange
+      final room = MockRoom();
+      when(room.getState(EventTypes.RoomCreate, '')).thenReturn(null);
+
+      // Assert
+      expect(room.isFeed, false);
     });
   });
 }

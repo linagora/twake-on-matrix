@@ -34,6 +34,18 @@ class FirstColumnInnerRoutes {
         } else {
           return _defaultPageRoute(const NewGroupChatInfo(contactsList: {}));
         }
+      case 'innernavigator/newfeed':
+        return _defaultPageRoute(const NewGroup(isFeed: true));
+      case 'innernavigator/newfeedinfo':
+        if (arguments is Set<PresentationContact>) {
+          return _defaultPageRoute(
+            NewGroupChatInfo(contactsList: arguments, isFeed: true),
+          );
+        } else {
+          return _defaultPageRoute(
+            const NewGroupChatInfo(contactsList: {}, isFeed: true),
+          );
+        }
       default:
         return _defaultPageRoute(const SizedBox.shrink());
     }

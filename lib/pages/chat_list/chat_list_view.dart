@@ -108,6 +108,16 @@ class ChatListView extends StatelessWidget {
                               ),
                             ),
                           ),
+                          MenuItemButton(
+                            leadingIcon: const Icon(Icons.campaign_outlined),
+                            onPressed: () => controller.goToNewFeed(context),
+                            child: Text(
+                              L10n.of(context)!.newFeed,
+                              style: PopupMenuWidgetStyle.defaultItemTextStyle(
+                                context,
+                              ),
+                            ),
+                          ),
                         ],
                         style: MenuStyle(
                           alignment: Alignment.topLeft,

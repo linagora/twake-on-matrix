@@ -105,4 +105,45 @@ void main() {
       expect(find.byIcon(Icons.arrow_back_ios), findsOneWidget);
     });
   });
+
+  group('NewGroupChatInfo in feed mode - widget test', () {
+    Future<void> pumpView(WidgetTester tester, {required bool isFeed}) async {
+      when(mockController.isFeed).thenReturn(isFeed);
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: NewGroupChatInfoView(mockController),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('titles the screen after the feed', (
+      WidgetTester tester,
+    ) async {
+      await pumpView(tester, isFeed: true);
+
+      final twakeAppBar = tester.widget<TwakeAppBar>(find.byType(TwakeAppBar));
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(twakeAppBar.title, equals(L10n.of(context)!.newFeed));
+    });
+
+    testWidgets('hides the encryption toggle', (WidgetTester tester) async {
+      await pumpView(tester, isFeed: true);
+
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.enableEncryption), findsNothing);
+    });
+
+    testWidgets('keeps the encryption toggle for a group', (
+      WidgetTester tester,
+    ) async {
+      await pumpView(tester, isFeed: false);
+
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
+    });
+  });
 }
