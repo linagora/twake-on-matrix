@@ -377,7 +377,9 @@ jobs:
       - name: Run integration shard on virtual device
         run: |
           BASE_RUN_ID="integration-${{ matrix.shard }}-${{ github.run_id }}"
-          FTL_WALL_TIMEOUT=25m
+          # Virtual devices allow up to 60m; the previous 20m cap left no room
+          # for the per-test fixture setup and made every shard time out.
+          FTL_WALL_TIMEOUT=45m
           RUN_ID="${BASE_RUN_ID}-attempt1"
           DEVICE_MODEL=MediumPhone.arm
           DEVICE_VERSION=34
@@ -398,7 +400,7 @@ jobs:
               --app "apks/${{ matrix.shard }}/app-debug.apk" \
               --test "apks/${{ matrix.shard }}/app-debug-androidTest.apk" \
               --device model="$DEVICE_MODEL",version="$DEVICE_VERSION" \
-              --timeout 20m \
+              --timeout 35m \
               --use-orchestrator \
               --environment-variables clearPackageData=${{ matrix.clear_package_data }} \
               --results-bucket "$FTL_RESULTS_BUCKET" \
