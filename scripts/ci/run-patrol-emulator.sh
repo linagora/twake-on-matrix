@@ -17,6 +17,7 @@ if [[ "$#" -lt 1 ]]; then
 fi
 
 DEVICE="${PATROL_DEVICE:-emulator-5554}"
+ADB="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}/platform-tools/adb"
 
 export PATH="$PATH:$HOME/.pub-cache/bin"
 
@@ -31,9 +32,6 @@ while IFS='=' read -r key value; do
   printf '%s=%s chars\n' "$key" "${#value}"
 done < .env.cicd
 
-echo "=== patrol version ==="
-patrol --version || true
-
 target_args=()
 for target in "$@"; do
   target_args+=(--target "$target")
@@ -42,8 +40,26 @@ done
 echo "=== patrol test on $DEVICE ==="
 printf '  target: %s\n' "$@"
 
+# Capture logcat so a native crash ("Process crashed") can be diagnosed: the
+# Gradle output alone does not say why the app process died.
+"$ADB" -s "$DEVICE" logcat -c || true
+"$ADB" -s "$DEVICE" logcat > logcat.txt 2>&1 &
+logcat_pid=$!
+
+set +e
 patrol test \
   -d "$DEVICE" \
   "${target_args[@]}" \
   --dart-define-from-file .env.cicd \
   -v
+status=$?
+set -e
+
+kill "$logcat_pid" 2>/dev/null || true
+wait "$logcat_pid" 2>/dev/null || true
+
+echo "=== crash signatures from logcat ==="
+grep -aE "FATAL EXCEPTION|Fatal signal|SIGSEGV|SIGABRT|Process crashed|tombstone|Abort message|backtrace" logcat.txt \
+  | tail -n 80 || true
+
+exit "$status"

@@ -118,6 +118,10 @@ jobs:
           # The provision script emits TEST_USERNAME/TEST_PASSWORD (to dodge
           # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
           sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
+          # Defines the suite reads that the provision script does not emit.
+          echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          echo "TestUserServer=localhost" >> .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -275,6 +279,10 @@ jobs:
           # The provision script emits TEST_USERNAME/TEST_PASSWORD (to dodge
           # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
           sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
+          # Defines the suite reads that the provision script does not emit.
+          echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          echo "TestUserServer=localhost" >> .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM

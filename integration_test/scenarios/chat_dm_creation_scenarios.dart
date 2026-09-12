@@ -7,6 +7,14 @@ String _stamp() {
   return '${now.year}${now.month}${now.day}${now.hour}${now.minute}${now.second}';
 }
 
+/// Homeserver of the throwaway DM accounts. Defaults to the staging server;
+/// the local-Synapse harness sets it to `localhost` so the address resolves on
+/// the test homeserver instead of an unreachable federated one.
+const _testUserServer = String.fromEnvironment(
+  'TestUserServer',
+  defaultValue: 'linagora.com',
+);
+
 /// Cross-platform scenario: start a DM with a user already chatted with.
 ///
 /// Opens the new-chat flow for an existing account, sends a message and
@@ -40,7 +48,7 @@ class CreateDmWithNewUserScenario extends BaseTestScenario {
   @override
   Future<void> runTestLogic() async {
     await robots.homeRobot().gotoChatListScreen();
-    final account = '@new${_stamp()}:linagora.com';
+    final account = '@new${_stamp()}:$_testUserServer';
     final opened = await robots.chatListRobot().createDirectMessage(account);
 
     // A never-chatted remote address only resolves to a draft tile where the
@@ -64,7 +72,7 @@ class CreateDmWithNonExistingUserScenario extends BaseTestScenario {
   @override
   Future<void> runTestLogic() async {
     await robots.homeRobot().gotoChatListScreen();
-    final account = '@anon${_stamp()}:linagora.com';
+    final account = '@anon${_stamp()}:$_testUserServer';
     final opened = await robots.chatListRobot().createDirectMessage(account);
 
     // Web surfaces no draft tile for a non-existing remote address, so there is
