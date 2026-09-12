@@ -153,10 +153,18 @@ class ChatGroupDetailRobot extends CoreRobot
   }
 
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {
-    await $(
+    // Long-press is ignored while the event is still sending, so retry until
+    // the menu opens instead of pressing once right after the bubble appears.
+    final messageFinder = $(
       MessageContent,
-    ).containing(find.textContaining(message)).longPress();
-    await $.waitUntilVisible($(PullDownMenu));
+    ).containing(find.textContaining(message));
+    final menu = $(PullDownMenu);
+    final deadline = DateTime.now().add(const Duration(seconds: 60));
+    while (!menu.exists && DateTime.now().isBefore(deadline)) {
+      await messageFinder.longPress();
+      await $.pump(const Duration(milliseconds: 700));
+    }
+    await $.waitUntilVisible(menu, timeout: const Duration(seconds: 15));
     await $.pump();
     return PullDownMenuRobot($);
   }
