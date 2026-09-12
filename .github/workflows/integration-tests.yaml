@@ -103,23 +103,18 @@ jobs:
           flutter pub run build_runner build --delete-conflicting-outputs
           dart pub global activate patrol_cli 4.3.1
 
-      - name: Write integration env file
-        env:
-          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+      - name: Start Synapse (Docker)
+        run: ./scripts/integration-server-synapse.sh
+
+      - name: Provision fixtures for the emulator
         run: |
-          # The secret may hold either base64-encoded content or the raw env
-          # file. Try base64 first (CR/LF/spaces stripped); if that yields
-          # env-like `KEY=...` lines use it, otherwise fall back to the raw
-          # secret value.
-          if printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q '='; then
-            printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d > .env.cicd
-          else
-            printf '%s\n' "$INTEGRATION_TEST_ENV_BASE64" > .env.cicd
-          fi
-          if ! grep -q '=' .env.cicd; then
-            echo "::error::INTEGRATION_TEST_ENV_BASE64 is neither valid base64 nor a raw env file."
-            exit 1
-          fi
+          SYNAPSE_URL=http://127.0.0.1 SYNAPSE_SERVER_NAME=localhost \
+            ./scripts/integration-test-provision-synapse.sh > .env.local
+          # The emulator reaches the runner's loopback through the 10.0.2.2
+          # alias, so rewrite the connection URLs while keeping the Matrix
+          # server name (user IDs stay @user:localhost).
+          sed -E 's#^(MATRIX_URL|SERVER_URL)=http://(127\.0\.0\.1|localhost)#\1=http://10.0.2.2#' \
+            .env.local > .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -139,6 +134,10 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: |
             bash scripts/ci/run-patrol-emulator.sh "${{ inputs.patrol_test_target }}"
+
+      - name: Tear down Synapse
+        if: always()
+        run: docker rm -f synapse || true
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 1b – Nightly functional suite, one shard per parallel x86_64 emulator.
@@ -258,23 +257,18 @@ jobs:
           flutter pub run build_runner build --delete-conflicting-outputs
           dart pub global activate patrol_cli 4.3.1
 
-      - name: Write integration env file
-        env:
-          INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
+      - name: Start Synapse (Docker)
+        run: ./scripts/integration-server-synapse.sh
+
+      - name: Provision fixtures for the emulator
         run: |
-          # The secret may hold either base64-encoded content or the raw env
-          # file. Try base64 first (CR/LF/spaces stripped); if that yields
-          # env-like `KEY=...` lines use it, otherwise fall back to the raw
-          # secret value.
-          if printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d 2>/dev/null | grep -q '='; then
-            printf '%s' "$INTEGRATION_TEST_ENV_BASE64" | tr -d '\r\n ' | base64 -d > .env.cicd
-          else
-            printf '%s\n' "$INTEGRATION_TEST_ENV_BASE64" > .env.cicd
-          fi
-          if ! grep -q '=' .env.cicd; then
-            echo "::error::INTEGRATION_TEST_ENV_BASE64 is neither valid base64 nor a raw env file."
-            exit 1
-          fi
+          SYNAPSE_URL=http://127.0.0.1 SYNAPSE_SERVER_NAME=localhost \
+            ./scripts/integration-test-provision-synapse.sh > .env.local
+          # The emulator reaches the runner's loopback through the 10.0.2.2
+          # alias, so rewrite the connection URLs while keeping the Matrix
+          # server name (user IDs stay @user:localhost).
+          sed -E 's#^(MATRIX_URL|SERVER_URL)=http://(127\.0\.0\.1|localhost)#\1=http://10.0.2.2#' \
+            .env.local > .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -294,6 +288,10 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: |
             bash scripts/ci/run-patrol-emulator.sh ${{ matrix.targets }}
+
+      - name: Tear down Synapse
+        if: always()
+        run: docker rm -f synapse || true
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 2 – Build perf APK once, upload as artifact

@@ -47,6 +47,14 @@ class ChatListSearchScenario extends BaseTestScenario {
     final s = SoftAssertHelper();
 
     await robots.homeRobot().gotoChatListScreen();
+    // Asserted with the list at rest: on mobile an active search field raises
+    // the keyboard over the bottom navigation, so the nav is hit-testable only
+    // before the first search.
+    s.softAssertEquals(
+      robots.homeRobot().isMainNavigationVisible(),
+      true,
+      'Main navigation is not visible',
+    );
     s.softAssertEquals(
       await robots.chatListRobot().isListScrollable(),
       true,
@@ -129,11 +137,6 @@ class ChatListSearchScenario extends BaseTestScenario {
       robots.searchRobot().isSearchFieldVisible(),
       true,
       'Search text field is not visible',
-    );
-    s.softAssertEquals(
-      robots.homeRobot().isMainNavigationVisible(),
-      true,
-      'Main navigation is not visible',
     );
 
     // Open a group from the search result and confirm the detail screen shows.

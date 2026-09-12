@@ -84,9 +84,7 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   final client = HttpClient()..autoUncompress = true;
   try {
     final session = await _receiverSession(client, endpoints);
-    final joinUri = Uri(
-      scheme: 'https',
-      host: endpoints.matrixURL,
+    final joinUri = _matrixBase(endpoints.matrixURL).replace(
       pathSegments: ['_matrix', 'client', 'v3', 'rooms', roomId, 'join'],
     );
     final request = await client.postUrl(joinUri);
@@ -144,7 +142,9 @@ Future<_MatrixSession> _loginWithPassword({
   required _SsoEndpoints endpoints,
   required _Credentials credentials,
 }) async {
-  final loginUri = Uri.https(endpoints.matrixURL, '/_matrix/client/v3/login');
+  final loginUri = _matrixBase(
+    endpoints.matrixURL,
+  ).replace(path: '/_matrix/client/v3/login');
   final request = await client.postUrl(loginUri);
   request.headers
     ..set(HttpHeaders.contentTypeHeader, 'application/json')
@@ -209,6 +209,17 @@ class _MatrixSession {
   const _MatrixSession({required this.endpoints, required this.accessToken});
   final _SsoEndpoints endpoints;
   final String accessToken;
+}
+
+/// Base URI for the Matrix client-server API.
+///
+/// Accepts either a bare host (`matrix.example.com`, defaulting to https — the
+/// staging convention) or a full URL (`http://10.0.2.2`, used when the suite
+/// runs against a locally-provisioned Synapse through the Android emulator's
+/// host-loopback alias).
+Uri _matrixBase(String matrixURL) {
+  final parsed = Uri.parse(matrixURL);
+  return parsed.hasScheme ? parsed : Uri(scheme: 'https', host: matrixURL);
 }
 
 // ---------------------------------------------------------------------------
@@ -439,7 +450,9 @@ Future<_MatrixSession> _loginWithMLoginToken({
   required _SsoEndpoints endpoints,
   required String loginToken,
 }) async {
-  final loginUri = Uri.https(endpoints.matrixURL, '/_matrix/client/v3/login');
+  final loginUri = _matrixBase(
+    endpoints.matrixURL,
+  ).replace(path: '/_matrix/client/v3/login');
   final request = await client.postUrl(loginUri);
   request.headers
     ..set(HttpHeaders.contentTypeHeader, 'application/json')
@@ -484,9 +497,7 @@ Future<void> _putMatrixMessage({
   // `groupID` is a full Matrix room ID (`!localpart:server`). Build the
   // path from segments so `!` and `:` are encoded once, matching the
   // Client-Server spec without double-encoding.
-  final sendUri = Uri(
-    scheme: 'https',
-    host: endpoints.matrixURL,
+  final sendUri = _matrixBase(endpoints.matrixURL).replace(
     pathSegments: [
       '_matrix',
       'client',
