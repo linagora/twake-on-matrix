@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
-# Runs one Patrol test target against an already-booted Android emulator.
+# Runs one or more Patrol test targets against an already-booted Android
+# emulator.
 #
 # Invoked as a single line from the `reactivecircus/android-emulator-runner`
 # `script` input: that action executes the script line by line, so anything
 # relying on multi-line shell (backslash continuations, variables) must live
 # in a file like this one.
 #
-# Usage: run-patrol-emulator.sh <patrol-test-target> [device-id]
+# Usage: run-patrol-emulator.sh <target> [<target> ...]
+#        (device id defaults to emulator-5554)
 set -euo pipefail
 
-TARGET="${1:?usage: run-patrol-emulator.sh <patrol-test-target> [device-id]}"
-DEVICE="${2:-emulator-5554}"
+if [[ "$#" -lt 1 ]]; then
+  echo "::error::usage: run-patrol-emulator.sh <target> [<target> ...]" >&2
+  exit 2
+fi
+
+DEVICE="${PATROL_DEVICE:-emulator-5554}"
 
 export PATH="$PATH:$HOME/.pub-cache/bin"
 
@@ -28,9 +34,16 @@ done < .env.cicd
 echo "=== patrol version ==="
 patrol --version || true
 
-echo "=== patrol test: $TARGET ==="
+target_args=()
+for target in "$@"; do
+  target_args+=(--target "$target")
+done
+
+echo "=== patrol test on $DEVICE ==="
+printf '  target: %s\n' "$@"
+
 patrol test \
   -d "$DEVICE" \
-  --target "$TARGET" \
+  "${target_args[@]}" \
   --dart-define-from-file .env.cicd \
   -v
