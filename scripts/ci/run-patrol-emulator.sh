@@ -59,7 +59,7 @@ kill "$logcat_pid" 2>/dev/null || true
 wait "$logcat_pid" 2>/dev/null || true
 
 echo "=== crash signatures from logcat ==="
-grep -aE "FATAL EXCEPTION|Fatal signal|SIGSEGV|SIGABRT|Process crashed|tombstone|Abort message|backtrace" logcat.txt \
-  | tail -n 80 || true
+grep -aE -A30 "FATAL EXCEPTION|Fatal signal|SIGSEGV|SIGABRT|Process crashed|tombstone|Abort message" logcat.txt \
+  | tail -n 200 || true
 
 exit "$status"

@@ -6,6 +6,9 @@ void main() {
     description:
         'Open settings contact visibility screen test and verify everyone option is present',
     mobileOnly: true,
+    // Contacts visibility is persisted through the staging TOM backend
+    // (`/_twake`), which the local-Synapse harness does not provide.
+    requiresBackend: true,
     scenarioBuilder: ($, robots) =>
         SettingsContactsVisibilityEveryoneScenario($, robots),
   );
@@ -14,6 +17,9 @@ void main() {
     description:
         'Open settings contact visibility screen test and my contacts option is present',
     mobileOnly: true,
+    // Contacts visibility is persisted through the staging TOM backend
+    // (`/_twake`), which the local-Synapse harness does not provide.
+    requiresBackend: true,
     scenarioBuilder: ($, robots) =>
         SettingsContactsVisibilityContactsScenario($, robots),
   );
@@ -22,6 +28,9 @@ void main() {
     description:
         'Open settings contact visibility screen test and nobody option is present',
     mobileOnly: true,
+    // Contacts visibility is persisted through the staging TOM backend
+    // (`/_twake`), which the local-Synapse harness does not provide.
+    requiresBackend: true,
     scenarioBuilder: ($, robots) =>
         SettingsContactsVisibilityNobodyScenario($, robots),
   );

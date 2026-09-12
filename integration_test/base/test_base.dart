@@ -30,6 +30,12 @@ class TestBase {
     // mobile, which prevents dedicated browser benchmarks from accidentally
     // entering Android or iOS suites.
     bool webOnly = false,
+    // Marks a test that needs the staging TOM REST backend (served at
+    // `/_twake`) — e.g. the contacts-visibility setting.
+    bool requiresBackend = false,
+    // Marks a test that needs real hardware (Wi-Fi toggling, system
+    // clipboard) rather than an emulator.
+    bool requiresHardware = false,
   }) {
     // On web a `mobileOnly` test must not be REGISTERED at all (not merely
     // skipped). Patrol web's Playwright runner boots the Flutter app
@@ -42,6 +48,14 @@ class TestBase {
     // Mobile is unaffected (`kIsWeb` is false), so coverage is preserved.
     if (kIsWeb && mobileOnly) return;
     if (!kIsWeb && webOnly) return;
+
+    // The local-Synapse emulator harness cannot provide the staging TOM backend
+    // or real hardware, so those tests are not registered there instead of
+    // failing. They stay registered everywhere else.
+    if (const bool.fromEnvironment('LOCAL_HARNESS') &&
+        (requiresBackend || requiresHardware)) {
+      return;
+    }
 
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',

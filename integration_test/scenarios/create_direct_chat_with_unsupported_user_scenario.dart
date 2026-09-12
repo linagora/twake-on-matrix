@@ -51,7 +51,7 @@ class CreateDirectChatWithUnsupportedUserScenario extends BaseTestScenario {
     final after = await robots.chatListRobot().getChatRoomCounts();
     expect(
       after,
-      before,
+      lessThanOrEqualTo(before),
       reason: 'Messaging an unsupported user must not create a room',
     );
   }

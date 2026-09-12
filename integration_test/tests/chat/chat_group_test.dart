@@ -29,6 +29,8 @@ void main() {
     tags: ["chat_group_test_test04"],
     description: 'copy a message in a direct chat',
     mobileOnly: true,
+    // Paste uses the system clipboard/context menu; unreliable on an emulator.
+    requiresHardware: true,
     scenarioBuilder: ($, robots) => ChatGroupCopyScenario($, robots),
   );
 

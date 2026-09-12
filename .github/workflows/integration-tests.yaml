@@ -122,6 +122,10 @@ jobs:
           echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
+          echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
+          # Tests needing the staging TOM backend or real hardware are not
+          # registered against this local harness (see TestBase.runPatrolTest).
+          echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -138,7 +142,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -no-snapshot
           script: |
             bash scripts/ci/run-patrol-emulator.sh "${{ inputs.patrol_test_target }}"
 
@@ -283,6 +287,10 @@ jobs:
           echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
+          echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
+          # Tests needing the staging TOM backend or real hardware are not
+          # registered against this local harness (see TestBase.runPatrolTest).
+          echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -299,7 +307,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -no-snapshot
           script: |
             bash scripts/ci/run-patrol-emulator.sh ${{ matrix.targets }}
 
