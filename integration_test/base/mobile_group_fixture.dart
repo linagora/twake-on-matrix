@@ -116,7 +116,15 @@ Future<MobileGroupFixture> _prepareMobileRoomFixture(
     await ensureReceiverJoined(roomId: room.id);
   }
 
-  final joined = await room.requestParticipants([Membership.join]);
+  // The receiver joins through the Client-Server API; the room membership only
+  // reaches this client after the next /sync. Poll instead of asserting once.
+  final joinDeadline = DateTime.now().add(const Duration(seconds: 30));
+  var joined = await room.requestParticipants([Membership.join]);
+  while (!joined.any((participant) => participant.id == receiverMatrixId) &&
+      DateTime.now().isBefore(joinDeadline)) {
+    await scenario.$.pump(const Duration(seconds: 1));
+    joined = await room.requestParticipants([Membership.join]);
+  }
   if (!joined.any((participant) => participant.id == receiverMatrixId)) {
     throw StateError(
       'Receiver $receiverMatrixId did not join room ${room.id}.',
