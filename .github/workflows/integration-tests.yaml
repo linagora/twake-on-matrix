@@ -115,6 +115,9 @@ jobs:
           # server name (user IDs stay @user:localhost).
           sed -E 's#^(MATRIX_URL|SERVER_URL)=http://(127\.0\.0\.1|localhost)#\1=http://10.0.2.2#' \
             .env.local > .env.cicd
+          # The provision script emits TEST_USERNAME/TEST_PASSWORD (to dodge
+          # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
+          sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
@@ -269,6 +272,9 @@ jobs:
           # server name (user IDs stay @user:localhost).
           sed -E 's#^(MATRIX_URL|SERVER_URL)=http://(127\.0\.0\.1|localhost)#\1=http://10.0.2.2#' \
             .env.local > .env.cicd
+          # The provision script emits TEST_USERNAME/TEST_PASSWORD (to dodge
+          # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
+          sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
           cut -d= -f1 .env.cicd
 
       - name: Enable KVM
