@@ -47,13 +47,20 @@ printf '  target: %s\n' "$@"
 logcat_pid=$!
 
 set +e
-patrol test \
-  -d "$DEVICE" \
-  "${target_args[@]}" \
-  --dart-define-from-file .env.cicd \
-  -v
+# Bound a hung test (e.g. an external MXID lookup against an isolated Synapse)
+# instead of letting the job run until the 90m job timeout.
+timeout --signal=INT --kill-after=2m "${PATROL_WALL_TIMEOUT:-20m}" \
+  patrol test \
+    -d "$DEVICE" \
+    "${target_args[@]}" \
+    --dart-define-from-file .env.cicd \
+    -v
 status=$?
 set -e
+
+if [[ "$status" -eq 124 ]]; then
+  echo "::error::patrol test exceeded the ${PATROL_WALL_TIMEOUT:-20m} wall-clock timeout."
+fi
 
 kill "$logcat_pid" 2>/dev/null || true
 wait "$logcat_pid" 2>/dev/null || true
