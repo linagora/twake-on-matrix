@@ -1,4 +1,5 @@
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/home_robot.dart';
 import '../robots/message_context_menu_robot.dart';
@@ -12,18 +13,16 @@ import 'chat_scenario.dart';
 class MessageContextMenuSafeAreaScenario extends BaseTestScenario {
   MessageContextMenuSafeAreaScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
-
   @override
   Future<void> runTestLogic() async {
     final s = SoftAssertHelper();
 
-    // Step 1: open the chat group.
+    // Step 1: open the in-app group fixture room. The staged `SearchByTitle`
+    // room is not available on the shared mobile account, so mobile uses the
+    // fixture created by the app instead of a staging search fixture.
     await HomeRobot($).gotoChatListScreen();
-    final chatDetail = await ChatScenario($).openChatGroup(_searchPhrase);
+    final fixture = await prepareMobileGroupFixture(this);
+    final chatDetail = await ChatScenario($).openChatGroup(fixture.title);
     await $.pumpAndSettle();
 
     // Step 2: send a long message so the context menu can overflow.

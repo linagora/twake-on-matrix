@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/base_test_scenario.dart';
+import '../base/mobile_group_fixture.dart';
 import '../robots/home_robot.dart';
 import 'chat_scenario.dart';
 
@@ -15,18 +16,16 @@ import 'chat_scenario.dart';
 class ChatImageRetryScenario extends BaseTestScenario {
   ChatImageRetryScenario(super.$, super.robots);
 
-  static const _searchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
-
   @override
   Future<void> runTestLogic() async {
     final chatScenario = ChatScenario($);
 
-    // 1. Navigate to a chat room.
+    // 1. Navigate to the in-app group fixture room. The staged `SearchByTitle`
+    // room is not available on the shared mobile account, so mobile uses the
+    // fixture created by the app instead of a staging search fixture.
     await HomeRobot($).gotoChatListScreen();
-    await chatScenario.openChatGroup(_searchPhrase);
+    final fixture = await prepareMobileGroupFixture(this);
+    await chatScenario.openChatGroup(fixture.title);
 
     // 2. Turn off internet.
     await $.native.disableWifi();
