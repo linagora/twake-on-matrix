@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
@@ -46,23 +44,25 @@ class ContactsTabController extends ConsumerState<ContactsTab>
   @override
   bool get enableRecentContacts => false;
 
+  ProviderSubscription<bool>? _invitationEnabledSubscription;
+
   @override
   bool get isInvitationEnabled =>
       mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
 
   @override
   void initState() {
-    // The well-known can land after the first synchronization skipped the
-    // phonebook.
-    ref.listenManual(
+    super.initState();
+    // The well-known can land after contacts without a Matrix ID were hidden.
+    _invitationEnabledSubscription = ref.listenManual(
       loginHomeserverSummaryProvider.select(
         (summary) => summary.isInvitationEnabled,
       ),
-      (_, next) {
-        if (next) {
-          unawaited(retrySynchronizeContacts());
-        }
-      },
+      (_, _) => refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: MatrixLocals(L10n.of(context)!),
+      ),
     );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
@@ -77,7 +77,6 @@ class ContactsTabController extends ConsumerState<ContactsTab>
     });
 
     _listenFocusTextEditing();
-    super.initState();
   }
 
   void _listenFocusTextEditing() {
@@ -156,6 +155,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
 
   @override
   void dispose() {
+    _invitationEnabledSubscription?.close();
     disposeContactsMixin();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

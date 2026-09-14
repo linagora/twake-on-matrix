@@ -36,6 +36,8 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
         GoToGroupChatMixin {
   final scrollController = ScrollController();
 
+  ProviderSubscription<bool>? _invitationEnabledSubscription;
+
   @override
   bool get isInvitationEnabled =>
       mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
@@ -43,6 +45,17 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
   @override
   void initState() {
     super.initState();
+    // The well-known can land after contacts without a Matrix ID were hidden.
+    _invitationEnabledSubscription = ref.listenManual(
+      loginHomeserverSummaryProvider.select(
+        (summary) => summary.isInvitationEnabled,
+      ),
+      (_, _) => refreshAllContacts(
+        context: context,
+        client: Matrix.of(context).client,
+        matrixLocalizations: MatrixLocals(L10n.of(context)!),
+      ),
+    );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
@@ -108,10 +121,11 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
 
   @override
   void dispose() {
-    super.dispose();
+    _invitationEnabledSubscription?.close();
     WidgetsBinding.instance.removeObserver(this);
     disposeContactsMixin();
     scrollController.dispose();
+    super.dispose();
   }
 
   @override

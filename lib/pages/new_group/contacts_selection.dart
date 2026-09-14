@@ -36,6 +36,8 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
 
   bool get isFullScreen => true;
 
+  ProviderSubscription<bool>? _invitationEnabledSubscription;
+
   @override
   bool get isInvitationEnabled =>
       mounted && ref.read(loginHomeserverSummaryProvider).isInvitationEnabled;
@@ -44,6 +46,18 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
 
   @override
   void initState() {
+    super.initState();
+    // The well-known can land after contacts without a Matrix ID were hidden.
+    _invitationEnabledSubscription = ref.listenManual(
+      loginHomeserverSummaryProvider.select(
+        (summary) => summary.isInvitationEnabled,
+      ),
+      (_, _) => refreshAllContacts(
+        context: context,
+        client: client,
+        matrixLocalizations: MatrixLocals(L10n.of(context)!),
+      ),
+    );
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
@@ -55,7 +69,6 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
         );
       }
     });
-    super.initState();
   }
 
   @override
@@ -65,6 +78,7 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
 
   @override
   void dispose() {
+    _invitationEnabledSubscription?.close();
     WidgetsBinding.instance.removeObserver(this);
     disposeContactsMixin();
     selectedContactsMapNotifier.dispose();
