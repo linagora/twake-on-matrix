@@ -18,7 +18,11 @@ All feature/fix commits that are intended for the release must be merged into `m
 
 ### 2. Pull translations from Weblate
 
-Weblate pushes translation commits to the `weblate/l10n` remote branch (tracked locally as `l10n`). Cherry-pick or merge those commits into `main`:
+Weblate pushes translation commits to the `l10n` branch. Merge the latest
+translations into `main` by following the sync workflow documented in
+[`docs/l10n_weblate_workflow.md`](../l10n_weblate_workflow.md) (rebase `l10n`
+on `main`, trigger the Weblate update, open a PR from `l10n` into `main`).
+Confirm that PR is merged before continuing to the next step.
 
 ### 3. Update CHANGELOG.md
 

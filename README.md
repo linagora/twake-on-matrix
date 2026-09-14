@@ -193,6 +193,19 @@ flutter devices   # To list available run targets
 flutter run -d chrome
 ```
 
+## Localization (Weblate)
+
+Translations are managed on
+[Weblate (Linagora / twake-matrix)](https://hosted.weblate.org/projects/linagora/twake-matrix/).
+
+- Translators: use the Weblate UI directly.
+- Source ARB files: `assets/l10n/` (template: `intl_en.arb`).
+- Sync branch: [`l10n`](https://github.com/linagora/twake-on-matrix/tree/l10n).
+
+Maintainers: the full sync process (rebase `l10n` on `main`, trigger the
+Weblate update/pull, open a PR from `l10n` into `main`) is documented in
+[docs/l10n_weblate_workflow.md](docs/l10n_weblate_workflow.md).
+
 ## Build
 
 Please use the helper script corresponding to your target in order to build:
