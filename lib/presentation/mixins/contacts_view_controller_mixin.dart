@@ -79,7 +79,7 @@ mixin class ContactsViewControllerMixin {
 
   bool get enablePhonebookLookup => true;
 
-  bool get isInvitationEnabled => true;
+  bool get isInvitationEnabled => false;
 
   bool get showPhonebookContacts => isInvitationEnabled;
 
