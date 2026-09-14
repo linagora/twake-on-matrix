@@ -18,7 +18,7 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'Pin/unpin a chat',
+    description: 'Pin and unpin a chat',
     scenarioBuilder: ($, robots) => PinChatScenario($, robots),
   );
 }

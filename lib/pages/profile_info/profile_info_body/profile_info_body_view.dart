@@ -19,26 +19,30 @@ class ProfileInfoBodyView extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (controller.responsive.isMobile(context))
-          _buildMobileHeader(context)
-        else
-          _buildWebHeader(context),
-        const SizedBox(height: 16),
-        ProfileInfoContactRows(
-          user: controller.user!,
-          userInfoNotifier: controller.userInfoNotifier,
-        ),
-        if (!controller.isOwnProfile) ...[
-          Padding(
-            padding: ProfileInfoBodyViewStyle.actionsPadding,
-            child: controller.buildProfileInfoActions(context),
-          ),
-        ] else
+    // Scrollable so the body never overflows when the member has extra
+    // contact rows (email/phone) or on short viewports.
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (controller.responsive.isMobile(context))
+            _buildMobileHeader(context)
+          else
+            _buildWebHeader(context),
           const SizedBox(height: 16),
-      ],
+          ProfileInfoContactRows(
+            user: controller.user!,
+            userInfoNotifier: controller.userInfoNotifier,
+          ),
+          if (!controller.isOwnProfile) ...[
+            Padding(
+              padding: ProfileInfoBodyViewStyle.actionsPadding,
+              child: controller.buildProfileInfoActions(context),
+            ),
+          ] else
+            const SizedBox(height: 16),
+        ],
+      ),
     );
   }
 

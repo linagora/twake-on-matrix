@@ -25,10 +25,20 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   PullDownMenuRobot get _menu => PullDownMenuRobot($);
 
   Future<void> _openMenu(String message) async {
-    await $(
+    // The app ignores long-presses while the event is still `isSending`
+    // (`MultiPlatformSelectionMode.onLongPress` is null until the server
+    // acks). Waiting only for the bubble to be *visible* races that ack, so
+    // press until the menu actually opens.
+    final messageFinder = $(
       MessageContent,
-    ).containing(find.textContaining(message)).longPress();
-    await $.waitUntilVisible($(PullDownMenu));
+    ).containing(find.textContaining(message));
+    final menu = $(PullDownMenu);
+    final deadline = DateTime.now().add(const Duration(seconds: 60));
+    while (!menu.exists && DateTime.now().isBefore(deadline)) {
+      await messageFinder.longPress();
+      await $.pump(const Duration(milliseconds: 700));
+    }
+    await $.waitUntilVisible(menu, timeout: const Duration(seconds: 15));
     await $.pump();
   }
 

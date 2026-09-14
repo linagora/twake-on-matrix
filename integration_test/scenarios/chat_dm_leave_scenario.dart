@@ -18,13 +18,17 @@ const _kNavigationTimeout = Duration(seconds: 5);
 // Generate unique timestamp-based account for each test run
 String generateTimestampAccount() {
   final now = DateTime.now();
-  const serverUrl = String.fromEnvironment('SERVER_URL');
-  if (serverUrl.isEmpty) {
+  // Derive the homeserver name from the configured account
+  // (`@alice:localhost` -> `localhost`) rather than `SERVER_URL`, which carries
+  // a scheme/host and is not a valid Matrix server name.
+  const currentAccount = String.fromEnvironment('CurrentAccount');
+  final separator = currentAccount.indexOf(':');
+  if (separator < 0 || separator == currentAccount.length - 1) {
     throw StateError(
-      'SERVER_URL environment variable is not set. '
-      'Please provide it via --dart-define=SERVER_URL=your-server',
+      'CurrentAccount must be a full Matrix ID, got "$currentAccount".',
     );
   }
+  final serverName = currentAccount.substring(separator + 1);
   final date =
       '${now.year}'
       '${now.month.toString().padLeft(2, '0')}'
@@ -33,7 +37,7 @@ String generateTimestampAccount() {
       '${now.hour.toString().padLeft(2, '0')}'
       '${now.minute.toString().padLeft(2, '0')}'
       '${now.second.toString().padLeft(2, '0')}';
-  return '@user$date.$time:$serverUrl';
+  return '@user$date.$time:$serverName';
 }
 
 /// Mobile-only: create a DM, send a message, verify it appears in the chat
