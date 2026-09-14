@@ -134,6 +134,9 @@ function onlineFirst(event) {
   return event.respondWith(
     fetch(event.request)
       .then(function (response) {
+        // An error page must not become the cached shell: it would then be what
+        // the offline fallback below serves. Return it, but keep it out.
+        if (!response || !response.ok) return response;
         return caches.open(CACHE_NAME).then(function (cache) {
           cache.put(event.request, response.clone());
           return response;
