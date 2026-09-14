@@ -58,7 +58,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
       loginHomeserverSummaryProvider.select(
         (summary) => summary.isInvitationEnabled,
       ),
-      (previous, next) {
+      (_, next) {
         if (next) {
           unawaited(retrySynchronizeContacts());
         }
