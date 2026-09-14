@@ -96,7 +96,8 @@ void main() {
 
       final result = EventListExtension.syncEventLists(
         oldEvents: [event1, event2, event3],
-        newEvents: [event1, event3], // event2 removed
+        newEvents: [event1, event3],
+        // event2 removed
         currentTop: [],
         currentBottom: [event1, event2, event3],
         wasRequestingFuture: false,
@@ -144,6 +145,8 @@ void main() {
 
       expect(result.bottom.length, 3);
       expect(result.bottom[2].eventId, '\$event3');
+      expect(result.hasHistoryEvents, isTrue);
+      expect(result.hasLiveEvents, isFalse);
     });
 
     test('should add new events at the start to top list', () {
@@ -161,6 +164,8 @@ void main() {
 
       expect(result.top.length, 1);
       expect(result.top[0].eventId, '\$event1');
+      expect(result.hasLiveEvents, isTrue);
+      expect(result.hasHistoryEvents, isFalse);
     });
 
     test('should not add duplicates when events exist in both lists', () {
@@ -224,7 +229,8 @@ void main() {
 
       final result = EventListExtension.syncEventLists(
         oldEvents: [event1, sendingEvent, event3],
-        newEvents: [event1, event3], // sending event removed
+        newEvents: [event1, event3],
+        // sending event removed
         currentTop: [],
         currentBottom: [event1, sendingEvent, event3],
         wasRequestingFuture: false,
