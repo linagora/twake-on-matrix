@@ -192,6 +192,38 @@ void main() {
     );
 
     test(
+      'execute_whenFeedPresetRejectionIsReworded_stillFailsWithFeedNotSupported',
+      () async {
+        // Arrange — only the errcode is relied upon, not the wording
+        stubRawCreateRoom(
+          throws: MatrixException.fromJson({
+            'errcode': 'M_BAD_JSON',
+            'error': 'Unknown room creation option',
+          }),
+        );
+        const request = CreateNewGroupChatRequest(
+          groupName: 'My feed',
+          isFeed: true,
+        );
+
+        // Act
+        final result = interactor.execute(
+          matrixClient: mockClient,
+          createNewGroupChatRequest: request,
+        );
+
+        // Assert
+        await expectLater(
+          result,
+          emitsInOrder([
+            emitsLoading,
+            emitsFailureWith<FeedNotSupportedByHomeserverException>(),
+          ]),
+        );
+      },
+    );
+
+    test(
       'execute_whenFeedCreationFailsForAnotherReason_keepsTheGenericFailure',
       () async {
         // Arrange

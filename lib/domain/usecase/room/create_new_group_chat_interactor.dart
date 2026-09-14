@@ -63,9 +63,11 @@ class CreateNewGroupChatInteractor {
       }
     } catch (exception, stackTrace) {
       Logs().e('CreateNewGroupChatInteractor', exception, stackTrace);
+      // The preset is the only non-standard field of a feed request, so a
+      // M_BAD_JSON means the homeserver does not know it.
       if (createNewGroupChatRequest.isFeed &&
           exception is MatrixException &&
-          exception.errorMessage.toLowerCase().contains('preset')) {
+          exception.error == MatrixError.M_BAD_JSON) {
         yield Left(
           CreateNewGroupChatFailed(
             exception: FeedNotSupportedByHomeserverException(),
