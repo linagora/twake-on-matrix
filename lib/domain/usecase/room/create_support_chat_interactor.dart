@@ -24,10 +24,11 @@ class CreateSupportChatInteractor {
         throw Exception('No cached discovery information available');
       }
       final discovery = cachedDiscovery;
-      final supportChatTwakeId =
-          (discovery.additionalProperties[AppTwakeInformation
-                  .appTwakeInformationKey]
-              as Map?)?[AppTwakeInformation.supportContactKey];
+      final twakeChatData = discovery
+          .additionalProperties[AppTwakeInformation.appTwakeInformationKey];
+      final supportChatTwakeId = twakeChatData is Map
+          ? twakeChatData[AppTwakeInformation.supportContactKey]
+          : null;
       if (supportChatTwakeId is! String || supportChatTwakeId.trim().isEmpty) {
         throw Exception('No support contact found in well-known');
       }
