@@ -5,6 +5,7 @@ flutter config --enable-web
 flutter clean
 flutter pub get
 flutter pub run build_runner build --delete-conflicting-outputs
+./scripts/fetch-web-vendor.sh
 # --no-web-resources-cdn keeps CanvasKit on our own origin. Without it Flutter
 # points the app at gstatic.com, while shipping an unused local copy anyway.
 flutter build web --release --verbose --source-maps --no-web-resources-cdn --base-href="$TWAKECHAT_BASE_HREF"
