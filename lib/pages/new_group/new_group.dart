@@ -4,10 +4,11 @@ import 'package:twake_chat/pages/new_group/contacts_selection.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 
-class NewGroup extends StatefulWidget {
+class NewGroup extends ConsumerStatefulWidget {
   const NewGroup({super.key});
 
   @override

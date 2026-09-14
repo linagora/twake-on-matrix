@@ -4,7 +4,6 @@ import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/model/contact/contact.dart';
-import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
@@ -38,11 +37,6 @@ class SearchContactsAndChatsController
   final recentAndContactsNotifier = ValueNotifier<List<PresentationSearch>>([]);
 
   final isShowChatsAndContactsNotifier = ValueNotifier(false);
-
-  @override
-  bool get isInvitationEnabled =>
-      context.mounted &&
-      Matrix.of(context).loginHomeserverSummary.isInvitationEnabled;
 
   void toggleShowMore() {
     isShowChatsAndContactsNotifier.toggle();

@@ -7,13 +7,14 @@ import 'package:twake_chat/presentation/extensions/invite_user_exception_extensi
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:matrix/matrix.dart';
 
-class InvitationSelection extends StatefulWidget {
+class InvitationSelection extends ConsumerStatefulWidget {
   final String roomId;
   final bool? isFullScreen;
 
