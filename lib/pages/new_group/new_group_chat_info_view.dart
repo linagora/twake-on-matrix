@@ -70,9 +70,8 @@ class NewGroupChatInfoView extends StatelessWidget {
                       _EncryptionSettingTile(
                         enableEncryptionNotifier:
                             newGroupInfoController.enableEncryptionNotifier,
-                        onChanged: (value) {
-                          newGroupInfoController.toggleEnableEncryption();
-                        },
+                        onChanged: (_) =>
+                            newGroupInfoController.toggleEnableEncryption(),
                       ),
                     ],
                   ],
