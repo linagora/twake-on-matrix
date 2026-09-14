@@ -206,13 +206,14 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
         );
 
         if (failure is CreateNewGroupChatFailed) {
+          final l10n = L10n.of(context)!;
           await showConfirmAlertDialog(
             context: context,
             message: failure.exception is FeedNotSupportedByHomeserverException
-                ? L10n.of(context)!.feedNotSupportedByHomeserver
-                : L10n.of(context)!.inviteUserErrorMessage,
+                ? l10n.feedNotSupportedByHomeserver
+                : l10n.inviteUserErrorMessage,
             isArrangeActionButtonsVertical: true,
-            okLabel: L10n.of(context)!.gotIt,
+            okLabel: l10n.gotIt,
           );
           return;
         }
