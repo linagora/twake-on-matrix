@@ -17,6 +17,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
+import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -303,7 +304,7 @@ Future<void> verifyDeviceAction(
     // in flight; cancel when it completes so KeyVerification is not orphaned.
     unawaited(
       verificationFuture.then(
-        (pending) => pending.cancel('m.user'),
+        (pending) => pending.cancel(KeyVerificationCodeEnum.user.code),
         onError: (_, __) {},
       ),
     );
