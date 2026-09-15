@@ -233,7 +233,7 @@ void main() {
         ],
       );
 
-      final expected = AppTwakeInformation(commonSettingsInformation: null);
+      const expected = AppTwakeInformation(commonSettingsInformation: null);
 
       expect(homeserver.appTwakeInformation, equals(expected));
     });
@@ -262,7 +262,7 @@ void main() {
         ],
       );
 
-      final expected = AppTwakeInformation(commonSettingsInformation: null);
+      const expected = AppTwakeInformation(commonSettingsInformation: null);
 
       expect(homeserver.appTwakeInformation, equals(expected));
     });

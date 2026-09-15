@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
+import 'package:twake_chat/domain/model/app_twake_information.dart';
 import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
@@ -37,8 +37,8 @@ void main() {
         () async {
           when(mockClient.userID).thenReturn(testUserId);
           when(mockDiscovery.additionalProperties).thenReturn({
-            WellKnownMixin.twakeChatKey: {
-              WellKnownMixin.supportContact: testSupportContactId,
+            AppTwakeInformation.appTwakeInformationKey: {
+              AppTwakeInformation.supportContactKey: testSupportContactId,
             },
           });
           when(
@@ -99,8 +99,8 @@ void main() {
         () async {
           when(mockClient.userID).thenReturn(testUserId);
           when(mockDiscovery.additionalProperties).thenReturn({
-            WellKnownMixin.twakeChatKey: {
-              WellKnownMixin.supportContact: testSupportContactId,
+            AppTwakeInformation.appTwakeInformationKey: {
+              AppTwakeInformation.supportContactKey: testSupportContactId,
             },
           });
           when(
@@ -142,8 +142,8 @@ void main() {
         () async {
           when(mockClient.userID).thenReturn(testUserId);
           when(mockDiscovery.additionalProperties).thenReturn({
-            WellKnownMixin.twakeChatKey: {
-              WellKnownMixin.supportContact: testSupportContactId,
+            AppTwakeInformation.appTwakeInformationKey: {
+              AppTwakeInformation.supportContactKey: testSupportContactId,
             },
           });
           when(
@@ -218,7 +218,7 @@ void main() {
         () async {
           when(
             mockDiscovery.additionalProperties,
-          ).thenReturn({WellKnownMixin.twakeChatKey: {}});
+          ).thenReturn({AppTwakeInformation.appTwakeInformationKey: {}});
 
           final result = interactor.execute(
             mockClient,
@@ -250,7 +250,9 @@ void main() {
 
       test('should fail when support contact is not a string', () async {
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {WellKnownMixin.supportContact: 123},
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: 123,
+          },
         });
 
         final result = interactor.execute(
@@ -276,8 +278,8 @@ void main() {
       test('should fail when user ID is null', () async {
         when(mockClient.userID).thenReturn(null);
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: testSupportContactId,
           },
         });
 
@@ -311,8 +313,8 @@ void main() {
       test('should fail when room creation fails', () async {
         when(mockClient.userID).thenReturn(testUserId);
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: testSupportContactId,
           },
         });
         when(
@@ -355,8 +357,8 @@ void main() {
       test('should fail when room is not found after creation', () async {
         when(mockClient.userID).thenReturn(testUserId);
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: testSupportContactId,
           },
         });
         when(
@@ -395,8 +397,8 @@ void main() {
       test('should fail when setFavourite fails', () async {
         when(mockClient.userID).thenReturn(testUserId);
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: testSupportContactId,
           },
         });
         when(
@@ -445,8 +447,8 @@ void main() {
         () async {
           when(mockClient.userID).thenReturn(testUserId);
           when(mockDiscovery.additionalProperties).thenReturn({
-            WellKnownMixin.twakeChatKey: {
-              WellKnownMixin.supportContact: testSupportContactId,
+            AppTwakeInformation.appTwakeInformationKey: {
+              AppTwakeInformation.supportContactKey: testSupportContactId,
             },
           });
           when(
@@ -507,8 +509,8 @@ void main() {
       test('should handle cleanup failure gracefully', () async {
         when(mockClient.userID).thenReturn(testUserId);
         when(mockDiscovery.additionalProperties).thenReturn({
-          WellKnownMixin.twakeChatKey: {
-            WellKnownMixin.supportContact: testSupportContactId,
+          AppTwakeInformation.appTwakeInformationKey: {
+            AppTwakeInformation.supportContactKey: testSupportContactId,
           },
         });
         when(
