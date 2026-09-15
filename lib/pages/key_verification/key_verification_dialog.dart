@@ -3,6 +3,7 @@ import 'package:twake_chat/pages/key_verification/key_verification_error_view.da
 import 'package:twake_chat/pages/key_verification/key_verification_styles.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_success_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_waiting_view.dart';
+import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
@@ -58,7 +59,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
       KeyVerificationState.error,
       KeyVerificationState.done,
     ].contains(widget.request.state)) {
-      widget.request.cancel('m.user');
+      widget.request.cancel(KeyVerificationCodeEnum.user.code);
     }
     super.dispose();
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -15,6 +17,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
+import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -286,10 +289,28 @@ Future<void> verifyDeviceAction(
   Device device,
 ) async {
   final client = Matrix.of(context).client;
-  final req = await client
+  // Keep a handle so a dismissed loading dialog cannot orphan the request.
+  final verificationFuture = client
       .userDeviceKeys[client.userID!]!
       .deviceKeys[device.deviceId]!
       .startVerification();
+  // Block the list while the request is set up so Verify can't be re-tapped.
+  final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+    future: () => verificationFuture,
+  );
+  final req = result.result;
+  if (req == null) {
+    // System back (or other pop) can dismiss while startVerification is still
+    // in flight; cancel when it completes so KeyVerification is not orphaned.
+    unawaited(
+      verificationFuture.then(
+        (pending) => pending.cancel(KeyVerificationCodeEnum.user.code),
+        onError: (_, __) {},
+      ),
+    );
+    return;
+  }
+  // Refresh only on a terminal state; a plain dialog close (cancel) is not one.
   req.onUpdate = () {
     if ({
       KeyVerificationState.error,
