@@ -119,7 +119,15 @@ jobs:
           # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
           sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
           # Defines the suite reads that the provision script does not emit.
-          echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          # Fail loudly if provisioning did not emit MemberMatrixID: an empty
+          # value would otherwise make CreateDmWithExistingUserScenario search
+          # for an empty account and fail with a confusing assertion.
+          member_matrix_id=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)
+          if [[ -z "$member_matrix_id" ]]; then
+            echo "::error::MemberMatrixID is missing from .env.cicd (fixture provisioning failed)"
+            exit 1
+          fi
+          echo "User2MaxtrixAddress=$member_matrix_id" >> .env.cicd
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
@@ -136,6 +144,12 @@ jobs:
 
       - name: Run Patrol on x86_64 emulator
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          # Pass the dispatch input through the environment instead of
+          # interpolating it into the shell script: `${{ }}` substitution is
+          # raw text, so an input containing `$(...)` or backticks would be
+          # evaluated by the shell even inside double quotes.
+          PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         with:
           api-level: 34
           target: google_apis
@@ -144,7 +158,7 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -no-snapshot
           script: |
-            bash scripts/ci/run-patrol-emulator.sh "${{ inputs.patrol_test_target }}"
+            bash scripts/ci/run-patrol-emulator.sh "$PATROL_TEST_TARGET"
 
       - name: Tear down Synapse
         if: always()
@@ -284,7 +298,15 @@ jobs:
           # zsh's read-only USERNAME); the suite reads USERNAME/PASSWORD.
           sed -i -E 's/^TEST_USERNAME=/USERNAME=/; s/^TEST_PASSWORD=/PASSWORD=/' .env.cicd
           # Defines the suite reads that the provision script does not emit.
-          echo "User2MaxtrixAddress=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)" >> .env.cicd
+          # Fail loudly if provisioning did not emit MemberMatrixID: an empty
+          # value would otherwise make CreateDmWithExistingUserScenario search
+          # for an empty account and fail with a confusing assertion.
+          member_matrix_id=$(grep '^MemberMatrixID=' .env.cicd | cut -d= -f2-)
+          if [[ -z "$member_matrix_id" ]]; then
+            echo "::error::MemberMatrixID is missing from .env.cicd (fixture provisioning failed)"
+            exit 1
+          fi
+          echo "User2MaxtrixAddress=$member_matrix_id" >> .env.cicd
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd

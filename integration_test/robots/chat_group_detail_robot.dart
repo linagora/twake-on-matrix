@@ -157,7 +157,7 @@ class ChatGroupDetailRobot extends CoreRobot
     // the menu opens instead of pressing once right after the bubble appears.
     final messageFinder = $(
       MessageContent,
-    ).containing(find.textContaining(message));
+    ).containing(find.textContaining(message, findRichText: true));
     final menu = $(PullDownMenu);
     final deadline = DateTime.now().add(const Duration(seconds: 60));
     while (!menu.exists && DateTime.now().isBefore(deadline)) {

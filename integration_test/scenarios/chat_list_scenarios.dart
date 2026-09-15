@@ -86,13 +86,22 @@ class ChatListSearchScenario extends BaseTestScenario {
     // member of exactly one room; on the shared mobile account the receiver can
     // already belong to other rooms, so only presence is asserted there.
     await _search(searchByMatrixAddress);
-    final addressMatches =
-        (await robots.chatListRobot().getListOfChatGroup()).length;
+    final addressResults = await robots.chatListRobot().getListOfChatGroup();
     s.softAssertEquals(
-      kIsWeb ? addressMatches == 1 : addressMatches >= 1,
+      kIsWeb ? addressResults.length == 1 : addressResults.isNotEmpty,
       true,
       'Search by $searchByMatrixAddress expected '
-      '${kIsWeb ? 'exactly 1' : 'at least 1'} group, got $addressMatches',
+      '${kIsWeb ? 'exactly 1' : 'at least 1'} group, '
+      'got ${addressResults.length}',
+    );
+    // A non-empty result set is not enough on mobile: the receiver may already
+    // share other rooms, so an unrelated match would mask a broken
+    // Matrix-address lookup. The fixture room itself must be returned.
+    s.softAssertEquals(
+      addressResults.any((row) => row.getTitle().text == searchByTitle),
+      true,
+      'Search by $searchByMatrixAddress did not return the fixture room '
+      '"$searchByTitle"',
     );
 
     // Diacritic-insensitive: title with 'U' replaced by 'Ù' should still match.

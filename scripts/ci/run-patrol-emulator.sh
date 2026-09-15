@@ -22,7 +22,7 @@ ADB="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}/platform-tools/adb"
 export PATH="$PATH:$HOME/.pub-cache/bin"
 
 if [[ ! -f .env.cicd ]]; then
-  echo "::error::.env.cicd is missing (INTEGRATION_TEST_ENV_BASE64 was not decoded)"
+  echo "::error::.env.cicd is missing (run the fixture provisioning step before this script)"
   exit 1
 fi
 

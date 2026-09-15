@@ -31,7 +31,7 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     // press until the menu actually opens.
     final messageFinder = $(
       MessageContent,
-    ).containing(find.textContaining(message));
+    ).containing(find.textContaining(message, findRichText: true));
     final menu = $(PullDownMenu);
     final deadline = DateTime.now().add(const Duration(seconds: 60));
     while (!menu.exists && DateTime.now().isBefore(deadline)) {
