@@ -2386,6 +2386,9 @@
     }
   },
   "newGroupChat": "Nouveau groupe de discussion",
+  "newFeed": "Nouveau feed",
+  "enterFeedName": "Saisissez le nom du feed",
+  "feedNotSupportedByHomeserver": "Ce serveur ne prend pas encore en charge les feeds. Contactez votre administrateur.",
   "onlineHourAgo": "en ligne il y a {hour}h",
   "@onlineHourAgo": {
     "placeholders": {
