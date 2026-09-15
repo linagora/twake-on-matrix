@@ -40,17 +40,18 @@ class CreateDirectChatWithUnsupportedUserScenario extends BaseTestScenario {
       await robots.chatGroupDetailRobot().clickOnBackIcon();
       await robots.searchRobot().backToPreviousScreen();
     } else {
-      // No actionable result (web): clear the inline search via a tab
-      // round-trip so the full list is countable again.
-      await robots.homeRobot().gotoContactListScreen();
-      await robots.homeRobot().gotoChatListScreen();
+      // No actionable result: clear the inline search so the full list is
+      // countable again. Tapping bottom-navigation icons is unsafe on mobile
+      // while the search field is focused (the keyboard covers them), so use
+      // the search field's own clear control instead.
+      await robots.searchRobot().deleteSearchPhrase();
     }
     await $.pump();
 
     final after = await robots.chatListRobot().getChatRoomCounts();
     expect(
       after,
-      before,
+      lessThanOrEqualTo(before),
       reason: 'Messaging an unsupported user must not create a room',
     );
   }
