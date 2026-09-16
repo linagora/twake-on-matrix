@@ -103,7 +103,11 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
 
   @override
   bool hasChatGroupWithTitle(String title) =>
-      getChatGroupByTitle(title).root.exists;
+      // Anchor on `TwakeListItem`, not `ChatListItemTitle`/`SlidableChatListItem`:
+      // chat-list search results render as `RecentItemWidget > TwakeListItem >
+      // HighlightText` (a `Text.rich`), so the slidable/title widgets only exist
+      // in the unfiltered list. `find.text` still matches the `Text.rich`.
+      $(TwakeListItem).containing($(title)).exists;
 
   @override
   int getUnreadMessage(String title) {
