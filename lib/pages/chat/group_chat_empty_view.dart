@@ -1,6 +1,6 @@
 import 'package:twake_chat/pages/chat/group_chat_empty_view_style.dart';
 import 'package:twake_chat/pages/chat/others_group_chat_empty_view.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -40,7 +40,7 @@ class GroupChatEmptyView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SvgPicture.asset(
-            ImagePaths.mascotEmptyGroup,
+            Assets.images.icMascotEmptyGroup.path,
             width: GroupChatEmptyViewStyle.iconSize(context),
             height: GroupChatEmptyViewStyle.iconSize(context),
           ),

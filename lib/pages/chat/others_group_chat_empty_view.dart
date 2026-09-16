@@ -3,7 +3,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -27,7 +27,7 @@ class OthersGroupChatEmptyView extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(10),
             child: SvgPicture.asset(
-              ImagePaths.icUsersOutline,
+              Assets.images.icUsersOutline.path,
               colorFilter: ColorFilter.mode(
                 Theme.of(context).primaryColor,
                 BlendMode.srcIn,

@@ -1,6 +1,6 @@
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
@@ -22,7 +22,7 @@ class ChatViewBodyStyle {
 
   static const Color backgroundColor = Color(0xFFF4EFE8);
 
-  static String get imageBackground => ImagePaths.chatBackground;
+  static String get imageBackground => Assets.images.chatBackground.path;
 
   static EdgeInsets inputBarPadding(BuildContext context) =>
       EdgeInsets.symmetric(

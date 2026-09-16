@@ -1,7 +1,7 @@
 import 'package:twake_chat/pages/chat/send_file_dialog/hover_actions_widget.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:twake_chat/presentation/list_notifier.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/widgets/file_widget/file_error_tile_widget_style.dart';
 import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
@@ -71,7 +71,7 @@ class FilesListViewWidget extends StatelessWidget {
                                 context,
                               ),
                           fileTileIcon: file.isFileHaveError(maxMediaSize)
-                              ? ImagePaths.icFileError
+                              ? Assets.images.icFileError.path
                               : null,
                           imageBytes: thumbnails[file]?.bytes,
                           style: file.isFileHaveError(maxMediaSize)

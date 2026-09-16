@@ -1,6 +1,6 @@
 import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/cupertino.dart';
@@ -46,7 +46,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
                         hoverColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         size: ChatInputRowStyle.sendIconBtnSize,
-                        imagePath: ImagePaths.icDeleteRecorderWeb,
+                        imagePath: Assets.images.icDeleteRecorderWeb.path,
                         onTap: () => onDeleteRecorderWeb?.call(),
                         paddingAll: 0,
                       ),
@@ -57,7 +57,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
                         hoverColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         size: ChatInputRowStyle.sendIconBtnSize,
-                        imagePath: ImagePaths.icSend,
+                        imagePath: Assets.images.icSend.path,
                         onTap: () => onFinishRecorderWeb?.call(),
                         paddingAll: 0,
                       ),
@@ -69,7 +69,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
                         hoverColor: Colors.transparent,
                         splashColor: Colors.transparent,
                         size: ChatInputRowStyle.sendIconBtnSize,
-                        imagePath: ImagePaths.icRecorder,
+                        imagePath: Assets.images.icRecorder.path,
                         onTap: () => onTapRecorderWeb?.call(),
                         paddingAll: 0,
                       ),
@@ -100,7 +100,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
               size: ChatInputRowStyle.sendIconBtnSize,
               onTap: onTap,
               tooltip: L10n.of(context)!.send,
-              imagePath: ImagePaths.icSend,
+              imagePath: Assets.images.icSend.path,
               paddingAll: 0,
             ),
           );

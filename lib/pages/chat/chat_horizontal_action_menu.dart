@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -38,7 +38,7 @@ enum ChatHorizontalActionMenu {
   String? getImagePath() {
     switch (this) {
       case ChatHorizontalActionMenu.reply:
-        return ImagePaths.icReply;
+        return Assets.images.icReply.path;
       case ChatHorizontalActionMenu.more:
       case ChatHorizontalActionMenu.forward:
       case ChatHorizontalActionMenu.reaction:

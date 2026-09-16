@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -112,9 +112,9 @@ enum MessageContextMenuAction {
   String? imagePath(Event event) {
     switch (this) {
       case MessageContextMenuAction.pin:
-        return event.isPinned ? ImagePaths.icUnpin : null;
+        return event.isPinned ? Assets.images.icUnpin.path : null;
       case MessageContextMenuAction.reply:
-        return ImagePaths.icReply;
+        return Assets.images.icReply.path;
       case MessageContextMenuAction.forward:
       case MessageContextMenuAction.edit:
       case MessageContextMenuAction.copy:

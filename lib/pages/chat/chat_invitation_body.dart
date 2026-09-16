@@ -2,7 +2,7 @@ import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_background.dart';
 import 'package:twake_chat/pages/chat/chat_invitation_body_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -66,7 +66,7 @@ class ChatInvitationBody extends StatelessWidget with MessageContentMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.asset(
-                ImagePaths.mascotInvite,
+                Assets.images.icMascotInvite.path,
                 width: ChatInvitationBodyStyle.iconSize(context),
                 height: ChatInvitationBodyStyle.iconSize(context),
               ),

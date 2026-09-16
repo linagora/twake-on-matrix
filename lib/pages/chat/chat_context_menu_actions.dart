@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -74,11 +74,11 @@ enum ChatContextMenuActions {
   String? getImagePath({bool unpin = false}) {
     switch (this) {
       case ChatContextMenuActions.reply:
-        return ImagePaths.icReply;
+        return Assets.images.icReply.path;
       case ChatContextMenuActions.jumpToMessage:
-        return ImagePaths.icGoTo;
+        return Assets.images.icGoto.path;
       case ChatContextMenuActions.pinChat:
-        return unpin ? ImagePaths.icUnpin : null;
+        return unpin ? Assets.images.icUnpin.path : null;
       default:
         return null;
     }
