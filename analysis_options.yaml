@@ -17,6 +17,7 @@ linter:
     - unnecessary_library_name
     - unnecessary_null_aware_operator_on_extension_on_nullable
     - use_string_buffers
+    - use_colored_box
 
 analyzer:
   errors:
