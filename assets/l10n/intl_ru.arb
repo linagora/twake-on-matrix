@@ -2987,7 +2987,7 @@
   "other": "Другое",
   "enableRightAndLeftMessageAlignment": "Включить выравнивание сообщений по правому/левому краю",
   "holdToRecordAudio": "Удерживайте для записи.",
-  "explainPermissionToAccessMicrophone": "Разрешите использовать микрофон для отправки голосовых сообщений.",
+  "explainPermissionToAccessMicrophone": "Для голосовых сообщений требуется доступ к микрофону.",
   "allowMicrophoneAccess": "Доступ к микрофону",
   "later": "Позже",
   "couldNotPlayAudioFile": "Не удалось воспроизвести аудиофайл",
