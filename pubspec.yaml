@@ -14,7 +14,7 @@ dependencies:
   receive_sharing_intent:
     git:
       url: https://github.com/linagora/receive_sharing_intent.git
-      ref: main
+      ref: fix/ios-share-unsaved-screenshot
 
   video_compress: ^3.1.4
 
