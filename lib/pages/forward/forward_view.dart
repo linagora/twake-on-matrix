@@ -11,7 +11,7 @@ import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
@@ -240,7 +240,7 @@ class _ForwardButton extends StatelessWidget {
               paddingAll: 0,
               onTap: forwardAction,
               tooltip: L10n.of(context)!.send,
-              imagePath: ImagePaths.icSend,
+              imagePath: Assets.images.icSend.path,
               imageSize: ForwardViewStyle.iconSendSize,
             ),
           ),

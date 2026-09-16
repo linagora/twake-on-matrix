@@ -1,5 +1,5 @@
 import 'package:twake_chat/presentation/style/media_picker_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -43,7 +43,7 @@ mixin SingleImagePickerMixin on CommonMediaPickerMixin {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
-              ImagePaths.icPhotosSettingPermission,
+              Assets.images.icPhotosSetting.path,
               width: MediaPickerStyle.photoPermissionIconSize,
               height: MediaPickerStyle.photoPermissionIconSize,
             ),

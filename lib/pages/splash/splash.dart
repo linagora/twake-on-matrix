@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie_native/lottie_native.dart';
@@ -32,14 +32,14 @@ class _SplashState extends State<Splash> {
             width: 176,
             height: 176,
             child: LottieView.fromAsset(
-              filePath: ImagePaths.lottieChat,
+              filePath: Assets.lottieChat.path,
               loop: false,
             ),
           ),
           Positioned(
             bottom: 40,
             child: SafeArea(
-              child: Image.asset(ImagePaths.icBrandingPng, width: 210),
+              child: Image.asset(Assets.branding.path, width: 210),
             ),
           ),
         ],

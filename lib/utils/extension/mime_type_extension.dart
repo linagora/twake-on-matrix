@@ -1,5 +1,5 @@
 import 'package:twake_chat/domain/model/preview_file/supported_preview_file_types.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
@@ -93,7 +93,7 @@ extension TwakeMimeTypeExtension on TwakeMimeType {
       'AttachmentExtension::getIcon(): mediaType: $this || fileType: $fileType',
     );
     if (this?.isEmpty == true || fileType == null) {
-      return ImagePaths.icFileUnknown;
+      return Assets.images.icFileUnknown.path;
     }
 
     return getPreviewIconFileType().imagePath;

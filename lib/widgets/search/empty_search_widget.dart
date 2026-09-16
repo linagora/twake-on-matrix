@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/search/empty_search_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -15,7 +15,7 @@ class EmptySearchWidget extends StatelessWidget {
       child: Column(
         children: [
           SvgPicture.asset(
-            ImagePaths.icEmptySearch,
+            Assets.images.icEmptySearch.path,
             width: EmptySearchWidgetStyle.iconWidth,
             height: EmptySearchWidgetStyle.iconHeight,
           ),

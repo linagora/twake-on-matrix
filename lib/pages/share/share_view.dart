@@ -2,7 +2,7 @@ import 'package:twake_chat/pages/forward/forward_view_style.dart';
 import 'package:twake_chat/pages/forward/recent_chat_list.dart';
 import 'package:twake_chat/pages/forward/recent_chat_title.dart';
 import 'package:twake_chat/pages/share/share.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar_style.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -75,7 +75,7 @@ class ShareView extends StatelessWidget {
               onTap: () =>
                   controller.shareTo(controller.selectedChatNotifier.value),
               tooltip: L10n.of(context)!.send,
-              imagePath: ImagePaths.icSend,
+              imagePath: Assets.images.icSend.path,
               imageSize: ForwardViewStyle.iconSendSize,
             ),
           ),
