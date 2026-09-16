@@ -9,6 +9,10 @@ import 'api_login_helper.dart';
 import 'base_test_scenario.dart';
 
 const mobileGroupFixtureTitle = 'FTL Mobile Test Group';
+
+/// Title for the chat-list fixtures. It must contain an uppercase "U" so the
+/// diacritic-insensitive search probe (`U` -> `Ù`) stays meaningful.
+const mobileChatListFixtureTitle = 'FTL Unread Search Group';
 const mobileReceiverMessageDisplayMenu = 'FTL receiver fixture display menu';
 const mobileReceiverMessageReply = 'FTL receiver fixture reply';
 const mobileReceiverMessageDelete = 'FTL receiver fixture delete';
@@ -33,22 +37,35 @@ class MobileGroupFixture {
   final String memberMatrixId;
 }
 
-Future<MobileGroupFixture>? _fixture;
+final Map<String, Future<MobileGroupFixture>> _fixtures = {};
 
-/// Creates (or repairs) the mobile-only group fixture and makes sure the
+/// Creates (or repairs) the shared mobile-only group fixture and makes sure the
 /// configured receiver is a joined member. The fixture is cached for the
 /// instrumentation process so the seven group tests do not create seven rooms.
 Future<MobileGroupFixture> prepareMobileGroupFixture(
   BaseTestScenario scenario,
+) => prepareMobileRoomFixture(scenario, mobileGroupFixtureTitle);
+
+/// Creates (or repairs) a named mobile-only room fixture and makes sure the
+/// configured receiver is a joined member. Cached per title for the
+/// instrumentation process, so tests that need extra destination rooms (e.g.
+/// the forward scenarios) create each one at most once.
+Future<MobileGroupFixture> prepareMobileRoomFixture(
+  BaseTestScenario scenario,
+  String title,
 ) {
   if (kIsWeb) {
     throw UnsupportedError('The web suite provisions its own Matrix fixture.');
   }
-  return _fixture ??= _prepareMobileGroupFixture(scenario);
+  return _fixtures.putIfAbsent(
+    title,
+    () => _prepareMobileRoomFixture(scenario, title),
+  );
 }
 
-Future<MobileGroupFixture> _prepareMobileGroupFixture(
+Future<MobileGroupFixture> _prepareMobileRoomFixture(
   BaseTestScenario scenario,
+  String title,
 ) async {
   const receiver = String.fromEnvironment('Receiver');
   if (receiver.isEmpty) {
@@ -65,7 +82,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
 
   Room? room;
   for (final candidate in client.rooms) {
-    if (candidate.name == mobileGroupFixtureTitle) {
+    if (candidate.name == title) {
       room = candidate;
       break;
     }
@@ -73,7 +90,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
 
   if (room == null) {
     final roomId = await client.createRoom(
-      name: mobileGroupFixtureTitle,
+      name: title,
       invite: [receiverMatrixId],
       isDirect: false,
       // Keep the creator at owner level and the invited receiver at the
@@ -99,7 +116,15 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
     await ensureReceiverJoined(roomId: room.id);
   }
 
-  final joined = await room.requestParticipants([Membership.join]);
+  // The receiver joins through the Client-Server API; the room membership only
+  // reaches this client after the next /sync. Poll instead of asserting once.
+  final joinDeadline = DateTime.now().add(const Duration(seconds: 30));
+  var joined = await room.requestParticipants([Membership.join]);
+  while (!joined.any((participant) => participant.id == receiverMatrixId) &&
+      DateTime.now().isBefore(joinDeadline)) {
+    await scenario.$.pump(const Duration(seconds: 1));
+    joined = await room.requestParticipants([Membership.join]);
+  }
   if (!joined.any((participant) => participant.id == receiverMatrixId)) {
     throw StateError(
       'Receiver $receiverMatrixId did not join room ${room.id}.',
@@ -108,7 +133,7 @@ Future<MobileGroupFixture> _prepareMobileGroupFixture(
 
   return MobileGroupFixture(
     roomId: room.id,
-    title: mobileGroupFixtureTitle,
+    title: title,
     memberMatrixId: receiverMatrixId,
   );
 }
