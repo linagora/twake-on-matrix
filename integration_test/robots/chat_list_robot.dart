@@ -102,6 +102,10 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   }
 
   @override
+  bool hasChatGroupWithTitle(String title) =>
+      getChatGroupByTitle(title).root.exists;
+
+  @override
   int getUnreadMessage(String title) {
     return getChatGroupByTitle(title).getUnreadMessage();
   }

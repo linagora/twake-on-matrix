@@ -98,7 +98,7 @@ class ChatListSearchScenario extends BaseTestScenario {
     // share other rooms, so an unrelated match would mask a broken
     // Matrix-address lookup. The fixture room itself must be returned.
     s.softAssertEquals(
-      addressResults.any((row) => row.getTitle().text == searchByTitle),
+      robots.chatListRobot().hasChatGroupWithTitle(searchByTitle),
       true,
       'Search by $searchByMatrixAddress did not return the fixture room '
       '"$searchByTitle"',
