@@ -79,7 +79,9 @@ mixin class ContactsViewControllerMixin {
 
   bool get enablePhonebookLookup => true;
 
-  bool get showPhonebookContacts => true;
+  /// Whether contacts without a Matrix ID are listed: they can only be
+  /// invited, which the homeserver may disable.
+  bool get isInvitationEnabled => false;
 
   Future<bool> _isPhonebookContactsAvailable() async {
     if (!enablePhonebookLookup) {
@@ -401,13 +403,7 @@ mixin class ContactsViewControllerMixin {
   }) {
     final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
-    if (showPhonebookContacts) {
-      _refreshPhoneBookContacts(keyword);
-    } else if (!presentationPhonebookContactNotifier.isDisposed) {
-      presentationPhonebookContactNotifier.value = const Right(
-        GetPhonebookContactsInitial(),
-      );
-    }
+    _refreshPhoneBookContacts(keyword);
     if (enableRecentContacts) {
       _refreshRecentContacts(
         context: context,
@@ -452,7 +448,9 @@ mixin class ContactsViewControllerMixin {
               .expand((contact) => contact.toPresentationContacts())
               .toList();
 
-          final combinedContacts = _combineTomContacts(filteredContacts);
+          final combinedContacts = _hideInvitationOnlyContacts(
+            _combineTomContacts(filteredContacts),
+          );
 
           if (combinedContacts.isEmpty) {
             return externalContactState ??
@@ -515,21 +513,8 @@ mixin class ContactsViewControllerMixin {
       },
       (success) {
         if (success is GetPhonebookContactsSuccess) {
-          final filteredContacts = success.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
           _refreshContacts(keyword);
-          if (filteredContacts.isEmpty) {
-            return Left(GetPresentationContactsEmpty(keyword: keyword));
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: filteredContacts,
-                keyword: keyword,
-              ),
-            );
-          }
+          return _mapPhonebookContactsToPresentation(success.contacts, keyword);
         }
         return Right(success);
       },
@@ -540,10 +525,12 @@ mixin class ContactsViewControllerMixin {
     List<contact_model.Contact> contacts,
     String keyword,
   ) {
-    final filteredContacts = contacts
-        .searchContacts(keyword)
-        .expand((contact) => contact.toPresentationContacts())
-        .toList();
+    final filteredContacts = _hideInvitationOnlyContacts(
+      contacts
+          .searchContacts(keyword)
+          .expand((contact) => contact.toPresentationContacts())
+          .toList(),
+    );
     if (filteredContacts.isEmpty) {
       return Left(GetPresentationContactsEmpty(keyword: keyword));
     }
@@ -715,11 +702,16 @@ mixin class ContactsViewControllerMixin {
     }).toList();
   }
 
-  List<String> _flatMatrixIdsFromPhonebookContacts() {
-    if (!showPhonebookContacts) {
-      return [];
-    }
+  List<PresentationContact> _hideInvitationOnlyContacts(
+    List<PresentationContact> contacts,
+  ) {
+    if (isInvitationEnabled) return contacts;
+    return contacts
+        .where((contact) => (contact.matrixId ?? '').isNotEmpty)
+        .toList();
+  }
 
+  List<String> _flatMatrixIdsFromPhonebookContacts() {
     final phonebookContacts =
         contactsManager
             .getPhonebookContactsNotifier()
@@ -761,8 +753,7 @@ mixin class ContactsViewControllerMixin {
     presentationPhonebookContactNotifier.dispose();
   }
 
-  @visibleForTesting
-  void refreshAllContactsTest({
+  void refreshAllContacts({
     required BuildContext context,
     required Client client,
     required MatrixLocalizations matrixLocalizations,
