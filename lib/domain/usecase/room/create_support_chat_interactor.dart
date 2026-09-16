@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
+import 'package:twake_chat/domain/model/app_twake_information.dart';
 import 'package:twake_chat/event/twake_event_types.dart';
-import 'package:twake_chat/presentation/mixins/wellknown_mixin.dart';
 import 'package:matrix/matrix.dart';
 
 class CreateSupportChatInteractor {
@@ -24,9 +24,11 @@ class CreateSupportChatInteractor {
         throw Exception('No cached discovery information available');
       }
       final discovery = cachedDiscovery;
-      final supportChatTwakeId =
-          (discovery.additionalProperties[WellKnownMixin.twakeChatKey]
-              as Map?)?[WellKnownMixin.supportContact];
+      final twakeChatData = discovery
+          .additionalProperties[AppTwakeInformation.appTwakeInformationKey];
+      final supportChatTwakeId = twakeChatData is Map
+          ? twakeChatData[AppTwakeInformation.supportContactKey]
+          : null;
       if (supportChatTwakeId is! String || supportChatTwakeId.trim().isEmpty) {
         throw Exception('No support contact found in well-known');
       }

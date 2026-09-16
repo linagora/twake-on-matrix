@@ -1,8 +1,12 @@
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
+import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
+import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_success.dart';
@@ -31,11 +35,20 @@ class ConcretePresentationSearch extends PresentationSearch {
 
 class CustomContactsViewControllerMixin with ContactsViewControllerMixin {}
 
+class InvitationGatedContactsViewController with ContactsViewControllerMixin {
+  @override
+  bool isInvitationEnabled = false;
+
+  @override
+  bool get enableRecentContacts => false;
+}
+
 @GenerateNiceMocks([
   MockSpec<BuildContext>(),
   MockSpec<Client>(),
   MockSpec<MatrixLocalizations>(),
   MockSpec<ContactsViewControllerMixin>(),
+  MockSpec<ContactsManager>(),
 ])
 void main() {
   const debouncerIntervalInMilliseconds = 300;
@@ -530,7 +543,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -539,7 +552,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -705,7 +718,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -714,7 +727,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -883,7 +896,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -892,7 +905,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -1070,7 +1083,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -1079,7 +1092,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -1284,7 +1297,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -1293,7 +1306,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -1387,7 +1400,7 @@ void main() {
           ValueNotifierCustom(const Right(GetPhonebookContactsInitial())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -1396,7 +1409,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -1949,7 +1962,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -1958,7 +1971,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2124,7 +2137,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -2133,7 +2146,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2314,7 +2327,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -2323,7 +2336,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2513,7 +2526,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -2522,7 +2535,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2739,7 +2752,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -2748,7 +2761,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2842,7 +2855,7 @@ void main() {
           ValueNotifierCustom(const Left(GetPhonebookContactsIsEmpty())),
         );
 
-        mockContactsViewControllerMixin.refreshAllContactsTest(
+        mockContactsViewControllerMixin.refreshAllContacts(
           context: mockBuildContext,
           client: mockClient,
           matrixLocalizations: mockMatrixLocalizations,
@@ -2851,7 +2864,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 1));
 
         verify(
-          mockContactsViewControllerMixin.refreshAllContactsTest(
+          mockContactsViewControllerMixin.refreshAllContacts(
             context: mockBuildContext,
             client: mockClient,
             matrixLocalizations: mockMatrixLocalizations,
@@ -2918,6 +2931,132 @@ void main() {
               .value,
           const Left(GetPhonebookContactsIsEmpty()),
         );
+      },
+    );
+  });
+
+  group('ContactsViewControllerMixin', () {
+    const alice = '@alice:domain.com';
+    const bob = '@bob:domain.com';
+
+    late MockContactsManager mockContactsManager;
+    late InvitationGatedContactsViewController controller;
+
+    void refreshAllContacts() => controller.refreshAllContacts(
+      context: MockBuildContext(),
+      client: MockClient(),
+      matrixLocalizations: MockMatrixLocalizations(),
+    );
+
+    List<String?> matrixIdsOf(Either<Failure, Success> state) =>
+        state
+            .getSuccessOrNull<GetPresentationContactsSuccess>()
+            ?.contacts
+            .map((contact) => (contact as PresentationContact).matrixId)
+            .toList() ??
+        [];
+
+    setUp(() {
+      mockContactsManager = MockContactsManager();
+      when(mockContactsManager.getContactsNotifier()).thenReturn(
+        ValueNotifierCustom(
+          Right(
+            GetContactsSuccess(
+              contacts: [
+                Contact(
+                  id: 'bob',
+                  displayName: 'Bob',
+                  emails: {Email(address: 'bob@domain.com', matrixId: bob)},
+                ),
+                ContactFixtures.contact6,
+              ],
+            ),
+          ),
+        ),
+      );
+      when(mockContactsManager.getPhonebookContactsNotifier()).thenReturn(
+        ValueNotifierCustom(
+          Right(
+            GetPhonebookContactsSuccess(
+              progress: 100,
+              contacts: [
+                Contact(
+                  id: 'alice',
+                  displayName: 'Alice',
+                  emails: {Email(address: 'alice@domain.com', matrixId: alice)},
+                ),
+                ContactFixtures.contact4,
+              ],
+            ),
+          ),
+        ),
+      );
+      getIt.registerSingleton<SearchRecentChatInteractor>(
+        SearchRecentChatInteractor(),
+      );
+      getIt.registerSingleton<ContactsManager>(mockContactsManager);
+      controller = InvitationGatedContactsViewController();
+    });
+
+    tearDown(() async {
+      controller.disposeContactsMixin();
+      await getIt.reset();
+    });
+
+    test(
+      'refreshAllContacts_whenInvitationsAreDisabled_listsOnlyMatrixUsers',
+      () {
+        // Arrange
+        controller.isInvitationEnabled = false;
+
+        // Act
+        refreshAllContacts();
+
+        // Assert
+        expect(
+          matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
+          [alice],
+        );
+        expect(matrixIdsOf(controller.presentationContactNotifier.value), [
+          bob,
+        ]);
+      },
+    );
+
+    test('refreshAllContacts_whenInvitationsAreEnabled_listsAllContacts', () {
+      // Arrange
+      controller.isInvitationEnabled = true;
+
+      // Act
+      refreshAllContacts();
+
+      // Assert
+      expect(
+        matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
+        [alice, ''],
+      );
+      expect(matrixIdsOf(controller.presentationContactNotifier.value), [
+        bob,
+        '',
+      ]);
+    });
+
+    test(
+      'refreshAllContacts_whenInvitationsBecomeEnabled_listsInvitableContacts',
+      () {
+        // Arrange
+        refreshAllContacts();
+        controller.isInvitationEnabled = true;
+
+        // Act
+        refreshAllContacts();
+
+        // Assert
+        expect(
+          matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
+          [alice, ''],
+        );
+        verifyNever(mockContactsManager.reSyncContacts());
       },
     );
   });
