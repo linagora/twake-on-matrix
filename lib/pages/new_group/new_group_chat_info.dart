@@ -4,10 +4,10 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:twake_chat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
+import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:twake_chat/domain/model/server_config.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
@@ -15,6 +15,7 @@ import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -26,6 +27,8 @@ import 'package:twake_chat/utils/power_level_manager.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ConsumerState, ConsumerStatefulWidget;
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -42,7 +45,7 @@ import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 
-class NewGroupChatInfo extends StatefulWidget {
+class NewGroupChatInfo extends ConsumerStatefulWidget {
   final Set<PresentationContact> contactsList;
 
   final bool isFeed;
@@ -54,10 +57,10 @@ class NewGroupChatInfo extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => NewGroupChatInfoController();
+  ConsumerState<NewGroupChatInfo> createState() => NewGroupChatInfoController();
 }
 
-class NewGroupChatInfoController extends State<NewGroupChatInfo>
+class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
@@ -120,25 +123,33 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
 
   void createNewGroup({String? urlAvatar}) {
     final client = Matrix.of(context).client;
+    final invite = getSelectedValidContacts(
+      contactsList ?? {},
+    ).map((contact) => contact.matrixId).whereNotNull().toList();
+    if (isFeed) {
+      unawaited(
+        createNewFeedAction(
+          matrixClient: client,
+          feedName: groupName,
+          urlAvatar: urlAvatar,
+          invite: invite,
+        ),
+      );
+      return;
+    }
     final powerLevelManager = getIt.get<PowerLevelManager>();
     createNewGroupChatAction(
       matrixClient: client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
         groupName: groupName,
-        invite: getSelectedValidContacts(
-          contactsList ?? {},
-        ).map((contact) => contact.matrixId).whereNotNull().toList(),
-        enableEncryption: isFeed ? false : enableEncryptionNotifier.value,
+        invite: invite,
+        enableEncryption: enableEncryptionNotifier.value,
         urlAvatar: urlAvatar,
-        isFeed: isFeed,
-        powerLevelContentOverride: isFeed
-            ? null
-            : {
-                'events': powerLevelManager
-                    .getDefaultPowerLevelEventForMember(),
-                'invite': powerLevelManager.getAdminPowerLevel(),
-                'kick': powerLevelManager.getAdminPowerLevel(),
-              },
+        powerLevelContentOverride: {
+          'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
+          'invite': powerLevelManager.getAdminPowerLevel(),
+          'kick': powerLevelManager.getAdminPowerLevel(),
+        },
       ),
     );
   }
@@ -284,6 +295,36 @@ class NewGroupChatInfoController extends State<NewGroupChatInfo>
               onDone: _handleCreateNewGroupChatOnDone,
               onError: _handleCreateNewGroupChatOnError,
             );
+  }
+
+  Future<void> createNewFeedAction({
+    required Client matrixClient,
+    required String feedName,
+    required List<String> invite,
+    String? urlAvatar,
+  }) async {
+    final createNewFeedInteractor = ref.read(
+      createNewFeedInteractorProvider(matrixClient),
+    );
+    createRoomStateNotifier.value = Right(CreateNewGroupChatLoading());
+    Either<Failure, Success> result;
+    try {
+      final roomId = await createNewFeedInteractor.execute(
+        feedName: feedName,
+        avatarUrl: urlAvatar,
+      );
+      result = Right(
+        CreateNewGroupChatSuccess(
+          roomId: roomId,
+          userIds: invite,
+          groupName: feedName,
+        ),
+      );
+    } on Exception catch (exception) {
+      result = Left(CreateNewGroupChatFailed(exception: exception));
+    }
+    if (!mounted) return;
+    _handleCreateNewGroupChatChatOnData(context, result);
   }
 
   void _goToRoom({required String roomId, String? groupName}) {

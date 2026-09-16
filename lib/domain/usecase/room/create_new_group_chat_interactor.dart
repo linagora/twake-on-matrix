@@ -5,7 +5,6 @@ import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dar
 import 'package:twake_chat/domain/exception/room/can_not_create_new_group_chat_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/client_feed_extension.dart';
 
 class CreateNewGroupChatInteractor {
   Stream<Either<Failure, Success>> execute({
@@ -30,21 +29,14 @@ class CreateNewGroupChatInteractor {
         stateKey: '',
       );
 
-      final roomId = createNewGroupChatRequest.isFeed
-          ? await matrixClient.createFeedRoom(
-              feedName: createNewGroupChatRequest.groupName,
-              initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
-              powerLevelContentOverride:
-                  createNewGroupChatRequest.powerLevelContentOverride,
-            )
-          : await matrixClient.createGroupChat(
-              groupName: createNewGroupChatRequest.groupName,
-              enableEncryption: createNewGroupChatRequest.enableEncryption,
-              preset: createNewGroupChatRequest.createRoomPreset,
-              initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
-              powerLevelContentOverride:
-                  createNewGroupChatRequest.powerLevelContentOverride,
-            );
+      final roomId = await matrixClient.createGroupChat(
+        groupName: createNewGroupChatRequest.groupName,
+        enableEncryption: createNewGroupChatRequest.enableEncryption,
+        preset: createNewGroupChatRequest.createRoomPreset,
+        initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
+        powerLevelContentOverride:
+            createNewGroupChatRequest.powerLevelContentOverride,
+      );
 
       if (roomId.isNotEmpty) {
         yield Right(
@@ -63,18 +55,6 @@ class CreateNewGroupChatInteractor {
       }
     } catch (exception, stackTrace) {
       Logs().e('CreateNewGroupChatInteractor', exception, stackTrace);
-      // The preset is the only non-standard field of a feed request, so a
-      // M_BAD_JSON means the homeserver does not know it.
-      if (createNewGroupChatRequest.isFeed &&
-          exception is MatrixException &&
-          exception.error == MatrixError.M_BAD_JSON) {
-        yield Left(
-          CreateNewGroupChatFailed(
-            exception: FeedNotSupportedByHomeserverException(),
-          ),
-        );
-        return;
-      }
       if (exception.toString().contains('M_FORBIDDEN: Federation denied')) {
         yield Left(
           CreateNewGroupChatFailed(

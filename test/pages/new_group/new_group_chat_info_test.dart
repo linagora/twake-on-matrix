@@ -107,8 +107,7 @@ void main() {
   });
 
   group('NewGroupChatInfo in feed mode - widget test', () {
-    Future<void> pumpView(WidgetTester tester, {required bool isFeed}) async {
-      when(mockController.isFeed).thenReturn(isFeed);
+    Future<void> pumpView(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('en'),
@@ -120,28 +119,45 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('titles the screen after the feed', (
+    testWidgets('build_whenFeed_titlesTheScreenAfterTheFeed', (
       WidgetTester tester,
     ) async {
-      await pumpView(tester, isFeed: true);
+      // Arrange
+      when(mockController.isFeed).thenReturn(true);
 
+      // Act
+      await pumpView(tester);
+
+      // Assert
       final twakeAppBar = tester.widget<TwakeAppBar>(find.byType(TwakeAppBar));
       final context = tester.element(find.byType(TwakeAppBar));
       expect(twakeAppBar.title, equals(L10n.of(context)!.newFeed));
     });
 
-    testWidgets('hides the encryption toggle', (WidgetTester tester) async {
-      await pumpView(tester, isFeed: true);
+    testWidgets('build_whenFeed_hidesTheEncryptionToggle', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(true);
 
+      // Act
+      await pumpView(tester);
+
+      // Assert
       final context = tester.element(find.byType(TwakeAppBar));
       expect(find.text(L10n.of(context)!.enableEncryption), findsNothing);
     });
 
-    testWidgets('keeps the encryption toggle for a group', (
+    testWidgets('build_whenGroup_showsTheEncryptionToggle', (
       WidgetTester tester,
     ) async {
-      await pumpView(tester, isFeed: false);
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
 
+      // Act
+      await pumpView(tester);
+
+      // Assert
       final context = tester.element(find.byType(TwakeAppBar));
       expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
     });
