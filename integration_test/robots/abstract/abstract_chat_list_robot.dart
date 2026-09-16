@@ -13,10 +13,6 @@ abstract class AbstractChatListRobot {
   /// Avoids the search screen so callers return to the same list afterwards.
   Future<void> openChatByTitle(String title);
 
-  /// Whether a chat row titled [title] is currently rendered in the list.
-  /// Uses a descendant finder (no indexing), so it is safe on empty rows.
-  bool hasChatGroupWithTitle(String title);
-
   Future<void> openSearchScreen();
   Future<void> clickOnPenIcon();
   Future<void> clickOnPinIcon();
