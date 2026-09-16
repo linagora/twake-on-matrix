@@ -15,6 +15,12 @@ void main() {
 
   const testRoomId = '!feed:example.com';
 
+  final sharedHistoryEvent = StateEvent(
+    type: EventTypes.HistoryVisibility,
+    content: {'history_visibility': HistoryVisibility.shared.name},
+    stateKey: '',
+  ).toJson();
+
   PostExpectation<Future<Map<String, Object?>>> whenCreateRoom() => when(
     mockClient.request(
       any,
@@ -85,7 +91,7 @@ void main() {
       expect(captureRequestBody().containsKey('name'), isFalse);
     });
 
-    test('createFeed_always_sendsTheAvatarAndASharedHistory', () async {
+    test('createFeed_whenGivenAnAvatar_sendsItWithASharedHistory', () async {
       // Act
       await datasource.createFeed(avatarUrl: 'mxc://example.com/avatar');
 
@@ -98,12 +104,19 @@ void main() {
             content: {'url': 'mxc://example.com/avatar'},
             stateKey: '',
           ).toJson(),
-          StateEvent(
-            type: EventTypes.HistoryVisibility,
-            content: {'history_visibility': HistoryVisibility.shared.name},
-            stateKey: '',
-          ).toJson(),
+          sharedHistoryEvent,
         ]),
+      );
+    });
+
+    test('createFeed_whenGivenNoAvatar_onlySendsASharedHistory', () async {
+      // Act
+      await datasource.createFeed(name: 'Announcements');
+
+      // Assert
+      expect(
+        captureRequestBody()['initial_state'],
+        equals([sharedHistoryEvent]),
       );
     });
 

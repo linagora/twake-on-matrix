@@ -35,11 +35,12 @@ class FeedDatasourceImpl implements FeedDatasource {
         'creation_content': {'type': FeedConfig.roomType},
         if (name != null) 'name': name,
         'initial_state': [
-          StateEvent(
-            type: EventTypes.RoomAvatar,
-            content: {'url': avatarUrl},
-            stateKey: '',
-          ).toJson(),
+          if (avatarUrl != null)
+            StateEvent(
+              type: EventTypes.RoomAvatar,
+              content: {'url': avatarUrl},
+              stateKey: '',
+            ).toJson(),
           StateEvent(
             type: EventTypes.HistoryVisibility,
             content: {'history_visibility': HistoryVisibility.shared.name},
