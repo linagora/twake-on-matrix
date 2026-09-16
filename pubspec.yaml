@@ -235,9 +235,10 @@ dependencies:
 
 dev_dependencies:
   sentry_dart_plugin: ^3.2.1
-  build_runner: 2.10.5
+  build_runner: ^2.12.0
   freezed: ^3.2.3
   riverpod_generator: 3.0.0
+  flutter_gen_runner: ^5.15.0
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
   flutter_native_splash: ^2.0.3+1
@@ -281,6 +282,12 @@ flutter:
     - assets/js/package/
     - configurations/
     - configurations/icons/
+
+flutter_gen:
+  output: lib/generated/
+  integrations:
+    flutter_svg: true
+    lottie: true
 
 msix_config:
   display_name: Twake Chat
