@@ -7,7 +7,7 @@ import 'package:twake_chat/pages/chat/chat_view_body.dart';
 import 'package:twake_chat/pages/chat/chat_view_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/stream_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -53,7 +53,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                   : null,
               imagePath:
                   controller.isUnpinEvent(controller.selectedEvents.first)
-                  ? ImagePaths.icUnpin
+                  ? Assets.images.icUnpin.path
                   : null,
               tooltip: !controller.isUnpinEvent(controller.selectedEvents.first)
                   ? L10n.of(context)!.pinChat

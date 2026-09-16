@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -18,7 +18,7 @@ class EmptyContactBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 100),
-          SvgPicture.asset(ImagePaths.icSkeletons),
+          SvgPicture.asset(Assets.images.icSkeletons.path),
           const SizedBox(height: 16.0),
           Text(
             L10n.of(context)!.soonThereHaveContacts,

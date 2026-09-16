@@ -2,7 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/widgets/add_contact_info.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -79,7 +79,7 @@ class AddContactDialogViewWeb extends StatelessWidget {
                   title: l10n.matrixId,
                   initialValue: controller.userName.value,
                   onChanged: controller.onUsernameChanged,
-                  assetPath: ImagePaths.icMatrixid,
+                  assetPath: Assets.images.icMatrixid.path,
                   errorMessage: errorMessage,
                   textInputAction: TextInputAction.done,
                   onSubmitted: (_) => controller.onSave(),

@@ -20,7 +20,7 @@ import 'package:twake_chat/pages/chat/sticky_timestamp_widget.dart';
 import 'package:twake_chat/pages/chat/tombstone_display.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -302,7 +302,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                                     LinagoraRefColors.material().tertiary[30],
                               ),
                           searchEmptyWidget: SvgPicture.asset(
-                            ImagePaths.icSearchEmojiEmpty,
+                            Assets.images.searchEmojiEmpty.path,
                           ),
                           searchFocusNode: controller.searchEmojiFocusNode,
                         ),

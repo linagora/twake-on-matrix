@@ -58,7 +58,7 @@ import 'package:twake_chat/presentation/mixins/send_files_with_caption_web_mixin
 import 'package:twake_chat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/account_bundles.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -2186,7 +2186,7 @@ class ChatController extends State<Chat>
                                                       .tertiary[30],
                                             ),
                                         searchEmptyWidget: SvgPicture.asset(
-                                          ImagePaths.icSearchEmojiEmpty,
+                                          Assets.images.searchEmojiEmpty.path,
                                         ),
                                         searchFocusNode: FocusNode(),
                                       ),
@@ -2901,7 +2901,10 @@ class ChatController extends State<Chat>
                                                           .tertiary[30],
                                                 ),
                                             searchEmptyWidget: SvgPicture.asset(
-                                              ImagePaths.icSearchEmojiEmpty,
+                                              Assets
+                                                  .images
+                                                  .searchEmojiEmpty
+                                                  .path,
                                             ),
                                             searchFocusNode: FocusNode(),
                                           ),
