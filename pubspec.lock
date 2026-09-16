@@ -1868,7 +1868,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "1e631ed763b7c9a908b5fb210d860283918cf516"
+      resolved-ref: ba65a4938a31e7475c9f970655ffb64e45b66538
       url: "https://github.com/linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
@@ -2617,7 +2617,7 @@ packages:
     description:
       path: "."
       ref: "fix/ios-share-unsaved-screenshot"
-      resolved-ref: "2956dd3f25f30ffd3a1d99ab6f40d86c98420fb6"
+      resolved-ref: c61f91aa6ea1a5b45ead0b76d6a77e8bed1a54cd
       url: "https://github.com/linagora/receive_sharing_intent.git"
     source: git
     version: "1.8.1"
