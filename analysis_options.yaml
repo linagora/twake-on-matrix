@@ -15,6 +15,7 @@ linter:
     - prefer_asserts_in_initializer_lists
     - prefer_constructors_over_static_methods
     - unnecessary_library_name
+    - unnecessary_null_aware_operator_on_extension_on_nullable
 
 analyzer:
   errors:
