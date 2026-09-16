@@ -1,5 +1,5 @@
 import 'package:twake_chat/pages/chat_draft/draft_chat_empty_widget_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -28,7 +28,7 @@ class DraftChatEmpty extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             SvgPicture.asset(
-              ImagePaths.mascotNewChat,
+              Assets.images.icMascotNewChat.path,
               width: DraftChatEmptyWidgetStyle.iconSize(context),
               height: DraftChatEmptyWidgetStyle.iconSize(context),
             ),

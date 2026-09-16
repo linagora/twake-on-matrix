@@ -18,7 +18,7 @@ import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -891,7 +891,7 @@ class ChatListController extends State<ChatList>
               : L10n.of(context)!.pin,
           icon: room.isFavourite
               ? SvgPicture.asset(
-                  ImagePaths.icUnpin,
+                  Assets.images.icUnpin.path,
                   width: ChatListViewStyle.slidableIconSize,
                   colorFilter: ColorFilter.mode(
                     Theme.of(context).colorScheme.onPrimary,

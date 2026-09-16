@@ -1,7 +1,7 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/verify_device_option.dart';
 import 'package:twake_chat/pages/bootstrap/verify_device_view_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -28,7 +28,7 @@ class VerifyDeviceView extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SvgPicture.asset(
-          ImagePaths.mascotVerifyDevices,
+          Assets.images.icMascotVerifyDevices.path,
           width: mascotWidth,
           height: mascotHeight,
           fit: BoxFit.contain,

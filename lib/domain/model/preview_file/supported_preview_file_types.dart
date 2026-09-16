@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 
 enum SupportedIconFileTypesEnum {
@@ -15,23 +15,23 @@ enum SupportedIconFileTypesEnum {
   String get imagePath {
     switch (this) {
       case SupportedIconFileTypesEnum.image:
-        return ImagePaths.icFileImage;
+        return Assets.images.icFileImage.path;
       case SupportedIconFileTypesEnum.doc:
-        return ImagePaths.icFileDocx;
+        return Assets.images.icFileDoc.path;
       case SupportedIconFileTypesEnum.excel:
-        return ImagePaths.icFileXlsx;
+        return Assets.images.icFileExcel.path;
       case SupportedIconFileTypesEnum.powerPoint:
-        return ImagePaths.icFilePptx;
+        return Assets.images.icFilePpt.path;
       case SupportedIconFileTypesEnum.pdf:
-        return ImagePaths.icFilePdf;
+        return Assets.images.icFilePdf.path;
       case SupportedIconFileTypesEnum.zip:
-        return ImagePaths.icFileZip;
+        return Assets.images.icFileZip.path;
       case SupportedIconFileTypesEnum.video:
-        return ImagePaths.icFileVideo;
+        return Assets.images.icFileVideo.path;
       case SupportedIconFileTypesEnum.audio:
-        return ImagePaths.icFileAudio;
+        return Assets.images.icFileAudio.path;
       case SupportedIconFileTypesEnum.unknown:
-        return ImagePaths.icFileUnknown;
+        return Assets.images.icFileUnknown.path;
     }
   }
 }

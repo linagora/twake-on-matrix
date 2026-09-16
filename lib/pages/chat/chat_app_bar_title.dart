@@ -12,7 +12,7 @@ import 'package:twake_chat/pages/chat/chat_app_bar_title_style.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/pages/chat/typing_timer_wrapper.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/common_helper.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
@@ -131,7 +131,7 @@ class ChatAppBarTitle extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: SvgPicture.asset(
-                              ImagePaths.icEncrypted,
+                              Assets.images.icEncrypted.path,
                               width: 16,
                               height: 16,
                             ),

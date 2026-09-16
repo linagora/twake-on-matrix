@@ -6,7 +6,7 @@ import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_option.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -222,7 +222,7 @@ class ChatDetailsEditView extends StatelessWidget {
                           horizontal: 16,
                         ),
                         leading: SvgPicture.asset(
-                          ImagePaths.icShieldLockFill,
+                          Assets.images.icShieldLockFill.path,
                           width: 24,
                           height: 24,
                           colorFilter: ColorFilter.mode(
