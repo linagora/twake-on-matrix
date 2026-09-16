@@ -14,6 +14,7 @@ linter:
     - matching_super_parameters
     - prefer_asserts_in_initializer_lists
     - prefer_constructors_over_static_methods
+    - unnecessary_library_name
 
 analyzer:
   errors:
