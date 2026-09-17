@@ -1308,6 +1308,7 @@ class MatrixState extends ConsumerState<Matrix>
       'MatrixState::_ensureToMServicesFromSummary: restoring ToM configuration '
       'from well-known (${tomServer.baseUrl})',
     );
+    _setupAuthUrl();
     setUpToMServices(tomServer, identityServer);
     await _storeToMConfiguration(
       newClient,
