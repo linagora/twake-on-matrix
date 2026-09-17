@@ -166,7 +166,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
           }
           return child!;
         },
-        child: Container(
+        child: ColoredBox(
           color: LinagoraSysColors.material().background,
           child: Column(
             children: [
