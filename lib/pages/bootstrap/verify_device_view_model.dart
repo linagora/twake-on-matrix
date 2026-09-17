@@ -4,6 +4,7 @@ import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
 import 'package:twake_chat/pages/bootstrap/verify_device_option.dart';
 import 'package:twake_chat/pages/bootstrap/verify_device_state.dart';
+import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -49,7 +50,7 @@ class VerifyDeviceViewModel extends _$VerifyDeviceViewModel {
       KeyVerificationState.error,
       KeyVerificationState.done,
     ].contains(request.state)) {
-      request.cancel('m.user');
+      request.cancel(KeyVerificationCodeEnum.user.code);
     }
   }
 

@@ -20,6 +20,10 @@ sealed class DevicesSettingsState with _$DevicesSettingsState {
     required List<Device> devices,
     @Default(VerificationBannerVisibility.shown)
     VerificationBannerVisibility bannerVisibility,
+
+    /// Bumped when device-key trust changes without the [Device] list
+    /// changing, so Riverpod notifies listeners (e.g. after SAS verify).
+    @Default(0) int keysRevision,
   }) = DevicesSettingsLoaded;
 
   /// The "remove all other devices" action is in flight.
@@ -27,6 +31,7 @@ sealed class DevicesSettingsState with _$DevicesSettingsState {
     required List<Device> devices,
     @Default(VerificationBannerVisibility.shown)
     VerificationBannerVisibility bannerVisibility,
+    @Default(0) int keysRevision,
   }) = DevicesSettingsDeletingDevices;
 
   /// The "remove all other devices" action failed.
@@ -35,5 +40,6 @@ sealed class DevicesSettingsState with _$DevicesSettingsState {
     required String message,
     @Default(VerificationBannerVisibility.shown)
     VerificationBannerVisibility bannerVisibility,
+    @Default(0) int keysRevision,
   }) = DevicesSettingsDeleteDevicesError;
 }
