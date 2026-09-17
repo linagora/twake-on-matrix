@@ -194,11 +194,13 @@ class ContactsManager {
   }
 
   void refreshTomContacts(Client client) {
-    tomContactsSubscription = getTomContactsInteractor.execute().listen((
-      event,
-    ) {
-      _contactsNotifier.value = event;
-    });
+    if (!_isSynchronizing) {
+      tomContactsSubscription = getTomContactsInteractor.execute().listen((
+        event,
+      ) {
+        _contactsNotifier.value = event;
+      });
+    }
     syncContactsAcrossDevices(client);
   }
 
