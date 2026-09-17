@@ -10,8 +10,10 @@ sealed class DevicesBannerState extends Equatable {
 class DevicesBannerInitialState extends DevicesBannerState {}
 
 class DisplayWarningBannerState extends DevicesBannerState {
-  const DisplayWarningBannerState();
+  final bool isCurrentSessionOutOfSync;
+
+  const DisplayWarningBannerState({required this.isCurrentSessionOutOfSync});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [isCurrentSessionOutOfSync];
 }
