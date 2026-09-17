@@ -265,6 +265,67 @@ void main() {
       );
     });
 
+    test('fills seenByUsers when the receipt is on a newer reaction', () async {
+      final client = await _clientWithDatabase(
+        EventIdListDatabase(['\$reaction', '\$own']),
+      );
+      final room = _room(client);
+      room.receiptState.global.otherUsers['@bob:test.local'] =
+          LatestReceiptStateData('\$reaction', 0);
+      room.lastEvent = Event(
+        content: {'msgtype': 'm.text', 'body': 'hello'},
+        type: EventTypes.Message,
+        eventId: '\$own',
+        senderId: client.userID!,
+        originServerTs: DateTime.utc(2024, 1, 2),
+        room: room,
+      );
+
+      final result = await room.lastEventAvailableInPreview();
+
+      expect(result, isA<RoomPreviewFound>());
+      expect((result as RoomPreviewFound).seenByUsers.map((user) => user.id), [
+        '@bob:test.local',
+      ]);
+    });
+
+    test('keeps the preview when the event order cannot be read', () async {
+      final client = await _clientWithDatabase(MockDatabase());
+      final room = _room(client);
+      room.receiptState.global.otherUsers['@bob:test.local'] =
+          LatestReceiptStateData('\$own', 0);
+      room.lastEvent = Event(
+        content: {'msgtype': 'm.text', 'body': 'hello'},
+        type: EventTypes.Message,
+        eventId: '\$own',
+        senderId: client.userID!,
+        originServerTs: DateTime.utc(2024, 1, 2),
+        room: room,
+      );
+
+      final result = await room.lastEventAvailableInPreview();
+
+      expect(result, isA<RoomPreviewFound>());
+      expect((result as RoomPreviewFound).seenByUsers.map((user) => user.id), [
+        '@bob:test.local',
+      ]);
+    });
+
+    test('leaves seenByUsers empty for a message from someone else', () async {
+      final client = await _clientWithDatabase(
+        EventIdListDatabase(['\$reaction', '\$1']),
+      );
+      final room = _room(client);
+      room.receiptState.global.otherUsers['@bob:test.local'] =
+          LatestReceiptStateData('\$reaction', 0);
+      room.lastEvent = _message(room, '\$1', DateTime.utc(2024, 1, 2));
+
+      final result = await room.lastEventAvailableInPreview();
+
+      expect(result, isA<RoomPreviewFound>());
+      expect((result as RoomPreviewFound).seenByUsers, isEmpty);
+    });
+
     test('returns RoomPreviewUnavailable when getEventList fails', () async {
       final client = await _clientWithDatabase(ThrowingGetEventListDatabase());
       final room = _room(client);
