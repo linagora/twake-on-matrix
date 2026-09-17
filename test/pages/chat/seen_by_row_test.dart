@@ -35,10 +35,19 @@ void main() {
       );
     });
 
-    test('sent status maps to sent even with receipts', () {
+    test('sent without receipts maps to sent', () {
+      expect(
+        seenByRow.getMessageStatus([], eventStatus: EventStatus.sent),
+        MessageStatus.sent,
+      );
+    });
+
+    // room.lastEvent can stay `sent` when the remote echo is handled before
+    // the send response.
+    test('sent with receipts maps to hasBeenSeen', () {
       expect(
         seenByRow.getMessageStatus(seenByOthers, eventStatus: EventStatus.sent),
-        MessageStatus.sent,
+        MessageStatus.hasBeenSeen,
       );
     });
 
