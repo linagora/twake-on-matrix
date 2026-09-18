@@ -1,7 +1,7 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_style/settings_style_twake_view.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +33,7 @@ class SettingsDataAndStorageView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 13),
             child: SvgPicture.asset(
-              ImagePaths.mascotDataAndStorage,
+              Assets.images.dataAndStorage.path,
               width: 106,
               height: 126,
             ),

@@ -4,7 +4,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/personal_qr/personal_qr.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view_mobile_style.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -143,7 +143,7 @@ class _QrCodeCard extends StatelessWidget {
                         children: [
                           TwakeQrCodeView(data: qrData, size: qrSize),
                           Image.asset(
-                            ImagePaths.logoPng,
+                            Assets.logoPng.path,
                             width: logoSize,
                             height: logoSize,
                           ),

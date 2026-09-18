@@ -8,7 +8,7 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/stream_image_view.dart';
@@ -338,7 +338,7 @@ class _EncryptionSettingTile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: SvgPicture.asset(
-              ImagePaths.icE2EEncryptionMessageIndicator,
+              Assets.images.icEndToEndEncryptionMessageIndicator.path,
               width: 24,
               height: 24,
               colorFilter: ColorFilter.mode(

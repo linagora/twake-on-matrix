@@ -1,7 +1,7 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome_view_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -47,7 +47,7 @@ class TwakeWelcomeView extends StatelessWidget {
           ? controller.onClickCreateTwakeId
           : null,
       logo: SvgPicture.asset(
-        ImagePaths.logoTwakeWelcome,
+        Assets.images.logoTwakeWelcome.path,
         width: TwakeWelcomeViewStyle.logoWidth,
         height: TwakeWelcomeViewStyle.logoHeight,
       ),

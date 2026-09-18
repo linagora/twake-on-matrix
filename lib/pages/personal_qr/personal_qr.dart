@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/personal_qr/personal_qr_view.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -245,7 +245,7 @@ class PersonalQrController extends State<PersonalQr> {
 
     return await _compositeOntoBackground(
       byteData,
-      ImagePaths.personalQrBackground,
+      Assets.personalQrBackground.path,
       image.width,
       image.height,
     );

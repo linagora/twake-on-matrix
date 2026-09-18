@@ -6,7 +6,7 @@ import 'package:twake_chat/pages/chat/item_actions_bottom_widget.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:twake_chat/presentation/enum/chat/audio_type_enum.dart';
 import 'package:twake_chat/presentation/style/media_picker_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/permission_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -228,7 +228,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
                               child: Stack(
                                 children: [
                                   SvgPicture.asset(
-                                    ImagePaths.icSend,
+                                    Assets.images.icSend.path,
                                     width: MediaPickerStyle.sendIconSize,
                                     height: MediaPickerStyle.sendIconSize,
                                   ),
@@ -310,7 +310,7 @@ mixin MediaPickerMixin on CommonMediaPickerMixin {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
-            ImagePaths.icPhotosSettingPermission,
+            Assets.images.icPhotosSetting.path,
             width: MediaPickerStyle.photoPermissionIconSize,
             height: MediaPickerStyle.photoPermissionIconSize,
           ),

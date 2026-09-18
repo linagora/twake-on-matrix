@@ -1,6 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_controller.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_appbar_style.dart';
@@ -67,7 +67,7 @@ class _LeadingAppBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      ImagePaths.icTwakeImageLogoBeta,
+      Assets.images.icTwakeImageBeta.path,
       width: AdaptiveScaffoldAppBarStyle.sizeWidthIcTwakeImageLogo,
       height: AdaptiveScaffoldAppBarStyle.sizeHeightIcTwakeImageLogo,
     );

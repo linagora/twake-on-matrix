@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/pages/image_viewer/context_menu_item_image_viewer.dart';
 
 class MediaViewerAppbarView extends StatelessWidget {
@@ -120,7 +120,8 @@ class MediaViewerAppbarView extends StatelessWidget {
                                     ),
                                     ContextMenuItemImageViewer(
                                       title: L10n.of(context)!.showInChat,
-                                      imagePath: ImagePaths.icShowInChat,
+                                      imagePath:
+                                          Assets.images.icShowInChat.path,
                                       onTap: () {
                                         controller.toggleShowMoreActions(
                                           controller.menuController,

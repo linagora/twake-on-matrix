@@ -1,5 +1,5 @@
 import 'package:twake_chat/domain/model/contact/contact_status.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -21,7 +21,7 @@ class ContactStatusWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SvgPicture.asset(
-                  ImagePaths.icStatus,
+                  Assets.images.icStatus.path,
                   colorFilter: ColorFilter.mode(
                     inactiveColor!,
                     BlendMode.srcIn,

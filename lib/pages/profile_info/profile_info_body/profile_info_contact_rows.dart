@@ -4,7 +4,7 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/pages/profile_info/copiable_profile_row/icon_copiable_profile_row.dart';
 import 'package:twake_chat/pages/profile_info/copiable_profile_row/svg_copiable_profile_row.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -50,7 +50,7 @@ class ProfileInfoContactRows extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgCopiableProfileRow(
-                    leadingIconPath: ImagePaths.icMatrixid,
+                    leadingIconPath: Assets.images.icMatrixid.path,
                     caption: L10n.of(context)!.matrixId,
                     copiableText: user.id,
                     enableDividerTop:

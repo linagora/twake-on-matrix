@@ -4,7 +4,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_item_builder.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_view_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/beautify_string_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -98,7 +98,7 @@ class SettingsSecurityView extends StatelessWidget {
                               ? null
                               : ignoredUsers.length.toString(),
                           leadingWidget: SvgPicture.asset(
-                            ImagePaths.icFrontHand,
+                            Assets.images.icFrontHand.path,
                             colorFilter: ColorFilter.mode(
                               refColorTertiary30 ?? sysColor.onSurface,
                               BlendMode.srcIn,
@@ -151,7 +151,7 @@ class SettingsSecurityView extends StatelessWidget {
                             letterSpacing: 2,
                           ),
                           leadingWidget: SvgPicture.asset(
-                            ImagePaths.icRecoveryKey,
+                            Assets.images.icRecoveryKey.path,
                             colorFilter: ColorFilter.mode(
                               refColorTertiary30 ?? sysColor.onSurface,
                               BlendMode.srcIn,

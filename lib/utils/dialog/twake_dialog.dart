@@ -3,7 +3,7 @@ import 'package:animations/animations.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/bootstrap/init_client_dialog.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
@@ -120,7 +120,7 @@ class TwakeDialog {
       context: context,
       future: future,
       loadingIcon: LottieBuilder.asset(
-        ImagePaths.lottieTwakeLoading,
+        Assets.twakeLoading.path,
         width: lottieSizeWeb,
         height: lottieSizeWeb,
       ),
@@ -158,7 +158,7 @@ class TwakeDialog {
       future: future,
       maxWidth: double.infinity,
       loadingIcon: LottieBuilder.asset(
-        ImagePaths.lottieTwakeLoading,
+        Assets.twakeLoading.path,
         width: lottieSizeMobile,
         height: lottieSizeMobile,
       ),
@@ -242,7 +242,7 @@ class ProgressDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           LottieBuilder.asset(
-            ImagePaths.lottieTwakeLoading,
+            Assets.twakeLoading.path,
             width: lottieSize,
             height: lottieSize,
           ),

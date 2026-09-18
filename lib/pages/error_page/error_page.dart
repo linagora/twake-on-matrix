@@ -1,5 +1,5 @@
 import 'package:twake_chat/pages/error_page/error_page_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -42,12 +42,12 @@ class _ErrorPageBackgroundWeb extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       children: [
         SvgPicture.asset(
-          ImagePaths.icErrorPageBackground,
+          Assets.images.icErrorPageBackground.path,
           colorFilter: ErrorPageStyle.backgroundColorFilter(context),
           fit: BoxFit.contain,
         ),
         SvgPicture.asset(
-          ImagePaths.icErrorPage,
+          Assets.images.icErrorPage.path,
           width: ErrorPageStyle.backgroundIconWidthWeb,
           fit: BoxFit.contain,
         ),
@@ -62,7 +62,7 @@ class _ErrorPageBackgroundMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      ImagePaths.icErrorPage,
+      Assets.images.icErrorPage.path,
       width: ErrorPageStyle.backgroundIconWidthMobile,
       fit: BoxFit.contain,
     );
