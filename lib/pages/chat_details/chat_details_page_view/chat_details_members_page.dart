@@ -42,65 +42,61 @@ class ChatDetailsMembersPage extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: displayMembersNotifier,
       builder: (context, members, child) {
-        members ??= [];
-        final canRequestMoreMembers = members.length < actualMembersCount;
-        return Column(
-          children: [
-            InkWell(
-              onTap: onAddMembers,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: sysColors.surfaceTint.withValues(alpha: 0.16),
+        final memberList = members ?? <User>[];
+        final canRequestMoreMembers = memberList.length < actualMembersCount;
+        // A single scroll view (instead of a Column with a fixed header and an
+        // Expanded list) so the page never overflows when the enclosing
+        // NestedScrollView gives it a short height, e.g. while its header is
+        // expanded or mid-scroll.
+        return CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: InkWell(
+                onTap: onAddMembers,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: sysColors.surfaceTint.withValues(alpha: 0.16),
+                      ),
                     ),
                   ),
-                ),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Icon(
-                        Icons.person_add_outlined,
-                        color: sysColors.primary,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        L10n.of(context)!.addMembers,
-                        style: textTheme.labelLarge?.copyWith(
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.person_add_outlined,
                           color: sysColors.primary,
+                          size: 24,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          L10n.of(context)!.addMembers,
+                          style: textTheme.labelLarge?.copyWith(
+                            color: sysColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: members.length + (canRequestMoreMembers ? 1 : 0),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              sliver: SliverList.builder(
+                itemCount: memberList.length + (canRequestMoreMembers ? 1 : 0),
                 itemBuilder: (BuildContext context, int index) {
-                  if (members == null) {
-                    return const SizedBox.shrink();
-                  }
-                  if (index < members.length) {
+                  if (index < memberList.length) {
                     return ListenableBuilder(
                       listenable: selectedUsersMapChangeNotifier,
                       builder: (context, child) {
-                        final member = members?[index];
-                        if (member == null) {
-                          return const SizedBox.shrink();
-                        }
+                        final member = memberList[index];
                         return ParticipantListItem(
                           key: ValueKey(member.id),
                           member,
@@ -114,14 +110,10 @@ class ChatDetailsMembersPage extends StatelessWidget {
                       },
                     );
                   }
-                  final haveMoreMembers = actualMembersCount > members.length;
-                  if (!haveMoreMembers) {
-                    return const SizedBox.shrink();
-                  }
                   return ListTile(
                     title: Text(
                       L10n.of(context)!.loadCountMoreParticipants(
-                        (actualMembersCount - members.length).toString(),
+                        (actualMembersCount - memberList.length).toString(),
                       ),
                     ),
                     leading: CircleAvatar(
