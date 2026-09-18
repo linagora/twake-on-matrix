@@ -1,4 +1,4 @@
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -60,9 +60,9 @@ enum DefaultPermissionLevelMember {
     switch (this) {
       case DefaultPermissionLevelMember.deleteMessagesSentByMe:
       case DefaultPermissionLevelMember.deleteMessagesSentByOthers:
-        return ImagePaths.icChatError;
+        return Assets.images.icChatError.path;
       case DefaultPermissionLevelMember.assignRoles:
-        return ImagePaths.icShieldLockFill;
+        return Assets.images.icShieldLockFill.path;
       case DefaultPermissionLevelMember.sendMessages:
       case DefaultPermissionLevelMember.invitePeopleToTheRoom:
       case DefaultPermissionLevelMember.sendReactions:

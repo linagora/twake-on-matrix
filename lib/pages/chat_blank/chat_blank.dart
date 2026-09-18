@@ -3,7 +3,7 @@ import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/pages/chat_blank/chat_blank_style.dart';
 import 'package:twake_chat/pages/chat_blank/chat_qr_code.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -64,7 +64,7 @@ class _ChatBlankNotChat extends StatelessWidget {
           child: Hero(
             tag: 'info-logo',
             child: SvgPicture.asset(
-              ImagePaths.mascotNoChat,
+              Assets.images.icMascotNoChat.path,
               width: ChatBlankStyle.mascotSize,
               height: ChatBlankStyle.mascotSize,
             ),

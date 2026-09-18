@@ -1,7 +1,7 @@
 import 'package:twake_chat/config/default_power_level_member.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/expandable_widget.dart';
@@ -237,8 +237,8 @@ class AssignRolesRolePickerView extends StatelessWidget {
               child: SvgPicture.asset(
                 isSelected ==
                         controller.widget.rolePickerType.assignRoles[index]
-                    ? ImagePaths.icRadioChecked
-                    : ImagePaths.icRadioUnchecked,
+                    ? Assets.images.icRadioChecked.path
+                    : Assets.images.icRadioUnchecked.path,
               ),
             ),
           ),

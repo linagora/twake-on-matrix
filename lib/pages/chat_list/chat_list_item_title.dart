@@ -2,7 +2,7 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title_style.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
@@ -48,7 +48,7 @@ class ChatListItemTitle extends StatelessWidget with ChatListItemMixin {
                     Padding(
                       padding: ChatListItemTitleStyle.paddingLeftIcon,
                       child: SvgPicture.asset(
-                        ImagePaths.icEncrypted,
+                        Assets.images.icEncrypted.path,
                         width: ChatListItemTitleStyle.encryptedInconWidth,
                         height: ChatListItemTitleStyle.encryptedInconHeight,
                       ),

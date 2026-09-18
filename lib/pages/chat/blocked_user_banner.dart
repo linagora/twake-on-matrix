@@ -1,5 +1,5 @@
 import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -19,7 +19,7 @@ class BlockedUserBanner extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SvgPicture.asset(
-            ImagePaths.icFrontHand,
+            Assets.images.icFrontHand.path,
             width: 16,
             height: 16,
             colorFilter: ColorFilter.mode(

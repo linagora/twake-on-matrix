@@ -2,7 +2,7 @@ import 'package:twake_chat/domain/model/app_grid/linagora_app.dart';
 import 'package:twake_chat/domain/model/extensions/linagora_app_extensions.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_item_style.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view_style.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/link_browser_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -66,17 +66,13 @@ class AppGridDashboardItem extends StatelessWidget {
                     else
                       app.iconName.endsWith("svg")
                           ? SvgPicture.asset(
-                              ImagePaths.getConfigurationImagePath(
-                                app.iconName,
-                              ),
+                              _configurationIconPath(app.iconName),
                               width: AppGridDashboardItemStyle.iconAppSize,
                               height: AppGridDashboardItemStyle.iconAppSize,
                               fit: BoxFit.fill,
                             )
                           : Image.asset(
-                              ImagePaths.getConfigurationImagePath(
-                                app.iconName,
-                              ),
+                              _configurationIconPath(app.iconName),
                               width: AppGridDashboardItemStyle.iconAppSize,
                               height: AppGridDashboardItemStyle.iconAppSize,
                               fit: BoxFit.fill,
@@ -100,5 +96,26 @@ class AppGridDashboardItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String _configurationIconPath(String iconName) {
+  switch (iconName) {
+    case 'ic_twake_calendar.svg':
+      return Assets.configurations.icons.icTwakeCalendar.path;
+    case 'ic_twake_chat.svg':
+      return Assets.configurations.icons.icTwakeChat.path;
+    case 'ic_twake_contacts.svg':
+      return Assets.configurations.icons.icTwakeContacts.path;
+    case 'ic_twake_drive.svg':
+      return Assets.configurations.icons.icTwakeDrive.path;
+    case 'ic_twake_mail.svg':
+      return Assets.configurations.icons.icTwakeMail.path;
+    case 'ic_twake_support.svg':
+      return Assets.configurations.icons.icTwakeSupport.path;
+    case 'ic_twake_visio.svg':
+      return Assets.configurations.icons.icTwakeVisio.path;
+    default:
+      return 'configurations/icons/$iconName';
   }
 }

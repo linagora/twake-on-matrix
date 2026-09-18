@@ -9,7 +9,7 @@ import 'package:twake_chat/domain/usecase/room/set_permission_level_interactor.d
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_style.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/assign_roles_role_picker_view.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -82,7 +82,7 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
     switch (role) {
       case DefaultPowerLevelMember.guest:
         return SvgPicture.asset(
-          ImagePaths.icGhost,
+          Assets.images.icGhost.path,
           width: AssignRolesRolePickerStyle.roleIconSize,
           height: AssignRolesRolePickerStyle.roleIconSize,
           colorFilter: ColorFilter.mode(
@@ -98,7 +98,7 @@ class AssignRolesEditorController extends State<AssignRolesRolePicker> {
         );
       case DefaultPowerLevelMember.moderator:
         return SvgPicture.asset(
-          ImagePaths.icShieldLockFill,
+          Assets.images.icShieldLockFill.path,
           width: AssignRolesRolePickerStyle.roleIconSize,
           height: AssignRolesRolePickerStyle.roleIconSize,
           colorFilter: ColorFilter.mode(

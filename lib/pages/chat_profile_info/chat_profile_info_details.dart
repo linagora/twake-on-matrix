@@ -12,7 +12,7 @@ import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dar
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -68,7 +68,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
               children: [
                 if (matrixId != null)
                   _CopiableRow(
-                    svgIconPath: ImagePaths.icMatrixid,
+                    svgIconPath: Assets.images.icMatrixid.path,
                     text: matrixId!,
                     title: L10n.of(context)!.username,
                   ),
@@ -152,7 +152,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
                               ? onUnblockUser
                               : onBlockUser,
                           child: _CopiableRow(
-                            svgIconPath: ImagePaths.icFrontHand,
+                            svgIconPath: Assets.images.icFrontHand.path,
                             enableCopy: false,
                             enableDivider: false,
                             text: isBlockedUser

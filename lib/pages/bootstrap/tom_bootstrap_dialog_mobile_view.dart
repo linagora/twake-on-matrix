@@ -2,7 +2,7 @@ import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_mobile_style.dar
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_skeletonizer_widget.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +88,7 @@ class TomBootstrapDialogMobileView extends StatelessWidget {
                   Padding(
                     padding: TomBootstrapDialogStyle.lottiePadding,
                     child: LottieBuilder.asset(
-                      ImagePaths.lottieTwakeLoading,
+                      Assets.twakeLoading.path,
                       width: TomBootstrapDialogStyle.lottieSize,
                       height: TomBootstrapDialogStyle.lottieSize,
                     ),

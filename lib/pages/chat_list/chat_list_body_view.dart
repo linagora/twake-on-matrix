@@ -6,7 +6,7 @@ import 'package:twake_chat/pages/chat_list/chat_list_skeletonizer_widget.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_builder.dart';
 import 'package:twake_chat/pages/chat_list/space_view.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/stream_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -69,7 +69,9 @@ class ChatListBodyView extends StatelessWidget {
                         padding: ChatListBodyViewStyle.paddingIconSkeletons,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [SvgPicture.asset(ImagePaths.icSkeletons)],
+                          children: [
+                            SvgPicture.asset(Assets.images.icSkeletons.path),
+                          ],
                         ),
                       ),
                       Padding(

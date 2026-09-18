@@ -15,7 +15,7 @@ import 'package:twake_chat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/android_utils.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -290,7 +290,7 @@ class DraftChatView extends StatelessWidget {
                               color: LinagoraRefColors.material().tertiary[30],
                             ),
                         searchEmptyWidget: SvgPicture.asset(
-                          ImagePaths.icSearchEmojiEmpty,
+                          Assets.images.searchEmojiEmpty.path,
                         ),
                         searchFocusNode: FocusNode(),
                       ),

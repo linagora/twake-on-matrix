@@ -1,5 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +38,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
 
     decoration = PrettyQrDecoration(
       image: PrettyQrDecorationImage(
-        image: AssetImage(ImagePaths.logoPng),
+        image: AssetImage(Assets.logoPng.path),
         position: PrettyQrDecorationImagePosition.embedded,
       ),
     );
@@ -63,7 +63,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                       url: AppConfig.twakeChatGooglePlay,
                     ).launchUrl();
                   },
-                  child: SvgPicture.asset(ImagePaths.googlePlay),
+                  child: SvgPicture.asset(Assets.images.googlePlay.path),
                 ),
                 const SizedBox(width: 24),
                 InkWell(
@@ -73,7 +73,7 @@ class _ChatQrCodeState extends State<ChatQrCode> {
                       url: AppConfig.twakeChatAppleStore,
                     ).launchUrl();
                   },
-                  child: SvgPicture.asset(ImagePaths.appStore),
+                  child: SvgPicture.asset(Assets.images.appStore.path),
                 ),
               ],
             ),
