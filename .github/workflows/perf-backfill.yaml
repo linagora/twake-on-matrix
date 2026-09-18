@@ -1,0 +1,120 @@
+name: Perf Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        description: "Rebuild nights on or after this date (YYYY-MM-DD). Empty means all."
+        required: false
+        default: ""
+      until:
+        description: "Rebuild nights on or before this date (YYYY-MM-DD). Empty means all."
+        required: false
+        default: ""
+      run_ids:
+        description: "Explicit GitHub run ids, space separated. Overrides bucket discovery when set."
+        required: false
+        default: ""
+      deploy:
+        description: "Deploy the rebuilt history to GitHub Pages."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: gh-pages-writes
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    name: Backfill FTL physical history
+    runs-on: ubuntu-latest
+    env:
+      FLUTTER_VERSION: "3.38.9"
+      FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Validate FTL bucket name
+        run: |
+          if [[ "$FTL_RESULTS_BUCKET" == _* ]]; then
+            echo "ERROR: FTL_RESULTS_BUCKET='$FTL_RESULTS_BUCKET' — GOOGLE_CLOUD_PROJECT_ID secret is missing or empty."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GOOGLE_CLOUD_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          service_account: ${{ secrets.GOOGLE_CLOUD_SERVICE_ACCOUNT }}
+
+      - name: Checkout existing GitHub Pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: existing-pages
+          persist-credentials: false
+
+      - name: Prepare performance dashboard tree
+        run: |
+          set -euo pipefail
+          mkdir -p performance-site/data
+          if [ -d existing-pages/performance ]; then
+            cp -R existing-pages/performance/. performance-site/
+          fi
+          cp -R scripts/perf/dashboard/. performance-site/
+          python3 scripts/perf/version_dashboard_assets.py \
+            --index performance-site/index.html \
+            --version "$GITHUB_SHA"
+
+      - name: Rebuild physical history
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ARGS=()
+          if [ -n "${{ inputs.since }}" ]; then
+            ARGS+=(--since "${{ inputs.since }}")
+          fi
+          if [ -n "${{ inputs.until }}" ]; then
+            ARGS+=(--until "${{ inputs.until }}")
+          fi
+          for run_id in ${{ inputs.run_ids }}; do
+            ARGS+=(--run-id "$run_id")
+          done
+          python3 scripts/perf/backfill_physical.py \
+            --bucket "gs://$FTL_RESULTS_BUCKET" \
+            --data-directory performance-site/data \
+            --repository "$GITHUB_REPOSITORY" \
+            --flutter-version "$FLUTTER_VERSION" \
+            "${ARGS[@]}"
+
+      - name: Upload rebuilt history
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-backfill-data-${{ github.run_id }}
+          retention-days: 30
+          path: performance-site/data
+
+      - name: Deploy performance dashboard
+        if: ${{ inputs.deploy }}
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: performance-site
+          keep_files: true
+          destination_dir: performance
+          commit_message: "Publish backfilled FTL performance history"
