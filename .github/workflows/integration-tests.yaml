@@ -542,7 +542,12 @@ jobs:
   # ────────────────────────────────────────────────────────────────────────────
   perf_median:
     name: Compute Perf Median
-    if: ${{ github.event_name == 'schedule' || inputs.run_perf == 'true' }}
+    if: >-
+      ${{
+        always() &&
+        needs.perf_run_physical.result == 'success' &&
+        (github.event_name == 'schedule' || inputs.run_perf == 'true')
+      }}
     needs: perf_run_physical
     runs-on: ubuntu-latest
     permissions:
@@ -591,12 +596,14 @@ jobs:
     name: Publish Perf History
     if: >-
       ${{
-        (github.ref == 'refs/heads/main' &&
+        always() &&
+        needs.perf_median.result == 'success' &&
+        ((github.ref == 'refs/heads/main' &&
           (github.event_name == 'schedule' ||
             (github.event_name == 'workflow_dispatch' && inputs.publish_perf_history == true))) ||
         (github.ref == 'refs/heads/feat/ftl-performance-pages' &&
           github.event_name == 'workflow_dispatch' &&
-          inputs.publish_perf_history == true)
+          inputs.publish_perf_history == true))
       }}
     needs: perf_median
     runs-on: ubuntu-latest
