@@ -1276,6 +1276,58 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
+    await _ensureToMServicesFromSummary(newClient);
+  }
+
+  /// Rebuilds the ToM configuration of an already logged-in session from the
+  /// homeserver well-known discovery information.
+  ///
+  /// The ToM configuration is normally persisted during login. A valid Matrix
+  /// session can however outlive that local data (for example when the app
+  /// container is reset while the session is kept in the keychain), leaving
+  /// the app with `twakeSupported == false`. In that state the ToM URL
+  /// interceptor has no host and every `/_twake/*` request fails until the
+  /// user logs in again. Re-deriving the configuration from the well-known
+  /// keeps the ToM-backed address book working without a new login.
+  Future<void> _ensureToMServicesFromSummary(Client newClient) async {
+    if (newClient.userID == null) return;
+
+    final tomServer = loginHomeserverSummary?.tomServer;
+    if (tomServer == null) return;
+
+    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    );
+    if (tomServerUrlInterceptor.baseUrl == tomServer.baseUrl?.toString()) {
+      return;
+    }
+
+    final identityServer =
+        loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
+    Logs().d(
+      'MatrixState::_ensureToMServicesFromSummary: restoring ToM configuration '
+      'from well-known (${tomServer.baseUrl})',
+    );
+    _setupAuthUrl();
+    setUpToMServices(tomServer, identityServer);
+    await _storeToMConfiguration(
+      newClient,
+      ToMConfigurations(
+        tomServerInformation: tomServer,
+        identityServerInformation: identityServer,
+        authUrl: authUrl,
+        loginType: loginType,
+      ),
+    );
+    // The address book may have been synced before the ToM configuration was
+    // available, so refresh it now that it is reachable — otherwise the ToM
+    // contacts only show up after a manual pull-to-refresh.
+    unawaited(
+      _contactsManager.initialSynchronizeContacts(
+        withMxId: newClient.userID!,
+        forceRun: true,
+      ),
+    );
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {

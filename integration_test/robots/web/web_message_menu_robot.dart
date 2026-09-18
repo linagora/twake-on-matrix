@@ -6,6 +6,7 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrol/patrol.dart';
 
 import '../../base/core_robot.dart';
 import '../abstract/abstract_message_menu_robot.dart';
@@ -30,36 +31,72 @@ class WebMessageMenuRobot extends CoreRobot
 
   L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).last))!;
 
-  /// Moves a synthetic mouse pointer over the bubble for [message] so the
-  /// container's `MouseRegion` fires and the action bar (gated on
-  /// `isHoverNotifier`) renders. Returns the live gesture — the caller removes
-  /// it once the bar interaction is done.
-  Future<TestGesture> _hover(String message) async {
+  /// Hovers the bubble for [message] and keeps the synthetic mouse pointer over
+  /// it until [target] is visible, returning the live gesture — the caller
+  /// removes it once the bar interaction is done.
+  ///
+  /// The action bar is gated on a `MouseRegion`-driven hover notifier, and a
+  /// single synthetic hover is dropped whenever the message list rebuilds right
+  /// after send (the optimistic event is replaced once the server acks, which
+  /// detaches the hovered region while the pointer stays still). Hovering once
+  /// and waiting therefore races the ack — exactly like the mobile long-press
+  /// path — so re-issue the hover until the bar actually renders.
+  Future<TestGesture> _hoverUntilVisible(
+    String message,
+    PatrolFinder target, {
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
     final bubble = $(
       MessageContent,
     ).containing(find.textContaining(message, findRichText: true)).first;
-    await $.waitUntilVisible(bubble);
+    await $.waitUntilVisible(bubble, timeout: timeout);
 
-    final center = $.tester.getCenter(bubble.finder);
     final gesture = await $.tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: center);
-    await $.pump();
-    await gesture.moveTo(center);
-    await $.pump(const Duration(milliseconds: 300));
-    return gesture;
+
+    var isPointerAdded = false;
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      // Re-read the bubble position every attempt: the list can scroll or the
+      // message can be rebuilt once the server acks, moving the bubble.
+      final center = bubble.exists ? $.tester.getCenter(bubble.finder) : null;
+      if (center == null) {
+        await $.pump(const Duration(milliseconds: 100));
+        continue;
+      }
+
+      if (!isPointerAdded) {
+        await gesture.addPointer(location: center);
+        isPointerAdded = true;
+      }
+      await gesture.moveTo(center);
+      await $.pump(const Duration(milliseconds: 200));
+      if (target.visible) {
+        return gesture;
+      }
+
+      // Leave and re-enter the bubble so the `MouseRegion` fires again if the
+      // message was rebuilt while the pointer stayed still.
+      await gesture.moveTo(Offset(center.dx, center.dy - 300));
+      await $.pump(const Duration(milliseconds: 100));
+    }
+
+    if (isPointerAdded) {
+      await gesture.removePointer();
+    }
+    throw StateError(
+      'The message action bar for "$message" did not appear within $timeout.',
+    );
   }
 
   /// Hovers [message], opens the "more" context menu and taps the row whose
   /// label is [itemLabel].
   Future<void> _tapOverflowItem(String message, String itemLabel) async {
-    final gesture = await _hover(message);
-
     // All overflow actions live behind the "more" button; open it, then tap
     // the row labelled [itemLabel].
     final moreButton = $(
       TwakeIconButton,
     ).containing(find.byIcon(Icons.more_horiz));
-    await $.waitUntilVisible(moreButton, timeout: const Duration(seconds: 5));
+    final gesture = await _hoverUntilVisible(message, moreButton);
     await $.tester.tap(moreButton.finder);
     await gesture.removePointer();
 
@@ -83,12 +120,11 @@ class WebMessageMenuRobot extends CoreRobot
 
   @override
   Future<void> openReply(String message) async {
-    final gesture = await _hover(message);
     // Reply is a first-class bar button (it is not in the "more" menu).
     final replyButton = $(
       TwakeIconButton,
     ).containing(find.byTooltip(_l10n.reply));
-    await $.waitUntilVisible(replyButton, timeout: const Duration(seconds: 5));
+    final gesture = await _hoverUntilVisible(message, replyButton);
     await $.tester.tap(replyButton.finder);
     await gesture.removePointer();
     await $.pump(const Duration(milliseconds: 300));
