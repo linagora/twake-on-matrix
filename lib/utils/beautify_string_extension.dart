@@ -1,15 +1,15 @@
 extension BeautifyStringExtension on String {
   String get beautified {
-    var beautifiedStr = '';
+    final buffer = StringBuffer();
     for (var i = 0; i < length; i++) {
-      beautifiedStr += substring(i, i + 1);
+      buffer.write(substring(i, i + 1));
       if (i % 4 == 3) {
-        beautifiedStr += ' ';
+        buffer.write(' ');
       }
       if (i % 16 == 15) {
-        beautifiedStr += '\n';
+        buffer.write('\n');
       }
     }
-    return beautifiedStr;
+    return buffer.toString();
   }
 }

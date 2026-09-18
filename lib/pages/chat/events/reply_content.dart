@@ -2,7 +2,6 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat/events/reply_content_style.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
 import 'package:twake_chat/pages/chat/optional_selection_container_disabled.dart';
-import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/extension/event_info_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -168,8 +167,7 @@ class ReplyPreviewIconBuilder extends StatelessWidget {
     }
     if (event.isAFile) {
       return SvgPicture.asset(
-        event.mimeType?.getIcon(fileType: event.fileType) ??
-            Assets.images.icFileUnknown.path,
+        event.mimeType.getIcon(fileType: event.fileType),
         width: ReplyContentStyle.replyContentSize,
         height: ReplyContentStyle.replyContentSize,
       );

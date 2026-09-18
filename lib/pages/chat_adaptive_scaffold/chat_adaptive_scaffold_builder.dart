@@ -72,7 +72,7 @@ class ChatAdaptiveScaffoldBuilderController
     return ValueListenableBuilder(
       valueListenable: rightColumnTypeNotifier,
       builder: (context, rightColumnType, body) {
-        return Container(
+        return ColoredBox(
           color: Theme.of(context).colorScheme.surface,
           child: AdaptiveLayout(
             body: SlotLayout(

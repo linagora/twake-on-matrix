@@ -279,6 +279,14 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
                 ),
               ],
             ),
+            TypedGoRoute<NewPrivateChatNewFeedRoute>(
+              path: 'newfeed',
+              routes: [
+                TypedGoRoute<NewPrivateChatNewFeedInfoRoute>(
+                  path: 'newfeedinfo',
+                ),
+              ],
+            ),
           ],
         ),
         TypedGoRoute<NewGroupRoute>(path: 'newgroup'),
@@ -483,6 +491,29 @@ class NewPrivateChatNewGroupInfoRoute extends GoRouteData
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _defaultPage(context, NewGroupChatInfo(contactsList: $extra ?? {}));
+}
+
+class NewPrivateChatNewFeedRoute extends GoRouteData
+    with $NewPrivateChatNewFeedRoute {
+  const NewPrivateChatNewFeedRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const NewGroup(isFeed: true));
+}
+
+class NewPrivateChatNewFeedInfoRoute extends GoRouteData
+    with $NewPrivateChatNewFeedInfoRoute {
+  const NewPrivateChatNewFeedInfoRoute({this.$extra});
+
+  final Set<PresentationContact>? $extra;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(
+        context,
+        NewGroupChatInfo(contactsList: $extra ?? {}, isFeed: true),
+      );
 }
 
 class NewGroupRoute extends GoRouteData with $NewGroupRoute {

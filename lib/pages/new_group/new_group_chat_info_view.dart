@@ -65,14 +65,15 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
-                    const SizedBox(height: 16),
-                    _EncryptionSettingTile(
-                      enableEncryptionNotifier:
-                          newGroupInfoController.enableEncryptionNotifier,
-                      onChanged: (value) {
-                        newGroupInfoController.toggleEnableEncryption();
-                      },
-                    ),
+                    if (!newGroupInfoController.isFeed) ...[
+                      const SizedBox(height: 16),
+                      _EncryptionSettingTile(
+                        enableEncryptionNotifier:
+                            newGroupInfoController.enableEncryptionNotifier,
+                        onChanged: (_) =>
+                            newGroupInfoController.toggleEnableEncryption(),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -118,10 +119,11 @@ class NewGroupChatInfoView extends StatelessWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return PreferredSize(
       preferredSize: const Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight),
       child: TwakeAppBar(
-        title: L10n.of(context)!.newGroupChat,
+        title: newGroupInfoController.isFeed ? l10n.newFeed : l10n.newGroupChat,
         context: context,
         centerTitle: true,
         withDivider: true,
@@ -166,6 +168,7 @@ class NewGroupChatInfoView extends StatelessWidget {
   }
 
   Widget _buildGroupNameTextField(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return Padding(
       padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
       child: ValueListenableBuilder(
@@ -197,11 +200,13 @@ class NewGroupChatInfoView extends StatelessWidget {
                   errorStyle: TextStyle(
                     color: LinagoraSysColors.material().error,
                   ),
-                  labelText: L10n.of(context)!.widgetName,
+                  labelText: l10n.widgetName,
                   labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  hintText: L10n.of(context)!.enterGroupName,
+                  hintText: newGroupInfoController.isFeed
+                      ? l10n.enterFeedName
+                      : l10n.enterGroupName,
                   hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: LinagoraRefColors.material().neutral[60],
                   ),

@@ -1916,7 +1916,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "1e631ed763b7c9a908b5fb210d860283918cf516"
+      resolved-ref: ba65a4938a31e7475c9f970655ffb64e45b66538
       url: "https://github.com/linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
