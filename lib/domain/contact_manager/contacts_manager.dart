@@ -95,6 +95,8 @@ class ContactsManager {
 
   bool _isSynchronizing = false;
 
+  bool _isSynchronizingTomContacts = false;
+
   bool get _isSynchronizedTomContacts =>
       _contactsNotifier.value.getSuccessOrNull<ContactsInitial>() == null;
 
@@ -194,12 +196,14 @@ class ContactsManager {
   }
 
   void refreshTomContacts(Client client) {
-    if (!_isSynchronizing) {
-      tomContactsSubscription = getTomContactsInteractor.execute().listen((
-        event,
-      ) {
-        _contactsNotifier.value = event;
-      });
+    if (!_isSynchronizingTomContacts) {
+      _isSynchronizingTomContacts = true;
+      tomContactsSubscription =
+          getTomContactsInteractor.execute().listen((event) {
+              _contactsNotifier.value = event;
+            })
+            ..onDone(() => _isSynchronizingTomContacts = false)
+            ..onError((_) => _isSynchronizingTomContacts = false);
     }
     syncContactsAcrossDevices(client);
   }
@@ -208,11 +212,13 @@ class ContactsManager {
     bool isAvailableSupportPhonebookContacts = false,
     required String withMxId,
   }) async {
+    _isSynchronizingTomContacts = true;
     tomContactsSubscription =
         getTomContactsInteractor.execute().listen((event) {
             _contactsNotifier.value = event;
           })
           ..onDone(() async {
+            _isSynchronizingTomContacts = false;
             Logs().d('ContactsManager::_getAllContacts: done');
             await _lookUpPhonebookContacts(
               isAvailableSupportPhonebookContacts:
@@ -221,6 +227,7 @@ class ContactsManager {
             ).whenComplete(() => _isSynchronizing = false);
           })
           ..onError((error) async {
+            _isSynchronizingTomContacts = false;
             Logs().d('ContactsManager::_getAllContacts: error - $error');
             await _lookUpPhonebookContacts(
               isAvailableSupportPhonebookContacts:
@@ -244,17 +251,20 @@ class ContactsManager {
       );
     }
 
+    _isSynchronizingTomContacts = true;
     tomContactsSubscription =
         getTomContactsInteractor.execute().listen((event) {
             _contactsNotifier.value = event;
           })
           ..onDone(() async {
+            _isSynchronizingTomContacts = false;
             Logs().d('ContactsManager::_getAllContactsOnContactTab: done');
             if (!isAvailableSupportPhonebookContacts) {
               _isSynchronizing = false;
             }
           })
           ..onError((error) async {
+            _isSynchronizingTomContacts = false;
             Logs().d(
               'ContactsManager::_getAllContactsOnContactTab: error - $error',
             );
@@ -479,6 +489,7 @@ class ContactsManager {
     if (_isSynchronizing) {
       _isSynchronizing = false;
     }
+    _isSynchronizingTomContacts = false;
   }
 
   void synchronizePhonebookContacts({required String withMxId}) =>

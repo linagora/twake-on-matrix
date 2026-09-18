@@ -29,6 +29,7 @@ import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_conta
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:matrix/matrix.dart' hide Contact;
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
@@ -1946,6 +1947,51 @@ void main() {
         ),
       ).called(1);
     });
+
+    test(
+      'WHEN a phonebook synchronization is in progress.\n'
+      'AND refreshTomContacts is called.\n'
+      'THEN the ToM contacts synchronization SHOULD still be started.\n',
+      () async {
+        final client = MockClient();
+
+        when(mockGetTomContactsInteractor.execute()).thenAnswer(
+          (_) => Stream.fromIterable([const Right(ContactsLoading())]),
+        );
+
+        when(
+          mockTryGetSyncedPhoneBookContactInteractor.execute(userId: mxId),
+        ).thenAnswer(
+          (_) async => Right(
+            GetSyncedPhoneBookContactSuccessState(
+              contacts: contacts,
+              timeAvailableForSyncVault: true,
+            ),
+          ),
+        );
+
+        final federationConfigurationsCompleter =
+            Completer<FederationConfigurations>();
+
+        when(
+          mockFederationConfigurationsRepository.getFederationConfigurations(
+            mxId,
+          ),
+        ).thenAnswer((_) => federationConfigurationsCompleter.future);
+
+        contactsManager.synchronizePhonebookContacts(withMxId: mxId);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        contactsManager.refreshTomContacts(client);
+
+        await Future.delayed(const Duration(seconds: 1));
+
+        verify(mockGetTomContactsInteractor.execute()).called(1);
+
+        expect(federationConfigurationsCompleter.isCompleted, isFalse);
+      },
+    );
   });
 
   group('ContactsManager Unit test - ENV: Mobile - Unsupported Federation server', () {
@@ -4724,3 +4770,5 @@ void main() {
     },
   );
 }
+
+class MockClient extends Mock implements Client {}
