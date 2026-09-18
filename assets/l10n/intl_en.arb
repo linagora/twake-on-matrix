@@ -3083,7 +3083,7 @@
   "other": "Other",
   "enableRightAndLeftMessageAlignment": "Enable right/left message alignment",
   "holdToRecordAudio": "Hold to record audio.",
-  "explainPermissionToAccessMicrophone": "Your microphone is needed send voice messages.",
+  "explainPermissionToAccessMicrophone": "Your microphone is needed to send voice messages.",
   "allowMicrophoneAccess": "Allow microphone access",
   "later": "Later",
   "couldNotPlayAudioFile": "Could not play audio file",
