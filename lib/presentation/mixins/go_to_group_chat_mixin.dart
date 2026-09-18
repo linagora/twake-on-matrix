@@ -11,4 +11,12 @@ mixin GoToGroupChatMixin {
       const NewPrivateChatNewGroupRoute().push(context);
     }
   }
+
+  void goToNewFeed(BuildContext context) {
+    if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
+      context.pushInner('innernavigator/newfeed');
+    } else {
+      const NewPrivateChatNewFeedRoute().push(context);
+    }
+  }
 }
