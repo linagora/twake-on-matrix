@@ -47,42 +47,49 @@ class ChatDetailsMembersPage extends StatelessWidget {
         // A single scroll view (instead of a Column with a fixed header and an
         // Expanded list) so the page never overflows when the enclosing
         // NestedScrollView gives it a short height, e.g. while its header is
-        // expanded or mid-scroll.
+        // expanded or mid-scroll. The "Add members" row is kept pinned so it
+        // stays visible above the scrollable list, exactly like before.
         return CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: InkWell(
-                onTap: onAddMembers,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: sysColors.surfaceTint.withValues(alpha: 0.16),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _AddMembersHeaderDelegate(
+                backgroundColor: sysColors.onPrimary,
+                child: InkWell(
+                  onTap: onAddMembers,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: sysColors.surfaceTint.withValues(alpha: 0.16),
+                        ),
                       ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Icon(
-                          Icons.person_add_outlined,
-                          color: sysColors.primary,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          L10n.of(context)!.addMembers,
-                          style: textTheme.labelLarge?.copyWith(
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.person_add_outlined,
                             color: sysColors.primary,
+                            size: 24,
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            L10n.of(context)!.addMembers,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: sysColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -132,4 +139,36 @@ class ChatDetailsMembersPage extends StatelessWidget {
       },
     );
   }
+}
+
+class _AddMembersHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _AddMembersHeaderDelegate({
+    required this.backgroundColor,
+    required this.child,
+  });
+
+  final Color backgroundColor;
+  final Widget child;
+
+  static const double _headerHeight = 64;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Material(color: backgroundColor, child: child);
+  }
+
+  @override
+  double get maxExtent => _headerHeight;
+
+  @override
+  double get minExtent => _headerHeight;
+
+  @override
+  bool shouldRebuild(covariant _AddMembersHeaderDelegate oldDelegate) =>
+      oldDelegate.child != child ||
+      oldDelegate.backgroundColor != backgroundColor;
 }
