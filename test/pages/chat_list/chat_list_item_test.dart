@@ -1,5 +1,8 @@
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
+import 'package:twake_chat/pages/chat/events/message_time_style.dart';
+import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -39,6 +42,8 @@ MockRoom buildRoom({required String name, String id = '!room:server.tld'}) {
   when(room.loadHeroUsers()).thenAnswer((_) async => <User>[]);
   return room;
 }
+
+class _FakeUser extends Fake implements User {}
 
 Widget wrap(Widget child) {
   return ThemeBuilder(
@@ -88,5 +93,37 @@ void main() {
     await tester.pump();
 
     verifyNever(room.loadHeroUsers());
+  });
+
+  testWidgets('shows the seen status computed with the preview', (
+    tester,
+  ) async {
+    final room = buildRoom(name: 'Project Apollo');
+    when(room.receiptState).thenReturn(LatestReceiptState.empty());
+    when(room.typingUsers).thenReturn([]);
+    final event = Event(
+      eventId: r'$own',
+      senderId: '@me:server.tld',
+      type: EventTypes.Message,
+      content: {'msgtype': 'm.text', 'body': 'hello'},
+      originServerTs: DateTime(2020, 1, 1),
+      status: EventStatus.synced,
+      room: room,
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        ChatListItem(
+          room,
+          previewResult: RoomPreviewFound(event, seenByUsers: [_FakeUser()]),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final icon = tester.widget<Icon>(
+      find.descendant(of: find.byType(SeenByRow), matching: find.byType(Icon)),
+    );
+    expect(icon.color, MessageTimeStyle.seenByRowIconPrimaryColor(false));
   });
 }

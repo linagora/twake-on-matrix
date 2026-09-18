@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/domain/model/search/recent_chat_model.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/markdown_fix.dart';
+import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
@@ -196,7 +197,7 @@ extension RoomExtension on Room {
         }
       }
 
-      if (bestSynced != null) return RoomPreviewFound(bestSynced);
+      if (bestSynced != null) return await _previewFound(bestSynced);
 
       final statePreviewCandidates = client.roomPreviewLastEvents
           .map(getState)
@@ -218,7 +219,7 @@ extension RoomExtension on Room {
         final best = bestPending != null
             ? _newestEvent(bestSynced, bestPending)
             : bestSynced;
-        return RoomPreviewFound(best);
+        return await _previewFound(best);
       }
 
       final dbEvents = await client.database.getEventList(
@@ -246,7 +247,7 @@ extension RoomExtension on Room {
           ? _newestEvent(bestSynced, bestPending)
           : bestSynced;
       if (dbBest != null) {
-        return RoomPreviewFound(dbBest);
+        return await _previewFound(dbBest);
       }
       return roomFullyScanned
           ? const RoomPreviewEmpty()
@@ -256,6 +257,13 @@ extension RoomExtension on Room {
       return const RoomPreviewUnavailable();
     }
   }
+
+  Future<RoomPreviewFound> _previewFound(Event event) async => RoomPreviewFound(
+    event,
+    seenByUsers: event.senderId == client.userID
+        ? await getSeenByUsersFromStore(event)
+        : const [],
+  );
 
   /// Picks the newest of two events. At equal timestamps, prefers the
   /// non-encrypted variant (the SDK may expose the same event both encrypted
