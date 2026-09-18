@@ -12,7 +12,7 @@ import 'package:twake_chat/pages/chat/events/message_reactions.dart';
 import 'package:twake_chat/pages/chat/events/message_time.dart';
 import 'package:twake_chat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:twake_chat/pages/chat/optional_stack.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -411,7 +411,9 @@ class _MessageContentWithTimestampBuilderState
             searchEmptyTextStyle: textTheme.labelMedium!.copyWith(
               color: linagoraRefColors.tertiary[30],
             ),
-            searchEmptyWidget: SvgPicture.asset(ImagePaths.icSearchEmojiEmpty),
+            searchEmptyWidget: SvgPicture.asset(
+              Assets.images.searchEmojiEmpty.path,
+            ),
             searchFocusNode: FocusNode(),
             showRecentTab: true,
           ),

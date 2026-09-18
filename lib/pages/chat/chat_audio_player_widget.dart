@@ -4,7 +4,7 @@ import 'package:async/async.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_play_extension.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -265,15 +265,15 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   String _displayAudioSpeed(double speed) {
     switch (speed) {
       case 0.5:
-        return ImagePaths.icAudioSpeed0_5x;
+        return Assets.images.audioSpeed05x.path;
       case 1.0:
-        return ImagePaths.icAudioSpeed1x;
+        return Assets.images.audioSpeed1x.path;
       case 1.5:
-        return ImagePaths.icAudioSpeed1_5x;
+        return Assets.images.audioSpeed15x.path;
       case 2.0:
-        return ImagePaths.icAudioSpeed2x;
+        return Assets.images.audioSpeed2x.path;
       default:
-        return ImagePaths.icAudioSpeed1x;
+        return Assets.images.audioSpeed1x.path;
     }
   }
 

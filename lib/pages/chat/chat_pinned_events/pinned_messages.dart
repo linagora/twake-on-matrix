@@ -17,7 +17,7 @@ import 'package:twake_chat/presentation/extensions/event_update_extension.dart';
 import 'package:twake_chat/presentation/mixins/delete_event_mixin.dart';
 import 'package:twake_chat/presentation/mixins/retry_text_message_mixin.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
@@ -182,7 +182,7 @@ class PinnedMessagesController extends State<PinnedMessages>
         child: popupItemByTwakeAppRouter(
           context,
           L10n.of(context)!.unpinAllMessages,
-          imagePath: ImagePaths.icUnpin,
+          imagePath: Assets.images.icUnpin.path,
           colorIcon: Theme.of(context).colorScheme.onSurface,
           onCallbackAction: () => unpinAll(),
         ),

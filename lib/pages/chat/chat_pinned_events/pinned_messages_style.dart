@@ -1,5 +1,5 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,5 +22,6 @@ class PinnedMessagesStyle {
   static const double bottomMenuHeightMobile = 56.0;
   static const double bottomMenuCloseButtonSize = 20.0;
 
-  static Widget unpinIcon() => SvgPicture.asset(ImagePaths.icUnpin, height: 18);
+  static Widget unpinIcon() =>
+      SvgPicture.asset(Assets.images.icUnpin.path, height: 18);
 }

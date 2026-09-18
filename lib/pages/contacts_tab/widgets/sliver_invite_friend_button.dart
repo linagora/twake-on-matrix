@@ -1,6 +1,6 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -73,7 +73,7 @@ class _InviteFriendButtonDelegate extends SliverPersistentHeaderDelegate {
               Padding(
                 padding: const EdgeInsets.all(12),
                 child: SvgPicture.asset(
-                  ImagePaths.icPersonCheck,
+                  Assets.images.icPersonCheck.path,
                   width: 24,
                   height: 24,
                   colorFilter: ColorFilter.mode(

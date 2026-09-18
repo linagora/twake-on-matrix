@@ -5,7 +5,7 @@ import 'package:twake_chat/pages/chat/chat_input_row_style.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_web.dart';
 import 'package:twake_chat/pages/chat/reply_display.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
-import 'package:twake_chat/resource/image_paths.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/android_utils.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -567,7 +567,7 @@ class ActionSelectModeWidget extends StatelessWidget {
                   children: <Widget>[
                     Text(L10n.of(context)!.tryToSendAgain),
                     const SizedBox(width: 4),
-                    SvgPicture.asset(ImagePaths.icSend),
+                    SvgPicture.asset(Assets.images.icSend.path),
                   ],
                 ),
               ),
