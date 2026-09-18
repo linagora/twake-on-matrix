@@ -107,18 +107,6 @@ class DraftChatView extends StatelessWidget {
           const ChatBackground(),
           Column(
             children: [
-              Expanded(
-                child: Center(
-                  child: DropTarget(
-                    onDragDone: (details) => controller.handleDragDone(details),
-                    onDragEntered: controller.onDragEntered,
-                    onDragExited: controller.onDragExited,
-                    child: DraftChatEmpty(
-                      onTap: () => controller.handleDraftAction(context),
-                    ),
-                  ),
-                ),
-              ),
               ValueListenableBuilder(
                 valueListenable: controller.isBlockedUserNotifier,
                 builder: (context, isBlockedUser, _) {
@@ -165,77 +153,79 @@ class DraftChatView extends StatelessWidget {
                 ),
               ),
               ChatDeviceVerificationBanner(client: controller.client),
-              ValueListenableBuilder(
-                valueListenable: controller.isBlockedUserNotifier,
-                builder: (context, isBlocked, child) {
-                  if (!isBlocked) {
-                    return child ?? const SizedBox();
-                  }
-
-                  return const BlockedMessageView();
-                },
-                child: Container(
-                  decoration: DraftChatViewStyle.responsive.isMobile(context)
-                      ? BoxDecoration(
-                          color: LinagoraSysColors.material().surface,
-                          border: Border(
-                            top: BorderSide(
-                              color: LinagoraStateLayer(
-                                LinagoraSysColors.material().surfaceTint,
-                              ).opacityLayer3,
-                            ),
-                          ),
-                        )
-                      : null,
-                  padding: EdgeInsets.only(
-                    top: 8,
-                    bottom: DraftChatViewStyle.bottomBarInputPadding(context),
-                  ),
-                  child: DraftChatInputRow(
-                    onEmojiAction: controller.onEmojiAction,
-                    onInputBarChanged: controller.onInputBarChanged,
-                    onInputBarSubmitted: controller.onInputBarSubmitted,
-                    onSendFileClick: controller.onSendFileClick,
-                    textEditingController: controller.sendController,
-                    typeAheadFocusNode: controller.inputFocus,
-                    typeAheadKey: controller.draftChatComposerTypeAheadKey,
-                    focusSuggestionController:
-                        controller.focusSuggestionController,
-                    inputText: controller.inputText,
-                    isSendingNotifier: controller.isSendingNotifier,
-                    onLongPressAudioRecord:
-                        controller.onLongPressAudioRecordInMobile,
-                    audioRecordStateNotifier:
-                        controller.audioRecordStateNotifier,
-                    startRecording: () {
-                      controller.startRecording();
-                    },
-                    stopRecording: () {
-                      if (controller.sendController.text.isNotEmpty) {
-                        controller.sendController.clear();
-                      }
-                      controller.stopRecording();
-                    },
-                    pauseRecording: () {
-                      controller.pauseRecording();
-                    },
-                    deleteRecording: () {
-                      controller.deleteRecording();
-                    },
-                    sendVoiceMessageAction: (audioFile, duration, waveform) =>
-                        controller.sendVoiceMessageAction(
-                          audioFile: audioFile,
-                          time: duration,
-                          waveform: waveform,
-                        ),
-                    onTapRecorderWeb: () =>
-                        controller.onTapRecorderWeb(context: context),
-                    onFinishRecorderWeb: controller.sendVoiceMessageWeb,
-                    onDeleteRecorderWeb: controller.stopRecordWeb,
-                    recordDurationWebNotifier:
-                        controller.recordDurationWebNotifier,
+              Expanded(
+                child: Center(
+                  child: DropTarget(
+                    onDragDone: (details) => controller.handleDragDone(details),
+                    onDragEntered: controller.onDragEntered,
+                    onDragExited: controller.onDragExited,
+                    child: DraftChatEmpty(
+                      onTap: () => controller.handleDraftAction(context),
+                    ),
                   ),
                 ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: controller.isBlockedUserNotifier,
+                builder: (context, isBlocked, _) {
+                  if (isBlocked) return const BlockedMessageView();
+                  return Container(
+                    decoration: DraftChatViewStyle.responsive.isMobile(context)
+                        ? BoxDecoration(
+                            color: LinagoraSysColors.material().surface,
+                            border: Border(
+                              top: BorderSide(
+                                color: LinagoraStateLayer(
+                                  LinagoraSysColors.material().surfaceTint,
+                                ).opacityLayer3,
+                              ),
+                            ),
+                          )
+                        : null,
+                    padding: EdgeInsets.only(
+                      top: 8,
+                      bottom: DraftChatViewStyle.bottomBarInputPadding(context),
+                    ),
+                    child: DraftChatInputRow(
+                      onEmojiAction: controller.onEmojiAction,
+                      onInputBarChanged: controller.onInputBarChanged,
+                      onInputBarSubmitted: controller.onInputBarSubmitted,
+                      onSendFileClick: controller.onSendFileClick,
+                      textEditingController: controller.sendController,
+                      typeAheadFocusNode: controller.inputFocus,
+                      typeAheadKey: controller.draftChatComposerTypeAheadKey,
+                      focusSuggestionController:
+                          controller.focusSuggestionController,
+                      inputText: controller.inputText,
+                      isSendingNotifier: controller.isSendingNotifier,
+                      onLongPressAudioRecord:
+                          controller.onLongPressAudioRecordInMobile,
+                      audioRecordStateNotifier:
+                          controller.audioRecordStateNotifier,
+                      startRecording: controller.startRecording,
+                      stopRecording: () {
+                        if (controller.sendController.text.isNotEmpty) {
+                          controller.sendController.clear();
+                        }
+                        controller.stopRecording();
+                      },
+                      pauseRecording: controller.pauseRecording,
+                      deleteRecording: controller.deleteRecording,
+                      sendVoiceMessageAction: (audioFile, duration, waveform) =>
+                          controller.sendVoiceMessageAction(
+                            audioFile: audioFile,
+                            time: duration,
+                            waveform: waveform,
+                          ),
+                      onTapRecorderWeb: () =>
+                          controller.onTapRecorderWeb(context: context),
+                      onFinishRecorderWeb: controller.sendVoiceMessageWeb,
+                      onDeleteRecorderWeb: controller.stopRecordWeb,
+                      recordDurationWebNotifier:
+                          controller.recordDurationWebNotifier,
+                    ),
+                  );
+                },
               ),
             ],
           ),
