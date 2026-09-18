@@ -2309,7 +2309,7 @@
   },
   "commandHint_markasdm": "직접 채팅으로 표시하세요",
   "commandHint_markasgroup": "채팅으로 표시하세요",
-  "countMembers": "{count, 복수형, =0{구성원 없음} =1{1명의 구성원} 기타{{카운트} 멤버",
+  "countMembers": "{count, plural, =0{구성원 없음} =1{1명의 구성원} other{{count} 멤버}}",
   "@countMembers": {
     "type": "text",
     "placeholders": {
