@@ -31,7 +31,7 @@ ARG YQ_VERSION=4.44.3
 # Single apt layer: install all deps, install Rust, install yq, then clean up
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev openssh-client && \
+      curl pkg-config libssl-dev && \
     rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
@@ -46,12 +46,10 @@ WORKDIR /app
 RUN rm -rf assets/js/* && \
     mkdir -p assets/js/package && \
     rm -rf fastlane && \
-    mkdir -p fastlane && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
+    mkdir -p fastlane
 
 # Cache cargo registry, git deps, nightly toolchain components, and compiled Rust artifacts.
-RUN --mount=type=ssh,required=true \
-    --mount=type=cache,target=/root/.cargo/registry \
+RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     --mount=type=cache,target=/root/.cargo/vodozemac-target \
     CARGO_TARGET_DIR=/root/.cargo/vodozemac-target \
@@ -60,8 +58,7 @@ RUN --mount=type=ssh,required=true \
 # Cache pub packages across builds; build-web.sh calls configure-sentry.sh internally.
 # SENTRY_AUTH_TOKEN passed as a Docker build secret to avoid leaking it in image layers
 # or `docker history` output.
-RUN --mount=type=ssh,required=true \
-    --mount=type=secret,id=sentry_auth_token,required=false \
+RUN --mount=type=secret,id=sentry_auth_token,required=false \
     --mount=type=cache,target=/root/.pub-cache \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null || true) \
     ./scripts/build-web.sh
