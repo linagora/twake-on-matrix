@@ -1,15 +1,11 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:dartz/dartz.dart' show Either;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/pages/chat/chat_app_bar_title_style.dart';
-import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/pages/chat/typing_timer_wrapper.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
@@ -51,10 +47,7 @@ class ChatAppBarTitle extends StatelessWidget {
     this.cachedPresenceStreamController,
   });
 
-  String _getRoomName(
-    BuildContext context,
-    Either<Failure, Success> getContactsState,
-  ) {
+  String _getRoomName(BuildContext context, List<UnifiedContact> contacts) {
     final localizedRoomName = room?.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)!),
     );
@@ -62,7 +55,7 @@ class ChatAppBarTitle extends StatelessWidget {
       directChatMatrixId: room?.directChatMatrixID,
       fallbackRoomName: roomName,
       localizedRoomName: localizedRoomName,
-      getContactsState: getContactsState,
+      contacts: contacts,
     );
   }
 
@@ -89,8 +82,7 @@ class ChatAppBarTitle extends StatelessWidget {
       // Single listener drives both the avatar name and the title text;
       // the status subtree is passed via `child:` so it does not rebuild
       // when the contacts notifier emits.
-      child: ValueListenableBuilder(
-        valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
+      child: Consumer(
         child: ConnectionStatusHeader(
           connectedWidget: _ChatAppBarStatusContent(
             connectivityResultStream: connectivityResultStream,
@@ -99,8 +91,11 @@ class ChatAppBarTitle extends StatelessWidget {
             cachedPresenceStreamController: cachedPresenceStreamController,
           ),
         ),
-        builder: (context, state, statusContent) {
-          final resolvedRoomName = _getRoomName(context, state);
+        builder: (context, ref, statusContent) {
+          final contacts =
+              ref.watch(contactsControllerProvider).asData?.value ??
+              const <UnifiedContact>[];
+          final resolvedRoomName = _getRoomName(context, contacts);
           return Row(
             children: [
               Padding(
@@ -375,15 +370,13 @@ String resolveChatAppBarTitle({
   required String? directChatMatrixId,
   required String? fallbackRoomName,
   required String? localizedRoomName,
-  required Either<Failure, Success> getContactsState,
+  required List<UnifiedContact> contacts,
 }) {
   if (directChatMatrixId == null) {
     return fallbackRoomName ?? localizedRoomName ?? '';
   }
-  final availableContact = getContactsState
-      .getSuccessOrNull<GetContactsSuccess>()
-      ?.contacts
-      .expand((contact) => contact.toPresentationContacts())
-      .firstWhereOrNull((contact) => contact.matrixId == directChatMatrixId);
-  return availableContact?.displayName ?? localizedRoomName ?? '';
+  final availableContact = contacts.firstWhereOrNull(
+    (contact) => contact.matrixId == directChatMatrixId,
+  );
+  return availableContact?.resolvedDisplayName ?? localizedRoomName ?? '';
 }
