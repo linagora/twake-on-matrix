@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/controllers/contacts_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 
 part 'unified_contact_read_providers.g.dart';
 
@@ -17,4 +18,22 @@ UnifiedContact? unifiedContact(Ref ref, String matrixId) {
     if (contact.matrixId == matrixId) return contact;
   }
   return null;
+}
+
+/// Single display entry point for a user: the unified store first, then the
+/// Matrix SDK (behind `matrixUserProfileProvider`) as a network fallback.
+///
+/// Existing widgets replace `FutureBuilder(getProfileFromUserId)` with
+/// `ref.watch(contactDisplayProvider(matrixId))`.
+@riverpod
+Future<UnifiedContact> contactDisplay(Ref ref, String matrixId) async {
+  final stored = ref.watch(unifiedContactProvider(matrixId));
+  if (stored != null) return stored;
+
+  final profile = await ref.watch(matrixUserProfileProvider(matrixId).future);
+  return UnifiedContact(
+    matrixId: matrixId,
+    canonicalDisplayName: profile?.displayName,
+    avatarUrl: profile?.avatarUrl,
+  );
 }
