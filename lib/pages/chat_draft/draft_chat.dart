@@ -245,6 +245,7 @@ class DraftChatController extends State<DraftChat>
     isBlockedUserNotifier.dispose();
     _captionsController.dispose();
     disposeAudioMixin();
+    draggingNotifier.dispose();
     super.dispose();
   }
 
@@ -408,6 +409,7 @@ class DraftChatController extends State<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
+    _createRoomSubscription?.cancel();
     _createRoomSubscription = createDirectChatInteractor
         .execute(
           contactMxId: presentationContact.matrixId!,
@@ -423,22 +425,40 @@ class DraftChatController extends State<DraftChat>
             },
             (success) async {
               if (success is CreateDirectChatSuccess) {
+                final intendedMxId = presentationContact.matrixId;
                 final room = Matrix.of(
                   context,
                 ).client.getRoomById(success.roomId);
-                if (room != null) {
-                  onRoomCreatedSuccess?.call(room);
-                  RoomRoute(
-                    roomid: room.id,
-                    $extra: ChatRouterInputArgument(
-                      type: ChatRouterInputArgumentType.draft,
-                      data:
-                          _userProfile.value?.displayName ??
-                          presentationContact.displayName ??
-                          room.name,
-                    ),
-                  ).go(context);
+                if (room == null) return;
+                if (intendedMxId == null ||
+                    !room.isUsableDirectChatWith(intendedMxId)) {
+                  Logs().w(
+                    'DraftChat: refusing non-matching room '
+                    'intended=$intendedMxId room=${room.id} '
+                    'isDirect=${room.isDirectChat} '
+                    'peer=${room.directChatMatrixID} '
+                    'joined=${room.summary.mJoinedMemberCount}',
+                  );
+                  isSendingNotifier.value = false;
+                  if (mounted) {
+                    TwakeSnackBar.show(
+                      context,
+                      L10n.of(context)!.roomCreationFailed,
+                    );
+                  }
+                  return;
                 }
+                onRoomCreatedSuccess?.call(room);
+                RoomRoute(
+                  roomid: room.id,
+                  $extra: ChatRouterInputArgument(
+                    type: ChatRouterInputArgumentType.draft,
+                    data:
+                        _userProfile.value?.displayName ??
+                        presentationContact.displayName ??
+                        room.name,
+                  ),
+                ).go(context);
               }
             },
           );

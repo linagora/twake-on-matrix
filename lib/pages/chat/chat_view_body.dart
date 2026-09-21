@@ -28,6 +28,7 @@ import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'chat_input_row.dart';
 
 class ChatViewBody extends StatelessWidget with MessageContentMixin {
@@ -37,7 +38,14 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
 
   @override
   Widget build(BuildContext context) {
+    // desktop_drop keeps listening even when this chat is covered/replaced
+    // (e.g. user opened draftChat). Only accept drops on the active room.
+    final roomId = controller.room?.id;
+    final routePath = GoRouterState.of(context).uri.path;
+    final acceptDrops = roomId != null && routePath.contains(roomId);
+
     return DropTarget(
+      enable: acceptDrops,
       onDragDone: (details) => controller.handleDragDone(details),
       onDragEntered: controller.onDragEntered,
       onDragUpdated: controller.onDragUpdated,
