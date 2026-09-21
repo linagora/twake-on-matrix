@@ -1,12 +1,20 @@
 server {
     listen ${TWAKECHAT_LISTEN_PORT};
 
+    root /usr/share/nginx/html;
+
     location = / {
        return 301 ${TWAKECHAT_BASE_HREF};
     }
 
+    # Deploy-time injected / version-bearing files are never cached: the app
+    # must always get the current homeserver/VAPID config and the current
+    # precache manifest (drives the service worker's eviction on each boot).
+    location = ${TWAKECHAT_BASE_HREF}config.json { add_header Cache-Control "no-store"; }
+    location = ${TWAKECHAT_BASE_HREF}version.json { add_header Cache-Control "no-store"; }
+    location = ${TWAKECHAT_BASE_HREF}assets/sw-manifest.json { add_header Cache-Control "no-store"; }
+
     location / {
-        root   /usr/share/nginx/html;
         index  index.html index.htm;
         try_files $uri $uri/ /index.html;
     }
