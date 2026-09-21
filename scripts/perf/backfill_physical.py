@@ -151,25 +151,39 @@ def pick_night(candidates: list[dict]) -> dict:
     return max(scheduled or candidates, key=lambda item: int(item["id"]))
 
 
+def resolve_metadata(repository: str, run_id: str) -> tuple[dict | None, str]:
+    """Resolve a run's metadata, capturing failures instead of raising."""
+    try:
+        return run_metadata(repository, run_id), ""
+    except BackfillError as error:
+        return None, f"run {run_id}: {error}"
+
+
 def select_nights(
     runs: dict[str, dict[int, str]],
     repository: str,
     since: date | None,
     until: date | None,
-) -> dict[str, dict]:
-    """Return the run to replay for each eligible night, with its samples."""
+) -> tuple[dict[str, dict], list[tuple[str, str]]]:
+    """Return the night to replay per eligible day, plus discovery failures."""
     complete = {
         run_id: samples
         for run_id, samples in runs.items()
         if set(RUN_DIRS) <= set(samples)
     }
     by_day: dict[str, list[dict]] = defaultdict(list)
+    failures: list[tuple[str, str]] = []
     for run_id, samples in complete.items():
-        metadata = run_metadata(repository, run_id)
+        metadata, error = resolve_metadata(repository, run_id)
+        if metadata is None:
+            failures.append((run_id, error))
+            print(f"WARN {error}")
+            continue
         if in_range(date.fromisoformat(metadata["day"]), since, until):
             metadata["samples"] = samples
             by_day[metadata["day"]].append(metadata)
-    return {day: pick_night(candidates) for day, candidates in by_day.items()}
+    nights = {day: pick_night(c) for day, c in by_day.items()}
+    return nights, failures
 
 
 def existing_days(data_directory: Path) -> set[str]:
@@ -328,7 +342,7 @@ def process_day(
         return DRY, f"sha={night['sha'][:8]} ({night['event']})"
     try:
         rebuild_night(config, night, work_root)
-    except BackfillError as error:
+    except (BackfillError, OSError) as error:
         return FAIL, str(error)
     return OK, night["event"]
 
@@ -345,14 +359,20 @@ def describe(status: str, night: dict, detail: str) -> str:
     return f"OK   {day} {night['id']} ({detail})"
 
 
-def report(outcomes: dict[str, list]) -> None:
-    """Print the run summary and the details of every failed night."""
+def report(
+    outcomes: dict[str, list],
+    discovery_failures: list[tuple[str, str]],
+) -> None:
+    """Print the run summary and the details of every failed item."""
     print(
         f"\nbackfilled {len(outcomes[OK])} night(s), "
-        f"{len(outcomes[SKIP])} skipped, {len(outcomes[FAIL])} failed"
+        f"{len(outcomes[SKIP])} skipped, {len(outcomes[FAIL])} failed, "
+        f"{len(discovery_failures)} discovery failure(s)"
     )
     for day, error in outcomes[FAIL]:
         print(f"  FAIL {day}: {error}")
+    for _run_id, error in discovery_failures:
+        print(f"  FAIL {error}")
 
 
 def main() -> None:
@@ -361,7 +381,9 @@ def main() -> None:
     args.data_directory.mkdir(parents=True, exist_ok=True)
     config = config_from_args(args)
     runs = resolve_runs(args, config)
-    nights = select_nights(runs, args.repository, args.since, args.until)
+    nights, discovery_failures = select_nights(
+        runs, args.repository, args.since, args.until
+    )
     skip = existing_days(config.data_directory) if args.skip_existing else set()
     work_root = resolve_work_root(args)
 
@@ -372,12 +394,12 @@ def main() -> None:
         outcomes[status].append((day, detail))
         print(describe(status, night, detail))
 
-    report(outcomes)
+    report(outcomes, discovery_failures)
 
     if not args.work_directory and not args.dry_run:
         shutil.rmtree(work_root, ignore_errors=True)
 
-    if outcomes[FAIL]:
+    if outcomes[FAIL] or discovery_failures:
         sys.exit(1)
 
 
