@@ -5,7 +5,6 @@ import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
@@ -109,8 +108,6 @@ class MatrixState extends ConsumerState<Matrix>
         ReceiveSharingIntentMixin,
         InitConfigMixin,
         ConnectivityMixin {
-  final _contactsManager = getIt.get<ContactsManager>();
-
   AudioPlayer audioPlayer = AudioPlayer();
   final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
@@ -207,7 +204,6 @@ class MatrixState extends ConsumerState<Matrix>
       await _storePersistActiveAccount(newClient!);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
-      getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
       Sentry.configureScope(
@@ -613,10 +609,7 @@ class MatrixState extends ConsumerState<Matrix>
         );
         if (currentClient.deviceID != senderId &&
             currentClient.userID != null) {
-          _contactsManager.initialSynchronizeContacts(
-            withMxId: currentClient.userID!,
-            forceRun: true,
-          );
+          ref.read(contactSyncServiceProvider).refresh();
         }
       }
     });
@@ -1349,12 +1342,7 @@ class MatrixState extends ConsumerState<Matrix>
     // The address book may have been synced before the ToM configuration was
     // available, so refresh it now that it is reachable — otherwise the ToM
     // contacts only show up after a manual pull-to-refresh.
-    unawaited(
-      _contactsManager.initialSynchronizeContacts(
-        withMxId: newClient.userID!,
-        forceRun: true,
-      ),
-    );
+    unawaited(ref.read(contactSyncServiceProvider).refresh());
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
@@ -1473,18 +1461,15 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> reSyncContacts() async {
-    _contactsManager.reSyncContacts();
+    await ref.read(contactSyncServiceProvider).clear();
   }
 
   Future<void> forceRunSynchronizeContacts() async {
-    _contactsManager.initialSynchronizeContacts(
-      withMxId: client.userID!,
-      forceRun: true,
-    );
+    await ref.read(contactSyncServiceProvider).refresh();
   }
 
   Future<void> cancelListenSynchronizeContacts() async {
-    await _contactsManager.cancelAllSubscriptions();
+    // Subscriptions are owned by the Riverpod controller.
   }
 
   void handleShowQrCodeDownload(bool show) {
