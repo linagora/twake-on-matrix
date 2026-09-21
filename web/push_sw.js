@@ -49,6 +49,15 @@ function resourceKey(url) {
   return key === '' ? '/' : key;
 }
 
+// Cachebuster for the SW's own asset fetches: appends the manifest MD5 as a
+// GET param, so the URL is unique to the bytes actually deployed. A misbehaving
+// middle layer that ignores `Cache-Control: no-cache` can never hand the fresh
+// precache stale bytes pinned to the plain URL.
+function withBust(url, hash) {
+  const sep = url.includes('?') ? '&' : '?';
+  return url + sep + 'v=' + hash;
+}
+
 function fetchManifest() {
   return fetch(MANIFEST_URL, { cache: 'no-store' })
     .then(function (response) {
@@ -131,16 +140,18 @@ async function applyManifest(fresh) {
   }
 
   // Precache CORE best-effort so the first controlled load is served from cache.
-  // `fetch` here uses the default cache mode, NOT {cache:'reload'}: the app can
-  // request main.dart.js at the same time, and forcing a bypass would download
-  // it twice on a first visit. This is only safe because nginx serves every
-  // asset with `Cache-Control: no-cache`, so the HTTP cache always revalidates
-  // and can never hand back stale bytes.
+  // The fetch is cachebusted with the deployed MD5 (?v=<hash>): the URL is only
+  // fresh right after the bytes changed, so a proxy that ignores no-cache/etag
+  // can never seed the cache with stale bytes. This intentionally bypasses
+  // HTTP-cache coalescing with the page's own plain-URL fetch, so a changed
+  // core asset (e.g. main.dart.js) may be downloaded once by the SW and once by
+  // an uncontrolled cold page load. The response is still keyed under the plain
+  // `url`, so cache keys, eviction and manifest lookups are unaffected.
   await Promise.allSettled(fresh.core.map(function (url) {
     if (fresh.resources[url] === undefined) return Promise.resolve();
     return contentCache.match(url).then(function (hit) {
       if (hit) return;
-      return fetch(url).then(function (response) {
+      return fetch(withBust(url, fresh.resources[url])).then(function (response) {
         if (response && response.ok) return contentCache.put(url, response);
       }).catch(function (error) {
         console.log('[Twake Chat] core precache miss: ' + url, error);
