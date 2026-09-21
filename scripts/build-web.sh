@@ -10,4 +10,4 @@ cp config.sample.json ./build/web/config.json
 ./scripts/run-sentry.sh
 # Last: sentry_dart_plugin rewrites main.dart.js to inject Debug IDs, and the
 # manifest must hash what is actually served.
-./scripts/generate-sw-manifest.py
+./scripts/generate-sw-manifest.sh
