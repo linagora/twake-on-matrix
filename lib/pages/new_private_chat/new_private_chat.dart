@@ -115,6 +115,7 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await handleDidChangeAppLifecycleState(
       state,
+      context: context,
       client: Matrix.of(context).client,
     );
   }
