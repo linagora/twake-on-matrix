@@ -74,7 +74,6 @@ import 'package:twake_chat/data/repository/user_info_repository_impl.dart';
 import 'package:twake_chat/di/global/hive_di.dart';
 import 'package:twake_chat/di/global/network_connectivity_di.dart';
 import 'package:twake_chat/di/global/network_di.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
@@ -435,7 +434,6 @@ class GetItInitializer {
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(ContactsManager());
     getIt.registerLazySingleton<SaveLanguageInteractor>(
       () => SaveLanguageInteractor(getIt.get<LocalizationsRepository>()),
     );

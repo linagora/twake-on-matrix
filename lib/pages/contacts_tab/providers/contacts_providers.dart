@@ -1,5 +1,4 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
 import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
@@ -26,12 +25,11 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'contacts_providers.g.dart';
 
-// `GetTomContactsInteractor` predates the Riverpod migration and is still
-// consumed by the non-Riverpod `ContactsManager`; this provider gives
-// Riverpod consumers a `ref.read` path instead of reaching into GetIt.
-@riverpod
-GetTomContactsInteractor getTomContactsInteractor(Ref ref) =>
-    getIt.get<GetTomContactsInteractor>();
+/// Test seam: the active unified contact repository, populated when
+/// [unifiedContactRepositoryProvider] builds. Integration tests use it to seed
+/// contacts without reaching into the widget tree.
+@visibleForTesting
+UnifiedContactRepository? debugUnifiedContactRepository;
 
 /// Pure DI: the resolution policy has no dependency and no state.
 @riverpod
@@ -48,8 +46,13 @@ ContactLocalDataSource contactLocalDataSource(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-UnifiedContactRepository unifiedContactRepository(Ref ref) =>
-    UnifiedContactRepositoryImpl(ref.watch(contactLocalDataSourceProvider));
+UnifiedContactRepository unifiedContactRepository(Ref ref) {
+  final repository = UnifiedContactRepositoryImpl(
+    ref.watch(contactLocalDataSourceProvider),
+  );
+  debugUnifiedContactRepository = repository;
+  return repository;
+}
 
 /// Legacy sources still wired through get_it until they are migrated.
 /// The TOM UserInfo enrichment source is added once its second-pass design is
