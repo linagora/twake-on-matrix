@@ -629,17 +629,21 @@ Branches delivered (stacked on the working branch `docs/readme-assets`, which is
 | `contacts/06-read-path` | `unifiedContactProvider(matrixId)`, `UnifiedContactDisplayName` + 1 test |
 | `contacts/07-cleanup` | removal of the dead `combineDuplicateContact` extension |
 | `contacts/08-consumers-widgets` | `MatrixProfileDatasource` (SDK behind Riverpod), `matrixUserProfile` / `contactDisplayProvider`; every `getProfileFromUserId()` call site migrated (profile sheet, avatar widget, participants chips, new-private-chat tiles, recent search, HTML pills, key verification, chat profile panel, draft chat, blocked users, twake header, adaptive navigation, settings profile, personal QR, new group) |
+| `contacts/09-tab-migration` | `active` status carried by the entity; `ContactsViewControllerMixin` now reads the unified store (TOM/phonebook split preserved, room members excluded), sync via `ContactSyncService`, UI unchanged |
 
 **Status of the SDK coupling**: `package:matrix` profile access now goes exclusively through
 `MatrixProfileDatasourceImpl` (fed by `activeMatrixClientProvider`). No widget calls
 `client.getProfileFromUserId()` directly.
 
-**Remaining** (a dedicated PR — option B of PR4):
+**Contact list**: the live contacts tab now renders from the unified store; the section split
+(TOM vs phonebook) and the well-known-driven visibility are preserved, so the UI is unchanged.
 
-- migrate the live `ContactsTab` (list rendering + permission / warning-banner / invitation
-  flows) to the unified store;
-- then delete `ContactsManager`, `ContactsViewControllerMixin`, `domain/app_state/contact/*`,
-  the legacy contact interactors and their `get_it` registrations. `ContactsManager` is still
-  consumed by `matrix.dart`, `chat_app_bar_title`, `draft_chat`, `search_contacts_and_chats_controller`,
-  `chat_view_body`, `chat_profile_info_details`, `add_contact_dialog` and `address_book_mixin`,
-  so it cannot be removed before those consumers are migrated.
+**Remaining** (final cleanup PR):
+
+- migrate the last `ContactsManager` consumers: `matrix.dart`, `chat_app_bar_title`,
+  `draft_chat`/`draft_chat_view`, `chat_profile_info`/`chat_profile_info_app_bar`/`chat_profile_info_details`,
+  `search_contacts_and_chats_controller`, `chat_view_body`, `add_contact_dialog`, `address_book_mixin`
+  (most only need `getContactsNotifier()` to resolve a display name → use `contactDisplayProvider`;
+  permission booleans move into `ContactsViewControllerMixin`);
+- then delete `ContactsManager`, `domain/app_state/contact/*`, the legacy contact interactors and
+  their `get_it` registrations.
