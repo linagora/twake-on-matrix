@@ -7,6 +7,7 @@ final class RoomSendQueueService {
 
   /// Completes with the result of [task], once every task queued before it
   /// for [roomId] is done. A failed task does not block the next ones.
+  /// [task] must not enqueue in the same room, it would wait for itself.
   Future<T> enqueue<T>(String roomId, Future<T> Function() task) async {
     final Future<void>? previous = _lastByRoomId[roomId];
     final Completer<void> done = Completer<void>();

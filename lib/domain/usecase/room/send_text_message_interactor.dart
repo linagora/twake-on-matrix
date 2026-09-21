@@ -18,7 +18,8 @@ final class SendTextMessageInteractor {
   final RoomSendQueueService sendQueue;
 
   /// Completes once the text is sent, after the sends queued before it in
-  /// the same room.
+  /// the same room. Throws when an edit or a command fails, a failed part is
+  /// only logged.
   Future<void> execute({
     required Room room,
     required String text,
