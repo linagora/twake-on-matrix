@@ -41,8 +41,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     // desktop_drop keeps listening even when this chat is covered/replaced
     // (e.g. user opened draftChat). Only accept drops on the active room.
     final roomId = controller.room?.id;
-    final routePath = GoRouterState.of(context).uri.path;
-    final acceptDrops = roomId != null && routePath.contains(roomId);
+    final routeSegments = GoRouterState.of(context).uri.pathSegments;
+    final acceptDrops = roomId != null && routeSegments.contains(roomId);
 
     return DropTarget(
       enable: acceptDrops,

@@ -101,11 +101,18 @@ class DraftChatView extends StatelessWidget {
   }
 
   Widget _chatViewBody(BuildContext context) {
+    // Same desktop_drop issue as ChatViewBody: covered routes still receive
+    // drops unless enable is gated on the active draft route.
+    final acceptDrops = GoRouterState.of(
+      context,
+    ).uri.pathSegments.contains('draftChat');
+
     return Center(
       child: Stack(
         children: [
           const ChatBackground(),
           DropTarget(
+            enable: acceptDrops,
             onDragDone: (details) => controller.handleDragDone(details),
             onDragEntered: controller.onDragEntered,
             onDragUpdated: controller.onDragUpdated,

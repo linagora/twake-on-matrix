@@ -180,6 +180,7 @@ class DraftChatController extends State<DraftChat>
   void handleDragDone(DropDoneDetails details) async {
     draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
+    if (!mounted) return;
 
     _handleSendFileOnWeb(context, matrixFilesList);
   }
@@ -566,6 +567,7 @@ class DraftChatController extends State<DraftChat>
       result.xFiles,
       (file) async => (await file.toMatrixFileOnWeb()).detectFileType,
     );
+    if (!mounted) return;
     _handleSendFileOnWeb(context, matrixFilesList);
   }
 
@@ -603,6 +605,7 @@ class DraftChatController extends State<DraftChat>
       matrixFiles: matrixFilesList,
       pendingText: pendingText,
     );
+    if (!mounted) return;
 
     if (dialogResult != null) {
       _handleSendFileDialogStatus(
