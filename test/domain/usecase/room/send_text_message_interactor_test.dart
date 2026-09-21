@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/domain/services/room_send_queue_service.dart';
 import 'package:twake_chat/domain/usecase/room/message_splitter.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 
@@ -14,9 +15,7 @@ void main() {
   group('SendTextMessageInteractor', () {
     // Twelve characters, three parts of five.
     const String longText = 'abcdefghijkl';
-    const SendTextMessageInteractor interactor = SendTextMessageInteractor(
-      splitter: MessageSplitter(maxLength: 5),
-    );
+    late SendTextMessageInteractor interactor;
     late MockRoom room;
 
     PostExpectation<Future<String?>> whenSendTextEvent() => when(
@@ -38,7 +37,12 @@ void main() {
     );
 
     setUp(() {
+      interactor = SendTextMessageInteractor(
+        splitter: const MessageSplitter(maxLength: 5),
+        sendQueue: RoomSendQueueService(),
+      );
       room = MockRoom();
+      when(room.id).thenReturn('!room:example.org');
       final MockClient client = MockClient();
       when(room.client).thenReturn(client);
       when(client.commands).thenReturn({'me': (_, _) => null});
@@ -100,6 +104,41 @@ void main() {
         // Assert
         expect(sendCountWhileFirstPartPending, equals(1));
         expect(sendCount, equals(3));
+      },
+    );
+
+    test(
+      'should send a second text after every part of a pending long text',
+      () async {
+        // Arrange
+        final Completer<String?> firstPart = Completer<String?>();
+        int sendCount = 0;
+        whenSendTextEvent().thenAnswer((_) {
+          sendCount++;
+          return sendCount == 1 ? firstPart.future : Future.value(r'$event');
+        });
+
+        // Act
+        final Future<void> sendingLongText = interactor.execute(
+          room: room,
+          text: longText,
+        );
+        final Future<void> sendingThanks = interactor.execute(
+          room: room,
+          text: 'Thanks',
+        );
+        await Future<void>.delayed(Duration.zero);
+        firstPart.complete(r'$first');
+        await Future.wait([sendingLongText, sendingThanks]);
+
+        // Assert
+        verifyInOrder([
+          room.sendTextEvent('abcde', parseCommands: false),
+          room.sendTextEvent('fghij', parseCommands: false),
+          room.sendTextEvent('kl', parseCommands: false),
+          room.sendTextEvent('Thank', parseCommands: false),
+          room.sendTextEvent('s', parseCommands: false),
+        ]);
       },
     );
 
