@@ -1,11 +1,11 @@
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/controllers/contacts_controller.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
 import 'package:twake_chat/pages/search/search_mixin.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
@@ -32,7 +32,17 @@ class SearchContactsAndChatsController
   final SearchRecentChatInteractor _searchRecentChatInteractor = getIt
       .get<SearchRecentChatInteractor>();
 
-  final ContactsManager contactManger = getIt.get<ContactsManager>();
+  List<UnifiedContact> _storeContacts() {
+    try {
+      return ProviderScope.containerOf(
+            context,
+            listen: false,
+          ).read(contactsControllerProvider).asData?.value ??
+          const <UnifiedContact>[];
+    } catch (_) {
+      return const <UnifiedContact>[];
+    }
+  }
 
   final recentAndContactsNotifier = ValueNotifier<List<PresentationSearch>>([]);
 
@@ -83,21 +93,18 @@ class SearchContactsAndChatsController
   List<PresentationSearch> contactPresentationSearchMatchedOnMobile({
     required String keyword,
   }) {
-    final tomContacts =
-        contactManger
-            .getContactsNotifier()
-            .value
-            .getSuccessOrNull<GetContactsSuccess>()
-            ?.contacts ??
-        [];
-
-    final phoneBookContacts = _tryToGetPhonebookContacts();
-    final tomPresentationSearchContacts = tomContacts
-        .expand((contact) => contact.toPresentationContacts())
+    final tomPresentationSearchContacts = _storeContacts()
+        .where((contact) => contact.isAddressBookContact)
+        .map((contact) => contact.toPresentationContact())
         .toList();
 
-    final phoneBookPresentationSearchContacts = phoneBookContacts
-        .expand((contact) => contact.toPresentationContacts())
+    final phoneBookPresentationSearchContacts = _storeContacts()
+        .where(
+          (contact) => contact.sources.any(
+            (source) => source.kind == ContactSourceKind.phonebook,
+          ),
+        )
+        .map((contact) => contact.toPresentationContact())
         .toList();
 
     final phoneBookPresentationSearchMatched =
@@ -121,55 +128,12 @@ class SearchContactsAndChatsController
     );
   }
 
-  List<Contact> _tryToGetPhonebookContacts() {
-    final phoneBookContacts =
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getSuccessOrNull<GetPhonebookContactsSuccess>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<LookUpPhonebookContactPartialFailed>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<GetPhonebookContactsFailure>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<RequestTokenFailure>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<RegisterTokenFailure>()
-            ?.contacts ??
-        contactManger
-            .getPhonebookContactsNotifier()
-            .value
-            .getFailureOrNull<GetHashDetailsFailure>()
-            ?.contacts ??
-        [];
-    return phoneBookContacts;
-  }
-
   List<PresentationSearch> contactPresentationSearchMatchedOnWeb({
     required String keyword,
   }) {
-    final tomContacts =
-        contactManger
-            .getContactsNotifier()
-            .value
-            .getSuccessOrNull<GetContactsSuccess>()
-            ?.contacts ??
-        [];
-
-    final tomPresentationSearchContacts = tomContacts
-        .expand((contact) => contact.toPresentationContacts())
+    final tomPresentationSearchContacts = _storeContacts()
+        .where((contact) => contact.isAddressBookContact)
+        .map((contact) => contact.toPresentationContact())
         .toList();
 
     final tomContactPresentationSearchMatched = tomPresentationSearchContacts
