@@ -48,6 +48,11 @@ PERF_DIR_PATTERN = re.compile(r"perf-physical-(\d+)(?:-run(\d+))?$")
 RUN_DIRS = (1, 2, 3)
 SCRIPT_DIR = Path(__file__).resolve().parent
 
+SKIP = "skip"
+DRY = "dry"
+OK = "ok"
+FAIL = "fail"
+
 
 class BackfillError(RuntimeError):
     """Raised when the backfill cannot proceed safely."""
@@ -112,13 +117,24 @@ def run_metadata(repository: str, run_id: str) -> dict:
     }
 
 
+def in_range(day: date, since: date | None, until: date | None) -> bool:
+    """Return True when the day falls inside the requested inclusive window."""
+    return (since is None or day >= since) and (until is None or day <= until)
+
+
+def pick_night(candidates: list[dict]) -> dict:
+    """Return one run per night, preferring scheduled runs over manual ones."""
+    scheduled = [item for item in candidates if item["event"] == "schedule"]
+    return max(scheduled or candidates, key=lambda item: int(item["id"]))
+
+
 def select_nights(
     runs: dict[str, set[int]],
     repository: str,
     since: date | None,
     until: date | None,
 ) -> dict[str, dict]:
-    """Return one run per night, preferring scheduled runs over manual ones."""
+    """Return the run to replay for each eligible night."""
     complete = {
         run_id: numbers
         for run_id, numbers in runs.items()
@@ -127,18 +143,9 @@ def select_nights(
     by_day: dict[str, list[dict]] = defaultdict(list)
     for run_id in complete:
         metadata = run_metadata(repository, run_id)
-        day = date.fromisoformat(metadata["day"])
-        if since and day < since:
-            continue
-        if until and day > until:
-            continue
-        by_day[metadata["day"]].append(metadata)
-    selected: dict[str, dict] = {}
-    for day, candidates in by_day.items():
-        scheduled = [item for item in candidates if item["event"] == "schedule"]
-        pool = scheduled or candidates
-        selected[day] = max(pool, key=lambda item: int(item["id"]))
-    return selected
+        if in_range(date.fromisoformat(metadata["day"]), since, until):
+            by_day[metadata["day"]].append(metadata)
+    return {day: pick_night(candidates) for day, candidates in by_day.items()}
 
 
 def existing_days(data_directory: Path) -> set[str]:
@@ -245,61 +252,93 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_runs(args: argparse.Namespace) -> dict[str, set[int]]:
+    """Use the explicit run ids when provided, otherwise discover them."""
+    if args.run_id:
+        return {run_id: set(RUN_DIRS) for run_id in args.run_id}
+    return list_run_ids(args.bucket, args.gcloud_account)
+
+
+def resolve_work_root(args: argparse.Namespace) -> Path:
+    """Reuse the requested directory or create a throwaway temporary one."""
+    work_root = args.work_directory or Path(tempfile.mkdtemp(prefix="perf-backfill-"))
+    work_root.mkdir(parents=True, exist_ok=True)
+    return work_root
+
+
+def rebuild_night(args: argparse.Namespace, night: dict, work_root: Path) -> None:
+    """Download the logcats and replay median + history for a single night."""
+    night_directory = work_root / night["id"]
+    night_directory.mkdir(parents=True, exist_ok=True)
+    logcats = download_logcats(
+        args.bucket, night["id"], night_directory, args.gcloud_account
+    )
+    median = night_directory / "median.json"
+    compute_median(logcats, median)
+    update_history(
+        median,
+        args.data_directory,
+        night,
+        args.repository,
+        args.flutter_version,
+    )
+
+
+def process_day(
+    args: argparse.Namespace,
+    day: str,
+    night: dict,
+    skip: set[str],
+    work_root: Path,
+) -> tuple[str, str]:
+    """Return the outcome status and a short human-readable detail."""
+    if day in skip:
+        return SKIP, "already published"
+    if args.dry_run:
+        return DRY, f"sha={night['sha'][:8]} ({night['event']})"
+    try:
+        rebuild_night(args, night, work_root)
+    except BackfillError as error:
+        return FAIL, str(error)
+    return OK, night["event"]
+
+
+def describe(status: str, day: str, night: dict, detail: str) -> str:
+    """Format the progress line printed for a finished night."""
+    if status == SKIP:
+        return f"SKIP {day} {night['id']} ({detail})"
+    if status == DRY:
+        return f"WOULD {day} {night['id']} {detail}"
+    if status == FAIL:
+        return f"FAIL {day} {night['id']}: {detail}"
+    return f"OK   {day} {night['id']} ({detail})"
+
+
+def report(outcomes: dict[str, list]) -> None:
+    """Print the run summary and the details of every failed night."""
+    print(
+        f"\nbackfilled {len(outcomes[OK])} night(s), "
+        f"{len(outcomes[SKIP])} skipped, {len(outcomes[FAIL])} failed"
+    )
+    for day, error in outcomes[FAIL]:
+        print(f"  FAIL {day}: {error}")
+
+
 def main() -> None:
     args = parse_args()
     args.data_directory.mkdir(parents=True, exist_ok=True)
-
-    if args.run_id:
-        runs = {run_id: set(RUN_DIRS) for run_id in args.run_id}
-    else:
-        runs = list_run_ids(args.bucket, args.gcloud_account)
-
-    nights = select_nights(runs, args.repository, args.since, args.until)
+    nights = select_nights(resolve_runs(args), args.repository, args.since, args.until)
     skip = existing_days(args.data_directory) if args.skip_existing else set()
+    work_root = resolve_work_root(args)
 
-    work_root = args.work_directory or Path(tempfile.mkdtemp(prefix="perf-backfill-"))
-    work_root.mkdir(parents=True, exist_ok=True)
-
-    ok: list[str] = []
-    skipped: list[str] = []
-    failed: list[tuple[str, str]] = []
-
+    outcomes: dict[str, list] = defaultdict(list)
     for day in sorted(nights):
         night = nights[day]
-        if day in skip:
-            skipped.append(day)
-            print(f"SKIP {day} {night['id']} (already published)")
-            continue
-        if args.dry_run:
-            print(f"WOULD {day} {night['id']} sha={night['sha'][:8]} ({night['event']})")
-            continue
-        night_directory = work_root / night["id"]
-        night_directory.mkdir(parents=True, exist_ok=True)
-        try:
-            logcats = download_logcats(
-                args.bucket, night["id"], night_directory, args.gcloud_account
-            )
-            median = night_directory / "median.json"
-            compute_median(logcats, median)
-            update_history(
-                median,
-                args.data_directory,
-                night,
-                args.repository,
-                args.flutter_version,
-            )
-            ok.append(day)
-            print(f"OK   {day} {night['id']} ({night['event']})")
-        except BackfillError as error:
-            failed.append((day, str(error)))
-            print(f"FAIL {day} {night['id']}: {error}")
+        status, detail = process_day(args, day, night, skip, work_root)
+        outcomes[status].append((day, detail))
+        print(describe(status, day, night, detail))
 
-    print(
-        f"\nbackfilled {len(ok)} night(s), "
-        f"{len(skipped)} skipped, {len(failed)} failed"
-    )
-    for day, error in failed:
-        print(f"  FAIL {day}: {error}")
+    report(outcomes)
 
     if not args.work_directory and not args.dry_run:
         shutil.rmtree(work_root, ignore_errors=True)
