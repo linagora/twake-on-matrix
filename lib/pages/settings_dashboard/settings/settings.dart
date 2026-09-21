@@ -19,6 +19,8 @@ import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -167,13 +169,15 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
   Client get client => Matrix.of(context).client;
 
   void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
-    );
+    final profile = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(client.userID!).future);
     Logs().d('Settings::_getCurrentProfile() - currentProfile: $profile');
-    avatarUriNotifier.value = profile.avatarUrl;
-    displayNameNotifier.value = profile.displayName;
+    avatarUriNotifier.value = profile?.avatarUrl == null
+        ? null
+        : Uri.tryParse(profile!.avatarUrl!);
+    displayNameNotifier.value = profile?.displayName;
   }
 
   void checkBootstrap() async {
