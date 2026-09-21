@@ -39,6 +39,7 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
@@ -199,6 +200,7 @@ class MatrixState extends ConsumerState<Matrix>
       _activeClient = index;
       // Transitional bridge: expose the active client to Riverpod consumers.
       ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
+      unawaited(ref.read(contactSyncServiceProvider).refresh());
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
@@ -846,6 +848,9 @@ class MatrixState extends ConsumerState<Matrix>
 
     // Transitional bridge: publish the initial active client to Riverpod.
     ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
+    if (clientOrNull != null) {
+      unawaited(ref.read(contactSyncServiceProvider).refresh());
+    }
 
     await _retrieveLocalToMConfiguration();
 
