@@ -2,8 +2,11 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
+import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
 import 'package:twake_chat/data/contact/datasources_impl/contact_local_datasource_impl.dart';
+import 'package:twake_chat/data/contact/datasources_impl/matrix_room_member_datasource_impl.dart';
 import 'package:twake_chat/data/contact/repositories/unified_contact_repository_impl.dart';
+import 'package:twake_chat/data/contact/sources/matrix_room_member_source.dart';
 import 'package:twake_chat/data/contact/sources/phonebook_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
@@ -17,6 +20,7 @@ import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'contacts_providers.g.dart';
 
@@ -46,13 +50,18 @@ UnifiedContactRepository unifiedContactRepository(Ref ref) =>
     UnifiedContactRepositoryImpl(ref.watch(contactLocalDataSourceProvider));
 
 /// Legacy sources still wired through get_it until they are migrated.
-/// The Matrix profile / UserInfo sources are added once a `matrixClientProvider`
-/// exists (migration Phase 0).
+/// The TOM UserInfo enrichment source is added once its second-pass design is
+/// settled.
 @riverpod
 List<ContactSource> contactSources(Ref ref) => [
   TomAddressBookSource(getIt.get<AddressBookRepository>()),
   PhonebookSource(getIt.get<PhonebookContactRepository>()),
+  MatrixRoomMemberSource(ref.watch(matrixRoomMemberDatasourceProvider)),
 ];
+
+@riverpod
+MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
+    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider));
 
 @riverpod
 SyncContactsUseCase syncContactsUseCase(Ref ref) => SyncContactsUseCase(
