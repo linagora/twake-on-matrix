@@ -9,6 +9,7 @@ import 'package:twake_chat/data/contact/repositories/unified_contact_repository_
 import 'package:twake_chat/data/contact/sources/matrix_room_member_source.dart';
 import 'package:twake_chat/data/contact/sources/phonebook_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
+import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
@@ -20,6 +21,7 @@ import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
+import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'contacts_providers.g.dart';
@@ -63,6 +65,14 @@ List<ContactSource> contactSources(Ref ref) => [
 MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
     MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider));
 
+/// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
+@riverpod
+TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
+  repository: ref.watch(unifiedContactRepositoryProvider),
+  userInfoRepository: getIt.get<UserInfoRepository>(),
+  policy: ref.watch(contactResolutionPolicyProvider),
+);
+
 @riverpod
 SyncContactsUseCase syncContactsUseCase(Ref ref) => SyncContactsUseCase(
   repository: ref.watch(unifiedContactRepositoryProvider),
@@ -95,4 +105,5 @@ ContactSyncService contactSyncService(Ref ref) => ContactSyncService(
   getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
   addContact: ref.watch(addContactUseCaseProvider),
   deleteContact: ref.watch(deleteContactUseCaseProvider),
+  enrichers: [ref.watch(tomUserInfoEnricherProvider)],
 );

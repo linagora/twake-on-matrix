@@ -3,6 +3,7 @@ import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
+import 'package:twake_chat/domain/contact/sources/contact_enricher.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
@@ -24,13 +25,15 @@ class ContactSyncService {
     required GetUnifiedContactUseCase getUnifiedContact,
     required AddContactUseCase addContact,
     required DeleteContactUseCase deleteContact,
+    List<ContactEnricher> enrichers = const <ContactEnricher>[],
   }) : _repository = repository,
        _policy = policy,
        _syncContacts = syncContacts,
        _watchUnifiedContacts = watchUnifiedContacts,
        _getUnifiedContact = getUnifiedContact,
        _addContact = addContact,
-       _deleteContact = deleteContact;
+       _deleteContact = deleteContact,
+       _enrichers = enrichers;
 
   final UnifiedContactRepository _repository;
   final ContactResolutionPolicy _policy;
@@ -39,6 +42,7 @@ class ContactSyncService {
   final GetUnifiedContactUseCase _getUnifiedContact;
   final AddContactUseCase _addContact;
   final DeleteContactUseCase _deleteContact;
+  final List<ContactEnricher> _enrichers;
 
   /// Local-first: callers should render the current store immediately and let
   /// [refresh] run in the background.
@@ -46,6 +50,9 @@ class ContactSyncService {
 
   Future<void> refresh() async {
     await _syncContacts.execute();
+    for (final enricher in _enrichers) {
+      await enricher.enrich();
+    }
   }
 
   Stream<List<UnifiedContact>> watchContacts() =>
