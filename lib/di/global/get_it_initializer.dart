@@ -93,12 +93,7 @@ import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart
 import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/device_settings/get_devices_interactor.dart';
 import 'package:twake_chat/domain/usecase/download_file_for_preview_interactor.dart';
@@ -383,20 +378,8 @@ class GetItInitializer {
     getIt.registerLazySingleton<DeleteRecoveryWordsInteractor>(
       () => DeleteRecoveryWordsInteractor(),
     );
-    getIt.registerFactory<GetTomContactsInteractor>(
-      () => GetTomContactsInteractor(),
-    );
     getIt.registerFactory<PostAddressBookInteractor>(
       () => PostAddressBookInteractor(),
-    );
-    getIt.registerFactory<FederationLookUpPhonebookContactInteractor>(
-      () => FederationLookUpPhonebookContactInteractor(),
-    );
-    getIt.registerFactory<TwakeLookupPhonebookContactInteractor>(
-      () => TwakeLookupPhonebookContactInteractor(),
-    );
-    getIt.registerSingleton<TryGetSyncedPhoneBookContactInteractor>(
-      TryGetSyncedPhoneBookContactInteractor(),
     );
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
@@ -438,9 +421,6 @@ class GetItInitializer {
       () => SaveLanguageInteractor(getIt.get<LocalizationsRepository>()),
     );
     getIt.registerSingleton<ServerSearchInteractor>(ServerSearchInteractor());
-    getIt.registerFactory<LookupMatchContactInteractor>(
-      () => LookupMatchContactInteractor(),
-    );
     getIt.registerSingleton<UpdateGroupChatInteractor>(
       UpdateGroupChatInteractor(),
     );

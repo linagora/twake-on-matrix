@@ -643,10 +643,13 @@ widget/mixin tests no longer mock it; the integration contact-search scenario se
 store through the `debugUnifiedContactRepository` test seam. `package:matrix` profile access and
 all contact display paths go through Riverpod.
 
-**Still dead (optional follow-up)**: the legacy contact interactors no longer consumed by
-production (`GetTomContactsInteractor`, `FederationLookUpPhonebookContactInteractor`,
-`TwakeLookupPhonebookContactInteractor`, `TryGetSyncedPhoneBookContactInteractor`,
-`LookupMatchContactInteractor`) and `domain/app_state/contact/*`. They are kept because their
-own unit tests still reference them; deleting them is a mechanical follow-up.
-`PostAddressBookInteractor` and `DeleteThirdPartyContactBoxInteractor` remain in use
-(add-contact dialog / invitation flow).
+**Dead legacy code removed**: `GetTomContactsInteractor`,
+`FederationLookUpPhonebookContactInteractor`, `TwakeLookupPhonebookContactInteractor`,
+`TryGetSyncedPhoneBookContactInteractor`, `LookupMatchContactInteractor`, their argument files
+(`federation_look_up_argument`, `twake_look_up_argument`), their `get_it` registrations and
+their unit tests.
+
+**Kept**: `PostAddressBookInteractor` and `DeleteThirdPartyContactBoxInteractor` (still used by
+the add-contact dialog and the invitation flow), and `domain/app_state/contact/*` for the states
+still consumed by the UI (`ContactsInitial`, `ContactsLoading`, `GetPhonebookContacts*`,
+`PostAddressBook*`, `DeleteThirdPartyContactBox*`).
