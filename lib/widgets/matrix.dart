@@ -39,6 +39,7 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -196,6 +197,8 @@ class MatrixState extends ConsumerState<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
+      // Transitional bridge: expose the active client to Riverpod consumers.
+      ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
@@ -841,6 +844,9 @@ class MatrixState extends ConsumerState<Matrix>
       _registerSubs(c.clientName);
     }
 
+    // Transitional bridge: publish the initial active client to Riverpod.
+    ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
+
     await _retrieveLocalToMConfiguration();
 
     if (kIsWeb) {
@@ -1431,6 +1437,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
+    ref.read(activeMatrixClientProvider.notifier).setClient(null);
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     Sentry.configureScope((scope) => scope.setUser(null));
