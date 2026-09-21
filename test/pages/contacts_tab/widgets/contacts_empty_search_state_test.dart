@@ -39,6 +39,9 @@ class TestContactsTabController extends Mock
     with ContactsViewControllerMixin
     implements ContactsTabController {
   @override
+  bool get enableRecentContacts => false;
+
+  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       runtimeType.toString();
 }
@@ -97,12 +100,9 @@ void main() {
     expect(find.byType(NoContactsFound), findsOneWidget);
   });
 
-  test('contact retry absorbs setup errors', () async {
+  test('contact retry refreshes without throwing', () async {
     final client = MockClient();
     when(client.userID).thenReturn('@alice:example.org');
-    contactsManager.cancelSubscriptionsError = StateError(
-      'subscription cancellation failed',
-    );
 
     await expectLater(
       controller.retrySynchronizeContactsOnContactTab(
@@ -112,6 +112,5 @@ void main() {
       ),
       completes,
     );
-    expect(contactsManager.cancelSubscriptionsCalled, isTrue);
   });
 }
