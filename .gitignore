@@ -106,3 +106,7 @@ test-results/
 # Xcode SwiftPM resolved state
 ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 ios/Runner.xcworkspace/xcshareddata/swiftpm/
+
+# local artifacts
+.codegraph
+.vodozemac
