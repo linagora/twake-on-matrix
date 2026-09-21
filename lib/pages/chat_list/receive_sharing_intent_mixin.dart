@@ -39,6 +39,15 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     return text.contains('twake.chat://openApp');
   }
 
+  /// The iOS Share Extension redirects to the host app via a
+  /// `ShareMedia-<bundleId>:share` URL so the OS hands control back to
+  /// Twake. That URL leaks into `app_links`' stream/initial-link on iOS
+  /// alongside the `receive_sharing_intent` stream, and isn't a navigable
+  /// link, so it must never reach [_processIncomingUris]/[UrlLauncher].
+  bool _isReceiveSharingIntentUri(String uri) {
+    return uri.toLowerCase().startsWith('sharemedia-');
+  }
+
   Future<void> _processIncomingSharedFiles(List<SharedMediaFile> files) async {
     Logs().d('ReceiveSharingIntentMixin::_processIncomingSharedFiles: $files');
     if (files.isEmpty) return;
@@ -179,7 +188,7 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
     intentUriStreamSubscription?.cancel();
     intentUriStreamSubscription = appLinks.stringLinkStream.listen(
       (uri) {
-        if (_intentOpenApp(uri)) return;
+        if (_intentOpenApp(uri) || _isReceiveSharingIntentUri(uri)) return;
 
         Logs().d(
           'ReceiveSharingIntentMixin::setupSharingIntentStreams: URI stream received $uri',
@@ -224,7 +233,9 @@ mixin ReceiveSharingIntentMixin<T extends StatefulWidget> on State<T> {
       Logs().d(
         'ReceiveSharingIntentMixin::setupSharingIntentStreams: Initial link received $uri, caching',
       );
-      if (uri != null && !_intentOpenApp(uri)) {
+      if (uri != null &&
+          !_intentOpenApp(uri) &&
+          !_isReceiveSharingIntentUri(uri)) {
         _cachedSharedUri = uri;
       }
     } catch (e, stackTrace) {
