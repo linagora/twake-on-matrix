@@ -1,7 +1,11 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
+import 'package:twake_chat/data/contact/datasources_impl/contact_local_datasource_impl.dart';
+import 'package:twake_chat/data/contact/repositories/unified_contact_repository_impl.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
+import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 
 part 'contacts_providers.g.dart';
 
@@ -19,3 +23,16 @@ GetTomContactsInteractor getTomContactsInteractor(Ref ref) =>
 @riverpod
 ContactResolutionPolicy contactResolutionPolicy(Ref ref) =>
     const ContactResolutionPolicy();
+
+/// Single Hive-backed store for the whole session: it owns the broadcast
+/// stream, so it must not be auto-disposed between screens.
+@Riverpod(keepAlive: true)
+ContactLocalDataSource contactLocalDataSource(Ref ref) {
+  final dataSource = ContactLocalDataSourceImpl();
+  ref.onDispose(dataSource.dispose);
+  return dataSource;
+}
+
+@Riverpod(keepAlive: true)
+UnifiedContactRepository unifiedContactRepository(Ref ref) =>
+    UnifiedContactRepositoryImpl(ref.watch(contactLocalDataSourceProvider));
