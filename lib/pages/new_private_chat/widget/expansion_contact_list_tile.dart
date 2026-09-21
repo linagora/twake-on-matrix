@@ -4,7 +4,9 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/model/invitation/invitation_status_response.dart';
 import 'package:twake_chat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:twake_chat/domain/model/contact/contact_status.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_invitation.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/invitation_status_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/pages/new_private_chat/widget/contact_status_widget.dart';
@@ -17,6 +19,7 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -122,7 +125,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
             top: 8.0,
             bottom: 8.0,
           ),
-          child: FutureBuilder<Profile?>(
+          child: FutureBuilder<UnifiedContact?>(
             key: widget.contact.matrixId?.isNotEmpty == true
                 ? Key(widget.contact.matrixId!)
                 : null,
@@ -139,7 +142,9 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
                       child: Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
+                        mxContent: snapshot.data?.avatarUrl == null
+                            ? null
+                            : Uri.tryParse(snapshot.data!.avatarUrl!),
                         name: widget.contact.displayName,
                       ),
                     ),
@@ -164,7 +169,10 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                                           children: [
                                             Flexible(
                                               child: _displayNameWidget(
-                                                snapshot.data?.displayName,
+                                                snapshot
+                                                        .data
+                                                        ?.resolvedDisplayName ??
+                                                    widget.contact.displayName,
                                               ),
                                             ),
                                           ],
@@ -361,27 +369,12 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
     return const SizedBox();
   }
 
-  Future<Profile?> getProfile(BuildContext context) async {
-    final client = Matrix.of(context).client;
-    if (widget.contact.matrixId == null) {
-      return Future.error(Exception("MatrixId is null"));
-    }
-    try {
-      final profile = await client.getProfileFromUserId(
-        widget.contact.matrixId!,
-        getFromRooms: false,
-      );
-      Logs().d(
-        "ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}",
-      );
-      return profile;
-    } catch (e) {
-      return Profile(
-        userId: widget.contact.matrixId!,
-        displayName: widget.contact.displayName,
-        avatarUrl: null,
-      );
-    }
+  Future<UnifiedContact?> getProfile(BuildContext context) async {
+    final matrixId = widget.contact.matrixId;
+    if (matrixId == null) return null;
+    // SDK access goes through Riverpod (transitional container read).
+    final container = ProviderScope.containerOf(context, listen: false);
+    return container.read(contactDisplayProvider(matrixId).future);
   }
 
   dynamic Function()? _onContactTapHandler(
