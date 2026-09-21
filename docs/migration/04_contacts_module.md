@@ -638,14 +638,15 @@ Branches delivered (stacked on the working branch `docs/readme-assets`, which is
 **Contact list**: the live contacts tab now renders from the unified store; the section split
 (TOM vs phonebook) and the well-known-driven visibility are preserved, so the UI is unchanged.
 
-**Remaining** (final cleanup PR):
+**Cleanup done**: `ContactsManager` is deleted (class, `get_it` registration, unit test);
+widget/mixin tests no longer mock it; the integration contact-search scenario seeds the unified
+store through the `debugUnifiedContactRepository` test seam. `package:matrix` profile access and
+all contact display paths go through Riverpod.
 
-- delete `ContactsManager`, `domain/app_state/contact/*`, the legacy contact interactors and
-  their `get_it` registrations. **Production code no longer references `ContactsManager`**
-  (chat app bar, add-contact banners, chat profile info, draft chat, search, contacts tab,
-  `MatrixState` all read the unified store / `ContactSyncService`).
-- the deletion is currently blocked by test-only references: `test/domain/contacts/contacts_manager_test.dart`,
-  the `MockSpec<ContactsManager>` in three widget/mixin tests, and
-  `integration_test/scenarios/contact_search_scenario.dart` which seeds
-  `ContactsManager.getContactsNotifier()`. Those must seed the unified store instead
-  (the scenario needs a `ProviderContainer`/test seam).
+**Still dead (optional follow-up)**: the legacy contact interactors no longer consumed by
+production (`GetTomContactsInteractor`, `FederationLookUpPhonebookContactInteractor`,
+`TwakeLookupPhonebookContactInteractor`, `TryGetSyncedPhoneBookContactInteractor`,
+`LookupMatchContactInteractor`) and `domain/app_state/contact/*`. They are kept because their
+own unit tests still reference them; deleting them is a mechanical follow-up.
+`PostAddressBookInteractor` and `DeleteThirdPartyContactBoxInteractor` remain in use
+(add-contact dialog / invitation flow).
