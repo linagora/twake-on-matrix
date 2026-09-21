@@ -1,12 +1,14 @@
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/search/recent_item_widget_style.dart';
 import 'package:twake_chat/presentation/extensions/room_summary_extension.dart';
-import 'package:twake_chat/presentation/extensions/search/presentation_search_extensions.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/highlight_text.dart';
 import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/material.dart' hide SearchController;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -47,7 +49,6 @@ class RecentItemWidget extends StatelessWidget {
   Widget _buildInformationWidget(BuildContext context) {
     if (presentationSearch is ContactPresentationSearch) {
       return _ContactInformation(
-        client: client,
         contactPresentationSearch:
             presentationSearch as ContactPresentationSearch,
         searchKeyword: highlightKeyword,
@@ -201,13 +202,11 @@ class _DirectChatInformation extends StatelessWidget {
 class _ContactInformation extends StatelessWidget {
   final ContactPresentationSearch contactPresentationSearch;
   final String? searchKeyword;
-  final Client client;
   final double? avatarSize;
 
   const _ContactInformation({
     required this.contactPresentationSearch,
     this.searchKeyword,
-    required this.client,
     this.avatarSize,
   });
 
@@ -216,11 +215,18 @@ class _ContactInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FutureBuilder<Profile?>(
-          future: contactPresentationSearch.getProfile(client),
+        FutureBuilder<UnifiedContact?>(
+          future: contactPresentationSearch.matrixId == null
+              ? null
+              : ProviderScope.containerOf(context, listen: false).read(
+                  contactDisplayProvider(
+                    contactPresentationSearch.matrixId!,
+                  ).future,
+                ),
           builder: (context, snapshot) {
+            final avatarUrl = snapshot.data?.avatarUrl;
             return Avatar(
-              mxContent: snapshot.data?.avatarUrl,
+              mxContent: avatarUrl == null ? null : Uri.tryParse(avatarUrl),
               name: contactPresentationSearch.displayName,
               size: avatarSize ?? RecentItemStyle.avatarSize,
             );
