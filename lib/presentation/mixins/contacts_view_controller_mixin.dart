@@ -195,7 +195,7 @@ mixin class ContactsViewControllerMixin {
 
   void _handleDenyPermissionDialog() {
     warningBannerNotifier.value = WarningContactsBannerState.display;
-    contactsManager.updateNotShowWarningContactsDialogAgain = true;
+    contactsManager.updateNotShowWarningContactsDialogAgain(true);
   }
 
   Future<void> _initWarningBanner() async {
@@ -673,7 +673,7 @@ mixin class ContactsViewControllerMixin {
       contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
-      contactsManager.updateNotShowWarningContactsDialogAgain = true;
+      contactsManager.updateNotShowWarningContactsDialogAgain(true);
 
       if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
         warningBannerNotifier.value = WarningContactsBannerState.display;
@@ -683,7 +683,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   void closeContactsWarningBanner() {
-    contactsManager.updateNotShowWarningContactsBannerAgain = true;
+    contactsManager.updateNotShowWarningContactsBannerAgain(true);
     warningBannerNotifier.value = WarningContactsBannerState.notDisplayAgain;
   }
 

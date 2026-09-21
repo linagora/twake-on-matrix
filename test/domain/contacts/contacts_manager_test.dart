@@ -349,7 +349,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -478,7 +478,7 @@ void main() {
 
       verifyNever(mockHomeServerDynamicUrlInterceptors.baseUrl);
 
-      verifyNever(mockAuthorizationInterceptor.getAccessToken);
+      verifyNever(mockAuthorizationInterceptor.accessToken);
 
       verifyNever(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -548,7 +548,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -609,7 +609,7 @@ void main() {
 
       verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+      verify(mockAuthorizationInterceptor.accessToken).called(1);
 
       verify(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -682,7 +682,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -754,7 +754,7 @@ void main() {
 
       verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+      verify(mockAuthorizationInterceptor.accessToken).called(1);
 
       verify(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -825,7 +825,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -897,7 +897,7 @@ void main() {
 
       verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-      verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+      verify(mockAuthorizationInterceptor.accessToken).called(1);
 
       verify(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -967,7 +967,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1065,7 +1065,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1163,7 +1163,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1261,7 +1261,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1357,7 +1357,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1464,9 +1464,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1584,7 +1582,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1678,7 +1676,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1774,7 +1772,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -1870,7 +1868,7 @@ void main() {
 
       when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -2047,7 +2045,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2153,7 +2151,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2259,7 +2257,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2392,7 +2390,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2482,7 +2480,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2511,7 +2509,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2602,7 +2600,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2694,7 +2692,7 @@ void main() {
         mockIdentityServerDynamicUrlInterceptors.baseUrl,
       ).thenReturn(baseUrl);
 
-      when(mockAuthorizationInterceptor.getAccessToken).thenReturn(accessToken);
+      when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
       when(
         mockTwakeLookupPhonebookContactInteractor.execute(
@@ -2830,7 +2828,7 @@ void main() {
               ).thenReturn(baseUrl);
 
               when(
-                mockAuthorizationInterceptor.getAccessToken,
+                mockAuthorizationInterceptor.accessToken,
               ).thenReturn(accessToken);
 
               when(
@@ -2969,9 +2967,7 @@ void main() {
           mockIdentityServerDynamicUrlInterceptors.baseUrl,
         ).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -3066,9 +3062,7 @@ void main() {
           mockIdentityServerDynamicUrlInterceptors.baseUrl,
         ).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -3163,9 +3157,7 @@ void main() {
           mockIdentityServerDynamicUrlInterceptors.baseUrl,
         ).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -3290,9 +3282,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3349,7 +3339,7 @@ void main() {
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-        verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+        verify(mockAuthorizationInterceptor.accessToken).called(1);
 
         verify(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3410,9 +3400,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3482,7 +3470,7 @@ void main() {
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-        verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+        verify(mockAuthorizationInterceptor.accessToken).called(1);
 
         verify(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3541,9 +3529,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3613,7 +3599,7 @@ void main() {
 
         verify(mockHomeServerDynamicUrlInterceptors.baseUrl).called(1);
 
-        verify(mockAuthorizationInterceptor.getAccessToken).called(1);
+        verify(mockAuthorizationInterceptor.accessToken).called(1);
 
         verify(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3675,9 +3661,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3763,9 +3747,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3851,9 +3833,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -3939,9 +3919,7 @@ void main() {
 
         when(mockHomeServerDynamicUrlInterceptors.baseUrl).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockFederationConfigurationsRepository.getFederationConfigurations(
@@ -4090,7 +4068,7 @@ void main() {
           ).thenReturn(baseUrl);
 
           when(
-            mockAuthorizationInterceptor.getAccessToken,
+            mockAuthorizationInterceptor.accessToken,
           ).thenReturn(accessToken);
 
           when(
@@ -4268,7 +4246,7 @@ void main() {
           ).thenReturn(baseUrl);
 
           when(
-            mockAuthorizationInterceptor.getAccessToken,
+            mockAuthorizationInterceptor.accessToken,
           ).thenReturn(accessToken);
 
           when(
@@ -4351,7 +4329,7 @@ void main() {
           ).thenReturn(baseUrl);
 
           when(
-            mockAuthorizationInterceptor.getAccessToken,
+            mockAuthorizationInterceptor.accessToken,
           ).thenReturn(accessToken);
 
           when(
@@ -4382,7 +4360,7 @@ void main() {
           ).thenReturn(baseUrl);
 
           when(
-            mockAuthorizationInterceptor.getAccessToken,
+            mockAuthorizationInterceptor.accessToken,
           ).thenReturn(accessToken);
 
           when(
@@ -4467,9 +4445,7 @@ void main() {
           mockIdentityServerDynamicUrlInterceptors.baseUrl,
         ).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -4550,9 +4526,7 @@ void main() {
           mockIdentityServerDynamicUrlInterceptors.baseUrl,
         ).thenReturn(baseUrl);
 
-        when(
-          mockAuthorizationInterceptor.getAccessToken,
-        ).thenReturn(accessToken);
+        when(mockAuthorizationInterceptor.accessToken).thenReturn(accessToken);
 
         when(
           mockTwakeLookupPhonebookContactInteractor.execute(
@@ -4676,7 +4650,7 @@ void main() {
                 ).thenReturn(baseUrl);
 
                 when(
-                  mockAuthorizationInterceptor.getAccessToken,
+                  mockAuthorizationInterceptor.accessToken,
                 ).thenReturn(accessToken);
 
                 when(

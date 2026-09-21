@@ -18,6 +18,7 @@ linter:
     - unnecessary_null_aware_operator_on_extension_on_nullable
     - use_string_buffers
     - use_colored_box
+    - avoid_setters_without_getters
 
 analyzer:
   errors:
