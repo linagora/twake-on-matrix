@@ -3,6 +3,7 @@ import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
+import 'package:twake_chat/domain/contact/sources/contact_enricher.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
@@ -23,13 +24,15 @@ class ContactSyncService {
     required WatchUnifiedContactsUseCase watchUnifiedContacts,
     required GetUnifiedContactUseCase getUnifiedContact,
     required AddContactUseCase addContact,
+    List<ContactEnricher> enrichers = const <ContactEnricher>[],
   }) : _userId = userId,
        _repository = repository,
        _policy = policy,
        _syncContacts = syncContacts,
        _watchUnifiedContacts = watchUnifiedContacts,
        _getUnifiedContact = getUnifiedContact,
-       _addContact = addContact;
+       _addContact = addContact,
+       _enrichers = enrichers;
 
   /// Matrix ID of the account that owns the contacts this service operates on.
   final String _userId;
@@ -39,6 +42,7 @@ class ContactSyncService {
   final WatchUnifiedContactsUseCase _watchUnifiedContacts;
   final GetUnifiedContactUseCase _getUnifiedContact;
   final AddContactUseCase _addContact;
+  final List<ContactEnricher> _enrichers;
 
   /// Local-first: callers should render the current store immediately and let
   /// [refresh] run in the background.
@@ -46,6 +50,9 @@ class ContactSyncService {
 
   Future<void> refresh() async {
     await _syncContacts.execute(_userId);
+    for (final enricher in _enrichers) {
+      await enricher.enrich();
+    }
   }
 
   Stream<List<UnifiedContact>> watchContacts() =>
