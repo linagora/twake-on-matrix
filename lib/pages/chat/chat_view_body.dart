@@ -248,9 +248,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
               builder: (context, dragging, _) {
                 if (!dragging) return const SizedBox.shrink();
                 return Container(
-                  color: Theme.of(
-                    context,
-                  ).scaffoldBackgroundColor.withOpacity(0.9),
+                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(
+                    ChatViewBodyStyle.dragOverlayOpacity,
+                  ),
                   alignment: Alignment.center,
                   child: const Icon(Icons.upload_outlined, size: 100),
                 );
