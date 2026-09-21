@@ -83,16 +83,24 @@ jobs:
       - name: Rebuild physical history
         env:
           GH_TOKEN: ${{ github.token }}
+          INPUT_SINCE: ${{ inputs.since }}
+          INPUT_UNTIL: ${{ inputs.until }}
+          INPUT_RUN_IDS: ${{ inputs.run_ids }}
         run: |
           set -euo pipefail
           ARGS=()
-          if [ -n "${{ inputs.since }}" ]; then
-            ARGS+=(--since "${{ inputs.since }}")
+          if [[ -n "$INPUT_SINCE" ]]; then
+            ARGS+=(--since "$INPUT_SINCE")
           fi
-          if [ -n "${{ inputs.until }}" ]; then
-            ARGS+=(--until "${{ inputs.until }}")
+          if [[ -n "$INPUT_UNTIL" ]]; then
+            ARGS+=(--until "$INPUT_UNTIL")
           fi
-          for run_id in ${{ inputs.run_ids }}; do
+          read -r -a run_ids <<< "$INPUT_RUN_IDS"
+          for run_id in "${run_ids[@]}"; do
+            if [[ ! "$run_id" =~ ^[0-9]+$ ]]; then
+              echo "ERROR: run IDs must be numeric, got '$run_id'."
+              exit 2
+            fi
             ARGS+=(--run-id "$run_id")
           done
           python3 scripts/perf/backfill_physical.py \

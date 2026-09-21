@@ -72,6 +72,7 @@ class BackfillConfig:
 
 
 def _run(command: list[str], *, capture: bool = True) -> str:
+    """Run a command, raising BackfillError on a non-zero exit code."""
     result = subprocess.run(
         command,
         check=False,
@@ -85,26 +86,34 @@ def _run(command: list[str], *, capture: bool = True) -> str:
 
 
 def _gcloud(args: list[str], account: str | None) -> list[str]:
+    """Build a `gcloud storage` command, appending the account when set."""
     command = ["gcloud", "storage", *args]
     if account:
         command.append(f"--account={account}")
     return command
 
 
-def list_run_ids(bucket: str, account: str | None) -> dict[str, set[int]]:
+def list_run_samples(bucket: str, account: str | None) -> dict[str, dict[int, str]]:
+    """List the FTL result directories as {run_id: {sample_number: name}}.
+
+    The directory name is preserved for every sample so downloads use the exact
+    name that exists in the bucket (both `perf-physical-<id>` and
+    `perf-physical-<id>-run<n>` are accepted, the former being sample one).
+    """
     output = _run(_gcloud(["ls", f"{bucket}/"], account))
-    runs: dict[str, set[int]] = defaultdict(set)
+    runs: dict[str, dict[int, str]] = defaultdict(dict)
     for line in output.splitlines():
         prefix = line.strip().rstrip("/").rsplit("/", 1)[-1]
         match = PERF_DIR_PATTERN.fullmatch(prefix)
         if not match:
             continue
         run_id, run_number = match.group(1), match.group(2)
-        runs[run_id].add(int(run_number) if run_number else 1)
+        runs[run_id][int(run_number) if run_number else 1] = prefix
     return runs
 
 
 def _github_json(path: str) -> dict:
+    """Fetch and decode a JSON document from the GitHub REST API."""
     token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
     request = urllib.request.Request(f"https://api.github.com{path}")
     request.add_header("Accept", "application/vnd.github+json")
@@ -120,6 +129,7 @@ def _github_json(path: str) -> dict:
 
 
 def run_metadata(repository: str, run_id: str) -> dict:
+    """Resolve the date, sha and event of a GitHub Actions run."""
     payload = _github_json(f"/repos/{repository}/actions/runs/{run_id}")
     return {
         "id": run_id,
@@ -142,26 +152,28 @@ def pick_night(candidates: list[dict]) -> dict:
 
 
 def select_nights(
-    runs: dict[str, set[int]],
+    runs: dict[str, dict[int, str]],
     repository: str,
     since: date | None,
     until: date | None,
 ) -> dict[str, dict]:
-    """Return the run to replay for each eligible night."""
+    """Return the run to replay for each eligible night, with its samples."""
     complete = {
-        run_id: numbers
-        for run_id, numbers in runs.items()
-        if set(RUN_DIRS) <= numbers
+        run_id: samples
+        for run_id, samples in runs.items()
+        if set(RUN_DIRS) <= set(samples)
     }
     by_day: dict[str, list[dict]] = defaultdict(list)
-    for run_id in complete:
+    for run_id, samples in complete.items():
         metadata = run_metadata(repository, run_id)
         if in_range(date.fromisoformat(metadata["day"]), since, until):
+            metadata["samples"] = samples
             by_day[metadata["day"]].append(metadata)
     return {day: pick_night(candidates) for day, candidates in by_day.items()}
 
 
 def existing_days(data_directory: Path) -> set[str]:
+    """Return the dates already present in the published index.json."""
     index_path = data_directory / "index.json"
     if not index_path.exists():
         return set()
@@ -171,15 +183,14 @@ def existing_days(data_directory: Path) -> set[str]:
 
 def download_logcats(
     config: BackfillConfig,
-    run_id: str,
+    night: dict,
     work_directory: Path,
 ) -> list[Path]:
+    """Download the three logcats of a night, reusing local copies."""
     logcats = []
     for number in RUN_DIRS:
-        source = (
-            f"{config.bucket}/perf-physical-{run_id}-run{number}"
-            "/oriole-33-en-portrait/logcat"
-        )
+        directory = night["samples"][number]
+        source = f"{config.bucket}/{directory}/oriole-33-en-portrait/logcat"
         destination = work_directory / f"run{number}.log"
         if not destination.exists() or destination.stat().st_size == 0:
             _run(
@@ -193,6 +204,7 @@ def download_logcats(
 
 
 def compute_median(logcats: list[Path], output: Path) -> None:
+    """Run compute_median.py over the downloaded logcats."""
     _run(
         [
             sys.executable,
@@ -208,6 +220,7 @@ def compute_median(logcats: list[Path], output: Path) -> None:
 
 
 def update_history(median: Path, night: dict, config: BackfillConfig) -> None:
+    """Run update_history.py to publish the median for a single night."""
     _run(
         [
             sys.executable,
@@ -239,6 +252,7 @@ def update_history(median: Path, night: dict, config: BackfillConfig) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse the command-line arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bucket", required=True)
     parser.add_argument("--data-directory", type=Path, required=True)
@@ -258,11 +272,18 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def resolve_runs(args: argparse.Namespace) -> dict[str, set[int]]:
-    """Use the explicit run ids when provided, otherwise discover them."""
-    if args.run_id:
-        return {run_id: set(RUN_DIRS) for run_id in args.run_id}
-    return list_run_ids(args.bucket, args.gcloud_account)
+def resolve_runs(
+    args: argparse.Namespace,
+    config: BackfillConfig,
+) -> dict[str, dict[int, str]]:
+    """Discover bucket runs, keeping only the requested ids when provided."""
+    runs = list_run_samples(config.bucket, config.account)
+    if not args.run_id:
+        return runs
+    requested = set(args.run_id)
+    for run_id in sorted(requested - runs.keys()):
+        print(f"WARN run id {run_id} not found in bucket, skipping")
+    return {run_id: samples for run_id, samples in runs.items() if run_id in requested}
 
 
 def resolve_work_root(args: argparse.Namespace) -> Path:
@@ -288,7 +309,7 @@ def rebuild_night(config: BackfillConfig, night: dict, work_root: Path) -> None:
     """Download the logcats and replay median + history for a single night."""
     night_directory = work_root / night["id"]
     night_directory.mkdir(parents=True, exist_ok=True)
-    logcats = download_logcats(config, night["id"], night_directory)
+    logcats = download_logcats(config, night, night_directory)
     median = night_directory / "median.json"
     compute_median(logcats, median)
     update_history(median, night, config)
@@ -335,10 +356,12 @@ def report(outcomes: dict[str, list]) -> None:
 
 
 def main() -> None:
+    """Rebuild every eligible night and exit non-zero if any of them failed."""
     args = parse_args()
     args.data_directory.mkdir(parents=True, exist_ok=True)
     config = config_from_args(args)
-    nights = select_nights(resolve_runs(args), args.repository, args.since, args.until)
+    runs = resolve_runs(args, config)
+    nights = select_nights(runs, args.repository, args.since, args.until)
     skip = existing_days(config.data_directory) if args.skip_existing else set()
     work_root = resolve_work_root(args)
 
@@ -353,6 +376,9 @@ def main() -> None:
 
     if not args.work_directory and not args.dry_run:
         shutil.rmtree(work_root, ignore_errors=True)
+
+    if outcomes[FAIL]:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
