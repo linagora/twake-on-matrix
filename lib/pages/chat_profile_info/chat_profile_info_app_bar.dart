@@ -1,22 +1,23 @@
-import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_app_bar_view.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 
 class ChatProfileInfoAppBar extends StatefulWidget {
   final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
@@ -98,11 +99,12 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
     final matrixId = widget.presentationContact?.matrixId;
     if (matrixId != null) {
       try {
-        final profile = await Matrix.of(
+        final profile = await ProviderScope.containerOf(
           context,
-        ).client.getProfileFromUserId(matrixId, getFromRooms: false);
+          listen: false,
+        ).read(matrixUserProfileProvider(matrixId).future);
         if (!mounted) return;
-        _profileNotifier.value = profile;
+        _profileNotifier.value = profile?.toProfile(matrixId);
       } catch (_) {
         if (!mounted) return;
         _profileNotifier.value = null;
@@ -312,7 +314,7 @@ class _SizedAppBar extends StatelessWidget {
   double getToolbarHeight(
     BuildContext context,
     Either<Failure, Success> userInfoNotifier,
-    Either<Failure, Success> getContactState,
+    List<UnifiedContact> contacts,
   ) {
     final height = userInfoNotifier.fold(
       (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
@@ -346,13 +348,9 @@ class _SizedAppBar extends StatelessWidget {
     final matrixId = contact?.matrixId ?? user?.id;
     final canAddContact =
         matrixId != null &&
-        getContactState.fold(
-          (failure) => false,
-          (success) => success is GetContactsSuccess
-              ? success.contacts.none(
-                  (contact) => contact.inTomAddressBook(matrixId),
-                )
-              : false,
+        !contacts.any(
+          (contact) =>
+              contact.isAddressBookContact && contact.matrixId == matrixId,
         );
     if (canAddContact) {
       additionalHeight += ChatDetailViewStyle.chatInfoAddContactHeight;
@@ -366,12 +364,14 @@ class _SizedAppBar extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: userInfoNotifier,
       builder: (context, lookupContact, _) {
-        return ValueListenableBuilder(
-          valueListenable: getIt.get<ContactsManager>().getContactsNotifier(),
-          builder: (context, getContactState, child) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final contacts =
+                ref.watch(contactsControllerProvider).asData?.value ??
+                const <UnifiedContact>[];
             return builder(
               context,
-              getToolbarHeight(context, lookupContact, getContactState),
+              getToolbarHeight(context, lookupContact, contacts),
             );
           },
         );
