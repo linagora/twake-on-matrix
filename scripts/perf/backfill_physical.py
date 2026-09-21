@@ -41,6 +41,7 @@ import tempfile
 import urllib.error
 import urllib.request
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -56,6 +57,18 @@ FAIL = "fail"
 
 class BackfillError(RuntimeError):
     """Raised when the backfill cannot proceed safely."""
+
+
+@dataclass(frozen=True)
+class BackfillConfig:
+    """Immutable settings shared by every backfill step."""
+
+    bucket: str
+    data_directory: Path
+    repository: str
+    flutter_version: str
+    account: str | None
+    dry_run: bool
 
 
 def _run(command: list[str], *, capture: bool = True) -> str:
@@ -157,15 +170,14 @@ def existing_days(data_directory: Path) -> set[str]:
 
 
 def download_logcats(
-    bucket: str,
+    config: BackfillConfig,
     run_id: str,
     work_directory: Path,
-    account: str | None,
 ) -> list[Path]:
     logcats = []
     for number in RUN_DIRS:
         source = (
-            f"{bucket}/perf-physical-{run_id}-run{number}"
+            f"{config.bucket}/perf-physical-{run_id}-run{number}"
             "/oriole-33-en-portrait/logcat"
         )
         destination = work_directory / f"run{number}.log"
@@ -173,7 +185,7 @@ def download_logcats(
             _run(
                 _gcloud(
                     ["cp", source, str(destination)],
-                    account,
+                    config.account,
                 )
             )
         logcats.append(destination)
@@ -195,13 +207,7 @@ def compute_median(logcats: list[Path], output: Path) -> None:
     )
 
 
-def update_history(
-    median: Path,
-    data_directory: Path,
-    night: dict,
-    repository: str,
-    flutter_version: str,
-) -> None:
+def update_history(median: Path, night: dict, config: BackfillConfig) -> None:
     _run(
         [
             sys.executable,
@@ -215,19 +221,19 @@ def update_history(
             "--physical-runs",
             "3",
             "--data-directory",
-            str(data_directory),
+            str(config.data_directory),
             "--date",
             night["day"],
             "--generated-at",
             night["created"],
             "--repository",
-            repository,
+            config.repository,
             "--sha",
             night["sha"],
             "--run-id",
             night["id"],
             "--flutter-version",
-            flutter_version,
+            config.flutter_version,
         ]
     )
 
@@ -266,45 +272,49 @@ def resolve_work_root(args: argparse.Namespace) -> Path:
     return work_root
 
 
-def rebuild_night(args: argparse.Namespace, night: dict, work_root: Path) -> None:
+def config_from_args(args: argparse.Namespace) -> BackfillConfig:
+    """Build the immutable settings consumed by the backfill steps."""
+    return BackfillConfig(
+        bucket=args.bucket,
+        data_directory=args.data_directory,
+        repository=args.repository,
+        flutter_version=args.flutter_version,
+        account=args.gcloud_account,
+        dry_run=args.dry_run,
+    )
+
+
+def rebuild_night(config: BackfillConfig, night: dict, work_root: Path) -> None:
     """Download the logcats and replay median + history for a single night."""
     night_directory = work_root / night["id"]
     night_directory.mkdir(parents=True, exist_ok=True)
-    logcats = download_logcats(
-        args.bucket, night["id"], night_directory, args.gcloud_account
-    )
+    logcats = download_logcats(config, night["id"], night_directory)
     median = night_directory / "median.json"
     compute_median(logcats, median)
-    update_history(
-        median,
-        args.data_directory,
-        night,
-        args.repository,
-        args.flutter_version,
-    )
+    update_history(median, night, config)
 
 
 def process_day(
-    args: argparse.Namespace,
-    day: str,
+    config: BackfillConfig,
     night: dict,
     skip: set[str],
     work_root: Path,
 ) -> tuple[str, str]:
     """Return the outcome status and a short human-readable detail."""
-    if day in skip:
+    if night["day"] in skip:
         return SKIP, "already published"
-    if args.dry_run:
+    if config.dry_run:
         return DRY, f"sha={night['sha'][:8]} ({night['event']})"
     try:
-        rebuild_night(args, night, work_root)
+        rebuild_night(config, night, work_root)
     except BackfillError as error:
         return FAIL, str(error)
     return OK, night["event"]
 
 
-def describe(status: str, day: str, night: dict, detail: str) -> str:
+def describe(status: str, night: dict, detail: str) -> str:
     """Format the progress line printed for a finished night."""
+    day = night["day"]
     if status == SKIP:
         return f"SKIP {day} {night['id']} ({detail})"
     if status == DRY:
@@ -327,16 +337,17 @@ def report(outcomes: dict[str, list]) -> None:
 def main() -> None:
     args = parse_args()
     args.data_directory.mkdir(parents=True, exist_ok=True)
+    config = config_from_args(args)
     nights = select_nights(resolve_runs(args), args.repository, args.since, args.until)
-    skip = existing_days(args.data_directory) if args.skip_existing else set()
+    skip = existing_days(config.data_directory) if args.skip_existing else set()
     work_root = resolve_work_root(args)
 
     outcomes: dict[str, list] = defaultdict(list)
     for day in sorted(nights):
         night = nights[day]
-        status, detail = process_day(args, day, night, skip, work_root)
+        status, detail = process_day(config, night, skip, work_root)
         outcomes[status].append((day, detail))
-        print(describe(status, day, night, detail))
+        print(describe(status, night, detail))
 
     report(outcomes)
 
