@@ -178,6 +178,7 @@ class DraftChatController extends State<DraftChat>
   }
 
   void handleDragDone(DropDoneDetails details) async {
+    draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
 
     _handleSendFileOnWeb(context, matrixFilesList);
@@ -541,17 +542,28 @@ class DraftChatController extends State<DraftChat>
     );
     if (result == null || result.files.isEmpty) return;
 
+    final matrixFilesList = await _convertFilesToMatrixFiles(
+      result.xFiles,
+      (file) async => (await file.toMatrixFileOnWeb()).detectFileType,
+    );
+    _handleSendFileOnWeb(context, matrixFilesList);
+  }
+
+  Future<List<MatrixFile>> _convertFilesToMatrixFiles<T>(
+    Iterable<T> files,
+    Future<MatrixFile> Function(T file) convert,
+  ) async {
     final matrixFilesList = await Future.wait(
-      result.xFiles.map((file) async {
+      files.map((file) async {
         try {
-          return (await file.toMatrixFileOnWeb()).detectFileType;
+          return await convert(file);
         } catch (e) {
           return null;
         }
       }),
     );
 
-    _handleSendFileOnWeb(context, matrixFilesList.nonNulls.toList());
+    return matrixFilesList.nonNulls.toList();
   }
 
   Future<void> _handleSendFileOnWeb(
