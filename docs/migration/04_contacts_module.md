@@ -628,15 +628,18 @@ Branches delivered (stacked on the working branch `docs/readme-assets`, which is
 | `contacts/05-bootstrap-sync` | `contactSyncService.refresh()` triggered when the active client is published |
 | `contacts/06-read-path` | `unifiedContactProvider(matrixId)`, `UnifiedContactDisplayName` + 1 test |
 | `contacts/07-cleanup` | removal of the dead `combineDuplicateContact` extension |
+| `contacts/08-consumers-widgets` | `MatrixProfileDatasource` (SDK behind Riverpod), `matrixUserProfile` / `contactDisplayProvider`; every `getProfileFromUserId()` call site migrated (profile sheet, avatar widget, participants chips, new-private-chat tiles, recent search, HTML pills, key verification, chat profile panel, draft chat, blocked users, twake header, adaptive navigation, settings profile, personal QR, new group) |
 
-**Deferred to a future PR** (requires migrating the live Contacts tab — option B of PR4):
+**Status of the SDK coupling**: `package:matrix` profile access now goes exclusively through
+`MatrixProfileDatasourceImpl` (fed by `activeMatrixClientProvider`). No widget calls
+`client.getProfileFromUserId()` directly.
 
-- per-screen migration of the 22 `getProfileFromUserId()` call sites to `unifiedContactProvider`
-  (the reusable read path and display widget are ready);
-- deletion of `ContactsManager`, `ContactsViewControllerMixin`, `domain/app_state/contact/*`,
-  the legacy contact interactors and their `get_it` registrations;
-- `MatrixProfileDataSource` (per-user network profile) — the room-member source covers the
-  local case without network.
+**Remaining** (a dedicated PR — option B of PR4):
 
-The live `ContactsTab` still uses `ContactsViewControllerMixin`; deleting it is unsafe until the
-screen is migrated (the permission / warning-banner / invitation flows live there).
+- migrate the live `ContactsTab` (list rendering + permission / warning-banner / invitation
+  flows) to the unified store;
+- then delete `ContactsManager`, `ContactsViewControllerMixin`, `domain/app_state/contact/*`,
+  the legacy contact interactors and their `get_it` registrations. `ContactsManager` is still
+  consumed by `matrix.dart`, `chat_app_bar_title`, `draft_chat`, `search_contacts_and_chats_controller`,
+  `chat_view_body`, `chat_profile_info_details`, `add_contact_dialog` and `address_book_mixin`,
+  so it cannot be removed before those consumers are migrated.
