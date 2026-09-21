@@ -17,4 +17,7 @@ enum ContactSourceKind {
 
   /// Matrix room members: profile derived from joined rooms.
   matrixRoomMember,
+
+  /// Contact created manually by the user (add-contact dialog).
+  manual,
 }
