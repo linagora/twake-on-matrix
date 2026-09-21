@@ -25,15 +25,17 @@ ENV SENTRY_DIST=${SENTRY_DIST}
 ENV SENTRY_DSN=${SENTRY_DSN}
 ENV SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
 
+# Single apt layer: install all deps, install Rust, install yq, then clean up
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-suggests --no-install-recommends \
+      curl brotli && \
+    rm -rf /var/lib/apt/lists/*
+
 # Pinned yq version for reproducible builds
 ARG YQ_VERSION=4.44.3
 
-# Single apt layer: install all deps, install Rust, install yq, then clean up
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev brotli && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
       -o /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq && \
