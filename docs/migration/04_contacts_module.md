@@ -640,10 +640,12 @@ Branches delivered (stacked on the working branch `docs/readme-assets`, which is
 
 **Remaining** (final cleanup PR):
 
-- migrate the last `ContactsManager` consumers: `matrix.dart`, `chat_app_bar_title`,
-  `draft_chat`/`draft_chat_view`, `chat_profile_info`/`chat_profile_info_app_bar`/`chat_profile_info_details`,
-  `search_contacts_and_chats_controller`, `chat_view_body`, `add_contact_dialog`, `address_book_mixin`
-  (most only need `getContactsNotifier()` to resolve a display name → use `contactDisplayProvider`;
-  permission booleans move into `ContactsViewControllerMixin`);
-- then delete `ContactsManager`, `domain/app_state/contact/*`, the legacy contact interactors and
-  their `get_it` registrations.
+- delete `ContactsManager`, `domain/app_state/contact/*`, the legacy contact interactors and
+  their `get_it` registrations. **Production code no longer references `ContactsManager`**
+  (chat app bar, add-contact banners, chat profile info, draft chat, search, contacts tab,
+  `MatrixState` all read the unified store / `ContactSyncService`).
+- the deletion is currently blocked by test-only references: `test/domain/contacts/contacts_manager_test.dart`,
+  the `MockSpec<ContactsManager>` in three widget/mixin tests, and
+  `integration_test/scenarios/contact_search_scenario.dart` which seeds
+  `ContactsManager.getContactsNotifier()`. Those must seed the unified store instead
+  (the scenario needs a `ProviderContainer`/test seam).
