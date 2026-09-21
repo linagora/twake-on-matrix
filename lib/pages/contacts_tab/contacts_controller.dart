@@ -7,12 +7,17 @@ part 'contacts_controller.g.dart';
 
 /// Continuous source (the local store) → `Stream<T>` in `build()`, so Riverpod
 /// owns the subscription lifecycle and every write re-renders the list.
-@riverpod
+///
+/// Session-wide read model (`keepAlive`): one store subscription shared by
+/// every screen, and one-shot readers (`.future`) are never disposed before
+/// the first emission.
+@Riverpod(keepAlive: true)
 class ContactsController extends _$ContactsController {
   @override
   Stream<List<UnifiedContact>> build() {
     final userId = ref.watch(currentUserIdProvider);
-    if (userId == null) return const Stream<List<UnifiedContact>>.empty();
+    // No account: an empty list (not an empty stream) so `.future` resolves.
+    if (userId == null) return Stream.value(const <UnifiedContact>[]);
     return ref.watch(contactSyncServiceProvider(userId)).watchContacts();
   }
 
