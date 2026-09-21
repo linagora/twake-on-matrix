@@ -610,3 +610,33 @@ In addition to `01_migration_plan.md` §8:
 - **Q5**: should `UnifiedContactStore` be exposed as a `Stream` from the repository (SDK-ready)
   or as a Riverpod `AsyncNotifier` state only? (The plan recommends `Stream<T>` in `build()`
   for continuous sources.)
+
+---
+
+## 14. Implementation status
+
+Branches delivered (stacked on the working branch `docs/readme-assets`, which is ahead of
+`main`; no pull request opened). 53 unit tests green, full `flutter analyze` clean.
+
+| Branch | Content |
+|---|---|
+| `contacts/01-foundation` | `UnifiedContact`, `ContactSourceValue/Kind`, sealed exceptions, `ContactResolutionPolicy` + 12 tests, this document |
+| `contacts/02-data` | `unified_contacts_box` Hive box, `ContactLocalDataSource`, `UnifiedContactRepository`, DTO + 7 tests |
+| `contacts/03-service` | `ContactSource`, 5 use cases, `ContactSyncService`, TOM AddressBook + Phonebook sources + 8 tests |
+| `contacts/03bis-matrix-source` | `activeMatrixClientProvider` (Phase 0 bridge), `MatrixRoomMemberSource`, `ContactEnricher` + `TomUserInfoSource` + 6 tests |
+| `contacts/04-presentation` | `ContactsController` (StreamNotifier), `ContactsState`, `UnifiedContactsList` (path only, live screen untouched) + 9 tests |
+| `contacts/05-bootstrap-sync` | `contactSyncService.refresh()` triggered when the active client is published |
+| `contacts/06-read-path` | `unifiedContactProvider(matrixId)`, `UnifiedContactDisplayName` + 1 test |
+| `contacts/07-cleanup` | removal of the dead `combineDuplicateContact` extension |
+
+**Deferred to a future PR** (requires migrating the live Contacts tab — option B of PR4):
+
+- per-screen migration of the 22 `getProfileFromUserId()` call sites to `unifiedContactProvider`
+  (the reusable read path and display widget are ready);
+- deletion of `ContactsManager`, `ContactsViewControllerMixin`, `domain/app_state/contact/*`,
+  the legacy contact interactors and their `get_it` registrations;
+- `MatrixProfileDataSource` (per-user network profile) — the room-member source covers the
+  local case without network.
+
+The live `ContactsTab` still uses `ContactsViewControllerMixin`; deleting it is unsafe until the
+screen is migrated (the permission / warning-banner / invitation flows live there).
