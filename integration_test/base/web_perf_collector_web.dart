@@ -19,7 +19,7 @@ class WebPerfCollector {
   final List<double> _longTaskDurationsMs = [];
   final List<String> _pending = [];
 
-  JSFunction? _frameCallback;
+  late JSFunction _frameCallback;
   web.PerformanceObserver? _longTaskObserver;
   int? _frameHandle;
   int _sequence = 0;
@@ -37,9 +37,9 @@ class WebPerfCollector {
     _frameCallback = ((double timestamp) {
       if (!_active) return;
       _frameTimestampsMs.add(timestamp);
-      _frameHandle = web.window.requestAnimationFrame(_frameCallback!);
+      _frameHandle = web.window.requestAnimationFrame(_frameCallback);
     }).toJS;
-    _frameHandle = web.window.requestAnimationFrame(_frameCallback!);
+    _frameHandle = web.window.requestAnimationFrame(_frameCallback);
   }
 
   /// Captures the current measurement window as one PERF_METRIC checkpoint.
