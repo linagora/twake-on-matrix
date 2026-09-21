@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
-import 'package:twake_chat/domain/usecase/room/message_splitter.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 
 import 'send_text_message_interactor_test.mocks.dart';

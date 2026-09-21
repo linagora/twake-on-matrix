@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/domain/usecase/room/message_splitter.dart';
+import 'package:twake_chat/domain/services/message_splitter.dart';
 
 void main() {
   group('MessageSplitter', () {

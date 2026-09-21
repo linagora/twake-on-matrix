@@ -1,6 +1,6 @@
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
-import 'package:twake_chat/domain/usecase/room/message_splitter.dart';
 
 /// Sends a composer text, split into several messages when it is longer than
 /// [MessageSplitter.maxLength]. Parts are sent one after the other, the reply
