@@ -1,73 +1,65 @@
 # Specify versions
 ARG FLUTTER_VERSION=3.38.9
 
-# Building Twake for the web
-FROM --platform=linux/amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+# Building Twake for the web.
+# Builds natively for the base image's platform, so no --platform flag is
+# needed; set platforms on the final stage to produce a multi-arch image.
+# See .github/workflows/image.yaml for the CI build and its requirements.
+FROM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
-# Sentry: all values passed from outside — nothing is hardcoded here.
-# Usage: docker build \
-#   --secret id=sentry_auth_token,src=<token-file> \
-#   --build-arg SENTRY_PROJECT=twake-chat \
-#   --build-arg SENTRY_ORG=datcorp \
-#   --build-arg SENTRY_RELEASE=2.19.7 \
-#   --build-arg SENTRY_DIST=2330 \
-#   ...
+# Sentry values are injected from build args; only SENTRY_PROJECT and SENTRY_ORG
+# are required. The auth token is passed as a build secret, not an arg.
 ARG SENTRY_PROJECT=""
 ARG SENTRY_ORG=""
 ARG SENTRY_RELEASE=""
 ARG SENTRY_DIST=""
 ARG SENTRY_DSN=""
 ARG SENTRY_ENVIRONMENT=""
-ENV SENTRY_PROJECT=${SENTRY_PROJECT}
-ENV SENTRY_ORG=${SENTRY_ORG}
-ENV SENTRY_RELEASE=${SENTRY_RELEASE}
-ENV SENTRY_DIST=${SENTRY_DIST}
-ENV SENTRY_DSN=${SENTRY_DSN}
-ENV SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+ENV SENTRY_PROJECT=${SENTRY_PROJECT} \
+    SENTRY_ORG=${SENTRY_ORG} \
+    SENTRY_RELEASE=${SENTRY_RELEASE} \
+    SENTRY_DIST=${SENTRY_DIST} \
+    SENTRY_DSN=${SENTRY_DSN} \
+    SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
 
-# Pinned yq version for reproducible builds
+# Install build dependencies
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-suggests --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Rust toolchain, architecture-matched yq, and the Sentry CLI
 ARG YQ_VERSION=4.44.3
-
-# Single apt layer: install all deps, install Rust, install yq, then clean up
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev openssh-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_$(dpkg --print-architecture)" \
       -o /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq && \
     curl -sL https://sentry.io/get-cli/ | sh
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-COPY . /app
 WORKDIR /app
 
-RUN rm -rf assets/js/* && \
-    mkdir -p assets/js/package && \
-    rm -rf fastlane && \
-    mkdir -p fastlane && \
-    ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-# Cache cargo registry, git deps, nightly toolchain components, and compiled Rust artifacts.
-RUN --mount=type=ssh,required=true \
-    --mount=type=cache,target=/root/.cargo/registry \
+# Heavy, rarely-changing step: vodozemac Rust toolchain and wasm codegen.
+# Needs only pubspec.yaml and the prepare script, so source edits don't
+# invalidate this layer; cargo caches are mounted to speed up rebuilds.
+COPY pubspec.yaml pubspec.lock ./
+COPY scripts/prepare-web.sh scripts/prepare-web.sh
+RUN --mount=type=cache,target=/root/.cargo/registry \
     --mount=type=cache,target=/root/.cargo/git \
     --mount=type=cache,target=/root/.cargo/vodozemac-target \
-    CARGO_TARGET_DIR=/root/.cargo/vodozemac-target \
-    ./scripts/prepare-web.sh
+    mkdir -p web && \
+    CARGO_TARGET_DIR=/root/.cargo/vodozemac-target ./scripts/prepare-web.sh
 
-# Cache pub packages across builds; build-web.sh calls configure-sentry.sh internally.
-# SENTRY_AUTH_TOKEN passed as a Docker build secret to avoid leaking it in image layers
-# or `docker history` output.
-RUN --mount=type=ssh,required=true \
-    --mount=type=secret,id=sentry_auth_token,required=false \
+# Remaining sources, filtered by .dockerignore
+COPY . .
+
+# Build the web app and pre-compress the assets. SENTRY_AUTH_TOKEN is passed as
+# a build secret so it never lands in an image layer.
+RUN --mount=type=secret,id=sentry_auth_token,required=false \
     --mount=type=cache,target=/root/.pub-cache \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null || true) \
-    ./scripts/build-web.sh
-
-# Pre-compress all web assets at build time (avoids re-compressing on every container start)
-RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \;
+    ./scripts/build-web.sh && \
+    find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \;
 
 # Final image — lean nginx:alpine with no extra packages needed
 FROM nginx:alpine AS final-image
