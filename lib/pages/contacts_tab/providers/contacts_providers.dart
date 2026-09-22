@@ -53,6 +53,7 @@ UnifiedContactRepository unifiedContactRepository(Ref ref) {
     ref.watch(contactLocalDataSourceProvider),
   );
   debugUnifiedContactRepository = repository;
+  ref.onDispose(() => debugUnifiedContactRepository = null);
   return repository;
 }
 
