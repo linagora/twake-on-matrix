@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
+import 'package:twake_chat/pages/device_settings/session_summary.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 
 class SessionAllActionsDialog {
@@ -10,10 +11,7 @@ class SessionAllActionsDialog {
 
   static Future<void> show(
     BuildContext context, {
-    required String deviceName,
-    required String lastActiveText,
-    required IconData platformIcon,
-    required bool verified,
+    required SessionSummary session,
     required VoidCallback onChangeName,
     VoidCallback? onStartVerification,
     VoidCallback? onRemove,
@@ -22,10 +20,7 @@ class SessionAllActionsDialog {
       useSafeArea: false,
       builder: () => BootstrapModalChrome(
         content: SessionAllActionsView(
-          deviceName: deviceName,
-          lastActiveText: lastActiveText,
-          platformIcon: platformIcon,
-          verified: verified,
+          session: session,
           onChangeName: onChangeName,
           onStartVerification: onStartVerification,
           onRemove: onRemove,
@@ -42,20 +37,14 @@ class SessionAllActionsView extends StatelessWidget {
   static const double _gapHeaderToActions = LinagoraSpacing.base * 2;
   static const double _gapActionsToCancel = LinagoraSpacing.base * 2;
 
-  final String deviceName;
-  final String lastActiveText;
-  final IconData platformIcon;
-  final bool verified;
+  final SessionSummary session;
   final VoidCallback onChangeName;
   final VoidCallback? onStartVerification;
   final VoidCallback? onRemove;
 
   const SessionAllActionsView({
     super.key,
-    required this.deviceName,
-    required this.lastActiveText,
-    required this.platformIcon,
-    required this.verified,
+    required this.session,
     required this.onChangeName,
     this.onStartVerification,
     this.onRemove,
@@ -78,8 +67,8 @@ class SessionAllActionsView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SessionDeviceAvatar(
-              icon: platformIcon,
-              verified: verified,
+              icon: session.platformIcon,
+              verified: session.verified,
               size: _avatarSize,
             ),
             const SizedBox(width: _gapAvatarToText),
@@ -89,13 +78,13 @@ class SessionAllActionsView extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    deviceName,
+                    session.deviceName,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: colors.onBackground,
                     ),
                   ),
                   Text(
-                    lastActiveText,
+                    session.lastActiveText,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: LinagoraRefColors.material().tertiary[30],
                     ),

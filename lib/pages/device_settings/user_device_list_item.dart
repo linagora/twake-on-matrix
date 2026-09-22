@@ -8,6 +8,7 @@ import '../../utils/date_time_extension.dart';
 import '../../utils/matrix_sdk_extensions/device_extension.dart';
 import '../../widgets/matrix.dart';
 import 'session_all_actions_dialog.dart';
+import 'session_summary.dart';
 
 class UserDeviceListItem extends StatelessWidget {
   final Device userDevice;
@@ -43,10 +44,12 @@ class UserDeviceListItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => SessionAllActionsDialog.show(
         context,
-        deviceName: userDevice.displayname,
-        lastActiveText: lastActiveText,
-        platformIcon: userDevice.icon,
-        verified: verified,
+        session: SessionSummary(
+          deviceName: userDevice.displayname,
+          lastActiveText: lastActiveText,
+          platformIcon: userDevice.icon,
+          verified: verified,
+        ),
         onChangeName: () => rename?.call(userDevice),
         onStartVerification: isOwnDevice ? null : () => verify(userDevice),
         onRemove: isOwnDevice ? null : () => remove?.call(userDevice),
