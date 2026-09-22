@@ -105,7 +105,10 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     });
   }
 
-  Future<void> _loadUserDevices(Client client) async {
+  Future<void> _loadUserDevices(
+    Client client, {
+    bool preserveStateOnFailure = false,
+  }) async {
     await ref
         .read(getDevicesInteractorProvider)
         .execute(client: client)
@@ -115,6 +118,7 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
               if (failure is GetDevicesEmpty) {
                 state = const DevicesSettingsState.loaded(devices: []);
               } else if (failure is GetDevicesFailed) {
+                if (preserveStateOnFailure) return;
                 state = DevicesSettingsState.error(
                   exception: failure.exception,
                 );
@@ -137,9 +141,10 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
   }
 
   Future<void> _softReload(Client client) {
-    return _loadInFlight ??= _loadUserDevices(client).whenComplete(() {
-      _loadInFlight = null;
-    });
+    return _loadInFlight ??=
+        _loadUserDevices(client, preserveStateOnFailure: true).whenComplete(() {
+          _loadInFlight = null;
+        });
   }
 
   Future<void> renameDevice({

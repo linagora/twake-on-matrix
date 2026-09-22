@@ -12,19 +12,12 @@ class SessionAllActionsDialog {
   static Future<void> show(
     BuildContext context, {
     required SessionSummary session,
-    required VoidCallback onChangeName,
-    VoidCallback? onStartVerification,
-    VoidCallback? onRemove,
+    required SessionActions actions,
   }) {
     return TwakeDialog.showDialogFullScreen(
       useSafeArea: false,
       builder: () => BootstrapModalChrome(
-        content: SessionAllActionsView(
-          session: session,
-          onChangeName: onChangeName,
-          onStartVerification: onStartVerification,
-          onRemove: onRemove,
-        ),
+        content: SessionAllActionsView(session: session, actions: actions),
       ),
     );
   }
@@ -38,16 +31,12 @@ class SessionAllActionsView extends StatelessWidget {
   static const double _gapActionsToCancel = LinagoraSpacing.base * 2;
 
   final SessionSummary session;
-  final VoidCallback onChangeName;
-  final VoidCallback? onStartVerification;
-  final VoidCallback? onRemove;
+  final SessionActions actions;
 
   const SessionAllActionsView({
     super.key,
     required this.session,
-    required this.onChangeName,
-    this.onStartVerification,
-    this.onRemove,
+    required this.actions,
   });
 
   void _runAfterClose(BuildContext context, VoidCallback action) {
@@ -103,9 +92,9 @@ class SessionAllActionsView extends StatelessWidget {
           subtitle: l10n.editDisplayNameForSession,
           showDivider: true,
           crossAxisAlignment: CrossAxisAlignment.start,
-          onTap: () => _runAfterClose(context, onChangeName),
+          onTap: () => _runAfterClose(context, actions.onChangeName),
         ),
-        if (onStartVerification case final onStartVerification?)
+        if (actions.onStartVerification case final onStartVerification?)
           LinagoraSettingItem(
             leadingIcon: Icons.verified_user,
             title: l10n.startVerification,
@@ -114,7 +103,7 @@ class SessionAllActionsView extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             onTap: () => _runAfterClose(context, onStartVerification),
           ),
-        if (onRemove case final onRemove?)
+        if (actions.onRemove case final onRemove?)
           LinagoraSettingItem(
             leadingIcon: Icons.delete_outline,
             title: l10n.removeDevice,

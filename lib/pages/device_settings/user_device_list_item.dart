@@ -50,9 +50,11 @@ class UserDeviceListItem extends StatelessWidget {
           platformIcon: userDevice.icon,
           verified: verified,
         ),
-        onChangeName: () => rename?.call(userDevice),
-        onStartVerification: isOwnDevice ? null : () => verify(userDevice),
-        onRemove: isOwnDevice ? null : () => remove?.call(userDevice),
+        actions: SessionActions(
+          onChangeName: () => rename?.call(userDevice),
+          onStartVerification: verified ? null : () => verify(userDevice),
+          onRemove: isOwnDevice ? null : () => remove?.call(userDevice),
+        ),
       ),
       child: SessionDeviceListItem(
         deviceName: userDevice.displayname,

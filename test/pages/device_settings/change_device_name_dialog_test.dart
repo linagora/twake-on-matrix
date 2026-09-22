@@ -22,6 +22,8 @@ Widget _wrap(Widget child) {
   );
 }
 
+const _errorMessage = "We couldn't save the changes. Try again later";
+
 Future<void> _pumpView(
   WidgetTester tester, {
   String initialName = 'My laptop',
@@ -30,6 +32,17 @@ Future<void> _pumpView(
   return tester.pumpWidget(
     _wrap(ChangeDeviceNameView(initialName: initialName, onSave: onSave)),
   );
+}
+
+Future<void> _pumpAndTapSave(
+  WidgetTester tester, {
+  required Future<void> Function(String) onSave,
+  required String newName,
+}) async {
+  await _pumpView(tester, onSave: onSave);
+  await tester.enterText(find.byType(TextField), newName);
+  await tester.tap(find.text('Save'));
+  await tester.pumpAndSettle();
 }
 
 Future<void> _prefillsInputWithCurrentDeviceName(WidgetTester tester) async {
@@ -41,75 +54,50 @@ Future<void> _prefillsInputWithCurrentDeviceName(WidgetTester tester) async {
 
 Future<void> _savingWithNonEmptyNameCallsOnSave(WidgetTester tester) async {
   String? savedName;
-  await _pumpView(
+  await _pumpAndTapSave(
     tester,
-    initialName: 'My laptop',
     onSave: (name) async => savedName = name,
+    newName: 'New name',
   );
-
-  await tester.enterText(find.byType(TextField), 'New name');
-  await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle();
 
   expect(savedName, 'New name');
 }
 
 Future<void> _savingEmptyNameIsNoOp(WidgetTester tester) async {
   var saveCalled = false;
-  await _pumpView(
+  await _pumpAndTapSave(
     tester,
-    initialName: 'My laptop',
     onSave: (_) async => saveCalled = true,
+    newName: '   ',
   );
-
-  await tester.enterText(find.byType(TextField), '   ');
-  await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle();
 
   expect(saveCalled, isFalse);
 }
 
 Future<void> _onSaveErrorKeepsModalOpenWithError(WidgetTester tester) async {
-  await _pumpView(
+  await _pumpAndTapSave(
     tester,
-    initialName: 'My laptop',
     onSave: (_) async => throw Exception('network error'),
+    newName: 'New name',
   );
 
-  await tester.enterText(find.byType(TextField), 'New name');
-  await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle();
-
-  expect(
-    find.text("We couldn't save the changes. Try again later"),
-    findsOneWidget,
-  );
+  expect(find.text(_errorMessage), findsOneWidget);
   expect(find.text('New name'), findsOneWidget);
   expect(find.byType(ChangeDeviceNameView), findsOneWidget);
 }
 
 Future<void> _editingAfterErrorClearsErrorMessage(WidgetTester tester) async {
-  await _pumpView(
+  await _pumpAndTapSave(
     tester,
-    initialName: 'My laptop',
     onSave: (_) async => throw Exception('network error'),
+    newName: 'New name',
   );
-
-  await tester.enterText(find.byType(TextField), 'New name');
-  await tester.tap(find.text('Save'));
-  await tester.pumpAndSettle();
-  expect(
-    find.text("We couldn't save the changes. Try again later"),
-    findsOneWidget,
-  );
+  expect(find.text(_errorMessage), findsOneWidget);
 
   await tester.enterText(find.byType(TextField), 'New name 2');
   await tester.pump();
 
-  expect(
-    find.text("We couldn't save the changes. Try again later"),
-    findsNothing,
-  );
+  expect(find.text(_errorMessage), findsNothing);
 }
 
 void main() {

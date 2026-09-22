@@ -45,7 +45,7 @@ Future<void> _pumpOwnDevice(
     _wrap(
       SessionAllActionsView(
         session: _ownDeviceSession,
-        onChangeName: onChangeName,
+        actions: SessionActions(onChangeName: onChangeName),
       ),
     ),
   );
@@ -61,9 +61,11 @@ Future<void> _pumpOtherDevice(
     _wrap(
       SessionAllActionsView(
         session: _otherDeviceSession,
-        onChangeName: onChangeName,
-        onStartVerification: onStartVerification,
-        onRemove: onRemove,
+        actions: SessionActions(
+          onChangeName: onChangeName,
+          onStartVerification: onStartVerification,
+          onRemove: onRemove,
+        ),
       ),
     ),
   );
