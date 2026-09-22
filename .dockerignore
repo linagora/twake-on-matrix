@@ -1,32 +1,36 @@
-# Native platform dirs (web-only build)
-android
-ios
-linux
-macos
-windows
+# Whitelist strategy: ignore everything, then re-include only what the web
+# build needs. Anything excluded here is never copied into the image, so no
+# post-copy `rm` cleanup is required in the Dockerfile.
+*
 
-# Build outputs
-build
-.dart_tool
-.pub-cache
-*.g.dart
+!pubspec.yaml
+!pubspec.lock
 
-# Test files
-test
-integration_test
+# Build scripts
+!scripts/build-web.sh
+!scripts/configure-sentry.sh
+!scripts/generate-sw-manifest.sh
+!scripts/prepare-web.sh
+!scripts/run-sentry.sh
 
-# CI/CD & docs
-.github
-*.md
-plans
-docs
+# Flutter web sources and assets
+!lib
+!lib/**
+!assets
+!assets/**
+!web
+!web/**
+!configurations
+!configurations/**
+!server
+!server/**
 
-# Local dev artifacts
-.vodozemac
-.env*
-*.log
+# Build configuration files
+!l10n.yaml
+!analysis_options.yaml
+!config.sample.json
+!.metadata
 
-# IDE
-.idea
-.vscode
-*.iml
+# Legacy libolm bundle (generated locally; the web build uses vodozemac)
+assets/js/package/*.js
+assets/js/package/*.wasm
