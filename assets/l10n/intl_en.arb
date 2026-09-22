@@ -283,11 +283,6 @@
       "targetName": {}
     }
   },
-  "blockDevice": "Block Device",
-  "@blockDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "blocked": "Blocked",
   "@blocked": {
     "type": "text",
@@ -317,6 +312,31 @@
   },
   "changeDeviceName": "Change device name",
   "@changeDeviceName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editDisplayNameForSession": "Edit the display name for this session",
+  "@editDisplayNameForSession": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterNewDisplayName": "Enter a new display name.",
+  "@enterNewDisplayName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVerification": "Start verification",
+  "@startVerification": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "syncDeviceWithCurrentSession": "Sync this device with your current session",
+  "@syncDeviceWithCurrentSession": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "signOutAndRemoveSession": "Sign out and remove this session permanently",
+  "@signOutAndRemoveSession": {
     "type": "text",
     "placeholders": {}
   },
@@ -673,6 +693,11 @@
     "placeholders": {
       "error": {}
     }
+  },
+  "couldNotSaveChangesTryLater": "We couldn't save the changes. Try again later",
+  "@couldNotSaveChangesTryLater": {
+    "type": "text",
+    "placeholders": {}
   },
   "countMembers": "{count, plural, =0{no members} =1{1 member} other{{count} members}}",
   "@countMembers": {
@@ -2096,11 +2121,6 @@
       "username": {},
       "targetName": {}
     }
-  },
-  "unblockDevice": "Unblock Device",
-  "@unblockDevice": {
-    "type": "text",
-    "placeholders": {}
   },
   "unknownDevice": "Unknown device",
   "@unknownDevice": {
