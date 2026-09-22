@@ -222,14 +222,26 @@
   async function fetchRecord(entry, platform = state.platform) {
     const cacheKey = platformRecordCacheKey(platform, entry.date);
     if (state.recordCache.has(cacheKey)) return state.recordCache.get(cacheKey);
-    const response = await fetch(
-      `${state.recordRoot}/${entry.file}`,
-      { cache: "no-store" }
-    );
-    if (!response.ok) throw new Error(`Impossible de charger ${entry.file}`);
-    const record = await response.json();
-    state.recordCache.set(cacheKey, record);
-    return record;
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const response = await fetch(
+          `${state.recordRoot}/${entry.file}`,
+          { cache: "no-store" }
+        );
+        if (response.ok) {
+          const record = await response.json();
+          state.recordCache.set(cacheKey, record);
+          return record;
+        }
+        lastError = new Error(`Impossible de charger ${entry.file}`);
+        if (response.status >= 400 && response.status < 500) break;
+      } catch (error) {
+        lastError = error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
+    }
+    throw lastError;
   }
 
   async function loadSelectedRecords(
