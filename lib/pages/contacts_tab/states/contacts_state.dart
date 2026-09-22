@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/utils/search/steps/diacritic_strip_step.dart';
 
 part 'contacts_state.freezed.dart';
 
@@ -32,9 +33,15 @@ abstract class ContactsState with _$ContactsState {
   }
 }
 
+const _diacriticStrip = DiacriticStripStep();
+
+String _normalize(String value) =>
+    _diacriticStrip.normalize(value.toLowerCase());
+
 bool _matches(UnifiedContact contact, String keyword) {
+  final nk = _normalize(keyword);
   bool contains(String? value) =>
-      value != null && value.toLowerCase().contains(keyword);
+      value != null && _normalize(value).contains(nk);
 
   return contains(contact.resolvedDisplayName) ||
       contains(contact.matrixId) ||
