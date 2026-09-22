@@ -358,7 +358,7 @@ hardcoded in the image):
 
 Example local build:
 
-```
+```bash
 docker build \
   --secret id=sentry_auth_token,src=<token-file> \
   --build-arg SENTRY_PROJECT=twake-chat \
