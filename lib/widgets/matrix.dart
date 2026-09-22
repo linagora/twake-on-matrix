@@ -939,7 +939,25 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     try {
-      final toMConfigurations = await getTomConfigurations(client.userID!);
+      var toMConfigurations = await getTomConfigurations(client.userID!);
+      if (toMConfigurations == null) {
+        // TOM configuration is optional local state. On a fresh install the
+        // active homeserver discovery is the source of truth and must be
+        // applied before the contact session starts its first refresh.
+        await _getHomeserverInformation(client);
+        final tomServer = loginHomeserverSummary?.tomServer;
+        if (tomServer != null) {
+          final discovery = loginHomeserverSummary?.discoveryInformation;
+          _setupAuthUrl();
+          toMConfigurations = ToMConfigurations(
+            tomServerInformation: tomServer,
+            identityServerInformation: discovery?.mIdentityServer,
+            authUrl: authUrl,
+            loginType: loginType,
+          );
+          await _storeToMConfiguration(client, toMConfigurations);
+        }
+      }
       if (toMConfigurations == null) {
         _setupAuthUrl();
         return;
@@ -1182,9 +1200,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        _setUpToMServer(null);
-        _setupAuthUrl();
-        setUpAuthorization(client);
+        await _retrieveLocalToMConfiguration();
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
