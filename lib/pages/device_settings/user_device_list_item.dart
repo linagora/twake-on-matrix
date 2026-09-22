@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import '../../utils/date_time_extension.dart';
 import '../../utils/matrix_sdk_extensions/device_extension.dart';
 import '../../widgets/matrix.dart';
-
-enum UserDeviceListItemAction { rename, remove, verify, block, unblock }
+import 'session_all_actions_dialog.dart';
 
 class UserDeviceListItem extends StatelessWidget {
   final Device userDevice;
   final void Function(Device)? remove;
   final void Function(Device)? rename;
   final void Function(Device) verify;
-  final void Function(Device)? block;
-  final void Function(Device)? unblock;
   final bool showDivider;
 
   const UserDeviceListItem(
@@ -25,61 +21,9 @@ class UserDeviceListItem extends StatelessWidget {
     this.remove,
     this.rename,
     required this.verify,
-    this.block,
-    this.unblock,
     this.showDivider = false,
     super.key,
   });
-
-  Future<void> _openActionSheet(
-    BuildContext context,
-    DeviceKeys? keys,
-    bool isOwnDevice,
-  ) async {
-    final l10n = L10n.of(context)!;
-    final action = await showModalActionSheet<UserDeviceListItemAction>(
-      context: context,
-      title: '${userDevice.displayName} (${userDevice.deviceId})',
-      actions: [
-        SheetAction(
-          key: UserDeviceListItemAction.rename,
-          label: l10n.changeDeviceName,
-        ),
-        if (!isOwnDevice && keys != null) ...{
-          if (!keys.blocked && block != null)
-            SheetAction(
-              key: UserDeviceListItemAction.block,
-              label: l10n.blockDevice,
-              isDestructiveAction: true,
-            ),
-          if (keys.blocked && unblock != null)
-            SheetAction(
-              key: UserDeviceListItemAction.unblock,
-              label: l10n.unblockDevice,
-              isDestructiveAction: true,
-            ),
-        },
-      ],
-    );
-    if (action == null) return;
-    switch (action) {
-      case UserDeviceListItemAction.rename:
-        rename?.call(userDevice);
-        break;
-      case UserDeviceListItemAction.remove:
-        remove?.call(userDevice);
-        break;
-      case UserDeviceListItemAction.verify:
-        verify(userDevice);
-        break;
-      case UserDeviceListItemAction.block:
-        block?.call(userDevice);
-        break;
-      case UserDeviceListItemAction.unblock:
-        unblock?.call(userDevice);
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,16 +33,27 @@ class UserDeviceListItem extends StatelessWidget {
         client.userDeviceKeys[client.userID]?.deviceKeys[userDevice.deviceId];
     final isOwnDevice = userDevice.deviceId == client.deviceID;
     final verified = isOwnDevice || keys?.verified == true;
+    final lastActiveText = l10n.lastActiveAgo(
+      DateTime.fromMillisecondsSinceEpoch(
+        userDevice.lastSeenTs ?? 0,
+      ).localizedTimeShort(context),
+    );
 
     return GestureDetector(
-      onTap: () => _openActionSheet(context, keys, isOwnDevice),
+      behavior: HitTestBehavior.opaque,
+      onTap: () => SessionAllActionsDialog.show(
+        context,
+        deviceName: userDevice.displayname,
+        lastActiveText: lastActiveText,
+        platformIcon: userDevice.icon,
+        verified: verified,
+        onChangeName: () => rename?.call(userDevice),
+        onStartVerification: isOwnDevice ? null : () => verify(userDevice),
+        onRemove: isOwnDevice ? null : () => remove?.call(userDevice),
+      ),
       child: SessionDeviceListItem(
         deviceName: userDevice.displayname,
-        lastActiveText: l10n.lastActiveAgo(
-          DateTime.fromMillisecondsSinceEpoch(
-            userDevice.lastSeenTs ?? 0,
-          ).localizedTimeShort(context),
-        ),
+        lastActiveText: lastActiveText,
         platformIcon: userDevice.icon,
         verified: verified,
         unverifiedLabel: l10n.unverified,
