@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/pages/device_settings/change_device_name_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -9,7 +9,6 @@ import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/encryption/utils/key_verification.dart';
@@ -19,6 +18,8 @@ import 'package:twake_chat/pages/device_settings/device_settings_state.dart';
 import 'package:twake_chat/pages/device_settings/device_settings_view_model.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -219,8 +220,6 @@ class _DevicesList extends ConsumerWidget {
           rename: (d) => renameDeviceAction(context, notifier, d),
           remove: (d) => removeDevicesAction(context, notifier, [d]),
           verify: (d) => verifyDeviceAction(context, notifier, d),
-          block: (d) => blockDeviceAction(context, notifier, d),
-          unblock: (d) => unblockDeviceAction(context, notifier, d),
           showDivider: isMobile,
         );
       },
@@ -236,7 +235,7 @@ Future<void> removeDevicesAction(
 }) async {
   final l10n = L10n.of(context)!;
   final confirmResult = await showConfirmAlertDialog(
-    useRootNavigator: false,
+    useRootNavigator: true,
     context: context,
     title: removeAll
         ? l10n.removeAllOtherDevicesConfirmationTitle
@@ -244,7 +243,7 @@ Future<void> removeDevicesAction(
     message: removeAll
         ? l10n.removeAllOtherDevicesConfirmationDescription
         : l10n.removeDeviceConfirmationDescription,
-    okLabel: removeAll ? l10n.removeAllOtherDevices : l10n.removeDevice,
+    okLabel: l10n.remove,
     cancelLabel: l10n.cancel,
     okLabelButtonColor: LinagoraSysColors.material().error,
     okTextColor: LinagoraSysColors.material().onError,
@@ -262,7 +261,7 @@ Future<void> removeDevicesAction(
     await client.uiaRequestBackground(
       (auth) => client.deleteDevices(deviceIds, auth: auth),
     );
-    await notifier.reload(client);
+    notifier.removeDevicesFromState(deviceIds);
   } catch (e, s) {
     Logs().v('Error while deleting devices', e, s);
     notifier.setErrorDeletingDevices(e.toString());
@@ -276,23 +275,16 @@ Future<void> renameDeviceAction(
   DevicesSettingsViewModel notifier,
   Device device,
 ) async {
-  final displayName = await showTextInputDialog(
-    useRootNavigator: false,
-    context: context,
-    title: L10n.of(context)!.changeDeviceName,
-    okLabel: L10n.of(context)!.ok,
-    cancelLabel: L10n.of(context)!.cancel,
-    textFields: [DialogTextField(hintText: device.displayName)],
-  );
-  if (displayName == null) return;
   final client = Matrix.of(context).client;
-  final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-    future: () =>
-        client.updateDevice(device.deviceId, displayName: displayName.single),
+  await ChangeDeviceNameDialog.show(
+    context,
+    initialName: device.displayname,
+    onSave: (name) => notifier.renameDevice(
+      client: client,
+      deviceId: device.deviceId,
+      displayName: name,
+    ),
   );
-  if (success.error == null) {
-    await notifier.reload(client);
-  }
 }
 
 Future<void> verifyDeviceAction(
@@ -332,31 +324,4 @@ Future<void> verifyDeviceAction(
     }
   };
   await KeyVerificationDialog(request: req).show(context);
-}
-
-Future<void> blockDeviceAction(
-  BuildContext context,
-  DevicesSettingsViewModel notifier,
-  Device device,
-) async {
-  final client = Matrix.of(context).client;
-  final key =
-      client.userDeviceKeys[client.userID!]!.deviceKeys[device.deviceId]!;
-  if (key.directVerified) {
-    await key.setVerified(false);
-  }
-  await key.setBlocked(true);
-  notifier.refreshDeviceKeys();
-}
-
-Future<void> unblockDeviceAction(
-  BuildContext context,
-  DevicesSettingsViewModel notifier,
-  Device device,
-) async {
-  final client = Matrix.of(context).client;
-  final key =
-      client.userDeviceKeys[client.userID!]!.deviceKeys[device.deviceId]!;
-  await key.setBlocked(false);
-  notifier.refreshDeviceKeys();
 }

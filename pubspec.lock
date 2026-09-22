@@ -1906,11 +1906,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.6"
-      resolved-ref: "361d5a222de7d1558881740b92abe2db3c4c1e7f"
+      ref: master
+      resolved-ref: "2821292c3c0040fdc179e495fa9f009a4a12b8ca"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.6"
+    version: "0.3.3"
   linkfy_text:
     dependency: "direct main"
     description:
@@ -1920,6 +1920,14 @@ packages:
       url: "https://github.com/linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
+  linkify:
+    dependency: transitive
+    description:
+      name: linkify
+      sha256: "4139ea77f4651ab9c315b577da2dd108d9aa0bd84b5d03d33323f1970c645832"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   lints:
     dependency: transitive
     description:
