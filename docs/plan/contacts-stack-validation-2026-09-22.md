@@ -27,8 +27,6 @@ SDK : Flutter 3.38.9 local. Tests sans résolution de dépendances (`--no-pub`),
 | Suite locale complète après stabilisation WorkerQueue | 1 487 tests passent, zéro erreur, code retour 0 |
 | Analyse statique du test WorkerQueue modifié | Aucun diagnostic |
 | Analyse statique des sources et tests concernés | Aucun diagnostic |
-| Analyse ciblée après restauration TOM par découverte homeserver | Aucun diagnostic |
-| Lancement iOS réel sur Mangue après le correctif | App installée, Dart VM attachée, `https://tom.linagora.com/` configuré |
 | `git diff --check` | Réussi |
 
 Les ensembles se recouvrent : ne pas additionner ces nombres. Les 11 échecs ont été reproduits dans un checkout isolé au commit de départ avec les nouveaux tests, puis les tests ont passé sur les corrections. Les tests de session supplémentaires utilisent de vrais providers, Hive jetable et des `Completer` pour contrôler l'ordre des événements.
@@ -38,8 +36,6 @@ Un passage complet précédent sur le code contacts corrigé a échoué avec `Ex
 Deux tests de `test/worker_queue_test.dart` (quatre tâches ordinaires et quatre identifiants identiques) lisaient la longueur de la file après deux attentes successives de 1 seconde, alors que le runnable durait 2 secondes. Le passage de trois à deux tâches en attente dépend de la résolution de `Task.execute`, puis de `_handleTaskExecuteCompleted`, qui lance et retire la tâche suivante. Les attentes du test n'observaient pas cette transition. Elles sont remplacées par des `Completer` : chaque runnable signale son démarrage, attend sa libération explicite et signale sa fin via le callback existant. Les assertions sur les longueurs, l'identifiant et l'ordre sont conservées ; le test d'erreur et le code de production sont inchangés. Cette modification supprime la dépendance à l'horloge de ces deux tests, sans constituer une reproduction ni une attribution de l'échec initial.
 
 Après cette édition, les deux tests ont passé huit fois chacun, puis la suite complète a passé ses 1 487 tests. L'analyse ciblée et `git diff --check` passent également. La trace complète est conservée localement dans `/tmp/contacts-suite-stabilized-20260922.json` ; elle contient les noms des tests et les événements du reporter JSON.
-
-Sur Mangue, une installation précédente connectait correctement le client Matrix mais envoyait les appels TOM sans hôte. Après le correctif, le lancement connecté à `matrix.linagora.com` logue la découverte et la configuration de `https://tom.linagora.com/`, sans erreur `No host specified` dans le journal de démarrage. Le parcours tactile de l'onglet Contacts n'a pas été automatisé ; l'écran doit encore être vérifié manuellement après ouverture de cet onglet.
 
 Commandes principales :
 
@@ -58,5 +54,5 @@ Le nettoyage des providers suit le cycle de vie Riverpod ; les abonnements sont 
 
 - **Transport** : une requête déjà soumise à Dio n'est pas annulée. Les interceptors URL/token restent partagés et mutables. L'invalidation empêche les requêtes suivantes et les écritures obsolètes ; elle ne constitue pas une garantie d'isolation URL/token d'une requête déjà en attente dans Dio. Ce transport n'a pas été refondu.
 - **Profils déjà enrichis** : `_alreadyEnriched` continue à les exclure des requêtes. Une politique d'expiration ou de rechargement des contributions TOM déjà présentes n'a pas été ajoutée ; leur actualisation ultérieure n'est pas garantie par ces tests.
-- **Appareil** : le lancement iOS authentifié sur Mangue a été vérifié et la configuration TOM issue de la découverte a été observée. Le parcours tactile complet de l'onglet Contacts n'est pas automatisé.
+- **Appareil** : aucun smoke test iPhone/Android ni parcours authentifié réel exécuté. Les tests de transition vérifient le controller utilisé par Matrix, pas une connexion complète aux fournisseurs.
 - **Préservation** : empreintes SHA-256 des deux fichiers préexistants (`ios/Runner.xcodeproj/project.pbxproj`, `chat_details_members_page.dart`) identiques avant et après le travail.

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
 import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
@@ -12,6 +13,7 @@ import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
+import 'package:twake_chat/domain/contact/services/contact_sync_session.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
@@ -55,8 +57,6 @@ UnifiedContactRepository unifiedContactRepository(Ref ref) {
 }
 
 /// Legacy sources still wired through get_it until they are migrated.
-/// The TOM UserInfo enrichment source is added once its second-pass design is
-/// settled.
 @riverpod
 List<ContactSource> contactSources(Ref ref) => [
   TomAddressBookSource(getIt.get<AddressBookRepository>()),
@@ -99,14 +99,25 @@ AddContactUseCase addContactUseCase(Ref ref) =>
 DeleteContactUseCase deleteContactUseCase(Ref ref) =>
     DeleteContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
-@Riverpod(keepAlive: true)
-ContactSyncService contactSyncService(Ref ref) => ContactSyncService(
-  repository: ref.watch(unifiedContactRepositoryProvider),
-  policy: ref.watch(contactResolutionPolicyProvider),
-  syncContacts: ref.watch(syncContactsUseCaseProvider),
-  watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
-  getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
-  addContact: ref.watch(addContactUseCaseProvider),
-  deleteContact: ref.watch(deleteContactUseCaseProvider),
-  enrichers: [ref.watch(tomUserInfoEnricherProvider)],
+/// The queue outlives account-scoped services; Hive is shared across accounts.
+final contactMutationQueueProvider = Provider<ContactMutationQueue>(
+  (ref) => ContactMutationQueue(),
 );
+
+@Riverpod(keepAlive: true)
+ContactSyncService contactSyncService(Ref ref) {
+  final service = ContactSyncService(
+    enabled: ref.watch(activeMatrixClientProvider) != null,
+    mutations: ref.watch(contactMutationQueueProvider),
+    repository: ref.watch(unifiedContactRepositoryProvider),
+    policy: ref.watch(contactResolutionPolicyProvider),
+    syncContacts: ref.watch(syncContactsUseCaseProvider),
+    watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
+    getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
+    addContact: ref.watch(addContactUseCaseProvider),
+    deleteContact: ref.watch(deleteContactUseCaseProvider),
+    enrichers: [ref.watch(tomUserInfoEnricherProvider)],
+  );
+  ref.onDispose(service.dispose);
+  return service;
+}

@@ -13,6 +13,9 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
 
   final HiveCollectionToMDatabase? _database;
 
+  // Not a Matrix ID: metadata stays in the same ordered Hive log as contacts.
+  static const _ownerKey = '__contact_store_owner__';
+
   final StreamController<List<UnifiedContact>> _controller =
       StreamController<List<UnifiedContact>>.broadcast();
 
@@ -23,6 +26,7 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
   Future<List<UnifiedContact>> getAll() async {
     final box = (await _db).unifiedContactsBox;
     final keys = await box.getAllKeys();
+    keys.remove(_ownerKey);
     final values = await box.getAll(keys);
 
     final contacts = <UnifiedContact>[];
@@ -66,32 +70,69 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
 
   @override
   Future<void> clear() async {
-    await (await _db).unifiedContactsBox.clear();
+    final box = (await _db).unifiedContactsBox;
+    final keys = await box.getAllKeys();
+    keys.remove(_ownerKey);
+    await box.deleteAll(keys);
+    await _emit();
+  }
+
+  @override
+  Future<void> prepareForAccount(String? owner) async {
+    final database = await _db;
+    if (_controller.isClosed) return;
+    final box = database.unifiedContactsBox;
+    final previousOwner = await box.get(_ownerKey);
+    if (_controller.isClosed) return;
+    if (owner != null && previousOwner?['owner'] == owner) return;
+
+    // Remove ownership before clearing: interruption can leave an unowned or
+    // empty store, never another account's contacts labelled as this account.
+    await box.delete(_ownerKey);
+    if (_controller.isClosed) return;
+    await box.clear();
+    if (_controller.isClosed) return;
+    if (owner != null) await box.put(_ownerKey, {'owner': owner});
     await _emit();
   }
 
   @override
   Stream<List<UnifiedContact>> watch() {
     return Stream<List<UnifiedContact>>.multi((controller) {
+      var receivedUpdate = false;
       // Subscribe synchronously so no write is missed between the initial
       // emission and the first `listen`.
       final subscription = _controller.stream.listen(
-        controller.add,
+        (contacts) {
+          receivedUpdate = true;
+          controller.add(contacts);
+        },
         onError: controller.addError,
+        onDone: controller.close,
       );
-      getAll().then<void>(controller.add).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        controller.addError(error, stackTrace);
-      });
+      getAll()
+          .then<void>((contacts) {
+            if (!_controller.isClosed &&
+                !controller.isClosed &&
+                !receivedUpdate) {
+              controller.add(contacts);
+            }
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            if (!_controller.isClosed &&
+                !controller.isClosed &&
+                !receivedUpdate) {
+              controller.addError(error, stackTrace);
+            }
+          });
       controller.onCancel = subscription.cancel;
     });
   }
 
   Future<void> _emit() async {
     if (_controller.isClosed) return;
-    _controller.add(await getAll());
+    final contacts = await getAll();
+    if (!_controller.isClosed) _controller.add(contacts);
   }
 
   void dispose() {

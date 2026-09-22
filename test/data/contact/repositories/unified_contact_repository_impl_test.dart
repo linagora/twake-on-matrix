@@ -6,6 +6,7 @@ import 'package:twake_chat/data/contact/repositories/unified_contact_repository_
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 
 class FakeContactLocalDataSource implements ContactLocalDataSource {
+  String? _owner;
   final Map<String, UnifiedContact> _store = <String, UnifiedContact>{};
   final StreamController<List<UnifiedContact>> _controller =
       StreamController<List<UnifiedContact>>.broadcast();
@@ -41,6 +42,12 @@ class FakeContactLocalDataSource implements ContactLocalDataSource {
   Future<void> clear() async {
     _store.clear();
     _controller.add(await getAll());
+  }
+
+  @override
+  Future<void> prepareForAccount(String? owner) async {
+    if (owner == null || owner != _owner) await clear();
+    _owner = owner;
   }
 
   @override

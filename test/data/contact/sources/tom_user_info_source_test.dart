@@ -113,6 +113,51 @@ void main() {
     expect(userInfoRepository.requestedUserIds, hasLength(2));
   });
 
+  test('caps failed network attempts at 50 out of 70 contacts', () async {
+    final matrixIds = List.generate(70, (index) => '@user$index:server');
+    userInfoRepository = _FakeUserInfoRepository(throwFor: matrixIds.toSet());
+    await repository.upsertAll(matrixIds.map(_contact));
+
+    await buildSource().enrich();
+
+    expect(userInfoRepository.requestedUserIds, matrixIds.take(50).toList());
+    expect(
+      repository.store.values.every(
+        (contact) => contact.sources.every(
+          (source) => source.kind != ContactSourceKind.tomUserInfo,
+        ),
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+    'counts successes and failures but not already enriched contacts',
+    () async {
+      userInfoRepository = _FakeUserInfoRepository(
+        throwFor: const {'@a:server'},
+      );
+      final alreadyEnriched = _contact('@existing:server', enriched: true);
+      await repository.upsertAll([
+        alreadyEnriched,
+        _contact('@a:server'),
+        _contact('@b:server'),
+        _contact('@c:server'),
+      ]);
+
+      await buildSource(maxPerRun: 2).enrich();
+
+      expect(userInfoRepository.requestedUserIds, ['@a:server', '@b:server']);
+      expect(repository.store['@existing:server'], alreadyEnriched);
+      expect(repository.store['@a:server'], _contact('@a:server'));
+      expect(repository.store['@c:server'], _contact('@c:server'));
+      expect(
+        repository.store['@b:server']!.sources.map((source) => source.kind),
+        contains(ContactSourceKind.tomUserInfo),
+      );
+    },
+  );
+
   test('a failing profile does not prevent the others', () async {
     userInfoRepository = _FakeUserInfoRepository(throwFor: const {'@a:server'});
     await repository.upsertAll([_contact('@a:server'), _contact('@b:server')]);
@@ -131,5 +176,28 @@ void main() {
       ))!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
       isTrue,
     );
+  });
+
+  test('next refresh reaches contacts beyond 50 permanent failures', () async {
+    final matrixIds = List.generate(55, (index) => '@user$index:server');
+    userInfoRepository = _FakeUserInfoRepository(
+      throwFor: matrixIds.take(50).toSet(),
+    );
+    await repository.upsertAll(matrixIds.map(_contact));
+    final source = buildSource();
+
+    await source.enrich();
+    expect(userInfoRepository.requestedUserIds, matrixIds.take(50).toList());
+    userInfoRepository.requestedUserIds.clear();
+    await source.enrich();
+
+    expect(userInfoRepository.requestedUserIds, hasLength(50));
+    expect(userInfoRepository.requestedUserIds.take(5), matrixIds.skip(50));
+    for (final matrixId in matrixIds.skip(50)) {
+      expect(
+        repository.store[matrixId]!.sources.map((source) => source.kind),
+        contains(ContactSourceKind.tomUserInfo),
+      );
+    }
   });
 }

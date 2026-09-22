@@ -653,3 +653,51 @@ their unit tests.
 the add-contact dialog and the invitation flow), and `domain/app_state/contact/*` for the states
 still consumed by the UI (`ContactsInitial`, `ContactsLoading`, `GetPhonebookContacts*`,
 `PostAddressBook*`, `DeleteThirdPartyContactBox*`).
+
+### Contact session isolation
+
+`ContactSessionController` is the lifecycle bridge used by startup, first login,
+additional login, restored accounts, the account picker, notifications and logout.
+It invalidates the previous sync before changing the shared TOM configuration,
+waits for any store mutation already in progress, prepares Hive for the next
+account, configures that account, publishes the ready client, then starts one
+background refresh. Store preparation runs before configuration because logout
+can delete the entire Hive collection. Disposal during configuration prevents
+any subsequent access to the provider container or contact store.
+Failures of that background refresh are logged. Account identity, rather than
+the mutable position in the clients list, determines whether a switch is needed.
+
+The domain service coalesces simultaneous refreshes. A cancelled session cannot
+start its next enrichment request or persist a delayed response. Sync commits,
+manual writes, enrichment read/merge/write and clear use one queue shared by
+successive Riverpod services. Provider disposal cancels the old session; logout
+leaves the service disabled and the store empty. Enrichment re-reads a contact
+inside its queued mutation, so it cannot recreate a contact deleted while its
+request was pending.
+
+**Persistence:** the Hive contact box also stores a reserved owner record
+(homeserver URL and Matrix user ID). Startup hides the cache until configuration
+finishes, preserving it only when the persisted owner matches the restored
+account. Unknown or different owners and logout clear it. Owner removal, contact
+clear and new-owner assignment are ordered in the same mutation queue and Hive
+log; interruption leaves an unowned/empty store rather than attributing old
+contacts to a new account. Switching accounts still discards the previous
+account cache; this is not a separate cache per account.
+
+**Transport limit:** a request already submitted to Dio is not cancelled. The
+legacy URL and authorization interceptors still read mutable configuration at
+`onRequest`, so the session guard does not guarantee an immutable URL/token for
+a request queued before a switch. It prevents subsequent application requests
+and rejects stale contact writes. Transport-level cancellation or credential
+snapshots are a separate boundary: setting headers or a URL only in the contact
+source is insufficient because those interceptors overwrite them. No transport
+isolation or request cancellation is claimed by this change.
+
+Regression coverage is in `contact_sync_clear_regression_test.dart` (also
+executable against the pre-session APIs) and `contact_session_test.dart`
+(real temporary Hive, real providers, deterministic request/write barriers).
+
+The user-info enricher caps attempts (including failures) at 50 per run and
+resumes from its next contact on the next refresh of the same provider instance.
+Permanent failures in the first batch therefore do not starve later contacts.
+The cursor is in memory only and resets when that enricher is recreated.
