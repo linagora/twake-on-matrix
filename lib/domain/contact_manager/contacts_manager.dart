@@ -106,11 +106,11 @@ class ContactsManager {
   bool get isDoNotShowWarningContactsDialogAgain =>
       _doNotShowWarningContactsDialogAgain;
 
-  set updateNotShowWarningContactsBannerAgain(bool value) {
+  void updateNotShowWarningContactsBannerAgain(bool value) {
     _doNotShowWarningContactsBannerAgain = value;
   }
 
-  set updateNotShowWarningContactsDialogAgain(bool value) {
+  void updateNotShowWarningContactsDialogAgain(bool value) {
     _doNotShowWarningContactsDialogAgain = value;
   }
 
@@ -333,7 +333,7 @@ class ContactsManager {
             .execute(
               argument: TwakeLookUpArgument(
                 homeServerUrl: identityServerUrlInterceptor.baseUrl ?? '',
-                withAccessToken: authorizationInterceptor.getAccessToken ?? '',
+                withAccessToken: authorizationInterceptor.accessToken ?? '',
               ),
             )
             .listen((state) {
@@ -393,8 +393,7 @@ class ContactsManager {
                       ?.baseUrl
                       .toString(),
                   withMxId: withMxId,
-                  withAccessToken:
-                      authorizationInterceptor.getAccessToken ?? '',
+                  withAccessToken: authorizationInterceptor.accessToken ?? '',
                 ),
               )
               .listen((state) {

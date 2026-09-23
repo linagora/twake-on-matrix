@@ -6,13 +6,7 @@ import 'package:matrix/matrix.dart';
 class AuthorizationInterceptor extends InterceptorsWrapper {
   AuthorizationInterceptor();
 
-  String? _accessToken;
-
-  set accessToken(String? accessToken) {
-    _accessToken = accessToken;
-  }
-
-  String? get getAccessToken => _accessToken;
+  String? accessToken;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -35,5 +29,5 @@ class AuthorizationInterceptor extends InterceptorsWrapper {
     super.onError(err, handler);
   }
 
-  String get _bearerToken => 'Bearer $_accessToken';
+  String get _bearerToken => 'Bearer $accessToken';
 }
