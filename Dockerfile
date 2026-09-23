@@ -31,7 +31,7 @@ ARG YQ_VERSION=4.44.3
 # Single apt layer: install all deps, install Rust, install yq, then clean up
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl pkg-config libssl-dev openssh-client && \
+      curl pkg-config libssl-dev openssh-client brotli && \
     rm -rf /var/lib/apt/lists/* && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
@@ -66,8 +66,53 @@ RUN --mount=type=ssh,required=true \
     SENTRY_AUTH_TOKEN=$(cat /run/secrets/sentry_auth_token 2>/dev/null || true) \
     ./scripts/build-web.sh
 
-# Pre-compress all web assets at build time (avoids re-compressing on every container start)
-RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \;
+# Pre-compress all web assets at build time (avoids re-compressing on every container start).
+# Both encodings are produced: nginx picks .br or .gz from Accept-Encoding, and falls back to
+# the plain file. The brotli pass skips the .gz twins the first one just created.
+# brotli -q 11 costs about 6 minutes sequentially, most of it on main.dart.js
+# alone, so the pass is parallelised.
+RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \; && \
+    find /app/build/web -type f ! -name "config.json" ! -name "*.gz" -print0 \
+      | xargs -0 -P 4 -n 1 brotli -k -f -q 11
+
+# ngx_brotli is not packaged for the nginx image: Alpine ships a module built against its
+# own nginx, which the official binary refuses. Build it here against the exact version the
+# final stage runs, so a base image bump rebuilds a matching module instead of silently
+# loading a stale one. Only the static module is kept: assets are pre-compressed above, so
+# on-the-fly compression is never needed.
+FROM nginx:alpine AS brotli-builder
+# Both inputs compiled into the module are pinned, so two identical builds cannot
+# produce different module code: the nginx source by version and digest, and
+# ngx_brotli by commit rather than a branch. Signature checking was considered
+# and dropped, nginx having rotated its release key without updating the bundle
+# it publishes at /keys/, which would break the build at the next rotation.
+#
+# NGINX_VERSION must match the base image. A base image bump therefore fails the
+# build until both values below are updated, which is deliberate: it turns an
+# unreviewed upstream change into a review point, and a module compiled against
+# the wrong version would be refused at load time anyway.
+ARG NGINX_VERSION=1.29.4
+ARG NGINX_SHA256=5a7d37eee505866fbab5810fa9f78247d6d5d9157a595c4e7a72043141ddab25
+ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
+RUN set -eux; \
+    image_version="$(nginx -v 2>&1 | sed 's|.*/||')"; \
+    if [ "$image_version" != "$NGINX_VERSION" ]; then \
+      echo "base image runs nginx $image_version but NGINX_VERSION pins $NGINX_VERSION;" >&2; \
+      echo "update NGINX_VERSION and NGINX_SHA256 in this Dockerfile" >&2; \
+      exit 1; \
+    fi; \
+    apk add --no-cache build-base pcre-dev zlib-dev openssl-dev linux-headers curl git \
+                       brotli-dev brotli-static; \
+    curl -fsSL -o /tmp/nginx.tar.gz "https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz"; \
+    echo "${NGINX_SHA256}  /tmp/nginx.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/nginx.tar.gz -C /tmp; \
+    git clone https://github.com/google/ngx_brotli.git /tmp/ngx_brotli; \
+    git -C /tmp/ngx_brotli checkout "$NGX_BROTLI_COMMIT"; \
+    git -C /tmp/ngx_brotli submodule update --init --recursive; \
+    cd "/tmp/nginx-${NGINX_VERSION}"; \
+    ./configure --with-compat --add-dynamic-module=/tmp/ngx_brotli; \
+    make modules; \
+    cp objs/ngx_http_brotli_static_module.so /tmp/
 
 # Final image — lean nginx:alpine with no extra packages needed
 FROM nginx:alpine AS final-image
@@ -75,6 +120,7 @@ ARG TWAKECHAT_BASE_HREF
 ENV TWAKECHAT_BASE_HREF=${TWAKECHAT_BASE_HREF:-/web/}
 ENV TWAKECHAT_LISTEN_PORT="80"
 RUN rm -rf /usr/share/nginx/html
+COPY --from=brotli-builder /tmp/ngx_http_brotli_static_module.so /usr/lib/nginx/modules/
 COPY --from=web-builder /app/server/nginx.conf /etc/nginx
 COPY --from=web-builder /app/build/web /usr/share/nginx/html${TWAKECHAT_BASE_HREF}
 COPY ./configurations/nginx.conf.template /etc/nginx/templates/default.conf.template
