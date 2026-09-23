@@ -2,12 +2,14 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/native_link_span.dart';
 import 'package:twake_chat/widgets/mentioned_user.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_matrix_html/flutter_html.dart';
@@ -163,12 +165,13 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
                   return user.content;
                 }
                 // there might still be a profile...
-                final profile = await room.client.getProfileFromUserId(
-                  identifier,
-                );
+                final contact = await ProviderScope.containerOf(
+                  context,
+                  listen: false,
+                ).read(contactDisplayProvider(identifier).future);
                 return {
-                  'displayname': profile.displayName,
-                  'avatar_url': profile.avatarUrl.toString(),
+                  'displayname': contact.resolvedDisplayName,
+                  'avatar_url': contact.avatarUrl ?? '',
                 };
               }
               if (identifier.sigil == '#') {
