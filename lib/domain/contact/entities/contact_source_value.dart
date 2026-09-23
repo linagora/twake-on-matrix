@@ -15,6 +15,7 @@ abstract class ContactSourceValue with _$ContactSourceValue {
     String? avatarUrl,
     @Default(<String>[]) List<String> emails,
     @Default(<String>[]) List<String> phones,
+    @Default(false) bool active,
     DateTime? updatedAt,
   }) = _ContactSourceValue;
 }
