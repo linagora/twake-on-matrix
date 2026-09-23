@@ -13,16 +13,18 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
   Stream<List<UnifiedContact>> watchContacts() {
     StreamSubscription<List<UnifiedContact>>? subscription;
     return Stream<List<UnifiedContact>>.multi((controller) {
-      subscription = _controller.stream.listen(
-        controller.add,
-        onError: controller.addError,
-      );
-      getContacts().then<void>(controller.add).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        controller.addError(error, stackTrace);
-      });
+      var receivedUpdate = false;
+      subscription = _controller.stream.listen((contacts) {
+        receivedUpdate = true;
+        controller.add(contacts);
+      }, onError: controller.addError);
+      getContacts()
+          .then<void>((contacts) {
+            if (!receivedUpdate) controller.add(contacts);
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            if (!receivedUpdate) controller.addError(error, stackTrace);
+          });
       controller.onCancel = () => subscription?.cancel();
     });
   }
