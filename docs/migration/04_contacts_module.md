@@ -461,7 +461,7 @@ lib/pages/contacts_tab/
 
 ---
 
-## 9. Migration plan — 7 stacked PRs
+## 9. Migration plan — 10 stacked PRs
 
 Each PR is a reviewable unit with a **hard budget of ≤ 20 files** (generated files
 included) and ≤ ~500 lines of significant diff. The app must compile and pass tests after
@@ -469,15 +469,18 @@ every PR. The branch is based on the previous one (stacked PRs).
 
 | # | Branch | Base | Former phase | Files ~ |
 |---|---|---|---|---|
-| 1 | `contacts/01-foundation` | `main` | Phase 0 + 1 | ~11 |
-| 2 | `contacts/02-data` | `contacts/01-foundation` | Phase 2 + 3 (adapters) | ~18 |
-| 3 | `contacts/03-service` | `contacts/02-data` | Phase 3 (service) | ~10 |
-| 4 | `contacts/04-presentation` | `contacts/03-service` | Phase 4 | ~12 |
-| 5 | `contacts/05-consumers-widgets` | `contacts/04-presentation` | Phase 5 (part 1) | ~13 |
-| 6 | `contacts/06-consumers-chat` | `contacts/04-presentation` | Phase 5 (part 2) | ~12 |
-| 7 | `contacts/07-cleanup` | `contacts/06-consumers-chat` | Phase 6 | ~17 |
+| 1 | `contacts/pr-01` | `main` | Phase 0 + 1 | ~16 |
+| 2 | `contacts/pr-02` | `contacts/pr-01` | Phase 2 + 3 (adapters) | ~16 |
+| 3 | `contacts/pr-03` | `contacts/pr-02` | Phase 3 (service + controller) | ~22 |
+| 4 | `contacts/pr-04` | `contacts/pr-03` | Phase 4 (Riverpod routing) | ~15 |
+| 5 | `contacts/pr-05` | `contacts/pr-04` | Phase 5 (profile SDK) | ~12 |
+| 6 | `contacts/pr-06` | `contacts/pr-05` | Phase 5 (drop ContactsManager from MatrixState) | ~12 |
+| 7 | `contacts/pr-07` | `contacts/pr-06` | Phase 5 (drop last consumers) | ~10 |
+| 8 | `contacts/pr-08` | `contacts/pr-07` | Phase 6 (delete ContactsManager) | ~8 |
+| 9 | `contacts/pr-09` | `contacts/pr-08` | Phase 6 (sync session isolation) | ~22 |
+| 10 | `contacts/pr-10` | `contacts/pr-09` | Phase 6 (post-migration fixes) | ~15 |
 
-**Stack shape**: depth = 6. PRs #5 and #6 are **parallelisable** (both based on #4); #7
+**Stack shape**: depth = 9. The stack is **linear** (each PR based on the previous one); #7
 waits for #6.
 
 ### PR 1 — `contacts/01-foundation`
@@ -569,7 +572,7 @@ Files to **keep but reduce**: `presentation_contact_extension.dart`
 In addition to `01_migration_plan.md` §8:
 
 1. **Merge policy tests** cover all §3 scenarios, including the "Jean Travail" case, with
-   both resolution options A and C exercised.
+   resolution options A, B and C exercised.
 2. **Store tests**: local-first render (no network), background refresh overwrites, stale
    `avatarUrl` refresh, `matrixId`-keyed dedup.
 3. **Controller tests** via `ProviderContainer`, no widget tree, store/repository overridden.
