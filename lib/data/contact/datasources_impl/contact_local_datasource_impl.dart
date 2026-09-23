@@ -72,11 +72,10 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
 
   @override
   Stream<List<UnifiedContact>> watch() {
-    StreamSubscription<List<UnifiedContact>>? subscription;
     return Stream<List<UnifiedContact>>.multi((controller) {
       // Subscribe synchronously so no write is missed between the initial
       // emission and the first `listen`.
-      subscription = _controller.stream.listen(
+      final subscription = _controller.stream.listen(
         controller.add,
         onError: controller.addError,
       );
@@ -86,7 +85,7 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
       ) {
         controller.addError(error, stackTrace);
       });
-      controller.onCancel = () => subscription?.cancel();
+      controller.onCancel = subscription.cancel;
     });
   }
 
