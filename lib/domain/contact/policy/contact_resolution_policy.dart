@@ -72,6 +72,7 @@ class ContactResolutionPolicy {
       avatarUrl: avatar,
       emails: _unique(byKind.values.expand((value) => value.emails)),
       phones: _unique(byKind.values.expand((value) => value.phones)),
+      active: byKind.values.any((value) => value.active),
       sources: byKind.values.toList(growable: false),
       prioritySource: resolved == null ? null : prioritySource,
       lastUpdated: _latest(byKind.values.map((value) => value.updatedAt)),
@@ -102,6 +103,7 @@ class ContactResolutionPolicy {
           avatarUrl: _newestNonEmpty(snapshots, (value) => value.avatarUrl),
           emails: _unique(snapshots.expand((value) => value.emails)),
           phones: _unique(snapshots.expand((value) => value.phones)),
+          active: snapshots.any((value) => value.active),
           updatedAt: _latest(snapshots.map((value) => value.updatedAt)),
         ),
       );

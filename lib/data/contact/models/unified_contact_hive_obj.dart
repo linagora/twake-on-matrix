@@ -14,6 +14,7 @@ class ContactSourceValueHiveObj {
     this.avatarUrl,
     this.emails = const <String>[],
     this.phones = const <String>[],
+    this.active = false,
     this.updatedAt,
   });
 
@@ -25,6 +26,7 @@ class ContactSourceValueHiveObj {
   final String? avatarUrl;
   final List<String> emails;
   final List<String> phones;
+  final bool active;
 
   /// Milliseconds since epoch (Hive-friendly primitive).
   final int? updatedAt;
@@ -42,6 +44,7 @@ class UnifiedContactHiveObj {
     this.avatarUrl,
     this.emails = const <String>[],
     this.phones = const <String>[],
+    this.active = false,
     this.sources = const <ContactSourceValueHiveObj>[],
     this.prioritySource,
     this.lastUpdated,
@@ -56,6 +59,7 @@ class UnifiedContactHiveObj {
   final String? avatarUrl;
   final List<String> emails;
   final List<String> phones;
+  final bool active;
   final List<ContactSourceValueHiveObj> sources;
   final String? prioritySource;
   final int? lastUpdated;
@@ -76,6 +80,7 @@ extension ContactSourceValueHiveObjMapper on ContactSourceValueHiveObj {
       avatarUrl: avatarUrl,
       emails: emails,
       phones: phones,
+      active: active,
       updatedAt: updatedAt == null
           ? null
           : DateTime.fromMillisecondsSinceEpoch(updatedAt!, isUtc: true),
@@ -90,6 +95,7 @@ extension ContactSourceValueMapper on ContactSourceValue {
     avatarUrl: avatarUrl,
     emails: emails,
     phones: phones,
+    active: active,
     updatedAt: updatedAt?.toUtc().millisecondsSinceEpoch,
   );
 }
@@ -102,6 +108,7 @@ extension UnifiedContactHiveObjMapper on UnifiedContactHiveObj {
     avatarUrl: avatarUrl,
     emails: emails,
     phones: phones,
+    active: active,
     sources: sources
         .map((source) => source.toEntity())
         .whereType<ContactSourceValue>()
@@ -121,6 +128,7 @@ extension UnifiedContactMapper on UnifiedContact {
     avatarUrl: avatarUrl,
     emails: emails,
     phones: phones,
+    active: active,
     sources: sources.map((source) => source.toHiveObj()).toList(),
     prioritySource: prioritySource?.name,
     lastUpdated: lastUpdated?.toUtc().millisecondsSinceEpoch,
