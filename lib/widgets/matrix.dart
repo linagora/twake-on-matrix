@@ -39,6 +39,8 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -196,6 +198,9 @@ class MatrixState extends ConsumerState<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
+      // Transitional bridge: expose the active client to Riverpod consumers.
+      ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
+      unawaited(ref.read(contactSyncServiceProvider).refresh());
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
@@ -841,6 +846,12 @@ class MatrixState extends ConsumerState<Matrix>
       _registerSubs(c.clientName);
     }
 
+    // Transitional bridge: publish the initial active client to Riverpod.
+    ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
+    if (clientOrNull != null) {
+      unawaited(ref.read(contactSyncServiceProvider).refresh());
+    }
+
     await _retrieveLocalToMConfiguration();
 
     if (kIsWeb) {
@@ -928,7 +939,25 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     try {
-      final toMConfigurations = await getTomConfigurations(client.userID!);
+      var toMConfigurations = await getTomConfigurations(client.userID!);
+      if (toMConfigurations == null) {
+        // TOM configuration is optional local state. On a fresh install the
+        // active homeserver discovery is the source of truth and must be
+        // applied before the contact session starts its first refresh.
+        await _getHomeserverInformation(client);
+        final tomServer = loginHomeserverSummary?.tomServer;
+        if (tomServer != null) {
+          final discovery = loginHomeserverSummary?.discoveryInformation;
+          _setupAuthUrl();
+          toMConfigurations = ToMConfigurations(
+            tomServerInformation: tomServer,
+            identityServerInformation: discovery?.mIdentityServer,
+            authUrl: authUrl,
+            loginType: loginType,
+          );
+          await _storeToMConfiguration(client, toMConfigurations);
+        }
+      }
       if (toMConfigurations == null) {
         _setupAuthUrl();
         return;
@@ -1171,9 +1200,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        _setUpToMServer(null);
-        _setupAuthUrl();
-        setUpAuthorization(client);
+        await _retrieveLocalToMConfiguration();
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
@@ -1431,6 +1458,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
+    ref.read(activeMatrixClientProvider.notifier).setClient(null);
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     Sentry.configureScope((scope) => scope.setUser(null));
