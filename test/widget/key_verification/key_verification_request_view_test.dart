@@ -63,16 +63,31 @@ void main() {
       'renders without exception when avatar is null',
       _nullAvatarTest,
     );
-    testWidgets('tapping Accept calls onAccept once', _tapAcceptTest);
-    testWidgets('tapping Reject calls onReject once', _tapRejectTest);
-    testWidgets(
-      'renders without overflow on phone size',
-      _phoneSizeOverflowTest,
-    );
-    testWidgets(
-      'renders without overflow on wide/web size',
-      _wideSizeOverflowTest,
-    );
+
+    for (final size in const [Size(390, 700), Size(1280, 800)]) {
+      testWidgets(
+        'renders without overflow at $size',
+        (tester) => _overflowTest(tester, size),
+      );
+    }
+
+    testWidgets('tapping Accept calls onAccept once', (tester) async {
+      var tapped = 0;
+      await _pumpRequestView(
+        tester,
+        _RequestViewCase(onAccept: () => tapped++),
+      );
+      await _tapAndExpectOnce(tester, 'Accept', () => tapped);
+    });
+
+    testWidgets('tapping Reject calls onReject once', (tester) async {
+      var tapped = 0;
+      await _pumpRequestView(
+        tester,
+        _RequestViewCase(onReject: () => tapped++),
+      );
+      await _tapAndExpectOnce(tester, 'Reject', () => tapped);
+    });
   });
 }
 
@@ -98,46 +113,23 @@ Future<void> _nullAvatarTest(WidgetTester tester) async {
   expect(find.text('Bob'), findsNothing);
 }
 
-Future<void> _tapAcceptTest(WidgetTester tester) async {
-  var acceptTapped = 0;
-
-  await _pumpRequestView(
-    tester,
-    _RequestViewCase(onAccept: () => acceptTapped++),
-  );
-  await tester.pump();
-
-  await tester.tap(find.text('Accept'));
-  await tester.pump();
-
-  expect(acceptTapped, 1);
-}
-
-Future<void> _tapRejectTest(WidgetTester tester) async {
-  var rejectTapped = 0;
-
-  await _pumpRequestView(
-    tester,
-    _RequestViewCase(onReject: () => rejectTapped++),
-  );
-  await tester.pump();
-
-  await tester.tap(find.text('Reject'));
-  await tester.pump();
-
-  expect(rejectTapped, 1);
-}
-
-Future<void> _phoneSizeOverflowTest(WidgetTester tester) async {
-  await _pumpRequestView(tester, const _RequestViewCase(size: Size(390, 700)));
+Future<void> _overflowTest(WidgetTester tester, Size size) async {
+  await _pumpRequestView(tester, _RequestViewCase(size: size));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
 }
 
-Future<void> _wideSizeOverflowTest(WidgetTester tester) async {
-  await _pumpRequestView(tester, const _RequestViewCase(size: Size(1280, 800)));
+/// Taps the button labelled [label] and asserts the counter it feeds reads
+/// exactly 1 afterwards — shared by the Accept and Reject tap tests.
+Future<void> _tapAndExpectOnce(
+  WidgetTester tester,
+  String label,
+  int Function() readTapCount,
+) async {
+  await tester.pump();
+  await tester.tap(find.text(label));
   await tester.pump();
 
-  expect(tester.takeException(), isNull);
+  expect(readTapCount(), 1);
 }
