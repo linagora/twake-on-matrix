@@ -1,4 +1,6 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -49,9 +51,17 @@ class _TwakeHeaderState extends State<TwakeHeader>
 
   void getCurrentProfile(Client client) async {
     currentProfileNotifier.value = Profile(userId: '');
-    final profile = await client.getProfileFromUserId(
-      widget.client.userID!,
-      getFromRooms: false,
+    // SDK access goes through Riverpod (transitional container read).
+    final data = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(widget.client.userID!).future);
+    final profile = Profile(
+      userId: widget.client.userID ?? '',
+      displayName: data?.displayName,
+      avatarUrl: data?.avatarUrl == null
+          ? null
+          : Uri.tryParse(data!.avatarUrl!),
     );
     Logs().d('ChatList::_getCurrentProfile() - currentProfile1: $profile');
     currentProfileNotifier.value = profile;

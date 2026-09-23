@@ -12,6 +12,9 @@ import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_qr_code_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -197,12 +200,11 @@ class _ProfileAvatar extends StatelessWidget {
       right: 0,
       child: Align(
         alignment: Alignment.center,
-        child: FutureBuilder<Profile>(
-          future: client.getProfileFromUserId(
-            client.userID ?? '',
-            cache: true,
-            getFromRooms: false,
-          ),
+        child: FutureBuilder<MatrixUserProfile?>(
+          future: ProviderScope.containerOf(
+            context,
+            listen: false,
+          ).read(matrixUserProfileProvider(client.userID ?? '').future),
           builder: (context, snapshot) {
             final profile = snapshot.data;
             final displayName =
@@ -218,7 +220,9 @@ class _ProfileAvatar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AvatarStyle.defaultSize),
               ),
               child: Avatar(
-                mxContent: profile?.avatarUrl,
+                mxContent: profile?.avatarUrl == null
+                    ? null
+                    : Uri.tryParse(profile!.avatarUrl!),
                 name: displayName,
                 size: 72,
                 fontSize: SettingsProfileViewMobileStyle.avatarFontSize,

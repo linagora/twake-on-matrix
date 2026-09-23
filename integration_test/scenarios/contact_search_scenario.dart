@@ -1,10 +1,8 @@
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart';
-import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab_body_view.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';
@@ -85,35 +83,37 @@ class ContactSearchScenario extends BaseTestScenario {
     return matrixId.split(':').first.replaceFirst('@', '');
   }
 
-  void _seedContactFixtures() {
-    getIt.get<ContactsManager>().getContactsNotifier().value = Right(
-      GetContactsSuccess(
-        contacts: [
-          Contact(
-            id: 'patrol-contact-alice',
+  Future<void> _seedContactFixtures() async {
+    await debugUnifiedContactRepository?.upsertAll([
+      UnifiedContact(
+        matrixId: _currentAccount,
+        canonicalDisplayName: _currentAccountTitle,
+        emails: const ['alice@example.test'],
+        active: true,
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomAddressBook,
             displayName: _currentAccountTitle,
-            emails: {
-              Email(
-                address: 'alice@example.test',
-                matrixId: _currentAccount,
-                status: ThirdPartyStatus.active,
-              ),
-            },
-          ),
-          Contact(
-            id: 'patrol-contact-charlie',
-            displayName: 'charlie',
-            emails: {
-              Email(
-                address: 'charlie@example.test',
-                matrixId: _searchByMatrixAddress,
-                status: ThirdPartyStatus.active,
-              ),
-            },
+            emails: const ['alice@example.test'],
+            active: true,
           ),
         ],
       ),
-    );
+      const UnifiedContact(
+        matrixId: _searchByMatrixAddress,
+        canonicalDisplayName: 'charlie',
+        emails: ['charlie@example.test'],
+        active: true,
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomAddressBook,
+            displayName: 'charlie',
+            emails: ['charlie@example.test'],
+            active: true,
+          ),
+        ],
+      ),
+    ]);
   }
 
   /// Enters [text] in the search field, then polls until the result state is
@@ -124,7 +124,7 @@ class ContactSearchScenario extends BaseTestScenario {
     String text, {
     required bool expectResults,
   }) async {
-    _seedContactFixtures();
+    await _seedContactFixtures();
     await robots.searchRobot().enterSearchText(text);
     final deadline = DateTime.now().add(const Duration(seconds: 8));
     while (DateTime.now().isBefore(deadline)) {

@@ -1,11 +1,11 @@
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/pages/new_group/contacts_selection.dart';
 import 'package:twake_chat/pages/new_group/widget/selected_participants_list_style.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class SelectedParticipantsList extends StatefulWidget {
@@ -70,20 +70,26 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                               ),
                         ),
                         avatar: contact.matrixId != null
-                            ? FutureBuilder<Profile>(
-                                future: Matrix.of(context).client
-                                    .getProfileFromUserId(
-                                      contact.matrixId!,
-                                      getFromRooms: false,
-                                    ),
-                                builder: ((context, snapshot) {
+                            ? Consumer(
+                                builder: (context, ref, _) {
+                                  final avatarUrl = ref
+                                      .watch(
+                                        contactDisplayProvider(
+                                          contact.matrixId!,
+                                        ),
+                                      )
+                                      .asData
+                                      ?.value
+                                      .avatarUrl;
                                   return Avatar(
-                                    mxContent: snapshot.data?.avatarUrl,
+                                    mxContent: avatarUrl == null
+                                        ? null
+                                        : Uri.tryParse(avatarUrl),
                                     name: contact.displayName,
                                     size: SelectedParticipantsListStyle
                                         .avatarChipSize,
                                   );
-                                }),
+                                },
                               )
                             : Avatar(
                                 name: contact.displayName,
