@@ -66,30 +66,33 @@ void main() {
       );
     });
 
-    test('phonebook alias becomes the resolved display name and priority', () {
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
-          value(ContactSourceKind.phonebook, name: 'Jean Travail'),
-        ],
-      );
+    test('resolved name and priority follow the policy rules', () {
+      final scenarios = [
+        (
+          label: 'phonebook alias wins',
+          values: [
+            value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
+            value(ContactSourceKind.phonebook, name: 'Jean Travail'),
+          ],
+          expectedName: 'Jean Travail',
+          expectedPriority: ContactSourceKind.phonebook,
+        ),
+        (
+          label: 'directory wins when no alias',
+          values: [
+            value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
+            value(ContactSourceKind.matrixProfile, name: 'Jean Matrix'),
+          ],
+          expectedName: 'Jean Dupont',
+          expectedPriority: ContactSourceKind.tomUserInfo,
+        ),
+      ];
 
-      expect(contact.resolvedDisplayName, 'Jean Travail');
-      expect(contact.prioritySource, ContactSourceKind.phonebook);
-    });
-
-    test('directory source wins the priority when no alias exists', () {
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
-          value(ContactSourceKind.matrixProfile, name: 'Jean Matrix'),
-        ],
-      );
-
-      expect(contact.canonicalDisplayName, 'Jean Dupont');
-      expect(contact.prioritySource, ContactSourceKind.tomUserInfo);
+      for (final s in scenarios) {
+        final contact = policy.resolve(matrixId: matrixId, values: s.values);
+        expect(contact.resolvedDisplayName, s.expectedName, reason: s.label);
+        expect(contact.prioritySource, s.expectedPriority, reason: s.label);
+      }
     });
 
     test('ignores blank display names and trailing spaces', () {
