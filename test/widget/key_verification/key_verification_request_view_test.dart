@@ -22,29 +22,39 @@ Widget _wrap(Widget child, {Size size = const Size(390, 700)}) {
   );
 }
 
-/// Pumps a [KeyVerificationRequestView], leaving only what a test actually
-/// varies as parameters — the shape every case shares stays in one place.
-Future<void> _pumpRequestView(
-  WidgetTester tester, {
-  String displayName = 'Alice',
-  VoidCallback onAccept = _noop,
-  VoidCallback onReject = _noop,
-  Size size = const Size(390, 700),
-}) {
-  return tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: displayName,
-        avatarUri: null,
-        onAccept: onAccept,
-        onReject: onReject,
-      ),
-      size: size,
-    ),
-  );
+/// Bundles what a single test case varies, so [_pumpRequestView] stays a
+/// two-argument function regardless of how many fields a case sets.
+class _RequestViewCase {
+  final String displayName;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+  final Size size;
+
+  const _RequestViewCase({
+    this.displayName = 'Alice',
+    this.onAccept = _noop,
+    this.onReject = _noop,
+    this.size = const Size(390, 700),
+  });
 }
 
 void _noop() {}
+
+/// Pumps a [KeyVerificationRequestView] for [testCase] — the shape every
+/// case shares stays in one place; only [testCase] varies per test.
+Future<void> _pumpRequestView(WidgetTester tester, _RequestViewCase testCase) {
+  return tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: testCase.displayName,
+        avatarUri: null,
+        onAccept: testCase.onAccept,
+        onReject: testCase.onReject,
+      ),
+      size: testCase.size,
+    ),
+  );
+}
 
 void main() {
   group('KeyVerificationRequestView', () {
@@ -67,7 +77,7 @@ void main() {
 }
 
 Future<void> _rendersContentTest(WidgetTester tester) async {
-  await _pumpRequestView(tester);
+  await _pumpRequestView(tester, const _RequestViewCase());
   await tester.pump();
 
   expect(tester.takeException(), isNull);
@@ -81,7 +91,7 @@ Future<void> _rendersContentTest(WidgetTester tester) async {
 }
 
 Future<void> _nullAvatarTest(WidgetTester tester) async {
-  await _pumpRequestView(tester, displayName: 'Bob');
+  await _pumpRequestView(tester, const _RequestViewCase(displayName: 'Bob'));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
@@ -91,7 +101,10 @@ Future<void> _nullAvatarTest(WidgetTester tester) async {
 Future<void> _tapAcceptTest(WidgetTester tester) async {
   var acceptTapped = 0;
 
-  await _pumpRequestView(tester, onAccept: () => acceptTapped++);
+  await _pumpRequestView(
+    tester,
+    _RequestViewCase(onAccept: () => acceptTapped++),
+  );
   await tester.pump();
 
   await tester.tap(find.text('Accept'));
@@ -103,7 +116,10 @@ Future<void> _tapAcceptTest(WidgetTester tester) async {
 Future<void> _tapRejectTest(WidgetTester tester) async {
   var rejectTapped = 0;
 
-  await _pumpRequestView(tester, onReject: () => rejectTapped++);
+  await _pumpRequestView(
+    tester,
+    _RequestViewCase(onReject: () => rejectTapped++),
+  );
   await tester.pump();
 
   await tester.tap(find.text('Reject'));
@@ -113,14 +129,14 @@ Future<void> _tapRejectTest(WidgetTester tester) async {
 }
 
 Future<void> _phoneSizeOverflowTest(WidgetTester tester) async {
-  await _pumpRequestView(tester, size: const Size(390, 700));
+  await _pumpRequestView(tester, const _RequestViewCase(size: Size(390, 700)));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
 }
 
 Future<void> _wideSizeOverflowTest(WidgetTester tester) async {
-  await _pumpRequestView(tester, size: const Size(1280, 800));
+  await _pumpRequestView(tester, const _RequestViewCase(size: Size(1280, 800)));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
