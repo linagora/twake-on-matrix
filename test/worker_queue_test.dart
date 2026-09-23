@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,16 +30,22 @@ void main() {
       () async {
         final completedTasks = <int>[];
         final alreadyRunTasks = <int>[];
+        final started = List.generate(4, (_) => Completer<void>());
+        final finish = List.generate(4, (_) => Completer<void>());
+        final completed = List.generate(4, (_) => Completer<void>());
         final tasks = List.generate(4, (index) {
           return generateTask(
             '${index + 1}',
-            () async => await Future.delayed(const Duration(seconds: 2), () {
+            () async {
+              started[index].complete();
+              await finish[index].future;
               alreadyRunTasks.add(index + 1);
               return index + 1;
-            }),
+            },
             onTaskCompleted: () {
               Logs().i('task${index + 1} completed');
               completedTasks.add(index + 1);
+              completed[index].complete();
             },
           );
         });
@@ -45,11 +53,15 @@ void main() {
         final workerQueue = DownloadWorkerQueue();
         tasks.forEach(workerQueue.addTask);
 
-        await Future.delayed(const Duration(seconds: 1));
+        await started.first.future;
         expect(workerQueue.queue.length, 3);
-        await Future.delayed(const Duration(seconds: 1));
+        finish.first.complete();
+        await started[1].future;
         expect(workerQueue.queue.length, 2);
-        await Future.delayed(const Duration(seconds: 7));
+        for (final task in finish.skip(1)) {
+          task.complete();
+        }
+        await Future.wait(completed.map((task) => task.future));
         // Verify that all tasks completed in the expected order
         expect(completedTasks, [1, 2, 3, 4]);
         expect(alreadyRunTasks, [1, 2, 3, 4]);
@@ -194,16 +206,22 @@ void main() {
       () async {
         final completedTasks = <int>[];
         final alreadyRunTasks = <int>[];
+        final started = List.generate(4, (_) => Completer<void>());
+        final finish = List.generate(4, (_) => Completer<void>());
+        final completed = List.generate(4, (_) => Completer<void>());
         final tasks = List.generate(4, (index) {
           return generateTask(
             '1',
-            () async => await Future.delayed(const Duration(seconds: 2), () {
+            () async {
+              started[index].complete();
+              await finish[index].future;
               alreadyRunTasks.add(index + 1);
               return index + 1;
-            }),
+            },
             onTaskCompleted: () {
               Logs().i('task${index + 1} completed');
               completedTasks.add(index + 1);
+              completed[index].complete();
             },
           );
         });
@@ -211,13 +229,17 @@ void main() {
         final workerQueue = DownloadWorkerQueue();
         tasks.forEach(workerQueue.addTask);
 
-        await Future.delayed(const Duration(seconds: 1));
+        await started.first.future;
         expect(workerQueue.queue.length, 3);
         expect(workerQueue.queue.first.id, '1');
 
-        await Future.delayed(const Duration(seconds: 1));
+        finish.first.complete();
+        await started[1].future;
         expect(workerQueue.queue.length, 2);
-        await Future.delayed(const Duration(seconds: 7));
+        for (final task in finish.skip(1)) {
+          task.complete();
+        }
+        await Future.wait(completed.map((task) => task.future));
         // Verify that all tasks completed in the expected order
         expect(completedTasks, containsAllInOrder([1, 2, 3, 4]));
         expect(alreadyRunTasks, containsAllInOrder([1, 2, 3, 4]));

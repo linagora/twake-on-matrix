@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -469,10 +471,17 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _getCurrentProfile(Client client, {isUpdated = false}) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      cache: !isUpdated,
-      getFromRooms: false,
+    // SDK access goes through Riverpod (transitional container read).
+    final data = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(client.userID!).future);
+    final profile = Profile(
+      userId: client.userID ?? '',
+      displayName: data?.displayName,
+      avatarUrl: data?.avatarUrl == null
+          ? null
+          : Uri.tryParse(data!.avatarUrl!),
     );
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',

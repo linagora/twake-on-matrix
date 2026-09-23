@@ -89,8 +89,6 @@ class MultipleAccountsPickerController {
       TwakeDialog.showLoadingDialog(context);
       final result = await _matrixState.setActiveClient(newClient);
       if (result.isSuccess) {
-        await _matrixState.cancelListenSynchronizeContacts();
-        _matrixState.reSyncContacts();
         if (!context.mounted) return;
         context.go(
           '/rooms',
