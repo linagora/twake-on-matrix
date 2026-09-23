@@ -74,17 +74,34 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
   Stream<List<UnifiedContact>> watch() {
     return Stream<List<UnifiedContact>>.multi((controller) {
       // Subscribe synchronously so no write is missed between the initial
-      // emission and the first `listen`.
-      final subscription = _controller.stream.listen(
-        controller.add,
-        onError: controller.addError,
-      );
-      getAll().then<void>(controller.add).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        controller.addError(error, stackTrace);
-      });
+      // emission and the first `listen`. Updates are buffered until the
+      // initial snapshot is emitted to preserve ordering.
+      var initialized = false;
+      final pending = <List<UnifiedContact>>[];
+      final subscription = _controller.stream.listen((contacts) {
+        if (initialized) {
+          controller.add(contacts);
+        } else {
+          pending.add(contacts);
+        }
+      }, onError: controller.addError);
+      void flush() {
+        initialized = true;
+        for (final contacts in pending) {
+          controller.add(contacts);
+        }
+        pending.clear();
+      }
+
+      getAll()
+          .then<void>((initial) {
+            controller.add(initial);
+            flush();
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            controller.addError(error, stackTrace);
+            flush();
+          });
       controller.onCancel = subscription.cancel;
     });
   }
