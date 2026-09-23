@@ -63,17 +63,24 @@ class UnifiedContactHiveObj {
   Map<String, dynamic> toJson() => _$UnifiedContactHiveObjToJson(this);
 }
 
+ContactSourceKind? _kindOrNull(String? name) =>
+    name == null ? null : ContactSourceKind.values.asNameMap()[name];
+
 extension ContactSourceValueHiveObjMapper on ContactSourceValueHiveObj {
-  ContactSourceValue toEntity() => ContactSourceValue(
-    kind: ContactSourceKind.values.byName(kind),
-    displayName: displayName,
-    avatarUrl: avatarUrl,
-    emails: emails,
-    phones: phones,
-    updatedAt: updatedAt == null
-        ? null
-        : DateTime.fromMillisecondsSinceEpoch(updatedAt!, isUtc: true),
-  );
+  ContactSourceValue? toEntity() {
+    final resolvedKind = _kindOrNull(kind);
+    if (resolvedKind == null) return null;
+    return ContactSourceValue(
+      kind: resolvedKind,
+      displayName: displayName,
+      avatarUrl: avatarUrl,
+      emails: emails,
+      phones: phones,
+      updatedAt: updatedAt == null
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(updatedAt!, isUtc: true),
+    );
+  }
 }
 
 extension ContactSourceValueMapper on ContactSourceValue {
@@ -95,10 +102,11 @@ extension UnifiedContactHiveObjMapper on UnifiedContactHiveObj {
     avatarUrl: avatarUrl,
     emails: emails,
     phones: phones,
-    sources: sources.map((source) => source.toEntity()).toList(),
-    prioritySource: prioritySource == null
-        ? null
-        : ContactSourceKind.values.byName(prioritySource!),
+    sources: sources
+        .map((source) => source.toEntity())
+        .whereType<ContactSourceValue>()
+        .toList(),
+    prioritySource: _kindOrNull(prioritySource),
     lastUpdated: lastUpdated == null
         ? null
         : DateTime.fromMillisecondsSinceEpoch(lastUpdated!, isUtc: true),

@@ -35,11 +35,16 @@ abstract class UnifiedContact with _$UnifiedContact {
 
   /// The name shown everywhere. `localAlias` (phonebook) wins over the
   /// directory name when present, so the user's rename is preserved.
-  String? get resolvedDisplayName => localAlias ?? canonicalDisplayName;
+  String? get resolvedDisplayName =>
+      _nonBlank(localAlias) ?? _nonBlank(canonicalDisplayName);
 
   /// Never-empty display helper for widgets.
   String get displayNameOrId => resolvedDisplayName ?? matrixId;
 
-  bool get hasResolvedDisplayName =>
-      resolvedDisplayName?.trim().isNotEmpty == true;
+  bool get hasResolvedDisplayName => resolvedDisplayName != null;
+
+  static String? _nonBlank(String? value) {
+    final trimmed = value?.trim();
+    return (trimmed == null || trimmed.isEmpty) ? null : trimmed;
+  }
 }
