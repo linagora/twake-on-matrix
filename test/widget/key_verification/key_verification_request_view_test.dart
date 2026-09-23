@@ -22,6 +22,30 @@ Widget _wrap(Widget child, {Size size = const Size(390, 700)}) {
   );
 }
 
+/// Pumps a [KeyVerificationRequestView], leaving only what a test actually
+/// varies as parameters — the shape every case shares stays in one place.
+Future<void> _pumpRequestView(
+  WidgetTester tester, {
+  String displayName = 'Alice',
+  VoidCallback onAccept = _noop,
+  VoidCallback onReject = _noop,
+  Size size = const Size(390, 700),
+}) {
+  return tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: displayName,
+        avatarUri: null,
+        onAccept: onAccept,
+        onReject: onReject,
+      ),
+      size: size,
+    ),
+  );
+}
+
+void _noop() {}
+
 void main() {
   group('KeyVerificationRequestView', () {
     testWidgets('renders title, body, and avatar', _rendersContentTest);
@@ -43,16 +67,7 @@ void main() {
 }
 
 Future<void> _rendersContentTest(WidgetTester tester) async {
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Alice',
-        avatarUri: null,
-        onAccept: () {},
-        onReject: () {},
-      ),
-    ),
-  );
+  await _pumpRequestView(tester);
   await tester.pump();
 
   expect(tester.takeException(), isNull);
@@ -66,16 +81,7 @@ Future<void> _rendersContentTest(WidgetTester tester) async {
 }
 
 Future<void> _nullAvatarTest(WidgetTester tester) async {
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Bob',
-        avatarUri: null,
-        onAccept: () {},
-        onReject: () {},
-      ),
-    ),
-  );
+  await _pumpRequestView(tester, displayName: 'Bob');
   await tester.pump();
 
   expect(tester.takeException(), isNull);
@@ -85,16 +91,7 @@ Future<void> _nullAvatarTest(WidgetTester tester) async {
 Future<void> _tapAcceptTest(WidgetTester tester) async {
   var acceptTapped = 0;
 
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Alice',
-        avatarUri: null,
-        onAccept: () => acceptTapped++,
-        onReject: () {},
-      ),
-    ),
-  );
+  await _pumpRequestView(tester, onAccept: () => acceptTapped++);
   await tester.pump();
 
   await tester.tap(find.text('Accept'));
@@ -106,16 +103,7 @@ Future<void> _tapAcceptTest(WidgetTester tester) async {
 Future<void> _tapRejectTest(WidgetTester tester) async {
   var rejectTapped = 0;
 
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Alice',
-        avatarUri: null,
-        onAccept: () {},
-        onReject: () => rejectTapped++,
-      ),
-    ),
-  );
+  await _pumpRequestView(tester, onReject: () => rejectTapped++);
   await tester.pump();
 
   await tester.tap(find.text('Reject'));
@@ -125,34 +113,14 @@ Future<void> _tapRejectTest(WidgetTester tester) async {
 }
 
 Future<void> _phoneSizeOverflowTest(WidgetTester tester) async {
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Alice',
-        avatarUri: null,
-        onAccept: () {},
-        onReject: () {},
-      ),
-      size: const Size(390, 700),
-    ),
-  );
+  await _pumpRequestView(tester, size: const Size(390, 700));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
 }
 
 Future<void> _wideSizeOverflowTest(WidgetTester tester) async {
-  await tester.pumpWidget(
-    _wrap(
-      KeyVerificationRequestView(
-        displayName: 'Alice',
-        avatarUri: null,
-        onAccept: () {},
-        onReject: () {},
-      ),
-      size: const Size(1280, 800),
-    ),
-  );
+  await _pumpRequestView(tester, size: const Size(1280, 800));
   await tester.pump();
 
   expect(tester.takeException(), isNull);
