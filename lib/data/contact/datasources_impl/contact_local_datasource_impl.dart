@@ -110,18 +110,13 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
         onError: controller.addError,
         onDone: controller.close,
       );
+      bool canEmit() => !_controller.isClosed && !controller.isClosed;
       getAll()
           .then<void>((contacts) {
-            if (!_controller.isClosed &&
-                !controller.isClosed &&
-                !receivedUpdate) {
-              controller.add(contacts);
-            }
+            if (canEmit() && !receivedUpdate) controller.add(contacts);
           })
           .catchError((Object error, StackTrace stackTrace) {
-            if (!_controller.isClosed &&
-                !controller.isClosed &&
-                !receivedUpdate) {
+            if (canEmit() && !receivedUpdate) {
               controller.addError(error, stackTrace);
             }
           });

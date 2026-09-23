@@ -44,40 +44,52 @@ class TomUserInfoSource implements ContactEnricher {
       if (_alreadyEnriched(contact)) continue;
 
       attempted++;
-      try {
-        final userInfo = await _userInfoRepository.getUserInfo(
-          Uri.encodeComponent(contact.matrixId),
-        );
-        if (session?.isActive == false) return;
-        Future<void> persist() async {
-          final current = await _repository.getByMatrixId(contact.matrixId);
-          if (current == null || session?.isActive == false) return;
-          final enriched = _policy.resolve(
-            matrixId: contact.matrixId,
-            values: [
-              ...current.sources,
-              ContactSourceValue(
-                kind: ContactSourceKind.tomUserInfo,
-                displayName: userInfo.displayName,
-                avatarUrl: userInfo.avatarUrl,
-                emails: userInfo.emails ?? const <String>[],
-                phones: userInfo.phones ?? const <String>[],
-                updatedAt: DateTime.now().toUtc(),
-              ),
-            ],
-          );
-          await _repository.upsert(enriched);
-        }
-
-        if (session == null) {
-          await persist();
-        } else {
-          await session.mutate(persist);
-        }
-      } catch (_) {
-        // Skip the unreachable profile; the base sync data is kept.
-      }
+      await _enrichOne(contact, session);
     }
+  }
+
+  Future<void> _enrichOne(
+    UnifiedContact contact,
+    ContactSyncSession? session,
+  ) async {
+    try {
+      final userInfo = await _userInfoRepository.getUserInfo(
+        Uri.encodeComponent(contact.matrixId),
+      );
+      if (session?.isActive == false) return;
+      Future<void> persist() => _persist(contact, userInfo, session);
+      if (session == null) {
+        await persist();
+      } else {
+        await session.mutate(persist);
+      }
+    } catch (_) {
+      // Skip the unreachable profile; the base sync data is kept.
+    }
+  }
+
+  Future<void> _persist(
+    UnifiedContact contact,
+    dynamic userInfo,
+    ContactSyncSession? session,
+  ) async {
+    final current = await _repository.getByMatrixId(contact.matrixId);
+    if (current == null || session?.isActive == false) return;
+    final enriched = _policy.resolve(
+      matrixId: contact.matrixId,
+      values: [
+        ...current.sources,
+        ContactSourceValue(
+          kind: ContactSourceKind.tomUserInfo,
+          displayName: userInfo.displayName,
+          avatarUrl: userInfo.avatarUrl,
+          emails: userInfo.emails ?? const <String>[],
+          phones: userInfo.phones ?? const <String>[],
+          updatedAt: DateTime.now().toUtc(),
+        ),
+      ],
+    );
+    await _repository.upsert(enriched);
   }
 
   bool _alreadyEnriched(UnifiedContact contact) => contact.sources.any(

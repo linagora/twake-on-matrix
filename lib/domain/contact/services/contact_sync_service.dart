@@ -17,25 +17,34 @@ import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 /// external system directly — it delegates to the use cases and the
 /// repository. Controllers and legacy consumers must go through it instead of
 /// reaching into `ContactsManager` or the SDK.
+/// Groups the contact use cases to keep the service constructor small.
+class ContactUseCases {
+  const ContactUseCases({
+    required this.sync,
+    required this.watch,
+    required this.get,
+    required this.add,
+    required this.delete,
+  });
+
+  final SyncContactsUseCase sync;
+  final WatchUnifiedContactsUseCase watch;
+  final GetUnifiedContactUseCase get;
+  final AddContactUseCase add;
+  final DeleteContactUseCase delete;
+}
+
 class ContactSyncService {
   ContactSyncService({
     required UnifiedContactRepository repository,
     required ContactResolutionPolicy policy,
-    required SyncContactsUseCase syncContacts,
-    required WatchUnifiedContactsUseCase watchUnifiedContacts,
-    required GetUnifiedContactUseCase getUnifiedContact,
-    required AddContactUseCase addContact,
-    required DeleteContactUseCase deleteContact,
+    required ContactUseCases useCases,
     List<ContactEnricher> enrichers = const <ContactEnricher>[],
     ContactMutationQueue? mutations,
     bool enabled = true,
   }) : _repository = repository,
        _policy = policy,
-       _syncContacts = syncContacts,
-       _watchUnifiedContacts = watchUnifiedContacts,
-       _getUnifiedContact = getUnifiedContact,
-       _addContact = addContact,
-       _deleteContact = deleteContact,
+       _useCases = useCases,
        _enrichers = enrichers,
        _mutations = mutations ?? ContactMutationQueue() {
     _session = ContactSyncSession(_mutations);
@@ -44,11 +53,7 @@ class ContactSyncService {
 
   final UnifiedContactRepository _repository;
   final ContactResolutionPolicy _policy;
-  final SyncContactsUseCase _syncContacts;
-  final WatchUnifiedContactsUseCase _watchUnifiedContacts;
-  final GetUnifiedContactUseCase _getUnifiedContact;
-  final AddContactUseCase _addContact;
-  final DeleteContactUseCase _deleteContact;
+  final ContactUseCases _useCases;
   final List<ContactEnricher> _enrichers;
   final ContactMutationQueue _mutations;
   late ContactSyncSession _session;
@@ -81,10 +86,10 @@ class ContactSyncService {
   }
 
   Stream<List<UnifiedContact>> watchContacts() =>
-      _disposed ? Stream.value(const []) : _watchUnifiedContacts.execute();
+      _disposed ? Stream.value(const []) : _useCases.watch.execute();
 
   Future<UnifiedContact?> getContact(String matrixId) =>
-      _disposed ? Future.value() : _getUnifiedContact.execute(matrixId);
+      _disposed ? Future.value() : _useCases.get.execute(matrixId);
 
   Future<void> addContact({
     required String matrixId,
@@ -113,11 +118,11 @@ class ContactSyncService {
       matrixId: matrixId,
       values: [...retained, manual],
     );
-    await _session.mutate(() => _addContact.execute(contact));
+    await _session.mutate(() => _useCases.add.execute(contact));
   }
 
   Future<void> deleteContact(String matrixId) =>
-      _session.mutate(() => _deleteContact.execute(matrixId));
+      _session.mutate(() => _useCases.delete.execute(matrixId));
 
   Future<void> clear() {
     if (_clearing != null) return _clearing!;
