@@ -60,17 +60,26 @@ class ContactSyncService {
     List<String> emails = const <String>[],
     List<String> phones = const <String>[],
   }) async {
+    final manual = ContactSourceValue(
+      kind: ContactSourceKind.manual,
+      displayName: displayName,
+      emails: emails,
+      phones: phones,
+      updatedAt: DateTime.now().toUtc(),
+    );
+
+    // Retain previously stored source values (synced, phonebook, …) and
+    // replace only the manual entry so a later sync does not discard user data.
+    final existing = await _repository.getByMatrixId(matrixId);
+    final retained = existing == null
+        ? const <ContactSourceValue>[]
+        : existing.sources
+              .where((v) => v.kind != ContactSourceKind.manual)
+              .toList(growable: false);
+
     final contact = _policy.resolve(
       matrixId: matrixId,
-      values: [
-        ContactSourceValue(
-          kind: ContactSourceKind.manual,
-          displayName: displayName,
-          emails: emails,
-          phones: phones,
-          updatedAt: DateTime.now().toUtc(),
-        ),
-      ],
+      values: [...retained, manual],
     );
     await _addContact.execute(contact);
   }

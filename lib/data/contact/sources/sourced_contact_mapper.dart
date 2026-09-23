@@ -28,13 +28,13 @@ SourcedContact? contactToSourcedContact({
 }
 
 String? _resolveMatrixId(Contact contact) {
-  for (final email in contact.emails ?? const <Email>{}) {
-    final matrixId = email.matrixId;
-    if (matrixId != null && matrixId.trim().isNotEmpty) return matrixId;
-  }
-  for (final phone in contact.phoneNumbers ?? const <PhoneNumber>{}) {
-    final matrixId = phone.matrixId;
-    if (matrixId != null && matrixId.trim().isNotEmpty) return matrixId;
+  final ids = <String?>[
+    ...?contact.emails?.map((email) => email.matrixId),
+    ...?contact.phoneNumbers?.map((phone) => phone.matrixId),
+  ];
+  for (final id in ids) {
+    final trimmed = id?.trim();
+    if (trimmed != null && trimmed.isNotEmpty) return trimmed;
   }
   return null;
 }

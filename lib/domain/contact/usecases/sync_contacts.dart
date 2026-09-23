@@ -25,25 +25,49 @@ class SyncContactsUseCase {
   Future<List<UnifiedContact>> execute() async {
     final results = await Future.wait(_sources.map(_safeFetch));
 
-    final valuesByMatrixId = <String, List<ContactSourceValue>>{};
+    final fetchedByMatrixId = <String, List<ContactSourceValue>>{};
     for (final contacts in results) {
       for (final contact in contacts) {
-        valuesByMatrixId
+        fetchedByMatrixId
             .putIfAbsent(contact.matrixId, () => <ContactSourceValue>[])
             .add(contact.value);
       }
     }
 
-    final contacts = valuesByMatrixId.entries
-        .map(
-          (entry) => _policy.resolve(matrixId: entry.key, values: entry.value),
-        )
-        .toList(growable: false);
+    // Preserve values from sources that did not participate in this run
+    // (e.g. a failed source or a manual entry added earlier).
+    final existing = await _repository.getContacts();
+    final existingByMatrixId = {
+      for (final contact in existing) contact.matrixId: contact,
+    };
+
+    final contacts = <UnifiedContact>[];
+    for (final entry in fetchedByMatrixId.entries) {
+      final stored = existingByMatrixId[entry.key];
+      final merged = <ContactSourceValue>[
+        ..._storedValuesExcept(stored, entry.value),
+        ...entry.value,
+      ];
+      contacts.add(_policy.resolve(matrixId: entry.key, values: merged));
+    }
 
     if (contacts.isNotEmpty) {
       await _repository.upsertAll(contacts);
     }
     return contacts;
+  }
+
+  /// Keeps previously stored values whose source kind is absent from the
+  /// current fetch (failed source, manual entry, etc.).
+  List<ContactSourceValue> _storedValuesExcept(
+    UnifiedContact? stored,
+    List<ContactSourceValue> fetched,
+  ) {
+    if (stored == null) return const [];
+    final fetchedKinds = {for (final v in fetched) v.kind};
+    return stored.sources
+        .where((v) => !fetchedKinds.contains(v.kind))
+        .toList(growable: false);
   }
 
   Future<List<SourcedContact>> _safeFetch(ContactSource source) async {
