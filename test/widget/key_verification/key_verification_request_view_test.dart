@@ -24,122 +24,136 @@ Widget _wrap(Widget child, {Size size = const Size(390, 700)}) {
 
 void main() {
   group('KeyVerificationRequestView', () {
-    testWidgets('renders title, body, and avatar', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Alice',
-            avatarUri: null,
-            onAccept: () {},
-            onReject: () {},
-          ),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('New verification request'), findsOneWidget);
-      expect(
-        find.text('Accept this verification request from Alice'),
-        findsOneWidget,
-      );
-      expect(find.text('Reject'), findsOneWidget);
-      expect(find.text('Accept'), findsOneWidget);
-    });
-
-    testWidgets('renders without exception when avatar is null', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Bob',
-            avatarUri: null,
-            onAccept: () {},
-            onReject: () {},
-          ),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-      expect(find.text('Bob'), findsNothing);
-    });
-
-    testWidgets('tapping Accept calls onAccept once', (tester) async {
-      var acceptTapped = 0;
-
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Alice',
-            avatarUri: null,
-            onAccept: () => acceptTapped++,
-            onReject: () {},
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Accept'));
-      await tester.pump();
-
-      expect(acceptTapped, 1);
-    });
-
-    testWidgets('tapping Reject calls onReject once', (tester) async {
-      var rejectTapped = 0;
-
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Alice',
-            avatarUri: null,
-            onAccept: () {},
-            onReject: () => rejectTapped++,
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Reject'));
-      await tester.pump();
-
-      expect(rejectTapped, 1);
-    });
-
-    testWidgets('renders without overflow on phone size', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Alice',
-            avatarUri: null,
-            onAccept: () {},
-            onReject: () {},
-          ),
-          size: const Size(390, 700),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-    });
-
-    testWidgets('renders without overflow on wide/web size', (tester) async {
-      await tester.pumpWidget(
-        _wrap(
-          KeyVerificationRequestView(
-            displayName: 'Alice',
-            avatarUri: null,
-            onAccept: () {},
-            onReject: () {},
-          ),
-          size: const Size(1280, 800),
-        ),
-      );
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-    });
+    testWidgets('renders title, body, and avatar', _rendersContentTest);
+    testWidgets(
+      'renders without exception when avatar is null',
+      _nullAvatarTest,
+    );
+    testWidgets('tapping Accept calls onAccept once', _tapAcceptTest);
+    testWidgets('tapping Reject calls onReject once', _tapRejectTest);
+    testWidgets(
+      'renders without overflow on phone size',
+      _phoneSizeOverflowTest,
+    );
+    testWidgets(
+      'renders without overflow on wide/web size',
+      _wideSizeOverflowTest,
+    );
   });
+}
+
+Future<void> _rendersContentTest(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Alice',
+        avatarUri: null,
+        onAccept: () {},
+        onReject: () {},
+      ),
+    ),
+  );
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('New verification request'), findsOneWidget);
+  expect(
+    find.text('Accept this verification request from Alice'),
+    findsOneWidget,
+  );
+  expect(find.text('Reject'), findsOneWidget);
+  expect(find.text('Accept'), findsOneWidget);
+}
+
+Future<void> _nullAvatarTest(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Bob',
+        avatarUri: null,
+        onAccept: () {},
+        onReject: () {},
+      ),
+    ),
+  );
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+  expect(find.text('Bob'), findsNothing);
+}
+
+Future<void> _tapAcceptTest(WidgetTester tester) async {
+  var acceptTapped = 0;
+
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Alice',
+        avatarUri: null,
+        onAccept: () => acceptTapped++,
+        onReject: () {},
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Accept'));
+  await tester.pump();
+
+  expect(acceptTapped, 1);
+}
+
+Future<void> _tapRejectTest(WidgetTester tester) async {
+  var rejectTapped = 0;
+
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Alice',
+        avatarUri: null,
+        onAccept: () {},
+        onReject: () => rejectTapped++,
+      ),
+    ),
+  );
+  await tester.pump();
+
+  await tester.tap(find.text('Reject'));
+  await tester.pump();
+
+  expect(rejectTapped, 1);
+}
+
+Future<void> _phoneSizeOverflowTest(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Alice',
+        avatarUri: null,
+        onAccept: () {},
+        onReject: () {},
+      ),
+      size: const Size(390, 700),
+    ),
+  );
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _wideSizeOverflowTest(WidgetTester tester) async {
+  await tester.pumpWidget(
+    _wrap(
+      KeyVerificationRequestView(
+        displayName: 'Alice',
+        avatarUri: null,
+        onAccept: () {},
+        onReject: () {},
+      ),
+      size: const Size(1280, 800),
+    ),
+  );
+  await tester.pump();
+
+  expect(tester.takeException(), isNull);
 }
