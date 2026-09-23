@@ -24,52 +24,76 @@ void main() {
   );
 
   group('ContactResolutionPolicy display name', () {
-    test('phonebook alias wins over the directory name everywhere', () {
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
+    test('resolves display name and priority from source values', () {
+      final cases = <String, List<ContactSourceValue>>{
+        'phonebook alias wins': [
           value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
           value(ContactSourceKind.phonebook, name: 'Jean Travail'),
           value(ContactSourceKind.matrixProfile, name: 'Jean Dupont'),
         ],
-      );
-
-      expect(contact.canonicalDisplayName, 'Jean Dupont');
-      expect(contact.localAlias, 'Jean Travail');
-      expect(contact.resolvedDisplayName, 'Jean Travail');
-      expect(contact.prioritySource, ContactSourceKind.phonebook);
-    });
-
-    test('falls back to the directory when there is no phonebook alias', () {
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
+        'no alias falls back to directory': [
           value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
           value(ContactSourceKind.matrixProfile, name: 'Jean Matrix'),
         ],
+        'matrix profile when no directory': [
+          value(ContactSourceKind.matrixRoomMember, name: 'Room name'),
+          value(ContactSourceKind.matrixProfile, name: 'Matrix name'),
+        ],
+      };
+
+      final resolved = cases.map(
+        (label, values) =>
+            MapEntry(label, policy.resolve(matrixId: matrixId, values: values)),
       );
 
-      expect(contact.canonicalDisplayName, 'Jean Dupont');
-      expect(contact.localAlias, isNull);
-      expect(contact.resolvedDisplayName, 'Jean Dupont');
-      expect(contact.prioritySource, ContactSourceKind.tomUserInfo);
+      expect(resolved['phonebook alias wins']!.localAlias, 'Jean Travail');
+      expect(
+        resolved['phonebook alias wins']!.canonicalDisplayName,
+        'Jean Dupont',
+      );
+      expect(resolved['no alias falls back to directory']!.localAlias, isNull);
+      expect(
+        resolved['no alias falls back to directory']!.resolvedDisplayName,
+        'Jean Dupont',
+      );
+      expect(
+        resolved['matrix profile when no directory']!.resolvedDisplayName,
+        'Matrix name',
+      );
+      expect(
+        resolved['matrix profile when no directory']!.prioritySource,
+        ContactSourceKind.matrixProfile,
+      );
     });
 
-    test(
-      'falls back to the Matrix profile when no directory source exists',
-      () {
-        final contact = policy.resolve(
-          matrixId: matrixId,
+    test('resolved name and priority follow the policy rules', () {
+      final scenarios = [
+        (
+          label: 'phonebook alias wins',
           values: [
-            value(ContactSourceKind.matrixRoomMember, name: 'Room name'),
-            value(ContactSourceKind.matrixProfile, name: 'Matrix name'),
+            value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
+            value(ContactSourceKind.phonebook, name: 'Jean Travail'),
           ],
-        );
+          expectedName: 'Jean Travail',
+          expectedPriority: ContactSourceKind.phonebook,
+        ),
+        (
+          label: 'directory wins when no alias',
+          values: [
+            value(ContactSourceKind.tomUserInfo, name: 'Jean Dupont'),
+            value(ContactSourceKind.matrixProfile, name: 'Jean Matrix'),
+          ],
+          expectedName: 'Jean Dupont',
+          expectedPriority: ContactSourceKind.tomUserInfo,
+        ),
+      ];
 
-        expect(contact.resolvedDisplayName, 'Matrix name');
-        expect(contact.prioritySource, ContactSourceKind.matrixProfile);
-      },
-    );
+      for (final s in scenarios) {
+        final contact = policy.resolve(matrixId: matrixId, values: s.values);
+        expect(contact.resolvedDisplayName, s.expectedName, reason: s.label);
+        expect(contact.prioritySource, s.expectedPriority, reason: s.label);
+      }
+    });
 
     test('ignores blank display names and trailing spaces', () {
       final contact = policy.resolve(
@@ -90,8 +114,16 @@ void main() {
       );
 
       expect(contact.resolvedDisplayName, isNull);
-      expect(contact.displayNameOrId, matrixId);
       expect(contact.hasResolvedDisplayName, isFalse);
+    });
+
+    test('displayNameOrId falls back to matrixId when no name exists', () {
+      final contact = policy.resolve(
+        matrixId: matrixId,
+        values: [value(ContactSourceKind.phonebook)],
+      );
+
+      expect(contact.displayNameOrId, matrixId);
       expect(contact.prioritySource, isNull);
     });
   });
@@ -198,10 +230,15 @@ void main() {
       final contact = policy.resolve(matrixId: matrixId);
 
       expect(contact.resolvedDisplayName, isNull);
+      expect(contact.lastUpdated, isNull);
+    });
+
+    test('empty source list yields empty collections', () {
+      final contact = policy.resolve(matrixId: matrixId);
+
       expect(contact.emails, isEmpty);
       expect(contact.phones, isEmpty);
       expect(contact.sources, isEmpty);
-      expect(contact.lastUpdated, isNull);
     });
   });
 
