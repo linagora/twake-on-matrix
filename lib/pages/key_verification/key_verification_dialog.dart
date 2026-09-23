@@ -1,13 +1,13 @@
 import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
+import 'package:twake_chat/pages/key_verification/key_verification_request_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_styles.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_success_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_waiting_view.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
 
@@ -17,8 +17,6 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
-
-import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
   /// Shows as a centered modal on web/desktop and a bottom sheet on mobile
@@ -185,51 +183,15 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         );
         break;
       case KeyVerificationState.askAccept:
-        title = Text(l10n.newVerificationRequest);
-        body = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 16),
-            Avatar(
-              mxContent: user?.avatarUrl,
-              name: displayName,
-              size: AvatarStyle.defaultSize * 2,
-            ),
-            const SizedBox(height: 16),
-            Text(l10n.askVerificationRequest(displayName)),
-          ],
-        );
-        buttons.add(
-          TwakeTextButton(
-            onTap: () => widget.request.rejectVerification().then(
-              (_) => Navigator.maybePop(context),
-            ),
-            message: l10n.reject,
-            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.primary,
-            ),
-            margin: KeyVerificationStyles.marginButtonWarningBanner,
-            buttonDecoration: BoxDecoration(
-              color: linagoraSysColors.onPrimary,
-              borderRadius: const BorderRadius.all(Radius.circular(100)),
-            ),
-          ),
-        );
-        buttons.add(
-          TwakeTextButton(
-            onTap: widget.request.acceptVerification,
-            message: l10n.accept,
-            borderHover: KeyVerificationStyles.borderHoverButtonWaningBanner,
-            styleMessage: theme.textTheme.labelLarge?.copyWith(
-              color: linagoraSysColors.onPrimary,
-            ),
-            margin: KeyVerificationStyles.marginButtonWarningBanner,
-            buttonDecoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(100),
-            ),
-          ),
+        // View owns title + body + actions — avoid a second title/button
+        // layer from the outer dialog chrome below.
+        body = KeyVerificationRequestView(
+          displayName: displayName,
+          avatarUri: profile?.avatarUrl ?? user?.avatarUrl,
+          onAccept: widget.request.acceptVerification,
+          onReject: () => widget.request.rejectVerification().then((_) {
+            if (context.mounted) Navigator.maybePop(context);
+          }),
         );
         break;
       case KeyVerificationState.askChoice:
