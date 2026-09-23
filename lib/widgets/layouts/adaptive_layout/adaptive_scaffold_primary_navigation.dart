@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/widgets/layouts/adaptive_layout/adaptive_scaffold_primary_navigation_view.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -34,9 +36,17 @@ class _AdaptiveScaffoldPrimaryNavigationState
   Client get client => Matrix.of(context).client;
 
   void _getCurrentProfile(Client client) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      getFromRooms: false,
+    // SDK access goes through Riverpod (transitional container read).
+    final data = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(client.userID!).future);
+    final profile = Profile(
+      userId: client.userID ?? '',
+      displayName: data?.displayName,
+      avatarUrl: data?.avatarUrl == null
+          ? null
+          : Uri.tryParse(data!.avatarUrl!),
     );
     Logs().d(
       'AdaptiveScaffoldPrimaryNavigation::_getCurrentProfile() - currentProfile: $profile',

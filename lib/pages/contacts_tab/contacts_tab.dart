@@ -150,7 +150,11 @@ class ContactsTabController extends ConsumerState<ContactsTab>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    await handleDidChangeAppLifecycleState(state, client: client);
+    await handleDidChangeAppLifecycleState(
+      state,
+      context: context,
+      client: client,
+    );
   }
 
   @override

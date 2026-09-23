@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
@@ -10,6 +11,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -18,6 +20,7 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 
 class KeyVerificationDialog extends StatefulWidget {
@@ -49,10 +52,14 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
       originalOnUpdate?.call();
       setState(() {});
     };
-    widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
-      profile = p;
-      setState(() {});
-    });
+    // SDK access goes through Riverpod (transitional container read).
+    ProviderScope.containerOf(context, listen: false)
+        .read(contactDisplayProvider(widget.request.userId).future)
+        .then((contact) {
+          if (!mounted) return;
+          profile = contact;
+          setState(() {});
+        });
     super.initState();
   }
 
@@ -69,7 +76,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     super.dispose();
   }
 
-  Profile? profile;
+  UnifiedContact? profile;
 
   Future<void> checkInput(String input) async {
     if (input.isEmpty) return;

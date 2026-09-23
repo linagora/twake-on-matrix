@@ -633,8 +633,6 @@ class BackgroundPush {
           '[Push] Switching to account ${targetClient.userID} for notification',
         );
         await _matrixState!.setActiveClient(targetClient);
-        await _matrixState!.cancelListenSynchronizeContacts();
-        await _matrixState!.reSyncContacts();
         return targetClient;
       }
     }

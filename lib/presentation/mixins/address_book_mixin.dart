@@ -1,24 +1,12 @@
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/post_address_book_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:matrix/matrix.dart';
 
+/// Address book helpers for screens that add contacts.
+///
+/// Cross-device address book propagation used to be driven by
+/// `ContactsManager.postAddressBookNotifier`; it now belongs to the unified
+/// contact sync pipeline, so there is nothing to listen to here.
 mixin AddressBooksMixin {
   void listenAddressBookEvents(Client client) {
     Logs().d('$runtimeType::listenAddressBookEvents');
-    final contactsManager = getIt.get<ContactsManager>();
-    contactsManager.postAddressBookNotifier().addListener(() {
-      contactsManager.postAddressBookNotifier().value.map(
-        (newSuccess) => _handleAddressBookUpdatedEvent(client, newSuccess),
-      );
-    });
-  }
-
-  void _handleAddressBookUpdatedEvent(Client client, Success successState) {
-    if (successState is PostAddressBookSuccessState) {
-      Logs().d('$runtimeType::_handleAddressBookUpdatedEvent sendToDevice');
-      getIt.get<ContactsManager>().syncContactsAcrossDevices(client);
-    }
   }
 }

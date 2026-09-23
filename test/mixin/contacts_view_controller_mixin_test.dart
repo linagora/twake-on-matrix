@@ -1,11 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
+
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
@@ -48,7 +51,6 @@ class InvitationGatedContactsViewController with ContactsViewControllerMixin {
   MockSpec<Client>(),
   MockSpec<MatrixLocalizations>(),
   MockSpec<ContactsViewControllerMixin>(),
-  MockSpec<ContactsManager>(),
 ])
 void main() {
   const debouncerIntervalInMilliseconds = 300;
@@ -2935,18 +2937,11 @@ void main() {
     );
   });
 
-  group('ContactsViewControllerMixin', () {
+  group('ContactsViewControllerMixin (unified store)', () {
     const alice = '@alice:domain.com';
     const bob = '@bob:domain.com';
 
-    late MockContactsManager mockContactsManager;
     late InvitationGatedContactsViewController controller;
-
-    void refreshAllContacts() => controller.refreshAllContacts(
-      context: MockBuildContext(),
-      client: MockClient(),
-      matrixLocalizations: MockMatrixLocalizations(),
-    );
 
     List<String?> matrixIdsOf(Either<Failure, Success> state) =>
         state
@@ -2956,46 +2951,39 @@ void main() {
             .toList() ??
         [];
 
+    void refreshAllContacts() => controller.refreshAllContacts(
+      context: MockBuildContext(),
+      client: MockClient(),
+      matrixLocalizations: MockMatrixLocalizations(),
+    );
+
     setUp(() {
-      mockContactsManager = MockContactsManager();
-      when(mockContactsManager.getContactsNotifier()).thenReturn(
-        ValueNotifierCustom(
-          Right(
-            GetContactsSuccess(
-              contacts: [
-                Contact(
-                  id: 'bob',
-                  displayName: 'Bob',
-                  emails: {Email(address: 'bob@domain.com', matrixId: bob)},
-                ),
-                ContactFixtures.contact6,
-              ],
-            ),
-          ),
-        ),
-      );
-      when(mockContactsManager.getPhonebookContactsNotifier()).thenReturn(
-        ValueNotifierCustom(
-          Right(
-            GetPhonebookContactsSuccess(
-              progress: 100,
-              contacts: [
-                Contact(
-                  id: 'alice',
-                  displayName: 'Alice',
-                  emails: {Email(address: 'alice@domain.com', matrixId: alice)},
-                ),
-                ContactFixtures.contact4,
-              ],
-            ),
-          ),
-        ),
-      );
       getIt.registerSingleton<SearchRecentChatInteractor>(
         SearchRecentChatInteractor(),
       );
-      getIt.registerSingleton<ContactsManager>(mockContactsManager);
       controller = InvitationGatedContactsViewController();
+      controller.setUnifiedContactsForTest(const [
+        UnifiedContact(
+          matrixId: bob,
+          canonicalDisplayName: 'Bob',
+          sources: [
+            ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Bob',
+            ),
+          ],
+        ),
+        UnifiedContact(
+          matrixId: alice,
+          canonicalDisplayName: 'Alice',
+          sources: [
+            ContactSourceValue(
+              kind: ContactSourceKind.phonebook,
+              displayName: 'Alice',
+            ),
+          ],
+        ),
+      ]);
     });
 
     tearDown(() async {
@@ -3006,13 +2994,10 @@ void main() {
     test(
       'refreshAllContacts_whenInvitationsAreDisabled_listsOnlyMatrixUsers',
       () {
-        // Arrange
         controller.isInvitationEnabled = false;
 
-        // Act
         refreshAllContacts();
 
-        // Assert
         expect(
           matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
           [alice],
@@ -3023,40 +3008,30 @@ void main() {
       },
     );
 
-    test('refreshAllContacts_whenInvitationsAreEnabled_listsAllContacts', () {
-      // Arrange
+    test('refreshAllContacts_splitsMergedStoreIntoBothSections', () {
       controller.isInvitationEnabled = true;
 
-      // Act
       refreshAllContacts();
 
-      // Assert
       expect(
         matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
-        [alice, ''],
+        [alice],
       );
-      expect(matrixIdsOf(controller.presentationContactNotifier.value), [
-        bob,
-        '',
-      ]);
+      expect(matrixIdsOf(controller.presentationContactNotifier.value), [bob]);
     });
 
     test(
       'refreshAllContacts_whenInvitationsBecomeEnabled_listsInvitableContacts',
       () {
-        // Arrange
         refreshAllContacts();
         controller.isInvitationEnabled = true;
 
-        // Act
         refreshAllContacts();
 
-        // Assert
         expect(
           matrixIdsOf(controller.presentationPhonebookContactNotifier.value),
-          [alice, ''],
+          [alice],
         );
-        verifyNever(mockContactsManager.reSyncContacts());
       },
     );
   });

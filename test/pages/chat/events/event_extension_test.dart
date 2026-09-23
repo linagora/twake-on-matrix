@@ -1,30 +1,14 @@
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 
 // ignore: implementation_imports — TimelineChunk is not yet exported publicly
 import 'package:matrix/src/models/timeline_chunk.dart';
-import 'package:mockito/annotations.dart';
 
 import '../../../fake_client.dart';
-import 'event_extension_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<ContactsManager>()])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late MockContactsManager mockContactsManager;
-
-  setUp(() {
-    mockContactsManager = MockContactsManager();
-    final getIt = GetIt.instance;
-    getIt.registerSingleton<ContactsManager>(mockContactsManager);
-  });
-
-  tearDown(() {
-    GetIt.instance.reset();
-  });
 
   group('Can edit event with room not encrypted test', () {
     late Client client;

@@ -5,7 +5,6 @@ import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
@@ -39,6 +38,9 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/contact_session_controller.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -107,8 +109,6 @@ class MatrixState extends ConsumerState<Matrix>
         ReceiveSharingIntentMixin,
         InitConfigMixin,
         ConnectivityMixin {
-  final _contactsManager = getIt.get<ContactsManager>();
-
   AudioPlayer audioPlayer = AudioPlayer();
   final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
@@ -189,20 +189,52 @@ class MatrixState extends ConsumerState<Matrix>
   RequestTokenResponse? currentThreepidCreds;
   String? supportChatRoomId;
 
-  Future<SetActiveClientState> setActiveClient(Client? newClient) async {
+  Future<void> _transitionContacts(
+    Client? nextClient,
+    Future<void> Function() configure, {
+    bool skipIfCurrent = false,
+  }) => ref
+      .read(contactSessionControllerProvider)
+      .transition(nextClient, configure, force: !skipIfCurrent);
+
+  void _refreshContactsInBackground() {
+    unawaited(
+      ref.read(contactSyncServiceProvider).refresh().catchError((
+        Object error,
+        StackTrace stackTrace,
+      ) {
+        Logs().e('MatrixState: contact refresh failed', error, stackTrace);
+      }),
+    );
+  }
+
+  Future<SetActiveClientState> setActiveClient(
+    Client? newClient, {
+    bool fromLogin = false,
+  }) async {
     final index = widget.clients.indexWhere(
       (client) => newClient != null && client.userID == newClient.userID,
     );
     if (index != -1) {
-      if (index == _activeClient) return SetActiveClientState.success;
-      _activeClient = index;
+      // Compare identities inside the transition queue: removing an account
+      // can reuse its index, and another switch may already be pending.
+      await _transitionContacts(newClient, () async {
+        _activeClient = widget.clients.indexOf(newClient!);
+        if (fromLogin) {
+          await setUpToMServicesInLogin(newClient);
+          await setUpFederationServicesInLogin(newClient);
+        } else {
+          await _setUpToMServicesWhenChangingActiveClient(newClient);
+        }
+      }, skipIfCurrent: !fromLogin);
+      if (identical(ref.read(activeMatrixClientProvider), newClient)) {
+        _activeClient = widget.clients.indexOf(newClient!);
+      }
       // TODO: Multi-client VoiP support
       createVoipPlugin();
-      await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient!);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
-      getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
       Sentry.configureScope(
@@ -212,7 +244,7 @@ class MatrixState extends ConsumerState<Matrix>
       );
       return SetActiveClientState.success;
     } else {
-      Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
+      Logs().w('Tried to set an unknown client ${newClient?.userID} as active');
       return SetActiveClientState.unknownClient;
     }
   }
@@ -607,11 +639,8 @@ class MatrixState extends ConsumerState<Matrix>
           '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
         );
         if (currentClient.deviceID != senderId &&
-            currentClient.userID != null) {
-          _contactsManager.initialSynchronizeContacts(
-            withMxId: currentClient.userID!,
-            forceRun: true,
-          );
+            identical(ref.read(activeMatrixClientProvider), currentClient)) {
+          _refreshContactsInBackground();
         }
       }
     });
@@ -700,8 +729,6 @@ class MatrixState extends ConsumerState<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
-    await matrixState.cancelListenSynchronizeContacts();
-    matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -723,12 +750,7 @@ class MatrixState extends ConsumerState<Matrix>
     LoginState loginState,
   ) async {
     waitForFirstSync = false;
-    await setUpToMServicesInLogin(newActiveClient);
-    await setUpFederationServicesInLogin(newActiveClient);
-    await _storePersistActiveAccount(newActiveClient);
-    await _getUserInfoWithActiveClient(newActiveClient);
-    await _getHomeserverInformation(newActiveClient);
-    matrixState.reSyncContacts();
+    await setActiveClient(newActiveClient, fromLogin: true);
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -754,21 +776,17 @@ class MatrixState extends ConsumerState<Matrix>
     final activeClient = getClientByName(_loginClientCandidate!.clientName);
     if (activeClient == null) return;
     waitForFirstSync = false;
-    await setUpToMServicesInLogin(activeClient);
-    await setUpFederationServicesInLogin(activeClient);
 
     if (PlatformInfos.isIOS) {
       await backgroundPush?.syncRecoveryKeyForClient(activeClient);
     }
 
-    final result = await setActiveClient(activeClient);
+    final result = await setActiveClient(activeClient, fromLogin: true);
 
     if (PlatformInfos.isIOS) {
       await backgroundPush?.setupPushForAdditionalClient(activeClient);
     }
 
-    await matrixState.cancelListenSynchronizeContacts();
-    matrixState.reSyncContacts();
     if (result.isSuccess) {
       onClientLoginStateChanged.add(
         ClientLoginStateEvent(
@@ -841,7 +859,10 @@ class MatrixState extends ConsumerState<Matrix>
       _registerSubs(c.clientName);
     }
 
-    await _retrieveLocalToMConfiguration();
+    await _transitionContacts(
+      isLoggedInClient() ? clientOrNull : null,
+      _retrieveLocalToMConfiguration,
+    );
 
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
@@ -928,7 +949,25 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     try {
-      final toMConfigurations = await getTomConfigurations(client.userID!);
+      var toMConfigurations = await getTomConfigurations(client.userID!);
+      if (toMConfigurations == null) {
+        // TOM configuration is optional local state. On a fresh install the
+        // active homeserver discovery is the source of truth and must be
+        // applied before the contact session starts its first refresh.
+        await _getHomeserverInformation(client);
+        final tomServer = loginHomeserverSummary?.tomServer;
+        if (tomServer != null) {
+          final discovery = loginHomeserverSummary?.discoveryInformation;
+          _setupAuthUrl();
+          toMConfigurations = ToMConfigurations(
+            tomServerInformation: tomServer,
+            identityServerInformation: discovery?.mIdentityServer,
+            authUrl: authUrl,
+            loginType: loginType,
+          );
+          await _storeToMConfiguration(client, toMConfigurations);
+        }
+      }
       if (toMConfigurations == null) {
         _setupAuthUrl();
         return;
@@ -1171,9 +1210,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        _setUpToMServer(null);
-        _setupAuthUrl();
-        setUpAuthorization(client);
+        await _retrieveLocalToMConfiguration();
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
@@ -1322,12 +1359,7 @@ class MatrixState extends ConsumerState<Matrix>
     // The address book may have been synced before the ToM configuration was
     // available, so refresh it now that it is reachable — otherwise the ToM
     // contacts only show up after a manual pull-to-refresh.
-    unawaited(
-      _contactsManager.initialSynchronizeContacts(
-        withMxId: newClient.userID!,
-        forceRun: true,
-      ),
-    );
+    unawaited(ref.read(contactSyncServiceProvider).refresh());
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
@@ -1431,7 +1463,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
-    matrixState.reSyncContacts();
+    await _transitionContacts(null, _deleteAllTomConfigurations);
     await matrixState.cancelListenSynchronizeContacts();
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
@@ -1441,22 +1473,19 @@ class MatrixState extends ConsumerState<Matrix>
       if (kIsWeb) await removeWebPush(client);
       TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
-    await _deleteAllTomConfigurations();
   }
 
   Future<void> reSyncContacts() async {
-    _contactsManager.reSyncContacts();
+    await ref.read(contactSyncServiceProvider).clear();
+    await ref.read(contactSyncServiceProvider).refresh();
   }
 
   Future<void> forceRunSynchronizeContacts() async {
-    _contactsManager.initialSynchronizeContacts(
-      withMxId: client.userID!,
-      forceRun: true,
-    );
+    await ref.read(contactSyncServiceProvider).refresh();
   }
 
   Future<void> cancelListenSynchronizeContacts() async {
-    await _contactsManager.cancelAllSubscriptions();
+    // Subscriptions are owned by the Riverpod controller.
   }
 
   void handleShowQrCodeDownload(bool show) {

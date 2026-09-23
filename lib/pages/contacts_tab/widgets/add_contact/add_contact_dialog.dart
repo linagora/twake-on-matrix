@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:debounce_throttle/debounce_throttle.dart';
@@ -5,16 +7,17 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/model/addressbook/address_book.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/post_address_book_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/pages/contacts_tab/controllers/contacts_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/model/extensions/contact/address_book_extension.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_navigator.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog_view.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog_view_web.dart';
-import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -91,16 +94,19 @@ class AddContactDialogController extends State<AddContactDialog> {
     },
   );
 
-  List<PresentationContact> get availableContacts =>
-      getIt
-          .get<ContactsManager>()
-          .getContactsNotifier()
-          .value
-          .getSuccessOrNull<GetContactsSuccess>()
-          ?.contacts
-          .expand((contact) => contact.toPresentationContacts())
-          .toList() ??
-      [];
+  List<PresentationContact> get availableContacts {
+    try {
+      return ProviderScope.containerOf(context, listen: false)
+              .read(contactsControllerProvider)
+              .asData
+              ?.value
+              .map((contact) => contact.toPresentationContact())
+              .toList() ??
+          [];
+    } catch (_) {
+      return [];
+    }
+  }
 
   void onUsernameChanged(String value) {
     userName.value = value;
@@ -140,8 +146,11 @@ class AddContactDialogController extends State<AddContactDialog> {
         TwakeSnackBar.show(context, state.exception.toString());
         return;
       } else if (state is PostAddressBookSuccessState) {
-        getIt.get<ContactsManager>().refreshTomContacts(
-          Matrix.of(context).client,
+        unawaited(
+          ProviderScope.containerOf(
+            context,
+            listen: false,
+          ).read(contactSyncServiceProvider).refresh(),
         );
         final createdContact = state.updatedAddressBooks.firstOrNull
             ?.toPresentationContact()
