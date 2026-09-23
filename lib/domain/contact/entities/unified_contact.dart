@@ -28,6 +28,9 @@ abstract class UnifiedContact with _$UnifiedContact {
     @Default(<String>[]) List<String> phones,
     @Default(<ContactSourceValue>[]) List<ContactSourceValue> sources,
 
+    /// Whether the contact is currently active (online / available).
+    @Default(false) bool active,
+
     /// Which source produced [resolvedDisplayName].
     ContactSourceKind? prioritySource,
     DateTime? lastUpdated,

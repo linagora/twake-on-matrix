@@ -2,6 +2,7 @@ import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/model/contact/contact.dart';
+import 'package:twake_chat/domain/model/contact/third_party_status.dart';
 
 /// Maps a legacy domain [Contact] to a [SourcedContact].
 ///
@@ -22,9 +23,18 @@ SourcedContact? contactToSourcedContact({
       displayName: contact.displayName,
       emails: _nonEmpty(contact.emails?.map((email) => email.address)),
       phones: _nonEmpty(contact.phoneNumbers?.map((phone) => phone.number)),
+      active: _isActive(contact),
       updatedAt: updatedAt,
     ),
   );
+}
+
+bool _isActive(Contact contact) {
+  final statuses = <ThirdPartyStatus?>[
+    ...?contact.emails?.map((email) => email.status),
+    ...?contact.phoneNumbers?.map((phone) => phone.status),
+  ];
+  return statuses.any((status) => status == ThirdPartyStatus.active);
 }
 
 String? _resolveMatrixId(Contact contact) {
