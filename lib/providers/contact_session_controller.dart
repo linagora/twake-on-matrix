@@ -32,42 +32,52 @@ class ContactSessionController {
       if (!force && identical(_ref.read(activeMatrixClientProvider), client)) {
         return;
       }
-      final previous = _ref.read(contactSyncServiceProvider);
-      final store = _ref.read(contactLocalDataSourceProvider);
-      final mutations = _ref.read(contactMutationQueueProvider);
-      final userId = client?.userID;
-      final homeserver = client?.homeserver;
-      final owner = userId == null || homeserver == null
-          ? null
-          : jsonEncode([homeserver.toString(), userId]);
-      previous.dispose();
-      _ref.read(activeMatrixClientProvider.notifier).setClient(null);
-      await mutations.run(() async {
-        if (_disposed) return;
-        await store.prepareForAccount(owner);
-        if (_disposed) return;
-        // Logout configuration may delete the Hive collection itself.
-        await configure();
-      });
-      if (_disposed) return;
-      _ref.read(activeMatrixClientProvider.notifier).setClient(client);
-      _ref.invalidate(contactSyncServiceProvider);
-      if (client != null) {
-        unawaited(
-          _ref.read(contactSyncServiceProvider).refresh().catchError((
-            Object error,
-            StackTrace stackTrace,
-          ) {
-            Logs().e('Contact session refresh failed', error, stackTrace);
-          }),
-        );
-      }
+      await _performTransition(client, configure);
     });
     _pending = transition.then<void>(
       (_) {},
       onError: (Object _, StackTrace __) {},
     );
     return transition;
+  }
+
+  Future<void> _performTransition(
+    Client? client,
+    Future<void> Function() configure,
+  ) async {
+    final previous = _ref.read(contactSyncServiceProvider);
+    final store = _ref.read(contactLocalDataSourceProvider);
+    final mutations = _ref.read(contactMutationQueueProvider);
+    final owner = _encodeOwner(client);
+    previous.dispose();
+    _ref.read(activeMatrixClientProvider.notifier).setClient(null);
+    await mutations.run(() async {
+      if (_disposed) return;
+      await store.prepareForAccount(owner);
+      if (_disposed) return;
+      // Logout configuration may delete the Hive collection itself.
+      await configure();
+    });
+    if (_disposed) return;
+    _ref.read(activeMatrixClientProvider.notifier).setClient(client);
+    _ref.invalidate(contactSyncServiceProvider);
+    if (client != null) {
+      unawaited(
+        _ref.read(contactSyncServiceProvider).refresh().catchError((
+          Object error,
+          StackTrace stackTrace,
+        ) {
+          Logs().e('Contact session refresh failed', error, stackTrace);
+        }),
+      );
+    }
+  }
+
+  String? _encodeOwner(Client? client) {
+    final userId = client?.userID;
+    final homeserver = client?.homeserver;
+    if (userId == null || homeserver == null) return null;
+    return jsonEncode([homeserver.toString(), userId]);
   }
 
   void dispose() => _disposed = true;
