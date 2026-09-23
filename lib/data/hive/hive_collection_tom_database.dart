@@ -26,6 +26,8 @@ class HiveCollectionToMDatabase {
 
   String get _invitationStatusBox => 'invitation_status_box';
 
+  String get _unifiedContactsBoxName => 'unified_contacts_box';
+
   late CollectionBox<Map> tomConfigurationsBox;
 
   late CollectionBox<Map> federationConfigurationsBox;
@@ -33,6 +35,9 @@ class HiveCollectionToMDatabase {
   late CollectionBox<Map> thirdPartyContactsBox;
 
   late CollectionBox<Map> invitationStatus;
+
+  /// Local read model for contacts, keyed by `matrixId`.
+  late CollectionBox<Map> unifiedContactsBox;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
 
@@ -135,6 +140,7 @@ class HiveCollectionToMDatabase {
         _federationConfigurationsBoxName,
         _thirdPartyContactsBox,
         _invitationStatusBox,
+        _unifiedContactsBoxName,
       },
       path: path,
       key: key,
@@ -148,12 +154,14 @@ class HiveCollectionToMDatabase {
     );
     thirdPartyContactsBox = await _collection.openBox(_thirdPartyContactsBox);
     invitationStatus = await _collection.openBox(_invitationStatusBox);
+    unifiedContactsBox = await _collection.openBox(_unifiedContactsBoxName);
   }
 
   Future<void> clear() async {
     await tomConfigurationsBox.clear();
     await federationConfigurationsBox.clear();
     await thirdPartyContactsBox.clear();
+    await unifiedContactsBox.clear();
     if (PlatformInfos.isMobile) {
       await _collection.deleteFromDisk();
     }
