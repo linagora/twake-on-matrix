@@ -28,77 +28,80 @@ class ChatEventListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!event.isVisibleInGui) return const SizedBox();
 
-    return Message(
-      key: GlobalObjectKey(event.eventId),
-      event,
-      autoScrollController: controller.scrollController,
-      scrollIndex: index,
-      matrixState: controller.matrix!,
-      onSwipe: (direction) => controller.replyAction(replyTo: event),
-      onAvatarTap: (Event event) => controller.onContactTap(
-        contactPresentationSearch: event.senderFromMemoryOrFallback
-            .toContactPresentationSearch(),
-        context: context,
-        path: 'rooms',
-      ),
-      onSelect: controller.onSelectMessage,
-      selectMode: controller.selectMode,
-      maxWidth: constraints.maxWidth,
-      scrollToEventId: (String eventId) =>
-          controller.scrollToEventId(eventId, highlight: true),
-      selected: controller.selectedEvents.any(
-        (e) => e.eventId == event.eventId,
-      ),
-      timeline: controller.timeline!,
-      previousEvent: previousEvent,
-      nextEvent: nextEvent,
-      onHover: (isHover, event) => controller.onHover(isHover, event),
-      isHoverNotifier: controller.focusHover,
-      listHorizontalActionMenu: controller.listHorizontalActionMenuBuilder(
+    // Build once per item build — previously called twice (menu + listAction).
+    final horizontalActions = controller.listHorizontalActionMenuBuilder(event);
+
+    // Isolate paint of this row from siblings while scrolling. Does not change
+    // layout, selection, or message behaviour.
+    return RepaintBoundary(
+      child: Message(
+        key: GlobalObjectKey(event.eventId),
         event,
+        autoScrollController: controller.scrollController,
+        scrollIndex: index,
+        matrixState: controller.matrix!,
+        onSwipe: (direction) => controller.replyAction(replyTo: event),
+        onAvatarTap: (Event event) => controller.onContactTap(
+          contactPresentationSearch: event.senderFromMemoryOrFallback
+              .toContactPresentationSearch(),
+          context: context,
+          path: 'rooms',
+        ),
+        onSelect: controller.onSelectMessage,
+        selectMode: controller.selectMode,
+        maxWidth: constraints.maxWidth,
+        scrollToEventId: (String eventId) =>
+            controller.scrollToEventId(eventId, highlight: true),
+        selected: controller.selectedEvents.any(
+          (e) => e.eventId == event.eventId,
+        ),
+        timeline: controller.timeline!,
+        previousEvent: previousEvent,
+        nextEvent: nextEvent,
+        onHover: (isHover, event) => controller.onHover(isHover, event),
+        isHoverNotifier: controller.focusHover,
+        listHorizontalActionMenu: horizontalActions,
+        onMenuAction: controller.handleHorizontalActionMenu,
+        hideKeyboardChatScreen: controller.onHideKeyboardAndEmoji,
+        markedUnreadLocation: controller.unreadReceivedMessageLocation,
+        timestampCallback: (event) {
+          controller.handleDisplayStickyTimestamp(event.originServerTs);
+        },
+        onEventVisible: controller.onEventVisible,
+        onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
+        onHideEmojiReaction: controller.onHideEmojiReaction,
+        listAction: horizontalActions
+            .map((action) => ContextMenuAction(name: action.action.name))
+            .toList(),
+        onPickEmojiReaction: () {},
+        onSelectEmojiReaction: (emoji, event) {
+          controller.sendEmojiAction(emoji: emoji, event: event);
+        },
+        onForward: (event) {
+          controller.forwardEventsAction(event: event);
+        },
+        onReply: (event) {
+          controller.replyAction(replyTo: event);
+        },
+        onCopy: controller.copyEventsAction,
+        onPin: (event) {
+          controller.pinEventAction(event);
+        },
+        onSaveToDownload: (event) =>
+            controller.saveSelectedEventToDownloadAndroid(context, event),
+        onSaveToGallery: (event) =>
+            controller.saveSelectedEventToGallery(context, event),
+        onTapMoreButton: controller.handleOnTapMoreButtonOnWeb,
+        onEdit: (event) {
+          controller.editAction(editEvent: event);
+        },
+        onDelete: (context, event) {
+          controller.deleteEventAction(context, event);
+        },
+        recentEmojiFuture: controller.getRecentReactionsInteractor.execute(),
+        onReport: controller.reportEventAction,
+        onRetryTextMessage: controller.retryTextMessage,
       ),
-      onMenuAction: controller.handleHorizontalActionMenu,
-      hideKeyboardChatScreen: controller.onHideKeyboardAndEmoji,
-      markedUnreadLocation: controller.unreadReceivedMessageLocation,
-      timestampCallback: (event) {
-        controller.handleDisplayStickyTimestamp(event.originServerTs);
-      },
-      onEventVisible: controller.onEventVisible,
-      onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
-      onHideEmojiReaction: controller.onHideEmojiReaction,
-      listAction: controller.listHorizontalActionMenuBuilder(event).map((
-        action,
-      ) {
-        return ContextMenuAction(name: action.action.name);
-      }).toList(),
-      onPickEmojiReaction: () {},
-      onSelectEmojiReaction: (emoji, event) {
-        controller.sendEmojiAction(emoji: emoji, event: event);
-      },
-      onForward: (event) {
-        controller.forwardEventsAction(event: event);
-      },
-      onReply: (event) {
-        controller.replyAction(replyTo: event);
-      },
-      onCopy: controller.copyEventsAction,
-      onPin: (event) {
-        controller.pinEventAction(event);
-      },
-      onSaveToDownload: (event) =>
-          controller.saveSelectedEventToDownloadAndroid(context, event),
-      onSaveToGallery: (event) =>
-          controller.saveSelectedEventToGallery(context, event),
-      onTapMoreButton: controller.handleOnTapMoreButtonOnWeb,
-      onEdit: (event) {
-        controller.editAction(editEvent: event);
-      },
-      onDelete: (context, event) {
-        controller.deleteEventAction(context, event);
-      },
-      recentEmojiFuture: controller.getRecentReactionsInteractor.execute(),
-      onReport: controller.reportEventAction,
-      onRetryTextMessage: controller.retryTextMessage,
     );
   }
 }
