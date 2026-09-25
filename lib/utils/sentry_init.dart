@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, kDebugMode;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, kDebugMode, visibleForTesting;
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -9,6 +10,14 @@ Future<void> sentryInit({
   required void Function(Widget app) runApp,
   required Widget app,
 }) async {
+  if (isLocalBuild(
+    isDebug: kDebugMode,
+    webHost: kIsWeb ? Uri.base.host : null,
+  )) {
+    Logs().i('sentryInit(): local build, Sentry disabled');
+    runApp(app);
+    return;
+  }
   try {
     final info = await PackageInfo.fromPlatform();
     await AppConfig.loadSentryConfig();
@@ -19,10 +28,10 @@ Future<void> sentryInit({
         options.enableLogs = true;
         // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
         // We recommend adjusting this value in production.
-        options.tracesSampleRate = kDebugMode ? 1.0 : 0.1;
+        options.tracesSampleRate = 0.1;
         // The sampling rate for profiling is relative to tracesSampleRate
         // Setting to 1.0 will profile 100% of sampled transactions:
-        options.profilesSampleRate = kDebugMode ? 1.0 : 0.1;
+        options.profilesSampleRate = 0.1;
         options.beforeSend = _fixWebSourceMapPaths;
 
         options.release = info.version;
@@ -35,6 +44,15 @@ Future<void> sentryInit({
     Logs().e('sentryInit():', e, s);
     runApp(app);
   }
+}
+
+const _localHosts = {'localhost', '127.0.0.1', '::1'};
+
+@visibleForTesting
+bool isLocalBuild({required bool isDebug, required String? webHost}) {
+  if (isDebug) return true;
+  if (webHost == null) return false;
+  return _localHosts.contains(webHost) || webHost.endsWith('.localhost');
 }
 
 SentryEvent? _fixWebSourceMapPaths(SentryEvent event, Hint hint) {
