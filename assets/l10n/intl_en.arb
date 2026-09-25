@@ -236,7 +236,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "askVerificationRequest": "Accept this verification request from {username}?",
+  "askVerificationRequest": "Accept this verification request from {username}",
   "@askVerificationRequest": {
     "type": "text",
     "placeholders": {
@@ -1357,7 +1357,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newVerificationRequest": "New verification request!",
+  "newVerificationRequest": "New verification request",
   "@newVerificationRequest": {
     "type": "text",
     "placeholders": {}
