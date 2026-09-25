@@ -28,7 +28,11 @@ class ContactLocalDataSourceImpl implements ContactLocalDataSource {
     final contacts = <UnifiedContact>[];
     for (final value in values) {
       if (value == null) continue;
-      contacts.add(UnifiedContactHiveObj.fromJson(copyMap(value)).toEntity());
+      try {
+        contacts.add(UnifiedContactHiveObj.fromJson(copyMap(value)).toEntity());
+      } catch (_) {
+        // Skip corrupted entries instead of failing the whole store.
+      }
     }
     return contacts;
   }

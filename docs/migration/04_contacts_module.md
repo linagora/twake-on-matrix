@@ -485,7 +485,8 @@ waits for #6.
 
 ### PR 1 — `contacts/01-foundation`
 
-- [ ] `contactsProviders` that delegate to `getIt` (coexistence bridge).
+- [ ] `contactsProviders` that delegate to `getIt` (coexistence bridge — removed in PR 8
+      when `ContactsManager` and its `get_it` registrations are deleted).
 - [ ] Add `matrixClientProvider` (keepAlive) if not already created by the pilot.
 - [ ] `UnifiedContact`, `ContactSourceValue`, `ContactSourceKind`, sealed exceptions.
 - [ ] `ContactResolutionPolicy` (priority + merge).
