@@ -341,8 +341,8 @@ source contributes its own `displayName` / `avatarUrl` / `lastUpdated`; the poli
 `GUIDELINES.md` §2.4.5 states that Matrix timeline/room state belongs to the SDK and must not
 be duplicated in a Riverpod cache. `UnifiedContactStore` does **not** violate this:
 
-- It stores **identity projections keyed by `matrixId`** (name, avatar URL, third-party ids),
-  not `Room` / `Timeline` / `Event` objects.
+- It stores **identity projections keyed by `(userId, matrixId)`** (name, avatar URL,
+  third-party ids), not `Room` / `Timeline` / `Event` objects.
 - Room members remain owned by the SDK; the sync service only *reads* them to refresh the
   identity projection.
 - The store is a **denormalised address-book index** — the same role a server address book
@@ -395,7 +395,7 @@ changes its mind.
 
 | Option | Notes |
 |---|---|
-| **Hive box keyed by `matrixId`** (recommended for phase 1) | Already a dependency (`hive ^2.2.3`, `hive_flutter`); the project already stores `thirdPartyContactsBox`. Fastest path, no new dependency. |
+| **Hive box keyed by `(userId, matrixId)`** (recommended for phase 1) | Already a dependency (`hive ^2.2.3`, `hive_flutter`); the project already stores `thirdPartyContactsBox`. Fastest path, no new dependency. Scoping by account keeps multi-account sessions from leaking contacts across accounts. |
 | SQLite / `sqflite_common_ffi` | Already present for tests. Better for larger queries/relations, but adds a schema/migration burden. |
 | Riverpod 3.0 offline persistence | Experimental — see §5.4 spike. |
 
@@ -495,7 +495,7 @@ waits for #6.
 
 ### PR 2 — `contacts/02-data`
 
-- [ ] `ContactLocalDataSource` (Hive box keyed by `matrixId`) + DTO.
+- [ ] `ContactLocalDataSource` (Hive box keyed by `(userId, matrixId)`) + DTO.
 - [ ] `UnifiedContactRepositoryImpl` reading/writing the store.
 - [ ] `watchUnifiedContacts` exposed as `Stream<List<UnifiedContact>>`.
 - [ ] `MatrixProfileDataSource` (the only `package:matrix` import in this module).
@@ -604,8 +604,8 @@ In addition to `01_migration_plan.md` §8:
 - **Q1 (blocking)**: display-name resolution policy — A, B or C (§6)?
 - **Q2**: should the local phonebook alias be shown to other devices via the TOM upload, or
   stay device-local? This changes the sync semantics.
-- **Q3**: is the store scoped per Matrix account (multi-account support)? If so, the Hive box
-  must be keyed by `(userId, matrixId)`.
+- **Q3** *(resolved)*: yes — the store is scoped per Matrix account; the Hive box is keyed by
+  `(userId, matrixId)` and every store API takes the owning `userId`.
 - **Q4**: do we need a contact-level `lastUpdated` conflict rule for concurrent updates from
   two devices, or is last-write-wins acceptable?
 - **Q5**: should `UnifiedContactStore` be exposed as a `Stream` from the repository (SDK-ready)

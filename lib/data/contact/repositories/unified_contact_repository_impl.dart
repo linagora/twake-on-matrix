@@ -8,26 +8,29 @@ class UnifiedContactRepositoryImpl implements UnifiedContactRepository {
   final ContactLocalDataSource _localDataSource;
 
   @override
-  Stream<List<UnifiedContact>> watchContacts() => _localDataSource.watch();
+  Stream<List<UnifiedContact>> watchContacts(String userId) =>
+      _localDataSource.watch(userId);
 
   @override
-  Future<List<UnifiedContact>> getContacts() => _localDataSource.getAll();
+  Future<List<UnifiedContact>> getContacts(String userId) =>
+      _localDataSource.getAll(userId);
 
   @override
-  Future<UnifiedContact?> getByMatrixId(String matrixId) =>
-      _localDataSource.getByMatrixId(matrixId);
+  Future<UnifiedContact?> getByMatrixId(String userId, String matrixId) =>
+      _localDataSource.getByMatrixId(userId, matrixId);
 
   @override
-  Future<void> upsert(UnifiedContact contact) =>
-      _localDataSource.upsert(contact);
+  Future<void> upsert(String userId, UnifiedContact contact) =>
+      _localDataSource.upsert(userId, contact);
 
   @override
-  Future<void> upsertAll(Iterable<UnifiedContact> contacts) =>
-      _localDataSource.upsertAll(contacts);
+  Future<void> upsertAll(String userId, Iterable<UnifiedContact> contacts) =>
+      _localDataSource.upsertAll(userId, contacts);
 
   @override
-  Future<void> delete(String matrixId) => _localDataSource.delete(matrixId);
+  Future<void> delete(String userId, String matrixId) =>
+      _localDataSource.delete(userId, matrixId);
 
   @override
-  Future<void> clear() => _localDataSource.clear();
+  Future<void> clear(String userId) => _localDataSource.clear(userId);
 }

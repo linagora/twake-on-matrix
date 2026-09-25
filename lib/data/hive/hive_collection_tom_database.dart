@@ -36,7 +36,8 @@ class HiveCollectionToMDatabase {
 
   late CollectionBox<Map> invitationStatus;
 
-  /// Local read model for contacts, keyed by `matrixId`.
+  /// Local read model for contacts, keyed by `userId|matrixId` (multi-account
+  /// scoped, same convention as [thirdPartyContactsBox]).
   late CollectionBox<Map> unifiedContactsBox;
 
   HiveCollectionToMDatabase(this.name, this.path, {this.key});
