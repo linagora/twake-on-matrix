@@ -142,7 +142,6 @@ dependencies:
       ref: main
   lottie: ^3.0.0
   lottie_native: 0.1.2
-  ### Dependencies from git ###
   matrix: ^7.1.2
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
