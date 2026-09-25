@@ -11,11 +11,20 @@ class BootstrapModalChrome extends StatelessWidget {
   final Widget content;
   final VoidCallback? onClose;
 
-  const BootstrapModalChrome({super.key, required this.content, this.onClose});
+  final bool forceCenteredDialog;
+
+  const BootstrapModalChrome({
+    super.key,
+    required this.content,
+    this.onClose,
+    this.forceCenteredDialog = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveUtils().isMobile(context)
+    final useMobileSheet =
+        ResponsiveUtils().isMobile(context) && !forceCenteredDialog;
+    return useMobileSheet
         ? _MobileSheet(content: content, onClose: onClose)
         : _WebModal(content: content, onClose: onClose);
   }
@@ -32,8 +41,13 @@ class _WebModal extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Center(
-        child: SizedBox(
-          width: VerifyDeviceViewStyle.webModalWidth,
+        child: Container(
+          constraints: const BoxConstraints(
+            maxWidth: VerifyDeviceViewStyle.webModalWidth,
+          ),
+          margin: const EdgeInsets.symmetric(
+            horizontal: VerifyDeviceViewStyle.closeButtonInset * 2,
+          ),
           child: Stack(
             clipBehavior: Clip.none,
             children: [
@@ -46,8 +60,10 @@ class _WebModal extends StatelessWidget {
                   ),
                   boxShadow: VerifyDeviceViewStyle.webModalShadow,
                 ),
-                child: SizedBox(
-                  width: VerifyDeviceViewStyle.webContentWidth,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: VerifyDeviceViewStyle.webContentWidth,
+                  ),
                   child: content,
                 ),
               ),
@@ -68,11 +84,74 @@ class _WebModal extends StatelessWidget {
   }
 }
 
-class _MobileSheet extends StatelessWidget {
+class _MobileSheet extends StatefulWidget {
   final Widget content;
   final VoidCallback? onClose;
 
   const _MobileSheet({required this.content, this.onClose});
+
+  @override
+  State<_MobileSheet> createState() => _MobileSheetState();
+}
+
+class _MobileSheetState extends State<_MobileSheet>
+    with SingleTickerProviderStateMixin {
+  /// Fraction of the sheet's own height the user must drag down (or drag
+  /// fast enough downward) before it's treated as a dismiss instead of
+  /// snapping back.
+  static const double _dismissDragFraction = 0.3;
+  static const double _dismissFlingVelocity = 700;
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  )..addListener(() => setState(() {}));
+
+  double _sheetHeight = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _close() {
+    final onClose = widget.onClose;
+    if (onClose != null) {
+      onClose();
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (_sheetHeight <= 0) return;
+    final next = (_controller.value + details.delta.dy / _sheetHeight).clamp(
+      0.0,
+      1.0,
+    );
+    _controller.value = next;
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final shouldDismiss =
+        _controller.value > _dismissDragFraction ||
+        details.velocity.pixelsPerSecond.dy > _dismissFlingVelocity;
+    if (!shouldDismiss) {
+      _controller.animateTo(0, curve: Curves.easeOut);
+      return;
+    }
+    // onClose stays on this dialog route (e.g. back to chooser) — snap the
+    // sheet back instead of sliding it off-screen. Route dismiss still slides.
+    if (widget.onClose != null) {
+      _controller.animateTo(0, curve: Curves.easeOut);
+      widget.onClose!();
+      return;
+    }
+    _controller.animateTo(1, curve: Curves.easeOut).whenComplete(() {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,35 +159,77 @@ class _MobileSheet extends StatelessWidget {
       backgroundColor: Colors.transparent,
       // Avoids a transparent gap above the iOS home indicator.
       extendBody: true,
-      body: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: VerifyDeviceViewStyle.backgroundColorOf(context),
-            borderRadius: VerifyDeviceViewStyle.sheetRadius,
-          ),
-          child: SafeArea(
-            top: false,
-            // Android needs bottom inset for the system nav bar; iOS home
-            // indicator should not add an empty band under the button.
-            bottom: PlatformInfos.isAndroid,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _DragHandle(onClose: onClose),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: VerifyDeviceViewStyle.sheetContentPadding,
-                    child: content,
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _close,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: FractionalTranslation(
+            translation: Offset(0, _controller.value),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              onVerticalDragUpdate: _onDragUpdate,
+              onVerticalDragEnd: _onDragEnd,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: VerifyDeviceViewStyle.backgroundColorOf(context),
+                  borderRadius: VerifyDeviceViewStyle.sheetRadius,
+                ),
+                child: SafeArea(
+                  top: false,
+                  bottom: PlatformInfos.isAndroid,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _DragHandle(onClose: widget.onClose),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: VerifyDeviceViewStyle.sheetContentPadding,
+                          child: _MeasureSize(
+                            onChange: (size) => _sheetHeight = size.height,
+                            child: widget.content,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class _MeasureSize extends StatefulWidget {
+  final Widget child;
+  final ValueChanged<Size> onChange;
+
+  const _MeasureSize({required this.child, required this.onChange});
+
+  @override
+  State<_MeasureSize> createState() => _MeasureSizeState();
+}
+
+class _MeasureSizeState extends State<_MeasureSize> {
+  final _key = GlobalKey();
+  Size? _lastSize;
+
+  void _reportIfChanged() {
+    final size = _key.currentContext?.size;
+    if (size == null || size == _lastSize) return;
+    _lastSize = size;
+    widget.onChange(size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportIfChanged());
+    return SizedBox(key: _key, child: widget.child);
   }
 }
 
