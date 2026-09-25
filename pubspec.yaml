@@ -1,7 +1,7 @@
 name: twake_chat
 description: A convenient Matrix-based tool for personal and corporate communication.
 publish_to: none
-version: 2.23.5+2330
+version: 2.24.0+2330
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -76,6 +76,7 @@ dependencies:
   #   git:
   #     url: https://github.com/flutter-webrtc/callkeep
   #     ref: master
+  characters: ^1.4.0
   chewie: ^1.3.6
   collection: ^1.16.0
   connectivity_plus: ^4.0.0

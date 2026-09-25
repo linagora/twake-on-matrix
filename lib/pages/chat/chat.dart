@@ -23,6 +23,7 @@ import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interac
 import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/report_content_interactor.dart';
+import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 import 'package:twake_chat/pages/chat/chat_actions.dart';
 import 'package:twake_chat/pages/chat/chat_context_menu_actions.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
@@ -33,6 +34,7 @@ import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
 import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -96,6 +98,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -116,7 +119,7 @@ part 'chat_scroll_to_event_mixin.dart';
 
 typedef OnJumpToMessage = void Function(String eventId);
 
-class Chat extends StatefulWidget {
+class Chat extends ConsumerStatefulWidget {
   final String roomId;
   final List<MatrixFile?>? shareFiles;
   final String? roomName;
@@ -136,7 +139,7 @@ class Chat extends StatefulWidget {
   ChatController createState() => ChatController();
 }
 
-class ChatController extends State<Chat>
+class ChatController extends ConsumerState<Chat>
     with
         CommonMediaPickerMixin,
         MediaPickerMixin,
@@ -815,9 +818,11 @@ class ChatController extends State<Chat>
     showEmojiPickerNotifier.value = false;
 
     if (sendController.text.trim().isEmpty) return;
+    final SendTextMessageInteractor sendTextMessageInteractor = ref.read(
+      sendTextMessageInteractorProvider,
+    );
     _storeInputTimeoutTimer?.cancel();
     await _draftStorage.remove(roomId!);
-    var parseCommands = true;
 
     final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&
@@ -832,15 +837,15 @@ class ChatController extends State<Chat>
         cancelLabel: l10n.cancel,
       );
       if (dialogResult == OkCancelResult.cancel) return;
-      parseCommands = false;
     }
 
-    // ignore: unawaited_futures
-    room!.sendTextEvent(
-      sendController.text.trim(),
-      inReplyTo: replyEventNotifier.value,
-      editEventId: editEventNotifier.value?.eventId,
-      parseCommands: parseCommands,
+    unawaited(
+      sendTextMessageInteractor.execute(
+        room: room!,
+        text: sendController.text.trim(),
+        inReplyTo: replyEventNotifier.value,
+        editEventId: editEventNotifier.value?.eventId,
+      ),
     );
     sendController.value = TextEditingValue(
       text: pendingText,

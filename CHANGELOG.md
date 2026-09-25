@@ -1,3 +1,32 @@
+## [2.24.0] - 2026-09-18
+### Added
+- #3334: TW-3325: Introduce feeds as group with public channel preset
+- Translated using Weblate (English, German, Irish, Korean, Russian)
+
+### Changed
+- #3292: TW-3218: [Part III] Migrate verify device flow state to Riverpod
+- #3342: TW-3332: Update remove-device confirmation dialog
+- #3349: TW-3330: Update localization process and document Weblate workflow
+- #3363, #3364, #3365, #3366: Migrate asset references to flutter_gen
+- #3313, #3320, #3321, #3355, #3356: Enable progressive linter rules
+- #3326: Update web setup in README
+- #3322: Bump fastlane to 2.238.0
+
+### Fixed
+- #3309: TW-3067: Fix erratic scrolling when jumping to a message
+- #3344: TW-3329: Show chat banner for any out-of-sync own session
+- #3339: TW-3333: Refresh devices list after verification
+- #3340: TW-3331: Center key verification modal on web
+- #3371: TW-3350: Make URLs with a single-character domain label clickable
+- #3317: Make invitations react to well-known updates
+
+### Tests
+- #3348: Run Android E2E on parallel x86_64 emulators with an isolated Synapse
+- #3310: Shard nightly FTL integration suite to fit the 60m virtual timeout
+- #3328: Handle unavailable recovery key
+- #3327: Align contact visibility expectation
+- #3324: Target Support Twake Workplace room
+
 ## [2.23.5] - 2026-08-31
 ### Added
 - #3257: TW-3218: [Part I] Add device verification warning banner in chat screen

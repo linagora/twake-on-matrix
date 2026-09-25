@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-require("../dashboard/metrics.js");
+require("../dashboard/perf-metrics.js");
 
 const {
   MIN_FRAME_SAMPLE,

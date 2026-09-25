@@ -16,8 +16,10 @@ import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
+import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
@@ -45,6 +47,7 @@ import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart'
@@ -60,7 +63,7 @@ typedef OnEmojiAction = void Function(TapDownDetails details);
 typedef OnKeyboardAction = void Function();
 typedef OnInputBarChanged = void Function(String text);
 
-class DraftChat extends StatefulWidget {
+class DraftChat extends ConsumerStatefulWidget {
   final PresentationContact contact;
 
   final void Function(RightColumnType)? onChangeRightColumnType;
@@ -72,10 +75,10 @@ class DraftChat extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => DraftChatController();
+  DraftChatController createState() => DraftChatController();
 }
 
-class DraftChatController extends State<DraftChat>
+class DraftChatController extends ConsumerState<DraftChat>
     with
         CommonMediaPickerMixin,
         MediaPickerMixin,
@@ -387,6 +390,9 @@ class DraftChatController extends State<DraftChat>
   }
 
   Future<void> sendText({OnRoomCreatedFailed onCreateRoomFailed}) async {
+    final SendTextMessageInteractor sendTextMessageInteractor = ref.read(
+      sendTextMessageInteractorProvider,
+    );
     scrollDown();
     sendController.value = TextEditingValue(
       text: sendController.value.text,
@@ -396,9 +402,9 @@ class DraftChatController extends State<DraftChat>
     final textEvent = await _triggerTagGreetingMessage();
     isSendingNotifier.value = true;
     _createRoom(
-      onRoomCreatedSuccess: (room) {
-        room.sendTextEvent(textEvent);
-      },
+      onRoomCreatedSuccess: (room) => unawaited(
+        sendTextMessageInteractor.execute(room: room, text: textEvent),
+      ),
       onRoomCreatedFailed: onCreateRoomFailed,
     );
   }
