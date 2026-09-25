@@ -19,6 +19,7 @@ linter:
     - use_string_buffers
     - use_colored_box
     - avoid_setters_without_getters
+    - sort_pub_dependencies
 
 analyzer:
   errors:

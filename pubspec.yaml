@@ -7,70 +7,14 @@ environment:
   sdk: ">=3.10.0 <4.0.0"
 
 dependencies:
-  sentry_flutter: ^9.10.0
-  ### Dependencies from git ###
-  matrix: ^7.1.2
-
-  receive_sharing_intent:
-    git:
-      url: https://github.com/linagora/receive_sharing_intent.git
-      ref: fix/ios-share-unsaved-screenshot
-
-  video_compress: ^3.1.4
-
-  linagora_design_flutter:
-    git:
-      url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.6
-
-  flutter_matrix_html:
-    git:
-      url: https://github.com/linagora/flutter_matrix_html.git
-      ref: master
-
-  # TODO: Remove it after this PR merged
-  # https://github.com/justsoft/video_thumbnail/pull/135
-  video_thumbnail:
-    git:
-      url: https://github.com/maRci002/video_thumbnail.git
-      ref: feat-web_implementation
-      path: video_thumbnail
-
-  # TODO: We will change it when the PR in upstream repository will be merged
-  # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
-  inview_notifier_list:
-    git:
-      # HTTPS so CI runners work without an SSH key (public repo)
-      url: https://github.com/linagora/inview_notifier_list.git
-      ref: master
-
-  future_loading_dialog:
-    git:
-      # HTTPS so CI runners work without an SSH key (public repo)
-      url: https://github.com/linagora/future-loading-dialog.git
-      ref: main
-
-  linkfy_text:
-    git:
-      # HTTPS so CI runners work without an SSH key (public repo)
-      url: https://github.com/linagora/linkfy_text.git
-      ref: main
-
-  flutter_emoji_mart:
-    git:
-      url: https://github.com/linagora/emoji_mart.git
-      ref: master
-
-  social_media_recorder:
-    git:
-      # HTTPS so CI runners work without an SSH key (public repo)
-      url: https://github.com/linagora/social_media_recorder.git
-      ref: twake_supported
-
   adaptive_dialog: ^1.8.0+1
-  flutter_adaptive_scaffold: ^0.1.4
+  after_layout: ^1.2.0
   animations: ^2.0.7
+  app_links: ^6.2.0
+  async: ^2.11.0
+  auto_size_text: 3.0.0
   blurhash_dart: ^1.1.0
+  byte_converter: 2.0.0
   # TODO: remove it after it release a new version, the PR is merged to master
   # callkeep:
   #   git:
@@ -80,183 +24,225 @@ dependencies:
   chewie: ^1.3.6
   collection: ^1.16.0
   connectivity_plus: ^4.0.0
+  crypto: ^3.0.3
   cupertino_icons: any
+  dartz: ^0.10.1
+  debounce_throttle: ^2.0.0
   desktop_drop: ^0.4.4
   desktop_lifecycle: ^0.1.0
   desktop_notifications: ^0.6.3
   device_info_plus: ^10.1.0
+  dio: ^5.1.1
+  dio_cache_interceptor: ^3.4.2
+  dio_cache_interceptor_hive_store: ^3.2.1
   dynamic_color: ^1.6.0
   emoji_picker_flutter: ^1.5.1
   emoji_proposal: ^0.0.1
   emojis: ^0.9.9
+  equatable: ^2.0.5
+  external_path: 2.2.0
   # TODO: remove this after this PR is merged https://gitlab.com/famedly/company/frontend/libraries/native_imaging/-/merge_requests/22
   fcm_shared_isolate:
     git:
       url: https://github.com/famedly/fcm_shared_isolate.git
       ref: main
   file_picker: ^10.1.7
+  file_saver: ^0.2.12
   flutter:
     sdk: flutter
+  flutter_adaptive_scaffold: ^0.1.4
   # TODO: remove this after this PR is merged https://github.com/g123k/flutter_app_badger/pull/92
   flutter_app_badger:
     git:
       url: https://github.com/bitsydarel/flutter_app_badger.git
       ref: master
   flutter_app_lock: ^3.0.0
+  flutter_avif: 3.1.0
   flutter_blurhash: ^0.8.2
   flutter_cache_manager: ^3.3.0
+  flutter_contacts: ^2.0.0-beta.2
+  flutter_emoji_mart:
+    git:
+      url: https://github.com/linagora/emoji_mart.git
+      ref: master
   flutter_foreground_task: ^3.10.0
+  flutter_image_compress: ^2.4.0
+  flutter_inappwebview: 6.1.0
+  flutter_keyboard_visibility: ^6.0.0
   flutter_local_notifications: 17.2.2
   flutter_localizations:
     sdk: flutter
+  flutter_localized_locales: ^2.0.5
   flutter_map: ^4.0.0
+  flutter_matrix_html:
+    git:
+      url: https://github.com/linagora/flutter_matrix_html.git
+      ref: master
   flutter_openssl_crypto:
     git:
       url: https://github.com/linagora/flutter_openssl_crypto.git
       ref: main
+  flutter_portal: 1.1.4
   flutter_ringtone_player: 4.0.0+4
+  flutter_riverpod: 3.0.0
   flutter_secure_storage: 9.2.4
+  flutter_slidable: 4.0.0
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
+  flutter_vodozemac: ^0.5.0
   flutter_web_auth_2: ^4.1.0
+  fluttertoast: ^9.0.0
+  freezed_annotation: 3.1.0
+  future_loading_dialog:
+    git:
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/future-loading-dialog.git
+      ref: main
+  gal: 2.3.0
+  get_it: ^7.2.0
+  go_router: 16.3.0
   # flutter_webrtc: # Until https://github.com/flutter-webrtc/flutter-webrtc/issues/1212 is fixed
   #   git: https://github.com/radzio-it/flutter-webrtc.git
   # flutter_webrtc: ^0.10.6
   handy_window: ^0.1.9
+  heic_to_png_jpg: 0.0.5
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  html_unescape: 2.0.0
   http: ^0.13.4
   image: ^4.0.15
+  image_gallery_saver:
+    git:
+      url: https://github.com/linagora/image_gallery_saver.git
+      ref: master
   image_picker: ^1.2.0
   # Direct deps so we can opt into the Android Photo Picker (useAndroidPhotoPicker)
   # in main.dart; both are already pulled in transitively by image_picker.
   image_picker_android: ^0.8.13
   image_picker_platform_interface: ^2.11.0
   intl: any
-  unorm_dart: ^0.2.0
+  # TODO: We will change it when the PR in upstream repository will be merged
+  # https://github.com/rvamsikrishna/inview_notifier_list/pull/60
+  inview_notifier_list:
+    git:
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/inview_notifier_list.git
+      ref: master
+  json_annotation: 4.9.0
   just_audio: 0.10.5
-  opus_caf_converter_dart: ^1.0.1
   keyboard_shortcuts: ^0.1.4
   latlong2: ^0.8.1
+  linagora_design_flutter:
+    git:
+      url: https://github.com/linagora/linagora-design-flutter.git
+      ref: v0.2.6
+  linkfy_text:
+    git:
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/linkfy_text.git
+      ref: main
+  lottie: ^3.0.0
+  lottie_native: 0.1.2
+  matrix: ^7.1.2
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
+  media_kit: ^1.2.1
+  media_kit_libs_video: ^1.0.7
+  media_kit_video: ^2.0.1
+  mime: ^1.0.4
   native_imaging:
     git:
       url: https://github.com/linagora/dart_native_imaging.git
       ref: main
+  open_file: ^3.5.11
+  opus_caf_converter_dart: ^1.0.1
+  overflow_view: 0.5.0
   package_info_plus: ^8.0.0
+  path: ^1.8.0
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
+  phone_numbers_parser: ^9.0.21
+  photo_manager: ^3.0.0-dev.5
+  photo_manager_image_provider: ^2.1.0
   pin_code_text_field: ^1.8.0
+  pretty_qr_code: 3.3.0
   provider: ^6.0.2
+  pull_down_button: 0.10.2
   punycode: ^1.0.0
-  qr_code_scanner: ^1.0.0
   qr: ^3.0.1
+  qr_code_scanner: ^1.0.0
+  receive_sharing_intent:
+    git:
+      url: https://github.com/linagora/receive_sharing_intent.git
+      ref: fix/ios-share-unsaved-screenshot
   record: 6.1.1
+  riverpod_annotation: 3.0.0
+  rxdart: ^0.27.7
   scroll_to_index: ^3.0.1
+  sentry_flutter: ^9.10.0
   share_plus: 10.0.2
   shared_preferences: ^2.5.3
-  slugify: ^2.0.0
+  sim_country_code_plus: ^0.1.4
+  skeletonizer: ^2.1.0+1
   skeletons:
     # TODO: Remove when https://github.com/badjio/skeletons/pull/9 is merged
     git:
       url: https://github.com/alirezat66/skeletons.git
       ref: master
-  tor_detector_web: ^1.1.0
-  app_links: ^6.2.0
-  unifiedpush: ^6.0.2
-  universal_html: ^2.0.8
-  url_launcher: 6.3.2
-  vibration: 3.1.3
-  go_router: 16.3.0
-  wakelock_plus: 1.3.2
-  webrtc_interface: ^1.0.10
-  overflow_view: 0.5.0
-  json_annotation: 4.9.0
-  equatable: ^2.0.5
-  get_it: ^7.2.0
-  dio: ^5.1.1
-  dio_cache_interceptor: ^3.4.2
-  dio_cache_interceptor_hive_store: ^3.2.1
-  dartz: ^0.10.1
-  debounce_throttle: ^2.0.0
-  fluttertoast: ^9.0.0
-  rxdart: ^0.27.7
-  photo_manager: ^3.0.0-dev.5
-  flutter_inappwebview: 6.1.0
-  tuple: ^2.0.2
-  lottie: ^3.0.0
-  lottie_native: 0.1.2
-  wechat_camera_picker: 4.4.0
-  open_file: ^3.5.11
-  mime: ^1.0.4
-  async: ^2.11.0
-  flutter_image_compress: ^2.4.0
-  image_gallery_saver:
+  slugify: ^2.0.0
+  social_media_recorder:
     git:
-      url: https://github.com/linagora/image_gallery_saver.git
-      ref: master
-  file_saver: ^0.2.12
-  flutter_keyboard_visibility: ^6.0.0
-  media_kit: ^1.2.1
-  media_kit_video: ^2.0.1
-  media_kit_libs_video: ^1.0.7
-  video_player: ^2.10.0
-  super_clipboard: 0.9.1
-  crypto: ^3.0.3
-  flutter_contacts: ^2.0.0-beta.2
-  phone_numbers_parser: ^9.0.21
-  sim_country_code_plus: ^0.1.4
-  flutter_localized_locales: ^2.0.5
-  after_layout: ^1.2.0
-  photo_manager_image_provider: ^2.1.0
-  flutter_slidable: 4.0.0
-  skeletonizer: ^2.1.0+1
-  flutter_portal: 1.1.4
-  external_path: 2.2.0
-  gal: 2.3.0
-  auto_size_text: 3.0.0
-  flutter_avif: 3.1.0
-  heic_to_png_jpg: 0.0.5
-  pull_down_button: 0.10.2
-  pretty_qr_code: 3.3.0
-  byte_converter: 2.0.0
-  flutter_vodozemac: ^0.5.0
-  html_unescape: 2.0.0
+      # HTTPS so CI runners work without an SSH key (public repo)
+      url: https://github.com/linagora/social_media_recorder.git
+      ref: twake_supported
   sqflite_common_ffi: ^2.3.6
   # https://github.com/tekartik/sqflite/blob/master/sqflite_common_ffi/doc/using_ffi_instead_of_sqflite.md#setup
   sqlite3_flutter_libs: ^0.5.40
-  visibility_detector: ^0.4.0+2
-  path: ^1.8.0
-  web: ^1.1.1
   storage_space: ^1.2.0
-  flutter_riverpod: 3.0.0
-  freezed_annotation: 3.1.0
-  riverpod_annotation: 3.0.0
-
+  super_clipboard: 0.9.1
+  tor_detector_web: ^1.1.0
+  tuple: ^2.0.2
+  unifiedpush: ^6.0.2
+  universal_html: ^2.0.8
+  unorm_dart: ^0.2.0
+  url_launcher: 6.3.2
+  vibration: 3.1.3
+  video_compress: ^3.1.4
+  video_player: ^2.10.0
+  # TODO: Remove it after this PR merged
+  # https://github.com/justsoft/video_thumbnail/pull/135
+  video_thumbnail:
+    git:
+      url: https://github.com/maRci002/video_thumbnail.git
+      ref: feat-web_implementation
+      path: video_thumbnail
+  visibility_detector: ^0.4.0+2
+  wakelock_plus: 1.3.2
+  web: ^1.1.1
+  webrtc_interface: ^1.0.10
+  wechat_camera_picker: 4.4.0
 dev_dependencies:
-  sentry_dart_plugin: ^3.2.1
   build_runner: ^2.12.0
-  freezed: ^3.2.3
-  riverpod_generator: 3.0.0
   flutter_gen_runner: ^5.15.0
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
   flutter_native_splash: ^2.0.3+1
   flutter_test:
     sdk: flutter
+  freezed: ^3.2.3
+  go_router_builder: ^4.2.0
+  html: ^0.15.4
   import_sorter: ^4.6.0
   integration_test:
     sdk: flutter
   json_serializable: ^6.6.2
-  msix: ^3.6.2
-  translations_cleaner: ^0.0.5
   mockito: 5.6.3
+  msix: ^3.6.2
   patrol: ^4.5.0
-  html: ^0.15.4
-  go_router_builder: ^4.2.0
   patrol_cli: ^4.3.1
-
+  riverpod_generator: 3.0.0
+  sentry_dart_plugin: ^3.2.1
+  translations_cleaner: ^0.0.5
 flutter_launcher_icons:
   android: false
   ios: true
@@ -306,18 +292,14 @@ msix_config:
 dependency_overrides:
   # flutter_emoji_mart still pins the design system at v0.2.4; force v0.2.5
   # for the new LinagoraTextField input behaviors (autofocus/onSubmitted).
-  linagora_design_flutter:
-    git:
-      url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.6
-  # Required by riverpod_generator 3.0.0 while flutter_emoji_mart still pins
-  # freezed_annotation ^2.4.1.
-  freezed_annotation: 3.1.0
-  http: 1.2.2
   # This otherwise breaks on linux with flutter 3.7.0, let's override it for now.
   file_selector: ^0.9.2+2
   file_selector_linux: ^0.9.1
   flutter_svg: ^2.0.4
+  # Required by riverpod_generator 3.0.0 while flutter_emoji_mart still pins
+  # freezed_annotation ^2.4.1.
+  freezed_annotation: 3.1.0
+  http: 1.2.2
   #  # fake secure storage plugin for Windows
   #  # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161
   #  flutter_secure_storage_windows:
@@ -331,10 +313,19 @@ dependency_overrides:
       # HTTPS so CI runners work without an SSH key (public repo)
       url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
+  linagora_design_flutter:
+    git:
+      url: https://github.com/linagora/linagora-design-flutter.git
+      ref: v0.2.6
   # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
   linkfy_text:
     git:
       url: https://github.com/linagora/linkfy_text.git
+      ref: main
+  # TODO: Remove this part when update matrix_homeserver_recommendations to same version as matrix_dart_sdk
+  matrix_api_lite:
+    git:
+      url: https://github.com/linagora/dart_matrix_api_lite.git
       ref: main
   # TODO: Remove this part after upstream contribution is merged
   # https://github.com/Sorunome/matrix_link_text/pull/4
@@ -343,24 +334,16 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/matrix_link_text.git
       ref: twake-supported
-  # TODO: Remove this part when update matrix_homeserver_recommendations to same version as matrix_dart_sdk
-  matrix_api_lite:
-    git:
-      url: https://github.com/linagora/dart_matrix_api_lite.git
-      ref: main
-
-  # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
-  url_launcher_ios: 6.3.1
-  # Fixes a compile error when comforming missing header to Launcher in iOS 18.
-  # TODO: Remove this part when depends of wakelock_plus update
-  wakelock_plus: 1.3.2
-
   # TODO: Remove when https://github.com/letsar/overflow_view/pull/13 is merged
   overflow_view:
     git:
       url: https://github.com/linagora/overflow_view.git
       ref: master
-
+  # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
+  url_launcher_ios: 6.3.1
+  # Fixes a compile error when comforming missing header to Launcher in iOS 18.
+  # TODO: Remove this part when depends of wakelock_plus update
+  wakelock_plus: 1.3.2
 cider:
   link_template:
     tag: https://github.com/linagora/twake-on-matrix/releases/tag/%tag% # initial release link template
