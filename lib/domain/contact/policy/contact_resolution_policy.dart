@@ -77,28 +77,60 @@ class ContactResolutionPolicy {
   }
 
   /// Merges several snapshots of the same source kind into one, keeping the
-  /// first non-empty name / avatar and the union of third-party ids.
+  /// newest non-empty name / avatar (by [ContactSourceValue.updatedAt]) and
+  /// the union of third-party ids.
+  ///
+  /// A snapshot without `updatedAt` is treated as the oldest one: a dated
+  /// value beats an undated one, and undated ties keep the first occurrence
+  /// so the result is stable regardless of the iteration order.
   Map<ContactSourceKind, ContactSourceValue> _mergeByKind(
     Iterable<ContactSourceValue> values,
   ) {
-    final result = <ContactSourceKind, ContactSourceValue>{};
+    final byKind = <ContactSourceKind, List<ContactSourceValue>>{};
     for (final value in values) {
-      final existing = result[value.kind];
-      if (existing == null) {
-        result[value.kind] = value;
-        continue;
-      }
-      result[value.kind] = ContactSourceValue(
-        kind: value.kind,
-        displayName:
-            _nonEmpty(existing.displayName) ?? _nonEmpty(value.displayName),
-        avatarUrl: _nonEmpty(existing.avatarUrl) ?? _nonEmpty(value.avatarUrl),
-        emails: _unique([...existing.emails, ...value.emails]),
-        phones: _unique([...existing.phones, ...value.phones]),
-        updatedAt: _latest([existing.updatedAt, value.updatedAt]),
-      );
+      byKind.putIfAbsent(value.kind, () => []).add(value);
     }
-    return result;
+
+    return byKind.map((kind, snapshots) {
+      return MapEntry(
+        kind,
+        ContactSourceValue(
+          kind: kind,
+          displayName: _newestNonEmpty(snapshots, (value) => value.displayName),
+          avatarUrl: _newestNonEmpty(snapshots, (value) => value.avatarUrl),
+          emails: _unique(snapshots.expand((value) => value.emails)),
+          phones: _unique(snapshots.expand((value) => value.phones)),
+          updatedAt: _latest(snapshots.map((value) => value.updatedAt)),
+        ),
+      );
+    });
+  }
+
+  /// Non-empty [field] taken from the snapshot with the most recent
+  /// `updatedAt`; empty values never win over a real one.
+  static String? _newestNonEmpty(
+    List<ContactSourceValue> snapshots,
+    String? Function(ContactSourceValue) field,
+  ) {
+    String? best;
+    DateTime? bestUpdatedAt;
+    for (final snapshot in snapshots) {
+      final candidate = _nonEmpty(field(snapshot));
+      if (candidate == null) continue;
+      if (best == null || _isNewer(snapshot.updatedAt, bestUpdatedAt)) {
+        best = candidate;
+        bestUpdatedAt = snapshot.updatedAt;
+      }
+    }
+    return best;
+  }
+
+  /// `true` when [candidate] is known to be more recent than [current].
+  /// A missing timestamp counts as the oldest possible one.
+  static bool _isNewer(DateTime? candidate, DateTime? current) {
+    if (candidate == null) return false;
+    if (current == null) return true;
+    return candidate.isAfter(current);
   }
 
   ({String? value, ContactSourceKind? kind}) _pickName(
