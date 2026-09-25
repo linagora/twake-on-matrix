@@ -30,8 +30,8 @@ class _QrCodePainter extends CustomPainter {
 
   // Cached size-dependent data
   Size? _cachedSize;
-  Paint? _cachedGradientPaint;
-  Path? _cachedCirclesPath;
+  late Paint _cachedGradientPaint;
+  late Path _cachedCirclesPath;
 
   _QrCodePainter({required this.qrImage}) {
     final count = qrImage.moduleCount;
@@ -88,7 +88,7 @@ class _QrCodePainter extends CustomPainter {
         for (int y = 0; y < count; y++) {
           if (qrImage.isDark(y, x) && !finderMask[x][y]) {
             final top = (y * moduleSize) + quietZoneOffset + centeringOffset;
-            _cachedCirclesPath!.addRRect(
+            _cachedCirclesPath.addRRect(
               RRect.fromRectAndRadius(
                 Rect.fromLTWH(
                   left,
@@ -105,7 +105,7 @@ class _QrCodePainter extends CustomPainter {
     }
 
     // Draw the modules with a single canvas call
-    canvas.drawPath(_cachedCirclesPath!, _cachedGradientPaint!);
+    canvas.drawPath(_cachedCirclesPath, _cachedGradientPaint);
 
     // Draw Finder Patterns with offset for quiet zone
     _drawFinder(canvas, 0, 0, moduleSize, quietZoneOffset);
@@ -168,9 +168,9 @@ class _QrCodePainter extends CustomPainter {
     );
 
     // Draw layers: outer ring (gradient) -> white ring -> center (gradient)
-    canvas.drawPath(outerRing, _cachedGradientPaint!);
+    canvas.drawPath(outerRing, _cachedGradientPaint);
     canvas.drawPath(whiteRing, whitePaint);
-    canvas.drawRRect(center, _cachedGradientPaint!);
+    canvas.drawRRect(center, _cachedGradientPaint);
   }
 
   @override

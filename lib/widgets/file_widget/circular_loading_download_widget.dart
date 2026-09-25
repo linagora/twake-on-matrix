@@ -21,7 +21,7 @@ class _CircularLoadingDownloadWidgetState
     extends State<CircularLoadingDownloadWidget>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   AnimationController? _controller;
-  Animation<double>? _animation;
+  late Animation<double> _animation;
 
   static const animationDurationSeconds = 2;
 
@@ -46,7 +46,7 @@ class _CircularLoadingDownloadWidgetState
   Widget build(BuildContext context) {
     super.build(context);
     return RotationTransition(
-      turns: _animation!,
+      turns: _animation,
       child: CircularProgressIndicator(
         color: Theme.of(context).colorScheme.surface,
         strokeWidth: widget.style.strokeWidthLoading,
