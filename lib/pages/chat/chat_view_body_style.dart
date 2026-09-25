@@ -20,6 +20,8 @@ class ChatViewBodyStyle {
 
   static double blockedUserBannerHeight = 40.0;
 
+  static const double dragOverlayOpacity = 0.9;
+
   static const Color backgroundColor = Color(0xFFF4EFE8);
 
   static String get imageBackground => Assets.images.chatBackground.path;

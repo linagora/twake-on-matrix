@@ -181,7 +181,9 @@ class DraftChatController extends ConsumerState<DraftChat>
   }
 
   void handleDragDone(DropDoneDetails details) async {
+    draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
+    if (!mounted) return;
 
     _handleSendFileOnWeb(context, matrixFilesList);
   }
@@ -247,6 +249,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     isBlockedUserNotifier.dispose();
     _captionsController.dispose();
     disposeAudioMixin();
+    draggingNotifier.dispose();
     super.dispose();
   }
 
@@ -413,6 +416,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
+    _createRoomSubscription?.cancel();
     _createRoomSubscription = createDirectChatInteractor
         .execute(
           contactMxId: presentationContact.matrixId!,
@@ -428,22 +432,40 @@ class DraftChatController extends ConsumerState<DraftChat>
             },
             (success) async {
               if (success is CreateDirectChatSuccess) {
+                final intendedMxId = presentationContact.matrixId;
                 final room = Matrix.of(
                   context,
                 ).client.getRoomById(success.roomId);
-                if (room != null) {
-                  onRoomCreatedSuccess?.call(room);
-                  RoomRoute(
-                    roomid: room.id,
-                    $extra: ChatRouterInputArgument(
-                      type: ChatRouterInputArgumentType.draft,
-                      data:
-                          _userProfile.value?.displayName ??
-                          presentationContact.displayName ??
-                          room.name,
-                    ),
-                  ).go(context);
+                if (room == null) return;
+                if (intendedMxId == null ||
+                    !room.isUsableDirectChatWith(intendedMxId)) {
+                  Logs().w(
+                    'DraftChat: refusing non-matching room '
+                    'intended=$intendedMxId room=${room.id} '
+                    'isDirect=${room.isDirectChat} '
+                    'peer=${room.directChatMatrixID} '
+                    'joined=${room.summary.mJoinedMemberCount}',
+                  );
+                  isSendingNotifier.value = false;
+                  if (mounted) {
+                    TwakeSnackBar.show(
+                      context,
+                      L10n.of(context)!.roomCreationFailed,
+                    );
+                  }
+                  return;
                 }
+                onRoomCreatedSuccess?.call(room);
+                RoomRoute(
+                  roomid: room.id,
+                  $extra: ChatRouterInputArgument(
+                    type: ChatRouterInputArgumentType.draft,
+                    data:
+                        _userProfile.value?.displayName ??
+                        presentationContact.displayName ??
+                        room.name,
+                  ),
+                ).go(context);
               }
             },
           );
@@ -547,17 +569,29 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     if (result == null || result.files.isEmpty) return;
 
+    final matrixFilesList = await _convertFilesToMatrixFiles(
+      result.xFiles,
+      (file) async => (await file.toMatrixFileOnWeb()).detectFileType,
+    );
+    if (!mounted) return;
+    _handleSendFileOnWeb(context, matrixFilesList);
+  }
+
+  Future<List<MatrixFile>> _convertFilesToMatrixFiles<T>(
+    Iterable<T> files,
+    Future<MatrixFile> Function(T file) convert,
+  ) async {
     final matrixFilesList = await Future.wait(
-      result.xFiles.map((file) async {
+      files.map((file) async {
         try {
-          return (await file.toMatrixFileOnWeb()).detectFileType;
+          return await convert(file);
         } catch (e) {
           return null;
         }
       }),
     );
 
-    _handleSendFileOnWeb(context, matrixFilesList.nonNulls.toList());
+    return matrixFilesList.nonNulls.toList();
   }
 
   Future<void> _handleSendFileOnWeb(
@@ -577,6 +611,7 @@ class DraftChatController extends ConsumerState<DraftChat>
       matrixFiles: matrixFilesList,
       pendingText: pendingText,
     );
+    if (!mounted) return;
 
     if (dialogResult != null) {
       _handleSendFileDialogStatus(

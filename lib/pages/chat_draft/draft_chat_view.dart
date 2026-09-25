@@ -101,143 +101,160 @@ class DraftChatView extends StatelessWidget {
   }
 
   Widget _chatViewBody(BuildContext context) {
+    // Same desktop_drop issue as ChatViewBody: covered routes still receive
+    // drops unless enable is gated on the active draft route.
+    final acceptDrops = GoRouterState.of(
+      context,
+    ).uri.pathSegments.contains('draftChat');
+
     return Center(
       child: Stack(
         children: [
           const ChatBackground(),
-          Column(
-            children: [
-              Expanded(
-                child: Center(
-                  child: DropTarget(
-                    onDragDone: (details) => controller.handleDragDone(details),
-                    onDragEntered: controller.onDragEntered,
-                    onDragExited: controller.onDragExited,
+          DropTarget(
+            enable: acceptDrops,
+            onDragDone: (details) => controller.handleDragDone(details),
+            onDragEntered: controller.onDragEntered,
+            onDragUpdated: controller.onDragUpdated,
+            onDragExited: controller.onDragExited,
+            child: Column(
+              children: [
+                ValueListenableBuilder(
+                  valueListenable: controller.isBlockedUserNotifier,
+                  builder: (context, isBlockedUser, _) {
+                    if (!isBlockedUser) return const SizedBox.shrink();
+                    return Column(
+                      children: [
+                        TwakeInkWell(
+                          onTap: () async => controller.onTapUnblockUser(
+                            context: context,
+                            client: Matrix.of(context).client,
+                            displayName:
+                                controller.presentationContact.matrixId ?? '',
+                            userID:
+                                controller.presentationContact.matrixId ?? '',
+                          ),
+                          child: const BlockedUserBanner(),
+                        ),
+                        Divider(
+                          height: ChatViewBodyStyle.dividerSize,
+                          thickness: ChatViewBodyStyle.dividerSize,
+                          color: Theme.of(context).dividerColor,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                ValueListenableBuilder(
+                  valueListenable: getIt
+                      .get<ContactsManager>()
+                      .getContactsNotifier(),
+                  builder: (context, state, child) {
+                    if (controller.isInsideContactManager(state)) {
+                      return const SizedBox();
+                    }
+
+                    return child ?? const SizedBox();
+                  },
+                  child: AddContactBanner(
+                    onTap: () => showAddContactDialog(
+                      context,
+                      displayName: controller.widget.contact.displayName,
+                      matrixId: controller.widget.contact.matrixId,
+                    ),
+                    show: controller.showAddContactBanner,
+                  ),
+                ),
+                ChatDeviceVerificationBanner(client: controller.client),
+                Expanded(
+                  child: Center(
                     child: DraftChatEmpty(
                       onTap: () => controller.handleDraftAction(context),
                     ),
                   ),
                 ),
-              ),
-              ValueListenableBuilder(
-                valueListenable: controller.isBlockedUserNotifier,
-                builder: (context, isBlockedUser, _) {
-                  if (!isBlockedUser) return const SizedBox.shrink();
-                  return Column(
-                    children: [
-                      TwakeInkWell(
-                        onTap: () async => controller.onTapUnblockUser(
-                          context: context,
-                          client: Matrix.of(context).client,
-                          displayName:
-                              controller.presentationContact.matrixId ?? '',
-                          userID: controller.presentationContact.matrixId ?? '',
+                ValueListenableBuilder(
+                  valueListenable: controller.isBlockedUserNotifier,
+                  builder: (context, isBlocked, _) {
+                    if (isBlocked) return const BlockedMessageView();
+                    final sysColors = LinagoraSysColors.material();
+                    return Container(
+                      decoration:
+                          DraftChatViewStyle.responsive.isMobile(context)
+                          ? BoxDecoration(
+                              color: sysColors.surface,
+                              border: Border(
+                                top: BorderSide(
+                                  color: LinagoraStateLayer(
+                                    sysColors.surfaceTint,
+                                  ).opacityLayer3,
+                                ),
+                              ),
+                            )
+                          : null,
+                      padding: EdgeInsets.only(
+                        top: 8,
+                        bottom: DraftChatViewStyle.bottomBarInputPadding(
+                          context,
                         ),
-                        child: const BlockedUserBanner(),
                       ),
-                      Divider(
-                        height: ChatViewBodyStyle.dividerSize,
-                        thickness: ChatViewBodyStyle.dividerSize,
-                        color: Theme.of(context).dividerColor,
+                      child: DraftChatInputRow(
+                        onEmojiAction: controller.onEmojiAction,
+                        onInputBarChanged: controller.onInputBarChanged,
+                        onInputBarSubmitted: controller.onInputBarSubmitted,
+                        onSendFileClick: controller.onSendFileClick,
+                        textEditingController: controller.sendController,
+                        typeAheadFocusNode: controller.inputFocus,
+                        typeAheadKey: controller.draftChatComposerTypeAheadKey,
+                        focusSuggestionController:
+                            controller.focusSuggestionController,
+                        inputText: controller.inputText,
+                        isSendingNotifier: controller.isSendingNotifier,
+                        onLongPressAudioRecord:
+                            controller.onLongPressAudioRecordInMobile,
+                        audioRecordStateNotifier:
+                            controller.audioRecordStateNotifier,
+                        startRecording: controller.startRecording,
+                        stopRecording: () {
+                          if (controller.sendController.text.isNotEmpty) {
+                            controller.sendController.clear();
+                          }
+                          controller.stopRecording();
+                        },
+                        pauseRecording: controller.pauseRecording,
+                        deleteRecording: controller.deleteRecording,
+                        sendVoiceMessageAction:
+                            (audioFile, duration, waveform) =>
+                                controller.sendVoiceMessageAction(
+                                  audioFile: audioFile,
+                                  time: duration,
+                                  waveform: waveform,
+                                ),
+                        onTapRecorderWeb: () =>
+                            controller.onTapRecorderWeb(context: context),
+                        onFinishRecorderWeb: controller.sendVoiceMessageWeb,
+                        onDeleteRecorderWeb: controller.stopRecordWeb,
+                        recordDurationWebNotifier:
+                            controller.recordDurationWebNotifier,
                       ),
-                    ],
-                  );
-                },
-              ),
-              ValueListenableBuilder(
-                valueListenable: getIt
-                    .get<ContactsManager>()
-                    .getContactsNotifier(),
-                builder: (context, state, child) {
-                  if (controller.isInsideContactManager(state)) {
-                    return const SizedBox();
-                  }
-
-                  return child ?? const SizedBox();
-                },
-                child: AddContactBanner(
-                  onTap: () => showAddContactDialog(
-                    context,
-                    displayName: controller.widget.contact.displayName,
-                    matrixId: controller.widget.contact.matrixId,
-                  ),
-                  show: controller.showAddContactBanner,
+                    );
+                  },
                 ),
-              ),
-              ChatDeviceVerificationBanner(client: controller.client),
-              ValueListenableBuilder(
-                valueListenable: controller.isBlockedUserNotifier,
-                builder: (context, isBlocked, child) {
-                  if (!isBlocked) {
-                    return child ?? const SizedBox();
-                  }
-
-                  return const BlockedMessageView();
-                },
-                child: Container(
-                  decoration: DraftChatViewStyle.responsive.isMobile(context)
-                      ? BoxDecoration(
-                          color: LinagoraSysColors.material().surface,
-                          border: Border(
-                            top: BorderSide(
-                              color: LinagoraStateLayer(
-                                LinagoraSysColors.material().surfaceTint,
-                              ).opacityLayer3,
-                            ),
-                          ),
-                        )
-                      : null,
-                  padding: EdgeInsets.only(
-                    top: 8,
-                    bottom: DraftChatViewStyle.bottomBarInputPadding(context),
-                  ),
-                  child: DraftChatInputRow(
-                    onEmojiAction: controller.onEmojiAction,
-                    onInputBarChanged: controller.onInputBarChanged,
-                    onInputBarSubmitted: controller.onInputBarSubmitted,
-                    onSendFileClick: controller.onSendFileClick,
-                    textEditingController: controller.sendController,
-                    typeAheadFocusNode: controller.inputFocus,
-                    typeAheadKey: controller.draftChatComposerTypeAheadKey,
-                    focusSuggestionController:
-                        controller.focusSuggestionController,
-                    inputText: controller.inputText,
-                    isSendingNotifier: controller.isSendingNotifier,
-                    onLongPressAudioRecord:
-                        controller.onLongPressAudioRecordInMobile,
-                    audioRecordStateNotifier:
-                        controller.audioRecordStateNotifier,
-                    startRecording: () {
-                      controller.startRecording();
-                    },
-                    stopRecording: () {
-                      if (controller.sendController.text.isNotEmpty) {
-                        controller.sendController.clear();
-                      }
-                      controller.stopRecording();
-                    },
-                    pauseRecording: () {
-                      controller.pauseRecording();
-                    },
-                    deleteRecording: () {
-                      controller.deleteRecording();
-                    },
-                    sendVoiceMessageAction: (audioFile, duration, waveform) =>
-                        controller.sendVoiceMessageAction(
-                          audioFile: audioFile,
-                          time: duration,
-                          waveform: waveform,
-                        ),
-                    onTapRecorderWeb: () =>
-                        controller.onTapRecorderWeb(context: context),
-                    onFinishRecorderWeb: controller.sendVoiceMessageWeb,
-                    onDeleteRecorderWeb: controller.stopRecordWeb,
-                    recordDurationWebNotifier:
-                        controller.recordDurationWebNotifier,
-                  ),
+              ],
+            ),
+          ),
+          ValueListenableBuilder(
+            valueListenable: controller.draggingNotifier,
+            builder: (context, dragging, _) {
+              if (!dragging) return const SizedBox.shrink();
+              return Container(
+                color: Theme.of(context).scaffoldBackgroundColor.withOpacity(
+                  ChatViewBodyStyle.dragOverlayOpacity,
                 ),
-              ),
-            ],
+                alignment: Alignment.center,
+                child: const Icon(Icons.upload_outlined, size: 100),
+              );
+            },
           ),
           ValueListenableBuilder(
             valueListenable: controller.showEmojiPickerComposerNotifier,

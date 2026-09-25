@@ -39,6 +39,31 @@ extension RoomExtension on Room {
     return !isSpace && !isStoryRoom;
   }
 
+  /// True when this room can be used as a DM with [userId].
+  ///
+  /// Rejects clear groups (`mJoinedMemberCount > 2`), including groups that
+  /// still look like DMs because `m.direct` maps [userId] onto them.
+  ///
+  /// When join/invite members are known, also requires [userId] among them
+  /// (not only a matching `m.direct` peer), so a stale mapping to another
+  /// contact's two-member room is rejected. A single known member (usually
+  /// self right after create) still passes.
+  ///
+  /// Allows a missing [directChatMatrixID] / empty member list when the room
+  /// is not a group — account data and membership may not be reflected yet.
+  bool isUsableDirectChatWith(String userId) {
+    final joined = summary.mJoinedMemberCount;
+    if (joined != null && joined > 2) return false;
+    final peer = directChatMatrixID;
+    if (peer != null && peer != userId) return false;
+
+    final members = getParticipants([Membership.join, Membership.invite]);
+    if (members.isEmpty) return true;
+    if (members.any((member) => member.id == userId)) return true;
+    // Post-create / invite-pending: only self (or one member) known so far.
+    return members.length <= 1;
+  }
+
   bool isShowInChatList() {
     return _isDirectChatHaveMessage() || _isGroupChat();
   }
