@@ -3159,5 +3159,67 @@
     "placeholders": {}
   },
   "webPushOnThisBrowser": "Уведомления в этом браузере",
-  "webPushPermissionDeniedHint": "Уведомления заблокированы. Разрешите их для этого сайта в настройках браузера, затем снова включите этот параметр."
+  "webPushPermissionDeniedHint": "Уведомления заблокированы. Разрешите их для этого сайта в настройках браузера, затем снова включите этот параметр.",
+  "removeDeviceConfirmationTitle": "Удалить устройство?",
+  "@removeDeviceConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeDeviceConfirmationDescription": "Сессия завершится и больше не будет получать зашифрованные сообщения.",
+  "@removeDeviceConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationTitle": "Удалить все остальные устройства?",
+  "@removeAllOtherDevicesConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationDescription": "Все остальные сессии завершатся и больше не будут получать зашифрованные сообщения.",
+  "@removeAllOtherDevicesConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newFeed": "Новая лента",
+  "enterFeedName": "Введите название",
+  "feedNotSupportedByHomeserver": "Ленты пока не поддерживаются на этом сервере. Обратитесь к администратору.",
+  "couldNotLaunchUrl": "Не удалось открыть ссылку",
+  "deviceVerificationWaring": "Некоторые зашифрованные сообщения могут быть недоступны из-за проблем с синхронизацией устройств",
+  "deviceVerificationWarningOnSettingsScreen": "Некоторые сессии не подтверждены. Зашифрованные сообщения могут быть недоступны, пока вы не подтвердите или не удалите все сессии.",
+  "verifyThisDevice": "Подтвердить",
+  "verifyThisDeviceDescription": "Подтвердите, что это вы, чтобы разблокировать зашифрованные сообщения.",
+  "useAnotherDevice": "Подтвердить с другого устройства",
+  "useAnotherDeviceDescription": "Выполнить проверку при помощи другой активной сессии",
+  "useRecoveryKeyTitle": "Использовать ключ восстановления",
+  "useRecoveryKeyDescription": "Используйте ключ из раздела Настройки → Конфиденциальность",
+  "notPossibleToVerify": "Не можете подтвердить?",
+  "notPossibleToVerifyDescription": "Нет доступа к другим устройствам или ключу восстановления",
+  "retryAutomatically": "Повторить попытку",
+  "checkYourOtherDevice": "Откройте другое устройство",
+  "checkYourOtherDeviceDescription": "Зайдите в Twake Chat на другом авторизованном устройстве и примите запрос на подтверждение.",
+  "verifyEmojiTitle": "Сверить эмодзи",
+  "verifyEmojiDescription": "Если эмодзи одинаковы, нажмите «Совпадают» на этом устройстве, а затем подтвердите их на другом.",
+  "dontMatch": "Не совпадают",
+  "match": "Совпадают",
+  "deviceVerifiedTitle": "Устройство подтверждено",
+  "deviceVerifiedDescription": "Доступ к зашифрованным сообщениям восстановлен",
+  "startChatting": "Перейти к чатам",
+  "enterRecoveryKey": "Введите ключ восстановления",
+  "enterRecoveryKeyDescription": "Вставьте ключ, сохранённый при настройке резервного копирования.",
+  "recoveryKeyDoesntMatch": "Неверный ключ восстановления",
+  "recoveryKeyRequired": "Требуется ключ восстановления",
+  "resetEndToEndEncryption": "Сбросить настройки сквозного шифрования",
+  "resetEndToEndEncryptionDescription": "Используйте эту опцию, только если у вас нет доступа к другим авторизованным устройствам и ключу восстановления.\nПосле сброса вы навсегда потеряете доступ к ранее зашифрованным сообщениям. Это действие нельзя отменить.",
+  "reset": "Сбросить",
+  "resetCompleteTitle": "Шифрование сброшено",
+  "resetCompleteDescription": "Шифрование настроено заново. Ранее зашифрованные сообщения больше недоступны.",
+  "verificationFailedTitle": "Не удалось подтвердить",
+  "verificationFailedDescription": "Запрос был отменен или отклонен. Попробуйте ещё раз.",
+  "retryFailedDescription": "Не удалось подтвердить устройство автоматически. Попробуйте другой способ.",
+  "chatBackupSetUpDescription": "Ключ сохранен. Он откроет доступ к зашифрованным сообщениям на любом устройстве.",
+  "messageCannotBeResent": "Не удалось отправить сообщение повторно: его содержимое недоступно",
+  "@messageCannotBeResent": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
