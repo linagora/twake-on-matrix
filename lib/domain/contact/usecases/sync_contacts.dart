@@ -30,55 +30,84 @@ class SyncContactsUseCase {
       _sources.map((source) => _safeFetch(source, failedKinds)),
     );
 
-    final fetchedByMatrixId = <String, List<ContactSourceValue>>{};
+    final existing = await _repository.getContacts(userId);
+    final outcome = _reconcile(
+      fetched: _groupByMatrixId(results),
+      existing: {for (final contact in existing) contact.matrixId: contact},
+      failedKinds: failedKinds,
+    );
+
+    if (outcome.contacts.isNotEmpty) {
+      await _repository.upsertAll(userId, outcome.contacts);
+    }
+    for (final matrixId in outcome.removedMatrixIds) {
+      await _repository.delete(userId, matrixId);
+    }
+    return outcome.contacts;
+  }
+
+  /// Rebuilds every contact from the fetched and stored values.
+  ///
+  /// A contact without any remaining value is reported as removed instead of
+  /// being resolved.
+  ({List<UnifiedContact> contacts, List<String> removedMatrixIds}) _reconcile({
+    required Map<String, List<ContactSourceValue>> fetched,
+    required Map<String, UnifiedContact> existing,
+    required Set<ContactSourceKind> failedKinds,
+  }) {
+    final contacts = <UnifiedContact>[];
+    final removedMatrixIds = <String>[];
+
+    for (final matrixId in {...fetched.keys, ...existing.keys}) {
+      final values = _mergeValues(
+        stored: existing[matrixId],
+        fetched: fetched[matrixId],
+        failedKinds: failedKinds,
+      );
+      if (values.isEmpty) {
+        removedMatrixIds.add(matrixId);
+      } else {
+        contacts.add(_policy.resolve(matrixId: matrixId, values: values));
+      }
+    }
+
+    return (contacts: contacts, removedMatrixIds: removedMatrixIds);
+  }
+
+  Map<String, List<ContactSourceValue>> _groupByMatrixId(
+    List<List<SourcedContact>> results,
+  ) {
+    final byMatrixId = <String, List<ContactSourceValue>>{};
     for (final contacts in results) {
       for (final contact in contacts) {
-        fetchedByMatrixId
+        byMatrixId
             .putIfAbsent(contact.matrixId, () => <ContactSourceValue>[])
             .add(contact.value);
       }
     }
-
-    final existing = await _repository.getContacts(userId);
-    final existingByMatrixId = {
-      for (final contact in existing) contact.matrixId: contact,
-    };
-
-    // A stored value is kept only when this run cannot refresh its kind:
-    // manual entries are never fetched, and failed sources keep their last
-    // known values. Values from successful sources are dropped so that a
-    // deletion propagates to the store.
-    bool keep(ContactSourceValue value) =>
-        value.kind == ContactSourceKind.manual ||
-        failedKinds.contains(value.kind);
-
-    final matrixIds = <String>{
-      ...fetchedByMatrixId.keys,
-      ...existingByMatrixId.keys,
-    };
-
-    final contacts = <UnifiedContact>[];
-    final removedMatrixIds = <String>[];
-    for (final matrixId in matrixIds) {
-      final merged = <ContactSourceValue>[
-        ...?existingByMatrixId[matrixId]?.sources.where(keep),
-        ...?fetchedByMatrixId[matrixId],
-      ];
-      if (merged.isEmpty) {
-        removedMatrixIds.add(matrixId);
-      } else {
-        contacts.add(_policy.resolve(matrixId: matrixId, values: merged));
-      }
-    }
-
-    if (contacts.isNotEmpty) {
-      await _repository.upsertAll(userId, contacts);
-    }
-    for (final matrixId in removedMatrixIds) {
-      await _repository.delete(userId, matrixId);
-    }
-    return contacts;
+    return byMatrixId;
   }
+
+  /// Merges the values fetched in this run with the stored ones that cannot be
+  /// refreshed: manual entries are never fetched, and failed sources keep their
+  /// last known values. Values from a successful source are dropped so that a
+  /// deletion propagates to the store.
+  List<ContactSourceValue> _mergeValues({
+    required UnifiedContact? stored,
+    required List<ContactSourceValue>? fetched,
+    required Set<ContactSourceKind> failedKinds,
+  }) => <ContactSourceValue>[
+    for (final value in stored?.sources ?? const <ContactSourceValue>[])
+      if (_isRetained(value, failedKinds)) value,
+    ...?fetched,
+  ];
+
+  bool _isRetained(
+    ContactSourceValue value,
+    Set<ContactSourceKind> failedKinds,
+  ) =>
+      value.kind == ContactSourceKind.manual ||
+      failedKinds.contains(value.kind);
 
   Future<List<SourcedContact>> _safeFetch(
     ContactSource source,
