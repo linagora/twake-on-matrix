@@ -16,7 +16,7 @@ import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
-import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
+import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
 
 part 'contacts_providers.g.dart';
 
@@ -51,7 +51,7 @@ UnifiedContactRepository unifiedContactRepository(Ref ref) =>
 @riverpod
 List<ContactSource> contactSources(Ref ref) => [
   TomAddressBookSource(getIt.get<AddressBookRepository>()),
-  PhonebookSource(getIt.get<PhonebookContactRepository>()),
+  PhonebookSource(getIt.get<HiveContactRepository>()),
 ];
 
 @riverpod

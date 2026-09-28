@@ -17,7 +17,7 @@ class TomAddressBookSource implements ContactSource {
   ContactSourceKind get kind => ContactSourceKind.tomAddressBook;
 
   @override
-  Future<List<SourcedContact>> fetch() async {
+  Future<List<SourcedContact>> fetch(String _) async {
     final response = await _repository.getAddressBook();
     final contacts = response.addressBooks?.toContacts() ?? const [];
 

@@ -18,7 +18,7 @@ class _FakeSource implements ContactSource {
   final bool throws;
 
   @override
-  Future<List<SourcedContact>> fetch() async {
+  Future<List<SourcedContact>> fetch(String userId) async {
     if (throws) throw Exception('source unavailable');
     return _contacts;
   }

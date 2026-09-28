@@ -27,7 +27,7 @@ class SyncContactsUseCase {
   Future<List<UnifiedContact>> execute(String userId) async {
     final failedKinds = <ContactSourceKind>{};
     final results = await Future.wait(
-      _sources.map((source) => _safeFetch(source, failedKinds)),
+      _sources.map((source) => _safeFetch(source, userId, failedKinds)),
     );
 
     final existing = await _repository.getContacts(userId);
@@ -111,10 +111,11 @@ class SyncContactsUseCase {
 
   Future<List<SourcedContact>> _safeFetch(
     ContactSource source,
+    String userId,
     Set<ContactSourceKind> failedKinds,
   ) async {
     try {
-      return await source.fetch();
+      return await source.fetch(userId);
     } catch (_) {
       failedKinds.add(source.kind);
       return const <SourcedContact>[];

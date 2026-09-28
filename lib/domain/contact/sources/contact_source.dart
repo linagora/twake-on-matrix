@@ -16,9 +16,11 @@ class SourcedContact {
 /// A read-only provider of contact values for one source.
 ///
 /// Implementations live in `data/` and are the only place that talks to an
-/// external system (TOM API, device phonebook, Matrix SDK).
+/// external system (TOM API, device phonebook, Matrix SDK). [fetch] receives
+/// the Matrix ID of the account being synced so a source can scope its data to
+/// that account instead of the currently active one.
 abstract class ContactSource {
   ContactSourceKind get kind;
 
-  Future<List<SourcedContact>> fetch();
+  Future<List<SourcedContact>> fetch(String userId);
 }

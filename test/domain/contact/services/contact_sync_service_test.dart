@@ -22,7 +22,7 @@ class _FakeSource implements ContactSource {
   final List<SourcedContact> contacts;
 
   @override
-  Future<List<SourcedContact>> fetch() async => contacts;
+  Future<List<SourcedContact>> fetch(String userId) async => contacts;
 }
 
 void main() {
