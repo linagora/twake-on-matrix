@@ -226,119 +226,106 @@ void main() {
       expect(contact.sources, hasLength(1));
     });
 
-    test('prefers the newest snapshot of the same source kind', () {
-      final older = DateTime.utc(2026, 1, 1);
-      final newer = DateTime.utc(2026, 6, 1);
+    test(
+      'merges same-kind snapshots by keeping the newest non-empty value',
+      () {
+        final older = DateTime.utc(2026, 1, 1);
+        final newer = DateTime.utc(2026, 6, 1);
 
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'Old name',
-            avatar: 'mxc://old',
-            updatedAt: older,
+        final scenarios = [
+          (
+            label: 'prefers the newest snapshot of the same source kind',
+            values: [
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'Old name',
+                avatar: 'mxc://old',
+                updatedAt: older,
+              ),
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'New name',
+                avatar: 'mxc://new',
+                updatedAt: newer,
+              ),
+            ],
+            expectedName: 'New name',
+            expectedAvatar: 'mxc://new',
           ),
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'New name',
-            avatar: 'mxc://new',
-            updatedAt: newer,
+          (
+            label: 'newest snapshot wins regardless of the iteration order',
+            values: [
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'New name',
+                avatar: 'mxc://new',
+                updatedAt: newer,
+              ),
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'Old name',
+                avatar: 'mxc://old',
+                updatedAt: older,
+              ),
+            ],
+            expectedName: 'New name',
+            expectedAvatar: 'mxc://new',
           ),
-        ],
-      );
-
-      expect(contact.resolvedDisplayName, 'New name');
-      expect(contact.avatarUrl, 'mxc://new');
-    });
-
-    test('newest snapshot wins regardless of the iteration order', () {
-      final older = DateTime.utc(2026, 1, 1);
-      final newer = DateTime.utc(2026, 6, 1);
-
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'New name',
-            avatar: 'mxc://new',
-            updatedAt: newer,
+          (
+            label: 'empty newest snapshot does not erase the previous name',
+            values: [
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'Kept name',
+                avatar: 'mxc://kept',
+                updatedAt: older,
+              ),
+              value(
+                ContactSourceKind.matrixProfile,
+                name: '   ',
+                updatedAt: newer,
+              ),
+            ],
+            expectedName: 'Kept name',
+            expectedAvatar: 'mxc://kept',
           ),
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'Old name',
-            avatar: 'mxc://old',
-            updatedAt: older,
+          (
+            label: 'a dated snapshot beats an undated one',
+            values: [
+              value(ContactSourceKind.matrixProfile, name: 'Undated'),
+              value(
+                ContactSourceKind.matrixProfile,
+                name: 'Dated',
+                updatedAt: older,
+              ),
+            ],
+            expectedName: 'Dated',
+            expectedAvatar: null,
           ),
-        ],
-      );
-
-      expect(contact.resolvedDisplayName, 'New name');
-      expect(contact.avatarUrl, 'mxc://new');
-    });
-
-    test('empty newest snapshot does not erase the previous name', () {
-      final older = DateTime.utc(2026, 1, 1);
-      final newer = DateTime.utc(2026, 6, 1);
-
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'Kept name',
-            avatar: 'mxc://kept',
-            updatedAt: older,
+          (
+            label: 'keeps the first non-empty value when no snapshot is dated',
+            values: [
+              value(ContactSourceKind.matrixProfile, name: 'First'),
+              value(ContactSourceKind.matrixProfile, name: 'Second'),
+            ],
+            expectedName: 'First',
+            expectedAvatar: null,
           ),
-          value(ContactSourceKind.matrixProfile, name: '   ', updatedAt: newer),
-        ],
-      );
+        ];
 
-      expect(contact.resolvedDisplayName, 'Kept name');
-      expect(contact.avatarUrl, 'mxc://kept');
-    });
-
-    test('a dated snapshot beats an undated one', () {
-      final dated = DateTime.utc(2026, 1, 1);
-
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(ContactSourceKind.matrixProfile, name: 'Undated'),
-          value(
-            ContactSourceKind.matrixProfile,
-            name: 'Dated',
-            updatedAt: dated,
-          ),
-        ],
-      );
-
-      expect(contact.resolvedDisplayName, 'Dated');
-    });
-
-    test('keeps the first non-empty value when no snapshot is dated', () {
-      final contact = policy.resolve(
-        matrixId: matrixId,
-        values: [
-          value(ContactSourceKind.matrixProfile, name: 'First'),
-          value(ContactSourceKind.matrixProfile, name: 'Second'),
-        ],
-      );
-
-      expect(contact.resolvedDisplayName, 'First');
-    });
+        for (final s in scenarios) {
+          final contact = policy.resolve(matrixId: matrixId, values: s.values);
+          expect(contact.resolvedDisplayName, s.expectedName, reason: s.label);
+          expect(contact.avatarUrl, s.expectedAvatar, reason: s.label);
+        }
+      },
+    );
 
     test('returns an empty projection for an empty source list', () {
       final contact = policy.resolve(matrixId: matrixId);
 
       expect(contact.resolvedDisplayName, isNull);
       expect(contact.lastUpdated, isNull);
-    });
-
-    test('empty source list yields empty collections', () {
-      final contact = policy.resolve(matrixId: matrixId);
-
       expect(contact.emails, isEmpty);
       expect(contact.phones, isEmpty);
       expect(contact.sources, isEmpty);
