@@ -189,11 +189,12 @@ function isStale(key, fresh, oldResources) {
   return fresh.resources[key] !== oldResources[key];
 }
 
-// A stale core entry we could not replace must be KEPT: serving slightly old
-// bytes offline is better than deleting the asset and breaking startup.
-function shouldKeepStale(key, fresh, staged) {
+// A stale entry we must not delete: one we already refreshed in place, or an
+// unreplaced core entry (serving slightly old bytes offline beats deleting the
+// asset). Removed paths and non-core entries are safe to drop.
+function shouldPreserveStale(key, fresh, staged) {
+  if (staged.has(key)) return true;
   if (fresh.resources[key] === undefined) return false;
-  if (staged.has(key)) return false;
   return fresh.core.indexOf(key) >= 0;
 }
 
@@ -223,7 +224,7 @@ async function evictStale(contentCache, fresh, oldResources, staged) {
   for (const request of await contentCache.keys()) {
     const key = resourceKey(request.url);
     if (!isStale(key, fresh, oldResources)) continue;
-    if (key !== null && shouldKeepStale(key, fresh, staged)) continue;
+    if (key !== null && shouldPreserveStale(key, fresh, staged)) continue;
     await contentCache.delete(request);
   }
 }
@@ -238,14 +239,19 @@ async function applyManifest(fresh) {
   //    mutated yet: a failed core fetch must not delete the working copy.
   const staged = await stageCore(contentCache, fresh, oldResources);
 
-  // 2. Evict entries that no longer match the deploy, keeping unreplaced core.
-  await evictStale(contentCache, fresh, oldResources, staged);
-
-  // 3. Install the fresh core bytes, then publish the manifest only once the
-  //    cache is coherent so a concurrent fetch never sees a half-applied deploy.
+  // 2. Write the staged bytes BEFORE evicting. cache.put overwrites the plain
+  //    URL key in place, so old entries are never deleted without a replacement:
+  //    a quota error here aborts with the previous entries still present.
   for (const [url, response] of staged) {
     await contentCache.put(url, response);
   }
+
+  // 3. Evict what no longer matches, preserving the entries refreshed in step 2
+  //    and any unreplaced core entry.
+  await evictStale(contentCache, fresh, oldResources, staged);
+
+  // 4. Publish the manifest only once the cache is coherent, so a concurrent
+  //    fetch never sees a half-applied deploy.
   await manifestCache.put('manifest', new Response(JSON.stringify(fresh)));
 }
 
