@@ -99,9 +99,15 @@ function storedHasResources(stored) {
 // manifest. Load the stored one once so a reload right after a worker restart is
 // still served from cache. Falls back to the network when there is nothing yet.
 async function loadInitialManifest() {
-  const stored = await loadStoredManifest();
-  if (storedHasResources(stored)) {
-    manifest = stored;
+  try {
+    const stored = await loadStoredManifest();
+    if (storedHasResources(stored)) {
+      manifest = stored;
+    }
+  } catch (error) {
+    // A corrupt stored manifest must not break startup: serve from an empty
+    // manifest (network) rather than reject every fetch.
+    console.log('[Twake Chat] stored manifest unreadable, starting empty: ', error);
   }
   manifestLoaded = true;
   return manifest;
@@ -128,11 +134,19 @@ async function doRefreshManifest() {
     return;
   }
 
-  const stored = await loadStoredManifest();
-  const changed = manifestChanged(stored, fresh);
-  manifest = fresh;
-  manifestLoaded = true;
-  if (changed) await applyManifest(fresh);
+  try {
+    const stored = await loadStoredManifest();
+    if (manifestChanged(stored, fresh)) await applyManifest(fresh);
+    // Publish only once the cache matches the fresh manifest (or when nothing
+    // had to change), so a failed eviction keeps the previous coherent pair.
+    manifest = fresh;
+    manifestLoaded = true;
+  } catch (error) {
+    // A failed cache update (QuotaExceededError, corrupt stored manifest, ...)
+    // must NEVER break navigation: keep the previous manifest and serve on.
+    console.log('[Twake Chat] manifest apply failed, keeping previous manifest: ', error);
+    if (!manifestLoaded) await loadInitialManifest();
+  }
 }
 
 // Concurrent navigations must not run applyManifest twice: coalesce them onto a
