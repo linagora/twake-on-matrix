@@ -2972,7 +2972,7 @@
   "other": "Eile",
   "enableRightAndLeftMessageAlignment": "Cumasaigh ailíniú teachtaireachta ar dheis/ar chlé",
   "holdToRecordAudio": "Coinnigh síos chun fuaim a thaifeadadh.",
-  "explainPermissionToAccessMicrophone": "Tá do mhicreafón ag teastáil chun teachtaireachtaí gutha a sheoladh.",
+  "explainPermissionToAccessMicrophone": "Tá gá le do mhicreafón chun teachtaireachtaí gutha a sheoladh.",
   "allowMicrophoneAccess": "Ceadaigh rochtain micreafóin",
   "later": "Níos déanaí",
   "couldNotPlayAudioFile": "Níorbh fhéidir an comhad fuaime a sheinm",
@@ -3217,5 +3217,67 @@
   "enableNotificationsExplanation": "Cuir fógraí ar siúl chun foláireamh a fháil faoi theachtaireachtaí nua, fiú nuair a bhíonn Twake dúnta.",
   "webPushOnThisBrowser": "Fógraí ar an mbrabhsálaí seo",
   "webPushPermissionDeniedHint": "Tá fógraí blocáilte. Ceadaigh iad don suíomh seo i socruithe do bhrabhsálaí, ansin cuir seo ar siúl.",
-  "newMessage": "Teachtaireacht nua"
+  "newMessage": "Teachtaireacht nua",
+  "removeDeviceConfirmationTitle": "An bhfuil an gléas seo le baint?",
+  "@removeDeviceConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeDeviceConfirmationDescription": "Logálfar amach as an seisiún seo agus ní ghlacfar a thuilleadh le teachtaireachtaí criptithe.",
+  "@removeDeviceConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationTitle": "An bhfuil na gléasanna eile go léir le baint?",
+  "@removeAllOtherDevicesConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationDescription": "Logálfar amach as gach seisiún eile iad agus ní ghlacfar a thuilleadh le teachtaireachtaí criptithe iontu.",
+  "@removeAllOtherDevicesConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "newFeed": "Fuaimniú Nua",
+  "enterFeedName": "Cuir isteach ainm an fhíde",
+  "feedNotSupportedByHomeserver": "Ní thacaíonn an freastalaí seo le fothaí go fóill. Déan teagmháil le do riarthóir.",
+  "couldNotLaunchUrl": "Níorbh fhéidir an URL a sheoladh",
+  "deviceVerificationWaring": "D’fhéadfadh teachtaireachtaí criptithe a bheith do-rochtana toisc nach bhfuil cuid de do ghléasanna sioncronaithe i gceart",
+  "deviceVerificationWarningOnSettingsScreen": "Níl roinnt seisiún fíoraithe. D’fhéadfadh sé nach ndéanfaí teachtaireachtaí criptithe a dhíchriptiú i gceart go dtí go mbeidh gach seisiún fíoraithe nó bainte.",
+  "verifyThisDevice": "Fíoraigh an gléas seo",
+  "verifyThisDeviceDescription": "Deimhnigh gurb tusa é chun do theachtaireachtaí criptithe a dhíghlasáil.",
+  "useAnotherDevice": "Bain úsáid as gléas eile",
+  "useAnotherDeviceDescription": "Ceadaigh ó cheann de do sheisiúin ghníomhacha eile",
+  "useRecoveryKeyTitle": "Úsáid eochair aisghabhála",
+  "useRecoveryKeyDescription": "Úsáid an eochair a shábháil tú faoi Socruithe > Príobháideachas & Slándáil",
+  "notPossibleToVerify": "Ní féidir a fhíorú?",
+  "notPossibleToVerifyDescription": "Ní féidir rochtain a fháil ar ghléasanna eile ná ar an eochair aisghabhála",
+  "retryAutomatically": "Déan iarracht arís go huathoibríoch",
+  "checkYourOtherDevice": "Seiceáil do ghléas eile",
+  "checkYourOtherDeviceDescription": "Oscail Twake Chat ar cheann de do ghléasanna eile a bhfuil tú logáilte isteach iontu, agus glac leis an iarratas fíoraithe.",
+  "verifyEmojiTitle": "Fíoraigh an emoji",
+  "verifyEmojiDescription": "Cliceáil 'Meaitseáil' ar an bhfeiste seo, ansin deimhnigh go bhfuil na straoiseoga ag teacht le chéile ar do ghléas eile chun an nasc slán a chur i gcrích.",
+  "dontMatch": "Ná déan meaitseáil",
+  "match": "Meaitseáil",
+  "deviceVerifiedTitle": "Gléas fíoraithe",
+  "deviceVerifiedDescription": "Tá do theachtaireachtaí criptithe díghlasáilte anois",
+  "startChatting": "Cuir tús leis an gcomhrá",
+  "enterRecoveryKey": "Cuir isteach an eochair aisghabhála",
+  "enterRecoveryKeyDescription": "Greamaigh an eochair a shábháil tú nuair a bhí tú ag socrú an chúltaca shláin.",
+  "recoveryKeyDoesntMatch": "Ní hionann an eochair aisghabhála",
+  "recoveryKeyRequired": "Tá eochair aisghabhála ag teastáil",
+  "resetEndToEndEncryption": "Athshocraigh an criptiú ceann go ceann",
+  "resetEndToEndEncryptionDescription": "Ná húsáid an rogha seo ach amháin mura bhfuil rochtain agat ar aon fheiste eile a bhfuil tú sínithe isteach inti agus má tá do chuid eochrach aisghabhála caillte agat.\nBainfidh an t-athshocrú seo an rochtain ar do chuid teachtaireachtaí a bhí criptithe roimhe seo go buan. Ní féidir an gníomh seo a chealú.",
+  "reset": "Athshocraigh",
+  "resetCompleteTitle": "Athshocrú críochnaithe",
+  "resetCompleteDescription": "Tá do chéannacht chriptithe nua réidh. Níl teacht a thuilleadh ar theachtaireachtaí a criptíodh roimhe seo.",
+  "verificationFailedTitle": "Theip ar an bhfíorú",
+  "verificationFailedDescription": "Cuireadh an t-iarratas ar ceal nó diúltaíodh dó. Déan iarracht arís, le do thoil.",
+  "retryFailedDescription": "Níor éirigh leis an athiarracht uathoibríoch. Bain triail as bealach eile chun an gléas seo a fhíorú.",
+  "chatBackupSetUpDescription": "Tá d’eochair aisghabhála sábháilte. Is féidir leat í a úsáid chun do theachtaireachtaí criptithe a athchóiriú ar aon fheiste.",
+  "messageCannotBeResent": "Ní féidir an teachtaireacht seo a sheoladh arís toisc nach bhfuil a sonraí ar fáil",
+  "@messageCannotBeResent": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
