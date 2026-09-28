@@ -78,12 +78,14 @@ DeleteContactUseCase deleteContactUseCase(Ref ref) =>
     DeleteContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
 @Riverpod(keepAlive: true)
-ContactSyncService contactSyncService(Ref ref) => ContactSyncService(
-  repository: ref.watch(unifiedContactRepositoryProvider),
-  policy: ref.watch(contactResolutionPolicyProvider),
-  syncContacts: ref.watch(syncContactsUseCaseProvider),
-  watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
-  getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
-  addContact: ref.watch(addContactUseCaseProvider),
-  deleteContact: ref.watch(deleteContactUseCaseProvider),
-);
+ContactSyncService contactSyncService(Ref ref, String userId) =>
+    ContactSyncService(
+      userId: userId,
+      repository: ref.watch(unifiedContactRepositoryProvider),
+      policy: ref.watch(contactResolutionPolicyProvider),
+      syncContacts: ref.watch(syncContactsUseCaseProvider),
+      watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
+      getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
+      addContact: ref.watch(addContactUseCaseProvider),
+      deleteContact: ref.watch(deleteContactUseCaseProvider),
+    );
