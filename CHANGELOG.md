@@ -1,3 +1,28 @@
+## [2.25.0] - 2026-09-28
+### Added
+- #3423: Translated using Weblate (French, Irish, Russian, Vietnamese)
+- TW-3357: Split long messages into parts
+- #3318: Self-host web remote assets and serve brotli
+
+### Changed
+- #3389: TW-3351: Update UI for actions in device settings
+- #3389: TW-3361: Update verification request dialogs and strings
+- #3380: TW-3368: Refactor chat file handling and drag-and-drop
+- #3386, #3387: Enable avoid_setters_without_getters and sort_pub_dependencies
+- #3383: Build Docker image without SSH
+- #3378: Document flutter_gen asset generation in README
+
+### Fixed
+- #3375: TW-3354: Fix inconsistent message status across timeline/list
+- #3369: Restore ToM config from well-known for existing sessions
+- #3379: Prevent RenderFlex overflow on chat details members page
+- #3367: TW-3197: Improve iOS share extension for unsaved screenshots
+
+### Tests
+- #3382: Add reproducible FTL physical backfill tooling
+- #3381: Publish FTL history on schedule and retry dashboard loads
+- #3407: Gate perf median on completeness; rename blocked asset
+
 ## [2.24.0] - 2026-09-18
 ### Added
 - #3334: TW-3325: Introduce feeds as group with public channel preset
