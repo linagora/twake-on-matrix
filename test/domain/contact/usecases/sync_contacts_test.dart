@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
@@ -110,5 +111,158 @@ void main() {
     await useCase.execute(userId);
 
     expect(repository.store, isEmpty);
+  });
+
+  test('drops stored values from a source that succeeded but no longer returns '
+      'the contact', () async {
+    const matrixId = '@jean:server';
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: matrixId,
+        canonicalDisplayName: 'Jean Dupont',
+        localAlias: 'Jean Travail',
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomAddressBook,
+            displayName: 'Jean Dupont',
+          ),
+          ContactSourceValue(
+            kind: ContactSourceKind.phonebook,
+            displayName: 'Jean Travail',
+          ),
+        ],
+      ),
+    );
+
+    final useCase = SyncContactsUseCase(
+      repository: repository,
+      policy: const ContactResolutionPolicy(),
+      sources: [
+        _FakeSource(ContactSourceKind.tomAddressBook, const [
+          SourcedContact(
+            matrixId: matrixId,
+            value: ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Jean Dupont',
+            ),
+          ),
+        ]),
+        _FakeSource(ContactSourceKind.phonebook, const []),
+      ],
+    );
+
+    final contacts = await useCase.execute(userId);
+
+    expect(contacts, hasLength(1));
+    expect(contacts.single.localAlias, isNull);
+    expect(contacts.single.resolvedDisplayName, 'Jean Dupont');
+    expect(repository.store[matrixId]!.sources.map((value) => value.kind), [
+      ContactSourceKind.tomAddressBook,
+    ]);
+  });
+
+  test(
+    'deletes a stored contact that no successful source returns anymore',
+    () async {
+      const matrixId = '@jean:server';
+      await repository.upsert(
+        userId,
+        const UnifiedContact(
+          matrixId: matrixId,
+          canonicalDisplayName: 'Jean Dupont',
+          sources: [
+            ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Jean Dupont',
+            ),
+          ],
+        ),
+      );
+
+      final useCase = SyncContactsUseCase(
+        repository: repository,
+        policy: const ContactResolutionPolicy(),
+        sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
+      );
+
+      final contacts = await useCase.execute(userId);
+
+      expect(contacts, isEmpty);
+      expect(repository.store, isEmpty);
+    },
+  );
+
+  test('keeps the last known values of a source that failed', () async {
+    const matrixId = '@jean:server';
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: matrixId,
+        canonicalDisplayName: 'Jean Dupont',
+        localAlias: 'Jean Travail',
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomAddressBook,
+            displayName: 'Jean Dupont',
+          ),
+          ContactSourceValue(
+            kind: ContactSourceKind.phonebook,
+            displayName: 'Jean Travail',
+          ),
+        ],
+      ),
+    );
+
+    final useCase = SyncContactsUseCase(
+      repository: repository,
+      policy: const ContactResolutionPolicy(),
+      sources: [
+        _FakeSource(ContactSourceKind.tomAddressBook, const [
+          SourcedContact(
+            matrixId: matrixId,
+            value: ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Jean Dupont',
+            ),
+          ),
+        ]),
+        _FakeSource(ContactSourceKind.phonebook, const [], throws: true),
+      ],
+    );
+
+    final contacts = await useCase.execute(userId);
+
+    expect(contacts.single.localAlias, 'Jean Travail');
+    expect(repository.store[matrixId]!.localAlias, 'Jean Travail');
+  });
+
+  test('preserves a manual-only contact that no source returns', () async {
+    const matrixId = '@manual:server';
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: matrixId,
+        canonicalDisplayName: 'Manual Entry',
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.manual,
+            displayName: 'Manual Entry',
+          ),
+        ],
+      ),
+    );
+
+    final useCase = SyncContactsUseCase(
+      repository: repository,
+      policy: const ContactResolutionPolicy(),
+      sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
+    );
+
+    final contacts = await useCase.execute(userId);
+
+    expect(contacts, hasLength(1));
+    expect(contacts.single.matrixId, matrixId);
+    expect(repository.store.containsKey(matrixId), isTrue);
   });
 }
