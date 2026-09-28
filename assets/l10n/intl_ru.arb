@@ -107,7 +107,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "askVerificationRequest": "Принять этот запрос подтверждения от {username}?",
+  "askVerificationRequest": "Примите запрос на подтверждение от {username}",
   "@askVerificationRequest": {
     "type": "text",
     "placeholders": {
@@ -1137,7 +1137,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "newVerificationRequest": "Новый запрос на подтверждение!",
+  "newVerificationRequest": "Запрос на подтверждение",
   "@newVerificationRequest": {
     "type": "text",
     "placeholders": {}
@@ -3219,6 +3219,36 @@
   "chatBackupSetUpDescription": "Ключ сохранен. Он откроет доступ к зашифрованным сообщениям на любом устройстве.",
   "messageCannotBeResent": "Не удалось отправить сообщение повторно: его содержимое недоступно",
   "@messageCannotBeResent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "editDisplayNameForSession": "Переименовать эту сессию",
+  "@editDisplayNameForSession": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterNewDisplayName": "Введите новое название.",
+  "@enterNewDisplayName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startVerification": "Начать подтверждение",
+  "@startVerification": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "syncDeviceWithCurrentSession": "Синхронизируйте это устройство с текущей сессией",
+  "@syncDeviceWithCurrentSession": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "signOutAndRemoveSession": "Выйти и удалить эту сессию",
+  "@signOutAndRemoveSession": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "couldNotSaveChangesTryLater": "Не удалось сохранить изменения. Попробуйте позже",
+  "@couldNotSaveChangesTryLater": {
     "type": "text",
     "placeholders": {}
   }
