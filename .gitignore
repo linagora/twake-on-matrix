@@ -106,3 +106,6 @@ test-results/
 # Xcode SwiftPM resolved state
 ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 ios/Runner.xcworkspace/xcshareddata/swiftpm/
+
+# Fetched by scripts/fetch-web-vendor.sh, pinned and integrity checked there.
+web/vendor/dotlottie/

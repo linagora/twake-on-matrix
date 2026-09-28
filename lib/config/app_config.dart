@@ -180,6 +180,9 @@ abstract class AppConfig {
   static const String iOSKeychainSharingAccount = 'app.twake.ios.chat.sessions';
   static const String iOSKeychainSharingSsssAccount = 'app.twake.ios.chat.ssss';
   static const int maxFilesSendPerDialog = 6;
+
+  /// Text messages longer than this are split
+  static const int maxMessageLength = 4096;
   static const bool supportMultipleAccountsInTheSameHomeserver = false;
   static const imageCompressFormmat = CompressFormat.jpeg;
   static const videoThumbnailFormat = ImageFormat.JPEG;

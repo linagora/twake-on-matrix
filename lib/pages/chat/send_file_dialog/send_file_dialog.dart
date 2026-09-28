@@ -73,10 +73,7 @@ class SendFileDialogController extends State<SendFileDialog> {
   void initState() {
     super.initState();
     filesNotifier = ListNotifier(widget.files);
-    isSendMediaWithCaption = _isShowSendMediaDialog(
-      filesNotifier.value,
-      widget.room,
-    );
+    isSendMediaWithCaption = _isShowSendMediaDialog(filesNotifier.value);
     textEditingController.text = widget.pendingText ?? '';
     // Deferred to after the first frame: the caption FocusNode isn't
     // attached to the FocusScope tree yet inside initState, so requesting
@@ -195,17 +192,15 @@ class SendFileDialogController extends State<SendFileDialog> {
   }
 
   void send() {
-    if (_isShowSendMediaDialog(filesNotifier.value, widget.room)) {
+    if (_isShowSendMediaDialog(filesNotifier.value)) {
       sendMediaWithCaption();
     } else {
       sendFilesWithCaption();
     }
   }
 
-  bool _isShowSendMediaDialog(List<MatrixFile> matrixFilesList, Room? room) =>
-      matrixFilesList.length == 1 &&
-      matrixFilesList.first is MatrixImageFile &&
-      room != null;
+  bool _isShowSendMediaDialog(List<MatrixFile> matrixFilesList) =>
+      matrixFilesList.length == 1 && matrixFilesList.first is MatrixImageFile;
 
   void onRemoveFile(MatrixFile matrixFile) {
     filesNotifier.remove(matrixFile);

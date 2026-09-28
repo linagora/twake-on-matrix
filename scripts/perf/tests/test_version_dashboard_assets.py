@@ -12,7 +12,7 @@ class VersionDashboardAssetsTest(unittest.TestCase):
             index_path.write_text(
                 """<link rel=\"stylesheet\" href=\"styles.css\" />
 <script src=\"vendor/chart.umd.min.js\"></script>
-<script src=\"metrics.js\"></script>
+<script src=\"perf-metrics.js\"></script>
 <script src=\"app.js\"></script>
 """,
                 encoding="utf-8",
@@ -23,7 +23,7 @@ class VersionDashboardAssetsTest(unittest.TestCase):
             html = index_path.read_text(encoding="utf-8")
             self.assertIn('href="styles.css?v=abc123"', html)
             self.assertIn('src="vendor/chart.umd.min.js?v=abc123"', html)
-            self.assertIn('src="metrics.js?v=abc123"', html)
+            self.assertIn('src="perf-metrics.js?v=abc123"', html)
             self.assertIn('src="app.js?v=abc123"', html)
 
 

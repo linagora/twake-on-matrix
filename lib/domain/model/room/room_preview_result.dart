@@ -16,7 +16,10 @@ sealed class RoomPreviewResult {
 
 final class RoomPreviewFound extends RoomPreviewResult {
   final Event event;
-  const RoomPreviewFound(this.event);
+
+  /// Other users who have read [event]. Only filled for own messages.
+  final List<User> seenByUsers;
+  const RoomPreviewFound(this.event, {this.seenByUsers = const []});
 }
 
 final class RoomPreviewEmpty extends RoomPreviewResult {

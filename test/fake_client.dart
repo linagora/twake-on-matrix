@@ -85,6 +85,21 @@ class MockDatabase extends Mock implements DatabaseApi {
   }
 }
 
+/// [MockDatabase] with a fixed stored event order, newest first.
+class EventIdListDatabase extends MockDatabase {
+  EventIdListDatabase(this.eventIds);
+
+  final List<String> eventIds;
+
+  @override
+  Future<List<String>> getEventIdList(
+    Room room, {
+    int start = 0,
+    bool includeSending = false,
+    int? limit,
+  }) async => eventIds;
+}
+
 Future<Client> getClient({
   DatabaseApi? database,
   http.Client? httpClient,
