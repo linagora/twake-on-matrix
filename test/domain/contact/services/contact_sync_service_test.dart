@@ -26,6 +26,7 @@ class _FakeSource implements ContactSource {
 }
 
 void main() {
+  const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
   late ContactSyncService service;
   const policy = ContactResolutionPolicy();
@@ -65,49 +66,62 @@ void main() {
       ]),
     ]);
 
-    await service.refresh();
+    await service.refresh(userId);
 
     expect(
-      (await service.getContact('@a:server'))?.resolvedDisplayName,
+      (await service.getContact(userId, '@a:server'))?.resolvedDisplayName,
       'Alice',
     );
   });
 
   test('addContact persists a manual contact', () async {
     await service.addContact(
+      userId: userId,
       matrixId: '@b:server',
       displayName: 'Bob',
       emails: ['bob@server.com'],
     );
 
-    final contact = await service.getContact('@b:server');
+    final contact = await service.getContact(userId, '@b:server');
     expect(contact, isNotNull);
     expect(contact!.resolvedDisplayName, 'Bob');
     expect(contact.emails, ['bob@server.com']);
   });
 
   test('deleteContact removes the contact', () async {
-    await service.addContact(matrixId: '@c:server', displayName: 'Carol');
+    await service.addContact(
+      userId: userId,
+      matrixId: '@c:server',
+      displayName: 'Carol',
+    );
 
-    await service.deleteContact('@c:server');
+    await service.deleteContact(userId, '@c:server');
 
-    expect(await service.getContact('@c:server'), isNull);
+    expect(await service.getContact(userId, '@c:server'), isNull);
   });
 
   test('watchContacts emits the store content', () async {
-    await service.addContact(matrixId: '@d:server', displayName: 'Dave');
+    await service.addContact(
+      userId: userId,
+      matrixId: '@d:server',
+      displayName: 'Dave',
+    );
 
-    final iterator = StreamIterator(service.watchContacts());
+    final iterator = StreamIterator(service.watchContacts(userId));
     expect(await iterator.moveNext(), isTrue);
     expect(iterator.current.single.matrixId, '@d:server');
     await iterator.cancel();
   });
 
   test('clear empties the store', () async {
-    await service.addContact(matrixId: '@e:server', displayName: 'Eve');
+    await service.addContact(
+      userId: userId,
+      matrixId: '@e:server',
+      displayName: 'Eve',
+    );
 
-    await service.clear();
+    await service.clear(userId);
 
-    expect(await repository.getContacts(), isEmpty);
+    expect(await repository.getContacts(userId), isEmpty);
   });
 }

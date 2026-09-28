@@ -10,5 +10,7 @@ class AddContactUseCase {
 
   final UnifiedContactRepository _repository;
 
-  Future<void> execute(UnifiedContact contact) => _repository.upsert(contact);
+  /// Persists [contact] under its owning account [userId] (its Matrix ID).
+  Future<void> execute(String userId, UnifiedContact contact) =>
+      _repository.upsert(userId, contact);
 }

@@ -24,6 +24,7 @@ class _FakeSource implements ContactSource {
 }
 
 void main() {
+  const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
 
   setUp(() => repository = FakeUnifiedContactRepository());
@@ -60,7 +61,7 @@ void main() {
         ],
       );
 
-      final contacts = await useCase.execute();
+      final contacts = await useCase.execute(userId);
 
       expect(contacts, hasLength(1));
       expect(contacts.single.canonicalDisplayName, 'Jean Dupont');
@@ -92,7 +93,7 @@ void main() {
         ],
       );
 
-      final contacts = await useCase.execute();
+      final contacts = await useCase.execute(userId);
 
       expect(contacts, hasLength(1));
       expect(contacts.single.matrixId, '@a:server');
@@ -106,7 +107,7 @@ void main() {
       sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
     );
 
-    await useCase.execute();
+    await useCase.execute(userId);
 
     expect(repository.store, isEmpty);
   });

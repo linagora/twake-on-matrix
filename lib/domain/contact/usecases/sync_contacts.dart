@@ -22,7 +22,7 @@ class SyncContactsUseCase {
   final ContactResolutionPolicy _policy;
   final List<ContactSource> _sources;
 
-  Future<List<UnifiedContact>> execute() async {
+  Future<List<UnifiedContact>> execute(String userId) async {
     final results = await Future.wait(_sources.map(_safeFetch));
 
     final fetchedByMatrixId = <String, List<ContactSourceValue>>{};
@@ -36,7 +36,7 @@ class SyncContactsUseCase {
 
     // Preserve values from sources that did not participate in this run
     // (e.g. a failed source or a manual entry added earlier).
-    final existing = await _repository.getContacts();
+    final existing = await _repository.getContacts(userId);
     final existingByMatrixId = {
       for (final contact in existing) contact.matrixId: contact,
     };
@@ -52,7 +52,7 @@ class SyncContactsUseCase {
     }
 
     if (contacts.isNotEmpty) {
-      await _repository.upsertAll(contacts);
+      await _repository.upsertAll(userId, contacts);
     }
     return contacts;
   }

@@ -6,5 +6,7 @@ class WatchUnifiedContactsUseCase {
 
   final UnifiedContactRepository _repository;
 
-  Stream<List<UnifiedContact>> execute() => _repository.watchContacts();
+  /// Streams the contacts owned by account [userId] (its Matrix ID).
+  Stream<List<UnifiedContact>> execute(String userId) =>
+      _repository.watchContacts(userId);
 }

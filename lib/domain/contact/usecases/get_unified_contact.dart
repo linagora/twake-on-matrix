@@ -6,6 +6,7 @@ class GetUnifiedContactUseCase {
 
   final UnifiedContactRepository _repository;
 
-  Future<UnifiedContact?> execute(String matrixId) =>
-      _repository.getByMatrixId(matrixId);
+  /// Returns the contact of account [userId] identified by [matrixId].
+  Future<UnifiedContact?> execute(String userId, String matrixId) =>
+      _repository.getByMatrixId(userId, matrixId);
 }

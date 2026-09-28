@@ -42,19 +42,20 @@ class ContactSyncService {
 
   /// Local-first: callers should render the current store immediately and let
   /// [refresh] run in the background.
-  Future<void> initialSync() => refresh();
+  Future<void> initialSync(String userId) => refresh(userId);
 
-  Future<void> refresh() async {
-    await _syncContacts.execute();
+  Future<void> refresh(String userId) async {
+    await _syncContacts.execute(userId);
   }
 
-  Stream<List<UnifiedContact>> watchContacts() =>
-      _watchUnifiedContacts.execute();
+  Stream<List<UnifiedContact>> watchContacts(String userId) =>
+      _watchUnifiedContacts.execute(userId);
 
-  Future<UnifiedContact?> getContact(String matrixId) =>
-      _getUnifiedContact.execute(matrixId);
+  Future<UnifiedContact?> getContact(String userId, String matrixId) =>
+      _getUnifiedContact.execute(userId, matrixId);
 
   Future<void> addContact({
+    required String userId,
     required String matrixId,
     String? displayName,
     List<String> emails = const <String>[],
@@ -70,7 +71,7 @@ class ContactSyncService {
 
     // Retain previously stored source values (synced, phonebook, …) and
     // replace only the manual entry so a later sync does not discard user data.
-    final existing = await _repository.getByMatrixId(matrixId);
+    final existing = await _repository.getByMatrixId(userId, matrixId);
     final retained = existing == null
         ? const <ContactSourceValue>[]
         : existing.sources
@@ -81,11 +82,11 @@ class ContactSyncService {
       matrixId: matrixId,
       values: [...retained, manual],
     );
-    await _addContact.execute(contact);
+    await _addContact.execute(userId, contact);
   }
 
-  Future<void> deleteContact(String matrixId) =>
-      _deleteContact.execute(matrixId);
+  Future<void> deleteContact(String userId, String matrixId) =>
+      _deleteContact.execute(userId, matrixId);
 
-  Future<void> clear() => _repository.clear();
+  Future<void> clear(String userId) => _repository.clear(userId);
 }

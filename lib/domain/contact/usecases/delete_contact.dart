@@ -5,5 +5,7 @@ class DeleteContactUseCase {
 
   final UnifiedContactRepository _repository;
 
-  Future<void> execute(String matrixId) => _repository.delete(matrixId);
+  /// Removes the contact of account [userId] identified by [matrixId].
+  Future<void> execute(String userId, String matrixId) =>
+      _repository.delete(userId, matrixId);
 }
