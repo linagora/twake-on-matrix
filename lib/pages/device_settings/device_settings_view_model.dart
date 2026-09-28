@@ -41,9 +41,6 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     _ => 0,
   };
 
-  /// Transitions to a new "devices loaded" variant, carrying over the
-  /// current [_devices]/[_bannerVisibility]/[_keysRevision] unless
-  /// overridden. No-op if devices haven't loaded yet.
   void _transition({
     List<Device>? devices,
     VerificationBannerVisibility? bannerVisibility,
@@ -108,7 +105,10 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     });
   }
 
-  Future<void> _loadUserDevices(Client client) async {
+  Future<void> _loadUserDevices(
+    Client client, {
+    bool preserveStateOnFailure = false,
+  }) async {
     await ref
         .read(getDevicesInteractorProvider)
         .execute(client: client)
@@ -118,6 +118,7 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
               if (failure is GetDevicesEmpty) {
                 state = const DevicesSettingsState.loaded(devices: []);
               } else if (failure is GetDevicesFailed) {
+                if (preserveStateOnFailure) return;
                 state = DevicesSettingsState.error(
                   exception: failure.exception,
                 );
@@ -139,16 +140,60 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     });
   }
 
+  Future<void> _softReload(Client client) {
+    return _loadInFlight ??=
+        _loadUserDevices(client, preserveStateOnFailure: true).whenComplete(() {
+          _loadInFlight = null;
+        });
+  }
+
+  Future<void> renameDevice({
+    required Client client,
+    required String deviceId,
+    required String displayName,
+  }) async {
+    await client.updateDevice(deviceId, displayName: displayName);
+    // Keep the new name if soft-reload fails with preserveStateOnFailure.
+    _applyLocalDisplayName(deviceId, displayName);
+    await _softReload(client);
+  }
+
+  void _applyLocalDisplayName(String deviceId, String displayName) {
+    final devices = _devices;
+    if (devices == null) return;
+    _transition(
+      devices: [
+        for (final device in devices)
+          if (device.deviceId == deviceId)
+            Device(
+              deviceId: device.deviceId,
+              displayName: displayName,
+              lastSeenIp: device.lastSeenIp,
+              lastSeenTs: device.lastSeenTs,
+            )
+          else
+            device,
+      ],
+    );
+  }
+
   void setLoadingDeletingDevices(bool loading) =>
       _transition(deleting: loading);
 
   void setErrorDeletingDevices(String? error) =>
       _transition(deleteError: error);
 
+  void removeDevicesFromState(List<String> deviceIds) {
+    final devices = _devices;
+    if (devices == null) return;
+    final idsToRemove = deviceIds.toSet();
+    _transition(
+      devices: devices.where((d) => !idsToRemove.contains(d.deviceId)).toList(),
+    );
+  }
+
   void refreshDeviceKeys() {
     if (_devices == null) return;
-    // Device list identity is unchanged after SAS; bump keysRevision so
-    // Freezed equality fails and list items re-read DeviceKeys.verified.
     _transition(keysRevision: _keysRevision + 1);
   }
 }

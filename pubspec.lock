@@ -978,7 +978,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "81f5fab958fdc64267bbbe1611ad3c2fe67df0da"
+      resolved-ref: e3c5df9393f7f2f2ac8f7105cb3686b027701852
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1906,11 +1906,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.2.6"
-      resolved-ref: "361d5a222de7d1558881740b92abe2db3c4c1e7f"
+      ref: "v0.3.4"
+      resolved-ref: "0712b30dcaf02e0d2ed9467051a8e144dfacf2f1"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.2.6"
+    version: "0.3.4"
   linkfy_text:
     dependency: "direct main"
     description:
@@ -1920,6 +1920,14 @@ packages:
       url: "https://github.com/linagora/linkfy_text.git"
     source: git
     version: "1.1.6"
+  linkify:
+    dependency: transitive
+    description:
+      name: linkify
+      sha256: "4139ea77f4651ab9c315b577da2dd108d9aa0bd84b5d03d33323f1970c645832"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   lints:
     dependency: transitive
     description:
@@ -3745,4 +3753,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.10.4 <4.0.0"
-  flutter: ">=3.35.0"
+  flutter: ">=3.38.0"

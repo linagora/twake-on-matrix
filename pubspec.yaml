@@ -135,7 +135,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.6
+      ref: v0.3.4
   linkfy_text:
     git:
       # HTTPS so CI runners work without an SSH key (public repo)
@@ -313,10 +313,6 @@ dependency_overrides:
       # HTTPS so CI runners work without an SSH key (public repo)
       url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
-  linagora_design_flutter:
-    git:
-      url: https://github.com/linagora/linagora-design-flutter.git
-      ref: v0.2.6
   # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
   linkfy_text:
     git:
