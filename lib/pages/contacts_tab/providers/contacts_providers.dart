@@ -11,7 +11,6 @@ import 'package:twake_chat/domain/contact/repositories/unified_contact_repositor
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
@@ -73,10 +72,6 @@ GetUnifiedContactUseCase getUnifiedContactUseCase(Ref ref) =>
 AddContactUseCase addContactUseCase(Ref ref) =>
     AddContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
-@riverpod
-DeleteContactUseCase deleteContactUseCase(Ref ref) =>
-    DeleteContactUseCase(ref.watch(unifiedContactRepositoryProvider));
-
 @Riverpod(keepAlive: true)
 ContactSyncService contactSyncService(Ref ref, String userId) =>
     ContactSyncService(
@@ -87,5 +82,4 @@ ContactSyncService contactSyncService(Ref ref, String userId) =>
       watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
       getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
       addContact: ref.watch(addContactUseCaseProvider),
-      deleteContact: ref.watch(deleteContactUseCaseProvider),
     );

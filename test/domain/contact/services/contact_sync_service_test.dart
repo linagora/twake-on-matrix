@@ -7,7 +7,6 @@ import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart'
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
@@ -44,7 +43,6 @@ void main() {
         watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
         getUnifiedContact: GetUnifiedContactUseCase(repository),
         addContact: AddContactUseCase(repository),
-        deleteContact: DeleteContactUseCase(repository),
       );
 
   setUp(() {
@@ -86,14 +84,6 @@ void main() {
     expect(contact, isNotNull);
     expect(contact!.resolvedDisplayName, 'Bob');
     expect(contact.emails, ['bob@server.com']);
-  });
-
-  test('deleteContact removes the contact', () async {
-    await service.addContact(matrixId: '@c:server', displayName: 'Carol');
-
-    await service.deleteContact('@c:server');
-
-    expect(await service.getContact('@c:server'), isNull);
   });
 
   test('watchContacts emits the store content', () async {

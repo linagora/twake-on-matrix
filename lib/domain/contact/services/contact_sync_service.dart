@@ -4,7 +4,6 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
@@ -24,15 +23,13 @@ class ContactSyncService {
     required WatchUnifiedContactsUseCase watchUnifiedContacts,
     required GetUnifiedContactUseCase getUnifiedContact,
     required AddContactUseCase addContact,
-    required DeleteContactUseCase deleteContact,
   }) : _userId = userId,
        _repository = repository,
        _policy = policy,
        _syncContacts = syncContacts,
        _watchUnifiedContacts = watchUnifiedContacts,
        _getUnifiedContact = getUnifiedContact,
-       _addContact = addContact,
-       _deleteContact = deleteContact;
+       _addContact = addContact;
 
   /// Matrix ID of the account that owns the contacts this service operates on.
   final String _userId;
@@ -42,7 +39,6 @@ class ContactSyncService {
   final WatchUnifiedContactsUseCase _watchUnifiedContacts;
   final GetUnifiedContactUseCase _getUnifiedContact;
   final AddContactUseCase _addContact;
-  final DeleteContactUseCase _deleteContact;
 
   /// Local-first: callers should render the current store immediately and let
   /// [refresh] run in the background.
@@ -87,9 +83,6 @@ class ContactSyncService {
     );
     await _addContact.execute(_userId, contact);
   }
-
-  Future<void> deleteContact(String matrixId) =>
-      _deleteContact.execute(_userId, matrixId);
 
   Future<void> clear() => _repository.clear(_userId);
 }
