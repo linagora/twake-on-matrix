@@ -17,7 +17,7 @@ const RESOURCES = {"splash/img/icon_twp.png": "5f3bf8fc4a58850bf5dae7b6f33043fc"
 "script.js": "e43a171f3b1eb4d2aed66279f55d32cf",
 "auth.html": "753913b429e0217a2c870bdafd63d063",
 "vendor/README.md": "29435ef46bd8f33febb17ca0153a7cda",
-"flutter_bootstrap.js": "41663fe43b0517ad5c7a21e3f31852a7",
+"flutter_bootstrap.js": "ff515a76a3f7468261a2860a2d640fbd",
 "worker_service/worker_service.js": "89c18f10e43fdfb76890cf9e43c621cf",
 "worker_service/img/ic-close-1x.png": "27b9c71ff0cf463da5f1affb11b4c204",
 "worker_service/img/ic-close-4x.png": "05a898c9308bad96d32143261c3e7182",
