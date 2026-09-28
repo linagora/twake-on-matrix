@@ -19,13 +19,19 @@
 #
 # The output is JSON but assembled with a minimal, guarded serializer: every
 # key is a scope-relative path and every value an MD5 hex string, so the only
-# characters that can appear are ordinary printable ASCII. A path containing a
-# quote, backslash, tab, newline or control byte fails the build instead of
-# producing malformed JSON.
+# characters that can appear are ordinary printable ASCII. A path carrying a
+# quote or backslash (JSON metacharacters), the '|' row delimiter, a space (it
+# splits the unquoted core-list expansions) or any non-printable byte (control
+# characters write raw into JSON) fails the build instead of producing a
+# truncated key or malformed manifest.
 #
 # Usage: scripts/generate-sw-manifest.sh [BUILD_DIR=build/web]
 
 set -euo pipefail
+
+# The [[:print:]] class below must mean "ASCII printable", independent of the
+# runner's locale.
+export LC_ALL=C
 
 BUILD_DIR="${1:-build/web}"
 MANIFEST="assets/sw-manifest.json"
@@ -44,11 +50,13 @@ die() {
 [ -f "$BUILD_DIR/index.html" ] || die "index.html missing from $BUILD_DIR"
 mkdir -p "$BUILD_DIR/assets"
 
-# Fail-fast guard: the JSON emitter quotes keys/values verbatim, so reject any
-# path that would need escaping.
+# Fail-fast guard: the JSON emitter quotes keys/values verbatim and the row
+# parser splits on '|', so reject any path those intermediate formats cannot
+# carry: JSON metacharacters (quote, backslash), the '|' delimiter, spaces (they
+# split the unquoted core-list expansions) and every non-printable byte.
 assert_safe_path() {
     case "$1" in
-        *'"'* | *'\\'* | *$'\t'* | *$'\n'*)
+        *[![:print:]]* | *'"'* | *'\\'* | *'|'* | *' '*)
             die "unsafe path in build output: $1"
             ;;
     esac
