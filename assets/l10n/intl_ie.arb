@@ -250,7 +250,6 @@
     "placeholders": {}
   },
   "scanQrCode": "Scannar un code QR",
-  "@scanQrCode": {},
   "noRoomsFound": "Null chambres trovat…",
   "@noRoomsFound": {
     "type": "text",
@@ -307,7 +306,6 @@
     "placeholders": {}
   },
   "recoveryKey": "Clave de regania",
-  "@recoveryKey": {},
   "sendMessages": "Inviar missages",
   "@sendMessages": {
     "type": "text",
@@ -369,17 +367,11 @@
     "placeholders": {}
   },
   "messageType": "Tip de missage",
-  "@messageType": {},
   "start": "Iniciar",
-  "@start": {},
   "messageInfo": "Information pri li missage",
-  "@messageInfo": {},
   "openGallery": "Aperter li galerie",
-  "@openGallery": {},
   "unsubscribeStories": "Desabonnar racontas",
-  "@unsubscribeStories": {},
   "yourStory": "Vor raconte",
-  "@yourStory": {},
   "videoWithSize": "Video ({size})",
   "@videoWithSize": {
     "type": "text",
@@ -388,15 +380,10 @@
     }
   },
   "reportUser": "Raportar li usator",
-  "@reportUser": {},
   "matrixWidgets": "Widgets de Matrix",
-  "@matrixWidgets": {},
   "voiceCall": "Telefonada",
-  "@voiceCall": {},
   "nextAccount": "Sequent conto",
-  "@nextAccount": {},
   "previousAccount": "Precedent conto",
-  "@previousAccount": {},
   "countFiles": "{count} files",
   "@countFiles": {
     "placeholders": {
@@ -568,25 +555,15 @@
     "placeholders": {}
   },
   "time": "Hora",
-  "@time": {},
   "publish": "Publicar",
-  "@publish": {},
   "sender": "Autor",
-  "@sender": {},
   "dismiss": "Demisser",
-  "@dismiss": {},
   "custom": "Personalisat",
-  "@custom": {},
   "emojis": "Emoji",
-  "@emojis": {},
   "widgetCustom": "Personalisat",
-  "@widgetCustom": {},
   "users": "Usatores",
-  "@users": {},
   "user": "Usator",
-  "@user": {},
   "stories": "Racontas",
-  "@stories": {},
   "forward": "Avan",
   "@forward": {
     "type": "text",
@@ -628,7 +605,6 @@
     "placeholders": {}
   },
   "link": "Ligament",
-  "@link": {},
   "participant": "Participante",
   "@participant": {
     "type": "text",
@@ -670,7 +646,6 @@
     "placeholders": {}
   },
   "repeatPassword": "Repetir li contrasigne",
-  "@repeatPassword": {},
   "addEmail": "Adjunter e-post",
   "@addEmail": {
     "type": "text",
@@ -692,7 +667,6 @@
     "placeholders": {}
   },
   "clearArchive": "Vacuar li archive",
-  "@clearArchive": {},
   "commandHint_clearcache": "Vacuar li cache",
   "@commandHint_clearcache": {
     "type": "text",
@@ -744,7 +718,6 @@
     "placeholders": {}
   },
   "openChat": "Aperter li conversation",
-  "@openChat": {},
   "reportMessage": "Raportar li missage",
   "@reportMessage": {
     "type": "text",
@@ -796,11 +769,8 @@
     "placeholders": {}
   },
   "iUnderstand": "Yo comprende",
-  "@iUnderstand": {},
   "addWidget": "Adjunter un widget",
-  "@addWidget": {},
   "addAccount": "Adjunter un conto",
-  "@addAccount": {},
   "publicRooms": "Public chambres",
   "@publicRooms": {
     "type": "text",
@@ -812,7 +782,6 @@
     "placeholders": {}
   },
   "addDescription": "Adjunter un descrition",
-  "@addDescription": {},
   "roomVersion": "Version del chambre",
   "@roomVersion": {
     "type": "text",
@@ -846,7 +815,6 @@
     }
   },
   "pleaseEnterValidEmail": "Ples provider un valid adresse de e-post.",
-  "@pleaseEnterValidEmail": {},
   "about": "Pri",
   "@about": {
     "type": "text",
@@ -858,16 +826,13 @@
     "placeholders": {}
   },
   "updateNow": "Actualisar in li funde",
-  "@updateNow": {},
   "confirmMatrixId": "Ples confirmar vor Matrix ID por destructer vor conto.",
-  "@confirmMatrixId": {},
   "allChats": "Omni conversationes",
   "@allChats": {
     "type": "text",
     "placeholders": {}
   },
   "addToSpace": "Adjunter al spacie",
-  "@addToSpace": {},
   "addGroupDescription": "Adjunter un descrition de gruppe",
   "@addGroupDescription": {
     "type": "text",
@@ -886,7 +851,6 @@
     "placeholder": {}
   },
   "sendOnEnter": "Inviar per Enter",
-  "@sendOnEnter": {},
   "blocked": "Blocat",
   "@blocked": {
     "type": "text",
@@ -957,13 +921,9 @@
     "type": "text"
   },
   "updateAvailable": "Un actualisament de FluffyChat es disponibil",
-  "@updateAvailable": {},
   "yourUserId": "Vor ID de usator:",
-  "@yourUserId": {},
   "editWidgets": "Modificar li widgets",
-  "@editWidgets": {},
   "widgetEtherpad": "Textual nota",
-  "@widgetEtherpad": {},
   "banFromChat": "Bannir del conversation",
   "@banFromChat": {
     "type": "text",
@@ -975,15 +935,10 @@
     "placeholders": {}
   },
   "commandHint_markasgroup": "Marcar quam gruppe",
-  "@commandHint_markasgroup": {},
   "widgetJitsi": "Jitsi Meet",
-  "@widgetJitsi": {},
   "screenSharingTitle": "partir li ecran",
-  "@screenSharingTitle": {},
   "callingPermissions": "Permissiones de telefonada",
-  "@callingPermissions": {},
   "callingAccount": "Conto telefonante",
-  "@callingAccount": {},
   "bannedUser": "{username} ha bannit {targetName}",
   "@bannedUser": {
     "type": "text",
@@ -1103,9 +1058,7 @@
     "placeholders": {}
   },
   "widgetVideo": "Video",
-  "@widgetVideo": {},
   "widgetName": "Nómine",
-  "@widgetName": {},
   "account": "Conto",
   "@account": {
     "type": "text",
@@ -1142,7 +1095,6 @@
     "placeholders": {}
   },
   "homeserver": "Hem-servitor",
-  "@homeserver": {},
   "fluffychat": "FluffyChat",
   "@fluffychat": {
     "type": "text",
@@ -1159,15 +1111,10 @@
     "placeholders": {}
   },
   "newGroup": "Crear un gruppe",
-  "@newGroup": {},
   "newSpace": "Crear un spacie",
-  "@newSpace": {},
   "enterSpace": "Intrar li spacie",
-  "@enterSpace": {},
   "enterRoom": "Intrar li chambre",
-  "@enterRoom": {},
   "allSpaces": "Omni spacies",
-  "@allSpaces": {},
   "numChats": "{number} conversationes",
   "@numChats": {
     "type": "number",
@@ -1212,7 +1159,6 @@
     "placeholders": {}
   },
   "unverified": "Ínverificat",
-  "@unverified": {},
   "deviceId": "ID de aparate",
   "@deviceId": {
     "type": "text",
