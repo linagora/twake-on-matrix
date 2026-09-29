@@ -4,7 +4,7 @@ publish_to: none
 version: 2.25.0+2330
 
 environment:
-  sdk: ">=3.10.0 <4.0.0"
+  sdk: ">=3.11.0 <4.0.0"
 
 dependencies:
   adaptive_dialog: ^1.8.0+1
@@ -89,7 +89,7 @@ dependencies:
   flutter_slidable: 4.0.0
   flutter_svg: ^0.22.0
   flutter_typeahead: ^5.1.0
-  flutter_vodozemac: ^0.5.0
+  flutter_vodozemac: ^0.8.1
   flutter_web_auth_2: ^4.1.0
   fluttertoast: ^9.0.0
   freezed_annotation: 3.1.0
@@ -143,8 +143,7 @@ dependencies:
       ref: main
   lottie: ^3.0.0
   lottie_native: 0.1.2
-  ### Dependencies from git ###
-  matrix: ^7.1.2
+  matrix: 12.0.1
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
   media_kit: ^1.2.1
@@ -231,7 +230,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^3.2.3
-  go_router_builder: ^4.2.0
+  go_router_builder: 4.2.0
   html: ^0.15.4
   import_sorter: ^4.6.0
   integration_test:

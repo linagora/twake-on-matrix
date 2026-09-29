@@ -97,7 +97,7 @@ jobs:
         target: ${{ fromJson(needs.discover.outputs.targets) }}
 
     env:
-      FLUTTER_VERSION: "3.38.9"
+      FLUTTER_VERSION: "3.47.5"
       PATROL_CLI_VERSION: "4.3.1"
       # Use explicit IPv4 loopback — Chrome headless on Ubuntu 24 resolves
       # "localhost" to ::1 (IPv6) but Docker -p 80:80 binds 0.0.0.0:80
@@ -227,7 +227,7 @@ jobs:
     permissions:
       contents: read
     env:
-      FLUTTER_VERSION: "3.38.9"
+      FLUTTER_VERSION: "3.47.5"
       PATROL_CLI_VERSION: "4.3.1"
       SYNAPSE_URL: http://127.0.0.1
       SERVER_NAME: localhost
@@ -418,7 +418,7 @@ jobs:
             --repository "$GITHUB_REPOSITORY" \
             --sha "$GITHUB_SHA" \
             --run-id "$GITHUB_RUN_ID" \
-            --flutter-version "3.38.9" \
+            --flutter-version "3.47.5" \
             --patrol-version "4.3.1" \
             --runner-image "${ImageOS:-ubuntu}-${ImageVersion:-unknown}"
 

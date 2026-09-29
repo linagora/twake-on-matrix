@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions_bottom_sheet.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions_style.dart';
@@ -444,7 +443,7 @@ class Reaction extends StatelessWidget {
   }
 }
 
-class ReactionEntry with EquatableMixin {
+class ReactionEntry {
   String? key;
   int count;
   bool reacted;
@@ -456,7 +455,4 @@ class ReactionEntry with EquatableMixin {
     required this.reacted,
     this.reactors,
   });
-
-  @override
-  List<Object?> get props => [key, count, reacted, reactors];
 }

@@ -57,7 +57,7 @@ bash scripts/config-pre-commit.sh
 
 ### Requirements
 
-- [ ] Flutter 3.38.9
+- [ ] Flutter 3.47.5
 
 You can at any moment verify your flutter installation using:
 

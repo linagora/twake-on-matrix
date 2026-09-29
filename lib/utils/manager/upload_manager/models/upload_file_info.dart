@@ -49,19 +49,4 @@ class UploadFileInfo extends UploadInfo {
       _$UploadFileInfoFromJson(json);
 
   Map<String, dynamic> toJson() => _$UploadFileInfoToJson(this);
-
-  @override
-  List<Object?> get props => [
-    txid,
-    uploadStateStreamController,
-    cancelToken,
-    createdAt,
-    captionInfo,
-    inReplyToEventId,
-    isFailed,
-    fileInfo,
-    matrixFile,
-    thumbnail,
-    shrinkImageMaxDimension,
-  ];
 }
