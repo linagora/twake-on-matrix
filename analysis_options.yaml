@@ -20,6 +20,7 @@ linter:
     - use_colored_box
     - avoid_setters_without_getters
     - sort_pub_dependencies
+    - use_late_for_private_fields_and_variables
 
 analyzer:
   errors:
