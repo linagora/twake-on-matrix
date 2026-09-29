@@ -49,7 +49,7 @@ class _SpaceViewState extends State<SpaceView> {
         future: () async {
           await client.joinRoom(
             spaceChild.roomId,
-            serverName: space?.spaceChildren
+            via: space?.spaceChildren
                 .firstWhereOrNull((child) => child.roomId == spaceChild.roomId)
                 ?.via,
           );

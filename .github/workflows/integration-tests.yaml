@@ -20,7 +20,7 @@ on:
 name: Integration Tests
 
 env:
-  FLUTTER_VERSION: "3.38.9"
+  FLUTTER_VERSION: "3.47.5"
   JAVA_VERSION: 17
   ANDROID_SDK_ROOT: "/usr/local/lib/android/sdk"
   # FTL_RESULTS_BUCKET cannot be defined here: secrets are not accessible in the
@@ -458,7 +458,6 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: matrix-ci-shared-account
-      queue: max
       cancel-in-progress: false
     permissions:
       id-token: write

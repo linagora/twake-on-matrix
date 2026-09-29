@@ -48,7 +48,7 @@ def record(day="2026-07-22", sha="abc123"):
         repository="linagora/twake-on-matrix",
         sha=sha,
         run_id="12345",
-        flutter_version="3.38.9",
+        flutter_version="3.47.5",
     )
     return build_daily_record(
         [checkpoint()],
@@ -80,7 +80,7 @@ class BuildDailyRecordTest(unittest.TestCase):
             repository="linagora/twake-on-matrix",
             sha="abc123",
             run_id="12345",
-            flutter_version="3.38.9",
+            flutter_version="3.47.5",
         )
 
         daily = build_daily_record(
@@ -104,7 +104,7 @@ class BuildDailyRecordTest(unittest.TestCase):
             repository="linagora/twake-on-matrix",
             sha="abc123",
             run_id="12345",
-            flutter_version="3.38.9",
+            flutter_version="3.47.5",
         )
         incomplete = physical_checkpoint()
         incomplete["rss_bytes_sample_count"] = 1
@@ -134,7 +134,7 @@ class BuildDailyRecordTest(unittest.TestCase):
             repository="linagora/twake-on-matrix",
             sha="abc123",
             run_id="12345",
-            flutter_version="3.38.9",
+            flutter_version="3.47.5",
         )
         for name, changes, expected_error in cases:
             with self.subTest(name=name):
@@ -154,7 +154,7 @@ class BuildDailyRecordTest(unittest.TestCase):
             repository="linagora/twake-on-matrix",
             sha="abc123",
             run_id="12345",
-            flutter_version="3.38.9",
+            flutter_version="3.47.5",
         )
 
         with self.assertRaisesRegex(HistoryError, "Invalid UTC date"):
@@ -283,7 +283,7 @@ class UpdateHistoryTest(unittest.TestCase):
                 repository="linagora/twake-on-matrix",
                 sha="physical",
                 run_id="54321",
-                flutter_version="3.38.9",
+                flutter_version="3.47.5",
             )
             current = build_daily_record(
                 [physical_checkpoint(value=150.0)],

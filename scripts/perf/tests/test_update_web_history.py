@@ -40,7 +40,7 @@ def metadata(day: str = "2026-07-24", sha: str = "abc") -> WebMetadata:
         repository="linagora/twake-on-matrix",
         sha=sha,
         run_id="123",
-        flutter_version="3.38.9",
+        flutter_version="3.47.5",
         patrol_version="4.3.1",
         runner_image="ubuntu-24.04",
     )
