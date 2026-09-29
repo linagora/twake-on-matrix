@@ -44,7 +44,7 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// be updated accordingly. When upgrading the `matrix` SDK dependency,
 /// compare the generated `Api.sync()` signature and body with this
 /// implementation.
-// Validated against matrix SDK ^6.0.0
+// Validated against matrix SDK 12.0.1 (Api.sync signature unchanged)
 class TwakeClient extends Client {
   TwakeClient(
     super.clientName, {

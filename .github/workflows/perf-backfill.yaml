@@ -34,7 +34,7 @@ jobs:
     name: Backfill FTL physical history
     runs-on: ubuntu-latest
     env:
-      FLUTTER_VERSION: "3.38.9"
+      FLUTTER_VERSION: "3.47.5"
       FTL_RESULTS_BUCKET: "${{ secrets.GOOGLE_CLOUD_PROJECT_ID }}_test_results"
 
     defaults:

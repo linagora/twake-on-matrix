@@ -158,7 +158,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
       matrix.audioPlayer.setFilePath(file.path);
     } else {
       await matrix.audioPlayer.setAudioSource(
-        MatrixFileAudioSource(matrixFile),
+        audioSourceFromMatrixFile(matrixFile),
       );
     }
 

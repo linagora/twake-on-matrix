@@ -242,6 +242,11 @@ class MatrixLocals extends MatrixLocalizations {
   }
 
   @override
+  String incomingCallFrom(String senderName) {
+    return l10n.startedACall(senderName);
+  }
+
+  @override
   String unbannedUser(String senderName, String targetName) {
     return l10n.unbannedUser(senderName, targetName);
   }

@@ -140,6 +140,11 @@ abstract class ClientManager {
         // To check which story room we can post in
         EventTypes.RoomPowerLevels,
       },
+      // Matrix 12+ no longer caches loadArchive() results for getRoomById().
+      // Persist left rooms via sync so archive navigation keeps working.
+      syncFilter: Filter(
+        room: RoomFilter(includeLeave: true),
+      ),
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       database: await MatrixSdkDatabase.init(
         clientName,

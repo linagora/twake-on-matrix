@@ -1085,7 +1085,6 @@ class ChatController extends ConsumerState<Chat>
               reason: selectedOption.value == MessageReportReason.other
                   ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
                   : selectedOption.value.getReason(l10n),
-              score: selectedOption.value.score,
             )
             .last;
         return state.fold((failure) {

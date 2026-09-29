@@ -194,7 +194,7 @@ class UrlLauncher with GoToDraftChatMixin {
           final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
-              serverName: servers.isNotEmpty ? servers.toList() : null,
+              via: servers.isNotEmpty ? servers.toList() : null,
             ),
           );
           if (response.error != null) return;

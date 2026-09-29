@@ -33,7 +33,6 @@ import 'package:matrix/encryption/utils/stored_inbound_group_session.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/copy_map.dart';
 import 'package:matrix/src/utils/queued_to_device_event.dart';
-import 'package:matrix/src/utils/run_benchmarked.dart';
 
 typedef OnStartMigrating = Function(int oldVersion, int newVersion);
 
@@ -1091,14 +1090,18 @@ class HiveCollectionsDatabase extends DatabaseApi {
   Future<void> setVerifiedUserCrossSigningKey(
     bool verified,
     String userId,
-    String publicKey,
-  ) async {
+    String publicKey, {
+    DateTime? trustOnFirstUseSince,
+  }) async {
     final raw =
         (await _userCrossSigningKeysBox.get(
           TupleKey(userId, publicKey).toString(),
         )) ??
         {};
     raw['verified'] = verified;
+    if (trustOnFirstUseSince != null) {
+      raw['tofu'] = trustOnFirstUseSince.millisecondsSinceEpoch;
+    }
     await _userCrossSigningKeysBox.put(
       TupleKey(userId, publicKey).toString(),
       raw,
@@ -1469,14 +1472,17 @@ class HiveCollectionsDatabase extends DatabaseApi {
     String publicKey,
     String content,
     bool verified,
-    bool blocked,
-  ) async {
+    bool blocked, {
+    DateTime? trustOnFirstUseSince,
+  }) async {
     await _userCrossSigningKeysBox.put(TupleKey(userId, publicKey).toString(), {
       'user_id': userId,
       'public_key': publicKey,
       'content': content,
       'verified': verified,
       'blocked': blocked,
+      if (trustOnFirstUseSince != null)
+        'tofu': trustOnFirstUseSince.millisecondsSinceEpoch,
     });
   }
 

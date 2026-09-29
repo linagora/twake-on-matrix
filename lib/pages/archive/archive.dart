@@ -22,7 +22,14 @@ class ArchiveController extends State<Archive> {
   Future<List<Room>> getArchive(BuildContext context) async {
     final archive = this.archive;
     if (archive != null) return archive;
-    return this.archive = await Matrix.of(context).client.loadArchive();
+    final client = Matrix.of(context).client;
+    final syncedLeaveRooms = client.rooms
+        .where((room) => room.membership == Membership.leave)
+        .toList();
+    if (syncedLeaveRooms.isNotEmpty) {
+      return this.archive = syncedLeaveRooms;
+    }
+    return this.archive = await client.loadArchive();
   }
 
   void forgetAllAction() async {

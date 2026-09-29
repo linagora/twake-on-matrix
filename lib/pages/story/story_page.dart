@@ -303,19 +303,6 @@ class StoryPageController extends State<StoryPage> {
     _modalOpened = true;
     final event = currentEvent;
     if (event == null) return;
-    final score = await showConfirmationDialog<int>(
-      context: context,
-      title: L10n.of(context)!.reportMessage,
-      message: L10n.of(context)!.howOffensiveIsThisContent,
-      cancelLabel: L10n.of(context)!.cancel,
-      okLabel: L10n.of(context)!.ok,
-      actions: [
-        AlertDialogAction(key: -100, label: L10n.of(context)!.extremeOffensive),
-        AlertDialogAction(key: -50, label: L10n.of(context)!.offensive),
-        AlertDialogAction(key: 0, label: L10n.of(context)!.inoffensive),
-      ],
-    );
-    if (score == null) return;
     final reason = await showTextInputDialog(
       useRootNavigator: false,
       context: context,
@@ -330,7 +317,6 @@ class StoryPageController extends State<StoryPage> {
         roomId,
         event.eventId,
         reason: reason.single,
-        score: score,
       ),
     );
     _modalOpened = false;

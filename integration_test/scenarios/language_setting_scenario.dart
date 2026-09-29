@@ -39,6 +39,7 @@ class LanguageSettingScenario extends BaseTestScenario {
     s.verifyAll();
   }
 
+  /// Waits for L10n titles after selection (checkmark can land first).
   Future<void> _waitUntilRelocalised(
     AbstractLanguageSettingRobot language,
     _LanguageExpectation expected,

@@ -1,23 +1,13 @@
 import 'package:just_audio/just_audio.dart';
 import 'package:matrix/matrix.dart';
 
-class MatrixFileAudioSource extends StreamAudioSource {
-  final MatrixFile file;
-
-  MatrixFileAudioSource(this.file);
-
-  @override
-  Future<StreamAudioResponse> request([int? start, int? end]) async {
-    start ??= 0;
-    end ??= file.bytes.length;
-    return StreamAudioResponse(
-      sourceLength: file.bytes.length,
-      contentLength: end - start,
-      offset: start,
-      stream: Stream.value(file.bytes.sublist(start, end)),
-      contentType: file.mimeType,
-    );
-  }
+/// Builds a stable [AudioSource] from an in-memory [MatrixFile].
+///
+/// Uses [AudioSource.uri] with a data URI (stable just_audio API).
+AudioSource audioSourceFromMatrixFile(MatrixFile file) {
+  return AudioSource.uri(
+    Uri.dataFromBytes(file.bytes, mimeType: file.mimeType),
+  );
 }
 
 extension AudioPlayExtension on AudioPlayer {

@@ -271,7 +271,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bucket", required=True)
     parser.add_argument("--data-directory", type=Path, required=True)
     parser.add_argument("--repository", required=True)
-    parser.add_argument("--flutter-version", default="3.38.9")
+    parser.add_argument("--flutter-version", default="3.47.5")
     parser.add_argument("--gcloud-account")
     parser.add_argument("--since", type=date.fromisoformat)
     parser.add_argument("--until", type=date.fromisoformat)

@@ -30,9 +30,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:heic_to_png_jpg/heic_to_png_jpg.dart';
 import 'package:matrix/matrix.dart';
-
-// ignore: implementation_imports
-import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';

@@ -21,20 +21,34 @@ enum ActiveFilter {
   spaces;
 
   bool Function(Room) getRoomFilterByActiveFilter() {
+    bool isListedMembership(Room room) =>
+        room.membership == Membership.join ||
+        room.membership == Membership.invite;
+
     switch (this) {
       case ActiveFilter.allChats:
-        return (room) => !room.isSpace && !room.isStoryRoom;
+        return (room) =>
+            isListedMembership(room) && !room.isSpace && !room.isStoryRoom;
       case ActiveFilter.groups:
         return (room) =>
-            !room.isSpace && !room.isDirectChat && !room.isStoryRoom;
+            isListedMembership(room) &&
+            !room.isSpace &&
+            !room.isDirectChat &&
+            !room.isStoryRoom;
       case ActiveFilter.messages:
         return (room) =>
-            !room.isSpace && room.isDirectChat && !room.isStoryRoom;
+            isListedMembership(room) &&
+            !room.isSpace &&
+            room.isDirectChat &&
+            !room.isStoryRoom;
       case ActiveFilter.spaces:
-        return (r) => r.isSpace;
+        return (r) => isListedMembership(r) && r.isSpace;
       case ActiveFilter.acceptedChats:
         return (room) =>
-            !room.isSpace && !room.isStoryRoom && !room.isInvitation;
+            isListedMembership(room) &&
+            !room.isSpace &&
+            !room.isStoryRoom &&
+            !room.isInvitation;
     }
   }
 }
