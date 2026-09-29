@@ -90,8 +90,8 @@ FROM nginx:alpine AS brotli-builder
 # build until both values below are updated, which is deliberate: it turns an
 # unreviewed upstream change into a review point, and a module compiled against
 # the wrong version would be refused at load time anyway.
-ARG NGINX_VERSION=1.29.4
-ARG NGINX_SHA256=5a7d37eee505866fbab5810fa9f78247d6d5d9157a595c4e7a72043141ddab25
+ARG NGINX_VERSION=1.31.6
+ARG NGINX_SHA256=974ed5298a5e398e008704ed5db284e655fc270c596493dbccada452448fc9f1
 ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 RUN set -eux; \
     image_version="$(nginx -v 2>&1 | sed 's|.*/||')"; \
