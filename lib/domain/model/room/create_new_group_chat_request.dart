@@ -9,6 +9,12 @@ class CreateNewGroupChatRequest extends Equatable {
   final String? urlAvatar;
   final Map<String, dynamic>? powerLevelContentOverride;
 
+  /// Public preset, listed in the room directory and never encrypted.
+  final bool isPublic;
+
+  /// Sets `m.federate: false` on a public room; cannot be changed later.
+  final bool isServerLimited;
+
   const CreateNewGroupChatRequest({
     this.groupName,
     this.invite,
@@ -16,6 +22,8 @@ class CreateNewGroupChatRequest extends Equatable {
     this.createRoomPreset = CreateRoomPreset.privateChat,
     this.urlAvatar,
     this.powerLevelContentOverride,
+    this.isPublic = false,
+    this.isServerLimited = false,
   });
 
   @override
@@ -26,5 +34,7 @@ class CreateNewGroupChatRequest extends Equatable {
     createRoomPreset,
     urlAvatar,
     powerLevelContentOverride,
+    isPublic,
+    isServerLimited,
   ];
 }
