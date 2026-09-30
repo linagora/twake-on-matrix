@@ -128,7 +128,7 @@ void main() {
         ],
       );
 
-      final expected = AppTwakeInformation(
+      const expected = AppTwakeInformation(
         commonSettingsInformation: CommonSettingsInformation(
           applicationUrl: 'https://app.twake.com/',
           enabled: true,
