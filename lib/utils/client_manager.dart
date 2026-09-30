@@ -23,6 +23,11 @@ abstract class ClientManager {
   /// on upgrade; new writes always go to [clientNamespace].
   static const String _legacyClientNamespace = 'im.fluffychat.store.clients';
 
+  /// One-shot: clear persisted sync_filter_id so Matrix 12 sessions redefine
+  /// the filter with includeLeave (SDK skips defineFilter when an ID exists).
+  static const String _includeLeaveFilterMigratedPrefix =
+      'im.twake.store.sync_filter_include_leave_v1';
+
   static Future<List<Client>> getClients({bool initialize = true}) async {
     final clientNames = <String>{};
     var migratedFromLegacyKey = false;
@@ -124,6 +129,11 @@ abstract class ClientManager {
       : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
   static Future<Client> createClient(String clientName) async {
+    final database = await MatrixSdkDatabase.init(
+      clientName,
+      database: await openSqfliteDb(name: clientName),
+    );
+    await _invalidatePersistedSyncFilterForIncludeLeave(database, clientName);
     return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid
@@ -141,13 +151,15 @@ abstract class ClientManager {
         EventTypes.RoomPowerLevels,
       },
       // Matrix 12+ no longer caches loadArchive() results for getRoomById().
-      // Persist left rooms via sync so archive navigation keeps working.
-      syncFilter: Filter(room: RoomFilter(includeLeave: true)),
-      logLevel: kReleaseMode ? Level.warning : Level.verbose,
-      database: await MatrixSdkDatabase.init(
-        clientName,
-        database: await openSqfliteDb(name: clientName),
+      // Persist left rooms via sync; keep SDK default member lazy-loading.
+      syncFilter: Filter(
+        room: RoomFilter(
+          includeLeave: true,
+          state: StateFilter(lazyLoadMembers: true),
+        ),
       ),
+      logLevel: kReleaseMode ? Level.warning : Level.verbose,
+      database: database,
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
@@ -159,5 +171,45 @@ abstract class ClientManager {
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
     );
+  }
+
+  static Future<void> _invalidatePersistedSyncFilterForIncludeLeave(
+    DatabaseApi database,
+    String clientName,
+  ) async {
+    final store = Store();
+    final migratedKey = '$_includeLeaveFilterMigratedPrefix.$clientName';
+    if (await store.getItem(migratedKey) == '1') return;
+
+    try {
+      final account = await database.getClient(clientName);
+      if (account != null && account['sync_filter_id'] != null) {
+        final tokenExpiresAtMs = int.tryParse(
+          account['token_expires_at']?.toString() ?? '',
+        );
+        await database.insertClient(
+          clientName,
+          account['homeserver_url'] as String,
+          account['token'] as String,
+          tokenExpiresAtMs == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(tokenExpiresAtMs),
+          account['refresh_token'] as String?,
+          account['user_id'] as String,
+          account['device_id'] as String?,
+          account['device_name'] as String?,
+          account['prev_batch'] as String?,
+          account['olm_account'] as String?,
+          account['oidc_client_id'] as String?,
+        );
+      }
+      await store.setItem(migratedKey, '1');
+    } catch (e, s) {
+      Logs().w(
+        'Unable to invalidate sync filter for includeLeave migration',
+        e,
+        s,
+      );
+    }
   }
 }

@@ -458,6 +458,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: matrix-ci-shared-account
+      queue: max
       cancel-in-progress: false
     permissions:
       id-token: write

@@ -23,13 +23,21 @@ class ArchiveController extends State<Archive> {
     final archive = this.archive;
     if (archive != null) return archive;
     final client = Matrix.of(context).client;
-    final syncedLeaveRooms = client.rooms
-        .where((room) => room.membership == Membership.leave)
-        .toList();
-    if (syncedLeaveRooms.isNotEmpty) {
-      return this.archive = syncedLeaveRooms;
+    final syncedById = {
+      for (final room in client.rooms)
+        if (room.membership == Membership.leave) room.id: room,
+    };
+    final loaded = await client.loadArchive();
+    final merged = <Room>[];
+    final seen = <String>{};
+    for (final room in loaded) {
+      merged.add(syncedById[room.id] ?? room);
+      seen.add(room.id);
     }
-    return this.archive = await client.loadArchive();
+    for (final MapEntry(:key, :value) in syncedById.entries) {
+      if (seen.add(key)) merged.add(value);
+    }
+    return this.archive = merged;
   }
 
   void forgetAllAction() async {
