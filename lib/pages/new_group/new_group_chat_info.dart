@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:twake_chat/domain/model/server_config.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
@@ -21,14 +22,14 @@ import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/power_level_manager.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -63,6 +64,8 @@ class NewGroupChatInfo extends ConsumerStatefulWidget {
 class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
+  final isPublicNotifier = ValueNotifier(false);
+  final isServerLimitedNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
   final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(CreateNewGroupInitial()),
@@ -98,6 +101,21 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
   void toggleEnableEncryption() {
     enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
+  }
+
+  String get serverName => Matrix.of(context).client.userID?.domain ?? '';
+
+  void setPublic(bool isPublic) {
+    isPublicNotifier.value = isPublic;
+    if (isPublic) {
+      isServerLimitedNotifier.value = ref
+          .read(loginHomeserverSummaryProvider)
+          .isPublicGroupsServerLimitedByDefault;
+    }
+  }
+
+  void setServerLimited(bool isServerLimited) {
+    isServerLimitedNotifier.value = isServerLimited;
   }
 
   Future<Set<PresentationContact>> getAllContactsGroupChat({
@@ -144,6 +162,10 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
         groupName: groupName,
         invite: invite,
         enableEncryption: enableEncryptionNotifier.value,
+        isPublic:
+            isPublicNotifier.value &&
+            ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
+        isServerLimited: isServerLimitedNotifier.value,
         urlAvatar: urlAvatar,
         powerLevelContentOverride: {
           'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
@@ -498,6 +520,8 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     disposePickAvatarMixin();
     haveGroupNameNotifier.dispose();
     enableEncryptionNotifier.dispose();
+    isPublicNotifier.dispose();
+    isServerLimitedNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
     groupNameTextEditingController.dispose();
@@ -508,6 +532,14 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
   @override
   Widget build(BuildContext context) {
-    return NewGroupChatInfoView(this);
+    final isPublicGroupsEnabled = ref.watch(
+      loginHomeserverSummaryProvider.select(
+        (summary) => summary.isPublicGroupsEnabled,
+      ),
+    );
+    return NewGroupChatInfoView(
+      this,
+      isPublicGroupsEnabled: isPublicGroupsEnabled,
+    );
   }
 }

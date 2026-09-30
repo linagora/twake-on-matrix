@@ -39,6 +39,11 @@ void main() {
       mockController.enableEncryptionNotifier,
     ).thenReturn(ValueNotifier(false));
     when(mockController.haveGroupNameNotifier).thenReturn(ValueNotifier(false));
+    when(mockController.isPublicNotifier).thenReturn(ValueNotifier(false));
+    when(
+      mockController.isServerLimitedNotifier,
+    ).thenReturn(ValueNotifier(true));
+    when(mockController.serverName).thenReturn('example.com');
     when(mockController.createRoomStateNotifier).thenReturn(
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial())),
     );
@@ -79,7 +84,10 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: NewGroupChatInfoView(mockController),
+          home: NewGroupChatInfoView(
+            mockController,
+            isPublicGroupsEnabled: true,
+          ),
         ),
       );
 
@@ -107,13 +115,19 @@ void main() {
   });
 
   group('NewGroupChatInfo in feed mode - widget test', () {
-    Future<void> pumpView(WidgetTester tester) async {
+    Future<void> pumpView(
+      WidgetTester tester, {
+      bool isPublicGroupsEnabled = true,
+    }) async {
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: NewGroupChatInfoView(mockController),
+          home: NewGroupChatInfoView(
+            mockController,
+            isPublicGroupsEnabled: isPublicGroupsEnabled,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -159,6 +173,45 @@ void main() {
 
       // Assert
       final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
+      expect(
+        find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
+        findsNothing,
+      );
+    });
+
+    testWidgets(
+      'build_whenPublic_showsTheServerLimitToggleAndHidesEncryption',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+        when(mockController.isPublicNotifier).thenReturn(ValueNotifier(true));
+
+        // Act
+        await pumpView(tester);
+
+        // Assert
+        final context = tester.element(find.byType(TwakeAppBar));
+        expect(
+          find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
+          findsOneWidget,
+        );
+        expect(find.text(L10n.of(context)!.enableEncryption), findsNothing);
+      },
+    );
+
+    testWidgets('build_whenPublicGroupsDisabled_hidesThePublicToggle', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+
+      // Act
+      await pumpView(tester, isPublicGroupsEnabled: false);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.makeChatPublic), findsNothing);
       expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
     });
   });

@@ -25,7 +25,13 @@ import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 class NewGroupChatInfoView extends StatelessWidget {
   final NewGroupChatInfoController newGroupInfoController;
 
-  const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
+  final bool isPublicGroupsEnabled;
+
+  const NewGroupChatInfoView(
+    this.newGroupInfoController, {
+    super.key,
+    required this.isPublicGroupsEnabled,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +73,9 @@ class NewGroupChatInfoView extends StatelessWidget {
                     _buildGroupNameTextField(context),
                     if (!newGroupInfoController.isFeed) ...[
                       const SizedBox(height: 16),
-                      _EncryptionSettingTile(
-                        enableEncryptionNotifier:
-                            newGroupInfoController.enableEncryptionNotifier,
-                        onChanged: (_) =>
-                            newGroupInfoController.toggleEnableEncryption(),
+                      _GroupPrivacySettings(
+                        controller: newGroupInfoController,
+                        isPublicGroupsEnabled: isPublicGroupsEnabled,
                       ),
                     ],
                   ],
@@ -314,6 +318,60 @@ class _AvatarForWebBuilder extends StatelessWidget {
         Icons.add_a_photo_outlined,
         color: LinagoraSysColors.material().onPrimary,
       ),
+    );
+  }
+}
+
+class _GroupPrivacySettings extends StatelessWidget {
+  final NewGroupChatInfoController controller;
+
+  final bool isPublicGroupsEnabled;
+
+  const _GroupPrivacySettings({
+    required this.controller,
+    required this.isPublicGroupsEnabled,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.isPublicNotifier,
+      builder: (context, isPublic, _) {
+        return Column(
+          children: [
+            if (isPublicGroupsEnabled)
+              LinagoraSettingItem.selectable(
+                title: L10n.of(context)!.makeChatPublic,
+                subtitle: L10n.of(context)!.makeChatPublicDescription,
+                subtitleMaxLines: null,
+                value: isPublic,
+                onChanged: controller.setPublic,
+              ),
+            if (isPublic)
+              ValueListenableBuilder<bool>(
+                valueListenable: controller.isServerLimitedNotifier,
+                builder: (context, isServerLimited, _) {
+                  return LinagoraSettingItem.selectable(
+                    title: L10n.of(
+                      context,
+                    )!.groupPrivacyLimitToServer(controller.serverName),
+                    subtitle: L10n.of(
+                      context,
+                    )!.groupPrivacyLimitToServerDescription,
+                    subtitleMaxLines: null,
+                    value: isServerLimited,
+                    onChanged: controller.setServerLimited,
+                  );
+                },
+              )
+            else
+              _EncryptionSettingTile(
+                enableEncryptionNotifier: controller.enableEncryptionNotifier,
+                onChanged: (_) => controller.toggleEnableEncryption(),
+              ),
+          ],
+        );
+      },
     );
   }
 }
