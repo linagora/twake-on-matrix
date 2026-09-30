@@ -8,7 +8,6 @@ import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'abstract/abstract_chat_list_robot.dart';
