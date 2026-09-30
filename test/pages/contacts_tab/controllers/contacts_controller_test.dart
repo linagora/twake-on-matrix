@@ -68,15 +68,20 @@ void main() {
     return container;
   }
 
-  /// Resolves with the first value emitted by the store stream.
-  Future<List<UnifiedContact>> firstEmission(ProviderContainer container) {
+  /// Resolves with the first emission of the store stream, optionally waiting
+  /// for one that satisfies [where].
+  Future<List<UnifiedContact>> firstEmission(
+    ProviderContainer container, {
+    bool Function(List<UnifiedContact>)? where,
+  }) {
     final completer = Completer<List<UnifiedContact>>();
     final subscription = container.listen(contactsControllerProvider, (
       previous,
       next,
     ) {
       next.whenData((contacts) {
-        if (!completer.isCompleted) completer.complete(contacts);
+        if (completer.isCompleted) return;
+        if (where == null || where(contacts)) completer.complete(contacts);
       });
     }, fireImmediately: true);
     completer.future.whenComplete(subscription.close);
@@ -114,23 +119,14 @@ void main() {
     );
 
     final container = buildContainer();
-    final completer = Completer<List<UnifiedContact>>();
-    final subscription = container.listen(contactsControllerProvider, (
-      previous,
-      next,
-    ) {
-      next.whenData((contacts) {
-        if (contacts.isNotEmpty && !completer.isCompleted) {
-          completer.complete(contacts);
-        }
-      });
-    }, fireImmediately: true);
 
     await container.read(contactsControllerProvider.notifier).refresh();
 
-    final contacts = await completer.future;
+    final contacts = await firstEmission(
+      container,
+      where: (contacts) => contacts.isNotEmpty,
+    );
     expect(contacts.single.canonicalDisplayName, 'Alice');
-    subscription.close();
   });
 
   test('search keyword provider drives the contactsState projection', () async {
