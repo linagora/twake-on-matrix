@@ -6,7 +6,6 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
@@ -17,6 +16,7 @@ import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_pro
 import '../../../domain/contact/fakes/fake_unified_contact_repository.dart';
 
 void main() {
+  const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
   late ContactSyncService service;
   const policy = ContactResolutionPolicy();
@@ -24,6 +24,7 @@ void main() {
   setUp(() {
     repository = FakeUnifiedContactRepository();
     service = ContactSyncService(
+      userId: userId,
       repository: repository,
       policy: policy,
       syncContacts: SyncContactsUseCase(
@@ -34,7 +35,6 @@ void main() {
       watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
       getUnifiedContact: GetUnifiedContactUseCase(repository),
       addContact: AddContactUseCase(repository),
-      deleteContact: DeleteContactUseCase(repository),
     );
   });
 
@@ -42,6 +42,7 @@ void main() {
 
   test('unifiedContact returns the stored contact by matrixId', () async {
     await repository.upsert(
+      userId,
       const UnifiedContact(
         matrixId: '@a:server',
         canonicalDisplayName: 'Alice',
@@ -49,7 +50,10 @@ void main() {
     );
 
     final container = ProviderContainer(
-      overrides: [contactSyncServiceProvider.overrideWithValue(service)],
+      overrides: [
+        currentUserIdProvider.overrideWithValue(userId),
+        contactSyncServiceProvider.overrideWith((ref, _) => service),
+      ],
     );
     addTearDown(container.dispose);
 

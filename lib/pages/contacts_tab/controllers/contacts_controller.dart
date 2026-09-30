@@ -10,13 +10,17 @@ part 'contacts_controller.g.dart';
 @riverpod
 class ContactsController extends _$ContactsController {
   @override
-  Stream<List<UnifiedContact>> build() =>
-      ref.watch(contactSyncServiceProvider).watchContacts();
+  Stream<List<UnifiedContact>> build() {
+    final userId = ref.watch(currentUserIdProvider);
+    if (userId == null) return const Stream<List<UnifiedContact>>.empty();
+    return ref.watch(contactSyncServiceProvider(userId)).watchContacts();
+  }
 
-  Future<void> refresh() => ref.read(contactSyncServiceProvider).refresh();
-
-  Future<void> deleteContact(String matrixId) =>
-      ref.read(contactSyncServiceProvider).deleteContact(matrixId);
+  Future<void> refresh() async {
+    final userId = ref.read(currentUserIdProvider);
+    if (userId == null) return;
+    await ref.read(contactSyncServiceProvider(userId)).refresh();
+  }
 }
 
 /// UI-only search keyword. Kept separate from [ContactsController] so typing

@@ -91,6 +91,13 @@ GetUnifiedContactUseCase getUnifiedContactUseCase(Ref ref) =>
 AddContactUseCase addContactUseCase(Ref ref) =>
     AddContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
+/// Matrix ID of the account currently signed in, or `null` before login.
+///
+/// Scoping key for every contact provider: a multi-account session must never
+/// mix the contacts of two accounts.
+@riverpod
+String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider)?.userID;
+
 @Riverpod(keepAlive: true)
 ContactSyncService contactSyncService(Ref ref, String userId) =>
     ContactSyncService(

@@ -51,7 +51,7 @@ class ContactSyncService {
   Future<void> refresh() async {
     await _syncContacts.execute(_userId);
     for (final enricher in _enrichers) {
-      await enricher.enrich();
+      await enricher.enrich(_userId);
     }
   }
 

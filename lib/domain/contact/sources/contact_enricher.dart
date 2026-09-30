@@ -4,5 +4,5 @@
 /// `matrixId`), an enricher runs after the base sync because it needs the
 /// stored contacts to know what to fetch (e.g. per-user TOM `user_info`).
 abstract class ContactEnricher {
-  Future<void> enrich();
+  Future<void> enrich(String userId);
 }

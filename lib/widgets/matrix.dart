@@ -200,11 +200,13 @@ class MatrixState extends ConsumerState<Matrix>
       _activeClient = index;
       // Transitional bridge: expose the active client to Riverpod consumers.
       ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
-      unawaited(ref.read(contactSyncServiceProvider).refresh());
+      unawaited(
+        ref.read(contactSyncServiceProvider(newClient!.userID!)).refresh(),
+      );
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
-      await _storePersistActiveAccount(newClient!);
+      await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
       getIt.get<ContactsManager>().refreshTomContacts(client);
@@ -849,7 +851,9 @@ class MatrixState extends ConsumerState<Matrix>
     // Transitional bridge: publish the initial active client to Riverpod.
     ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
     if (clientOrNull != null) {
-      unawaited(ref.read(contactSyncServiceProvider).refresh());
+      unawaited(
+        ref.read(contactSyncServiceProvider(clientOrNull!.userID!)).refresh(),
+      );
     }
 
     await _retrieveLocalToMConfiguration();

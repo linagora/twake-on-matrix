@@ -27,8 +27,8 @@ class TomUserInfoSource implements ContactEnricher {
   final int maxPerRun;
 
   @override
-  Future<void> enrich() async {
-    final contacts = await _repository.getContacts();
+  Future<void> enrich(String userId) async {
+    final contacts = await _repository.getContacts(userId);
     var processed = 0;
 
     for (final contact in contacts) {
@@ -53,7 +53,7 @@ class TomUserInfoSource implements ContactEnricher {
             ),
           ],
         );
-        await _repository.upsert(enriched);
+        await _repository.upsert(userId, enriched);
         processed++;
       } catch (_) {
         // Skip the unreachable profile; the base sync data is kept.

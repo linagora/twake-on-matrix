@@ -60,6 +60,7 @@ UnifiedContact _contact(String matrixId, {bool enriched = false}) =>
     );
 
 void main() {
+  const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
   late _FakeUserInfoRepository userInfoRepository;
   const policy = ContactResolutionPolicy();
@@ -79,11 +80,11 @@ void main() {
   );
 
   test('adds the tomUserInfo profile and re-resolves the contact', () async {
-    await repository.upsert(_contact('@a:server'));
+    await repository.upsert(userId, _contact('@a:server'));
 
-    await buildSource().enrich();
+    await buildSource().enrich(userId);
 
-    final contact = await repository.getByMatrixId('@a:server');
+    final contact = await repository.getByMatrixId(userId, '@a:server');
     expect(
       contact!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
       isTrue,
@@ -94,39 +95,44 @@ void main() {
   });
 
   test('skips contacts already enriched', () async {
-    await repository.upsert(_contact('@a:server', enriched: true));
+    await repository.upsert(userId, _contact('@a:server', enriched: true));
 
-    await buildSource().enrich();
+    await buildSource().enrich(userId);
 
     expect(userInfoRepository.requestedUserIds, isEmpty);
   });
 
   test('caps the number of network calls per run', () async {
-    await repository.upsertAll([
+    await repository.upsertAll(userId, [
       _contact('@a:server'),
       _contact('@b:server'),
       _contact('@c:server'),
     ]);
 
-    await buildSource(maxPerRun: 2).enrich();
+    await buildSource(maxPerRun: 2).enrich(userId);
 
     expect(userInfoRepository.requestedUserIds, hasLength(2));
   });
 
   test('a failing profile does not prevent the others', () async {
     userInfoRepository = _FakeUserInfoRepository(throwFor: const {'@a:server'});
-    await repository.upsertAll([_contact('@a:server'), _contact('@b:server')]);
+    await repository.upsertAll(userId, [
+      _contact('@a:server'),
+      _contact('@b:server'),
+    ]);
 
-    await buildSource().enrich();
+    await buildSource().enrich(userId);
 
     expect(
       (await repository.getByMatrixId(
+        userId,
         '@a:server',
       ))!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
       isFalse,
     );
     expect(
       (await repository.getByMatrixId(
+        userId,
         '@b:server',
       ))!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
       isTrue,

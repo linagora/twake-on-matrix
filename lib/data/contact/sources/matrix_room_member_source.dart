@@ -14,7 +14,7 @@ class MatrixRoomMemberSource implements ContactSource {
   ContactSourceKind get kind => ContactSourceKind.matrixRoomMember;
 
   @override
-  Future<List<SourcedContact>> fetch() async {
+  Future<List<SourcedContact>> fetch(String userId) async {
     final members = await _datasource.fetchRoomMembers();
 
     return members

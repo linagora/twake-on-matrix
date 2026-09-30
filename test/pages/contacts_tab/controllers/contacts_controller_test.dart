@@ -9,7 +9,6 @@ import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart'
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/delete_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
@@ -27,16 +26,18 @@ class _FakeSource implements ContactSource {
   ContactSourceKind get kind => ContactSourceKind.tomAddressBook;
 
   @override
-  Future<List<SourcedContact>> fetch() async => contacts;
+  Future<List<SourcedContact>> fetch(String userId) async => contacts;
 }
 
 void main() {
+  const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
   late ContactSyncService service;
   const policy = ContactResolutionPolicy();
 
   ContactSyncService buildService({List<ContactSource> sources = const []}) =>
       ContactSyncService(
+        userId: userId,
         repository: repository,
         policy: policy,
         syncContacts: SyncContactsUseCase(
@@ -47,7 +48,6 @@ void main() {
         watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
         getUnifiedContact: GetUnifiedContactUseCase(repository),
         addContact: AddContactUseCase(repository),
-        deleteContact: DeleteContactUseCase(repository),
       );
 
   setUp(() {
@@ -59,7 +59,10 @@ void main() {
 
   ProviderContainer buildContainer() {
     final container = ProviderContainer(
-      overrides: [contactSyncServiceProvider.overrideWithValue(service)],
+      overrides: [
+        currentUserIdProvider.overrideWithValue(userId),
+        contactSyncServiceProvider.overrideWith((ref, _) => service),
+      ],
     );
     addTearDown(container.dispose);
     return container;
@@ -82,6 +85,7 @@ void main() {
 
   test('build exposes the current store content', () async {
     await repository.upsert(
+      userId,
       const UnifiedContact(
         matrixId: '@a:server',
         canonicalDisplayName: 'Alice',
@@ -129,19 +133,8 @@ void main() {
     subscription.close();
   });
 
-  test('deleteContact delegates to the service', () async {
-    await repository.upsert(const UnifiedContact(matrixId: '@a:server'));
-    final container = buildContainer();
-
-    await container
-        .read(contactsControllerProvider.notifier)
-        .deleteContact('@a:server');
-
-    expect(await repository.getContacts(), isEmpty);
-  });
-
   test('search keyword provider drives the contactsState projection', () async {
-    await repository.upsertAll(const [
+    await repository.upsertAll(userId, const [
       UnifiedContact(matrixId: '@a:server', canonicalDisplayName: 'Alice'),
       UnifiedContact(matrixId: '@b:server', canonicalDisplayName: 'Bob'),
     ]);

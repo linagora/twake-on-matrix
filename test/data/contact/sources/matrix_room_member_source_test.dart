@@ -25,7 +25,7 @@ void main() {
       ]),
     );
 
-    final contacts = await source.fetch();
+    final contacts = await source.fetch('@me:server');
 
     expect(contacts, hasLength(2));
     expect(contacts.first.matrixId, '@alice:server');
@@ -40,6 +40,6 @@ void main() {
       _FakeMatrixRoomMemberDatasource(const []),
     );
 
-    expect(await source.fetch(), isEmpty);
+    expect(await source.fetch('@me:server'), isEmpty);
   });
 }
