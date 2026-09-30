@@ -28,7 +28,7 @@ Future<String> fetchAuthToken({
       form: form,
       credentials: credentials,
     );
-    return _exchangeCodeForLoginToken(
+    return await _exchangeCodeForLoginToken(
       client: client,
       endpoints: endpoints,
       redirect: redirect,
