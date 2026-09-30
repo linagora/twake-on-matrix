@@ -2,6 +2,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:twake_chat/domain/model/common_settings_information.dart';
+import 'package:twake_chat/domain/model/public_groups_information.dart';
 
 part 'app_twake_information.freezed.dart';
 part 'app_twake_information.g.dart';
@@ -16,6 +17,8 @@ abstract class AppTwakeInformation with _$AppTwakeInformation {
     @JsonKey(name: 'common_settings')
     CommonSettingsInformation? commonSettingsInformation,
     @JsonKey(name: 'enable_invitations') bool? isInvitationEnabled,
+    @JsonKey(name: 'public_groups')
+    PublicGroupsInformation? publicGroupsInformation,
   }) = _AppTwakeInformation;
 
   factory AppTwakeInformation.fromJson(Map<String, dynamic> json) =>
