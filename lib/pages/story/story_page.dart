@@ -313,11 +313,9 @@ class StoryPageController extends State<StoryPage> {
     );
     if (reason == null || reason.single.isEmpty) return;
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.reportEvent(
-        roomId,
-        event.eventId,
-        reason: reason.single,
-      ),
+      future: () => Matrix.of(
+        context,
+      ).client.reportEvent(roomId, event.eventId, reason: reason.single),
     );
     _modalOpened = false;
     if (result.error != null) return;
