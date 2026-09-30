@@ -3088,16 +3088,27 @@ class ChatController extends ConsumerState<Chat>
     handleLongPressAudioRecordInMobile(context: context);
   }
 
+  /// Chat-scoped voice **recording** (mic) vs Matrix-scoped voice **playback**.
+  ///
+  /// On mobile, [MatrixState.audioPlayer] keeps playing after leaving the chat
+  /// (background playback). Do not stop/dispose it here. The web recorder and
+  /// recording UI notifiers are Chat-scoped and must always be torn down.
   void disposeAudioPlayer() {
+    disposeAudioMixin();
+
     if (PlatformInfos.isMobile) {
       return;
     }
-    disposeAudioMixin();
+
     matrix?.audioPlayer.stop();
     matrix?.audioPlayer.clearAudioSources();
     matrix?.voiceMessageEvent.value = null;
   }
 
+  /// Sync playback UI with [MatrixState.audioPlayer] after [matrix] is ready.
+  ///
+  /// On mobile, if a voice message is already playing (user left another chat
+  /// mid-playback), leave it running. On web, stop the previous player.
   void initAudioPlayer() {
     if (matrix?.audioPlayer.playing == true) {
       if (!PlatformInfos.isMobile) {
@@ -3156,6 +3167,9 @@ class ChatController extends ConsumerState<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
+    if (PlatformInfos.isWeb) {
+      initAudioRecorderWeb();
+    }
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
@@ -3166,9 +3180,6 @@ class ChatController extends ConsumerState<Chat>
       initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
-      if (PlatformInfos.isWeb) {
-        initAudioRecorderWeb();
-      }
       initAudioPlayer();
     });
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
