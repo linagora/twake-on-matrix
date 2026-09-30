@@ -219,12 +219,12 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
+    if (PlatformInfos.isWeb) {
+      initAudioRecorderWeb();
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _getProfile();
       listenIgnoredUser();
-      if (PlatformInfos.isWeb) {
-        initAudioRecorderWeb();
-      }
     });
   }
 
