@@ -34,7 +34,8 @@ class PublicRoomBottomSheet extends StatelessWidget {
           : client.joinRoom(roomAlias ?? chunk!.roomId),
     );
     if (result.error == null) {
-      if (client.getRoomById(result.result!) == null) {
+      final joinedRoom = client.getRoomById(result.result!);
+      if (joinedRoom == null || joinedRoom.membership != Membership.join) {
         await client.onSync.stream.firstWhere(
           (sync) => sync.rooms?.join?.containsKey(result.result) ?? false,
         );
