@@ -30,6 +30,7 @@ class ContactResolutionPolicy {
     ContactSourceKind.tomAddressBook,
     ContactSourceKind.matrixProfile,
     ContactSourceKind.matrixRoomMember,
+    ContactSourceKind.manual,
   ];
 
   static const List<ContactSourceKind> defaultAvatarPriority = [
@@ -38,6 +39,7 @@ class ContactResolutionPolicy {
     ContactSourceKind.tomAddressBook,
     ContactSourceKind.matrixRoomMember,
     ContactSourceKind.phonebook,
+    ContactSourceKind.manual,
   ];
 
   final List<ContactSourceKind> displayNamePriority;
