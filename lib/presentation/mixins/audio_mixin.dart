@@ -23,7 +23,9 @@ mixin AudioMixin {
 
   Timer? _timerWeb;
 
-  late final AudioRecorder _audioRecorder;
+  /// Web-only mic recorder. Created in [initAudioRecorderWeb], cleared in
+  /// [disposeAudioMixin]. Independent of [MatrixState.audioPlayer] playback.
+  AudioRecorder? _audioRecorder;
 
   StreamSubscription<RecordState>? _recordSubWeb;
 
@@ -34,9 +36,26 @@ mixin AudioMixin {
   final ValueNotifier<AudioRecordState> audioRecordStateNotifier =
       ValueNotifier<AudioRecordState>(AudioRecordState.initial);
 
+  /// Tears down Chat-scoped **recording** only (not Matrix playback).
+  ///
+  /// Safe if [initAudioRecorderWeb] was never called. Always dispose both
+  /// notifiers. Do not couple this to [MatrixState.audioPlayer], which may
+  /// keep playing after the chat is closed on mobile.
   void disposeAudioMixin() {
+    _timerWeb?.cancel();
+    _timerWeb = null;
+    _recordSubWeb?.cancel();
+    _recordSubWeb = null;
+    _amplitudeSubWeb?.cancel();
+    _amplitudeSubWeb = null;
+
+    final recorder = _audioRecorder;
+    _audioRecorder = null;
+    recorder?.dispose();
+    _amplitudeTimelineWeb.clear();
+
     audioRecordStateNotifier.dispose();
-    _disposeAudioRecorderWeb();
+    recordDurationWebNotifier.dispose();
   }
 
   void startRecording() {
@@ -55,32 +74,26 @@ mixin AudioMixin {
     audioRecordStateNotifier.value = AudioRecordState.initial;
   }
 
+  /// Web mic recorder for this Chat/DraftChat only. Call from `initState`
+  /// (not post-frame): it does not need [BuildContext]/Matrix, and deferring
+  /// races with dispose on fast navigation. Playback uses
+  /// [MatrixState.audioPlayer] and is intentionally separate.
   void initAudioRecorderWeb() {
     if (!PlatformInfos.isWeb) return;
-    _audioRecorder = AudioRecorder();
+    if (_audioRecorder != null) return;
 
-    _recordSubWeb = _audioRecorder.onStateChanged().listen((recordState) {
-      _updateRecordStateWeb(recordState);
-    });
+    final recorder = AudioRecorder();
+    _audioRecorder = recorder;
 
-    _amplitudeSubWeb = _audioRecorder
+    _recordSubWeb = recorder.onStateChanged().listen(_updateRecordStateWeb);
+
+    _amplitudeSubWeb = recorder
         .onAmplitudeChanged(const Duration(milliseconds: 100))
         .listen((amp) {
           var value = 100 + amp.current * 2;
           value = value < 1 ? 1 : value;
           _amplitudeTimelineWeb.add(value);
         });
-  }
-
-  void _disposeAudioRecorderWeb() {
-    if (!PlatformInfos.isWeb) return;
-    stopRecordWeb();
-    _timerWeb?.cancel();
-    _recordSubWeb?.cancel();
-    _amplitudeSubWeb?.cancel();
-    _audioRecorder.dispose();
-    _amplitudeTimelineWeb.clear();
-    recordDurationWebNotifier.dispose();
   }
 
   void _updateRecordStateWeb(RecordState recordState) {
@@ -115,8 +128,10 @@ mixin AudioMixin {
   }
 
   Future<void> onTapRecorderWeb({required BuildContext context}) async {
+    final recorder = _audioRecorder;
+    if (recorder == null) return;
     try {
-      if (await _audioRecorder.hasPermission()) {
+      if (await recorder.hasPermission()) {
         const encoder = AudioEncoder.wav;
 
         if (!await _isEncoderSupported(encoder)) {
@@ -131,7 +146,7 @@ mixin AudioMixin {
         const config = RecordConfig(encoder: encoder, numChannels: 1);
 
         // Record to file
-        await recordFile(_audioRecorder, config);
+        await recordFile(recorder, config);
 
         recordDurationWebNotifier.value = 0;
 
@@ -159,7 +174,9 @@ mixin AudioMixin {
   }
 
   Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
-    final isSupported = await _audioRecorder.isEncoderSupported(encoder);
+    final recorder = _audioRecorder;
+    if (recorder == null) return false;
+    final isSupported = await recorder.isEncoderSupported(encoder);
 
     if (!isSupported) {
       Logs().d(
@@ -167,7 +184,7 @@ mixin AudioMixin {
       );
 
       for (final e in AudioEncoder.values) {
-        if (await _audioRecorder.isEncoderSupported(e)) {
+        if (await recorder.isEncoderSupported(e)) {
           Logs().d('AudioMixin: - ${e.name}');
         }
       }
@@ -177,11 +194,13 @@ mixin AudioMixin {
   }
 
   Future<String?> stopRecordWeb() async {
+    final recorder = _audioRecorder;
+    if (recorder == null) return null;
     try {
-      final value = await _audioRecorder.isRecording();
+      final value = await recorder.isRecording();
 
       if (value == true) {
-        return await _audioRecorder.stop();
+        return await recorder.stop();
       }
     } catch (e) {
       debugPrint('Error checking recording status: $e');
