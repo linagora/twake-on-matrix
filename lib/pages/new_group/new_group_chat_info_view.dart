@@ -8,7 +8,6 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
-import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/stream_image_view.dart';
@@ -16,7 +15,6 @@ import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -379,7 +377,7 @@ class _GroupPrivacySettings extends StatelessWidget {
 class _EncryptionSettingTile extends StatelessWidget {
   final ValueNotifier<bool> enableEncryptionNotifier;
 
-  final ValueChanged<bool?>? onChanged;
+  final ValueChanged<bool>? onChanged;
 
   const _EncryptionSettingTile({
     required this.enableEncryptionNotifier,
@@ -388,104 +386,37 @@ class _EncryptionSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0, right: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: SvgPicture.asset(
-              Assets.images.icEndToEndEncryptionMessageIndicator.path,
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(
-                LinagoraRefColors.material().tertiary[30] ?? Colors.transparent,
-                BlendMode.srcIn,
-              ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: enableEncryptionNotifier,
+      builder: (context, isEnabled, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinagoraSettingItem.selectable(
+              title: L10n.of(context)!.enableEncryption,
+              subtitle: L10n.of(context)!.encryptionMessage,
+              subtitleMaxLines: null,
+              value: isEnabled,
+              onChanged: onChanged,
             ),
-          ),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    L10n.of(context)!.enableEncryption,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      letterSpacing: 0.15,
-                      fontWeight: FontWeight.w500,
-                    ),
+            if (isEnabled)
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: LinagoraSpacing.base * 3,
+                  right: LinagoraSpacing.base * 3,
+                  bottom: LinagoraSpacing.base * 2,
+                ),
+                child: Text(
+                  L10n.of(context)!.encryptionWarning,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    letterSpacing: 0.4,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
-                const SizedBox(height: 4.0),
-                ValueListenableBuilder<bool>(
-                  valueListenable: enableEncryptionNotifier,
-                  builder: (context, isEnable, child) {
-                    return Column(
-                      children: [
-                        Text(
-                          L10n.of(context)!.encryptionMessage,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                letterSpacing: 0.5,
-                                color: LinagoraSysColors.material().tertiary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                        ),
-                        AnimatedSize(
-                          alignment: Alignment.topCenter,
-                          duration: const Duration(milliseconds: 50),
-                          child: isEnable
-                              ? Text(
-                                  L10n.of(context)!.encryptionWarning,
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        letterSpacing: 0.4,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.error,
-                                      ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          ValueListenableBuilder<bool>(
-            valueListenable: enableEncryptionNotifier,
-            builder: (context, isEnable, child) {
-              return Checkbox(
-                value: isEnable,
-                onChanged: (value) => onChanged?.call(value),
-                side: WidgetStateBorderSide.resolveWith((
-                  Set<WidgetState> states,
-                ) {
-                  if (states.contains(WidgetState.selected)) {
-                    return const BorderSide(
-                      color: Colors.transparent,
-                      width: 2.0,
-                    );
-                  }
-                  return BorderSide(
-                    color:
-                        LinagoraRefColors.material().tertiary[30] ??
-                        Colors.transparent,
-                    width: 2.0,
-                  );
-                }),
-              );
-            },
-          ),
-        ],
-      ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
