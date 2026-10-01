@@ -20,6 +20,45 @@ HomeserverSummary _summaryWith(Map<String, dynamic> publicGroups) =>
       loginFlows: [],
     );
 
+typedef _TransitionCase = ({
+  String name,
+  Map<String, dynamic> publicGroups,
+  bool startsPublic,
+  void Function(GroupPrivacyViewModel viewModel) act,
+  GroupPrivacyState expected,
+});
+
+final _transitionCases = <_TransitionCase>[
+  (
+    name: 'setPublic_whenWellKnownHasNoDefault_limitsToTheServer',
+    publicGroups: {'enabled': true},
+    startsPublic: false,
+    act: (viewModel) => viewModel.setPublic(isPublic: true),
+    expected: const GroupPrivacyState(isPublic: true, isServerLimited: true),
+  ),
+  (
+    name: 'setPublic_whenWellKnownOpensGroupsByDefault_doesNotLimit',
+    publicGroups: {'enabled': true, 'default_server_limited': false},
+    startsPublic: false,
+    act: (viewModel) => viewModel.setPublic(isPublic: true),
+    expected: const GroupPrivacyState(isPublic: true),
+  ),
+  (
+    name: 'setPublic_whenBackToPrivate_clearsTheServerLimit',
+    publicGroups: {'enabled': true},
+    startsPublic: true,
+    act: (viewModel) => viewModel.setPublic(isPublic: false),
+    expected: const GroupPrivacyState(),
+  ),
+  (
+    name: 'setServerLimited_whenPublic_keepsTheGroupPublic',
+    publicGroups: {'enabled': true},
+    startsPublic: true,
+    act: (viewModel) => viewModel.setServerLimited(isServerLimited: false),
+    expected: const GroupPrivacyState(isPublic: true),
+  ),
+];
+
 ProviderContainer _container(Map<String, dynamic> publicGroups) {
   final container = ProviderContainer(
     overrides: [
@@ -47,71 +86,24 @@ void main() {
       expect(state, const GroupPrivacyState());
     });
 
-    test('setPublic_whenWellKnownHasNoDefault_limitsToTheServer', () {
-      // Arrange
-      final container = _container({'enabled': true});
+    for (final testCase in _transitionCases) {
+      test(testCase.name, () {
+        // Arrange
+        final container = _container(testCase.publicGroups);
+        final viewModel = container.read(
+          groupPrivacyViewModelProvider.notifier,
+        );
+        if (testCase.startsPublic) viewModel.setPublic(isPublic: true);
 
-      // Act
-      container
-          .read(groupPrivacyViewModelProvider.notifier)
-          .setPublic(isPublic: true);
+        // Act
+        testCase.act(viewModel);
 
-      // Assert
-      expect(
-        container.read(groupPrivacyViewModelProvider),
-        const GroupPrivacyState(isPublic: true, isServerLimited: true),
-      );
-    });
-
-    test('setPublic_whenWellKnownOpensGroupsByDefault_doesNotLimit', () {
-      // Arrange
-      final container = _container({
-        'enabled': true,
-        'default_server_limited': false,
+        // Assert
+        expect(
+          container.read(groupPrivacyViewModelProvider),
+          testCase.expected,
+        );
       });
-
-      // Act
-      container
-          .read(groupPrivacyViewModelProvider.notifier)
-          .setPublic(isPublic: true);
-
-      // Assert
-      expect(
-        container.read(groupPrivacyViewModelProvider),
-        const GroupPrivacyState(isPublic: true),
-      );
-    });
-
-    test('setPublic_whenBackToPrivate_clearsTheServerLimit', () {
-      // Arrange
-      final container = _container({'enabled': true});
-      final viewModel = container.read(groupPrivacyViewModelProvider.notifier)
-        ..setPublic(isPublic: true);
-
-      // Act
-      viewModel.setPublic(isPublic: false);
-
-      // Assert
-      expect(
-        container.read(groupPrivacyViewModelProvider),
-        const GroupPrivacyState(),
-      );
-    });
-
-    test('setServerLimited_whenPublic_keepsTheGroupPublic', () {
-      // Arrange
-      final container = _container({'enabled': true});
-      final viewModel = container.read(groupPrivacyViewModelProvider.notifier)
-        ..setPublic(isPublic: true);
-
-      // Act
-      viewModel.setServerLimited(isServerLimited: false);
-
-      // Assert
-      expect(
-        container.read(groupPrivacyViewModelProvider),
-        const GroupPrivacyState(isPublic: true),
-      );
-    });
+    }
   });
 }
