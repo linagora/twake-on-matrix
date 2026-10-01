@@ -20,12 +20,12 @@ import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
-import 'package:twake_chat/pages/contacts_tab/contacts_view_model.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 import '../../domain/contact/fakes/fake_unified_contact_repository.dart';
-import 'contacts_view_model_test.mocks.dart';
+import 'contacts_controller_test.mocks.dart';
 
 class _FakeSource implements ContactSource {
   _FakeSource(this.contacts);
@@ -102,7 +102,7 @@ void main() {
     bool Function(List<UnifiedContact>)? where,
   }) {
     final completer = Completer<List<UnifiedContact>>();
-    final subscription = container.listen(contactsViewModelProvider, (
+    final subscription = container.listen(contactsControllerProvider, (
       previous,
       next,
     ) {
@@ -147,7 +147,7 @@ void main() {
 
     final container = buildContainer();
 
-    await container.read(contactsViewModelProvider.notifier).refresh();
+    await container.read(contactsControllerProvider.notifier).refresh();
 
     final contacts = await firstEmission(
       container,
@@ -254,7 +254,7 @@ void main() {
         when(client.userID).thenReturn(userId);
         container.read(activeMatrixClientProvider.notifier).setClient(client);
 
-        await container.read(contactsViewModelProvider.notifier).refresh();
+        await container.read(contactsControllerProvider.notifier).refresh();
 
         final contact = await repository.getByMatrixId(userId, matrixId);
         expect(

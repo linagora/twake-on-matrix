@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
-import 'package:twake_chat/pages/contacts_tab/contacts_view_model.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 
 part 'unified_contact_read_providers.g.dart';
 
@@ -11,7 +11,7 @@ part 'unified_contact_read_providers.g.dart';
 class UnifiedContactIndex extends _$UnifiedContactIndex {
   @override
   Map<String, UnifiedContact> build() {
-    final contacts = ref.watch(contactsViewModelProvider).asData?.value;
+    final contacts = ref.watch(contactsControllerProvider).asData?.value;
     if (contacts == null) return const <String, UnifiedContact>{};
     return {for (final contact in contacts) contact.matrixId: contact};
   }

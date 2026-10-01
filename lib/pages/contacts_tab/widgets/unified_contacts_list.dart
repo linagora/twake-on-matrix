@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/pages/contacts_tab/contacts_view_model.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 
 /// Read-only list backed by the unified contact store.
 ///
@@ -39,7 +39,7 @@ class UnifiedContactsList extends ConsumerWidget {
               final visibleContacts = state.visibleContacts;
               return RefreshIndicator(
                 onRefresh: () =>
-                    ref.read(contactsViewModelProvider.notifier).refresh(),
+                    ref.read(contactsControllerProvider.notifier).refresh(),
                 child: visibleContacts.isEmpty
                     ? const _EmptyContacts()
                     : ListView.builder(
