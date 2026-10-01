@@ -3,17 +3,21 @@ import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
 import 'package:twake_chat/widgets/stream_image_view.dart';
 import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -23,13 +27,7 @@ import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 class NewGroupChatInfoView extends StatelessWidget {
   final NewGroupChatInfoController newGroupInfoController;
 
-  final bool isPublicGroupsEnabled;
-
-  const NewGroupChatInfoView(
-    this.newGroupInfoController, {
-    super.key,
-    required this.isPublicGroupsEnabled,
-  });
+  const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +69,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                     _buildGroupNameTextField(context),
                     if (!newGroupInfoController.isFeed) ...[
                       const SizedBox(height: 16),
-                      _GroupPrivacySettings(
-                        controller: newGroupInfoController,
-                        isPublicGroupsEnabled: isPublicGroupsEnabled,
-                      ),
+                      _GroupPrivacySettings(controller: newGroupInfoController),
                     ],
                   ],
                 ),
@@ -320,56 +315,49 @@ class _AvatarForWebBuilder extends StatelessWidget {
   }
 }
 
-class _GroupPrivacySettings extends StatelessWidget {
+class _GroupPrivacySettings extends ConsumerWidget {
   final NewGroupChatInfoController controller;
 
-  final bool isPublicGroupsEnabled;
-
-  const _GroupPrivacySettings({
-    required this.controller,
-    required this.isPublicGroupsEnabled,
-  });
+  const _GroupPrivacySettings({required this.controller});
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: controller.isPublicNotifier,
-      builder: (context, isPublic, _) {
-        return Column(
-          children: [
-            if (isPublicGroupsEnabled)
-              LinagoraSettingItem.selectable(
-                title: L10n.of(context)!.makeChatPublic,
-                subtitle: L10n.of(context)!.makeChatPublicDescription,
-                subtitleMaxLines: null,
-                value: isPublic,
-                onChanged: controller.setPublic,
-              ),
-            if (isPublic)
-              ValueListenableBuilder<bool>(
-                valueListenable: controller.isServerLimitedNotifier,
-                builder: (context, isServerLimited, _) {
-                  return LinagoraSettingItem.selectable(
-                    title: L10n.of(
-                      context,
-                    )!.groupPrivacyLimitToServer(controller.serverName),
-                    subtitle: L10n.of(
-                      context,
-                    )!.groupPrivacyLimitToServerDescription,
-                    subtitleMaxLines: null,
-                    value: isServerLimited,
-                    onChanged: controller.setServerLimited,
-                  );
-                },
-              )
-            else
-              _EncryptionSettingTile(
-                enableEncryptionNotifier: controller.enableEncryptionNotifier,
-                onChanged: (_) => controller.toggleEnableEncryption(),
-              ),
-          ],
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPublicGroupsEnabled = ref.watch(
+      loginHomeserverSummaryProvider.select(
+        (summary) => summary.isPublicGroupsEnabled,
+      ),
+    );
+    final privacy = ref.watch(groupPrivacyViewModelProvider);
+    return Column(
+      children: [
+        if (isPublicGroupsEnabled)
+          LinagoraSettingItem.selectable(
+            title: L10n.of(context)!.makeChatPublic,
+            subtitle: L10n.of(context)!.makeChatPublicDescription,
+            subtitleMaxLines: null,
+            value: privacy.isPublic,
+            onChanged: (isPublic) => ref
+                .read(groupPrivacyViewModelProvider.notifier)
+                .setPublic(isPublic: isPublic),
+          ),
+        if (privacy.isPublic)
+          LinagoraSettingItem.selectable(
+            title: L10n.of(
+              context,
+            )!.groupPrivacyLimitToServer(controller.serverName),
+            subtitle: L10n.of(context)!.groupPrivacyLimitToServerDescription,
+            subtitleMaxLines: null,
+            value: privacy.isServerLimited,
+            onChanged: (isServerLimited) => ref
+                .read(groupPrivacyViewModelProvider.notifier)
+                .setServerLimited(isServerLimited: isServerLimited),
+          )
+        else
+          _EncryptionSettingTile(
+            enableEncryptionNotifier: controller.enableEncryptionNotifier,
+            onChanged: (_) => controller.toggleEnableEncryption(),
+          ),
+      ],
     );
   }
 }

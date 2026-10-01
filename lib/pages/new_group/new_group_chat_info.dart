@@ -14,6 +14,7 @@ import 'package:twake_chat/domain/model/server_config.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
+import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
@@ -66,8 +67,6 @@ class NewGroupChatInfo extends ConsumerStatefulWidget {
 class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
-  final isPublicNotifier = ValueNotifier(false);
-  final isServerLimitedNotifier = ValueNotifier(false);
   final haveGroupNameNotifier = ValueNotifier(false);
   final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(CreateNewGroupInitial()),
@@ -106,19 +105,6 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
   }
 
   String get serverName => Matrix.of(context).client.userID?.domain ?? '';
-
-  void setPublic(bool isPublic) {
-    isPublicNotifier.value = isPublic;
-    if (isPublic) {
-      isServerLimitedNotifier.value = ref
-          .read(loginHomeserverSummaryProvider)
-          .isPublicGroupsServerLimitedByDefault;
-    }
-  }
-
-  void setServerLimited(bool isServerLimited) {
-    isServerLimitedNotifier.value = isServerLimited;
-  }
 
   Future<Set<PresentationContact>> getAllContactsGroupChat({
     bool isCustomDisplayName = true,
@@ -159,6 +145,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
       return;
     }
     final powerLevelManager = getIt.get<PowerLevelManager>();
+    final privacy = ref.read(groupPrivacyViewModelProvider);
     createNewGroupChatAction(
       matrixClient: client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
@@ -166,9 +153,9 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
         invite: invite,
         enableEncryption: enableEncryptionNotifier.value,
         isPublic:
-            isPublicNotifier.value &&
+            privacy.isPublic &&
             ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-        isServerLimited: isServerLimitedNotifier.value,
+        isServerLimited: privacy.isServerLimited,
         urlAvatar: urlAvatar,
         powerLevelContentOverride: {
           'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
@@ -523,8 +510,6 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     disposePickAvatarMixin();
     haveGroupNameNotifier.dispose();
     enableEncryptionNotifier.dispose();
-    isPublicNotifier.dispose();
-    isServerLimitedNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
     groupNameTextEditingController.dispose();
@@ -535,14 +520,6 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
   @override
   Widget build(BuildContext context) {
-    final isPublicGroupsEnabled = ref.watch(
-      loginHomeserverSummaryProvider.select(
-        (summary) => summary.isPublicGroupsEnabled,
-      ),
-    );
-    return NewGroupChatInfoView(
-      this,
-      isPublicGroupsEnabled: isPublicGroupsEnabled,
-    );
+    return NewGroupChatInfoView(this);
   }
 }
