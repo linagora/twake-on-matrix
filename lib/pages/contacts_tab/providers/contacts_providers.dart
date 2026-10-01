@@ -62,7 +62,9 @@ List<ContactSource> contactSources(Ref ref) => [
 
 @riverpod
 MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
-    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider).client);
+    MatrixRoomMemberDatasourceImpl(
+      ref.watch(activeMatrixClientProvider).client,
+    );
 
 /// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
 @riverpod
