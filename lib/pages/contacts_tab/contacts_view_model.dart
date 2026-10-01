@@ -3,12 +3,12 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/pages/contacts_tab/states/contacts_state.dart';
 
-part 'contacts_controller.g.dart';
+part 'contacts_view_model.g.dart';
 
 /// Continuous source (the local store) → `Stream<T>` in `build()`, so Riverpod
 /// owns the subscription lifecycle and every write re-renders the list.
 @riverpod
-class ContactsController extends _$ContactsController {
+class ContactsViewModel extends _$ContactsViewModel {
   @override
   Stream<List<UnifiedContact>> build() {
     final userId = ref.watch(currentUserIdProvider);
@@ -23,7 +23,7 @@ class ContactsController extends _$ContactsController {
   }
 }
 
-/// UI-only search keyword. Kept separate from [ContactsController] so typing
+/// UI-only search keyword. Kept separate from [ContactsViewModel] so typing
 /// does not rebuild (or restart) the store stream.
 @riverpod
 class ContactsSearchKeyword extends _$ContactsSearchKeyword {
@@ -38,6 +38,6 @@ class ContactsSearchKeyword extends _$ContactsSearchKeyword {
 /// Single state the list widget watches.
 @riverpod
 ContactsState contactsState(Ref ref) => ContactsState(
-  contacts: ref.watch(contactsControllerProvider),
+  contacts: ref.watch(contactsViewModelProvider),
   keyword: ref.watch(contactsSearchKeywordProvider),
 );

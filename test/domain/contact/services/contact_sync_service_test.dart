@@ -5,6 +5,7 @@ import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
+import 'package:twake_chat/domain/contact/sources/contact_enricher.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
@@ -22,6 +23,19 @@ class _FakeSource implements ContactSource {
 
   @override
   Future<List<SourcedContact>> fetch(String userId) async => contacts;
+}
+
+class _FakeEnricher implements ContactEnricher {
+  _FakeEnricher({this.throws = false});
+
+  final bool throws;
+  final List<String> enrichedUserIds = <String>[];
+
+  @override
+  Future<void> enrich(String userId) async {
+    if (throws) throw Exception('enricher down');
+    enrichedUserIds.add(userId);
+  }
 }
 
 void main() {
@@ -94,6 +108,46 @@ void main() {
     expect(iterator.current.single.matrixId, '@d:server');
     await iterator.cancel();
   });
+
+  test(
+    'a throwing enricher does not abort the refresh nor the other enrichers',
+    () async {
+      final failing = _FakeEnricher(throws: true);
+      final healthy = _FakeEnricher();
+      service = ContactSyncService(
+        userId: userId,
+        repository: repository,
+        policy: policy,
+        syncContacts: SyncContactsUseCase(
+          repository: repository,
+          policy: policy,
+          sources: [
+            _FakeSource(ContactSourceKind.tomAddressBook, const [
+              SourcedContact(
+                matrixId: '@a:server',
+                value: ContactSourceValue(
+                  kind: ContactSourceKind.tomAddressBook,
+                  displayName: 'Alice',
+                ),
+              ),
+            ]),
+          ],
+        ),
+        watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
+        getUnifiedContact: GetUnifiedContactUseCase(repository),
+        addContact: AddContactUseCase(repository),
+        enrichers: [failing, healthy],
+      );
+
+      await service.refresh();
+
+      expect(healthy.enrichedUserIds, [userId]);
+      expect(
+        (await service.getContact('@a:server'))?.resolvedDisplayName,
+        'Alice',
+      );
+    },
+  );
 
   test('clear empties the store', () async {
     await service.addContact(matrixId: '@e:server', displayName: 'Eve');

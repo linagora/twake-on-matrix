@@ -200,15 +200,19 @@ class MatrixState extends ConsumerState<Matrix>
       _activeClient = index;
       // Transitional bridge: expose the active client to Riverpod consumers.
       ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
-      unawaited(
-        ref.read(contactSyncServiceProvider(newClient!.userID!)).refresh(),
-      );
+      final userId = newClient!.userID;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
+      // Refresh the unified contacts only once the ToM configuration of the
+      // new active account is applied, so the sources never hit the previous
+      // account's URL/token.
+      if (userId != null) {
+        unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
+      }
       getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
@@ -735,6 +739,13 @@ class MatrixState extends ConsumerState<Matrix>
     await _storePersistActiveAccount(newActiveClient);
     await _getUserInfoWithActiveClient(newActiveClient);
     await _getHomeserverInformation(newActiveClient);
+    // The client pushed at boot was still logged out: re-publish it now that
+    // the login set its userID, so Riverpod consumers (contacts…) wake up.
+    ref.read(activeMatrixClientProvider.notifier).setClient(newActiveClient);
+    final userId = newActiveClient.userID;
+    if (userId != null) {
+      unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
+    }
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
@@ -850,10 +861,11 @@ class MatrixState extends ConsumerState<Matrix>
 
     // Transitional bridge: publish the initial active client to Riverpod.
     ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
-    if (clientOrNull != null) {
-      unawaited(
-        ref.read(contactSyncServiceProvider(clientOrNull!.userID!)).refresh(),
-      );
+    // A logged-out client (fresh install) has no userID yet; its first
+    // refresh runs in _handleFirstLoggedIn once the login completes.
+    final initialUserId = clientOrNull?.userID;
+    if (initialUserId != null) {
+      unawaited(ref.read(contactSyncServiceProvider(initialUserId)).refresh());
     }
 
     await _retrieveLocalToMConfiguration();
@@ -943,26 +955,13 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     try {
-      var toMConfigurations = await getTomConfigurations(client.userID!);
+      final toMConfigurations =
+          await getTomConfigurations(client.userID!) ??
+          await _discoverFreshInstallToMConfiguration(client);
       if (toMConfigurations == null) {
-        // TOM configuration is optional local state. On a fresh install the
-        // active homeserver discovery is the source of truth and must be
-        // applied before the contact session starts its first refresh.
-        await _getHomeserverInformation(client);
-        final tomServer = loginHomeserverSummary?.tomServer;
-        if (tomServer != null) {
-          final discovery = loginHomeserverSummary?.discoveryInformation;
-          _setupAuthUrl();
-          toMConfigurations = ToMConfigurations(
-            tomServerInformation: tomServer,
-            identityServerInformation: discovery?.mIdentityServer,
-            authUrl: authUrl,
-            loginType: loginType,
-          );
-          await _storeToMConfiguration(client, toMConfigurations);
-        }
-      }
-      if (toMConfigurations == null) {
+        // No ToM server for this account: drop any configuration left over
+        // from a previously active account (multi-account switch).
+        _setUpToMServer(null);
         _setupAuthUrl();
         return;
       }
@@ -975,6 +974,29 @@ class MatrixState extends ConsumerState<Matrix>
     } catch (e, s) {
       Logs().wtf('MatrixState::_retrieveToMConfiguration:', e, s);
     }
+  }
+
+  /// Fresh-install bootstrap: no ToM configuration has been stored for the
+  /// current account yet, so the active homeserver discovery is the source of
+  /// truth. When a ToM server is discovered, the configuration is persisted
+  /// so later boots stay local-only. Returns `null` for non-ToM accounts.
+  Future<ToMConfigurations?> _discoverFreshInstallToMConfiguration(
+    Client client,
+  ) async {
+    await _getHomeserverInformation(client);
+    final tomServer = loginHomeserverSummary?.tomServer;
+    if (tomServer == null) return null;
+
+    final discovery = loginHomeserverSummary?.discoveryInformation;
+    _setupAuthUrl();
+    final toMConfigurations = ToMConfigurations(
+      tomServerInformation: tomServer,
+      identityServerInformation: discovery?.mIdentityServer,
+      authUrl: authUrl,
+      loginType: loginType,
+    );
+    await _storeToMConfiguration(client, toMConfigurations);
+    return toMConfigurations;
   }
 
   void setUpToMServices(

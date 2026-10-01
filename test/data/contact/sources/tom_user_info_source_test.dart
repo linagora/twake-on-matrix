@@ -72,11 +72,15 @@ void main() {
 
   tearDown(() => repository.dispose());
 
-  TomUserInfoSource buildSource({int maxPerRun = 50}) => TomUserInfoSource(
+  TomUserInfoSource buildSource({
+    int maxPerRun = 50,
+    Duration failureCooldown = const Duration(minutes: 5),
+  }) => TomUserInfoSource(
     repository: repository,
     userInfoRepository: userInfoRepository,
     policy: policy,
     maxPerRun: maxPerRun,
+    failureCooldown: failureCooldown,
   );
 
   test('adds the tomUserInfo profile and re-resolves the contact', () async {
@@ -112,6 +116,53 @@ void main() {
     await buildSource(maxPerRun: 2).enrich(userId);
 
     expect(userInfoRepository.requestedUserIds, hasLength(2));
+  });
+
+  test('an all-failure run is still capped by maxPerRun', () async {
+    userInfoRepository = _FakeUserInfoRepository(
+      throwFor: const {'@a:server', '@b:server', '@c:server'},
+    );
+    await repository.upsertAll(userId, [
+      _contact('@a:server'),
+      _contact('@b:server'),
+      _contact('@c:server'),
+    ]);
+
+    await buildSource(maxPerRun: 2).enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, hasLength(2));
+  });
+
+  test('a failing contact in cooldown does not starve the next ones', () async {
+    userInfoRepository = _FakeUserInfoRepository(throwFor: const {'@a:server'});
+    await repository.upsertAll(userId, [
+      _contact('@a:server'),
+      _contact('@b:server'),
+    ]);
+    final source = buildSource(maxPerRun: 1);
+
+    await source.enrich(userId);
+    await source.enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, ['@a:server', '@b:server']);
+    expect(
+      (await repository.getByMatrixId(
+        userId,
+        '@b:server',
+      ))!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
+      isTrue,
+    );
+  });
+
+  test('a failing contact is retried once the cooldown has elapsed', () async {
+    userInfoRepository = _FakeUserInfoRepository(throwFor: const {'@a:server'});
+    await repository.upsert(userId, _contact('@a:server'));
+    final source = buildSource(failureCooldown: Duration.zero);
+
+    await source.enrich(userId);
+    await source.enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, ['@a:server', '@a:server']);
   });
 
   test('a failing profile does not prevent the others', () async {

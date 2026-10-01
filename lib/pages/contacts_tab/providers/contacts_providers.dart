@@ -62,7 +62,7 @@ List<ContactSource> contactSources(Ref ref) => [
 
 @riverpod
 MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
-    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider));
+    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider).client);
 
 /// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
 @riverpod
@@ -96,7 +96,7 @@ AddContactUseCase addContactUseCase(Ref ref) =>
 /// Scoping key for every contact provider: a multi-account session must never
 /// mix the contacts of two accounts.
 @riverpod
-String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider)?.userID;
+String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider).userId;
 
 @Riverpod(keepAlive: true)
 ContactSyncService contactSyncService(Ref ref, String userId) =>

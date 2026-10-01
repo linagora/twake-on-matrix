@@ -265,4 +265,81 @@ void main() {
     expect(contacts.single.matrixId, matrixId);
     expect(repository.store.containsKey(matrixId), isTrue);
   });
+
+  test(
+    'retains the enrichment values of a contact the sources still return',
+    () async {
+      const matrixId = '@jean:server';
+      await repository.upsert(
+        userId,
+        const UnifiedContact(
+          matrixId: matrixId,
+          canonicalDisplayName: 'Jean Dupont',
+          sources: [
+            ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Jean Dupont',
+            ),
+            ContactSourceValue(
+              kind: ContactSourceKind.tomUserInfo,
+              displayName: 'Jean D. (LDAP)',
+              avatarUrl: 'mxc://server/jean',
+            ),
+          ],
+        ),
+      );
+
+      final useCase = SyncContactsUseCase(
+        repository: repository,
+        policy: const ContactResolutionPolicy(),
+        sources: [
+          _FakeSource(ContactSourceKind.tomAddressBook, const [
+            SourcedContact(
+              matrixId: matrixId,
+              value: ContactSourceValue(
+                kind: ContactSourceKind.tomAddressBook,
+                displayName: 'Jean Dupont',
+              ),
+            ),
+          ]),
+        ],
+      );
+
+      final contacts = await useCase.execute(userId);
+
+      expect(contacts.single.sources.map((value) => value.kind), [
+        ContactSourceKind.tomAddressBook,
+        ContactSourceKind.tomUserInfo,
+      ]);
+      expect(contacts.single.avatarUrl, 'mxc://server/jean');
+    },
+  );
+
+  test('deletes a contact left with only enrichment values', () async {
+    const matrixId = '@ghost:server';
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: matrixId,
+        canonicalDisplayName: 'Ghost (LDAP)',
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomUserInfo,
+            displayName: 'Ghost (LDAP)',
+          ),
+        ],
+      ),
+    );
+
+    final useCase = SyncContactsUseCase(
+      repository: repository,
+      policy: const ContactResolutionPolicy(),
+      sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
+    );
+
+    final contacts = await useCase.execute(userId);
+
+    expect(contacts, isEmpty);
+    expect(repository.store, isEmpty);
+  });
 }

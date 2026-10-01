@@ -9,7 +9,7 @@ import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
-import 'package:twake_chat/pages/contacts_tab/controllers/contacts_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_view_model.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 
@@ -58,7 +58,7 @@ void main() {
     addTearDown(container.dispose);
 
     final completer = Completer<void>();
-    final subscription = container.listen(contactsControllerProvider, (
+    final subscription = container.listen(contactsViewModelProvider, (
       previous,
       next,
     ) {

@@ -138,9 +138,9 @@ Dependencies always point inward. `package:matrix` appears only in
 │   ContactsPage      ChatList     ProfilePage     Search       DraftChat        │
 │   (ConsumerWidget)   item…        …              …            …                │
 │         │                                                                      │
-│         │  ref.watch(contactsControllerProvider)   ── display only            │
+│         │  ref.watch(contactsViewModelProvider)    ── display only            │
 │         ▼                                                                      │
-│   ContactsController (AsyncNotifier)  ──→  ContactsState (@freezed)           │
+│   ContactsViewModel (AsyncNotifier)  ──→  ContactsState (@freezed)           │
 │         │  ref.read(...).sync() / addContact() / deleteContact()  ── actions  │
 └─────────┼──────────────────────────────────────────────────────────────────────┘
           ▼
@@ -186,7 +186,7 @@ Dependencies always point inward. `package:matrix` appears only in
 ### Figure 2 — Read path (every screen)
 
 ```
-Screens ──watch──▶ ContactsController ──watch──▶ UnifiedContactRepository
+Screens ──watch──▶ ContactsViewModel ──watch──▶ UnifiedContactRepository
                                                         │
                                                         ▼
                                             UnifiedContactStore (Hive, local)
@@ -250,7 +250,7 @@ re-notifies after the background sync.
 flowchart TB
     subgraph PRES["Presentation — Flutter / Riverpod"]
         UI["ContactsPage · ChatList · Profile · Search · Draft"]
-        CTRL["ContactsController (AsyncNotifier)"]
+        CTRL["ContactsViewModel (AsyncNotifier)"]
         STATE["ContactsState @freezed"]
         UI -->|ref.watch| CTRL
         CTRL --> STATE
@@ -317,7 +317,7 @@ At startup:
 | Repository Impl | `UnifiedContactRepositoryImpl` — maps DTO/SDK types → `UnifiedContact` entity, applies nothing else |
 | UseCase (`Future<T>`) | `SyncContactsUseCase`, `GetUnifiedContactUseCase`, `WatchUnifiedContactsUseCase`, `AddContactUseCase`, `DeleteContactUseCase` |
 | Service | `ContactSyncService` (orchestration, priority policy, background scheduling) |
-| Controller | `ContactsController extends AsyncNotifier` (`@riverpod`) |
+| Controller | `ContactsViewModel extends AsyncNotifier` (`@riverpod`) |
 | Screen | `ContactsPage` `ConsumerWidget` |
 
 ### 5.2 `ContactResolutionPolicy` — pure domain
@@ -449,7 +449,7 @@ lib/data/contact/
 
 lib/pages/contacts_tab/
   controllers/
-    contacts_controller.dart        # @riverpod AsyncNotifier
+    contacts_view_model.dart        # @riverpod AsyncNotifier
   states/
     contacts_state.dart             # @freezed
   pages/
@@ -518,7 +518,7 @@ waits for #6.
 
 ### PR 4 — `contacts/04-presentation`
 
-- [ ] `ContactsController` (`@riverpod` `AsyncNotifier`) watching the store.
+- [ ] `ContactsViewModel` (`@riverpod` `AsyncNotifier`) watching the store.
 - [ ] `ContactsState` (`@freezed`).
 - [ ] `ContactsPage` becomes `ConsumerWidget`; the existing `ContactsTabController` is kept
       as a thin adapter delegating to the controller (or removed if the PR stays small).
@@ -625,7 +625,7 @@ Branches delivered (stacked on the working branch `docs/readme-assets`, which is
 | `contacts/02-data` | `unified_contacts_box` Hive box, `ContactLocalDataSource`, `UnifiedContactRepository`, DTO + 7 tests |
 | `contacts/03-service` | `ContactSource`, 5 use cases, `ContactSyncService`, TOM AddressBook + Phonebook sources + 8 tests |
 | `contacts/03bis-matrix-source` | `activeMatrixClientProvider` (Phase 0 bridge), `MatrixRoomMemberSource`, `ContactEnricher` + `TomUserInfoSource` + 6 tests |
-| `contacts/04-presentation` | `ContactsController` (StreamNotifier), `ContactsState`, `UnifiedContactsList` (path only, live screen untouched) + 9 tests |
+| `contacts/04-presentation` | `ContactsViewModel` (StreamNotifier), `ContactsState`, `UnifiedContactsList` (path only, live screen untouched) + 9 tests |
 | `contacts/05-bootstrap-sync` | `contactSyncService.refresh()` triggered when the active client is published |
 | `contacts/06-read-path` | `unifiedContactProvider(matrixId)`, `UnifiedContactDisplayName` + 1 test |
 | `contacts/07-cleanup` | removal of the dead `combineDuplicateContact` extension |

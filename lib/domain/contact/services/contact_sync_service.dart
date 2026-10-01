@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
@@ -51,7 +52,17 @@ class ContactSyncService {
   Future<void> refresh() async {
     await _syncContacts.execute(_userId);
     for (final enricher in _enrichers) {
-      await enricher.enrich(_userId);
+      // Enrichment is best-effort on top of the synced base data: a failing
+      // enricher must not abort the refresh nor skip the remaining ones.
+      try {
+        await enricher.enrich(_userId);
+      } catch (exception, stackTrace) {
+        Logs().e(
+          'ContactSyncService::refresh: enricher failed',
+          exception,
+          stackTrace,
+        );
+      }
     }
   }
 
