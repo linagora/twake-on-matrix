@@ -5,6 +5,7 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/sources/contact_enricher.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 
 /// Second-pass enricher fetching the canonical TOM `user_info` profile for the
@@ -43,48 +44,60 @@ class TomUserInfoSource implements ContactEnricher {
 
     for (final contact in contacts) {
       if (attempts >= maxPerRun) break;
-      if (_alreadyEnriched(contact)) continue;
-      final lastFailure = _lastFailureAt[contact.matrixId];
-      if (lastFailure != null &&
-          now.difference(lastFailure) < failureCooldown) {
-        continue;
-      }
+      if (!_needsEnrichment(contact, now)) continue;
 
       // Count the attempt before the network call: failures must consume the
       // per-run budget too, otherwise an all-failure run would be unbounded.
       attempts++;
-      try {
-        final userInfo = await _userInfoRepository.getUserInfo(
-          Uri.encodeComponent(contact.matrixId),
-        );
-        final enriched = _policy.resolve(
-          matrixId: contact.matrixId,
-          values: [
-            ...contact.sources,
-            ContactSourceValue(
-              kind: ContactSourceKind.tomUserInfo,
-              displayName: userInfo.displayName,
-              avatarUrl: userInfo.avatarUrl,
-              emails: userInfo.emails ?? const <String>[],
-              phones: userInfo.phones ?? const <String>[],
-              updatedAt: DateTime.now().toUtc(),
-            ),
-          ],
-        );
-        await _repository.upsert(userId, enriched);
-        _lastFailureAt.remove(contact.matrixId);
-      } catch (exception, stackTrace) {
-        _lastFailureAt[contact.matrixId] = now;
-        // Skip the unreachable profile; the base sync data is kept.
-        Logs().e(
-          'TomUserInfoSource::enrich: user_info fetch failed for '
-          '${contact.matrixId}',
-          exception,
-          stackTrace,
-        );
-      }
+      await _enrichOne(userId, contact, now);
     }
   }
+
+  bool _needsEnrichment(UnifiedContact contact, DateTime now) {
+    if (_alreadyEnriched(contact)) return false;
+    final lastFailure = _lastFailureAt[contact.matrixId];
+    return lastFailure == null ||
+        now.difference(lastFailure) >= failureCooldown;
+  }
+
+  Future<void> _enrichOne(
+    String userId,
+    UnifiedContact contact,
+    DateTime now,
+  ) async {
+    try {
+      final userInfo = await _userInfoRepository.getUserInfo(
+        Uri.encodeComponent(contact.matrixId),
+      );
+      await _repository.upsert(userId, _enriched(contact, userInfo));
+      _lastFailureAt.remove(contact.matrixId);
+    } catch (exception, stackTrace) {
+      _lastFailureAt[contact.matrixId] = now;
+      // Skip the unreachable profile; the base sync data is kept.
+      Logs().e(
+        'TomUserInfoSource::enrich: user_info fetch failed for '
+        '${contact.matrixId}',
+        exception,
+        stackTrace,
+      );
+    }
+  }
+
+  UnifiedContact _enriched(UnifiedContact contact, UserInfo userInfo) =>
+      _policy.resolve(
+        matrixId: contact.matrixId,
+        values: [
+          ...contact.sources,
+          ContactSourceValue(
+            kind: ContactSourceKind.tomUserInfo,
+            displayName: userInfo.displayName,
+            avatarUrl: userInfo.avatarUrl,
+            emails: userInfo.emails ?? const <String>[],
+            phones: userInfo.phones ?? const <String>[],
+            updatedAt: DateTime.now().toUtc(),
+          ),
+        ],
+      );
 
   bool _alreadyEnriched(UnifiedContact contact) => contact.sources.any(
     (source) => source.kind == ContactSourceKind.tomUserInfo,

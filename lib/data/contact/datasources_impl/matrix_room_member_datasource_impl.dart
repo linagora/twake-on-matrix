@@ -23,7 +23,10 @@ class MatrixRoomMemberDatasourceImpl implements MatrixRoomMemberDatasource {
         'cannot fetch members for $userId',
       );
     }
+    return _collectMembers(client, userId);
+  }
 
+  List<SourcedContact> _collectMembers(Client client, String userId) {
     // Seeded with our own id: the current user is never a contact of itself.
     final seenMatrixIds = <String>{userId};
     final members = <SourcedContact>[];
@@ -31,21 +34,24 @@ class MatrixRoomMemberDatasourceImpl implements MatrixRoomMemberDatasource {
     for (final room in client.rooms) {
       for (final user in room.getParticipants()) {
         if (members.length >= maxMembers) return members;
-        final matrixId = user.id;
-        if (matrixId.isEmpty || !seenMatrixIds.add(matrixId)) continue;
-        members.add(
-          SourcedContact(
-            matrixId: matrixId,
-            value: ContactSourceValue(
-              kind: ContactSourceKind.matrixRoomMember,
-              displayName: user.calcDisplayname(),
-              avatarUrl: user.avatarUrl?.toString(),
-            ),
-          ),
-        );
+        final contact = _toSourcedContact(user, seenMatrixIds);
+        if (contact != null) members.add(contact);
       }
     }
 
     return members;
+  }
+
+  SourcedContact? _toSourcedContact(User user, Set<String> seenMatrixIds) {
+    final matrixId = user.id;
+    if (matrixId.isEmpty || !seenMatrixIds.add(matrixId)) return null;
+    return SourcedContact(
+      matrixId: matrixId,
+      value: ContactSourceValue(
+        kind: ContactSourceKind.matrixRoomMember,
+        displayName: user.calcDisplayname(),
+        avatarUrl: user.avatarUrl?.toString(),
+      ),
+    );
   }
 }
