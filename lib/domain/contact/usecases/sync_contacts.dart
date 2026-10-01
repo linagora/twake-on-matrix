@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
@@ -116,7 +117,12 @@ class SyncContactsUseCase {
   ) async {
     try {
       return await source.fetch(userId);
-    } catch (_) {
+    } catch (exception, stackTrace) {
+      Logs().e(
+        'SyncContactsUseCase::_safeFetch: ${source.kind}',
+        exception,
+        stackTrace,
+      );
       failedKinds.add(source.kind);
       return const <SourcedContact>[];
     }
