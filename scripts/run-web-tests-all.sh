@@ -40,6 +40,7 @@ run_test() {
     --dart-define=SearchByTitle="$SearchByTitle" \
     --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
     --dart-define=GroupID="$GroupID" \
+    --dart-define=GroupRoomVersion="${GroupRoomVersion:-}" \
     --dart-define=PATROL_WEB=true 2>&1)
   local ec=$?
 

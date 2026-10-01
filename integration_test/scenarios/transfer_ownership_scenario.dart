@@ -5,6 +5,9 @@ import '../base/base_test_scenario.dart';
 /// Cross-platform scenario: transfer group ownership to a member and verify
 /// the action disappears afterwards.
 ///
+/// From room version 12 the creator cannot be demoted, so the action must not
+/// be offered at all: `GroupRoomVersion` tells which behaviour to expect.
+///
 /// Pre-condition: the logged-in account owns the group named by
 /// `SearchByTitle` and `MemberMatrixID` is a joined member. Note the action
 /// mutates server state — re-running against the same homeserver without
@@ -25,6 +28,10 @@ class TransferOwnershipScenario extends BaseTestScenario {
     defaultValue: '@member:localhost',
   );
 
+  static const _roomVersion = String.fromEnvironment('GroupRoomVersion');
+
+  bool get _creatorIsPermanentOwner => (int.tryParse(_roomVersion) ?? 0) >= 12;
+
   @override
   Future<void> runTestLogic() async {
     // 1. Open the group chat.
@@ -43,6 +50,14 @@ class TransferOwnershipScenario extends BaseTestScenario {
     );
 
     final profile = robots.chatProfileInfoRobot();
+
+    if (_creatorIsPermanentOwner) {
+      await profile.verifyProfileActionButtonVisible(
+        ProfileInfoActions.transferOwnership,
+        expected: false,
+      );
+      return;
+    }
 
     // 3. Verify transfer ownership button is visible (current user is owner).
     await profile.verifyProfileActionButtonVisible(
