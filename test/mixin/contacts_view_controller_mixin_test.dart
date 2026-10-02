@@ -9,7 +9,6 @@ import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
@@ -52,7 +51,6 @@ class InvitationGatedContactsViewController with ContactsViewControllerMixin {
   MockSpec<Client>(),
   MockSpec<MatrixLocalizations>(),
   MockSpec<ContactsViewControllerMixin>(),
-  MockSpec<ContactsManager>(),
 ])
 void main() {
   const debouncerIntervalInMilliseconds = 300;
@@ -2963,7 +2961,6 @@ void main() {
       getIt.registerSingleton<SearchRecentChatInteractor>(
         SearchRecentChatInteractor(),
       );
-      getIt.registerSingleton<ContactsManager>(MockContactsManager());
       controller = InvitationGatedContactsViewController();
       controller.setUnifiedContactsForTest(const [
         UnifiedContact(

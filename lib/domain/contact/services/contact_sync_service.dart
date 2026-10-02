@@ -16,7 +16,7 @@ import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 /// Pure Dart orchestration: it owns no state of its own and never talks to an
 /// external system directly — it delegates to the use cases and the
 /// repository. Controllers and legacy consumers must go through it instead of
-/// reaching into `ContactsManager` or the SDK.
+/// reaching into legacy managers or the SDK.
 class ContactSyncService {
   const ContactSyncService({
     required String userId,
