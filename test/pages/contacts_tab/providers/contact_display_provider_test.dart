@@ -98,43 +98,33 @@ void main() {
     expect(profileDatasource.requested, ['@a:server']);
   });
 
-  test('prefers the store and does not hit the SDK', () async {
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: '@a:server',
-        canonicalDisplayName: 'Stored Alice',
-      ),
+  // warmUp: wait for the store stream to emit before the first read; otherwise
+  // the first read happens while the store is still loading.
+  for (final warmUp in [true, false]) {
+    test(
+      warmUp
+          ? 'prefers the store and does not hit the SDK'
+          : 'a one-shot read while the store is loading still prefers it',
+      () async {
+        await repository.upsert(
+          userId,
+          const UnifiedContact(
+            matrixId: '@a:server',
+            canonicalDisplayName: 'Stored Alice',
+          ),
+        );
+        final container = buildContainer();
+        if (warmUp) await awaitStoreLoaded(container);
+
+        final contact = await container.read(
+          contactDisplayProvider('@a:server').future,
+        );
+
+        expect(contact.resolvedDisplayName, 'Stored Alice');
+        expect(profileDatasource.requested, isEmpty);
+      },
     );
-    final container = buildContainer();
-    await awaitStoreLoaded(container);
-
-    final contact = await container.read(
-      contactDisplayProvider('@a:server').future,
-    );
-
-    expect(contact.resolvedDisplayName, 'Stored Alice');
-    expect(profileDatasource.requested, isEmpty);
-  });
-
-  test('a one-shot read while the store is loading still prefers it', () async {
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: '@a:server',
-        canonicalDisplayName: 'Stored Alice',
-      ),
-    );
-    final container = buildContainer();
-
-    // No warm-up: the first read happens before the store stream emitted.
-    final contact = await container.read(
-      contactDisplayProvider('@a:server').future,
-    );
-
-    expect(contact.resolvedDisplayName, 'Stored Alice');
-    expect(profileDatasource.requested, isEmpty);
-  });
+  }
 
   test('returns an id-only contact when the SDK knows nothing', () async {
     profileDatasource = _FakeMatrixProfileDatasource(unknown: true);
