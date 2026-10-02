@@ -2,21 +2,17 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
-import 'package:dartz/dartz.dart' hide State;
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:equatable/equatable.dart';
-import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart';
-import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
@@ -380,18 +376,17 @@ class ChatController extends State<Chat>
 
   final showAddContactBanner = ValueNotifier(true);
 
-  User? contactToAdd(Either<Failure, Success> state) {
+  User? contactToAdd(List<UnifiedContact> contacts) {
     final isDirectChat = room?.isDirectChat == true;
     if (!isDirectChat) return null;
 
-    final List<Contact> contacts = state.fold(
-      (failure) => [],
-      (success) => success is GetContactsSuccess ? success.contacts : [],
-    );
+    final addressBookMatrixIds = contacts
+        .where((contact) => contact.isAddressBookContact)
+        .map((contact) => contact.matrixId)
+        .toSet();
     return room?.getParticipants().firstWhereOrNull(
       (user) =>
-          user.id != client.userID &&
-          contacts.none((contact) => contact.inTomAddressBook(user.id)),
+          user.id != client.userID && !addressBookMatrixIds.contains(user.id),
     );
   }
 

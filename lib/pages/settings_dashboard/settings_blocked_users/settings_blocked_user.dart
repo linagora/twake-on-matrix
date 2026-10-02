@@ -10,6 +10,9 @@ import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
@@ -29,6 +32,15 @@ class BlockedUsers extends StatefulWidget {
 class SettingsIgnoreListController extends State<BlockedUsers>
     with SearchDebouncerMixin {
   Client get client => Matrix.read(context).client;
+
+  /// `null` when the profile cannot be resolved: the user is then skipped.
+  Future<Profile?> _fetchProfile(String userId) async {
+    final data = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(userId).future);
+    return data?.toProfile(userId);
+  }
 
   final responsiveUtils = getIt.get<ResponsiveUtils>();
 
@@ -62,10 +74,8 @@ class SettingsIgnoreListController extends State<BlockedUsers>
 
     for (final userId in client.ignoredUsers) {
       try {
-        final user = await client.getProfileFromUserId(
-          userId,
-          getFromRooms: false,
-        );
+        final user = await _fetchProfile(userId);
+        if (user == null) continue;
         blockedUsers.add(user);
       } catch (e) {
         Logs().e(
@@ -142,10 +152,8 @@ class SettingsIgnoreListController extends State<BlockedUsers>
 
     for (final userId in client.ignoredUsers) {
       try {
-        final user = await client.getProfileFromUserId(
-          userId,
-          getFromRooms: false,
-        );
+        final user = await _fetchProfile(userId);
+        if (user == null) continue;
         if (!blockedUsers.any((u) => u.userId == user.userId)) {
           blockedUsers.add(user);
         } else {

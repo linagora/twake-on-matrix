@@ -1,6 +1,5 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
 import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab_view.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
@@ -32,7 +31,6 @@ class ContactsTabController extends ConsumerState<ContactsTab>
     with
         ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
-        AddressBooksMixin,
         WidgetsBindingObserver,
         AutomaticKeepAliveClientMixin {
   final responsive = getIt.get<ResponsiveUtils>();
@@ -67,7 +65,6 @@ class ContactsTabController extends ConsumerState<ContactsTab>
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
-        listenAddressBookEvents(client);
         synchronizeContactsOnContactTab(
           context: context,
           client: Matrix.of(context).client,
@@ -150,7 +147,11 @@ class ContactsTabController extends ConsumerState<ContactsTab>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    await handleDidChangeAppLifecycleState(state, client: client);
+    await handleDidChangeAppLifecycleState(
+      state,
+      context: context,
+      client: client,
+    );
   }
 
   @override

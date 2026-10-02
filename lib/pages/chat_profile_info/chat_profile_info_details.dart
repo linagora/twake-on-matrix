@@ -3,12 +3,11 @@ import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart';
-import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
@@ -122,13 +121,13 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     ),
                   ),
                 ],
-                ValueListenableBuilder(
-                  valueListenable: getIt
-                      .get<ContactsManager>()
-                      .getContactsNotifier(),
-                  builder: (context, state, child) {
+                Consumer(
+                  builder: (context, ref, child) {
+                    final contacts =
+                        ref.watch(contactsControllerProvider).asData?.value ??
+                        const <UnifiedContact>[];
                     return _AddContactButton(
-                      canAddContact: canAddContact(state),
+                      canAddContact: canAddContact(contacts),
                       matrixId: matrixId,
                       displayName: displayName,
                     );
@@ -190,14 +189,12 @@ class ChatProfileInfoDetails extends StatelessWidget {
     );
   }
 
-  bool canAddContact(Either<Failure, Success> state) {
+  bool canAddContact(List<UnifiedContact> contacts) {
     if (PlatformInfos.isMobile || matrixId == null) return false;
 
-    final List<Contact> contacts = state.fold(
-      (failure) => [],
-      (success) => success is GetContactsSuccess ? success.contacts : [],
+    return !contacts.any(
+      (contact) => contact.isAddressBookContact && contact.matrixId == matrixId,
     );
-    return contacts.none((contact) => contact.inTomAddressBook(matrixId!));
   }
 }
 

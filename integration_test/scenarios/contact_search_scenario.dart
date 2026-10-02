@@ -1,10 +1,12 @@
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart';
-import 'package:twake_chat/domain/model/contact/third_party_status.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab_body_view.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';
@@ -85,35 +87,44 @@ class ContactSearchScenario extends BaseTestScenario {
     return matrixId.split(':').first.replaceFirst('@', '');
   }
 
-  void _seedContactFixtures() {
-    getIt.get<ContactsManager>().getContactsNotifier().value = Right(
-      GetContactsSuccess(
-        contacts: [
-          Contact(
-            id: 'patrol-contact-alice',
-            displayName: _currentAccountTitle,
-            emails: {
-              Email(
-                address: 'alice@example.test',
-                matrixId: _currentAccount,
-                status: ThirdPartyStatus.active,
-              ),
-            },
-          ),
-          Contact(
-            id: 'patrol-contact-charlie',
-            displayName: 'charlie',
-            emails: {
-              Email(
-                address: 'charlie@example.test',
-                matrixId: _searchByMatrixAddress,
-                status: ThirdPartyStatus.active,
-              ),
-            },
-          ),
-        ],
-      ),
+  /// Writes the fixtures straight into the unified contact store of the
+  /// signed-in account. A `manual` value keeps each contact alive across the
+  /// background syncs (they only replace the values of their own source), and
+  /// a fresh `tomUserInfo` value marks it as a directory contact without
+  /// triggering an enrichment request.
+  Future<void> _seedContactFixtures() async {
+    final container = ProviderScope.containerOf(
+      $.tester.element(find.byType(Scaffold).first),
+      listen: false,
     );
+    final now = DateTime.now().toUtc();
+    UnifiedContact fixture(String name, String email, String matrixId) =>
+        const ContactResolutionPolicy().resolve(
+          matrixId: matrixId,
+          values: [
+            ContactSourceValue(
+              kind: ContactSourceKind.manual,
+              displayName: name,
+              emails: [email],
+              active: true,
+              updatedAt: now,
+            ),
+            ContactSourceValue(
+              kind: ContactSourceKind.tomUserInfo,
+              displayName: name,
+              emails: [email],
+              active: true,
+              updatedAt: now,
+            ),
+          ],
+        );
+
+    await container
+        .read(unifiedContactRepositoryProvider)
+        .upsertAll(_currentAccount, [
+          fixture(_currentAccountTitle, 'alice@example.test', _currentAccount),
+          fixture('charlie', 'charlie@example.test', _searchByMatrixAddress),
+        ]);
   }
 
   /// Enters [text] in the search field, then polls until the result state is
@@ -124,7 +135,7 @@ class ContactSearchScenario extends BaseTestScenario {
     String text, {
     required bool expectResults,
   }) async {
-    _seedContactFixtures();
+    await _seedContactFixtures();
     await robots.searchRobot().enterSearchText(text);
     final deadline = DateTime.now().add(const Duration(seconds: 8));
     while (DateTime.now().isBefore(deadline)) {
