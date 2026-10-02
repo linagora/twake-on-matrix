@@ -21,10 +21,12 @@ class ContactsController extends _$ContactsController {
     return ref.watch(contactSyncServiceProvider(userId)).watchContacts();
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool resolvePhonebook = false}) async {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
-    await ref.read(contactSyncServiceProvider(userId)).refresh();
+    await ref
+        .read(contactSyncServiceProvider(userId))
+        .refresh(resolvePhonebook: resolvePhonebook);
   }
 }
 
