@@ -5,6 +5,7 @@ import 'package:twake_chat/data/model/invitation/invitation_status_response.dart
 import 'package:twake_chat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:twake_chat/domain/model/contact/contact_status.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_invitation.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/invitation_status_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/pages/new_private_chat/widget/contact_status_widget.dart';
@@ -17,6 +18,7 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_chip.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -123,16 +125,18 @@ class _ExpansionPhonebookContactListTileState
             top: 8.0,
             bottom: 8.0,
           ),
-          child: FutureBuilder<Profile?>(
+          child: Consumer(
             key: widget.contact.matrixId?.isNotEmpty == true
                 ? Key(widget.contact.matrixId!)
                 : null,
-            future:
-                widget.contact.status == ContactStatus.active &&
-                    widget.contact.matrixId?.isNotEmpty == true
-                ? getProfile(context)
-                : null,
-            builder: (context, snapshot) {
+            builder: (context, ref, _) {
+              final matrixId = widget.contact.matrixId;
+              final profile =
+                  widget.contact.status == ContactStatus.active &&
+                      matrixId?.isNotEmpty == true
+                  ? ref.watch(contactDisplayProvider(matrixId!)).value
+                  : null;
+              final avatarUrl = profile?.avatarUrl;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -140,7 +144,9 @@ class _ExpansionPhonebookContactListTileState
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
                       child: Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
+                        mxContent: avatarUrl == null
+                            ? null
+                            : Uri.tryParse(avatarUrl),
                         name: widget.contact.displayName,
                       ),
                     ),
@@ -348,29 +354,6 @@ class _ExpansionPhonebookContactListTileState
       );
     }
     return const SizedBox();
-  }
-
-  Future<Profile?> getProfile(BuildContext context) async {
-    final client = Matrix.of(context).client;
-    if (widget.contact.matrixId == null) {
-      return Future.error(Exception("MatrixId is null"));
-    }
-    try {
-      final profile = await client.getProfileFromUserId(
-        widget.contact.matrixId!,
-        getFromRooms: false,
-      );
-      Logs().d(
-        "ExpansionContactListTile()::getProfiles(): ${profile.avatarUrl}",
-      );
-      return profile;
-    } catch (e) {
-      return Profile(
-        userId: widget.contact.matrixId!,
-        displayName: widget.contact.displayName,
-        avatarUrl: null,
-      );
-    }
   }
 
   dynamic Function()? _onContactTapHandler(
