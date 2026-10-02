@@ -167,10 +167,16 @@ ContactSyncService contactSyncService(Ref ref, String userId) =>
       userId: userId,
       repository: ref.watch(unifiedContactRepositoryProvider),
       policy: ref.watch(contactResolutionPolicyProvider),
-      syncContacts: ref.watch(syncContactsUseCaseProvider),
-      watchUnifiedContacts: ref.watch(watchUnifiedContactsUseCaseProvider),
-      getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
-      addContact: ref.watch(addContactUseCaseProvider),
-      enrichers: [ref.watch(tomUserInfoEnricherProvider)],
-      phonebookResolver: ref.watch(phonebookResolverProvider),
+      useCases: ContactUseCases(
+        sync: ref.watch(syncContactsUseCaseProvider),
+        watch: ref.watch(watchUnifiedContactsUseCaseProvider),
+        get: ref.watch(getUnifiedContactUseCaseProvider),
+        add: ref.watch(addContactUseCaseProvider),
+      ),
+      options: ContactSyncOptions(
+        enrichers: [ref.watch(tomUserInfoEnricherProvider)],
+        phonebookResolver: ref.watch(phonebookResolverProvider),
+        // The sources follow the active account: stop as soon as it changes.
+        isAccountActive: () => ref.read(currentUserIdProvider) == userId,
+      ),
     );

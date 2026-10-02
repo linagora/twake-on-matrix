@@ -24,6 +24,30 @@ class _FakeSource implements ContactSource {
   }
 }
 
+/// Ends the session while it is being fetched: the account was switched.
+class _EndsSessionSource implements ContactSource {
+  _EndsSessionSource(this._endSession);
+
+  final void Function() _endSession;
+
+  @override
+  ContactSourceKind get kind => ContactSourceKind.tomAddressBook;
+
+  @override
+  Future<List<SourcedContact>> fetch(String userId) async {
+    _endSession();
+    return const [
+      SourcedContact(
+        matrixId: '@late:server',
+        value: ContactSourceValue(
+          kind: ContactSourceKind.tomAddressBook,
+          displayName: 'Late',
+        ),
+      ),
+    ];
+  }
+}
+
 void main() {
   const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
@@ -341,5 +365,73 @@ void main() {
 
     expect(contacts, isEmpty);
     expect(repository.store, isEmpty);
+  });
+
+  group('isCurrent guard', () {
+    SyncContactsUseCase buildUseCase() => SyncContactsUseCase(
+      repository: repository,
+      policy: const ContactResolutionPolicy(),
+      sources: [
+        _FakeSource(ContactSourceKind.tomAddressBook, const [
+          SourcedContact(
+            matrixId: '@a:server',
+            value: ContactSourceValue(
+              kind: ContactSourceKind.tomAddressBook,
+              displayName: 'Alice',
+            ),
+          ),
+        ]),
+      ],
+    );
+
+    test('writes normally while the session is current', () async {
+      await buildUseCase().execute(userId, isCurrent: () => true);
+
+      expect(repository.store.keys, ['@a:server']);
+    });
+
+    test('drops the fetched contacts of a session that is over', () async {
+      final contacts = await buildUseCase().execute(
+        userId,
+        isCurrent: () => false,
+      );
+
+      expect(contacts, isEmpty);
+      expect(repository.store, isEmpty);
+    });
+
+    test('does not delete anything once the session is over', () async {
+      const ghost = UnifiedContact(
+        matrixId: '@ghost:server',
+        canonicalDisplayName: 'Ghost',
+        sources: [
+          ContactSourceValue(
+            kind: ContactSourceKind.tomAddressBook,
+            displayName: 'Ghost',
+          ),
+        ],
+      );
+      await repository.upsert(userId, ghost);
+
+      await buildUseCase().execute(userId, isCurrent: () => false);
+
+      expect(repository.store.keys, ['@ghost:server']);
+    });
+
+    test(
+      'the session ending while the sources load drops the result',
+      () async {
+        var current = true;
+        final useCase = SyncContactsUseCase(
+          repository: repository,
+          policy: const ContactResolutionPolicy(),
+          sources: [_EndsSessionSource(() => current = false)],
+        );
+
+        await useCase.execute(userId, isCurrent: () => current);
+
+        expect(repository.store, isEmpty);
+      },
+    );
   });
 }
