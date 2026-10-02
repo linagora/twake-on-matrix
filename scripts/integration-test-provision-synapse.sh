@@ -81,17 +81,13 @@ create_room() {
   local payload
   payload=$(jq -nc \
     --arg name "$ROOM_NAME" \
-    --arg mxid1 "$mxid1" \
     --arg mxid2 "$mxid2" \
     --arg mxid3 "$mxid3" \
     '{
       name: $name,
       preset: "private_chat",
       visibility: "private",
-      invite: [$mxid2, $mxid3],
-      power_level_content_override: {
-        users: {($mxid1): 100, ($mxid2): 50}
-      }
+      invite: [$mxid2, $mxid3]
     }')
   local response
   response=$(curl -sS --fail-with-body -X POST \
@@ -137,6 +133,33 @@ create_named_room() {
   echo "$room_id"
 }
 
+# Patches the server-built power levels instead of overriding `users` at
+# creation: room v12 rejects a `users` map listing the creator (MSC4289),
+# older versions reject one that omits them.
+set_power_level() {
+  local token="$1"
+  local room_id="$2"
+  local mxid="$3"
+  local level="$4"
+  local url="$BASE_URL/_matrix/client/v3/rooms/$room_id/state/m.room.power_levels"
+  local payload
+  payload=$(curl -sS --fail-with-body "$url" \
+    -H "Authorization: Bearer $token" |
+    jq -c --arg mxid "$mxid" --argjson level "$level" '.users[$mxid] = $level')
+  curl -sS --fail-with-body -X PUT "$url" \
+    -H "Authorization: Bearer $token" \
+    -H "Content-Type: application/json" \
+    -d "$payload" >/dev/null
+}
+
+room_version() {
+  local token="$1"
+  local room_id="$2"
+  curl -sS --fail-with-body \
+    "$BASE_URL/_matrix/client/v3/rooms/$room_id/state/m.room.create" \
+    -H "Authorization: Bearer $token" | jq -r '.room_version // "1"'
+}
+
 accept_invite() {
   local token="$1"
   local room_id="$2"
@@ -174,6 +197,10 @@ MXID3="@$USER3:$SERVER_NAME"
 
 log "Creating $ROOM_NAME with $USER1 as admin..."
 ROOM_ID=$(create_room "$TOKEN1" "$MXID1" "$MXID2" "$MXID3")
+set_power_level "$TOKEN1" "$ROOM_ID" "$MXID2" 50
+# The server picks the room version; the suite adapts to it.
+ROOM_VERSION=$(room_version "$TOKEN1" "$ROOM_ID")
+log "$ROOM_NAME is a room version $ROOM_VERSION."
 
 log "Joining invitees to $ROOM_ID..."
 accept_invite "$TOKEN2" "$ROOM_ID"
@@ -222,6 +249,7 @@ SearchByMatrixAddress=$MXID3
 SearchByTitle=$ROOM_NAME
 TitleOfGroupTest=$ROOM_NAME
 GroupID=$ROOM_ID
+GroupRoomVersion=$ROOM_VERSION
 ForwardReceiver1Name="$RECEIVER1_NAME"
 ForwardReceiver2Name="$RECEIVER2_NAME"
 EOF

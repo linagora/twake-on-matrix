@@ -40,6 +40,7 @@ patrol test \
   --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
   --dart-define=GroupTest="$SearchByTitle" \
   --dart-define=GroupID="$GroupID" \
+  --dart-define=GroupRoomVersion="${GroupRoomVersion:-}" \
   --dart-define=ForwardReceiver1Name="${ForwardReceiver1Name:-Receiver Alpha}" \
   --dart-define=ForwardReceiver2Name="${ForwardReceiver2Name:-Receiver Beta}" \
   --dart-define=PATROL_WEB=true 2>&1 | tee /tmp/patrol-last.log

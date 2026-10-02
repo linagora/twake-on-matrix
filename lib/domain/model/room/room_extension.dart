@@ -396,7 +396,23 @@ extension RoomExtension on Room {
   bool get canTransferOwnership {
     return ownPowerLevel >=
             PowerLevel(DefaultPowerLevelMember.owner.powerLevel) &&
-        canAssignRoles;
+        canAssignRoles &&
+        !hasPermanentCreatorPower(client.userID);
+  }
+
+  /// Since room version 12 (MSC4289) the creators hold an unbounded power
+  /// level: they cannot be listed in `users`, so they cannot be demoted.
+  bool hasPermanentCreatorPower(String? userId) {
+    if (userId == null) return false;
+    final create = getState(EventTypes.RoomCreate);
+    if (create == null) return false;
+    final version = int.tryParse(
+      create.content.tryGet<String>('room_version') ?? '',
+    );
+    if (version == null || version < 12) return false;
+    final additionalCreators =
+        create.content.tryGetList<String>('additional_creators') ?? const [];
+    return create.senderId == userId || additionalCreators.contains(userId);
   }
 
   User get ownUser {

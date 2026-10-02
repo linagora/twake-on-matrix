@@ -134,4 +134,76 @@ void main() {
       expect(result, true);
     });
   });
+
+  group('hasPermanentCreatorPower', () {
+    const creator = '@creator:example.com';
+    const extra = '@extra:example.com';
+    const other = '@other:example.com';
+
+    MockRoom roomWithCreate(Map<String, Object?>? content) {
+      final room = MockRoom();
+      when(room.getState(EventTypes.RoomCreate)).thenReturn(
+        content == null
+            ? null
+            : StrippedStateEvent(
+                type: EventTypes.RoomCreate,
+                content: content,
+                senderId: creator,
+                stateKey: '',
+              ),
+      );
+      return room;
+    }
+
+    test('true for the creator of a v12 room', () {
+      final room = roomWithCreate({'room_version': '12'});
+      expect(room.hasPermanentCreatorPower(creator), isTrue);
+    });
+
+    test('true for an additional creator of a v12 room', () {
+      final room = roomWithCreate({
+        'room_version': '12',
+        'additional_creators': [extra],
+      });
+      expect(room.hasPermanentCreatorPower(extra), isTrue);
+    });
+
+    test('false for a regular member of a v12 room', () {
+      final room = roomWithCreate({'room_version': '12'});
+      expect(room.hasPermanentCreatorPower(other), isFalse);
+    });
+
+    test('false for the creator of a v10 or v11 room', () {
+      expect(
+        roomWithCreate({
+          'room_version': '10',
+        }).hasPermanentCreatorPower(creator),
+        isFalse,
+      );
+      expect(
+        roomWithCreate({
+          'room_version': '11',
+        }).hasPermanentCreatorPower(creator),
+        isFalse,
+      );
+    });
+
+    test('false when the version is missing or not numeric', () {
+      expect(roomWithCreate({}).hasPermanentCreatorPower(creator), isFalse);
+      expect(
+        roomWithCreate({
+          'room_version': 'org.matrix.msc3757.11',
+        }).hasPermanentCreatorPower(creator),
+        isFalse,
+      );
+    });
+
+    test('false without create event or user id', () {
+      expect(roomWithCreate(null).hasPermanentCreatorPower(creator), isFalse);
+      expect(
+        roomWithCreate({'room_version': '12'}).hasPermanentCreatorPower(null),
+        isFalse,
+      );
+    });
+  });
 }

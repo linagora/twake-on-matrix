@@ -177,6 +177,7 @@ jobs:
             --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
             --dart-define=GroupTest="$SearchByTitle" \
             --dart-define=GroupID="$GroupID" \
+            --dart-define=GroupRoomVersion="$GroupRoomVersion" \
             --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
             --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
             --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
@@ -299,6 +300,7 @@ jobs:
             --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
             --dart-define=GroupTest="$SearchByTitle" \
             --dart-define=GroupID="$GroupID" \
+            --dart-define=GroupRoomVersion="$GroupRoomVersion" \
             --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
             --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
             --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
