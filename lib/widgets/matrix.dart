@@ -39,6 +39,8 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -196,12 +198,21 @@ class MatrixState extends ConsumerState<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
+      // Transitional bridge: expose the active client to Riverpod consumers.
+      ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
+      final userId = newClient!.userID;
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
-      await _storePersistActiveAccount(newClient!);
+      await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
+      // Refresh the unified contacts only once the ToM configuration of the
+      // new active account is applied, so the sources never hit the previous
+      // account's URL/token.
+      if (userId != null) {
+        unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
+      }
       getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
@@ -728,6 +739,13 @@ class MatrixState extends ConsumerState<Matrix>
     await _storePersistActiveAccount(newActiveClient);
     await _getUserInfoWithActiveClient(newActiveClient);
     await _getHomeserverInformation(newActiveClient);
+    // The client pushed at boot was still logged out: re-publish it now that
+    // the login set its userID, so Riverpod consumers (contacts…) wake up.
+    ref.read(activeMatrixClientProvider.notifier).setClient(newActiveClient);
+    final userId = newActiveClient.userID;
+    if (userId != null) {
+      unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
+    }
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
@@ -841,7 +859,19 @@ class MatrixState extends ConsumerState<Matrix>
       _registerSubs(c.clientName);
     }
 
+    // Transitional bridge: publish the initial active client to Riverpod.
+    ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
+
     await _retrieveLocalToMConfiguration();
+
+    // Refresh only once the ToM URL/token of the restored account are applied:
+    // the ToM sources would otherwise fail and put their contacts in cooldown.
+    // A logged-out client (fresh install) has no userID yet; its first
+    // refresh runs in _handleFirstLoggedIn once the login completes.
+    final initialUserId = clientOrNull?.userID;
+    if (initialUserId != null) {
+      unawaited(ref.read(contactSyncServiceProvider(initialUserId)).refresh());
+    }
 
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);
@@ -928,8 +958,13 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     try {
-      final toMConfigurations = await getTomConfigurations(client.userID!);
+      final toMConfigurations =
+          await getTomConfigurations(client.userID!) ??
+          await _discoverFreshInstallToMConfiguration(client);
       if (toMConfigurations == null) {
+        // No ToM server for this account: drop any configuration left over
+        // from a previously active account (multi-account switch).
+        _setUpToMServer(null);
         _setupAuthUrl();
         return;
       }
@@ -942,6 +977,29 @@ class MatrixState extends ConsumerState<Matrix>
     } catch (e, s) {
       Logs().wtf('MatrixState::_retrieveToMConfiguration:', e, s);
     }
+  }
+
+  /// Fresh-install bootstrap: no ToM configuration has been stored for the
+  /// current account yet, so the active homeserver discovery is the source of
+  /// truth. When a ToM server is discovered, the configuration is persisted
+  /// so later boots stay local-only. Returns `null` for non-ToM accounts.
+  Future<ToMConfigurations?> _discoverFreshInstallToMConfiguration(
+    Client client,
+  ) async {
+    await _getHomeserverInformation(client);
+    final tomServer = loginHomeserverSummary?.tomServer;
+    if (tomServer == null) return null;
+
+    final discovery = loginHomeserverSummary?.discoveryInformation;
+    _setupAuthUrl();
+    final toMConfigurations = ToMConfigurations(
+      tomServerInformation: tomServer,
+      identityServerInformation: discovery?.mIdentityServer,
+      authUrl: authUrl,
+      loginType: loginType,
+    );
+    await _storeToMConfiguration(client, toMConfigurations);
+    return toMConfigurations;
   }
 
   void setUpToMServices(
@@ -1171,9 +1229,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        _setUpToMServer(null);
-        _setupAuthUrl();
-        setUpAuthorization(client);
+        await _retrieveLocalToMConfiguration();
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
@@ -1431,6 +1487,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
+    ref.read(activeMatrixClientProvider.notifier).setClient(null);
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     Sentry.configureScope((scope) => scope.setUser(null));
