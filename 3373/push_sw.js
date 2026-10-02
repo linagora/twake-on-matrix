@@ -44,11 +44,12 @@ let manifest = { core: [], resources: {} };
 let manifestLoaded = false;
 
 // Keys in manifest.resources are scope-relative: the app is deployed under
-// /web/, not at the origin root.
+// /web/, not at the origin root. Request.url keeps the fragment and the app
+// uses hash routes, so drop it: /web/#/rooms is still the root navigation.
 function resourceKey(url) {
   const scope = self.registration.scope;
   if (!url.startsWith(scope)) return null;
-  const key = url.substring(scope.length);
+  const key = url.substring(scope.length).split('#')[0];
   return key === '' ? '/' : key;
 }
 
