@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -444,7 +447,7 @@ class SettingsProfileController extends State<SettingsProfile>
           );
           _sendAccountDataEvent(profile: newProfile);
           isEditedProfileNotifier.toggle();
-          _getCurrentProfile(client, isUpdated: true);
+          _getCurrentProfile(client);
           TwakeDialog.hideLoadingDialog(context);
         }
 
@@ -458,7 +461,7 @@ class SettingsProfileController extends State<SettingsProfile>
           if (isEditedProfileNotifier.value) {
             isEditedProfileNotifier.toggle();
           }
-          _getCurrentProfile(client, isUpdated: true);
+          _getCurrentProfile(client);
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
@@ -468,12 +471,13 @@ class SettingsProfileController extends State<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(Client client, {isUpdated = false}) async {
-    final profile = await client.getProfileFromUserId(
-      client.userID!,
-      cache: !isUpdated,
-      getFromRooms: false,
-    );
+  void _getCurrentProfile(Client client) async {
+    // SDK access goes through Riverpod (transitional container read).
+    final data = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(client.userID!).future);
+    final profile = data.toProfile(client.userID!);
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );

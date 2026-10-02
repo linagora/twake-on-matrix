@@ -1,16 +1,14 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:dartz/dartz.dart' hide State;
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
@@ -51,6 +49,9 @@ import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -278,14 +279,10 @@ class DraftChatController extends State<DraftChat>
     }
   }
 
-  bool isInsideContactManager(Either<Failure, Success> state) => state.fold(
-    (failure) => false,
-    (success) => success is GetContactsSuccess
-        ? success.contacts.any(
-            (contact) =>
-                contact.inTomAddressBook(presentationContact.matrixId ?? ""),
-          )
-        : false,
+  bool isInsideContactManager(List<UnifiedContact> contacts) => contacts.any(
+    (contact) =>
+        contact.isAddressBookContact &&
+        contact.matrixId == (presentationContact.matrixId ?? ''),
   );
   final showAddContactBanner = ValueNotifier(true);
 
@@ -636,11 +633,12 @@ class DraftChatController extends State<DraftChat>
 
   Future<void> _getProfile() async {
     try {
-      final profile = await Matrix.of(context).client.getProfileFromUserId(
-        presentationContact.matrixId!,
-        getFromRooms: false,
-      );
-      _userProfile.value = profile;
+      final matrixId = presentationContact.matrixId!;
+      final data = await ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(matrixUserProfileProvider(matrixId).future);
+      _userProfile.value = data?.toProfile(matrixId);
     } catch (e) {
       Logs().e('Error _getProfile profile: $e');
       _userProfile.value = null;

@@ -4,18 +4,19 @@ import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/app_state/room/block_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/usecase/room/block_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:twake_chat/presentation/enum/chat/chat_details_screen_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
-import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
@@ -223,19 +224,23 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   PresentationContact? presentationContact;
 
+  ProviderSubscription<AsyncValue<List<UnifiedContact>>>? _contactsSubscription;
+
+  ProviderContainer? _tryContainer() {
+    try {
+      return ProviderScope.containerOf(context, listen: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
   PresentationContact? _getContactFromId(String matrixId) {
-    final getContactsState = getIt.get<ContactsManager>().getContactsNotifier();
-    return getContactsState.value.fold(
-      (failure) => null,
-      (success) => success is GetContactsSuccess
-          ? success.contacts
-                .firstWhereOrNull(
-                  (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
-                )
-                ?.toPresentationContacts()
-                .firstOrNull
-          : null,
-    );
+    final contact = _tryContainer()
+        ?.read(contactsControllerProvider)
+        .asData
+        ?.value
+        .firstWhereOrNull((c) => c.matrixId == matrixId);
+    return contact?.toPresentationContact();
   }
 
   void _initPresentationContact() {
@@ -305,8 +310,11 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
   void initState() {
     super.initState();
     _initPresentationContact();
-    getIt.get<ContactsManager>().getContactsNotifier().addListener(
-      _onTomContactsUpdateListener,
+    _contactsSubscription = _tryContainer()?.listen(
+      contactsControllerProvider,
+      (previous, next) {
+        next.whenData((_) => _onTomContactsUpdateListener());
+      },
     );
     getUserInfoAction();
     listenIgnoredUser();
@@ -314,9 +322,7 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   @override
   void dispose() {
-    getIt.get<ContactsManager>().getContactsNotifier().removeListener(
-      _onTomContactsUpdateListener,
-    );
+    _contactsSubscription?.close();
     userInfoNotifier.dispose();
     userInfoNotifierSub?.cancel();
     ignoredUsersStreamSub?.cancel();
