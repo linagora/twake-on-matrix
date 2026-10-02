@@ -193,13 +193,19 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   }
 
   @override
-  Future<void> createGroupChat(String name, String memberSearchKey) async {
+  Future<void> createGroupChat(
+    String name,
+    String memberSearchKey, {
+    bool isPublic = false,
+  }) async {
     await clickOnPenIcon();
     await NewChatRobot($).clickOnNewGroupChatIcon();
     await AddMemberRobot($).makeASearch(memberSearchKey);
     await AddMemberRobot($).selectAllFilteredAccounts();
     await AddMemberRobot($).clickOnNextIcon();
-    await SettingForNewGroupRobot($).settingForNewGroup(name);
+    await SettingForNewGroupRobot(
+      $,
+    ).settingForNewGroup(name, isPublic: isPublic);
     await SettingForNewGroupRobot($).getConfirmIcon().tap();
     await $.pump(const Duration(seconds: 10));
     await $.waitUntilVisible($(ChatView));

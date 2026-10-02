@@ -45,5 +45,11 @@ abstract class AbstractChatListRobot {
 
   /// Opens the new-group flow, adds the member(s) matched by [memberSearchKey],
   /// names the group [name] and confirms. Settles on the new group's chat view.
-  Future<void> createGroupChat(String name, String memberSearchKey);
+  /// With [isPublic] the group is made public, which needs the public groups
+  /// well-known flag.
+  Future<void> createGroupChat(
+    String name,
+    String memberSearchKey, {
+    bool isPublic = false,
+  });
 }
