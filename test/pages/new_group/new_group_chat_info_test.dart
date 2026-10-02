@@ -241,5 +241,86 @@ void main() {
       expect(find.text(L10n.of(context)!.makeChatPublic), findsNothing);
       expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
     });
+
+    GroupPrivacyState privacyOf(WidgetTester tester) =>
+        ProviderScope.containerOf(
+          tester.element(find.byType(NewGroupChatInfoView)),
+        ).read(groupPrivacyViewModelProvider);
+
+    Future<void> tapSetting(WidgetTester tester, String title) async {
+      await tester.ensureVisible(find.text(title));
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'makeChatPublicToggle_whenTapped_showsTheServerLimitToggleAndHidesEncryption',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+        await pumpView(tester);
+        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+        // Act
+        await tapSetting(tester, l10n.makeChatPublic);
+
+        // Assert
+        expect(privacyOf(tester).isPublic, isTrue);
+        expect(
+          find.text(l10n.groupPrivacyLimitToServer('example.com')),
+          findsOneWidget,
+        );
+        expect(find.text(l10n.enableEncryption), findsNothing);
+      },
+    );
+
+    testWidgets('serverLimitToggle_whenTapped_opensTheGroupToOtherServers', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      await pumpView(
+        tester,
+        privacy: const GroupPrivacyState(isPublic: true, isServerLimited: true),
+      );
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+      // Act
+      await tapSetting(tester, l10n.groupPrivacyLimitToServer('example.com'));
+
+      // Assert
+      expect(privacyOf(tester), const GroupPrivacyState(isPublic: true));
+    });
+
+    testWidgets('build_whenEncryptionIsEnabled_showsTheWarning', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      when(
+        mockController.enableEncryptionNotifier,
+      ).thenReturn(ValueNotifier(true));
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.encryptionWarning), findsOneWidget);
+    });
+
+    testWidgets('build_whenEncryptionIsDisabled_hidesTheWarning', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.encryptionWarning), findsNothing);
+    });
   });
 }

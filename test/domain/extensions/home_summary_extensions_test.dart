@@ -318,6 +318,21 @@ void main() {
       expect(isEnabled, isFalse);
     });
 
+    test('isPublicGroupsEnabled_whenWellKnownIsMalformed_returnsFalse', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': 'yes'},
+        },
+      });
+
+      // Act
+      final isEnabled = summary.isPublicGroupsEnabled;
+
+      // Assert
+      expect(isEnabled, isFalse);
+    });
+
     test(
       'isPublicGroupsServerLimitedByDefault_whenWellKnownOpensGroups_returnsFalse',
       () {
