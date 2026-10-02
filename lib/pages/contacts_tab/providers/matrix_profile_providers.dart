@@ -9,14 +9,14 @@ part 'matrix_profile_providers.g.dart';
 /// The Matrix SDK sits behind this provider: consumers never touch
 /// `Matrix.of(context).client` to resolve a profile.
 ///
-/// Rebuilds only when the signed-in account changes, not on every snapshot
-/// push of the same `Client` instance.
+/// Rebuilds only when the `Client` instance changes, not on every snapshot
+/// push of the same one.
 @riverpod
 MatrixProfileDatasource matrixProfileDatasource(Ref ref) {
-  ref.watch(activeMatrixClientProvider.select((snapshot) => snapshot.userId));
-  return MatrixProfileDatasourceImpl(
-    ref.read(activeMatrixClientProvider).client,
+  final client = ref.watch(
+    activeMatrixClientProvider.select((snapshot) => snapshot.client),
   );
+  return MatrixProfileDatasourceImpl(client);
 }
 
 /// One-shot network profile lookup (only used as a fallback when the unified

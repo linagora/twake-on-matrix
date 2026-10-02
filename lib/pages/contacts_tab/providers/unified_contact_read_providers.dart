@@ -47,15 +47,18 @@ Future<UnifiedContact> contactDisplay(Ref ref, String matrixId) async {
   // One-shot path (`container.read(….future)`): Riverpod 3 pauses the store
   // stream when nothing actively listens to it, so the index above may never
   // fill. Read the store directly before falling back to the network.
+  // `ref` is unusable after an await (autoDispose may fire meanwhile), so
+  // everything that needs it is read before the first await.
+  final datasource = ref.watch(matrixProfileDatasourceProvider);
   final userId = ref.read(currentUserIdProvider);
-  if (userId != null) {
-    final stored = await ref
-        .read(contactSyncServiceProvider(userId))
-        .getContact(matrixId);
-    if (stored != null) return stored;
-  }
+  final service = userId == null
+      ? null
+      : ref.read(contactSyncServiceProvider(userId));
 
-  final profile = await ref.watch(matrixUserProfileProvider(matrixId).future);
+  final stored = await service?.getContact(matrixId);
+  if (stored != null) return stored;
+
+  final profile = await datasource.fetchProfile(matrixId);
   return UnifiedContact(
     matrixId: matrixId,
     canonicalDisplayName: profile?.displayName,

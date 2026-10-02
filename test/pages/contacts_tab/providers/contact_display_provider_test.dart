@@ -126,6 +126,20 @@ void main() {
     );
   }
 
+  test(
+    'a slow store read that misses still resolves through the SDK',
+    () async {
+      repository.readDelay = const Duration(milliseconds: 1);
+      final container = buildContainer();
+
+      final contact = await container.read(
+        contactDisplayProvider('@a:server').future,
+      );
+
+      expect(contact.resolvedDisplayName, 'Network @a:server');
+    },
+  );
+
   test('returns an id-only contact when the SDK knows nothing', () async {
     profileDatasource = _FakeMatrixProfileDatasource(unknown: true);
     final container = buildContainer();
