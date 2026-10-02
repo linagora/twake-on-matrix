@@ -4,7 +4,6 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/model/invitation/invitation_status_response.dart';
 import 'package:twake_chat/domain/app_state/invitation/get_invitation_status_state.dart';
 import 'package:twake_chat/domain/model/contact/contact_status.dart';
-import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_invitation.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/invitation_status_mixin.dart';
@@ -126,16 +125,18 @@ class _ExpansionPhonebookContactListTileState
             top: 8.0,
             bottom: 8.0,
           ),
-          child: FutureBuilder<UnifiedContact?>(
+          child: Consumer(
             key: widget.contact.matrixId?.isNotEmpty == true
                 ? Key(widget.contact.matrixId!)
                 : null,
-            future:
-                widget.contact.status == ContactStatus.active &&
-                    widget.contact.matrixId?.isNotEmpty == true
-                ? getProfile(context)
-                : null,
-            builder: (context, snapshot) {
+            builder: (context, ref, _) {
+              final matrixId = widget.contact.matrixId;
+              final profile =
+                  widget.contact.status == ContactStatus.active &&
+                      matrixId?.isNotEmpty == true
+                  ? ref.watch(contactDisplayProvider(matrixId!)).value
+                  : null;
+              final avatarUrl = profile?.avatarUrl;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -143,9 +144,9 @@ class _ExpansionPhonebookContactListTileState
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
                       child: Avatar(
-                        mxContent: snapshot.data?.avatarUrl == null
+                        mxContent: avatarUrl == null
                             ? null
-                            : Uri.tryParse(snapshot.data!.avatarUrl!),
+                            : Uri.tryParse(avatarUrl),
                         name: widget.contact.displayName,
                       ),
                     ),
@@ -353,14 +354,6 @@ class _ExpansionPhonebookContactListTileState
       );
     }
     return const SizedBox();
-  }
-
-  Future<UnifiedContact?> getProfile(BuildContext context) async {
-    final matrixId = widget.contact.matrixId;
-    if (matrixId == null) return null;
-    // SDK access goes through Riverpod (transitional container read).
-    final container = ProviderScope.containerOf(context, listen: false);
-    return container.read(contactDisplayProvider(matrixId).future);
   }
 
   dynamic Function()? _onContactTapHandler(

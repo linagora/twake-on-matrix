@@ -1,5 +1,4 @@
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
-import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/search/recent_item_widget_style.dart';
 import 'package:twake_chat/presentation/extensions/room_summary_extension.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -215,16 +214,12 @@ class _ContactInformation extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        FutureBuilder<UnifiedContact?>(
-          future: contactPresentationSearch.matrixId == null
-              ? null
-              : ProviderScope.containerOf(context, listen: false).read(
-                  contactDisplayProvider(
-                    contactPresentationSearch.matrixId!,
-                  ).future,
-                ),
-          builder: (context, snapshot) {
-            final avatarUrl = snapshot.data?.avatarUrl;
+        Consumer(
+          builder: (context, ref, _) {
+            final matrixId = contactPresentationSearch.matrixId;
+            final avatarUrl = matrixId == null
+                ? null
+                : ref.watch(contactDisplayProvider(matrixId)).value?.avatarUrl;
             return Avatar(
               mxContent: avatarUrl == null ? null : Uri.tryParse(avatarUrl),
               name: contactPresentationSearch.displayName,
