@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,6 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
@@ -16,6 +18,7 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/new_group/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
@@ -77,7 +80,7 @@ void main() {
   setUp(() {
     mockClient = MockClient();
     mockCreateNewFeedInteractor = MockCreateNewFeedInteractor();
-    clearInteractions(mockCreateNewGroupChatInteractor);
+    reset(mockCreateNewGroupChatInteractor);
   });
 
   void stubFeedCreationFailure(FeedException exception) {
@@ -257,5 +260,39 @@ void main() {
         expect(capturedRequest().isPublic, isFalse);
       },
     );
+
+    testWidgets('createNewGroup_whenCreationFails_keepsThePrivacyChoices', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(
+        mockCreateNewGroupChatInteractor.execute(
+          matrixClient: anyNamed('matrixClient'),
+          createNewGroupChatRequest: anyNamed('createNewGroupChatRequest'),
+        ),
+      ).thenAnswer(
+        (_) => Stream.value(
+          Left(CreateNewGroupChatFailed(exception: Exception('Server error'))),
+        ),
+      );
+      final controller = await pumpGroupCreationScreen(
+        tester,
+        isPublicGroupsEnabled: true,
+      );
+      makeGroupPublic(tester);
+
+      // Act
+      controller.createNewGroup();
+      await tester.pumpAndSettle();
+
+      // Assert
+      final privacy = ProviderScope.containerOf(
+        tester.element(find.byType(NewGroupChatInfo)),
+      ).read(groupPrivacyViewModelProvider);
+      expect(
+        privacy,
+        const GroupPrivacyState(isPublic: true, isServerLimited: true),
+      );
+    });
   });
 }
