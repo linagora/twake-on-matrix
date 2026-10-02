@@ -267,4 +267,116 @@ void main() {
       expect(homeserver.appTwakeInformation, equals(expected));
     });
   });
+
+  group('public groups flags', () {
+    HomeserverSummary summaryWith(Map<String, dynamic> additionalProperties) =>
+        HomeserverSummary(
+          discoveryInformation: DiscoveryInformation(
+            mHomeserver: HomeserverInformation(
+              baseUrl: Uri.parse('https://matrix.example.com'),
+            ),
+            additionalProperties: additionalProperties,
+          ),
+          versions: GetVersionsResponse(versions: ['r1.6.0']),
+          loginFlows: [],
+        );
+
+    test('isPublicGroupsEnabled_whenWellKnownEnablesIt_returnsTrue', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': true},
+        },
+      });
+
+      // Act
+      final isEnabled = summary.isPublicGroupsEnabled;
+
+      // Assert
+      expect(isEnabled, isTrue);
+    });
+
+    test('isPublicGroupsEnabled_whenKeyIsMissing_returnsFalse', () {
+      // Arrange
+      final summary = summaryWith({'app.twake.chat': <String, dynamic>{}});
+
+      // Act
+      final isEnabled = summary.isPublicGroupsEnabled;
+
+      // Assert
+      expect(isEnabled, isFalse);
+    });
+
+    test('isPublicGroupsEnabled_whenSummaryIsNull_returnsFalse', () {
+      // Arrange
+      const HomeserverSummary? summary = null;
+
+      // Act
+      final isEnabled = summary.isPublicGroupsEnabled;
+
+      // Assert
+      expect(isEnabled, isFalse);
+    });
+
+    test('isPublicGroupsEnabled_whenWellKnownIsMalformed_returnsFalse', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': 'yes'},
+        },
+      });
+
+      // Act
+      final isEnabled = summary.isPublicGroupsEnabled;
+
+      // Assert
+      expect(isEnabled, isFalse);
+    });
+
+    test(
+      'isPublicGroupsServerLimitedByDefault_whenWellKnownOpensGroups_returnsFalse',
+      () {
+        // Arrange
+        final summary = summaryWith({
+          'app.twake.chat': {
+            'public_groups': {'default_server_limited': false},
+          },
+        });
+
+        // Act
+        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
+
+        // Assert
+        expect(isLimited, isFalse);
+      },
+    );
+
+    test(
+      'isPublicGroupsServerLimitedByDefault_whenKeyIsMissing_returnsTrue',
+      () {
+        // Arrange
+        final summary = summaryWith({'app.twake.chat': <String, dynamic>{}});
+
+        // Act
+        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
+
+        // Assert
+        expect(isLimited, isTrue);
+      },
+    );
+
+    test(
+      'isPublicGroupsServerLimitedByDefault_whenSummaryIsNull_returnsTrue',
+      () {
+        // Arrange
+        const HomeserverSummary? summary = null;
+
+        // Act
+        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
+
+        // Assert
+        expect(isLimited, isTrue);
+      },
+    );
+  });
 }
