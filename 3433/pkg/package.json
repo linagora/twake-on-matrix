@@ -1,0 +1,9 @@
+{
+  "name": "vodozemac_bindings_dart",
+  "version": "0.1.0",
+  "files": [
+    "vodozemac_bindings_dart_bg.wasm",
+    "vodozemac_bindings_dart.js"
+  ],
+  "browser": "vodozemac_bindings_dart.js"
+}
