@@ -64,45 +64,45 @@ class _FakeUser extends Fake implements User {
   }) => 'Member';
 }
 
+Future<void> _pumpMembersPage(
+  WidgetTester tester, {
+  required Room room,
+  VoidCallback? onAddMembers,
+}) async {
+  final selectedUsersNotifier = SelectedUsersMapChangeNotifier();
+  addTearDown(selectedUsersNotifier.dispose);
+  final membersNotifier = ValueNotifier<List<User>?>([
+    _FakeUser(room, powerLevel: PowerLevel(10)),
+  ]);
+  addTearDown(membersNotifier.dispose);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+      localizationsDelegates: L10n.localizationsDelegates,
+      home: Provider<MatrixState>.value(
+        value: _FakeMatrixState(),
+        child: Scaffold(
+          body: ChatDetailsMembersPage(
+            displayMembersNotifier: membersNotifier,
+            actualMembersCount: 1,
+            openDialogInvite: () {},
+            requestMoreMembersAction: () {},
+            isMobileAndTablet: false,
+            selectedUsersMapChangeNotifier: selectedUsersNotifier,
+            onAddMembers: onAddMembers,
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
 void main() {
   setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
 
   tearDown(GetIt.instance.reset);
-
-  Future<void> pumpMembersPage(
-    WidgetTester tester, {
-    required Room room,
-    VoidCallback? onAddMembers,
-  }) async {
-    final selectedUsersNotifier = SelectedUsersMapChangeNotifier();
-    addTearDown(selectedUsersNotifier.dispose);
-    final membersNotifier = ValueNotifier<List<User>?>([
-      _FakeUser(room, powerLevel: PowerLevel(10)),
-    ]);
-    addTearDown(membersNotifier.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-        localizationsDelegates: L10n.localizationsDelegates,
-        home: Provider<MatrixState>.value(
-          value: _FakeMatrixState(),
-          child: Scaffold(
-            body: ChatDetailsMembersPage(
-              displayMembersNotifier: membersNotifier,
-              actualMembersCount: 1,
-              openDialogInvite: () {},
-              requestMoreMembersAction: () {},
-              isMobileAndTablet: false,
-              selectedUsersMapChangeNotifier: selectedUsersNotifier,
-              onAddMembers: onAddMembers,
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-  }
 
   group('ChatDetailsMembersPage', () {
     final moderatorRoom = _FakeRoom(
@@ -110,12 +110,13 @@ void main() {
       canBan: true,
     );
     final readOnlyRoom = _FakeRoom(ownPowerLevel: PowerLevel(0), canBan: false);
+    final sameRoleRoom = _FakeRoom(ownPowerLevel: PowerLevel(10), canBan: true);
 
     testWidgets('shows the add members row when inviting is allowed', (
       tester,
     ) async {
       var tapCount = 0;
-      await pumpMembersPage(
+      await _pumpMembersPage(
         tester,
         room: moderatorRoom,
         onAddMembers: () => tapCount++,
@@ -129,37 +130,26 @@ void main() {
     testWidgets('hides the add members row when inviting is not allowed', (
       tester,
     ) async {
-      await pumpMembersPage(tester, room: readOnlyRoom);
+      await _pumpMembersPage(tester, room: readOnlyRoom);
 
       expect(find.byIcon(Icons.person_add_outlined), findsNothing);
       expect(find.text('Member'), findsOneWidget);
     });
 
-    testWidgets('offers the remove swipe on a member that can be removed', (
-      tester,
-    ) async {
-      await pumpMembersPage(tester, room: moderatorRoom);
+    final removeSwipeCases = [
+      ('offers the remove swipe on a removable member', moderatorRoom, true),
+      ('has no remove swipe without the ban permission', readOnlyRoom, false),
+      ('has no remove swipe on a member of equal role', sameRoleRoom, false),
+    ];
+    for (final (description, room, isOffered) in removeSwipeCases) {
+      testWidgets(description, (tester) async {
+        await _pumpMembersPage(tester, room: room);
 
-      expect(find.byType(Slidable), findsOneWidget);
-    });
-
-    testWidgets('has no remove swipe when the member cannot be removed', (
-      tester,
-    ) async {
-      await pumpMembersPage(tester, room: readOnlyRoom);
-
-      expect(find.byType(Slidable), findsNothing);
-    });
-
-    testWidgets('has no remove swipe on a member of higher or equal role', (
-      tester,
-    ) async {
-      await pumpMembersPage(
-        tester,
-        room: _FakeRoom(ownPowerLevel: PowerLevel(10), canBan: true),
-      );
-
-      expect(find.byType(Slidable), findsNothing);
-    });
+        expect(
+          find.byType(Slidable),
+          isOffered ? findsOneWidget : findsNothing,
+        );
+      });
+    }
   });
 }
