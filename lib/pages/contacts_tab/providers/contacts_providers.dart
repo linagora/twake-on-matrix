@@ -1,5 +1,4 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
 import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
@@ -10,6 +9,7 @@ import 'package:twake_chat/data/contact/sources/matrix_room_member_source.dart';
 import 'package:twake_chat/data/contact/sources/phonebook_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
@@ -21,6 +21,7 @@ import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
+import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'contacts_providers.g.dart';
@@ -60,18 +61,29 @@ List<ContactSource> contactSources(Ref ref) => [
   MatrixRoomMemberSource(ref.watch(matrixRoomMemberDatasourceProvider)),
 ];
 
+/// Rebuilds only when the signed-in account changes. Every `setClient` pushes
+/// a new snapshot of the same `Client` instance; watching the whole snapshot
+/// would rebuild the sources → use cases → sync service → controller chain and
+/// restart the store stream (list flashes to loading) on each push.
 @riverpod
-MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
-    MatrixRoomMemberDatasourceImpl(
-      ref.watch(activeMatrixClientProvider).client,
-    );
+MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
+  ref.watch(activeMatrixClientProvider.select((snapshot) => snapshot.userId));
+  return MatrixRoomMemberDatasourceImpl(
+    ref.read(activeMatrixClientProvider).client,
+  );
+}
 
 /// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
+///
+/// `UserInfoRepository` talks to the ToM server of the *active* account, so the
+/// enricher is told which account is active and skips a run started for
+/// another one (account switched mid-refresh).
 @riverpod
 TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
   repository: ref.watch(unifiedContactRepositoryProvider),
   userInfoRepository: getIt.get<UserInfoRepository>(),
   policy: ref.watch(contactResolutionPolicyProvider),
+  activeUserId: () => ref.read(activeMatrixClientProvider).userId,
 );
 
 @riverpod

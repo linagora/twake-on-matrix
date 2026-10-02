@@ -11,7 +11,9 @@ part 'unified_contact_read_providers.g.dart';
 class UnifiedContactIndex extends _$UnifiedContactIndex {
   @override
   Map<String, UnifiedContact> build() {
-    final contacts = ref.watch(contactsControllerProvider).asData?.value;
+    // `value` keeps the previous list while the stream is re-subscribed, so
+    // names do not fall back to matrixIds during a reload.
+    final contacts = ref.watch(contactsControllerProvider).value;
     if (contacts == null) return const <String, UnifiedContact>{};
     return {for (final contact in contacts) contact.matrixId: contact};
   }

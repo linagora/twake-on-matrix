@@ -861,14 +861,17 @@ class MatrixState extends ConsumerState<Matrix>
 
     // Transitional bridge: publish the initial active client to Riverpod.
     ref.read(activeMatrixClientProvider.notifier).setClient(clientOrNull);
+
+    await _retrieveLocalToMConfiguration();
+
+    // Refresh only once the ToM URL/token of the restored account are applied:
+    // the ToM sources would otherwise fail and put their contacts in cooldown.
     // A logged-out client (fresh install) has no userID yet; its first
     // refresh runs in _handleFirstLoggedIn once the login completes.
     final initialUserId = clientOrNull?.userID;
     if (initialUserId != null) {
       unawaited(ref.read(contactSyncServiceProvider(initialUserId)).refresh());
     }
-
-    await _retrieveLocalToMConfiguration();
 
     if (kIsWeb) {
       onFocusSub = html.window.onFocus.listen((_) => webHasFocus = true);

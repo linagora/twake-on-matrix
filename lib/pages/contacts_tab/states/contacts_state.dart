@@ -20,8 +20,10 @@ abstract class ContactsState with _$ContactsState {
 
   bool get isSearching => keyword.trim().isNotEmpty;
 
+  /// Previous list is kept while the store stream reloads (see
+  /// `AsyncValue.value`), so the list does not blink to empty.
   List<UnifiedContact> get allContacts =>
-      contacts.asData?.value ?? const <UnifiedContact>[];
+      contacts.value ?? const <UnifiedContact>[];
 
   List<UnifiedContact> get visibleContacts {
     final keyword = this.keyword.trim().toLowerCase();

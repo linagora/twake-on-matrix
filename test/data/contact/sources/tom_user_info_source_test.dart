@@ -12,15 +12,17 @@ import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart
 import '../../../domain/contact/fakes/fake_unified_contact_repository.dart';
 
 class _FakeUserInfoRepository implements UserInfoRepository {
-  _FakeUserInfoRepository({this.throwFor = const <String>{}});
+  _FakeUserInfoRepository({this.throwFor = const <String>{}, this.onRequest});
 
   final Set<String> throwFor;
+  final void Function()? onRequest;
   final List<String> requestedUserIds = <String>[];
 
   @override
   Future<UserInfo> getUserInfo(String userId) async {
     final matrixId = Uri.decodeComponent(userId);
     requestedUserIds.add(matrixId);
+    onRequest?.call();
     if (throwFor.contains(matrixId)) throw Exception('unreachable');
     return UserInfo(
       uid: matrixId,
@@ -42,22 +44,26 @@ class _FakeUserInfoRepository implements UserInfoRepository {
   ) async => UserInfoVisibility();
 }
 
-UnifiedContact _contact(String matrixId, {bool enriched = false}) =>
-    UnifiedContact(
-      matrixId: matrixId,
-      canonicalDisplayName: 'Addressbook name',
-      sources: [
-        const ContactSourceValue(
-          kind: ContactSourceKind.tomAddressBook,
-          displayName: 'Addressbook name',
-        ),
-        if (enriched)
-          const ContactSourceValue(
-            kind: ContactSourceKind.tomUserInfo,
-            displayName: 'Existing',
-          ),
-      ],
-    );
+UnifiedContact _contact(
+  String matrixId, {
+  bool enriched = false,
+  DateTime? enrichedAt,
+}) => UnifiedContact(
+  matrixId: matrixId,
+  canonicalDisplayName: 'Addressbook name',
+  sources: [
+    const ContactSourceValue(
+      kind: ContactSourceKind.tomAddressBook,
+      displayName: 'Addressbook name',
+    ),
+    if (enriched)
+      ContactSourceValue(
+        kind: ContactSourceKind.tomUserInfo,
+        displayName: 'Existing',
+        updatedAt: enrichedAt ?? DateTime.now().toUtc(),
+      ),
+  ],
+);
 
 void main() {
   const userId = '@me:server';
@@ -75,12 +81,16 @@ void main() {
   TomUserInfoSource buildSource({
     int maxPerRun = 50,
     Duration failureCooldown = const Duration(minutes: 5),
+    Duration refreshAfter = const Duration(hours: 24),
+    String? Function()? activeUserId,
   }) => TomUserInfoSource(
     repository: repository,
     userInfoRepository: userInfoRepository,
     policy: policy,
+    activeUserId: activeUserId,
     maxPerRun: maxPerRun,
     failureCooldown: failureCooldown,
+    refreshAfter: refreshAfter,
   );
 
   test('adds the tomUserInfo profile and re-resolves the contact', () async {
@@ -187,6 +197,65 @@ void main() {
         '@b:server',
       ))!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
       isTrue,
+    );
+  });
+
+  test('refetches a user_info value older than refreshAfter', () async {
+    final stale = DateTime.now().toUtc().subtract(const Duration(days: 2));
+    await repository.upsert(
+      userId,
+      _contact('@a:server', enriched: true, enrichedAt: stale),
+    );
+
+    await buildSource().enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, ['@a:server']);
+    final contact = await repository.getByMatrixId(userId, '@a:server');
+    final userInfoValues = contact!.sources.where(
+      (s) => s.kind == ContactSourceKind.tomUserInfo,
+    );
+    // Replaced, not duplicated.
+    expect(userInfoValues, hasLength(1));
+    expect(userInfoValues.single.displayName, 'Directory @a:server');
+    expect(userInfoValues.single.updatedAt!.isAfter(stale), isTrue);
+  });
+
+  test('a user_info value without timestamp is treated as stale', () async {
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: '@a:server',
+        sources: [ContactSourceValue(kind: ContactSourceKind.tomUserInfo)],
+      ),
+    );
+
+    await buildSource().enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, ['@a:server']);
+  });
+
+  test('skips the run when another account is active', () async {
+    await repository.upsert(userId, _contact('@a:server'));
+
+    await buildSource(activeUserId: () => '@other:server').enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, isEmpty);
+  });
+
+  test('does not write a profile fetched before an account switch', () async {
+    await repository.upsert(userId, _contact('@a:server'));
+    var active = userId;
+    userInfoRepository = _FakeUserInfoRepository(
+      onRequest: () => active = '@other:server',
+    );
+
+    await buildSource(activeUserId: () => active).enrich(userId);
+
+    expect(userInfoRepository.requestedUserIds, ['@a:server']);
+    final contact = await repository.getByMatrixId(userId, '@a:server');
+    expect(
+      contact!.sources.any((s) => s.kind == ContactSourceKind.tomUserInfo),
+      isFalse,
     );
   });
 }

@@ -221,11 +221,11 @@ void main() {
         const matrixId = '@a:server';
         await repository.upsert(
           userId,
-          const UnifiedContact(
+          UnifiedContact(
             matrixId: matrixId,
             canonicalDisplayName: 'Alice',
             sources: [
-              ContactSourceValue(
+              const ContactSourceValue(
                 kind: ContactSourceKind.tomAddressBook,
                 displayName: 'Alice',
               ),
@@ -233,6 +233,8 @@ void main() {
                 kind: ContactSourceKind.tomUserInfo,
                 displayName: 'Alice (LDAP)',
                 avatarUrl: 'mxc://server/alice',
+                // Fresh: the enricher must not refetch (and replace) it.
+                updatedAt: DateTime.now().toUtc(),
               ),
             ],
           ),

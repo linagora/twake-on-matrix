@@ -6,9 +6,8 @@ import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 
 /// Read-only list backed by the unified contact store.
 ///
-/// This is the new presentation path (PR4-A): it is not wired into the live
-/// Contacts tab yet, so the legacy permission / warning-banner flow is
-/// untouched.
+/// New presentation path, not wired into the live Contacts tab yet (the legacy
+/// permission / warning-banner flow is untouched until the tab migrates).
 class UnifiedContactsList extends ConsumerWidget {
   const UnifiedContactsList({super.key});
 
@@ -69,7 +68,8 @@ class UnifiedContactsList extends ConsumerWidget {
   String _initials(UnifiedContact contact) {
     final name = contact.resolvedDisplayName?.trim() ?? '';
     if (name.isEmpty) return '?';
-    return name[0].toUpperCase();
+    // First grapheme, not first UTF-16 unit: emoji / surrogate pairs are safe.
+    return name.characters.first.toUpperCase();
   }
 }
 

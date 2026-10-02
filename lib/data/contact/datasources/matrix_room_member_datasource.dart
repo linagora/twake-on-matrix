@@ -1,7 +1,7 @@
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 
-/// Reads the members of the joined rooms. The implementation is the only place
-/// in this module that imports `package:matrix`.
+/// Reads the members of the joined rooms. Only the implementation touches the
+/// Matrix SDK objects; the domain layer sees `SourcedContact` only.
 abstract class MatrixRoomMemberDatasource {
   /// Members visible to the account identified by [userId].
   ///
