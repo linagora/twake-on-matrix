@@ -24,16 +24,20 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
   Stream<List<UnifiedContact>> watchContacts(String userId) {
     StreamSubscription<List<UnifiedContact>>? subscription;
     return Stream<List<UnifiedContact>>.multi((controller) {
-      subscription = _controller.stream.listen(
-        controller.add,
-        onError: controller.addError,
-      );
-      getContacts(userId).then<void>(controller.add).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        controller.addError(error, stackTrace);
-      });
+      // Like the real store: the initial snapshot must not overwrite a write
+      // that was broadcast while it was being read.
+      var receivedUpdate = false;
+      subscription = _controller.stream.listen((contacts) {
+        receivedUpdate = true;
+        controller.add(contacts);
+      }, onError: controller.addError);
+      getContacts(userId)
+          .then<void>((contacts) {
+            if (!receivedUpdate) controller.add(contacts);
+          })
+          .catchError((Object error, StackTrace stackTrace) {
+            if (!receivedUpdate) controller.addError(error, stackTrace);
+          });
       controller.onCancel = () => subscription?.cancel();
     });
   }

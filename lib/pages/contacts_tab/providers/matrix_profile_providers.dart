@@ -24,3 +24,11 @@ MatrixProfileDatasource matrixProfileDatasource(Ref ref) {
 @riverpod
 Future<MatrixUserProfile?> matrixUserProfile(Ref ref, String matrixId) =>
     ref.watch(matrixProfileDatasourceProvider).fetchProfile(matrixId);
+
+/// Profile of a user typed by hand, checked against the homeserver (no cache):
+/// `null` means the user does not exist or cannot be reached.
+@riverpod
+Future<MatrixUserProfile?> freshMatrixUserProfile(Ref ref, String matrixId) =>
+    ref
+        .watch(matrixProfileDatasourceProvider)
+        .fetchProfile(matrixId, fresh: true);

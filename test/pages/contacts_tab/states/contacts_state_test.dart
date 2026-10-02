@@ -45,4 +45,18 @@ void main() {
     const state = ContactsState();
     expect(state.visibleContacts, isEmpty);
   });
+
+  test('search ignores diacritics', () {
+    const elise = UnifiedContact(
+      matrixId: '@elise:server',
+      canonicalDisplayName: 'Élise',
+    );
+    ContactsState state(String keyword) => ContactsState(
+      contacts: const AsyncData<List<UnifiedContact>>([elise, bob]),
+      keyword: keyword,
+    );
+
+    expect(state('elise').visibleContacts, [elise]);
+    expect(state('ÉLISE').visibleContacts, [elise]);
+  });
 }

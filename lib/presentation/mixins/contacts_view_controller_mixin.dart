@@ -19,6 +19,7 @@ import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_search_extension.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_empty.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_success.dart';
@@ -546,25 +547,10 @@ mixin class ContactsViewControllerMixin {
   List<UnifiedContact> _tomContactsForTab(String keyword) => _unifiedContacts
       .where((contact) => _hasAddressBookSource(contact))
       .where((contact) => !_hasPhonebookSource(contact))
-      .where((contact) => _matchesUnifiedKeyword(contact, keyword))
-      .toList();
+      .searchContacts(keyword);
 
   List<UnifiedContact> _phonebookContactsForTab(String keyword) =>
-      _unifiedContacts
-          .where(_hasPhonebookSource)
-          .where((contact) => _matchesUnifiedKeyword(contact, keyword))
-          .toList();
-
-  bool _matchesUnifiedKeyword(UnifiedContact contact, String keyword) {
-    final normalized = keyword.trim().toLowerCase();
-    if (normalized.isEmpty) return true;
-    bool contains(String? value) =>
-        value != null && value.toLowerCase().contains(normalized);
-    return contains(contact.resolvedDisplayName) ||
-        contains(contact.matrixId) ||
-        contact.emails.any(contains) ||
-        contact.phones.any(contains);
-  }
+      _unifiedContacts.where(_hasPhonebookSource).searchContacts(keyword);
 
   Future<void> _refreshRecentContacts({
     required BuildContext context,
