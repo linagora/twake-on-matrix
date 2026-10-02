@@ -172,7 +172,7 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
   List<ProfileInfoActions> profileInfoActions() {
     return [
       ProfileInfoActions.sendMessage,
-      if (user?.canKick == true) ProfileInfoActions.removeFromGroup,
+      if (user?.canBan == true) ProfileInfoActions.removeFromGroup,
       if (user?.room.canTransferOwnership == true && user?.isBanned == false)
         ProfileInfoActions.transferOwnership,
     ];

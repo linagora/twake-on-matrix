@@ -18,7 +18,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
   final void Function(User member)? onRemoveMember;
   final void Function(User member, {DefaultPowerLevelMember? role})?
   onChangeRole;
-  final VoidCallback onAddMembers;
+  final VoidCallback? onAddMembers;
 
   const ChatDetailsMembersPage({
     super.key,
@@ -32,7 +32,7 @@ class ChatDetailsMembersPage extends StatelessWidget {
     this.onSelectMember,
     this.onRemoveMember,
     this.onChangeRole,
-    required this.onAddMembers,
+    this.onAddMembers,
   });
 
   @override
@@ -51,49 +51,52 @@ class ChatDetailsMembersPage extends StatelessWidget {
         // stays visible above the scrollable list, exactly like before.
         return CustomScrollView(
           slivers: [
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _AddMembersHeaderDelegate(
-                backgroundColor: sysColors.onPrimary,
-                child: InkWell(
-                  onTap: onAddMembers,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: sysColors.surfaceTint.withValues(alpha: 0.16),
-                        ),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Icon(
-                            Icons.person_add_outlined,
-                            color: sysColors.primary,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            L10n.of(context)!.addMembers,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.labelLarge?.copyWith(
-                              color: sysColors.primary,
+            if (onAddMembers != null)
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _AddMembersHeaderDelegate(
+                  backgroundColor: sysColors.onPrimary,
+                  child: InkWell(
+                    onTap: onAddMembers,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: sysColors.surfaceTint.withValues(
+                              alpha: 0.16,
                             ),
                           ),
                         ),
-                      ],
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.person_add_outlined,
+                              color: sysColors.primary,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              L10n.of(context)!.addMembers,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.labelLarge?.copyWith(
+                                color: sysColors.primary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               sliver: SliverList.builder(
