@@ -99,7 +99,25 @@ mixin class ContactsViewControllerMixin {
   Future<void> _refreshUnifiedContacts(BuildContext context) async {
     final container = _tryContainer(context);
     if (container == null) return;
-    await container.read(contactsControllerProvider.notifier).refresh();
+    await container
+        .read(contactsControllerProvider.notifier)
+        .refresh(resolvePhonebook: await _isPhonebookContactsAvailable());
+  }
+
+  /// The phonebook lookup runs only where the phonebook can be read: mobile
+  /// with the contacts permission granted (never prompts by itself).
+  Future<bool> _isPhonebookContactsAvailable() async {
+    if (!enablePhonebookLookup) {
+      contactsPermissionStatus = null;
+      return false;
+    }
+
+    final currentContactsPermissionStatus = PlatformInfos.isMobile
+        ? await _permissionHandlerService.contactsPermissionStatus
+        : null;
+    contactsPermissionStatus = currentContactsPermissionStatus;
+    return PlatformInfos.isMobile &&
+        _canReadPhonebookContacts(currentContactsPermissionStatus);
   }
 
   void _startListeningUnifiedContacts({
