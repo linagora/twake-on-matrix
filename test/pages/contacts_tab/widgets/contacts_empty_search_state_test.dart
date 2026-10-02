@@ -2,7 +2,6 @@ import 'package:dartz/dartz.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
@@ -15,19 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
-
-class MockContactsManager extends Mock implements ContactsManager {
-  Object? cancelSubscriptionsError;
-  bool cancelSubscriptionsCalled = false;
-
-  @override
-  Future<void> cancelAllSubscriptions() async {
-    cancelSubscriptionsCalled = true;
-    if (cancelSubscriptionsError case final error?) {
-      throw error;
-    }
-  }
-}
 
 class MockClient extends Mock implements Client {}
 
@@ -47,15 +33,12 @@ class TestContactsTabController extends Mock
 }
 
 void main() {
-  late MockContactsManager contactsManager;
   late TestContactsTabController controller;
 
   setUp(() {
-    contactsManager = MockContactsManager();
     getIt.registerSingleton<SearchRecentChatInteractor>(
       SearchRecentChatInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(contactsManager);
     controller = TestContactsTabController();
   });
 

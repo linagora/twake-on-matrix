@@ -29,7 +29,6 @@ import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dar
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
@@ -38,13 +37,6 @@ import 'package:twake_chat/utils/contact_lookup_failed_snackbar.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 
 part 'contacts_providers.g.dart';
-
-// `GetTomContactsInteractor` predates the Riverpod migration and is still
-// consumed by the non-Riverpod `ContactsManager`; this provider gives
-// Riverpod consumers a `ref.read` path instead of reaching into GetIt.
-@riverpod
-GetTomContactsInteractor getTomContactsInteractor(Ref ref) =>
-    getIt.get<GetTomContactsInteractor>();
 
 /// Pure DI: the resolution policy has no dependency and no state.
 @riverpod

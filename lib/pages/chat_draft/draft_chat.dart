@@ -4,11 +4,10 @@ import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_success.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
@@ -21,7 +20,6 @@ import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
-import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_web_extension.dart';
@@ -38,9 +36,11 @@ import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -49,9 +49,6 @@ import 'package:linagora_design_flutter/images_picker/images_picker.dart'
     hide ImagePicker;
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
-import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 typedef OnRoomCreatedSuccess = FutureOr<void> Function(Room room)?;
 typedef OnRoomCreatedFailed = FutureOr<void> Function()?;
@@ -126,7 +123,7 @@ class DraftChatController extends State<DraftChat>
 
   ValueNotifier<bool> showEmojiPickerComposerNotifier = ValueNotifier(false);
 
-  final ValueNotifier<Profile?> _userProfile = ValueNotifier(null);
+  final ValueNotifier<UnifiedContact?> _userProfile = ValueNotifier(null);
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
@@ -184,21 +181,24 @@ class DraftChatController extends State<DraftChat>
     _handleSendFileOnWeb(context, matrixFilesList);
   }
 
+  ProviderSubscription<AsyncValue<List<UnifiedContact>>>? _contactsSubscription;
+
+  ProviderContainer? _tryContainer() {
+    try {
+      return ProviderScope.containerOf(context, listen: false);
+    } catch (_) {
+      return null;
+    }
+  }
+
   void _onTomContactsUpdateListener() {
     final matrixId = presentationContact.matrixId;
-    final getContactsState = getIt.get<ContactsManager>().getContactsNotifier();
-    final updatedContact = getContactsState.value.fold((failure) => null, (
-      success,
-    ) {
-      if (success is! GetContactsSuccess) return null;
-
-      return success.contacts
-          .firstWhereOrNull(
-            (c) => c.emails?.any((e) => e.matrixId == matrixId) == true,
-          )
-          ?.toPresentationContacts()
-          .firstOrNull;
-    });
+    final contact = _tryContainer()
+        ?.read(contactsControllerProvider)
+        .asData
+        ?.value
+        .firstWhereOrNull((c) => c.matrixId == matrixId);
+    final updatedContact = contact?.toPresentationContact();
     if (mounted && updatedContact != null) {
       setState(() {
         presentationContact = updatedContact;
@@ -210,8 +210,11 @@ class DraftChatController extends State<DraftChat>
   void initState() {
     super.initState();
     presentationContact = widget.contact;
-    getIt.get<ContactsManager>().getContactsNotifier().addListener(
-      _onTomContactsUpdateListener,
+    _contactsSubscription = _tryContainer()?.listen(
+      contactsControllerProvider,
+      (previous, next) {
+        next.whenData((_) => _onTomContactsUpdateListener());
+      },
     );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
@@ -226,9 +229,7 @@ class DraftChatController extends State<DraftChat>
 
   @override
   void dispose() {
-    getIt.get<ContactsManager>().getContactsNotifier().removeListener(
-      _onTomContactsUpdateListener,
-    );
+    _contactsSubscription?.close();
     scrollController.dispose();
     sendController.dispose();
     forwardListController.dispose();
@@ -267,7 +268,7 @@ class DraftChatController extends State<DraftChat>
     if (_userProfile.value == null) {
       return sendController.value.text;
     } else {
-      final displayName = _userProfile.value?.displayName;
+      final displayName = _userProfile.value?.resolvedDisplayName;
       if (sendController.value.text.contains(displayName ?? '') == true) {
         return sendController.value.text.replaceAll(
           "${displayName ?? ''}!",
@@ -429,7 +430,7 @@ class DraftChatController extends State<DraftChat>
                     $extra: ChatRouterInputArgument(
                       type: ChatRouterInputArgumentType.draft,
                       data:
-                          _userProfile.value?.displayName ??
+                          _userProfile.value?.resolvedDisplayName ??
                           presentationContact.displayName ??
                           room.name,
                     ),
@@ -623,7 +624,7 @@ class DraftChatController extends State<DraftChat>
     inputFocus.requestFocus();
     sendController.value = TextEditingValue(
       text: L10n.of(context)!.draftChatHookPhrase(
-        _userProfile.value?.displayName ??
+        _userProfile.value?.resolvedDisplayName ??
             presentationContact.displayName ??
             '',
       ),
@@ -633,12 +634,12 @@ class DraftChatController extends State<DraftChat>
 
   Future<void> _getProfile() async {
     try {
-      final matrixId = presentationContact.matrixId!;
-      final data = await ProviderScope.containerOf(
+      // SDK access goes through Riverpod (transitional container read).
+      final profile = await ProviderScope.containerOf(
         context,
         listen: false,
-      ).read(matrixUserProfileProvider(matrixId).future);
-      _userProfile.value = data?.toProfile(matrixId);
+      ).read(contactDisplayProvider(presentationContact.matrixId!).future);
+      _userProfile.value = profile;
     } catch (e) {
       Logs().e('Error _getProfile profile: $e');
       _userProfile.value = null;

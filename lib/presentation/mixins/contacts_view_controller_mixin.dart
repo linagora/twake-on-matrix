@@ -10,7 +10,7 @@ import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/presentation/model/contact/contacts_warning_preferences.dart';
 import 'package:twake_chat/domain/model/contact/contact.dart'
     show ThirdPartyIdType;
 import 'package:twake_chat/domain/model/contact/contact_status.dart';
@@ -76,7 +76,7 @@ mixin class ContactsViewControllerMixin {
     initialValue: '',
   );
 
-  final contactsManager = getIt.get<ContactsManager>();
+  final warningPreferences = contactsWarningPreferences;
 
   /// Current snapshot of the unified store, refreshed from the Riverpod
   /// controller (single source of truth for the contacts list).
@@ -161,8 +161,7 @@ mixin class ContactsViewControllerMixin {
       return;
     }
 
-    if (PlatformInfos.isMobile &&
-        !contactsManager.isDoNotShowWarningContactsDialogAgain) {
+    if (PlatformInfos.isMobile && !warningPreferences.doNotShowDialogAgain) {
       await displayContactPermissionDialog(context);
     } else {
       await _initWarningBanner();
@@ -254,7 +253,7 @@ mixin class ContactsViewControllerMixin {
 
   void _handleDenyPermissionDialog() {
     warningBannerNotifier.value = WarningContactsBannerState.display;
-    contactsManager.updateNotShowWarningContactsDialogAgain(true);
+    warningPreferences.doNotShowDialogAgain = true;
   }
 
   Future<void> _initWarningBanner() async {
@@ -278,8 +277,8 @@ mixin class ContactsViewControllerMixin {
       return;
     }
 
-    if (!contactsManager.isDoNotShowWarningContactsBannerAgain &&
-        contactsManager.isDoNotShowWarningContactsDialogAgain) {
+    if (!warningPreferences.doNotShowBannerAgain &&
+        warningPreferences.doNotShowDialogAgain) {
       warningBannerNotifier.value = WarningContactsBannerState.display;
       return;
     }
@@ -307,7 +306,7 @@ mixin class ContactsViewControllerMixin {
 
       if (currentContactPermission != contactsPermissionStatus &&
           currentContactPermission.isDenied) {
-        if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
+        if (!warningPreferences.doNotShowBannerAgain) {
           warningBannerNotifier.value = WarningContactsBannerState.display;
         }
         contactsPermissionStatus = currentContactPermission;
@@ -673,9 +672,9 @@ mixin class ContactsViewControllerMixin {
       unawaited(_refreshUnifiedContacts(context));
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
-      contactsManager.updateNotShowWarningContactsDialogAgain(true);
+      warningPreferences.doNotShowDialogAgain = true;
 
-      if (!contactsManager.isDoNotShowWarningContactsBannerAgain) {
+      if (!warningPreferences.doNotShowBannerAgain) {
         warningBannerNotifier.value = WarningContactsBannerState.display;
       }
     }
@@ -683,7 +682,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   void closeContactsWarningBanner() {
-    contactsManager.updateNotShowWarningContactsBannerAgain(true);
+    warningPreferences.doNotShowBannerAgain = true;
     warningBannerNotifier.value = WarningContactsBannerState.notDisplayAgain;
   }
 

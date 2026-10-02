@@ -31,7 +31,7 @@ class PhonebookLookupEndpoints {
   final String Function() accessToken;
 }
 
-/// Port of the phonebook lookup that `ContactsManager` used to drive: decide
+/// Phonebook lookup (formerly driven by the legacy `ContactsManager`): decide
 /// whether the stored resolution is still valid, otherwise run the federation
 /// (or Twake) lookup, then upload the resolved contacts to the ToM address book
 /// and tell the other devices.
