@@ -22,7 +22,22 @@ class ArchiveController extends State<Archive> {
   Future<List<Room>> getArchive(BuildContext context) async {
     final archive = this.archive;
     if (archive != null) return archive;
-    return this.archive = await Matrix.of(context).client.loadArchive();
+    final client = Matrix.of(context).client;
+    final syncedById = {
+      for (final room in client.rooms)
+        if (room.membership == Membership.leave) room.id: room,
+    };
+    final loaded = await client.loadArchive();
+    final merged = <Room>[];
+    final seen = <String>{};
+    for (final room in loaded) {
+      merged.add(syncedById[room.id] ?? room);
+      seen.add(room.id);
+    }
+    for (final MapEntry(:key, :value) in syncedById.entries) {
+      if (seen.add(key)) merged.add(value);
+    }
+    return this.archive = merged;
   }
 
   void forgetAllAction() async {

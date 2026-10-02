@@ -20,9 +20,6 @@ Future<void> sentryInit({
         // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
         // We recommend adjusting this value in production.
         options.tracesSampleRate = kDebugMode ? 1.0 : 0.1;
-        // The sampling rate for profiling is relative to tracesSampleRate
-        // Setting to 1.0 will profile 100% of sampled transactions:
-        options.profilesSampleRate = kDebugMode ? 1.0 : 0.1;
         options.beforeSend = _fixWebSourceMapPaths;
 
         options.release = info.version;

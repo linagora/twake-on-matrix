@@ -1,5 +1,5 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.38.9
+ARG FLUTTER_VERSION=3.47.5
 
 # Building Twake for the web.
 # Builds natively for the base image's platform, so no --platform flag is

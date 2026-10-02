@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
@@ -33,19 +35,25 @@ class PublicRoomBottomSheet extends StatelessWidget {
           ? client.knockRoom(chunk!.roomId)
           : client.joinRoom(roomAlias ?? chunk!.roomId),
     );
-    if (result.error == null) {
-      if (client.getRoomById(result.result!) == null) {
-        await client.onSync.stream.firstWhere(
-          (sync) => sync.rooms?.join?.containsKey(result.result) ?? false,
-        );
+    if (result.error != null) return;
+
+    final roomId = result.result!;
+    if (client.getRoomById(roomId)?.membership != Membership.join) {
+      try {
+        await client
+            .waitForRoomInSync(roomId, join: true)
+            .timeout(const Duration(seconds: 30));
+      } on TimeoutException {
+        // Join may have landed before the wait subscribed; re-check below.
       }
-      // don't open the room if the joined room is a space
-      if (!client.getRoomById(result.result!)!.isSpace) {
-        RoomRoute(roomid: result.result!).go(context);
-      }
-      Navigator.of(context, rootNavigator: false).pop();
-      return;
     }
+    if (!context.mounted) return;
+    final room = client.getRoomById(roomId);
+    if (room != null && !room.isSpace) {
+      RoomRoute(roomid: roomId).go(context);
+    }
+    if (!context.mounted) return;
+    Navigator.of(context, rootNavigator: false).pop();
   }
 
   bool _testRoom(PublicRoomsChunk r) => r.canonicalAlias == roomAlias;

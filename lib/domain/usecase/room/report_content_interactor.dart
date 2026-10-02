@@ -9,12 +9,11 @@ class ReportContentInteractor {
     required Client client,
     required String roomId,
     required String eventId,
-    required int score,
     required String reason,
   }) async* {
     try {
       yield const Right(ReportContentLoading());
-      await client.reportEvent(roomId, eventId, score: score, reason: reason);
+      await client.reportEvent(roomId, eventId, reason: reason);
       yield const Right(ReportContentSuccess());
     } catch (e) {
       yield Left(ReportContentFailure(exception: e));
