@@ -12,10 +12,7 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
-import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
-import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
-import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
+import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
@@ -24,6 +21,7 @@ import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
+import '../../domain/contact/fakes/build_contact_sync_service.dart';
 import '../../domain/contact/fakes/fake_unified_contact_repository.dart';
 import 'contacts_controller_test.mocks.dart';
 
@@ -37,6 +35,36 @@ class _FakeSource implements ContactSource {
 
   @override
   Future<List<SourcedContact>> fetch(String userId) async => contacts;
+}
+
+/// Answers only once the test opens its gate (a slow ToM address book).
+class _GatedSource implements ContactSource {
+  final Completer<void> gate = Completer<void>();
+
+  @override
+  ContactSourceKind get kind => ContactSourceKind.tomAddressBook;
+
+  @override
+  Future<List<SourcedContact>> fetch(String userId) async {
+    await gate.future;
+    return const [
+      SourcedContact(
+        matrixId: '@a:server',
+        value: ContactSourceValue(
+          kind: ContactSourceKind.tomAddressBook,
+          displayName: 'Alice',
+        ),
+      ),
+    ];
+  }
+}
+
+class _NoopPhonebookResolver implements PhonebookResolver {
+  @override
+  Future<void> resolve(String userId) async {}
+
+  @override
+  Future<void> cancel() async {}
 }
 
 class _FakeUserInfoRepository implements UserInfoRepository {
@@ -63,18 +91,10 @@ void main() {
   const policy = ContactResolutionPolicy();
 
   ContactSyncService buildService({List<ContactSource> sources = const []}) =>
-      ContactSyncService(
+      buildContactSyncService(
         userId: userId,
         repository: repository,
-        policy: policy,
-        syncContacts: SyncContactsUseCase(
-          repository: repository,
-          policy: policy,
-          sources: sources,
-        ),
-        watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
-        getUnifiedContact: GetUnifiedContactUseCase(repository),
-        addContact: AddContactUseCase(repository),
+        sources: sources,
       );
 
   setUp(() {
@@ -186,6 +206,7 @@ void main() {
         overrides: [
           unifiedContactRepositoryProvider.overrideWithValue(repository),
           contactSourcesProvider.overrideWithValue(sources),
+          phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
           tomUserInfoEnricherProvider.overrideWith(
             (ref) => TomUserInfoSource(
               repository: repository,
@@ -267,6 +288,32 @@ void main() {
           ]),
         );
         expect(contact.avatarUrl, 'mxc://server/alice');
+      },
+    );
+
+    test(
+      'a refresh outliving an account switch writes into no store',
+      () async {
+        final source = _GatedSource();
+        final container = buildWiredContainer(sources: [source]);
+        final accountA = MockClient();
+        when(accountA.userID).thenReturn(userId);
+        final accountB = MockClient();
+        when(accountB.userID).thenReturn('@other:server');
+        final active = container.read(activeMatrixClientProvider.notifier);
+        active.setClient(accountA);
+
+        final refresh = container
+            .read(contactsControllerProvider.notifier)
+            .refresh();
+        await pumpEventQueue();
+        // The user switches to B while A's address book is still loading.
+        active.setClient(accountB);
+        source.gate.complete();
+        await refresh;
+
+        expect(await repository.getContacts(userId), isEmpty);
+        expect(await repository.getContacts('@other:server'), isEmpty);
       },
     );
   });

@@ -353,4 +353,40 @@ void main() {
       expect(contact.prioritySource, ContactSourceKind.matrixProfile);
     });
   });
+
+  group('ContactResolutionPolicy active status', () {
+    test('a contact is active when any source value is active', () {
+      final contact = const ContactResolutionPolicy().resolve(
+        matrixId: matrixId,
+        values: const [
+          ContactSourceValue(kind: ContactSourceKind.tomAddressBook),
+          ContactSourceValue(kind: ContactSourceKind.phonebook, active: true),
+        ],
+      );
+
+      expect(contact.active, isTrue);
+    });
+
+    test('same-kind snapshots keep the active flag', () {
+      final contact = const ContactResolutionPolicy().resolve(
+        matrixId: matrixId,
+        values: const [
+          ContactSourceValue(kind: ContactSourceKind.phonebook, active: true),
+          ContactSourceValue(kind: ContactSourceKind.phonebook),
+        ],
+      );
+
+      expect(contact.active, isTrue);
+      expect(contact.sources.single.active, isTrue);
+    });
+
+    test('a contact with no active value is inactive', () {
+      final contact = const ContactResolutionPolicy().resolve(
+        matrixId: matrixId,
+        values: const [ContactSourceValue(kind: ContactSourceKind.phonebook)],
+      );
+
+      expect(contact.active, isFalse);
+    });
+  });
 }

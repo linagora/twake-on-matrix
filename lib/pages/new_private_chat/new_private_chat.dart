@@ -1,5 +1,4 @@
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/presentation/mixins/address_book_mixin.dart';
 import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
@@ -32,7 +31,6 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
         GoToDraftChatMixin,
         WidgetsBindingObserver,
         InviteExternalContactMixin,
-        AddressBooksMixin,
         GoToGroupChatMixin {
   final scrollController = ScrollController();
 
@@ -60,7 +58,6 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
       WidgetsBinding.instance.addObserver(this);
       if (mounted) {
         final client = Matrix.of(context).client;
-        listenAddressBookEvents(client);
         initialFetchContacts(
           context: context,
           client: client,
@@ -115,6 +112,7 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     await handleDidChangeAppLifecycleState(
       state,
+      context: context,
       client: Matrix.of(context).client,
     );
   }

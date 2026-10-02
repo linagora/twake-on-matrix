@@ -9,6 +9,14 @@ import 'package:twake_chat/domain/contact/repositories/unified_contact_repositor
 /// and [userId] is accepted to satisfy the account-scoped contract but ignored.
 class FakeUnifiedContactRepository implements UnifiedContactRepository {
   final Map<String, UnifiedContact> store = <String, UnifiedContact>{};
+
+  /// Delays [getByMatrixId], to exercise callers that await the store.
+  Duration? readDelay;
+
+  /// Makes the next [clear] throw, to check a failed write does not block the
+  /// next ones.
+  bool failNextClear = false;
+
   final StreamController<List<UnifiedContact>> _controller =
       StreamController<List<UnifiedContact>>.broadcast();
 
@@ -35,8 +43,10 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
       store.values.toList();
 
   @override
-  Future<UnifiedContact?> getByMatrixId(String userId, String matrixId) async =>
-      store[matrixId];
+  Future<UnifiedContact?> getByMatrixId(String userId, String matrixId) async {
+    if (readDelay != null) await Future<void>.delayed(readDelay!);
+    return store[matrixId];
+  }
 
   @override
   Future<void> upsert(String userId, UnifiedContact contact) async {
@@ -63,6 +73,10 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
 
   @override
   Future<void> clear(String userId) async {
+    if (failNextClear) {
+      failNextClear = false;
+      throw StateError('clear failed');
+    }
     store.clear();
     _controller.add(await getContacts(userId));
   }
