@@ -30,6 +30,10 @@ on:
         required: false
         default: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   # Lists the Patrol test files to run (the single given target, or every
   # *_test.dart) so the test job can fan them out across a matrix — one
