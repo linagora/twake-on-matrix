@@ -195,18 +195,21 @@ class MatrixState extends ConsumerState<Matrix>
     if (index != -1) {
       if (index == _activeClient) return SetActiveClientState.success;
       _activeClient = index;
-      // Transitional bridge: expose the active client to Riverpod consumers.
-      ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
+      // The lookup in progress belongs to the account being left.
+      unawaited(cancelContactsLookup());
       final userId = newClient!.userID;
+      _rememberContactOwner(newClient);
       // TODO: Multi-client VoiP support
       createVoipPlugin();
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
-      // Refresh the unified contacts only once the ToM configuration of the
-      // new active account is applied, so the sources never hit the previous
-      // account's URL/token.
+      // Transitional bridge: expose the active client to Riverpod consumers,
+      // only once the ToM URL/token of the new account are applied. Until
+      // then the previous account stays active, so no contact source can read
+      // the new account's data with the old configuration (or the opposite).
+      ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
       if (userId != null) {
         unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
       }
@@ -685,7 +688,7 @@ class MatrixState extends ConsumerState<Matrix>
         _handleFirstLoggedIn(client, state);
       } else {
         Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
-        await _handleLastLogout();
+        await _handleLastLogout(client);
       }
     }
   }
@@ -708,7 +711,7 @@ class MatrixState extends ConsumerState<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
-    await cancelContactsLookup();
+    await _clearContactsOf(currentClient);
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -730,6 +733,7 @@ class MatrixState extends ConsumerState<Matrix>
     LoginState loginState,
   ) async {
     waitForFirstSync = false;
+    _rememberContactOwner(newActiveClient);
     await setUpToMServicesInLogin(newActiveClient);
     await setUpFederationServicesInLogin(newActiveClient);
     await _storePersistActiveAccount(newActiveClient);
@@ -767,6 +771,7 @@ class MatrixState extends ConsumerState<Matrix>
     final activeClient = getClientByName(_loginClientCandidate!.clientName);
     if (activeClient == null) return;
     waitForFirstSync = false;
+    _rememberContactOwner(activeClient);
     await setUpToMServicesInLogin(activeClient);
     await setUpFederationServicesInLogin(activeClient);
 
@@ -851,6 +856,7 @@ class MatrixState extends ConsumerState<Matrix>
     for (final c in widget.clients) {
       Logs().d('MatrixState::initMatrix: ${c.clientName} calling registerSubs');
       _registerSubs(c.clientName);
+      _rememberContactOwner(c);
     }
 
     // Transitional bridge: publish the initial active client to Riverpod.
@@ -1476,10 +1482,10 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
-  Future<void> _handleLastLogout() async {
+  Future<void> _handleLastLogout(Client loggedOutClient) async {
     waitForFirstSync = false;
     ref.read(activeMatrixClientProvider.notifier).setClient(null);
-    await cancelContactsLookup();
+    await _clearContactsOf(loggedOutClient);
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
@@ -1495,6 +1501,31 @@ class MatrixState extends ConsumerState<Matrix>
   /// results belong to the account that started it.
   Future<void> cancelContactsLookup() =>
       ref.read(phonebookResolverProvider).cancel();
+
+  /// Matrix ID of each signed-in client, by client name. The SDK forgets the
+  /// user ID of a client when it logs out, but the contacts it owned must still
+  /// be wiped from the store.
+  final Map<String, String> _contactOwners = <String, String>{};
+
+  void _rememberContactOwner(Client client) {
+    final userId = client.userID;
+    if (userId != null) _contactOwners[client.clientName] = userId;
+  }
+
+  /// Logout: stops the lookup and removes the account's contacts from the
+  /// local store.
+  Future<void> _clearContactsOf(Client loggedOutClient) async {
+    await cancelContactsLookup();
+    final owner =
+        _contactOwners.remove(loggedOutClient.clientName) ??
+        loggedOutClient.userID;
+    if (owner == null) return;
+    try {
+      await ref.read(contactSyncServiceProvider(owner)).clear();
+    } catch (exception, stackTrace) {
+      Logs().e('MatrixState::_clearContactsOf', exception, stackTrace);
+    }
+  }
 
   void handleShowQrCodeDownload(bool show) {
     showQrCodeDownload.value = show;

@@ -15,6 +15,11 @@ import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 /// Values whose kind is produced by no source (enrichers, e.g. TOM user_info)
 /// survive the sync as long as the contact itself does, so an enrichment pass
 /// is not wiped — and refetched — on every refresh.
+///
+/// [execute] takes an `isCurrent` guard: the sources talk to whichever account
+/// the app is configured for, so a result that arrives after the session was
+/// replaced (account switch, logout, store cleared) is dropped instead of being
+/// written into the store of the account that started the sync.
 class SyncContactsUseCase {
   const SyncContactsUseCase({
     required UnifiedContactRepository repository,
@@ -28,13 +33,20 @@ class SyncContactsUseCase {
   final ContactResolutionPolicy _policy;
   final List<ContactSource> _sources;
 
-  Future<List<UnifiedContact>> execute(String userId) async {
+  Future<List<UnifiedContact>> execute(
+    String userId, {
+    bool Function()? isCurrent,
+  }) async {
+    bool stale() => isCurrent != null && !isCurrent();
+
     final failedKinds = <ContactSourceKind>{};
     final results = await Future.wait(
       _sources.map((source) => _safeFetch(source, userId, failedKinds)),
     );
+    if (stale()) return const <UnifiedContact>[];
 
     final existing = await _repository.getContacts(userId);
+    if (stale()) return const <UnifiedContact>[];
     final outcome = _reconcile(
       fetched: _groupByMatrixId(results),
       existing: {for (final contact in existing) contact.matrixId: contact},
@@ -49,6 +61,7 @@ class SyncContactsUseCase {
       await _repository.upsertAll(userId, outcome.contacts);
     }
     for (final matrixId in outcome.removedMatrixIds) {
+      if (stale()) break;
       await _repository.delete(userId, matrixId);
     }
     return outcome.contacts;
