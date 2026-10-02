@@ -1,9 +1,10 @@
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/chat/add_contact_banner.dart';
 import 'package:twake_chat/pages/chat/blocked_message_view.dart';
 import 'package:twake_chat/pages/chat/blocked_user_banner.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_audio_player_widget.dart';
 import 'package:twake_chat/pages/chat/chat_background.dart';
@@ -181,12 +182,15 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         );
                       },
                     ),
-                    ValueListenableBuilder(
-                      valueListenable: getIt
-                          .get<ContactsManager>()
-                          .getContactsNotifier(),
-                      builder: (context, state, child) {
-                        final contactToAdd = controller.contactToAdd(state);
+                    Consumer(
+                      builder: (context, ref, child) {
+                        final contacts =
+                            ref
+                                .watch(contactsControllerProvider)
+                                .asData
+                                ?.value ??
+                            const <UnifiedContact>[];
+                        final contactToAdd = controller.contactToAdd(contacts);
                         if (contactToAdd == null) {
                           return const SizedBox();
                         }

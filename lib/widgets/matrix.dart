@@ -5,7 +5,6 @@ import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
 import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
@@ -109,8 +108,6 @@ class MatrixState extends ConsumerState<Matrix>
         ReceiveSharingIntentMixin,
         InitConfigMixin,
         ConnectivityMixin {
-  final _contactsManager = getIt.get<ContactsManager>();
-
   AudioPlayer audioPlayer = AudioPlayer();
   final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
@@ -213,7 +210,6 @@ class MatrixState extends ConsumerState<Matrix>
       if (userId != null) {
         unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
       }
-      getIt.get<ContactsManager>().refreshTomContacts(client);
       _createSupportChat(newClient);
       _listenSyncPresence(newClient);
       Sentry.configureScope(
@@ -619,9 +615,10 @@ class MatrixState extends ConsumerState<Matrix>
         );
         if (currentClient.deviceID != senderId &&
             currentClient.userID != null) {
-          _contactsManager.initialSynchronizeContacts(
-            withMxId: currentClient.userID!,
-            forceRun: true,
+          unawaited(
+            ref
+                .read(contactSyncServiceProvider(currentClient.userID!))
+                .refresh(),
           );
         }
       }
@@ -711,8 +708,7 @@ class MatrixState extends ConsumerState<Matrix>
     await _cancelSubs(currentClient.clientName);
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
-    await matrixState.cancelListenSynchronizeContacts();
-    matrixState.reSyncContacts();
+    await cancelContactsLookup();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
@@ -746,7 +742,6 @@ class MatrixState extends ConsumerState<Matrix>
     if (userId != null) {
       unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
     }
-    matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
         client: client,
@@ -785,8 +780,7 @@ class MatrixState extends ConsumerState<Matrix>
       await backgroundPush?.setupPushForAdditionalClient(activeClient);
     }
 
-    await matrixState.cancelListenSynchronizeContacts();
-    matrixState.reSyncContacts();
+    await cancelContactsLookup();
     if (result.isSuccess) {
       onClientLoginStateChanged.add(
         ClientLoginStateEvent(
@@ -1379,10 +1373,7 @@ class MatrixState extends ConsumerState<Matrix>
     // available, so refresh it now that it is reachable — otherwise the ToM
     // contacts only show up after a manual pull-to-refresh.
     unawaited(
-      _contactsManager.initialSynchronizeContacts(
-        withMxId: newClient.userID!,
-        forceRun: true,
-      ),
+      ref.read(contactSyncServiceProvider(newClient.userID!)).refresh(),
     );
   }
 
@@ -1488,8 +1479,7 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> _handleLastLogout() async {
     waitForFirstSync = false;
     ref.read(activeMatrixClientProvider.notifier).setClient(null);
-    matrixState.reSyncContacts();
-    await matrixState.cancelListenSynchronizeContacts();
+    await cancelContactsLookup();
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
@@ -1501,20 +1491,10 @@ class MatrixState extends ConsumerState<Matrix>
     await _deleteAllTomConfigurations();
   }
 
-  Future<void> reSyncContacts() async {
-    _contactsManager.reSyncContacts();
-  }
-
-  Future<void> forceRunSynchronizeContacts() async {
-    _contactsManager.initialSynchronizeContacts(
-      withMxId: client.userID!,
-      forceRun: true,
-    );
-  }
-
-  Future<void> cancelListenSynchronizeContacts() async {
-    await _contactsManager.cancelAllSubscriptions();
-  }
+  /// Stops the phonebook lookup in progress (logout, account switch): its
+  /// results belong to the account that started it.
+  Future<void> cancelContactsLookup() =>
+      ref.read(phonebookResolverProvider).cancel();
 
   void handleShowQrCodeDownload(bool show) {
     showQrCodeDownload.value = show;

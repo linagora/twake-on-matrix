@@ -28,7 +28,8 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget;
+    show ConsumerState, ConsumerStatefulWidget, ProviderScope;
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -104,14 +105,15 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     bool isCustomDisplayName = true,
   }) async {
     final userId = Matrix.of(context).client.userID;
-    final profile = await Matrix.of(
+    final profile = await ProviderScope.containerOf(
       context,
-    ).client.getProfileFromUserId(userId ?? '');
+      listen: false,
+    ).read(matrixUserProfileProvider(userId ?? '').future);
     final newContactsList = {
       PresentationContact(
         displayName: isCustomDisplayName
             ? L10n.of(context)!.you
-            : profile.displayName,
+            : profile?.displayName,
         matrixId: Matrix.of(context).client.userID,
       ),
     };

@@ -4,34 +4,39 @@ import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dar
 import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
 import 'package:twake_chat/data/contact/datasources_impl/contact_local_datasource_impl.dart';
 import 'package:twake_chat/data/contact/datasources_impl/matrix_room_member_datasource_impl.dart';
+import 'package:twake_chat/data/contact/phonebook/address_book_broadcaster.dart';
+import 'package:twake_chat/data/contact/phonebook/phonebook_resolver_impl.dart';
 import 'package:twake_chat/data/contact/repositories/unified_contact_repository_impl.dart';
 import 'package:twake_chat/data/contact/sources/matrix_room_member_source.dart';
 import 'package:twake_chat/data/contact/sources/phonebook_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
+import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
 import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
+import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/utils/contact_lookup_failed_snackbar.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 part 'contacts_providers.g.dart';
-
-// `GetTomContactsInteractor` predates the Riverpod migration and is still
-// consumed by the non-Riverpod `ContactsManager`; this provider gives
-// Riverpod consumers a `ref.read` path instead of reaching into GetIt.
-@riverpod
-GetTomContactsInteractor getTomContactsInteractor(Ref ref) =>
-    getIt.get<GetTomContactsInteractor>();
 
 /// Pure DI: the resolution policy has no dependency and no state.
 @riverpod
@@ -113,6 +118,50 @@ AddContactUseCase addContactUseCase(Ref ref) =>
 String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider).userId;
 
 @Riverpod(keepAlive: true)
+AddressBookBroadcaster addressBookBroadcaster(Ref ref) =>
+    AddressBookBroadcaster(() => ref.read(activeMatrixClientProvider).client);
+
+/// Phonebook → Matrix ID lookup that used to live in `ContactsManager`.
+///
+/// Kept alive: it owns the in-flight lookup, and the legacy interceptors it
+/// reads (home / identity server, token) are reconfigured on account switch,
+/// so they are resolved at call time.
+@Riverpod(keepAlive: true)
+PhonebookResolver phonebookResolver(Ref ref) {
+  final broadcaster = ref.watch(addressBookBroadcasterProvider);
+  return PhonebookResolverImpl(
+    tryGetSynced: getIt.get<TryGetSyncedPhoneBookContactInteractor>(),
+    federationLookUp: getIt.get<FederationLookUpPhonebookContactInteractor>(),
+    twakeLookUp: getIt.get<TwakeLookupPhonebookContactInteractor>(),
+    postAddressBook: getIt.get<PostAddressBookInteractor>(),
+    federationConfigurations: (userId) => getIt
+        .get<FederationConfigurationsRepository>()
+        .getFederationConfigurations(userId),
+    endpoints: PhonebookLookupEndpoints(
+      homeServerUrl: () =>
+          getIt
+              .get<DynamicUrlInterceptors>(
+                instanceName: NetworkDI.homeServerUrlInterceptorName,
+              )
+              .baseUrl ??
+          '',
+      identityServerUrl: () =>
+          getIt
+              .get<DynamicUrlInterceptors>(
+                instanceName: NetworkDI.identityServerUrlInterceptorName,
+              )
+              .baseUrl ??
+          '',
+      accessToken: () =>
+          getIt.get<AuthorizationInterceptor>().accessToken ?? '',
+    ),
+    uploadsAddressBook: !PlatformInfos.isWeb,
+    onPartialFailure: showContactLookupFailedSnackBar,
+    onAddressBookUploaded: broadcaster.notifyOtherDevices,
+  );
+}
+
+@Riverpod(keepAlive: true)
 ContactSyncService contactSyncService(Ref ref, String userId) =>
     ContactSyncService(
       userId: userId,
@@ -123,4 +172,5 @@ ContactSyncService contactSyncService(Ref ref, String userId) =>
       getUnifiedContact: ref.watch(getUnifiedContactUseCaseProvider),
       addContact: ref.watch(addContactUseCaseProvider),
       enrichers: [ref.watch(tomUserInfoEnricherProvider)],
+      phonebookResolver: ref.watch(phonebookResolverProvider),
     );
