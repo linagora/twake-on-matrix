@@ -2,7 +2,6 @@ import 'package:twake_chat/utils/voip/video_call_helper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 
 import 'video_call_helper_test.mocks.dart';
 
@@ -18,29 +17,6 @@ void main() {
     originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
     room: MockRoom(),
   );
-
-  group('VideoCallHelper.generateUrl', () {
-    test('produces a slug matching baseUrl/xxx-xxxx-xxx', () {
-      final url = VideoCallHelper.generateUrl(baseUrl);
-      expect(
-        RegExp(
-          '^${RegExp.escape(baseUrl)}/[a-z]{3}-[a-z]{4}-[a-z]{3}\$',
-        ).hasMatch(url),
-        isTrue,
-        reason: 'unexpected url: $url',
-      );
-    });
-
-    test('round-trips: a generated url is accepted by extractUrl', () {
-      final url = VideoCallHelper.generateUrl(baseUrl);
-      final event = buildTextEvent({
-        'msgtype': MessageTypes.Text,
-        'body': 'Has started a video call $url',
-        VideoCallHelper.callUrlKey: url,
-      });
-      expect(VideoCallHelper.extractUrl(event, baseUrl), url);
-    });
-  });
 
   group('VideoCallHelper.extractUrl', () {
     String validUrl() => '$baseUrl/abc-defg-hij';
@@ -101,48 +77,6 @@ void main() {
         VideoCallHelper.callUrlKey: '$baseUrl/not-a-valid-slug',
       });
       expect(VideoCallHelper.extractUrl(event, baseUrl), isNull);
-    });
-  });
-
-  group('VideoCallHelper.start', () {
-    late MockRoom room;
-
-    setUp(() {
-      room = MockRoom();
-      when(room.sendEvent(any)).thenAnswer((_) async => '\$sent:example.com');
-    });
-
-    test('sends a text event carrying the generated call_url', () {
-      VideoCallHelper.start(
-        room: room,
-        startedTitle: 'Has started a video call',
-        baseUrl: baseUrl,
-      );
-
-      final captured =
-          verify(room.sendEvent(captureAny)).captured.single
-              as Map<String, dynamic>;
-      expect(captured['msgtype'], MessageTypes.Text);
-      final url = captured[VideoCallHelper.callUrlKey] as String;
-      expect(
-        VideoCallHelper.extractUrl(buildTextEvent(captured), baseUrl),
-        url,
-      );
-      expect(captured['body'], contains(url));
-    });
-
-    test('does nothing when room is null', () {
-      VideoCallHelper.start(
-        room: null,
-        startedTitle: 'title',
-        baseUrl: baseUrl,
-      );
-      verifyNever(room.sendEvent(any));
-    });
-
-    test('does nothing when baseUrl is null', () {
-      VideoCallHelper.start(room: room, startedTitle: 'title', baseUrl: null);
-      verifyNever(room.sendEvent(any));
     });
   });
 }

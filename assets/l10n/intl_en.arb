@@ -3250,6 +3250,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "failedToStartVideoCall": "Failed to start the call",
+  "@failedToStartVideoCall": {
+    "type": "text",
+    "placeholders": {}
+  },
   "couldNotLaunchUrl": "Could not launch URL",
   "deviceVerificationWaring": "Encrypted messages may be unavailable because some of your devices are out of sync",
   "deviceVerificationWarningOnSettingsScreen": "Some sessions are unverified. Encrypted messages may not decrypt correctly until all sessions are verified or removed.",
