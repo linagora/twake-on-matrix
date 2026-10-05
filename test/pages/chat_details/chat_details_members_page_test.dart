@@ -112,7 +112,7 @@ void main() {
     final readOnlyRoom = _FakeRoom(ownPowerLevel: PowerLevel(0), canBan: false);
     final sameRoleRoom = _FakeRoom(ownPowerLevel: PowerLevel(10), canBan: true);
 
-    testWidgets('shows the add members row when inviting is allowed', (
+    testWidgets('shows the add members row when onAddMembers is provided', (
       tester,
     ) async {
       var tapCount = 0;
@@ -127,7 +127,7 @@ void main() {
       expect(tapCount, 1);
     });
 
-    testWidgets('hides the add members row when inviting is not allowed', (
+    testWidgets('hides the add members row when onAddMembers is null', (
       tester,
     ) async {
       await _pumpMembersPage(tester, room: readOnlyRoom);
