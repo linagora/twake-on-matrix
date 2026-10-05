@@ -178,6 +178,7 @@ class SearchView extends StatelessWidget {
             Expanded(
               child: SearchTextField(
                 textEditingController: searchController.textEditingController,
+                onClear: searchController.onCloseSearchTapped,
               ),
             ),
           ],
