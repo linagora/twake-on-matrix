@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,6 +69,7 @@ Future<void> _pumpMembersPage(
   WidgetTester tester, {
   required Room room,
   VoidCallback? onAddMembers,
+  void Function(User member)? onSelectMember,
 }) async {
   final selectedUsersNotifier = SelectedUsersMapChangeNotifier();
   addTearDown(selectedUsersNotifier.dispose);
@@ -91,6 +93,7 @@ Future<void> _pumpMembersPage(
             isMobileAndTablet: false,
             selectedUsersMapChangeNotifier: selectedUsersNotifier,
             onAddMembers: onAddMembers,
+            onSelectMember: onSelectMember,
           ),
         ),
       ),
@@ -136,17 +139,54 @@ void main() {
       expect(find.text('Member'), findsOneWidget);
     });
 
-    final removeSwipeCases = [
-      ('offers the remove swipe on a removable member', moderatorRoom, true),
-      ('has no remove swipe without the ban permission', readOnlyRoom, false),
-      ('has no remove swipe on a member of equal role', sameRoleRoom, false),
+    final removalCases = [
+      ('a removable member', moderatorRoom, true),
+      ('a member without the ban permission', readOnlyRoom, false),
+      ('a member of equal role', sameRoleRoom, false),
     ];
-    for (final (description, room, isOffered) in removeSwipeCases) {
-      testWidgets(description, (tester) async {
+    for (final (member, room, isOffered) in removalCases) {
+      final outcome = isOffered ? 'offers' : 'does not offer';
+
+      testWidgets('$outcome the remove swipe on $member', (tester) async {
         await _pumpMembersPage(tester, room: room);
 
         expect(
           find.byType(Slidable),
+          isOffered ? findsOneWidget : findsNothing,
+        );
+      });
+
+      testWidgets('$outcome selection on long press of $member', (
+        tester,
+      ) async {
+        final selected = <User>[];
+        await _pumpMembersPage(
+          tester,
+          room: room,
+          onSelectMember: selected.add,
+        );
+
+        await tester.longPress(find.text('Member'));
+
+        expect(selected, hasLength(isOffered ? 1 : 0));
+      });
+
+      testWidgets('$outcome the remove button on hover of $member', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(1280, 800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await _pumpMembersPage(tester, room: room);
+
+        final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await mouse.addPointer(location: Offset.zero);
+        addTearDown(mouse.removePointer);
+        await mouse.moveTo(tester.getCenter(find.text('Member')));
+        await tester.pump();
+
+        expect(
+          find.byIcon(Icons.delete_outlined),
           isOffered ? findsOneWidget : findsNothing,
         );
       });
