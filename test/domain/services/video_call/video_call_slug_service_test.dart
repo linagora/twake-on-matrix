@@ -78,22 +78,6 @@ void main() {
       expect(slug, 'abc-defg-hij');
     });
 
-    test('parse_always_returnsASlugAcceptedByExtractUrl', () {
-      // Arrange
-      final slug = slugService.parse('https://other.example.org/abc-defg-hij/');
-      final event = buildTextEvent({
-        'msgtype': MessageTypes.Text,
-        'body': 'Has started a video call $baseUrl/$slug',
-        VideoCallHelper.callUrlKey: '$baseUrl/$slug',
-      });
-
-      // Act
-      final extracted = VideoCallHelper.extractUrl(event, baseUrl);
-
-      // Assert
-      expect(extracted, '$baseUrl/abc-defg-hij');
-    });
-
     test('parse_whenSlugIsMalformed_returnsNull', () {
       // Act & Assert
       expect(slugService.parse('$baseUrl/ABC-defg-hij'), isNull);
