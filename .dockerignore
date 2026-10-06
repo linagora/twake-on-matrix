@@ -28,6 +28,9 @@ web/pkg/
 !config.sample.json
 !.metadata
 
+# Git history, read by sentry-cli to attach commits to the release
+!.git
+
 # Legacy libolm bundle (generated locally; the web build uses vodozemac)
 assets/js/package/*.js
 assets/js/package/*.wasm
