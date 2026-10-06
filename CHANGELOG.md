@@ -1,3 +1,7 @@
+## [2.25.2] - 2026-10-06
+### Fixed
+- #3439: Restore git history in the Docker build context
+
 ## [2.25.1] - 2026-10-05
 ### Changed
 - #3430: TW-3304: Simplify search close in chat and contacts views
