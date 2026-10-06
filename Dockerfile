@@ -2,10 +2,10 @@
 ARG FLUTTER_VERSION=3.38.9
 
 # Building Twake for the web.
-# Builds natively for the base image's platform, so no --platform flag is
-# needed; set platforms on the final stage to produce a multi-arch image.
+# The web output is platform-independent: this stage runs once, on the build
+# host's platform, and only the nginx stages are built per target platform.
 # See .github/workflows/image.yaml for the CI build and its requirements.
-FROM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
 ARG TWAKECHAT_BASE_HREF="/web/"
 # Sentry values are injected from build args; only SENTRY_PROJECT and SENTRY_ORG
 # are required. The auth token is passed as a build secret, not an arg.
