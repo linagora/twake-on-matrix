@@ -1,19 +1,21 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions_bottom_sheet.dart';
-import 'package:twake_chat/pages/chat/events/message_reactions_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:linagora_design_flutter/reaction/linagora_reaction_chip.dart';
+import 'package:linagora_design_flutter/reaction/linagora_reactions.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
-import 'package:overflow_view/overflow_view.dart';
 
 class MessageReactions extends StatelessWidget {
   final Event event;
@@ -79,114 +81,40 @@ class ReactionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OverflowView.flexible(
-      spacing: 4.0,
-      builder: (context, index) {
-        if (event.room.isDirectChat) {
-          return const SizedBox.shrink();
-        }
-        return InkWell(
-          hoverColor: Colors.transparent,
-          focusColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          onTapDown: (details) {
-            _handleDisplayReactionsInfo(
+    final isDirectChat = event.room.isDirectChat;
+    return LinagoraReactions(
+      reactions: reactionList.map((r) {
+        final count = isDirectChat ? null : r.count;
+        void onTap() => unawaited(_toggleReaction(r));
+        return r.isCustomEmoji
+            ? LinagoraReactionChip.image(
+                image: r.customEmojiImage,
+                count: count,
+                onTap: onTap,
+              )
+            : LinagoraReactionChip(emoji: r.key!, count: count, onTap: onTap);
+      }).toList(),
+      onShowAll: isDirectChat
+          ? null
+          : (details) => _handleDisplayReactionsInfo(
               context: context,
               tapDownDetails: details,
-            );
-          },
-          child: Container(
-            width: MessageReactionsStyle.moreReactionContainer,
-            height: MessageReactionsStyle.moreReactionContainer,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border.all(color: MessageReactionsStyle.borderColor),
-              shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Icon(
-                Icons.more_horiz_rounded,
-                size: MessageReactionsStyle.moreReactionIconSize,
-              ),
-            ),
-          ),
-        );
-      },
-      children: [
-        ...reactionList
-            .take(3)
-            .map(
-              (r) => Reaction(
-                reactionKey: r.key,
-                count: event.room.isDirectChat ? null : r.count,
-                reacted: r.reacted,
-                onTap: () async {
-                  if (r.reacted) {
-                    final evt = allReactionEvents.firstWhereOrNull((e) {
-                      final relatedTo = e.content['m.relates_to'];
-                      return e.senderId == e.room.client.userID &&
-                          relatedTo is Map &&
-                          relatedTo['key'] == r.key;
-                    });
-                    if (evt != null) {
-                      await evt.redactEvent();
-                    }
-                  } else {
-                    event.room.sendReaction(event.eventId, r.key!);
-                  }
-                },
-              ),
-            ),
-        if (reactionList.length > 3)
-          Container(
-            width: MessageReactionsStyle.moreReactionContainer,
-            height: MessageReactionsStyle.moreReactionContainer,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border.all(color: MessageReactionsStyle.borderColor),
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.only(left: 4, right: 4),
-            child: Center(
-              child: Text(
-                '+${reactionList.length - 3}',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: LinagoraRefColors.material().neutral[50],
-                ),
-              ),
-            ),
-          ),
-        if (!event.room.isDirectChat && reactionList.isNotEmpty)
-          InkWell(
-            hoverColor: Colors.transparent,
-            focusColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            splashColor: Colors.transparent,
-            onTapDown: (details) {
-              _handleDisplayReactionsInfo(
-                context: context,
-                tapDownDetails: details,
-              );
-            },
-            child: Container(
-              width: MessageReactionsStyle.moreReactionContainer,
-              height: MessageReactionsStyle.moreReactionContainer,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                border: Border.all(color: MessageReactionsStyle.borderColor),
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.more_horiz_rounded,
-                  size: MessageReactionsStyle.moreReactionIconSize,
-                ),
-              ),
-            ),
-          ),
-      ],
     );
+  }
+
+  Future<void> _toggleReaction(ReactionEntry reaction) async {
+    if (!reaction.reacted) {
+      await event.room.sendReaction(event.eventId, reaction.key!);
+      return;
+    }
+    final ownReaction = allReactionEvents.firstWhereOrNull((e) {
+      final relatedTo = e.content['m.relates_to'];
+      return e.senderId == e.room.client.userID &&
+          relatedTo is Map &&
+          relatedTo['key'] == reaction.key;
+    });
+    await ownReaction?.redactEvent();
   }
 
   void _handleDisplayReactionInfoWeb({
@@ -262,22 +190,11 @@ class ReactionsList extends StatelessWidget {
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 16,
-                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         child: MessageReactionsBottomSheet(
-                          event: event,
                           allReactionEvents: allReactionEvents,
-                          client: client,
                           reactionList: reactionList,
                           scrollController: ScrollController(),
-                          reactionHeaderPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
-                          reactionListPadding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                          ),
                         ),
                       ),
                     ),
@@ -307,8 +224,8 @@ class ReactionsList extends StatelessWidget {
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
         ),
       ),
       isScrollControlled: true,
@@ -321,123 +238,29 @@ class ReactionsList extends StatelessWidget {
           maxChildSize: 0.8,
           expand: false,
           builder: (BuildContext context, ScrollController scrollController) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Container(
-                    height: 4,
-                    width: 32,
-                    margin: const EdgeInsets.symmetric(vertical: 16),
-                    decoration: BoxDecoration(
-                      color: LinagoraSysColors.material().outline,
-                      borderRadius: BorderRadius.circular(100),
+            return Column(
+              children: [
+                Container(
+                  height: 4,
+                  width: 32,
+                  margin: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: LinagoraSysColors.material().outline.withValues(
+                      alpha: 0.4,
                     ),
+                    borderRadius: BorderRadius.circular(100),
                   ),
-                  Expanded(
-                    child: MessageReactionsBottomSheet(
-                      event: event,
-                      allReactionEvents: allReactionEvents,
-                      client: client,
-                      reactionList: reactionList,
-                      scrollController: scrollController,
-                    ),
+                ),
+                Expanded(
+                  child: MessageReactionsBottomSheet(
+                    allReactionEvents: allReactionEvents,
+                    reactionList: reactionList,
+                    scrollController: scrollController,
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
-        ),
-      ),
-    );
-  }
-}
-
-class Reaction extends StatelessWidget {
-  final String? reactionKey;
-  final int? count;
-  final bool? reacted;
-  final void Function()? onTap;
-  final void Function()? onLongPress;
-  final bool enableDecoration;
-  final TextStyle? countStyle;
-
-  const Reaction({
-    super.key,
-    this.reactionKey,
-    this.count,
-    this.reacted,
-    this.onTap,
-    this.onLongPress,
-    this.enableDecoration = true,
-    this.countStyle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = LinagoraSysColors.material().surface;
-    final fontSize = DefaultTextStyle.of(context).style.fontSize;
-    Widget content;
-    if (reactionKey!.startsWith('mxc://')) {
-      content = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          MxcImage(uri: Uri.parse(reactionKey!), width: 9999, height: fontSize),
-          if (count != null && count! > 1) ...[
-            const SizedBox(width: 4),
-            Text(
-              count.toString(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: LinagoraRefColors.material().neutral[50],
-              ),
-            ),
-          ],
-        ],
-      );
-    } else {
-      final renderKey = Characters(reactionKey!);
-      content = Text(
-        '$renderKey',
-        strutStyle: const StrutStyle(forceStrutHeight: true),
-        style: TextStyle(fontSize: MessageReactionsStyle.renderKeyFontSize),
-        textAlign: TextAlign.center,
-      );
-    }
-    return InkWell(
-      onTap: () => onTap != null ? onTap!() : null,
-      onLongPress: () => onLongPress != null ? onLongPress!() : null,
-      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-      child: Container(
-        height: 28,
-        decoration: enableDecoration
-            ? BoxDecoration(
-                color: color,
-                border: Border.all(
-                  color: MessageReactionsStyle.reactionBorderColor,
-                ),
-                borderRadius: BorderRadius.circular(
-                  MessageReactionsStyle.reactionBorderRadius,
-                ),
-              )
-            : null,
-        padding: const EdgeInsets.only(left: 4, right: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(padding: const EdgeInsets.only(top: 4), child: content),
-            if (count != null && count! > 1) ...[
-              const SizedBox(width: 4),
-              Text(
-                '$count',
-                style:
-                    countStyle ??
-                    Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: LinagoraRefColors.material().neutral[50],
-                    ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
         ),
       ),
     );
@@ -459,4 +282,11 @@ class ReactionEntry with EquatableMixin {
 
   @override
   List<Object?> get props => [key, count, reacted, reactors];
+}
+
+extension ReactionEntryCustomEmoji on ReactionEntry {
+  bool get isCustomEmoji => key!.startsWith('mxc://');
+
+  Widget get customEmojiImage =>
+      MxcImage(uri: Uri.parse(key!), fit: BoxFit.contain);
 }
