@@ -1,3 +1,18 @@
+## [2.25.1] - 2026-10-05
+### Changed
+- #3430: TW-3304: Simplify search close in chat and contacts views
+- #3385: Optimize Docker build layering and context
+- #3388: Enable use_late_for_private_fields_and_variables lint
+- #3432: Cancel superseded pull request CI runs
+
+### Fixed
+- #3434: TW-3427: Hide member actions the role does not allow
+- #3431: Support room version 12 in ownership transfer
+- #3406: Skip Sentry on localhost and debug builds
+
+### Tests
+- #3428: Tolerate excluded perf metrics missing from physical runs
+
 ## [2.25.0] - 2026-09-28
 ### Added
 - #3423: Translated using Weblate (French, Irish, Russian, Vietnamese)
