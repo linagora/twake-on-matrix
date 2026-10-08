@@ -222,7 +222,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
       await matrix?.audioPlayer.setFilePath(file.path);
     } else if (matrixFile != null) {
       await matrix?.audioPlayer.setAudioSource(
-        MatrixFileAudioSource(matrixFile),
+        audioSourceFromMatrixFile(matrixFile),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

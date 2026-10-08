@@ -7,7 +7,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when applicationUrl is null',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: null,
         );
@@ -21,7 +21,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when applicationUrl is empty',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: '',
         );
@@ -35,7 +35,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when applicationUrl does not contain {username}',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://settings.twake.app/',
         );
@@ -49,7 +49,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when userId is invalid (no @)',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -63,7 +63,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when userId is invalid (no :)',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -72,7 +72,7 @@ void main() {
     );
 
     test('completedApplicationUrl returns null when userId has double @', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -85,7 +85,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when userId has @ at the end',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -97,7 +97,7 @@ void main() {
     );
 
     test('completedApplicationUrl returns null when userId has double :', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -110,7 +110,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when userId has no username part',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -121,7 +121,7 @@ void main() {
     test(
       'completedApplicationUrl returns null when userId has no homeserver part',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -130,7 +130,7 @@ void main() {
     );
 
     test('completedApplicationUrl returns correct URL for valid userId', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -141,7 +141,7 @@ void main() {
     });
 
     test('completedApplicationUrl handles different usernames', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -153,7 +153,7 @@ void main() {
 
     // New test cases
     test('completedApplicationUrl handles userIds with special characters', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -168,7 +168,7 @@ void main() {
     test(
       'completedApplicationUrl handles very long usernames and homeservers',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl: 'https://{username}-settings.twake.app/',
         );
@@ -182,7 +182,7 @@ void main() {
     );
 
     test('completedApplicationUrl handles homeservers with subdomains', () {
-      final commonSettings = CommonSettingsInformation(
+      const commonSettings = CommonSettingsInformation(
         enabled: true,
         applicationUrl: 'https://{username}-settings.twake.app/',
       );
@@ -197,7 +197,7 @@ void main() {
     test(
       'completedApplicationUrl handles multiple occurrences of {username} in applicationUrl',
       () {
-        final commonSettings = CommonSettingsInformation(
+        const commonSettings = CommonSettingsInformation(
           enabled: true,
           applicationUrl:
               'https://{username}-settings.twake.app/{username}/dashboard',

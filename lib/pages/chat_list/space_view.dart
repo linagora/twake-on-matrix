@@ -44,16 +44,18 @@ class _SpaceViewState extends State<SpaceView> {
   void _onJoinSpaceChild(SpaceRoomsChunk spaceChild) async {
     final client = Matrix.of(context).client;
     final space = client.getRoomById(widget.controller.activeSpaceId!);
-    if (client.getRoomById(spaceChild.roomId) == null) {
+    final existing = client.getRoomById(spaceChild.roomId);
+    if (existing == null || existing.membership != Membership.join) {
       final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           await client.joinRoom(
             spaceChild.roomId,
-            serverName: space?.spaceChildren
+            via: space?.spaceChildren
                 .firstWhereOrNull((child) => child.roomId == spaceChild.roomId)
                 ?.via,
           );
-          if (client.getRoomById(spaceChild.roomId) == null) {
+          if (client.getRoomById(spaceChild.roomId)?.membership !=
+              Membership.join) {
             // Wait for room actually appears in sync
             await client.waitForRoomInSync(spaceChild.roomId, join: true);
           }
@@ -89,7 +91,7 @@ class _SpaceViewState extends State<SpaceView> {
           room?.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
       message: spaceChild?.topic ?? room?.topic,
       actions: [
-        if (room == null)
+        if (room == null || room.membership != Membership.join)
           SheetAction(
             key: SpaceChildContextAction.join,
             label: L10n.of(context)!.joinRoom,
@@ -101,7 +103,7 @@ class _SpaceViewState extends State<SpaceView> {
             label: L10n.of(context)!.removeFromSpace,
             icon: Icons.delete_sweep_outlined,
           ),
-        if (room != null)
+        if (room != null && room.membership == Membership.join)
           SheetAction(
             key: SpaceChildContextAction.leave,
             label: L10n.of(context)!.leave,
@@ -247,7 +249,9 @@ class _SpaceViewState extends State<SpaceView> {
             }
             final spaceChild = spaceChildren[i];
             final room = client.getRoomById(spaceChild.roomId);
-            if (room != null && !room.isSpace) {
+            if (room != null &&
+                !room.isSpace &&
+                room.membership == Membership.join) {
               return ChatListItem(
                 room,
                 onTapAvatar: () => _onSpaceChildContextMenu(spaceChild, room),
