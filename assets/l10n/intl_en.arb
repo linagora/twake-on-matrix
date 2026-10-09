@@ -3288,5 +3288,15 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "makeChatPublic": "Make chat public",
+  "makeChatPublicDescription": "Users will be able to find this chat in search and join without an invitation",
+  "groupPrivacyLimitToServer": "Limit to users of {serverName}",
+  "@groupPrivacyLimitToServer": {
+    "type": "text",
+    "placeholders": {
+      "serverName": {}
+    }
+  },
+  "groupPrivacyLimitToServerDescription": "This public chat is available only to users on this server, turn the toggle off to open it to everyone. Note that this setting can't be changed later"
 }

@@ -3,14 +3,20 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/pages/new_group/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
@@ -39,6 +45,7 @@ void main() {
       mockController.enableEncryptionNotifier,
     ).thenReturn(ValueNotifier(false));
     when(mockController.haveGroupNameNotifier).thenReturn(ValueNotifier(false));
+    when(mockController.serverName).thenReturn('example.com');
     when(mockController.createRoomStateNotifier).thenReturn(
       ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial())),
     );
@@ -79,7 +86,7 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: NewGroupChatInfoView(mockController),
+          home: ProviderScope(child: NewGroupChatInfoView(mockController)),
         ),
       );
 
@@ -107,13 +114,42 @@ void main() {
   });
 
   group('NewGroupChatInfo in feed mode - widget test', () {
-    Future<void> pumpView(WidgetTester tester) async {
+    HomeserverSummary summaryWith({required bool isPublicGroupsEnabled}) =>
+        HomeserverSummary(
+          discoveryInformation: DiscoveryInformation(
+            mHomeserver: HomeserverInformation(
+              baseUrl: Uri.parse('https://matrix.example.com'),
+            ),
+            additionalProperties: {
+              'app.twake.chat': {
+                'public_groups': {'enabled': isPublicGroupsEnabled},
+              },
+            },
+          ),
+          versions: GetVersionsResponse(versions: ['r1.6.0']),
+          loginFlows: [],
+        );
+
+    Future<void> pumpView(
+      WidgetTester tester, {
+      bool isPublicGroupsEnabled = true,
+      GroupPrivacyState privacy = const GroupPrivacyState(),
+    }) async {
       await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          home: NewGroupChatInfoView(mockController),
+        ProviderScope(
+          overrides: [
+            loginHomeserverSummaryProvider.overrideWithBuild(
+              (_, _) =>
+                  summaryWith(isPublicGroupsEnabled: isPublicGroupsEnabled),
+            ),
+            groupPrivacyViewModelProvider.overrideWithBuild((_, _) => privacy),
+          ],
+          child: MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            home: NewGroupChatInfoView(mockController),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -160,6 +196,131 @@ void main() {
       // Assert
       final context = tester.element(find.byType(TwakeAppBar));
       expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
+      expect(
+        find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
+        findsNothing,
+      );
+    });
+
+    testWidgets(
+      'build_whenPublic_showsTheServerLimitToggleAndHidesEncryption',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+
+        // Act
+        await pumpView(
+          tester,
+          privacy: const GroupPrivacyState(
+            isPublic: true,
+            isServerLimited: true,
+          ),
+        );
+
+        // Assert
+        final context = tester.element(find.byType(TwakeAppBar));
+        expect(
+          find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
+          findsOneWidget,
+        );
+        expect(find.text(L10n.of(context)!.enableEncryption), findsNothing);
+      },
+    );
+
+    testWidgets('build_whenPublicGroupsDisabled_hidesThePublicToggle', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+
+      // Act
+      await pumpView(tester, isPublicGroupsEnabled: false);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.makeChatPublic), findsNothing);
+      expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
+    });
+
+    GroupPrivacyState privacyOf(WidgetTester tester) =>
+        ProviderScope.containerOf(
+          tester.element(find.byType(NewGroupChatInfoView)),
+        ).read(groupPrivacyViewModelProvider);
+
+    Future<void> tapSetting(WidgetTester tester, String title) async {
+      await tester.ensureVisible(find.text(title));
+      await tester.tap(find.text(title));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets(
+      'makeChatPublicToggle_whenTapped_showsTheServerLimitToggleAndHidesEncryption',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+        await pumpView(tester);
+        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+        // Act
+        await tapSetting(tester, l10n.makeChatPublic);
+
+        // Assert
+        expect(privacyOf(tester).isPublic, isTrue);
+        expect(
+          find.text(l10n.groupPrivacyLimitToServer('example.com')),
+          findsOneWidget,
+        );
+        expect(find.text(l10n.enableEncryption), findsNothing);
+      },
+    );
+
+    testWidgets('serverLimitToggle_whenTapped_opensTheGroupToOtherServers', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      await pumpView(
+        tester,
+        privacy: const GroupPrivacyState(isPublic: true, isServerLimited: true),
+      );
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+      // Act
+      await tapSetting(tester, l10n.groupPrivacyLimitToServer('example.com'));
+
+      // Assert
+      expect(privacyOf(tester), const GroupPrivacyState(isPublic: true));
+    });
+
+    testWidgets('build_whenEncryptionIsEnabled_showsTheWarning', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      when(
+        mockController.enableEncryptionNotifier,
+      ).thenReturn(ValueNotifier(true));
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.encryptionWarning), findsOneWidget);
+    });
+
+    testWidgets('build_whenEncryptionIsDisabled_hidesTheWarning', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      expect(find.text(L10n.of(context)!.encryptionWarning), findsNothing);
     });
   });
 }
