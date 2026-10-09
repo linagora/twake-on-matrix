@@ -105,7 +105,7 @@ abstract class AppConfig {
   static const String sourceCodeUrl =
       'https://github.com/linagora/twake-on-matrix';
   static String supportUrl = 'https://twake.app/support';
-  static String cozyExternalBridgeVersion = '0.16.1';
+  static String cozyExternalBridgeVersion = '1.3.0';
   static bool renderHtml = true;
   static bool hideUnknownEvents = true;
   static bool hideUnimportantStateEvents = true;
