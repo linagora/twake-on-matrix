@@ -16,7 +16,6 @@ import 'package:twake_chat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view_style.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
-import 'package:twake_chat/utils/android_utils.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -89,12 +88,7 @@ class DraftChatView extends StatelessWidget {
               ),
             ),
           ),
-          body:
-              AndroidUtils.isNavigationButtonsEnabled(
-                systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
-              )
-              ? SafeArea(child: _chatViewBody(context))
-              : _chatViewBody(context),
+          body: _chatViewBody(context),
         ),
       ),
     );
