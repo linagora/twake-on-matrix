@@ -3,6 +3,7 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/android_utils.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -111,11 +112,33 @@ class TwakeAppState extends State<TwakeApp> {
               return supportedLocales.first;
             },
             routerConfig: TwakeApp.router,
-            builder: (context, child) =>
-                Matrix(clients: widget.clients, child: child),
+            builder: (context, child) => Matrix(
+              clients: widget.clients,
+              child: _NavigationButtonsSafeArea(child: child),
+            ),
           );
         },
       ),
+    );
+  }
+}
+
+class _NavigationButtonsSafeArea extends StatelessWidget {
+  final Widget? child;
+
+  const _NavigationButtonsSafeArea({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final child = this.child ?? const SizedBox.shrink();
+    if (!AndroidUtils.isNavigationButtonsEnabled(
+      systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
+    )) {
+      return child;
+    }
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: SafeArea(top: false, left: false, right: false, child: child),
     );
   }
 }
