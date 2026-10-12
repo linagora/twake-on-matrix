@@ -21,7 +21,7 @@ import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +149,7 @@ class AddContactDialogController extends State<AddContactDialog> {
         if (PlatformInfos.isMobile) {
           Navigator.pop(context);
           Navigator.of(context).push(
-            CupertinoPageRoute(
+            TwakeCupertinoPageRoute(
               builder: (context) => ChatProfileInfoNavigator(
                 isInStack: true,
                 onBack: context.pop,

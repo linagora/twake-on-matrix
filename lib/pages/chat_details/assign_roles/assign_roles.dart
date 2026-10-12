@@ -23,7 +23,7 @@ import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -74,7 +74,7 @@ class AssignRolesController extends State<AssignRoles>
   void goToAssignRolesPicker() {
     if (responsive.isMobile(context)) {
       Navigator.of(context).push(
-        CupertinoPageRoute(
+        TwakeCupertinoPageRoute(
           settings: const RouteSettings(name: '/assign-roles-member-picker'),
           builder: (context) {
             return AssignRolesMemberPicker(room: widget.room);
