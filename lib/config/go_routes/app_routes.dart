@@ -65,8 +65,6 @@ part 'app_routes.g.dart';
 
 ResponsiveUtils get _responsive => getIt.get<ResponsiveUtils>();
 
-const double _kWideBackGestureWidth = 100;
-
 FutureOr<String?> _loggedInRedirect(
   BuildContext context,
   GoRouterState state,
@@ -80,19 +78,27 @@ FutureOr<String?> _loggedOutRedirect(
     : const HomeTwakeWelcomeRoute().location;
 
 Page<void> _defaultPage(BuildContext context, Widget child, {String? name}) =>
-    CustomTransitionPage(
-      name: name,
-      child: child,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-          !_responsive.isMobile(context)
-          ? FadeTransition(opacity: animation, child: child)
-          : CupertinoPageTransition(
-              primaryRouteAnimation: animation,
-              secondaryRouteAnimation: secondaryAnimation,
-              linearTransition: false,
-              child: child,
-            ),
-    );
+    _responsive.isMobile(context)
+    ? TwakeCupertinoPage(name: name, child: child)
+    : _transitionPage(context, child, name: name);
+
+Page<void> _transitionPage(
+  BuildContext context,
+  Widget child, {
+  String? name,
+}) => CustomTransitionPage(
+  name: name,
+  child: child,
+  transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+      !_responsive.isMobile(context)
+      ? FadeTransition(opacity: animation, child: child)
+      : CupertinoPageTransition(
+          primaryRouteAnimation: animation,
+          secondaryRouteAnimation: secondaryAnimation,
+          linearTransition: false,
+          child: child,
+        ),
+);
 
 // ===========================================================================
 // Top-level routes
@@ -346,7 +352,7 @@ class RoomsShellRoute extends ShellRouteData {
     BuildContext context,
     GoRouterState state,
     Widget navigator,
-  ) => _defaultPage(
+  ) => _transitionPage(
     context,
     !_responsive.isMobile(context)
         ? AppAdaptiveScaffold(
@@ -546,7 +552,6 @@ class DraftChatRoute extends GoRouteData with $DraftChatRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       TwakeCupertinoPage(
-        backGestureWidth: _kWideBackGestureWidth,
         child: DraftChatAdaptiveScaffold(
           key: Key($extra?['receiverId'] ?? ''),
           state: state,
@@ -872,7 +877,6 @@ class RoomRoute extends GoRouteData with $RoomRoute {
         name: name,
         restorationId: state.pageKey.value,
         child: child,
-        backGestureWidth: _kWideBackGestureWidth,
       );
     }
 
@@ -923,18 +927,13 @@ class PinnedMessagesRoute extends GoRouteData with $PinnedMessagesRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    if ($extra != null) {
-      return MaterialPage(
-        fullscreenDialog: true,
-        child: PinnedMessages(
-          pinnedEvents: $extra!.pinnedEvents,
-          timeline: $extra!.timeline,
-        ),
-      );
-    }
-    return const TwakeCupertinoPage(
-      backGestureWidth: _kWideBackGestureWidth,
-      child: PinnedMessages(pinnedEvents: []),
+    final child = PinnedMessages(
+      pinnedEvents: $extra?.pinnedEvents ?? const [],
+      timeline: $extra?.timeline,
     );
+    if ($extra != null && !_responsive.isMobile(context)) {
+      return MaterialPage(fullscreenDialog: true, child: child);
+    }
+    return TwakeCupertinoPage(child: child);
   }
 }

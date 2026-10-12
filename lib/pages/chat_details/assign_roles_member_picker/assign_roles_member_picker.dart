@@ -12,7 +12,7 @@ import 'package:twake_chat/pages/chat_details/assign_roles_member_picker/selecte
 import 'package:twake_chat/pages/chat_details/assign_roles_role_picker/role_picker_type_enum.dart';
 import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -96,7 +96,7 @@ class AssignRolesPickerController extends State<AssignRolesMemberPicker>
 
     if (responsive.isMobile(context)) {
       Navigator.of(context).push(
-        CupertinoPageRoute(
+        TwakeCupertinoPageRoute(
           settings: const RouteSettings(name: '/assign_roles_role_picker'),
           builder: (context) {
             return AssignRolesRolePicker(

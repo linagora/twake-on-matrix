@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 
 class ChatProfileInfoRoutes {
   static const String profileInfo = '/profileInfo';
@@ -40,7 +41,7 @@ class ChatProfileInfoNavigator extends StatelessWidget {
     }
     return Navigator(
       initialRoute: ChatProfileInfoRoutes.profileInfo,
-      onGenerateRoute: (route) => CupertinoPageRoute(
+      onGenerateRoute: (route) => TwakeCupertinoPageRoute(
         builder: (context) {
           switch (route.name) {
             case ChatProfileInfoRoutes.profileInfo:

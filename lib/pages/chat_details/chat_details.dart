@@ -14,7 +14,7 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
@@ -171,7 +171,7 @@ class ChatDetailsController extends State<ChatDetails>
 
   void onTapEditButton() {
     Navigator.of(context).push(
-      CupertinoPageRoute(
+      TwakeCupertinoPageRoute(
         builder: (context) {
           return ChatDetailsEdit(roomId: roomId);
         },

@@ -36,7 +36,7 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
@@ -478,7 +478,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       return;
     }
     Navigator.of(context).push(
-      CupertinoPageRoute(
+      TwakeCupertinoPageRoute(
         settings: const RouteSettings(name: '/assign_roles'),
         builder: (context) {
           return AssignRoles(room: room!);
@@ -493,7 +493,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       return;
     }
     Navigator.of(context).push(
-      CupertinoPageRoute(
+      TwakeCupertinoPageRoute(
         builder: (context) {
           return Exceptions(room: room!);
         },
@@ -507,7 +507,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
       return;
     }
     Navigator.of(context).push(
-      CupertinoPageRoute(
+      TwakeCupertinoPageRoute(
         builder: (context) {
           return Removed(room: room!);
         },
