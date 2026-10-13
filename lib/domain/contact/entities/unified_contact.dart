@@ -41,6 +41,9 @@ abstract class UnifiedContact with _$UnifiedContact {
   /// Never-empty display helper for widgets.
   String get displayNameOrId => resolvedDisplayName ?? matrixId;
 
+  /// [avatarUrl] as the `Uri` the avatar widgets take.
+  Uri? get avatarUri => avatarUrl == null ? null : Uri.tryParse(avatarUrl!);
+
   bool get hasResolvedDisplayName => resolvedDisplayName != null;
 
   static String? _nonBlank(String? value) {

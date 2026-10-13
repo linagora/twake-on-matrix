@@ -135,7 +135,6 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                       matrixId?.isNotEmpty == true
                   ? ref.watch(contactDisplayProvider(matrixId!)).value
                   : null;
-              final avatarUrl = profile?.avatarUrl;
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -143,9 +142,7 @@ class _ExpansionContactListTileState extends State<ExpansionContactListTile>
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
                       child: Avatar(
-                        mxContent: avatarUrl == null
-                            ? null
-                            : Uri.tryParse(avatarUrl),
+                        mxContent: profile?.avatarUri,
                         name: widget.contact.displayName,
                       ),
                     ),

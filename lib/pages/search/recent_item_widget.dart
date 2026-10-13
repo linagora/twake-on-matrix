@@ -217,11 +217,11 @@ class _ContactInformation extends StatelessWidget {
         Consumer(
           builder: (context, ref, _) {
             final matrixId = contactPresentationSearch.matrixId;
-            final avatarUrl = matrixId == null
+            final profile = matrixId == null
                 ? null
-                : ref.watch(contactDisplayProvider(matrixId)).value?.avatarUrl;
+                : ref.watch(contactDisplayProvider(matrixId)).value;
             return Avatar(
-              mxContent: avatarUrl == null ? null : Uri.tryParse(avatarUrl),
+              mxContent: profile?.avatarUri,
               name: contactPresentationSearch.displayName,
               size: avatarSize ?? RecentItemStyle.avatarSize,
             );
