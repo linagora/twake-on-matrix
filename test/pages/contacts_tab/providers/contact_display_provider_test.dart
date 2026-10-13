@@ -199,4 +199,31 @@ void main() {
     expect(contact.avatarUrl, 'mxc://stored/a');
     expect(profileDatasource.requested, isEmpty);
   });
+
+  test('a watcher sees the entry change when the store changes', () async {
+    final container = buildContainer();
+    final updated = Completer<String?>();
+    final subscription = container.listen(contactDisplayProvider('@a:server'), (
+      _,
+      next,
+    ) {
+      final name = next.value?.resolvedDisplayName;
+      if (name == 'Stored Alice' && !updated.isCompleted) {
+        updated.complete(name);
+      }
+    }, fireImmediately: true);
+    addTearDown(subscription.close);
+    await container.read(contactDisplayProvider('@a:server').future);
+
+    await repository.upsert(
+      userId,
+      const UnifiedContact(
+        matrixId: '@a:server',
+        canonicalDisplayName: 'Stored Alice',
+        avatarUrl: 'mxc://stored/a',
+      ),
+    );
+
+    expect(await updated.future, 'Stored Alice');
+  });
 }
