@@ -11,9 +11,10 @@ class AddressBookBroadcaster {
 
   Future<void> notifyOtherDevices() async {
     final client = _client();
-    final userId = client?.userID;
-    final deviceId = client?.deviceID;
-    if (client == null || userId == null || deviceId == null) return;
+    if (client == null) return;
+    final userId = client.userID;
+    final deviceId = client.deviceID;
+    if (userId == null || deviceId == null) return;
 
     await client.sendToDevice(
       TwakeEventTypes.addressBookUpdatedEventType,

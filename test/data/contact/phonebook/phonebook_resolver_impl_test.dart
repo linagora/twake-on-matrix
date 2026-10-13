@@ -73,6 +73,14 @@ void main() {
     ),
   ).thenAnswer((_) => states);
 
+  void stubFederationSuccess({int progress = 100}) => stubFederation(
+    Stream.value(
+      Right(
+        GetPhonebookContactsSuccess(progress: progress, contacts: contacts),
+      ),
+    ),
+  );
+
   void stubTwake(Stream<_State> states) => when(
     twake.execute(argument: anyNamed('argument')),
   ).thenAnswer((_) => states);
@@ -163,11 +171,7 @@ void main() {
 
   test('looks up when nothing is stored yet', () async {
     stubSynced(const Left(GetSyncedPhoneBookContactIsEmpty()));
-    stubFederation(
-      Stream.value(
-        Right(GetPhonebookContactsSuccess(progress: 100, contacts: contacts)),
-      ),
-    );
+    stubFederationSuccess();
 
     await build().resolve(userId);
 
@@ -238,11 +242,7 @@ void main() {
 
   test('does not upload before the lookup is complete', () async {
     stubSynced(syncedAndDue());
-    stubFederation(
-      Stream.value(
-        Right(GetPhonebookContactsSuccess(progress: 50, contacts: contacts)),
-      ),
-    );
+    stubFederationSuccess(progress: 50);
 
     await build().resolve(userId);
 
@@ -251,11 +251,7 @@ void main() {
 
   test('does not upload the address book on the web', () async {
     stubSynced(syncedAndDue());
-    stubFederation(
-      Stream.value(
-        Right(GetPhonebookContactsSuccess(progress: 100, contacts: contacts)),
-      ),
-    );
+    stubFederationSuccess();
 
     await build(uploadsAddressBook: false).resolve(userId);
 
@@ -265,11 +261,7 @@ void main() {
 
   test('does not tell the other devices when the upload failed', () async {
     stubSynced(syncedAndDue());
-    stubFederation(
-      Stream.value(
-        Right(GetPhonebookContactsSuccess(progress: 100, contacts: contacts)),
-      ),
-    );
+    stubFederationSuccess();
     stubPost(const Left(PostAddressBookFailureState(exception: 'offline')));
 
     await build().resolve(userId);
