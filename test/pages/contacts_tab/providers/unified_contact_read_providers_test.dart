@@ -61,23 +61,6 @@ void main() {
       _CurrentUser.new,
     );
 
-    ContactSyncService serviceFor(
-      FakeUnifiedContactRepository repository,
-      String id,
-    ) => ContactSyncService(
-      userId: id,
-      repository: repository,
-      policy: policy,
-      syncContacts: SyncContactsUseCase(
-        repository: repository,
-        policy: policy,
-        sources: const [],
-      ),
-      watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
-      getUnifiedContact: GetUnifiedContactUseCase(repository),
-      addContact: AddContactUseCase(repository),
-    );
-
     String? nameOf(String matrixId) =>
         container.read(unifiedContactProvider(matrixId))?.resolvedDisplayName;
 
@@ -92,7 +75,10 @@ void main() {
       );
       services = {
         userId: service,
-        '@other:server': serviceFor(repositoryB, '@other:server'),
+        '@other:server': buildContactSyncService(
+          userId: '@other:server',
+          repository: repositoryB,
+        ),
       };
       container = ProviderContainer(
         overrides: [
