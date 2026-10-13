@@ -73,4 +73,63 @@ void main() {
     expect(container.read(unifiedContactProvider('@missing:server')), isNull);
     subscription.close();
   });
+  test('does not serve the previous account contacts after a switch', () async {
+    ContactSyncService serviceFor(
+      FakeUnifiedContactRepository repository,
+      String id,
+    ) => ContactSyncService(
+      userId: id,
+      repository: repository,
+      policy: policy,
+      syncContacts: SyncContactsUseCase(
+        repository: repository,
+        policy: policy,
+        sources: const [],
+      ),
+      watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
+      getUnifiedContact: GetUnifiedContactUseCase(repository),
+      addContact: AddContactUseCase(repository),
+    );
+    final repositoryB = FakeUnifiedContactRepository();
+    addTearDown(repositoryB.dispose);
+    await repository.upsert(
+      userId,
+      const UnifiedContact(matrixId: '@x:server', canonicalDisplayName: 'X'),
+    );
+    final services = {
+      userId: service,
+      '@other:server': serviceFor(repositoryB, '@other:server'),
+    };
+    final currentUser = NotifierProvider<_CurrentUser, String?>(
+      _CurrentUser.new,
+    );
+    final container = ProviderContainer(
+      overrides: [
+        currentUserIdProvider.overrideWith((ref) => ref.watch(currentUser)),
+        contactSyncServiceProvider.overrideWith((ref, id) => services[id]!),
+      ],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(
+      unifiedContactIndexProvider,
+      (_, _) {},
+    );
+    addTearDown(subscription.close);
+    await container.read(contactsControllerProvider.future);
+    expect(container.read(unifiedContactProvider('@x:server')), isNotNull);
+
+    container.read(currentUser.notifier).set('@other:server');
+    // Account B is still loading: A's list must not be served meanwhile.
+    expect(container.read(unifiedContactProvider('@x:server')), isNull);
+
+    await container.read(contactsControllerProvider.future);
+    expect(container.read(unifiedContactProvider('@x:server')), isNull);
+  });
+}
+
+class _CurrentUser extends Notifier<String?> {
+  @override
+  String? build() => '@me:server';
+
+  void set(String? userId) => state = userId;
 }

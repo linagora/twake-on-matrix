@@ -11,11 +11,19 @@ part 'unified_contact_read_providers.g.dart';
 /// lookup is O(1) instead of a full scan per consumer.
 @Riverpod(keepAlive: true)
 class UnifiedContactIndex extends _$UnifiedContactIndex {
+  /// Account whose contacts the last emitted list belongs to.
+  String? _loadedFor;
+
   @override
   Map<String, UnifiedContact> build() {
-    // `value` keeps the previous list while the stream is re-subscribed, so
-    // names do not fall back to matrixIds during a reload.
-    final contacts = ref.watch(contactsControllerProvider).value;
+    final userId = ref.watch(currentUserIdProvider);
+    final state = ref.watch(contactsControllerProvider);
+    if (!state.isLoading) _loadedFor = userId;
+    // While the stream is re-subscribed, `value` keeps the previous list so
+    // names do not fall back to matrixIds during a same-account reload. After
+    // an account switch that list is the previous account's: serve nothing.
+    if (userId != _loadedFor) return const <String, UnifiedContact>{};
+    final contacts = state.value;
     if (contacts == null) return const <String, UnifiedContact>{};
     return {for (final contact in contacts) contact.matrixId: contact};
   }
