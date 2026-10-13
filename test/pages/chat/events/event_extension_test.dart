@@ -695,6 +695,17 @@ void main() {
       expect(event.bodyWithoutReplyFallback, 'Hanoi');
     });
 
+    test('GIVEN reply text containing its own quote line\n'
+        'THEN keep the quote line typed in the reply\n', () {
+      final event = createEvent({
+        'msgtype': 'm.text',
+        'body': '> <@a:example.com> old\n\n> important quote\nmy reply',
+        'm.relates_to': replyRelation,
+      });
+
+      expect(event.bodyWithoutReplyFallback, '> important quote\nmy reply');
+    });
+
     test('GIVEN reply without fallback in body\n'
         'THEN return body unchanged\n', () {
       final event = createEvent({

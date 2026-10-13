@@ -262,16 +262,19 @@ extension LocalizedBody on Event {
     );
   }
 
-  /// Mirrors the SDK's private `_stripBodyFallback`.
+  /// Removes the leading reply fallback and its blank separator line only,
+  /// so quote lines typed in the reply itself are preserved.
   String get bodyWithoutReplyFallback {
     final isFallbackPresent =
         body.startsWith('> <@') || body.startsWith('> * <@');
     if (!isReplyEvent() || !isFallbackPresent) return body;
 
-    return body
-        .split('\n')
-        .skipWhile((line) => line.isEmpty || line.startsWith('> '))
-        .join('\n');
+    final lines = body.split('\n');
+    final fallbackLength = lines.indexWhere((line) => !line.startsWith('> '));
+    if (fallbackLength == -1) return '';
+
+    final separatorLength = lines[fallbackLength].isEmpty ? 1 : 0;
+    return lines.skip(fallbackLength + separatorLength).join('\n');
   }
 
   bool isBubbleEventEncrypted({bool isThumbnail = true}) {
