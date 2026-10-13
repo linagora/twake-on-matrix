@@ -111,6 +111,7 @@ void main() {
           const UnifiedContact(
             matrixId: '@a:server',
             canonicalDisplayName: 'Stored Alice',
+            avatarUrl: 'mxc://stored/a',
           ),
         );
         final container = buildContainer();
@@ -160,5 +161,42 @@ void main() {
     );
 
     expect(contact.resolvedDisplayName, 'Network @a:server');
+  });
+  test(
+    'completes a missing avatar from the profile, keeping the name',
+    () async {
+      await repository.upsert(
+        userId,
+        const UnifiedContact(
+          matrixId: '@a:server',
+          canonicalDisplayName: 'Stored Alice',
+        ),
+      );
+      final container = buildContainer();
+      await awaitStoreLoaded(container);
+
+      final contact = await container.read(
+        contactDisplayProvider('@a:server').future,
+      );
+
+      expect(contact.resolvedDisplayName, 'Stored Alice');
+      expect(contact.avatarUrl, 'mxc://server/@a:server');
+    },
+  );
+
+  test('keeps the stored avatar without calling the SDK', () async {
+    await repository.upsert(
+      userId,
+      const UnifiedContact(matrixId: '@a:server', avatarUrl: 'mxc://stored/a'),
+    );
+    final container = buildContainer();
+    await awaitStoreLoaded(container);
+
+    final contact = await container.read(
+      contactDisplayProvider('@a:server').future,
+    );
+
+    expect(contact.avatarUrl, 'mxc://stored/a');
+    expect(profileDatasource.requested, isEmpty);
   });
 }
