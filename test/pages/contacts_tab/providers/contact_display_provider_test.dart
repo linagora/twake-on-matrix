@@ -20,6 +20,9 @@ import '../../../domain/contact/fakes/fake_unified_contact_repository.dart';
 class _FakeMatrixProfileDatasource implements MatrixProfileDatasource {
   _FakeMatrixProfileDatasource({this.unknown = false});
 
+  /// When set, answers wait for it (the network is slow).
+  Completer<void>? gate;
+
   /// Simulates an unknown user / network failure (datasource returns null).
   final bool unknown;
   final List<String> requested = <String>[];
@@ -27,6 +30,7 @@ class _FakeMatrixProfileDatasource implements MatrixProfileDatasource {
   @override
   Future<MatrixUserProfile?> fetchProfile(String matrixId) async {
     requested.add(matrixId);
+    await gate?.future;
     if (unknown) return null;
     return MatrixUserProfile(
       matrixId: matrixId,
@@ -162,9 +166,8 @@ void main() {
 
     expect(contact.resolvedDisplayName, 'Network @a:server');
   });
-  test(
-    'completes a missing avatar from the profile, keeping the name',
-    () async {
+  group('avatar missing from the store', () {
+    setUp(() async {
       await repository.upsert(
         userId,
         const UnifiedContact(
@@ -172,6 +175,10 @@ void main() {
           canonicalDisplayName: 'Stored Alice',
         ),
       );
+    });
+
+    test('the name is there before the profile answers', () async {
+      profileDatasource.gate = Completer<void>();
       final container = buildContainer();
       await awaitStoreLoaded(container);
 
@@ -180,9 +187,76 @@ void main() {
       );
 
       expect(contact.resolvedDisplayName, 'Stored Alice');
-      expect(contact.avatarUrl, 'mxc://server/@a:server');
-    },
-  );
+      expect(contact.avatarUrl, isNull);
+      expect(container.read(contactAvatarProvider('@a:server')), isNull);
+      profileDatasource.gate!.complete();
+    });
+
+    test('the avatar follows, keeping the name', () async {
+      profileDatasource.gate = Completer<void>();
+      final container = buildContainer();
+      await awaitStoreLoaded(container);
+      final avatars = <Uri?>[];
+      final subscription = container.listen(
+        contactAvatarProvider('@a:server'),
+        (_, next) => avatars.add(next),
+        fireImmediately: true,
+      );
+      addTearDown(subscription.close);
+      await container.read(contactDisplayProvider('@a:server').future);
+      expect(subscription.read(), isNull);
+
+      profileDatasource.gate!.complete();
+      await container.read(homeserverAvatarProvider('@a:server').future);
+
+      expect(subscription.read(), Uri.parse('mxc://server/@a:server'));
+      expect(
+        (await container.read(
+          contactDisplayProvider('@a:server').future,
+        )).resolvedDisplayName,
+        'Stored Alice',
+      );
+    });
+
+    test('many rebuilds of one row read the profile once', () async {
+      final container = buildContainer();
+      await awaitStoreLoaded(container);
+      var subscription = container.listen(
+        contactAvatarProvider('@a:server'),
+        (_, _) {},
+      );
+      await container.read(homeserverAvatarProvider('@a:server').future);
+      // The tile leaves the screen and comes back, several times.
+      for (var i = 0; i < 5; i++) {
+        subscription.close();
+        subscription = container.listen(
+          contactAvatarProvider('@a:server'),
+          (_, _) {},
+        );
+        container.read(contactAvatarProvider('@a:server'));
+      }
+      subscription.close();
+
+      expect(profileDatasource.requested, ['@a:server']);
+    });
+
+    test('an unknown user is not asked again at every rebuild', () async {
+      profileDatasource = _FakeMatrixProfileDatasource(unknown: true);
+      final container = buildContainer();
+      await awaitStoreLoaded(container);
+      for (var i = 0; i < 5; i++) {
+        final subscription = container.listen(
+          contactAvatarProvider('@a:server'),
+          (_, _) {},
+        );
+        await container.read(homeserverAvatarProvider('@a:server').future);
+        subscription.close();
+      }
+
+      expect(profileDatasource.requested, ['@a:server']);
+      expect(container.read(contactAvatarProvider('@a:server')), isNull);
+    });
+  });
 
   test('keeps the stored avatar without calling the SDK', () async {
     await repository.upsert(

@@ -72,15 +72,10 @@ class _SelectedParticipantsListState extends State<SelectedParticipantsList> {
                         avatar: contact.matrixId != null
                             ? Consumer(
                                 builder: (context, ref, _) {
-                                  final profile = ref
-                                      .watch(
-                                        contactDisplayProvider(
-                                          contact.matrixId!,
-                                        ),
-                                      )
-                                      .value;
                                   return Avatar(
-                                    mxContent: profile?.avatarUri,
+                                    mxContent: ref.watch(
+                                      contactAvatarProvider(contact.matrixId!),
+                                    ),
                                     name: contact.displayName,
                                     size: SelectedParticipantsListStyle
                                         .avatarChipSize,

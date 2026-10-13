@@ -136,6 +136,9 @@ class _ExpansionPhonebookContactListTileState
                       matrixId?.isNotEmpty == true
                   ? ref.watch(contactDisplayProvider(matrixId!)).value
                   : null;
+              final avatar = profile == null
+                  ? null
+                  : ref.watch(contactAvatarProvider(matrixId!));
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -143,7 +146,7 @@ class _ExpansionPhonebookContactListTileState
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: IgnorePointer(
                       child: Avatar(
-                        mxContent: profile?.avatarUri,
+                        mxContent: avatar,
                         name: widget.contact.displayName,
                       ),
                     ),

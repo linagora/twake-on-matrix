@@ -1,30 +1,33 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
-import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 
 part 'unified_contact_read_providers.g.dart';
 
+/// Contacts of one account. Family-keyed by the account so a value can only
+/// ever be that account's: after a switch the new key starts without a value
+/// (nothing of the previous account is served), and re-subscribing
+/// `contactsControllerProvider` leaves it untouched (no flash).
+@riverpod
+Stream<List<UnifiedContact>> accountContacts(Ref ref, String userId) =>
+    ref.watch(contactSyncServiceProvider(userId)).watchContacts();
+
 /// `matrixId → contact` index built once per store emission, so a single
 /// lookup is O(1) instead of a full scan per consumer.
+///
+/// Empty without an account, and until the current account's store has
+/// emitted.
 @Riverpod(keepAlive: true)
 class UnifiedContactIndex extends _$UnifiedContactIndex {
-  /// Account whose contacts the last emitted list belongs to.
-  String? _loadedFor;
-
   @override
   Map<String, UnifiedContact> build() {
     final userId = ref.watch(currentUserIdProvider);
-    final state = ref.watch(contactsControllerProvider);
-    if (!state.isLoading) _loadedFor = userId;
-    // While the stream is re-subscribed, `value` keeps the previous list so
-    // names do not fall back to matrixIds during a same-account reload. After
-    // an account switch that list is the previous account's: serve nothing.
-    if (userId != _loadedFor) return const <String, UnifiedContact>{};
-    final contacts = state.value;
+    if (userId == null) return const <String, UnifiedContact>{};
+    final contacts = ref.watch(accountContactsProvider(userId)).value;
     if (contacts == null) return const <String, UnifiedContact>{};
     return {for (final contact in contacts) contact.matrixId: contact};
   }
@@ -52,7 +55,7 @@ Future<UnifiedContact> contactDisplay(Ref ref, String matrixId) async {
   // its store entry changes.
   final indexed = ref.watch(unifiedContactProvider(matrixId));
   final datasource = ref.watch(matrixProfileDatasourceProvider);
-  if (indexed != null) return _withAvatar(datasource, indexed);
+  if (indexed != null) return indexed;
 
   // One-shot path (`container.read(….future)`): Riverpod 3 pauses the store
   // stream when nothing actively listens to it, so the index above may never
@@ -65,7 +68,7 @@ Future<UnifiedContact> contactDisplay(Ref ref, String matrixId) async {
       : ref.read(contactSyncServiceProvider(userId));
 
   final stored = await service?.getContact(matrixId);
-  if (stored != null) return _withAvatar(datasource, stored);
+  if (stored != null) return stored;
 
   final profile = await datasource.fetchProfile(matrixId);
   return UnifiedContact(
@@ -75,13 +78,26 @@ Future<UnifiedContact> contactDisplay(Ref ref, String matrixId) async {
   );
 }
 
-/// A store entry may lack an avatar (no source carried one): complete it from
-/// the homeserver profile, keeping the store's names.
-Future<UnifiedContact> _withAvatar(
-  MatrixProfileDatasource datasource,
-  UnifiedContact contact,
-) async {
-  if (contact.avatarUrl != null) return contact;
-  final profile = await datasource.fetchProfile(contact.matrixId);
-  return contact.copyWith(avatarUrl: profile?.avatarUrl);
+/// Avatar of a user the store holds no avatar for: the homeserver profile,
+/// asked once (through `matrixUserProfileProvider`) and kept five minutes, a
+/// failure too (the datasource answers null), so rebuilds and tiles coming
+/// back on screen do not ask again. The profile is never awaited by
+/// [contactDisplay]: names show at once, the avatar follows.
+@riverpod
+Future<Uri?> homeserverAvatar(Ref ref, String matrixId) async {
+  final link = ref.keepAlive();
+  final timer = Timer(const Duration(minutes: 5), link.close);
+  ref.onDispose(timer.cancel);
+  final profile = await ref.watch(matrixUserProfileProvider(matrixId).future);
+  final avatarUrl = profile?.avatarUrl;
+  return avatarUrl == null ? null : Uri.tryParse(avatarUrl);
+}
+
+/// Avatar for a row: the store's, else the homeserver's once it answers.
+@riverpod
+Uri? contactAvatar(Ref ref, String matrixId) {
+  final contact = ref.watch(contactDisplayProvider(matrixId)).value;
+  if (contact == null) return null;
+  return contact.avatarUri ??
+      ref.watch(homeserverAvatarProvider(matrixId)).value;
 }
