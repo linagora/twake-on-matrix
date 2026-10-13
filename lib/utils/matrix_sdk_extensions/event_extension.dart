@@ -254,12 +254,24 @@ extension LocalizedBody on Event {
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
     if (isCaptionModeOrReply()) {
-      return body;
+      return bodyWithoutReplyFallback;
     }
     return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
     );
+  }
+
+  /// Mirrors the SDK's private `_stripBodyFallback`.
+  String get bodyWithoutReplyFallback {
+    final isFallbackPresent =
+        body.startsWith('> <@') || body.startsWith('> * <@');
+    if (!isReplyEvent() || !isFallbackPresent) return body;
+
+    return body
+        .split('\n')
+        .skipWhile((line) => line.isEmpty || line.startsWith('> '))
+        .join('\n');
   }
 
   bool isBubbleEventEncrypted({bool isThumbnail = true}) {

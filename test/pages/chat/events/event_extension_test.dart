@@ -649,6 +649,85 @@ void main() {
     });
   });
 
+  group('bodyWithoutReplyFallback test', () {
+    late Room room;
+
+    setUpAll(() async {
+      room = Room(
+        client: await getClient(),
+        id: '!test:example.com',
+        membership: Membership.join,
+      );
+    });
+
+    Event createEvent(Map<String, dynamic> content) => Event(
+      senderId: '@user:example.com',
+      type: 'm.room.message',
+      room: room,
+      eventId: '\$event1',
+      content: content,
+      originServerTs: DateTime.fromMillisecondsSinceEpoch(1234567890),
+    );
+
+    const replyRelation = {
+      'm.in_reply_to': {'event_id': '\$original'},
+    };
+
+    test('GIVEN reply with fallback in body\n'
+        'THEN return only the reply text\n', () {
+      final event = createEvent({
+        'msgtype': 'm.text',
+        'body': '> <@a:example.com> Which part of hanoi ?\n\nHanoi',
+        'm.relates_to': replyRelation,
+      });
+
+      expect(event.bodyWithoutReplyFallback, 'Hanoi');
+    });
+
+    test('GIVEN reply with multi-line fallback\n'
+        'THEN return only the reply text\n', () {
+      final event = createEvent({
+        'msgtype': 'm.text',
+        'body': '> <@a:example.com> line1\n> line2\n\nHanoi',
+        'm.relates_to': replyRelation,
+      });
+
+      expect(event.bodyWithoutReplyFallback, 'Hanoi');
+    });
+
+    test('GIVEN reply without fallback in body\n'
+        'THEN return body unchanged\n', () {
+      final event = createEvent({
+        'msgtype': 'm.text',
+        'body': 'Hanoi',
+        'm.relates_to': replyRelation,
+      });
+
+      expect(event.bodyWithoutReplyFallback, 'Hanoi');
+    });
+
+    test('GIVEN non-reply message starting with a quote\n'
+        'THEN return body unchanged\n', () {
+      const quoted = '> <@a:example.com> quoted\n\ntext';
+      final event = createEvent({'msgtype': 'm.text', 'body': quoted});
+
+      expect(event.bodyWithoutReplyFallback, quoted);
+    });
+
+    test('GIVEN image reply with caption and fallback\n'
+        'THEN return only the caption\n', () {
+      final event = createEvent({
+        'msgtype': 'm.image',
+        'body': '> <@a:example.com> hi\n\nmy caption',
+        'filename': 'photo.jpg',
+        'url': 'mxc://example.org/img',
+        'm.relates_to': replyRelation,
+      });
+
+      expect(event.bodyWithoutReplyFallback, 'my caption');
+    });
+  });
+
   group('isCaptionModeOrReply test', () {
     late Client client;
     late Room room;
