@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/presentation/extensions/contact/unified_contact_search_extension.dart';
 
 part 'contacts_state.freezed.dart';
 
@@ -25,21 +26,6 @@ abstract class ContactsState with _$ContactsState {
   List<UnifiedContact> get allContacts =>
       contacts.value ?? const <UnifiedContact>[];
 
-  List<UnifiedContact> get visibleContacts {
-    final keyword = this.keyword.trim().toLowerCase();
-    if (keyword.isEmpty) return allContacts;
-    return allContacts
-        .where((contact) => _matches(contact, keyword))
-        .toList(growable: false);
-  }
-}
-
-bool _matches(UnifiedContact contact, String keyword) {
-  bool contains(String? value) =>
-      value != null && value.toLowerCase().contains(keyword);
-
-  return contains(contact.resolvedDisplayName) ||
-      contains(contact.matrixId) ||
-      contact.emails.any(contains) ||
-      contact.phones.any(contains);
+  List<UnifiedContact> get visibleContacts =>
+      allContacts.searchContacts(keyword);
 }

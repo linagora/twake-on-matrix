@@ -24,7 +24,10 @@ class _FakeMatrixProfileDatasource implements MatrixProfileDatasource {
   final List<String> requested = <String>[];
 
   @override
-  Future<MatrixUserProfile?> fetchProfile(String matrixId) async {
+  Future<MatrixUserProfile?> fetchProfile(
+    String matrixId, {
+    bool fresh = false,
+  }) async {
     requested.add(matrixId);
     await gate?.future;
     if (unknown) return null;

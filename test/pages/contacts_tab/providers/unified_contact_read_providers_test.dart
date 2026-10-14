@@ -161,7 +161,10 @@ void main() {
 
 class _KnowsNobody implements MatrixProfileDatasource {
   @override
-  Future<MatrixUserProfile?> fetchProfile(String matrixId) async => null;
+  Future<MatrixUserProfile?> fetchProfile(
+    String matrixId, {
+    bool fresh = false,
+  }) async => null;
 }
 
 class _CurrentUser extends Notifier<String?> {
