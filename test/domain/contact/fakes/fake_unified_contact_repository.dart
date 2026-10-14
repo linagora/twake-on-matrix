@@ -12,6 +12,11 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
 
   /// Delays [getByMatrixId], to exercise callers that await the store.
   Duration? readDelay;
+
+  /// Makes the next [clear] throw, to check a failed write does not block the
+  /// next ones.
+  bool failNextClear = false;
+
   final StreamController<List<UnifiedContact>> _controller =
       StreamController<List<UnifiedContact>>.broadcast();
 
@@ -68,6 +73,10 @@ class FakeUnifiedContactRepository implements UnifiedContactRepository {
 
   @override
   Future<void> clear(String userId) async {
+    if (failNextClear) {
+      failNextClear = false;
+      throw StateError('clear failed');
+    }
     store.clear();
     _controller.add(await getContacts(userId));
   }
