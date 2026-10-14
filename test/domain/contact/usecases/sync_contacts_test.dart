@@ -76,6 +76,23 @@ void main() {
     value: ContactSourceValue(kind: kind, displayName: name),
   );
 
+  Future<void> storeContact(
+    String matrixId,
+    ContactSourceKind kind,
+    String name,
+  ) => repository.upsert(
+    userId,
+    UnifiedContact(
+      matrixId: matrixId,
+      canonicalDisplayName: name,
+      sources: [ContactSourceValue(kind: kind, displayName: name)],
+    ),
+  );
+
+  /// Syncs against an address book that returns nobody.
+  Future<List<UnifiedContact>> syncWithEmptyAddressBook() =>
+      useCaseWith([source(ContactSourceKind.tomAddressBook)]).execute(userId);
+
   /// Jean, known from the ToM address book and aliased by the phonebook.
   Future<void> storeJeanWithAlias() => repository.upsert(
     userId,
@@ -157,9 +174,7 @@ void main() {
   );
 
   test('empty sources do not write to the repository', () async {
-    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
-
-    await useCase.execute(userId);
+    await syncWithEmptyAddressBook();
 
     expect(repository.store, isEmpty);
   });
@@ -186,32 +201,20 @@ void main() {
     ]);
   });
 
-  test(
-    'deletes a stored contact that no successful source returns anymore',
-    () async {
-      const matrixId = '@jean:server';
-      await repository.upsert(
-        userId,
-        const UnifiedContact(
-          matrixId: matrixId,
-          canonicalDisplayName: 'Jean Dupont',
-          sources: [
-            ContactSourceValue(
-              kind: ContactSourceKind.tomAddressBook,
-              displayName: 'Jean Dupont',
-            ),
-          ],
-        ),
-      );
+  for (final kind in [
+    ContactSourceKind.tomAddressBook,
+    ContactSourceKind.tomUserInfo,
+  ]) {
+    test('deletes a contact that only ${kind.name} knew and no source returns '
+        'anymore', () async {
+      await storeContact('@jean:server', kind, 'Jean Dupont');
 
-      final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
-
-      final contacts = await useCase.execute(userId);
+      final contacts = await syncWithEmptyAddressBook();
 
       expect(contacts, isEmpty);
       expect(repository.store, isEmpty);
-    },
-  );
+    });
+  }
 
   test('keeps the last known values of a source that failed', () async {
     const matrixId = '@jean:server';
@@ -232,23 +235,9 @@ void main() {
 
   test('preserves a manual-only contact that no source returns', () async {
     const matrixId = '@manual:server';
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: matrixId,
-        canonicalDisplayName: 'Manual Entry',
-        sources: [
-          ContactSourceValue(
-            kind: ContactSourceKind.manual,
-            displayName: 'Manual Entry',
-          ),
-        ],
-      ),
-    );
+    await storeContact(matrixId, ContactSourceKind.manual, 'Manual Entry');
 
-    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
-
-    final contacts = await useCase.execute(userId);
+    final contacts = await syncWithEmptyAddressBook();
 
     expect(contacts, hasLength(1));
     expect(contacts.single.matrixId, matrixId);
@@ -294,30 +283,6 @@ void main() {
     },
   );
 
-  test('deletes a contact left with only enrichment values', () async {
-    const matrixId = '@ghost:server';
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: matrixId,
-        canonicalDisplayName: 'Ghost (LDAP)',
-        sources: [
-          ContactSourceValue(
-            kind: ContactSourceKind.tomUserInfo,
-            displayName: 'Ghost (LDAP)',
-          ),
-        ],
-      ),
-    );
-
-    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
-
-    final contacts = await useCase.execute(userId);
-
-    expect(contacts, isEmpty);
-    expect(repository.store, isEmpty);
-  });
-
   group('isCurrent guard', () {
     SyncContactsUseCase buildUseCase() => useCaseWith([
       source(ContactSourceKind.tomAddressBook, [
@@ -342,17 +307,11 @@ void main() {
     });
 
     test('does not delete anything once the session is over', () async {
-      const ghost = UnifiedContact(
-        matrixId: '@ghost:server',
-        canonicalDisplayName: 'Ghost',
-        sources: [
-          ContactSourceValue(
-            kind: ContactSourceKind.tomAddressBook,
-            displayName: 'Ghost',
-          ),
-        ],
+      await storeContact(
+        '@ghost:server',
+        ContactSourceKind.tomAddressBook,
+        'Ghost',
       );
-      await repository.upsert(userId, ghost);
 
       await buildUseCase().execute(userId, isCurrent: () => false);
 
