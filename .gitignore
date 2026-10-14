@@ -109,3 +109,9 @@ ios/Runner.xcworkspace/xcshareddata/swiftpm/
 
 # Fetched by scripts/fetch-web-vendor.sh, pinned and integrity checked there.
 web/vendor/dotlottie/
+
+# Hive boxes written by tests
+/test/**/*.hive
+/test/**/*.lock
+/unit_test_*.hive
+/unit_test_*.lock

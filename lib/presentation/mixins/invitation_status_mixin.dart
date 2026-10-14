@@ -176,7 +176,7 @@ mixin InvitationStatusMixin {
               Logs().e('InvitationStatusMixin::_postAddressBook', failure);
             },
             (success) {
-              Logs().d('ContactsManager::_postAddressBook', success);
+              Logs().d('InvitationStatusMixin::_postAddressBook', success);
               _onDeleteThirdPartyContactBox();
             },
           );
