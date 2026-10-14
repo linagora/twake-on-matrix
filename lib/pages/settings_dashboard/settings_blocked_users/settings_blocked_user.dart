@@ -39,7 +39,7 @@ class SettingsIgnoreListController extends State<BlockedUsers>
       context,
       listen: false,
     ).read(matrixUserProfileProvider(userId).future);
-    return data?.toProfile(userId);
+    return data.toProfile(userId);
   }
 
   final responsiveUtils = getIt.get<ResponsiveUtils>();

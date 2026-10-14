@@ -104,7 +104,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
           listen: false,
         ).read(matrixUserProfileProvider(matrixId).future);
         if (!mounted) return;
-        _profileNotifier.value = profile?.toProfile(matrixId);
+        _profileNotifier.value = profile.toProfile(matrixId);
       } catch (_) {
         if (!mounted) return;
         _profileNotifier.value = null;

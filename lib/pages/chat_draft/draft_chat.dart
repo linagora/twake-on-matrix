@@ -638,7 +638,7 @@ class DraftChatController extends State<DraftChat>
         context,
         listen: false,
       ).read(matrixUserProfileProvider(matrixId).future);
-      _userProfile.value = data?.toProfile(matrixId);
+      _userProfile.value = data.toProfile(matrixId);
     } catch (e) {
       Logs().e('Error _getProfile profile: $e');
       _userProfile.value = null;
