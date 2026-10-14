@@ -1,7 +1,8 @@
 name: Bug report
 description: Create a report to help us improve
-title: "[BUG] Quick description of the bug"
-labels: [bug]
+title: "Quick description of the bug"
+type: Bug
+labels: ["needs::triage"]
 body:
   - type: checkboxes
     attributes:

@@ -37,11 +37,7 @@ class SeenByRow extends StatelessWidget {
       return MessageStatus.sending;
     }
 
-    if (eventStatus == EventStatus.sent || seenByUsers.isEmpty) {
-      return MessageStatus.sent;
-    }
-
-    return MessageStatus.hasBeenSeen;
+    return seenByUsers.isEmpty ? MessageStatus.sent : MessageStatus.hasBeenSeen;
   }
 
   Widget getEventIcon(

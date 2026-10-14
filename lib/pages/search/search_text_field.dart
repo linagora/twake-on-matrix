@@ -12,6 +12,7 @@ class SearchTextField extends StatelessWidget {
   final bool autofocus;
   final String? hintText;
   final FocusNode? focusNode;
+  final VoidCallback? onClear;
 
   const SearchTextField({
     super.key,
@@ -19,6 +20,7 @@ class SearchTextField extends StatelessWidget {
     this.autofocus = true,
     this.hintText,
     this.focusNode,
+    this.onClear,
   });
 
   @override
@@ -64,7 +66,7 @@ class SearchTextField extends StatelessWidget {
               child: TwakeIconButton(
                 tooltip: L10n.of(context)!.close,
                 icon: Icons.close,
-                onTap: textEditingController.clear,
+                onTap: onClear ?? textEditingController.clear,
               ),
             ),
           ),

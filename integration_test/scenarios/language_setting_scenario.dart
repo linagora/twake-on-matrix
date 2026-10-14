@@ -25,6 +25,7 @@ class LanguageSettingScenario extends BaseTestScenario {
 
     for (final expectation in _expectations) {
       await expectation.choose(language);
+      await _waitUntilRelocalised(language, expectation);
       _verifyLabels(s, language, expectation);
     }
 
@@ -36,6 +37,30 @@ class LanguageSettingScenario extends BaseTestScenario {
     );
 
     s.verifyAll();
+  }
+
+  Future<void> _waitUntilRelocalised(
+    AbstractLanguageSettingRobot language,
+    _LanguageExpectation expected,
+  ) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
+    while (DateTime.now().isBefore(deadline)) {
+      if (_labelsMatch(language, expected)) {
+        return;
+      }
+      await $.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  bool _labelsMatch(
+    AbstractLanguageSettingRobot language,
+    _LanguageExpectation expected,
+  ) {
+    return language.getSelectedLanguage() == expected.selected &&
+        language.getEnglishInDisplay() == expected.english &&
+        language.getFrenchInDisplay() == expected.french &&
+        language.getRussianInDisplay() == expected.russian &&
+        language.getVietnameseInDisplay() == expected.vietnamese;
   }
 
   /// Asserts that, after selecting a language, the selected value and every

@@ -8,16 +8,13 @@
     }
   },
   "repeatPassword": "تکرار رمزعبور",
-  "@repeatPassword": {},
   "about": "درباره",
   "@about": {
     "type": "text",
     "placeholders": {}
   },
   "passwordsDoNotMatch": "گذرواژه‌ها نامطابقند!",
-  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "لطفاً یک آدرس ایمیل معتبر وارد کنید.",
-  "@pleaseEnterValidEmail": {},
   "accept": "پذیرش",
   "@accept": {
     "type": "text",
@@ -36,7 +33,6 @@
     "placeholders": {}
   },
   "addToSpace": "بہ اسپیس افزایید",
-  "@addToSpace": {},
   "appLock": "قفل برنامہ",
   "@appLock": {
     "type": "text",
@@ -127,7 +123,6 @@
     }
   },
   "confirmMatrixId": "لطفاً شناسایی ماترس تان را تایید دهید تا حساب تان را حذف کنید.",
-  "@confirmMatrixId": {},
   "changeDeviceName": "نام دستگاه را تغییر کنید",
   "@changeDeviceName": {
     "type": "text",
@@ -151,9 +146,7 @@
     }
   },
   "updateNow": "بہ‌روزرسانی را در پس‌زمینہ شروع کنید",
-  "@updateNow": {},
   "updateAvailable": "بہ‌روزرسانی فلأفی‌گپ در دسترس است",
-  "@updateAvailable": {},
   "areGuestsAllowedToJoin": "آیا اجازه می‌شود کہ کاربر مہمان‌ها بپیوندند",
   "@areGuestsAllowedToJoin": {
     "type": "text",
@@ -165,7 +158,6 @@
     "placeholder": {}
   },
   "sendOnEnter": "ارسال با کلید بازگشت",
-  "@sendOnEnter": {},
   "cancel": "لغو",
   "@cancel": {
     "type": "text",
@@ -349,7 +341,6 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "پشتیبان گپ تان تنظیم شده‌است.",
-  "@yourChatBackupHasBeenSetUp": {},
   "changeTheme": "سبک خود را تغییر دهید",
   "@changeTheme": {
     "type": "text",
@@ -376,7 +367,6 @@
     "placeholders": {}
   },
   "clearArchive": "بایگانی را پاک سازید",
-  "@clearArchive": {},
   "chooseAUsername": "یہ نام کاربری را سازید",
   "@chooseAUsername": {
     "type": "text",
@@ -403,7 +393,6 @@
     "placeholders": {}
   },
   "sender": "فرستنده",
-  "@sender": {},
   "changedTheJoinRules": "{username} قوانین پیوستن را تغییر داد",
   "@changedTheJoinRules": {
     "type": "text",
@@ -417,9 +406,7 @@
     "placeholders": {}
   },
   "commandHint_markasdm": "بہ عنوان اتاق پیام‌های مستقیم علامت دهید",
-  "@commandHint_markasdm": {},
   "commandHint_markasgroup": "بہ عنوان گروه علامت دهید",
-  "@commandHint_markasgroup": {},
   "commandHint_clearcache": "حافظہ پنھان را پاک سازید",
   "@commandHint_clearcache": {
     "type": "text",
@@ -487,7 +474,6 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "گپ بہ این اسپیس اضافه شده‌است",
-  "@chatHasBeenAddedToThisSpace": {},
   "chat": "گپ",
   "@chat": {
     "type": "text",
@@ -577,7 +563,6 @@
     "placeholders": {}
   },
   "replyHasBeenSent": "پاسخ فرستاده شده‌است",
-  "@replyHasBeenSent": {},
   "loadCountMoreParticipants": "{count} تا شرکت کنندۀ اضافی را بار گیرید",
   "@loadCountMoreParticipants": {
     "type": "text",
@@ -603,7 +588,6 @@
     "placeholders": {}
   },
   "allSpaces": "همہ اسپیس‌ها",
-  "@allSpaces": {},
   "commandHint_ban": "کاربر مشخص شده را از این اتاق ممنوعیت کنید",
   "@commandHint_ban": {
     "type": "text",
@@ -675,7 +659,6 @@
     "placeholders": {}
   },
   "yourUserId": "شناسایی کاربری شما:",
-  "@yourUserId": {},
   "commandHint_html": "متن با فرمت HTML فرستید",
   "@commandHint_html": {
     "type": "text",
@@ -1028,14 +1011,12 @@
     }
   },
   "homeserver": "سرور خانه",
-  "@homeserver": {},
   "enterYourHomeserver": "سرور خانه خود را وارد کنید",
   "@enterYourHomeserver": {
     "type": "text",
     "placeholders": {}
   },
   "enterASpacepName": "یک نام برای فضا وارد کنید",
-  "@enterASpacepName": {},
   "errorObtainingLocation": "خطا در هنگام بدست آوری مکان: {error}",
   "@errorObtainingLocation": {
     "type": "text",
@@ -1104,7 +1085,6 @@
     "placeholders": {}
   },
   "commandHint_googly": "ارسال چند چشم گوگولی",
-  "@commandHint_googly": {},
   "googlyEyesContent": "{senderName} به شما چشمان گوگولی می‌فرستد",
   "@googlyEyesContent": {
     "type": "text",

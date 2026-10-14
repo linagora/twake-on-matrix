@@ -2402,7 +2402,7 @@
   },
   "inactive": "Compte non activé",
   "noMoreResult": "Plus de résultat !",
-  "youCreatedGroupChat": "Félicitations, vous avez créé une discussion",
+  "youCreatedGroupChat": "Félicitations, vous avez créé une discussion !",
   "searchForPeopleAndChannels": "Personnes ou Salons",
   "noResultForKeyword": "Pas de résultat pour \"{keyword}\"",
   "@noResultForKeyword": {
@@ -2583,7 +2583,7 @@
   "noResultsFound": "Aucun résultat trouvé",
   "muteThisChat": "Muet",
   "clearAllSelected": "Tout désélectionner",
-  "encryptionMessage": "Protège vos messages contre la lecture par d'autres personnes. Évite également leur sauvegarde sur nos serveurs. Choix définitif : vous ne pourrez pas désactiver cette fonction plus tard.",
+  "encryptionMessage": "Les messages seront chiffrés et leurs copies ne seront pas stockées sur nos serveurs. Une fois activée, cette fonctionnalité ne peut pas être désactivée.",
   "selectedUsers": "Utilisateurs sélectionnés",
   "unmuteThisChat": "Son",
   "encryptionWarning": "Vous risquez de perdre vos messages si vous accédez à l'application Twake Chat sur un autre appareil.",
@@ -2816,7 +2816,7 @@
   "video": "Vidéo",
   "loadingStatus": "Chargement du statut...",
   "explainPermissionToAccessPhotos": "Twake Chat ne synchronise pas les données entre votre appareil et nos serveurs. Nous stockons uniquement les fichiers multimédias que vous avez envoyés au salon de discussion. Tous les fichiers multimédias envoyés dans la discussion sont chiffrés et stockés en toute sécurité. Accédez à Paramètres > Autorisations et activez l'autorisation Stockage : Photos. Vous pouvez également refuser l'accès à votre bibliothèque multimédia à tout moment.",
-  "explainPermissionToAccessContacts": "Twake Chat NE COLLECTE PAS vos contacts. Twake Chat envoie uniquement des empreintes (hash) des contacts aux serveurs Twake Chat pour identifier lesquels ont déjà rejoint Twake Chat, afin de vous permettre d'établir ainsi la connexion avec eux. Vos contacts NE SONT PAS synchronisés ni conservés sur notre serveur.",
+  "explainPermissionToAccessContacts": "Twake Chat vérifie uniquement les hashs chiffrés des numéros de téléphone pour identifier lesquels de vos amis utilisent déjà le service. Vos contacts ne sont ni envoyés au serveur ni synchronisés avec celui-ci.",
   "photo": "Photo",
   "saturday": "Sam",
   "@saturday": {
@@ -2986,7 +2986,7 @@
   "other": "Autre",
   "enableRightAndLeftMessageAlignment": "Activer l'alignement alterné des messages",
   "holdToRecordAudio": "Maintenir pour enregistrer.",
-  "explainPermissionToAccessMicrophone": "Autoriser Twake Chat à accéder au microphone, pour envoyer des messages vocaux.",
+  "explainPermissionToAccessMicrophone": "L'accès au microphone est nécessaire pour envoyer des messages vocaux.",
   "allowMicrophoneAccess": "Autoriser l'accès au microphone",
   "slideToCancel": "Glisser pour annuler",
   "recordingInProgress": "Enregistrement en cours",
@@ -3157,5 +3157,64 @@
     "placeholders": {}
   },
   "webPushOnThisBrowser": "Notifications sur ce navigateur",
-  "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option."
+  "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option.",
+  "removeDeviceConfirmationTitle": "Supprimer cet appareil ?",
+  "@removeDeviceConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeDeviceConfirmationDescription": "Cette session va prendre fin et ne pourra plus recevoir de messages chiffrés.",
+  "@removeDeviceConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationTitle": "Supprimer tous les autres appareils ?",
+  "@removeAllOtherDevicesConfirmationTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "removeAllOtherDevicesConfirmationDescription": "Toutes les autres sessions vont prendre fin et ne pourront plus recevoir de messages chiffrés.",
+  "@removeAllOtherDevicesConfirmationDescription": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "couldNotLaunchUrl": "Impossible d'ouvrir ce lien",
+  "deviceVerificationWaring": "Les messages chiffrés peuvent être indisponibles car certains de vos appareils ne sont pas synchronisés",
+  "deviceVerificationWarningOnSettingsScreen": "Certaines sessions ne sont pas vérifiées. Il est possible que les messages chiffrés ne soient pas déchiffrés correctement tant que toutes les sessions n'ont pas été vérifiées ou supprimées.",
+  "verifyThisDevice": "Vérifier cet appareil",
+  "verifyThisDeviceDescription": "Confirmez votre identité pour déverrouiller vos messages chiffrés.",
+  "useAnotherDevice": "Utilisez un autre appareil",
+  "useAnotherDeviceDescription": "Approuvez depuis l'une de vos autres sessions actives",
+  "useRecoveryKeyTitle": "Utiliser la clé de récupération",
+  "useRecoveryKeyDescription": "Utilisez la clé que vous avez enregistrée dans Paramètres > Confidentialité et sécurité",
+  "notPossibleToVerify": "Impossible de vérifier ?",
+  "notPossibleToVerifyDescription": "Impossible d'accéder aux autres appareils ou à la clé de récupération",
+  "retryAutomatically": "Réessayer automatiquement",
+  "checkYourOtherDevice": "Vérifiez votre autre appareil",
+  "checkYourOtherDeviceDescription": "Ouvrez Twake Chat sur l'un de vos autres appareils connectés et acceptez la demande de vérification.",
+  "verifyEmojiTitle": "Vérifiez les emojis",
+  "verifyEmojiDescription": "Cliquez sur « Associer sur cet appareil », puis confirmez que les émojis correspondent sur votre autre appareil pour finaliser la connexion sécurisée.",
+  "dontMatch": "Ne correspondent pas",
+  "match": "Correspondent",
+  "deviceVerifiedTitle": "Appareil vérifié",
+  "deviceVerifiedDescription": "Vos messages chiffrés sont désormais débloqués",
+  "startChatting": "Commencer à discuter",
+  "enterRecoveryKey": "Saisir la clé de récupération",
+  "enterRecoveryKeyDescription": "Collez la clé que vous avez enregistrée lors de la configuration de la sauvegarde sécurisée.",
+  "recoveryKeyDoesntMatch": "La clé de récupération ne correspond pas",
+  "recoveryKeyRequired": "La clé de récupération est requise",
+  "resetEndToEndEncryption": "Réinitialiser le chiffrement de bout en bout",
+  "resetEndToEndEncryptionDescription": "N'utilisez cette option que si vous ne pouvez accéder à aucun autre appareil connecté et que vous avez perdu votre clé de récupération.\nCette réinitialisation supprime définitivement l'accès à vos messages précédemment cryptés. Cette action ne peut pas être annulée.",
+  "reset": "Réinitialiser",
+  "resetCompleteTitle": "Réinitialisation terminée",
+  "resetCompleteDescription": "Votre nouvelle identité de chiffrement est prête. Les messages chiffrés précédemment ne sont plus disponibles.",
+  "verificationFailedTitle": "La vérification a échoué",
+  "verificationFailedDescription": "La demande a été annulée ou rejetée. Veuillez réessayer.",
+  "retryFailedDescription": "La nouvelle tentative automatique a échoué. Essayez un autre moyen de vérifier cet appareil.",
+  "chatBackupSetUpDescription": "Votre clé de récupération est enregistrée. Vous pouvez l'utiliser pour restaurer vos messages chiffrés sur n'importe quel appareil.",
+  "messageCannotBeResent": "Ce message ne peut pas être renvoyé car ses données sont indisponibles",
+  "@messageCannotBeResent": {
+    "type": "text",
+    "placeholders": {}
+  }
 }

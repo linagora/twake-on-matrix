@@ -4,236 +4,211 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
+import '../fake_client.dart';
 import 'room_status_extension_test.mocks.dart';
 
-@GenerateNiceMocks([
-  MockSpec<Room>(),
-  MockSpec<Event>(),
-  MockSpec<Client>(),
-  MockSpec<Timeline>(),
-])
+typedef _Scenario = ({
+  String name,
+  Map<String, String> receipts,
+  Map<String, String> mainThreadReceipts,
+  String? ownReceipt,
+  List<String> seenBy,
+});
+
+@GenerateNiceMocks([MockSpec<Client>(), MockSpec<Timeline>()])
 void main() {
-  group('getSeenByUsers', () {
-    late MockRoom mockRoom;
-    late MockClient mockClient;
-    late MockTimeline mockTimeline;
+  const ownUserId = '@me:example.com';
+  const userA = '@a:example.com';
+  const userB = '@b:example.com';
+  const newest = r'$newest';
+  const newer = r'$newer';
+  const target = r'$target';
+  const older = r'$older';
+  const eventIds = [newest, newer, target, older];
 
-    const ownUserId = '@me:example.com';
-    const otherUserId = '@other:example.com';
+  late MockClient client;
 
-    MockEvent createEvent(String eventId, List<Receipt> receipts) {
-      final event = MockEvent();
-      when(event.eventId).thenReturn(eventId);
-      when(event.receipts).thenReturn(receipts);
-      return event;
+  Room buildRoom({
+    Map<String, String> receipts = const {},
+    Map<String, String> mainThreadReceipts = const {},
+    String? ownReceipt,
+  }) {
+    LatestReceiptStateForTimeline forTimeline(Map<String, String> others) =>
+        LatestReceiptStateForTimeline(
+          ownPrivate: null,
+          ownPublic: null,
+          latestOwnReceipt: ownReceipt == null
+              ? null
+              : LatestReceiptStateData(ownReceipt, 0),
+          otherUsers: others.map(
+            (userId, eventId) =>
+                MapEntry(userId, LatestReceiptStateData(eventId, 0)),
+          ),
+        );
+    final room = Room(id: '!room:example.com', client: client);
+    room.receiptState = LatestReceiptState(
+      global: forTimeline(receipts),
+      mainThread: mainThreadReceipts.isEmpty
+          ? null
+          : forTimeline(mainThreadReceipts),
+      byThread: {},
+    );
+    room.states[EventTypes.RoomMember] = {
+      for (final userId in [ownUserId, userA, userB])
+        userId: Event(
+          eventId: '\$member_$userId',
+          senderId: userId,
+          stateKey: userId,
+          type: EventTypes.RoomMember,
+          content: {'membership': 'join'},
+          originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+          room: room,
+        ),
+    };
+    return room;
+  }
+
+  Event buildEvent(Room room, String eventId) => Event(
+    eventId: eventId,
+    senderId: ownUserId,
+    type: EventTypes.Message,
+    content: {'msgtype': 'm.text', 'body': 'hello'},
+    originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+    room: room,
+  );
+
+  MockTimeline buildTimeline(Room room, List<String> eventIds) {
+    final timeline = MockTimeline();
+    when(
+      timeline.events,
+    ).thenReturn([for (final eventId in eventIds) buildEvent(room, eventId)]);
+    return timeline;
+  }
+
+  List<String> ids(List<User> users) => users.map((user) => user.id).toList();
+
+  setUp(() {
+    client = MockClient();
+    when(client.userID).thenReturn(ownUserId);
+    when(client.database).thenReturn(EventIdListDatabase(eventIds));
+  });
+
+  // The timeline and the chat list must always agree (#3354).
+  group('seen by users, in the timeline and from the store', () {
+    const scenarios = <_Scenario>[
+      (
+        name: 'receipt on the event',
+        receipts: {userA: target},
+        mainThreadReceipts: {},
+        ownReceipt: null,
+        seenBy: [userA],
+      ),
+      (
+        name: 'receipt on a newer event, such as a reaction',
+        receipts: {userA: newest},
+        mainThreadReceipts: {},
+        ownReceipt: null,
+        seenBy: [userA],
+      ),
+      (
+        name: 'receipts from the newest event down to the event',
+        receipts: {userA: newer, userB: target},
+        mainThreadReceipts: {},
+        ownReceipt: null,
+        seenBy: [userA, userB],
+      ),
+      (
+        name: 'receipt on an older event',
+        receipts: {userA: newest, userB: older},
+        mainThreadReceipts: {},
+        ownReceipt: null,
+        seenBy: [userA],
+      ),
+      (
+        name: 'receipt on an unknown event',
+        receipts: {userA: r'$unknown'},
+        mainThreadReceipts: {},
+        ownReceipt: null,
+        seenBy: [],
+      ),
+      (
+        name: 'own receipt only',
+        receipts: {},
+        mainThreadReceipts: {},
+        ownReceipt: newest,
+        seenBy: [],
+      ),
+      (
+        name: 'main thread receipt, without duplicating the user',
+        receipts: {userA: newest},
+        mainThreadReceipts: {userA: newer, userB: older},
+        ownReceipt: null,
+        seenBy: [userA],
+      ),
+    ];
+
+    for (final scenario in scenarios) {
+      test(scenario.name, () async {
+        final room = buildRoom(
+          receipts: scenario.receipts,
+          mainThreadReceipts: scenario.mainThreadReceipts,
+          ownReceipt: scenario.ownReceipt,
+        );
+
+        final inTimeline = room.getSeenByUsers(
+          buildTimeline(room, eventIds),
+          eventId: target,
+        );
+        final fromStore = await room.getSeenByUsersFromStore(
+          buildEvent(room, target),
+        );
+
+        expect(ids(inTimeline), unorderedEquals(scenario.seenBy));
+        expect(ids(fromStore), unorderedEquals(scenario.seenBy));
+      });
     }
 
-    setUp(() {
-      mockRoom = MockRoom();
-      mockClient = MockClient();
-      mockTimeline = MockTimeline();
+    test('exact receipt on an event missing from the known order', () async {
+      when(client.database).thenReturn(EventIdListDatabase([newest, older]));
+      final room = buildRoom(receipts: {userA: target, userB: newest});
 
-      when(mockRoom.client).thenReturn(mockClient);
-      when(mockClient.userID).thenReturn(ownUserId);
+      final inTimeline = room.getSeenByUsers(
+        buildTimeline(room, [newest, older]),
+        eventId: target,
+      );
+      final fromStore = await room.getSeenByUsersFromStore(
+        buildEvent(room, target),
+      );
+
+      expect(ids(inTimeline), [userA]);
+      expect(ids(fromStore), [userA]);
     });
+  });
 
+  group('getSeenByUsersFromStore', () {
+    test('exact receipt when the store cannot be read', () async {
+      when(client.database).thenReturn(MockDatabase());
+      final room = buildRoom(receipts: {userA: target, userB: newest});
+
+      final fromStore = await room.getSeenByUsersFromStore(
+        buildEvent(room, target),
+      );
+
+      expect(ids(fromStore), [userA]);
+    });
+  });
+
+  group('getSeenByUsers', () {
     test('returns empty list when timeline is empty', () {
-      when(mockTimeline.events).thenReturn([]);
+      final room = buildRoom(receipts: {userA: target});
 
-      expect(mockRoom.getSeenByUsers(mockTimeline), isEmpty);
+      expect(room.getSeenByUsers(buildTimeline(room, [])), isEmpty);
     });
 
-    test('returns empty list when only own user has receipts', () {
-      final ownUser = MockUser(ownUserId);
-      final event = createEvent('ev1', [Receipt(ownUser, DateTime.now())]);
-      when(mockTimeline.events).thenReturn([event]);
+    test('defaults to the latest event', () {
+      final room = buildRoom(receipts: {userA: newest, userB: newer});
 
-      expect(mockRoom.getSeenByUsers(mockTimeline), isEmpty);
-    });
-
-    test('returns other user who has receipt on latest event', () {
-      final otherUser = MockUser(otherUserId);
-      final event = createEvent('ev1', [Receipt(otherUser, DateTime.now())]);
-      when(mockTimeline.events).thenReturn([event]);
-
-      final result = mockRoom.getSeenByUsers(mockTimeline);
-      expect(result, hasLength(1));
-      expect(result.first.id, otherUserId);
-    });
-
-    test('accumulates receipts from newer events down to target', () {
-      final user1 = MockUser('@a:example.com');
-      final user2 = MockUser('@b:example.com');
-
-      final newest = createEvent('ev1', [Receipt(user1, DateTime.now())]);
-      final target = createEvent('ev2', [Receipt(user2, DateTime.now())]);
-      final older = createEvent('ev3', []);
-
-      when(mockTimeline.events).thenReturn([newest, target, older]);
-
-      final result = mockRoom.getSeenByUsers(mockTimeline, eventId: 'ev2');
-      expect(
-        result.map((u) => u.id),
-        containsAll(['@a:example.com', '@b:example.com']),
-      );
-    });
-
-    test('does not include receipts from events older than target', () {
-      final user1 = MockUser('@a:example.com');
-      final user2 = MockUser('@b:example.com');
-
-      final newest = createEvent('ev1', [Receipt(user1, DateTime.now())]);
-      final target = createEvent('ev2', []);
-      final older = createEvent('ev3', [Receipt(user2, DateTime.now())]);
-
-      when(mockTimeline.events).thenReturn([newest, target, older]);
-
-      final result = mockRoom.getSeenByUsers(mockTimeline, eventId: 'ev2');
-      expect(result.map((u) => u.id), contains('@a:example.com'));
-      expect(result.map((u) => u.id), isNot(contains('@b:example.com')));
-    });
-
-    test(
-      'uses timeline receipts progression when target has no direct receipt',
-      () {
-        final user1 = MockUser('@a:example.com');
-        final user2 = MockUser('@b:example.com');
-        final user3 = MockUser('@c:example.com');
-
-        final newest = createEvent('ev1', [Receipt(user1, DateTime.now())]);
-        final beforeTarget = createEvent('ev2', [
-          Receipt(user2, DateTime.now()),
-        ]);
-        final target = createEvent('ev3', []);
-        final older = createEvent('ev4', [Receipt(user3, DateTime.now())]);
-
-        when(
-          mockTimeline.events,
-        ).thenReturn([newest, beforeTarget, target, older]);
-
-        final result = mockRoom.getSeenByUsers(mockTimeline, eventId: 'ev3');
-        expect(
-          result.map((u) => u.id),
-          containsAll(['@a:example.com', '@b:example.com']),
-        );
-        expect(result.map((u) => u.id), isNot(contains('@c:example.com')));
-      },
-    );
-
-    test('returns empty list when target eventId is not found in timeline', () {
-      final user1 = MockUser('@a:example.com');
-      final user2 = MockUser('@b:example.com');
-
-      final event1 = createEvent('ev1', [Receipt(user1, DateTime.now())]);
-      final event2 = createEvent('ev2', [Receipt(user2, DateTime.now())]);
-      when(mockTimeline.events).thenReturn([event1, event2]);
-
-      expect(
-        mockRoom.getSeenByUsers(mockTimeline, eventId: 'ev-unknown'),
-        isEmpty,
-      );
-    });
-
-    test('excludes own user from results even with mixed receipts', () {
-      final ownUser = MockUser(ownUserId);
-      final otherUser = MockUser(otherUserId);
-
-      final event = createEvent('ev1', [
-        Receipt(ownUser, DateTime.now()),
-        Receipt(otherUser, DateTime.now()),
-      ]);
-      when(mockTimeline.events).thenReturn([event]);
-
-      final result = mockRoom.getSeenByUsers(mockTimeline);
-      expect(result, hasLength(1));
-      expect(result.first.id, otherUserId);
+      expect(ids(room.getSeenByUsers(buildTimeline(room, eventIds))), [userA]);
     });
   });
-
-  group('hasLastEventBeenSeenByOthers', () {
-    late MockRoom mockRoom;
-    late MockEvent mockEvent;
-    late MockClient mockClient;
-
-    const ownUserId = '@me:example.com';
-    const otherUserId = '@other:example.com';
-
-    setUp(() {
-      mockRoom = MockRoom();
-      mockEvent = MockEvent();
-      mockClient = MockClient();
-
-      when(mockRoom.client).thenReturn(mockClient);
-      when(mockClient.userID).thenReturn(ownUserId);
-    });
-
-    test('returns false when lastEvent is null', () {
-      when(mockRoom.lastEvent).thenReturn(null);
-
-      expect(mockRoom.hasLastEventBeenSeenByOthers, false);
-    });
-
-    test('returns false when receipts is empty', () {
-      when(mockRoom.lastEvent).thenReturn(mockEvent);
-      when(mockEvent.receipts).thenReturn([]);
-
-      expect(mockRoom.hasLastEventBeenSeenByOthers, false);
-    });
-
-    test('returns false when only receipt is from current user', () {
-      final ownUser = MockUser(ownUserId);
-
-      when(mockRoom.lastEvent).thenReturn(mockEvent);
-      when(mockEvent.receipts).thenReturn([Receipt(ownUser, DateTime.now())]);
-
-      expect(mockRoom.hasLastEventBeenSeenByOthers, false);
-    });
-
-    test('returns true when receipt is from another user', () {
-      final otherUser = MockUser(otherUserId);
-
-      when(mockRoom.lastEvent).thenReturn(mockEvent);
-      when(mockEvent.receipts).thenReturn([Receipt(otherUser, DateTime.now())]);
-
-      expect(mockRoom.hasLastEventBeenSeenByOthers, true);
-    });
-
-    test(
-      'returns true when receipts contain both current user and other user',
-      () {
-        final ownUser = MockUser(ownUserId);
-        final otherUser = MockUser(otherUserId);
-
-        when(mockRoom.lastEvent).thenReturn(mockEvent);
-        when(mockEvent.receipts).thenReturn([
-          Receipt(ownUser, DateTime.now()),
-          Receipt(otherUser, DateTime.now()),
-        ]);
-
-        expect(mockRoom.hasLastEventBeenSeenByOthers, true);
-      },
-    );
-
-    test('returns true when multiple other users have seen the event', () {
-      final otherUser1 = MockUser(otherUserId);
-      final otherUser2 = MockUser('@another:example.com');
-
-      when(mockRoom.lastEvent).thenReturn(mockEvent);
-      when(mockEvent.receipts).thenReturn([
-        Receipt(otherUser1, DateTime.now()),
-        Receipt(otherUser2, DateTime.now()),
-      ]);
-
-      expect(mockRoom.hasLastEventBeenSeenByOthers, true);
-    });
-  });
-}
-
-class MockUser extends Mock implements User {
-  final String _id;
-
-  MockUser(this._id);
-
-  @override
-  String get id => _id;
 }

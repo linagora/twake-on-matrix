@@ -30,6 +30,10 @@ on:
         required: false
         default: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   # Lists the Patrol test files to run (the single given target, or every
   # *_test.dart) so the test job can fan them out across a matrix — one
@@ -177,6 +181,7 @@ jobs:
             --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
             --dart-define=GroupTest="$SearchByTitle" \
             --dart-define=GroupID="$GroupID" \
+            --dart-define=GroupRoomVersion="$GroupRoomVersion" \
             --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
             --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
             --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \
@@ -299,6 +304,7 @@ jobs:
             --dart-define=TitleOfGroupTest="$TitleOfGroupTest" \
             --dart-define=GroupTest="$SearchByTitle" \
             --dart-define=GroupID="$GroupID" \
+            --dart-define=GroupRoomVersion="$GroupRoomVersion" \
             --dart-define=User2MaxtrixAddress="$MemberMatrixID" \
             --dart-define=ForwardReceiver1Name="$ForwardReceiver1Name" \
             --dart-define=ForwardReceiver2Name="$ForwardReceiver2Name" \

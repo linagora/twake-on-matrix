@@ -11,7 +11,7 @@ from pathlib import Path
 ASSETS = (
     "styles.css",
     "vendor/chart.umd.min.js",
-    "metrics.js",
+    "perf-metrics.js",
     "app.js",
 )
 

@@ -58,6 +58,8 @@ class _ParticipantListItemState extends State<ParticipantListItem>
   bool get canChangePermissions =>
       widget.member.room.canUpdateRoleInRoom(widget.member);
 
+  bool get canRemove => widget.member.room.canBanMemberInRoom(widget.member);
+
   @override
   void dispose() {
     isHoverParticipantItemNotifier.dispose();
@@ -92,7 +94,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
       onTap: () async => await _onItemTap(context),
       onLongPress: () => _handleLongPress(context),
       onHover: (hover) {
-        if (widget.member.room.canBanMemberInRoom(widget.member) &&
+        if (canRemove &&
             !ParticipantListItemStyle.responsiveUtils.isMobile(context)) {
           isHoverParticipantItemNotifier.value = hover;
         }
@@ -206,12 +208,14 @@ class _ParticipantListItemState extends State<ParticipantListItem>
 
     if (widget.isMembersSelecting) return child;
 
-    child = _ParticipantSlidable(
-      slideActions: [
-        _ParticipantBanAction(widget.member, onDone: widget.onUpdatedMembers),
-      ],
-      child: child,
-    );
+    if (canRemove) {
+      child = _ParticipantSlidable(
+        slideActions: [
+          _ParticipantBanAction(widget.member, onDone: widget.onUpdatedMembers),
+        ],
+        child: child,
+      );
+    }
 
     if (PlatformInfos.isWeb) {
       child = GestureDetector(
@@ -320,7 +324,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
     final l10n = L10n.of(context)!;
 
     return [
-      if (PlatformInfos.isMobile)
+      if (PlatformInfos.isMobile && canRemove)
         _buildMenuItem(
           context: context,
           name: l10n.select,
@@ -344,7 +348,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
           onTap: () => widget.onChangeRole?.call(widget.member),
         ),
       ],
-      if (widget.onRemoveMember != null)
+      if (canRemove && widget.onRemoveMember != null)
         _buildMenuItem(
           context: context,
           name: l10n.removeFromGroup,
@@ -356,13 +360,14 @@ class _ParticipantListItemState extends State<ParticipantListItem>
   }
 
   /// Handles long press gesture on mobile devices.
-  /// Shows floating context menu if user has permissions, otherwise triggers member selection.
+  /// Shows floating context menu if user can change roles, otherwise triggers
+  /// member selection when the member can be removed.
   void _handleLongPress(BuildContext context) {
     if (PlatformInfos.isMobile &&
         canChangePermissions &&
         widget.onRemoveMember != null) {
       _showMobileContextMenu(context);
-    } else {
+    } else if (canRemove) {
       widget.onSelectMember?.call(widget.member);
     }
   }

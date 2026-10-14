@@ -1,6 +1,20 @@
 (() => {
   "use strict";
 
+  const PerfMetricsApi = globalThis.PerfMetrics;
+  if (!PerfMetricsApi) {
+    const light = document.getElementById("status-light");
+    const label = document.getElementById("status-label");
+    const meta = document.getElementById("status-meta");
+    if (light) light.classList.add("error");
+    if (label) label.textContent = "Mesures indisponibles";
+    if (meta) {
+      meta.textContent =
+        "Le module perf-metrics.js n’a pas été chargé — un bloqueur de contenu l’intercepte probablement.";
+    }
+    return;
+  }
+
   const {
     MIN_FRAME_SAMPLE,
     MIN_WEB_FRAME_SAMPLE,
@@ -22,7 +36,7 @@
     platformDataPaths,
     platformRecordCacheKey,
     shouldFallbackToWeb,
-  } = globalThis.PerfMetrics;
+  } = PerfMetricsApi;
 
   const SCENARIO_LABELS = {
     nav_cycles: "Ouverture répétée d’une conversation",

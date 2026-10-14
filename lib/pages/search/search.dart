@@ -190,6 +190,14 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
 
   void onCloseSearchTapped() {
     textEditingController.clear();
+    final onCloseSearchPage = widget.onCloseSearchPage;
+    if (onCloseSearchPage != null) {
+      onCloseSearchPage();
+      return;
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   void clearSearchBar() {

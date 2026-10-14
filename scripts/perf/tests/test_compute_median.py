@@ -222,6 +222,61 @@ class ComputeMedianTest(unittest.TestCase):
                 expected_samples=3,
             )
 
+    def test_expected_samples_allows_excluded_metric_in_fewer_samples(self) -> None:
+        for index, path in enumerate(self.logs, start=1):
+            metrics = "rss_bytes=100"
+            if index == 1:
+                metrics += " | build_p50_us=727"
+            Path(path).write_text(
+                "PERF_METRIC | scroll_room1 | scroll_settled"
+                f" | {metrics}\n",
+                encoding="utf-8",
+            )
+
+        output = self.directory / "median.json"
+        compute_median(
+            self.logs,
+            str(output),
+            expected_samples=3,
+            requirements={
+                ("scroll_room1", "scroll_settled"): {"rss_bytes"},
+            },
+        )
+
+        checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
+        self.assertEqual(checkpoint["sample_count"], 3)
+        self.assertEqual(checkpoint["rss_bytes"], 100.0)
+        self.assertEqual(checkpoint["build_p50_us"], 727.0)
+        self.assertEqual(checkpoint["build_p50_us_sample_count"], 1)
+
+    def test_expected_samples_rejects_incomplete_required_metric(self) -> None:
+        for index, path in enumerate(self.logs, start=1):
+            metrics = "rss_bytes=100"
+            if index < 3:
+                metrics += " | build_p50_us=727"
+            Path(path).write_text(
+                "PERF_METRIC | scroll_room1 | scroll_settled"
+                f" | {metrics}\n",
+                encoding="utf-8",
+            )
+
+        with self.assertRaisesRegex(
+            ValueError,
+            r"scroll_room1/scroll_settled/build_p50_us has 2 sample\(s\);"
+            r" expected 3",
+        ):
+            compute_median(
+                self.logs,
+                str(self.directory / "median.json"),
+                expected_samples=3,
+                requirements={
+                    ("scroll_room1", "scroll_settled"): {
+                        "rss_bytes",
+                        "build_p50_us",
+                    },
+                },
+            )
+
     def test_expected_samples_rejects_duplicate_repetition(self) -> None:
         combined_log = self.directory / "combined.log"
         combined_log.write_text(

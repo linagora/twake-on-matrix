@@ -13,8 +13,10 @@ import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
 import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
+import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
+import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
@@ -58,7 +60,7 @@ typedef OnEmojiAction = void Function(TapDownDetails details);
 typedef OnKeyboardAction = void Function();
 typedef OnInputBarChanged = void Function(String text);
 
-class DraftChat extends StatefulWidget {
+class DraftChat extends ConsumerStatefulWidget {
   final PresentationContact contact;
 
   final void Function(RightColumnType)? onChangeRightColumnType;
@@ -70,10 +72,10 @@ class DraftChat extends StatefulWidget {
   });
 
   @override
-  State<StatefulWidget> createState() => DraftChatController();
+  DraftChatController createState() => DraftChatController();
 }
 
-class DraftChatController extends State<DraftChat>
+class DraftChatController extends ConsumerState<DraftChat>
     with
         CommonMediaPickerMixin,
         MediaPickerMixin,
@@ -176,7 +178,9 @@ class DraftChatController extends State<DraftChat>
   }
 
   void handleDragDone(DropDoneDetails details) async {
+    draggingNotifier.value = false;
     final matrixFilesList = await super.onDragDone(details);
+    if (!mounted) return;
 
     _handleSendFileOnWeb(context, matrixFilesList);
   }
@@ -246,6 +250,7 @@ class DraftChatController extends State<DraftChat>
     isBlockedUserNotifier.dispose();
     _captionsController.dispose();
     disposeAudioMixin();
+    draggingNotifier.dispose();
     super.dispose();
   }
 
@@ -385,6 +390,9 @@ class DraftChatController extends State<DraftChat>
   }
 
   Future<void> sendText({OnRoomCreatedFailed onCreateRoomFailed}) async {
+    final SendTextMessageInteractor sendTextMessageInteractor = ref.read(
+      sendTextMessageInteractorProvider,
+    );
     scrollDown();
     sendController.value = TextEditingValue(
       text: sendController.value.text,
@@ -394,9 +402,9 @@ class DraftChatController extends State<DraftChat>
     final textEvent = await _triggerTagGreetingMessage();
     isSendingNotifier.value = true;
     _createRoom(
-      onRoomCreatedSuccess: (room) {
-        room.sendTextEvent(textEvent);
-      },
+      onRoomCreatedSuccess: (room) => unawaited(
+        sendTextMessageInteractor.execute(room: room, text: textEvent),
+      ),
       onRoomCreatedFailed: onCreateRoomFailed,
     );
   }
@@ -405,6 +413,7 @@ class DraftChatController extends State<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
+    _createRoomSubscription?.cancel();
     _createRoomSubscription = createDirectChatInteractor
         .execute(
           contactMxId: presentationContact.matrixId!,
@@ -420,22 +429,40 @@ class DraftChatController extends State<DraftChat>
             },
             (success) async {
               if (success is CreateDirectChatSuccess) {
+                final intendedMxId = presentationContact.matrixId;
                 final room = Matrix.of(
                   context,
                 ).client.getRoomById(success.roomId);
-                if (room != null) {
-                  onRoomCreatedSuccess?.call(room);
-                  RoomRoute(
-                    roomid: room.id,
-                    $extra: ChatRouterInputArgument(
-                      type: ChatRouterInputArgumentType.draft,
-                      data:
-                          _userProfile.value?.resolvedDisplayName ??
-                          presentationContact.displayName ??
-                          room.name,
-                    ),
-                  ).go(context);
+                if (room == null) return;
+                if (intendedMxId == null ||
+                    !room.isUsableDirectChatWith(intendedMxId)) {
+                  Logs().w(
+                    'DraftChat: refusing non-matching room '
+                    'intended=$intendedMxId room=${room.id} '
+                    'isDirect=${room.isDirectChat} '
+                    'peer=${room.directChatMatrixID} '
+                    'joined=${room.summary.mJoinedMemberCount}',
+                  );
+                  isSendingNotifier.value = false;
+                  if (mounted) {
+                    TwakeSnackBar.show(
+                      context,
+                      L10n.of(context)!.roomCreationFailed,
+                    );
+                  }
+                  return;
                 }
+                onRoomCreatedSuccess?.call(room);
+                RoomRoute(
+                  roomid: room.id,
+                  $extra: ChatRouterInputArgument(
+                    type: ChatRouterInputArgumentType.draft,
+                    data:
+                        _userProfile.value?.resolvedDisplayName ??
+                        presentationContact.displayName ??
+                        room.name,
+                  ),
+                ).go(context);
               }
             },
           );
@@ -539,17 +566,29 @@ class DraftChatController extends State<DraftChat>
     );
     if (result == null || result.files.isEmpty) return;
 
+    final matrixFilesList = await _convertFilesToMatrixFiles(
+      result.xFiles,
+      (file) async => (await file.toMatrixFileOnWeb()).detectFileType,
+    );
+    if (!mounted) return;
+    _handleSendFileOnWeb(context, matrixFilesList);
+  }
+
+  Future<List<MatrixFile>> _convertFilesToMatrixFiles<T>(
+    Iterable<T> files,
+    Future<MatrixFile> Function(T file) convert,
+  ) async {
     final matrixFilesList = await Future.wait(
-      result.xFiles.map((file) async {
+      files.map((file) async {
         try {
-          return (await file.toMatrixFileOnWeb()).detectFileType;
+          return await convert(file);
         } catch (e) {
           return null;
         }
       }),
     );
 
-    _handleSendFileOnWeb(context, matrixFilesList.nonNulls.toList());
+    return matrixFilesList.nonNulls.toList();
   }
 
   Future<void> _handleSendFileOnWeb(
@@ -569,6 +608,7 @@ class DraftChatController extends State<DraftChat>
       matrixFiles: matrixFilesList,
       pendingText: pendingText,
     );
+    if (!mounted) return;
 
     if (dialogResult != null) {
       _handleSendFileDialogStatus(

@@ -329,7 +329,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
           onSelectMember: _onSelectMember,
           onRemoveMember: _handleOnRemoveMember,
           onChangeRole: _handleChangePermission,
-          onAddMembers: onTapAddMembers,
+          onAddMembers: room?.canInvite == true ? onTapAddMembers : null,
         ),
       );
     }

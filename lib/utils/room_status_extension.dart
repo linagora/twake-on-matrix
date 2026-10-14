@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:flutter/widgets.dart';
@@ -52,33 +51,40 @@ extension RoomStatusExtension on Room {
     return typingText;
   }
 
+  /// Other users who have read [eventId], the latest event by default.
   List<User> getSeenByUsers(Timeline timeline, {String? eventId}) {
     if (timeline.events.isEmpty) return [];
     eventId ??= timeline.events.first.eventId;
-
-    final targetIndex = timeline.events.indexWhere((e) => e.eventId == eventId);
-    if (targetIndex == -1) return [];
-
-    final lastReceipts = <User>{};
-    for (final event in timeline.events.take(targetIndex + 1)) {
-      lastReceipts.addAll(
-        event.receipts
-            .where((r) => r.user.id != client.userID)
-            .map((r) => r.user),
-      );
-    }
-    return lastReceipts.toList();
+    final eventIds = timeline.events.map((e) => e.eventId).toList();
+    return _seenByUsers(eventIds, eventId);
   }
 
-  /// Returns true if the last event has been seen by at least one other user.
-  ///
-  /// [receipts] is a getter that reads from [room.receiptState], so it is always
-  /// up to date without requiring the [Timeline] to be loaded.
-  bool get hasLastEventBeenSeenByOthers {
-    return lastEvent?.receipts
-            .whereNot((r) => r.user.id == client.userID)
-            .isNotEmpty ??
-        false;
+  /// [getSeenByUsers] for the chat list, where no [Timeline] is loaded.
+  Future<List<User>> getSeenByUsersFromStore(Event event) async {
+    var eventIds = const <String>[];
+    try {
+      eventIds = await client.database.getEventIdList(this);
+    } catch (e) {
+      Logs().w('Room::getSeenByUsersFromStore: room: $id error - $e');
+    }
+    return _seenByUsers(eventIds, event.eventId);
+  }
+
+  /// Other users whose read receipt is on [eventId] or on a newer event.
+  /// [eventIds] is ordered newest first; when it doesn't contain [eventId],
+  /// only receipts on [eventId] itself count.
+  List<User> _seenByUsers(List<String> eventIds, String eventId) {
+    final index = eventIds.indexOf(eventId);
+    final seenEventIds = {eventId, ...eventIds.take(index + 1)};
+    final receipts = [
+      ...receiptState.global.otherUsers.entries,
+      ...?receiptState.mainThread?.otherUsers.entries,
+    ];
+    return receipts
+        .where((receipt) => seenEventIds.contains(receipt.value.eventId))
+        .map((receipt) => unsafeGetUserFromMemoryOrFallback(receipt.key))
+        .toSet()
+        .toList();
   }
 
   bool isTypingText(BuildContext context) {

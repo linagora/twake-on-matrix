@@ -4,6 +4,7 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_failed.dart';
 import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_loading.dart';
 import 'package:twake_chat/domain/app_state/direct_chat/create_direct_chat_success.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Manually implements direct chat creation instead of using client.startDirectChat()
@@ -50,26 +51,34 @@ class CreateDirectChatInteractor {
       if (directChatRoomId != null) {
         final room = client.getRoomById(directChatRoomId);
         if (room != null && !room.isAbandonedDMRoom) {
-          // Case 1: Already joined - return existing room
-          if (room.membership == Membership.join) {
+          if (!room.isUsableDirectChatWith(contactMxId)) {
+            Logs().w(
+              'CreateDirectChatInteractor: ignoring invalid direct mapping '
+              'contactMxId=$contactMxId roomId=$directChatRoomId '
+              'isDirectChat=${room.isDirectChat} '
+              'peer=${room.directChatMatrixID} '
+              'joined=${room.summary.mJoinedMemberCount}',
+            );
+            // Fall through to create a new DM
+          } else if (room.membership == Membership.join) {
+            // Case 1: Already joined - return existing room
             yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
             return;
           } else if (room.membership == Membership.invite) {
             // Case 2: Pending invite - accept and wait for sync
             await room.join();
-            // Wait for sync to update membership status before checking
             if (waitForSync) {
               await client.waitForRoomInSync(directChatRoomId, join: true);
             }
-            // After sync, verify membership is not leave
             final updatedRoom = client.getRoomById(directChatRoomId);
             if (updatedRoom != null &&
-                updatedRoom.membership == Membership.join) {
+                updatedRoom.membership == Membership.join &&
+                updatedRoom.isUsableDirectChatWith(contactMxId)) {
               yield Right(CreateDirectChatSuccess(roomId: directChatRoomId));
               return;
             }
           }
-          // Case 3: Left room - continue to create new room below
+          // Case 3: Left / invalid peer - continue to create new room
         }
       }
 

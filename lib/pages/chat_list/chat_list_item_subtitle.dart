@@ -36,9 +36,12 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
       room.hasNewMessages,
       room.notificationCount > 0,
     );
-    final Event? lastEvent = switch (previewResult) {
-      RoomPreviewFound(:final event) => event,
-      _ => null,
+    final (Event? lastEvent, List<User> seenByUsers) = switch (previewResult) {
+      RoomPreviewFound(:final event, :final seenByUsers) => (
+        event,
+        seenByUsers,
+      ),
+      _ => (null, const []),
     };
     final bool isMediaEvent =
         lastEvent?.messageType == MessageTypes.Image ||
@@ -85,12 +88,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     eventStatus: lastEvent.status,
                     timelineOverlayMessage: false,
                     size: 20,
-                    getSeenByUsers: lastEvent.receipts
-                        .where(
-                          (receipt) => receipt.user.id != room.client.userID,
-                        )
-                        .map((receipt) => receipt.user)
-                        .toList(),
+                    getSeenByUsers: seenByUsers,
                   )
                 : AnimatedContainer(
                     duration: TwakeThemes.animationDuration,

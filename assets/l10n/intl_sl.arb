@@ -1,10 +1,7 @@
 {
   "passwordsDoNotMatch": "Geslo se ne ujema!",
-  "@passwordsDoNotMatch": {},
   "pleaseEnterValidEmail": "Vnesite veljaven elektronski naslov.",
-  "@pleaseEnterValidEmail": {},
   "repeatPassword": "Ponovite geslo",
-  "@repeatPassword": {},
   "about": "O aplikaciji",
   "@about": {
     "type": "text",
@@ -38,7 +35,6 @@
     "placeholders": {}
   },
   "addToSpace": "Dodajte v prostor",
-  "@addToSpace": {},
   "alias": "vzdevek",
   "@alias": {
     "type": "text",
@@ -102,7 +98,6 @@
     }
   },
   "sendOnEnter": "Pošlji ob vstopu",
-  "@sendOnEnter": {},
   "banFromChat": "Prepoved klepeta",
   "@banFromChat": {
     "type": "text",
@@ -260,9 +255,7 @@
     "placeholders": {}
   },
   "yourUserId": "Vaš ID uporabnika:",
-  "@yourUserId": {},
   "yourChatBackupHasBeenSetUp": "Varnostna kopija klepeta je nastavljena.",
-  "@yourChatBackupHasBeenSetUp": {},
   "chatBackup": "Varnostno kopiranje klepeta",
   "@chatBackup": {
     "type": "text",
@@ -274,7 +267,6 @@
     "placeholders": {}
   },
   "chatHasBeenAddedToThisSpace": "Klepet je bil dodan v ta prostor",
-  "@chatHasBeenAddedToThisSpace": {},
   "chats": "Klepeti",
   "@chats": {
     "type": "text",
@@ -291,7 +283,6 @@
     "placeholders": {}
   },
   "clearArchive": "Počisti arhiv",
-  "@clearArchive": {},
   "close": "Zapri",
   "@close": {
     "type": "text",

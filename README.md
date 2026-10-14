@@ -335,6 +335,40 @@ Every now and then, manually scroll through the app using your mouse to make sur
 
 ### Web version using Docker
 
+#### Build web Docker image
+
+The image is built without SSH and without a forced `--platform`: the
+`web-builder` stage builds natively for the platform of its base image, and the
+final nginx stage carries platform-neutral web assets. CI builds and pushes
+`linux/amd64` and `linux/arm64` variants (see
+[`.github/workflows/image.yaml`](.github/workflows/image.yaml)).
+
+Build requirements (all Sentry values are injected from build args — nothing is
+hardcoded in the image):
+
+| Argument / secret        | Required | Default |
+|--------------------------|----------|---------|
+| `--build-arg SENTRY_PROJECT`   | yes   | — |
+| `--build-arg SENTRY_ORG`       | yes   | — |
+| `--build-arg SENTRY_RELEASE`   | no    | version from `pubspec.yaml` |
+| `--build-arg SENTRY_DIST`      | no    | build number from `pubspec.yaml` |
+| `--build-arg SENTRY_DSN`       | no    | empty |
+| `--build-arg SENTRY_ENVIRONMENT` | no  | empty |
+| `--secret id=sentry_auth_token,src=<file>` | no | source maps not uploaded |
+
+Example local build:
+
+```bash
+docker build \
+  --secret id=sentry_auth_token,src=<token-file> \
+  --build-arg SENTRY_PROJECT=twake-chat \
+  --build-arg SENTRY_ORG=datcorp \
+  --build-arg SENTRY_ENVIRONMENT=prod \
+  -t linagora/twake-web:<tag> .
+```
+
+#### Run the web image
+
 - Create a config file `config.json` in the root of the project with the following
   [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
 

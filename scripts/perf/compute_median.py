@@ -176,8 +176,14 @@ def _validate_expected_samples(
     groups: dict[tuple, dict[tuple[int, str], float]],
     checkpoint_samples: dict[tuple, set],
     expected_samples: int,
+    requirements: dict[tuple[str, str], set[str]] | None = None,
 ) -> None:
-    """Reject checkpoints or metrics absent from any expected repetition."""
+    """Reject checkpoints or required metrics absent from any expected repetition.
+
+    Metrics a checkpoint explicitly excludes (see the requirements manifest)
+    are optional: an idle checkpoint may legitimately render no frame and omit
+    frame-derived metrics from some repetitions.
+    """
     for (scenario, label), samples in sorted(checkpoint_samples.items()):
         _validate_sample_count(
             f"{scenario}/{label}",
@@ -186,6 +192,10 @@ def _validate_expected_samples(
             expected_samples,
         )
     for (scenario, label, metric), samples in sorted(groups.items()):
+        if requirements is not None:
+            required = requirements.get((scenario, label))
+            if required is not None and metric not in required:
+                continue
         _validate_sample_count(
             f"{scenario}/{label}/{metric}",
             "",
@@ -267,7 +277,12 @@ def compute_median(
     if requirements is not None:
         _validate_requirements(groups, checkpoint_samples, requirements)
     if expected_samples is not None:
-        _validate_expected_samples(groups, checkpoint_samples, expected_samples)
+        _validate_expected_samples(
+            groups,
+            checkpoint_samples,
+            expected_samples,
+            requirements,
+        )
     output = _build_checkpoints(
         groups,
         checkpoint_samples,
