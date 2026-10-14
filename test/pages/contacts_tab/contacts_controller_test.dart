@@ -12,6 +12,7 @@ import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
+import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
@@ -37,6 +38,14 @@ class _FakeSource implements ContactSource {
 
   @override
   Future<List<SourcedContact>> fetch(String userId) async => contacts;
+}
+
+class _NoopPhonebookResolver implements PhonebookResolver {
+  @override
+  Future<void> resolve(String userId) async {}
+
+  @override
+  Future<void> cancel() async {}
 }
 
 class _FakeUserInfoRepository implements UserInfoRepository {
@@ -186,6 +195,7 @@ void main() {
         overrides: [
           unifiedContactRepositoryProvider.overrideWithValue(repository),
           contactSourcesProvider.overrideWithValue(sources),
+          phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
           tomUserInfoEnricherProvider.overrideWith(
             (ref) => TomUserInfoSource(
               repository: repository,

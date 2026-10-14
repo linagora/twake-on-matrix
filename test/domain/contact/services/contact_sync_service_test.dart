@@ -7,6 +7,7 @@ import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart'
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_enricher.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
+import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
 import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
@@ -38,26 +39,61 @@ class _FakeEnricher implements ContactEnricher {
   }
 }
 
+class _FakePhonebookResolver implements PhonebookResolver {
+  _FakePhonebookResolver(this.events, {this.throws = false});
+
+  final List<String> events;
+  final bool throws;
+
+  @override
+  Future<void> resolve(String userId) async {
+    events.add('resolve:$userId');
+    if (throws) throw Exception('lookup down');
+  }
+
+  @override
+  Future<void> cancel() async {}
+}
+
+/// Records when it is fetched, to assert the phonebook is resolved first.
+class _RecordingSource implements ContactSource {
+  _RecordingSource(this.events);
+
+  final List<String> events;
+
+  @override
+  ContactSourceKind get kind => ContactSourceKind.phonebook;
+
+  @override
+  Future<List<SourcedContact>> fetch(String userId) async {
+    events.add('fetch');
+    return const [];
+  }
+}
+
 void main() {
   const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
   late ContactSyncService service;
   const policy = ContactResolutionPolicy();
 
-  ContactSyncService buildService(List<ContactSource> sources) =>
-      ContactSyncService(
-        userId: userId,
-        repository: repository,
-        policy: policy,
-        syncContacts: SyncContactsUseCase(
-          repository: repository,
-          policy: policy,
-          sources: sources,
-        ),
-        watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
-        getUnifiedContact: GetUnifiedContactUseCase(repository),
-        addContact: AddContactUseCase(repository),
-      );
+  ContactSyncService buildService(
+    List<ContactSource> sources, {
+    PhonebookResolver? phonebookResolver,
+  }) => ContactSyncService(
+    userId: userId,
+    repository: repository,
+    policy: policy,
+    syncContacts: SyncContactsUseCase(
+      repository: repository,
+      policy: policy,
+      sources: sources,
+    ),
+    watchUnifiedContacts: WatchUnifiedContactsUseCase(repository),
+    getUnifiedContact: GetUnifiedContactUseCase(repository),
+    addContact: AddContactUseCase(repository),
+    phonebookResolver: phonebookResolver,
+  );
 
   setUp(() {
     repository = FakeUnifiedContactRepository();
@@ -155,5 +191,49 @@ void main() {
     await service.clear();
 
     expect(await repository.getContacts(userId), isEmpty);
+  });
+
+  group('phonebook resolution', () {
+    test('is skipped unless the caller asks for it', () async {
+      final events = <String>[];
+      service = buildService([
+        _RecordingSource(events),
+      ], phonebookResolver: _FakePhonebookResolver(events));
+
+      await service.refresh();
+
+      expect(events, ['fetch']);
+    });
+
+    test('runs before the sources are fetched when asked', () async {
+      final events = <String>[];
+      service = buildService([
+        _RecordingSource(events),
+      ], phonebookResolver: _FakePhonebookResolver(events));
+
+      await service.refresh(resolvePhonebook: true);
+
+      expect(events, ['resolve:$userId', 'fetch']);
+    });
+
+    test('a failing resolution does not abort the refresh', () async {
+      final events = <String>[];
+      service = buildService([
+        _RecordingSource(events),
+      ], phonebookResolver: _FakePhonebookResolver(events, throws: true));
+
+      await service.refresh(resolvePhonebook: true);
+
+      expect(events, ['resolve:$userId', 'fetch']);
+    });
+
+    test('is a no-op when no resolver is wired', () async {
+      final events = <String>[];
+      service = buildService([_RecordingSource(events)]);
+
+      await service.refresh(resolvePhonebook: true);
+
+      expect(events, ['fetch']);
+    });
   });
 }

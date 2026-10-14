@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:twake_chat/app_state/failure.dart';
@@ -6,16 +8,19 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/contact/get_contacts_state.dart';
 import 'package:twake_chat/domain/app_state/contact/get_phonebook_contact_state.dart';
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
+import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
-import 'package:twake_chat/domain/model/contact/contact.dart' as contact_model;
+import 'package:twake_chat/domain/model/contact/contact.dart'
+    show ThirdPartyIdType;
+import 'package:twake_chat/domain/model/contact/contact_status.dart';
 import 'package:twake_chat/domain/model/contact/contact_type.dart';
-import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_empty.dart';
-import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_failure.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_success.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_success.dart';
@@ -27,6 +32,7 @@ import 'package:twake_chat/utils/permission_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -72,17 +78,34 @@ mixin class ContactsViewControllerMixin {
 
   final contactsManager = getIt.get<ContactsManager>();
 
-  PermissionStatus? contactsPermissionStatus;
+  /// Current snapshot of the unified store, refreshed from the Riverpod
+  /// controller (single source of truth for the contacts list).
+  List<UnifiedContact> _unifiedContacts = const <UnifiedContact>[];
 
-  bool _canReadPhonebookContacts(PermissionStatus? status) =>
-      status == PermissionStatus.granted || status == PermissionStatus.limited;
+  ProviderSubscription<AsyncValue<List<UnifiedContact>>>?
+  _unifiedContactsSubscription;
 
-  bool get enablePhonebookLookup => true;
+  /// Returns the Riverpod container when the widget is under a
+  /// `ProviderScope`. Some legacy/unit-test contexts are not, so the mixin
+  /// degrades gracefully instead of throwing.
+  ProviderContainer? _tryContainer(BuildContext context) {
+    try {
+      return ProviderScope.containerOf(context, listen: false);
+    } catch (_) {
+      return null;
+    }
+  }
 
-  /// Whether contacts without a Matrix ID are listed: they can only be
-  /// invited, which the homeserver may disable.
-  bool get isInvitationEnabled => false;
+  Future<void> _refreshUnifiedContacts(BuildContext context) async {
+    final container = _tryContainer(context);
+    if (container == null) return;
+    await container
+        .read(contactsControllerProvider.notifier)
+        .refresh(resolvePhonebook: await _isPhonebookContactsAvailable());
+  }
 
+  /// The phonebook lookup runs only where the phonebook can be read: mobile
+  /// with the contacts permission granted (never prompts by itself).
   Future<bool> _isPhonebookContactsAvailable() async {
     if (!enablePhonebookLookup) {
       contactsPermissionStatus = null;
@@ -96,6 +119,41 @@ mixin class ContactsViewControllerMixin {
     return PlatformInfos.isMobile &&
         _canReadPhonebookContacts(currentContactsPermissionStatus);
   }
+
+  void _startListeningUnifiedContacts({
+    required BuildContext context,
+    required Client client,
+    required MatrixLocalizations matrixLocalizations,
+  }) {
+    final container = _tryContainer(context);
+    if (container == null) return;
+    _unifiedContactsSubscription?.close();
+    _unifiedContactsSubscription = container.listen(
+      contactsControllerProvider,
+      (previous, next) {
+        next.whenData((contacts) {
+          _unifiedContacts = contacts;
+          _refreshAllContacts(
+            context: context,
+            client: client,
+            matrixLocalizations: matrixLocalizations,
+          );
+        });
+      },
+      fireImmediately: true,
+    );
+  }
+
+  PermissionStatus? contactsPermissionStatus;
+
+  bool _canReadPhonebookContacts(PermissionStatus? status) =>
+      status == PermissionStatus.granted || status == PermissionStatus.limited;
+
+  bool get enablePhonebookLookup => true;
+
+  /// Whether contacts without a Matrix ID are listed: they can only be
+  /// invited, which the homeserver may disable.
+  bool get isInvitationEnabled => false;
 
   Future<void> _initPhonebookPermission(BuildContext context) async {
     if (!enablePhonebookLookup) {
@@ -184,6 +242,7 @@ mixin class ContactsViewControllerMixin {
             onAcceptButton: () async {
               Navigator.of(dialogContext).pop();
               await _handleRequestContactsPermission(
+                context: context,
                 client: Matrix.of(context).client,
               );
             },
@@ -228,6 +287,7 @@ mixin class ContactsViewControllerMixin {
 
   Future<void> handleDidChangeAppLifecycleState(
     AppLifecycleState state, {
+    required BuildContext context,
     required Client client,
   }) async {
     if (!enablePhonebookLookup || !PlatformInfos.isMobile) {
@@ -258,7 +318,7 @@ mixin class ContactsViewControllerMixin {
           _canReadPhonebookContacts(currentContactPermission)) {
         contactsPermissionStatus = currentContactPermission;
         warningBannerNotifier.value = WarningContactsBannerState.hide;
-        contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
+        unawaited(_refreshUnifiedContacts(context));
         return;
       }
     }
@@ -296,12 +356,7 @@ mixin class ContactsViewControllerMixin {
     if (client.userID == null) {
       return;
     }
-    await contactsManager.initialSynchronizeContacts(
-      withMxId: client.userID!,
-      isAvailableSupportPhonebookContacts:
-          await _isPhonebookContactsAvailable(),
-      forceRun: forceRun,
-    );
+    await _refreshUnifiedContacts(context);
   }
 
   void synchronizeContactsOnContactTab({
@@ -335,11 +390,7 @@ mixin class ContactsViewControllerMixin {
     if (client.userID == null) {
       return;
     }
-    await contactsManager.synchronizeContactsOnContactTab(
-      withMxId: client.userID!,
-      isAvailableSupportPhonebookContacts:
-          await _isPhonebookContactsAvailable(),
-    );
+    await _refreshUnifiedContacts(context);
   }
 
   Future<void> retrySynchronizeContactsOnContactTab({
@@ -354,18 +405,12 @@ mixin class ContactsViewControllerMixin {
         return;
       }
 
-      await contactsManager.cancelAllSubscriptions();
-      await contactsManager.reSyncContacts();
       _refreshAllContacts(
         context: context,
         client: client,
         matrixLocalizations: matrixLocalizations,
       );
-      await contactsManager.synchronizeContactsOnContactTab(
-        withMxId: client.userID!,
-        isAvailableSupportPhonebookContacts:
-            await _isPhonebookContactsAvailable(),
-      );
+      await _refreshUnifiedContacts(context);
     } catch (error, stackTrace) {
       Logs().e(
         'ContactsViewControllerMixin::retrySynchronizeContactsOnContactTab',
@@ -380,19 +425,10 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
-    contactsManager.getContactsNotifier().addListener(
-      () => _refreshAllContacts(
-        context: context,
-        client: client,
-        matrixLocalizations: matrixLocalizations,
-      ),
-    );
-    contactsManager.getPhonebookContactsNotifier().addListener(
-      () => _refreshAllContacts(
-        context: context,
-        client: client,
-        matrixLocalizations: matrixLocalizations,
-      ),
+    _startListeningUnifiedContacts(
+      context: context,
+      client: client,
+      matrixLocalizations: matrixLocalizations,
     );
   }
 
@@ -401,6 +437,9 @@ mixin class ContactsViewControllerMixin {
     required Client client,
     required MatrixLocalizations matrixLocalizations,
   }) {
+    _unifiedContacts =
+        _tryContainer(context)?.read(contactsControllerProvider).value ??
+        _unifiedContacts;
     final keyword = _debouncer.value.trim();
     _refreshContacts(keyword);
     _refreshPhoneBookContacts(keyword);
@@ -418,55 +457,19 @@ mixin class ContactsViewControllerMixin {
     if (presentationContactNotifier.isDisposed) return;
 
     final externalContactState = _checkExternalContact(keyword);
-
-    presentationContactNotifier
-        .value = contactsManager.getContactsNotifier().value.fold(
-      (failure) {
-        if (externalContactState != null) {
-          return externalContactState;
-        }
-
-        if (failure is GetContactsFailure) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(GetPresentationContactsFailure(keyword: keyword)),
-          );
-        }
-
-        if (failure is GetContactsIsEmpty) {
-          return _handleSearchExternalContact(
-            keyword,
-            otherResult: Left(GetPresentationContactsEmpty(keyword: keyword)),
-          );
-        }
-        return Left(failure);
-      },
-      (success) {
-        if (success is GetContactsSuccess) {
-          final filteredContacts = success.contacts
-              .searchContacts(keyword)
-              .expand((contact) => contact.toPresentationContacts())
-              .toList();
-
-          final combinedContacts = _hideInvitationOnlyContacts(
-            _combineTomContacts(filteredContacts),
-          );
-
-          if (combinedContacts.isEmpty) {
-            return externalContactState ??
-                Left(GetPresentationContactsEmpty(keyword: keyword));
-          } else {
-            return Right(
-              GetPresentationContactsSuccess(
-                contacts: combinedContacts,
-                keyword: keyword,
-              ),
-            );
-          }
-        }
-        return externalContactState ?? Right(success);
-      },
+    final tomContacts = _hideInvitationOnlyContacts(
+      _tomContactsForTab(keyword).map(_toPresentationContact).toList(),
     );
+
+    presentationContactNotifier.value = tomContacts.isEmpty
+        ? (externalContactState ??
+              Left(GetPresentationContactsEmpty(keyword: keyword)))
+        : Right(
+            GetPresentationContactsSuccess(
+              contacts: tomContacts,
+              keyword: keyword,
+            ),
+          );
   }
 
   Either<Failure, Success>? _checkExternalContact(String keyword) {
@@ -486,79 +489,82 @@ mixin class ContactsViewControllerMixin {
 
   Future<void> _refreshPhoneBookContacts(String keyword) async {
     if (presentationPhonebookContactNotifier.isDisposed) return;
-    presentationPhonebookContactNotifier
-        .value = contactsManager.getPhonebookContactsNotifier().value.fold(
-      (failure) {
-        if (failure is LookUpPhonebookContactPartialFailed) {
-          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
-        }
 
-        if (failure is GetPhonebookContactsFailure) {
-          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
-        }
+    final phonebookContacts = _hideInvitationOnlyContacts(
+      _phonebookContactsForTab(keyword).map(_toPresentationContact).toList(),
+    );
 
-        if (failure is RequestTokenFailure) {
-          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
-        }
+    presentationPhonebookContactNotifier.value = phonebookContacts.isEmpty
+        ? Left(GetPresentationContactsEmpty(keyword: keyword))
+        : Right(
+            GetPresentationContactsSuccess(
+              contacts: phonebookContacts,
+              keyword: keyword,
+            ),
+          );
+  }
 
-        if (failure is RegisterTokenFailure) {
-          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
-        }
-
-        if (failure is GetHashDetailsFailure) {
-          return _mapPhonebookContactsToPresentation(failure.contacts, keyword);
-        }
-
-        return Left(failure);
-      },
-      (success) {
-        if (success is GetPhonebookContactsSuccess) {
-          _refreshContacts(keyword);
-          return _mapPhonebookContactsToPresentation(success.contacts, keyword);
-        }
-        return Right(success);
-      },
+  PresentationContact _toPresentationContact(UnifiedContact contact) {
+    return PresentationContact(
+      id: contact.matrixId,
+      displayName: contact.resolvedDisplayName,
+      matrixId: contact.matrixId,
+      status: contact.active ? ContactStatus.active : ContactStatus.inactive,
+      emails: contact.emails
+          .map(
+            (email) => PresentationEmail(
+              email: email,
+              thirdPartyId: email,
+              thirdPartyIdType: ThirdPartyIdType.email,
+              matrixId: contact.matrixId,
+            ),
+          )
+          .toSet(),
+      phoneNumbers: contact.phones
+          .map(
+            (phone) => PresentationPhoneNumber(
+              phoneNumber: phone,
+              thirdPartyId: phone,
+              thirdPartyIdType: ThirdPartyIdType.msisdn,
+              matrixId: contact.matrixId,
+            ),
+          )
+          .toSet(),
     );
   }
 
-  Either<Failure, Success> _mapPhonebookContactsToPresentation(
-    List<contact_model.Contact> contacts,
-    String keyword,
-  ) {
-    final filteredContacts = _hideInvitationOnlyContacts(
-      contacts
-          .searchContacts(keyword)
-          .expand((contact) => contact.toPresentationContacts())
-          .toList(),
-    );
-    if (filteredContacts.isEmpty) {
-      return Left(GetPresentationContactsEmpty(keyword: keyword));
-    }
-    return Right(
-      GetPresentationContactsSuccess(
-        contacts: filteredContacts,
-        keyword: keyword,
-      ),
-    );
-  }
+  bool _hasPhonebookSource(UnifiedContact contact) => contact.sources.any(
+    (source) => source.kind == ContactSourceKind.phonebook,
+  );
 
-  Either<Failure, Success> _handleSearchExternalContact(
-    String keyword, {
-    required Either<Failure, Success> otherResult,
-  }) {
-    if (keyword.isValidMatrixId && keyword.startsWith("@")) {
-      return Right(
-        PresentationExternalContactSuccess(
-          contact: PresentationContact(
-            matrixId: keyword,
-            displayName: keyword.substring(1),
-            type: ContactType.external,
-          ),
-        ),
-      );
-    } else {
-      return otherResult;
-    }
+  bool _hasAddressBookSource(UnifiedContact contact) => contact.sources.any(
+    (source) =>
+        source.kind == ContactSourceKind.tomAddressBook ||
+        source.kind == ContactSourceKind.tomUserInfo ||
+        source.kind == ContactSourceKind.manual,
+  );
+
+  List<UnifiedContact> _tomContactsForTab(String keyword) => _unifiedContacts
+      .where((contact) => _hasAddressBookSource(contact))
+      .where((contact) => !_hasPhonebookSource(contact))
+      .where((contact) => _matchesUnifiedKeyword(contact, keyword))
+      .toList();
+
+  List<UnifiedContact> _phonebookContactsForTab(String keyword) =>
+      _unifiedContacts
+          .where(_hasPhonebookSource)
+          .where((contact) => _matchesUnifiedKeyword(contact, keyword))
+          .toList();
+
+  bool _matchesUnifiedKeyword(UnifiedContact contact, String keyword) {
+    final normalized = keyword.trim().toLowerCase();
+    if (normalized.isEmpty) return true;
+    bool contains(String? value) =>
+        value != null && value.toLowerCase().contains(normalized);
+    return contains(contact.resolvedDisplayName) ||
+        contains(contact.matrixId) ||
+        contact.emails.any(contains) ||
+        contact.phones.any(contains);
   }
 
   Future<void> _refreshRecentContacts({
@@ -582,16 +588,9 @@ mixin class ContactsViewControllerMixin {
                   .where((contact) => contact.directChatMatrixID != null)
                   .toList();
 
-              final tomContacts =
-                  contactsManager
-                      .getContactsNotifier()
-                      .value
-                      .getSuccessOrNull<GetContactsSuccess>()
-                      ?.contacts ??
-                  [];
-              final tomPresentationSearchContacts = tomContacts
-                  .expand((contact) => contact.toPresentationContacts())
-                  .toList();
+              final tomPresentationSearchContacts = _tomContactsForTab(
+                '',
+              ).map(_toPresentationContact).toList();
               final tomContactPresentationSearchMatched =
                   tomPresentationSearchContacts
                       .expand((contact) => contact.toPresentationSearch())
@@ -661,6 +660,7 @@ mixin class ContactsViewControllerMixin {
   }
 
   Future<void> _handleRequestContactsPermission({
+    required BuildContext context,
     required Client client,
   }) async {
     if (!enablePhonebookLookup) {
@@ -670,7 +670,7 @@ mixin class ContactsViewControllerMixin {
     final currentContactsPermissionStatus = await _permissionHandlerService
         .requestContactsPermissionActions();
     if (_canReadPhonebookContacts(currentContactsPermissionStatus)) {
-      contactsManager.synchronizePhonebookContacts(withMxId: client.userID!);
+      unawaited(_refreshUnifiedContacts(context));
       warningBannerNotifier.value = WarningContactsBannerState.hide;
     } else {
       contactsManager.updateNotShowWarningContactsDialogAgain(true);
@@ -691,17 +691,6 @@ mixin class ContactsViewControllerMixin {
     _permissionHandlerService.goToSettingsForPermissionActions();
   }
 
-  List<PresentationContact> _combineTomContacts(
-    List<PresentationContact> filteredTomContacts,
-  ) {
-    final foundMatrixIdsInPhonebook = _flatMatrixIdsFromPhonebookContacts();
-
-    return filteredTomContacts.where((contact) {
-      if (contact.matrixId == null) return true;
-      return !foundMatrixIdsInPhonebook.contains(contact.matrixId);
-    }).toList();
-  }
-
   List<PresentationContact> _hideInvitationOnlyContacts(
     List<PresentationContact> contacts,
   ) {
@@ -711,38 +700,9 @@ mixin class ContactsViewControllerMixin {
         .toList();
   }
 
-  List<String> _flatMatrixIdsFromPhonebookContacts() {
-    final phonebookContacts =
-        contactsManager
-            .getPhonebookContactsNotifier()
-            .value
-            .getSuccessOrNull<GetPhonebookContactsSuccess>()
-            ?.contacts ??
-        [];
-
-    final Set<String> matrixIds = {};
-
-    for (final contact in phonebookContacts) {
-      final emailMatrixIds =
-          contact.emails
-              ?.where((email) => email.matrixId != null)
-              .map((email) => email.matrixId!) ??
-          [];
-
-      final phoneMatrixIds =
-          contact.phoneNumbers
-              ?.where((phone) => phone.matrixId != null)
-              .map((phone) => phone.matrixId!) ??
-          [];
-
-      matrixIds.addAll(emailMatrixIds);
-      matrixIds.addAll(phoneMatrixIds);
-    }
-
-    return matrixIds.toList();
-  }
-
   void disposeContactsMixin() {
+    _unifiedContactsSubscription?.close();
+    _debouncer.cancel();
     textEditingController.clear();
     searchFocusNode.dispose();
     textEditingController.dispose();
@@ -763,5 +723,11 @@ mixin class ContactsViewControllerMixin {
       client: client,
       matrixLocalizations: matrixLocalizations,
     );
+  }
+
+  /// Test seam: inject the unified store snapshot without a `ProviderScope`.
+  @visibleForTesting
+  void setUnifiedContactsForTest(List<UnifiedContact> contacts) {
+    _unifiedContacts = contacts;
   }
 }
