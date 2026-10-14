@@ -49,10 +49,6 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
       originalOnUpdate?.call();
       setState(() {});
     };
-    widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
-      profile = p;
-      setState(() {});
-    });
     super.initState();
   }
 
@@ -68,8 +64,6 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     }
     super.dispose();
   }
-
-  Profile? profile;
 
   Future<void> checkInput(String input) async {
     if (input.isEmpty) return;
