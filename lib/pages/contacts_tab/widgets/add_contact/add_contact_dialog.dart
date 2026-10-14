@@ -100,6 +100,7 @@ class AddContactDialogController extends State<AddContactDialog> {
               .read(contactsControllerProvider)
               .asData
               ?.value
+              .where((contact) => contact.isAddressBookContact)
               .map((contact) => contact.toPresentationContact())
               .toList() ??
           [];
