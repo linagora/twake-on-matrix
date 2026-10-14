@@ -313,6 +313,39 @@ void main() {
     expect(uploads, 0);
   });
 
+  test('after cancel, the next resolve runs its own lookup', () async {
+    stubSynced(syncedAndDue());
+    final gate = Completer<void>();
+    stubFederation(() async* {
+      await gate.future;
+      yield Right<Failure, Success>(
+        GetPhonebookContactsSuccess(progress: 100, contacts: contacts),
+      );
+    }());
+    final resolver = build();
+
+    final previous = resolver.resolve(userId);
+    await untilCalled(
+      federation.execute(
+        lookupChunkSize: anyNamed('lookupChunkSize'),
+        argument: anyNamed('argument'),
+      ),
+    );
+    await resolver.cancel();
+    stubFederationSuccess();
+    await resolver.resolve('@other:server');
+    gate.complete();
+    await previous;
+
+    verify(
+      federation.execute(
+        lookupChunkSize: anyNamed('lookupChunkSize'),
+        argument: anyNamed('argument'),
+      ),
+    ).called(2);
+    expect(uploads, 1);
+  });
+
   test('never throws when the lookup blows up', () async {
     stubSynced(syncedAndDue());
     stubFederation(Stream.error(StateError('boom')));

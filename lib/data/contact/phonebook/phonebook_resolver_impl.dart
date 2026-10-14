@@ -78,12 +78,22 @@ class PhonebookResolverImpl implements PhonebookResolver {
   int _generation = 0;
 
   @override
-  Future<void> resolve(String userId) =>
-      _running ??= _resolve(userId).whenComplete(() => _running = null);
+  Future<void> resolve(String userId) {
+    final running = _running;
+    if (running != null) return running;
+    late final Future<void> lookup;
+    lookup = _resolve(userId).whenComplete(() {
+      if (identical(_running, lookup)) _running = null;
+    });
+    return _running = lookup;
+  }
 
+  /// Drops the lookup in progress: its results are ignored and the next
+  /// [resolve] (another account after a switch) starts its own.
   @override
   Future<void> cancel() async {
     _generation++;
+    _running = null;
   }
 
   Future<void> _resolve(String userId) async {
