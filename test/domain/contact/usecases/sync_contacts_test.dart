@@ -55,6 +55,47 @@ void main() {
   setUp(() => repository = FakeUnifiedContactRepository());
   tearDown(() => repository.dispose());
 
+  SyncContactsUseCase useCaseWith(List<ContactSource> sources) =>
+      SyncContactsUseCase(
+        repository: repository,
+        policy: const ContactResolutionPolicy(),
+        sources: sources,
+      );
+
+  ContactSource source(
+    ContactSourceKind kind, [
+    List<SourcedContact> contacts = const [],
+  ]) => _FakeSource(kind, contacts);
+
+  SourcedContact sourced(
+    String matrixId,
+    ContactSourceKind kind,
+    String name,
+  ) => SourcedContact(
+    matrixId: matrixId,
+    value: ContactSourceValue(kind: kind, displayName: name),
+  );
+
+  /// Jean, known from the ToM address book and aliased by the phonebook.
+  Future<void> storeJeanWithAlias() => repository.upsert(
+    userId,
+    const UnifiedContact(
+      matrixId: '@jean:server',
+      canonicalDisplayName: 'Jean Dupont',
+      localAlias: 'Jean Travail',
+      sources: [
+        ContactSourceValue(
+          kind: ContactSourceKind.tomAddressBook,
+          displayName: 'Jean Dupont',
+        ),
+        ContactSourceValue(
+          kind: ContactSourceKind.phonebook,
+          displayName: 'Jean Travail',
+        ),
+      ],
+    ),
+  );
+
   test(
     'merges sources by matrixId and persists the resolved contacts',
     () async {
@@ -101,22 +142,12 @@ void main() {
   test(
     'a failing source does not prevent the others from being merged',
     () async {
-      final useCase = SyncContactsUseCase(
-        repository: repository,
-        policy: const ContactResolutionPolicy(),
-        sources: [
-          _FakeSource(ContactSourceKind.tomAddressBook, const [], throws: true),
-          _FakeSource(ContactSourceKind.matrixProfile, const [
-            SourcedContact(
-              matrixId: '@a:server',
-              value: ContactSourceValue(
-                kind: ContactSourceKind.matrixProfile,
-                displayName: 'A',
-              ),
-            ),
-          ]),
-        ],
-      );
+      final useCase = useCaseWith([
+        _FakeSource(ContactSourceKind.tomAddressBook, const [], throws: true),
+        source(ContactSourceKind.matrixProfile, [
+          sourced('@a:server', ContactSourceKind.matrixProfile, 'A'),
+        ]),
+      ]);
 
       final contacts = await useCase.execute(userId);
 
@@ -126,11 +157,7 @@ void main() {
   );
 
   test('empty sources do not write to the repository', () async {
-    final useCase = SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
-    );
+    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
 
     await useCase.execute(userId);
 
@@ -140,41 +167,14 @@ void main() {
   test('drops stored values from a source that succeeded but no longer returns '
       'the contact', () async {
     const matrixId = '@jean:server';
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: matrixId,
-        canonicalDisplayName: 'Jean Dupont',
-        localAlias: 'Jean Travail',
-        sources: [
-          ContactSourceValue(
-            kind: ContactSourceKind.tomAddressBook,
-            displayName: 'Jean Dupont',
-          ),
-          ContactSourceValue(
-            kind: ContactSourceKind.phonebook,
-            displayName: 'Jean Travail',
-          ),
-        ],
-      ),
-    );
+    await storeJeanWithAlias();
 
-    final useCase = SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [
-        _FakeSource(ContactSourceKind.tomAddressBook, const [
-          SourcedContact(
-            matrixId: matrixId,
-            value: ContactSourceValue(
-              kind: ContactSourceKind.tomAddressBook,
-              displayName: 'Jean Dupont',
-            ),
-          ),
-        ]),
-        _FakeSource(ContactSourceKind.phonebook, const []),
-      ],
-    );
+    final useCase = useCaseWith([
+      source(ContactSourceKind.tomAddressBook, [
+        sourced(matrixId, ContactSourceKind.tomAddressBook, 'Jean Dupont'),
+      ]),
+      source(ContactSourceKind.phonebook),
+    ]);
 
     final contacts = await useCase.execute(userId);
 
@@ -204,11 +204,7 @@ void main() {
         ),
       );
 
-      final useCase = SyncContactsUseCase(
-        repository: repository,
-        policy: const ContactResolutionPolicy(),
-        sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
-      );
+      final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
 
       final contacts = await useCase.execute(userId);
 
@@ -219,41 +215,14 @@ void main() {
 
   test('keeps the last known values of a source that failed', () async {
     const matrixId = '@jean:server';
-    await repository.upsert(
-      userId,
-      const UnifiedContact(
-        matrixId: matrixId,
-        canonicalDisplayName: 'Jean Dupont',
-        localAlias: 'Jean Travail',
-        sources: [
-          ContactSourceValue(
-            kind: ContactSourceKind.tomAddressBook,
-            displayName: 'Jean Dupont',
-          ),
-          ContactSourceValue(
-            kind: ContactSourceKind.phonebook,
-            displayName: 'Jean Travail',
-          ),
-        ],
-      ),
-    );
+    await storeJeanWithAlias();
 
-    final useCase = SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [
-        _FakeSource(ContactSourceKind.tomAddressBook, const [
-          SourcedContact(
-            matrixId: matrixId,
-            value: ContactSourceValue(
-              kind: ContactSourceKind.tomAddressBook,
-              displayName: 'Jean Dupont',
-            ),
-          ),
-        ]),
-        _FakeSource(ContactSourceKind.phonebook, const [], throws: true),
-      ],
-    );
+    final useCase = useCaseWith([
+      source(ContactSourceKind.tomAddressBook, [
+        sourced(matrixId, ContactSourceKind.tomAddressBook, 'Jean Dupont'),
+      ]),
+      _FakeSource(ContactSourceKind.phonebook, const [], throws: true),
+    ]);
 
     final contacts = await useCase.execute(userId);
 
@@ -277,11 +246,7 @@ void main() {
       ),
     );
 
-    final useCase = SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
-    );
+    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
 
     final contacts = await useCase.execute(userId);
 
@@ -313,21 +278,11 @@ void main() {
         ),
       );
 
-      final useCase = SyncContactsUseCase(
-        repository: repository,
-        policy: const ContactResolutionPolicy(),
-        sources: [
-          _FakeSource(ContactSourceKind.tomAddressBook, const [
-            SourcedContact(
-              matrixId: matrixId,
-              value: ContactSourceValue(
-                kind: ContactSourceKind.tomAddressBook,
-                displayName: 'Jean Dupont',
-              ),
-            ),
-          ]),
-        ],
-      );
+      final useCase = useCaseWith([
+        source(ContactSourceKind.tomAddressBook, [
+          sourced(matrixId, ContactSourceKind.tomAddressBook, 'Jean Dupont'),
+        ]),
+      ]);
 
       final contacts = await useCase.execute(userId);
 
@@ -355,11 +310,7 @@ void main() {
       ),
     );
 
-    final useCase = SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [_FakeSource(ContactSourceKind.tomAddressBook, const [])],
-    );
+    final useCase = useCaseWith([source(ContactSourceKind.tomAddressBook)]);
 
     final contacts = await useCase.execute(userId);
 
@@ -368,21 +319,11 @@ void main() {
   });
 
   group('isCurrent guard', () {
-    SyncContactsUseCase buildUseCase() => SyncContactsUseCase(
-      repository: repository,
-      policy: const ContactResolutionPolicy(),
-      sources: [
-        _FakeSource(ContactSourceKind.tomAddressBook, const [
-          SourcedContact(
-            matrixId: '@a:server',
-            value: ContactSourceValue(
-              kind: ContactSourceKind.tomAddressBook,
-              displayName: 'Alice',
-            ),
-          ),
-        ]),
-      ],
-    );
+    SyncContactsUseCase buildUseCase() => useCaseWith([
+      source(ContactSourceKind.tomAddressBook, [
+        sourced('@a:server', ContactSourceKind.tomAddressBook, 'Alice'),
+      ]),
+    ]);
 
     test('writes normally while the session is current', () async {
       await buildUseCase().execute(userId, isCurrent: () => true);
@@ -422,11 +363,9 @@ void main() {
       'the session ending while the sources load drops the result',
       () async {
         var current = true;
-        final useCase = SyncContactsUseCase(
-          repository: repository,
-          policy: const ContactResolutionPolicy(),
-          sources: [_EndsSessionSource(() => current = false)],
-        );
+        final useCase = useCaseWith([
+          _EndsSessionSource(() => current = false),
+        ]);
 
         await useCase.execute(userId, isCurrent: () => current);
 

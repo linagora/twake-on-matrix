@@ -95,7 +95,7 @@ class ContactSyncService {
   /// background refresh never triggers the lookup.
   Future<void> refresh({bool resolvePhonebook = false}) {
     final running = _refresh;
-    if (running != null && (!resolvePhonebook || _refreshResolvesPhonebook)) {
+    if (running != null && _runningRefreshCovers(resolvePhonebook)) {
       return running;
     }
 
@@ -108,6 +108,11 @@ class ContactSyncService {
         });
     return _refresh = refresh;
   }
+
+  /// The refresh in progress does what this call asks: the call does not
+  /// need the phonebook, or that refresh resolves it too.
+  bool _runningRefreshCovers(bool resolvePhonebook) =>
+      !resolvePhonebook || _refreshResolvesPhonebook;
 
   Future<void> _runRefresh(bool resolvePhonebook, int generation) async {
     bool isCurrent() =>
