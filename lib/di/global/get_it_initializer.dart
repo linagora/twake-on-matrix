@@ -74,7 +74,6 @@ import 'package:twake_chat/data/repository/user_info_repository_impl.dart';
 import 'package:twake_chat/di/global/hive_di.dart';
 import 'package:twake_chat/di/global/network_connectivity_di.dart';
 import 'package:twake_chat/di/global/network_di.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
@@ -95,7 +94,6 @@ import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_in
 import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
@@ -384,9 +382,6 @@ class GetItInitializer {
     getIt.registerLazySingleton<DeleteRecoveryWordsInteractor>(
       () => DeleteRecoveryWordsInteractor(),
     );
-    getIt.registerFactory<GetTomContactsInteractor>(
-      () => GetTomContactsInteractor(),
-    );
     getIt.registerFactory<PostAddressBookInteractor>(
       () => PostAddressBookInteractor(),
     );
@@ -435,7 +430,6 @@ class GetItInitializer {
     getIt.registerFactory<ChatGetPinnedEventsInteractor>(
       () => ChatGetPinnedEventsInteractor(),
     );
-    getIt.registerSingleton<ContactsManager>(ContactsManager());
     getIt.registerLazySingleton<SaveLanguageInteractor>(
       () => SaveLanguageInteractor(getIt.get<LocalizationsRepository>()),
     );
