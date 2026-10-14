@@ -201,14 +201,15 @@ class MatrixState extends ConsumerState<Matrix>
       _rememberContactOwner(newClient);
       // TODO: Multi-client VoiP support
       createVoipPlugin();
+      // No account is active while the ToM URL/token switch: a refresh of the
+      // previous account in flight must not read with the new configuration.
+      ref.read(activeMatrixClientProvider.notifier).setClient(null);
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
       // Transitional bridge: expose the active client to Riverpod consumers,
-      // only once the ToM URL/token of the new account are applied. Until
-      // then the previous account stays active, so no contact source can read
-      // the new account's data with the old configuration (or the opposite).
+      // only once the ToM URL/token of the new account are applied.
       ref.read(activeMatrixClientProvider.notifier).setClient(newClient);
       if (userId != null) {
         unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
@@ -1484,8 +1485,10 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _handleLastLogout(Client loggedOutClient) async {
     waitForFirstSync = false;
-    ref.read(activeMatrixClientProvider.notifier).setClient(null);
+    // Clear first: unpublishing the client rebuilds the contact services, and
+    // the wipe must run behind the refresh of the instance that owns it.
     await _clearContactsOf(loggedOutClient);
+    ref.read(activeMatrixClientProvider.notifier).setClient(null);
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
