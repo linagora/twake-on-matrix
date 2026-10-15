@@ -198,6 +198,7 @@ void main() {
       'www.example.com/path',
       'example.com:8080/path',
       'localhost:8080',
+      '//example.com/page',
     ]) {
       test('GIVEN $url\nTHEN returns false', () {
         expect(isAppSchemeUri(Uri.parse(url)), isFalse);
