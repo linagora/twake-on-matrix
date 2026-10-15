@@ -116,6 +116,7 @@ void main() {
       'file:///etc/passwd',
       'javascript:alert(1)',
       'data:text/html,<script>alert(1)</script>',
+      'file://links.twake.app/chat/x',
     ]) {
       testWidgets('WHEN $url is tapped\n'
           'THEN nothing is launched and a message is shown', (tester) async {

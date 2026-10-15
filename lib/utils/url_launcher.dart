@@ -45,6 +45,10 @@ class UrlLauncher with GoToDraftChatMixin {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
+    if (isBlockedSchemeUri(uri)) {
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
+      return;
+    }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
       final inviteUri = Uri.parse(AppConfig.inviteLinkPrefix);
       final matrixToUri = uri.replace(
@@ -57,44 +61,7 @@ class UrlLauncher with GoToDraftChatMixin {
       );
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
-      if (isBlockedSchemeUri(uri)) {
-        TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
-        return;
-      }
-
-      // we need to transmute geo URIs on desktop and on iOS
-      if ((!PlatformInfos.isMobile || PlatformInfos.isIOS) &&
-          uri.scheme == 'geo') {
-        final latlong = uri.path
-            .split(';')
-            .first
-            .split(',')
-            .map((s) => double.tryParse(s))
-            .toList();
-        if (latlong.length == 2 &&
-            latlong.first != null &&
-            latlong.last != null) {
-          if (PlatformInfos.isIOS) {
-            // iOS is great at not following standards, so we need to transmute the geo URI
-            // to an apple maps thingy
-            // https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
-            final ll = '${latlong.first},${latlong.last}';
-            launchUrlString('https://maps.apple.com/?q=$ll&sll=$ll');
-          } else {
-            // transmute geo URIs on desktop to openstreetmap links, as those usually can't handle
-            // geo URIs
-            launchUrlString(
-              'https://www.openstreetmap.org/?mlat=${latlong.first}&mlon=${latlong.last}#map=16/${latlong.first}/${latlong.last}',
-            );
-          }
-          return;
-        }
-      }
-      if (isAppSchemeUri(uri)) {
-        _launchAppSchemeUrl();
-        return;
-      }
-      launchUrlString('https://$url');
+      _launchNonHttpUrl(uri);
       return;
     }
     if (uri.host.isEmpty) {
@@ -120,6 +87,46 @@ class UrlLauncher with GoToDraftChatMixin {
       uri.replace(host: newHost).toString(),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  void _launchNonHttpUrl(Uri uri) {
+    // we need to transmute geo URIs on desktop and on iOS
+    if ((!PlatformInfos.isMobile || PlatformInfos.isIOS) &&
+        uri.scheme == 'geo' &&
+        _launchGeoUri(uri)) {
+      return;
+    }
+    if (isAppSchemeUri(uri)) {
+      _launchAppSchemeUrl();
+      return;
+    }
+    launchUrlString('https://$url');
+  }
+
+  bool _launchGeoUri(Uri uri) {
+    final latlong = uri.path
+        .split(';')
+        .first
+        .split(',')
+        .map((s) => double.tryParse(s))
+        .toList();
+    if (latlong.length != 2 || latlong.first == null || latlong.last == null) {
+      return false;
+    }
+    if (PlatformInfos.isIOS) {
+      // iOS is great at not following standards, so we need to transmute the geo URI
+      // to an apple maps thingy
+      // https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
+      final ll = '${latlong.first},${latlong.last}';
+      launchUrlString('https://maps.apple.com/?q=$ll&sll=$ll');
+    } else {
+      // transmute geo URIs on desktop to openstreetmap links, as those usually can't handle
+      // geo URIs
+      launchUrlString(
+        'https://www.openstreetmap.org/?mlat=${latlong.first}&mlon=${latlong.last}#map=16/${latlong.first}/${latlong.last}',
+      );
+    }
+    return true;
   }
 
   Future<void> _launchAppSchemeUrl() async {

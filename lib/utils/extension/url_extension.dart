@@ -60,4 +60,5 @@ bool isBlockedSchemeUri(Uri uri) => _blockedSchemes.contains(uri.scheme);
 /// (e.g. `visio://room`, `tel:+33…`), as opposed to a bare `host:port`
 /// that [Uri.parse] reads as a scheme (e.g. `example.com:8080`).
 bool isAppSchemeUri(Uri uri) =>
-    uri.hasAuthority || _schemesWithoutAuthority.contains(uri.scheme);
+    (uri.hasScheme && uri.hasAuthority) ||
+    _schemesWithoutAuthority.contains(uri.scheme);
