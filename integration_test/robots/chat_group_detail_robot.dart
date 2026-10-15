@@ -8,6 +8,7 @@ import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -171,6 +172,26 @@ class ChatGroupDetailRobot extends CoreRobot
 
   Future<void> closePullDownMenu() async {
     await PullDownMenuRobot($).close();
+  }
+
+  /// Taps [text] inside a message bubble. Links are spans of a `RichText`,
+  /// so tapping the bubble itself would miss them.
+  Future<void> tapTextInMessage(String text) async {
+    final message = await getText(text);
+    await $.waitUntilVisible(message);
+    final paragraph = message
+        .$(RichText)
+        .evaluate()
+        .map((element) => element.renderObject! as RenderParagraph)
+        .firstWhere((p) => p.text.toPlainText().contains(text));
+    final start = paragraph.text.toPlainText().indexOf(text);
+    final box = paragraph
+        .getBoxesForSelection(
+          TextSelection(baseOffset: start, extentOffset: start + text.length),
+        )
+        .first;
+    await $.tester.tapAt(paragraph.localToGlobal(box.toRect().center));
+    await $.pump(const Duration(milliseconds: 500));
   }
 
   Future<void> expectSnackShown(

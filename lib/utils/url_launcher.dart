@@ -2,6 +2,7 @@ import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -56,7 +57,10 @@ class UrlLauncher with GoToDraftChatMixin {
       );
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
-      // just launch non-https / non-http uris directly
+      if (isBlockedSchemeUri(uri)) {
+        TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
+        return;
+      }
 
       // we need to transmute geo URIs on desktop and on iOS
       if ((!PlatformInfos.isMobile || PlatformInfos.isIOS) &&
@@ -86,6 +90,10 @@ class UrlLauncher with GoToDraftChatMixin {
           return;
         }
       }
+      if (isAppSchemeUri(uri)) {
+        _launchAppSchemeUrl();
+        return;
+      }
       launchUrlString('https://$url');
       return;
     }
@@ -112,6 +120,16 @@ class UrlLauncher with GoToDraftChatMixin {
       uri.replace(host: newHost).toString(),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  Future<void> _launchAppSchemeUrl() async {
+    final launched = await launchUrlString(
+      url!,
+      mode: LaunchMode.externalApplication,
+    ).catchError((_) => false);
+    if (!launched && context.mounted) {
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
+    }
   }
 
   void openMatrixToUrl({

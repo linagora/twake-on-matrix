@@ -159,4 +159,49 @@ void main() {
       });
     });
   });
+
+  group('isBlockedSchemeUri', () {
+    for (final url in [
+      'file:///etc/passwd',
+      'javascript:alert(1)',
+      'JavaScript:alert(1)',
+      'data:text/html,hi',
+    ]) {
+      test('GIVEN $url\nTHEN returns true', () {
+        expect(isBlockedSchemeUri(Uri.parse(url)), isTrue);
+      });
+    }
+
+    for (final url in ['visio://toto', 'tel:+33123456789', 'example.com']) {
+      test('GIVEN $url\nTHEN returns false', () {
+        expect(isBlockedSchemeUri(Uri.parse(url)), isFalse);
+      });
+    }
+  });
+
+  group('isAppSchemeUri', () {
+    for (final url in [
+      'visio://toto',
+      'maps://?q=Paris',
+      'mailto:someone@example.com',
+      'tel:+33123456789',
+      'sms:+33123456789',
+      'geo:48.85,2.35',
+    ]) {
+      test('GIVEN $url\nTHEN returns true', () {
+        expect(isAppSchemeUri(Uri.parse(url)), isTrue);
+      });
+    }
+
+    for (final url in [
+      'example.com',
+      'www.example.com/path',
+      'example.com:8080/path',
+      'localhost:8080',
+    ]) {
+      test('GIVEN $url\nTHEN returns false', () {
+        expect(isAppSchemeUri(Uri.parse(url)), isFalse);
+      });
+    }
+  });
 }
