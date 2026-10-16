@@ -166,6 +166,9 @@ void main() {
       'javascript:alert(1)',
       'JavaScript:alert(1)',
       'data:text/html,hi',
+      'intent://scan/#Intent;scheme=zxing;package=com.example;end',
+      'content://com.example.provider/secret',
+      'android-app://com.example/https/example.com/path',
     ]) {
       test('GIVEN $url\nTHEN returns true', () {
         expect(isBlockedSchemeUri(Uri.parse(url)), isTrue);

@@ -49,7 +49,15 @@ bool isFilenameUrl(String? url) {
   return _hasKnownFileExtension(url);
 }
 
-const _blockedSchemes = {'file', 'javascript', 'data'};
+// `intent`, `content` and `android-app` let a link drive Android components.
+const _blockedSchemes = {
+  'file',
+  'javascript',
+  'data',
+  'intent',
+  'content',
+  'android-app',
+};
 
 const _schemesWithoutAuthority = {'mailto', 'tel', 'sms', 'geo'};
 

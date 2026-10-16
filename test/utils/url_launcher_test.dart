@@ -117,6 +117,9 @@ void main() {
       'javascript:alert(1)',
       'data:text/html,<script>alert(1)</script>',
       'file://links.twake.app/chat/x',
+      'intent://scan/#Intent;scheme=zxing;package=com.example;end',
+      'content://com.example.provider/secret',
+      'android-app://com.example/https/example.com/path',
     ]) {
       testWidgets('WHEN $url is tapped\n'
           'THEN nothing is launched and a message is shown', (tester) async {
