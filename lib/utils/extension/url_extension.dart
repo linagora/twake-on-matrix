@@ -48,3 +48,25 @@ bool isFilenameUrl(String? url) {
   if (_hasUrlStructuralIndicator(url)) return false;
   return _hasKnownFileExtension(url);
 }
+
+// `intent`, `content` and `android-app` let a link drive Android components.
+const _blockedSchemes = {
+  'file',
+  'javascript',
+  'data',
+  'intent',
+  'content',
+  'android-app',
+};
+
+const _schemesWithoutAuthority = {'mailto', 'tel', 'sms', 'geo'};
+
+/// Returns true if [uri] uses a scheme that must never be launched.
+bool isBlockedSchemeUri(Uri uri) => _blockedSchemes.contains(uri.scheme);
+
+/// Returns true if [uri] targets the app registered for its scheme
+/// (e.g. `visio://room`, `tel:+33…`), as opposed to a bare `host:port`
+/// that [Uri.parse] reads as a scheme (e.g. `example.com:8080`).
+bool isAppSchemeUri(Uri uri) =>
+    (uri.hasScheme && uri.hasAuthority) ||
+    _schemesWithoutAuthority.contains(uri.scheme);
