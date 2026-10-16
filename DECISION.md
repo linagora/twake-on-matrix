@@ -1,8 +1,9 @@
 # Decisions
 
-Product and architecture decisions for Twake Chat, newest last. A decision
-changes only by a new entry that says what it replaces. The records of
-`docs/adr/` stay as they are.
+The product and design decisions of Twake Chat, the large ones, newest last.
+A decision changes only by a new entry that says what it replaces.
+Architecture and purely technical choices, the fundamental changes, are
+records of `docs/adr/`, not entries here.
 
 Status: **decided** (given by the product owner), **proposed** (to confirm),
 **open**.
@@ -19,3 +20,6 @@ lists what one day decided or changed, for a review day by day. The workflow
 Decisions are written in this file, one `## Dnn` entry each, with the date in
 the title: `(decided by <who>, YYYY-MM-DD; updates Dxx, YYYY-MM-DD)`. A
 section found later, under an entry, is a `###` heading with its own date.
+
+This file holds the large product and design decisions; `docs/adr/` keeps
+architecture and purely technical choices, the fundamental changes.
