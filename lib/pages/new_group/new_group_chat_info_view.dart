@@ -328,12 +328,13 @@ class _GroupPrivacySettings extends ConsumerWidget {
       ),
     );
     final privacy = ref.watch(groupPrivacyViewModelProvider);
+    final l10n = L10n.of(context)!;
     return Column(
       children: [
         if (isPublicGroupsEnabled)
           LinagoraSettingItem.selectable(
-            title: L10n.of(context)!.makeChatPublic,
-            subtitle: L10n.of(context)!.makeChatPublicDescription,
+            title: l10n.makeChatPublic,
+            subtitle: l10n.makeChatPublicDescription,
             subtitleMaxLines: null,
             value: privacy.isPublic,
             onChanged: (isPublic) => ref
@@ -342,10 +343,8 @@ class _GroupPrivacySettings extends ConsumerWidget {
           ),
         if (privacy.isPublic)
           LinagoraSettingItem.selectable(
-            title: L10n.of(
-              context,
-            )!.groupPrivacyLimitToServer(controller.serverName),
-            subtitle: L10n.of(context)!.groupPrivacyLimitToServerDescription,
+            title: l10n.groupPrivacyLimitToServer(controller.serverName),
+            subtitle: l10n.groupPrivacyLimitToServerDescription,
             subtitleMaxLines: null,
             value: privacy.isServerLimited,
             onChanged: (isServerLimited) => ref
@@ -374,6 +373,7 @@ class _EncryptionSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return ValueListenableBuilder<bool>(
       valueListenable: enableEncryptionNotifier,
       builder: (context, isEnabled, _) {
@@ -381,8 +381,8 @@ class _EncryptionSettingTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             LinagoraSettingItem.selectable(
-              title: L10n.of(context)!.enableEncryption,
-              subtitle: L10n.of(context)!.encryptionMessage,
+              title: l10n.enableEncryption,
+              subtitle: l10n.encryptionMessage,
               subtitleMaxLines: null,
               value: isEnabled,
               onChanged: onChanged,
@@ -395,7 +395,7 @@ class _EncryptionSettingTile extends StatelessWidget {
                   bottom: LinagoraSpacing.base * 2,
                 ),
                 child: Text(
-                  L10n.of(context)!.encryptionWarning,
+                  l10n.encryptionWarning,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     letterSpacing: 0.4,
                     color: Theme.of(context).colorScheme.error,

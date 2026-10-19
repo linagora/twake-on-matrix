@@ -1,40 +1,22 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:matrix/matrix.dart';
 
-class CreateNewGroupChatRequest extends Equatable {
-  final String? groupName;
-  final List<String>? invite;
-  final bool? enableEncryption;
-  final CreateRoomPreset createRoomPreset;
-  final String? urlAvatar;
-  final Map<String, dynamic>? powerLevelContentOverride;
+part 'create_new_group_chat_request.freezed.dart';
 
-  /// Public preset, listed in the room directory and never encrypted.
-  final bool isPublic;
+@freezed
+abstract class CreateNewGroupChatRequest with _$CreateNewGroupChatRequest {
+  const factory CreateNewGroupChatRequest({
+    String? groupName,
+    List<String>? invite,
+    bool? enableEncryption,
+    @Default(CreateRoomPreset.privateChat) CreateRoomPreset createRoomPreset,
+    String? urlAvatar,
+    Map<String, dynamic>? powerLevelContentOverride,
 
-  /// Sets `m.federate: false` on a public room; cannot be changed later.
-  final bool isServerLimited;
+    /// Public preset, listed in the room directory and never encrypted.
+    @Default(false) bool isPublic,
 
-  const CreateNewGroupChatRequest({
-    this.groupName,
-    this.invite,
-    this.enableEncryption,
-    this.createRoomPreset = CreateRoomPreset.privateChat,
-    this.urlAvatar,
-    this.powerLevelContentOverride,
-    this.isPublic = false,
-    this.isServerLimited = false,
-  });
-
-  @override
-  List<Object?> get props => [
-    groupName,
-    invite,
-    enableEncryption,
-    createRoomPreset,
-    urlAvatar,
-    powerLevelContentOverride,
-    isPublic,
-    isServerLimited,
-  ];
+    /// Sets `m.federate: false` on a public room; cannot be changed later.
+    @Default(false) bool isServerLimited,
+  }) = _CreateNewGroupChatRequest;
 }
