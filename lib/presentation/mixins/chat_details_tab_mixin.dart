@@ -38,7 +38,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
@@ -178,7 +178,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void _openDialogInvite() {
     if (PlatformInfos.isMobile) {
       Navigator.of(context).push(
-        CupertinoPageRoute(
+        TwakeCupertinoPageRoute(
           builder: (_) => InvitationSelection(roomId: room!.id),
         ),
       );
@@ -521,7 +521,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   Future<void> _openAssignRolesPageForMobile(User user) async {
     if (room == null) return;
     await Navigator.of(context).push(
-      CupertinoPageRoute(
+      TwakeCupertinoPageRoute(
         settings: const RouteSettings(name: '/assign_roles_role_picker'),
         builder: (context) {
           return AssignRolesRolePicker(

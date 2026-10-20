@@ -9,6 +9,9 @@ const Duration _kDroppedSwipePageAnimationDuration = Duration(
   milliseconds: 350,
 );
 
+/// Width of the swipe-back hit area used on every page.
+const double kTwakeBackGestureWidth = 100;
+
 /// A [Page] that creates an iOS-style [PageRoute] with a configurable
 /// back-gesture hit-test width.
 ///
@@ -21,7 +24,7 @@ class TwakeCupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
-    this.backGestureWidth = 20.0,
+    this.backGestureWidth = kTwakeBackGestureWidth,
     super.canPop,
     super.onPopInvoked,
     super.key,
@@ -68,18 +71,13 @@ class TwakeCupertinoPage<T> extends Page<T> {
 // Route
 // ---------------------------------------------------------------------------
 
-class _TwakePageBasedCupertinoPageRoute<T> extends PageRoute<T>
-    with CupertinoRouteTransitionMixin<T> {
+class _TwakePageBasedCupertinoPageRoute<T> extends _TwakeCupertinoRoute<T> {
   _TwakePageBasedCupertinoPageRoute({
     required TwakeCupertinoPage<T> page,
     super.allowSnapshotting = true,
   }) : super(settings: page) {
     assert(opaque);
   }
-
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition =>
-      fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   TwakeCupertinoPage<T> get _page => settings as TwakeCupertinoPage<T>;
 
@@ -96,7 +94,53 @@ class _TwakePageBasedCupertinoPageRoute<T> extends PageRoute<T>
   bool get fullscreenDialog => _page.fullscreenDialog;
 
   @override
+  double get backGestureWidth => _page.backGestureWidth;
+
+  @override
   String get debugLabel => '${super.debugLabel}(${_page.name})';
+}
+
+/// Same as [CupertinoPageRoute] with the [TwakeCupertinoPage] back gesture,
+/// for routes pushed with [Navigator.push].
+class TwakeCupertinoPageRoute<T> extends _TwakeCupertinoRoute<T> {
+  TwakeCupertinoPageRoute({
+    required this.builder,
+    this.title,
+    this.maintainState = true,
+    this.backGestureWidth = kTwakeBackGestureWidth,
+    super.settings,
+    super.fullscreenDialog,
+    super.allowSnapshotting = true,
+  });
+
+  final WidgetBuilder builder;
+
+  @override
+  Widget buildContent(BuildContext context) => builder(context);
+
+  @override
+  final String? title;
+
+  @override
+  final bool maintainState;
+
+  @override
+  final double backGestureWidth;
+}
+
+abstract class _TwakeCupertinoRoute<T> extends PageRoute<T>
+    with CupertinoRouteTransitionMixin<T> {
+  _TwakeCupertinoRoute({
+    super.settings,
+    super.fullscreenDialog,
+    super.allowSnapshotting,
+  });
+
+  double get backGestureWidth;
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition =>
+      fullscreenDialog ? null : CupertinoPageTransition.delegatedTransition;
 
   /// Starts the pop gesture and returns the controller.
   _TwakeCupertinoBackGestureController<T> _startPopGesture() {
@@ -132,7 +176,7 @@ class _TwakePageBasedCupertinoPageRoute<T> extends PageRoute<T>
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       child: _TwakeCupertinoBackGestureDetector<T>(
-        backGestureWidth: _page.backGestureWidth,
+        backGestureWidth: backGestureWidth,
         enabledCallback: () => popGestureEnabled,
         onStartPopGesture: _startPopGesture,
         child: child,

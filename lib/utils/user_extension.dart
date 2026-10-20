@@ -5,7 +5,7 @@ import 'package:twake_chat/pages/profile_info/profile_info_page.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:twake_chat/utils/search/search_options.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -38,7 +38,7 @@ extension UserExtension on User {
 
     if (responsive.isMobile(context)) {
       Navigator.of(context).push(
-        CupertinoPageRoute(
+        TwakeCupertinoPageRoute(
           builder: (ctx) => ProfileInfoPage(
             roomId: room.id,
             userId: id,

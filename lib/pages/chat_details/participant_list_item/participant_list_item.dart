@@ -14,7 +14,7 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/user_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -260,7 +260,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
   Future _openDialogInvite(BuildContext context) async {
     if (PlatformInfos.isMobile) {
       Navigator.of(context).push(
-        CupertinoPageRoute(
+        TwakeCupertinoPageRoute(
           builder: (ctx) => ProfileInfoPage(
             roomId: widget.member.room.id,
             userId: widget.member.id,

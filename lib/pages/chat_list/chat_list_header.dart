@@ -5,7 +5,7 @@ import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/connection_status_header.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
-import 'package:twake_chat/widgets/swipe_to_dismiss_wrap.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:twake_chat/widgets/twake_components/twake_header.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
@@ -78,13 +78,9 @@ class ChatListHeader extends StatelessWidget {
   }
 
   void _navigateWithSlideAnimation(BuildContext context) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return const SwipeToDismissWrap(child: Search());
-        },
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(TwakeCupertinoPageRoute(builder: (_) => const Search()));
   }
 
   Widget _normalModeWidgetWeb(BuildContext context) {

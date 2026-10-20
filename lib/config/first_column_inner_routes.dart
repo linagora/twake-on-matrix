@@ -4,6 +4,7 @@ import 'package:twake_chat/pages/new_private_chat/new_private_chat.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/cupertino.dart';
 
 class FirstColumnInnerRoutes {
@@ -52,7 +53,7 @@ class FirstColumnInnerRoutes {
   }
 
   static PageRoute<dynamic> _defaultPageRoute(Widget widget) {
-    return CupertinoPageRoute(
+    return TwakeCupertinoPageRoute(
       builder: (context) {
         return widget;
       },
