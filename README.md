@@ -337,9 +337,9 @@ Every now and then, manually scroll through the app using your mouse to make sur
 
 #### Build web Docker image
 
-The image is built without SSH and without a forced `--platform`: the
-`web-builder` stage builds natively for the platform of its base image, and the
-final nginx stage carries platform-neutral web assets. CI builds and pushes
+The image is built without SSH. The `web-builder` stage is pinned to
+`$BUILDPLATFORM`: it runs once, natively on the build host, and the final nginx
+stage carries platform-neutral web assets. CI builds and pushes
 `linux/amd64` and `linux/arm64` variants (see
 [`.github/workflows/image.yaml`](.github/workflows/image.yaml)).
 
