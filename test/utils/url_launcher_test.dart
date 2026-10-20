@@ -120,6 +120,8 @@ void main() {
       'intent://scan/#Intent;scheme=zxing;package=com.example;end',
       'content://com.example.provider/secret',
       'android-app://com.example/https/example.com/path',
+      'twake.chat://redirect',
+      'twake.chat://login',
     ]) {
       testWidgets('WHEN $url is tapped\n'
           'THEN nothing is launched and a message is shown', (tester) async {

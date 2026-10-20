@@ -191,7 +191,7 @@ class ChatGroupDetailRobot extends CoreRobot
         )
         .first;
     await $.tester.tapAt(paragraph.localToGlobal(box.toRect().center));
-    await $.pump(const Duration(milliseconds: 500));
+    await $.pump();
   }
 
   Future<void> expectSnackShown(

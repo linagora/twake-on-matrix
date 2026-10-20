@@ -1,3 +1,5 @@
+import 'package:twake_chat/config/app_config.dart';
+
 const _fileExtensions = {
   // Documents
   'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
@@ -50,13 +52,17 @@ bool isFilenameUrl(String? url) {
 }
 
 // `intent`, `content` and `android-app` let a link drive Android components.
+// The app's own scheme would reopen Twake with the same link, in a loop.
 const _blockedSchemes = {
   'file',
   'javascript',
+  'vbscript',
   'data',
+  'blob',
   'intent',
   'content',
   'android-app',
+  AppConfig.appOpenUrlScheme,
 };
 
 const _schemesWithoutAuthority = {'mailto', 'tel', 'sms', 'geo'};

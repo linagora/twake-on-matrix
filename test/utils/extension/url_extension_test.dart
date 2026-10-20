@@ -169,6 +169,9 @@ void main() {
       'intent://scan/#Intent;scheme=zxing;package=com.example;end',
       'content://com.example.provider/secret',
       'android-app://com.example/https/example.com/path',
+      'vbscript:msgbox(1)',
+      'blob:https://example.com/uuid',
+      'twake.chat://redirect',
     ]) {
       test('GIVEN $url\nTHEN returns true', () {
         expect(isBlockedSchemeUri(Uri.parse(url)), isTrue);
