@@ -4,7 +4,8 @@
 # Usage:
 #   scripts/migration_status.sh                 print the metrics of the working tree
 #   scripts/migration_status.sh --check <ref>   fail if a legacy metric grew since <ref>
-#   scripts/migration_status.sh --write         refresh the table in MIGRATION_STATUS.md
+#   scripts/migration_status.sh --write         refresh the table in MIGRATION_STATUS.md,
+#                                               on an up-to-date main only
 #
 # Only tracked files are measured: `git add` new files before a check.
 
@@ -14,8 +15,9 @@ cd "$(git rev-parse --show-toplevel)"
 
 STATUS_FILE="MIGRATION_STATUS.md"
 EXCLUDES=(':!*.g.dart' ':!*.freezed.dart' ':!*.mocks.dart')
-# Riverpod providers that wrap a GetIt registration on purpose.
-BRIDGES=(':!*.provider.dart' ':!*_providers.dart')
+# Riverpod providers next to their implementation; they may wrap a GetIt
+# registration on purpose (ADR 0037 §3).
+BRIDGES=(':!*.provider.dart')
 
 # Legacy metrics: a pull request may not increase them.
 LEGACY=(matrix_of get_it_lookups get_it_registrations stream_either dartz_imports app_state_files)
@@ -25,12 +27,12 @@ PROGRESS=(get_it_bridges riverpod_providers notifiers consumer_widgets stateful_
 label() {
   case "$1" in
     matrix_of) echo '`Matrix.of` / `Matrix.read` calls' ;;
-    get_it_lookups) echo '`getIt` lookups outside providers' ;;
+    get_it_lookups) echo '`getIt` uses outside `*.provider.dart`' ;;
     get_it_registrations) echo '`getIt.register*` calls' ;;
     stream_either) echo '`Stream<Either<…>>`' ;;
     dartz_imports) echo 'Files importing `dartz`' ;;
     app_state_files) echo 'Files in `lib/domain/app_state/`' ;;
-    get_it_bridges) echo '`getIt` lookups inside providers (bridges)' ;;
+    get_it_bridges) echo '`getIt` uses in `*.provider.dart` (bridges)' ;;
     riverpod_providers) echo '`@riverpod` providers' ;;
     notifiers) echo 'Notifier classes' ;;
     consumer_widgets) echo 'Consumer widgets' ;;
@@ -65,6 +67,17 @@ grep_or_none() {
   [ "$status" -le 1 ]
 }
 
+# Counts the lines that use `getIt`, other than imports and registrations.
+# The word is matched alone: `dart format` often puts `.get<X>()` on the next
+# line.
+count_get_it() {
+  local ref="$1"
+  shift
+  grep_or_none -h "$ref" '(^|[^A-Za-z0-9_.])getIt([^A-Za-z0-9_]|$)' "$@" |
+    awk '!/^[[:space:]]*import / && !/getIt[[:space:]]*\.[[:space:]]*register/' |
+    wc -l | tr -d ' '
+}
+
 count_tree() {
   local ref="$1" dir="$2"
   if [ -n "$ref" ]; then
@@ -76,15 +89,14 @@ count_tree() {
 
 metric() {
   local ref="$1" name="$2"
-  local get_it='getIt\.get|getIt<|getIt\(\)'
   case "$name" in
     matrix_of) count_lines "$ref" 'Matrix\.(of|read)\(' lib "${EXCLUDES[@]}" ;;
-    get_it_lookups) count_lines "$ref" "$get_it" lib ':!lib/di/' "${EXCLUDES[@]}" "${BRIDGES[@]}" ;;
+    get_it_lookups) count_get_it "$ref" lib ':!lib/di/' "${EXCLUDES[@]}" "${BRIDGES[@]}" ;;
     get_it_registrations) count_lines "$ref" '\.register(Factory|Singleton|LazySingleton)' lib "${EXCLUDES[@]}" ;;
     stream_either) count_lines "$ref" 'Stream<Either<' lib "${EXCLUDES[@]}" ;;
     dartz_imports) count_files "$ref" "package:dartz/" lib "${EXCLUDES[@]}" ;;
     app_state_files) count_tree "$ref" lib/domain/app_state ;;
-    get_it_bridges) count_lines "$ref" "$get_it" '*.provider.dart' '*_providers.dart' "${EXCLUDES[@]}" ;;
+    get_it_bridges) count_get_it "$ref" 'lib/*.provider.dart' ;;
     riverpod_providers) count_lines "$ref" '^@(riverpod|Riverpod\()' lib "${EXCLUDES[@]}" ;;
     notifiers) count_lines "$ref" 'extends _\$[A-Za-z0-9]+' lib "${EXCLUDES[@]}" ;;
     consumer_widgets) count_lines "$ref" 'extends (ConsumerWidget|ConsumerStatefulWidget)([^A-Za-z0-9_]|$)' lib "${EXCLUDES[@]}" ;;
@@ -135,10 +147,14 @@ check() {
 
 write() {
   local begin='<!-- metrics:begin -->' end='<!-- metrics:end -->' tmp
+  if ! grep -qxF "$begin" "$STATUS_FILE" || ! grep -qxF "$end" "$STATUS_FILE"; then
+    echo "$STATUS_FILE has no $begin / $end markers." >&2
+    exit 1
+  fi
   tmp=$(mktemp)
   {
     echo "$begin"
-    echo "_Measured on $(git log -1 --format=%cs) at \`$(git rev-parse --short HEAD)\` by \`scripts/migration_status.sh --write\`._"
+    echo "_Measured on $(date +%F) by \`scripts/migration_status.sh --write\`._"
     echo
     table
     echo "$end"

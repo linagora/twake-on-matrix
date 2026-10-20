@@ -4,7 +4,7 @@
 > **Last updated**: 2026-03-27
 > **Status**: Draft — pending decisions on open questions
 > **Superseded**: the phases and timeline are replaced by [04_plan_v2.md](./04_plan_v2.md); the open questions are answered by [ADR 0037](../adr/0037-riverpod-migration-rules.md)
-> **Reference document**: [GUIDELINES.md](../../GUIDELINES.md)
+> **Reference document**: [GUIDELINES.md](https://github.com/linagora/twake-flutter-guidelines/blob/main/GUIDELINES.md)
 
 ---
 

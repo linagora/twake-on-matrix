@@ -3,7 +3,7 @@
 > These points must be decided before or during Phase 0. They impact the entire migration.
 > See [01_migration_plan.md](./01_migration_plan.md) for the full plan.
 >
-> **Proposed answers**: [ADR 0037](../adr/0037-riverpod-migration-rules.md) §3.
+> **Proposed answers**: [ADR 0037](../adr/0037-riverpod-migration-rules.md) §4.
 
 ---
 

@@ -4,16 +4,20 @@ Plan: [docs/migration/04_plan_v2.md](docs/migration/04_plan_v2.md) ·
 Rules: [ADR 0037](docs/adr/0037-riverpod-migration-rules.md)
 
 A pull request may not increase the first table: the `Riverpod migration`
-workflow compares it with the base branch. Run `scripts/migration_status.sh`
-for live numbers.
+workflow compares it with the base branch and shows both in its summary. Run
+`scripts/migration_status.sh` for live numbers.
+
+The tables below are a snapshot, refreshed with
+`scripts/migration_status.sh --write` on an up-to-date `main`. A pull request
+updates only the Modules table.
 
 <!-- metrics:begin -->
-_Measured on 2026-10-20 at `7d123675f` by `scripts/migration_status.sh --write`._
+_Measured on 2026-10-20 by `scripts/migration_status.sh --write`._
 
 | Metric | Count |
 |---|---:|
 | `Matrix.of` / `Matrix.read` calls | 288 |
-| `getIt` lookups outside providers | 231 |
+| `getIt` uses outside `*.provider.dart` | 347 |
 | `getIt.register*` calls | 145 |
 | `Stream<Either<…>>` | 56 |
 | Files importing `dartz` | 121 |
@@ -21,7 +25,7 @@ _Measured on 2026-10-20 at `7d123675f` by `scripts/migration_status.sh --write`.
 
 | Progress | Count |
 |---|---:|
-| `getIt` lookups inside providers (bridges) | 8 |
+| `getIt` uses in `*.provider.dart` (bridges) | 0 |
 | `@riverpod` providers | 26 |
 | Notifier classes | 7 |
 | Consumer widgets | 19 |

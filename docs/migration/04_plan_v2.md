@@ -41,33 +41,42 @@ Every pull request is written by an agent, reviewed by the `zeus` and
 - [ ] The app's `ProviderContainer`, created in `main` with automatic retry
       off ([Automatic retry][retry]) and given to the tree with
       `UncontrolledProviderScope`
-- [ ] `matrixClientProvider`: the active, non-null `Client`, still fed by
-      `MatrixState`, the tolerated exception until Step 4 (ADR 0037 §3)
+- [ ] `matrixClientProvider`: the active, non-null `Client` for screens
+      behind login, read from `activeMatrixClientProvider`, which
+      `MatrixState` feeds: the tolerated exception until Step 4
+      (ADR 0037 §3, §4 Q1)
 - [ ] One bridge provider per GetIt registration, generated next to each
       implementation
 - [ ] Patrol scenario: log in, add a second account, switch, log out
 
 ## Step 2 — Mechanical sweep
 
-One pull request per area, one pattern each, areas that nobody is changing:
+One pull request per area, one pattern each, areas that nobody is changing.
+The sweep covers `lib/pages`, `lib/widgets` and `lib/presentation`, where a
+`ref` is at hand:
 
 | Area | `Matrix.of` | `getIt` |
 |---|---:|---:|
-| `pages/settings_dashboard` | 53 | 17 |
-| `pages/chat` | 37 | 35 |
-| `pages/chat_list` | 24 | 4 |
-| `presentation/mixins` | 13 | 17 |
-| Other `pages/` and `widgets/` | ~150 | ~150 |
+| `pages/settings_dashboard` | 53 | 23 |
+| `pages/chat` | 37 | 42 |
+| `pages/chat_list` | 24 | 5 |
+| `presentation/mixins` | 13 | 24 |
+| Other `pages/`, `widgets/`, `presentation/` | 155 | 124 |
+
+The `getIt` lookups in `lib/data`, `lib/domain` and `lib/utils` (about 125)
+are fields of repositories, datasources and interactors: they need
+constructor injection and move with their module in Step 3.
 
 - `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
   `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
 - `getIt.get<X>()` → `ref.read(xProvider)`
 - Every other `MatrixState` member read by the UI (`shareContent`,
-  `showToMBootstrap`, `loginType`, `accountBundles`, `voipPlugin`…) → its own
+  `showToMBootstrap`, `loginType`, `accountBundles`…) → its own
   provider, one small pull request each
 - Rename the existing `ViewModel`s to `Controller`s
 
-Measured on 2026-10-20; areas overlap, the totals are in `MIGRATION_STATUS.md`.
+Measured on 2026-10-20 with `scripts/migration_status.sh`'s patterns; the
+totals are in `MIGRATION_STATUS.md`.
 
 ## Step 3 — Module migrations
 

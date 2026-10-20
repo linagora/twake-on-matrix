@@ -57,9 +57,13 @@ Before it exists, leave these calls alone; a new controller takes the
 
 ### `getIt.get<X>()`
 
+Only in `lib/pages`, `lib/widgets` and `lib/presentation`. A `getIt` field
+in `lib/data`, `lib/domain` or `lib/utils` becomes a constructor parameter
+during its module's migration.
+
 - Find or add the provider of `X` in `<implementation of X>.provider.dart`.
-  While `X` has legacy consumers it returns `getIt.get<X>()`, with a comment
-  naming them.
+  While `X` has legacy consumers it returns `getIt.get<X>()`, with a
+  `// TODO: [transitional]` comment naming them.
 - Rewrite the call site to `ref.read(xProvider)` (`ref.watch` in `build()`).
 
 ### Imports
@@ -79,9 +83,9 @@ In this order, one commit per step:
    request; otherwise add a use case next to it.
 3. **Controller**: `@riverpod class XxxController extends _$XxxController`;
    `build()` returns `T`, `Future<T>` or `Stream<T>` like its source
-   (GUIDELINES.md §2.5.0bis). State `XxxState` with `@freezed`. After every
-   `await`, `if (!ref.mounted) return;` before touching `state`
-   ([`Ref.mounted`][mounted]). No side effect in `build()`
+   ([GUIDELINES.md][guidelines] §2.5.0bis). State `XxxState` with
+   `@freezed`. After every `await`, `if (!ref.mounted) return;` before
+   touching `state` ([`Ref.mounted`][mounted]). No side effect in `build()`
    ([DO/DON'T][do-dont]).
 4. **Screen**: Consumer widget; `ref.watch` the state, `ref.read(...notifier)`
    in callbacks; no business logic. Ephemeral UI state (text controllers,
@@ -94,29 +98,31 @@ In this order, one commit per step:
    tests still pass.
 6. **Cleanup**: delete the module's `app_state` files, mixins, unused
    interactors and their GetIt registrations.
-7. Update the module row in `MIGRATION_STATUS.md` and run
-   `scripts/migration_status.sh --write`.
+7. Update the module row in the Modules table of `MIGRATION_STATUS.md`.
+   Leave the metrics: they are refreshed on `main`.
 
 ## 5. Before opening the pull request
 
 ```bash
 flutter pub get
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 flutter analyze
 dart run custom_lint
 flutter test
-git add -N . && scripts/migration_status.sh --check origin/main
+git add -N <new files>
+scripts/migration_status.sh --check origin/main
 ```
 
 Never run `build_runner` with `--build-filter` and
 `--delete-conflicting-outputs` together: it deletes every generated file and
 rebuilds only the filtered ones.
 
-Then run the `zeus` agent (GUIDELINES.md) and the `migration-reviewer` agent
-on the branch, fix their findings, and put both summaries in the pull request
-description.
+Then run the `zeus` agent ([GUIDELINES.md][guidelines]) and the
+`migration-reviewer` agent on the branch, fix their findings, and put both
+summaries in the pull request description.
 
-Commit and pull request title: `type(TW-XXXX): Short subject`, no body.
+Commit message: `type(TW-XXXX): Short subject`, no body. The pull request
+takes the same title; its description holds the two agent summaries.
 For a sweep: `refactor(TW-XXXX): Read the Matrix client from Riverpod in settings`.
 
 ## Riverpod references
@@ -129,3 +135,4 @@ For a sweep: `refactor(TW-XXXX): Read the Matrix client from Riverpod in setting
 [mounted]: https://riverpod.dev/docs/whats_new#refmounted
 [container-test]: https://riverpod.dev/docs/whats_new#providercontainertest
 [do-dont]: https://riverpod.dev/docs/root/do_dont
+[guidelines]: https://github.com/linagora/twake-flutter-guidelines/blob/main/GUIDELINES.md

@@ -7,15 +7,15 @@ color: cyan
 
 You review a Riverpod migration diff. You check it against
 `docs/adr/0037-riverpod-migration-rules.md` and the checklist below, nothing
-else; `zeus` covers GUIDELINES.md.
+else; `zeus` covers [GUIDELINES.md][guidelines].
 
 ## Steps
 
 1. Read `docs/adr/0037-riverpod-migration-rules.md` and
    `docs/migration/04_plan_v2.md`.
 2. Pick the base: `origin/main` unless told otherwise. Use it as `<base>` in
-   every command below. Find the diff with `git diff <base>...HEAD`. Ignore `*.g.dart`, `*.freezed.dart`,
-   `*.mocks.dart`.
+   every command below. Find the diff with `git diff <base>...HEAD`. Ignore
+   `*.g.dart`, `*.freezed.dart`, `*.mocks.dart`.
 3. Run `scripts/migration_status.sh --check <base>` (after `git add -N`
    on new files) and quote its table.
 4. Classify the pull request: **mechanical** (one pattern applied to many
@@ -30,8 +30,10 @@ else; `zeus` covers GUIDELINES.md.
 
 ### Every pull request
 - No legacy metric grows (step 3).
-- No `Matrix.of`, `getIt` or `package:matrix` import added in `lib/pages`,
-  `lib/widgets` or `lib/presentation`.
+- No `Matrix.of` or `getIt` added outside a `*.provider.dart` bridge.
+- No `package:matrix` import added in `lib/pages`, `lib/widgets` or
+  `lib/presentation`, except in a controller that takes the `Client` as a
+  provider parameter while `matrixClientProvider` does not exist.
 - `ref.watch` only in `build()` and in dependency providers; `ref.read` in
   callbacks, methods and `initState`; `ref.listenManual` cancelled in
   `dispose()`.
@@ -84,12 +86,13 @@ else; `zeus` covers GUIDELINES.md.
 - Under about 500 lines of non-generated diff.
 
 ### Bridges
-- A provider returning `getIt.get<X>()` names the legacy consumers that keep
-  `X` in GetIt.
+- A provider returning `getIt.get<X>()` lives in
+  `<implementation of X>.provider.dart`, carries a `// TODO: [transitional]`
+  comment and names the legacy consumers that keep `X` in GetIt.
 - A value still owned by legacy code is pushed into its provider by its owner
-  and says it is a bridge. The only widget allowed to push is `MatrixState`
-  (active client, homeserver summary) until Step 4; a push from any other
-  widget is BLOCKING ([DO/DON'T][do-dont]).
+  and carries a `// TODO: [transitional]` comment. The only widget allowed
+  to push is `MatrixState` (active client, homeserver summary) until Step 4;
+  a push from any other widget is BLOCKING ([DO/DON'T][do-dont]).
 - Code outside the widget tree reads providers only through the app's
   container, never through a container of its own.
 
@@ -123,3 +126,4 @@ Cite these links in a finding when the rule comes from them.
 [pause]: https://riverpod.dev/docs/whats_new#listeners-inside-widgets-that-are-not-visible-are-now-paused
 [container-test]: https://riverpod.dev/docs/whats_new#providercontainertest
 [do-dont]: https://riverpod.dev/docs/root/do_dont
+[guidelines]: https://github.com/linagora/twake-flutter-guidelines/blob/main/GUIDELINES.md

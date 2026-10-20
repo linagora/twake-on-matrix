@@ -12,16 +12,18 @@ The Riverpod migration plan (`docs/migration/01_migration_plan.md`) has been a
 draft since March. Its open questions were never settled, so the code drifted:
 
 - Notifiers are named `ViewModel` on `main` and `Controller` on
-  `contacts/migration`, while GUIDELINES.md §3.2 says `Controller`.
+  `contacts/migration`, while [GUIDELINES.md][guidelines] §3.2 says
+  `Controller`.
 - Providers live either in `lib/pages/<feature>/providers/` or next to their
   implementation in `*.provider.dart`.
 - States are `@freezed` or hand-written sealed classes.
 - `MatrixState`, a widget, pushes values into providers
-  (`loginHomeserverSummaryProvider`, `activeMatrixClientProvider`), although
-  the plan only allows Riverpod to read from GetIt.
+  (`loginHomeserverSummaryProvider` on `main`, `activeMatrixClientProvider`
+  in #3459), although the plan only allows Riverpod to read from GetIt.
 
-Meanwhile `Matrix.of` calls grew from 246 to 288. Nothing stops new legacy
-code from being added.
+Meanwhile the legacy did not shrink: `Matrix.of` and `Matrix.read` calls were
+288 when the plan was written and are 288 today, with a peak at 295 in June.
+Nothing stops new legacy code from being added.
 
 The plan was also written before Riverpod 3.0, which retries failing
 providers, pauses hidden listeners and throws on disposed refs
@@ -34,15 +36,16 @@ providers, pauses hidden listeners and throws on disposed refs
 - Providers use code generation (`@riverpod`), the way the Riverpod
   documentation recommends ([About code generation][codegen]).
 - A Notifier is a `XxxController`; its state is a `XxxState`
-  (GUIDELINES.md §3.2). Existing `ViewModel`s are renamed as their module is
-  migrated.
+  ([GUIDELINES.md][guidelines] §3.2). Existing `ViewModel`s are renamed as
+  their module is migrated.
 - States are `@freezed`; a state with several shapes is a `@freezed` sealed
-  union (GUIDELINES.md §9.3). Riverpod 3 notifies listeners only when the new
-  state is not `==` to the old one, which `@freezed` implements
+  union ([GUIDELINES.md][guidelines] §9.3). Riverpod 3 notifies listeners
+  only when the new state is not `==` to the old one, which `@freezed`
+  implements
   ([All `updateShouldNotify` now use `==`][whats-new-equality]).
 - A dependency provider (datasource, repository, use case, service) lives in
   `<implementation>.provider.dart`, next to its implementation
-  (GUIDELINES.md §2.7). A controller lives next to its screen.
+  ([GUIDELINES.md][guidelines] §2.7). A controller lives next to its screen.
 - Ephemeral UI state stays in the widget: text controllers, selection,
   animations, form fields ([DO/DON'T: avoid using providers for ephemeral
   state][do-dont]).
@@ -79,18 +82,26 @@ providers, pauses hidden listeners and throws on disposed refs
   memory and does not see it.
 - Riverpod may read from GetIt: a provider that returns `getIt.get<X>()` is
   allowed while `X` still has legacy consumers, with a comment naming them.
+  It lives in `<implementation of X>.provider.dart`; the ratchet counts every
+  other `getIt` use as legacy, including the `lib/pages/**/*_providers.dart`
+  bridges that exist today.
 - A value still owned by legacy code is pushed into its provider by its
   owner. Providers are not initialized from widgets ([DO/DON'T: avoid
   initializing providers in a widget][do-dont]), with one tolerated exception:
   `MatrixState` keeps pushing the active client and the homeserver summary
-  until Step 4, because it is where the active account is chosen today. Each
-  push is marked as a bridge. No other widget pushes into a provider.
+  until Step 4, because it is where the active account is chosen today. No
+  other widget pushes into a provider.
+- Every bridge carries a `// TODO: [transitional]` comment, the marker the
+  code already uses, so `git grep "TODO: \[transitional\]"` lists them.
 
 ### 4. Open questions of the plan
 
-- **Q1**: a single `matrixClientProvider` exposes the active `Client`. It is
-  fed by `MatrixState` until the choice of the active account and client
-  creation move to Riverpod (last step).
+- **Q1**: a single `matrixClientProvider` exposes the active, non-null
+  `Client` to screens behind login. It reads `activeMatrixClientProvider`
+  (#3459), which `MatrixState` feeds; nothing else reads
+  `activeMatrixClientProvider`. When the choice of the active account and
+  client creation move to Riverpod (last step), `matrixClientProvider` keeps
+  its name and `activeMatrixClientProvider` goes.
 - **Q2**: an interactor is rewritten in place to `Future<T>` + typed
   exceptions when its consumers are migrated in the same pull request.
   Otherwise a `UseCase` is added next to it and the interactor is deleted with
@@ -102,15 +113,20 @@ providers, pauses hidden listeners and throws on disposed refs
 ### 5. Scope per module
 
 A service is created only when it orchestrates several use cases or holds
-state (GUIDELINES.md §2.3.5). A module with one use case goes
+state ([GUIDELINES.md][guidelines] §2.3.5). A module with one use case goes
 controller → use case → repository → datasource.
 
 ### 6. Guardrails
 
 - The `Riverpod migration` workflow fails a pull request that increases a
-  legacy metric: `Matrix.of`, GetIt lookups outside providers, GetIt
+  legacy metric: `Matrix.of`, `getIt` uses outside `*.provider.dart`, GetIt
   registrations, `Stream<Either>`, `dartz` imports,
   `lib/domain/app_state/` files.
+- The workflow compares a pull request with `main` as it is when the check
+  runs. Two pull requests that each add one use and are checked before either
+  merges both pass, and the growth stays. The next pull request starts from
+  the higher number; the reviewer agents catch the additions, and
+  `MIGRATION_STATUS.md` shows the drift.
 - `riverpod_lint` checks the rules the Riverpod documentation recommends
   ([DO/DON'T][do-dont], [riverpod_lint][riverpod-lint]). Version 3.0.x runs
   through `custom_lint` (`dart run custom_lint`) and follows the `riverpod`
@@ -128,13 +144,14 @@ controller → use case → repository → datasource.
 
 ## Consequences
 
-- The plan's 6 to 10 months shrink: most `Matrix.of` calls (152 of them only
-  read `.client`) and every `getIt.get` call site can be rewritten
-  mechanically.
+- The plan's 6 to 10 months shrink: in `lib/pages`, `lib/widgets` and
+  `lib/presentation`, most `Matrix.of` calls (152 of them only read
+  `.client`) and the `getIt` lookups can be rewritten mechanically. The
+  lookups in `lib/data`, `lib/domain` and `lib/utils` (about 125) need
+  constructor injection and go with their module.
 - Six existing `ViewModel`s and their tests are renamed.
-- Bridges exist until the last step; they are listed by the `getIt` lookups
-  inside providers metric, by the writes through the app container and by
-  `MatrixState`'s marked pushes.
+- Bridges exist until the last step; `git grep "TODO: \[transitional\]"`
+  lists them.
 - `MatrixState` stays a widget that initializes providers until Step 4,
   against the Riverpod recommendation; the exception ends with it.
 - Turning retry off changes how today's providers react to errors; their
@@ -146,6 +163,7 @@ controller → use case → repository → datasource.
 - [Riverpod — DO/DON'T][do-dont]
 - [Riverpod — About code generation][codegen]
 - [riverpod_lint][riverpod-lint]
+- [GUIDELINES.md][guidelines], in `linagora/twake-flutter-guidelines`
 
 [whats-new]: https://riverpod.dev/docs/whats_new
 [whats-new-retry]: https://riverpod.dev/docs/whats_new#automatic-retry
@@ -157,3 +175,4 @@ controller → use case → repository → datasource.
 [do-dont]: https://riverpod.dev/docs/root/do_dont
 [codegen]: https://riverpod.dev/docs/concepts/about_code_generation
 [riverpod-lint]: https://pub.dev/packages/riverpod_lint
+[guidelines]: https://github.com/linagora/twake-flutter-guidelines/blob/main/GUIDELINES.md
