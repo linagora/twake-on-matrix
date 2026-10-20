@@ -45,8 +45,6 @@ Every pull request is written by an agent, reviewed by the `zeus` and
       behind login, read from `activeMatrixClientProvider`, which
       `MatrixState` feeds: the tolerated exception until Step 4
       (ADR 0037 §3, §4 Q1)
-- [ ] One bridge provider per GetIt registration, generated next to each
-      implementation
 - [ ] Patrol scenario: log in, add a second account, switch, log out
 
 ## Step 2 — Mechanical sweep

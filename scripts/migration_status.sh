@@ -15,9 +15,6 @@ cd "$(git rev-parse --show-toplevel)"
 
 STATUS_FILE="MIGRATION_STATUS.md"
 EXCLUDES=(':!*.g.dart' ':!*.freezed.dart' ':!*.mocks.dart')
-# Riverpod providers next to their implementation; they may wrap a GetIt
-# registration on purpose (ADR 0037 §3).
-BRIDGES=(':!*.provider.dart')
 
 # Legacy metrics: a pull request may not increase them.
 LEGACY=(matrix_of get_it_lookups get_it_registrations stream_either dartz_imports app_state_files)
@@ -27,12 +24,12 @@ PROGRESS=(get_it_bridges riverpod_providers notifiers consumer_widgets stateful_
 label() {
   case "$1" in
     matrix_of) echo '`Matrix.of` / `Matrix.read` calls' ;;
-    get_it_lookups) echo '`getIt` uses outside `*.provider.dart`' ;;
+    get_it_lookups) echo '`getIt` uses, bridges included' ;;
     get_it_registrations) echo '`getIt.register*` calls' ;;
     stream_either) echo '`Stream<Either<…>>`' ;;
     dartz_imports) echo 'Files importing `dartz`' ;;
     app_state_files) echo 'Files in `lib/domain/app_state/`' ;;
-    get_it_bridges) echo '`getIt` uses in `*.provider.dart` (bridges)' ;;
+    get_it_bridges) echo '…of which in `*.provider.dart` bridges' ;;
     riverpod_providers) echo '`@riverpod` providers' ;;
     notifiers) echo 'Notifier classes' ;;
     consumer_widgets) echo 'Consumer widgets' ;;
@@ -91,7 +88,7 @@ metric() {
   local ref="$1" name="$2"
   case "$name" in
     matrix_of) count_lines "$ref" 'Matrix\.(of|read)\(' lib "${EXCLUDES[@]}" ;;
-    get_it_lookups) count_get_it "$ref" lib ':!lib/di/' "${EXCLUDES[@]}" "${BRIDGES[@]}" ;;
+    get_it_lookups) count_get_it "$ref" lib ':!lib/di/' "${EXCLUDES[@]}" ;;
     get_it_registrations) count_lines "$ref" '\.register(Factory|Singleton|LazySingleton)' lib "${EXCLUDES[@]}" ;;
     stream_either) count_lines "$ref" 'Stream<Either<' lib "${EXCLUDES[@]}" ;;
     dartz_imports) count_files "$ref" "package:dartz/" lib "${EXCLUDES[@]}" ;;

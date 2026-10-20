@@ -69,7 +69,8 @@ during its module's migration.
 ### Imports
 
 A file that imports `package:provider` imports Riverpod with `show`:
-`import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget;`
+`import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, ConsumerWidget;`,
+keeping only the names the file uses.
 
 ## 4. Module recipe
 
@@ -85,7 +86,7 @@ In this order, one commit per step:
    `build()` returns `T`, `Future<T>` or `Stream<T>` like its source
    ([GUIDELINES.md][guidelines] §2.5.0bis). State `XxxState` with
    `@freezed`. After every `await`, `if (!ref.mounted) return;` before
-   touching `state` ([`Ref.mounted`][mounted]). No side effect in `build()`
+   touching `state` or `ref` ([`Ref.mounted`][mounted]). No side effect in `build()`
    ([DO/DON'T][do-dont]).
 4. **Screen**: Consumer widget; `ref.watch` the state, `ref.read(...notifier)`
    in callbacks; no business logic. Ephemeral UI state (text controllers,

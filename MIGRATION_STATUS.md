@@ -17,7 +17,7 @@ _Measured on 2026-10-20 by `scripts/migration_status.sh --write`._
 | Metric | Count |
 |---|---:|
 | `Matrix.of` / `Matrix.read` calls | 288 |
-| `getIt` uses outside `*.provider.dart` | 347 |
+| `getIt` uses, bridges included | 347 |
 | `getIt.register*` calls | 145 |
 | `Stream<Either<…>>` | 56 |
 | Files importing `dartz` | 121 |
@@ -25,7 +25,7 @@ _Measured on 2026-10-20 by `scripts/migration_status.sh --write`._
 
 | Progress | Count |
 |---|---:|
-| `getIt` uses in `*.provider.dart` (bridges) | 0 |
+| …of which in `*.provider.dart` bridges | 0 |
 | `@riverpod` providers | 26 |
 | Notifier classes | 7 |
 | Consumer widgets | 19 |

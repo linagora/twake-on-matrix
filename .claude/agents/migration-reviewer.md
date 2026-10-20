@@ -30,7 +30,8 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 
 ### Every pull request
 - No legacy metric grows (step 3).
-- No `Matrix.of` or `getIt` added outside a `*.provider.dart` bridge.
+- No `Matrix.of` added; no `getIt` added except in a `*.provider.dart`
+  bridge that replaces at least one lookup.
 - No `package:matrix` import added in `lib/pages`, `lib/widgets` or
   `lib/presentation`, except in a controller that takes the `Client` as a
   provider parameter while `matrixClientProvider` does not exist.

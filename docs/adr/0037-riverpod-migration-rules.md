@@ -82,9 +82,10 @@ providers, pauses hidden listeners and throws on disposed refs
   memory and does not see it.
 - Riverpod may read from GetIt: a provider that returns `getIt.get<X>()` is
   allowed while `X` still has legacy consumers, with a comment naming them.
-  It lives in `<implementation of X>.provider.dart`; the ratchet counts every
-  other `getIt` use as legacy, including the `lib/pages/**/*_providers.dart`
-  bridges that exist today.
+  It lives in `<implementation of X>.provider.dart` and is created by the
+  pull request that first needs it. The ratchet counts it like any other
+  `getIt` use: a bridge replaces one or more lookups, so the count never
+  grows, and no file name can hide a lookup.
 - A value still owned by legacy code is pushed into its provider by its
   owner. Providers are not initialized from widgets ([DO/DON'T: avoid
   initializing providers in a widget][do-dont]), with one tolerated exception:
@@ -119,7 +120,7 @@ controller → use case → repository → datasource.
 ### 6. Guardrails
 
 - The `Riverpod migration` workflow fails a pull request that increases a
-  legacy metric: `Matrix.of`, `getIt` uses outside `*.provider.dart`, GetIt
+  legacy metric: `Matrix.of`, `getIt` uses (bridges included), GetIt
   registrations, `Stream<Either>`, `dartz` imports,
   `lib/domain/app_state/` files.
 - The workflow compares a pull request with `main` as it is when the check
