@@ -23,3 +23,24 @@ section found later, under an entry, is a `###` heading with its own date.
 
 This file holds the large product and design decisions; `docs/adr/` keeps
 architecture and purely technical choices, the fundamental changes.
+
+## D2. Android navigation bar: one bottom inset for every page (proposed by Johann, 2026-10-20)
+
+On Android with 3-button navigation, every page keeps its bottom content above
+the system navigation bar, through one bottom inset at the app root (#3435).
+The strip under the content is always the `surface` color, whatever the page
+draws.
+
+Accepted trade-offs:
+
+- full-bleed dark screens (media viewer, image viewer) show a light strip at
+  the bottom in the light theme;
+- the barrier of a dialog or a bottom sheet stops above the strip instead of
+  covering it.
+
+The alternative, an inset on each page with bottom actions, renders these
+screens right but has to be repeated on every new page; missing it is what
+caused #3435.
+
+Unchanged: iOS, web, desktop and Android gesture navigation. Only the bottom is
+handled, since the app is locked to portrait.
