@@ -59,7 +59,8 @@ One pull request per area, one pattern each, areas that nobody is changing:
 | `presentation/mixins` | 13 | 17 |
 | Other `pages/` and `widgets/` | ~150 | ~150 |
 
-- `Matrix.of(context).client` → `ref.watch` / `ref.read(matrixClientProvider)`
+- `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
+  `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
 - `getIt.get<X>()` → `ref.read(xProvider)`
 - Every other `MatrixState` member read by the UI (`shareContent`,
   `showToMBootstrap`, `loginType`, `accountBundles`, `voipPlugin`…) → its own

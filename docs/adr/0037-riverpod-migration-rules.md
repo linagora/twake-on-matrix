@@ -61,7 +61,9 @@ providers, pauses hidden listeners and throws on disposed refs
 - **No legacy providers**: no `StateProvider`, `StateNotifierProvider` or
   `ChangeNotifierProvider` ([discouraged and moved to a different
   import][whats-new-legacy]).
-- **Tests** create their container with `ProviderContainer.test()`
+- **Tests** create their container with
+  `ProviderContainer.test(retry: (_, _) => null)`: a test container does not
+  inherit the app's retry setting
   ([`ProviderContainer.test`][whats-new-test]).
 - **Hidden widgets pause their listeners.** A provider read only by a hidden
   screen (an unread badge in another tab) stops updating until the screen is

@@ -87,7 +87,9 @@ In this order, one commit per step:
    in callbacks; no business logic. Ephemeral UI state (text controllers,
    selection, animations, form fields) stays in the widget
    ([DO/DON'T][do-dont]).
-5. **Tests**: controller tests with `ProviderContainer.test(overrides: …)`
+5. **Tests**: controller tests with
+   `ProviderContainer.test(retry: (_, _) => null, overrides: …)`, since a
+   test container does not inherit the app's retry setting
    ([`ProviderContainer.test`][container-test]); use case tests; existing
    tests still pass.
 6. **Cleanup**: delete the module's `app_state` files, mixins, unused

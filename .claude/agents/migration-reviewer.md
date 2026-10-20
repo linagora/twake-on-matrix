@@ -13,10 +13,10 @@ else; `zeus` covers GUIDELINES.md.
 
 1. Read `docs/adr/0037-riverpod-migration-rules.md` and
    `docs/migration/04_plan_v2.md`.
-2. Find the diff: the branch against `origin/main` unless told otherwise
-   (`git diff origin/main...HEAD`). Ignore `*.g.dart`, `*.freezed.dart`,
+2. Pick the base: `origin/main` unless told otherwise. Use it as `<base>` in
+   every command below. Find the diff with `git diff <base>...HEAD`. Ignore `*.g.dart`, `*.freezed.dart`,
    `*.mocks.dart`.
-3. Run `scripts/migration_status.sh --check origin/main` (after `git add -N`
+3. Run `scripts/migration_status.sh --check <base>` (after `git add -N`
    on new files) and quote its table.
 4. Classify the pull request: **mechanical** (one pattern applied to many
    files), **module** (one module through its layers), **end-to-end** (Patrol
@@ -52,8 +52,13 @@ else; `zeus` covers GUIDELINES.md.
 - No mutations or offline persistence (experimental), no `StateProvider`,
   `StateNotifierProvider` or `ChangeNotifierProvider`
   ([What's new in Riverpod 3.0][whats-new]).
-- `dart run custom_lint` reports nothing new.
-- No change in behaviour. Anything that is not a pure rewrite is a finding.
+- `dart run custom_lint` reports no finding that it does not also report on
+  `<base>`. The 6 findings on `main` (public getters of
+  `BootstrapViewModel` and of the verify device test, a scoped override in
+  `verify_device_screen_test.dart`) are known.
+- No unintended change in behaviour: what the user sees and the data sent
+  stay the same. The rewrites this checklist asks for (`Future<T>`, typed
+  exceptions, controllers) are not findings by themselves.
 
 ### Mechanical
 - The same rewrite everywhere; list every file that differs from the pattern.
@@ -72,8 +77,8 @@ else; `zeus` covers GUIDELINES.md.
 - Dependency providers sit in `<implementation>.provider.dart`.
 - The module's legacy is deleted: interactors without consumers, `app_state`
   files, mixins, GetIt registrations.
-- Controller tests use `ProviderContainer.test()` with overrides, not a
-  widget tree ([`ProviderContainer.test`][container-test]).
+- Controller tests use `ProviderContainer.test(retry: (_, _) => null)` with
+  overrides, not a widget tree ([`ProviderContainer.test`][container-test]).
 - A hidden screen does not rely on a provider updating while it is hidden
   ([paused listeners][pause]).
 - Under about 500 lines of non-generated diff.

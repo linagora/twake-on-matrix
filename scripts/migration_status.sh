@@ -43,21 +43,26 @@ label() {
 count_lines() {
   local ref="$1" pattern="$2"
   shift 2
-  if [ -n "$ref" ]; then
-    git grep -h -E "$pattern" "$ref" -- "$@" | wc -l | tr -d ' '
-  else
-    git grep -h -E "$pattern" -- "$@" | wc -l | tr -d ' '
-  fi
+  grep_or_none -h "$ref" "$pattern" "$@" | wc -l | tr -d ' '
 }
 
 count_files() {
   local ref="$1" pattern="$2"
   shift 2
+  grep_or_none -l "$ref" "$pattern" "$@" | wc -l | tr -d ' '
+}
+
+# `git grep` exits 1 when nothing matches: that is a count of zero, not an
+# error. Any other status still fails the script.
+grep_or_none() {
+  local mode="$1" ref="$2" pattern="$3" status=0
+  shift 3
   if [ -n "$ref" ]; then
-    git grep -l -E "$pattern" "$ref" -- "$@" | wc -l | tr -d ' '
+    git grep "$mode" -E "$pattern" "$ref" -- "$@" || status=$?
   else
-    git grep -l -E "$pattern" -- "$@" | wc -l | tr -d ' '
+    git grep "$mode" -E "$pattern" -- "$@" || status=$?
   fi
+  [ "$status" -le 1 ]
 }
 
 count_tree() {
