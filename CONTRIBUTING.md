@@ -105,3 +105,17 @@ What the issue is waiting for before someone can work on it.
 ### Adding a label
 
 Open a pull request on this file. A new area needs at least five issues to justify it.
+
+## Git workflow
+
+- Branch off `main`.
+- Keep your branch up to date by **rebasing** it on `main`, never by merging `main` into it:
+
+  ```bash
+  git fetch origin
+  git rebase origin/main
+  git push --force-with-lease
+  ```
+
+- A pull request must not contain merge commits. If one slipped in, rebase the branch on `main` to drop it.
+- Commit subjects follow `type(TW-XXXX): Subject`, for example `fix(TW-3435): Keep bottom actions above Android nav bar`.
