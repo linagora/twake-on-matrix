@@ -20,6 +20,7 @@ class ChatListBottomNavigator extends StatelessWidget {
         minHeight: ResponsiveUtils.heightBottomNavigation,
       ),
       padding: ChatListBottomNavigatorStyle.padding,
+      alignment: Alignment.center,
       color: Theme.of(context).colorScheme.surface,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
