@@ -254,12 +254,27 @@ extension LocalizedBody on Event {
 
   String getSelectedEventString(BuildContext context, Timeline timeline) {
     if (isCaptionModeOrReply()) {
-      return body;
+      return bodyWithoutReplyFallback;
     }
     return getDisplayEventWithoutEditEvent(timeline).calcLocalizedBodyFallback(
       MatrixLocals(L10n.of(context)!),
       hideReply: true,
     );
+  }
+
+  /// Removes the leading reply fallback and its blank separator line only,
+  /// so quote lines typed in the reply itself are preserved.
+  String get bodyWithoutReplyFallback {
+    final isFallbackPresent =
+        body.startsWith('> <@') || body.startsWith('> * <@');
+    if (!isReplyEvent() || !isFallbackPresent) return body;
+
+    final lines = body.split('\n');
+    final fallbackLength = lines.indexWhere((line) => !line.startsWith('> '));
+    if (fallbackLength == -1) return '';
+
+    final separatorLength = lines[fallbackLength].isEmpty ? 1 : 0;
+    return lines.skip(fallbackLength + separatorLength).join('\n');
   }
 
   bool isBubbleEventEncrypted({bool isThumbnail = true}) {
