@@ -40,7 +40,7 @@ jobs:
   # isolated job per file (own Synapse, own build), in parallel.
   discover:
     name: Discover targets
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Least privilege: this job only checks out the repo and globs test files.
     permissions:
       contents: read
@@ -82,7 +82,7 @@ jobs:
   patrol-web:
     name: "web — ${{ matrix.target }}"
     needs: discover
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Hard cap: Patrol's --web-timeout only bounds web-server startup, not test
     # execution, so a hung test has no effective timeout and would otherwise run
     # to the 6h default. Fail the job instead.
@@ -227,7 +227,7 @@ jobs:
         github.event_name == 'schedule' ||
         (github.event_name == 'workflow_dispatch' && inputs.run_web_perf)
       }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
@@ -370,7 +370,7 @@ jobs:
           )
         )
       }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     concurrency:
