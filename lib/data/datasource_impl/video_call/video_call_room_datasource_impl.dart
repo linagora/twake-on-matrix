@@ -36,21 +36,21 @@ class VideoCallRoomDatasourceImpl implements VideoCallRoomDatasource {
     } on TimeoutException catch (exception, stackTrace) {
       cancelToken.cancel();
       throw _toVideoCallException(exception, stackTrace);
-    } on Exception catch (exception, stackTrace) {
-      throw _toVideoCallException(exception, stackTrace);
+    } catch (error, stackTrace) {
+      throw _toVideoCallException(error, stackTrace);
     }
   }
 
   VideoCallException _toVideoCallException(
-    Exception exception,
+    Object error,
     StackTrace stackTrace,
   ) {
-    if (exception is DioException &&
-        _unavailableStatusCodes.contains(exception.response?.statusCode)) {
+    if (error is DioException &&
+        _unavailableStatusCodes.contains(error.response?.statusCode)) {
       Logs().w('VideoCallRoomDatasourceImpl::createRoom: not available');
       return const VideoCallRoomCreationUnavailableException();
     }
-    Logs().e('VideoCallRoomDatasourceImpl::createRoom', exception, stackTrace);
-    return VideoCallRoomCreationFailedException(cause: exception);
+    Logs().e('VideoCallRoomDatasourceImpl::createRoom', error, stackTrace);
+    return VideoCallRoomCreationFailedException(cause: error);
   }
 }
