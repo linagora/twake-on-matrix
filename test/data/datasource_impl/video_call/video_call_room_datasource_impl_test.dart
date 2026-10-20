@@ -179,39 +179,30 @@ void main() {
       );
     });
 
-    test('createRoom_whenResponseIsNotJson_throwsCreationFailed', () async {
-      // Arrange
-      whenCreateRoom().thenAnswer((_) async => '<html></html>');
+    for (final (name, body, cause) in [
+      ('ResponseIsNotJson', '<html></html>', isA<FormatException>()),
+      ('UrlIsNotAString', {'url': 42}, isA<TypeError>()),
+    ]) {
+      test('createRoom_when${name}_throwsCreationFailed', () async {
+        // Arrange
+        whenCreateRoom().thenAnswer((_) async => body);
 
-      // Act
-      final creation = datasource.createRoom();
+        // Act
+        final creation = datasource.createRoom();
 
-      // Assert
-      await expectLater(
-        creation,
-        throwsA(isA<VideoCallRoomCreationFailedException>()),
-      );
-    });
-
-    test('createRoom_whenUrlIsNotAString_throwsCreationFailed', () async {
-      // Arrange
-      whenCreateRoom().thenAnswer((_) async => {'url': 42});
-
-      // Act
-      final creation = datasource.createRoom();
-
-      // Assert
-      await expectLater(
-        creation,
-        throwsA(
-          isA<VideoCallRoomCreationFailedException>().having(
-            (exception) => exception.cause,
-            'cause',
-            isA<TypeError>(),
+        // Assert
+        await expectLater(
+          creation,
+          throwsA(
+            isA<VideoCallRoomCreationFailedException>().having(
+              (exception) => exception.cause,
+              'cause',
+              cause,
+            ),
           ),
-        ),
-      );
-    });
+        );
+      });
+    }
 
     testWidgets(
       'createRoom_whenToMDoesNotAnswerInTime_cancelsTheRequestAndThrowsCreationFailed',
