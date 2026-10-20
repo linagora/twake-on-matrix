@@ -4,7 +4,7 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
+import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';

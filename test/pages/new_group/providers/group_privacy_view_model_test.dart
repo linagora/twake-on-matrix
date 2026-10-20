@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_state.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
 HomeserverSummary _summaryWith(Map<String, dynamic> publicGroups) =>

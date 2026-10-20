@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
 part 'group_privacy_view_model.g.dart';

@@ -14,7 +14,7 @@ import 'package:twake_chat/domain/model/server_config.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
+import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';

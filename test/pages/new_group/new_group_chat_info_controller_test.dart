@@ -18,8 +18,8 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_state.dart';
-import 'package:twake_chat/pages/new_group/group_privacy_view_model.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
