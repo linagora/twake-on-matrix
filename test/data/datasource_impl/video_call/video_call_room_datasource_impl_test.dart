@@ -193,6 +193,26 @@ void main() {
       );
     });
 
+    test('createRoom_whenUrlIsNotAString_throwsCreationFailed', () async {
+      // Arrange
+      whenCreateRoom().thenAnswer((_) async => {'url': 42});
+
+      // Act
+      final creation = datasource.createRoom();
+
+      // Assert
+      await expectLater(
+        creation,
+        throwsA(
+          isA<VideoCallRoomCreationFailedException>().having(
+            (exception) => exception.cause,
+            'cause',
+            isA<TypeError>(),
+          ),
+        ),
+      );
+    });
+
     testWidgets(
       'createRoom_whenToMDoesNotAnswerInTime_cancelsTheRequestAndThrowsCreationFailed',
       (tester) async {
