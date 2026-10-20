@@ -99,37 +99,27 @@ void main() {
       },
     );
 
-    test('createRoom_whenToMAnswers404_throwsUnavailable', () async {
-      // Arrange
-      whenCreateRoom().thenThrow(
-        badResponse(404, data: '<html>Cannot POST $createRoomPath</html>'),
+    for (final (statusCode, data) in [
+      (404, '<html>Cannot POST $createRoomPath</html>'),
+      (422, {'errcode': 'M_UNPROCESSABLE'}),
+    ]) {
+      test(
+        'createRoom_whenToMAnswers${statusCode}_throwsUnavailable',
+        () async {
+          // Arrange
+          whenCreateRoom().thenThrow(badResponse(statusCode, data: data));
+
+          // Act
+          final creation = datasource.createRoom();
+
+          // Assert
+          await expectLater(
+            creation,
+            throwsA(isA<VideoCallRoomCreationUnavailableException>()),
+          );
+        },
       );
-
-      // Act
-      final creation = datasource.createRoom();
-
-      // Assert
-      await expectLater(
-        creation,
-        throwsA(isA<VideoCallRoomCreationUnavailableException>()),
-      );
-    });
-
-    test('createRoom_whenToMAnswers422_throwsUnavailable', () async {
-      // Arrange
-      whenCreateRoom().thenThrow(
-        badResponse(422, data: {'errcode': 'M_UNPROCESSABLE'}),
-      );
-
-      // Act
-      final creation = datasource.createRoom();
-
-      // Assert
-      await expectLater(
-        creation,
-        throwsA(isA<VideoCallRoomCreationUnavailableException>()),
-      );
-    });
+    }
 
     for (final statusCode in [401, 500, 502]) {
       test(
