@@ -88,7 +88,6 @@ create_room() {
     --arg mxid2 "$mxid2" \
     --arg mxid3 "$mxid3" \
     '{
-      room_version: "11",
       name: $name,
       preset: "private_chat",
       visibility: "private",
