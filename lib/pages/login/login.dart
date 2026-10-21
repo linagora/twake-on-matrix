@@ -138,6 +138,9 @@ class LoginController extends State<Login> {
       case MultipleAccountLoginType.otherAccountLoggedIn:
         _handleAddAnotherAccount(event.client);
         return;
+      case MultipleAccountLoginType.loginFailed:
+      case MultipleAccountLoginType.cleanupFailed:
+        return;
     }
   }
 
