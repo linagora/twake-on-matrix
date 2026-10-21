@@ -23,7 +23,7 @@ class AccountRepositoryImpl implements AccountRepository {
        _pendingPushRemovals = pendingPushRemovals,
        _pendingCandidateDiscards = pendingCandidateDiscards,
        _registry = registry,
-       _clientNameBuilder = clientNameBuilder ?? _defaultClientName;
+       _clientNameBuilder = clientNameBuilder;
 
   final AccountClientDataSource _dataSource;
   final PersistedActiveAccountSource _persistedActiveAccount;
@@ -31,7 +31,7 @@ class AccountRepositoryImpl implements AccountRepository {
   final PendingRemovalsSource _pendingPushRemovals;
   final PendingRemovalsSource _pendingCandidateDiscards;
   final AccountClientRegistry _registry;
-  final String Function() _clientNameBuilder;
+  final String Function()? _clientNameBuilder;
 
   /// Names that are in the store, in store order, so a name is never written
   /// twice.
@@ -41,7 +41,8 @@ class AccountRepositoryImpl implements AccountRepository {
   /// knows them.
   final Set<String> _pendingIds = {};
 
-  static String _defaultClientName() =>
+  String _newClientName() =>
+      _clientNameBuilder?.call() ??
       '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
 
   /// Takes over clients that were already created and initialised at boot
@@ -101,7 +102,7 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<Account> createCandidate() async {
-    final client = await _dataSource.createClient(_clientNameBuilder());
+    final client = await _dataSource.createClient(_newClientName());
     _registry.add(client);
     return _toAccount(client);
   }
