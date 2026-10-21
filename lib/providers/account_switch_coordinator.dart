@@ -130,7 +130,9 @@ class AccountSwitchCoordinator {
     try {
       final client = _clientOf(switching.to);
       if (client == null) throw UnknownAccountException(switching.to);
-      await apply(client);
+      if (!await apply(client)) {
+        throw SwitchSupersededException(switching.to);
+      }
       _accounts.completeSwitch(ticket);
     } catch (e, s) {
       Logs().wtf('AccountSwitchCoordinator: switch failed', e, s);

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
+import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -116,6 +118,7 @@ void main() {
   /// Wires the coordinator as `MatrixState.initState` does.
   void boot({Client? Function(String id)? clientOf, List<Client>? clients}) {
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(
           FakeAccountClientDataSource(),
@@ -124,7 +127,7 @@ void main() {
     );
     addTearDown(container.dispose);
     final adopted = clients ?? [a, b, c];
-    container.read(accountRepositoryProvider).adopt(adopted);
+    container.read(adoptBootAccountsUseCaseProvider(adopted)).execute();
     final registry = {for (final client in adopted) client.clientName: client};
     coordinator = AccountSwitchCoordinator(
       effects: effects,
@@ -140,7 +143,7 @@ void main() {
 
   AccountsState state() => container.read(accountsProvider);
   Future<void> switchTo(String id) =>
-      container.read(accountsProvider.notifier).switchTo(id);
+      container.read(accountsProvider.notifier).switchTo(AccountId(id));
   Future<void> pump() => Future<void>.delayed(Duration.zero);
 
   /// Lets the background work that nobody awaits (a restore) run to its end.
@@ -261,6 +264,25 @@ void main() {
   });
 
   group('stale switch', () {
+    test('an apply from elsewhere makes the running switch fail, not '
+        'complete', () async {
+      effects.gates['tom:b'] = Completer<void>();
+      boot();
+      final result = expectLater(
+        switchTo('b'),
+        throwsA(isA<SwitchSupersededException>()),
+      );
+      await pump();
+
+      await coordinator.apply(c);
+      effects.gates['tom:b']!.complete();
+      await result;
+      await settle();
+
+      expect((state() as Active).activeId, 'a');
+      expect(effects.store['tom'], 'c');
+    });
+
     test('a newer switch wins; the older effects stop at their next '
         'checkpoint', () async {
       effects.gates['userInfo'] = Completer<void>();
@@ -363,7 +385,10 @@ void main() {
     test('dispose turns the token of a running apply stale', () async {
       effects.gates['userInfo:b'] = Completer<void>();
       boot();
-      final switching = switchTo('b');
+      final switching = expectLater(
+        switchTo('b'),
+        throwsA(isA<SwitchSupersededException>()),
+      );
       await pump();
       coordinator.dispose();
       effects.gates['userInfo:b']!.complete();
@@ -560,7 +585,9 @@ void main() {
       boot(clients: [first]);
       expect(state(), isA<NoAccount>());
       first.loggedIn = true;
-      await container.read(accountsProvider.notifier).addAccount('a');
+      await container
+          .read(accountsProvider.notifier)
+          .addAccount(const AccountId('a'));
       expect((state() as Active).activeId, 'a');
 
       expect(await coordinator.activateCurrent(), isTrue);
@@ -584,7 +611,9 @@ void main() {
       expect(coordinator.isAppliedTo(only), isFalse);
 
       only.loggedIn = true;
-      await container.read(accountsProvider.notifier).addAccount('a');
+      await container
+          .read(accountsProvider.notifier)
+          .addAccount(const AccountId('a'));
       expect(await coordinator.activateCurrent(), isTrue);
       expect(effects.log, fullRunFor('a'));
       expect(coordinator.isAppliedTo(only), isTrue);
