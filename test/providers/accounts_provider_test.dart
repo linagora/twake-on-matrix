@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
+import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
@@ -29,11 +32,13 @@ void main() {
     List<FakeAccountClient> clients, {
     String? persistedUserId,
     Set<String> pending = const {},
+    List<Override> overrides = const [],
   }) {
     dataSource = FakeAccountClientDataSource();
     container = ProviderContainer(
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
+        ...overrides,
         if (persistedUserId != null)
           bootPersistedActiveUserIdProvider.overrideWithValue(persistedUserId),
       ],
@@ -683,4 +688,38 @@ void main() {
       expect(seen, isEmpty);
     });
   });
+
+  test('the transitions come from the overridable provider', () {
+    final transitions = _RecordingTransitions();
+    boot(
+      [a],
+      overrides: [accountTransitionsProvider.overrideWithValue(transitions)],
+    );
+    state();
+    notifier().logoutLast();
+    expect(transitions.calls, ['initialize', 'logoutLast']);
+  });
+}
+
+class _RecordingTransitions implements AccountTransitions {
+  final calls = <String>[];
+
+  @override
+  AccountsState initialize(
+    AccountsState state,
+    List<Account> accounts, {
+    String? persistedUserId,
+  }) {
+    calls.add('initialize');
+    return Active(accounts: accounts, activeId: accounts.first.id);
+  }
+
+  @override
+  AccountsState logoutLast(AccountsState state) {
+    calls.add('logoutLast');
+    return state;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
