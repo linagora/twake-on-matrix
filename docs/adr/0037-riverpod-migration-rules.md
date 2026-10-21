@@ -130,9 +130,10 @@ controller → use case → repository → datasource.
   `MIGRATION_STATUS.md` shows the drift.
 - `riverpod_lint` checks the rules the Riverpod documentation recommends
   ([DO/DON'T][do-dont], [riverpod_lint][riverpod-lint]). Version 3.0.x runs
-  through `custom_lint` (`dart run custom_lint`) and follows the `riverpod`
-  version; 3.1.x needs Riverpod 3.4 and analyzer 13. It joins CI once the
-  findings on existing code are fixed.
+  as a legacy analyzer plugin through `custom_lint`, which `flutter analyze`
+  reports as deprecated since Dart 3.13. Version 3.1.x uses the new plugin
+  system but needs Riverpod 3.4 and analyzer 13: it comes in its own pull
+  request with that upgrade.
 
 ### 7. Pull requests
 

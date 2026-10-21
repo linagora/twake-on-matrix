@@ -116,7 +116,6 @@ In this order, one commit per step:
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 flutter analyze
-dart run custom_lint
 flutter test
 git add -N <new files>
 scripts/migration_status.sh --check origin/main

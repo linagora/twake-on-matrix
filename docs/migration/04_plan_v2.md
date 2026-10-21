@@ -30,10 +30,10 @@ Every pull request is written by an agent, reviewed by the `zeus` and
 - [ ] `scripts/migration_status.sh` and the `Riverpod migration` workflow
 - [ ] `MIGRATION_STATUS.md`
 - [ ] `migration-reviewer` agent and `migrate-module` skill in `.claude/`
-- [ ] `riverpod_lint`, which checks the rules of [Riverpod's
-      DO/DON'T][do-dont]
-- [ ] Fix its 6 findings on existing code (public notifier getters, a scoped
-      override without dependencies), then run it in CI
+- [ ] Riverpod 3.4 and `riverpod_lint` 3.1, which checks the rules of
+      [Riverpod's DO/DON'T][do-dont], in their own pull request
+- [ ] Fix its findings on existing code (on Riverpod 3.0: public notifier
+      getters, a scoped override without dependencies), then run it in CI
 
 ## Step 1 — The Matrix client in Riverpod
 

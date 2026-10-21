@@ -55,10 +55,8 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 - No mutations or offline persistence (experimental), no `StateProvider`,
   `StateNotifierProvider` or `ChangeNotifierProvider`
   ([What's new in Riverpod 3.0][whats-new]).
-- `dart run custom_lint` reports no finding that it does not also report on
-  `<base>`. The 6 findings on `main` (public getters of
-  `BootstrapViewModel` and of the verify device test, a scoped override in
-  `verify_device_screen_test.dart`) are known.
+- Once `riverpod_lint` is set up, it reports no finding that it does not
+  also report on `<base>`.
 - No unintended change in behaviour: what the user sees and the data sent
   stay the same. The rewrites this checklist asks for (`Future<T>`, typed
   exceptions, controllers) are not findings by themselves.
