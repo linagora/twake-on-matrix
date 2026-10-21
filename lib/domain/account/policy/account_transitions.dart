@@ -119,12 +119,7 @@ abstract final class AccountTransitions {
       throw _invalid('remove', state);
     }
     final remaining = state.accounts.where((a) => a.id != id).toList();
-    if (id != state.activeId) {
-      return Active(accounts: remaining, activeId: state.activeId);
-    }
-    final nextId = _nextUsable(state.accounts, id);
-    if (nextId == null) return _noSurvivor(remaining);
-    return Active(accounts: remaining, activeId: nextId);
+    return _withoutActive(state, id, remaining);
   }
 
   /// Keeps [id], whose removal failed, in the list as unavailable: it cannot
@@ -140,6 +135,16 @@ abstract final class AccountTransitions {
       for (final a in state.accounts)
         a.id == id ? a.withStatus(AccountStatus.unavailable) : a,
     ];
+    return _withoutActive(state, id, accounts);
+  }
+
+  /// [accounts] is the list after [id] stopped being usable: the active
+  /// account stays unless it is [id], then the next usable one takes over.
+  static AccountsState _withoutActive(
+    Active state,
+    String id,
+    List<Account> accounts,
+  ) {
     if (id != state.activeId) {
       return Active(accounts: accounts, activeId: state.activeId);
     }
