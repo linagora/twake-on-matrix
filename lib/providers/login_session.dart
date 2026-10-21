@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/providers/login_host.dart';
 
@@ -137,7 +138,7 @@ class LoginSession {
       rethrow;
     }
     _move(LoginSessionState.created, {LoginSessionState.creating});
-    _host.setPendingCandidate(id);
+    _host.setPendingCandidate(AccountId(id));
     _listen();
     return client;
   }
@@ -213,7 +214,7 @@ class LoginSession {
   /// step, and the account stays when it fails.
   Future<void> _registerFirstAccount() async {
     _host.markFirstSyncDone();
-    await _host.addAccount(id);
+    await _host.addAccount(AccountId(id));
     _accountAdded = true;
     _effectsTouched = true;
     await _setUp(_SetUp.tom);
@@ -223,10 +224,10 @@ class LoginSession {
   }
 
   Future<void> _registerAdditionalAccount() async {
-    await _host.addAccount(id);
+    await _host.addAccount(AccountId(id));
     _accountAdded = true;
-    await _host.registerSubscriptions(id);
-    final active = _host.clientByName(id);
+    await _host.registerSubscriptions(AccountId(id));
+    final active = _host.clientByName(AccountId(id));
     if (active == null) throw StateError('No client named $id');
     _host.markFirstSyncDone();
     _effectsTouched = true;
@@ -254,7 +255,7 @@ class LoginSession {
   }
 
   Future<void> _runSetUp(_SetUp setUp) {
-    final target = _host.clientByName(id) ?? client;
+    final target = _host.clientByName(AccountId(id)) ?? client;
     return switch (setUp) {
       _SetUp.tom => _host.setUpToM(target),
       _SetUp.federation => _host.setUpFederation(target),
@@ -315,7 +316,9 @@ class LoginSession {
     ] else ...[
       _Cleanup.removePush,
       _Cleanup.cancelSubscriptions,
-      _host.isStored(id) ? _Cleanup.removeAccount : _Cleanup.discardCandidate,
+      _host.isStored(AccountId(id))
+          ? _Cleanup.removeAccount
+          : _Cleanup.discardCandidate,
       _Cleanup.cancelListener,
     ],
   };
@@ -339,15 +342,15 @@ class LoginSession {
   Future<void> _run(_Cleanup step) => switch (step) {
     _Cleanup.removePush => _bestEffort(
       'push removal',
-      () => _host.removePush(id),
+      () => _host.removePush(AccountId(id)),
     ),
-    _Cleanup.cancelSubscriptions => _host.cancelSubscriptions(id),
+    _Cleanup.cancelSubscriptions => _host.cancelSubscriptions(AccountId(id)),
     _Cleanup.signOut => _bestEffort(
       'sign-out',
-      () => _host.signOut(id, quiet: keepsClient),
+      () => _host.signOut(AccountId(id), quiet: keepsClient),
     ),
-    _Cleanup.removeAccount => _host.removeAccount(id),
-    _Cleanup.discardCandidate => _host.discardCandidate(id),
+    _Cleanup.removeAccount => _host.removeAccount(AccountId(id)),
+    _Cleanup.discardCandidate => _host.discardCandidate(AccountId(id)),
     _Cleanup.restoreEffects => _restoreActiveEffects(),
     _Cleanup.cancelListener => _cancelListener(),
     _Cleanup.logoutLast => Future<void>.sync(_host.logoutLast),
@@ -358,7 +361,7 @@ class LoginSession {
   /// back to "no account".
   Future<void> _restoreActiveEffects() async {
     final active = _host.activeClientName;
-    if (active != null && active != id && _host.isLoggedIn(active)) {
+    if (active != null && active != id && _host.isLoggedIn(AccountId(active))) {
       await _host.applyEffects(_host.activeClient);
     } else {
       await _host.clearEffects();
@@ -388,7 +391,7 @@ class LoginSession {
       _state = LoginSessionState.created;
     } else {
       _state = LoginSessionState.disposed;
-      _host.forgetQuiet(id);
+      _host.forgetQuiet(AccountId(id));
       _release();
     }
   }
@@ -429,7 +432,7 @@ class LoginSession {
   /// they wait until this one is it. When the account is gone from the app the
   /// set-ups are dropped.
   Future<void> _retrySetUps() async {
-    if (!_host.isStored(id)) {
+    if (!_host.isStored(AccountId(id))) {
       _failedSetUps.clear();
       return;
     }
@@ -452,7 +455,8 @@ class LoginSession {
       case LoginSessionState.created:
       case LoginSessionState.loggingIn:
         if (keepsClient) return;
-        if (_host.isLoggedIn(id)) return; // the login worked: registering
+        // The login worked: registering takes over.
+        if (_host.isLoggedIn(AccountId(id))) return;
         _move(LoginSessionState.rollingBack, {
           LoginSessionState.created,
           LoginSessionState.loggingIn,
