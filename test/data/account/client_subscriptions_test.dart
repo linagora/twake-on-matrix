@@ -20,6 +20,14 @@ void main() {
     };
   };
 
+  void openWithSync(List<String> ids) {
+    for (final id in ids) {
+      subscriptions
+        ..open(id)
+        ..keep(id, 'sync', listen('$id-sync'));
+    }
+  }
+
   test('keeps one subscription of each kind per client', () {
     subscriptions.open('a');
 
@@ -37,11 +45,7 @@ void main() {
   });
 
   test('cancels the subscriptions of one client only', () async {
-    subscriptions
-      ..open('a')
-      ..open('b')
-      ..keep('a', 'sync', listen('a-sync'))
-      ..keep('b', 'sync', listen('b-sync'));
+    openWithSync(['a', 'b']);
 
     await subscriptions.cancel('a');
 
@@ -49,9 +53,7 @@ void main() {
   });
 
   test('a subscription that is started after the cancel is dropped', () async {
-    subscriptions
-      ..open('a')
-      ..keep('a', 'sync', listen('a-sync'));
+    openWithSync(['a']);
     await subscriptions.cancel('a');
     log.clear();
 
@@ -66,9 +68,7 @@ void main() {
     subscriptions.open('a');
     await subscriptions.cancel('a');
 
-    subscriptions
-      ..open('a')
-      ..keep('a', 'sync', listen('a-sync'));
+    openWithSync(['a']);
 
     expect(log, ['listen:a-sync']);
   });
@@ -93,11 +93,7 @@ void main() {
   );
 
   test('cancelAll cancels every client', () async {
-    subscriptions
-      ..open('a')
-      ..open('b')
-      ..keep('a', 'sync', listen('a-sync'))
-      ..keep('b', 'sync', listen('b-sync'));
+    openWithSync(['a', 'b']);
     log.clear();
 
     await subscriptions.cancelAll();
