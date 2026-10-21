@@ -1,5 +1,6 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
+import 'package:twake_chat/pages/chat/events/sticker.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -10,6 +11,7 @@ import 'package:patrol/patrol.dart';
 
 import '../../base/core_robot.dart';
 import '../abstract/abstract_message_menu_robot.dart';
+import '../last_message_finder.dart';
 import '../message_selection_appbar_helper.dart';
 
 /// Web/desktop message action menu.
@@ -45,10 +47,21 @@ class WebMessageMenuRobot extends CoreRobot
     String message,
     PatrolFinder target, {
     Duration timeout = const Duration(seconds: 15),
-  }) async {
-    final bubble = $(
+  }) => _hoverBubbleUntilVisible(
+    $(
       MessageContent,
-    ).containing(find.textContaining(message, findRichText: true)).first;
+    ).containing(find.textContaining(message, findRichText: true)).first,
+    target,
+    label: message,
+    timeout: timeout,
+  );
+
+  Future<TestGesture> _hoverBubbleUntilVisible(
+    PatrolFinder bubble,
+    PatrolFinder target, {
+    required String label,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
     await $.waitUntilVisible(bubble, timeout: timeout);
 
     final gesture = await $.tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -84,19 +97,36 @@ class WebMessageMenuRobot extends CoreRobot
       await gesture.removePointer();
     }
     throw StateError(
-      'The message action bar for "$message" did not appear within $timeout.',
+      'The message action bar for "$label" did not appear within $timeout.',
     );
   }
 
   /// Hovers [message], opens the "more" context menu and taps the row whose
   /// label is [itemLabel].
-  Future<void> _tapOverflowItem(String message, String itemLabel) async {
+  Future<void> _tapOverflowItem(String message, String itemLabel) =>
+      _tapOverflowItemOn(
+        $(
+          MessageContent,
+        ).containing(find.textContaining(message, findRichText: true)).first,
+        itemLabel,
+        label: message,
+      );
+
+  Future<void> _tapOverflowItemOn(
+    PatrolFinder bubble,
+    String itemLabel, {
+    required String label,
+  }) async {
     // All overflow actions live behind the "more" button; open it, then tap
     // the row labelled [itemLabel].
     final moreButton = $(
       TwakeIconButton,
     ).containing(find.byIcon(Icons.more_horiz));
-    final gesture = await _hoverUntilVisible(message, moreButton);
+    final gesture = await _hoverBubbleUntilVisible(
+      bubble,
+      moreButton,
+      label: label,
+    );
     await $.tester.tap(moreButton.finder);
     await gesture.removePointer();
 
@@ -112,6 +142,20 @@ class WebMessageMenuRobot extends CoreRobot
   @override
   Future<void> openForward(String message) async {
     await _tapOverflowItem(message, _l10n.forward);
+    await $.waitUntilExists(
+      $(ForwardView),
+      timeout: const Duration(seconds: 15),
+    );
+  }
+
+  @override
+  Future<void> openForwardOnLastSticker() async {
+    await $.waitUntilExists($(Sticker), timeout: const Duration(seconds: 30));
+    await _tapOverflowItemOn(
+      lastMessageContaining($, find.byType(Sticker)),
+      _l10n.forward,
+      label: 'last sticker',
+    );
     await $.waitUntilExists(
       $(ForwardView),
       timeout: const Duration(seconds: 15),
