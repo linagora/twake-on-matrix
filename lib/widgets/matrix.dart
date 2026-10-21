@@ -38,8 +38,11 @@ import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/account_interactor_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -63,11 +66,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show
-        ConsumerState,
-        ConsumerStatefulWidget,
-        ProviderContainer,
-        ProviderScope;
+    show ConsumerState, ConsumerStatefulWidget, ProviderSubscription;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -168,8 +167,9 @@ class MatrixState extends ConsumerState<Matrix>
   /// Every account the app lists (the former `widget.clients`).
   List<Client> get accountClients => ref.read(accountClientsProvider);
 
-  /// Saved in `initState` for `dispose`, where `ref` can no longer be used.
-  late final ProviderContainer _container;
+  /// Read by `dispose`, where `ref` can no longer be used; closed after it.
+  late final ProviderSubscription<Client?> _activeClientSubscription;
+  late final ProviderSubscription<List<Client>> _accountClientsSubscription;
 
   Client get _workingClient => _switchCoordinator.target ?? client;
 
@@ -213,7 +213,7 @@ class MatrixState extends ConsumerState<Matrix>
     // account that is active now still cancels a switch away from it that is
     // queued but not started, so the last request wins.
     try {
-      await ref.read(accountsProvider.notifier).switchTo(id!);
+      await ref.read(accountsProvider.notifier).switchTo(AccountId(id!));
     } on UnknownAccountException {
       return SetActiveClientState.unknownClient;
     } on InvalidAccountTransitionException catch (e) {
@@ -333,13 +333,11 @@ class MatrixState extends ConsumerState<Matrix>
   List<Client?> get currentClients => List<Client?>.from(accountClients);
 
   /// The unlogged client a login screen uses: the placeholder of a logged-out
-  /// boot, else the pending candidate, else a new one.
+  /// boot, else the pending candidate, else a new one. An account that waits
+  /// for its removal is never it.
   Future<Client> getLoginClient() async {
-    final current = clientOrNull;
-    if (current != null && !current.isLogged()) return current;
-
-    final pending = ref.read(loginCandidateProvider);
-    if (pending != null) return pending;
+    final reusable = ref.read(loginCandidateProvider);
+    if (reusable != null) return reusable;
 
     final account = await ref.read(accountRepositoryProvider).createCandidate();
     final candidate = ref.read(accountClientRegistryProvider)[account.id]!;
@@ -456,16 +454,23 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   void initState() {
     super.initState();
-    _container = ProviderScope.containerOf(context, listen: false);
     // The clients created at boot are read once, here; from then on the
     // account state lives in the providers.
-    final accountRepository = ref.read(accountRepositoryProvider);
-    if (accountRepository.registeredAccounts().isEmpty) {
-      accountRepository.adopt(
-        widget.clients,
-        pendingRemovals: ref.read(bootPendingRemovalIdsProvider),
-      );
-    }
+    ref
+        .read(adoptBootAccountsInteractorProvider(widget.clients))
+        .execute(
+          pendingRemovals: ref
+              .read(bootAccountSnapshotProvider)
+              .pendingRemovalIds,
+        );
+    _activeClientSubscription = ref.listenManual(
+      activeMatrixClientProvider,
+      (_, _) {},
+    );
+    _accountClientsSubscription = ref.listenManual(
+      accountClientsProvider,
+      (_, _) {},
+    );
     final registry = ref.read(accountClientRegistryProvider);
     _switchCoordinator = AccountSwitchCoordinator(
       effects: this,
@@ -811,16 +816,14 @@ class MatrixState extends ConsumerState<Matrix>
   /// accounts whose session is still open; a record whose account is gone
   /// cannot be retried and is dropped.
   Future<void> _retryPendingPushRemovalsFromLastRun() async {
-    final repository = ref.read(accountRepositoryProvider);
     final registry = ref.read(accountClientRegistryProvider);
     try {
-      for (final id in await repository.pendingPushRemovals()) {
+      final retryable = await ref
+          .read(listPendingPushRemovalsInteractorProvider)
+          .execute();
+      for (final id in retryable) {
         final pending = registry[id];
-        if (pending == null) {
-          await repository.clearPushRemovalPending(id);
-        } else {
-          await removePushBeforeLogout(pending);
-        }
+        if (pending != null) await removePushBeforeLogout(pending);
       }
     } catch (e, s) {
       _report(e, s, 'retry of the pending pusher deletions');
@@ -920,7 +923,7 @@ class MatrixState extends ConsumerState<Matrix>
     try {
       await ref
           .read(accountsProvider.notifier)
-          .addAccount(newActiveClient.clientName);
+          .addAccount(AccountId(newActiveClient.clientName));
     } catch (e, s) {
       Logs().wtf('MatrixState::_handleFirstLoggedIn: cannot add account', e, s);
       return;
@@ -947,8 +950,10 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'MatrixState::_handleAddAnotherAccount() - Add another account successful',
     );
-    await ref.read(accountsProvider.notifier).addAccount(candidate.clientName);
-    _registerSubs(candidate.clientName);
+    await ref
+        .read(accountsProvider.notifier)
+        .addAccount(AccountId(candidate.clientName));
+    await _registerSubs(candidate.clientName);
     final activeClient = getClientByName(candidate.clientName);
     if (activeClient == null) return;
     waitForFirstSync = false;
@@ -1852,11 +1857,10 @@ class MatrixState extends ConsumerState<Matrix>
     onClientLoginStateChanged.close();
     _switchCoordinator.dispose();
     // `ref` is unsafe once the widget is unmounted, so read through the
-    // container saved in `initState`.
-    final clients = _container.read(accountClientsProvider);
+    // subscriptions opened in `initState`.
+    final clients = _accountClientsSubscription.read();
     if (clients.isNotEmpty) {
-      (_container.read(activeMatrixClientProvider) ?? clients.first).httpClient
-          .close();
+      (_activeClientSubscription.read() ?? clients.first).httpClient.close();
     }
     onFocusSub?.cancel();
     onBlurSub?.cancel();
