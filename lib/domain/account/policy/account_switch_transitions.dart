@@ -3,18 +3,18 @@ import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
 
 /// The transitions of an account switch.
-abstract final class AccountSwitchTransitions {
+class AccountSwitchTransitions {
+  const AccountSwitchTransitions(this._support);
+
+  final AccountTransitionSupport _support;
+
   /// Starts a switch to [toId]. [seq] numbers the switch; its settlement hands
   /// it back to [completeSwitch] or [failSwitch].
-  static AccountsState beginSwitch(
-    AccountsState state,
-    String toId, {
-    int seq = 0,
-  }) {
+  AccountsState beginSwitch(AccountsState state, String toId, {int seq = 0}) {
     final target = state.accounts.where((a) => a.id == toId).firstOrNull;
     if (target == null) throw UnknownAccountException(toId);
     if (!target.isLoggedIn) {
-      throw AccountTransitionSupport.invalid('beginSwitch', state);
+      throw _support.invalid('beginSwitch', state);
     }
     return switch (state) {
       Active(:final accounts, :final activeId) =>
@@ -25,29 +25,29 @@ abstract final class AccountSwitchTransitions {
         toId == from
             ? Active(accounts: accounts, activeId: from)
             : Switching(accounts: accounts, from: from, to: toId, seq: seq),
-      _ => throw AccountTransitionSupport.invalid('beginSwitch', state),
+      _ => throw _support.invalid('beginSwitch', state),
     };
   }
 
   /// Ends the switch numbered [expectedSeq]; a [Switching] with another
   /// number is a newer switch and throws [SwitchSupersededException].
-  static AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
+  AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
       _settleSwitch(state, expectedSeq, 'completeSwitch', (s) => s.to);
 
   /// A failed switch goes back to the origin account. Guarded by
   /// [expectedSeq] like [completeSwitch].
-  static AccountsState failSwitch(AccountsState state, int expectedSeq) =>
+  AccountsState failSwitch(AccountsState state, int expectedSeq) =>
       _settleSwitch(state, expectedSeq, 'failSwitch', (s) => s.from);
 
   /// Ends the switch numbered [expectedSeq] on the account [landOn] picks.
-  static AccountsState _settleSwitch(
+  AccountsState _settleSwitch(
     AccountsState state,
     int expectedSeq,
     String transition,
     String Function(Switching switching) landOn,
   ) {
     if (state is! Switching) {
-      throw AccountTransitionSupport.invalid(transition, state);
+      throw _support.invalid(transition, state);
     }
     if (state.seq != expectedSeq) throw SwitchSupersededException(state.to);
     return Active(accounts: state.accounts, activeId: landOn(state));

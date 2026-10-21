@@ -4,14 +4,19 @@ import 'package:twake_chat/domain/account/policy/account_policy.dart';
 import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
 
 /// The transition out of [Booting].
-abstract final class AccountInitTransitions {
-  static AccountsState initialize(
+class AccountInitTransitions {
+  const AccountInitTransitions(this._policy, this._support);
+
+  final AccountPolicy _policy;
+  final AccountTransitionSupport _support;
+
+  AccountsState initialize(
     AccountsState state,
     List<Account> accounts, {
     String? persistedUserId,
   }) {
     if (state is! Booting) {
-      throw AccountTransitionSupport.invalid('initialize', state);
+      throw _support.invalid('initialize', state);
     }
     final loggedIn = accounts.where((a) => a.isLoggedIn).toList();
     if (loggedIn.isNotEmpty) {
@@ -23,25 +28,22 @@ abstract final class AccountInitTransitions {
     return _withoutLoggedIn(accounts);
   }
 
-  static String _initialActiveId(
-    List<Account> loggedIn,
-    String? persistedUserId,
-  ) {
+  String _initialActiveId(List<Account> loggedIn, String? persistedUserId) {
     final persisted = loggedIn
         .where((a) => persistedUserId != null && a.userId == persistedUserId)
         .map((a) => a.id)
         .firstOrNull;
-    return AccountPolicy.selectInitialActive(
+    return _policy.selectInitialActive(
       loggedInIds: loggedIn.map((a) => a.id).toList(),
       persistedId: persisted,
     )!;
   }
 
-  static AccountsState _withoutLoggedIn(List<Account> accounts) {
+  AccountsState _withoutLoggedIn(List<Account> accounts) {
     final failed = accounts
         .where((a) => a.status == AccountStatus.initFailed)
         .toList();
-    if (failed.isEmpty) return AccountTransitionSupport.noSurvivor(accounts);
+    if (failed.isEmpty) return _support.noSurvivor(accounts);
     final others = accounts.where((a) => a.status != AccountStatus.initFailed);
     if (others.every((a) => a.status == AccountStatus.unavailable)) {
       return AccountInitFailed(
@@ -52,6 +54,6 @@ abstract final class AccountInitTransitions {
     }
     // A logged-out placeholder exists: the next login can use it, so the
     // failed accounts do not block the app. They stay in the store.
-    return AccountTransitionSupport.noSurvivor(others.toList());
+    return _support.noSurvivor(others.toList());
   }
 }
