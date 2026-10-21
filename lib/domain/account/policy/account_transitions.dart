@@ -101,28 +101,24 @@ abstract final class AccountTransitions {
   /// Ends the switch numbered [expectedSeq]; a [Switching] with another
   /// number is a newer switch and throws [SwitchSupersededException].
   static AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
-      switch (state) {
-        Switching(:final to, seq: final running) when running != expectedSeq =>
-          throw SwitchSupersededException(to),
-        Switching(:final accounts, :final to) => Active(
-          accounts: accounts,
-          activeId: to,
-        ),
-        _ => throw _invalid('completeSwitch', state),
-      };
+      _settleSwitch(state, expectedSeq, 'completeSwitch', (s) => s.to);
 
   /// A failed switch goes back to the origin account. Guarded by
   /// [expectedSeq] like [completeSwitch].
   static AccountsState failSwitch(AccountsState state, int expectedSeq) =>
-      switch (state) {
-        Switching(:final to, seq: final running) when running != expectedSeq =>
-          throw SwitchSupersededException(to),
-        Switching(:final accounts, :final from) => Active(
-          accounts: accounts,
-          activeId: from,
-        ),
-        _ => throw _invalid('failSwitch', state),
-      };
+      _settleSwitch(state, expectedSeq, 'failSwitch', (s) => s.from);
+
+  /// Ends the switch numbered [expectedSeq] on the account [landOn] picks.
+  static AccountsState _settleSwitch(
+    AccountsState state,
+    int expectedSeq,
+    String transition,
+    String Function(Switching switching) landOn,
+  ) {
+    if (state is! Switching) throw _invalid(transition, state);
+    if (state.seq != expectedSeq) throw SwitchSupersededException(state.to);
+    return Active(accounts: state.accounts, activeId: landOn(state));
+  }
 
   /// Removes [id] while other accounts remain. Removing a non-active account
   /// never changes the active one; removing the active one picks the next by
