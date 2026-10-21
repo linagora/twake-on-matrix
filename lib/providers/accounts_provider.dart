@@ -87,11 +87,18 @@ class Accounts extends _$Accounts {
     } catch (_) {}
   }
 
-  void completeSwitch(String to, int switchSeq) {
+  /// The running switch to [to] numbered [switchSeq], or null when it is not
+  /// the latest one any more.
+  Switching? _switchingTo(String to, int switchSeq) {
     final current = state;
-    if (current is! Switching || current.to != to || switchSeq != _switchSeq) {
-      return;
-    }
+    if (current is! Switching) return null;
+    if (current.to != to || switchSeq != _switchSeq) return null;
+    return current;
+  }
+
+  void completeSwitch(String to, int switchSeq) {
+    final current = _switchingTo(to, switchSeq);
+    if (current == null) return;
     state = AccountTransitions.completeSwitch(current, switchSeq);
     _finishPendingSwitch();
   }
@@ -102,10 +109,8 @@ class Accounts extends _$Accounts {
     Object error, [
     StackTrace? stackTrace,
   ]) {
-    final current = state;
-    if (current is! Switching || current.to != to || switchSeq != _switchSeq) {
-      return;
-    }
+    final current = _switchingTo(to, switchSeq);
+    if (current == null) return;
     state = AccountTransitions.failSwitch(current, switchSeq);
     final pending = _pendingSwitch;
     _pendingSwitch = null;
