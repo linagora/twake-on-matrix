@@ -15,6 +15,14 @@ Account _failed(String id, Object error) =>
 Account _waiting(String id) =>
     Account(id: id, status: AccountStatus.unavailable);
 
+Switching _firstSwitch(Account a, Account b, Account c) =>
+    AccountTransitions.beginSwitch(
+          Active(accounts: [a, b, c], activeId: a.id),
+          b.id,
+          seq: 1,
+        )
+        as Switching;
+
 void main() {
   final a = _in('a');
   final b = _in('b');
@@ -230,11 +238,7 @@ void main() {
     });
 
     test('a stale handler cannot settle a newer switch', () {
-      final first = AccountTransitions.beginSwitch(
-        Active(accounts: [a, b, c], activeId: 'a'),
-        'b',
-        seq: 1,
-      );
+      final first = _firstSwitch(a, b, c);
       final second = AccountTransitions.beginSwitch(first, 'c', seq: 2);
       for (final settle in [
         AccountTransitions.completeSwitch,
@@ -258,11 +262,7 @@ void main() {
     });
 
     test('a newer switch to the same target is also told apart', () {
-      final first = AccountTransitions.beginSwitch(
-        Active(accounts: [a, b, c], activeId: 'a'),
-        'b',
-        seq: 1,
-      );
+      final first = _firstSwitch(a, b, c);
       final again = Switching(
         accounts: first.accounts,
         from: 'a',
