@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "appName": "Twake Mail",
+      "icon": "ic_twake_mail.svg",
+      "appLink": "http://tmail.linagora.com/"
+    },
+    {
+      "appName": "Twake Drive",
+      "icon": "ic_twake_drive.svg",
+      "appLink": "https://tdrive.linagora.com/"
+    }
+  ]
+}
