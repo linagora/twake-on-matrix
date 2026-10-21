@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 
@@ -114,15 +115,15 @@ class AccountSwitchCoordinator {
       final origin = _clientOf(next.from);
       _originApplied = origin != null && isAppliedTo(origin);
     }
-    final switchSeq = next.seq;
+    final ticket = next.ticket;
     try {
       final client = _clientOf(next.to);
       if (client == null) throw UnknownAccountException(next.to);
       await apply(client);
-      _accounts.completeSwitch(next.to, switchSeq);
+      _accounts.completeSwitch(ticket);
     } catch (e, s) {
       Logs().wtf('AccountSwitchCoordinator: switch failed', e, s);
-      _accounts.failSwitch(next.to, switchSeq, e, s);
+      _accounts.failSwitch(ticket, e, s);
     }
   }
 
