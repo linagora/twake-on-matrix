@@ -143,7 +143,7 @@ dependencies:
       ref: main
   lottie: ^3.0.0
   lottie_native: 0.1.2
-  matrix: 12.0.1
+  matrix: 13.0.0
   matrix_homeserver_recommendations: ^0.3.0
   matrix_link_text: ^2.0.0
   media_kit: ^1.2.1

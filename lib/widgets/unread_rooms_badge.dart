@@ -36,8 +36,12 @@ class UnreadRoomsBadge extends StatelessWidget {
     );
   }
 
-  int getNotificationsCount(BuildContext context) {
-    return Matrix.of(context).client.joinedOrInvitedRooms
+  int getNotificationsCount(BuildContext context) =>
+      countNotifications(Matrix.of(context).client, filter);
+
+  @visibleForTesting
+  static int countNotifications(Client client, bool Function(Room) filter) {
+    return client.joinedOrInvitedRooms
         .where(filter)
         .where((r) => (r.isUnread || r.membership == Membership.invite))
         .map((element) => element.isUnread ? element.notificationCount : 1)
