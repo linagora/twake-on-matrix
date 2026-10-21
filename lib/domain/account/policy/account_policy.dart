@@ -1,8 +1,10 @@
 /// Account selection rules. They see ids only, never a `Client`.
-abstract final class AccountPolicy {
+class AccountPolicy {
+  const AccountPolicy();
+
   /// The account that follows [removedId] in store order, else the one before
   /// it; null when no other account remains or [removedId] is unknown.
-  static String? nextActiveAfterRemoving({
+  String? nextActiveAfterRemoving({
     required List<String> ids,
     required String removedId,
   }) {
@@ -15,7 +17,7 @@ abstract final class AccountPolicy {
 
   /// The persisted account when it is logged in, else the first logged-in
   /// one by store order; null when nobody is logged in.
-  static String? selectInitialActive({
+  String? selectInitialActive({
     required List<String> loggedInIds,
     required String? persistedId,
   }) {
