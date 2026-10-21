@@ -46,6 +46,11 @@ A module is migrated only when its flows have Patrol scenarios on `main`.
 
 ## 3. Mechanical recipes
 
+End state: no `package:matrix` import in `lib/pages`, `lib/widgets` or
+`lib/presentation`; only datasource implementations import the SDK. The sweep
+is a step towards it, and the ratchet stops new UI imports. Keep the client's
+type inferred (`final client = ref.watch(...)`) so the sweep adds none.
+
 ### `Matrix.of(context).client`
 
 Once `matrixClientProvider` exists:

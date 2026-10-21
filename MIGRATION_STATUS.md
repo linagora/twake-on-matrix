@@ -12,7 +12,7 @@ The tables below are a snapshot, refreshed with
 updates only the Modules table.
 
 <!-- metrics:begin -->
-_Measured on 2026-10-20 by `scripts/migration_status.sh --write`._
+_Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 
 | Metric | Count |
 |---|---:|
@@ -22,15 +22,15 @@ _Measured on 2026-10-20 by `scripts/migration_status.sh --write`._
 | `Stream<Either<…>>` | 56 |
 | Files importing `dartz` | 121 |
 | Files in `lib/domain/app_state/` | 70 |
+| UI files importing `package:matrix` | 327 |
 
 | Progress | Count |
 |---|---:|
-| …of which in `*.provider.dart` bridges | 0 |
+| `getIt` uses in `*.provider.dart` bridges | 0 |
 | `@riverpod` providers | 26 |
 | Notifier classes | 7 |
 | Consumer widgets | 19 |
 | `StatefulWidget`s | 152 |
-| UI files importing `package:matrix` | 327 |
 <!-- metrics:end -->
 
 ## Modules

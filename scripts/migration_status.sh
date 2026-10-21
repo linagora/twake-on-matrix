@@ -17,9 +17,9 @@ STATUS_FILE="MIGRATION_STATUS.md"
 EXCLUDES=(':!*.g.dart' ':!*.freezed.dart' ':!*.mocks.dart')
 
 # Legacy metrics: a pull request may not increase them.
-LEGACY=(matrix_of get_it_lookups get_it_registrations stream_either dartz_imports app_state_files)
+LEGACY=(matrix_of get_it_lookups get_it_registrations stream_either dartz_imports app_state_files matrix_imports_in_ui)
 # Progress metrics: shown, never checked.
-PROGRESS=(get_it_bridges riverpod_providers notifiers consumer_widgets stateful_widgets matrix_imports_in_ui)
+PROGRESS=(get_it_bridges riverpod_providers notifiers consumer_widgets stateful_widgets)
 
 label() {
   case "$1" in
@@ -29,7 +29,7 @@ label() {
     stream_either) echo '`Stream<Either<…>>`' ;;
     dartz_imports) echo 'Files importing `dartz`' ;;
     app_state_files) echo 'Files in `lib/domain/app_state/`' ;;
-    get_it_bridges) echo '…of which in `*.provider.dart` bridges' ;;
+    get_it_bridges) echo '`getIt` uses in `*.provider.dart` bridges' ;;
     riverpod_providers) echo '`@riverpod` providers' ;;
     notifiers) echo 'Notifier classes' ;;
     consumer_widgets) echo 'Consumer widgets' ;;

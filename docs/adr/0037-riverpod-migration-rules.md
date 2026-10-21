@@ -128,7 +128,7 @@ controller → use case → repository → datasource.
 - The `Riverpod migration` workflow fails a pull request that increases a
   legacy metric: `Matrix.of`, `getIt` uses (bridges included), GetIt
   registrations, `Stream<Either>`, `dartz` imports,
-  `lib/domain/app_state/` files.
+  `lib/domain/app_state/` files, UI files importing `package:matrix`.
 - The workflow compares a pull request with `main` as it is when the check
   runs. Two pull requests that each add one use and are checked before either
   merges both pass, and the growth stays. The next pull request starts from
