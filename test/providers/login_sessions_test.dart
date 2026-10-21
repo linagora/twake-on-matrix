@@ -31,6 +31,27 @@ void main() {
       expect(host.calls, isEmpty);
     });
 
+    test('a failing retry is reported and the login goes on', () async {
+      host.onRemovalRetry = () => throw StateError('retry failed');
+
+      final client = await sessions.loginClient();
+
+      expect(client, same(host.clientOf('c1')));
+      expect(host.reports, ['retry of the failed cleanups']);
+    });
+
+    test('registers the candidate before a slow retry ends', () async {
+      host.removalGate = Completer<void>();
+
+      final login = sessions.loginClient();
+      await pumpEventQueue();
+
+      expect(sessions.sessionOf('c1'), isNotNull);
+
+      host.removalGate!.complete();
+      expect((await login).clientName, 'c1');
+    });
+
     test('makes one candidate for calls made at the same time', () async {
       host.gates['createCandidate:c1'] = Completer<void>();
 
@@ -86,6 +107,21 @@ void main() {
 
       expect(host.calls, contains('removeAccount:c1'));
       expect(sessions.sessionOf('c1')!.state, LoginSessionState.disposed);
+    });
+  });
+
+  group('a pending candidate whose cleanup failed', () {
+    test('is not handed out again as the reusable client', () async {
+      final client = await sessions.loginClient();
+      host.failing.addAll(['switchTo:c1', 'removeAccount:c1']);
+      host.logIn(client.clientName);
+      await pumpEventQueue();
+      expect(sessions.sessionOf('c1')!.state, LoginSessionState.cleanupFailed);
+      host.reusable = client;
+
+      final next = await sessions.loginClient();
+
+      expect(next.clientName, 'c2');
     });
   });
 
@@ -180,14 +216,18 @@ void main() {
       expect(events(), [MultipleAccountLoginType.firstLoggedIn]);
     });
 
-    test('a client that logs in again gets a fresh run', () async {
-      await sessions.firstLoggedIn(host.clientOf('a'), LoginState.loggedIn);
-      host.calls.clear();
+    test(
+      'a client that logs in again after a logout gets a fresh run',
+      () async {
+        await sessions.firstLoggedIn(host.clientOf('a'), LoginState.loggedIn);
+        host.loggedIn.remove('a');
+        host.calls.clear();
 
-      await sessions.firstLoggedIn(host.clientOf('a'), LoginState.loggedIn);
+        await sessions.firstLoggedIn(host.clientOf('a'), LoginState.loggedIn);
 
-      expect(host.calls, contains('activateCurrent'));
-    });
+        expect(host.calls, contains('activateCurrent'));
+      },
+    );
 
     test(
       'a repeated loggedIn of an active candidate keeps its session: no placeholder, no firstLoggedIn',

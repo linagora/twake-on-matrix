@@ -21,6 +21,9 @@ class FakeLoginHost implements LoginHost {
   final streams = <String, StreamController<LoginState>>{};
   final clients = <String, FakeAccountClient>{};
 
+  /// Holds the retry of the pending removals until it completes.
+  Completer<void>? removalGate;
+
   bool switchSucceeds = true;
   Client? reusable;
   String? activeName = 'a';
@@ -178,6 +181,7 @@ class FakeLoginHost implements LoginHost {
   @override
   Future<void> retryPendingRemovals() async {
     removalRetries++;
+    await removalGate?.future;
     await Future<void>.delayed(Duration.zero);
     onRemovalRetry?.call();
   }

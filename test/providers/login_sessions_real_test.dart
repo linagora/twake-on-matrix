@@ -6,8 +6,10 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/providers/account_interactor_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -61,24 +63,24 @@ class _RealHost implements LoginHost {
       container.read(accountClientRegistryProvider)[id];
 
   @override
-  bool isStored(String id) => container
+  bool isStored(AccountId id) => container
       .read(accountRepositoryProvider)
       .registeredAccounts()
-      .any((a) => a.id == id);
+      .any((a) => a.id == id.value);
 
   @override
-  bool isLoggedIn(String id) => _client(id)?.isLogged() ?? false;
+  bool isLoggedIn(AccountId id) => _client(id.value)?.isLogged() ?? false;
 
   @override
-  Future<void> addAccount(String id) async {
-    calls.add('addAccount:$id');
+  Future<void> addAccount(AccountId id) async {
+    calls.add('addAccount:${id.value}');
     await _accounts.addAccount(id);
   }
 
   @override
-  Future<void> removeAccount(String id) async {
-    calls.add('removeAccount:$id');
-    await rollback.removeStored(id, activateReplacement: () async {});
+  Future<void> removeAccount(AccountId id) async {
+    calls.add('removeAccount:${id.value}');
+    await rollback.removeStored(id.value, activateReplacement: () async {});
   }
 
   @override
@@ -97,12 +99,12 @@ class _RealHost implements LoginHost {
   Client get activeClient => _client(activeClientName!)!;
 
   @override
-  Client? clientByName(String name) => _client(name);
+  Client? clientByName(AccountId id) => _client(id.value);
 
   @override
   Future<bool> switchTo(Client client) async {
     calls.add('switchTo:${client.clientName}');
-    await _accounts.switchTo(client.clientName);
+    await _accounts.switchTo(AccountId(client.clientName));
     return !failing.contains('switchAfter:${client.clientName}');
   }
 
@@ -136,9 +138,9 @@ class _RealHost implements LoginHost {
   }
 
   @override
-  Future<void> discardCandidate(String id) async {
-    calls.add('discardCandidate:$id');
-    await rollback.discardCandidate(id);
+  Future<void> discardCandidate(AccountId id) async {
+    calls.add('discardCandidate:${id.value}');
+    await rollback.discardCandidate(id.value);
   }
 
   @override
@@ -146,15 +148,15 @@ class _RealHost implements LoginHost {
       container.read(pendingLoginCandidateProvider);
 
   @override
-  void setPendingCandidate(String? id) =>
-      container.read(pendingLoginCandidateProvider.notifier).set(id);
+  void setPendingCandidate(AccountId? id) =>
+      container.read(pendingLoginCandidateProvider.notifier).set(id?.value);
 
   @override
-  Future<void> signOut(String id, {required bool quiet}) =>
-      _step('signOut:$id');
+  Future<void> signOut(AccountId id, {required bool quiet}) =>
+      _step('signOut:${id.value}');
 
   @override
-  void forgetQuiet(String id) {}
+  void forgetQuiet(AccountId id) {}
 
   @override
   StreamSubscription<LoginState> listenLoginState(
@@ -169,13 +171,15 @@ class _RealHost implements LoginHost {
       .listen(onState);
 
   @override
-  Future<void> removePush(String id) => _step('removePush:$id');
+  Future<void> removePush(AccountId id) => _step('removePush:${id.value}');
 
   @override
-  Future<void> cancelSubscriptions(String id) => _step('cancelSubs:$id');
+  Future<void> cancelSubscriptions(AccountId id) =>
+      _step('cancelSubs:${id.value}');
 
   @override
-  Future<void> registerSubscriptions(String id) => _step('registerSubs:$id');
+  Future<void> registerSubscriptions(AccountId id) =>
+      _step('registerSubs:${id.value}');
 
   @override
   Future<void> setUpToM(Client client) => _step('tom:${client.clientName}');
@@ -238,14 +242,15 @@ void main() {
     Set<String> pending = const {},
   }) {
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
       ],
     );
     addTearDown(container.dispose);
     container
-        .read(accountRepositoryProvider)
-        .adopt(accounts, pendingRemovals: pending);
+        .read(adoptBootAccountsInteractorProvider(accounts))
+        .execute(pendingRemovals: pending);
     effects = FakeSwitchEffects();
     coordinator = AccountSwitchCoordinator(
       effects: effects,
