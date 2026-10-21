@@ -107,5 +107,9 @@ test-results/
 ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 ios/Runner.xcworkspace/xcshareddata/swiftpm/
 
+# local artifacts
+.codegraph
+.vodozemac
+
 # Fetched by scripts/fetch-web-vendor.sh, pinned and integrity checked there.
 web/vendor/dotlottie/
