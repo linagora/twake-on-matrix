@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/providers/account_interactor_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
@@ -28,14 +30,15 @@ void main() {
   void boot(List<FakeAccountClient> clients, {Set<String> pending = const {}}) {
     dataSource = FakeAccountClientDataSource();
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
       ],
     );
     addTearDown(container.dispose);
     container
-        .read(accountRepositoryProvider)
-        .adopt(clients, pendingRemovals: pending);
+        .read(adoptBootAccountsInteractorProvider(clients))
+        .execute(pendingRemovals: pending);
   }
 
   Future<bool> logout(String id, {bool announce = true}) => removals.remove(
@@ -150,7 +153,7 @@ void main() {
     'a removal that fails with no logged-in survivor holds the account and logs nobody in',
     () async {
       boot([user('a'), user('b')]);
-      await notifier().holdRemoval('b');
+      await notifier().holdRemoval(const AccountId('b'));
       dataSource.failDelete = true;
 
       expect(await logout('a'), isFalse);
