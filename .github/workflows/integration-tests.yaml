@@ -203,6 +203,7 @@ jobs:
             targets: >-
               integration_test/tests/chat/chat_test.dart
               integration_test/tests/chat/forward_message_test.dart
+              integration_test/tests/chat/forward_sticker_mobile_test.dart
               integration_test/tests/chat/sending_message_test.dart
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart

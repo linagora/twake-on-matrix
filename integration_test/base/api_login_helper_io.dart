@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:html/parser.dart';
 
+import 'sticker_fixture.dart';
+
 /// Drives the SSO OIDC flow (steps 1-7) over `dart:io` `HttpClient` and
 /// returns a one-time login token that can be handed to
 /// `/onAuthRedirect?loginToken=…` to complete authentication inside the app.
@@ -72,6 +74,49 @@ Future<void> sendMessagesAsReceiver({
         message: message,
       );
     }
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Sends an `m.sticker` event as the configured receiver. Twake cannot send
+/// stickers itself, so tests use this to receive one like from Element.
+Future<void> sendStickerAsReceiver({
+  required String body,
+  required String roomId,
+}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    final uploadUri = _matrixBase(
+      endpoints.matrixURL,
+    ).replace(path: '/_matrix/media/v3/upload');
+    final request = await client.postUrl(uploadUri);
+    request.headers
+      ..set(HttpHeaders.contentTypeHeader, stickerFixtureMimeType)
+      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+      ..set(HttpHeaders.userAgentHeader, _userAgent);
+    request.contentLength = stickerFixtureBytes.length;
+    request.add(stickerFixtureBytes);
+    final response = await request.close();
+    final responseBody = await utf8.decoder.bind(response).join();
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception(
+        'Receiver sticker upload failed [status=${response.statusCode}] '
+        'body=$responseBody',
+      );
+    }
+    final contentUri =
+        (jsonDecode(responseBody) as Map<String, dynamic>)['content_uri']
+            as String;
+    await _putMatrixEvent(
+      client: client,
+      session: session,
+      groupID: roomId,
+      eventType: 'm.sticker',
+      content: stickerFixtureContent(body: body, url: contentUri),
+    );
   } finally {
     client.close(force: true);
   }
@@ -487,6 +532,20 @@ Future<void> _putMatrixMessage({
   required _MatrixSession session,
   required String groupID,
   required String message,
+}) => _putMatrixEvent(
+  client: client,
+  session: session,
+  groupID: groupID,
+  eventType: 'm.room.message',
+  content: {'msgtype': 'm.text', 'body': message},
+);
+
+Future<void> _putMatrixEvent({
+  required HttpClient client,
+  required _MatrixSession session,
+  required String groupID,
+  required String eventType,
+  required Map<String, Object?> content,
 }) async {
   final endpoints = session.endpoints;
   // Matrix `PUT /send/{eventType}/{txnId}` uses a per-request transaction ID
@@ -505,7 +564,7 @@ Future<void> _putMatrixMessage({
       'rooms',
       groupID,
       'send',
-      'm.room.message',
+      eventType,
       txnId,
     ],
   );
@@ -515,7 +574,7 @@ Future<void> _putMatrixMessage({
     ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
     ..set(HttpHeaders.userAgentHeader, _userAgent)
     ..set('Origin', 'https://${endpoints.chatURL}');
-  request.write(jsonEncode({'msgtype': 'm.text', 'body': message}));
+  request.write(jsonEncode(content));
   final response = await request.close();
   if (response.statusCode < 200 || response.statusCode >= 300) {
     final body = await utf8.decoder.bind(response).join();
