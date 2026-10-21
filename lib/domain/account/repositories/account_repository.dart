@@ -30,6 +30,10 @@ abstract interface class AccountRepository {
   /// candidate: use discardCandidate.
   Future<void> removeAccount(String id);
 
+  /// The ids of the accounts whose removal was recorded by
+  /// [markRemovalPending] and did not finish, read from the store.
+  Future<Set<String>> pendingRemovalIds();
+
   /// Records, across restarts, that the removal of the stored account [id]
   /// failed: the account is listed as unavailable until [removeAccount] works.
   /// Throws InvalidAccountTransitionException for a candidate.

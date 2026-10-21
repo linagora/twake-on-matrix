@@ -89,13 +89,14 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<List<Account>> loadAccounts({bool initialize = true}) async {
     final clients = await _dataSource.loadClients(initialize: initialize);
+    final persistedPending = await _pendingRemovals.read();
     _registry.replaceAll(clients);
     _storedIds
       ..clear()
       ..addAll(clients.map((c) => c.clientName));
     _pendingIds
       ..clear()
-      ..addAll((await _pendingRemovals.read()).where(_storedIds.contains))
+      ..addAll(persistedPending.where(_storedIds.contains))
       ..addAll(_loggedOutBesideOthers(clients));
     return clients.map(_toAccount).toList();
   }
@@ -135,6 +136,9 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
+  Future<Set<String>> pendingRemovalIds() => _pendingRemovals.read();
+
+  @override
   Future<void> markRemovalPending(String id) async {
     _requireClient(id);
     if (!_storedIds.contains(id)) {
@@ -157,12 +161,14 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<void> markPushRemovalPending(String id) async {
+    await _mergePersisted(_pushIds, _pendingPushRemovals);
     _pushIds.add(id);
     await _pendingPushRemovals.write(_pushIds);
   }
 
   @override
   Future<void> clearPushRemovalPending(String id) async {
+    await _mergePersisted(_pushIds, _pendingPushRemovals);
     if (!_pushIds.remove(id)) return;
     await _pendingPushRemovals.write(_pushIds);
   }
@@ -180,15 +186,25 @@ class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<void> markCandidateDiscardPending(String id) async {
+    await _mergePersisted(_candidateIds, _pendingCandidateDiscards);
     _candidateIds.add(id);
     await _pendingCandidateDiscards.write(_candidateIds);
   }
 
   @override
   Future<void> clearCandidateDiscardPending(String id) async {
+    await _mergePersisted(_candidateIds, _pendingCandidateDiscards);
     if (!_candidateIds.remove(id)) return;
     await _pendingCandidateDiscards.write(_candidateIds);
   }
+
+  /// The set is empty until its `pending*` call has read the store, so a
+  /// change made before that must not drop or miss what an earlier session
+  /// persisted.
+  Future<void> _mergePersisted(
+    Set<String> ids,
+    PendingRemovalsSource source,
+  ) async => ids.addAll(await source.read());
 
   /// Candidates whose storage could not be deleted; persisted, so a restart
   /// still knows them.
