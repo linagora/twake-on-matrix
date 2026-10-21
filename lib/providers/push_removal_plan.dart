@@ -12,14 +12,12 @@ class PushRemovalPlan {
     required AccountRepository repository,
     required String? Function() sessionToken,
     required Future<void> Function() removePush,
-    bool Function() isPushReady = _always,
+    bool Function()? isPushReady,
   }) : _repository = repository,
        _sessionToken = sessionToken,
        _openedWith = sessionToken(),
        _removePush = removePush,
-       _isPushReady = isPushReady;
-
-  static bool _always() => true;
+       _isPushReady = isPushReady ?? (() => true);
 
   final String id;
   final AccountRepository _repository;
