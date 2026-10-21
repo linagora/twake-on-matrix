@@ -21,7 +21,7 @@ class AccountInitTransitions {
     final loggedIn = accounts.where((a) => a.isLoggedIn).toList();
     if (loggedIn.isNotEmpty) {
       return Active(
-        accounts: accounts,
+        accounts: List.unmodifiable(accounts),
         activeId: _initialActiveId(loggedIn, persistedUserId),
       );
     }

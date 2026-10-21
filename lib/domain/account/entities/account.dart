@@ -1,27 +1,26 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'account.freezed.dart';
 
 /// [unavailable]: the account logged out but its removal failed; it stays
 /// listed, cannot be switched to, and is removed again until that works.
 enum AccountStatus { loggedIn, loggedOut, initFailed, unavailable }
 
-class Account extends Equatable {
-  /// The client name; the only identity an account has in memory.
-  final String id;
+@freezed
+abstract class Account with _$Account {
+  const Account._();
 
-  /// The Matrix user id; null until the account has logged in.
-  final String? userId;
+  const factory Account({
+    /// The client name; the only identity an account has in memory.
+    required String id,
+    required AccountStatus status,
 
-  final AccountStatus status;
+    /// The Matrix user id; null until the account has logged in.
+    String? userId,
 
-  /// Set only when [status] is [AccountStatus.initFailed].
-  final Object? initError;
-
-  const Account({
-    required this.id,
-    required this.status,
-    this.userId,
-    this.initError,
-  });
+    /// Set only when [status] is [AccountStatus.initFailed].
+    Object? initError,
+  }) = _Account;
 
   bool get isLoggedIn => status == AccountStatus.loggedIn;
 
@@ -32,7 +31,4 @@ class Account extends Equatable {
     status: status,
     initError: status == AccountStatus.initFailed ? initError : null,
   );
-
-  @override
-  List<Object?> get props => [id, userId, status, initError];
 }
