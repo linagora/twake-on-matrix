@@ -1,4 +1,5 @@
 import 'package:twake_chat/data/account/logout_removals.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 
 /// The steps that take a logged-out account away, wired to the account state.
@@ -38,7 +39,7 @@ class LogoutRemovalPlan {
   late final RemovalSteps steps = RemovalSteps(
     remove: _remove,
     hold: _hold,
-    persist: () => _accounts.recordPendingRemoval(id),
+    persist: () => _accounts.recordPendingRemoval(AccountId(id)),
     settle: _settle,
   );
 
@@ -47,12 +48,12 @@ class LogoutRemovalPlan {
     await _accounts.whenSwitchSettled();
     _wasActive ??= _isActive();
     await _cancelSubscriptions();
-    await _accounts.removeAccount(id);
+    await _accounts.removeAccount(AccountId(id));
   }
 
   Future<void> _hold() async {
     await _accounts.whenSwitchSettled();
-    await _accounts.holdRemoval(id);
+    await _accounts.holdRemoval(AccountId(id));
   }
 
   /// The account list changed, by a hold or by the removal: once, however many
