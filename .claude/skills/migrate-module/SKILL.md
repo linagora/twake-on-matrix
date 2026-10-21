@@ -24,7 +24,7 @@ Progress: `MIGRATION_STATUS.md`, `scripts/migration_status.sh`.
 |---|---|---|
 | End-to-end | Patrol scenarios for a module, nothing else | any |
 | Mechanical | One rewrite pattern over one area | any |
-| Module | One module through its layers | ≤ ~500 lines, generated files excluded |
+| Module | One module through its layers | ≤ ~500 lines added in `lib/`, tests and generated files excluded |
 
 Never mix two kinds. Check which open pull requests change files in the area
 first, and skip an area someone is changing:
@@ -60,8 +60,8 @@ Once `matrixClientProvider` exists:
 - Change nothing else in the class.
 - A mixin on `State` that needs `ref` is constrained on `ConsumerState`.
 
-Before it exists, leave these calls alone; a new controller takes the
-`Client` as a provider parameter, as `BootstrapViewModel` does.
+Before it exists, leave these calls alone. A controller never takes the
+`Client`: it calls use cases, so a module migration waits for Step 1.
 
 ### `getIt.get<X>()`
 
@@ -86,10 +86,11 @@ In this order, one commit per step:
 
 1. **Data**: datasource interface + implementation (`package:matrix` only
    here), repository implementation mapping SDK types to domain entities.
-   Providers in `<implementation>.provider.dart`.
-2. **Use cases**: `Future<T>` + typed exceptions in `domain/exceptions/`.
-   Rewrite the interactor in place if all its consumers move in this pull
-   request; otherwise add a use case next to it.
+   Providers in `<implementation>.provider.dart`, typed with the interface.
+2. **Use cases**: in `lib/domain/usecase/<feature>/`, `Future<T>` + typed
+   exceptions in `domain/exceptions/`. Rewrite the interactor in place if all
+   its consumers move in this pull request; otherwise add a use case next to
+   it and delete the interactor with its last consumer.
 3. **Controller**: `@riverpod class XxxController extends _$XxxController`;
    `build()` returns `T`, `Future<T>` or `Stream<T>` like its source
    ([GUIDELINES.md][guidelines] §2.5.0bis). State `XxxState` with

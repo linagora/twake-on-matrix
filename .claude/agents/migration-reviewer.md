@@ -33,14 +33,16 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 - No `Matrix.of` added; no `getIt` added except in a `*.provider.dart`
   bridge that replaces at least one lookup.
 - No `package:matrix` import added in `lib/pages`, `lib/widgets` or
-  `lib/presentation`, except in a controller that takes the `Client` as a
-  provider parameter while `matrixClientProvider` does not exist.
+  `lib/presentation`: controllers call use cases and take domain types, not
+  a `Client`.
+- No `print`, `debugPrint` or `dart:developer` log; logs go through `Logs()`
+  ([GUIDELINES.md][guidelines] §2.4.7).
 - `ref.watch` only in `build()` and in dependency providers; `ref.read` in
   callbacks, methods and `initState`; `ref.listenManual` cancelled in
   `dispose()`.
 - `keepAlive` only for session-wide state, with a reason.
-- Provider parameters are value-comparable. A `Client` parameter is a finding
-  once `matrixClientProvider` exists.
+- Provider parameters are value-comparable. A `Client` parameter is a
+  finding.
 - A file that imports `package:provider` imports `flutter_riverpod` with
   `show` or an alias.
 - `ref.mounted` is checked after every `await` in a Notifier method, before
@@ -75,14 +77,17 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 - `domain/` imports neither Riverpod, nor Flutter, nor `package:matrix`, nor
   Dio.
 - Controller named `XxxController`, state `XxxState` with `@freezed`.
-- Dependency providers sit in `<implementation>.provider.dart`.
+- Dependency providers sit in `<implementation>.provider.dart` and expose the
+  interface, not the `*Impl`.
+- Use cases sit in `lib/domain/usecase/<feature>/`.
 - The module's legacy is deleted: interactors without consumers, `app_state`
   files, mixins, GetIt registrations.
 - Controller tests use `ProviderContainer.test(retry: (_, _) => null)` with
   overrides, not a widget tree ([`ProviderContainer.test`][container-test]).
 - A hidden screen does not rely on a provider updating while it is hidden
   ([paused listeners][pause]).
-- Under about 500 lines of non-generated diff.
+- Under about 500 lines added in `lib/`; tests, generated files and deleted
+  lines do not count.
 
 ### Bridges
 - A provider returning `getIt.get<X>()` lives in
@@ -90,8 +95,9 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
   comment and names the legacy consumers that keep `X` in GetIt.
 - A value still owned by legacy code is pushed into its provider by its owner
   and carries a `// TODO: [transitional]` comment. The only widget allowed
-  to push is `MatrixState` (active client, homeserver summary) until Step 4;
-  a push from any other widget is BLOCKING ([DO/DON'T][do-dont]).
+  to push is `MatrixState` (active client, homeserver summary), until the
+  account state moves to Riverpod; a push from any other widget is BLOCKING
+  ([DO/DON'T][do-dont]).
 - Code outside the widget tree reads providers only through the app's
   container, never through a container of its own.
 

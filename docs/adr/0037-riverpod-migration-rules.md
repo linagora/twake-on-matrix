@@ -45,7 +45,8 @@ providers, pauses hidden listeners and throws on disposed refs
   ([All `updateShouldNotify` now use `==`][whats-new-equality]).
 - A dependency provider (datasource, repository, use case, service) lives in
   `<implementation>.provider.dart`, next to its implementation
-  ([GUIDELINES.md][guidelines] §2.7). A controller lives next to its screen.
+  ([GUIDELINES.md][guidelines] §2.7), and its type is the interface, not the
+  `*Impl`. A controller lives next to its screen.
 - Ephemeral UI state stays in the widget: text controllers, selection,
   animations, form fields ([DO/DON'T: avoid using providers for ephemeral
   state][do-dont]).
@@ -90,23 +91,28 @@ providers, pauses hidden listeners and throws on disposed refs
   owner. Providers are not initialized from widgets ([DO/DON'T: avoid
   initializing providers in a widget][do-dont]), with one tolerated exception:
   `MatrixState` keeps pushing the active client and the homeserver summary
-  until Step 4, because it is where the active account is chosen today. No
-  other widget pushes into a provider.
+  while it is where the active account is chosen. The account state moving
+  to Riverpod (#3466–#3476) ends the exception for the client; Step 1 does
+  not wait for it. No other widget pushes into a provider.
 - Every bridge carries a `// TODO: [transitional]` comment, the marker the
   code already uses, so `git grep "TODO: \[transitional\]"` lists them.
 
 ### 4. Open questions of the plan
 
-- **Q1**: a single `matrixClientProvider` exposes the active, non-null
-  `Client` to screens behind login. It reads `activeMatrixClientProvider`
-  (#3459), which `MatrixState` feeds; nothing else reads
-  `activeMatrixClientProvider`. When the choice of the active account and
-  client creation move to Riverpod (last step), `matrixClientProvider` keeps
-  its name and `activeMatrixClientProvider` goes.
-- **Q2**: an interactor is rewritten in place to `Future<T>` + typed
-  exceptions when its consumers are migrated in the same pull request.
-  Otherwise a `UseCase` is added next to it and the interactor is deleted with
-  its last consumer.
+- **Q1**: code reads the active `Client` from `matrixClientProvider`, which
+  is never null and serves screens behind login. During the migration it
+  reads the nullable `activeMatrixClientProvider` (#3459), fed by
+  `MatrixState` and later derived from the account state (#3466–#3476);
+  nothing else reads `activeMatrixClientProvider`. At the end only
+  `matrixClientProvider` remains, reading the active account directly; "no
+  account" is the account state's and the router's concern, not the
+  client's.
+- **Q2**: use cases stay in `lib/domain/usecase/<feature>/`, where the
+  interactors are. An interactor is rewritten in place to `Future<T>` + typed
+  exceptions when all its consumers are migrated in the same pull request.
+  Otherwise a `UseCase` is added next to it for the migrated consumers, and
+  the interactor is deleted with its last consumer: the two exist side by
+  side only for that time.
 - **Q3**: no move to `features/` folders during the migration.
 - **Q4**: the migration is done when every legacy metric of
   `scripts/migration_status.sh` is zero and the `Matrix` widget is gone.
@@ -138,7 +144,8 @@ controller → use case → repository → datasource.
 ### 7. Pull requests
 
 - A mechanical pull request applies one pattern; its size does not matter.
-- A module pull request stays under about 500 lines of non-generated diff.
+- A module pull request adds under about 500 lines in `lib/`; tests,
+  generated files and deleted lines do not count.
 - A module is covered by Patrol scenarios, mobile and web, merged before its
   migration.
 - Every migration pull request runs the `zeus` and `migration-reviewer` agents
@@ -154,8 +161,8 @@ controller → use case → repository → datasource.
 - Six existing `ViewModel`s and their tests are renamed.
 - Bridges exist until the last step; `git grep "TODO: \[transitional\]"`
   lists them.
-- `MatrixState` stays a widget that initializes providers until Step 4,
-  against the Riverpod recommendation; the exception ends with it.
+- `MatrixState` stays a widget that initializes providers until the account
+  state moves to Riverpod, against the Riverpod recommendation.
 - Turning retry off changes how today's providers react to errors; their
   tests run with it off.
 

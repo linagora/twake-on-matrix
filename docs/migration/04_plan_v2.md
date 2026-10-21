@@ -43,7 +43,8 @@ Every pull request is written by an agent, reviewed by the `zeus` and
       `UncontrolledProviderScope`
 - [ ] `matrixClientProvider`: the active, non-null `Client` for screens
       behind login, read from `activeMatrixClientProvider`, which
-      `MatrixState` feeds: the tolerated exception until Step 4
+      `MatrixState` feeds until the account state moves to Riverpod
+      (#3466–#3476). Step 1 does not wait for those pull requests
       (ADR 0037 §3, §4 Q1)
 - [ ] Patrol scenario: log in, add a second account, switch, log out
 
@@ -96,8 +97,9 @@ For each module:
 ## Step 4 — Removing the legacy
 
 - [ ] Client creation, the choice of the active account and login move to
-      `keepAlive` providers; their owner feeds `matrixClientProvider`, so no
-      widget initializes a provider any more
+      `keepAlive` providers; `matrixClientProvider` reads the active account
+      directly and `activeMatrixClientProvider` goes, so no widget
+      initializes a provider any more
       ([DO/DON'T: avoid initializing providers in a widget][do-dont])
 - [ ] The `Matrix` widget is deleted
 - [ ] `get_it`, `dartz` and `lib/domain/app_state/` are deleted
