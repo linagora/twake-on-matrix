@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/data/account/datasources_impl/fault_injecting_account_data_source.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
@@ -240,11 +241,19 @@ void main() {
   void boot({
     List<FakeAccountClient> accounts = const [],
     Set<String> pending = const {},
+    bool faults = false,
   }) {
     container = ProviderContainer(
       retry: (_, _) => null,
       overrides: [
-        accountClientDataSourceProvider.overrideWithValue(dataSource),
+        accountClientDataSourceProvider.overrideWithValue(
+          faults
+              ? FaultInjectingAccountDataSource(
+                  dataSource,
+                  failAddClientNameOnce: true,
+                )
+              : dataSource,
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -480,5 +489,66 @@ void main() {
       expect(events().last, MultipleAccountLoginType.firstLoggedIn);
       expect(container.read(accountsProvider), isA<Active>());
     });
+  });
+
+  group('with the fault that makes storing the name fail once', () {
+    test(
+      'add-account: the first try fails cleanly, the second one works',
+      () async {
+        boot(accounts: [a], faults: true);
+        final first = await sessions.loginClient();
+
+        await host.logIn(first.clientName);
+
+        expect(events(), [MultipleAccountLoginType.loginFailed]);
+        expect(
+          container.read(accountClientRegistryProvider)[first.clientName],
+          isNull,
+        );
+        expect(dataSource.calls, contains('delete:${first.clientName}'));
+
+        final second = await sessions.loginClient();
+        await host.logIn(second.clientName);
+
+        expect(events(), [
+          MultipleAccountLoginType.loginFailed,
+          MultipleAccountLoginType.otherAccountLoggedIn,
+        ]);
+        expect(container.read(accountsProvider).accounts.map((x) => x.id), [
+          'a',
+          second.clientName,
+        ]);
+      },
+    );
+
+    test(
+      'first login: a failed set-up is rolled back and the same client logs in again',
+      () async {
+        boot(accounts: const []);
+        final placeholder = await container
+            .read(accountRepositoryProvider)
+            .createCandidate();
+        final client =
+            container.read(accountClientRegistryProvider)[placeholder.id]!
+                  as LoginableClient
+              ..loggedIn = true;
+        host.failing.add('activateCurrent');
+
+        await sessions.firstLoggedIn(client, LoginState.loggedIn);
+
+        expect(events(), [MultipleAccountLoginType.loginFailed]);
+        expect(container.read(accountsProvider), isA<LastLoggedOut>());
+        expect(
+          container.read(accountClientRegistryProvider)[client.clientName],
+          same(client),
+        );
+
+        host.failing.clear();
+        await sessions.firstLoggedIn(client, LoginState.loggedIn);
+
+        expect(events().last, MultipleAccountLoginType.firstLoggedIn);
+        expect(container.read(accountsProvider), isA<Active>());
+      },
+    );
   });
 }
