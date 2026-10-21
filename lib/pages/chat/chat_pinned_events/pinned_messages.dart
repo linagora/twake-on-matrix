@@ -19,6 +19,7 @@ import 'package:twake_chat/presentation/mixins/retry_text_message_mixin.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
+import 'package:twake_chat/utils/extension/basic_event_extension.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -402,7 +403,7 @@ class PinnedMessagesController extends State<PinnedMessages>
   void forwardEventAction(Event event) async {
     Matrix.of(context).shareContent = event
         .getDisplayEventWithoutEditEvent(widget.timeline!)
-        .content;
+        .formatContentForwards();
     Logs().d(
       "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
     );
