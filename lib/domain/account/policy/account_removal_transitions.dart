@@ -16,7 +16,8 @@ class AccountRemovalTransitions {
   /// [AccountPolicy.nextActiveAfterRemoving], and with no logged-in account
   /// left nobody is logged in ([NoAccount], which keeps the accounts that wait
   /// for their removal). The only account goes through [logoutLast]. An
-  /// account that waits for its removal is removed from [NoAccount] too.
+  /// account that waits for its removal is removed from [NoAccount] and
+  /// [AccountInitFailed] too.
   AccountsState remove(AccountsState state, String id) {
     if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
@@ -24,6 +25,13 @@ class AccountRemovalTransitions {
     if (state is NoAccount) {
       return NoAccount(
         candidateId: state.candidateId,
+        accounts: state.accounts.where((a) => a.id != id).toList(),
+      );
+    }
+    if (state is AccountInitFailed) {
+      return AccountInitFailed(
+        id: state.id,
+        error: state.error,
         accounts: state.accounts.where((a) => a.id != id).toList(),
       );
     }
@@ -43,7 +51,7 @@ class AccountRemovalTransitions {
     if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
     }
-    if (state is NoAccount) return state;
+    if (state is NoAccount || state is AccountInitFailed) return state;
     if (state is! Active) {
       throw _support.invalid('markUnavailable', state);
     }
@@ -56,7 +64,9 @@ class AccountRemovalTransitions {
 
   /// The last logged-in account logs out but stays, marked logged out, so the
   /// next login can reuse it. The accounts that wait for their removal stay
-  /// listed beside it ([NoAccount]); with none, it is [LastLoggedOut].
+  /// listed beside it ([NoAccount]); with none, it is [LastLoggedOut]. Another
+  /// logged-in account rejects it; a logged-out or init-failed one beside it
+  /// is dropped, as `initialize` does.
   AccountsState logoutLast(AccountsState state) {
     if (state is! Active) {
       throw _support.invalid('logoutLast', state);
@@ -66,10 +76,15 @@ class AccountRemovalTransitions {
         .firstWhere((a) => a.id == state.activeId)
         .withStatus(AccountStatus.loggedOut);
     if (others.isEmpty) return LastLoggedOut(account: loggedOut);
-    if (others.any((a) => a.status != AccountStatus.unavailable)) {
+    if (others.any((a) => a.isLoggedIn)) {
       throw _support.invalid('logoutLast', state);
     }
-    return NoAccount(candidateId: loggedOut.id, accounts: others.toList());
+    return NoAccount(
+      candidateId: loggedOut.id,
+      accounts: others
+          .where((a) => a.status == AccountStatus.unavailable)
+          .toList(),
+    );
   }
 
   /// [accounts] is the list after [id] stopped being usable: the active
