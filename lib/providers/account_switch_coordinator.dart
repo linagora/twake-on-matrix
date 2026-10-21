@@ -104,21 +104,32 @@ class AccountSwitchCoordinator {
     AccountsState next,
   ) async {
     if (next is LastLoggedOut || next is NoAccount) _reset();
-    if (next is Active &&
-        previous is Switching &&
-        next.activeId != previous.to) {
+    if (_switchEndedElsewhere(previous, next)) {
       _invalidate();
-      _restoreOrigin(next.activeId);
+      _restoreOrigin((next as Active).activeId);
     }
     if (next is! Switching) return;
-    if (previous is! Switching) {
-      final origin = _clientOf(next.from);
-      _originApplied = origin != null && isAppliedTo(origin);
-    }
-    final ticket = next.ticket;
+    if (previous is! Switching) _noteOrigin(next.from);
+    await _runSwitch(next);
+  }
+
+  /// A switch ended on another account than the one it was heading to.
+  bool _switchEndedElsewhere(AccountsState? previous, AccountsState next) =>
+      switch ((previous, next)) {
+        (Switching(:final to), Active(:final activeId)) => activeId != to,
+        _ => false,
+      };
+
+  void _noteOrigin(String fromId) {
+    final origin = _clientOf(fromId);
+    _originApplied = origin != null && isAppliedTo(origin);
+  }
+
+  Future<void> _runSwitch(Switching switching) async {
+    final ticket = switching.ticket;
     try {
-      final client = _clientOf(next.to);
-      if (client == null) throw UnknownAccountException(next.to);
+      final client = _clientOf(switching.to);
+      if (client == null) throw UnknownAccountException(switching.to);
       await apply(client);
       _accounts.completeSwitch(ticket);
     } catch (e, s) {
