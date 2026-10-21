@@ -5,11 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/account_interactor_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -36,17 +40,19 @@ void main() {
   }) {
     dataSource = FakeAccountClientDataSource();
     container = ProviderContainer(
+      retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
         ...overrides,
-        if (persistedUserId != null)
-          bootPersistedActiveUserIdProvider.overrideWithValue(persistedUserId),
       ],
     );
     addTearDown(container.dispose);
     container
-        .read(accountRepositoryProvider)
-        .adopt(clients, pendingRemovals: pending);
+        .read(bootAccountSnapshotProvider.notifier)
+        .set(AccountBootSnapshot(persistedActiveUserId: persistedUserId));
+    container
+        .read(adoptBootAccountsInteractorProvider(clients))
+        .execute(pendingRemovals: pending);
   }
 
   AccountsState state() => container.read(accountsProvider);
@@ -159,7 +165,7 @@ void main() {
       'without a handler it emits Switching then Active, once each',
       () async {
         final seen = record();
-        await notifier().switchTo('b');
+        await notifier().switchTo(const AccountId('b'));
         expect(seen, [
           isA<Switching>(),
           isA<Active>().having((s) => s.activeId, 'activeId', 'b'),
@@ -180,7 +186,7 @@ void main() {
         }
       });
 
-      final done = notifier().switchTo('b');
+      final done = notifier().switchTo(const AccountId('b'));
       await handlerStarted.future;
 
       expect(state(), isA<Switching>());
@@ -196,7 +202,7 @@ void main() {
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
 
-      final first = notifier().switchTo('b');
+      final first = notifier().switchTo(const AccountId('b'));
       final firstResult = expectLater(
         first,
         throwsA(isA<SwitchSupersededException>()),
@@ -205,7 +211,7 @@ void main() {
       final firstSeq = (state() as Switching).seq;
       expect(firstSeq, notifier().switchSeq);
 
-      final second = notifier().switchTo('c');
+      final second = notifier().switchTo(const AccountId('c'));
       await pumpEventQueue();
       expect((state() as Switching).seq, firstSeq + 1);
       await firstResult;
@@ -226,7 +232,9 @@ void main() {
         final dispose = notifier().registerSwitchHandler();
         addTearDown(dispose);
         var completed = false;
-        final future = notifier().switchTo('b').then((_) => completed = true);
+        final future = notifier()
+            .switchTo(const AccountId('b'))
+            .then((_) => completed = true);
 
         await pumpEventQueue();
         expect(completed, isFalse);
@@ -246,7 +254,7 @@ void main() {
         final dispose = notifier().registerSwitchHandler();
         addTearDown(dispose);
         final seen = record();
-        final future = notifier().switchTo('b');
+        final future = notifier().switchTo(const AccountId('b'));
         await pumpEventQueue();
 
         notifier().failSwitch(
@@ -266,14 +274,14 @@ void main() {
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
 
-      final first = notifier().switchTo('b');
+      final first = notifier().switchTo(const AccountId('b'));
       final firstResult = expectLater(
         first,
         throwsA(isA<SwitchSupersededException>()),
       );
       await pumpEventQueue();
       final firstSeq = notifier().switchSeq;
-      final second = notifier().switchTo('c');
+      final second = notifier().switchTo(const AccountId('c'));
       await pumpEventQueue();
 
       await firstResult;
@@ -294,13 +302,13 @@ void main() {
         final dispose = notifier().registerSwitchHandler();
         addTearDown(dispose);
         final first = expectLater(
-          notifier().switchTo('b'),
+          notifier().switchTo(const AccountId('b')),
           throwsA(isA<SwitchSupersededException>()),
         );
         await pumpEventQueue();
         final firstSeq = notifier().switchSeq;
-        await notifier().switchTo('a');
-        final second = notifier().switchTo('b');
+        await notifier().switchTo(const AccountId('a'));
+        final second = notifier().switchTo(const AccountId('b'));
         await pumpEventQueue();
         await first;
 
@@ -322,10 +330,10 @@ void main() {
     test('asking again for the switch that is running joins it', () async {
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
-      final first = notifier().switchTo('b');
+      final first = notifier().switchTo(const AccountId('b'));
       await pumpEventQueue();
       final seq = notifier().switchSeq;
-      final again = notifier().switchTo('b');
+      final again = notifier().switchTo(const AccountId('b'));
       await pumpEventQueue();
 
       expect(notifier().switchSeq, seq);
@@ -346,7 +354,10 @@ void main() {
           }
         });
 
-        await expectLater(notifier().switchTo('b'), throwsStateError);
+        await expectLater(
+          notifier().switchTo(const AccountId('b')),
+          throwsStateError,
+        );
         expect((state() as Active).activeId, 'a');
       },
     );
@@ -354,7 +365,7 @@ void main() {
     test('whenSwitchSettled waits for the running switch', () async {
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
-      final switching = notifier().switchTo('b');
+      final switching = notifier().switchTo(const AccountId('b'));
       await pumpEventQueue();
       var settled = false;
       final waiting = notifier().whenSwitchSettled().then(
@@ -382,8 +393,8 @@ void main() {
             .read(accountClientRegistryProvider)
             .add(FakeAccountClient(candidate.id, userID: '@n:s'));
 
-        final adding = notifier().addAccount(candidate.id);
-        final removing = notifier().removeAccount('a');
+        final adding = notifier().addAccount(AccountId(candidate.id));
+        final removing = notifier().removeAccount(const AccountId('a'));
         await Future.wait([adding, removing]);
 
         expect(state().accounts.map((x) => x.id), [candidate.id]);
@@ -393,14 +404,14 @@ void main() {
 
     test('switching to the active account emits nothing', () async {
       final seen = record();
-      await notifier().switchTo('a');
+      await notifier().switchTo(const AccountId('a'));
       expect(seen, isEmpty);
     });
 
     test('switching to an unknown account throws and emits nothing', () async {
       final seen = record();
       await expectLater(
-        notifier().switchTo('x'),
+        notifier().switchTo(const AccountId('x')),
         throwsA(isA<UnknownAccountException>()),
       );
       expect(seen, isEmpty);
@@ -412,10 +423,10 @@ void main() {
       'removing a non-active account keeps the active one, one emission',
       () async {
         boot([a, b, c]);
-        await notifier().switchTo('c');
+        await notifier().switchTo(const AccountId('c'));
         final seen = record();
 
-        await notifier().removeAccount('a');
+        await notifier().removeAccount(const AccountId('a'));
 
         expect(seen, hasLength(1));
         expect((state() as Active).activeId, 'c');
@@ -430,7 +441,7 @@ void main() {
         boot([a, b, c]);
         final seen = record();
 
-        await notifier().removeAccount('a');
+        await notifier().removeAccount(const AccountId('a'));
 
         expect(seen, hasLength(1));
         expect((state() as Active).activeId, 'b');
@@ -442,11 +453,11 @@ void main() {
       boot([a, b]);
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
-      unawaited(notifier().switchTo('b').catchError((_) {}));
+      unawaited(notifier().switchTo(const AccountId('b')).catchError((_) {}));
       await pumpEventQueue();
 
       await expectLater(
-        notifier().removeAccount('b'),
+        notifier().removeAccount(const AccountId('b')),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
       expect(state(), isA<Switching>());
@@ -456,7 +467,7 @@ void main() {
     test('the only account must go through logoutLast', () async {
       boot([a]);
       await expectLater(
-        notifier().removeAccount('a'),
+        notifier().removeAccount(const AccountId('a')),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
       expect((state() as Active).activeId, 'a');
@@ -470,7 +481,7 @@ void main() {
         boot([a, b]);
         final seen = record();
 
-        await notifier().holdRemoval('b');
+        await notifier().holdRemoval(const AccountId('b'));
 
         expect(seen, hasLength(1));
         final held = state() as Active;
@@ -484,7 +495,7 @@ void main() {
       boot([a, b]);
       final seen = record();
 
-      await notifier().holdRemoval('a');
+      await notifier().holdRemoval(const AccountId('a'));
 
       expect(seen, hasLength(1));
       expect((state() as Active).activeId, 'b');
@@ -495,9 +506,9 @@ void main() {
       'with no logged-in survivor nobody is logged in and it stays listed',
       () async {
         boot([a, b]);
-        await notifier().holdRemoval('b');
+        await notifier().holdRemoval(const AccountId('b'));
 
-        await notifier().holdRemoval('a');
+        await notifier().holdRemoval(const AccountId('a'));
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['a', 'b']);
@@ -507,10 +518,10 @@ void main() {
 
     test('holding again changes nothing, so a retry is safe', () async {
       boot([a, b]);
-      await notifier().holdRemoval('b');
+      await notifier().holdRemoval(const AccountId('b'));
       final seen = record();
 
-      await notifier().holdRemoval('b');
+      await notifier().holdRemoval(const AccountId('b'));
 
       expect(seen, isEmpty);
     });
@@ -519,9 +530,9 @@ void main() {
       'removing the active account with only unavailable survivors logs nobody in',
       () async {
         boot([a, b]);
-        await notifier().holdRemoval('b');
+        await notifier().holdRemoval(const AccountId('b'));
 
-        await notifier().removeAccount('a');
+        await notifier().removeAccount(const AccountId('a'));
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['b']);
@@ -531,10 +542,10 @@ void main() {
 
     test('the record that survives a restart is written on its own', () async {
       boot([a, b]);
-      await notifier().holdRemoval('b');
+      await notifier().holdRemoval(const AccountId('b'));
       expect(await PendingRemovalsSource(Store()).read(), isEmpty);
 
-      await notifier().recordPendingRemoval('b');
+      await notifier().recordPendingRemoval(const AccountId('b'));
 
       expect(await PendingRemovalsSource(Store()).read(), {'b'});
     });
@@ -544,20 +555,21 @@ void main() {
       () async {
         dataSource = FakeAccountClientDataSource();
         container = ProviderContainer(
+          retry: (_, _) => null,
           overrides: [
             accountClientDataSourceProvider.overrideWithValue(dataSource),
           ],
         );
         addTearDown(container.dispose);
         container
-            .read(accountRepositoryProvider)
-            .adopt([a, b], pendingRemovals: {'a', 'b'});
+            .read(adoptBootAccountsInteractorProvider([a, b]))
+            .execute(pendingRemovals: {'a', 'b'});
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['a', 'b']);
 
-        await notifier().removeAccount('a');
-        await notifier().removeAccount('b');
+        await notifier().removeAccount(const AccountId('a'));
+        await notifier().removeAccount(const AccountId('b'));
 
         expect(state(), const NoAccount());
         expect(dataSource.calls, contains('delete:a'));
@@ -589,7 +601,7 @@ void main() {
       container
           .read(accountClientRegistryProvider)
           .add(FakeAccountClient(candidate.id, userID: '@n:s'));
-      await notifier().addAccount(candidate.id);
+      await notifier().addAccount(AccountId(candidate.id));
       expect((state() as Active).accounts, hasLength(2));
 
       notifier().logoutLast();
@@ -599,7 +611,7 @@ void main() {
       expect(out.accounts.map((x) => x.id), ['w']);
       expect(out.accounts.single.status, AccountStatus.unavailable);
 
-      await notifier().addAccount(candidate.id);
+      await notifier().addAccount(AccountId(candidate.id));
 
       expect((state() as Active).activeId, candidate.id);
     });
@@ -608,7 +620,7 @@ void main() {
       boot([a]);
       notifier().logoutLast();
 
-      await notifier().addAccount('a');
+      await notifier().addAccount(const AccountId('a'));
 
       expect((state() as Active).activeId, 'a');
       expect(container.read(activeMatrixClientProvider), same(a));
@@ -622,7 +634,7 @@ void main() {
       // The placeholder logs in: the SDK client now reports a user id.
       final loggedIn = FakeAccountClient('p', userID: '@p:s');
       container.read(accountClientRegistryProvider).add(loggedIn);
-      await notifier().addAccount('p');
+      await notifier().addAccount(const AccountId('p'));
 
       expect((state() as Active).activeId, 'p');
       expect(container.read(activeMatrixClientProvider), same(loggedIn));
@@ -642,7 +654,7 @@ void main() {
       container
           .read(accountClientRegistryProvider)
           .add(FakeAccountClient(candidate.id, userID: '@n:s'));
-      await notifier().addAccount(candidate.id);
+      await notifier().addAccount(AccountId(candidate.id));
 
       expect(container.read(accountClientsProvider).map((c) => c.clientName), [
         'a',
@@ -651,10 +663,25 @@ void main() {
       expect((state() as Active).activeId, 'a');
     });
 
+    test('a pending candidate that logged in is no longer offered', () async {
+      boot([a]);
+      final candidate = FakeAccountClient('n', logged: false);
+      container.read(accountClientRegistryProvider).add(candidate);
+      container.read(pendingLoginCandidateProvider.notifier).set('n');
+      expect(container.read(loginCandidateProvider), same(candidate));
+
+      container
+          .read(accountClientRegistryProvider)
+          .add(FakeAccountClient('n', userID: '@n:s'));
+      container.invalidate(loginCandidateProvider);
+
+      expect(container.read(loginCandidateProvider), isNull);
+    });
+
     test('a repeated login event for a listed account does nothing', () async {
       boot([a, b]);
       final seen = record();
-      await notifier().addAccount('a');
+      await notifier().addAccount(const AccountId('a'));
       expect(seen, isEmpty);
     });
 
@@ -670,7 +697,7 @@ void main() {
       final seen = record();
 
       await expectLater(
-        notifier().addAccount(candidate.id),
+        notifier().addAccount(AccountId(candidate.id)),
         throwsA(isA<StateError>()),
       );
 
@@ -682,7 +709,7 @@ void main() {
       boot([a]);
       final seen = record();
       await expectLater(
-        notifier().addAccount('missing'),
+        notifier().addAccount(const AccountId('missing')),
         throwsA(isA<UnknownAccountException>()),
       );
       expect(seen, isEmpty);

@@ -18,7 +18,8 @@ class PendingLoginCandidate extends _$PendingLoginCandidate {
 
 /// The unlogged `Client` a login screen should use: the placeholder of a
 /// logged-out boot, the account that logged out last, else the pending
-/// add-account candidate. An account that waits for its removal is never it.
+/// add-account candidate, unless that one has logged in meanwhile. An account
+/// that waits for its removal is never it.
 @Riverpod(keepAlive: true)
 Client? loginCandidate(Ref ref) {
   final registry = ref.watch(accountClientRegistryProvider);
@@ -28,5 +29,7 @@ Client? loginCandidate(Ref ref) {
     LastLoggedOut(:final account) => account.id,
     _ => null,
   });
-  return stateClient ?? clientOf(ref.watch(pendingLoginCandidateProvider));
+  if (stateClient != null) return stateClient;
+  final pending = clientOf(ref.watch(pendingLoginCandidateProvider));
+  return pending != null && !pending.isLogged() ? pending : null;
 }
