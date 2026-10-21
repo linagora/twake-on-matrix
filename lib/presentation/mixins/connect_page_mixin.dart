@@ -1,3 +1,5 @@
+import 'package:twake_chat/providers/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
@@ -147,7 +149,7 @@ mixin ConnectPageMixin {
       if (token == null || token.isEmpty) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final client = await Matrix.of(context).getLoginClient();
-      return await loginWithToken(Matrix.of(context), client, token);
+      return await loginWithToken(context.loginSessions, client, token);
     } catch (e) {
       Logs().e('ConnectPageMixin:: ssoLoginActionMobil(): error: $e');
       return SsoLoginState.error;
@@ -268,12 +270,12 @@ mixin ConnectPageMixin {
   /// user is told and the result is an error, so they can try again.
   @visibleForTesting
   Future<SsoLoginState> loginWithToken(
-    MatrixState matrix,
+    LoginSessions sessions,
     Client client,
     String token,
   ) async {
     final dialogResult = await TwakeDialog.showStreamDialogFullScreen(
-      future: () async => matrix.trackLogin(
+      future: () async => sessions.trackLogin(
         client,
         () => client.login(
           LoginType.mLoginToken,
@@ -298,6 +300,7 @@ mixin ConnectPageMixin {
 
   Future<SsoLoginState> handleTokenFromRegistrationSite({
     required MatrixState matrix,
+    required LoginSessions sessions,
     required String uri,
   }) async {
     try {
@@ -308,7 +311,7 @@ mixin ConnectPageMixin {
       }
       matrix.loginType = LoginType.mLoginToken;
       final client = await matrix.getLoginClient();
-      return await loginWithToken(matrix, client, token);
+      return await loginWithToken(sessions, client, token);
     } catch (e) {
       Logs().e(
         'ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e',

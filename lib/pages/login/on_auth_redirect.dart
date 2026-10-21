@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
@@ -25,6 +26,10 @@ class OnAuthRedirect extends StatefulWidget {
 
 class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
   Client? _clientFirstLoggedIn;
+
+  /// The client this redirect logs in with; the login events of any other
+  /// client (an earlier candidate that is still being cleaned up) are not its.
+  Client? _loginClient;
 
   StreamSubscription? _clientLoginStateChangedSubscription;
 
@@ -56,7 +61,8 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       _handleLoginSuccess();
       return;
     }
-    if (event.multipleAccountLoginType.isFailure) {
+    if (event.multipleAccountLoginType.isFailure &&
+        event.client == _loginClient) {
       _handleLoginFailed(event.error);
       return;
     }
@@ -74,6 +80,9 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       );
     }
     if (!mounted) return;
+    // A cleanup that failed leaves its session alive: drop the pending
+    // candidate now, not at the next login.
+    unawaited(context.loginSessions.discardPending());
     const HomeRoute().go(context);
   }
 
@@ -98,7 +107,7 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
     );
     if (!mounted) return;
     // A login that ended here leaves no client behind.
-    unawaited(Matrix.of(context).discardPendingLoginCandidate());
+    unawaited(context.loginSessions.discardPending());
     const HomeRoute().go(context);
   }
 
@@ -159,12 +168,20 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       Logs().i('tryLoggingUsingToken::homeserver: $homeserver');
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final client = await Matrix.of(context).getLoginClient();
+      _loginClient = client;
       if (!context.mounted) return;
-      Matrix.of(context).loginHomeserverSummary = await client
+      final sessions = context.loginSessions;
+      final summary = await client
           .checkHomeserver(Uri.parse(homeserver))
           .toHomeserverSummary();
+      if (!context.mounted) {
+        // The user left while the homeserver was checked: no login follows.
+        unawaited(sessions.discardPending());
+        return;
+      }
+      Matrix.of(context).loginHomeserverSummary = summary;
 
-      await Matrix.of(context).trackLogin(
+      await sessions.trackLogin(
         client,
         () => client.login(
           LoginType.mLoginToken,

@@ -8,7 +8,6 @@ import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart'
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/domain/exception/federation_configuration_not_found.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
-import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
@@ -28,8 +27,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
 import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
-import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
-import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
@@ -46,12 +43,14 @@ import 'package:twake_chat/providers/account_interactor_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
+import 'package:twake_chat/providers/configuration_repository_providers.dart';
+import 'package:twake_chat/providers/url_interceptor_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/client_subscriptions.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
 import 'package:twake_chat/providers/login_configuration_persister.dart';
 import 'package:twake_chat/providers/login_host.dart';
-import 'package:twake_chat/providers/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/providers/login_state_watcher.dart';
 import 'package:twake_chat/providers/logout_removal_plan.dart';
 import 'package:twake_chat/providers/push_removal_plan.dart';
@@ -158,8 +157,8 @@ class MatrixState extends ConsumerState<Matrix>
   ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
 
   bool get twakeSupported {
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    final tomServerUrlInterceptor = ref.read(
+      dynamicUrlInterceptorsProvider(NetworkDI.tomServerUrlInterceptorName),
     );
     return tomServerUrlInterceptor.baseUrl != null;
   }
@@ -340,8 +339,9 @@ class MatrixState extends ConsumerState<Matrix>
 
   /// The unlogged client a login screen uses: the placeholder of a logged-out
   /// boot, else the pending candidate, else a new one. Its lifecycle belongs
-  /// to [LoginSessions].
-  Future<Client> getLoginClient() => _loginSessions.loginClient();
+  /// to `LoginSessions`.
+  Future<Client> getLoginClient() =>
+      ref.read(loginHostSlotProvider).sessions.loginClient();
 
   Client? getClientByUserId(String userId) =>
       accountClients.firstWhereOrNull((c) => c.userID == userId);
@@ -455,9 +455,13 @@ class MatrixState extends ConsumerState<Matrix>
       : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  late final _loginHost = _MatrixLoginHost(this);
+  late final LoginHostSlot _loginHostSlot;
+
   @override
   void initState() {
     super.initState();
+    _loginHostSlot = ref.read(loginHostSlotProvider)..attach(_loginHost);
     // The clients created at boot are read once, here; from then on the
     // account state lives in the providers.
     ref
@@ -938,20 +942,6 @@ class MatrixState extends ConsumerState<Matrix>
     Sentry.captureException(error, stackTrace: stackTrace);
   }
 
-  late final LoginSessions _loginSessions = LoginSessions(
-    _MatrixLoginHost(this),
-  );
-
-  /// The user left the "add another account" flow without logging in: throws
-  /// away the client made for it, with its storage. A creation or a login that
-  /// is going on ends first.
-  Future<void> discardPendingLoginCandidate() =>
-      _loginSessions.discardPending();
-
-  /// Runs [login] for [client] so that leaving the screen waits for it.
-  Future<T> trackLogin<T>(Client client, Future<T> Function() login) =>
-      _loginSessions.trackLogin(client, login);
-
   /// The sign-outs of logins that could not be stored; they are not account
   /// logouts and must not reach the logout handlers.
   final _quietLogouts = QuietLogouts();
@@ -959,8 +949,8 @@ class MatrixState extends ConsumerState<Matrix>
   /// Saves what a login needs to be complete; its failures are errors.
   late final LoginConfigurationPersister _loginConfigurations =
       LoginConfigurationPersister(
-        tom: () => getIt.get<ToMConfigurationsRepository>(),
-        federation: () => getIt.get<FederationConfigurationsRepository>(),
+        tom: () => ref.read(tomConfigurationsRepositoryProvider),
+        federation: () => ref.read(federationConfigurationsRepositoryProvider),
       );
 
   Future<void> _signOutQuietly(String id, {required bool quiet}) async {
@@ -973,7 +963,9 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> _handleFirstLoggedIn(
     Client newActiveClient,
     LoginState loginState,
-  ) => _loginSessions.firstLoggedIn(newActiveClient, loginState);
+  ) => ref
+      .read(loginSessionsProvider)
+      .firstLoggedIn(newActiveClient, loginState);
 
   Future<void> _deletePersistActiveAccount() async {
     try {
@@ -1093,8 +1085,9 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<ToMConfigurations?> getTomConfigurations(String userID) async {
     try {
-      final tomConfigurationRepository = getIt
-          .get<ToMConfigurationsRepository>();
+      final tomConfigurationRepository = ref.read(
+        tomConfigurationsRepositoryProvider,
+      );
       final toMConfigurations = await tomConfigurationRepository
           .getTomConfigurations(userID);
       return toMConfigurations;
@@ -1108,8 +1101,9 @@ class MatrixState extends ConsumerState<Matrix>
     String userId,
   ) async {
     try {
-      final federationConfigurationRepository = getIt
-          .get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = ref.read(
+        federationConfigurationsRepositoryProvider,
+      );
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(userId);
       return federationConfigurations;
@@ -1207,10 +1201,10 @@ class MatrixState extends ConsumerState<Matrix>
       NetworkDI.identityServerUrlInterceptorName,
       NetworkDI.homeServerUrlInterceptorName,
     ]) {
-      getIt.get<DynamicUrlInterceptors>(instanceName: name).changeBaseUrl(null);
+      ref.read(dynamicUrlInterceptorsProvider(name)).changeBaseUrl(null);
     }
     _authUrl = null;
-    getIt.get<AuthorizationInterceptor>().accessToken = null;
+    ref.read(authorizationInterceptorProvider).accessToken = null;
   }
 
   Future<void> setUpFederationServicesInLogin(Client client) async {
@@ -1234,8 +1228,9 @@ class MatrixState extends ConsumerState<Matrix>
     if (clientOrNull == null) return;
     if (client.userID == null) return;
     try {
-      final federationConfigurationRepository = getIt
-          .get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = ref.read(
+        federationConfigurationsRepositoryProvider,
+      );
       final federationConfigurations = await federationConfigurationRepository
           .getFederationConfigurations(client.userID!);
 
@@ -1274,8 +1269,9 @@ class MatrixState extends ConsumerState<Matrix>
 
       if (fedServerJson is! Map<String, dynamic>) return;
 
-      final federationConfigurationRepository = getIt
-          .get<FederationConfigurationsRepository>();
+      final federationConfigurationRepository = ref.read(
+        federationConfigurationsRepositoryProvider,
+      );
 
       await federationConfigurationRepository.saveFederationConfigurations(
         client.userID!,
@@ -1291,7 +1287,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void setUpAuthorization(Client client) {
-    final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    final authorizationInterceptor = ref.read(authorizationInterceptorProvider);
     Logs().d(
       'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
     );
@@ -1299,8 +1295,8 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _setUpToMServer(ToMServerInformation? tomServer) {
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    final tomServerUrlInterceptor = ref.read(
+      dynamicUrlInterceptorsProvider(NetworkDI.tomServerUrlInterceptorName),
     );
     Logs().d(
       'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
@@ -1309,8 +1305,8 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _setUpHomeServer(Uri homeServerUri) {
-    final homeServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    final homeServerUrlInterceptor = ref.read(
+      dynamicUrlInterceptorsProvider(NetworkDI.homeServerUrlInterceptorName),
     );
     Logs().d(
       'MatrixState::_setUpHomeServer: ${homeServerUrlInterceptor.baseUrl}',
@@ -1319,8 +1315,10 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _setUpIdentityServer(IdentityServerInformation identityServer) {
-    final identityServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.identityServerUrlInterceptorName,
+    final identityServerUrlInterceptor = ref.read(
+      dynamicUrlInterceptorsProvider(
+        NetworkDI.identityServerUrlInterceptorName,
+      ),
     );
     Logs().d(
       'MatrixState::_setUpIdentityServer: ${identityServerUrlInterceptor.hashCode}',
@@ -1340,8 +1338,9 @@ class MatrixState extends ConsumerState<Matrix>
       );
       Logs().e('Matrix::_storeToMConfiguration: userId - ${client.userID}');
       if (client.userID == null) return;
-      final ToMConfigurationsRepository configurationRepository = getIt
-          .get<ToMConfigurationsRepository>();
+      final ToMConfigurationsRepository configurationRepository = ref.read(
+        tomConfigurationsRepositoryProvider,
+      );
       await configurationRepository.saveTomConfigurations(
         client.userID!,
         config,
@@ -1501,8 +1500,8 @@ class MatrixState extends ConsumerState<Matrix>
     final tomServer = loginHomeserverSummary?.tomServer;
     if (tomServer == null) return;
 
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    final tomServerUrlInterceptor = ref.read(
+      dynamicUrlInterceptorsProvider(NetworkDI.tomServerUrlInterceptorName),
     );
     if (tomServerUrlInterceptor.baseUrl == tomServer.baseUrl?.toString()) {
       return;
@@ -1820,6 +1819,8 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // Saved in `initState`: `ref` is not safe to use in `dispose`.
+    _loginHostSlot.release(_loginHost);
     if (PlatformInfos.isWeb) {
       html.window.removeEventListener('focus', onWindowFocus);
       html.window.removeEventListener('blur', onWindowBlur);
@@ -1916,25 +1917,25 @@ class _MatrixLoginHost implements LoginHost {
   WidgetRef get _ref => _state.ref;
 
   @override
-  bool isStored(String id) => _ref
+  bool isStored(AccountId id) => _ref
       .read(accountRepositoryProvider)
       .registeredAccounts()
-      .any((a) => a.id == id);
+      .any((a) => a.id == id.value);
 
   @override
-  bool isLoggedIn(String id) =>
-      _ref.read(accountClientRegistryProvider)[id]?.isLogged() ?? false;
+  bool isLoggedIn(AccountId id) =>
+      _ref.read(accountClientRegistryProvider)[id.value]?.isLogged() ?? false;
 
   @override
-  Future<void> addAccount(String id) =>
+  Future<void> addAccount(AccountId id) =>
       _ref.read(accountsProvider.notifier).addAccount(id);
 
   @override
-  Future<void> removeAccount(String id) async {
-    final client = _ref.read(accountClientRegistryProvider)[id];
+  Future<void> removeAccount(AccountId id) async {
+    final client = _ref.read(accountClientRegistryProvider)[id.value];
     if (client == null) return;
     await _state._rollbackRemovals.removeStored(
-      id,
+      id.value,
       activateReplacement: () => _state._activateAfterLogout(
         LoginState.loggedOut,
         client,
@@ -1953,7 +1954,7 @@ class _MatrixLoginHost implements LoginHost {
   String? get activeClientName => _state.clientOrNull?.clientName;
 
   @override
-  Client? clientByName(String name) => _state.getClientByName(name);
+  Client? clientByName(AccountId id) => _state.getClientByName(id.value);
 
   @override
   Future<bool> switchTo(Client client) async =>
@@ -1979,8 +1980,8 @@ class _MatrixLoginHost implements LoginHost {
   @override
   Future<Client> createCandidate() async {
     final account = await _ref
-        .read(accountRepositoryProvider)
-        .createCandidate();
+        .read(createAccountCandidateInteractorProvider)
+        .execute();
     return _ref.read(accountClientRegistryProvider)[account.id]!;
   }
 
@@ -1988,19 +1989,19 @@ class _MatrixLoginHost implements LoginHost {
   String? get pendingCandidateId => _ref.read(pendingLoginCandidateProvider);
 
   @override
-  void setPendingCandidate(String? id) =>
-      _ref.read(pendingLoginCandidateProvider.notifier).set(id);
+  void setPendingCandidate(AccountId? id) =>
+      _ref.read(pendingLoginCandidateProvider.notifier).set(id?.value);
 
   @override
-  Future<void> discardCandidate(String id) =>
-      _state._rollbackRemovals.discardCandidate(id);
+  Future<void> discardCandidate(AccountId id) =>
+      _state._rollbackRemovals.discardCandidate(id.value);
 
   @override
-  Future<void> signOut(String id, {required bool quiet}) =>
-      _state._signOutQuietly(id, quiet: quiet);
+  Future<void> signOut(AccountId id, {required bool quiet}) =>
+      _state._signOutQuietly(id.value, quiet: quiet);
 
   @override
-  void forgetQuiet(String id) => _state._quietLogouts.forget(id);
+  void forgetQuiet(AccountId id) => _state._quietLogouts.forget(id.value);
 
   @override
   StreamSubscription<LoginState> listenLoginState(
@@ -2012,14 +2013,16 @@ class _MatrixLoginHost implements LoginHost {
   );
 
   @override
-  Future<void> cancelSubscriptions(String id) => _state._cancelSubs(id);
+  Future<void> cancelSubscriptions(AccountId id) =>
+      _state._cancelSubs(id.value);
 
   @override
-  Future<void> registerSubscriptions(String id) => _state._registerSubs(id);
+  Future<void> registerSubscriptions(AccountId id) =>
+      _state._registerSubs(id.value);
 
   @override
-  Future<void> removePush(String id) async {
-    final target = _state.getClientByName(id);
+  Future<void> removePush(AccountId id) async {
+    final target = _state.getClientByName(id.value);
     if (target == null || !target.isLogged()) return;
     await _state.removePushBeforeLogout(target);
   }

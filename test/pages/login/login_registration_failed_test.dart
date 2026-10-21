@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -12,7 +13,9 @@ import 'package:twake_chat/pages/login/login.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import '../../providers/fake_login_sessions.dart';
 
 class _FakeLoginClient extends Fake implements Client {
   int logins = 0;
@@ -54,14 +57,6 @@ class _FakeMatrixState extends Fake implements MatrixState {
   @override
   String? loginType;
 
-  int discards = 0;
-
-  @override
-  Future<void> discardPendingLoginCandidate() async => discards++;
-
-  @override
-  Future<T> trackLogin<T>(Client client, Future<T> Function() login) => login();
-
   @override
   Future<Client> getLoginClient() async {
     return loginClientRequests++ == 0 ? loginClient : retryClient;
@@ -75,11 +70,13 @@ class _FakeMatrixState extends Fake implements MatrixState {
 void main() {
   late _FakeLoginClient client;
   late _FakeMatrixState matrix;
+  late FakeLoginSessions sessions;
 
   setUp(() {
     getIt.registerSingleton(ResponsiveUtils());
     client = _FakeLoginClient(homeserver: Uri.parse('https://example.com'));
     matrix = _FakeMatrixState(client);
+    sessions = FakeLoginSessions(loginClient: matrix.getLoginClient);
     TwakeDialog.responsiveUtils = getIt.get<ResponsiveUtils>();
   });
 
@@ -97,7 +94,17 @@ void main() {
         theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
-        home: Provider<MatrixState>.value(value: matrix, child: const Login()),
+        home: ProviderScope(
+          overrides: [
+            loginHostSlotProvider.overrideWithValue(
+              FakeLoginHostSlot(sessions),
+            ),
+          ],
+          child: Provider<MatrixState>.value(
+            value: matrix,
+            child: const Login(),
+          ),
+        ),
       ),
     );
     await tester.pump();

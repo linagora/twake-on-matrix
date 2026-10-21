@@ -5,13 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/login/login.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import '../../providers/fake_login_sessions.dart';
 
 class _FakeClient extends Fake implements Client {
   @override
@@ -20,7 +23,6 @@ class _FakeClient extends Fake implements Client {
 
 class _FakeMatrixState extends Fake implements MatrixState {
   final _client = _FakeClient();
-  int discards = 0;
 
   @override
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
@@ -30,19 +32,18 @@ class _FakeMatrixState extends Fake implements MatrixState {
   Future<Client> getLoginClient() async => _client;
 
   @override
-  Future<void> discardPendingLoginCandidate() async => discards++;
-
-  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeMatrixState';
 }
 
 void main() {
   late _FakeMatrixState matrix;
+  late FakeLoginSessions sessions;
 
   setUp(() {
     getIt.registerSingleton(ResponsiveUtils());
     matrix = _FakeMatrixState();
+    sessions = FakeLoginSessions(loginClient: matrix.getLoginClient);
   });
 
   tearDown(() async {
@@ -54,8 +55,12 @@ void main() {
     theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
     localizationsDelegates: L10n.localizationsDelegates,
     supportedLocales: L10n.supportedLocales,
-    builder: (context, child) =>
-        Provider<MatrixState>.value(value: matrix, child: child),
+    builder: (context, child) => ProviderScope(
+      overrides: [
+        loginHostSlotProvider.overrideWithValue(FakeLoginHostSlot(sessions)),
+      ],
+      child: Provider<MatrixState>.value(value: matrix, child: child),
+    ),
     home: home,
   );
 
@@ -71,11 +76,11 @@ void main() {
     await bigScreen(tester);
     await tester.pumpWidget(app(const Login()));
     await tester.pump();
-    expect(matrix.discards, 0);
+    expect(sessions.discards, 0);
 
     await tester.pumpWidget(app(const SizedBox()));
 
-    expect(matrix.discards, 1);
+    expect(sessions.discards, 1);
   });
 
   testWidgets(
@@ -102,7 +107,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Login), findsNothing);
-      expect(matrix.discards, 0);
+      expect(sessions.discards, 0);
     },
   );
 }

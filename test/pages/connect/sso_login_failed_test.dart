@@ -16,6 +16,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import '../../providers/fake_login_sessions.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 
 class _FakeLoginClient extends Fake implements Client {
@@ -42,9 +43,6 @@ class _FakeMatrixState extends Fake implements MatrixState {
       StreamController<ClientLoginStateEvent>.broadcast();
 
   @override
-  Future<T> trackLogin<T>(Client client, Future<T> Function() login) => login();
-
-  @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeMatrixState';
 }
@@ -54,12 +52,14 @@ class _Host with ConnectPageMixin {}
 void main() {
   late _FakeLoginClient client;
   late _FakeMatrixState matrix;
+  late FakeLoginSessions sessions;
   late _Host host;
 
   setUp(() {
     getIt.registerSingleton(ResponsiveUtils());
     client = _FakeLoginClient();
     matrix = _FakeMatrixState();
+    sessions = FakeLoginSessions();
     host = _Host();
     TwakeApp.routerKey = GlobalKey<NavigatorState>();
   });
@@ -100,7 +100,7 @@ void main() {
     (tester) async {
       await pumpApp(tester);
 
-      final result = host.loginWithToken(matrix, client, 'token');
+      final result = host.loginWithToken(sessions, client, 'token');
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(InitClientDialog), findsOneWidget);
       expect(client.logins, 1);
@@ -119,14 +119,14 @@ void main() {
 
   testWidgets('the user can start the login again', (tester) async {
     await pumpApp(tester);
-    final first = host.loginWithToken(matrix, client, 'token');
+    final first = host.loginWithToken(sessions, client, 'token');
     await tester.pump(const Duration(milliseconds: 100));
     matrix.onClientLoginStateChanged.add(loginFailed());
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(InitClientDialog), findsNothing);
     expect(await first, SsoLoginState.error);
 
-    final second = host.loginWithToken(matrix, client, 'token');
+    final second = host.loginWithToken(sessions, client, 'token');
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(client.logins, 2);
@@ -142,7 +142,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester);
-    final result = host.loginWithToken(matrix, client, 'token');
+    final result = host.loginWithToken(sessions, client, 'token');
     await tester.pump(const Duration(milliseconds: 100));
 
     Navigator.of(TwakeApp.routerKey.currentContext!).pop();
@@ -157,7 +157,7 @@ void main() {
     (tester) async {
       await pumpApp(tester);
 
-      final result = host.loginWithToken(matrix, client, 'token');
+      final result = host.loginWithToken(sessions, client, 'token');
       await tester.pump(const Duration(milliseconds: 100));
       matrix.onClientLoginStateChanged.add(
         loginFailed(type: MultipleAccountLoginType.cleanupFailed),

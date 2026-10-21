@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
@@ -90,7 +92,7 @@ class LoginController extends State<Login> {
       client.homeserver ??= _loginHomeserver;
       _loginHomeserver = client.homeserver;
       _pendingLoginClient = client;
-      await Matrix.of(context).trackLogin(
+      await context.loginSessions.trackLogin(
         client,
         () => client.login(
           LoginType.mLoginPassword,
@@ -167,7 +169,7 @@ class LoginController extends State<Login> {
     if (!mounted) return;
     TwakeDialog.hideLoadingDialog(context);
     setState(() {
-      loginClientFuture = Matrix.of(context).getLoginClient();
+      loginClientFuture = context.loginSessions.loginClient();
       loginError = (error ?? Object()).toLocalizedString(context);
       loading = false;
     });
@@ -265,7 +267,7 @@ class LoginController extends State<Login> {
 
   StreamSubscription? _clientLoginStateChangedSubscription;
 
-  late final MatrixState _matrix;
+  late final LoginSessions _sessions;
 
   /// True when nothing is under this page, so the add-account flow starts and
   /// ends here; otherwise the page below owns the client made for the flow.
@@ -274,7 +276,7 @@ class LoginController extends State<Login> {
   @override
   void initState() {
     super.initState();
-    _matrix = Matrix.of(context);
+    _sessions = context.loginSessions;
     _endsTheFlow = !Navigator.of(context).canPop();
     loginClientFuture = Matrix.of(context).getLoginClient();
     _clientLoginStateChangedSubscription = Matrix.of(
@@ -284,7 +286,7 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
-    if (_endsTheFlow) unawaited(_matrix.discardPendingLoginCandidate());
+    if (_endsTheFlow) unawaited(_sessions.discardPending());
     _coolDown?.cancel();
     usernameController.dispose();
     passwordController.dispose();
