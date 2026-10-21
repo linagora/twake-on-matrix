@@ -83,6 +83,10 @@ class LoginSession {
   LoginSessionState _state;
   Future<void> _tail = Future<void>.value();
   Future<void> _login = Future<void>.value();
+
+  /// True once [dispose] was called on a candidate: a login started after that
+  /// would run while the candidate is thrown away.
+  bool _disposeRequested = false;
   StreamSubscription<LoginState>? _loggedInSubscription;
   bool _accountAdded = false;
 
@@ -152,6 +156,9 @@ class LoginSession {
   /// Runs [login] (a call of the login screen) and remembers it while it
   /// goes on. A login that fails leaves the session ready for another try.
   Future<T> trackLogin<T>(Future<T> Function() login) {
+    if (_disposeRequested) {
+      throw StateError('Cannot log in: the session is being disposed');
+    }
     if (_state == LoginSessionState.created) {
       _state = LoginSessionState.loggingIn;
     } else if (_state != LoginSessionState.loggingIn) {
@@ -174,8 +181,12 @@ class LoginSession {
   /// The server accepted the login: store the account and set it up. A failure
   /// at any step rolls the login back. Never throws.
   Future<void> onLoggedIn(LoginState loginState) => _enqueue(() async {
-    if (_state == LoginSessionState.active && keepsClient) {
-      _state = LoginSessionState.created; // a new login of the same client
+    if (_state == LoginSessionState.active &&
+        keepsClient &&
+        !_host.isLoggedIn(AccountId(id))) {
+      // The account logged out since: this is a new login of the same client,
+      // not a repeated event.
+      _state = LoginSessionState.created;
     }
     if (_state != LoginSessionState.created &&
         _state != LoginSessionState.loggingIn) {
@@ -447,7 +458,10 @@ class LoginSession {
   /// going on, then throws away a candidate that did not become an account.
   /// Calling it again, or twice at once, discards once: the calls run in turn
   /// and the second finds the session already disposed.
-  Future<void> dispose() => _enqueue(_dispose);
+  Future<void> dispose() {
+    if (!keepsClient) _disposeRequested = true;
+    return _enqueue(_dispose);
+  }
 
   Future<void> _dispose() async {
     await _login;
