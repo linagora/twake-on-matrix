@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/repository/federation_configurations_repositor
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings/logout_failure_reporter.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
@@ -121,9 +122,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
+          await matrix.removePushBeforeLogout(matrix.client);
           final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),
@@ -131,8 +130,12 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             _deleteFederationConfigurations(matrix.client),
             KeychainSharingManager.deleteRecoveryKey(userId: userId),
           ]);
-        } catch (e) {
-          Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
+        } catch (e, s) {
+          const LogoutFailureReporter().report(
+            'SettingsController()::_logoutActionsOnMobile',
+            e,
+            s,
+          );
         }
       },
     );
@@ -142,9 +145,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
+          await matrix.removePushBeforeLogout(matrix.client);
           final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),
@@ -152,8 +153,12 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             _deleteFederationConfigurations(matrix.client),
             KeychainSharingManager.deleteRecoveryKey(userId: userId),
           ]);
-        } catch (e) {
-          Logs().e('SettingsController()::_logoutActions - error: $e');
+        } catch (e, s) {
+          const LogoutFailureReporter().report(
+            'SettingsController()::_logoutActions',
+            e,
+            s,
+          );
         } finally {
           try {
             await tryLogoutSso(context);
