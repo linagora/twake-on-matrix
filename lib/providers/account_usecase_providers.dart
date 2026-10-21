@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/usecases/add_account_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/initialize_accounts_usecase.dart';
+import 'package:twake_chat/domain/account/usecases/list_pending_push_removals.dart';
 import 'package:twake_chat/domain/account/usecases/remove_account_usecase.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
@@ -33,3 +34,9 @@ RemoveAccountUseCase removeAccountUseCase(Ref ref) => RemoveAccountUseCase(
   repository: ref.watch(accountRepositoryProvider),
   transitions: ref.watch(accountTransitionsProvider),
 );
+
+@Riverpod(keepAlive: true)
+ListPendingPushRemovalsUseCase listPendingPushRemovalsUseCase(Ref ref) =>
+    ListPendingPushRemovalsUseCase(
+      repository: ref.watch(accountRepositoryProvider),
+    );

@@ -26,9 +26,9 @@ import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
+import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
-import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import 'utils/background_push.dart';
 import 'widgets/lock_screen.dart';
@@ -135,26 +135,32 @@ Future<void> startGui(List<Client> clients, ProviderContainer container) async {
     }
   }
 
+  // The only container of the app (created in main): the boot reads go
+  // through it and the widget tree is attached to it.
+  final repository = container.read(accountRepositoryProvider);
   // The account that was active last time is read here, before the first
   // frame, so the account state starts on it.
   String? persistedActiveUserId;
   var pendingRemovalIds = <String>{};
-  final probe = ProviderContainer();
   try {
-    persistedActiveUserId = await probe
-        .read(accountRepositoryProvider)
-        .persistedActiveUserId();
+    persistedActiveUserId = await repository.persistedActiveUserId();
   } catch (e, s) {
     Logs().w('Unable to read the persisted active account', e, s);
   }
   try {
     // Accounts whose removal did not finish before the last exit.
-    pendingRemovalIds = await PendingRemovalsSource(Store()).read();
+    pendingRemovalIds = await repository.pendingRemovalIds();
   } catch (e, s) {
     Logs().w('Unable to read the pending account removals', e, s);
-  } finally {
-    probe.dispose();
   }
+  container
+      .read(bootAccountSnapshotProvider.notifier)
+      .set(
+        AccountBootSnapshot(
+          persistedActiveUserId: persistedActiveUserId,
+          pendingRemovalIds: pendingRemovalIds,
+        ),
+      );
 
   // Start rendering the Flutter app and wrap it in an Applock.
   // We do this only for mobile applications as we saw routing
