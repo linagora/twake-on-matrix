@@ -261,6 +261,8 @@ flutter_native_splash:
 flutter:
   generate: true
   uses-material-design: true
+  config:
+    enable-swift-package-manager: false
   assets:
     - assets/
     - assets/images/
