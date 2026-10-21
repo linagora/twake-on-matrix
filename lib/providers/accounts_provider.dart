@@ -52,7 +52,7 @@ class Accounts extends _$Accounts {
   /// for [id]; without a registered handler it ends at once.
   Future<void> switchTo(String id) async {
     await _mutations;
-    final next = AccountTransitions.beginSwitch(state, id);
+    final next = AccountTransitions.beginSwitch(state, id, seq: _switchSeq + 1);
     if (identical(next, state)) return;
     if (_isRunningSwitch(next)) {
       // The same switch is already running: wait for it.
@@ -65,12 +65,9 @@ class Accounts extends _$Accounts {
       return;
     }
     final pending = _pendingSwitch = Completer<void>();
-    state = Switching(
-      accounts: next.accounts,
-      from: next.from,
-      to: next.to,
-      seq: ++_switchSeq,
-    );
+    // Before the emission: a listener may settle the switch synchronously.
+    _switchSeq = next.seq;
+    state = next;
     if (_switchHandlers == 0) completeSwitch(id, _switchSeq);
     await pending.future;
   }
@@ -95,7 +92,7 @@ class Accounts extends _$Accounts {
     if (current is! Switching || current.to != to || switchSeq != _switchSeq) {
       return;
     }
-    state = AccountTransitions.completeSwitch(current);
+    state = AccountTransitions.completeSwitch(current, switchSeq);
     _finishPendingSwitch();
   }
 
@@ -109,7 +106,7 @@ class Accounts extends _$Accounts {
     if (current is! Switching || current.to != to || switchSeq != _switchSeq) {
       return;
     }
-    state = AccountTransitions.failSwitch(current);
+    state = AccountTransitions.failSwitch(current, switchSeq);
     final pending = _pendingSwitch;
     _pendingSwitch = null;
     pending?.completeError(error, stackTrace);
