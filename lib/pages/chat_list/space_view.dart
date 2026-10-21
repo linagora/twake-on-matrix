@@ -11,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/pages/chat_list/search_title.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -135,7 +136,7 @@ class _SpaceViewState extends State<SpaceView> {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final activeSpaceId = widget.controller.activeSpaceId;
-    final allSpaces = client.rooms.where((room) => room.isSpace);
+    final allSpaces = client.joinedOrInvitedRooms.where((room) => room.isSpace);
     if (activeSpaceId == null) {
       final rootSpaces = allSpaces
           .where(

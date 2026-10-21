@@ -30,15 +30,17 @@ class PublicRoomBottomSheet extends StatelessWidget {
 
   void _joinRoom(BuildContext context) async {
     final client = Matrix.of(context).client;
+    final isKnock = chunk?.joinRule == 'knock';
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen<String>(
-      future: () => chunk?.joinRule == 'knock'
+      future: () => isKnock
           ? client.knockRoom(chunk!.roomId)
           : client.joinRoom(roomAlias ?? chunk!.roomId),
     );
     if (result.error != null) return;
 
     final roomId = result.result!;
-    if (client.getRoomById(roomId)?.membership != Membership.join) {
+    // A knock only requests access; the room never reaches join until approved.
+    if (!isKnock && client.getRoomById(roomId)?.membership != Membership.join) {
       try {
         await client
             .waitForRoomInSync(roomId, join: true)

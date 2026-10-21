@@ -10,6 +10,7 @@ import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_list.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar_style.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
@@ -237,7 +238,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     ).firstMatch(searchText);
     if (roomMatch != null && widget.room != null) {
       final roomSearch = roomMatch[1]!;
-      final eligibleRooms = widget.room!.client.rooms
+      final eligibleRooms = widget.room!.client.joinedOrInvitedRooms
           .where((r) => r.getState(EventTypes.RoomTombstone) == null)
           .toList();
       final matchedRooms = engine.matchAnyField(

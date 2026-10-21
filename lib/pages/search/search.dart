@@ -7,6 +7,7 @@ import 'package:twake_chat/domain/usecase/search/pre_search_recent_contacts_inte
 import 'package:twake_chat/pages/search/search_contacts_and_chats_controller.dart';
 import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -83,7 +84,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   void fetchPreSearchRecentContacts() {
     _preSearchRecentContactsInteractor
         .execute(
-          allRooms: Matrix.of(context).client.rooms,
+          allRooms: Matrix.of(context).client.joinedOrInvitedRooms,
           limit: limitPrefetchedRecentContacts,
         )
         .listen((value) {

@@ -381,7 +381,7 @@ class ChatListController extends State<ChatList>
       title: L10n.of(context)!.addToSpace,
       message: L10n.of(context)!.addToSpaceDescription,
       fullyCapitalizedForMaterial: false,
-      actions: Matrix.of(context).client.rooms
+      actions: Matrix.of(context).client.joinedOrInvitedRooms
           .where((r) => r.isSpace)
           .map(
             (space) => AlertDialogAction(

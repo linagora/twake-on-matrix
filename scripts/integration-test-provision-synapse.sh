@@ -79,10 +79,6 @@ create_room() {
   local mxid2="$3"
   local mxid3="$4"
   local payload
-  # Pin room_version to 11. Synapse :latest may default to v12 (MSC4289),
-  # where the creator cannot be demoted via power_levels — that breaks the
-  # transfer-ownership E2E (demoting the creator). v11 keeps classic PL
-  # semantics the suite expects.
   payload=$(jq -nc \
     --arg name "$ROOM_NAME" \
     --arg mxid2 "$mxid2" \
