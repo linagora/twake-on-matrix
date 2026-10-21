@@ -12,6 +12,7 @@ void main() {
     final source = FaultInjectingAccountDataSource(
       inner,
       failAddClientNameOnce: true,
+      succeedFirst: 0,
     );
 
     await expectLater(source.addClientName('a'), throwsStateError);
@@ -35,7 +36,10 @@ void main() {
   });
 
   test('does not fail when not armed', () async {
-    final source = FaultInjectingAccountDataSource(inner);
+    final source = FaultInjectingAccountDataSource(
+      inner,
+      failAddClientNameOnce: false,
+    );
 
     await source.addClientName('a');
 

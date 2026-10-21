@@ -251,6 +251,7 @@ void main() {
               ? FaultInjectingAccountDataSource(
                   dataSource,
                   failAddClientNameOnce: true,
+                  succeedFirst: 0,
                 )
               : dataSource,
         ),

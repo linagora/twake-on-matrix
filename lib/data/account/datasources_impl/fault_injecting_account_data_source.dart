@@ -25,12 +25,18 @@ class FaultInjectingAccountDataSource implements AccountClientDataSource {
 
   @override
   Future<void> addClientName(String clientName) async {
-    if (kDebugMode && _failAddClientNameOnce && _succeedFirst-- <= 0) {
+    if (_shouldFail()) {
       _failAddClientNameOnce = false;
       Logs().w('FaultInjection: addClientName($clientName) fails once');
       throw StateError('Injected fault: addClientName($clientName)');
     }
     await _inner.addClientName(clientName);
+  }
+
+  /// Counts a call down only while the fault is armed.
+  bool _shouldFail() {
+    if (!kDebugMode || !_failAddClientNameOnce) return false;
+    return _succeedFirst-- <= 0;
   }
 
   @override

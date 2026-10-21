@@ -18,10 +18,16 @@ class LoginFaults {
   int _succeedFirst;
 
   void maybeFailSetUp(String clientName) {
-    if (kDebugMode && _failSetUpOnce && _succeedFirst-- <= 0) {
+    if (_shouldFail()) {
       _failSetUpOnce = false;
       Logs().w('FaultInjection: set-up of $clientName fails once');
       throw StateError('Injected fault: set-up of $clientName');
     }
+  }
+
+  /// Counts a call down only while the fault is armed.
+  bool _shouldFail() {
+    if (!kDebugMode || !_failSetUpOnce) return false;
+    return _succeedFirst-- <= 0;
   }
 }
