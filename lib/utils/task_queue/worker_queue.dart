@@ -29,7 +29,7 @@ abstract class WorkerQueue {
   Future _processTask() async {
     try {
       if (_completer != null) {
-        return _completer!.future;
+        return await _completer!.future;
       }
       _completer = Completer();
       if (_queue.isNotEmpty) {
@@ -45,7 +45,7 @@ abstract class WorkerQueue {
       } else {
         _completer?.complete();
       }
-      return _completer!.future;
+      return await _completer!.future;
     } catch (e) {
       Logs().e('WorkerQueue<$workerName>::_processTask(): $e');
       _completer?.complete(e);

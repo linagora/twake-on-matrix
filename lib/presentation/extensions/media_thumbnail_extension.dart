@@ -14,8 +14,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
-// ignore: implementation_imports
-import 'package:matrix/src/utils/run_benchmarked.dart';
 import 'package:mime/mime.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';

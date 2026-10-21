@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/pages/search/search_debouncer_mixin.dart';
 import 'package:twake_chat/pages/search/search_mixin.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -47,7 +48,7 @@ class SearchContactsAndChatsController
 
   Client get client => Matrix.of(context).client;
 
-  List<Room> get _rooms => client.rooms;
+  List<Room> get _rooms => client.joinedOrInvitedRooms;
 
   Future<void> init() async {
     initializeDebouncer((keyword) {

@@ -136,9 +136,6 @@ class ChatListController extends State<ChatList>
 
   Stream<Client> get clientStream => _clientStream.stream;
 
-  // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces => activeClient.rooms.where((r) => r.isSpace).toList();
-
   ValueNotifier<String?> activeRoomIdNotifier = ValueNotifier(null);
 
   bool get isSelectMode => selectModeNotifier.value == SelectMode.select;
@@ -381,7 +378,7 @@ class ChatListController extends State<ChatList>
       title: L10n.of(context)!.addToSpace,
       message: L10n.of(context)!.addToSpaceDescription,
       fullyCapitalizedForMaterial: false,
-      actions: Matrix.of(context).client.rooms
+      actions: Matrix.of(context).client.joinedOrInvitedRooms
           .where((r) => r.isSpace)
           .map(
             (space) => AlertDialogAction(

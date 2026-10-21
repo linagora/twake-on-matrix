@@ -1,5 +1,5 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.38.9
+ARG FLUTTER_VERSION=3.44.0
 
 # Building Twake for the web.
 # The web output is platform-independent: this stage runs once, on the build

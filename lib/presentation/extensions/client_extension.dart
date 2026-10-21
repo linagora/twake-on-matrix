@@ -19,6 +19,16 @@ extension ClientExtension on Client {
     return room2.realLatestEventTime.compareTo(room1.realLatestEventTime);
   }
 
+  /// Synced with `includeLeave`, [rooms] also holds left rooms; use this where
+  /// only rooms the user is in or invited to should show up.
+  List<Room> get joinedOrInvitedRooms => rooms
+      .where(
+        (room) =>
+            room.membership == Membership.join ||
+            room.membership == Membership.invite,
+      )
+      .toList();
+
   List<Room> filteredRoomsForAll(ActiveFilter activeFilter) {
     return rooms
         .where(activeFilter.getRoomFilterByActiveFilter())

@@ -12,6 +12,7 @@ import 'package:twake_chat/domain/model/contact/contact_type.dart';
 import 'package:twake_chat/domain/model/extensions/contact/contact_extension.dart';
 import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.dart';
 import 'package:twake_chat/presentation/enum/contacts/warning_contacts_banner_enum.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/contact/presentation_contact_extension.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/get_presentation_contacts_empty.dart';
@@ -571,7 +572,7 @@ mixin class ContactsViewControllerMixin {
         .execute(
           keyword: keyword ?? '',
           matrixLocalizations: matrixLocalizations,
-          rooms: client.rooms,
+          rooms: client.joinedOrInvitedRooms,
         )
         .listen((event) {
           event.map((success) {

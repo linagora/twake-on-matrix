@@ -161,7 +161,11 @@ class UrlLauncher with GoToDraftChatMixin {
         room = matrix.client.getRoomById(roomId!);
       }
       servers.addAll(identityParts.via);
-      if (room != null) {
+      final canOpenDirectly =
+          room != null &&
+          (room.membership == Membership.join ||
+              room.membership == Membership.invite);
+      if (canOpenDirectly) {
         if (room.isSpace) {
           // TODO: Implement navigate to space
           const RoomsRoute().go(context);
@@ -174,7 +178,7 @@ class UrlLauncher with GoToDraftChatMixin {
           RoomRoute(roomid: room.id).go(context);
         }
         return;
-      } else {
+      } else if (room == null) {
         await showAdaptiveBottomSheet(
           context: context,
           builder: (c) => PublicRoomBottomSheet(
@@ -183,7 +187,9 @@ class UrlLauncher with GoToDraftChatMixin {
           ),
         );
       }
-      if (roomIdOrAlias.sigil == '!') {
+      if (roomIdOrAlias.sigil == '!' ||
+          room?.membership == Membership.leave ||
+          room?.membership == Membership.ban) {
         if (await showOkCancelAlertDialog(
               useRootNavigator: false,
               context: context,
@@ -194,7 +200,7 @@ class UrlLauncher with GoToDraftChatMixin {
           final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
-              serverName: servers.isNotEmpty ? servers.toList() : null,
+              via: servers.isNotEmpty ? servers.toList() : null,
             ),
           );
           if (response.error != null) return;

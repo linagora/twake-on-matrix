@@ -197,10 +197,11 @@ void main() {
 
         interceptor.onRequest(options, mockHandler);
 
-        verify(
-          mockHandler.reject(
-            DioDuplicateDownloadException(requestOptions: options),
-          ),
+        final rejected = verify(mockHandler.reject(captureAny)).captured.single;
+        expect(rejected, isA<DioDuplicateDownloadException>());
+        expect(
+          (rejected as DioDuplicateDownloadException).requestOptions,
+          same(options),
         );
         expect(interceptor.currentDownloads.length, 1);
       },

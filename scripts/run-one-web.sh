@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 
 # Use the working pinned SDK directly (the fvm/global shim throws
 # "Invalid SDK hash" on this machine).
-export PATH="$HOME/fvm/versions/3.38.9/bin:$PATH"
+export PATH="$HOME/fvm/versions/3.47.5/bin:$PATH"
 
 if [ ! -f .env.patrol-web ]; then
   echo "Missing .env.patrol-web — run: scripts/integration-test-provision-synapse.sh > .env.patrol-web" >&2

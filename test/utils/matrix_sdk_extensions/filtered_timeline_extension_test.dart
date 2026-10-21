@@ -210,9 +210,13 @@ void main() {
       eventId: '\$ev$seq',
       content: content,
       originServerTs: DateTime.now(),
-      prevContent: prevContent,
       stateKey: stateKey,
-      unsigned: unsigned,
+      unsigned: unsigned == null && prevContent == null
+          ? null
+          : {
+              ...?unsigned,
+              if (prevContent != null) 'prev_content': prevContent,
+            },
     );
   }
 

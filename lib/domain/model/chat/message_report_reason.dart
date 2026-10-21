@@ -3,17 +3,13 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 
 enum MessageReportReason {
-  spam(score: -95),
-  violence(score: -96),
-  childAbuse(score: -97),
-  pornography(score: -98),
-  copyrightInfringement(score: -99),
-  terrorism(score: -100),
-  other(score: -90);
-
-  const MessageReportReason({required this.score});
-
-  final int score;
+  spam,
+  violence,
+  childAbuse,
+  pornography,
+  copyrightInfringement,
+  terrorism,
+  other,
 }
 
 extension MessageReportReasonExtension on MessageReportReason {

@@ -31,6 +31,7 @@ Future<void> sentryInit({
         options.tracesSampleRate = 0.1;
         // The sampling rate for profiling is relative to tracesSampleRate
         // Setting to 1.0 will profile 100% of sampled transactions:
+        // ignore: experimental_member_use
         options.profilesSampleRate = 0.1;
         options.beforeSend = _fixWebSourceMapPaths;
 

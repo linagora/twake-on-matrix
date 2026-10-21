@@ -11,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/pages/chat_list/search_title.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -44,16 +45,18 @@ class _SpaceViewState extends State<SpaceView> {
   void _onJoinSpaceChild(SpaceRoomsChunk spaceChild) async {
     final client = Matrix.of(context).client;
     final space = client.getRoomById(widget.controller.activeSpaceId!);
-    if (client.getRoomById(spaceChild.roomId) == null) {
+    final existing = client.getRoomById(spaceChild.roomId);
+    if (existing == null || existing.membership != Membership.join) {
       final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () async {
           await client.joinRoom(
             spaceChild.roomId,
-            serverName: space?.spaceChildren
+            via: space?.spaceChildren
                 .firstWhereOrNull((child) => child.roomId == spaceChild.roomId)
                 ?.via,
           );
-          if (client.getRoomById(spaceChild.roomId) == null) {
+          if (client.getRoomById(spaceChild.roomId)?.membership !=
+              Membership.join) {
             // Wait for room actually appears in sync
             await client.waitForRoomInSync(spaceChild.roomId, join: true);
           }
@@ -89,7 +92,7 @@ class _SpaceViewState extends State<SpaceView> {
           room?.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!)),
       message: spaceChild?.topic ?? room?.topic,
       actions: [
-        if (room == null)
+        if (room == null || room.membership != Membership.join)
           SheetAction(
             key: SpaceChildContextAction.join,
             label: L10n.of(context)!.joinRoom,
@@ -101,7 +104,7 @@ class _SpaceViewState extends State<SpaceView> {
             label: L10n.of(context)!.removeFromSpace,
             icon: Icons.delete_sweep_outlined,
           ),
-        if (room != null)
+        if (room != null && room.membership == Membership.join)
           SheetAction(
             key: SpaceChildContextAction.leave,
             label: L10n.of(context)!.leave,
@@ -133,7 +136,7 @@ class _SpaceViewState extends State<SpaceView> {
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
     final activeSpaceId = widget.controller.activeSpaceId;
-    final allSpaces = client.rooms.where((room) => room.isSpace);
+    final allSpaces = client.joinedOrInvitedRooms.where((room) => room.isSpace);
     if (activeSpaceId == null) {
       final rootSpaces = allSpaces
           .where(
@@ -247,7 +250,9 @@ class _SpaceViewState extends State<SpaceView> {
             }
             final spaceChild = spaceChildren[i];
             final room = client.getRoomById(spaceChild.roomId);
-            if (room != null && !room.isSpace) {
+            if (room != null &&
+                !room.isSpace &&
+                room.membership == Membership.join) {
               return ChatListItem(
                 room,
                 onTapAvatar: () => _onSpaceChildContextMenu(spaceChild, room),

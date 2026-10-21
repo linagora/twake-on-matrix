@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/pages/chat/chat_view.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
@@ -6,7 +8,6 @@ import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/chat_list/slidable_chat_list_item.dart';
 import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
 import 'abstract/abstract_chat_list_robot.dart';
@@ -145,15 +146,45 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
 
   bool _isPinned(TwakeListItemRobot item) => item.getPinIcon().visible;
 
+  /// Favouriting / unfavouriting triggers a room sync; the chat list
+  /// StreamBuilder rate-limits rebuilds to 1s. A long-press during that
+  /// rebuild is dropped (gesture succeeds in Patrol, but `onLongPress` never
+  /// runs), so selection mode never opens. Retry until the checkbox appears.
+  Future<void> _enterSelectionMode(TwakeListItemRobot item) async {
+    final checkbox = item.getCheckBox();
+    final deadline = DateTime.now().add(const Duration(seconds: 30));
+    while (!checkbox.exists && DateTime.now().isBefore(deadline)) {
+      await $.tester.ensureVisible(item.root);
+      await item.root.longPress();
+      await $.pump(const Duration(milliseconds: 700));
+    }
+    await $.waitUntilVisible(checkbox, timeout: const Duration(seconds: 15));
+  }
+
+  Future<void> _waitForPinState(String title, {required bool pinned}) async {
+    final deadline = DateTime.now().add(const Duration(seconds: 20));
+    while (DateTime.now().isBefore(deadline)) {
+      final item = getChatGroupByTitle(title);
+      if (item.root.exists && _isPinned(item) == pinned) {
+        await $.pumpAndSettle();
+        return;
+      }
+      await $.pump(const Duration(milliseconds: 300));
+    }
+    throw TimeoutException(
+      'Chat "$title" did not reach pinned=$pinned within 20s',
+    );
+  }
+
   @override
   Future<void> pinChat(String title) async {
     final item = getChatGroupByTitle(title);
     await scrollUntilVisible($, item.root);
     if (!_isPinned(item)) {
-      await $.tester.ensureVisible(item.root);
-      await item.root.longPress();
-      await $.waitUntilVisible(item.getCheckBox());
+      await _enterSelectionMode(item);
       await clickOnPinIcon();
+      // Let the post-favourite list rebuild finish before the next long-press.
+      await _waitForPinState(title, pinned: true);
     }
   }
 
@@ -162,10 +193,9 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
     final item = getChatGroupByTitle(title);
     await scrollUntilVisible($, item.root);
     if (_isPinned(item)) {
-      await $.tester.ensureVisible(item.root);
-      await item.root.longPress();
-      await $.waitUntilVisible(item.getCheckBox());
+      await _enterSelectionMode(item);
       await clickOnUnPinIcon();
+      await _waitForPinState(title, pinned: false);
     }
   }
 

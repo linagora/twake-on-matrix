@@ -5,12 +5,12 @@ part 'common_settings_information.g.dart';
 
 @JsonSerializable()
 class CommonSettingsInformation with EquatableMixin {
-  bool? enabled;
+  final bool? enabled;
 
   @JsonKey(name: "application_url")
-  String? applicationUrl;
+  final String? applicationUrl;
 
-  CommonSettingsInformation({this.enabled, this.applicationUrl});
+  const CommonSettingsInformation({this.enabled, this.applicationUrl});
 
   factory CommonSettingsInformation.fromJson(Map<String, dynamic> json) =>
       _$CommonSettingsInformationFromJson(json);

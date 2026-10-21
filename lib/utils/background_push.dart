@@ -353,7 +353,7 @@ class BackgroundPush {
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
-      final unreadCount = client.rooms
+      final unreadCount = client.joinedOrInvitedRooms
           .where((room) => room.isUnreadOrInvited && room.id != roomId)
           .length;
       if (unreadCount == 0) {
@@ -850,7 +850,7 @@ class BackgroundPush {
           });
           if (!syncErrored) {
             emptyRooms = client.rooms
-                .where((r) => r.notificationCount == 0)
+                .where(_hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
@@ -872,13 +872,13 @@ class BackgroundPush {
               e,
             );
             emptyRooms = client.rooms
-                .where((r) => r.notificationCount == 0)
+                .where(_hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
       } else {
         emptyRooms = client.rooms
-            .where((r) => r.notificationCount == 0)
+            .where(_hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
@@ -953,6 +953,11 @@ class BackgroundPush {
 
     await _handleInnerNavigation();
   }
+
+  /// A left room keeps the unread count it had when it was left (synced with
+  /// `includeLeave`), so it must not block clearing its notifications.
+  bool _hasNoPendingNotification(Room room) =>
+      room.notificationCount == 0 || room.membership == Membership.leave;
 
   void _handleRedirectRoom(
     String roomId, {
