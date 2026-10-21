@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -170,7 +171,7 @@ void main() {
         if (next is Switching) {
           handlerStarted.complete();
           await release.future;
-          notifier().completeSwitch(next.to, next.seq);
+          notifier().completeSwitch(next.ticket);
         }
       });
 
@@ -204,10 +205,12 @@ void main() {
       expect((state() as Switching).seq, firstSeq + 1);
       await firstResult;
 
-      notifier().completeSwitch('c', firstSeq);
+      notifier().completeSwitch(SwitchTicket(to: 'c', seq: firstSeq));
       expect(state(), isA<Switching>());
 
-      notifier().completeSwitch('c', (state() as Switching).seq);
+      notifier().completeSwitch(
+        SwitchTicket(to: 'c', seq: (state() as Switching).seq),
+      );
       await second;
       expect((state() as Active).activeId, 'c');
     });
@@ -223,7 +226,9 @@ void main() {
         await pumpEventQueue();
         expect(completed, isFalse);
 
-        notifier().completeSwitch('b', notifier().switchSeq);
+        notifier().completeSwitch(
+          SwitchTicket(to: 'b', seq: notifier().switchSeq),
+        );
         await future;
         expect(completed, isTrue);
         expect((state() as Active).activeId, 'b');
@@ -240,8 +245,7 @@ void main() {
         await pumpEventQueue();
 
         notifier().failSwitch(
-          'b',
-          notifier().switchSeq,
+          SwitchTicket(to: 'b', seq: notifier().switchSeq),
           StateError('effects failed'),
         );
 
@@ -268,9 +272,13 @@ void main() {
       await pumpEventQueue();
 
       await firstResult;
-      notifier().completeSwitch('b', firstSeq); // stale: ignored
+      notifier().completeSwitch(
+        SwitchTicket(to: 'b', seq: firstSeq),
+      ); // stale: ignored
       expect(state(), isA<Switching>());
-      notifier().completeSwitch('c', notifier().switchSeq);
+      notifier().completeSwitch(
+        SwitchTicket(to: 'c', seq: notifier().switchSeq),
+      );
       await second;
       expect((state() as Active).activeId, 'c');
     });
@@ -291,11 +299,16 @@ void main() {
         await pumpEventQueue();
         await first;
 
-        notifier().completeSwitch('b', firstSeq);
-        notifier().failSwitch('b', firstSeq, StateError('stale'));
+        notifier().completeSwitch(SwitchTicket(to: 'b', seq: firstSeq));
+        notifier().failSwitch(
+          SwitchTicket(to: 'b', seq: firstSeq),
+          StateError('stale'),
+        );
         expect(state(), isA<Switching>());
 
-        notifier().completeSwitch('b', notifier().switchSeq);
+        notifier().completeSwitch(
+          SwitchTicket(to: 'b', seq: notifier().switchSeq),
+        );
         await second;
         expect((state() as Active).activeId, 'b');
       },
@@ -311,7 +324,7 @@ void main() {
       await pumpEventQueue();
 
       expect(notifier().switchSeq, seq);
-      notifier().completeSwitch('b', seq);
+      notifier().completeSwitch(SwitchTicket(to: 'b', seq: seq));
       await first;
       await again;
       expect((state() as Active).activeId, 'b');
@@ -324,11 +337,7 @@ void main() {
         addTearDown(dispose);
         container.listen(accountsProvider, (_, next) {
           if (next is Switching) {
-            notifier().failSwitch(
-              next.to,
-              notifier().switchSeq,
-              StateError('now'),
-            );
+            notifier().failSwitch(next.ticket, StateError('now'));
           }
         });
 
@@ -349,7 +358,9 @@ void main() {
 
       await pumpEventQueue();
       expect(settled, isFalse);
-      notifier().completeSwitch('b', notifier().switchSeq);
+      notifier().completeSwitch(
+        SwitchTicket(to: 'b', seq: notifier().switchSeq),
+      );
       await switching;
       await waiting;
       expect(settled, isTrue);

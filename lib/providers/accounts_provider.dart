@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
@@ -41,9 +42,9 @@ class Accounts extends _$Accounts {
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
-  /// `seq`. A handler hands it back to [completeSwitch] or [failSwitch], so
-  /// that a stale handler cannot end a newer switch, even one to the same
-  /// account.
+  /// `seq`. A handler hands its [SwitchTicket] back to [completeSwitch] or
+  /// [failSwitch], so that a stale handler cannot end a newer switch, even one
+  /// to the same account.
   int get switchSeq => _switchSeq;
 
   /// Makes [id] the active account. While the side effects of the switch run
@@ -68,7 +69,7 @@ class Accounts extends _$Accounts {
     // Before the emission: a listener may settle the switch synchronously.
     _switchSeq = next.seq;
     state = next;
-    if (_switchHandlers == 0) completeSwitch(id, _switchSeq);
+    if (_switchHandlers == 0) completeSwitch(next.ticket);
     await pending.future;
   }
 
@@ -87,31 +88,26 @@ class Accounts extends _$Accounts {
     } catch (_) {}
   }
 
-  /// The running switch to [to] numbered [switchSeq], or null when it is not
-  /// the latest one any more.
-  Switching? _switchingTo(String to, int switchSeq) {
+  /// The running switch that [ticket] names, or null when it is not the
+  /// latest one any more.
+  Switching? _switchingTo(SwitchTicket ticket) {
     final current = state;
     if (current is! Switching) return null;
-    if (current.to != to || switchSeq != _switchSeq) return null;
+    if (current.to != ticket.to || ticket.seq != _switchSeq) return null;
     return current;
   }
 
-  void completeSwitch(String to, int switchSeq) {
-    final current = _switchingTo(to, switchSeq);
+  void completeSwitch(SwitchTicket ticket) {
+    final current = _switchingTo(ticket);
     if (current == null) return;
-    state = AccountTransitions.completeSwitch(current, switchSeq);
+    state = AccountTransitions.completeSwitch(current, ticket.seq);
     _finishPendingSwitch();
   }
 
-  void failSwitch(
-    String to,
-    int switchSeq,
-    Object error, [
-    StackTrace? stackTrace,
-  ]) {
-    final current = _switchingTo(to, switchSeq);
+  void failSwitch(SwitchTicket ticket, Object error, [StackTrace? stackTrace]) {
+    final current = _switchingTo(ticket);
     if (current == null) return;
-    state = AccountTransitions.failSwitch(current, switchSeq);
+    state = AccountTransitions.failSwitch(current, ticket.seq);
     final pending = _pendingSwitch;
     _pendingSwitch = null;
     pending?.completeError(error, stackTrace);
