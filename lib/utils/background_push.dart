@@ -353,7 +353,7 @@ class BackgroundPush {
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
-      final unreadCount = client.rooms
+      final unreadCount = client.joinedOrInvitedRooms
           .where((room) => room.isUnreadOrInvited && room.id != roomId)
           .length;
       if (unreadCount == 0) {
