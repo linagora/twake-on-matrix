@@ -28,46 +28,32 @@ void main() {
   }
 
   group('NavigationButtonsSafeArea', () {
-    testWidgets(
-      'pads the bottom with button navigation on Android',
-      (tester) async {
-        await pump(tester, systemGestureInsets: EdgeInsets.zero);
+    testWidgets('pads the bottom with button navigation on Android', (
+      tester,
+    ) async {
+      await pump(tester, systemGestureInsets: EdgeInsets.zero);
 
-        expect(
-          tester.getSize(find.byKey(childKey)).height,
-          screenHeight(tester) - bottomInset,
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      expect(
+        tester.getSize(find.byKey(childKey)).height,
+        screenHeight(tester) - bottomInset,
+      );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-      'does not pad with gesture navigation on Android',
-      (tester) async {
-        await pump(
-          tester,
-          systemGestureInsets: const EdgeInsets.symmetric(horizontal: 24),
-        );
+    testWidgets('does not pad with gesture navigation on Android', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        systemGestureInsets: const EdgeInsets.symmetric(horizontal: 24),
+      );
 
-        expect(
-          tester.getSize(find.byKey(childKey)).height,
-          screenHeight(tester),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-    );
+      expect(tester.getSize(find.byKey(childKey)).height, screenHeight(tester));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    testWidgets(
-      'does not pad on iOS',
-      (tester) async {
-        await pump(tester, systemGestureInsets: EdgeInsets.zero);
+    testWidgets('does not pad on iOS', (tester) async {
+      await pump(tester, systemGestureInsets: EdgeInsets.zero);
 
-        expect(
-          tester.getSize(find.byKey(childKey)).height,
-          screenHeight(tester),
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-    );
+      expect(tester.getSize(find.byKey(childKey)).height, screenHeight(tester));
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
   });
 }
