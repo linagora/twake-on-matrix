@@ -1,3 +1,5 @@
+// @CodeScene(disable:"Primitive Obsession")
+// The overrides keep the String ids of the LoginHost interface.
 import 'dart:async';
 
 import 'package:matrix/matrix.dart';
