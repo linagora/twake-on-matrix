@@ -1,3 +1,4 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions_bottom_sheet.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions_style.dart';
@@ -13,6 +14,8 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:overflow_view/overflow_view.dart';
+
+part 'message_reactions.freezed.dart';
 
 class MessageReactions extends StatelessWidget {
   final Event event;
@@ -34,17 +37,14 @@ class MessageReactions extends StatelessWidget {
           .tryGetMap<String, dynamic>('m.relates_to')
           ?.tryGet<String>('key');
       if (key != null) {
-        if (!reactionMap.containsKey(key)) {
-          reactionMap[key] = ReactionEntry(
-            key: key,
-            count: 0,
-            reacted: false,
-            reactors: [],
-          );
-        }
-        reactionMap[key]!.count++;
-        reactionMap[key]!.reactors!.add(e.senderFromMemoryOrFallback);
-        reactionMap[key]!.reacted |= e.senderId == e.room.client.userID;
+        final entry =
+            reactionMap[key] ??
+            ReactionEntry(key: key, count: 0, reacted: false, reactors: []);
+        reactionMap[key] = entry.copyWith(
+          count: entry.count + 1,
+          reactors: [...?entry.reactors, e.senderFromMemoryOrFallback],
+          reacted: entry.reacted || e.senderId == e.room.client.userID,
+        );
       }
     }
 
@@ -443,16 +443,12 @@ class Reaction extends StatelessWidget {
   }
 }
 
-class ReactionEntry {
-  String? key;
-  int count;
-  bool reacted;
-  List<User>? reactors;
-
-  ReactionEntry({
-    this.key,
-    required this.count,
-    required this.reacted,
-    this.reactors,
-  });
+@freezed
+abstract class ReactionEntry with _$ReactionEntry {
+  const factory ReactionEntry({
+    String? key,
+    required int count,
+    required bool reacted,
+    List<User>? reactors,
+  }) = _ReactionEntry;
 }

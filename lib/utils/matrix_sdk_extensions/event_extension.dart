@@ -3,7 +3,6 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/pages/chat/events/message_reactions.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
@@ -406,28 +405,14 @@ extension LocalizedBody on Event {
       timeline,
       RelationshipTypes.reaction,
     );
-    final reactionMap = <String, ReactionEntry>{};
 
-    for (final e in allReactionEvents) {
-      final key = e.content
-          .tryGetMap<String, dynamic>('m.relates_to')
-          ?.tryGet<String>('key');
-      if (key != null) {
-        if (!reactionMap.containsKey(key)) {
-          reactionMap[key] = ReactionEntry(
-            key: key,
-            count: 0,
-            reacted: false,
-            reactors: [],
-          );
-        }
-        reactionMap[key]!.count++;
-        reactionMap[key]!.reactors!.add(e.senderFromMemoryOrFallback);
-        reactionMap[key]!.reacted |= e.senderId == e.room.client.userID;
-      }
-    }
-
-    return reactionMap.isNotEmpty;
+    return allReactionEvents.any(
+      (e) =>
+          e.content
+              .tryGetMap<String, dynamic>('m.relates_to')
+              ?.tryGet<String>('key') !=
+          null,
+    );
   }
 
   /// Checks if this event should be handled in caption mode.
