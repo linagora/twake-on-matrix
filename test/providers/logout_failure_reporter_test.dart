@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings/logout_failure_reporter.dart';
+import 'package:twake_chat/providers/logout_failure_reporter.dart';
 
 void main() {
   test('a failed logout step is logged as wtf with its error and stack', () {

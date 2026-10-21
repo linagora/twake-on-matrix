@@ -669,22 +669,25 @@ class BackgroundPush {
         Logs().d(
           '[Push] Switching to account ${targetClient.userID} for notification',
         );
-        try {
-          await _matrixState!.setActiveClient(targetClient);
-        } catch (e, s) {
-          Logs().w(
-            '[Push] Cannot switch to account ${targetClient.userID}',
-            e,
-            s,
-          );
-          return null;
-        }
+        if (!await _setActive(targetClient)) return null;
         await _matrixState!.cancelListenSynchronizeContacts();
         await _matrixState!.reSyncContacts();
         return targetClient;
       }
     }
     return null;
+  }
+
+  /// True only when [target] is the active account afterwards.
+  Future<bool> _setActive(Client target) async {
+    try {
+      final result = await _matrixState!.setActiveClient(target);
+      if (result.isSuccess) return true;
+      Logs().w('[Push] Cannot switch to account ${target.userID}: $result');
+    } catch (e, s) {
+      Logs().w('[Push] Cannot switch to account ${target.userID}', e, s);
+    }
+    return false;
   }
 
   void onReceiveNotification(dynamic message) {
