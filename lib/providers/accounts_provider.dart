@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 
 part 'accounts_provider.g.dart';
@@ -26,22 +28,21 @@ class Accounts extends _$Accounts {
   Future<void> _mutations = Future.value();
 
   @override
-  AccountsState build() => _transitions.initialize(
-    const Booting(),
-    ref.read(accountRepositoryProvider).registeredAccounts(),
-    persistedUserId: ref.read(bootPersistedActiveUserIdProvider),
-  );
+  AccountsState build() => ref
+      .read(initializeAccountsUseCaseProvider)
+      .execute(
+        persistedUserId: ref
+            .read(bootAccountSnapshotProvider)
+            .persistedActiveUserId,
+      );
 
   /// Registers the account [id] that just logged in. Does nothing when it is
   /// already registered (a repeated `loggedIn` event).
-  Future<void> addAccount(String id) => _serialized(() async {
-    final listed = state is Active || state is Switching;
-    if (listed && state.accounts.any((a) => a.id == id)) return;
-    final repository = ref.read(accountRepositoryProvider);
-    final account = repository.accountOf(id);
-    _transitions.add(state, account);
-    await repository.addAccount(account);
-    state = _transitions.add(state, account);
+  Future<void> addAccount(AccountId id) => _serialized(() async {
+    final next = await ref
+        .read(addAccountUseCaseProvider)
+        .execute(() => state, id.value);
+    if (next != null) state = next;
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
@@ -54,16 +55,16 @@ class Accounts extends _$Accounts {
   /// the state is `Switching` and the active account is still the old one.
   /// The returned future ends when `completeSwitch` or `failSwitch` is called
   /// for [id]; without a registered handler it ends at once.
-  Future<void> switchTo(String id) async {
+  Future<void> switchTo(AccountId id) async {
     await _mutations;
-    final next = _transitions.beginSwitch(state, id, seq: _switchSeq + 1);
+    final next = _transitions.beginSwitch(state, id.value, seq: _switchSeq + 1);
     if (identical(next, state)) return;
     if (_isRunningSwitch(next)) {
       // The same switch is already running: wait for it.
       await _pendingSwitch?.future;
       return;
     }
-    _supersedePendingSwitch(SwitchSupersededException(id));
+    _supersedePendingSwitch(SwitchSupersededException(id.value));
     if (next is! Switching) {
       state = next;
       return;
@@ -118,23 +119,23 @@ class Accounts extends _$Accounts {
 
   /// Removes [id]; when it was the active account the next one becomes active
   /// in the same emission.
-  Future<void> removeAccount(String id) => _serialized(() async {
-    _transitions.remove(state, id);
-    await ref.read(accountRepositoryProvider).removeAccount(id);
-    state = _transitions.remove(state, id);
+  Future<void> removeAccount(AccountId id) => _serialized(() async {
+    state = await ref
+        .read(removeAccountUseCaseProvider)
+        .execute(() => state, id.value);
   });
 
   /// The removal of [id] failed: the account stays listed as unavailable, not
   /// switchable; another logged-in account takes its place when it was the
   /// active one (with none, nobody is logged in). The record that survives a
   /// restart is [recordPendingRemoval], which is retried on its own.
-  Future<void> holdRemoval(String id) => _serialized(() async {
-    state = _transitions.markUnavailable(state, id);
+  Future<void> holdRemoval(AccountId id) => _serialized(() async {
+    state = _transitions.markUnavailable(state, id.value);
   });
 
   /// Records, across restarts, that the removal of [id] is pending.
-  Future<void> recordPendingRemoval(String id) => _serialized(
-    () => ref.read(accountRepositoryProvider).markRemovalPending(id),
+  Future<void> recordPendingRemoval(AccountId id) => _serialized(
+    () => ref.read(recordPendingRemovalUseCaseProvider).execute(id.value),
   );
 
   /// The only account logged out; it stays in the state as `LastLoggedOut`.
