@@ -54,11 +54,7 @@ class Accounts extends _$Accounts {
     await _mutations;
     final next = AccountTransitions.beginSwitch(state, id);
     if (identical(next, state)) return;
-    final running = state;
-    if (next is Switching &&
-        running is Switching &&
-        next.from == running.from &&
-        next.to == running.to) {
+    if (_isRunningSwitch(next)) {
       // The same switch is already running: wait for it.
       await _pendingSwitch?.future;
       return;
@@ -77,6 +73,14 @@ class Accounts extends _$Accounts {
     );
     if (_switchHandlers == 0) completeSwitch(id, _switchSeq);
     await pending.future;
+  }
+
+  bool _isRunningSwitch(AccountsState next) {
+    final running = state;
+    return next is Switching &&
+        running is Switching &&
+        next.from == running.from &&
+        next.to == running.to;
   }
 
   /// Ends when the switch that is running now has ended, however it ended.
