@@ -63,7 +63,7 @@ class Accounts extends _$Accounts {
       await _pendingSwitch?.future;
       return;
     }
-    _supersedePendingSwitch(id);
+    _supersedePendingSwitch(SwitchSupersededException(id));
     if (next is! Switching) {
       state = next;
       return;
@@ -158,11 +158,11 @@ class Accounts extends _$Accounts {
     return run;
   }
 
-  void _supersedePendingSwitch(String newTarget) {
+  void _supersedePendingSwitch(SwitchSupersededException error) {
     final pending = _pendingSwitch;
     _pendingSwitch = null;
     if (pending != null && !pending.isCompleted) {
-      pending.completeError(SwitchSupersededException(newTarget));
+      pending.completeError(error);
     }
   }
 
