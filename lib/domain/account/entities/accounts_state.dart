@@ -82,16 +82,22 @@ final class LastLoggedOut extends AccountsState {
   List<Object?> get props => [account];
 }
 
-/// Every account failed to initialise and none is logged in.
+/// Every account that is not waiting for its removal failed to initialise and
+/// none is logged in. [id] and [error] are those of the first failed one;
+/// [accounts] are the ones that stay listed, those whose removal is pending.
 final class AccountInitFailed extends AccountsState {
   final String id;
   final Object? error;
 
-  const AccountInitFailed({required this.id, this.error});
+  @override
+  final List<Account> accounts;
+
+  const AccountInitFailed({
+    required this.id,
+    this.error,
+    this.accounts = const [],
+  });
 
   @override
-  List<Account> get accounts => const [];
-
-  @override
-  List<Object?> get props => [id, error];
+  List<Object?> get props => [id, error, accounts];
 }
