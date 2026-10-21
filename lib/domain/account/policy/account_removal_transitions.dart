@@ -5,15 +5,20 @@ import 'package:twake_chat/domain/account/policy/account_policy.dart';
 import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
 
 /// The transitions that take an account out of use.
-abstract final class AccountRemovalTransitions {
+class AccountRemovalTransitions {
+  const AccountRemovalTransitions(this._policy, this._support);
+
+  final AccountPolicy _policy;
+  final AccountTransitionSupport _support;
+
   /// Removes [id] while other accounts remain. Removing a non-active account
   /// never changes the active one; removing the active one picks the next by
   /// [AccountPolicy.nextActiveAfterRemoving], and with no logged-in account
   /// left nobody is logged in ([NoAccount], which keeps the accounts that wait
   /// for their removal). The only account goes through [logoutLast]. An
   /// account that waits for its removal is removed from [NoAccount] too.
-  static AccountsState remove(AccountsState state, String id) {
-    if (!AccountTransitionSupport.has(state.accounts, id)) {
+  AccountsState remove(AccountsState state, String id) {
+    if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
     }
     if (state is NoAccount) {
@@ -23,7 +28,7 @@ abstract final class AccountRemovalTransitions {
       );
     }
     if (state is! Active || state.accounts.length < 2) {
-      throw AccountTransitionSupport.invalid('remove', state);
+      throw _support.invalid('remove', state);
     }
     final remaining = state.accounts.where((a) => a.id != id).toList();
     return _withoutActive(state, id, remaining);
@@ -34,13 +39,13 @@ abstract final class AccountRemovalTransitions {
   /// becomes active in the same emission; with none left nobody is logged in
   /// ([NoAccount], which lists [id] as unavailable). Holding an account that
   /// is already unavailable changes nothing.
-  static AccountsState markUnavailable(AccountsState state, String id) {
-    if (!AccountTransitionSupport.has(state.accounts, id)) {
+  AccountsState markUnavailable(AccountsState state, String id) {
+    if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
     }
     if (state is NoAccount) return state;
     if (state is! Active) {
-      throw AccountTransitionSupport.invalid('markUnavailable', state);
+      throw _support.invalid('markUnavailable', state);
     }
     final accounts = [
       for (final a in state.accounts)
@@ -52,9 +57,9 @@ abstract final class AccountRemovalTransitions {
   /// The last logged-in account logs out but stays, marked logged out, so the
   /// next login can reuse it. The accounts that wait for their removal stay
   /// listed beside it ([NoAccount]); with none, it is [LastLoggedOut].
-  static AccountsState logoutLast(AccountsState state) {
+  AccountsState logoutLast(AccountsState state) {
     if (state is! Active) {
-      throw AccountTransitionSupport.invalid('logoutLast', state);
+      throw _support.invalid('logoutLast', state);
     }
     final others = state.accounts.where((a) => a.id != state.activeId);
     final loggedOut = state.accounts
@@ -62,14 +67,14 @@ abstract final class AccountRemovalTransitions {
         .withStatus(AccountStatus.loggedOut);
     if (others.isEmpty) return LastLoggedOut(account: loggedOut);
     if (others.any((a) => a.status != AccountStatus.unavailable)) {
-      throw AccountTransitionSupport.invalid('logoutLast', state);
+      throw _support.invalid('logoutLast', state);
     }
     return NoAccount(candidateId: loggedOut.id, accounts: others.toList());
   }
 
   /// [accounts] is the list after [id] stopped being usable: the active
   /// account stays unless it is [id], then the next usable one takes over.
-  static AccountsState _withoutActive(
+  AccountsState _withoutActive(
     Active state,
     String id,
     List<Account> accounts,
@@ -78,14 +83,14 @@ abstract final class AccountRemovalTransitions {
       return Active(accounts: accounts, activeId: state.activeId);
     }
     final nextId = _nextUsable(state.accounts, id);
-    if (nextId == null) return AccountTransitionSupport.noSurvivor(accounts);
+    if (nextId == null) return _support.noSurvivor(accounts);
     return Active(accounts: accounts, activeId: nextId);
   }
 
   /// The account that becomes active when [id] stops being it: the next one
   /// that is logged in, by [AccountPolicy.nextActiveAfterRemoving].
-  static String? _nextUsable(List<Account> accounts, String id) =>
-      AccountPolicy.nextActiveAfterRemoving(
+  String? _nextUsable(List<Account> accounts, String id) =>
+      _policy.nextActiveAfterRemoving(
         ids: [
           for (final a in accounts)
             if (a.isLoggedIn || a.id == id) a.id,
