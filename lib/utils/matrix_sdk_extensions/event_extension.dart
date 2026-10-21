@@ -353,10 +353,10 @@ extension LocalizedBody on Event {
   }
 
   List<Client?> currentRoomBundle(MatrixState? matrix) {
-    if (matrix == null || matrix.currentBundle == null) {
+    if (matrix == null) {
       return [];
     }
-    final clients = matrix.currentBundle!;
+    final clients = matrix.currentClients;
     clients.removeWhere((c) => c!.getRoomById(roomId!) == null);
     return clients;
   }
