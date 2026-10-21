@@ -510,8 +510,9 @@ void main() {
       expect(host.calls.last, 'emit:firstLoggedIn');
     });
 
-    test('a new login of an active client runs again', () async {
+    test('a new login after the account logged out runs again', () async {
       await session.onLoggedIn(LoginState.loggedIn);
+      host.loggedIn.remove('a');
       host.calls.clear();
 
       await session.onLoggedIn(LoginState.loggedIn);
@@ -519,6 +520,19 @@ void main() {
       expect(host.calls, contains('activateCurrent'));
       expect(session.state, LoginSessionState.active);
     });
+
+    test(
+      'a repeated login event of a logged-in account does nothing',
+      () async {
+        await session.onLoggedIn(LoginState.loggedIn);
+        host.calls.clear();
+
+        await session.onLoggedIn(LoginState.loggedIn);
+
+        expect(host.calls, isEmpty);
+        expect(session.state, LoginSessionState.active);
+      },
+    );
 
     test(
       'disposing it does nothing: the client is not the session\'s to throw away',
@@ -611,6 +625,29 @@ void main() {
         login.completeError(StateError('wrong password'));
         await disposed;
 
+        expect(host.calls, contains('discardCandidate:c1'));
+      },
+    );
+
+    test(
+      'a login started after the disposal was requested is refused',
+      () async {
+        final session = await candidate();
+        final login = Completer<void>();
+        unawaited(
+          session.trackLogin<void>(() => login.future).catchError((_) {}),
+        );
+        final disposed = session.dispose();
+        var started = false;
+
+        expect(
+          () => session.trackLogin<void>(() async => started = true),
+          throwsStateError,
+        );
+        login.completeError(StateError('wrong password'));
+        await disposed;
+
+        expect(started, isFalse);
         expect(host.calls, contains('discardCandidate:c1'));
       },
     );
