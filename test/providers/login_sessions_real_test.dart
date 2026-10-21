@@ -1,3 +1,5 @@
+// @CodeScene(disable:"Primitive Obsession")
+// The host overrides keep the String ids of the LoginHost interface.
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
