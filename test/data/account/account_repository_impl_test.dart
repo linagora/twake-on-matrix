@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.dart';
+import 'package:twake_chat/data/account/repositories/client_account_boot_port.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/data/account/sources/persisted_active_account_source.dart';
@@ -49,10 +50,63 @@ void main() {
       expect(await repository.pendingPushRemovals(), {'b'});
     });
 
+    test(
+      'a change before the first read keeps what a past session saved',
+      () async {
+        await repository.markPushRemovalPending('a');
+        await repository.markCandidateDiscardPending('c');
+        final restarted = _newRepository(dataSource, registry);
+
+        await restarted.markPushRemovalPending('b');
+        await restarted.markCandidateDiscardPending('d');
+
+        expect(await restarted.pendingPushRemovals(), {'a', 'b'});
+        expect(await restarted.pendingCandidateDiscards(), {'c', 'd'});
+      },
+    );
+
+    test('a clear before the first read removes a saved id', () async {
+      await repository.markPushRemovalPending('a');
+      await repository.markCandidateDiscardPending('c');
+      final restarted = _newRepository(dataSource, registry);
+
+      await restarted.clearPushRemovalPending('a');
+      await restarted.clearCandidateDiscardPending('c');
+
+      expect(await restarted.pendingPushRemovals(), isEmpty);
+      expect(await restarted.pendingCandidateDiscards(), isEmpty);
+    });
+
     test('do not mix with the pending account removals', () async {
       await repository.markPushRemovalPending('a');
 
       expect(await PendingRemovalsSource(Store()).read(), isEmpty);
+    });
+  });
+
+  group('pendingRemovalIds', () {
+    test('reads what markRemovalPending recorded', () async {
+      registry.add(FakeAccountClient('a'));
+      repository.adopt([registry['a']!]);
+      await repository.markRemovalPending('a');
+
+      expect(await repository.pendingRemovalIds(), {'a'});
+    });
+
+    test('is empty when nothing was recorded', () async {
+      expect(await repository.pendingRemovalIds(), isEmpty);
+    });
+  });
+
+  group('ClientAccountBootPort', () {
+    test('adopts the boot clients into the repository', () {
+      final a = FakeAccountClient('a', userID: '@a:s');
+      final port = ClientAccountBootPort(repository: repository, clients: [a]);
+
+      expect(port.adopt(), const [
+        Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
+      ]);
+      expect(registry['a'], same(a));
     });
   });
 
@@ -86,6 +140,24 @@ void main() {
 
     test('an empty list gives an empty result', () async {
       expect(await repository.loadAccounts(), isEmpty);
+    });
+
+    test('leaves the registry untouched when reading the pending removals '
+        'fails', () async {
+      final failing = AccountRepositoryImpl(
+        dataSource: dataSource,
+        persistedActiveAccount: PersistedActiveAccountSource(Store()),
+        pendingRemovals: _FailingPendingRemovals(),
+        pendingPushRemovals: PendingRemovalsSource(Store()),
+        pendingCandidateDiscards: PendingRemovalsSource(Store()),
+        registry: registry,
+        clientNameBuilder: () => 'new-client',
+      );
+      dataSource.toLoad = [FakeAccountClient('a', userID: '@a:s')];
+
+      await expectLater(failing.loadAccounts(), throwsStateError);
+
+      expect(registry['a'], isNull);
     });
   });
 
@@ -393,3 +465,29 @@ void main() {
     });
   });
 }
+
+class _FailingPendingRemovals extends PendingRemovalsSource {
+  _FailingPendingRemovals() : super(Store());
+
+  @override
+  Future<Set<String>> read() => Future.error(StateError('unreadable'));
+}
+
+AccountRepositoryImpl _newRepository(
+  FakeAccountClientDataSource dataSource,
+  AccountClientRegistry registry,
+) => AccountRepositoryImpl(
+  dataSource: dataSource,
+  persistedActiveAccount: PersistedActiveAccountSource(Store()),
+  pendingRemovals: PendingRemovalsSource(Store()),
+  pendingPushRemovals: PendingRemovalsSource(
+    Store(),
+    storeKey: PendingRemovalsSource.pushKey,
+  ),
+  pendingCandidateDiscards: PendingRemovalsSource(
+    Store(),
+    storeKey: PendingRemovalsSource.candidateKey,
+  ),
+  registry: registry,
+  clientNameBuilder: () => 'new-client',
+);
