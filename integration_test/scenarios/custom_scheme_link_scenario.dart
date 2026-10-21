@@ -6,9 +6,8 @@ import '../base/mobile_group_fixture.dart';
 import '../robots/home_robot.dart';
 import 'chat_scenario.dart';
 
-/// Mobile-only: tapping a link with a custom scheme hands it to the OS as-is,
-/// and links with an unsafe scheme are never launched. No app handles
-/// `visio://` on the test devices, so in both cases the app reports that it
+/// Mobile-only: tapping a link with a custom scheme hands it to the OS as-is.
+/// No app handles `visio://` on the test devices, so the app reports that it
 /// cannot open the URI. Before the fix, `visio://…` opened `https://visio` in
 /// the in-app browser instead. Web is not covered: the browser does not report
 /// whether a custom scheme was handled, so there is nothing to assert.
@@ -30,18 +29,13 @@ class CustomSchemeLinkScenario extends BaseTestScenario {
     final anchorLabel = 'Join visio $suffix';
     const anchorUri = 'visio://toto';
     final plainUri = 'visio://meet.example.com/room-$suffix';
-    final unsafeLabel = 'Run script $suffix';
-    const unsafeUri = 'javascript:alert(1)';
 
-    await chatScenario.sendAMesage(
-      '[$anchorLabel]($anchorUri) $plainUri [$unsafeLabel]($unsafeUri)',
-    );
+    await chatScenario.sendAMesage('[$anchorLabel]($anchorUri) $plainUri');
     await chatScenario.verifyMessageIsShown(anchorLabel, true);
 
     for (final (tappedText, uri) in [
       (anchorLabel, anchorUri),
       (plainUri, plainUri),
-      (unsafeLabel, unsafeUri),
     ]) {
       await chat.tapTextInMessage(tappedText);
 

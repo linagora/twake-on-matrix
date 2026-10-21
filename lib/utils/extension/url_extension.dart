@@ -1,5 +1,3 @@
-import 'package:twake_chat/config/app_config.dart';
-
 const _fileExtensions = {
   // Documents
   'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
@@ -51,28 +49,8 @@ bool isFilenameUrl(String? url) {
   return _hasKnownFileExtension(url);
 }
 
-// `intent`, `content` and `android-app` let a link drive Android components.
-// The app's own scheme would reopen Twake with the same link, in a loop.
-const _blockedSchemes = {
-  'file',
-  'javascript',
-  'vbscript',
-  'data',
-  'blob',
-  'intent',
-  'content',
-  'android-app',
-  AppConfig.appOpenUrlScheme,
-};
-
-const _schemesWithoutAuthority = {'mailto', 'tel', 'sms', 'geo'};
-
-/// Returns true if [uri] uses a scheme that must never be launched.
-bool isBlockedSchemeUri(Uri uri) => _blockedSchemes.contains(uri.scheme);
-
-/// Returns true if [uri] targets the app registered for its scheme
-/// (e.g. `visio://room`, `tel:+33…`), as opposed to a bare `host:port`
-/// that [Uri.parse] reads as a scheme (e.g. `example.com:8080`).
-bool isAppSchemeUri(Uri uri) =>
-    (uri.hasScheme && uri.hasAuthority) ||
-    _schemesWithoutAuthority.contains(uri.scheme);
+/// Returns true if [uri] is a bare `host:port` that [Uri.parse] reads as a
+/// scheme (e.g. `example.com:8080`, `localhost:3000/path`).
+bool isHostAndPortUri(Uri uri) =>
+    (uri.scheme == 'localhost' || uri.scheme.contains('.')) &&
+    RegExp(r'^\d+(/|$)').hasMatch(uri.path);

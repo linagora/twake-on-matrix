@@ -45,10 +45,6 @@ class UrlLauncher with GoToDraftChatMixin {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
     }
-    if (isBlockedSchemeUri(uri)) {
-      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
-      return;
-    }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
       final inviteUri = Uri.parse(AppConfig.inviteLinkPrefix);
       final matrixToUri = uri.replace(
@@ -96,11 +92,11 @@ class UrlLauncher with GoToDraftChatMixin {
         _launchGeoUri(uri)) {
       return;
     }
-    if (isAppSchemeUri(uri)) {
-      _launchAppSchemeUrl();
+    if (!uri.hasScheme || isHostAndPortUri(uri)) {
+      launchUrlString('https://$url');
       return;
     }
-    launchUrlString('https://$url');
+    _launchAppSchemeUrl(uri);
   }
 
   bool _launchGeoUri(Uri uri) {
@@ -129,11 +125,14 @@ class UrlLauncher with GoToDraftChatMixin {
     return true;
   }
 
-  Future<void> _launchAppSchemeUrl() async {
-    final launched = await launchUrlString(
-      url!,
-      mode: LaunchMode.externalApplication,
-    ).catchError((_) => false);
+  // The app's own scheme would reopen Twake with the same link, in a loop.
+  Future<void> _launchAppSchemeUrl(Uri uri) async {
+    final launched =
+        uri.scheme != AppConfig.appOpenUrlScheme &&
+        await launchUrlString(
+          url!,
+          mode: LaunchMode.externalApplication,
+        ).catchError((_) => false);
     if (!launched && context.mounted) {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
     }

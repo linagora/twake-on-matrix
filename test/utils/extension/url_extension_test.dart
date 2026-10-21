@@ -160,54 +160,29 @@ void main() {
     });
   });
 
-  group('isBlockedSchemeUri', () {
+  group('isHostAndPortUri', () {
     for (final url in [
-      'file:///etc/passwd',
-      'javascript:alert(1)',
-      'JavaScript:alert(1)',
-      'data:text/html,hi',
-      'intent://scan/#Intent;scheme=zxing;package=com.example;end',
-      'content://com.example.provider/secret',
-      'android-app://com.example/https/example.com/path',
-      'vbscript:msgbox(1)',
-      'blob:https://example.com/uuid',
-      'twake.chat://redirect',
+      'example.com:8080',
+      'example.com:8080/path?q=1',
+      'localhost:3000',
+      'localhost:3000/path',
     ]) {
       test('GIVEN $url\nTHEN returns true', () {
-        expect(isBlockedSchemeUri(Uri.parse(url)), isTrue);
-      });
-    }
-
-    for (final url in ['visio://toto', 'tel:+33123456789', 'example.com']) {
-      test('GIVEN $url\nTHEN returns false', () {
-        expect(isBlockedSchemeUri(Uri.parse(url)), isFalse);
-      });
-    }
-  });
-
-  group('isAppSchemeUri', () {
-    for (final url in [
-      'visio://toto',
-      'maps://?q=Paris',
-      'mailto:someone@example.com',
-      'tel:+33123456789',
-      'sms:+33123456789',
-      'geo:48.85,2.35',
-    ]) {
-      test('GIVEN $url\nTHEN returns true', () {
-        expect(isAppSchemeUri(Uri.parse(url)), isTrue);
+        expect(isHostAndPortUri(Uri.parse(url)), isTrue);
       });
     }
 
     for (final url in [
       'example.com',
-      'www.example.com/path',
-      'example.com:8080/path',
-      'localhost:8080',
-      '//example.com/page',
+      'visio://toto',
+      'tel:0612345678',
+      'skype:echo123?call',
+      'sip:alice@example.com',
+      'twake.chat://redirect',
+      'com.example.app:/callback',
     ]) {
       test('GIVEN $url\nTHEN returns false', () {
-        expect(isAppSchemeUri(Uri.parse(url)), isFalse);
+        expect(isHostAndPortUri(Uri.parse(url)), isFalse);
       });
     }
   });

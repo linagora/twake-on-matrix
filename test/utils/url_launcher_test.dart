@@ -77,7 +77,10 @@ void main() {
       'maps://?q=Paris',
       'mailto:someone@example.com',
       'tel:+33123456789',
+      'tel:0612345678',
       'sms:+33123456789',
+      'skype:echo123?call',
+      'sip:alice@example.com',
     ]) {
       testWidgets('WHEN $url is tapped\n'
           'THEN it is launched as-is in an external app', (tester) async {
@@ -111,18 +114,8 @@ void main() {
     });
   });
 
-  group('GIVEN a link with a blocked scheme\n', () {
-    for (final url in [
-      'file:///etc/passwd',
-      'javascript:alert(1)',
-      'data:text/html,<script>alert(1)</script>',
-      'file://links.twake.app/chat/x',
-      'intent://scan/#Intent;scheme=zxing;package=com.example;end',
-      'content://com.example.provider/secret',
-      'android-app://com.example/https/example.com/path',
-      'twake.chat://redirect',
-      'twake.chat://login',
-    ]) {
+  group('GIVEN a link with the app\'s own scheme\n', () {
+    for (final url in ['twake.chat://redirect', 'twake.chat://login']) {
       testWidgets('WHEN $url is tapped\n'
           'THEN nothing is launched and a message is shown', (tester) async {
         await launch(tester, url);
