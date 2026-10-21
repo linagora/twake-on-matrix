@@ -26,8 +26,13 @@ Progress: `MIGRATION_STATUS.md`, `scripts/migration_status.sh`.
 | Mechanical | One rewrite pattern over one area | any |
 | Module | One module through its layers | ≤ ~500 lines, generated files excluded |
 
-Never mix two kinds. Check open pull requests on the area first
-(`gh pr list --search <path>`); skip an area someone is changing.
+Never mix two kinds. Check which open pull requests change files in the area
+first, and skip an area someone is changing:
+
+```bash
+gh pr list --limit 100 --json number,title,files \
+  --jq '.[] | select(any(.files[]; .path | startswith("<path>/"))) | "#\(.number) \(.title)"'
+```
 
 ## 2. End-to-end first
 
@@ -48,8 +53,11 @@ Once `matrixClientProvider` exists:
 - In `build()`: `ref.watch(matrixClientProvider)`.
 - In `initState`, `dispose`, callbacks and methods:
   `ref.read(matrixClientProvider)`.
-- `StatefulWidget` → `ConsumerStatefulWidget`, `State` → `ConsumerState`;
-  `StatelessWidget` → `ConsumerWidget`. Change nothing else in the class.
+- `StatefulWidget` → `ConsumerStatefulWidget`, `State` → `ConsumerState`.
+- `StatelessWidget` → `ConsumerWidget`, and its
+  `Widget build(BuildContext context)` becomes
+  `Widget build(BuildContext context, WidgetRef ref)`.
+- Change nothing else in the class.
 - A mixin on `State` that needs `ref` is constrained on `ConsumerState`.
 
 Before it exists, leave these calls alone; a new controller takes the
@@ -69,7 +77,7 @@ during its module's migration.
 ### Imports
 
 A file that imports `package:provider` imports Riverpod with `show`:
-`import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, ConsumerWidget;`,
+`import 'package:flutter_riverpod/flutter_riverpod.dart' show ConsumerState, ConsumerStatefulWidget, ConsumerWidget, WidgetRef;`,
 keeping only the names the file uses.
 
 ## 4. Module recipe

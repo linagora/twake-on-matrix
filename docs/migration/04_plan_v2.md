@@ -53,7 +53,7 @@ One pull request per area, one pattern each, areas that nobody is changing.
 The sweep covers `lib/pages`, `lib/widgets` and `lib/presentation`, where a
 `ref` is at hand:
 
-| Area | `Matrix.of` | `getIt` |
+| Area | `Matrix.of` / `Matrix.read` | `getIt` |
 |---|---:|---:|
 | `pages/settings_dashboard` | 53 | 23 |
 | `pages/chat` | 37 | 42 |
@@ -63,7 +63,8 @@ The sweep covers `lib/pages`, `lib/widgets` and `lib/presentation`, where a
 
 The `getIt` lookups in `lib/data`, `lib/domain` and `lib/utils` (about 125)
 are fields of repositories, datasources and interactors: they need
-constructor injection and move with their module in Step 3.
+constructor injection and move with their module in Step 3. So do the 6
+`Matrix.of` / `Matrix.read` calls in `lib/utils` and `lib/config`.
 
 - `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
   `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
