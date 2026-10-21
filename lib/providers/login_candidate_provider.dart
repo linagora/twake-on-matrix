@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -23,14 +24,22 @@ class PendingLoginCandidate extends _$PendingLoginCandidate {
 Client? loginCandidate(Ref ref) {
   final registry = ref.watch(accountClientRegistryProvider);
   final state = ref.watch(accountsProvider);
-  if (state is NoAccount && state.candidateId != null) {
-    final placeholder = registry[state.candidateId!];
-    if (placeholder != null) return placeholder;
-  }
-  if (state is LastLoggedOut) {
-    final loggedOut = registry[state.account.id];
-    if (loggedOut != null) return loggedOut;
-  }
+  final stateClient = _LoginCandidates.clientOf(
+    registry,
+    _LoginCandidates.idOf(state),
+  );
+  if (stateClient != null) return stateClient;
   final pending = ref.watch(pendingLoginCandidateProvider);
-  return pending == null ? null : registry[pending];
+  return _LoginCandidates.clientOf(registry, pending);
+}
+
+abstract final class _LoginCandidates {
+  static String? idOf(AccountsState state) => switch (state) {
+    NoAccount(:final candidateId) => candidateId,
+    LastLoggedOut(:final account) => account.id,
+    _ => null,
+  };
+
+  static Client? clientOf(AccountClientRegistry registry, String? id) =>
+      id == null ? null : registry[id];
 }
