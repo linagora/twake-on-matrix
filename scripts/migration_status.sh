@@ -87,7 +87,7 @@ count_tree() {
 metric() {
   local ref="$1" name="$2"
   case "$name" in
-    matrix_of) count_lines "$ref" 'Matrix\.(of|read)\(' lib "${EXCLUDES[@]}" ;;
+    matrix_of) count_lines "$ref" 'Matrix\.(of|read)([^A-Za-z0-9_]|$)' lib "${EXCLUDES[@]}" ;;
     get_it_lookups) count_get_it "$ref" lib ':!lib/di/' "${EXCLUDES[@]}" ;;
     get_it_registrations) count_lines "$ref" '\.register(Factory|Singleton|LazySingleton)' lib "${EXCLUDES[@]}" ;;
     stream_either) count_lines "$ref" 'Stream<Either<' lib "${EXCLUDES[@]}" ;;
