@@ -30,33 +30,27 @@ class FakeLoginHost implements LoginHost {
   /// The name the next candidate gets.
   String get nextCandidate => 'c${_created + 1}';
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   FakeAccountClient clientOf(String id) =>
       clients.putIfAbsent(id, () => FakeAccountClient(id, userID: '@$id:s'));
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   Future<void> _step(String name) async {
     calls.add(name);
     await gates[name]?.future;
     if (failing.contains(name)) throw StateError('$name failed');
   }
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   bool isStored(AccountId id) => stored.contains(id.value);
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   bool isLoggedIn(AccountId id) => loggedIn.contains(id.value);
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> addAccount(AccountId id) async {
     await _step('addAccount:${id.value}');
     stored.add(id.value);
   }
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> removeAccount(AccountId id) async {
     await _step('removeAccount:${id.value}');
@@ -75,7 +69,6 @@ class FakeLoginHost implements LoginHost {
   @override
   String? get activeClientName => activeName;
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Client? clientByName(AccountId id) => clients[id.value];
 
@@ -105,7 +98,6 @@ class FakeLoginHost implements LoginHost {
     return clientOf(name);
   }
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> discardCandidate(AccountId id) async {
     await _step('discardCandidate:${id.value}');
@@ -114,16 +106,13 @@ class FakeLoginHost implements LoginHost {
   @override
   String? get pendingCandidateId => pending;
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void setPendingCandidate(AccountId? id) => pending = id?.value;
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> signOut(AccountId id, {required bool quiet}) =>
       _step('signOut:$id:${quiet ? 'quiet' : 'loud'}');
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void forgetQuiet(AccountId id) => calls.add('forgetQuiet:${id.value}');
 
@@ -139,16 +128,13 @@ class FakeLoginHost implements LoginHost {
     return controller.stream.listen(onState);
   }
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> removePush(AccountId id) => _step('removePush:${id.value}');
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> cancelSubscriptions(AccountId id) =>
       _step('cancelSubs:${id.value}');
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> registerSubscriptions(AccountId id) =>
       _step('registerSubs:${id.value}');
@@ -196,12 +182,10 @@ class FakeLoginHost implements LoginHost {
     onRemovalRetry?.call();
   }
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void report(Object error, StackTrace stackTrace, String what) =>
       reports.add(what);
 
-  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   /// Sends `loggedIn` on the stream of [id], as the SDK does.
   void logIn(String id) {
     loggedIn.add(id);
