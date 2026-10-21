@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -39,9 +41,23 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
     }
   }
 
+  late final MatrixState _matrix;
+
+  /// True when nothing is under this page, so the add-account flow starts and
+  /// ends here; otherwise the page below owns the client made for the flow.
+  late final bool _endsTheFlow;
+
+  @override
+  void dispose() {
+    if (_endsTheFlow) unawaited(_matrix.discardPendingLoginCandidate());
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _matrix = Matrix.of(context);
+    _endsTheFlow = !Navigator.of(context).canPop();
     loginClientFuture = Matrix.of(context).getLoginClient();
     if (supportsSso(context)) {
       login();

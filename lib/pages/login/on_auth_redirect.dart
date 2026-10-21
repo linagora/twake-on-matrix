@@ -3,9 +3,12 @@ import 'dart:async';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
@@ -53,6 +56,25 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       _handleLoginSuccess();
       return;
     }
+    if (event.multipleAccountLoginType.isFailure) {
+      _handleLoginFailed(event.error);
+      return;
+    }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone: tell the user and go back where they can start the
+  /// login again.
+  void _handleLoginFailed(Object? error) {
+    final messengerContext = TwakeApp.routerKey.currentContext;
+    if (messengerContext != null && messengerContext.mounted) {
+      TwakeSnackBar.show(
+        messengerContext,
+        (error ?? Object()).toLocalizedString(messengerContext),
+      );
+    }
+    if (!mounted) return;
+    const HomeRoute().go(context);
   }
 
   void _handleLoginSuccess() {
@@ -75,6 +97,8 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       stackTrace,
     );
     if (!mounted) return;
+    // A login that ended here leaves no client behind.
+    unawaited(Matrix.of(context).discardPendingLoginCandidate());
     const HomeRoute().go(context);
   }
 
@@ -140,10 +164,13 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
           .checkHomeserver(Uri.parse(homeserver))
           .toHomeserverSummary();
 
-      await client.login(
-        LoginType.mLoginToken,
-        token: loginToken,
-        initialDeviceDisplayName: PlatformInfos.clientName,
+      await Matrix.of(context).trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginToken,
+          token: loginToken!,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
     } catch (e, s) {
       _handleLoginError(e, s);

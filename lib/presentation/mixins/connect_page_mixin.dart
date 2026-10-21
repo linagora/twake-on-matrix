@@ -2,9 +2,13 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -143,14 +147,7 @@ mixin ConnectPageMixin {
       if (token == null || token.isEmpty) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final client = await Matrix.of(context).getLoginClient();
-      await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => client.login(
-          LoginType.mLoginToken,
-          token: token,
-          initialDeviceDisplayName: PlatformInfos.clientName,
-        ),
-      );
-      return SsoLoginState.success;
+      return await loginWithToken(Matrix.of(context), client, token);
     } catch (e) {
       Logs().e('ConnectPageMixin:: ssoLoginActionMobil(): error: $e');
       return SsoLoginState.error;
@@ -266,6 +263,39 @@ mixin ConnectPageMixin {
     }
   }
 
+  /// Logs in with [token] in the full screen dialog. When the login worked on
+  /// the server but the account could not be stored, the login was undone: the
+  /// user is told and the result is an error, so they can try again.
+  @visibleForTesting
+  Future<SsoLoginState> loginWithToken(
+    MatrixState matrix,
+    Client client,
+    String token,
+  ) async {
+    final dialogResult = await TwakeDialog.showStreamDialogFullScreen(
+      future: () async => matrix.trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginToken,
+          token: token,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
+      ),
+    );
+    if (dialogResult is! ClientLoginStateEvent ||
+        !dialogResult.multipleAccountLoginType.isFailure) {
+      return SsoLoginState.success;
+    }
+    final messengerContext = TwakeApp.routerKey.currentContext;
+    if (messengerContext != null && messengerContext.mounted) {
+      TwakeSnackBar.show(
+        messengerContext,
+        (dialogResult.error ?? Object()).toLocalizedString(messengerContext),
+      );
+    }
+    return SsoLoginState.error;
+  }
+
   Future<SsoLoginState> handleTokenFromRegistrationSite({
     required MatrixState matrix,
     required String uri,
@@ -278,14 +308,7 @@ mixin ConnectPageMixin {
       }
       matrix.loginType = LoginType.mLoginToken;
       final client = await matrix.getLoginClient();
-      await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => client.login(
-          LoginType.mLoginToken,
-          token: token,
-          initialDeviceDisplayName: PlatformInfos.clientName,
-        ),
-      );
-      return SsoLoginState.success;
+      return await loginWithToken(matrix, client, token);
     } catch (e) {
       Logs().e(
         'ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e',

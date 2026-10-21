@@ -276,8 +276,14 @@ class HomeserverPickerController extends State<HomeserverPicker>
     }
   }
 
+  late final MatrixState _matrix;
+
   @override
   void dispose() {
+    // Leaving the add-account flow without logging in drops its client.
+    if (widget.arg.type == HomeserverPickerType.multiAccount) {
+      unawaited(_matrix.discardPendingLoginCandidate());
+    }
     homeserverFocusNode.removeListener(_updateFocus);
     homeserverFocusNode.dispose();
     homeserverController.dispose();
@@ -286,6 +292,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   void initState() {
+    _matrix = Matrix.of(context);
     homeserverFocusNode.addListener(_updateFocus);
     _checkTorBrowser();
     super.initState();
