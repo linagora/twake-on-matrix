@@ -494,6 +494,27 @@ void main() {
         throwsA(isA<UnknownAccountException>()),
       );
     });
+
+    test('a waiting account is removed from AccountInitFailed', () {
+      final error = StateError('init');
+      expect(
+        _transitions.remove(
+          AccountInitFailed(
+            id: 'f',
+            error: error,
+            accounts: [waiting('w'), waiting('v')],
+          ),
+          'w',
+        ),
+        AccountInitFailed(id: 'f', error: error, accounts: [waiting('v')]),
+      );
+    });
+
+    test('holding a waiting account in AccountInitFailed changes nothing', () {
+      final failed = AccountInitFailed(id: 'f', accounts: [waiting('w')]);
+
+      expect(_transitions.markUnavailable(failed, 'w'), failed);
+    });
   });
 
   group('logoutLast', () {
@@ -515,6 +536,18 @@ void main() {
       final waiting = a.withStatus(AccountStatus.unavailable);
       expect(
         _transitions.logoutLast(Active(accounts: [waiting, b], activeId: 'b')),
+        NoAccount(candidateId: 'b', accounts: [waiting]),
+      );
+    });
+
+    test('a logged-out or init-failed account beside it is dropped, not '
+        'a reason to reject', () {
+      const failed = Account(id: 'f', status: AccountStatus.initFailed);
+      final waiting = a.withStatus(AccountStatus.unavailable);
+      expect(
+        _transitions.logoutLast(
+          Active(accounts: [waiting, _out('p'), failed, b], activeId: 'b'),
+        ),
         NoAccount(candidateId: 'b', accounts: [waiting]),
       );
     });
@@ -557,10 +590,14 @@ void main() {
   });
 
   test('state collections are unmodifiable', () {
+    final state = Active(accounts: [a, b], activeId: 'a');
+    expect(() => state.accounts.add(c), throwsUnsupportedError);
+  });
+
+  test('initialize keeps its own copy of the accounts', () {
     final source = [a, b];
-    final state = Active(accounts: source, activeId: 'a');
+    final state = _transitions.initialize(const Booting(), source);
     source.add(c);
     expect(state.accounts, [a, b]);
-    expect(() => state.accounts.add(c), throwsUnsupportedError);
   });
 }
