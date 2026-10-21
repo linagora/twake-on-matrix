@@ -106,10 +106,11 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       return false;
     }
     try {
-      final allHomeserverLoggedIn = (await ClientManager.getClients())
-          .where((client) => client.homeserver != null)
-          .map((client) => client.homeserver.toString())
-          .toList();
+      final allHomeserverLoggedIn =
+          ClientManager.loggedIn(await ClientManager.getClients())
+              .where((client) => client.homeserver != null)
+              .map((client) => client.homeserver.toString())
+              .toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
       final homeserverExists = allHomeserverLoggedIn.any(
         (homeserver) => "$homeserver/".contains(AppConfig.homeserver),

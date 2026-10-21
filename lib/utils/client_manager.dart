@@ -69,24 +69,16 @@ abstract class ClientManager {
         ),
       );
     }
-    if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
-      final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
-      for (final client in loggedOutClients) {
-        Logs().w(
-          'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
-        );
-        clientNames.remove(client.clientName);
-        final database = client.database;
-        await database.delete();
-        if (database is MatrixSdkDatabase && database.database?.path != null) {
-          await deleteSqfliteDb(database.database!.path);
-        }
-        clients.remove(client);
-      }
-      await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
-    }
+    // A logged-out client next to others is not deleted here: the account
+    // repository lists it as a pending removal, which is retried until it works.
     return clients;
   }
+
+  /// The clients that hold a session. A logged-out client stays loaded while
+  /// its removal is pending; screens that read profiles or homeservers, and the
+  /// background push, must not treat it as an account.
+  static List<Client> loggedIn(Iterable<Client> clients) =>
+      clients.where((client) => client.isLogged()).toList();
 
   static Future<void> addClientNameToStore(String clientName) async {
     final clientNamesList = <String>[];
