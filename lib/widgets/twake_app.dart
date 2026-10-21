@@ -6,6 +6,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -111,8 +112,10 @@ class TwakeAppState extends State<TwakeApp> {
               return supportedLocales.first;
             },
             routerConfig: TwakeApp.router,
-            builder: (context, child) =>
-                Matrix(clients: widget.clients, child: child),
+            builder: (context, child) => Matrix(
+              clients: widget.clients,
+              child: NavigationButtonsSafeArea(child: child),
+            ),
           );
         },
       ),

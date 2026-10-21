@@ -1,4 +1,4 @@
-import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 class AndroidUtils {
@@ -7,6 +7,8 @@ class AndroidUtils {
   static bool isNavigationButtonsEnabled({
     required EdgeInsets systemGestureInsets,
   }) {
-    return PlatformInfos.isAndroid && systemGestureInsets.left == 0;
+    return !kIsWeb &&
+        defaultTargetPlatform == TargetPlatform.android &&
+        systemGestureInsets.left == 0;
   }
 }

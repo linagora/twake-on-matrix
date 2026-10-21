@@ -16,11 +16,14 @@ class ChatListBottomNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ResponsiveUtils.heightBottomNavigation,
+      constraints: const BoxConstraints(
+        minHeight: ResponsiveUtils.heightBottomNavigation,
+      ),
       padding: ChatListBottomNavigatorStyle.padding,
       color: Theme.of(context).colorScheme.surface,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: bottomNavigationActionsWidget,
       ),
     );

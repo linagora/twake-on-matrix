@@ -198,7 +198,7 @@ class _ColumnPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final child = PageView(
+    return PageView(
       controller: pageController,
       physics: const NeverScrollableScrollPhysics(),
       children: [
@@ -225,14 +225,6 @@ class _ColumnPageView extends StatelessWidget {
         ),
       ],
     );
-
-    if (AndroidUtils.isNavigationButtonsEnabled(
-      systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
-    )) {
-      return SafeArea(child: child);
-    }
-
-    return child;
   }
 
   Widget _triggerPageViewBuilder({

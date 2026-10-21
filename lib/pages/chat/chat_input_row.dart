@@ -37,7 +37,7 @@ class ChatInputRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return KeyboardVisibilityBuilder(
       builder: (context, isKeyboardVisible) {
-        final child = Stack(
+        return Stack(
           alignment: Alignment.centerRight,
           children: [
             Padding(
@@ -343,14 +343,6 @@ class ChatInputRow extends StatelessWidget {
               ),
           ],
         );
-
-        if (AndroidUtils.isNavigationButtonsEnabled(
-          systemGestureInsets: MediaQuery.systemGestureInsetsOf(context),
-        )) {
-          return SafeArea(child: child);
-        }
-
-        return child;
       },
     );
   }

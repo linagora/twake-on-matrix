@@ -710,6 +710,7 @@ class ChatListController extends State<ChatList>
         child: SizedBox(
           width: width,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: paddingIcon,
@@ -721,6 +722,7 @@ class ChatListController extends State<ChatList>
               ),
               Text(
                 _getTitleBottomNavigation(item),
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                 ),
