@@ -21,7 +21,7 @@ const RESOURCES = {"pkg/vodozemac_bindings_dart_bg.wasm": "406d014979857bf01f04f
 "script.js": "e43a171f3b1eb4d2aed66279f55d32cf",
 "main.dart.js": "bb16327380458d138596ef00ae40fc69",
 "vendor/README.md": "29435ef46bd8f33febb17ca0153a7cda",
-"flutter_bootstrap.js": "bdf058eb9c98e7d5f956c8f0223b2e2f",
+"flutter_bootstrap.js": "8f9b57f26f1e9f933cf7d15f0b3ae04a",
 "push_sw.js": "f67a9b663ed758672ccc350a5b00cbcb",
 "favicon.png": "2e69080e35d3ca42d9e9f78474df7d20",
 "version.json": "2d17413ba5a6533ee7fb8aa37318437b",
