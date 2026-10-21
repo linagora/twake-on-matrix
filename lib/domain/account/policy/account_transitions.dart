@@ -26,11 +26,19 @@ abstract final class AccountTransitions {
     }
     final failed = accounts
         .where((a) => a.status == AccountStatus.initFailed)
-        .firstOrNull;
-    if (failed != null) {
-      return AccountInitFailed(id: failed.id, error: failed.initError);
+        .toList();
+    if (failed.isEmpty) return _noSurvivor(accounts);
+    final others = accounts.where((a) => a.status != AccountStatus.initFailed);
+    if (others.every((a) => a.status == AccountStatus.unavailable)) {
+      return AccountInitFailed(
+        id: failed.first.id,
+        error: failed.first.initError,
+        accounts: others.toList(),
+      );
     }
-    return _noSurvivor(accounts);
+    // A logged-out placeholder exists: the next login can use it, so the
+    // failed accounts do not block the app. They stay in the store.
+    return _noSurvivor(others.toList());
   }
 
   /// Nobody is logged in: the first account that is not waiting for its
@@ -67,7 +75,13 @@ abstract final class AccountTransitions {
     };
   }
 
-  static AccountsState beginSwitch(AccountsState state, String toId) {
+  /// Starts a switch to [toId]. [seq] numbers the switch; its settlement hands
+  /// it back to [completeSwitch] or [failSwitch].
+  static AccountsState beginSwitch(
+    AccountsState state,
+    String toId, {
+    int seq = 0,
+  }) {
     final target = state.accounts.where((a) => a.id == toId).firstOrNull;
     if (target == null) throw UnknownAccountException(toId);
     if (!target.isLoggedIn) throw _invalid('beginSwitch', state);
@@ -75,31 +89,40 @@ abstract final class AccountTransitions {
       Active(:final accounts, :final activeId) =>
         toId == activeId
             ? state
-            : Switching(accounts: accounts, from: activeId, to: toId),
+            : Switching(accounts: accounts, from: activeId, to: toId, seq: seq),
       Switching(:final accounts, :final from) =>
         toId == from
             ? Active(accounts: accounts, activeId: from)
-            : Switching(accounts: accounts, from: from, to: toId),
+            : Switching(accounts: accounts, from: from, to: toId, seq: seq),
       _ => throw _invalid('beginSwitch', state),
     };
   }
 
-  static AccountsState completeSwitch(AccountsState state) => switch (state) {
-    Switching(:final accounts, :final to) => Active(
-      accounts: accounts,
-      activeId: to,
-    ),
-    _ => throw _invalid('completeSwitch', state),
-  };
+  /// Ends the switch numbered [expectedSeq]; a [Switching] with another
+  /// number is a newer switch and throws [SwitchSupersededException].
+  static AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
+      switch (state) {
+        Switching(:final to, seq: final running) when running != expectedSeq =>
+          throw SwitchSupersededException(to),
+        Switching(:final accounts, :final to) => Active(
+          accounts: accounts,
+          activeId: to,
+        ),
+        _ => throw _invalid('completeSwitch', state),
+      };
 
-  /// A failed switch goes back to the origin account.
-  static AccountsState failSwitch(AccountsState state) => switch (state) {
-    Switching(:final accounts, :final from) => Active(
-      accounts: accounts,
-      activeId: from,
-    ),
-    _ => throw _invalid('failSwitch', state),
-  };
+  /// A failed switch goes back to the origin account. Guarded by
+  /// [expectedSeq] like [completeSwitch].
+  static AccountsState failSwitch(AccountsState state, int expectedSeq) =>
+      switch (state) {
+        Switching(:final to, seq: final running) when running != expectedSeq =>
+          throw SwitchSupersededException(to),
+        Switching(:final accounts, :final from) => Active(
+          accounts: accounts,
+          activeId: from,
+        ),
+        _ => throw _invalid('failSwitch', state),
+      };
 
   /// Removes [id] while other accounts remain. Removing a non-active account
   /// never changes the active one; removing the active one picks the next by

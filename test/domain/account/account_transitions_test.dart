@@ -12,6 +12,9 @@ Account _out(String id) => Account(id: id, status: AccountStatus.loggedOut);
 Account _failed(String id, Object error) =>
     Account(id: id, status: AccountStatus.initFailed, initError: error);
 
+Account _waiting(String id) =>
+    Account(id: id, status: AccountStatus.unavailable);
+
 void main() {
   final a = _in('a');
   final b = _in('b');
@@ -77,6 +80,28 @@ void main() {
       );
     });
 
+    test('AccountInitFailed keeps the accounts that wait for removal', () {
+      final error = StateError('boom');
+      expect(
+        AccountTransitions.initialize(const Booting(), [
+          _failed('f', error),
+          _waiting('w'),
+        ]),
+        AccountInitFailed(id: 'f', error: error, accounts: [_waiting('w')]),
+      );
+    });
+
+    test('a failed account does not hide the logged-out placeholder', () {
+      expect(
+        AccountTransitions.initialize(const Booting(), [
+          _failed('f', 1),
+          _out('x'),
+          _waiting('w'),
+        ]),
+        NoAccount(candidateId: 'x', accounts: [_waiting('w')]),
+      );
+    });
+
     test('a logged-in account wins over an init-failed one', () {
       expect(
         AccountTransitions.initialize(const Booting(), [_failed('f', 1), a]),
@@ -114,7 +139,7 @@ void main() {
       );
       state = AccountTransitions.beginSwitch(state, 'b');
       expect(state, Switching(accounts: [a, b], from: 'a', to: 'b'));
-      state = AccountTransitions.completeSwitch(state);
+      state = AccountTransitions.completeSwitch(state, 0);
       expect(state, Active(accounts: [a, b], activeId: 'b'));
     });
 
@@ -168,7 +193,7 @@ void main() {
       final switching = AccountTransitions.beginSwitch(active, 'b');
       expect(switching, Switching(accounts: [a, b], from: 'a', to: 'b'));
       expect(
-        AccountTransitions.completeSwitch(switching),
+        AccountTransitions.completeSwitch(switching, 0),
         Active(accounts: [a, b], activeId: 'b'),
       );
     });
@@ -204,18 +229,64 @@ void main() {
       expect(AccountTransitions.beginSwitch(first, 'a'), active);
     });
 
+    test('a stale handler cannot settle a newer switch', () {
+      final first = AccountTransitions.beginSwitch(
+        Active(accounts: [a, b, c], activeId: 'a'),
+        'b',
+        seq: 1,
+      );
+      final second = AccountTransitions.beginSwitch(first, 'c', seq: 2);
+      for (final settle in [
+        AccountTransitions.completeSwitch,
+        AccountTransitions.failSwitch,
+      ]) {
+        expect(
+          () => settle(second, 1),
+          throwsA(
+            isA<SwitchSupersededException>().having(
+              (e) => e.accountId,
+              'accountId',
+              'c',
+            ),
+          ),
+        );
+      }
+      expect(
+        AccountTransitions.completeSwitch(second, 2),
+        Active(accounts: [a, b, c], activeId: 'c'),
+      );
+    });
+
+    test('a newer switch to the same target is also told apart', () {
+      final first = AccountTransitions.beginSwitch(
+        Active(accounts: [a, b, c], activeId: 'a'),
+        'b',
+        seq: 1,
+      );
+      final again = Switching(
+        accounts: first.accounts,
+        from: 'a',
+        to: 'b',
+        seq: 2,
+      );
+      expect(
+        () => AccountTransitions.completeSwitch(again, 1),
+        throwsA(isA<SwitchSupersededException>()),
+      );
+    });
+
     test('a failed switch returns to Active(from)', () {
       final switching = AccountTransitions.beginSwitch(active, 'b');
-      expect(AccountTransitions.failSwitch(switching), active);
+      expect(AccountTransitions.failSwitch(switching, 0), active);
     });
 
     test('complete and fail outside Switching are rejected', () {
       expect(
-        () => AccountTransitions.completeSwitch(active),
+        () => AccountTransitions.completeSwitch(active, 0),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
       expect(
-        () => AccountTransitions.failSwitch(active),
+        () => AccountTransitions.failSwitch(active, 0),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
     });
@@ -483,8 +554,8 @@ void main() {
     expect(input.accounts, [a, b]);
 
     final switching = Switching(accounts: [a, b], from: 'a', to: 'b');
-    AccountTransitions.completeSwitch(switching);
-    AccountTransitions.failSwitch(switching);
+    AccountTransitions.completeSwitch(switching, 0);
+    AccountTransitions.failSwitch(switching, 0);
     AccountTransitions.beginSwitch(switching, 'a');
     expect(switching, Switching(accounts: [a, b], from: 'a', to: 'b'));
 
