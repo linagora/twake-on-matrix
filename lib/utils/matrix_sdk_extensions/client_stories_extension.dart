@@ -4,6 +4,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 
 extension ClientStoriesExtension on Client {
@@ -22,7 +23,7 @@ extension ClientStoriesExtension on Client {
       .toList();
 
   List<Room> get storiesRooms =>
-      rooms.where((room) => room.isStoryRoom).toList();
+      joinedOrInvitedRooms.where((room) => room.isStoryRoom).toList();
 
   Future<List<User>> getUndecidedContactsForStories(Room? storiesRoom) async {
     if (storiesRoom == null) return contacts;
@@ -74,7 +75,7 @@ extension ClientStoriesExtension on Client {
   }
 
   Future<Room?> getStoriesRoom(BuildContext context) async {
-    final candidates = rooms.where(
+    final candidates = joinedOrInvitedRooms.where(
       (room) =>
           room
                   .getState(EventTypes.RoomCreate)
