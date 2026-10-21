@@ -6,6 +6,7 @@ import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_transitions_provider.dart';
 
 part 'accounts_provider.g.dart';
 
@@ -18,12 +19,14 @@ class Accounts extends _$Accounts {
   int _switchHandlers = 0;
   int _switchSeq = 0;
 
+  AccountTransitions get _transitions => ref.read(accountTransitionsProvider);
+
   /// Orders the mutations that await the repository, so none of them is
   /// computed from a state that another one is about to replace.
   Future<void> _mutations = Future.value();
 
   @override
-  AccountsState build() => AccountTransitions.initialize(
+  AccountsState build() => _transitions.initialize(
     const Booting(),
     ref.read(accountRepositoryProvider).registeredAccounts(),
     persistedUserId: ref.read(bootPersistedActiveUserIdProvider),
@@ -36,9 +39,9 @@ class Accounts extends _$Accounts {
     if (listed && state.accounts.any((a) => a.id == id)) return;
     final repository = ref.read(accountRepositoryProvider);
     final account = repository.accountOf(id);
-    AccountTransitions.add(state, account);
+    _transitions.add(state, account);
     await repository.addAccount(account);
-    state = AccountTransitions.add(state, account);
+    state = _transitions.add(state, account);
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
@@ -53,7 +56,7 @@ class Accounts extends _$Accounts {
   /// for [id]; without a registered handler it ends at once.
   Future<void> switchTo(String id) async {
     await _mutations;
-    final next = AccountTransitions.beginSwitch(state, id, seq: _switchSeq + 1);
+    final next = _transitions.beginSwitch(state, id, seq: _switchSeq + 1);
     if (identical(next, state)) return;
     if (_isRunningSwitch(next)) {
       // The same switch is already running: wait for it.
@@ -100,14 +103,14 @@ class Accounts extends _$Accounts {
   void completeSwitch(SwitchTicket ticket) {
     final current = _switchingTo(ticket);
     if (current == null) return;
-    state = AccountTransitions.completeSwitch(current, ticket.seq);
+    state = _transitions.completeSwitch(current, ticket.seq);
     _finishPendingSwitch();
   }
 
   void failSwitch(SwitchTicket ticket, Object error, [StackTrace? stackTrace]) {
     final current = _switchingTo(ticket);
     if (current == null) return;
-    state = AccountTransitions.failSwitch(current, ticket.seq);
+    state = _transitions.failSwitch(current, ticket.seq);
     final pending = _pendingSwitch;
     _pendingSwitch = null;
     pending?.completeError(error, stackTrace);
@@ -116,9 +119,9 @@ class Accounts extends _$Accounts {
   /// Removes [id]; when it was the active account the next one becomes active
   /// in the same emission.
   Future<void> removeAccount(String id) => _serialized(() async {
-    AccountTransitions.remove(state, id);
+    _transitions.remove(state, id);
     await ref.read(accountRepositoryProvider).removeAccount(id);
-    state = AccountTransitions.remove(state, id);
+    state = _transitions.remove(state, id);
   });
 
   /// The removal of [id] failed: the account stays listed as unavailable, not
@@ -126,7 +129,7 @@ class Accounts extends _$Accounts {
   /// active one (with none, nobody is logged in). The record that survives a
   /// restart is [recordPendingRemoval], which is retried on its own.
   Future<void> holdRemoval(String id) => _serialized(() async {
-    state = AccountTransitions.markUnavailable(state, id);
+    state = _transitions.markUnavailable(state, id);
   });
 
   /// Records, across restarts, that the removal of [id] is pending.
@@ -135,7 +138,7 @@ class Accounts extends _$Accounts {
   );
 
   /// The only account logged out; it stays in the state as `LastLoggedOut`.
-  void logoutLast() => state = AccountTransitions.logoutLast(state);
+  void logoutLast() => state = _transitions.logoutLast(state);
 
   /// Declares that something reacts to `Switching` and will end it. Returns
   /// the function that unregisters it.
