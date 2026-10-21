@@ -1,5 +1,3 @@
-// @CodeScene(disable:"Primitive Obsession")
-// The host overrides keep the String ids of the LoginHost interface.
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,29 +52,35 @@ class _RealHost implements LoginHost {
   Accounts get _accounts => container.read(accountsProvider.notifier);
   AccountsState get _state => container.read(accountsProvider);
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   Future<void> _step(String name) async {
     calls.add(name);
     if (failing.contains(name)) throw StateError('$name failed');
   }
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   Client? _client(String id) =>
       container.read(accountClientRegistryProvider)[id];
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   bool isStored(String id) => container
       .read(accountRepositoryProvider)
       .registeredAccounts()
       .any((a) => a.id == id);
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   bool isLoggedIn(String id) => _client(id)?.isLogged() ?? false;
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> addAccount(String id) async {
     calls.add('addAccount:$id');
     await _accounts.addAccount(id);
   }
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> removeAccount(String id) async {
     calls.add('removeAccount:$id');
@@ -98,6 +102,7 @@ class _RealHost implements LoginHost {
   @override
   Client get activeClient => _client(activeClientName!)!;
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Client? clientByName(String name) => _client(name);
 
@@ -137,6 +142,7 @@ class _RealHost implements LoginHost {
     return _client(account.id)!;
   }
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> discardCandidate(String id) async {
     calls.add('discardCandidate:$id');
@@ -147,14 +153,17 @@ class _RealHost implements LoginHost {
   String? get pendingCandidateId =>
       container.read(pendingLoginCandidateProvider);
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void setPendingCandidate(String? id) =>
       container.read(pendingLoginCandidateProvider.notifier).set(id);
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> signOut(String id, {required bool quiet}) =>
       _step('signOut:$id');
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void forgetQuiet(String id) {}
 
@@ -170,12 +179,15 @@ class _RealHost implements LoginHost {
       .stream
       .listen(onState);
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> removePush(String id) => _step('removePush:$id');
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> cancelSubscriptions(String id) => _step('cancelSubs:$id');
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   Future<void> registerSubscriptions(String id) => _step('registerSubs:$id');
 
@@ -214,10 +226,12 @@ class _RealHost implements LoginHost {
     await candidates.retryAll();
   }
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   @override
   void report(Object error, StackTrace stackTrace, String what) =>
       calls.add('report:$what');
 
+  // @codescene(disable:"Primitive Obsession") the String id comes from LoginHost
   /// The server accepts the login of [id]: it is logged in, then `loggedIn`.
   Future<void> logIn(String id) async {
     (_client(id)! as LoginableClient).loggedIn = true;
