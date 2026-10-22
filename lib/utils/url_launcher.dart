@@ -2,6 +2,7 @@ import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
@@ -21,6 +22,8 @@ import 'package:twake_chat/widgets/public_room_bottom_sheet.dart';
 import 'platform_infos.dart';
 
 class UrlLauncher with GoToDraftChatMixin {
+  static const _blockedSchemes = {AppConfig.appOpenUrlScheme, 'file'};
+
   final String? url;
   final BuildContext context;
   final Room? room;
@@ -56,37 +59,7 @@ class UrlLauncher with GoToDraftChatMixin {
       );
     }
     if (!{'https', 'http'}.contains(uri.scheme)) {
-      // just launch non-https / non-http uris directly
-
-      // we need to transmute geo URIs on desktop and on iOS
-      if ((!PlatformInfos.isMobile || PlatformInfos.isIOS) &&
-          uri.scheme == 'geo') {
-        final latlong = uri.path
-            .split(';')
-            .first
-            .split(',')
-            .map((s) => double.tryParse(s))
-            .toList();
-        if (latlong.length == 2 &&
-            latlong.first != null &&
-            latlong.last != null) {
-          if (PlatformInfos.isIOS) {
-            // iOS is great at not following standards, so we need to transmute the geo URI
-            // to an apple maps thingy
-            // https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
-            final ll = '${latlong.first},${latlong.last}';
-            launchUrlString('https://maps.apple.com/?q=$ll&sll=$ll');
-          } else {
-            // transmute geo URIs on desktop to openstreetmap links, as those usually can't handle
-            // geo URIs
-            launchUrlString(
-              'https://www.openstreetmap.org/?mlat=${latlong.first}&mlon=${latlong.last}#map=16/${latlong.first}/${latlong.last}',
-            );
-          }
-          return;
-        }
-      }
-      launchUrlString('https://$url');
+      _launchNonHttpUrl(uri);
       return;
     }
     if (uri.host.isEmpty) {
@@ -112,6 +85,61 @@ class UrlLauncher with GoToDraftChatMixin {
       uri.replace(host: newHost).toString(),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  void _launchNonHttpUrl(Uri uri) {
+    // we need to transmute geo URIs on desktop and on iOS
+    if ((!PlatformInfos.isMobile || PlatformInfos.isIOS) &&
+        uri.scheme == 'geo' &&
+        _launchGeoUri(uri)) {
+      return;
+    }
+    if (!uri.hasScheme || isHostAndPortUri(uri)) {
+      // a network-path reference (//example.com) already has its slashes
+      launchUrlString(url!.startsWith('//') ? 'https:$url' : 'https://$url');
+      return;
+    }
+    _launchAppSchemeUrl(uri);
+  }
+
+  bool _launchGeoUri(Uri uri) {
+    final latlong = uri.path
+        .split(';')
+        .first
+        .split(',')
+        .map((s) => double.tryParse(s))
+        .toList();
+    if (latlong.length != 2 || latlong.first == null || latlong.last == null) {
+      return false;
+    }
+    if (PlatformInfos.isIOS) {
+      // iOS is great at not following standards, so we need to transmute the geo URI
+      // to an apple maps thingy
+      // https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/MapLinks/MapLinks.html
+      final ll = '${latlong.first},${latlong.last}';
+      launchUrlString('https://maps.apple.com/?q=$ll&sll=$ll');
+    } else {
+      // transmute geo URIs on desktop to openstreetmap links, as those usually can't handle
+      // geo URIs
+      launchUrlString(
+        'https://www.openstreetmap.org/?mlat=${latlong.first}&mlon=${latlong.last}#map=16/${latlong.first}/${latlong.last}',
+      );
+    }
+    return true;
+  }
+
+  // The app's own scheme would reopen Twake with the same link, in a loop.
+  // A file: link would open a local file or app on desktop.
+  Future<void> _launchAppSchemeUrl(Uri uri) async {
+    final launched =
+        !_blockedSchemes.contains(uri.scheme) &&
+        await launchUrlString(
+          url!,
+          mode: LaunchMode.externalApplication,
+        ).catchError((_) => false);
+    if (!launched && context.mounted) {
+      TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
+    }
   }
 
   void openMatrixToUrl({

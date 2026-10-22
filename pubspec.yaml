@@ -243,6 +243,7 @@ dev_dependencies:
   riverpod_generator: 3.0.0
   sentry_dart_plugin: ^3.2.1
   translations_cleaner: ^0.0.5
+  url_launcher_platform_interface: ^2.3.2
 flutter_launcher_icons:
   android: false
   ios: true

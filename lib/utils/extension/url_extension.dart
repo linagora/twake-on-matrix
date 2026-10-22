@@ -48,3 +48,9 @@ bool isFilenameUrl(String? url) {
   if (_hasUrlStructuralIndicator(url)) return false;
   return _hasKnownFileExtension(url);
 }
+
+/// Returns true if [uri] is a bare `host:port` that [Uri.parse] reads as a
+/// scheme (e.g. `example.com:8080`, `localhost:3000/path`).
+bool isHostAndPortUri(Uri uri) =>
+    (uri.scheme == 'localhost' || uri.scheme.contains('.')) &&
+    RegExp(r'^\d+(/|$)').hasMatch(uri.path);

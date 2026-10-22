@@ -159,4 +159,31 @@ void main() {
       });
     });
   });
+
+  group('isHostAndPortUri', () {
+    for (final url in [
+      'example.com:8080',
+      'example.com:8080/path?q=1',
+      'localhost:3000',
+      'localhost:3000/path',
+    ]) {
+      test('GIVEN $url\nTHEN returns true', () {
+        expect(isHostAndPortUri(Uri.parse(url)), isTrue);
+      });
+    }
+
+    for (final url in [
+      'example.com',
+      'visio://toto',
+      'tel:0612345678',
+      'skype:echo123?call',
+      'sip:alice@example.com',
+      'twake.chat://redirect',
+      'com.example.app:/callback',
+    ]) {
+      test('GIVEN $url\nTHEN returns false', () {
+        expect(isHostAndPortUri(Uri.parse(url)), isFalse);
+      });
+    }
+  });
 }
