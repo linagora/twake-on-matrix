@@ -171,12 +171,6 @@ class SettingsProfileController extends State<SettingsProfile>
       _clearImageInLocal();
     } else {
       TwakeDialog.showLoadingDialog(context);
-      final newProfile = Profile(
-        userId: client.userID!,
-        displayName: displayName,
-        avatarUrl: null,
-      );
-      currentProfile.value = newProfile;
       _uploadProfile(isDeleteAvatar: true);
     }
   }

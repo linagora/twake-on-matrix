@@ -20,7 +20,8 @@ class UpdateProfileInteractor {
       );
       if (avatarUrl != null || isDeleteAvatar) {
         await client.setProfileField(client.userID!, 'avatar_url', {
-          'avatar_url': isDeleteAvatar ? null : avatarUrl?.toString(),
+          // Servers reject null; an empty string clears the avatar.
+          'avatar_url': isDeleteAvatar ? '' : avatarUrl?.toString(),
         });
       }
       if (displayName != null) {
