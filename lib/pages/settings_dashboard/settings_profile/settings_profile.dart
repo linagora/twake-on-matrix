@@ -167,7 +167,7 @@ class SettingsProfileController extends State<SettingsProfile>
     if (assetEntity != null || matrixFile != null) {
       isEditedProfileNotifier.toggle();
     }
-    if (currentProfile.value?.avatarUrl == null) {
+    if (!hasAvatar) {
       _clearImageInLocal();
     } else {
       TwakeDialog.showLoadingDialog(context);
