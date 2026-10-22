@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_item.dart';
@@ -9,16 +8,7 @@ void main() {
   const setLabel = 'Set profile avatar';
   const changeLabel = 'Change profile avatar';
 
-  Profile profile({Uri? avatarUrl}) => Profile(
-    userId: '@alice:example.com',
-    displayName: 'Alice',
-    avatarUrl: avatarUrl,
-  );
-
-  Future<void> pumpItem(
-    WidgetTester tester,
-    ValueNotifier<Profile?> currentProfile,
-  ) {
+  Future<void> pumpItem(WidgetTester tester, ValueNotifier<bool> hasAvatar) {
     return tester.pumpWidget(
       MaterialApp(
         locale: const Locale('en'),
@@ -27,7 +17,8 @@ void main() {
         home: Scaffold(
           body: SettingsProfileContextMenuItem(
             action: SettingsProfileContextMenuActions.edit,
-            currentProfile: currentProfile,
+            profileListenable: hasAvatar,
+            hasAvatar: () => hasAvatar.value,
             onTap: () {},
           ),
         ),
@@ -35,10 +26,8 @@ void main() {
     );
   }
 
-  testWidgets('edit item reads "Set" while the profile is not loaded', (
-    tester,
-  ) async {
-    await pumpItem(tester, ValueNotifier(null));
+  testWidgets('edit item reads "Set" when there is no avatar', (tester) async {
+    await pumpItem(tester, ValueNotifier(false));
 
     expect(find.text(setLabel), findsOneWidget);
   });
@@ -46,15 +35,15 @@ void main() {
   testWidgets('edit item follows the avatar as the profile changes', (
     tester,
   ) async {
-    final currentProfile = ValueNotifier<Profile?>(profile());
-    await pumpItem(tester, currentProfile);
+    final hasAvatar = ValueNotifier(false);
+    await pumpItem(tester, hasAvatar);
     expect(find.text(setLabel), findsOneWidget);
 
-    currentProfile.value = profile(avatarUrl: Uri.parse('mxc://example.com/a'));
+    hasAvatar.value = true;
     await tester.pump();
     expect(find.text(changeLabel), findsOneWidget);
 
-    currentProfile.value = profile();
+    hasAvatar.value = false;
     await tester.pump();
     expect(find.text(setLabel), findsOneWidget);
   });
