@@ -243,7 +243,8 @@ class SettingsProfileController extends State<SettingsProfile>
     final items = listAction.map((action) {
       return SettingsProfileContextMenuItem(
         action: action,
-        currentProfile: currentProfile,
+        profileListenable: currentProfile,
+        hasAvatar: () => hasAvatar,
         onTap: () {
           menuController.close();
           _handleActionContextMenu(action);
