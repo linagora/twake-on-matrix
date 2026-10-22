@@ -126,6 +126,18 @@ void main() {
     }
   });
 
+  group('GIVEN a link that would open a local file\n', () {
+    for (final url in ['file:///etc/passwd', 'FILE:///C:/Windows/calc.exe']) {
+      testWidgets('WHEN $url is tapped\n'
+          'THEN nothing is launched and a message is shown', (tester) async {
+        await launch(tester, url);
+
+        expect(platform.launches, isEmpty);
+        expect(cantOpen(url), findsOneWidget);
+      });
+    }
+  });
+
   group('GIVEN a link without scheme\n', () {
     for (final (url, expected) in [
       ('example.com', 'https://example.com'),

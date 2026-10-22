@@ -22,6 +22,8 @@ import 'package:twake_chat/widgets/public_room_bottom_sheet.dart';
 import 'platform_infos.dart';
 
 class UrlLauncher with GoToDraftChatMixin {
+  static const _blockedSchemes = {AppConfig.appOpenUrlScheme, 'file'};
+
   final String? url;
   final BuildContext context;
   final Room? room;
@@ -126,9 +128,10 @@ class UrlLauncher with GoToDraftChatMixin {
   }
 
   // The app's own scheme would reopen Twake with the same link, in a loop.
+  // A file: link would open a local file or app on desktop.
   Future<void> _launchAppSchemeUrl(Uri uri) async {
     final launched =
-        uri.scheme != AppConfig.appOpenUrlScheme &&
+        !_blockedSchemes.contains(uri.scheme) &&
         await launchUrlString(
           url!,
           mode: LaunchMode.externalApplication,
