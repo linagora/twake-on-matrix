@@ -112,8 +112,9 @@ providers, pauses hidden listeners and throws on disposed refs
   client's.
 - **Q2**: use cases stay in `lib/domain/usecase/<feature>/`, where the
   interactors are, one class per use case with `execute()`
-  ([GUIDELINES.md][guidelines] §2.3.4). An interactor is rewritten in place to `Future<T>` + typed
-  exceptions when all its consumers are migrated in the same pull request.
+  ([GUIDELINES.md][guidelines] §2.3.4). An interactor is rewritten in place
+  to `Future<T>` + typed exceptions when all its consumers are migrated in
+  the same pull request.
   Otherwise a `UseCase` is added next to it for the migrated consumers, and
   the interactor is deleted with its last consumer: the two exist side by
   side only for that time.
