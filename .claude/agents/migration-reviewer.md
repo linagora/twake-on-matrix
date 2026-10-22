@@ -75,7 +75,9 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 - Use cases return `Future<T>` and throw typed exceptions; no `Either`, no
   `app_state` class.
 - `domain/` imports neither Riverpod, nor Flutter, nor `package:matrix`, nor
-  Dio.
+  Dio, nor `get_it`. The one allowed SDK import is
+  `package:matrix/matrix_api_lite/utils/logs.dart` for `Logs()`
+  ([GUIDELINES.md][guidelines] §2.4.7).
 - Controller named `XxxController`, state `XxxState` with `@freezed`.
 - Dependency providers sit in `<implementation>.provider.dart` and expose the
   interface, not the `*Impl`.
@@ -92,11 +94,12 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 ### Bridges
 - A provider returning `getIt.get<X>()` lives in
   `<implementation of X>.provider.dart`, carries a `// TODO: [transitional]`
-  comment and names the legacy consumers that keep `X` in GetIt.
+  comment and names the legacy consumers that keep `X` in GetIt. The pull
+  request moves at least one existing `getIt.get<X>()` lookup onto it.
 - A value still owned by legacy code is pushed into its provider by its owner
-  and carries a `// TODO: [transitional]` comment. The only widget allowed
-  to push is `MatrixState` (active client, homeserver summary), until the
-  account state moves to Riverpod; a push from any other widget is BLOCKING
+  and carries a `// TODO: [transitional]` comment. Only the two existing
+  pushes of `MatrixState` (active client, homeserver summary) are tolerated;
+  any new push from a widget, `MatrixState` included, is BLOCKING
   ([DO/DON'T][do-dont]).
 - Code outside the widget tree reads providers only through the app's
   container, never through a container of its own.

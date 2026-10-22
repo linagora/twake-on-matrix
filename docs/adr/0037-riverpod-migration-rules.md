@@ -46,7 +46,10 @@ providers, pauses hidden listeners and throws on disposed refs
 - A dependency provider (datasource, repository, use case, service) lives in
   `<implementation>.provider.dart`, next to its implementation
   ([GUIDELINES.md][guidelines] §2.7), and its type is the interface, not the
-  `*Impl`. A controller lives next to its screen.
+  `*Impl`. App-wide state with no implementation file (the accounts, the
+  active client) lives in `lib/providers/`, like
+  `login_homeserver_summary_provider.dart`. A controller lives next to its
+  screen.
 - Ephemeral UI state stays in the widget: text controllers, selection,
   animations, form fields ([DO/DON'T: avoid using providers for ephemeral
   state][do-dont]).
@@ -84,16 +87,16 @@ providers, pauses hidden listeners and throws on disposed refs
 - Riverpod may read from GetIt: a provider that returns `getIt.get<X>()` is
   allowed while `X` still has legacy consumers, with a comment naming them.
   It lives in `<implementation of X>.provider.dart` and is created by the
-  pull request that first needs it. The ratchet counts it like any other
-  `getIt` use: a bridge replaces one or more lookups, so the count never
-  grows, and no file name can hide a lookup.
+  pull request that first needs it, which moves at least one existing
+  `getIt.get<X>()` lookup onto it. The ratchet counts it like any other
+  `getIt` use, so a bridge added without that move fails the check on
+  purpose, and no file name can hide a lookup.
 - A value still owned by legacy code is pushed into its provider by its
   owner. Providers are not initialized from widgets ([DO/DON'T: avoid
-  initializing providers in a widget][do-dont]), with one tolerated exception:
-  `MatrixState` keeps pushing the active client and the homeserver summary
-  while it is where the active account is chosen. The account state moving
-  to Riverpod (#3466–#3476) ends the exception for the client; Step 1 does
-  not wait for it. No other widget pushes into a provider.
+  initializing providers in a widget][do-dont]). The two pushes `MatrixState`
+  does today (the active client, the homeserver summary) are tolerated until
+  they are removed; any new push from a widget, `MatrixState` included, is
+  not.
 - Every bridge carries a `// TODO: [transitional]` comment, the marker the
   code already uses, so `git grep "TODO: \[transitional\]"` lists them.
 
@@ -108,7 +111,8 @@ providers, pauses hidden listeners and throws on disposed refs
   account" is the account state's and the router's concern, not the
   client's.
 - **Q2**: use cases stay in `lib/domain/usecase/<feature>/`, where the
-  interactors are. An interactor is rewritten in place to `Future<T>` + typed
+  interactors are, one class per use case with `execute()`
+  ([GUIDELINES.md][guidelines] §2.3.4). An interactor is rewritten in place to `Future<T>` + typed
   exceptions when all its consumers are migrated in the same pull request.
   Otherwise a `UseCase` is added next to it for the migrated consumers, and
   the interactor is deleted with its last consumer: the two exist side by
@@ -161,8 +165,8 @@ controller → use case → repository → datasource.
 - Six existing `ViewModel`s and their tests are renamed.
 - Bridges exist until the last step; `git grep "TODO: \[transitional\]"`
   lists them.
-- `MatrixState` stays a widget that initializes providers until the account
-  state moves to Riverpod, against the Riverpod recommendation.
+- `MatrixState` keeps its two pushes into providers until they are removed,
+  against the Riverpod recommendation.
 - Turning retry off changes how today's providers react to errors; their
   tests run with it off.
 
