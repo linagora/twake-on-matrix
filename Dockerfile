@@ -1,5 +1,7 @@
 # Specify versions
 ARG FLUTTER_VERSION=3.44.0
+# Pins both nginx stages and the source the brotli module is compiled against.
+ARG NGINX_VERSION=1.31.8
 
 # Building Twake for the web.
 # The web output is platform-independent: this stage runs once, on the build
@@ -75,19 +77,19 @@ RUN find /app/build/web -type f ! -name "config.json" -exec gzip -k -f {} \; && 
 # final stage runs, so a base image bump rebuilds a matching module instead of silently
 # loading a stale one. Only the static module is kept: assets are pre-compressed above, so
 # on-the-fly compression is never needed.
-FROM nginx:alpine AS brotli-builder
+FROM nginx:${NGINX_VERSION}-alpine AS brotli-builder
 # Both inputs compiled into the module are pinned, so two identical builds cannot
 # produce different module code: the nginx source by version and digest, and
 # ngx_brotli by commit rather than a branch. Signature checking was considered
 # and dropped, nginx having rotated its release key without updating the bundle
 # it publishes at /keys/, which would break the build at the next rotation.
 #
-# NGINX_VERSION must match the base image. A base image bump therefore fails the
-# build until both values below are updated, which is deliberate: it turns an
-# unreviewed upstream change into a review point, and a module compiled against
-# the wrong version would be refused at load time anyway.
-ARG NGINX_VERSION=1.31.7
-ARG NGINX_SHA256=89ea8a3dc171511f7325043b50e4c036248d9fad5feb7ec809c0b82d5df42c65
+# The base image tag is pinned to NGINX_VERSION, so upstream releases no longer
+# change it: a bump is a pull request updating NGINX_VERSION and NGINX_SHA256.
+# The check below stays as a guard, since a module compiled against the wrong
+# version would be refused at load time.
+ARG NGINX_VERSION
+ARG NGINX_SHA256=0652b760b3b772d2ec17b47c2fc15d9a95e6fe35cd5b877eadc1a62d9bc75af1
 ARG NGX_BROTLI_COMMIT=a71f9312c2deb28875acc7bacfdd5695a111aa53
 RUN set -eux; \
     image_version="$(nginx -v 2>&1 | sed 's|.*/||')"; \
@@ -110,7 +112,7 @@ RUN set -eux; \
     cp objs/ngx_http_brotli_static_module.so /tmp/
 
 # Final image — lean nginx:alpine with no extra packages needed
-FROM nginx:alpine AS final-image
+FROM nginx:${NGINX_VERSION}-alpine AS final-image
 ARG TWAKECHAT_BASE_HREF
 ENV TWAKECHAT_BASE_HREF=${TWAKECHAT_BASE_HREF:-/web/}
 ENV TWAKECHAT_LISTEN_PORT="80"
