@@ -144,6 +144,7 @@ void main() {
       ('www.example.com/path?q=1', 'https://www.example.com/path?q=1'),
       ('example.com:8080/path', 'https://example.com:8080/path'),
       ('localhost:8080', 'https://localhost:8080'),
+      ('//example.com/page', 'https://example.com/page'),
     ]) {
       testWidgets('WHEN $url is tapped\n'
           'THEN it is opened over https', (tester) async {

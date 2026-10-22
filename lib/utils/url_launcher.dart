@@ -95,7 +95,8 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
     if (!uri.hasScheme || isHostAndPortUri(uri)) {
-      launchUrlString('https://$url');
+      // a network-path reference (//example.com) already has its slashes
+      launchUrlString(url!.startsWith('//') ? 'https:$url' : 'https://$url');
       return;
     }
     _launchAppSchemeUrl(uri);
