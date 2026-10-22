@@ -333819,17 +333819,18 @@ $1(a){if(a.a==="app.twake.inapp.profile.avatar")this.a.Qs()},
 $S:213}
 A.bM9.prototype={
 $1(a){return this.bpp(a)},
-bpp(a){var s=0,r=A.m(t.H),q=this,p,o
+bpp(a){var s=0,r=A.m(t.H),q,p=this,o,n
 var $async$$1=A.h(function(b,c){if(b===1)return A.j(c,r)
-for(;;)switch(s){case 0:p=q.a
-o=p.c
-s=o!=null?2:3
+for(;;)switch(s){case 0:o=p.a
+n=o.c
+s=n!=null?3:4
 break
-case 2:s=4
-return A.e(A.ad(o,!1,t.e).awp(),$async$$1)
-case 4:p.Qs()
-p.amm()
-case 3:return A.k(null,r)}})
+case 3:s=5
+return A.e(A.ad(n,!1,t.e).awp(),$async$$1)
+case 5:if(o.c==null){s=1
+break}o.Qs()
+o.amm()
+case 4:case 1:return A.k(q,r)}})
 return A.l($async$$1,r)},
 $S:59}
 A.bk6.prototype={}
