@@ -119,13 +119,17 @@ class SettingsProfileController extends State<SettingsProfile>
     SettingsProfileEnum.matrixId,
   ];
 
+  bool get hasAvatar => currentProfile.value?.avatarUrl != null;
+
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
       key: AvatarAction.file,
-      label: L10n.of(context)!.changeProfileAvatar,
+      label: hasAvatar
+          ? L10n.of(context)!.changeProfileAvatar
+          : L10n.of(context)!.setProfileAvatar,
       icon: Icons.add_a_photo_outlined,
     ),
-    if (currentProfile.value?.avatarUrl != null)
+    if (hasAvatar)
       SheetAction(
         key: AvatarAction.remove,
         label: L10n.of(context)!.removeYourAvatar,
@@ -234,15 +238,18 @@ class SettingsProfileController extends State<SettingsProfile>
       SettingsProfileContextMenuActions.delete,
     ];
     final items = listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitle(context),
-        iconAction: action.getIcon(),
-        isClearCurrentPage: false,
-        onCallbackAction: () {
-          menuController.close();
-          _handleActionContextMenu(action);
-        },
+      return ValueListenableBuilder(
+        valueListenable: currentProfile,
+        builder: (context, _, _) => popupItemByTwakeAppRouter(
+          context,
+          action.getTitle(context, hasAvatar: hasAvatar),
+          iconAction: action.getIcon(),
+          isClearCurrentPage: false,
+          onCallbackAction: () {
+            menuController.close();
+            _handleActionContextMenu(action);
+          },
+        ),
       );
     }).toList();
 
