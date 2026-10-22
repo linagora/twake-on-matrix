@@ -168,12 +168,6 @@ class SettingsProfileController extends State<SettingsProfile>
       _clearImageInLocal();
     } else {
       TwakeDialog.showLoadingDialog(context);
-      final newProfile = Profile(
-        userId: client.userID!,
-        displayName: displayName,
-        avatarUrl: null,
-      );
-      currentProfile.value = newProfile;
       _uploadProfile(isDeleteAvatar: true);
     }
   }
@@ -474,8 +468,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void _getCurrentProfile(Client client, {isUpdated = false}) async {
     final profile = await client.getProfileFromUserId(
       client.userID!,
-      cache: !isUpdated,
-      getFromRooms: false,
+      maxCacheAge: isUpdated ? Duration.zero : const Duration(days: 1),
     );
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
