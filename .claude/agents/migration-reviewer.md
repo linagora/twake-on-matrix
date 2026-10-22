@@ -31,7 +31,9 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 ### Every pull request
 - No legacy metric grows (step 3).
 - No `Matrix.of` added; no `getIt` added except in a `*.provider.dart`
-  bridge that replaces at least one lookup.
+  bridge (see Bridges) that replaces at least one lookup.
+- A mechanical pull request does not rewrite `getIt` lookups: they go with
+  their module.
 - No `package:matrix` import added in `lib/pages`, `lib/widgets` or
   `lib/presentation`: controllers call use cases and take domain types, not
   a `Client`.
@@ -81,7 +83,10 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
 - Controller named `XxxController`, state `XxxState` with `@freezed`.
 - Dependency providers sit in `<implementation>.provider.dart` and expose the
   interface, not the `*Impl`.
-- Use cases sit in `lib/domain/usecase/<feature>/`.
+- New use cases sit in `lib/domain/<feature>/usecases/`; a legacy interactor
+  moves there only when all its consumers migrate.
+- The module's dependencies have native providers and its `getIt` lookups
+  are gone.
 - The module's legacy is deleted: interactors without consumers, `app_state`
   files, mixins, GetIt registrations.
 - Controller tests use `ProviderContainer.test(retry: (_, _) => null)` with
@@ -92,7 +97,11 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
   lines do not count.
 
 ### Bridges
-- A provider returning `getIt.get<X>()` lives in
+- A provider returning `getIt.get<X>()` is only for a singleton whose state
+  legacy consumers share (`ContactsManager`, `HiveCollectionToMDatabase`,
+  `UploadManager`…). A bridge for a stateless dependency is a finding: it
+  gets a native provider.
+- A bridge lives in
   `<implementation of X>.provider.dart`, carries a `// TODO: [transitional]`
   comment and names the legacy consumers that keep `X` in GetIt. The pull
   request moves at least one existing `getIt.get<X>()` lookup onto it.

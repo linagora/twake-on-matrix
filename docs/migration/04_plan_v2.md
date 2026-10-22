@@ -15,9 +15,10 @@ v1 rewrote each module through every layer, in a fixed order, by one part-time
 developer: 6 to 10 months. v2 splits the work:
 
 - **Mechanical rewrites** (one pattern over many files) are done by agents in
-  bulk: `Matrix.of(context).client`, `getIt.get<X>()`.
-- **Module migrations** (use cases, controllers, states) stay one module per
-  pull request, behind Patrol scenarios written first.
+  bulk: `Matrix.of(context).client`.
+- **Module migrations** (use cases, controllers, states, and the module's
+  `getIt` lookups) stay one module per pull request, behind Patrol scenarios
+  written first.
 - **A CI ratchet** stops legacy code from growing, so the remaining work only
   shrinks.
 
@@ -54,22 +55,20 @@ One pull request per area, one pattern each, areas that nobody is changing.
 The sweep covers `lib/pages`, `lib/widgets` and `lib/presentation`, where a
 `ref` is at hand:
 
-| Area | `Matrix.of` / `Matrix.read` | `getIt` |
-|---|---:|---:|
-| `pages/settings_dashboard` | 53 | 23 |
-| `pages/chat` | 37 | 42 |
-| `pages/chat_list` | 24 | 5 |
-| `presentation/mixins` | 13 | 24 |
-| Other `pages/`, `widgets/`, `presentation/` | 155 | 124 |
+| Area | `Matrix.of` / `Matrix.read` |
+|---|---:|
+| `pages/settings_dashboard` | 53 |
+| `pages/chat` | 37 |
+| `pages/chat_list` | 24 |
+| `presentation/mixins` | 13 |
+| Other `pages/`, `widgets/`, `presentation/` | 155 |
 
-The `getIt` lookups in `lib/data`, `lib/domain` and `lib/utils` (about 125)
-are fields of repositories, datasources and interactors: they need
-constructor injection and move with their module in Step 3. So do the 6
-`Matrix.of` / `Matrix.read` calls in `lib/utils` and `lib/config`.
+The 6 `Matrix.of` / `Matrix.read` calls in `lib/utils` and `lib/config` move
+with their module in Step 3. `getIt` is not swept: it goes module by module
+(ADR 0037 §3).
 
 - `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
   `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
-- `getIt.get<X>()` → `ref.read(xProvider)`
 - Every other `MatrixState` member read by the UI (`shareContent`,
   `showToMBootstrap`, `loginType`, `accountBundles`…) → its own
   provider, one small pull request each
@@ -83,9 +82,12 @@ totals are in `MIGRATION_STATUS.md`.
 For each module:
 
 1. Patrol scenarios (mobile and web files) for its flows, merged first.
-2. Interactors → `Future<T>` use cases with typed exceptions.
-3. Controller + `@freezed` state; the screen becomes a Consumer widget.
-4. Delete its `app_state/` files, mixins and GetIt registrations.
+2. Interactors → `Future<T>` use cases with typed exceptions, in
+   `lib/domain/<feature>/usecases/`.
+3. Its dependencies get native providers; its `getIt` lookups go. A bridge
+   only for a singleton whose state legacy code shares (ADR 0037 §3).
+4. Controller + `@freezed` state; the screen becomes a Consumer widget.
+5. Delete its `app_state/` files, mixins and GetIt registrations.
 
 | Wave | Modules |
 |---|---|
@@ -102,6 +104,8 @@ For each module:
       initializes a provider any more
       ([DO/DON'T: avoid initializing providers in a widget][do-dont])
 - [ ] The `Matrix` widget is deleted
+- [ ] The `getIt` lookups outside any module (shared widgets, `lib/utils`)
+      get native providers
 - [ ] `get_it`, `dartz` and `lib/domain/app_state/` are deleted
 - [ ] Full Patrol run, mobile and web, before the next release
 

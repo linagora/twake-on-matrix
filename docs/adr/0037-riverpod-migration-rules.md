@@ -84,13 +84,19 @@ providers, pauses hidden listeners and throws on disposed refs
   (GetIt services, `background_push.dart`, `ClientManager`) reads and feeds
   providers through this container only. A background isolate has its own
   memory and does not see it.
-- Riverpod may read from GetIt: a provider that returns `getIt.get<X>()` is
-  allowed while `X` still has legacy consumers, with a comment naming them.
-  It lives in `<implementation of X>.provider.dart` and is created by the
-  pull request that first needs it, which moves at least one existing
-  `getIt.get<X>()` lookup onto it. The ratchet counts it like any other
-  `getIt` use, so a bridge added without that move fails the check on
-  purpose, and no file name can hide a lookup.
+- GetIt goes module by module, not in a sweep. A module migration gives each
+  dependency it needs a native provider (`XImpl(ref.watch(...))`) and
+  deletes the module's `getIt` lookups and registrations. Legacy code keeps
+  its GetIt registration until its last consumer migrates; a stateless
+  dependency can be built by both meanwhile.
+- A bridge, a provider that returns `getIt.get<X>()`, is only for a
+  singleton whose state is shared with legacy consumers (`ContactsManager`,
+  `HiveCollectionToMDatabase`, `UploadManager`…): a second instance would
+  hold a second state. It lives in `<implementation of X>.provider.dart`,
+  names the legacy consumers in a comment, and the pull request that creates
+  it moves at least one existing `getIt.get<X>()` lookup onto it. The
+  ratchet counts it like any other `getIt` use, so a bridge added without
+  that move fails the check on purpose, and no file name can hide a lookup.
 - A value still owned by legacy code is pushed into its provider by its
   owner. Providers are not initialized from widgets ([DO/DON'T: avoid
   initializing providers in a widget][do-dont]). The two pushes `MatrixState`
@@ -110,14 +116,14 @@ providers, pauses hidden listeners and throws on disposed refs
   `matrixClientProvider` remains, reading the active account directly; "no
   account" is the account state's and the router's concern, not the
   client's.
-- **Q2**: use cases stay in `lib/domain/usecase/<feature>/`, where the
-  interactors are, one class per use case with `execute()`
-  ([GUIDELINES.md][guidelines] §2.3.4). An interactor is rewritten in place
-  to `Future<T>` + typed exceptions when all its consumers are migrated in
-  the same pull request.
-  Otherwise a `UseCase` is added next to it for the migrated consumers, and
-  the interactor is deleted with its last consumer: the two exist side by
-  side only for that time.
+- **Q2**: new use cases go in `lib/domain/<feature>/usecases/`, one class
+  per use case with `execute()` ([GUIDELINES.md][guidelines] §2.3.4), as
+  #3459 does. Legacy interactors stay in `lib/domain/usecase/<feature>/`. An
+  interactor moves to the new folder, rewritten to `Future<T>` + typed
+  exceptions, when all its consumers migrate in the same pull request.
+  Otherwise a use case is added in the new folder for the migrated
+  consumers, and the interactor is deleted with its last consumer. The
+  folder tells migrated code from legacy; nothing is renamed in bulk.
 - **Q3**: no move to `features/` folders during the migration.
 - **Q4**: the migration is done when every legacy metric of
   `scripts/migration_status.sh` is zero and the `Matrix` widget is gone.
@@ -160,12 +166,12 @@ controller → use case → repository → datasource.
 
 - The plan's 6 to 10 months shrink: in `lib/pages`, `lib/widgets` and
   `lib/presentation`, most `Matrix.of` calls (152 of them only read
-  `.client`) and the `getIt` lookups can be rewritten mechanically. The
-  lookups in `lib/data`, `lib/domain` and `lib/utils` (about 125) need
-  constructor injection and go with their module.
+  `.client`) can be rewritten mechanically.
+- `getIt` shrinks only as modules migrate, and is gone after the last wave
+  (room, chat, chat_list) and Step 4. In exchange there are few bridges:
+  only shared-state singletons, listed by
+  `git grep "TODO: \[transitional\]"`.
 - Six existing `ViewModel`s and their tests are renamed.
-- Bridges exist until the last step; `git grep "TODO: \[transitional\]"`
-  lists them.
 - `MatrixState` keeps its two pushes into providers until they are removed,
   against the Riverpod recommendation.
 - Turning retry off changes how today's providers react to errors; their

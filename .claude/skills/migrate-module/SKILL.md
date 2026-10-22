@@ -68,16 +68,7 @@ Once `matrixClientProvider` exists:
 Before it exists, leave these calls alone. A controller never takes the
 `Client`: it calls use cases, so a module migration waits for Step 1.
 
-### `getIt.get<X>()`
-
-Only in `lib/pages`, `lib/widgets` and `lib/presentation`. A `getIt` field
-in `lib/data`, `lib/domain` or `lib/utils` becomes a constructor parameter
-during its module's migration.
-
-- Find or add the provider of `X` in `<implementation of X>.provider.dart`.
-  While `X` has legacy consumers it returns `getIt.get<X>()`, with a
-  `// TODO: [transitional]` comment naming them.
-- Rewrite the call site to `ref.read(xProvider)` (`ref.watch` in `build()`).
+`getIt` is not swept: it goes with its module (§4).
 
 ### Imports
 
@@ -91,11 +82,17 @@ In this order, one commit per step:
 
 1. **Data**: datasource interface + implementation (`package:matrix` only
    here), repository implementation mapping SDK types to domain entities.
-   Providers in `<implementation>.provider.dart`, typed with the interface.
-2. **Use cases**: in `lib/domain/usecase/<feature>/`, `Future<T>` + typed
-   exceptions in `domain/exceptions/`. Rewrite the interactor in place if all
-   its consumers move in this pull request; otherwise add a use case next to
-   it and delete the interactor with its last consumer.
+   Providers in `<implementation>.provider.dart`, typed with the interface,
+   built natively (`XImpl(ref.watch(...))`); every `getIt` field of the
+   module becomes a constructor parameter. Only a singleton whose state
+   legacy code shares (`ContactsManager`, `HiveCollectionToMDatabase`,
+   `UploadManager`…) gets a bridge returning `getIt.get<X>()`, with a
+   `// TODO: [transitional]` comment naming its legacy consumers.
+2. **Use cases**: in `lib/domain/<feature>/usecases/`, `Future<T>` + typed
+   exceptions in `domain/exceptions/`. Move and rewrite the interactor from
+   `lib/domain/usecase/<feature>/` if all its consumers move in this pull
+   request; otherwise add a use case in the new folder and delete the
+   interactor with its last consumer.
 3. **Controller**: `@riverpod class XxxController extends _$XxxController`;
    `build()` returns `T`, `Future<T>` or `Stream<T>` like its source
    ([GUIDELINES.md][guidelines] §2.5.0bis). State `XxxState` with
