@@ -455,7 +455,8 @@ class SettingsProfileController extends State<SettingsProfile>
           if (isEditedProfileNotifier.value) {
             isEditedProfileNotifier.toggle();
           }
-          _getCurrentProfile(client, isUpdated: true);
+          currentProfile.value = newProfile;
+          _clearImageInLocal();
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
