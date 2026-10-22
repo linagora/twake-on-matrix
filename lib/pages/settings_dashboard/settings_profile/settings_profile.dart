@@ -19,6 +19,7 @@ import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_item.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
@@ -38,7 +39,6 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
-import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +61,6 @@ class SettingsProfileController extends State<SettingsProfile>
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin,
         OnProfileChangeMixin,
         PickAvatarMixin,
         SingleTickerProviderStateMixin {
@@ -127,9 +126,10 @@ class SettingsProfileController extends State<SettingsProfile>
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
       key: AvatarAction.file,
-      label: hasAvatar
-          ? L10n.of(context)!.changeProfileAvatar
-          : L10n.of(context)!.setProfileAvatar,
+      label: SettingsProfileContextMenuActions.edit.getTitle(
+        context,
+        hasAvatar: hasAvatar,
+      ),
       icon: Icons.add_a_photo_outlined,
     ),
     if (hasAvatar)
@@ -241,18 +241,13 @@ class SettingsProfileController extends State<SettingsProfile>
       SettingsProfileContextMenuActions.delete,
     ];
     final items = listAction.map((action) {
-      return ValueListenableBuilder(
-        valueListenable: currentProfile,
-        builder: (context, _, _) => popupItemByTwakeAppRouter(
-          context,
-          action.getTitle(context, hasAvatar: hasAvatar),
-          iconAction: action.getIcon(),
-          isClearCurrentPage: false,
-          onCallbackAction: () {
-            menuController.close();
-            _handleActionContextMenu(action);
-          },
-        ),
+      return SettingsProfileContextMenuItem(
+        action: action,
+        currentProfile: currentProfile,
+        onTap: () {
+          menuController.close();
+          _handleActionContextMenu(action);
+        },
       );
     }).toList();
 
