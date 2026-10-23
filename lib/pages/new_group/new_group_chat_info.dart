@@ -14,9 +14,9 @@ import 'package:twake_chat/domain/model/server_config.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
-import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
@@ -67,6 +67,7 @@ class NewGroupChatInfo extends ConsumerStatefulWidget {
 class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
+  final groupPrivacyNotifier = ValueNotifier(const GroupPrivacyState());
   final haveGroupNameNotifier = ValueNotifier(false);
   final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(
     Right(CreateNewGroupInitial()),
@@ -104,6 +105,24 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
   void toggleEnableEncryption() {
     enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
+  }
+
+  /// Also resets [GroupPrivacyState.isServerLimited] to the well-known default.
+  void setPublic({required bool isPublic}) {
+    groupPrivacyNotifier.value = GroupPrivacyState(
+      isPublic: isPublic,
+      isServerLimited:
+          isPublic &&
+          ref
+              .read(loginHomeserverSummaryProvider)
+              .isPublicGroupsServerLimitedByDefault,
+    );
+  }
+
+  void setServerLimited({required bool isServerLimited}) {
+    groupPrivacyNotifier.value = groupPrivacyNotifier.value.copyWith(
+      isServerLimited: isServerLimited,
+    );
   }
 
   String get serverName => _client.userID?.domain ?? '';
@@ -146,7 +165,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
       return;
     }
     final powerLevelManager = getIt.get<PowerLevelManager>();
-    final privacy = ref.read(groupPrivacyViewModelProvider);
+    final privacy = groupPrivacyNotifier.value;
     createNewGroupChatAction(
       matrixClient: _client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
@@ -511,6 +530,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     disposePickAvatarMixin();
     haveGroupNameNotifier.dispose();
     enableEncryptionNotifier.dispose();
+    groupPrivacyNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
     createNewGroupChatInteractorStreamSubscription?.cancel();
     groupNameTextEditingController.dispose();

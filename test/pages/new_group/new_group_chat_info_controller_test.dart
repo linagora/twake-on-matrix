@@ -19,7 +19,6 @@ import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
-import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -168,6 +167,7 @@ void main() {
     Future<NewGroupChatInfoController> pumpGroupCreationScreen(
       WidgetTester tester, {
       required bool isPublicGroupsEnabled,
+      bool? isServerLimitedByDefault,
     }) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -180,7 +180,10 @@ void main() {
                   ),
                   additionalProperties: {
                     'app.twake.chat': {
-                      'public_groups': {'enabled': isPublicGroupsEnabled},
+                      'public_groups': {
+                        'enabled': isPublicGroupsEnabled,
+                        'default_server_limited': ?isServerLimitedByDefault,
+                      },
                     },
                   },
                 ),
@@ -206,12 +209,6 @@ void main() {
       );
     }
 
-    void makeGroupPublic(WidgetTester tester) {
-      ProviderScope.containerOf(
-        tester.element(find.byType(NewGroupChatInfo)),
-      ).read(groupPrivacyViewModelProvider.notifier).setPublic(isPublic: true);
-    }
-
     CreateNewGroupChatRequest capturedRequest() =>
         verify(
               mockCreateNewGroupChatInteractor.execute(
@@ -224,14 +221,14 @@ void main() {
             as CreateNewGroupChatRequest;
 
     testWidgets(
-      'createNewGroup_whenThePrivacyViewModelIsPublic_requestsAPublicServerLimitedGroup',
+      'createNewGroup_whenThePrivacyIsPublic_requestsAPublicServerLimitedGroup',
       (WidgetTester tester) async {
         // Arrange
         final controller = await pumpGroupCreationScreen(
           tester,
           isPublicGroupsEnabled: true,
         );
-        makeGroupPublic(tester);
+        controller.setPublic(isPublic: true);
 
         // Act
         controller.createNewGroup();
@@ -251,7 +248,7 @@ void main() {
           tester,
           isPublicGroupsEnabled: false,
         );
-        makeGroupPublic(tester);
+        controller.setPublic(isPublic: true);
 
         // Act
         controller.createNewGroup();
@@ -279,20 +276,92 @@ void main() {
         tester,
         isPublicGroupsEnabled: true,
       );
-      makeGroupPublic(tester);
+      controller.setPublic(isPublic: true);
 
       // Act
       controller.createNewGroup();
       await tester.pumpAndSettle();
 
       // Assert
-      final privacy = ProviderScope.containerOf(
-        tester.element(find.byType(NewGroupChatInfo)),
-      ).read(groupPrivacyViewModelProvider);
       expect(
-        privacy,
+        controller.groupPrivacyNotifier.value,
         const GroupPrivacyState(isPublic: true, isServerLimited: true),
       );
     });
+
+    testWidgets('groupPrivacy_whenCreated_startsPrivate', (
+      WidgetTester tester,
+    ) async {
+      // Act
+      final controller = await pumpGroupCreationScreen(
+        tester,
+        isPublicGroupsEnabled: true,
+      );
+
+      // Assert
+      expect(controller.groupPrivacyNotifier.value, const GroupPrivacyState());
+    });
+
+    final transitionCases =
+        <
+          ({
+            String name,
+            bool? isServerLimitedByDefault,
+            bool startsPublic,
+            void Function(NewGroupChatInfoController controller) act,
+            GroupPrivacyState expected,
+          })
+        >[
+          (
+            name: 'setPublic_whenWellKnownHasNoDefault_limitsToTheServer',
+            isServerLimitedByDefault: null,
+            startsPublic: false,
+            act: (controller) => controller.setPublic(isPublic: true),
+            expected: const GroupPrivacyState(
+              isPublic: true,
+              isServerLimited: true,
+            ),
+          ),
+          (
+            name: 'setPublic_whenWellKnownOpensGroupsByDefault_doesNotLimit',
+            isServerLimitedByDefault: false,
+            startsPublic: false,
+            act: (controller) => controller.setPublic(isPublic: true),
+            expected: const GroupPrivacyState(isPublic: true),
+          ),
+          (
+            name: 'setPublic_whenBackToPrivate_clearsTheServerLimit',
+            isServerLimitedByDefault: null,
+            startsPublic: true,
+            act: (controller) => controller.setPublic(isPublic: false),
+            expected: const GroupPrivacyState(),
+          ),
+          (
+            name: 'setServerLimited_whenPublic_keepsTheGroupPublic',
+            isServerLimitedByDefault: null,
+            startsPublic: true,
+            act: (controller) =>
+                controller.setServerLimited(isServerLimited: false),
+            expected: const GroupPrivacyState(isPublic: true),
+          ),
+        ];
+
+    for (final testCase in transitionCases) {
+      testWidgets(testCase.name, (WidgetTester tester) async {
+        // Arrange
+        final controller = await pumpGroupCreationScreen(
+          tester,
+          isPublicGroupsEnabled: true,
+          isServerLimitedByDefault: testCase.isServerLimitedByDefault,
+        );
+        if (testCase.startsPublic) controller.setPublic(isPublic: true);
+
+        // Act
+        testCase.act(controller);
+
+        // Assert
+        expect(controller.groupPrivacyNotifier.value, testCase.expected);
+      });
+    }
   });
 }

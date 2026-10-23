@@ -4,10 +4,10 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/pages/new_group/providers/group_privacy_view_model.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -327,36 +327,35 @@ class _GroupPrivacySettings extends ConsumerWidget {
         (summary) => summary.isPublicGroupsEnabled,
       ),
     );
-    final privacy = ref.watch(groupPrivacyViewModelProvider);
     final l10n = L10n.of(context)!;
-    return Column(
-      children: [
-        if (isPublicGroupsEnabled)
-          LinagoraSettingItem.selectable(
-            title: l10n.makeChatPublic,
-            subtitle: l10n.makeChatPublicDescription,
-            subtitleMaxLines: null,
-            value: privacy.isPublic,
-            onChanged: (isPublic) => ref
-                .read(groupPrivacyViewModelProvider.notifier)
-                .setPublic(isPublic: isPublic),
-          ),
-        if (privacy.isPublic)
-          LinagoraSettingItem.selectable(
-            title: l10n.groupPrivacyLimitToServer(controller.serverName),
-            subtitle: l10n.groupPrivacyLimitToServerDescription,
-            subtitleMaxLines: null,
-            value: privacy.isServerLimited,
-            onChanged: (isServerLimited) => ref
-                .read(groupPrivacyViewModelProvider.notifier)
-                .setServerLimited(isServerLimited: isServerLimited),
-          )
-        else
-          _EncryptionSettingTile(
-            enableEncryptionNotifier: controller.enableEncryptionNotifier,
-            onChanged: (_) => controller.toggleEnableEncryption(),
-          ),
-      ],
+    return ValueListenableBuilder<GroupPrivacyState>(
+      valueListenable: controller.groupPrivacyNotifier,
+      builder: (context, privacy, _) => Column(
+        children: [
+          if (isPublicGroupsEnabled)
+            LinagoraSettingItem.selectable(
+              title: l10n.makeChatPublic,
+              subtitle: l10n.makeChatPublicDescription,
+              subtitleMaxLines: null,
+              value: privacy.isPublic,
+              onChanged: (isPublic) => controller.setPublic(isPublic: isPublic),
+            ),
+          if (privacy.isPublic)
+            LinagoraSettingItem.selectable(
+              title: l10n.groupPrivacyLimitToServer(controller.serverName),
+              subtitle: l10n.groupPrivacyLimitToServerDescription,
+              subtitleMaxLines: null,
+              value: privacy.isServerLimited,
+              onChanged: (isServerLimited) =>
+                  controller.setServerLimited(isServerLimited: isServerLimited),
+            )
+          else
+            _EncryptionSettingTile(
+              enableEncryptionNotifier: controller.enableEncryptionNotifier,
+              onChanged: (_) => controller.toggleEnableEncryption(),
+            ),
+        ],
+      ),
     );
   }
 }
