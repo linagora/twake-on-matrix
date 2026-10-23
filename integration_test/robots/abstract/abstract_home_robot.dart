@@ -12,4 +12,6 @@ abstract class AbstractHomeRobot {
   /// Whether the main navigation is visible — `BottomNavigationBar` on
   /// narrow (mobile) layouts, `NavigationRail` on wide (web/desktop) layouts.
   bool isMainNavigationVisible();
+
+  Future<void> waitForMainNavigation();
 }

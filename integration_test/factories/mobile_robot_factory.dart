@@ -1,5 +1,6 @@
 import 'package:patrol/patrol.dart';
 
+import '../robots/abstract/abstract_app_grid_robot.dart';
 import '../robots/abstract/abstract_chat_group_detail_robot.dart';
 import '../robots/abstract/abstract_chat_list_robot.dart';
 import '../robots/abstract/abstract_chat_profile_info_robot.dart';
@@ -13,6 +14,7 @@ import '../robots/abstract/abstract_message_menu_robot.dart';
 import '../robots/abstract/abstract_search_robot.dart';
 import '../robots/abstract/abstract_search_view_robot.dart';
 import '../robots/abstract/abstract_setting_robot.dart';
+import '../robots/app_grid_robot.dart';
 import '../robots/chat/chat_profile_info_robot.dart';
 import '../robots/chat_group_detail_robot.dart';
 import '../robots/chat_list_robot.dart';
@@ -80,4 +82,7 @@ class MobileRobotFactory implements RobotFactory {
   @override
   AbstractLanguageSettingRobot languageSettingRobot() =>
       LanguageSettingRobot($);
+
+  @override
+  AbstractAppGridRobot appGridRobot() => AppGridRobot($);
 }
