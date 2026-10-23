@@ -140,6 +140,11 @@ class SettingsProfileView extends StatelessWidget {
                       textEditingController: controller.getController(
                         controller.getListProfileMobile[index],
                       ),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileMobile[index],
+                      ),
+                      onChanged: (_) => controller.onDisplayNameChanged(),
+                      onSubmitted: (_) => controller.onDisplayNameSubmitted(),
                       onCopyAction: () => controller.copyEventsAction(
                         controller.getListProfileMobile[index],
                       ),
@@ -197,6 +202,11 @@ class SettingsProfileView extends StatelessWidget {
                       textEditingController: controller.getController(
                         controller.getListProfileBasicInfo[index],
                       ),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileBasicInfo[index],
+                      ),
+                      onChanged: (_) => controller.onDisplayNameChanged(),
+                      onSubmitted: (_) => controller.onDisplayNameSubmitted(),
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                     );

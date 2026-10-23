@@ -15,6 +15,9 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final bool canEditDisplayName;
   final bool enableDivider;
   final VoidCallback? onEditRequested;
+  final FocusNode? focusNode;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
 
   const SettingsProfileItemBuilder({
     super.key,
@@ -28,6 +31,9 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     required this.canEditDisplayName,
     this.enableDivider = true,
     this.onEditRequested,
+    this.focusNode,
+    this.onChanged,
+    this.onSubmitted,
   });
 
   @override
@@ -59,16 +65,25 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (textEditingController != null)
+                    if (textEditingController != null && isEditableText)
+                      TextField(
+                        controller: textEditingController,
+                        focusNode: focusNode,
+                        onChanged: onChanged,
+                        onSubmitted: onSubmitted,
+                        style: valueStyle(context),
+                        maxLines: 1,
+                        decoration: const InputDecoration.collapsed(
+                          hintText: null,
+                        ),
+                      )
+                    else if (textEditingController != null)
                       ValueListenableBuilder<TextEditingValue>(
                         valueListenable: textEditingController!,
                         builder: (context, value, _) {
                           return Text(
                             value.text,
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(
-                                  color: LinagoraSysColors.material().onSurface,
-                                ),
+                            style: valueStyle(context),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           );
@@ -104,6 +119,14 @@ class SettingsProfileItemBuilder extends StatelessWidget {
       ],
     );
   }
+
+  TextStyle? valueStyle(BuildContext context) => Theme.of(context)
+      .textTheme
+      .bodyLarge
+      ?.copyWith(color: LinagoraSysColors.material().onSurface);
+
+  bool get isEditableText =>
+      settingsProfilePresentation.isEditable && hasSuffixIcon;
 
   bool get hasSuffixIcon {
     return switch (settingsProfileEnum) {

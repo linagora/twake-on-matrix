@@ -94,8 +94,12 @@ class SettingsProfileController extends State<SettingsProfile>
 
   Client get client => Matrix.of(context).client;
 
-  bool get _hasEditedDisplayName =>
-      displayNameEditingController.text != displayName;
+  bool get _hasEditedDisplayName {
+    final text = displayNameEditingController.text.trim();
+    return text.isNotEmpty && text != displayName;
+  }
+
+  bool get _hasPendingAvatar => assetEntity != null || matrixFile != null;
 
   String get displayName =>
       currentProfile.value?.displayName ??
@@ -447,7 +451,7 @@ class SettingsProfileController extends State<SettingsProfile>
           );
           _sendAccountDataEvent(profile: newProfile);
           isEditedProfileNotifier.toggle();
-          _getCurrentProfile(client);
+          _getCurrentProfile(client, isUpdated: true);
           TwakeDialog.hideLoadingDialog(context);
         }
 
@@ -461,7 +465,7 @@ class SettingsProfileController extends State<SettingsProfile>
           if (isEditedProfileNotifier.value) {
             isEditedProfileNotifier.toggle();
           }
-          _getCurrentProfile(client);
+          _getCurrentProfile(client, isUpdated: true);
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
@@ -471,13 +475,15 @@ class SettingsProfileController extends State<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(Client client) async {
+  void _getCurrentProfile(Client client, {bool isUpdated = false}) async {
+    final userId = client.userID!;
     // SDK access goes through Riverpod (transitional container read).
-    final data = await ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(matrixUserProfileProvider(client.userID!).future);
-    final profile = data.toProfile(client.userID!);
+    final data = await ProviderScope.containerOf(context, listen: false).read(
+      isUpdated
+          ? freshMatrixUserProfileProvider(userId).future
+          : matrixUserProfileProvider(userId).future,
+    );
+    final profile = data.toProfile(userId);
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
     );
@@ -487,6 +493,16 @@ class SettingsProfileController extends State<SettingsProfile>
     }
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = client.mxid(context);
+  }
+
+  void onDisplayNameChanged() {
+    isEditedProfileNotifier.value = _hasEditedDisplayName || _hasPendingAvatar;
+  }
+
+  void onDisplayNameSubmitted() {
+    if (isEditedProfileNotifier.value) {
+      onUploadProfileAction();
+    }
   }
 
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
