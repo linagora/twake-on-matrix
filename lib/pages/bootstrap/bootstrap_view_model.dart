@@ -13,7 +13,7 @@ part 'bootstrap_view_model.g.dart';
 
 @riverpod
 class BootstrapViewModel extends _$BootstrapViewModel {
-  Bootstrap? _bootstrap;
+  Bootstrap? _bootstrapOrNull;
   bool _constructing = false;
   bool _wipe = false;
   bool _isRetrying = false;
@@ -21,21 +21,21 @@ class BootstrapViewModel extends _$BootstrapViewModel {
 
   /// `_start` always runs before anything else reads this, so it's safe to
   /// assume non-null past `build()`.
-  Bootstrap get bootstrap => _bootstrap!;
+  Bootstrap get _bootstrap => _bootstrapOrNull!;
 
-  bool get supportsSecureStorage =>
+  bool get _supportsSecureStorage =>
       PlatformInfos.isMobile || PlatformInfos.isDesktop;
 
   @override
   BootstrapUiState build(Client client, {required bool wipe}) {
-    ref.onDispose(() => _bootstrap?.onUpdate = null);
+    ref.onDispose(() => _bootstrapOrNull?.onUpdate = null);
     _start(wipe);
     return _computeState();
   }
 
   void _start(bool wipe, {bool isRetry = false}) {
     // Detach the previous Bootstrap so its stale onUpdate can't fire.
-    _bootstrap?.onUpdate = null;
+    _bootstrapOrNull?.onUpdate = null;
     _wipe = wipe;
     _isRetrying = isRetry;
     _recoveryKeyStored = false;
@@ -44,7 +44,7 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     _constructing = true;
     final created = client.encryption!.bootstrap(onUpdate: (_) => _refresh());
     _constructing = false;
-    _bootstrap = created;
+    _bootstrapOrNull = created;
     if (isRetry) _cachedRecoveryKeyPrefill = _prefillCachedRecoveryKey();
   }
 
@@ -70,15 +70,15 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   }
 
   BootstrapUiState _computeState() {
-    final ssssKey = bootstrap.newSsssKey;
+    final ssssKey = _bootstrap.newSsssKey;
     if (ssssKey?.recoveryKey != null && !_recoveryKeyStored) {
       return BootstrapRecoveryKeyDisplayState(
         recoveryKey: ssssKey!.recoveryKey!,
-        supportsSecureStorage: supportsSecureStorage,
+        supportsSecureStorage: _supportsSecureStorage,
       );
     }
 
-    switch (bootstrap.state) {
+    switch (_bootstrap.state) {
       case BootstrapState.openExistingSsss:
         return _computeOpenExistingSsssState();
       case BootstrapState.error:
@@ -100,7 +100,7 @@ class BootstrapViewModel extends _$BootstrapViewModel {
         }
         return const BootstrapLegacyDoneState();
       default:
-        _driveAutoStep(bootstrap.state);
+        _driveAutoStep(_bootstrap.state);
         return const BootstrapLoadingState();
     }
   }
@@ -123,21 +123,22 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   /// drive `_computeState()` again. Keyed by [BootstrapState] instead of a
   /// switch so dispatch in [_driveAutoStep] is a lookup, not a branch.
   late final Map<BootstrapState, void Function()> _autoStepActions = {
-    BootstrapState.askWipeSsss: () => bootstrap.wipeSsss(_wipe),
-    BootstrapState.askBadSsss: () => bootstrap.ignoreBadSecrets(true),
-    BootstrapState.askUseExistingSsss: () => bootstrap.useExistingSsss(!_wipe),
-    BootstrapState.askUnlockSsss: bootstrap.unlockedSsss,
-    BootstrapState.askNewSsss: bootstrap.newSsss,
-    BootstrapState.askWipeCrossSigning: () => bootstrap.wipeCrossSigning(_wipe),
-    BootstrapState.askSetupCrossSigning: () => bootstrap.askSetupCrossSigning(
+    BootstrapState.askWipeSsss: () => _bootstrap.wipeSsss(_wipe),
+    BootstrapState.askBadSsss: () => _bootstrap.ignoreBadSecrets(true),
+    BootstrapState.askUseExistingSsss: () => _bootstrap.useExistingSsss(!_wipe),
+    BootstrapState.askUnlockSsss: _bootstrap.unlockedSsss,
+    BootstrapState.askNewSsss: _bootstrap.newSsss,
+    BootstrapState.askWipeCrossSigning: () =>
+        _bootstrap.wipeCrossSigning(_wipe),
+    BootstrapState.askSetupCrossSigning: () => _bootstrap.askSetupCrossSigning(
       setupMasterKey: true,
       setupSelfSigningKey: true,
       setupUserSigningKey: true,
     ),
     BootstrapState.askWipeOnlineKeyBackup: () =>
-        bootstrap.wipeOnlineKeyBackup(_wipe),
+        _bootstrap.wipeOnlineKeyBackup(_wipe),
     BootstrapState.askSetupOnlineKeyBackup: () =>
-        bootstrap.askSetupOnlineKeyBackup(true),
+        _bootstrap.askSetupOnlineKeyBackup(true),
   };
 
   void _driveAutoStep(BootstrapState step) {
@@ -224,7 +225,7 @@ class BootstrapViewModel extends _$BootstrapViewModel {
   Future<bool> unlockWithRecoveryKey(String recoveryKey) async {
     final result = await ref
         .read(unlockSsssWithRecoveryKeyInteractorProvider)
-        .execute(bootstrap: bootstrap, recoveryKey: recoveryKey);
+        .execute(bootstrap: _bootstrap, recoveryKey: recoveryKey);
     return result is UnlockSsssSuccessState;
   }
 

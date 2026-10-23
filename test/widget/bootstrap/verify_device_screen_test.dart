@@ -59,13 +59,16 @@ Widget _buildScreen({
   BootstrapUiState bootstrapState = const BootstrapVerifyDeviceState(),
   Future<bool> Function()? onResetEncryption,
 }) {
-  return ProviderScope(
-    overrides: [
-      bootstrapViewModelProvider(
-        client,
-        wipe: false,
-      ).overrideWithValue(bootstrapState),
-    ],
+  return UncontrolledProviderScope(
+    container: ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [
+        bootstrapViewModelProvider(
+          client,
+          wipe: false,
+        ).overrideWithValue(bootstrapState),
+      ],
+    ),
     child: Builder(
       builder: (context) => VerifyDeviceScreen(
         client: client,
