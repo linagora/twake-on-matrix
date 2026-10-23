@@ -450,6 +450,7 @@ class SettingsProfileController extends State<SettingsProfile>
             avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
+          _clearImageInLocal();
           isEditedProfileNotifier.toggle();
           _getCurrentProfile(client, isUpdated: true);
           TwakeDialog.hideLoadingDialog(context);
@@ -477,12 +478,14 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _getCurrentProfile(Client client, {bool isUpdated = false}) async {
     final userId = client.userID!;
+    final textBeforeRead = displayNameEditingController.text;
     // SDK access goes through Riverpod (transitional container read).
     final data = await ProviderScope.containerOf(context, listen: false).read(
       isUpdated
           ? freshMatrixUserProfileProvider(userId).future
           : matrixUserProfileProvider(userId).future,
     );
+    if (!mounted) return;
     final profile = data.toProfile(userId);
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
@@ -491,7 +494,9 @@ class SettingsProfileController extends State<SettingsProfile>
     if (profile.avatarUrl == null) {
       _clearImageInLocal();
     }
-    displayNameEditingController.text = displayName;
+    if (displayNameEditingController.text == textBeforeRead) {
+      displayNameEditingController.text = displayName;
+    }
     matrixIdEditingController.text = client.mxid(context);
   }
 
