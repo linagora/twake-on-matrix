@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:twake_chat/providers/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
@@ -276,8 +278,14 @@ class HomeserverPickerController extends State<HomeserverPicker>
     }
   }
 
+  late final LoginSessions _sessions;
+
   @override
   void dispose() {
+    // Leaving the add-account flow without logging in drops its client.
+    if (widget.arg.type == HomeserverPickerType.multiAccount) {
+      unawaited(_sessions.discardPending());
+    }
     homeserverFocusNode.removeListener(_updateFocus);
     homeserverFocusNode.dispose();
     homeserverController.dispose();
@@ -286,6 +294,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   void initState() {
+    _sessions = context.loginSessions;
     homeserverFocusNode.addListener(_updateFocus);
     _checkTorBrowser();
     super.initState();

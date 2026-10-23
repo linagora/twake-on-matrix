@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/account/policy/account_transition_support.dart
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
 import 'package:twake_chat/domain/account/usecases/add_account_interactor.dart';
+import 'package:twake_chat/domain/account/usecases/create_account_candidate_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/initialize_accounts_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/record_pending_removal_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/remove_account_interactor.dart';
@@ -31,6 +32,7 @@ class _FakeRepository extends Fake implements AccountRepository {
 
   final List<Account> registered;
   final List<String> writes = [];
+  final candidate = const Account(id: 'new', status: AccountStatus.loggedOut);
 
   @override
   List<Account> registeredAccounts() => registered;
@@ -44,6 +46,9 @@ class _FakeRepository extends Fake implements AccountRepository {
 
   @override
   Future<void> removeAccount(String id) async => writes.add('remove $id');
+
+  @override
+  Future<Account> createCandidate() async => candidate;
 
   @override
   Future<void> markRemovalPending(String id) async => writes.add('pending $id');
@@ -143,5 +148,14 @@ void main() {
     await RecordPendingRemovalInteractor(repository: repository).execute('a');
 
     expect(repository.writes, ['pending a']);
+  });
+
+  test('CreateAccountCandidateInteractor returns the new candidate', () async {
+    final repository = _FakeRepository([a]);
+
+    expect(
+      await CreateAccountCandidateInteractor(repository: repository).execute(),
+      repository.candidate,
+    );
   });
 }

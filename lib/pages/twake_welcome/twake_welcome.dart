@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
@@ -85,7 +86,11 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         ),
       );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
-      await handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+      await handleTokenFromRegistrationSite(
+        matrix: matrix,
+        sessions: context.loginSessions,
+        uri: uri,
+      );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: DONE");
       TwakeDialog.hideLoadingDialog(context);
     } catch (e) {

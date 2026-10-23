@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
@@ -32,9 +34,12 @@ class LoginController extends State<Login> {
   String? loginError;
   bool loading = false;
   bool showPassword = false;
-  late final Future<Client> loginClientFuture;
+  late Future<Client> loginClientFuture;
 
   Client? _pendingLoginClient;
+
+  /// The homeserver of the last login try, for the next try after a failure.
+  Uri? _loginHomeserver;
 
   void toggleShowPassword() =>
       setState(() => showPassword = !loading && !showPassword);
@@ -81,12 +86,20 @@ class LoginController extends State<Login> {
       }
       Matrix.of(context).loginType = LoginType.mLoginPassword;
       final client = await loginClientFuture;
+      // After a failed try the client was signed out and lost its homeserver,
+      // and the SDK can clear it again later: give it back right before the
+      // login.
+      client.homeserver ??= _loginHomeserver;
+      _loginHomeserver = client.homeserver;
       _pendingLoginClient = client;
-      await client.login(
-        LoginType.mLoginPassword,
-        identifier: identifier,
-        password: passwordController.text,
-        initialDeviceDisplayName: PlatformInfos.clientName,
+      await context.loginSessions.trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginPassword,
+          identifier: identifier,
+          password: passwordController.text,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
     } on MatrixException catch (exception) {
       if (!mounted) return;
@@ -150,11 +163,13 @@ class LoginController extends State<Login> {
   }
 
   /// The login worked on the server but the account could not be stored and
-  /// the login was undone: show why and let the user try again.
+  /// the login was undone: show why and let the user try again, on a client
+  /// that is still usable.
   void _handleLoginFailed(Object? error) {
     if (!mounted) return;
     TwakeDialog.hideLoadingDialog(context);
     setState(() {
+      loginClientFuture = context.loginSessions.loginClient();
       loginError = (error ?? Object()).toLocalizedString(context);
       loading = false;
     });
@@ -252,9 +267,17 @@ class LoginController extends State<Login> {
 
   StreamSubscription? _clientLoginStateChangedSubscription;
 
+  late final LoginSessions _sessions;
+
+  /// True when nothing is under this page, so the add-account flow starts and
+  /// ends here; otherwise the page below owns the client made for the flow.
+  late final bool _endsTheFlow;
+
   @override
   void initState() {
     super.initState();
+    _sessions = context.loginSessions;
+    _endsTheFlow = !Navigator.of(context).canPop();
     loginClientFuture = Matrix.of(context).getLoginClient();
     _clientLoginStateChangedSubscription = Matrix.of(
       context,
@@ -263,6 +286,7 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
+    if (_endsTheFlow) unawaited(_sessions.discardPending());
     _coolDown?.cancel();
     usernameController.dispose();
     passwordController.dispose();

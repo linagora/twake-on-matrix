@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/usecases/add_account_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts_interactor.dart';
+import 'package:twake_chat/domain/account/usecases/create_account_candidate_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/initialize_accounts_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/list_pending_push_removals_interactor.dart';
 import 'package:twake_chat/domain/account/usecases/record_pending_removal_interactor.dart';
@@ -49,5 +50,11 @@ RecordPendingRemovalInteractor recordPendingRemovalInteractor(Ref ref) =>
 @Riverpod(keepAlive: true)
 ListPendingPushRemovalsInteractor listPendingPushRemovalsInteractor(Ref ref) =>
     ListPendingPushRemovalsInteractor(
+      repository: ref.watch(accountRepositoryProvider),
+    );
+
+@Riverpod(keepAlive: true)
+CreateAccountCandidateInteractor createAccountCandidateInteractor(Ref ref) =>
+    CreateAccountCandidateInteractor(
       repository: ref.watch(accountRepositoryProvider),
     );
