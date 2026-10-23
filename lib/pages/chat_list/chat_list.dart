@@ -43,7 +43,6 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
-import '../../../utils/account_bundles.dart';
 import '../../widgets/matrix.dart';
 
 class ChatList extends StatefulWidget {
@@ -163,10 +162,6 @@ class ChatListController extends State<ChatList>
         PushRuleState.notify,
   );
 
-  bool get displayBundles =>
-      Matrix.of(context).hasComplexBundles &&
-      Matrix.of(context).accountBundles.keys.length > 1;
-
   bool get filteredRoomsForAllIsEmpty => filteredRoomsForAll.isEmpty;
 
   bool get filteredRoomsForPinIsEmpty => filteredRoomsForPin.isEmpty;
@@ -197,16 +192,6 @@ class ChatListController extends State<ChatList>
     if (mounted) {
       context.go('/spaces/$spaceId');
     }
-  }
-
-  String? get secureActiveBundle {
-    if (Matrix.of(context).activeBundle == null ||
-        !Matrix.of(
-          context,
-        ).accountBundles.keys.contains(Matrix.of(context).activeBundle)) {
-      return Matrix.of(context).accountBundles.keys.first;
-    }
-    return Matrix.of(context).activeBundle;
   }
 
   void toggleSelection(String roomId) {
@@ -520,46 +505,6 @@ class ChatListController extends State<ChatList>
         await setWebPushEnabled(activeClient, true);
       }
     });
-  }
-
-  void editBundlesForAccount(String? userId, String? activeBundle) async {
-    final l10n = L10n.of(context)!;
-    final client = Matrix.of(
-      context,
-    ).widget.clients[Matrix.of(context).getClientIndexByMatrixId(userId!)];
-    final action = await showConfirmationDialog<EditBundleAction>(
-      context: context,
-      title: L10n.of(context)!.editBundlesForAccount,
-      actions: [
-        AlertDialogAction(
-          key: EditBundleAction.addToBundle,
-          label: L10n.of(context)!.addToBundle,
-        ),
-        if (activeBundle != client.userID)
-          AlertDialogAction(
-            key: EditBundleAction.removeFromBundle,
-            label: L10n.of(context)!.removeFromBundle,
-          ),
-      ],
-    );
-    if (action == null) return;
-    switch (action) {
-      case EditBundleAction.addToBundle:
-        final bundle = await showTextInputDialog(
-          context: context,
-          title: l10n.bundleName,
-          textFields: [DialogTextField(hintText: l10n.bundleName)],
-        );
-        if (bundle == null || bundle.isEmpty || bundle.single.isEmpty) return;
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => client.setAccountBundle(bundle.single),
-        );
-        break;
-      case EditBundleAction.removeFromBundle:
-        await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => client.removeFromAccountBundle(activeBundle!),
-        );
-    }
   }
 
   void _onTapBottomNavigation(
@@ -949,5 +894,3 @@ class ChatListController extends State<ChatList>
   @override
   bool get wantKeepAlive => true;
 }
-
-enum EditBundleAction { addToBundle, removeFromBundle }

@@ -11,8 +11,6 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -121,14 +119,6 @@ class ChatInputRow extends StatelessWidget {
                                 ),
                               );
                             },
-                          ),
-                        if (controller.matrix!.isMultiAccount &&
-                            controller.matrix!.hasComplexBundles &&
-                            controller.matrix!.currentBundle!.length > 1)
-                          Container(
-                            height: ChatInputRowStyle.chatInputRowHeight,
-                            alignment: Alignment.center,
-                            child: ChatAccountPicker(controller),
                           ),
                         ValueListenableBuilder(
                           valueListenable: controller.audioRecordStateNotifier,
@@ -568,68 +558,6 @@ class ActionSelectModeWidget extends StatelessWidget {
             const SizedBox.shrink(),
           ],
         ],
-      ),
-    );
-  }
-}
-
-class ChatAccountPicker extends StatelessWidget {
-  final ChatController controller;
-
-  const ChatAccountPicker(this.controller, {super.key});
-
-  void _popupMenuButtonSelected(String mxid) {
-    final client = controller.matrix!.currentBundle!.firstWhere(
-      (cl) => cl!.userID == mxid,
-      orElse: () => null,
-    );
-    if (client == null) {
-      Logs().w('Attempted to switch to a non-existing client $mxid');
-      return;
-    }
-    controller.setSendingClient(client);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    controller.matrix ??= Matrix.of(context);
-    final clients = controller.currentRoomBundle;
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: FutureBuilder<Profile>(
-        future: controller.sendingClient!.fetchOwnProfile(),
-        builder: (context, snapshot) => PopupMenuButton<String>(
-          onSelected: _popupMenuButtonSelected,
-          itemBuilder: (BuildContext context) => clients
-              .map(
-                (client) => PopupMenuItem<String>(
-                  value: client!.userID,
-                  child: FutureBuilder<Profile>(
-                    future: client.fetchOwnProfile(),
-                    builder: (context, snapshot) => ListTile(
-                      leading: Avatar(
-                        mxContent: snapshot.data?.avatarUrl,
-                        name:
-                            snapshot.data?.displayName ??
-                            client.userID!.localpart,
-                        size: 20,
-                      ),
-                      title: Text(snapshot.data?.displayName ?? client.userID!),
-                      contentPadding: const EdgeInsets.all(0),
-                    ),
-                  ),
-                ),
-              )
-              .toList(),
-          child: Avatar(
-            mxContent: snapshot.data?.avatarUrl,
-            name:
-                snapshot.data?.displayName ??
-                controller.matrix!.client.userID!.localpart,
-            size: 20,
-            fontSize: 8,
-          ),
-        ),
       ),
     );
   }
