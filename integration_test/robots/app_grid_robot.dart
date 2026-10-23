@@ -41,30 +41,27 @@ class AppGridRobot extends CoreRobot implements AbstractAppGridRobot {
   @override
   bool isAppGridOpen() => appGridOverlay().exists;
 
-  @override
-  List<String> getVisibleAppNames() {
+  List<T> _itemWidgets<T extends Widget>() {
     return find
         .descendant(
           of: find.byType(AppGridDashboardItem),
-          matching: find.byType(Text),
+          matching: find.byType(T),
         )
         .evaluate()
-        .map((element) => (element.widget as Text).data)
-        .whereType<String>()
+        .map((element) => element.widget as T)
         .toList();
   }
 
   @override
-  List<String> getVisibleAppLinks() {
-    return find
-        .descendant(
-          of: find.byType(AppGridDashboardItem),
-          matching: find.byType(LinkBrowserWidget),
-        )
-        .evaluate()
-        .map((element) => (element.widget as LinkBrowserWidget).uri.toString())
-        .toList();
-  }
+  List<String> getVisibleAppNames() => _itemWidgets<Text>()
+      .map((text) => text.data)
+      .whereType<String>()
+      .toList();
+
+  @override
+  List<String> getVisibleAppLinks() => _itemWidgets<LinkBrowserWidget>()
+      .map((link) => link.uri.toString())
+      .toList();
 
   @override
   Future<void> openAppGrid() async {
