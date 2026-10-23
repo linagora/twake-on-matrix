@@ -42,36 +42,49 @@ List<List<Account>> _accountLists() {
   return lists;
 }
 
-/// What a state must always satisfy, whatever transition produced it.
-List<String> _violations(AccountsState state) {
-  final accounts = state.accounts;
+bool _isLoggedIn(List<Account> accounts, String id) =>
+    accounts.any((a) => a.id == id && a.isLoggedIn);
+
+List<String> _duplicateIds(List<Account> accounts) {
   final ids = accounts.map((a) => a.id).toList();
-  Account? find(String id) => accounts.where((a) => a.id == id).firstOrNull;
-  return [
-    if (ids.toSet().length != ids.length) 'duplicate ids $ids',
-    ...switch (state) {
-      Active(:final activeId) => [
-        if (find(activeId)?.isLoggedIn != true)
-          'active $activeId is not a logged-in account',
-      ],
-      Switching(:final from, :final to) => [
-        if (find(from)?.isLoggedIn != true) 'from $from is not logged in',
-        if (find(to)?.isLoggedIn != true) 'to $to is not logged in',
-        if (from == to) 'switch from $from to itself',
-      ],
-      NoAccount(:final candidateId) => [
-        if (accounts.any((a) => a.status != AccountStatus.unavailable))
-          'NoAccount lists an account that is not unavailable',
-        if (ids.contains(candidateId)) 'candidate $candidateId is also listed',
-      ],
-      LastLoggedOut(:final account) => [
-        if (account.status != AccountStatus.loggedOut)
-          'LastLoggedOut holds ${account.status}',
-      ],
-      _ => const <String>[],
-    },
-  ];
+  return [if (ids.toSet().length != ids.length) 'duplicate ids $ids'];
 }
+
+List<String> _activeViolations(Active state) => [
+  if (!_isLoggedIn(state.accounts, state.activeId))
+    'active ${state.activeId} is not a logged-in account',
+];
+
+List<String> _switchingViolations(Switching state) => [
+  if (!_isLoggedIn(state.accounts, state.from))
+    'from ${state.from} is not logged in',
+  if (!_isLoggedIn(state.accounts, state.to)) 'to ${state.to} is not logged in',
+  if (state.from == state.to) 'switch from ${state.from} to itself',
+];
+
+List<String> _noAccountViolations(NoAccount state) => [
+  if (state.accounts.any((a) => a.status != AccountStatus.unavailable))
+    'NoAccount lists an account that is not unavailable',
+  if (state.accounts.any((a) => a.id == state.candidateId))
+    'candidate ${state.candidateId} is also listed',
+];
+
+List<String> _lastLoggedOutViolations(LastLoggedOut state) => [
+  if (state.account.status != AccountStatus.loggedOut)
+    'LastLoggedOut holds ${state.account.status}',
+];
+
+/// What a state must always satisfy, whatever transition produced it.
+List<String> _violations(AccountsState state) => [
+  ..._duplicateIds(state.accounts),
+  ...switch (state) {
+    Active() => _activeViolations(state),
+    Switching() => _switchingViolations(state),
+    NoAccount() => _noAccountViolations(state),
+    LastLoggedOut() => _lastLoggedOutViolations(state),
+    Booting() => const <String>[],
+  },
+];
 
 List<AccountsState> _validStates() {
   final states = <AccountsState>[
