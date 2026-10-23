@@ -23,6 +23,26 @@ void main() {
   );
 
   TestBase().runPatrolTest(
+    description: 'Open the avatar menu from profile settings',
+    mobileOnly: true,
+    scenarioBuilder: ($, robots) =>
+        SettingsProfileAvatarMenuScenario($, robots),
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Open the personal QR code from profile settings',
+    mobileOnly: true,
+    scenarioBuilder: ($, robots) => SettingsProfileQrCodeScenario($, robots),
+  );
+
+  TestBase().runPatrolTest(
+    description: 'Open the account picker from profile settings',
+    mobileOnly: true,
+    scenarioBuilder: ($, robots) =>
+        SettingsProfileMultipleAccountsScenario($, robots),
+  );
+
+  TestBase().runPatrolTest(
     description: 'Back from profile settings returns to settings',
     mobileOnly: true,
     scenarioBuilder: ($, robots) => SettingsProfileBackScenario($, robots),

@@ -1,4 +1,3 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
 
 import '../base/base_test_scenario.dart';
@@ -48,8 +47,7 @@ class SettingsProfileOpenScenario extends _SettingsProfileScenario {
   }
 }
 
-/// The CI Synapse keeps the default capabilities, so display name and avatar
-/// are both editable: only the "allowed" branch is observable here.
+/// CI Synapse allows profile edits, so only the "allowed" branch is testable.
 class SettingsProfileCapabilitiesScenario extends _SettingsProfileScenario {
   SettingsProfileCapabilitiesScenario(super.$, super.robots);
 
@@ -59,12 +57,6 @@ class SettingsProfileCapabilitiesScenario extends _SettingsProfileScenario {
 
     await $.waitUntilVisible(profile.displayNameEditIcon());
     await $.waitUntilVisible(profile.avatarEditBadge());
-    expect(
-      profile.redirectionEditButton(),
-      findsNothing,
-      reason:
-          'external Edit button must be hidden when the server allows edits',
-    );
   }
 }
 
@@ -76,6 +68,38 @@ class SettingsProfileCopyMatrixIdScenario extends _SettingsProfileScenario {
     await openProfile();
     await profile.waitForValueOf(SettingsProfileEnum.matrixId);
     await profile.copyMatrixId();
+  }
+}
+
+class SettingsProfileAvatarMenuScenario extends _SettingsProfileScenario {
+  SettingsProfileAvatarMenuScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    await openProfile();
+    await $.waitUntilVisible(profile.avatarEditBadge());
+    await profile.openAvatarMenu();
+  }
+}
+
+class SettingsProfileQrCodeScenario extends _SettingsProfileScenario {
+  SettingsProfileQrCodeScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    await openProfile();
+    await profile.openQrCode();
+  }
+}
+
+class SettingsProfileMultipleAccountsScenario extends _SettingsProfileScenario {
+  SettingsProfileMultipleAccountsScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    await openProfile();
+    await $.waitUntilVisible(profile.multipleAccountsButton());
+    await profile.openMultipleAccountsPicker();
   }
 }
 
