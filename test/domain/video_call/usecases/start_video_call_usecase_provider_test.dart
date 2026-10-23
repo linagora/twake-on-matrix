@@ -1,14 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/dio_client.provider.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.provider.dart';
-import 'package:twake_chat/di/global/get_it_provider.dart';
-import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 
 import 'start_video_call_usecase_provider_test.mocks.dart';
@@ -40,16 +38,10 @@ void main() {
       when(mockRoom.membership).thenReturn(Membership.join);
       when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
 
-      final getIt = GetIt.asNewInstance()
-        ..registerSingleton<DioClient>(
-          mockDioClient,
-          instanceName: NetworkDI.tomDioClientName,
-        );
-
       final container = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
-          getItProvider.overrideWithValue(getIt),
+          tomDioClientProvider.overrideWithValue(mockDioClient),
           tomServerUrlInterceptorProvider.overrideWithValue(
             DynamicUrlInterceptors()..changeBaseUrl('https://tom.example.com/'),
           ),
