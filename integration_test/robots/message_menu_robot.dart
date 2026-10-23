@@ -5,6 +5,7 @@ import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../base/core_robot.dart';
@@ -106,5 +107,20 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   Future<void> openMessageInfo(String message) async {
     await openSelect(message);
     await openMessageInfoFromSelectionAppBar($, _l10n);
+  }
+
+  @override
+  Future<void> reactWithQuickEmoji(String message, String emoji) async {
+    await _openMenu(message);
+    await $(ReactionsPicker).$(find.text(emoji)).first.tap();
+    await $.pump(const Duration(milliseconds: 300));
+    await $.pumpAndTrySettle();
+  }
+
+  @override
+  Future<void> openFullEmojiPicker(String message) async {
+    await _openMenu(message);
+    await $(ReactionsPicker).$(find.byIcon(Icons.expand_circle_down)).tap();
+    await $.pump(const Duration(milliseconds: 300));
   }
 }

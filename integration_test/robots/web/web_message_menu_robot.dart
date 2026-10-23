@@ -6,6 +6,7 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:patrol/patrol.dart';
 
 import '../../base/core_robot.dart';
@@ -203,5 +204,35 @@ class WebMessageMenuRobot extends CoreRobot
   Future<void> openMessageInfo(String message) async {
     await openSelect(message);
     await openMessageInfoFromSelectionAppBar($, _l10n);
+  }
+
+  Future<void> _openReactionPopup(String message) async {
+    final reactionButton = $(
+      TwakeIconButton,
+    ).containing(find.byTooltip(_l10n.reaction));
+    final gesture = await _hoverUntilVisible(message, reactionButton);
+    await $.tester.tap(reactionButton.finder);
+    await gesture.removePointer();
+    await $.waitUntilVisible(
+      $(ReactionsPicker),
+      timeout: const Duration(seconds: 10),
+    );
+  }
+
+  @override
+  Future<void> reactWithQuickEmoji(String message, String emoji) async {
+    await _openReactionPopup(message);
+    await $.tester.tap($(ReactionsPicker).$(find.text(emoji)).first.finder);
+    await $.pump(const Duration(milliseconds: 300));
+    await $.pumpAndTrySettle();
+  }
+
+  @override
+  Future<void> openFullEmojiPicker(String message) async {
+    await _openReactionPopup(message);
+    await $.tester.tap(
+      $(ReactionsPicker).$(find.byIcon(Icons.expand_circle_down)).finder,
+    );
+    await $.pump(const Duration(milliseconds: 300));
   }
 }
