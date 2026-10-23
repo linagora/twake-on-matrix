@@ -8,6 +8,16 @@ class VideoCallMessageDatasourceImpl implements VideoCallMessageDatasource {
   final Client _client;
 
   @override
+  bool isJoined(String roomId) {
+    final hasJoined =
+        _client.getRoomById(roomId)?.membership == Membership.join;
+    if (!hasJoined) {
+      Logs().w('VideoCallMessageDatasourceImpl::isJoined: room left');
+    }
+    return hasJoined;
+  }
+
+  @override
   Future<void> sendCallMessage({
     required String roomId,
     required String url,

@@ -9,11 +9,12 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/rtc_focus.dart';
-import 'package:twake_chat/domain/usecase/video_call/start_video_call_interactor.dart';
+import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.dart';
+import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
+import 'package:twake_chat/domain/exception/video_call/video_call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
-import 'package:twake_chat/pages/chat/providers/video_call_providers.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -35,12 +36,12 @@ class _FakeChatController extends Fake implements ChatController {
 }
 
 @GenerateNiceMocks([
-  MockSpec<StartVideoCallInteractor>(),
+  MockSpec<StartVideoCallUseCase>(),
   MockSpec<Client>(),
   MockSpec<Room>(),
 ])
 void main() {
-  late MockStartVideoCallInteractor mockInteractor;
+  late MockStartVideoCallUseCase mockUseCase;
   late MockClient mockClient;
   late MockRoom mockRoom;
 
@@ -67,7 +68,7 @@ void main() {
       );
 
   PostExpectation<Future<void>> whenExecute() => when(
-    mockInteractor.execute(
+    mockUseCase.execute(
       roomId: anyNamed('roomId'),
       baseUrl: anyNamed('baseUrl'),
       startedTitle: anyNamed('startedTitle'),
@@ -78,14 +79,14 @@ void main() {
     WidgetTester tester, {
     bool withVideoCall = true,
   }) async {
-    final container = ProviderContainer(
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
       overrides: [
-        startVideoCallInteractorProvider(
+        startVideoCallUseCaseProvider(
           mockClient,
-        ).overrideWithValue(mockInteractor),
+        ).overrideWithValue(mockUseCase),
       ],
     );
-    addTearDown(container.dispose);
     container
         .read(loginHomeserverSummaryProvider.notifier)
         .set(summaryOf(withVideoCall: withVideoCall));
@@ -107,7 +108,7 @@ void main() {
 
   setUp(() {
     GetIt.instance.registerSingleton(ResponsiveUtils());
-    mockInteractor = MockStartVideoCallInteractor();
+    mockUseCase = MockStartVideoCallUseCase();
     mockClient = MockClient();
     mockRoom = MockRoom();
     when(mockRoom.client).thenReturn(mockClient);
@@ -137,7 +138,7 @@ void main() {
 
       // Assert
       verify(
-        mockInteractor.execute(
+        mockUseCase.execute(
           roomId: testRoomId,
           baseUrl: 'https://meet.example.com',
           startedTitle: 'Has started a video call',
@@ -166,9 +167,38 @@ void main() {
       expect(find.byType(TwakeIconButton), findsOneWidget);
     });
 
+    testWidgets('onTap_whileTheCallIsStarting_startsASingleCall', (
+      tester,
+    ) async {
+      // Arrange
+      final completer = Completer<void>();
+      whenExecute().thenAnswer((_) => completer.future);
+      await pumpButton(tester);
+
+      // Act
+      await tester.tap(find.byType(TwakeIconButton));
+      await tester.pump();
+      await tester.tap(find.byType(CircularProgressIndicator));
+      completer.complete();
+      await tester.pump();
+
+      // Assert
+      verify(
+        mockUseCase.execute(
+          roomId: anyNamed('roomId'),
+          baseUrl: anyNamed('baseUrl'),
+          startedTitle: anyNamed('startedTitle'),
+        ),
+      ).called(1);
+    });
+
     testWidgets('build_whenTheCallFailsToStart_showsASnackBar', (tester) async {
       // Arrange
-      whenExecute().thenAnswer((_) => Future.error(Exception('502')));
+      whenExecute().thenAnswer(
+        (_) => Future.error(
+          VideoCallRoomCreationFailedException(cause: Exception('502')),
+        ),
+      );
       await pumpButton(tester);
 
       // Act

@@ -19,6 +19,38 @@ void main() {
     datasource = VideoCallMessageDatasourceImpl(mockClient);
   });
 
+  group('VideoCallMessageDatasourceImpl.isJoined', () {
+    for (final (name, membership, expected) in [
+      ('Joined', Membership.join, true),
+      ('Left', Membership.leave, false),
+      ('Banned', Membership.ban, false),
+    ]) {
+      test('isJoined_whenRoomIs${name}_returns$expected', () {
+        // Arrange
+        final mockRoom = MockRoom();
+        when(mockRoom.membership).thenReturn(membership);
+        when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+
+        // Act
+        final joined = datasource.isJoined(testRoomId);
+
+        // Assert
+        expect(joined, equals(expected));
+      });
+    }
+
+    test('isJoined_whenRoomIsUnknown_returnsFalse', () {
+      // Arrange
+      when(mockClient.getRoomById(testRoomId)).thenReturn(null);
+
+      // Act
+      final joined = datasource.isJoined(testRoomId);
+
+      // Assert
+      expect(joined, isFalse);
+    });
+  });
+
   group('VideoCallMessageDatasourceImpl.sendCallMessage', () {
     test('sendCallMessage_always_sendsTheCallMessageToTheRoom', () async {
       // Arrange
