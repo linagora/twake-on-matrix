@@ -1655,7 +1655,7 @@ class MatrixState extends ConsumerState<Matrix>
     clientOrNull?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
-    backgroundPush?.clearingPushTimer?.cancel();
+    backgroundPush?.onRoomSync?.cancel();
     showToMBootstrap.dispose();
     linuxNotifications?.close();
     showQrCodeDownload.dispose();
