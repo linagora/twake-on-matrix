@@ -16,6 +16,7 @@ import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_item.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
@@ -35,7 +36,6 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
-import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +58,6 @@ class SettingsProfileController extends State<SettingsProfile>
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin,
         OnProfileChangeMixin,
         PickAvatarMixin,
         SingleTickerProviderStateMixin {
@@ -119,13 +118,18 @@ class SettingsProfileController extends State<SettingsProfile>
     SettingsProfileEnum.matrixId,
   ];
 
+  bool get hasAvatar => currentProfile.value?.avatarUrl != null;
+
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
       key: AvatarAction.file,
-      label: L10n.of(context)!.changeProfileAvatar,
+      label: SettingsProfileContextMenuActions.edit.getTitle(
+        context,
+        hasAvatar: hasAvatar,
+      ),
       icon: Icons.add_a_photo_outlined,
     ),
-    if (currentProfile.value?.avatarUrl != null)
+    if (hasAvatar)
       SheetAction(
         key: AvatarAction.remove,
         label: L10n.of(context)!.removeYourAvatar,
@@ -160,16 +164,10 @@ class SettingsProfileController extends State<SettingsProfile>
     if (assetEntity != null || matrixFile != null) {
       isEditedProfileNotifier.toggle();
     }
-    if (currentProfile.value?.avatarUrl == null) {
+    if (!hasAvatar) {
       _clearImageInLocal();
     } else {
       TwakeDialog.showLoadingDialog(context);
-      final newProfile = Profile(
-        userId: client.userID!,
-        displayName: displayName,
-        avatarUrl: null,
-      );
-      currentProfile.value = newProfile;
       _uploadProfile(isDeleteAvatar: true);
     }
   }
@@ -234,12 +232,11 @@ class SettingsProfileController extends State<SettingsProfile>
       SettingsProfileContextMenuActions.delete,
     ];
     final items = listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitle(context),
-        iconAction: action.getIcon(),
-        isClearCurrentPage: false,
-        onCallbackAction: () {
+      return SettingsProfileContextMenuItem(
+        action: action,
+        profileListenable: currentProfile,
+        hasAvatar: () => hasAvatar,
+        onTap: () {
           menuController.close();
           _handleActionContextMenu(action);
         },
@@ -458,7 +455,8 @@ class SettingsProfileController extends State<SettingsProfile>
           if (isEditedProfileNotifier.value) {
             isEditedProfileNotifier.toggle();
           }
-          _getCurrentProfile(client, isUpdated: true);
+          currentProfile.value = newProfile;
+          _clearImageInLocal();
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
@@ -471,8 +469,7 @@ class SettingsProfileController extends State<SettingsProfile>
   void _getCurrentProfile(Client client, {isUpdated = false}) async {
     final profile = await client.getProfileFromUserId(
       client.userID!,
-      cache: !isUpdated,
-      getFromRooms: false,
+      maxCacheAge: isUpdated ? Duration.zero : const Duration(days: 1),
     );
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',

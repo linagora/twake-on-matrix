@@ -2737,6 +2737,7 @@
   "editWorkIdentitiesDescriptions": "Edit your work identity settings such as Matrix ID, email or company name.",
   "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
   "changeProfileAvatar": "Change profile avatar",
+  "setProfileAvatar": "Set profile avatar",
   "countPinChat": "PINNED CHATS ({countPinChat})",
   "countAllChat": "ALL CHATS ({countAllChat})",
   "thisMessageHasBeenEncrypted": "This message has been encrypted",

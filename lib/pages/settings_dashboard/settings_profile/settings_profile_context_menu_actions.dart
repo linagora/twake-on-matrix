@@ -5,13 +5,13 @@ enum SettingsProfileContextMenuActions {
   edit,
   delete;
 
-  String getTitle(BuildContext context) {
-    switch (this) {
-      case SettingsProfileContextMenuActions.edit:
-        return L10n.of(context)!.changeProfileAvatar;
-      case SettingsProfileContextMenuActions.delete:
-        return L10n.of(context)!.removeYourAvatar;
-    }
+  String getTitle(BuildContext context, {required bool hasAvatar}) {
+    final l10n = L10n.of(context)!;
+    return switch (this) {
+      edit when hasAvatar => l10n.changeProfileAvatar,
+      edit => l10n.setProfileAvatar,
+      delete => l10n.removeYourAvatar,
+    };
   }
 
   IconData getIcon() {
