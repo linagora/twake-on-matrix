@@ -3,8 +3,14 @@ sealed class AccountException implements Exception {
 
   final String message;
 
+  String get _name => switch (this) {
+    UnknownAccountException() => 'UnknownAccountException',
+    InvalidAccountTransitionException() => 'InvalidAccountTransitionException',
+    SwitchSupersededException() => 'SwitchSupersededException',
+  };
+
   @override
-  String toString() => '$runtimeType: $message';
+  String toString() => '$_name: $message';
 }
 
 class UnknownAccountException extends AccountException {
@@ -24,7 +30,7 @@ class InvalidAccountTransitionException extends AccountException {
   final String stateName;
 
   @override
-  String toString() => '$runtimeType: $transition from $stateName';
+  String toString() => '$_name: $transition from $stateName';
 }
 
 /// A newer switch replaced this one before it finished.

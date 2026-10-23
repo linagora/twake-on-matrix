@@ -32,22 +32,12 @@ sealed class AccountsState with _$AccountsState {
     required List<Account> accounts,
     required String from,
     required String to,
-    @Default(0) int seq,
+    required int seq,
   }) = Switching;
 
   /// The last account logged out. It stays so the next login can reuse it.
   const factory AccountsState.lastLoggedOut({required Account account}) =
       LastLoggedOut;
-
-  /// Every account that is not waiting for its removal failed to initialise
-  /// and none is logged in. [id] and [error] are those of the first failed
-  /// one; [accounts] are the ones that stay listed, those whose removal is
-  /// pending.
-  const factory AccountsState.accountInitFailed({
-    required String id,
-    Object? error,
-    @Default([]) List<Account> accounts,
-  }) = AccountInitFailed;
 
   /// Every account the state knows about, in store order.
   List<Account> get accounts => switch (this) {
@@ -56,6 +46,5 @@ sealed class AccountsState with _$AccountsState {
     Active(:final accounts) => accounts,
     Switching(:final accounts) => accounts,
     LastLoggedOut(:final account) => List.unmodifiable([account]),
-    AccountInitFailed(:final accounts) => accounts,
   };
 }

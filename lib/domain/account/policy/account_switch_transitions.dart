@@ -10,7 +10,11 @@ class AccountSwitchTransitions {
 
   /// Starts a switch to [toId]. [seq] numbers the switch; its settlement hands
   /// it back to [completeSwitch] or [failSwitch].
-  AccountsState beginSwitch(AccountsState state, String toId, {int seq = 0}) {
+  AccountsState beginSwitch(
+    AccountsState state,
+    String toId, {
+    required int seq,
+  }) {
     final target = state.accounts.where((a) => a.id == toId).firstOrNull;
     if (target == null) throw UnknownAccountException(toId);
     if (!target.isLoggedIn) {
@@ -30,7 +34,10 @@ class AccountSwitchTransitions {
   }
 
   /// Ends the switch numbered [expectedSeq]; a [Switching] with another
-  /// number is a newer switch and throws [SwitchSupersededException].
+  /// number is a newer switch and throws [SwitchSupersededException]. A state
+  /// that is no longer [Switching] throws [InvalidAccountTransitionException]:
+  /// the accounts notifier drops the tickets of ended switches before it calls
+  /// here, so only the number check guards a running switch.
   AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
       _settleSwitch(state, expectedSeq, 'completeSwitch', (s) => s.to);
 

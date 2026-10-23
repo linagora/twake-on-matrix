@@ -16,8 +16,7 @@ class AccountRemovalTransitions {
   /// [AccountPolicy.nextActiveAfterRemoving], and with no logged-in account
   /// left nobody is logged in ([NoAccount], which keeps the accounts that wait
   /// for their removal). The only account goes through [logoutLast]. An
-  /// account that waits for its removal is removed from [NoAccount] and
-  /// [AccountInitFailed] too.
+  /// account that waits for its removal is removed from [NoAccount] too.
   AccountsState remove(AccountsState state, String id) {
     if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
@@ -25,13 +24,6 @@ class AccountRemovalTransitions {
     if (state is NoAccount) {
       return NoAccount(
         candidateId: state.candidateId,
-        accounts: state.accounts.where((a) => a.id != id).toList(),
-      );
-    }
-    if (state is AccountInitFailed) {
-      return AccountInitFailed(
-        id: state.id,
-        error: state.error,
         accounts: state.accounts.where((a) => a.id != id).toList(),
       );
     }
@@ -51,13 +43,13 @@ class AccountRemovalTransitions {
     if (!_support.has(state.accounts, id)) {
       throw UnknownAccountException(id);
     }
-    if (state is NoAccount || state is AccountInitFailed) return state;
+    if (state is NoAccount) return state;
     if (state is! Active) {
       throw _support.invalid('markUnavailable', state);
     }
     final accounts = [
       for (final a in state.accounts)
-        a.id == id ? a.withStatus(AccountStatus.unavailable) : a,
+        a.id == id ? a.copyWith(status: AccountStatus.unavailable) : a,
     ];
     return _withoutActive(state, id, accounts);
   }
@@ -65,8 +57,8 @@ class AccountRemovalTransitions {
   /// The last logged-in account logs out but stays, marked logged out, so the
   /// next login can reuse it. The accounts that wait for their removal stay
   /// listed beside it ([NoAccount]); with none, it is [LastLoggedOut]. Another
-  /// logged-in account rejects it; a logged-out or init-failed one beside it
-  /// is dropped, as `initialize` does.
+  /// logged-in account rejects it. A logged-out one beside it is dropped from
+  /// the state, while `initialize` keeps such an account in [Active].
   AccountsState logoutLast(AccountsState state) {
     if (state is! Active) {
       throw _support.invalid('logoutLast', state);
@@ -74,7 +66,7 @@ class AccountRemovalTransitions {
     final others = state.accounts.where((a) => a.id != state.activeId);
     final loggedOut = state.accounts
         .firstWhere((a) => a.id == state.activeId)
-        .withStatus(AccountStatus.loggedOut);
+        .copyWith(status: AccountStatus.loggedOut);
     if (others.isEmpty) return LastLoggedOut(account: loggedOut);
     if (others.any((a) => a.isLoggedIn)) {
       throw _support.invalid('logoutLast', state);

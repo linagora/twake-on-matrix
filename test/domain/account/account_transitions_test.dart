@@ -23,9 +23,6 @@ Account _in(String id) =>
 
 Account _out(String id) => Account(id: id, status: AccountStatus.loggedOut);
 
-Account _failed(String id, Object error) =>
-    Account(id: id, status: AccountStatus.initFailed, initError: error);
-
 Account _waiting(String id) =>
     Account(id: id, status: AccountStatus.unavailable);
 
@@ -88,45 +85,19 @@ void main() {
       );
     });
 
-    test('only init-failed accounts give AccountInitFailed for the first', () {
-      final error = StateError('boom');
-      expect(
-        _transitions.initialize(const Booting(), [
-          _failed('f1', error),
-          _failed('f2', 'other'),
-        ]),
-        AccountInitFailed(id: 'f1', error: error),
-      );
-    });
-
-    test('AccountInitFailed keeps the accounts that wait for removal', () {
-      final error = StateError('boom');
-      expect(
-        _transitions.initialize(const Booting(), [
-          _failed('f', error),
-          _waiting('w'),
-        ]),
-        AccountInitFailed(id: 'f', error: error, accounts: [_waiting('w')]),
-      );
-    });
-
-    test('a failed account does not hide the logged-out placeholder', () {
-      expect(
-        _transitions.initialize(const Booting(), [
-          _failed('f', 1),
-          _out('x'),
-          _waiting('w'),
-        ]),
-        NoAccount(candidateId: 'x', accounts: [_waiting('w')]),
-      );
-    });
-
-    test('a logged-in account wins over an init-failed one', () {
-      expect(
-        _transitions.initialize(const Booting(), [_failed('f', 1), a]),
-        Active(accounts: [_failed('f', 1), a], activeId: 'a'),
-      );
-    });
+    test(
+      'the first logged-out account is the placeholder of the next login',
+      () {
+        expect(
+          _transitions.initialize(const Booting(), [
+            _waiting('w'),
+            _out('p'),
+            _out('q'),
+          ]),
+          NoAccount(candidateId: 'p', accounts: [_waiting('w')]),
+        );
+      },
+    );
 
     test('is rejected outside Booting', () {
       expect(
@@ -153,9 +124,9 @@ void main() {
 
     test('add then switch makes the new account active', () {
       var state = _transitions.add(Active(accounts: [a], activeId: 'a'), b);
-      state = _transitions.beginSwitch(state, 'b');
-      expect(state, Switching(accounts: [a, b], from: 'a', to: 'b'));
-      state = _transitions.completeSwitch(state, 0);
+      state = _transitions.beginSwitch(state, 'b', seq: 1);
+      expect(state, Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1));
+      state = _transitions.completeSwitch(state, 1);
       expect(state, Active(accounts: [a, b], activeId: 'b'));
     });
 
@@ -180,6 +151,13 @@ void main() {
       );
     });
 
+    test('a duplicate id is rejected from NoAccount too', () {
+      expect(
+        () => _transitions.add(NoAccount(accounts: [_waiting('a')]), a),
+        throwsA(isA<InvalidAccountTransitionException>()),
+      );
+    });
+
     test('an account that is not logged in is rejected', () {
       expect(
         () => _transitions.add(const NoAccount(), _out('x')),
@@ -194,7 +172,7 @@ void main() {
       );
       expect(
         () => _transitions.add(
-          Switching(accounts: [a, b], from: 'a', to: 'b'),
+          Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
           c,
         ),
         throwsA(isA<InvalidAccountTransitionException>()),
@@ -206,25 +184,28 @@ void main() {
     final active = Active(accounts: [a, b], activeId: 'a');
 
     test('switch goes through Switching then Active', () {
-      final switching = _transitions.beginSwitch(active, 'b');
-      expect(switching, Switching(accounts: [a, b], from: 'a', to: 'b'));
+      final switching = _transitions.beginSwitch(active, 'b', seq: 1);
       expect(
-        _transitions.completeSwitch(switching, 0),
+        switching,
+        Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
+      );
+      expect(
+        _transitions.completeSwitch(switching, 1),
         Active(accounts: [a, b], activeId: 'b'),
       );
     });
 
     test('switch to the active account is a no-op', () {
-      expect(_transitions.beginSwitch(active, 'a'), same(active));
+      expect(_transitions.beginSwitch(active, 'a', seq: 1), same(active));
     });
 
     test('switch to an unknown account throws', () {
       expect(
-        () => _transitions.beginSwitch(active, 'x'),
+        () => _transitions.beginSwitch(active, 'x', seq: 1),
         throwsA(isA<UnknownAccountException>()),
       );
       expect(
-        () => _transitions.beginSwitch(const NoAccount(), 'x'),
+        () => _transitions.beginSwitch(const NoAccount(), 'x', seq: 1),
         throwsA(isA<UnknownAccountException>()),
       );
     });
@@ -233,16 +214,17 @@ void main() {
       final first = _transitions.beginSwitch(
         Active(accounts: [a, b, c], activeId: 'a'),
         'b',
+        seq: 1,
       );
       expect(
-        _transitions.beginSwitch(first, 'c'),
-        Switching(accounts: [a, b, c], from: 'a', to: 'c'),
+        _transitions.beginSwitch(first, 'c', seq: 2),
+        Switching(accounts: [a, b, c], from: 'a', to: 'c', seq: 2),
       );
     });
 
     test('switching back to the origin during a switch returns to Active', () {
-      final first = _transitions.beginSwitch(active, 'b');
-      expect(_transitions.beginSwitch(first, 'a'), active);
+      final first = _transitions.beginSwitch(active, 'b', seq: 1);
+      expect(_transitions.beginSwitch(first, 'a', seq: 2), active);
     });
 
     test('a stale handler cannot settle a newer switch', () {
@@ -284,8 +266,8 @@ void main() {
     });
 
     test('a failed switch returns to Active(from)', () {
-      final switching = _transitions.beginSwitch(active, 'b');
-      expect(_transitions.failSwitch(switching, 0), active);
+      final switching = _transitions.beginSwitch(active, 'b', seq: 1);
+      expect(_transitions.failSwitch(switching, 1), active);
     });
 
     test('complete and fail outside Switching are rejected', () {
@@ -299,14 +281,14 @@ void main() {
       );
     });
 
-    test('a logged-out or init-failed target is rejected', () {
+    test('a logged-out or waiting target is rejected', () {
       final state = Active(
-        accounts: [a, _out('x'), _failed('f', 1)],
+        accounts: [a, _out('x'), _waiting('w')],
         activeId: 'a',
       );
-      for (final id in ['x', 'f']) {
+      for (final id in ['x', 'w']) {
         expect(
-          () => _transitions.beginSwitch(state, id),
+          () => _transitions.beginSwitch(state, id, seq: 1),
           throwsA(isA<InvalidAccountTransitionException>()),
         );
       }
@@ -314,7 +296,11 @@ void main() {
 
     test('a known account in a state that cannot switch is rejected', () {
       expect(
-        () => _transitions.beginSwitch(LastLoggedOut(account: _out('a')), 'a'),
+        () => _transitions.beginSwitch(
+          LastLoggedOut(account: _out('a')),
+          'a',
+          seq: 1,
+        ),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
     });
@@ -363,7 +349,7 @@ void main() {
     test('removing during a switch is rejected (P6)', () {
       expect(
         () => _transitions.remove(
-          Switching(accounts: [a, b], from: 'a', to: 'b'),
+          Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
           'b',
         ),
         throwsA(isA<InvalidAccountTransitionException>()),
@@ -413,7 +399,10 @@ void main() {
           'b',
         ),
         Active(
-          accounts: [a, b.withStatus(AccountStatus.unavailable)],
+          accounts: [
+            a,
+            b.copyWith(status: AccountStatus.unavailable),
+          ],
           activeId: 'a',
         ),
       );
@@ -450,6 +439,25 @@ void main() {
       final held = NoAccount(accounts: [waiting('w')]);
 
       expect(_transitions.markUnavailable(held, 'w'), held);
+    });
+
+    test('holding is rejected outside Active and NoAccount', () {
+      final switching = Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1);
+      expect(
+        () => _transitions.markUnavailable(switching, 'a'),
+        throwsA(isA<InvalidAccountTransitionException>()),
+      );
+      expect(
+        () => _transitions.markUnavailable(
+          LastLoggedOut(account: _out('a')),
+          'a',
+        ),
+        throwsA(isA<InvalidAccountTransitionException>()),
+      );
+      expect(
+        () => _transitions.markUnavailable(const Booting(), 'a'),
+        throwsA(isA<UnknownAccountException>()),
+      );
     });
 
     test(
@@ -494,27 +502,6 @@ void main() {
         throwsA(isA<UnknownAccountException>()),
       );
     });
-
-    test('a waiting account is removed from AccountInitFailed', () {
-      final error = StateError('init');
-      expect(
-        _transitions.remove(
-          AccountInitFailed(
-            id: 'f',
-            error: error,
-            accounts: [waiting('w'), waiting('v')],
-          ),
-          'w',
-        ),
-        AccountInitFailed(id: 'f', error: error, accounts: [waiting('v')]),
-      );
-    });
-
-    test('holding a waiting account in AccountInitFailed changes nothing', () {
-      final failed = AccountInitFailed(id: 'f', accounts: [waiting('w')]);
-
-      expect(_transitions.markUnavailable(failed, 'w'), failed);
-    });
   });
 
   group('logoutLast', () {
@@ -533,24 +520,25 @@ void main() {
 
     test('accounts that wait for their removal stay listed and the logged-out '
         'one is the candidate of the next login', () {
-      final waiting = a.withStatus(AccountStatus.unavailable);
+      final waiting = a.copyWith(status: AccountStatus.unavailable);
       expect(
         _transitions.logoutLast(Active(accounts: [waiting, b], activeId: 'b')),
         NoAccount(candidateId: 'b', accounts: [waiting]),
       );
     });
 
-    test('a logged-out or init-failed account beside it is dropped, not '
-        'a reason to reject', () {
-      const failed = Account(id: 'f', status: AccountStatus.initFailed);
-      final waiting = a.withStatus(AccountStatus.unavailable);
-      expect(
-        _transitions.logoutLast(
-          Active(accounts: [waiting, _out('p'), failed, b], activeId: 'b'),
-        ),
-        NoAccount(candidateId: 'b', accounts: [waiting]),
-      );
-    });
+    test(
+      'a logged-out account beside it is dropped, not a reason to reject',
+      () {
+        final waiting = a.copyWith(status: AccountStatus.unavailable);
+        expect(
+          _transitions.logoutLast(
+            Active(accounts: [waiting, _out('p'), b], activeId: 'b'),
+          ),
+          NoAccount(candidateId: 'b', accounts: [waiting]),
+        );
+      },
+    );
 
     test('is rejected with several accounts or in another state', () {
       expect(
@@ -566,27 +554,64 @@ void main() {
 
   test('transitions leave the input state unchanged', () {
     final input = Active(accounts: [a, b], activeId: 'a');
-    _transitions.beginSwitch(input, 'b');
+    _transitions.beginSwitch(input, 'b', seq: 1);
     _transitions.remove(input, 'a');
     _transitions.add(input, c);
     expect(input, Active(accounts: [a, b], activeId: 'a'));
     expect(input.accounts, [a, b]);
 
-    final switching = Switching(accounts: [a, b], from: 'a', to: 'b');
-    _transitions.completeSwitch(switching, 0);
-    _transitions.failSwitch(switching, 0);
-    _transitions.beginSwitch(switching, 'a');
-    expect(switching, Switching(accounts: [a, b], from: 'a', to: 'b'));
+    final switching = Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1);
+    _transitions.completeSwitch(switching, 1);
+    _transitions.failSwitch(switching, 1);
+    _transitions.beginSwitch(switching, 'a', seq: 2);
+    expect(switching, Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1));
 
     final loggedOut = LastLoggedOut(account: _out('a'));
     _transitions.add(loggedOut, a);
     expect(loggedOut, LastLoggedOut(account: _out('a')));
   });
 
-  test('an init error is dropped when the status changes', () {
-    final failed = _failed('f', 1);
-    expect(failed.withStatus(AccountStatus.loggedOut).initError, isNull);
-    expect(failed.withStatus(AccountStatus.initFailed).initError, 1);
+  test('an invalid transition names the state it came from', () {
+    final active = Active(accounts: [a], activeId: 'a');
+    final switching = Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1);
+    final calls = <String, void Function()>{
+      'Booting': () => _transitions.add(const Booting(), a),
+      'NoAccount': () => _transitions.completeSwitch(const NoAccount(), 1),
+      'Active': () => _transitions.completeSwitch(active, 1),
+      'Switching': () => _transitions.add(switching, c),
+      'LastLoggedOut': () =>
+          _transitions.completeSwitch(LastLoggedOut(account: _out('a')), 1),
+    };
+    calls.forEach((name, call) {
+      expect(
+        call,
+        throwsA(
+          isA<InvalidAccountTransitionException>().having(
+            (e) => e.stateName,
+            'stateName',
+            name,
+          ),
+        ),
+      );
+    });
+  });
+
+  test('exceptions print a fixed type name', () {
+    expect(
+      const UnknownAccountException('x').toString(),
+      'UnknownAccountException: No account with this id',
+    );
+    expect(
+      const InvalidAccountTransitionException(
+        transition: 'add',
+        stateName: 'Booting',
+      ).toString(),
+      'InvalidAccountTransitionException: add from Booting',
+    );
+    expect(
+      const SwitchSupersededException('x').toString(),
+      'SwitchSupersededException: The switch was replaced by a newer one',
+    );
   });
 
   test('state collections are unmodifiable', () {

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 const _policy = AccountPolicy();
 
 void main() {
-  group('_policy.nextActiveAfterRemoving', () {
+  group('nextActiveAfterRemoving', () {
     test('picks the account that followed the removed one', () {
       expect(
         _policy.nextActiveAfterRemoving(ids: ['a', 'b', 'c'], removedId: 'a'),
@@ -45,7 +45,7 @@ void main() {
     });
   });
 
-  group('_policy.selectInitialActive', () {
+  group('selectInitialActive', () {
     test('keeps the persisted id when it is logged in', () {
       expect(
         _policy.selectInitialActive(loggedInIds: ['a', 'b'], persistedId: 'b'),
