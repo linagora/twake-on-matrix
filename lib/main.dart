@@ -161,7 +161,7 @@ class AppStarter with WidgetsBindingObserver {
     Logs().i(
       '${AppConfig.applicationName} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
     );
-    startGui(clients, container);
+    unawaited(startGui(clients, container));
     // We must make sure that the GUI is only started once.
     guiStarted = true;
   }

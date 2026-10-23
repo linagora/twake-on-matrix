@@ -18,4 +18,18 @@ void main() {
     expect(calls, 1);
     expect(container.read(failing).hasError, isTrue);
   });
+
+  test('creating a new app container disposes the previous one', () {
+    var isDisposed = false;
+    final kept = Provider<int>((ref) {
+      ref.onDispose(() => isDisposed = true);
+      return 0;
+    });
+    createAppProviderContainer().read(kept);
+
+    final next = createAppProviderContainer();
+    addTearDown(next.dispose);
+
+    expect(isDisposed, isTrue);
+  });
 }
