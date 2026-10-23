@@ -44,3 +44,20 @@ caused #3435.
 
 Unchanged: iOS, web, desktop and Android gesture navigation. Only the bottom is
 handled, since the app is locked to portrait.
+
+## D3. Video call links: the room must be on the configured Meet host (proposed by Johann, 2026-10-23)
+
+A video call link is always `<livekit_base_url>/<slug>`, `livekit_base_url`
+being the well-known value every client checks a received call link against.
+When ToM creates the room on another host, Chat sends nothing and shows that
+the call could not be started: a link on that host would not show as a call
+in any client, and a link on the configured host would open a room that does
+not exist.
+
+## D4. Video call room creation: 422 falls back to a local link, like 404 (proposed by Johann, 2026-10-23)
+
+When ToM answers 404 (no room creation on this server) or 422 (no room for
+this user, who has no usable email), Chat sends a link it generates itself, as
+before room creation existed. The call works, but its first participant may
+not be able to open it without logging in to Meet. Any other failure sends
+nothing and shows that the call could not be started.
