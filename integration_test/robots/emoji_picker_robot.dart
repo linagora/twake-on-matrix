@@ -45,19 +45,12 @@ class EmojiPickerRobot extends CoreRobot {
       ),
     ).first;
     await $.waitUntilVisible(firstRecent, timeout: const Duration(seconds: 10));
-    final emojiInFirst = find.descendant(
-      of: firstRecent.finder,
-      matching: find.text(emoji),
+    final emojiInFirst = $(
+      find.descendant(of: firstRecent.finder, matching: find.text(emoji)),
     );
-    final deadline = DateTime.now().add(const Duration(seconds: 10));
-    while (emojiInFirst.evaluate().isEmpty &&
-        DateTime.now().isBefore(deadline)) {
-      await $.pump(const Duration(milliseconds: 300));
-    }
-    expect(
+    await $.waitUntilVisible(
       emojiInFirst,
-      findsOneWidget,
-      reason: '$emoji should be the most recent reaction',
+      timeout: const Duration(seconds: 10),
     );
   }
 
