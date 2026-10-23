@@ -8,9 +8,9 @@ import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/get_it_provider.dart';
 import 'package:twake_chat/di/global/network_di.dart';
-import 'package:twake_chat/pages/chat/providers/video_call_providers.dart';
+import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 
-import 'video_call_providers_test.mocks.dart';
+import 'start_video_call_usecase_provider_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<DioClient>(),
@@ -22,7 +22,7 @@ void main() {
   const baseUrl = 'https://meet.example.com';
 
   test(
-    'startVideoCallInteractor_always_createsTheRoomOnToMAndSendsWithTheGivenClient',
+    'startVideoCallUseCase_always_createsTheRoomOnToMAndSendsWithTheGivenClient',
     () async {
       // Arrange
       final mockDioClient = MockDioClient();
@@ -36,6 +36,7 @@ void main() {
 
       final mockRoom = MockRoom();
       final mockClient = MockClient();
+      when(mockRoom.membership).thenReturn(Membership.join);
       when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
 
       final getIt = GetIt.asNewInstance()
@@ -48,14 +49,14 @@ void main() {
           instanceName: NetworkDI.tomServerUrlInterceptorName,
         );
 
-      final container = ProviderContainer(
+      final container = ProviderContainer.test(
+        retry: (_, _) => null,
         overrides: [getItProvider.overrideWithValue(getIt)],
       );
-      addTearDown(container.dispose);
 
       // Act
       await container
-          .read(startVideoCallInteractorProvider(mockClient))
+          .read(startVideoCallUseCaseProvider(mockClient))
           .execute(
             roomId: testRoomId,
             baseUrl: baseUrl,
