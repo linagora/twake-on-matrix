@@ -36,4 +36,11 @@ abstract class AbstractMessageMenuRobot {
   /// ("More" → "Message info"), leaving the `EventInfoDialog` on screen. The
   /// caller asserts the dialog contents and closes it.
   Future<void> openMessageInfo(String message);
+
+  /// Opens the action menu for [message] and taps [emoji] in the quick
+  /// reaction row. Tapping the emoji already reacted removes the reaction.
+  Future<void> reactWithQuickEmoji(String message, String emoji);
+
+  /// Opens the action menu for [message] and expands the full emoji picker.
+  Future<void> openFullEmojiPicker(String message);
 }

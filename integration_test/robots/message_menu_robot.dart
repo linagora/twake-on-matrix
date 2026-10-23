@@ -4,6 +4,7 @@ import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../base/core_robot.dart';
@@ -24,7 +25,7 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
 
   PullDownMenuRobot get _menu => PullDownMenuRobot($);
 
-  Future<void> _openMenu(String message) async {
+  Future<void> openMenu(String message) async {
     // The app ignores long-presses while the event is still `isSending`
     // (`MultiPlatformSelectionMode.onLongPress` is null until the server
     // acks). Waiting only for the bubble to be *visible* races that ack, so
@@ -44,7 +45,7 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
 
   @override
   Future<void> openForward(String message) async {
-    await _openMenu(message);
+    await openMenu(message);
     await _menu.getForwardItem().tap();
     await $.pump(const Duration(milliseconds: 300));
     await $.pumpAndTrySettle();
@@ -56,14 +57,14 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
 
   @override
   Future<void> openReply(String message) async {
-    await _openMenu(message);
+    await openMenu(message);
     await _menu.getReplyItem().tap();
     await $.pump(const Duration(milliseconds: 300));
   }
 
   @override
   Future<void> openDelete(String message) async {
-    await _openMenu(message);
+    await openMenu(message);
     await _menu.getDeleteItem().tap();
     final dialog = $(find.byKey(TwakeDialog.showConfirmAlertDialogKey));
     final delete = dialog.$(find.text(_l10n.delete));
@@ -74,14 +75,14 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
 
   @override
   Future<void> openEdit(String message) async {
-    await _openMenu(message);
+    await openMenu(message);
     await _menu.getEditItem().tap();
     await $.pump(const Duration(milliseconds: 300));
   }
 
   @override
   Future<void> openSelect(String message) async {
-    await _openMenu(message);
+    await openMenu(message);
     await _menu.getSelectItem().tap();
     await $.pump(const Duration(milliseconds: 300));
   }
@@ -90,5 +91,20 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   Future<void> openMessageInfo(String message) async {
     await openSelect(message);
     await openMessageInfoFromSelectionAppBar($, _l10n);
+  }
+
+  @override
+  Future<void> reactWithQuickEmoji(String message, String emoji) async {
+    await openMenu(message);
+    await $(ReactionsPicker).$(find.text(emoji)).first.tap();
+    await $.pump(const Duration(milliseconds: 300));
+    await $.pumpAndTrySettle();
+  }
+
+  @override
+  Future<void> openFullEmojiPicker(String message) async {
+    await openMenu(message);
+    await $(ReactionsPicker).$(find.byIcon(Icons.expand_circle_down)).tap();
+    await $.pump(const Duration(milliseconds: 300));
   }
 }
