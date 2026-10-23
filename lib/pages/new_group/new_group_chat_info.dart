@@ -95,8 +95,10 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
   Set<PresentationContact>? contactsList;
 
+  Client get _client => Matrix.of(context).client;
+
   Future<ServerConfig> getServerConfig() async {
-    final mediaConfig = await Matrix.of(context).client.getConfig();
+    final mediaConfig = await _client.getConfig();
     return ServerConfig(mUploadSize: mediaConfig.mUploadSize);
   }
 
@@ -104,12 +106,12 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
   }
 
-  String get serverName => Matrix.of(context).client.userID?.domain ?? '';
+  String get serverName => _client.userID?.domain ?? '';
 
   Future<Set<PresentationContact>> getAllContactsGroupChat({
     bool isCustomDisplayName = true,
   }) async {
-    final userId = Matrix.of(context).client.userID;
+    final userId = _client.userID;
     final profile = await ProviderScope.containerOf(
       context,
       listen: false,
@@ -119,7 +121,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
         displayName: isCustomDisplayName
             ? L10n.of(context)!.you
             : profile?.displayName,
-        matrixId: Matrix.of(context).client.userID,
+        matrixId: userId,
       ),
     };
     newContactsList.addAll(getSelectedValidContacts(contactsList ?? {}));
@@ -129,14 +131,13 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
   bool get isFeed => widget.isFeed;
 
   void createNewGroup({String? urlAvatar}) {
-    final client = Matrix.of(context).client;
     final invite = getSelectedValidContacts(
       contactsList ?? {},
     ).map((contact) => contact.matrixId).whereNotNull().toList();
     if (isFeed) {
       unawaited(
         createNewFeedAction(
-          matrixClient: client,
+          matrixClient: _client,
           feedName: groupName,
           urlAvatar: urlAvatar,
           invite: invite,
@@ -147,7 +148,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     final powerLevelManager = getIt.get<PowerLevelManager>();
     final privacy = ref.read(groupPrivacyViewModelProvider);
     createNewGroupChatAction(
-      matrixClient: client,
+      matrixClient: _client,
       createNewGroupChatRequest: CreateNewGroupChatRequest(
         groupName: groupName,
         invite: invite,
@@ -439,7 +440,7 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
 
     inviteUserInteractorStreamSubscription = inviteUserInteractor
         .execute(
-          matrixClient: Matrix.of(context).client,
+          matrixClient: _client,
           roomId: roomId,
           groupName: groupName,
           userIds: userIds,
