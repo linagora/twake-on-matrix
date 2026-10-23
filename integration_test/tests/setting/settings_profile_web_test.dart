@@ -21,4 +21,11 @@ void main() {
     scenarioBuilder: ($, robots) =>
         SettingsProfileCopyMatrixIdScenario($, robots),
   );
+
+  TestBase().runPatrolTest(
+    description: 'Open the avatar menu from profile settings',
+    webOnly: true,
+    scenarioBuilder: ($, robots) =>
+        SettingsProfileAvatarMenuScenario($, robots),
+  );
 }
