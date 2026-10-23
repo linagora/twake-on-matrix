@@ -48,6 +48,7 @@ import 'package:twake_chat/providers/url_interceptor_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/client_subscriptions.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
+import 'package:twake_chat/providers/login_faults.dart';
 import 'package:twake_chat/providers/login_configuration_persister.dart';
 import 'package:twake_chat/providers/login_host.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
@@ -1913,6 +1914,7 @@ class _MatrixLoginHost implements LoginHost {
   _MatrixLoginHost(this._state);
 
   final MatrixState _state;
+  final _faults = LoginFaults();
 
   WidgetRef get _ref => _state.ref;
 
@@ -2033,6 +2035,7 @@ class _MatrixLoginHost implements LoginHost {
 
   @override
   Future<void> setUpFederation(Client client) async {
+    if (kDebugMode) _faults.maybeFailSetUp(client.clientName);
     await _state.setUpFederationServicesInLogin(client);
   }
 
