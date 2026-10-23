@@ -228,6 +228,7 @@ jobs:
               integration_test/tests/setting/settings_contacts_visibility_test.dart
               integration_test/tests/setting/settings_recovery_key_test.dart
               integration_test/tests/app_grid/app_grid_mobile_test.dart
+              integration_test/tests/setting/settings_profile_test.dart
 
     steps:
       - uses: actions/checkout@v4
