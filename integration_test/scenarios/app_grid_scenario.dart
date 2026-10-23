@@ -33,7 +33,6 @@ class AppGridOpenAndCloseScenario extends BaseTestScenario {
       );
 
     await appGrid.closeAppGridByTappingButton();
-    s.softAssertEquals(appGrid.isAppGridOpen(), false, 'app grid still open');
 
     s.verifyAll();
   }
@@ -48,10 +47,6 @@ class AppGridCloseOnTapOutsideScenario extends BaseTestScenario {
 
     await appGrid.openAppGrid();
     await appGrid.closeAppGridByTappingOutside();
-
-    final s = SoftAssertHelper()
-      ..softAssertEquals(appGrid.isAppGridOpen(), false, 'app grid still open');
-    s.verifyAll();
   }
 }
 

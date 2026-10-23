@@ -5,7 +5,6 @@
 abstract class AbstractAppGridRobot {
   bool isAppGridButtonVisible();
   bool isHelpButtonVisible();
-  bool isAppGridOpen();
   List<String> getVisibleAppNames();
   List<String> getVisibleAppLinks();
 

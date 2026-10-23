@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:flutter/material.dart';
@@ -22,13 +20,12 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
   Future<void> waitForMainNavigation({
     Duration timeout = const Duration(seconds: 30),
   }) async {
-    final end = DateTime.now().add(timeout);
-    while (!isMainNavigationVisible()) {
-      if (DateTime.now().isAfter(end)) {
-        throw TimeoutException('Main navigation not visible after $timeout');
-      }
-      await $.pump(const Duration(milliseconds: 200));
-    }
+    await waitForEitherVisible(
+      $: $,
+      first: $(BottomNavigationBar),
+      second: $(NavigationRail),
+      timeout: timeout,
+    );
   }
 
   Future<PatrolFinder> getContactTab() async {

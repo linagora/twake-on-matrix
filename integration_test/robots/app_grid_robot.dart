@@ -38,9 +38,6 @@ class AppGridRobot extends CoreRobot implements AbstractAppGridRobot {
   bool isHelpButtonVisible() =>
       $(find.byKey(const ValueKey('AppHelpTooltip'))).exists;
 
-  @override
-  bool isAppGridOpen() => appGridOverlay().exists;
-
   List<T> _itemWidgets<T extends Widget>() {
     return find
         .descendant(
