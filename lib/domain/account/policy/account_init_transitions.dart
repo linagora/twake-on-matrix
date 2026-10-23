@@ -25,7 +25,7 @@ class AccountInitTransitions {
         activeId: _initialActiveId(loggedIn, persistedUserId),
       );
     }
-    return _withoutLoggedIn(accounts);
+    return _support.noSurvivor(accounts);
   }
 
   String _initialActiveId(List<Account> loggedIn, String? persistedUserId) {
@@ -37,23 +37,5 @@ class AccountInitTransitions {
       loggedInIds: loggedIn.map((a) => a.id).toList(),
       persistedId: persisted,
     )!;
-  }
-
-  AccountsState _withoutLoggedIn(List<Account> accounts) {
-    final failed = accounts
-        .where((a) => a.status == AccountStatus.initFailed)
-        .toList();
-    if (failed.isEmpty) return _support.noSurvivor(accounts);
-    final others = accounts.where((a) => a.status != AccountStatus.initFailed);
-    if (others.every((a) => a.status == AccountStatus.unavailable)) {
-      return AccountInitFailed(
-        id: failed.first.id,
-        error: failed.first.initError,
-        accounts: others.toList(),
-      );
-    }
-    // A logged-out placeholder exists: the next login can use it, so the
-    // failed accounts do not block the app. They stay in the store.
-    return _support.noSurvivor(others.toList());
   }
 }

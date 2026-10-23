@@ -40,10 +40,8 @@ class AccountTransitions {
       throw _support.invalid('add', state);
     }
     return switch (state) {
-      NoAccount(:final accounts) => Active(
-        accounts: [...accounts, account],
-        activeId: account.id,
-      ),
+      NoAccount(:final accounts) when !_support.has(accounts, account.id) =>
+        Active(accounts: [...accounts, account], activeId: account.id),
       Active(:final accounts, :final activeId)
           when !_support.has(accounts, account.id) =>
         Active(accounts: [...accounts, account], activeId: activeId),
@@ -55,8 +53,11 @@ class AccountTransitions {
     };
   }
 
-  AccountsState beginSwitch(AccountsState state, String toId, {int seq = 0}) =>
-      _switching.beginSwitch(state, toId, seq: seq);
+  AccountsState beginSwitch(
+    AccountsState state,
+    String toId, {
+    required int seq,
+  }) => _switching.beginSwitch(state, toId, seq: seq);
 
   AccountsState completeSwitch(AccountsState state, int expectedSeq) =>
       _switching.completeSwitch(state, expectedSeq);

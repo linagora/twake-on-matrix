@@ -14,14 +14,20 @@ class AccountTransitionSupport {
     AccountsState state,
   ) => InvalidAccountTransitionException(
     transition: transition,
-    stateName: state.runtimeType.toString(),
+    stateName: switch (state) {
+      Booting() => 'Booting',
+      NoAccount() => 'NoAccount',
+      Active() => 'Active',
+      Switching() => 'Switching',
+      LastLoggedOut() => 'LastLoggedOut',
+    },
   );
 
-  /// Nobody is logged in: the first account that is not waiting for its
-  /// removal is the placeholder of the next login, the others stay listed.
+  /// Nobody is logged in: the first logged-out account is the placeholder of
+  /// the next login, the accounts that wait for their removal stay listed.
   NoAccount noSurvivor(List<Account> accounts) => NoAccount(
     candidateId: accounts
-        .where((a) => a.status != AccountStatus.unavailable)
+        .where((a) => a.status == AccountStatus.loggedOut)
         .firstOrNull
         ?.id,
     accounts: accounts
