@@ -1,12 +1,182 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/usecase/contacts/get_tom_contacts_interactor.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
+import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
+import 'package:twake_chat/data/contact/datasources_impl/contact_local_datasource_impl.dart';
+import 'package:twake_chat/data/contact/datasources_impl/matrix_room_member_datasource_impl.dart';
+import 'package:twake_chat/data/contact/phonebook/address_book_broadcaster.dart';
+import 'package:twake_chat/data/contact/phonebook/phonebook_resolver_impl.dart';
+import 'package:twake_chat/data/contact/repositories/unified_contact_repository_impl.dart';
+import 'package:twake_chat/data/contact/sources/matrix_room_member_source.dart';
+import 'package:twake_chat/data/contact/sources/phonebook_source.dart';
+import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
+import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
+import 'package:twake_chat/domain/contact/repositories/unified_contact_repository.dart';
+import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
+import 'package:twake_chat/domain/contact/sources/contact_source.dart';
+import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
+import 'package:twake_chat/domain/contact/usecases/add_contact.dart';
+import 'package:twake_chat/domain/contact/usecases/get_unified_contact.dart';
+import 'package:twake_chat/domain/contact/usecases/sync_contacts.dart';
+import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
+import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
+import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
+import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
+import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
+import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
+import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/utils/contact_lookup_failed_snackbar.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 
 part 'contacts_providers.g.dart';
 
-// `GetTomContactsInteractor` predates the Riverpod migration and is still
-// consumed by the non-Riverpod `ContactsManager`; this provider gives
-// Riverpod consumers a `ref.read` path instead of reaching into GetIt.
+/// Pure DI: the resolution policy has no dependency and no state.
 @riverpod
-GetTomContactsInteractor getTomContactsInteractor(Ref ref) =>
-    getIt.get<GetTomContactsInteractor>();
+ContactResolutionPolicy contactResolutionPolicy(Ref ref) =>
+    const ContactResolutionPolicy();
+
+/// Single Hive-backed store for the whole session: it owns the broadcast
+/// stream, so it must not be auto-disposed between screens.
+@Riverpod(keepAlive: true)
+ContactLocalDataSource contactLocalDataSource(Ref ref) {
+  final dataSource = ContactLocalDataSourceImpl();
+  ref.onDispose(dataSource.dispose);
+  return dataSource;
+}
+
+@Riverpod(keepAlive: true)
+UnifiedContactRepository unifiedContactRepository(Ref ref) =>
+    UnifiedContactRepositoryImpl(ref.watch(contactLocalDataSourceProvider));
+
+/// Legacy sources still wired through get_it until they are migrated.
+/// The TOM UserInfo enrichment source is added once its second-pass design is
+/// settled.
+@riverpod
+List<ContactSource> contactSources(Ref ref) => [
+  TomAddressBookSource(getIt.get<AddressBookRepository>()),
+  PhonebookSource(getIt.get<HiveContactRepository>()),
+  MatrixRoomMemberSource(ref.watch(matrixRoomMemberDatasourceProvider)),
+];
+
+/// Rebuilds only when the signed-in account changes. Every `setClient` pushes
+/// a new snapshot of the same `Client` instance; watching the whole snapshot
+/// would rebuild the sources → use cases → sync service → controller chain and
+/// restart the store stream (list flashes to loading) on each push.
+@riverpod
+MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
+  ref.watch(activeMatrixClientProvider.select((snapshot) => snapshot.userId));
+  return MatrixRoomMemberDatasourceImpl(
+    ref.read(activeMatrixClientProvider).client,
+  );
+}
+
+/// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
+///
+/// `UserInfoRepository` talks to the ToM server of the *active* account, so the
+/// enricher is told which account is active and skips a run started for
+/// another one (account switched mid-refresh).
+@riverpod
+TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
+  repository: ref.watch(unifiedContactRepositoryProvider),
+  userInfoRepository: getIt.get<UserInfoRepository>(),
+  policy: ref.watch(contactResolutionPolicyProvider),
+  activeUserId: () => ref.read(activeMatrixClientProvider).userId,
+);
+
+@riverpod
+SyncContactsUseCase syncContactsUseCase(Ref ref) => SyncContactsUseCase(
+  repository: ref.watch(unifiedContactRepositoryProvider),
+  policy: ref.watch(contactResolutionPolicyProvider),
+  sources: ref.watch(contactSourcesProvider),
+);
+
+@riverpod
+WatchUnifiedContactsUseCase watchUnifiedContactsUseCase(Ref ref) =>
+    WatchUnifiedContactsUseCase(ref.watch(unifiedContactRepositoryProvider));
+
+@riverpod
+GetUnifiedContactUseCase getUnifiedContactUseCase(Ref ref) =>
+    GetUnifiedContactUseCase(ref.watch(unifiedContactRepositoryProvider));
+
+@riverpod
+AddContactUseCase addContactUseCase(Ref ref) =>
+    AddContactUseCase(ref.watch(unifiedContactRepositoryProvider));
+
+/// Matrix ID of the account currently signed in, or `null` before login.
+///
+/// Scoping key for every contact provider: a multi-account session must never
+/// mix the contacts of two accounts.
+@riverpod
+String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider).userId;
+
+@Riverpod(keepAlive: true)
+AddressBookBroadcaster addressBookBroadcaster(Ref ref) =>
+    AddressBookBroadcaster(() => ref.read(activeMatrixClientProvider).client);
+
+/// Phonebook → Matrix ID lookup that used to live in `ContactsManager`.
+///
+/// Kept alive: it owns the in-flight lookup, and the legacy interceptors it
+/// reads (home / identity server, token) are reconfigured on account switch,
+/// so they are resolved at call time.
+@Riverpod(keepAlive: true)
+PhonebookResolver phonebookResolver(Ref ref) {
+  final broadcaster = ref.watch(addressBookBroadcasterProvider);
+  return PhonebookResolverImpl(
+    tryGetSynced: getIt.get<TryGetSyncedPhoneBookContactInteractor>(),
+    federationLookUp: getIt.get<FederationLookUpPhonebookContactInteractor>(),
+    twakeLookUp: getIt.get<TwakeLookupPhonebookContactInteractor>(),
+    postAddressBook: getIt.get<PostAddressBookInteractor>(),
+    federationConfigurations: (userId) => getIt
+        .get<FederationConfigurationsRepository>()
+        .getFederationConfigurations(userId),
+    endpoints: PhonebookLookupEndpoints(
+      homeServerUrl: () =>
+          getIt
+              .get<DynamicUrlInterceptors>(
+                instanceName: NetworkDI.homeServerUrlInterceptorName,
+              )
+              .baseUrl ??
+          '',
+      identityServerUrl: () =>
+          getIt
+              .get<DynamicUrlInterceptors>(
+                instanceName: NetworkDI.identityServerUrlInterceptorName,
+              )
+              .baseUrl ??
+          '',
+      accessToken: () =>
+          getIt.get<AuthorizationInterceptor>().accessToken ?? '',
+    ),
+    uploadsAddressBook: !PlatformInfos.isWeb,
+    onPartialFailure: showContactLookupFailedSnackBar,
+    onAddressBookUploaded: broadcaster.notifyOtherDevices,
+  );
+}
+
+@Riverpod(keepAlive: true)
+ContactSyncService contactSyncService(Ref ref, String userId) =>
+    ContactSyncService(
+      userId: userId,
+      repository: ref.watch(unifiedContactRepositoryProvider),
+      policy: ref.watch(contactResolutionPolicyProvider),
+      useCases: ContactUseCases(
+        sync: ref.watch(syncContactsUseCaseProvider),
+        watch: ref.watch(watchUnifiedContactsUseCaseProvider),
+        get: ref.watch(getUnifiedContactUseCaseProvider),
+        add: ref.watch(addContactUseCaseProvider),
+      ),
+      options: ContactSyncOptions(
+        enrichers: [ref.watch(tomUserInfoEnricherProvider)],
+        phonebookResolver: ref.watch(phonebookResolverProvider),
+        // The sources follow the active account: stop as soon as it changes.
+        isAccountActive: () => ref.read(currentUserIdProvider) == userId,
+      ),
+    );

@@ -1,4 +1,9 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_emoji_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_error_view.dart';
 import 'package:twake_chat/pages/key_verification/key_verification_request_view.dart';
@@ -47,11 +52,24 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
       originalOnUpdate?.call();
       setState(() {});
     };
-    widget.request.client.getProfileFromUserId(widget.request.userId).then((p) {
-      profile = p;
-      setState(() {});
-    });
     super.initState();
+    unawaited(_loadProfile());
+  }
+
+  Profile? profile;
+
+  Future<void> _loadProfile() async {
+    final userId = widget.request.userId;
+    try {
+      final data = await ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(matrixUserProfileProvider(userId).future);
+      if (!mounted) return;
+      setState(() => profile = data.toProfile(userId));
+    } catch (e) {
+      Logs().w('KeyVerificationDialog: no profile for $userId', e);
+    }
   }
 
   @override
@@ -66,8 +84,6 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
     }
     super.dispose();
   }
-
-  Profile? profile;
 
   Future<void> checkInput(String input) async {
     if (input.isEmpty) return;

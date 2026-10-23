@@ -1,6 +1,9 @@
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
+import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/chat/add_contact_banner.dart';
 import 'package:twake_chat/pages/chat/blocked_message_view.dart';
 import 'package:twake_chat/pages/chat/blocked_user_banner.dart';
@@ -139,12 +142,12 @@ class DraftChatView extends StatelessWidget {
                     );
                   },
                 ),
-                ValueListenableBuilder(
-                  valueListenable: getIt
-                      .get<ContactsManager>()
-                      .getContactsNotifier(),
-                  builder: (context, state, child) {
-                    if (controller.isInsideContactManager(state)) {
+                Consumer(
+                  builder: (context, ref, child) {
+                    final contacts =
+                        ref.watch(contactsControllerProvider).asData?.value ??
+                        const <UnifiedContact>[];
+                    if (controller.isInsideContactManager(contacts)) {
                       return const SizedBox();
                     }
 
@@ -401,12 +404,10 @@ class _EmptyChatTitle extends StatelessWidget {
     BuildContext context,
     String receiverId,
   ) async {
-    try {
-      return await Matrix.of(
-        context,
-      ).client.getProfileFromUserId(receiverId, getFromRooms: false);
-    } catch (e) {
-      return Profile(avatarUrl: null, displayName: null, userId: receiverId);
-    }
+    final profile = await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(matrixUserProfileProvider(receiverId).future);
+    return profile.toProfile(receiverId);
   }
 }
