@@ -157,9 +157,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
-      final allHomeserverLoggedIn = (await ClientManager.getClients())
-          .map((client) => client.homeserver.toString())
-          .toList();
+      final allHomeserverLoggedIn = ClientManager.loggedIn(
+        await ClientManager.getClients(),
+      ).map((client) => client.homeserver.toString()).toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
       final client = await matrix.getLoginClient();
 

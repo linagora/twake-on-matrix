@@ -35,11 +35,24 @@ import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/model/tom_server_information.dart';
-import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
+import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_id.dart';
+import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/account_interactor_providers.dart';
+import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_switch_coordinator.dart';
+import 'package:twake_chat/providers/accounts_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/client_subscriptions.dart';
+import 'package:twake_chat/providers/login_candidate_provider.dart';
+import 'package:twake_chat/providers/logout_removal_plan.dart';
+import 'package:twake_chat/providers/push_removal_plan.dart';
+import 'package:twake_chat/providers/logout_removals.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
-import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -53,7 +66,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget;
+    show ConsumerState, ConsumerStatefulWidget, ProviderSubscription;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -104,7 +117,8 @@ class MatrixState extends ConsumerState<Matrix>
         WidgetsBindingObserver,
         ReceiveSharingIntentMixin,
         InitConfigMixin,
-        ConnectivityMixin {
+        ConnectivityMixin
+    implements AccountSwitchEffects {
   final _contactsManager = getIt.get<ContactsManager>();
 
   AudioPlayer audioPlayer = AudioPlayer();
@@ -116,7 +130,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
-  int _activeClient = -1;
+  late final AccountSwitchCoordinator _switchCoordinator;
   Store store = Store();
   // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
   HomeserverSummary? get loginHomeserverSummary =>
@@ -147,26 +161,29 @@ class MatrixState extends ConsumerState<Matrix>
   BackgroundPush? backgroundPush;
 
   bool get isValidActiveClient =>
-      _activeClient >= 0 && _activeClient < widget.clients.length;
+      _switchCoordinator.hasApplied &&
+      ref.read(activeMatrixClientProvider) != null;
+
+  /// Every account the app lists (the former `widget.clients`).
+  List<Client> get accountClients => ref.read(accountClientsProvider);
+
+  /// Read by `dispose`, where `ref` can no longer be used; closed after it.
+  late final ProviderSubscription<Client?> _activeClientSubscription;
+  late final ProviderSubscription<List<Client>> _accountClientsSubscription;
+
+  Client get _workingClient => _switchCoordinator.target ?? client;
 
   String? get authUrl => _authUrl;
 
-  Client get client {
-    if (!isValidActiveClient) {
-      return widget.clients.first;
-    }
-    return widget.clients[_activeClient];
-  }
+  Client get client =>
+      ref.read(activeMatrixClientProvider) ?? accountClients.first;
 
   /// Null-safe accessor for the active client.
   ///
   /// Returns the same client as [client] whenever any account exists, but
-  /// returns null instead of throwing [StateError] (`widget.clients.first`
-  /// on an empty list) during a logged-out boot with `clients: []`.
-  /// Gated on [widget.clients.isEmpty] — not on [isValidActiveClient] — so it
-  /// preserves the exact `widget.clients.first` fallback the [client] getter
-  /// uses while `_activeClient` is still -1 in a normal logged-in boot.
-  Client? get clientOrNull => widget.clients.isEmpty ? null : client;
+  /// returns null instead of throwing [StateError] on an empty account list
+  /// (a logged-out boot with `clients: []`).
+  Client? get clientOrNull => accountClients.isEmpty ? null : client;
 
   /// True only when an account exists AND it is logged in.
   /// Safe to call during a logged-out boot (returns false on empty clients).
@@ -177,44 +194,69 @@ class MatrixState extends ConsumerState<Matrix>
 
   // VoipPlugin? voipPlugin;
 
-  bool get isMultiAccount => widget.clients.length > 1;
+  bool get isMultiAccount => accountClients.length > 1;
 
   int getClientIndexByMatrixId(String matrixId) =>
-      widget.clients.indexWhere((client) => client.userID == matrixId);
+      accountClients.indexWhere((client) => client.userID == matrixId);
 
   late String currentClientSecret;
   RequestTokenResponse? currentThreepidCreds;
   String? supportChatRoomId;
 
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
-    final index = widget.clients.indexWhere(
-      (client) => newClient != null && client.userID == newClient.userID,
-    );
-    if (index != -1) {
-      if (index == _activeClient) return SetActiveClientState.success;
-      _activeClient = index;
-      // TODO: Multi-client VoiP support
-      createVoipPlugin();
-      await _setUpToMServicesWhenChangingActiveClient(newClient);
-      await _storePersistActiveAccount(newClient!);
-      await _getUserInfoWithActiveClient(newClient);
-      await _getHomeserverInformation(newClient);
-      getIt.get<ContactsManager>().refreshTomContacts(client);
-      _createSupportChat(newClient);
-      _listenSyncPresence(newClient);
-      Sentry.configureScope(
-        (scope) => scope.setUser(
-          SentryUser(username: newClient.userID, name: newClient.userID),
-        ),
-      );
-      return SetActiveClientState.success;
-    } else {
-      Logs().w('Tried to set an unknown client ${newClient!.userID} as active');
+    final id = newClient?.clientName;
+    if (newClient == null || !accountClients.any((c) => c.clientName == id)) {
+      Logs().w('Tried to set an unknown client ${newClient?.userID} as active');
       return SetActiveClientState.unknownClient;
     }
+    // Always through the notifier, which orders the calls: asking for the
+    // account that is active now still cancels a switch away from it that is
+    // queued but not started, so the last request wins.
+    try {
+      await ref.read(accountsProvider.notifier).switchTo(AccountId(id!));
+    } on UnknownAccountException {
+      return SetActiveClientState.unknownClient;
+    } on InvalidAccountTransitionException catch (e) {
+      Logs().w('Cannot switch to client ${newClient.userID}: $e');
+      return SetActiveClientState.unknownClient;
+    }
+    final accounts = ref.read(accountsProvider);
+    if (accounts is Active && accounts.activeId == id) {
+      await _switchCoordinator.activateCurrent();
+    }
+    return SetActiveClientState.success;
   }
 
-  void _createSupportChat(Client client) {
+  // The switch side effects: the coordinator decides when and in which order,
+  // these are the bodies that need this state's context and interceptors.
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) =>
+      _setUpToMServicesWhenChangingActiveClient(client, token);
+
+  @override
+  Future<void> persistActiveAccount(Client client, SwitchToken token) =>
+      _storePersistActiveAccount(client, token);
+
+  @override
+  Future<void> loadUserInfo(Client client, SwitchToken token) =>
+      _getUserInfoWithActiveClient(client, token);
+
+  @override
+  Future<void> loadHomeserverInfo(Client client, SwitchToken token) =>
+      _getHomeserverInformation(client, token);
+
+  @override
+  void refreshContacts(Client client) =>
+      getIt.get<ContactsManager>().refreshTomContacts(client);
+
+  @override
+  void configureSentryUser(Client client) => Sentry.configureScope(
+    (scope) =>
+        scope.setUser(SentryUser(username: client.userID, name: client.userID)),
+  );
+
+  @override
+  void createSupportChat(Client client) {
     Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
     StreamSubscription? syncListener;
@@ -256,7 +298,8 @@ class MatrixState extends ConsumerState<Matrix>
       CachedStreamController();
   StreamSubscription? _presenceSubscription;
 
-  void _listenSyncPresence(Client client) {
+  @override
+  void listenPresence(Client client) {
     _presenceSubscription?.cancel();
     _presenceSubscription = client.onSync.stream.listen((sync) {
       // Deduplicate per user: keep only the most recent presence per userid
@@ -287,40 +330,37 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   /// A fresh copy on every call: callers filter it in place.
-  List<Client?> get currentClients => List<Client?>.from(widget.clients);
+  List<Client?> get currentClients => List<Client?>.from(accountClients);
 
-  Client? _loginClientCandidate;
-
+  /// The unlogged client a login screen uses: the placeholder of a logged-out
+  /// boot, else the pending candidate, else a new one. An account that waits
+  /// for its removal is never it.
   Future<Client> getLoginClient() async {
-    if (widget.clients.isNotEmpty && !client.isLogged()) {
-      return client;
-    }
+    final reusable = ref.read(loginCandidateProvider);
+    if (reusable != null) return reusable;
 
-    // Generate client name consistently
-    final clientName =
-        '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
-
-    final candidate = _loginClientCandidate ??=
-        await ClientManager.createClient(clientName)
-          ..onLoginStateChanged.stream
-              .where((l) => l == LoginState.loggedIn)
-              .first
-              .then((state) => _handleAddAnotherAccount(state))
-              .catchError(
-                (e, s) => Logs().wtf(
-                  'MatrixState::getLoginClient: add-account handler failed',
-                  e,
-                  s,
-                ),
-              );
+    final account = await ref.read(accountRepositoryProvider).createCandidate();
+    final candidate = ref.read(accountClientRegistryProvider)[account.id]!;
+    ref.read(pendingLoginCandidateProvider.notifier).set(account.id);
+    candidate.onLoginStateChanged.stream
+        .where((l) => l == LoginState.loggedIn)
+        .first
+        .then((state) => _handleAddAnotherAccount(candidate, state))
+        .catchError(
+          (e, s) => Logs().wtf(
+            'MatrixState::getLoginClient: add-account handler failed',
+            e,
+            s,
+          ),
+        );
     return candidate;
   }
 
   Client? getClientByUserId(String userId) =>
-      widget.clients.firstWhereOrNull((c) => c.userID == userId);
+      accountClients.firstWhereOrNull((c) => c.userID == userId);
 
   Client? getClientByName(String name) =>
-      widget.clients.firstWhereOrNull((c) => c.clientName == name);
+      accountClients.firstWhereOrNull((c) => c.clientName == name);
 
   Map<String, dynamic>? shareContent;
 
@@ -339,7 +379,7 @@ class MatrixState extends ConsumerState<Matrix>
   File? wallpaper;
 
   void _initWithStore() async {
-    if (widget.clients.isEmpty) return;
+    if (clientOrNull == null) return;
     try {
       if (client.isLogged()) {
         // TODO: Figure out how this works in multi account
@@ -359,11 +399,16 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  final onRoomKeyRequestSub = <String, StreamSubscription>{};
-  final onKeyVerificationRequestSub = <String, StreamSubscription>{};
-  final onNotification = <String, StreamSubscription>{};
-  final onLoginStateChanged = <String, StreamSubscription<LoginState>>{};
-  final onSyncStatusSub = <String, StreamSubscription>{};
+  /// Every subscription kept for a client, so a rollback or a logout cancels
+  /// them all and none is started after that.
+  final _subscriptions = ClientSubscriptions();
+
+  /// Removals of logged-out accounts that failed and are retried.
+  final _logoutRemovals = LogoutRemovals();
+
+  /// Pusher deletions that failed and are retried.
+  final _pushRemovals = LogoutRemovals();
+
   final _lastSyncErrorSentAt = <String, DateTime>{};
 
   static const _syncErrorSentryThrottle = Duration(minutes: 10);
@@ -371,7 +416,6 @@ class MatrixState extends ConsumerState<Matrix>
   /// Re-registers the Web Push pusher when the app language changes so its
   /// (generic) notification text follows the account language.
   VoidCallback? _webPushLocaleListener;
-  final onUiaRequest = <String, StreamSubscription<UiaRequest>>{};
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController.broadcast();
   StreamSubscription<html.Event>? onFocusSub;
@@ -410,6 +454,31 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   void initState() {
     super.initState();
+    // The clients created at boot are read once, here; from then on the
+    // account state lives in the providers.
+    ref
+        .read(adoptBootAccountsInteractorProvider(widget.clients))
+        .execute(
+          pendingRemovals: ref
+              .read(bootAccountSnapshotProvider)
+              .pendingRemovalIds,
+        );
+    _activeClientSubscription = ref.listenManual(
+      activeMatrixClientProvider,
+      (_, _) {},
+    );
+    _accountClientsSubscription = ref.listenManual(
+      accountClientsProvider,
+      (_, _) {},
+    );
+    final registry = ref.read(accountClientRegistryProvider);
+    _switchCoordinator = AccountSwitchCoordinator(
+      effects: this,
+      accounts: ref.read(accountsProvider.notifier),
+      clientOf: (id) => registry[id],
+      currentState: () => ref.read(accountsProvider),
+    )..start();
+    ref.listenManual(accountsProvider, _switchCoordinator.onAccountsChanged);
     _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
@@ -463,7 +532,7 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  void _registerSubs(String name) async {
+  Future<void> _registerSubs(String name) async {
     final currentClient = getClientByName(name);
     if (currentClient == null) {
       Logs().w(
@@ -474,55 +543,106 @@ class MatrixState extends ConsumerState<Matrix>
     if (PlatformInfos.isMobile) {
       await HiveCollectionToMDatabase.databaseBuilder();
     }
-    onRoomKeyRequestSub[name] ??= currentClient.onRoomKeyRequest.stream.listen((
-      RoomKeyRequest request,
-    ) async {
-      if (widget.clients.any(
-        ((cl) =>
-            cl.userID == request.requestingDevice.userId &&
-            cl.identityKey == request.requestingDevice.curve25519Key),
-      )) {
-        Logs().i(
-          '[Key Request] Request is from one of our own clients, forwarding the key...',
-        );
-        await request.forwardKey();
-      }
-    });
-    onKeyVerificationRequestSub[name] ??= currentClient
-        .onKeyVerificationRequest
-        .stream
-        .listen((KeyVerification request) async {
-          var hidPopup = false;
-          request.onUpdate = () {
-            if (!hidPopup &&
-                {
-                  KeyVerificationState.done,
-                  KeyVerificationState.error,
-                }.contains(request.state)) {
-              Navigator.of(context).pop('dialog');
-            }
-            hidPopup = true;
-          };
-          request.onUpdate = null;
-          hidPopup = true;
-          await KeyVerificationDialog(request: request).show(
-            TwakeApp.router.routerDelegate.navigatorKey.currentContext ??
-                context,
+    _subscriptions.open(name);
+    _subscriptions.keep(
+      name,
+      'roomKeyRequest',
+      () => currentClient.onRoomKeyRequest.stream.listen((
+        RoomKeyRequest request,
+      ) async {
+        if (accountClients.any(
+          ((cl) =>
+              cl.userID == request.requestingDevice.userId &&
+              cl.identityKey == request.requestingDevice.curve25519Key),
+        )) {
+          Logs().i(
+            '[Key Request] Request is from one of our own clients, forwarding the key...',
           );
-        });
-    onLoginStateChanged[name] ??= currentClient.onLoginStateChanged.stream
-        .listen((state) => _listenLoginStateChanged(state, currentClient));
-    onUiaRequest[name] ??= currentClient.onUiaRequest.stream.listen(
-      uiaRequestHandler,
+          await request.forwardKey();
+        }
+      }).cancel,
     );
-    onSyncStatusSub[name] ??= currentClient.onSyncStatus.stream.listen(
-      (update) => _handleSyncStatusUpdate(currentClient, update),
+    _subscriptions.keep(
+      name,
+      'keyVerificationRequest',
+      () => currentClient.onKeyVerificationRequest.stream.listen((
+        KeyVerification request,
+      ) async {
+        var hidPopup = false;
+        request.onUpdate = () {
+          if (!hidPopup &&
+              {
+                KeyVerificationState.done,
+                KeyVerificationState.error,
+              }.contains(request.state)) {
+            Navigator.of(context).pop('dialog');
+          }
+          hidPopup = true;
+        };
+        request.onUpdate = null;
+        hidPopup = true;
+        await KeyVerificationDialog(request: request).show(
+          TwakeApp.router.routerDelegate.navigatorKey.currentContext ?? context,
+        );
+      }).cancel,
+    );
+    _subscriptions.keep(
+      name,
+      'loginState',
+      () => currentClient.onLoginStateChanged.stream
+          .listen((state) => _listenLoginStateChanged(state, currentClient))
+          .cancel,
+    );
+    _subscriptions.keep(
+      name,
+      'uiaRequest',
+      () => currentClient.onUiaRequest.stream.listen(uiaRequestHandler).cancel,
+    );
+    _subscriptions.keep(
+      name,
+      'syncStatus',
+      () => currentClient.onSyncStatus.stream
+          .listen((update) => _handleSyncStatusUpdate(currentClient, update))
+          .cancel,
+    );
+    _subscriptions.keep(
+      name,
+      'toDeviceEvent',
+      () => currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
+        if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
+          final senderId = deviceEvent.senderId;
+          Logs().d(
+            '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
+          );
+          if (currentClient.deviceID != senderId &&
+              currentClient.userID != null) {
+            _contactsManager.initialSynchronizeContacts(
+              withMxId: currentClient.userID!,
+              forceRun: true,
+            );
+          }
+        }
+      }).cancel,
     );
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
+      // The pusher is registered while the name is open; one that finishes
+      // after a rollback or a logout is deleted again.
+      Future<void> setUpWebPush() => _subscriptions.runGuarded(
+        name,
+        setUp: () => setupWebPush(currentClient),
+        undo: () => removeWebPush(currentClient, unsubscribe: false),
+      );
+      void setUpWebPushReported() => unawaited(
+        setUpWebPush().catchError(
+          (Object e, StackTrace s) => _report(e, s, 'web push of $name'),
+        ),
+      );
+
       Future<void> initWebNotifications() async {
+        // Cancelled (a rollback, a logout) before this ran: set nothing up.
+        if (!_subscriptions.isOpen(name)) return;
         if (kIsWeb) {
-          // ignore: unawaited_futures
-          setupWebPush(currentClient);
+          setUpWebPushReported();
           // Re-register on language change (and once the locale resolves after
           // a cold start) so the generic notification text matches the account
           // language. removeListener+addListener keeps a single live listener.
@@ -530,50 +650,50 @@ class MatrixState extends ConsumerState<Matrix>
           if (listener != null) {
             LocalizationService.currentLocale.removeListener(listener);
           }
-          _webPushLocaleListener = () => setupWebPush(currentClient);
+          _webPushLocaleListener = setUpWebPushReported;
           LocalizationService.currentLocale.addListener(
             _webPushLocaleListener!,
           );
         } else {
           await _requestNotificationPermission();
         }
-        onNotification[name] ??= currentClient.onEvent.stream
-            .where(
-              (e) =>
-                  e.type == EventUpdateType.timeline &&
-                  EventTypeRules.messageContentTypes.contains(
-                    e.content['type'],
-                  ) &&
-                  e.content['sender'] != currentClient.userID,
-            )
-            .listen(showLocalNotification);
+        // The permission prompt can outlast the login: `keep` starts nothing
+        // for a name that was closed meanwhile.
+        _subscriptions.keep(
+          name,
+          'notification',
+          () => currentClient.onEvent.stream
+              .where(
+                (e) =>
+                    e.type == EventUpdateType.timeline &&
+                    EventTypeRules.messageContentTypes.contains(
+                      e.content['type'],
+                    ) &&
+                    e.content['sender'] != currentClient.userID,
+              )
+              .listen(showLocalNotification)
+              .cancel,
+        );
       }
 
       // On a warm start the first sync may already have happened before this
       // listener attaches, so onSync.stream.first would never fire and web push
       // setup would silently be skipped. Run immediately if already synced.
       if (currentClient.prevBatch != null) {
-        // ignore: unawaited_futures
-        initWebNotifications();
+        await initWebNotifications();
       } else {
-        currentClient.onSync.stream.first.then((_) => initWebNotifications());
+        // Waits for a sync that may never come: the wait is cancelled with the
+        // other subscriptions of the client.
+        _subscriptions.keepOnce(
+          name,
+          'firstSync',
+          currentClient.onSync.stream,
+          () => initWebNotifications().catchError(
+            (Object e, StackTrace s) => _report(e, s, 'notifications of $name'),
+          ),
+        );
       }
     }
-    currentClient.onToDeviceEvent.stream.listen((deviceEvent) {
-      if (deviceEvent.type == TwakeEventTypes.addressBookUpdatedEventType) {
-        final senderId = deviceEvent.senderId;
-        Logs().d(
-          '[MATRIX]: onToDeviceEvent:: addressBookUpdatedEventType: senderDevice = $senderId',
-        );
-        if (currentClient.deviceID != senderId &&
-            currentClient.userID != null) {
-          _contactsManager.initialSynchronizeContacts(
-            withMxId: currentClient.userID!,
-            forceRun: true,
-          );
-        }
-      }
-    });
   }
 
   void _handleSyncStatusUpdate(Client client, SyncStatusUpdate update) {
@@ -626,55 +746,173 @@ class MatrixState extends ConsumerState<Matrix>
     await html.Notification.requestPermission();
   }
 
-  void _listenLoginStateChanged(LoginState state, Client client) async {
-    final loggedInWithMultipleClients = widget.clients.length > 1;
+  Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
+    final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
-      _handleLogoutWithMultipleAccount(state, client);
+      await _handleLogoutWithMultipleAccount(state, client);
     } else {
       if (state == LoginState.loggedIn) {
         Logs().v('[MATRIX]:_listenLoginStateChanged:: First Log in successful');
-        _handleFirstLoggedIn(client, state);
+        // Not awaited: the session queues this behind a rollback that is
+        // cancelling this very listener, and cancelling waits for the handlers.
+        // The session never throws and is awaited by its own queue.
+        unawaited(_handleFirstLoggedIn(client, state));
       } else {
         Logs().v('[MATRIX]:_listenLoginStateChanged:: Last Log out successful');
-        await _handleLastLogout();
+        await _handleLastLogout(loggedOut: client);
       }
     }
   }
 
-  void _handleLogoutWithMultipleAccount(
+  Future<void> _handleLogoutWithMultipleAccount(
     LoginState state,
     Client currentClient,
   ) async {
     waitForFirstSync = false;
-
-    if (PlatformInfos.isIOS) {
-      backgroundPush?.cancelKeychainSyncForClient(currentClient);
-      await backgroundPush?.removePusherForClient(currentClient);
+    try {
+      await _removePush(currentClient);
+    } catch (e, s) {
+      _report(e, s, 'push removal of ${currentClient.clientName}');
     }
+    await _removeLoggedOutAccount(state, currentClient);
+  }
 
-    // Web: drop just this account's pusher, but keep the shared browser
-    // subscription alive for the accounts still signed in.
-    if (kIsWeb) await removeWebPush(currentClient, unsubscribe: false);
+  /// Push registration of an account that goes away: the keychain sync of iOS,
+  /// the pusher (it needs a session that is still open) and, on web, the
+  /// pusher of this account only: the shared browser subscription stays for
+  /// the accounts still signed in. Throws when a pusher cannot be deleted.
+  Future<void> _removePush(Client target) async {
+    if (PlatformInfos.isIOS) {
+      await backgroundPush?.cancelKeychainSyncForClient(target);
+    }
+    if (PlatformInfos.isMobile && target.isLogged()) {
+      await backgroundPush?.removePusherForClient(target);
+    }
+    if (kIsWeb) await removeWebPush(target, unsubscribe: false);
+  }
 
-    await _cancelSubs(currentClient.clientName);
-    widget.clients.remove(currentClient);
-    await ClientManager.removeClientNameFromStore(currentClient.clientName);
+  /// The push teardown of [target], to run before its logout (while the
+  /// session can still delete the pusher), for a normal logout, the last one
+  /// and a rolled-back login. A failure is reported and kept: it is recorded
+  /// across restarts and runs again, in the background, while the session of
+  /// [target] is still open. Never throws, so the logout goes on (local
+  /// first).
+  Future<void> removePushBeforeLogout(Client target) async {
+    await _pushRemovals.remove(
+      target.clientName,
+      PushRemovalPlan(
+        id: target.clientName,
+        repository: ref.read(accountRepositoryProvider),
+        sessionToken: () => target.isLogged() ? target.accessToken : null,
+        removePush: () => _removePush(target),
+        isPushReady: () =>
+            !PlatformInfos.isMobile || (backgroundPush?.hasPushToken ?? false),
+      ).steps,
+      _report,
+    );
+  }
+
+  /// Pusher deletions that failed before the last exit run again now, for the
+  /// accounts whose session is still open; a record whose account is gone
+  /// cannot be retried and is dropped.
+  Future<void> _retryPendingPushRemovalsFromLastRun() async {
+    final registry = ref.read(accountClientRegistryProvider);
+    try {
+      final retryable = await ref
+          .read(listPendingPushRemovalsInteractorProvider)
+          .execute();
+      for (final id in retryable) {
+        final pending = registry[id];
+        if (pending != null) await removePushBeforeLogout(pending);
+      }
+    } catch (e, s) {
+      _report(e, s, 'retry of the pending pusher deletions');
+    }
+  }
+
+  /// Removes the account that logged out. Every step (the wait for a switch,
+  /// the subscriptions, the removal, holding the account as unavailable, the
+  /// record that survives a restart, the effects of the change) runs again on
+  /// its own when it fails, in the background and after a restart, until it
+  /// works; meanwhile the account is listed as unavailable and cannot be
+  /// switched to.
+  Future<void> _removeLoggedOutAccount(
+    LoginState state,
+    Client currentClient, {
+    bool announce = true,
+  }) async {
+    await _logoutRemovals.remove(
+      currentClient.clientName,
+      LogoutRemovalPlan(
+        id: currentClient.clientName,
+        accounts: ref.read(accountsProvider.notifier),
+        isActive: () => ref.read(activeMatrixClientProvider) == currentClient,
+        cancelSubscriptions: () => _cancelSubs(currentClient.clientName),
+        activateReplacement: () => _activateAfterLogout(state, currentClient),
+        announce: announce ? _announceLogout : null,
+      ).steps,
+      _report,
+    );
+  }
+
+  /// The accounts whose removal did not finish before the app was closed are
+  /// removed again now, and again in the background until it works. They stay
+  /// listed even when nobody is logged in, so the state is the list to read.
+  void _retryPendingRemovalsFromLastRun() {
+    final registry = ref.read(accountClientRegistryProvider);
+    for (final account in ref.read(accountsProvider).accounts) {
+      if (account.status != AccountStatus.unavailable) continue;
+      final pending = registry[account.id];
+      if (pending == null) continue;
+      unawaited(
+        _removeLoggedOutAccount(LoginState.loggedOut, pending, announce: false),
+      );
+    }
+    unawaited(_retryPendingPushRemovalsFromLastRun());
+  }
+
+  Future<void> _announceLogout() async {
     await matrixState.cancelListenSynchronizeContacts();
     matrixState.reSyncContacts();
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
-    final result = await setActiveClient(widget.clients.first);
+  }
+
+  /// The active account is gone or held: the account that takes its place
+  /// gets the shared effects, or, with none logged in, the app goes where the
+  /// last logout goes.
+  Future<void> _activateAfterLogout(
+    LoginState state,
+    Client currentClient,
+  ) async {
+    if (ref.read(accountsProvider) is NoAccount) {
+      await _handleLastLogout(loggedOut: currentClient);
+      return;
+    }
+    final newActiveClient = client;
+    await _switchCoordinator.apply(newActiveClient);
+    // Push serves one account: the replacement gets its pusher now.
+    if (PlatformInfos.isMobile && newActiveClient.isLogged()) {
+      backgroundPush?.rebindFrom(currentClient, newActiveClient);
+    }
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
     );
-    if (state != LoginState.loggedIn && result.isSuccess) {
+    if (state != LoginState.loggedIn) {
       TwakeApp.router.go(
         '/rooms',
-        extra: LogoutBodyArgs(newActiveClient: widget.clients.first),
+        extra: LogoutBodyArgs(newActiveClient: newActiveClient),
       );
     }
+  }
+
+  /// Makes a failure visible: logged and sent to the error reporting.
+  void _report(Object error, StackTrace stackTrace, String what) {
+    Logs().wtf('MatrixState: $what', error, stackTrace);
+    // ignore: unawaited_futures
+    Sentry.captureException(error, stackTrace: stackTrace);
   }
 
   Future<void> _handleFirstLoggedIn(
@@ -682,11 +920,19 @@ class MatrixState extends ConsumerState<Matrix>
     LoginState loginState,
   ) async {
     waitForFirstSync = false;
+    try {
+      await ref
+          .read(accountsProvider.notifier)
+          .addAccount(AccountId(newActiveClient.clientName));
+    } catch (e, s) {
+      Logs().wtf('MatrixState::_handleFirstLoggedIn: cannot add account', e, s);
+      return;
+    }
     await setUpToMServicesInLogin(newActiveClient);
     await setUpFederationServicesInLogin(newActiveClient);
-    await _storePersistActiveAccount(newActiveClient);
-    await _getUserInfoWithActiveClient(newActiveClient);
-    await _getHomeserverInformation(newActiveClient);
+    await _switchCoordinator.activateCurrent();
+    // The first login of a boot that had nobody logged in.
+    _ensureBackgroundPush();
     matrixState.reSyncContacts();
     onClientLoginStateChanged.add(
       ClientLoginStateEvent(
@@ -697,20 +943,18 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
-  Future<void> _handleAddAnotherAccount(LoginState loginState) async {
+  Future<void> _handleAddAnotherAccount(
+    Client candidate,
+    LoginState loginState,
+  ) async {
     Logs().d(
       'MatrixState::_handleAddAnotherAccount() - Add another account successful',
     );
-    Logs().d(
-      'MatrixState::_handleAddAnotherAccount() - New Client ${_loginClientCandidate!.clientName}',
-    );
-    if (!widget.clients.contains(_loginClientCandidate)) {
-      widget.clients.add(_loginClientCandidate!);
-    }
-    await ClientManager.addClientNameToStore(_loginClientCandidate!.clientName);
-    Logs().d('MatrixState::_handleAddAnotherAccount() - Registering subs');
-    _registerSubs(_loginClientCandidate!.clientName);
-    final activeClient = getClientByName(_loginClientCandidate!.clientName);
+    await ref
+        .read(accountsProvider.notifier)
+        .addAccount(AccountId(candidate.clientName));
+    await _registerSubs(candidate.clientName);
+    final activeClient = getClientByName(candidate.clientName);
     if (activeClient == null) return;
     waitForFirstSync = false;
     await setUpToMServicesInLogin(activeClient);
@@ -722,7 +966,9 @@ class MatrixState extends ConsumerState<Matrix>
 
     final result = await setActiveClient(activeClient);
 
-    if (PlatformInfos.isIOS) {
+    // The first account after a time with nobody logged in gets the push set
+    // up like a first login; else only iOS sets push up for an additional one.
+    if (!_ensureBackgroundPush() && PlatformInfos.isIOS) {
       await backgroundPush?.setupPushForAdditionalClient(activeClient);
     }
 
@@ -737,14 +983,13 @@ class MatrixState extends ConsumerState<Matrix>
               MultipleAccountLoginType.otherAccountLoggedIn,
         ),
       );
-      _loginClientCandidate = null;
+      ref.read(pendingLoginCandidateProvider.notifier).set(null);
     }
   }
 
   Future<void> _deletePersistActiveAccount() async {
     try {
-      final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
-      await multipleAccountRepository.deletePersistActiveAccount();
+      await ref.read(accountRepositoryProvider).clearPersistedActiveAccount();
       Logs().d(
         'MatrixState::_handleLogoutWithMultipleAccount: Delete persist active account success',
       );
@@ -754,23 +999,55 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _cancelSubs(String name) async {
-    await onRoomKeyRequestSub[name]?.cancel();
-    onRoomKeyRequestSub.remove(name);
-    await onKeyVerificationRequestSub[name]?.cancel();
-    onKeyVerificationRequestSub.remove(name);
-    await onLoginStateChanged[name]?.cancel();
-    onLoginStateChanged.remove(name);
-    await onNotification[name]?.cancel();
-    onNotification.remove(name);
-    await onUiaRequest[name]?.cancel();
-    onUiaRequest.remove(name);
-    await onSyncStatusSub[name]?.cancel();
-    onSyncStatusSub.remove(name);
+    // The listener goes first: a failing cancel below must not leave it live.
     final webPushListener = _webPushLocaleListener;
     if (webPushListener != null) {
       LocalizationService.currentLocale.removeListener(webPushListener);
       _webPushLocaleListener = null;
     }
+    await _subscriptions.cancel(name);
+  }
+
+  /// Makes the push service serve the active client once it is logged in: it
+  /// creates the service, or, when the one that exists did not set push up
+  /// (the boot had nobody logged in, or the last account logged out since),
+  /// binds it to this client. A boot with no logged-in account has nothing to
+  /// push for, so the service is never bound to a client that cannot receive
+  /// push. Returns true when it set push up for the active client.
+  bool _ensureBackgroundPush() {
+    final pushClient = clientOrNull;
+    if (!PlatformInfos.isMobile ||
+        pushClient == null ||
+        !pushClient.isLogged()) {
+      return false;
+    }
+    final existing = backgroundPush;
+    if (existing != null) {
+      if (existing.isSetUp) return false;
+      existing.rebind(pushClient);
+      return true;
+    }
+    backgroundPush = BackgroundPush(
+      this,
+      pushClient,
+      onFcmError: (errorMsg, {Uri? link}) async {
+        final result = await showOkCancelAlertDialog(
+          barrierDismissible: true,
+          context: context,
+          title: L10n.of(context)!.oopsSomethingWentWrong,
+          message: errorMsg,
+          okLabel: link == null ? L10n.of(context)!.ok : L10n.of(context)!.help,
+          cancelLabel: L10n.of(context)!.doNotShowAgain,
+        );
+        if (result == OkCancelResult.ok && link != null) {
+          UrlLauncher(context, url: link.toString()).openUrlInAppBrowser();
+        }
+        if (result == OkCancelResult.cancel) {
+          await store.setItemBool(SettingKeys.showNoGoogle, true);
+        }
+      },
+    );
+    return true;
   }
 
   Future<void> initMatrix() async {
@@ -795,10 +1072,11 @@ class MatrixState extends ConsumerState<Matrix>
 
     _initWithStore();
 
-    for (final c in widget.clients) {
+    for (final c in accountClients) {
       Logs().d('MatrixState::initMatrix: ${c.clientName} calling registerSubs');
-      _registerSubs(c.clientName);
+      await _registerSubs(c.clientName);
     }
+    _retryPendingRemovalsFromLastRun();
 
     await _retrieveLocalToMConfiguration();
 
@@ -807,30 +1085,7 @@ class MatrixState extends ConsumerState<Matrix>
       onBlurSub = html.window.onBlur.listen((_) => webHasFocus = false);
     }
 
-    if (PlatformInfos.isMobile) {
-      backgroundPush = BackgroundPush(
-        this,
-        client,
-        onFcmError: (errorMsg, {Uri? link}) async {
-          final result = await showOkCancelAlertDialog(
-            barrierDismissible: true,
-            context: context,
-            title: L10n.of(context)!.oopsSomethingWentWrong,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context)!.ok
-                : L10n.of(context)!.help,
-            cancelLabel: L10n.of(context)!.doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            UrlLauncher(context, url: link.toString()).openUrlInAppBrowser();
-          }
-          if (result == OkCancelResult.cancel) {
-            await store.setItemBool(SettingKeys.showNoGoogle, true);
-          }
-        },
-      );
-    }
+    _ensureBackgroundPush();
 
     createVoipPlugin();
 
@@ -839,6 +1094,7 @@ class MatrixState extends ConsumerState<Matrix>
     await _setupSharingStreamsOnce();
   }
 
+  @override
   void createVoipPlugin() async {
     // if (await store.getItemBool(SettingKeys.experimentalVoip) == false) {
     //   voipPlugin = null;
@@ -876,7 +1132,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _retrieveLocalToMConfiguration() async {
-    if (widget.clients.isEmpty) return;
+    if (clientOrNull == null) return;
     if (client.userID == null) return;
 
     // Matrix APIs must remain available even when no optional ToM
@@ -905,8 +1161,9 @@ class MatrixState extends ConsumerState<Matrix>
 
   void setUpToMServices(
     ToMServerInformation tomServer,
-    IdentityServerInformation? identityServer,
-  ) {
+    IdentityServerInformation? identityServer, {
+    Client? forClient,
+  }) {
     Logs().d(
       'MatrixState::setUpToMServices: $tomServer, ${identityServer?.baseUrl}',
     );
@@ -914,9 +1171,10 @@ class MatrixState extends ConsumerState<Matrix>
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
-    setUpAuthorization(client);
-    if (client.homeserver != null) {
-      _setUpHomeServer(client.homeserver!);
+    final working = forClient ?? _workingClient;
+    setUpAuthorization(working);
+    if (working.homeserver != null) {
+      _setUpHomeServer(working.homeserver!);
     }
   }
 
@@ -969,7 +1227,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> tryToGetFederationConfigurations() async {
-    if (widget.clients.isEmpty) return;
+    if (clientOrNull == null) return;
     if (client.userID == null) return;
     try {
       final federationConfigurationRepository = getIt
@@ -1119,13 +1377,22 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  Future<void> _setUpToMServicesWhenChangingActiveClient(Client? client) async {
+  /// A token that went stale means a newer switch owns the shared state: the
+  /// body stops before its next write. Without a token the call is not part
+  /// of a switch and always writes.
+  bool _isCurrent(SwitchToken? token) => token?.isCurrent ?? true;
+
+  Future<void> _setUpToMServicesWhenChangingActiveClient(
+    Client? client, [
+    SwitchToken? token,
+  ]) async {
     Logs().d(
       'Matrix::_setUpToMServicesWhenChangingActiveClient: Old twakeSupported - $twakeSupported',
     );
     if (client == null || client.userID == null) return;
     try {
       final toMConfigurations = await getTomConfigurations(client.userID!);
+      if (!_isCurrent(token)) return;
       Logs().d(
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
@@ -1138,9 +1405,11 @@ class MatrixState extends ConsumerState<Matrix>
         setUpToMServices(
           toMConfigurations.tomServerInformation,
           toMConfigurations.identityServerInformation,
+          forClient: client,
         );
       }
     } catch (e, s) {
+      if (!_isCurrent(token)) return;
       _setUpToMServer(null);
       _setupAuthUrl();
       setUpAuthorization(client);
@@ -1157,31 +1426,22 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> retrievePersistedActiveClient() async {
     try {
-      final multipleAccountRepository = getIt.get<MultipleAccountRepository>();
-      final persistActiveAccount = await multipleAccountRepository
-          .getPersistActiveAccount();
-      if (persistActiveAccount == null) {
-        await _storePersistActiveAccount(client);
-        await _getUserInfoWithActiveClient(client);
-        await _getHomeserverInformation(client);
-        return;
-      } else {
-        final newActiveClient = getClientByUserId(persistActiveAccount);
-        if (newActiveClient != null) {
-          await setActiveClient(newActiveClient);
-        }
-      }
+      await _switchCoordinator.activateCurrent();
     } catch (e, s) {
       Logs().wtf('Matrix::_retrievePersistedActiveAccount(): Error', e, s);
     }
   }
 
-  Future<void> _getUserInfoWithActiveClient(Client newClient) async {
+  Future<void> _getUserInfoWithActiveClient(
+    Client newClient, [
+    SwitchToken? token,
+  ]) async {
     if (newClient.userID == null) return;
     try {
       final result = await getIt.get<UserInfoRepository>().getUserInfo(
         Uri.encodeComponent(newClient.userID!),
       );
+      if (!_isCurrent(token)) return;
 
       await LocalizationService.initializeLanguage(
         context,
@@ -1189,11 +1449,15 @@ class MatrixState extends ConsumerState<Matrix>
       );
     } catch (e, s) {
       Logs().wtf('Matrix::_getUserInfoWithActiveClient(): Error', e, s);
+      if (!_isCurrent(token)) return;
       await LocalizationService.initializeLanguage(context);
     }
   }
 
-  Future<void> _getHomeserverInformation(Client newClient) async {
+  Future<void> _getHomeserverInformation(
+    Client newClient, [
+    SwitchToken? token,
+  ]) async {
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
@@ -1221,7 +1485,10 @@ class MatrixState extends ConsumerState<Matrix>
 
     // The active client may have changed while awaiting: a late result must
     // not overwrite the newer account's summary.
-    if (clientOrNull != newClient) return;
+    if (!_isCurrent(token) ||
+        (_switchCoordinator.target ?? clientOrNull) != newClient) {
+      return;
+    }
 
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
@@ -1235,7 +1502,7 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
-    await _ensureToMServicesFromSummary(newClient);
+    await _ensureToMServicesFromSummary(newClient, token);
   }
 
   /// Rebuilds the ToM configuration of an already logged-in session from the
@@ -1248,7 +1515,10 @@ class MatrixState extends ConsumerState<Matrix>
   /// interceptor has no host and every `/_twake/*` request fails until the
   /// user logs in again. Re-deriving the configuration from the well-known
   /// keeps the ToM-backed address book working without a new login.
-  Future<void> _ensureToMServicesFromSummary(Client newClient) async {
+  Future<void> _ensureToMServicesFromSummary(
+    Client newClient, [
+    SwitchToken? token,
+  ]) async {
     if (newClient.userID == null) return;
 
     final tomServer = loginHomeserverSummary?.tomServer;
@@ -1268,7 +1538,7 @@ class MatrixState extends ConsumerState<Matrix>
       'from well-known (${tomServer.baseUrl})',
     );
     _setupAuthUrl();
-    setUpToMServices(tomServer, identityServer);
+    setUpToMServices(tomServer, identityServer, forClient: newClient);
     await _storeToMConfiguration(
       newClient,
       ToMConfigurations(
@@ -1278,6 +1548,7 @@ class MatrixState extends ConsumerState<Matrix>
         loginType: loginType,
       ),
     );
+    if (!_isCurrent(token)) return;
     // The address book may have been synced before the ToM configuration was
     // available, so refresh it now that it is reachable — otherwise the ToM
     // contacts only show up after a manual pull-to-refresh.
@@ -1294,8 +1565,11 @@ class MatrixState extends ConsumerState<Matrix>
     await _getHomeserverInformation(client);
   }
 
-  Future<void> _storePersistActiveAccount(Client newClient) async {
-    if (newClient.userID == null) return;
+  Future<void> _storePersistActiveAccount(
+    Client newClient, [
+    SwitchToken? token,
+  ]) async {
+    if (newClient.userID == null || !_isCurrent(token)) return;
     try {
       Logs().d(
         'Matrix::_storePersistActiveAccount: clientName - ${newClient.clientName}',
@@ -1303,11 +1577,9 @@ class MatrixState extends ConsumerState<Matrix>
       Logs().d(
         'Matrix::_storePersistActiveAccount: userId - ${newClient.userID}',
       );
-      final MultipleAccountRepository multipleAccountRepository = getIt
-          .get<MultipleAccountRepository>();
-      await multipleAccountRepository.storePersistActiveAccount(
-        newClient.userID!,
-      );
+      await ref
+          .read(accountRepositoryProvider)
+          .persistActiveAccount(newClient.clientName);
     } catch (e, s) {
       Logs().wtf('Matrix::_storePersistActiveAccount(): Error', e, s);
     }
@@ -1388,8 +1660,21 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
-  Future<void> _handleLastLogout() async {
+  Future<void> _handleLastLogout({required Client loggedOut}) async {
     waitForFirstSync = false;
+    // Nobody is logged in: the next login sets push up again.
+    backgroundPush?.forgetSetup();
+    if (PlatformInfos.isIOS) {
+      try {
+        await backgroundPush?.cancelKeychainSyncForClient(loggedOut);
+      } catch (e, s) {
+        _report(e, s, 'keychain sync cancel of ${loggedOut.clientName}');
+      }
+    }
+    final accounts = ref.read(accountsProvider);
+    if (accounts is Active && accounts.accounts.length == 1) {
+      ref.read(accountsProvider.notifier).logoutLast();
+    }
     matrixState.reSyncContacts();
     await matrixState.cancelListenSynchronizeContacts();
     Sentry.configureScope((scope) => scope.setUser(null));
@@ -1397,7 +1682,7 @@ class MatrixState extends ConsumerState<Matrix>
       await _deletePersistActiveAccount();
       TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     } else {
-      if (kIsWeb) await removeWebPush(client);
+      if (kIsWeb) await removeWebPush(loggedOut);
       TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();
@@ -1447,7 +1732,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   @override
   Future<void> onConnect() async {
-    if (widget.clients.isEmpty) return;
+    if (clientOrNull == null) return;
     if (client.homeserver != null) return;
     await _refreshHomeserverInformation(client);
   }
@@ -1456,7 +1741,7 @@ class MatrixState extends ConsumerState<Matrix>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().i('didChangeAppLifecycleState: AppLifecycleState = $state');
     Logs().i('didChangeAppLifecycleState: currentTime: ${DateTime.now()}');
-    if (widget.clients.isEmpty) return;
+    if (clientOrNull == null) return;
     final foreground =
         state != AppLifecycleState.detached &&
         state != AppLifecycleState.paused;
@@ -1566,26 +1851,17 @@ class MatrixState extends ConsumerState<Matrix>
     }
     intentFileStreamSubscription?.cancel();
     intentUriStreamSubscription?.cancel();
-    for (final s in onRoomKeyRequestSub.values) {
-      s.cancel();
-    }
-    for (final s in onKeyVerificationRequestSub.values) {
-      s.cancel();
-    }
-    for (final s in onLoginStateChanged.values) {
-      s.cancel();
-    }
-    for (final s in onNotification.values) {
-      s.cancel();
-    }
-    for (final s in onUiaRequest.values) {
-      s.cancel();
-    }
-    for (final s in onSyncStatusSub.values) {
-      s.cancel();
-    }
+    unawaited(_subscriptions.cancelAll());
+    _logoutRemovals.dispose();
+    _pushRemovals.dispose();
     onClientLoginStateChanged.close();
-    clientOrNull?.httpClient.close();
+    _switchCoordinator.dispose();
+    // `ref` is unsafe once the widget is unmounted, so read through the
+    // subscriptions opened in `initState`.
+    final clients = _accountClientsSubscription.read();
+    if (clients.isNotEmpty) {
+      (_activeClientSubscription.read() ?? clients.first).httpClient.close();
+    }
     onFocusSub?.cancel();
     onBlurSub?.cancel();
     backgroundPush?.clearingPushTimer?.cancel();
