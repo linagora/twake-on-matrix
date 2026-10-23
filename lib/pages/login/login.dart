@@ -129,8 +129,13 @@ class LoginController extends State<Login> {
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
-    _loginCompleter.complete();
     _pendingLoginClient = null;
+    if (event.multipleAccountLoginType.isFailure) {
+      // Not a completed login: the user can try again.
+      _handleLoginFailed(event.error);
+      return;
+    }
+    _loginCompleter.complete();
     switch (event.multipleAccountLoginType) {
       case MultipleAccountLoginType.firstLoggedIn:
         _handleFirstLoggedIn(event.client);
@@ -138,7 +143,21 @@ class LoginController extends State<Login> {
       case MultipleAccountLoginType.otherAccountLoggedIn:
         _handleAddAnotherAccount(event.client);
         return;
+      case MultipleAccountLoginType.loginFailed:
+      case MultipleAccountLoginType.cleanupFailed:
+        return;
     }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone: show why and let the user try again.
+  void _handleLoginFailed(Object? error) {
+    if (!mounted) return;
+    TwakeDialog.hideLoadingDialog(context);
+    setState(() {
+      loginError = (error ?? Object()).toLocalizedString(context);
+      loading = false;
+    });
   }
 
   void _handleFirstLoggedIn(Client client) {

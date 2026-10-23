@@ -1,0 +1,11 @@
+{
+  "rule_sets": [
+    {
+      "matching_content_path": "test/**",
+      "rules": [
+        { "name": "Primitive Obsession", "weight": 0.0 }
+      ],
+      "thresholds": []
+    }
+  ]
+}
