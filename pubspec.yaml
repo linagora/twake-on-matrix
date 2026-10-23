@@ -84,7 +84,7 @@ dependencies:
       ref: main
   flutter_portal: 1.1.4
   flutter_ringtone_player: 4.0.0+4
-  flutter_riverpod: 3.0.0
+  flutter_riverpod: 3.4.3
   flutter_secure_storage: 9.2.4
   flutter_slidable: 4.0.0
   flutter_svg: ^0.22.0
@@ -128,7 +128,7 @@ dependencies:
       # HTTPS so CI runners work without an SSH key (public repo)
       url: https://github.com/linagora/inview_notifier_list.git
       ref: master
-  json_annotation: 4.9.0
+  json_annotation: 4.12.0
   just_audio: 0.10.5
   keyboard_shortcuts: ^0.1.4
   latlong2: ^0.8.1
@@ -176,7 +176,7 @@ dependencies:
       url: https://github.com/linagora/receive_sharing_intent.git
       ref: fix/ios-share-unsaved-screenshot
   record: 6.1.1
-  riverpod_annotation: 3.0.0
+  riverpod_annotation: 4.0.7
   rxdart: ^0.27.7
   scroll_to_index: ^3.0.1
   sentry_flutter: ^9.10.0
@@ -229,19 +229,21 @@ dev_dependencies:
   flutter_native_splash: ^2.0.3+1
   flutter_test:
     sdk: flutter
-  freezed: ^3.2.3
-  go_router_builder: 4.2.0
+  freezed: ^4.0.1
+  go_router_builder: 4.3.1
   html: ^0.15.4
   import_sorter: ^4.6.0
   integration_test:
     sdk: flutter
-  json_serializable: ^6.6.2
-  mockito: 5.6.3
+  json_serializable: ^6.15.2
+  mockito: 5.8.1
   msix: ^3.6.2
   patrol: ^4.5.0
   patrol_cli: ^4.3.1
-  riverpod_generator: 3.0.0
+  riverpod_generator: 4.0.9
   sentry_dart_plugin: ^3.2.1
+  # go_router_builder 4.3.1 clashes with source_helper 1.4.0 (duplicate `qualifiedName` extension).
+  source_helper: 1.3.13
   translations_cleaner: ^0.0.5
   url_launcher_platform_interface: ^2.3.2
 flutter_launcher_icons:
@@ -297,7 +299,7 @@ dependency_overrides:
   file_selector: ^0.9.2+2
   file_selector_linux: ^0.9.1
   flutter_svg: ^2.0.4
-  # Required by riverpod_generator 3.0.0 while flutter_emoji_mart still pins
+  # Required by freezed 4 while flutter_emoji_mart still pins
   # freezed_annotation ^2.4.1.
   freezed_annotation: 3.1.0
   http: 1.2.2
