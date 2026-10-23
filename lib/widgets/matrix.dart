@@ -924,13 +924,14 @@ class MatrixState extends ConsumerState<Matrix>
     final identityServer =
         loginHomeserverSummary?.discoveryInformation?.mIdentityServer;
     final homeServer =
-        loginHomeserverSummary?.discoveryInformation?.mHomeserver;
+        loginHomeserverSummary?.discoveryInformation?.mHomeserver.baseUrl ??
+        client.homeserver;
     _setupAuthUrl();
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
     if (homeServer != null) {
-      _setUpHomeServer(homeServer.baseUrl);
+      _setUpHomeServer(homeServer);
     }
     if (tomServer != null) {
       await _storeToMConfiguration(
