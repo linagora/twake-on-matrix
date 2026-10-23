@@ -1506,10 +1506,6 @@
   },
   "oneClientLoggedOut": "One of your clients has been logged out",
   "addAccount": "Add account",
-  "editBundlesForAccount": "Edit bundles for this account",
-  "addToBundle": "Add to bundle",
-  "removeFromBundle": "Remove from this bundle",
-  "bundleName": "Bundle name",
   "enableMultiAccounts": "(BETA) Enable multi accounts on this device",
   "openInMaps": "Open in maps",
   "@openInMaps": {

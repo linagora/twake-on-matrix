@@ -158,14 +158,9 @@ class MatrixState extends ConsumerState<Matrix>
     return widget.clients[_activeClient];
   }
 
-  /// Null-safe accessor for the active client.
-  ///
-  /// Returns the same client as [client] whenever any account exists, but
-  /// returns null instead of throwing [StateError] (`widget.clients.first`
-  /// on an empty list) during a logged-out boot with `clients: []`.
-  /// Gated on [widget.clients.isEmpty] — not on [isValidActiveClient] — so it
-  /// preserves the exact `widget.clients.first` fallback the [client] getter
-  /// uses while `_activeClient` is still -1 in a normal logged-in boot.
+  /// Like [client], but null instead of throwing on a logged-out boot
+  /// (`clients: []`). Gated on `clients.isEmpty`, not [isValidActiveClient],
+  /// to keep the `clients.first` fallback while `_activeClient` is -1.
   Client? get clientOrNull => widget.clients.isEmpty ? null : client;
 
   /// True only when an account exists AND it is logged in.

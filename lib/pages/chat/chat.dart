@@ -1121,7 +1121,7 @@ class ChatController extends ConsumerState<Chat>
             if (event.canRedact) {
               await event.redactEvent();
             } else {
-              final client = currentRoomBundle.firstWhere(
+              final client = clientsInRoom.firstWhere(
                 (cl) => selectedEvents.first.senderId == cl!.userID,
                 orElse: () => null,
               );
@@ -1141,7 +1141,7 @@ class ChatController extends ConsumerState<Chat>
     _clearSelectEvent();
   }
 
-  List<Client?> get currentRoomBundle {
+  List<Client?> get clientsInRoom {
     final clients = matrix!.currentClients;
     clients.removeWhere((c) => c!.getRoomById(roomId!) == null);
     return clients;
@@ -1165,7 +1165,7 @@ class ChatController extends ConsumerState<Chat>
         !selectedEvents.first.status.isSent) {
       return false;
     }
-    return currentRoomBundle.any(
+    return clientsInRoom.any(
       (cl) => selectedEvents.first.senderId == cl!.userID,
     );
   }
@@ -1490,7 +1490,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void editSelectedEventAction() {
-    final client = currentRoomBundle.firstWhere(
+    final client = clientsInRoom.firstWhere(
       (cl) => selectedEvents.first.senderId == cl!.userID,
       orElse: () => null,
     );

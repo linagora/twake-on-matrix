@@ -70,7 +70,7 @@ with their module in Step 3. `getIt` is not swept: it goes module by module
 - `Matrix.of(context).client` → `ref.watch(matrixClientProvider)` in
   `build()`, `ref.read(matrixClientProvider)` in callbacks and `initState`
 - Every other `MatrixState` member read by the UI (`shareContent`,
-  `showToMBootstrap`, `loginType`, `accountBundles`…) → its own
+  `showToMBootstrap`, `loginType`…) → its own
   provider, one small pull request each
 - Rename the existing `ViewModel`s to `Controller`s
 

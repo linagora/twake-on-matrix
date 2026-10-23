@@ -352,7 +352,7 @@ extension LocalizedBody on Event {
     );
   }
 
-  List<Client?> currentRoomBundle(MatrixState? matrix) {
+  List<Client?> clientsInRoom(MatrixState? matrix) {
     if (matrix == null) {
       return [];
     }
@@ -368,11 +368,11 @@ extension LocalizedBody on Event {
   }
 
   bool canEditEvents(MatrixState? matrix) {
-    final isAuthoredByCurrentBundle = currentRoomBundle(
+    final isAuthoredByCurrentClient = clientsInRoom(
       matrix,
     ).any((cl) => senderId == cl!.userID);
 
-    if (isCaptionModeOrReply() && isAuthoredByCurrentBundle) {
+    if (isCaptionModeOrReply() && isAuthoredByCurrentClient) {
       return true;
     }
 
@@ -388,7 +388,7 @@ extension LocalizedBody on Event {
       return false;
     }
 
-    return isAuthoredByCurrentBundle;
+    return isAuthoredByCurrentClient;
   }
 
   bool get canDelete {
