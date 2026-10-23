@@ -126,6 +126,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           }
           final userId = matrix.client.userID;
           await Future.wait([
+            KeychainSharingManager.logoutNotificationSession(matrix.client),
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
             _deleteFederationConfigurations(matrix.client),
@@ -147,6 +148,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
           }
           final userId = matrix.client.userID;
           await Future.wait([
+            KeychainSharingManager.logoutNotificationSession(matrix.client),
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
             _deleteFederationConfigurations(matrix.client),

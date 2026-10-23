@@ -110,19 +110,8 @@ abstract class ClientManager {
     await Store().setItem(clientNamespace, jsonEncode(clientNamesList));
   }
 
-  static Future<void> _syncKeychainForClient(Client client) async {
-    if (!PlatformInfos.isIOS || !client.isLogged()) return;
-    final accessToken = client.accessToken;
-    final userId = client.userID;
-    final homeserver = client.homeserver?.toString();
-    if (accessToken == null || userId == null || homeserver == null) return;
-    await KeychainSharingManager.saveSession(
-      accessToken: accessToken,
-      userId: userId,
-      deviceId: client.deviceID ?? '',
-      homeserverUrl: homeserver,
-    );
-  }
+  static Future<void> _syncKeychainForClient(Client client) =>
+      KeychainSharingManager.syncNotificationSession(client);
 
   static NativeImplementations get nativeImplementations => kIsWeb
       ? const NativeImplementationsDummy()
