@@ -32,7 +32,7 @@ in [config.sample.json](https://github.com/linagora/twake-on-matrix/blob/main/co
   "enable_logs": true,
   "support_url": "https://example.com/",
   "support_email": "support@example.com",
-  "cozy_external_bridge_version": "0.8.0"
+  "cozy_external_bridge_version": "1.3.0"
 }
 ```
 

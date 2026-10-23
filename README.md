@@ -170,7 +170,7 @@ Here is an example working with `matrix.org`:
   "vapid_public_key": "",
   "web_push_enabled": false,
   "support_url": "https://twake.app/support",
-  "cozy_external_bridge_version": "0.16.1"
+  "cozy_external_bridge_version": "1.3.0"
 }
 ```
 
