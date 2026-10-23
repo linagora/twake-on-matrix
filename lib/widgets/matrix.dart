@@ -28,7 +28,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
 import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
-import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.provider.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -1023,7 +1023,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void setUpAuthorization(Client client) {
-    final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    final authorizationInterceptor = ref.read(authorizationInterceptorProvider);
     Logs().d(
       'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
     );
