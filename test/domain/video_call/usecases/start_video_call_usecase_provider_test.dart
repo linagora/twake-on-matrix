@@ -6,6 +6,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.provider.dart';
 import 'package:twake_chat/di/global/get_it_provider.dart';
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
@@ -43,15 +44,16 @@ void main() {
         ..registerSingleton<DioClient>(
           mockDioClient,
           instanceName: NetworkDI.tomDioClientName,
-        )
-        ..registerSingleton<DynamicUrlInterceptors>(
-          DynamicUrlInterceptors()..changeBaseUrl('https://tom.example.com/'),
-          instanceName: NetworkDI.tomServerUrlInterceptorName,
         );
 
       final container = ProviderContainer.test(
         retry: (_, _) => null,
-        overrides: [getItProvider.overrideWithValue(getIt)],
+        overrides: [
+          getItProvider.overrideWithValue(getIt),
+          tomServerUrlInterceptorProvider.overrideWithValue(
+            DynamicUrlInterceptors()..changeBaseUrl('https://tom.example.com/'),
+          ),
+        ],
       );
 
       // Act
