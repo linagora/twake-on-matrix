@@ -61,7 +61,6 @@ import 'package:twake_chat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
-import 'package:twake_chat/utils/account_bundles.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/basic_event_extension.dart';
@@ -1122,7 +1121,7 @@ class ChatController extends ConsumerState<Chat>
             if (event.canRedact) {
               await event.redactEvent();
             } else {
-              final client = currentRoomBundle.firstWhere(
+              final client = clientsInRoom.firstWhere(
                 (cl) => selectedEvents.first.senderId == cl!.userID,
                 orElse: () => null,
               );
@@ -1142,18 +1141,18 @@ class ChatController extends ConsumerState<Chat>
     _clearSelectEvent();
   }
 
-  List<Client?> get currentRoomBundle {
-    final clients = matrix!.currentBundle!;
+  List<Client?> get clientsInRoom {
+    final clients = matrix!.currentClients;
     clients.removeWhere((c) => c!.getRoomById(roomId!) == null);
     return clients;
   }
 
   bool get canRedactSelectedEvents {
     if (isArchived) return false;
-    final clients = matrix!.currentBundle;
+    final clients = matrix!.currentClients;
     for (final event in selectedEvents) {
       if (event.canRedact == false &&
-          !(clients!.any((cl) => event.senderId == cl!.userID))) {
+          !(clients.any((cl) => event.senderId == cl!.userID))) {
         return false;
       }
     }
@@ -1166,7 +1165,7 @@ class ChatController extends ConsumerState<Chat>
         !selectedEvents.first.status.isSent) {
       return false;
     }
-    return currentRoomBundle.any(
+    return clientsInRoom.any(
       (cl) => selectedEvents.first.senderId == cl!.userID,
     );
   }
@@ -1491,7 +1490,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void editSelectedEventAction() {
-    final client = currentRoomBundle.firstWhere(
+    final client = clientsInRoom.firstWhere(
       (cl) => selectedEvents.first.senderId == cl!.userID,
       orElse: () => null,
     );
@@ -1636,21 +1635,6 @@ class ChatController extends ConsumerState<Chat>
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
       await _draftStorage.save(roomId!, text);
     });
-    if (text.endsWith(' ') && matrix!.hasComplexBundles) {
-      final clients = currentRoomBundle;
-      for (final client in clients) {
-        final prefix = client!.sendPrefix;
-        if ((prefix.isNotEmpty) &&
-            text.toLowerCase() == '${prefix.toLowerCase()} ') {
-          setSendingClient(client);
-          inputText.value = '';
-          setState(() {
-            sendController.text = '';
-          });
-          return;
-        }
-      }
-    }
     typingCoolDown?.cancel();
     typingCoolDown = Timer(const Duration(seconds: 2), () {
       typingCoolDown = null;

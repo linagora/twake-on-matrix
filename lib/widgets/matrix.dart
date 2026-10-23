@@ -27,7 +27,6 @@ import 'package:universal_html/html.dart' as html hide File;
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
-import 'package:equatable/equatable.dart';
 import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
@@ -71,7 +70,6 @@ import 'package:universal_html/html.dart' as html;
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
-import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
 import '../utils/web_push/web_push.dart';
 import '../utils/famedlysdk_store.dart';
@@ -119,7 +117,6 @@ class MatrixState extends ConsumerState<Matrix>
   StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
   int _activeClient = -1;
-  String? activeBundle;
   Store store = Store();
   // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
   HomeserverSummary? get loginHomeserverSummary =>
@@ -156,19 +153,14 @@ class MatrixState extends ConsumerState<Matrix>
 
   Client get client {
     if (!isValidActiveClient) {
-      return currentBundle!.first!;
+      return widget.clients.first;
     }
     return widget.clients[_activeClient];
   }
 
-  /// Null-safe accessor for the active client.
-  ///
-  /// Returns the same client as [client] whenever any account exists, but
-  /// returns null instead of throwing [StateError] (`currentBundle!.first!`
-  /// on an empty list) during a logged-out boot with `clients: []`.
-  /// Gated on [widget.clients.isEmpty] — not on [isValidActiveClient] — so it
-  /// preserves the exact `currentBundle.first` fallback the [client] getter
-  /// uses while `_activeClient` is still -1 in a normal logged-in boot.
+  /// Like [client], but null instead of throwing on a logged-out boot
+  /// (`clients: []`). Gated on `clients.isEmpty`, not [isValidActiveClient],
+  /// to keep the `clients.first` fallback while `_activeClient` is -1.
   Client? get clientOrNull => widget.clients.isEmpty ? null : client;
 
   /// True only when an account exists AND it is logged in.
@@ -289,46 +281,8 @@ class MatrixState extends ConsumerState<Matrix>
     });
   }
 
-  List<Client?>? get currentBundle {
-    if (!hasComplexBundles) {
-      return List.from(widget.clients);
-    }
-    final bundles = accountBundles;
-    if (bundles.containsKey(activeBundle)) {
-      return bundles[activeBundle];
-    }
-    return bundles.values.first;
-  }
-
-  Map<String?, List<Client?>> get accountBundles {
-    final resBundles = <String?, List<_AccountBundleWithClient>>{};
-    for (var i = 0; i < widget.clients.length; i++) {
-      final bundles = widget.clients[i].accountBundles;
-      for (final bundle in bundles) {
-        if (bundle.name == null) {
-          continue;
-        }
-        resBundles[bundle.name] ??= [];
-        resBundles[bundle.name]!.add(
-          _AccountBundleWithClient(client: widget.clients[i], bundle: bundle),
-        );
-      }
-    }
-    for (final b in resBundles.values) {
-      b.sort(
-        (a, b) => a.bundle!.priority == null
-            ? 1
-            : b.bundle!.priority == null
-            ? -1
-            : a.bundle!.priority!.compareTo(b.bundle!.priority!),
-      );
-    }
-    return resBundles.map(
-      (k, v) => MapEntry(k, v.map((vv) => vv.client).toList()),
-    );
-  }
-
-  bool get hasComplexBundles => accountBundles.values.any((v) => v.length > 1);
+  /// A fresh copy on every call: callers filter it in place.
+  List<Client?> get currentClients => List<Client?>.from(widget.clients);
 
   Client? _loginClientCandidate;
 
@@ -1667,16 +1621,6 @@ class FixedThreepidCreds extends ThreepidCreds {
     if (idAccessToken != null) data['id_access_token'] = idAccessToken;
     return data;
   }
-}
-
-class _AccountBundleWithClient extends Equatable {
-  final Client? client;
-  final AccountBundle? bundle;
-
-  const _AccountBundleWithClient({this.client, this.bundle});
-
-  @override
-  List<Object?> get props => [client, bundle];
 }
 
 extension HomeserverSummaryConversion
