@@ -90,7 +90,8 @@ class SettingsProfileRobot extends HomeRobot {
     SettingsProfileEnum settingsProfileEnum, {
     Duration timeout = const Duration(seconds: 15),
   }) async {
-    await $.waitUntilVisible(item(settingsProfileEnum));
+    // The row's centre is empty space, so it is never hit-testable.
+    await item(settingsProfileEnum).waitUntilExists();
     final deadline = DateTime.now().add(timeout);
     var value = getValueOf(settingsProfileEnum) ?? '';
     while (value.isEmpty && DateTime.now().isBefore(deadline)) {
