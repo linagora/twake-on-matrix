@@ -75,6 +75,7 @@ TESTS=(
   integration_test/tests/chat/search_external_mxid_test.dart
   integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
   integration_test/tests/chat/transfer_ownership_test.dart
+  integration_test/tests/setting/settings_profile_web_test.dart
 )
 
 for test in "${TESTS[@]}"; do
