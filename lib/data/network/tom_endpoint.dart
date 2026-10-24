@@ -17,6 +17,10 @@ class TomEndpoint {
 
   static final ServicePath userInfoServicePath = ServicePath('/user_info');
 
+  static final ServicePath videoCallRoomsServicePath = ServicePath(
+    '/video_call/rooms',
+  );
+
   static const String twakeRootPath = '/_twake';
 
   static const String twakeAPIVersion = 'v1';
