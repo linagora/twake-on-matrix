@@ -118,7 +118,7 @@ In this order, one commit per step:
 ```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter analyze
+dart analyze --fatal-infos
 flutter test
 git add -N <new files>
 scripts/migration_status.sh --check origin/main

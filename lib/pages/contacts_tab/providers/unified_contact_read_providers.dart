@@ -12,7 +12,7 @@ part 'unified_contact_read_providers.g.dart';
 /// ever be that account's: after a switch the new key starts without a value
 /// (nothing of the previous account is served), and re-subscribing
 /// `contactsControllerProvider` leaves it untouched (no flash).
-@riverpod
+@Riverpod(keepAlive: true)
 Stream<List<UnifiedContact>> accountContacts(Ref ref, String userId) =>
     ref.watch(contactSyncServiceProvider(userId)).watchContacts();
 

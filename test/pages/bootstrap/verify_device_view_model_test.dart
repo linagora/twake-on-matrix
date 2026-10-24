@@ -49,8 +49,12 @@ class CountingStartSelfVerificationInteractor
 /// so calling `.notifier` on it throws; `overrideWith` keeps a live notifier.
 class FakeBootstrapViewModel extends BootstrapViewModel {
   final BootstrapUiState initialState;
+  // Test spies, read by the assertions.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
   bool retryCalled = false;
+  // ignore: riverpod_lint/avoid_public_notifier_properties
   String? unlockedWithRecoveryKey;
+  // ignore: riverpod_lint/avoid_public_notifier_properties
   bool unlockResult = true;
 
   FakeBootstrapViewModel(this.initialState);
