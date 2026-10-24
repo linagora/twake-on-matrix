@@ -498,9 +498,6 @@ class SettingsProfileController extends State<SettingsProfile>
         'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
       );
       currentProfile.value = profile;
-      if (profile.avatarUrl == null) {
-        _clearImageInLocal();
-      }
     }
     if (SettingsProfileEditRules.shouldOverwriteName(
       textBeforeRead: textBeforeRead,
