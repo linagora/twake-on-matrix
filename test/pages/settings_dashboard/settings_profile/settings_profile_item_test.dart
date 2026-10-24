@@ -35,7 +35,6 @@ void main() {
       textEditingController: controller,
       canEditDisplayName: canEditDisplayName,
       focusNode: focusNode,
-      onEditRequested: focusNode.requestFocus,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       onCopyAction: onCopyAction,
@@ -100,6 +99,17 @@ void main() {
       expect(find.byIcon(Icons.edit_outlined), findsNothing);
       expect(find.byType(TextField), findsNothing);
       expect(find.text('Alice'), findsOneWidget);
+    });
+
+    testWidgets('another edit row does not get the display name field', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        item(SettingsProfileEnum.bio, canEditDisplayName: true),
+      );
+
+      expect(find.byType(TextField), findsNothing);
     });
 
     testWidgets('matrix id row copies and is not editable', (tester) async {

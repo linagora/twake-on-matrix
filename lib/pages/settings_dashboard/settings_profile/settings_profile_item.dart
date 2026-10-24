@@ -14,7 +14,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
   final VoidCallback? onCopyAction;
   final bool canEditDisplayName;
   final bool enableDivider;
-  final VoidCallback? onEditRequested;
   final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
@@ -30,7 +29,6 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     this.onCopyAction,
     required this.canEditDisplayName,
     this.enableDivider = true,
-    this.onEditRequested,
     this.focusNode,
     this.onChanged,
     this.onSubmitted,
@@ -65,13 +63,13 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (textEditingController != null && isEditableText)
+                    if (textEditingController != null && _isEditableText)
                       TextField(
                         controller: textEditingController,
                         focusNode: focusNode,
                         onChanged: onChanged,
                         onSubmitted: onSubmitted,
-                        style: valueStyle(context),
+                        style: _valueStyle(context),
                         maxLines: 1,
                         decoration: const InputDecoration.collapsed(
                           hintText: null,
@@ -83,7 +81,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
                         builder: (context, value, _) {
                           return Text(
                             value.text,
-                            style: valueStyle(context),
+                            style: _valueStyle(context),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           );
@@ -96,7 +94,7 @@ class SettingsProfileItemBuilder extends StatelessWidget {
             if (hasSuffixIcon)
               IconButton(
                 onPressed: settingsProfilePresentation.isEditable
-                    ? onEditRequested
+                    ? focusNode?.requestFocus
                     : onCopyAction,
                 icon: Icon(
                   suffixIcon,
@@ -120,13 +118,14 @@ class SettingsProfileItemBuilder extends StatelessWidget {
     );
   }
 
-  TextStyle? valueStyle(BuildContext context) => Theme.of(context)
+  TextStyle? _valueStyle(BuildContext context) => Theme.of(context)
       .textTheme
       .bodyLarge
       ?.copyWith(color: LinagoraSysColors.material().onSurface);
 
-  bool get isEditableText =>
-      settingsProfilePresentation.isEditable && hasSuffixIcon;
+  bool get _isEditableText =>
+      settingsProfileEnum == SettingsProfileEnum.displayName &&
+      canEditDisplayName;
 
   bool get hasSuffixIcon {
     return switch (settingsProfileEnum) {
