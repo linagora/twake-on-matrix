@@ -86,7 +86,7 @@ class BackgroundPush {
   Store? _store;
 
   Store get store => _store ??= Store();
-  Timer? clearingPushTimer;
+  StreamSubscription<SyncUpdate>? onRoomSync;
 
   Future<void> loadLocale() async {
     final context = _matrixState?.context;
@@ -108,9 +108,11 @@ class BackgroundPush {
   bool upAction = false;
 
   BackgroundPush._(this.client) {
-    clearingPushTimer ??= Timer.periodic(const Duration(seconds: 20), (_) {
-      _onClearingPush(getFromServer: false);
-    });
+    // Clear only after a sync: unread counts are stale while sync is paused
+    // in background, and a timer would cancel notifications just shown.
+    onRoomSync ??= client.onSync.stream
+        .where((s) => s.hasRoomUpdate)
+        .listen((_) => _onClearingPush(getFromServer: false));
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: (endpoint, i) => _newUpEndpoint(endpoint.url, i),
@@ -348,8 +350,9 @@ class BackgroundPush {
 
   Future<void> cancelNotification(String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    final id = await mapRoomIdToInt(roomId);
-    await FlutterLocalNotificationsPlugin().cancel(id);
+    await _loadIdMap();
+    final id = idMap[roomId];
+    if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -798,26 +801,6 @@ class BackgroundPush {
         (await store.getItem(SettingKeys.notificationCurrentIds)) ?? '{}',
       ),
     );
-  }
-
-  Future<int> mapRoomIdToInt(String roomId) async {
-    await _loadIdMap();
-    int? currentInt;
-    try {
-      currentInt = idMap[roomId];
-    } catch (_) {
-      currentInt = null;
-    }
-    if (currentInt != null) {
-      return currentInt;
-    }
-    var nCurrentInt = 0;
-    while (idMap.values.contains(currentInt)) {
-      nCurrentInt++;
-    }
-    idMap[roomId] = nCurrentInt;
-    await store.setItem(SettingKeys.notificationCurrentIds, json.encode(idMap));
-    return nCurrentInt;
   }
 
   bool _clearingPushLock = false;
