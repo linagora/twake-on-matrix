@@ -126,8 +126,8 @@ class BootstrapViewModel extends _$BootstrapViewModel {
     BootstrapState.askWipeSsss: () => _bootstrap.wipeSsss(_wipe),
     BootstrapState.askBadSsss: () => _bootstrap.ignoreBadSecrets(true),
     BootstrapState.askUseExistingSsss: () => _bootstrap.useExistingSsss(!_wipe),
-    BootstrapState.askUnlockSsss: _bootstrap.unlockedSsss,
-    BootstrapState.askNewSsss: _bootstrap.newSsss,
+    BootstrapState.askUnlockSsss: () => _bootstrap.unlockedSsss(),
+    BootstrapState.askNewSsss: () => _bootstrap.newSsss(),
     BootstrapState.askWipeCrossSigning: () =>
         _bootstrap.wipeCrossSigning(_wipe),
     BootstrapState.askSetupCrossSigning: () => _bootstrap.askSetupCrossSigning(
