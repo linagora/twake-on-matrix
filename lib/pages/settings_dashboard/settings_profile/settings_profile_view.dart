@@ -131,15 +131,14 @@ class SettingsProfileView extends StatelessWidget {
                           .getTrailingIcon(),
                       leadingIcon: controller.getListProfileMobile[index]
                           .getLeadingIcon(),
-                      onEditRequested: () {
-                        final focusNode = controller.getFocusNode(
-                          controller.getListProfileMobile[index],
-                        );
-                        focusNode?.requestFocus();
-                      },
                       textEditingController: controller.getController(
                         controller.getListProfileMobile[index],
                       ),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileMobile[index],
+                      ),
+                      onChanged: (_) => controller.onDisplayNameChanged(),
+                      onSubmitted: (_) => controller.onDisplayNameSubmitted(),
                       onCopyAction: () => controller.copyEventsAction(
                         controller.getListProfileMobile[index],
                       ),
@@ -188,15 +187,14 @@ class SettingsProfileView extends StatelessWidget {
                       ),
                       suffixIcon: controller.getListProfileBasicInfo[index]
                           .getTrailingIcon(),
-                      onEditRequested: () {
-                        final focusNode = controller.getFocusNode(
-                          controller.getListProfileBasicInfo[index],
-                        );
-                        focusNode?.requestFocus();
-                      },
                       textEditingController: controller.getController(
                         controller.getListProfileBasicInfo[index],
                       ),
+                      focusNode: controller.getFocusNode(
+                        controller.getListProfileBasicInfo[index],
+                      ),
+                      onChanged: (_) => controller.onDisplayNameChanged(),
+                      onSubmitted: (_) => controller.onDisplayNameSubmitted(),
                       canEditDisplayName:
                           capabilities?.canEditDisplayName == true,
                     );
@@ -224,12 +222,6 @@ class SettingsProfileView extends StatelessWidget {
                       suffixIcon: controller
                           .getListProfileWorkIdentitiesInfo[index]
                           .getTrailingIcon(),
-                      onEditRequested: () {
-                        final focusNode = controller.getFocusNode(
-                          controller.getListProfileWorkIdentitiesInfo[index],
-                        );
-                        focusNode?.requestFocus();
-                      },
                       textEditingController: controller.getController(
                         controller.getListProfileWorkIdentitiesInfo[index],
                       ),
