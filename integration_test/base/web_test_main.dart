@@ -25,10 +25,12 @@ library;
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/providers/app_provider_container.dart';
 import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show UncontrolledProviderScope;
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
@@ -97,5 +99,10 @@ Future<void> main() async {
   // calls `widget.clients.add(...)` on a successful login, which would throw
   // on a const list. Held in a `final` so the analyzer doesn't suggest const.
   final clients = <Client>[];
-  runApp(ProviderScope(child: TwakeApp(clients: clients)));
+  runApp(
+    UncontrolledProviderScope(
+      container: createAppProviderContainer(),
+      child: TwakeApp(clients: clients),
+    ),
+  );
 }

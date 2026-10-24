@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/providers/app_provider_container.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
 import 'package:twake_chat/utils/manager/legacy_settings_migration_manager.dart';
@@ -60,6 +61,8 @@ Future<void> initializeApp() async {
 
   await LegacySettingsMigrationManager.migrateLegacySettingKeys();
 
+  final container = createAppProviderContainer();
+
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
   // Preload first client
@@ -76,7 +79,7 @@ Future<void> initializeApp() async {
     // starting the Flutter engine but process incoming push notifications.
     BackgroundPush.clientOnly(clients.first);
     // To start the flutter engine afterwards we add an custom observer.
-    WidgetsBinding.instance.addObserver(AppStarter(clients));
+    WidgetsBinding.instance.addObserver(AppStarter(clients, container));
     Logs().i(
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
@@ -93,7 +96,7 @@ Future<void> initializeApp() async {
   Logs().i(
     '${AppConfig.applicationName} started in foreground mode. Rendering GUI...',
   );
-  await startGui(clients);
+  await startGui(clients, container);
 }
 
 /// Opts the Android `image_picker` implementation into the modern, system
@@ -110,7 +113,7 @@ void _enableAndroidPhotoPicker() {
 }
 
 /// Fetch the pincode for the applock and start the flutter engine.
-Future<void> startGui(List<Client> clients) async {
+Future<void> startGui(List<Client> clients, ProviderContainer container) async {
   // Fetch the pin for the applock if existing for mobile applications.
   String? pin;
   if (PlatformInfos.isMobile) {
@@ -128,7 +131,8 @@ Future<void> startGui(List<Client> clients) async {
   // problems on other platforms if we wrap it always.
   await sentryInit(
     runApp: runApp,
-    app: ProviderScope(
+    app: UncontrolledProviderScope(
+      container: container,
       child: PlatformInfos.isMobile
           ? AppLock(
               builder: (args) => TwakeApp(clients: clients),
@@ -144,9 +148,10 @@ Future<void> startGui(List<Client> clients) async {
 /// is no longer detached.
 class AppStarter with WidgetsBindingObserver {
   final List<Client> clients;
+  final ProviderContainer container;
   bool guiStarted = false;
 
-  AppStarter(this.clients);
+  AppStarter(this.clients, this.container);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -156,7 +161,7 @@ class AppStarter with WidgetsBindingObserver {
     Logs().i(
       '${AppConfig.applicationName} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
     );
-    startGui(clients);
+    unawaited(startGui(clients, container));
     // We must make sure that the GUI is only started once.
     guiStarted = true;
   }
