@@ -37,7 +37,7 @@ final class NSEUserSession {
             .username(username: credentials.userID)
             .userAgent(userAgent: UserAgentBuilder.makeASCIIUserAgent())
             .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
-            .crossProcessStoreLocksHolderName(holderName: InfoPlistReader.main.bundleIdentifier)
+            .crossProcessLockConfig(crossProcessLockConfig: .multiProcess(holderName: InfoPlistReader.main.bundleIdentifier))
             .setSessionDelegate(sessionDelegate: clientSessionDelegate)
             .build()
         
@@ -103,6 +103,9 @@ final class NSEUserSession {
             case .eventNotFound:
                 MXLog.info("NSE: Notification event not found - roomID: \(roomID) eventID: \(eventID)")
                 return nil
+            case .eventRedacted:
+                MXLog.info("NSE: Notification event redacted - roomID: \(roomID) eventID: \(eventID)")
+                return nil
             }
         } catch {
             MXLog.error("NSE: Could not get notification's content, error: \(error)")
@@ -116,5 +119,9 @@ private class ClientDelegateWrapper: ClientDelegate {
 
     func didReceiveAuthError(isSoftLogout: Bool) {
         MXLog.error("Received authentication error, the NSE can't handle this.")
+    }
+
+    func onBackgroundTaskErrorReport(taskName: String, error: BackgroundTaskFailureReason) {
+        MXLog.error("NSE: Background task \(taskName) failed: \(error)")
     }
 }
