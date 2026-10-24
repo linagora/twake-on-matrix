@@ -1,7 +1,3 @@
-import 'package:matrix/matrix.dart';
-import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
-import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
-
 abstract final class SettingsProfileEditRules {
   static String? editedDisplayName({
     required String text,
@@ -22,14 +18,10 @@ abstract final class SettingsProfileEditRules {
 
   /// A failed fresh read right after a save must not replace the saved profile
   /// with an id-only one.
-  static Profile? reloadedProfile({
-    required MatrixUserProfile? fetched,
-    required String userId,
+  static bool keepsSavedProfile({
+    required bool readFailed,
     required bool fresh,
-  }) {
-    if (fetched == null && fresh) return null;
-    return fetched.toProfile(userId);
-  }
+  }) => readFailed && fresh;
 
   static bool shouldOverwriteName({
     required String textBeforeRead,

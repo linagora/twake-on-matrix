@@ -1,149 +1,82 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_edit_rules.dart';
 
 void main() {
-  const userId = '@alice:example.org';
+  test('editedDisplayName trims and ignores unchanged names', () {
+    const cases = <(String, String?)>[
+      ('  Bob  ', 'Bob'),
+      ('   ', null),
+      (' Alice ', null),
+    ];
 
-  group('SettingsProfileEditRules.editedDisplayName', () {
-    test('returns the trimmed name when it differs', () {
+    for (final (text, expected) in cases) {
       expect(
         SettingsProfileEditRules.editedDisplayName(
-          text: '  Bob  ',
+          text: text,
           currentName: 'Alice',
         ),
-        'Bob',
+        expected,
+        reason: 'text: "$text"',
       );
-    });
-
-    test('ignores a whitespace-only name', () {
-      expect(
-        SettingsProfileEditRules.editedDisplayName(
-          text: '   ',
-          currentName: 'Alice',
-        ),
-        isNull,
-      );
-    });
-
-    test('ignores the current name surrounded by spaces', () {
-      expect(
-        SettingsProfileEditRules.editedDisplayName(
-          text: ' Alice ',
-          currentName: 'Alice',
-        ),
-        isNull,
-      );
-    });
+    }
   });
 
-  group('SettingsProfileEditRules.hasChanges', () {
-    test('keeps Done for an edited name once the picked avatar is removed', () {
-      expect(
-        SettingsProfileEditRules.hasChanges(
-          text: 'Bob',
-          currentName: 'Alice',
-          hasPendingAvatar: false,
-        ),
-        isTrue,
-      );
-    });
+  test('hasChanges follows the edited name and the pending avatar', () {
+    const cases = <(String, bool, bool)>[
+      ('Bob', false, true),
+      ('Alice', true, true),
+      (' Alice ', false, false),
+    ];
 
-    test('shows Done for a pending avatar with an unchanged name', () {
+    for (final (text, hasPendingAvatar, expected) in cases) {
       expect(
         SettingsProfileEditRules.hasChanges(
-          text: 'Alice',
+          text: text,
           currentName: 'Alice',
-          hasPendingAvatar: true,
+          hasPendingAvatar: hasPendingAvatar,
         ),
-        isTrue,
+        expected,
+        reason: 'text: "$text", pending avatar: $hasPendingAvatar',
       );
-    });
-
-    test('hides Done when nothing changed', () {
-      expect(
-        SettingsProfileEditRules.hasChanges(
-          text: ' Alice ',
-          currentName: 'Alice',
-          hasPendingAvatar: false,
-        ),
-        isFalse,
-      );
-    });
+    }
   });
 
-  group('SettingsProfileEditRules.reloadedProfile', () {
-    test('keeps the saved profile when the fresh read fails', () {
+  test('keepsSavedProfile only when a fresh read fails', () {
+    const cases = <(bool, bool, bool)>[
+      (true, true, true),
+      (true, false, false),
+      (false, true, false),
+    ];
+
+    for (final (readFailed, fresh, expected) in cases) {
       expect(
-        SettingsProfileEditRules.reloadedProfile(
-          fetched: null,
-          userId: userId,
-          fresh: true,
+        SettingsProfileEditRules.keepsSavedProfile(
+          readFailed: readFailed,
+          fresh: fresh,
         ),
-        isNull,
+        expected,
+        reason: 'read failed: $readFailed, fresh: $fresh',
       );
-    });
-
-    test('falls back to an id-only profile on the first read', () {
-      final profile = SettingsProfileEditRules.reloadedProfile(
-        fetched: null,
-        userId: userId,
-        fresh: false,
-      );
-
-      expect(profile?.userId, userId);
-      expect(profile?.displayName, isNull);
-      expect(profile?.avatarUrl, isNull);
-    });
-
-    test('uses the fetched profile', () {
-      final profile = SettingsProfileEditRules.reloadedProfile(
-        fetched: const MatrixUserProfile(
-          matrixId: userId,
-          displayName: 'Bob',
-          avatarUrl: 'mxc://example.org/avatar',
-        ),
-        userId: userId,
-        fresh: true,
-      );
-
-      expect(profile?.displayName, 'Bob');
-      expect(profile?.avatarUrl, Uri.parse('mxc://example.org/avatar'));
-    });
+    }
   });
 
-  group('SettingsProfileEditRules.shouldOverwriteName', () {
-    test('overwrites an untouched field', () {
-      expect(
-        SettingsProfileEditRules.shouldOverwriteName(
-          textBeforeRead: 'Alice',
-          textAfterRead: 'Alice',
-          hadUnsavedEditBeforeRead: false,
-        ),
-        isTrue,
-      );
-    });
+  test('shouldOverwriteName keeps names typed or edited by the user', () {
+    const cases = <(String, String, bool, bool)>[
+      ('Alice', 'Alice', false, true),
+      ('Alice', 'Bob', false, false),
+      ('Bob', 'Bob', true, false),
+    ];
 
-    test('keeps a name typed during the read', () {
+    for (final (before, after, hadUnsavedEdit, expected) in cases) {
       expect(
         SettingsProfileEditRules.shouldOverwriteName(
-          textBeforeRead: 'Alice',
-          textAfterRead: 'Bob',
-          hadUnsavedEditBeforeRead: false,
+          textBeforeRead: before,
+          textAfterRead: after,
+          hadUnsavedEditBeforeRead: hadUnsavedEdit,
         ),
-        isFalse,
+        expected,
+        reason: 'before: "$before", after: "$after", edited: $hadUnsavedEdit',
       );
-    });
-
-    test('keeps an unsaved edit across an avatar removal', () {
-      expect(
-        SettingsProfileEditRules.shouldOverwriteName(
-          textBeforeRead: 'Bob',
-          textAfterRead: 'Bob',
-          hadUnsavedEditBeforeRead: true,
-        ),
-        isFalse,
-      );
-    });
+    }
   });
 }

@@ -4,6 +4,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -487,15 +488,15 @@ class SettingsProfileController extends State<SettingsProfile>
           : matrixUserProfileProvider(userId).future,
     );
     if (!mounted) return;
-    final profile = SettingsProfileEditRules.reloadedProfile(
-      fetched: data,
-      userId: userId,
+    final keepSavedProfile = SettingsProfileEditRules.keepsSavedProfile(
+      readFailed: data == null,
       fresh: fresh,
     );
-    Logs().d(
-      'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
-    );
-    if (profile != null) {
+    if (!keepSavedProfile) {
+      final profile = data.toProfile(userId);
+      Logs().d(
+        'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+      );
       currentProfile.value = profile;
       if (profile.avatarUrl == null) {
         _clearImageInLocal();
