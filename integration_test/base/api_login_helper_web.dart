@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'sticker_fixture.dart';
+
 /// Web implementation of the API login helper.
 ///
 /// On Flutter Web the SSO OIDC bypass used on mobile is not available —
@@ -105,6 +107,56 @@ Future<void> sendMessagesAsReceiver({
 }) async {
   for (final message in messages) {
     await sendMessageAsReceiver(message: message, roomId: roomId);
+  }
+}
+
+/// Sends an `m.sticker` event as the `Receiver` account. Twake cannot send
+/// stickers itself, so tests use this to receive one like from Element.
+Future<void> sendStickerAsReceiver({
+  required String body,
+  required String roomId,
+}) async {
+  const matrixURL = String.fromEnvironment('MATRIX_URL');
+  const receiver = String.fromEnvironment('Receiver');
+  const passOfReceiver = String.fromEnvironment('ReceiverPass');
+  final accessToken = await fetchAuthToken(
+    username: receiver,
+    password: passOfReceiver,
+  );
+
+  final upload = await http.post(
+    Uri.parse('$matrixURL/_matrix/media/v3/upload'),
+    headers: {
+      'Content-Type': stickerFixtureMimeType,
+      'Authorization': 'Bearer $accessToken',
+    },
+    body: stickerFixtureBytes,
+  );
+  if (upload.statusCode != 200) {
+    throw Exception(
+      'Sticker upload failed [${upload.statusCode}]: ${upload.body}',
+    );
+  }
+  final contentUri =
+      (jsonDecode(upload.body) as Map<String, dynamic>)['content_uri']
+          as String;
+
+  final encodedRoomId = Uri.encodeComponent(roomId);
+  final response = await http.put(
+    Uri.parse(
+      '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.sticker/'
+      'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
+    ),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    },
+    body: jsonEncode(stickerFixtureContent(body: body, url: contentUri)),
+  );
+  if (response.statusCode != 200) {
+    throw Exception(
+      'sendSticker failed [${response.statusCode}]: ${response.body}',
+    );
   }
 }
 

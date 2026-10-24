@@ -15,6 +15,9 @@ abstract class AbstractMessageMenuRobot {
   /// screen.
   Future<void> openForward(String message);
 
+  /// Same as [openForward], for the newest sticker of the timeline.
+  Future<void> openForwardOnLastSticker();
+
   /// Opens the action menu for [message] and taps Reply, leaving the composer
   /// in reply mode (the caller then sends the reply).
   Future<void> openReply(String message);
