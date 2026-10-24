@@ -2664,6 +2664,13 @@ stats:
 #    alias: "*"
 #    room_id: "*"
 #    action: allow
+#
+# Synapse denies publication by default; the public group tests need it.
+room_list_publication_rules:
+  - user_id: "*"
+    alias: "*"
+    room_id: "*"
+    action: allow
 
 
 ## Opentracing ##

@@ -106,6 +106,17 @@ extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
   bool get isInvitationEnabled =>
       this?.appTwakeInformation?.isInvitationEnabled ?? false;
 
+  bool get isPublicGroupsEnabled =>
+      this?.appTwakeInformation?.publicGroupsInformation?.isEnabled ?? false;
+
+  /// Limiting to the server cannot be undone, so it is the safe default.
+  bool get isPublicGroupsServerLimitedByDefault =>
+      this
+          ?.appTwakeInformation
+          ?.publicGroupsInformation
+          ?.isServerLimitedByDefault ??
+      true;
+
   bool get supportSSOLogin {
     return this?.loginFlows.any(
           (flow) => flow.type == AppConstants.ssoLoginType,
