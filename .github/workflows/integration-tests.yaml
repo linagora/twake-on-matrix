@@ -195,7 +195,7 @@ jobs:
           # 4 test cases (~8 min)
           - shard: shard_2_chat_list
             targets: integration_test/tests/chat/chat_list_test.dart
-          # 8 repeatable message test cases. transfer_ownership_test is
+          # 10 repeatable message test cases. transfer_ownership_test is
           # intentionally excluded: it transfers the persistent fixture to a
           # different owner. It stays covered by the web workflow, whose
           # Synapse is disposable.
@@ -206,6 +206,7 @@ jobs:
               integration_test/tests/chat/sending_message_test.dart
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart
+              integration_test/tests/chat/message_reactions_mobile_test.dart
           # 6 stateful chat flows, isolated from the message scenarios above.
           - shard: shard_4_chat_flows
             targets: >-
