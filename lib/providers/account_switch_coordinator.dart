@@ -241,7 +241,7 @@ class AccountSwitchCoordinator {
       apply(client).then<void>(
         (_) {},
         onError: (Object e, StackTrace s) =>
-            Logs().wtf('AccountSwitchCoordinator: restore failed', e, s),
+            Logs().w('AccountSwitchCoordinator: restore failed', e, s),
       ),
     );
   }
