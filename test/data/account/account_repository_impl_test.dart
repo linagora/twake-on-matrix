@@ -87,7 +87,7 @@ void main() {
   group('pendingRemovalIds', () {
     test('reads what markRemovalPending recorded', () async {
       registry.add(FakeAccountClient('a'));
-      repository.adopt([registry['a']!]);
+      repository.adopt([registry['a']!], pendingRemovals: const {});
       await repository.markRemovalPending('a');
 
       expect(await repository.pendingRemovalIds(), {'a'});
@@ -103,61 +103,26 @@ void main() {
       final a = FakeAccountClient('a', userID: '@a:s');
       final port = ClientAccountBootPort(repository: repository, clients: [a]);
 
-      expect(port.adopt(), const [
+      expect(port.adopt(pendingRemovals: const {}), const [
         Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
       ]);
       expect(registry['a'], same(a));
     });
   });
 
-  group('loadAccounts', () {
-    test(
-      'maps clients to accounts in store order and fills the registry',
-      () async {
-        final a = FakeAccountClient('a', userID: '@a:s');
-        final p = FakeAccountClient('p', logged: false);
-        dataSource.toLoad = [a, p];
+  group('adopt', () {
+    test('maps clients to accounts in store order and fills the registry', () {
+      final a = FakeAccountClient('a', userID: '@a:s');
+      final p = FakeAccountClient('p', logged: false);
 
-        final accounts = await repository.loadAccounts();
+      final accounts = repository.adopt([a, p], pendingRemovals: const {});
 
-        expect(accounts, [
-          const Account(
-            id: 'a',
-            userId: '@a:s',
-            status: AccountStatus.loggedIn,
-          ),
-          const Account(id: 'p', status: AccountStatus.unavailable),
-        ]);
-        expect(registry['a'], same(a));
-        expect(registry['p'], same(p));
-      },
-    );
-
-    test('passes initialize through', () async {
-      await repository.loadAccounts(initialize: false);
-      expect(dataSource.lastInitialize, isFalse);
-    });
-
-    test('an empty list gives an empty result', () async {
-      expect(await repository.loadAccounts(), isEmpty);
-    });
-
-    test('leaves the registry untouched when reading the pending removals '
-        'fails', () async {
-      final failing = AccountRepositoryImpl(
-        dataSource: dataSource,
-        persistedActiveAccount: PersistedActiveAccountSource(Store()),
-        pendingRemovals: _FailingPendingRemovals(),
-        pendingPushRemovals: PendingRemovalsSource(Store()),
-        pendingCandidateDiscards: PendingRemovalsSource(Store()),
-        registry: registry,
-        clientNameBuilder: () => 'new-client',
-      );
-      dataSource.toLoad = [FakeAccountClient('a', userID: '@a:s')];
-
-      await expectLater(failing.loadAccounts(), throwsStateError);
-
-      expect(registry['a'], isNull);
+      expect(accounts, [
+        const Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
+        const Account(id: 'p', status: AccountStatus.unavailable),
+      ]);
+      expect(registry['a'], same(a));
+      expect(registry['p'], same(p));
     });
   });
 
@@ -166,7 +131,7 @@ void main() {
       final accounts = repository.adopt([
         FakeAccountClient('a', userID: '@a:s'),
         FakeAccountClient('p', logged: false),
-      ]);
+      ], pendingRemovals: const {});
 
       expect(accounts.map((x) => x.status), [
         AccountStatus.loggedIn,
@@ -178,20 +143,33 @@ void main() {
     test('alone it is only logged out (the placeholder of the next login)', () {
       final accounts = repository.adopt([
         FakeAccountClient('p', logged: false),
-      ]);
+      ], pendingRemovals: const {});
 
       expect(accounts.single.status, AccountStatus.loggedOut);
     });
+  });
 
-    test('loadAccounts does the same', () async {
-      dataSource.toLoad = [
-        FakeAccountClient('a', userID: '@a:s'),
-        FakeAccountClient('p', logged: false),
-      ];
+  group('pending account removals survive an unreadable boot', () {
+    final a = FakeAccountClient('a', userID: '@a:s');
+    final b = FakeAccountClient('b', userID: '@b:s');
 
-      final accounts = await repository.loadAccounts();
+    test('marking a removal keeps the ones the last session saved', () async {
+      await PendingRemovalsSource(Store()).write({'b'});
+      // The boot read of the persisted ids failed: nothing is passed in.
+      repository.adopt([a, b], pendingRemovals: const {});
 
-      expect(accounts.last.status, AccountStatus.unavailable);
+      await repository.markRemovalPending('a');
+
+      expect(await repository.pendingRemovalIds(), {'a', 'b'});
+    });
+
+    test('removing an account keeps the other persisted ones', () async {
+      await PendingRemovalsSource(Store()).write({'a', 'b'});
+      repository.adopt([a, b], pendingRemovals: const {'a'});
+
+      await repository.removeAccount('a');
+
+      expect(await repository.pendingRemovalIds(), {'b'});
     });
   });
 
@@ -222,8 +200,9 @@ void main() {
     });
 
     test('an account loaded from the store is not added again', () async {
-      dataSource.toLoad = [FakeAccountClient('a', userID: '@a:s')];
-      await repository.loadAccounts();
+      repository.adopt([
+        FakeAccountClient('a', userID: '@a:s'),
+      ], pendingRemovals: const {});
 
       await repository.addAccount(
         const Account(id: 'a', status: AccountStatus.loggedIn),
@@ -245,11 +224,10 @@ void main() {
 
   group('removeAccount', () {
     setUp(() async {
-      dataSource.toLoad = [
+      repository.adopt([
         FakeAccountClient('a', userID: '@a:s'),
         FakeAccountClient('b', userID: '@b:s'),
-      ];
-      await repository.loadAccounts();
+      ], pendingRemovals: const {});
       dataSource.calls.clear();
     });
 
@@ -313,7 +291,7 @@ void main() {
 
         await expectLater(
           repository.removeAccount('new-client'),
-          throwsA(isA<InvalidAccountTransitionException>()),
+          throwsA(isA<NotStoredAccountException>()),
         );
         expect(dataSource.calls, isEmpty);
         expect(registry['new-client'], isNotNull);
@@ -364,13 +342,14 @@ void main() {
     });
 
     test('a stored account is never discarded', () async {
-      dataSource.toLoad = [FakeAccountClient('a', userID: '@a:s')];
-      await repository.loadAccounts();
+      repository.adopt([
+        FakeAccountClient('a', userID: '@a:s'),
+      ], pendingRemovals: const {});
       dataSource.calls.clear();
 
       await expectLater(
         repository.discardCandidate('a'),
-        throwsA(isA<InvalidAccountTransitionException>()),
+        throwsA(isA<StoredAccountException>()),
       );
       expect(dataSource.calls, isEmpty);
       expect(registry['a'], isNotNull);
@@ -403,11 +382,10 @@ void main() {
 
   group('persisted active account (D2: stored by userId)', () {
     setUp(() async {
-      dataSource.toLoad = [
+      repository.adopt([
         FakeAccountClient('a', userID: '@a:s'),
         FakeAccountClient('p', logged: false),
-      ];
-      await repository.loadAccounts();
+      ], pendingRemovals: const {});
     });
 
     test('nothing is persisted at first', () async {
@@ -464,13 +442,6 @@ void main() {
       expect(() => registry.clients.clear(), throwsUnsupportedError);
     });
   });
-}
-
-class _FailingPendingRemovals extends PendingRemovalsSource {
-  _FailingPendingRemovals() : super(Store());
-
-  @override
-  Future<Set<String>> read() => Future.error(StateError('unreadable'));
 }
 
 AccountRepositoryImpl _newRepository(

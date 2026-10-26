@@ -18,9 +18,7 @@ class FakeAccountClient extends Fake implements Client {
 }
 
 class FakeAccountClientDataSource implements AccountClientDataSource {
-  List<Client> toLoad = [];
   final calls = <String>[];
-  bool? lastInitialize;
   bool failDelete = false;
   bool failAddName = false;
   bool failRemoveName = false;
@@ -28,13 +26,6 @@ class FakeAccountClientDataSource implements AccountClientDataSource {
 
   /// Makes the clients `createClient` returns, when a test needs its own.
   Client Function(String clientName)? clientFactory;
-
-  @override
-  Future<List<Client>> loadClients({required bool initialize}) async {
-    lastInitialize = initialize;
-    calls.add('load');
-    return toLoad;
-  }
 
   @override
   Future<Client> createClient(String clientName) async {

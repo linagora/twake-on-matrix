@@ -52,7 +52,7 @@ class AccountRepositoryImpl implements AccountRepository {
   /// widget tree is building.
   List<Account> adopt(
     Iterable<Client> clients, {
-    Set<String> pendingRemovals = const {},
+    required Set<String> pendingRemovals,
   }) {
     _registry.replaceAll(clients);
     _storedIds
@@ -80,26 +80,11 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   List<Account> registeredAccounts() => [
     for (final id in _storedIds)
-      if (_registry[id] != null) _toAccount(_registry[id]!),
+      if (_registry[id] case final client?) _toAccount(client),
   ];
 
   @override
   Account accountOf(String id) => _toAccount(_requireClient(id));
-
-  @override
-  Future<List<Account>> loadAccounts({bool initialize = true}) async {
-    final clients = await _dataSource.loadClients(initialize: initialize);
-    final persistedPending = await _pendingRemovals.read();
-    _registry.replaceAll(clients);
-    _storedIds
-      ..clear()
-      ..addAll(clients.map((c) => c.clientName));
-    _pendingIds
-      ..clear()
-      ..addAll(persistedPending.where(_storedIds.contains))
-      ..addAll(_loggedOutBesideOthers(clients));
-    return clients.map(_toAccount).toList();
-  }
 
   @override
   Future<Account> createCandidate() async {
@@ -119,12 +104,7 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<void> removeAccount(String id) async {
     final client = _requireClient(id);
-    if (!_storedIds.contains(id)) {
-      throw const InvalidAccountTransitionException(
-        transition: 'removeAccount',
-        stateName: 'candidate',
-      );
-    }
+    if (!_storedIds.contains(id)) throw NotStoredAccountException(id);
     // The storage goes first and the bookkeeping only when that worked, so a
     // failure leaves the account listed and the call can be repeated.
     await _deleteStorage(id, client);
@@ -141,12 +121,8 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<void> markRemovalPending(String id) async {
     _requireClient(id);
-    if (!_storedIds.contains(id)) {
-      throw const InvalidAccountTransitionException(
-        transition: 'markRemovalPending',
-        stateName: 'candidate',
-      );
-    }
+    if (!_storedIds.contains(id)) throw NotStoredAccountException(id);
+    await _mergePersisted(_pendingIds, _pendingRemovals);
     _pendingIds.add(id);
     await _pendingRemovals.write(_pendingIds);
   }
@@ -213,8 +189,9 @@ class AccountRepositoryImpl implements AccountRepository {
   /// The account is gone; a record that cannot be cleared now is dropped at the
   /// next boot, because its client is no longer there.
   Future<void> _forgetPending(String id) async {
-    if (!_pendingIds.remove(id)) return;
     try {
+      await _mergePersisted(_pendingIds, _pendingRemovals);
+      if (!_pendingIds.remove(id)) return;
       await _pendingRemovals.write(_pendingIds);
     } catch (e, s) {
       Logs().w('Cannot clear the pending removal of $id', e, s);
@@ -229,12 +206,7 @@ class AccountRepositoryImpl implements AccountRepository {
       _registry.add(await _dataSource.createClient(id));
     }
     final client = _requireClient(id);
-    if (_storedIds.contains(id)) {
-      throw const InvalidAccountTransitionException(
-        transition: 'discardCandidate',
-        stateName: 'stored account',
-      );
-    }
+    if (_storedIds.contains(id)) throw StoredAccountException(id);
     await _deleteStorage(id, client);
     _registry.remove(id);
     _storageDeleted.remove(id);

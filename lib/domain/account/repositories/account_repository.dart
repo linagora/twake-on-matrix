@@ -5,10 +5,6 @@ import 'package:twake_chat/domain/account/entities/account.dart';
 /// Accounts are identified by client name; the persisted active account is
 /// stored by Matrix user id.
 abstract interface class AccountRepository {
-  /// Reads the stored accounts in store order. Meant to run once at boot; a
-  /// second call replaces what the first one loaded.
-  Future<List<Account>> loadAccounts({bool initialize = true});
-
   /// The accounts that are stored and in memory, in the order they were
   /// stored.
   List<Account> registeredAccounts();
@@ -36,7 +32,7 @@ abstract interface class AccountRepository {
 
   /// Records, across restarts, that the removal of the stored account [id]
   /// failed: the account is listed as unavailable until [removeAccount] works.
-  /// Throws InvalidAccountTransitionException for a candidate.
+  /// Throws NotStoredAccountException for a candidate.
   Future<void> markRemovalPending(String id);
 
   /// The accounts whose pusher deletion failed, kept across restarts: it runs
@@ -64,7 +60,7 @@ abstract interface class AccountRepository {
   /// storage; it stays known until that worked, so a failure can be retried.
   /// A candidate recorded by [markCandidateDiscardPending] is known again
   /// after a restart (read with [pendingCandidateDiscards] first).
-  /// Throws InvalidAccountTransitionException for a stored account.
+  /// Throws StoredAccountException for a stored account.
   Future<void> discardCandidate(String id);
 
   Future<String?> persistedActiveUserId();

@@ -12,10 +12,6 @@ class ClientManagerAccountDataSource implements AccountClientDataSource {
   final Set<Client> _disposed = {};
 
   @override
-  Future<List<Client>> loadClients({required bool initialize}) =>
-      ClientManager.getClients(initialize: initialize);
-
-  @override
   Future<Client> createClient(String clientName) =>
       ClientManager.createClient(clientName);
 
@@ -35,9 +31,8 @@ class ClientManagerAccountDataSource implements AccountClientDataSource {
       _disposed.add(client);
     }
     await database.delete();
-    if (database is MatrixSdkDatabase && database.database?.path != null) {
-      await deleteSqfliteDb(database.database!.path);
-    }
+    final path = database is MatrixSdkDatabase ? database.database?.path : null;
+    if (path != null) await deleteSqfliteDb(path);
     _disposed.remove(client);
   }
 }
