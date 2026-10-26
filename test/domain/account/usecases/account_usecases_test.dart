@@ -26,6 +26,15 @@ const _transitions = AccountTransitions(
 Account _in(String id) =>
     Account(id: id, userId: '@$id:s', status: AccountStatus.loggedIn);
 
+Future<void> _expectRejected(
+  Future<Object?> Function() run,
+  Matcher matcher,
+  _FakeRepository repository,
+) async {
+  await expectLater(run(), throwsA(matcher));
+  expect(repository.writes, isEmpty);
+}
+
 class _FakeRepository extends Fake implements AccountRepository {
   _FakeRepository(this.registered);
 
@@ -57,9 +66,28 @@ class _FakeRepository extends Fake implements AccountRepository {
   Future<void> markRemovalPending(String id) async => writes.add('pending $id');
 }
 
+/// Runs [execute] with a state that [changed] replaces during the write.
+Future<AccountsState?> _executeWithChangeDuringWrite(
+  _FakeRepository repository,
+  AccountsState start,
+  AccountsState changed,
+  Future<AccountsState?> Function(AccountsState Function() read) execute,
+) {
+  var current = start;
+  repository.onWrite = () => current = changed;
+  return execute(() => current);
+}
+
+AddAccountUseCase _addUseCase(_FakeRepository repository) =>
+    AddAccountUseCase(repository: repository, transitions: _transitions);
+
+RemoveAccountUseCase _removeUseCase(_FakeRepository repository) =>
+    RemoveAccountUseCase(repository: repository, transitions: _transitions);
+
 void main() {
   final a = _in('a');
   final b = _in('b');
+  AccountsState activeAB() => Active(accounts: [a, b], activeId: 'a');
 
   test('InitializeAccountsUseCase starts on the persisted account', () {
     final useCase = InitializeAccountsUseCase(
@@ -79,10 +107,7 @@ void main() {
 
     setUp(() {
       repository = _FakeRepository([a, b]);
-      useCase = AddAccountUseCase(
-        repository: repository,
-        transitions: _transitions,
-      );
+      useCase = _addUseCase(repository);
     });
 
     test('stores the account and lists it', () async {
@@ -96,34 +121,29 @@ void main() {
     });
 
     test('does nothing for an account that is already listed', () async {
-      final next = await useCase.execute(
-        () => Active(accounts: [a, b], activeId: 'a'),
-        'b',
-      );
+      final next = await useCase.execute(activeAB, 'b');
 
       expect(next, isNull);
       expect(repository.writes, isEmpty);
     });
 
-    test('stores nothing when the transition is invalid', () async {
-      await expectLater(
-        useCase.execute(() => const Booting(), 'b'),
-        throwsA(isA<InvalidAccountTransitionException>()),
+    test('stores nothing when the transition is invalid', () {
+      return _expectRejected(
+        () => useCase.execute(() => const Booting(), 'b'),
+        isA<InvalidAccountTransitionException>(),
+        repository,
       );
-      expect(repository.writes, isEmpty);
     });
 
     test('keeps the state that is current after the write', () async {
-      AccountsState current = Active(accounts: [a], activeId: 'a');
-      repository = _FakeRepository([a, b, _in('c')])
-        ..onWrite = () =>
-            current = Active(accounts: [a, _in('c')], activeId: 'a');
-      useCase = AddAccountUseCase(
-        repository: repository,
-        transitions: _transitions,
-      );
+      repository.registered.add(_in('c'));
 
-      final next = await useCase.execute(() => current, 'b');
+      final next = await _executeWithChangeDuringWrite(
+        repository,
+        Active(accounts: [a], activeId: 'a'),
+        Active(accounts: [a, _in('c')], activeId: 'a'),
+        (read) => useCase.execute(read, 'b'),
+      );
 
       expect(next, Active(accounts: [a, _in('c'), b], activeId: 'a'));
     });
@@ -145,41 +165,34 @@ void main() {
 
     setUp(() {
       repository = _FakeRepository([a, b]);
-      useCase = RemoveAccountUseCase(
-        repository: repository,
-        transitions: _transitions,
-      );
+      useCase = _removeUseCase(repository);
     });
 
     test('deletes the account and activates the next one', () async {
-      final next = await useCase.execute(
-        () => Active(accounts: [a, b], activeId: 'a'),
-        'a',
-      );
+      final next = await useCase.execute(activeAB, 'a');
 
       expect(next, Active(accounts: [b], activeId: 'b'));
       expect(repository.writes, ['remove a']);
     });
 
-    test('deletes nothing when the transition is invalid', () async {
-      await expectLater(
-        useCase.execute(() => const Booting(), 'a'),
-        throwsA(isA<UnknownAccountException>()),
+    test('deletes nothing when the transition is invalid', () {
+      return _expectRejected(
+        () => useCase.execute(() => const Booting(), 'a'),
+        isA<UnknownAccountException>(),
+        repository,
       );
-      expect(repository.writes, isEmpty);
     });
 
     test('keeps the state that is current after the delete', () async {
       final c = _in('c');
-      AccountsState current = Active(accounts: [a, b], activeId: 'a');
-      repository = _FakeRepository([a, b, c])
-        ..onWrite = () => current = Active(accounts: [a, b, c], activeId: 'a');
-      useCase = RemoveAccountUseCase(
-        repository: repository,
-        transitions: _transitions,
-      );
+      repository.registered.add(c);
 
-      final next = await useCase.execute(() => current, 'b');
+      final next = await _executeWithChangeDuringWrite(
+        repository,
+        activeAB(),
+        Active(accounts: [a, b, c], activeId: 'a'),
+        (read) => useCase.execute(read, 'b'),
+      );
 
       expect(next, Active(accounts: [a, c], activeId: 'a'));
     });
