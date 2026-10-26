@@ -80,6 +80,16 @@ abstract class ClientManager {
   static List<Client> loggedIn(Iterable<Client> clients) =>
       clients.where((client) => client.isLogged()).toList();
 
+  /// Deletes what a client stored: its database and, for the SQLite one, the
+  /// file.
+  static Future<void> deleteClientStorage(DatabaseApi database) async {
+    await database.delete();
+    if (database is MatrixSdkDatabase) {
+      final path = database.database?.path;
+      if (path != null) await deleteSqfliteDb(path);
+    }
+  }
+
   static Future<void> addClientNameToStore(String clientName) async {
     final clientNamesList = <String>[];
     final rawClientNames = await Store().getItem(clientNamespace);

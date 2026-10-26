@@ -13,7 +13,6 @@ import 'package:twake_chat/data/datasource/invitation/hive_invitation_status_dat
 import 'package:twake_chat/data/datasource/invitation/invitation_datasource.dart';
 import 'package:twake_chat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:twake_chat/data/datasource/media/media_data_source.dart';
-import 'package:twake_chat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:twake_chat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:twake_chat/data/datasource/recovery_words_data_source.dart';
 import 'package:twake_chat/utils/logging/filters/sensitive_data_filter.dart';
@@ -33,7 +32,6 @@ import 'package:twake_chat/data/datasource_impl/invitation/hive_invitation_statu
 import 'package:twake_chat/data/datasource_impl/invitation/invitation_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/media/media_data_source_impl.dart';
-import 'package:twake_chat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/reactions/reactions_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:twake_chat/data/datasource_impl/server_config_datasource_impl.dart';
@@ -42,7 +40,6 @@ import 'package:twake_chat/data/datasource_impl/tom_configurations_datasource_im
 import 'package:twake_chat/data/datasource_impl/user_info/user_info_datasource_impl.dart';
 import 'package:twake_chat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
-import 'package:twake_chat/data/local/multiple_account/multiple_account_cache_manager.dart';
 import 'package:twake_chat/data/local/reaction/reaction_cache_manager.dart';
 import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dart';
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
@@ -64,7 +61,6 @@ import 'package:twake_chat/data/repository/invitation/hive_invitation_status_rep
 import 'package:twake_chat/data/repository/invitation/invitation_repository_impl.dart';
 import 'package:twake_chat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:twake_chat/data/repository/media/media_repository_impl.dart';
-import 'package:twake_chat/data/repository/multiple_account/multiple_account_repository_impl.dart';
 import 'package:twake_chat/data/repository/reactions/reactions_repository_impl.dart';
 import 'package:twake_chat/data/repository/recovery_words_repository_impl.dart';
 import 'package:twake_chat/data/repository/server_config_repository_impl.dart';
@@ -82,7 +78,6 @@ import 'package:twake_chat/domain/repository/federation_configurations_repositor
 import 'package:twake_chat/domain/repository/invitation/hive_invitation_status_repository.dart';
 import 'package:twake_chat/domain/repository/invitation/invitation_repository.dart';
 import 'package:twake_chat/domain/repository/localizations/localizations_repository.dart';
-import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
 import 'package:twake_chat/domain/repository/reactions/reactions_repository.dart';
 import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
@@ -214,9 +209,6 @@ class GetItInitializer {
 
   void bindingCachingManager() {
     getIt.registerSingleton(PowerLevelManager());
-    getIt.registerFactory<MultipleAccountCacheManager>(
-      () => MultipleAccountCacheManager(),
-    );
     getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
     getIt.registerFactory<ReactionsCacheManager>(() => ReactionsCacheManager());
   }
@@ -268,9 +260,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerConfigDatasource>(
       () => ServerConfigDatasourceImpl(),
-    );
-    getIt.registerFactory<MultipleAccountDatasource>(
-      () => MultipleAccountDatasourceImpl(),
     );
     getIt.registerFactory<HiveInvitationStatusDatasource>(
       () => HiveInvitationStatusDatasourceImpl(),
@@ -347,9 +336,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerSearchRepository>(
       () => ServerSearchRepositoryImpl(),
-    );
-    getIt.registerFactory<MultipleAccountRepository>(
-      () => MultipleAccountRepositoryImpl(),
     );
     getIt.registerFactory<ServerConfigRepository>(
       () => ServerConfigRepositoryImpl(),

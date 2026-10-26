@@ -1,7 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/account/datasources/account_client_data_source.dart';
 import 'package:twake_chat/utils/client_manager.dart';
-import 'package:twake_chat/utils/open_sqflite_db.dart';
 
 /// Wraps the statics of [ClientManager], which stays as it is for now.
 class ClientManagerAccountDataSource implements AccountClientDataSource {
@@ -30,9 +29,7 @@ class ClientManagerAccountDataSource implements AccountClientDataSource {
       await client.dispose(closeDatabase: false);
       _disposed.add(client);
     }
-    await database.delete();
-    final path = database is MatrixSdkDatabase ? database.database?.path : null;
-    if (path != null) await deleteSqfliteDb(path);
+    await ClientManager.deleteClientStorage(database);
     _disposed.remove(client);
   }
 }

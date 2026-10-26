@@ -16,14 +16,12 @@ class AccountRepositoryImpl implements AccountRepository {
     required PendingRemovalsSource pendingPushRemovals,
     required AccountClientRegistry registry,
     required PendingRemovalsSource pendingCandidateDiscards,
-    String Function()? clientNameBuilder,
   }) : _dataSource = dataSource,
        _persistedActiveAccount = persistedActiveAccount,
        _pendingRemovals = pendingRemovals,
        _pendingPushRemovals = pendingPushRemovals,
        _pendingCandidateDiscards = pendingCandidateDiscards,
-       _registry = registry,
-       _clientNameBuilder = clientNameBuilder;
+       _registry = registry;
 
   final AccountClientDataSource _dataSource;
   final PersistedActiveAccountSource _persistedActiveAccount;
@@ -31,7 +29,6 @@ class AccountRepositoryImpl implements AccountRepository {
   final PendingRemovalsSource _pendingPushRemovals;
   final PendingRemovalsSource _pendingCandidateDiscards;
   final AccountClientRegistry _registry;
-  final String Function()? _clientNameBuilder;
 
   /// Names that are in the store, in store order, so a name is never written
   /// twice.
@@ -47,7 +44,6 @@ class AccountRepositoryImpl implements AccountRepository {
   bool _adopted = false;
 
   String _newClientName() =>
-      _clientNameBuilder?.call() ??
       '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
 
   /// Takes over clients that were already created and initialised at boot
