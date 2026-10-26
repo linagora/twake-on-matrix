@@ -131,85 +131,75 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<void> markRemovalPending(String id) async {
     _requireClient(id);
     if (!_storedIds.contains(id)) throw NotStoredAccountException(id);
-    await _mergeLivePending();
-    _pendingIds.add(id);
-    await _pendingRemovals.write(_pendingIds);
+    await _updateLivePending((ids) => ids.add(id));
   }
 
   @override
-  Future<Set<String>> pendingPushRemovals() async {
-    _pushIds
-      ..clear()
-      ..addAll(await _pendingPushRemovals.read());
-    return {..._pushIds};
-  }
+  Future<Set<String>> pendingPushRemovals() => _pendingPushRemovals.read();
 
   @override
-  Future<void> markPushRemovalPending(String id) async {
-    await _mergePersisted(_pushIds, _pendingPushRemovals);
-    _pushIds.add(id);
-    await _pendingPushRemovals.write(_pushIds);
-  }
+  Future<void> markPushRemovalPending(String id) =>
+      _update(_pendingPushRemovals, (ids) => ids.add(id));
 
   @override
-  Future<void> clearPushRemovalPending(String id) async {
-    await _mergePersisted(_pushIds, _pendingPushRemovals);
-    if (!_pushIds.remove(id)) return;
-    await _pendingPushRemovals.write(_pushIds);
-  }
-
-  /// Accounts whose pusher deletion failed; persisted like [_pendingIds].
-  final Set<String> _pushIds = {};
+  Future<void> clearPushRemovalPending(String id) =>
+      _update(_pendingPushRemovals, (ids) => ids.remove(id));
 
   @override
-  Future<Set<String>> pendingCandidateDiscards() async {
-    _candidateIds
-      ..clear()
-      ..addAll(await _pendingCandidateDiscards.read());
-    return {..._candidateIds};
-  }
+  Future<Set<String>> pendingCandidateDiscards() =>
+      _pendingCandidateDiscards.read();
 
   @override
-  Future<void> markCandidateDiscardPending(String id) async {
-    await _mergePersisted(_candidateIds, _pendingCandidateDiscards);
-    _candidateIds.add(id);
-    await _pendingCandidateDiscards.write(_candidateIds);
-  }
+  Future<void> markCandidateDiscardPending(String id) =>
+      _update(_pendingCandidateDiscards, (ids) => ids.add(id));
 
   @override
-  Future<void> clearCandidateDiscardPending(String id) async {
-    await _mergePersisted(_candidateIds, _pendingCandidateDiscards);
-    if (!_candidateIds.remove(id)) return;
-    await _pendingCandidateDiscards.write(_candidateIds);
+  Future<void> clearCandidateDiscardPending(String id) =>
+      _update(_pendingCandidateDiscards, (ids) => ids.remove(id));
+
+  /// The end of the last store update; each update starts after it, so two
+  /// read-modify-writes never interleave and none is lost.
+  Future<void> _lastUpdate = Future.value();
+
+  Future<void> _serialized(Future<void> Function() update) {
+    final next = _lastUpdate.then((_) => update());
+    _lastUpdate = next.catchError((Object _) {});
+    return next;
   }
 
-  /// The set is empty until its `pending*` call has read the store, so a
-  /// change made before that must not drop or miss what an earlier session
-  /// persisted.
-  Future<void> _mergePersisted(
-    Set<String> ids,
+  /// Reads the store, applies [change] and writes the result, in one
+  /// serialized section, so the store stays the only owner of the ids. Marking
+  /// or clearing an id twice writes once.
+  Future<void> _update(
     PendingRemovalsSource source,
-  ) async => ids.addAll(await source.read());
+    bool Function(Set<String> ids) change,
+  ) => _serialized(() async {
+    final ids = await source.read();
+    if (change(ids)) await source.write(ids);
+  });
 
-  /// Candidates whose storage could not be deleted; persisted, so a restart
-  /// still knows them.
-  final Set<String> _candidateIds = {};
+  /// Writes the pending account removals with the ones [adopt] found, without
+  /// the ids whose client is gone (left by an earlier session), so they are
+  /// never written back. [_pendingIds] takes what was written: it is only the
+  /// copy the synchronous [Account.status] reads.
+  Future<void> _updateLivePending(void Function(Set<String> ids) change) =>
+      _serialized(() async {
+        final ids = {...await _pendingRemovals.read(), ..._pendingIds}
+          ..removeWhere((p) => !_storedIds.contains(p));
+        change(ids);
+        await _pendingRemovals.write(ids);
+        _pendingIds
+          ..clear()
+          ..addAll(ids);
+      });
 
-  /// Merges the persisted pending removals, without the ids whose client is
-  /// gone (left by an earlier session), so they are never written back.
-  Future<void> _mergeLivePending() async {
-    await _mergePersisted(_pendingIds, _pendingRemovals);
-    _pendingIds.removeWhere((p) => !_storedIds.contains(p));
-  }
-
-  /// The account is gone, so it is no longer stored and the merge drops it
+  /// The account is gone, so it is no longer stored and the update drops it
   /// with any stale id. A record that cannot be cleared now stays in the
   /// store but is ignored by [adopt] and [pendingRemovalIds], and leaves the
   /// store at the next successful write.
   Future<void> _forgetPending(String id) async {
     try {
-      await _mergeLivePending();
-      await _pendingRemovals.write(_pendingIds);
+      await _updateLivePending((ids) => ids.remove(id));
     } catch (e, s) {
       Logs().w('Cannot clear the pending removal of $id', e, s);
     }
@@ -219,7 +209,8 @@ class AccountRepositoryImpl implements AccountRepository {
   Future<void> discardCandidate(String id) async {
     // After a restart the candidate has no client yet: one is made on its
     // storage, so the storage can be deleted.
-    if (_registry[id] == null && _candidateIds.contains(id)) {
+    if (_registry[id] == null &&
+        (await _pendingCandidateDiscards.read()).contains(id)) {
       _registry.add(await _dataSource.createClient(id));
     }
     final client = _requireClient(id);

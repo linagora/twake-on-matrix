@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.dart';
@@ -520,6 +522,122 @@ void main() {
       expect(registry['c'], isNotNull);
     });
   });
+
+  group('pending pushers and candidates are owned by the store', () {
+    for (final kind in _Kind.values) {
+      group(kind.name, () {
+        test(
+          'a read that finishes late does not bring a cleared id back',
+          () async {
+            final source = _GatedSource();
+            final repo = _repositoryWith(dataSource, registry, kind, source);
+            await kind.mark(repo, 'x');
+
+            final gate = source.holdNextRead();
+            final staleRead = kind.read(repo);
+            await kind.clear(repo, 'x');
+            gate.complete();
+
+            expect(await staleRead, {'x'});
+            await kind.mark(repo, 'y');
+            expect(await kind.read(repo), {'y'});
+            expect(await source.read(), {'y'});
+          },
+        );
+
+        test('two marks in parallel keep both ids', () async {
+          final source = _GatedSource();
+          final repo = _repositoryWith(dataSource, registry, kind, source);
+
+          await Future.wait([kind.mark(repo, 'a'), kind.mark(repo, 'b')]);
+
+          expect(await kind.read(repo), {'a', 'b'});
+        });
+
+        test('a new repository on the same store sees every write', () async {
+          final source = _GatedSource();
+          final repo = _repositoryWith(dataSource, registry, kind, source);
+          await kind.mark(repo, 'a');
+          await kind.mark(repo, 'b');
+          await kind.clear(repo, 'a');
+
+          final restarted = _repositoryWith(dataSource, registry, kind, source);
+
+          expect(await kind.read(restarted), {'b'});
+        });
+
+        test('marking or clearing twice is the same as once', () async {
+          final source = _GatedSource();
+          final repo = _repositoryWith(dataSource, registry, kind, source);
+
+          await kind.mark(repo, 'a');
+          await kind.mark(repo, 'a');
+          expect(await source.read(), {'a'});
+
+          await kind.clear(repo, 'a');
+          await kind.clear(repo, 'a');
+          expect(await source.read(), isEmpty);
+        });
+      });
+    }
+  });
+}
+
+enum _Kind {
+  push,
+  candidate;
+
+  Future<Set<String>> read(AccountRepositoryImpl r) => switch (this) {
+    push => r.pendingPushRemovals(),
+    candidate => r.pendingCandidateDiscards(),
+  };
+
+  Future<void> mark(AccountRepositoryImpl r, String id) => switch (this) {
+    push => r.markPushRemovalPending(id),
+    candidate => r.markCandidateDiscardPending(id),
+  };
+
+  Future<void> clear(AccountRepositoryImpl r, String id) => switch (this) {
+    push => r.clearPushRemovalPending(id),
+    candidate => r.clearCandidateDiscardPending(id),
+  };
+}
+
+AccountRepositoryImpl _repositoryWith(
+  FakeAccountClientDataSource dataSource,
+  AccountClientRegistry registry,
+  _Kind kind,
+  PendingRemovalsSource source,
+) => AccountRepositoryImpl(
+  dataSource: dataSource,
+  persistedActiveAccount: PersistedActiveAccountSource(Store()),
+  pendingRemovals: PendingRemovalsSource(Store()),
+  pendingPushRemovals: kind == _Kind.push ? source : _GatedSource(),
+  pendingCandidateDiscards: kind == _Kind.candidate ? source : _GatedSource(),
+  registry: registry,
+);
+
+/// In-memory store whose next read can be held until the test releases it,
+/// returning what was stored when the read started.
+class _GatedSource extends PendingRemovalsSource {
+  _GatedSource() : super(Store());
+
+  Set<String> _ids = {};
+  Completer<void>? _gate;
+
+  Completer<void> holdNextRead() => _gate = Completer<void>();
+
+  @override
+  Future<Set<String>> read() async {
+    final snapshot = {..._ids};
+    final gate = _gate;
+    _gate = null;
+    if (gate != null) await gate.future;
+    return snapshot;
+  }
+
+  @override
+  Future<void> write(Set<String> ids) async => _ids = {...ids};
 }
 
 AccountRepositoryImpl _newRepository(
