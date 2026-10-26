@@ -38,9 +38,7 @@ class StartVideoCallUseCase {
       return _slugService.generate();
     }
     // Received call links are only shown when they are on the base url.
-    final slug = roomUrl.startsWith('$baseUrl/')
-        ? _slugService.parse(roomUrl)
-        : null;
+    final slug = _slugService.parse(roomUrl, baseUrl: baseUrl);
     if (slug == null) {
       throw VideoCallRoomCreationFailedException(
         cause: FormatException('Unusable room url', roomUrl),

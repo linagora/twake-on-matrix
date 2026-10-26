@@ -140,6 +140,7 @@ void main() {
     for (final (name, roomUrl) in [
       ('IsOnAnotherHost', 'https://other-meet.example.com/abc-defg-hij'),
       ('ExtendsTheBaseUrlHost', '$baseUrl.evil.com/abc-defg-hij'),
+      ('HasAnExtraSegment', '$baseUrl/other/abc-defg-hij'),
       ('HasNoSlug', '$baseUrl/6f1c2d3e-0000-4000-8000-000000000000'),
     ]) {
       test('execute_whenRoomUrl${name}_throwsAndSendsNothing', () async {

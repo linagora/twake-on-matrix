@@ -44,59 +44,53 @@ void main() {
   });
 
   group('VideoCallSlugService.parse', () {
-    test('parse_whenUrlEndsWithASlug_returnsIt', () {
-      // Act
-      final slug = slugService.parse('$baseUrl/abc-defg-hij');
+    for (final (name, roomUrl) in [
+      ('IsOneSlugUnderTheBaseUrl', '$baseUrl/abc-defg-hij'),
+      ('HasATrailingSlash', '$baseUrl/abc-defg-hij/'),
+      ('HasAQueryAndFragment', '$baseUrl/abc-defg-hij?lang=fr#top'),
+      ('DiffersOnlyByCase', 'HTTPS://Meet.Example.com/abc-defg-hij'),
+      ('HasTheDefaultPort', 'https://meet.example.com:443/abc-defg-hij'),
+    ]) {
+      test('parse_whenUrl${name}_returnsTheSlug', () {
+        // Act
+        final slug = slugService.parse(roomUrl, baseUrl: baseUrl);
 
-      // Assert
-      expect(slug, 'abc-defg-hij');
-    });
+        // Assert
+        expect(slug, 'abc-defg-hij');
+      });
+    }
 
-    test('parse_whenUrlHasATrailingSlash_ignoresIt', () {
-      // Act
-      final slug = slugService.parse('$baseUrl/abc-defg-hij/');
-
-      // Assert
-      expect(slug, 'abc-defg-hij');
-    });
-
-    test('parse_whenUrlIsOnAnotherHost_returnsTheSlug', () {
+    test('parse_whenBaseUrlHasAPath_returnsTheSlugUnderIt', () {
       // Act
       final slug = slugService.parse(
-        'https://www.meet.example.org//abc-defg-hij',
+        'https://example.com/meet/abc-defg-hij',
+        baseUrl: 'https://example.com/meet',
       );
 
       // Assert
       expect(slug, 'abc-defg-hij');
     });
 
-    test('parse_whenUrlHasAQueryString_ignoresIt', () {
-      // Act
-      final slug = slugService.parse('$baseUrl/abc-defg-hij?lang=fr#top');
+    for (final (name, roomUrl) in [
+      ('IsOnAnotherHost', 'https://other.example.com/abc-defg-hij'),
+      ('ExtendsTheBaseHost', 'https://meet.example.com.evil.com/abc-defg-hij'),
+      ('UsesAnotherScheme', 'http://meet.example.com/abc-defg-hij'),
+      ('UsesAnotherPort', 'https://meet.example.com:8443/abc-defg-hij'),
+      ('HasAnExtraSegment', '$baseUrl/other/abc-defg-hij'),
+      ('HasAMalformedSlug', '$baseUrl/ABC-defg-hij'),
+      ('HasAShortSlug', '$baseUrl/abc-defg'),
+      ('HasAUuid', '$baseUrl/6f1c2d3e-0000-4000-8000-000000000000'),
+      ('IsTheBaseUrl', baseUrl),
+      ('IsTheBaseUrlWithASlash', '$baseUrl/'),
+      ('IsEmpty', ''),
+    ]) {
+      test('parse_whenUrl${name}_returnsNull', () {
+        // Act
+        final slug = slugService.parse(roomUrl, baseUrl: baseUrl);
 
-      // Assert
-      expect(slug, 'abc-defg-hij');
-    });
-
-    test('parse_whenSlugIsMalformed_returnsNull', () {
-      // Act & Assert
-      expect(slugService.parse('$baseUrl/ABC-defg-hij'), isNull);
-      expect(slugService.parse('$baseUrl/abc-defg'), isNull);
-      expect(
-        slugService.parse('$baseUrl/6f1c2d3e-0000-4000-8000-000000000000'),
-        isNull,
-      );
-    });
-
-    test('parse_whenUrlHasNoSlug_returnsNull', () {
-      // Act & Assert
-      expect(slugService.parse(baseUrl), isNull);
-      expect(slugService.parse('$baseUrl/'), isNull);
-    });
-
-    test('parse_whenUrlIsEmpty_returnsNull', () {
-      // Act & Assert
-      expect(slugService.parse(''), isNull);
-    });
+        // Assert
+        expect(slug, isNull);
+      });
+    }
   });
 }
