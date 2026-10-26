@@ -61,6 +61,7 @@ class AccountSwitchCoordinator {
   final AccountsState Function() _currentState;
 
   void Function()? _unregister;
+  bool _disposed = false;
   Client? _target;
   int _generation = 0;
 
@@ -94,6 +95,7 @@ class AccountSwitchCoordinator {
   void start() => _unregister ??= _accounts.registerSwitchHandler();
 
   void dispose() {
+    _disposed = true;
     _unregister?.call();
     _unregister = null;
     _invalidate();
@@ -103,6 +105,7 @@ class AccountSwitchCoordinator {
     AccountsState? previous,
     AccountsState next,
   ) async {
+    if (_disposed) return;
     if (next is LastLoggedOut || next is NoAccount) _reset();
     final endedOn = _switchEndedElsewhere(previous, next);
     if (endedOn != null) {
@@ -154,6 +157,7 @@ class AccountSwitchCoordinator {
   /// older one stops at its next checkpoint, after the steps that await.
   /// Returns true only when it ran to the end as the newest call.
   Future<bool> apply(Client client) {
+    if (_disposed) return Future.value(false);
     final token = _begin(client);
     final run = _run(client, token);
     _inFlight = run;
@@ -231,9 +235,9 @@ class AccountSwitchCoordinator {
 
   /// After a failed or cancelled switch the shared state may hold the half
   /// applied target; applies the account that stays active again, if its
-  /// effects ran before the switch (otherwise there is nothing to put back). Runs in the
-  /// background: the caller of the switch must not wait for the network. A
-  /// later switch or [activateCurrent] covers a restore that fails.
+  /// effects ran before the switch (otherwise there is nothing to put back).
+  /// Runs in the background: the caller of the switch must not wait for the
+  /// network. A later switch or [activateCurrent] covers a restore that fails.
   void _restoreOrigin(String id) {
     final client = _clientOf(id);
     if (client == null || !_dirty || !_originApplied) return;

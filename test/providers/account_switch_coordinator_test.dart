@@ -152,11 +152,7 @@ void main() {
   Future<void> pump() => Future<void>.delayed(Duration.zero);
 
   /// Lets the background work that nobody awaits (a restore) run to its end.
-  Future<void> settle() async {
-    for (var i = 0; i < 5; i++) {
-      await pump();
-    }
-  }
+  Future<void> settle() => pumpEventQueue();
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -585,14 +581,28 @@ void main() {
 
     test('starting twice registers one switch handler', () {
       boot();
-      coordinator
-        ..start()
-        ..dispose();
+      final accounts = container.read(accountsProvider.notifier);
+      coordinator.start();
 
-      expect(
-        container.read(accountsProvider.notifier).registerSwitchHandler,
-        returnsNormally,
-      );
+      expect(accounts.registerSwitchHandler, throwsA(isA<AssertionError>()));
+
+      coordinator.dispose();
+
+      expect(accounts.registerSwitchHandler, returnsNormally);
+    });
+
+    test('a run for another account does not stop the activation of the '
+        'active one', () async {
+      effects.gates['tom:b'] = Completer<void>();
+      boot();
+      final other = coordinator.apply(b);
+      await pump();
+
+      expect(await coordinator.activateCurrent(), isTrue);
+      effects.gates['tom:b']!.complete();
+
+      expect(await other, isFalse);
+      expect(coordinator.isAppliedTo(a), isTrue);
     });
 
     test('applies the active account once; later calls are no-ops', () async {
@@ -794,6 +804,24 @@ void main() {
       },
     );
 
+    test('after dispose no run starts, even when called directly', () async {
+      boot();
+      coordinator.dispose();
+
+      expect(await coordinator.apply(a), isFalse);
+      expect(await coordinator.activateCurrent(), isFalse);
+      await coordinator.onAccountsChanged(
+        null,
+        Switching(
+          accounts: (state() as Active).accounts,
+          from: 'a',
+          to: 'b',
+          seq: 1,
+        ),
+      );
+      expect(effects.log, isEmpty);
+    });
+
     test('after dispose no effect runs and a switch ends at once', () async {
       boot();
       subscription.close();
@@ -802,5 +830,65 @@ void main() {
       expect(effects.log, isEmpty);
       expect((state() as Active).activeId, 'b');
     });
+  });
+
+  group('invariants after every outcome', () {
+    void expectResting() {
+      expect(coordinator.target, isNull);
+      final current = state();
+      if (current is LastLoggedOut || current is NoAccount) {
+        expect(coordinator.hasApplied, isFalse);
+      }
+      if (current is Active) {
+        final active = {'a': a, 'b': b, 'c': c}[current.activeId]!;
+        expect(
+          !coordinator.hasApplied || coordinator.isAppliedTo(active),
+          isTrue,
+          reason: 'what is applied is the active account, or nothing',
+        );
+      }
+    }
+
+    final outcomes = <String, Future<void> Function()>{
+      'a switch that works': () => switchTo('b'),
+      'a step that throws': () async {
+        effects.failing.add('homeserver:b');
+        await expectLater(switchTo('b'), throwsStateError);
+      },
+      'a switch replaced by a newer one': () async {
+        effects.gates['tom:b'] = Completer<void>();
+        final first = expectLater(
+          switchTo('b'),
+          throwsA(isA<SwitchSupersededException>()),
+        );
+        await pump();
+        final second = switchTo('c');
+        effects.gates['tom:b']!.complete();
+        await first;
+        await second;
+      },
+      'the last account logging out': () async {
+        container.read(accountsProvider.notifier).logoutLast();
+      },
+    };
+    // Logging out is only possible with one account left.
+    const singleAccount = {'the last account logging out'};
+
+    for (final applied in [false, true]) {
+      for (final outcome in outcomes.entries) {
+        test(
+          '${outcome.key}, starting ${applied ? 'applied' : 'unapplied'}',
+          () async {
+            boot(clients: singleAccount.contains(outcome.key) ? [a] : null);
+            if (applied) await coordinator.activateCurrent();
+
+            await outcome.value();
+            await settle();
+
+            expectResting();
+          },
+        );
+      }
+    }
   });
 }
