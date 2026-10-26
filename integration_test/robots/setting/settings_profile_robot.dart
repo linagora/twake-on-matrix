@@ -83,6 +83,8 @@ class SettingsProfileRobot extends HomeRobot {
 
   String? getValueOf(SettingsProfileEnum settingsProfileEnum) {
     final row = item(settingsProfileEnum);
+    final field = row.$(EditableText).evaluate().firstOrNull;
+    if (field != null) return (field.widget as EditableText).controller.text;
     final title =
         (row.evaluate().first.widget as SettingsProfileItemBuilder).title;
     return row
