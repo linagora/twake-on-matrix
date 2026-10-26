@@ -341,9 +341,9 @@ void main() {
       },
     );
 
-    test('the last logged-out account is the login candidate', () {
+    test('the last logged-out account is the login candidate', () async {
       boot([a]);
-      notifier().logoutLast();
+      await notifier().logoutLast();
       expect(state(), isA<LastLoggedOut>());
       expect(container.read(loginCandidateProvider), same(a));
     });
@@ -794,11 +794,29 @@ void main() {
   });
 
   group('logoutLast and login again', () {
-    test('the last account stays listed, with no active client', () {
+    test('waits for a write in flight before it changes the state', () async {
+      boot([a]);
+      final gate = Completer<void>();
+      dataSource.addGate = gate.future;
+      container.read(accountClientsProvider);
+      container.read(accountClientRegistryProvider).add(b);
+      final adding = notifier().addAccount(const AccountId('b'));
+      await pumpEventQueue();
+
+      final loggingOut = notifier().logoutLast().catchError((_) {});
+      await pumpEventQueue();
+
+      expect(state(), isA<Active>());
+      gate.complete();
+      await adding;
+      await loggingOut;
+    });
+
+    test('the last account stays listed, with no active client', () async {
       boot([a]);
       final seen = record();
 
-      notifier().logoutLast();
+      await notifier().logoutLast();
 
       expect(seen, hasLength(1));
       expect(state(), isA<LastLoggedOut>());
@@ -819,7 +837,7 @@ void main() {
       await notifier().addAccount(AccountId(candidate.id));
       expect((state() as Active).accounts, hasLength(2));
 
-      notifier().logoutLast();
+      await notifier().logoutLast();
 
       final out = state() as NoAccount;
       expect(out.candidateId, candidate.id);
@@ -833,7 +851,7 @@ void main() {
 
     test('logging in again gives Active', () async {
       boot([a]);
-      notifier().logoutLast();
+      await notifier().logoutLast();
 
       await notifier().addAccount(const AccountId('a'));
 
@@ -931,7 +949,7 @@ void main() {
     });
   });
 
-  test('the transitions come from the overridable provider', () {
+  test('the transitions come from the overridable provider', () async {
     boot(
       [a],
       overrides: [
@@ -940,7 +958,7 @@ void main() {
     );
     expect(state(), isA<Active>());
 
-    notifier().logoutLast();
+    await notifier().logoutLast();
 
     expect(state(), const NoAccount(candidateId: 'stub'));
   });

@@ -156,9 +156,11 @@ class Accounts extends _$Accounts {
   );
 
   /// The only account logged out; it stays in the state as `LastLoggedOut`.
-  void logoutLast() {
-    if (ref.mounted) _move(_transitions.logoutLast(state));
-  }
+  /// Serialized with the writes, so it never changes the state under a removal
+  /// that is still waiting on the repository.
+  Future<void> logoutLast() => _serialized(() async {
+    _move(_transitions.logoutLast(_current()));
+  });
 
   /// Declares that something reacts to `Switching` and will end it: the
   /// coordinator, which is the only one. Returns the function that unregisters
