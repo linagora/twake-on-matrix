@@ -142,9 +142,7 @@ class AccountSwitchCoordinator {
     } catch (e, s) {
       if (e is SwitchSupersededException) {
         // Expected: a newer switch or a cancel replaced this one.
-        Logs().d(
-          'AccountSwitchCoordinator: switch to ${switching.to} replaced',
-        );
+        Logs().d('AccountSwitchCoordinator: a switch was replaced');
       } else {
         Logs().wtf('AccountSwitchCoordinator: switch failed', e, s);
       }
