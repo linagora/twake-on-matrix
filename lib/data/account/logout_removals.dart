@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:matrix/matrix.dart' show Logs;
 
 /// Makes a failure visible: logged and sent to the error reporting.
@@ -59,6 +60,7 @@ class LogoutRemovals {
   int _retryRounds = 0;
 
   /// The accounts whose removal, or what follows it, is not done yet.
+  @visibleForTesting
   Set<String> get failedIds => _removals.keys.toSet();
 
   /// Runs the steps for [id], or the ones that are left when [id] was started
@@ -151,8 +153,11 @@ class LogoutRemovals {
 
   /// Runs again every removal that is not done.
   Future<void> retryAll() async {
-    for (final entry in _removals.entries.toList()) {
-      await remove(entry.key, entry.value.steps, entry.value.report);
+    for (final id in _removals.keys.toList()) {
+      final removal = _removals[id];
+      // Another call may have finished it while the ones before ran.
+      if (removal == null) continue;
+      await remove(id, removal.steps, removal.report);
     }
   }
 

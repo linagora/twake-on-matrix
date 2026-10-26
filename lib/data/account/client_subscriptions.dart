@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:matrix/matrix.dart' show Logs;
+
 /// Cancels one subscription.
 typedef CancelSubscription = Future<void> Function();
 
@@ -41,9 +43,23 @@ class ClientSubscriptions {
     name,
     key,
     () => trigger.take(1).listen((_) {
-      if (isOpen(name)) unawaited(action());
+      if (isOpen(name)) unawaited(_runLogged(name, key, action));
     }).cancel,
   );
+
+  /// A failing action is logged: nobody awaits it, so it would otherwise end
+  /// as an uncaught error.
+  Future<void> _runLogged(
+    String name,
+    String key,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+    } catch (error, stackTrace) {
+      Logs().e('ClientSubscriptions: $key of $name failed', error, stackTrace);
+    }
+  }
 
   /// Runs [setUp] when [name] is open and, when [name] was closed while it
   /// ran, [undo] right after: a set-up that outlives its client is torn down.
@@ -53,8 +69,22 @@ class ClientSubscriptions {
     required Future<void> Function() undo,
   }) async {
     if (!isOpen(name)) return;
-    await setUp();
+    try {
+      await setUp();
+    } catch (_) {
+      // Half done: what was set up before the failure is undone too.
+      if (!isOpen(name)) await _undoLogged(name, undo);
+      rethrow;
+    }
     if (!isOpen(name)) await undo();
+  }
+
+  Future<void> _undoLogged(String name, Future<void> Function() undo) async {
+    try {
+      await undo();
+    } catch (error, stackTrace) {
+      Logs().w('ClientSubscriptions: undo of $name failed', error, stackTrace);
+    }
   }
 
   /// Stops accepting subscriptions for [name] and cancels what it has. A

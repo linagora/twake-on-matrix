@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // ignore: depend_on_referenced_packages
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,16 +11,19 @@ void main() {
   late List<String> log;
   late List<String> reports;
   late Set<String> failing;
+  late Map<String, Completer<void>> gates;
 
   setUp(() {
     removals = LogoutRemovals();
     log = [];
     reports = [];
     failing = {};
+    gates = {};
   });
 
   Future<void> step(String name, String id) async {
     log.add('$name:$id');
+    await gates['$name:$id']?.future;
     if (failing.contains('$name:$id')) throw StateError(name);
   }
 
@@ -95,6 +100,27 @@ void main() {
       isNotEmpty,
     );
   });
+
+  test(
+    'retryAll skips a removal that another call finished meanwhile',
+    () async {
+      failing.addAll(['remove:a', 'remove:b']);
+      await run('a');
+      await run('b');
+      failing.clear();
+      log.clear();
+      gates['remove:a'] = Completer<void>();
+
+      final retry = removals.retryAll();
+      await pumpEventQueue();
+      await run('b');
+      gates['remove:a']!.complete();
+      await retry;
+
+      expect(log.where((e) => e == 'remove:b'), hasLength(1));
+      expect(removals.failedIds, isEmpty);
+    },
+  );
 
   test('a retry runs the removal again and nothing that is done', () async {
     failing.add('remove:a');

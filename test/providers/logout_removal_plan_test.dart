@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +8,7 @@ import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -197,6 +200,27 @@ void main() {
       expect(removals.failedIds, isEmpty);
       expect(events.where((e) => e == 'announce:b'), hasLength(2));
       expect(dataSource.calls.where((c) => c == 'delete:b'), hasLength(1));
+    },
+  );
+
+  test(
+    'a removal waits for the switch that is running, which would refuse it',
+    () async {
+      boot([user('a'), user('b'), user('c')]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      unawaited(notifier().switchTo(const AccountId('b')));
+      await pumpEventQueue();
+      final ticket = (state() as Switching).ticket;
+
+      final removal = logout('c');
+      await pumpEventQueue();
+      expect(events, isEmpty);
+
+      notifier().completeSwitch(ticket);
+
+      expect(await removal, isTrue);
+      expect(events, ['cancel:c', 'announce:c']);
     },
   );
 }

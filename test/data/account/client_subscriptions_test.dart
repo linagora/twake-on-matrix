@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/account/client_subscriptions.dart';
 
@@ -99,5 +101,115 @@ void main() {
     await subscriptions.cancelAll();
 
     expect(log, unorderedEquals(['cancel:a-sync', 'cancel:b-sync']));
+  });
+
+  group('keepOnce', () {
+    late StreamController<int> trigger;
+
+    setUp(() => trigger = StreamController<int>.broadcast());
+    tearDown(() => trigger.close());
+
+    test('runs the action on the first event only', () async {
+      subscriptions.open('a');
+      var runs = 0;
+      subscriptions.keepOnce('a', 'first', trigger.stream, () async => runs++);
+
+      trigger
+        ..add(1)
+        ..add(2);
+      await pumpEventQueue();
+
+      expect(runs, 1);
+    });
+
+    test('does not run it once the client was closed', () async {
+      subscriptions.open('a');
+      var runs = 0;
+      subscriptions.keepOnce('a', 'first', trigger.stream, () async => runs++);
+
+      await subscriptions.cancel('a');
+      trigger.add(1);
+      await pumpEventQueue();
+
+      expect(runs, 0);
+    });
+
+    test('a failing action is logged, not thrown into the zone', () async {
+      subscriptions.open('a');
+      subscriptions.keepOnce(
+        'a',
+        'first',
+        trigger.stream,
+        () async => throw StateError('action'),
+      );
+
+      trigger.add(1);
+      await pumpEventQueue();
+    });
+  });
+
+  group('runGuarded', () {
+    test('does not run the set-up for a client that is not open', () async {
+      await subscriptions.runGuarded(
+        'a',
+        setUp: () async => log.add('setUp'),
+        undo: () async => log.add('undo'),
+      );
+
+      expect(log, isEmpty);
+    });
+
+    test('undoes a set-up that finished after the client was closed', () async {
+      subscriptions.open('a');
+      final gate = Completer<void>();
+      final run = subscriptions.runGuarded(
+        'a',
+        setUp: () async {
+          log.add('setUp');
+          await gate.future;
+        },
+        undo: () async => log.add('undo'),
+      );
+      await subscriptions.cancel('a');
+
+      gate.complete();
+      await run;
+
+      expect(log, ['setUp', 'undo']);
+    });
+
+    test('undoes a set-up that failed after the client was closed, and '
+        'throws its error', () async {
+      subscriptions.open('a');
+      final gate = Completer<void>();
+      final run = subscriptions.runGuarded(
+        'a',
+        setUp: () async {
+          log.add('setUp');
+          await gate.future;
+          throw StateError('half done');
+        },
+        undo: () async => log.add('undo'),
+      );
+      final thrown = expectLater(run, throwsStateError);
+      await subscriptions.cancel('a');
+
+      gate.complete();
+      await thrown;
+
+      expect(log, ['setUp', 'undo']);
+    });
+
+    test('keeps a set-up of a client that is still open', () async {
+      subscriptions.open('a');
+
+      await subscriptions.runGuarded(
+        'a',
+        setUp: () async => log.add('setUp'),
+        undo: () async => log.add('undo'),
+      );
+
+      expect(log, ['setUp']);
+    });
   });
 }

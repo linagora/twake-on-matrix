@@ -40,7 +40,7 @@ class LogoutRemovalPlan {
   );
 
   Future<void> _remove() async {
-    // A removal is rejected during a switch (P6): wait for it to end.
+    // A removal is rejected during a switch: wait for it to end.
     await _accounts.whenSwitchSettled();
     _wasActive ??= _isActive();
     await _cancelSubscriptions();

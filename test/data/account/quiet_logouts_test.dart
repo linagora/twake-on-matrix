@@ -14,7 +14,6 @@ void main() {
   test('the announced logout is quiet, however late it is seen', () async {
     quiet.announce('a');
 
-    await Future<void>.delayed(const Duration(milliseconds: 20));
     await pumpEventQueue();
 
     expect(quiet.consume('a', LoginState.loggedOut), isTrue);
