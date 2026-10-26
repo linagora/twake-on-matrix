@@ -19,8 +19,11 @@ class CreateNewGroupChatInteractor {
         content: {'url': createNewGroupChatRequest.urlAvatar},
         stateKey: '',
       );
-      final historyVisibility =
-          createNewGroupChatRequest.enableEncryption == true
+      final isPublic = createNewGroupChatRequest.isPublic;
+      final enableEncryption = isPublic
+          ? false
+          : createNewGroupChatRequest.enableEncryption;
+      final historyVisibility = enableEncryption == true
           ? HistoryVisibility.joined
           : HistoryVisibility.shared;
       final historyVisibilityStateEvent = StateEvent(
@@ -31,8 +34,12 @@ class CreateNewGroupChatInteractor {
 
       final roomId = await matrixClient.createGroupChat(
         groupName: createNewGroupChatRequest.groupName,
-        enableEncryption: createNewGroupChatRequest.enableEncryption,
-        preset: createNewGroupChatRequest.createRoomPreset,
+        enableEncryption: enableEncryption,
+        preset: isPublic
+            ? CreateRoomPreset.publicChat
+            : createNewGroupChatRequest.createRoomPreset,
+        visibility: isPublic ? Visibility.public : null,
+        federated: !(isPublic && createNewGroupChatRequest.isServerLimited),
         initialState: [addAvatarStateEvent, historyVisibilityStateEvent],
         powerLevelContentOverride:
             createNewGroupChatRequest.powerLevelContentOverride,
