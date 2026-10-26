@@ -41,6 +41,10 @@ class AccountRepositoryImpl implements AccountRepository {
   /// knows them.
   final Set<String> _pendingIds = {};
 
+  /// Until [adopt] ran, the stored ids are not known: the persisted pending
+  /// removals are returned as they are, for the boot to pass them to [adopt].
+  bool _adopted = false;
+
   String _newClientName() =>
       _clientNameBuilder?.call() ??
       '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
@@ -48,13 +52,15 @@ class AccountRepositoryImpl implements AccountRepository {
   /// Takes over clients that were already created and initialised at boot
   /// (by `ClientManager.getClients`); their names are already in the store.
   /// [pendingRemovals] are the persisted ids read at boot; the ones whose
-  /// client is gone are dropped. Plain object work: safe to call while the
-  /// widget tree is building.
+  /// client is gone are dropped; they leave the store at the next write of
+  /// the pending removals. Plain object work: safe to call while the widget
+  /// tree is building.
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
   }) {
     _registry.replaceAll(clients);
+    _adopted = true;
     _storedIds
       ..clear()
       ..addAll(clients.map((c) => c.clientName));
@@ -116,13 +122,16 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Set<String>> pendingRemovalIds() => _pendingRemovals.read();
+  Future<Set<String>> pendingRemovalIds() async {
+    final ids = await _pendingRemovals.read();
+    return _adopted ? ids.where(_storedIds.contains).toSet() : ids;
+  }
 
   @override
   Future<void> markRemovalPending(String id) async {
     _requireClient(id);
     if (!_storedIds.contains(id)) throw NotStoredAccountException(id);
-    await _mergePersisted(_pendingIds, _pendingRemovals);
+    await _mergeLivePending();
     _pendingIds.add(id);
     await _pendingRemovals.write(_pendingIds);
   }
@@ -186,12 +195,20 @@ class AccountRepositoryImpl implements AccountRepository {
   /// still knows them.
   final Set<String> _candidateIds = {};
 
-  /// The account is gone; a record that cannot be cleared now is dropped at the
-  /// next boot, because its client is no longer there.
+  /// Merges the persisted pending removals, without the ids whose client is
+  /// gone (left by an earlier session), so they are never written back.
+  Future<void> _mergeLivePending() async {
+    await _mergePersisted(_pendingIds, _pendingRemovals);
+    _pendingIds.removeWhere((p) => !_storedIds.contains(p));
+  }
+
+  /// The account is gone, so it is no longer stored and the merge drops it
+  /// with any stale id. A record that cannot be cleared now stays in the
+  /// store but is ignored by [adopt] and [pendingRemovalIds], and leaves the
+  /// store at the next successful write.
   Future<void> _forgetPending(String id) async {
     try {
-      await _mergePersisted(_pendingIds, _pendingRemovals);
-      if (!_pendingIds.remove(id)) return;
+      await _mergeLivePending();
       await _pendingRemovals.write(_pendingIds);
     } catch (e, s) {
       Logs().w('Cannot clear the pending removal of $id', e, s);

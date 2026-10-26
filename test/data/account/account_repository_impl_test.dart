@@ -117,6 +117,56 @@ void main() {
       expect(await repository.pendingRemovalIds(), {'a'});
     });
 
+    test(
+      'a stale id persisted by a past session is not written back',
+      () async {
+        await PendingRemovalsSource(Store()).write({'gone'});
+        repository.adopt(
+          [
+            FakeAccountClient('a', userID: '@a:s'),
+            FakeAccountClient('b', userID: '@b:s'),
+          ],
+          pendingRemovals: const {'gone'},
+        );
+
+        await repository.markRemovalPending('a');
+
+        expect(await PendingRemovalsSource(Store()).read(), {'a'});
+        expect(await repository.pendingRemovalIds(), {'a'});
+      },
+    );
+
+    test('removing an account drops the stale ids from the store', () async {
+      await PendingRemovalsSource(Store()).write({'gone'});
+      repository.adopt(
+        [
+          FakeAccountClient('a', userID: '@a:s'),
+          FakeAccountClient('b', userID: '@b:s'),
+        ],
+        pendingRemovals: const {'gone'},
+      );
+
+      await repository.removeAccount('a');
+
+      expect(await PendingRemovalsSource(Store()).read(), isEmpty);
+    });
+
+    test('after adopt a stale id is not reported as pending', () async {
+      await PendingRemovalsSource(Store()).write({'gone', 'a'});
+      repository.adopt(
+        [FakeAccountClient('a', userID: '@a:s')],
+        pendingRemovals: const {'gone', 'a'},
+      );
+
+      expect(await repository.pendingRemovalIds(), {'a'});
+    });
+
+    test('before adopt the persisted ids are returned for the boot', () async {
+      await PendingRemovalsSource(Store()).write({'a'});
+
+      expect(await repository.pendingRemovalIds(), {'a'});
+    });
+
     test('a record that cannot be cleared does not fail the removal', () async {
       final failing =
           AccountRepositoryImpl(
