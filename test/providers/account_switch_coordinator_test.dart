@@ -178,11 +178,12 @@ void main() {
     await settle();
   }
 
-  /// Boots with a applied and an empty log.
+  /// Boots with a applied and nothing recorded yet.
   Future<void> bootApplied() async {
     boot();
     await coordinator.apply(a);
     effects.log.clear();
+    effects.checks.clear();
   }
 
   setUp(() {
@@ -255,9 +256,7 @@ void main() {
 
     test('an origin applied before a failed switch is restored even when '
         'the switch was retried first', () async {
-      boot();
-      await coordinator.apply(a);
-      effects.log.clear();
+      await bootApplied();
       effects.failing.add('homeserver:c');
       effects.gates['tom:b'] = Completer<void>();
       final first = expectLater(
@@ -447,16 +446,9 @@ void main() {
   });
 
   group('rollback', () {
-    Future<void> applyOrigin() async {
-      boot();
-      await coordinator.apply(a);
-      effects.log.clear();
-      effects.checks.clear();
-    }
-
     test('a failed switch ends first, then the origin is applied again so '
         'its configuration is back', () async {
-      await applyOrigin();
+      await bootApplied();
       effects.failing.add('homeserver:b');
       await expectLater(switchTo('b'), throwsStateError);
       expect(coordinator.isAppliedTo(a), isFalse);
@@ -477,7 +469,7 @@ void main() {
 
     test('a failing restore is logged, not thrown, and the next activation '
         'applies the origin', () async {
-      await applyOrigin();
+      await bootApplied();
       effects.failing.add('homeserver');
       await expectLater(switchTo('b'), throwsStateError);
       await settle();
@@ -491,7 +483,7 @@ void main() {
 
     test('a failing step is logged once as a failure, its failed restore '
         'only as a warning', () async {
-      await applyOrigin();
+      await bootApplied();
       effects.failing.add('homeserver');
       Logs().outputEvents.clear();
 
@@ -504,7 +496,7 @@ void main() {
     });
 
     test('a restore is dropped when another switch starts', () async {
-      await applyOrigin();
+      await bootApplied();
       effects.failing.add('homeserver:b');
       effects.gates['userInfo:a'] = Completer<void>();
       await expectLater(switchTo('b'), throwsStateError);
@@ -525,7 +517,7 @@ void main() {
 
     test('switching back to the origin while the switch runs stops it and '
         'applies the origin again', () async {
-      await applyOrigin();
+      await bootApplied();
       final toB = supersededSwitchHeldAt('userInfo:b', 'b');
       await pump();
       expect(effects.store['tom'], 'b');
@@ -543,16 +535,51 @@ void main() {
     });
 
     test('a switch superseded by another one is not rolled back', () async {
-      await applyOrigin();
+      await bootApplied();
       await replaceHeldSwitchToB('userInfo:b');
 
       expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
       expect(effects.store.values.toSet(), {'c'});
     });
 
+    Future<void> expectOriginNotRestored(Future<void> failedSwitch) async {
+      await failedSwitch;
+      await settle();
+      expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
+      expect((state() as Active).activeId, 'a');
+    }
+
+    test('an origin that never had a client is not restored after a failed '
+        'switch', () async {
+      final registry = {'b': b, 'c': c};
+      boot(clientOf: (id) => registry[id]);
+      effects.failing.add('homeserver:b');
+
+      await expectOriginNotRestored(
+        expectLater(switchTo('b'), throwsStateError),
+      );
+    });
+
+    test('an origin whose client is gone when the switch fails is not '
+        'restored', () async {
+      var originGone = false;
+      final registry = {'a': a, 'b': b, 'c': c};
+      boot(clientOf: (id) => originGone && id == 'a' ? null : registry[id]);
+      await coordinator.apply(a);
+      effects.log.clear();
+      effects.failing.add('persist:b');
+      effects.gates['tom:b'] = Completer<void>();
+
+      final failed = expectLater(switchTo('b'), throwsStateError);
+      await pump();
+      originGone = true;
+      effects.gates['tom:b']!.complete();
+      await expectOriginNotRestored(failed);
+    });
+
     test('an account without a client changes nothing, so nothing is '
         'restored', () async {
-      await applyOrigin();
+      await bootApplied();
       final registry = {'a': a, 'b': b, 'c': c};
       container.dispose();
       boot(clientOf: (id) => id == 'b' ? null : registry[id]);
