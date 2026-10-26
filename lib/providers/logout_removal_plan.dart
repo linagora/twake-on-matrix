@@ -32,10 +32,6 @@ class LogoutRemovalPlan {
   bool? _wasActive;
   bool _announced = false;
 
-  /// Whether the account was the active one when its removal started; null
-  /// before that.
-  bool? get wasActive => _wasActive;
-
   late final RemovalSteps steps = RemovalSteps(
     remove: _remove,
     hold: _hold,

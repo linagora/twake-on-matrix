@@ -1,6 +1,7 @@
 // ignore: depend_on_referenced_packages
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart' show Level, Logs;
 import 'package:twake_chat/data/account/logout_removals.dart';
 
 void main() {
@@ -55,6 +56,45 @@ void main() {
       expect(reports, ['cannot remove logged-out account a']);
     },
   );
+
+  test(
+    'a step that keeps failing is reported once, then only logged',
+    () async {
+      failing.add('remove:a');
+      await run('a');
+      Logs().outputEvents.clear();
+
+      await removals.retryAll();
+      await removals.retryAll();
+
+      expect(reports, ['cannot remove logged-out account a']);
+      expect(
+        Logs().outputEvents.where((e) => e.level == Level.warning),
+        hasLength(2),
+      );
+    },
+  );
+
+  test('new steps for a removal that is kept are ignored and logged', () async {
+    failing.add('remove:a');
+    await run('a');
+    log.clear();
+    Logs().outputEvents.clear();
+
+    await removals.remove(
+      'a',
+      stepsOf('other'),
+      (error, stackTrace, what) => reports.add(what),
+    );
+
+    expect(log.where((e) => e.endsWith(':other')), isEmpty);
+    expect(
+      Logs().outputEvents.where(
+        (e) => e.level == Level.warning && e.title.contains('ignored'),
+      ),
+      isNotEmpty,
+    );
+  });
 
   test('a retry runs the removal again and nothing that is done', () async {
     failing.add('remove:a');
@@ -134,7 +174,6 @@ void main() {
       expect(reports, [
         'cannot remove logged-out account a',
         'cannot record the pending removal of account a',
-        'cannot remove logged-out account a',
       ]);
     },
   );
@@ -216,12 +255,37 @@ void main() {
         expect(log.where((e) => e == 'remove:a'), hasLength(2));
 
         failing.clear();
-        async.elapse(const Duration(minutes: 1));
+        async.elapse(const Duration(minutes: 2));
         expect(removals.failedIds, isEmpty);
 
         log.clear();
         async.elapse(const Duration(minutes: 5));
         expect(log, isEmpty);
+      });
+    });
+
+    test('the retries back off, up to a limit', () {
+      fakeAsync((async) {
+        removals = LogoutRemovals(
+          retryEvery: const Duration(minutes: 1),
+          maxRetryEvery: const Duration(minutes: 4),
+        );
+        failing.add('remove:a');
+        run('a');
+        async.flushMicrotasks();
+        int tries() => log.where((e) => e == 'remove:a').length;
+        expect(tries(), 1);
+
+        async.elapse(const Duration(minutes: 1));
+        expect(tries(), 2);
+        async.elapse(const Duration(minutes: 1));
+        expect(tries(), 2);
+        async.elapse(const Duration(minutes: 1));
+        expect(tries(), 3);
+        async.elapse(const Duration(minutes: 4));
+        expect(tries(), 4);
+        async.elapse(const Duration(minutes: 4));
+        expect(tries(), 5);
       });
     });
 

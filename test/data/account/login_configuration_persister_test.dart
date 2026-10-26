@@ -1,10 +1,13 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
+import 'package:twake_chat/providers/configuration_repository_providers.dart';
 import 'package:twake_chat/data/account/login_configuration_persister.dart';
+import 'package:twake_chat/providers/login_configuration_persister_provider.dart';
 
 class _Client extends Fake implements Client {
   _Client(this.userID);
@@ -56,10 +59,7 @@ void main() {
   setUp(() {
     tom = _Tom();
     federation = _Federation();
-    persister = LoginConfigurationPersister(
-      tom: () => tom,
-      federation: () => federation,
-    );
+    persister = LoginConfigurationPersister(tom: tom, federation: federation);
   });
 
   test('saves the ToM configuration of the user', () async {
@@ -103,5 +103,22 @@ void main() {
     );
     expect(tom.saved, isEmpty);
     expect(federation.saved, isEmpty);
+  });
+
+  test('the provider builds it from the configuration repositories', () async {
+    final container = ProviderContainer.test(
+      overrides: [
+        tomConfigurationsRepositoryProvider.overrideWithValue(tom),
+        federationConfigurationsRepositoryProvider.overrideWithValue(
+          federation,
+        ),
+      ],
+    );
+
+    await container
+        .read(loginConfigurationPersisterProvider)
+        .saveToM(_Client('@a:s'), _Config());
+
+    expect(tom.saved, ['@a:s']);
   });
 }

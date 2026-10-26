@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:matrix/matrix.dart' show Logs;
+
 /// Makes a failure visible: logged and sent to the error reporting.
 typedef ReportFailure =
     void Function(Object error, StackTrace stackTrace, String what);
@@ -38,16 +40,23 @@ class RemovalSteps {
 }
 
 /// Removals of logged-out accounts. A removal that fails is reported and
-/// kept, and runs again with [retryAll] and in the background every
-/// [retryEvery], until it works; until then the account stays listed.
+/// kept, and runs again with [retryAll] and in the background until it works;
+/// until then the account stays listed. The background retries wait
+/// [retryEvery], then twice as long after each round, up to [maxRetryEvery].
+/// A step is reported on its first failure only; the retries are logged.
 class LogoutRemovals {
-  LogoutRemovals({this.retryEvery = const Duration(minutes: 1)});
+  LogoutRemovals({
+    this.retryEvery = const Duration(minutes: 1),
+    this.maxRetryEvery = const Duration(minutes: 30),
+  });
 
   final Duration retryEvery;
+  final Duration maxRetryEvery;
   final Map<String, _Removal> _removals = {};
   final Set<String> _running = {};
   Timer? _timer;
   bool _disposed = false;
+  int _retryRounds = 0;
 
   /// The accounts whose removal, or what follows it, is not done yet.
   Set<String> get failedIds => _removals.keys.toSet();
@@ -61,6 +70,12 @@ class LogoutRemovals {
     ReportFailure report,
   ) async {
     if (!_running.add(id)) return false;
+    final kept = _removals[id];
+    if (kept == null) {
+      _retryRounds = 0;
+    } else if (!identical(kept.steps, steps)) {
+      Logs().w('The removal of $id is kept: the new steps are ignored');
+    }
     final removal = _removals.putIfAbsent(id, () => _Removal(steps, report));
     try {
       await _run(id, removal);
@@ -92,6 +107,7 @@ class LogoutRemovals {
     }
     await _afterChange(id, removal);
     if (removal.done) _removals.remove(id);
+    if (_removals.isEmpty) _retryRounds = 0;
   }
 
   /// The account list changed (held or removed): the effects first, because
@@ -124,7 +140,11 @@ class LogoutRemovals {
       await step();
       return true;
     } catch (error, stackTrace) {
-      removal.report(error, stackTrace, what);
+      if (removal.reported.add(what)) {
+        removal.report(error, stackTrace, what);
+      } else {
+        Logs().w('Still failing: $what', error, stackTrace);
+      }
       return false;
     }
   }
@@ -138,10 +158,16 @@ class LogoutRemovals {
 
   void _schedule() {
     if (_disposed || _timer != null) return;
-    _timer = Timer(retryEvery, () {
+    _timer = Timer(_nextDelay(), () {
       _timer = null;
+      _retryRounds++;
       unawaited(retryAll());
     });
+  }
+
+  Duration _nextDelay() {
+    final doubled = retryEvery * (1 << (_retryRounds < 10 ? _retryRounds : 10));
+    return doubled > maxRetryEvery ? maxRetryEvery : doubled;
   }
 
   /// Stops the background retries.
@@ -161,6 +187,9 @@ class _Removal {
   bool held = false;
   bool persisted = false;
   bool settled = false;
+
+  /// The steps that were reported already; their next failures are logged.
+  final Set<String> reported = {};
 
   /// Nothing is left to run: removed and settled.
   bool get done => removed && settled;
