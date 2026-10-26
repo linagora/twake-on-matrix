@@ -180,6 +180,31 @@ void main() {
       },
     );
 
+    test(
+      'a switch settled after the container was disposed does not throw',
+      () async {
+        boot([a, b]);
+        final dispose = notifier().registerSwitchHandler();
+        addTearDown(dispose);
+        late SwitchTicket ticket;
+        container.listen(accountsProvider, (_, next) {
+          if (next is Switching) ticket = next.ticket;
+        });
+        final switching = notifier().switchTo(const AccountId('b'));
+        await pumpEventQueue();
+        final accounts = notifier();
+
+        container.dispose();
+
+        expect(() => accounts.completeSwitch(ticket), returnsNormally);
+        expect(
+          () => accounts.failSwitch(ticket, StateError('late')),
+          returnsNormally,
+        );
+        await switching;
+      },
+    );
+
     test('the clients are not announced again around a switch', () async {
       boot([a, b]);
       final dispose = notifier().registerSwitchHandler();

@@ -112,6 +112,7 @@ class Accounts extends _$Accounts {
   /// The running switch that [ticket] names, or null when it is not the
   /// latest one any more.
   Switching? _switchingTo(SwitchTicket ticket) {
+    if (!ref.mounted) return null;
     final current = state;
     if (current is! Switching) return null;
     if (current.to != ticket.to || ticket.seq != _switchSeq) return null;
