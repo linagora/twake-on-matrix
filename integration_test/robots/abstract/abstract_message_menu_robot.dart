@@ -1,3 +1,5 @@
+import 'package:flutter_test/flutter_test.dart';
+
 /// Platform-agnostic contract for the per-message action menu.
 ///
 /// The menu is opened very differently per platform:
@@ -15,8 +17,9 @@ abstract class AbstractMessageMenuRobot {
   /// screen.
   Future<void> openForward(String message);
 
-  /// Same as [openForward], for the newest sticker of the timeline.
-  Future<void> openForwardOnLastSticker();
+  /// Same as [openForward], for the newest message bubble containing
+  /// [content].
+  Future<void> openForwardOnLast(Finder content);
 
   /// Opens the action menu for [message] and taps Reply, leaving the composer
   /// in reply mode (the caller then sends the reply).

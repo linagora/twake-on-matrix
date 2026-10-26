@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
+import 'package:twake_chat/pages/chat/events/sticker.dart';
 import 'package:twake_chat/widgets/matrix.dart' as twake;
 
 import '../base/api_login_helper.dart';
@@ -50,7 +51,7 @@ abstract class ForwardStickerScenario extends BaseTestScenario {
     }
     await $.pump(const Duration(seconds: 1));
 
-    await robots.messageMenuRobot().openForwardOnLastSticker();
+    await robots.messageMenuRobot().openForwardOnLast(find.byType(Sticker));
 
     final forward = robots.forwardRobot();
     await forward.searchRoom(_receiver);
@@ -59,6 +60,10 @@ abstract class ForwardStickerScenario extends BaseTestScenario {
     await forward.tapSendButton();
     await forward.verifyOpenedRoom(_receiver);
 
+    await _verifyForwardedAsImage(stickerBody);
+  }
+
+  Future<void> _verifyForwardedAsImage(String stickerBody) async {
     await _waitForLastEvent(
       roomOf: (client) =>
           client.rooms.where((room) => room.name == _receiver).firstOrNull,
@@ -68,8 +73,16 @@ abstract class ForwardStickerScenario extends BaseTestScenario {
           event.body == stickerBody,
       reason: 'the forwarded sticker as an image',
     );
+    // The mobile receiver room is persistent and keeps older images.
     await $.waitUntilExists(
-      $(MessageContent).containing(find.byType(MessageImageBuilder)),
+      $(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is MessageContent &&
+              widget.event.messageType == MessageTypes.Image &&
+              widget.event.body == stickerBody,
+        ),
+      ).containing(find.byType(MessageImageBuilder)),
       timeout: const Duration(seconds: 30),
     );
     expect(

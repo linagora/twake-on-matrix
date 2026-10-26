@@ -1,6 +1,5 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
-import 'package:twake_chat/pages/chat/events/sticker.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
@@ -149,12 +148,12 @@ class WebMessageMenuRobot extends CoreRobot
   }
 
   @override
-  Future<void> openForwardOnLastSticker() async {
-    await $.waitUntilExists($(Sticker), timeout: const Duration(seconds: 30));
+  Future<void> openForwardOnLast(Finder content) async {
+    await $.waitUntilExists($(content), timeout: const Duration(seconds: 30));
     await _tapOverflowItemOn(
-      lastMessageContaining($, find.byType(Sticker)),
+      lastMessageContaining($, content),
       _l10n.forward,
-      label: 'last sticker',
+      label: 'last ${content.describeMatch(Plurality.one)}',
     );
     await $.waitUntilExists(
       $(ForwardView),

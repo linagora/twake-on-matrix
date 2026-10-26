@@ -1,6 +1,5 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
-import 'package:twake_chat/pages/chat/events/sticker.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
@@ -55,9 +54,9 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   }
 
   @override
-  Future<void> openForwardOnLastSticker() async {
-    await $.waitUntilExists($(Sticker), timeout: const Duration(seconds: 30));
-    await _openMenuOn(lastMessageContaining($, find.byType(Sticker)));
+  Future<void> openForwardOnLast(Finder content) async {
+    await $.waitUntilExists($(content), timeout: const Duration(seconds: 30));
+    await _openMenuOn(lastMessageContaining($, content));
     await _tapForward();
   }
 
