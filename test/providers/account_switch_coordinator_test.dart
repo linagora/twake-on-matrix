@@ -484,6 +484,20 @@ void main() {
       expect(coordinator.isAppliedTo(a), isTrue);
     });
 
+    test('a failing step is logged once as a failure, its failed restore '
+        'only as a warning', () async {
+      await applyOrigin();
+      effects.failing.add('homeserver');
+      Logs().outputEvents.clear();
+
+      await expectLater(switchTo('b'), throwsStateError);
+      await settle();
+
+      final events = Logs().outputEvents;
+      expect(events.where((e) => e.level == Level.wtf), hasLength(1));
+      expect(events.where((e) => e.level == Level.warning), isNotEmpty);
+    });
+
     test('a restore is dropped when another switch starts', () async {
       await applyOrigin();
       effects.failing.add('homeserver:b');
@@ -562,6 +576,25 @@ void main() {
   });
 
   group('activateCurrent', () {
+    test('does nothing when the active account has no client', () async {
+      boot(clientOf: (_) => null);
+
+      expect(await coordinator.activateCurrent(), isFalse);
+      expect(effects.log, isEmpty);
+    });
+
+    test('starting twice registers one switch handler', () {
+      boot();
+      coordinator
+        ..start()
+        ..dispose();
+
+      expect(
+        container.read(accountsProvider.notifier).registerSwitchHandler,
+        returnsNormally,
+      );
+    });
+
     test('applies the active account once; later calls are no-ops', () async {
       boot();
       expect(await coordinator.activateCurrent(), isTrue);
@@ -626,6 +659,22 @@ void main() {
   });
 
   group('logout of the last account', () {
+    test(
+      'with only waiting accounts left, nothing is applied any more',
+      () async {
+        boot();
+        final accounts = container.read(accountsProvider.notifier);
+        await accounts.holdRemoval(const AccountId('b'));
+        await accounts.holdRemoval(const AccountId('c'));
+        expect(await coordinator.activateCurrent(), isTrue);
+
+        accounts.logoutLast();
+
+        expect(state(), isA<NoAccount>());
+        expect(coordinator.hasApplied, isFalse);
+      },
+    );
+
     test('logging in again applies the effects again', () async {
       final only = LoginableClient('a', userID: '@a:s')..loggedIn = true;
       boot(clients: [only]);
