@@ -1,20 +1,5 @@
 {
   "@@last_modified": "2021-08-14 12:41:10.002360",
-  "setAsCanonicalAlias": "Tetapkan sebagai alias utama",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "roomVersion": "Versi obrolan grup",
-  "@roomVersion": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "Orang",
-  "@people": {
-    "type": "text",
-    "placeholders": {}
-  },
   "goToTheNewRoom": "Pergi ke obrolan baru",
   "@goToTheNewRoom": {
     "type": "text",
@@ -67,11 +52,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "Tambahkan deskripsi obrolan",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "account": "Akun",
   "@account": {
     "type": "text",
@@ -99,14 +79,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} mengundang Anda ke FluffyChat. \n1. Instal FluffyChat: [https://fluffychat.im](https://fluffychat.im) \n2. Daftar atau masuk \n3. Buka tautan undangan: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "inviteForMe": "Undangan untuk saya",
   "@inviteForMe": {
     "type": "text",
@@ -130,13 +102,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteContactToGroup": "Undang kontak ke {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
-  },
   "inviteContact": "Undang kontak",
   "@inviteContact": {
     "type": "text",
@@ -149,16 +114,6 @@
   },
   "iHaveClickedOnLink": "Saya telah mengeklik tautannya",
   "@iHaveClickedOnLink": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Abaikan nama pengguna",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreListDescription": "Anda dapat mengabaikan pengguna yang mengganggu Anda. Anda tidak akan dapat menerima pesan atau undangan obrolan apa pun dari pengguna yang ada dalam daftar abaikan pribadi Anda.",
-  "@ignoreListDescription": {
     "type": "text",
     "placeholders": {}
   },
@@ -212,16 +167,6 @@
       "displayname": {}
     }
   },
-  "groupIsPublic": "Obrolan grup bersifat publik",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupDescriptionHasBeenChanged": "Deskripsi obrolan grup diubah",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groupDescription": "Deskripsi",
   "@groupDescription": {
     "type": "text",
@@ -259,11 +204,6 @@
   },
   "fileName": "Nama file",
   "@fileName": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "everythingReady": "Semuanya siap!",
-  "@everythingReady": {
     "type": "text",
     "placeholders": {}
   },
@@ -344,23 +284,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "editRoomAliases": "Edit alias obrolan",
-  "@editRoomAliases": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Edit nama tampilan",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Edit",
   "@edit": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "Nama tampilan telah diubah",
-  "@displaynameHasBeenChanged": {
     "type": "text",
     "placeholders": {}
   },
@@ -404,24 +329,11 @@
     "type": "text",
     "placeholders": {}
   },
-  "deactivateAccountWarning": "Ini akan menonaktifkan akun pengguna Anda. Ini tidak dapat dibatalkan! Apakah Anda yakin?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
   "dateWithYear": "{year}-{month}-{day}",
   "@dateWithYear": {
     "type": "text",
     "placeholders": {
       "year": {},
-      "month": {},
-      "day": {}
-    }
-  },
-  "dateWithoutYear": "{month}-{day}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
       "month": {},
       "day": {}
     }
@@ -436,11 +348,6 @@
   },
   "currentlyActive": "Saat ini aktif",
   "@currentlyActive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "crossSigningEnabled": "Cross-signing aktif",
-  "@crossSigningEnabled": {
     "type": "text",
     "placeholders": {}
   },
@@ -510,11 +417,6 @@
   },
   "changeTheNameOfTheGroup": "Ubah nama obrolan",
   "@changeTheNameOfTheGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "changeTheHomeserver": "Ubah homeserver",
-  "@changeTheHomeserver": {
     "type": "text",
     "placeholders": {}
   },
@@ -672,15 +574,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "badServerVersionsException": "Homeserver mendukung versi Spec berikut:\n{serverVersions}\nTetapi aplikasi ini hanya mendukung {supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "sendOnEnter": "Kirim dengan Enter",
   "badServerLoginTypesException": "Homeserver mendukung jenis login berikut:\n{serverVersions}\nTetapi aplikasi ini hanya mendukung:\n{supportedVersions}",
   "@badServerLoginTypesException": {
     "type": "text",
@@ -703,16 +596,6 @@
   },
   "askSSSSSign": "Agar dapat menandatangani orang lain, harap masukkan frasa sandi penyimpanan aman atau kunci pemulihan Anda.",
   "@askSSSSSign": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Apakah pengguna tamu diizinkan untuk bergabung",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "Ruang yang diarsipkan",
-  "@archivedRoom": {
     "type": "text",
     "placeholders": {}
   },
@@ -772,22 +655,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "compareEmojiMatch": "Harap bandingkan emoji",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "close": "Tutup",
   "@close": {
     "type": "text",
     "placeholders": {}
   },
   "clearArchive": "Kosongkan arsip",
-  "chooseAUsername": "Pilih nama pengguna",
-  "@chooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "chooseAStrongPassword": "Pilih kata sandi yang kuat",
   "@chooseAStrongPassword": {
     "type": "text",
@@ -822,16 +695,6 @@
       "count": {}
     }
   },
-  "license": "Lisensi",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "leftTheChat": "Meninggalkan obrolan",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "leave": "Tinggalkan",
   "@leave": {
     "type": "text",
@@ -864,11 +727,6 @@
       "username": {},
       "targetName": {}
     }
-  },
-  "keysCached": "Kunci disimpan dalam cache",
-  "@keysCached": {
-    "type": "text",
-    "placeholders": {}
   },
   "joinRoom": "Gabung ke obrolan",
   "@joinRoom": {
@@ -967,22 +825,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "makeSureTheIdentifierIsValid": "Pastikan pengenal tersebut valid",
-  "@makeSureTheIdentifierIsValid": {
-    "type": "text",
-    "placeholders": {}
-  },
   "logout": "Keluar",
   "@logout": {
     "type": "text",
     "placeholders": {}
-  },
-  "logInTo": "Masuk ke {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
   },
   "login": "Masuk",
   "@login": {
@@ -1011,11 +857,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "transferFromAnotherDevice": "Transfer dari perangkat lain",
-  "@transferFromAnotherDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "showPassword": "Tampilkan kata sandi",
   "@showPassword": {
     "type": "text",
@@ -1038,11 +879,6 @@
   },
   "pleaseFollowInstructionsOnWeb": "Harap ikuti petunjuk di situs web lalu ketuk berikutnya.",
   "@pleaseFollowInstructionsOnWeb": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChoose": "Silakan pilih",
-  "@pleaseChoose": {
     "type": "text",
     "placeholders": {}
   },
@@ -1086,11 +922,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "Anda tidak dapat mengundang diri sendiri",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youAreNoLongerParticipatingInThisChat": "Anda tidak lagi berpartisipasi dalam obrolan ini",
   "@youAreNoLongerParticipatingInThisChat": {
     "type": "text",
@@ -1111,33 +942,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "writeAMessage": "Tulis pesan…",
-  "@writeAMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
   "withTheseAddressesRecoveryDescription": "Dengan alamat ini Anda dapat memulihkan kata sandi Anda.",
   "@withTheseAddressesRecoveryDescription": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "Hapus cadangan obrolan Anda untuk membuat kunci pemulihan baru?",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "Mengapa Anda ingin melaporkan ini?",
   "@whyDoYouWantToReportThis": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "Siapa yang diizinkan bergabung ke obrolan ini",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoCanPerformWhichAction": "Siapa yang dapat melakukan tindakan apa",
-  "@whoCanPerformWhichAction": {
     "type": "text",
     "placeholders": {}
   },
@@ -1168,11 +979,6 @@
   },
   "waitingPartnerEmoji": "Menunggu pihak lain menerima emoji…",
   "@waitingPartnerEmoji": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "waitingPartnerAcceptRequest": "Menunggu pihak lain menerima permintaan…",
-  "@waitingPartnerAcceptRequest": {
     "type": "text",
     "placeholders": {}
   },
@@ -1319,21 +1125,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "toggleUnread": "Tandai Dibaca/Belum Dibaca",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "Alihkan Bisu",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleFavorite": "Alihkan Favorit",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
   "title": "FluffyChat",
   "@title": {
     "description": "Title for the application",
@@ -1342,11 +1133,6 @@
   },
   "thursday": "Kam",
   "@thursday": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "thisRoomHasBeenArchived": "Obrolan ini telah diarsipkan.",
-  "@thisRoomHasBeenArchived": {
     "type": "text",
     "placeholders": {}
   },
@@ -1397,16 +1183,6 @@
       "senderName": {}
     }
   },
-  "spaceName": "Nama ruang",
-  "@spaceName": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceIsPublic": "Ruang bersifat publik",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sourceCode": "Kode sumber",
   "@sourceCode": {
     "type": "text",
@@ -1424,11 +1200,6 @@
   },
   "signUp": "Daftar",
   "@signUp": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "shareLocation": "Bagikan lokasi",
-  "@shareLocation": {
     "type": "text",
     "placeholders": {}
   },
@@ -1461,16 +1232,6 @@
   },
   "setInvitationLink": "Tetapkan tautan undangan",
   "@setInvitationLink": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "Tetapkan deskripsi",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "Tetapkan emote kustom",
-  "@setCustomEmotes": {
     "type": "text",
     "placeholders": {}
   },
@@ -1574,11 +1335,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "Cabut larangan dari obrolan",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "remove": "Hapus",
   "@remove": {
     "type": "text",
@@ -1618,18 +1374,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "pleaseEnterAMatrixIdentifier": "Harap masukkan Matrix ID.",
-  "@pleaseEnterAMatrixIdentifier": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseClickOnLink": "Silakan klik tautan di email lalu lanjutkan.",
   "@pleaseClickOnLink": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChooseAUsername": "Silakan pilih nama pengguna",
-  "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -1660,11 +1406,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "Lupa kata sandi",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "password": "Kata sandi",
   "@password": {
     "type": "text",
@@ -1685,18 +1426,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Opsional) Nama grup",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "serverRequiresEmail": "Server ini perlu memvalidasi alamat email Anda untuk pendaftaran.",
   "openInMaps": "Buka di peta",
   "@openInMaps": {
     "type": "text",
     "placeholders": {}
   },
-  "enableMultiAccounts": "(BETA) Aktifkan multiakun di perangkat ini",
   "bundleName": "Nama bundel",
   "removeFromBundle": "Hapus dari bundel ini",
   "addToBundle": "Tambahkan ke bundel",
@@ -1718,16 +1453,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "offensive": "Menyinggung",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "obtainingLocation": "Sedang memperoleh lokasi…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "numUsersTyping": "{count} pengguna sedang mengetik",
   "@numUsersTyping": {
     "type": "text",
@@ -1736,8 +1461,6 @@
     }
   },
   "scanQrCode": "Pindai kode QR",
-  "typeInInviteLinkManually": "Ketik tautan undangan secara manual...",
-  "shareYourInviteLink": "Bagikan tautan undangan Anda",
   "noMatrixServer": "{server1} bukan server Matrix, gunakan {server2} sebagai gantinya?",
   "@noMatrixServer": {
     "type": "text",
@@ -1768,16 +1491,6 @@
       "brand": {}
     }
   },
-  "locationDisabledNotice": "Layanan lokasi dinonaktifkan. Harap aktifkan agar Anda dapat membagikan lokasi Anda.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationPermissionDeniedNotice": "Izin lokasi ditolak. Harap berikan izin agar Anda dapat membagikan lokasi Anda.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Terang",
   "@lightTheme": {
     "type": "text",
@@ -1788,18 +1501,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Tidak menyinggung",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "ignore": "Abaikan",
   "@ignore": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "howOffensiveIsThisContent": "Seberapa menyinggung konten ini?",
-  "@howOffensiveIsThisContent": {
     "type": "text",
     "placeholders": {}
   },
@@ -1813,15 +1516,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "errorObtainingLocation": "Kesalahan saat memperoleh lokasi: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
   "homeserver": "Homeserver",
-  "enterASpacepName": "Masukkan nama ruang",
   "enableEncryption": "Aktifkan enkripsi end-to-end",
   "@enableEncryption": {
     "type": "text",
@@ -1842,11 +1537,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Jelajahi",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
   "defaultPermissionLevel": "Tingkat izin default",
   "@defaultPermissionLevel": {
     "type": "text",
@@ -1854,11 +1544,6 @@
   },
   "darkTheme": "Gelap",
   "@darkTheme": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "createNewSpace": "Ruang baru",
-  "@createNewSpace": {
     "type": "text",
     "placeholders": {}
   },
@@ -1960,26 +1645,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "extremeOffensive": "Sangat menyinggung",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Kirim video",
-  "@sendVideo": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "Kirim stiker",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Kirim asli",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendMessages": "Kirim pesan",
   "@sendMessages": {
     "type": "text",
@@ -1987,16 +1652,6 @@
   },
   "sendImage": "Kirim gambar",
   "@sendImage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "Kirim file",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendAudio": "Kirim audio",
-  "@sendAudio": {
     "type": "text",
     "placeholders": {}
   },
@@ -2056,11 +1711,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "publicRooms": "Obrolan publik",
-  "@publicRooms": {
-    "type": "text",
-    "placeholders": {}
-  },
   "privacy": "Privasi",
   "@privacy": {
     "type": "text",
@@ -2088,7 +1738,6 @@
   },
   "link": "Tautan",
   "yourChatBackupHasBeenSetUp": "Cadangan obrolan Anda telah disiapkan.",
-  "yourUserId": "ID pengguna Anda:",
   "unverified": "Belum terverifikasi",
   "pleaseEnterValidEmail": "Harap masukkan alamat email yang valid.",
   "pleaseChooseAtLeastChars": "Harap pilih setidaknya {min} karakter.",
@@ -2104,7 +1753,6 @@
   "time": "Waktu",
   "messageType": "Jenis pesan",
   "sender": "Pengirim",
-  "openGallery": "Buka galeri",
   "addToSpaceDescription": "Pilih ruang untuk menambahkan obrolan ini ke dalamnya.",
   "start": "Mulai",
   "loginWithOneClick": "Masuk dengan satu klik",
@@ -2130,16 +1778,10 @@
     "description": "Usage hint for the command /create"
   },
   "thisUserHasNotPostedAnythingYet": "Pengguna ini belum memposting apa pun di ceritanya",
-  "openVideoCamera": "Buka kamera untuk video",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToStory": "Tambahkan ke cerita",
   "publish": "Publikasikan",
   "whoCanSeeMyStories": "Siapa yang dapat melihat cerita saya?",
   "unsubscribeStories": "Berhenti berlangganan cerita",
-  "yourStory": "Cerita Anda",
   "replyHasBeenSent": "Balasan telah dikirim",
   "storyFrom": "Cerita dari {date}: \n{body}",
   "@storyFrom": {
@@ -2147,13 +1789,6 @@
     "placeholders": {
       "date": {},
       "body": {}
-    }
-  },
-  "videoWithSize": "Video ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
     }
   },
   "bubbleSize": "Ukuran gelembung",
@@ -2168,7 +1803,6 @@
   "storyPrivacyWarning": "Harap perhatikan bahwa orang-orang dapat saling melihat dan menghubungi satu sama lain dalam cerita Anda. Cerita Anda akan terlihat selama 24 jam, tetapi tidak ada jaminan bahwa cerita tersebut akan dihapus dari semua perangkat dan server.",
   "dismiss": "Tutup",
   "markAsRead": "Tandai sebagai dibaca",
-  "reportUser": "Laporkan pengguna",
   "openChat": "Buka Obrolan",
   "matrixWidgets": "Widget Matrix",
   "reactedWith": "{sender} bereaksi dengan {reaction}",
@@ -2183,20 +1817,9 @@
   "confirmEventUnpin": "Apakah Anda yakin ingin melepas sematan pesan ini secara permanen?",
   "unsupportedAndroidVersionLong": "Fitur ini memerlukan versi Android yang lebih baru. Harap periksa pembaruan atau dukungan Lineage OS.",
   "unsupportedAndroidVersion": "Versi Android tidak didukung",
-  "placeCall": "Lakukan panggilan",
   "voiceCall": "Panggilan suara",
   "videoCallsBetaWarning": "Harap diperhatikan bahwa panggilan video saat ini masih dalam versi beta. Fitur ini mungkin tidak berfungsi seperti yang diharapkan atau bahkan tidak berfungsi sama sekali di semua platform.",
-  "emailOrUsername": "Email atau nama pengguna",
   "experimentalVideoCalls": "Panggilan video eksperimental",
-  "previousAccount": "Akun sebelumnya",
-  "switchToAccount": "Beralih ke akun {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "nextAccount": "Akun berikutnya",
   "widgetEtherpad": "Catatan teks",
   "widgetJitsi": "Jitsi Meet",
   "widgetCustom": "Kustom",
@@ -2263,27 +1886,14 @@
     }
   },
   "noEmailWarning": "Harap masukkan alamat email yang valid. Jika tidak, Anda tidak akan dapat mengatur ulang kata sandi Anda. Jika Anda tidak ingin melakukannya, ketuk tombol sekali lagi untuk melanjutkan.",
-  "pleaseEnterRecoveryKeyDescription": "Untuk membuka kunci pesan lama Anda, harap masukkan kunci pemulihan yang telah dibuat pada sesi sebelumnya. Kunci pemulihan Anda BUKAN kata sandi Anda.",
   "users": "Pengguna",
   "storeInSecureStorageDescription": "Simpan kunci pemulihan di penyimpanan aman perangkat ini.",
   "saveKeyManuallyDescription": "Simpan kunci ini secara manual dengan memicu dialog berbagi sistem atau papan klip.",
   "recoveryKey": "Kunci pemulihan",
   "stories": "Cerita",
   "storeInAppleKeyChain": "Simpan di Apple KeyChain",
-  "pleaseEnterRecoveryKey": "Harap masukkan kunci pemulihan Anda:",
-  "unlockOldMessages": "Buka kunci pesan lama",
-  "recoveryKeyLost": "Kunci pemulihan hilang?",
   "storeInAndroidKeystore": "Simpan di Android KeyStore",
-  "enableAutoBackups": "Aktifkan pencadangan otomatis",
   "storeSecurlyOnThisDevice": "Simpan dengan aman di perangkat ini",
-  "countFiles": "{count} file",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "dehydrateShare": "Ini adalah ekspor FluffyChat pribadi Anda. Pastikan Anda tidak kehilangannya dan tetap menjaganya tetap pribadi.",
-  "hydrate": "Pulihkan dari file cadangan",
   "indexedDbErrorTitle": "Masalah mode privat",
   "indexedDbErrorLong": "Penyimpanan pesan sayangnya tidak diaktifkan dalam mode privat secara default.\nSilakan kunjungi\n - about:config\n - atur dom.indexedDB.privateBrowsing.enabled menjadi true\nJika tidak, FluffyChat tidak dapat dijalankan.",
   "dehydrate": "Ekspor sesi dan hapus data perangkat",
@@ -2296,14 +1906,6 @@
   "updateAvailable": "Pembaruan Twake Chat tersedia",
   "updateNow": "Mulai pembaruan di latar belakang",
   "user": "Pengguna",
-  "confirmMatrixId": "Harap konfirmasikan Matrix ID Anda untuk menghapus akun Anda.",
-  "supposedMxid": "Ini seharusnya {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
   "commandHint_markasdm": "Tandai sebagai obrolan langsung",
   "commandHint_markasgroup": "Tandai sebagai obrolan",
   "screenSharingTitle": "berbagi layar",
@@ -2362,18 +1964,12 @@
       "oldDisplayName": {}
     }
   },
-  "startFirstChat": "Mulai obrolan pertama Anda",
-  "newSpaceDescription": "Ruang memungkinkan Anda mengonsolidasikan obrolan dan membangun komunitas privat atau publik.",
   "sorryThatsNotPossible": "Maaf... itu tidak memungkinkan",
   "deviceKeys": "Kunci perangkat:",
   "encryptThisChat": "Enkripsi obrolan ini",
   "endToEndEncryption": "Enkripsi end-to-end",
   "disableEncryptionWarning": "Demi alasan keamanan, Anda tidak dapat menonaktifkan enkripsi dalam obrolan yang sebelumnya sudah diaktifkan.",
-  "noSearchResult": "Tidak ada hasil pencarian yang cocok.",
-  "letsStart": "Mari mulai",
-  "enterInviteLinkOrMatrixId": "Masukkan tautan undangan atau Matrix ID...",
   "reopenChat": "Buka kembali obrolan",
-  "noBackupWarning": "Peringatan! Tanpa mengaktifkan cadangan obrolan, Anda akan kehilangan akses ke pesan terenkripsi Anda. Sangat disarankan untuk mengaktifkan cadangan obrolan terlebih dahulu sebelum keluar.",
   "noOtherDevicesFound": "Tidak ada perangkat lain yang ditemukan",
   "fileIsTooBigForServer": "Server melaporkan bahwa ukuran file terlalu besar untuk dikirim.",
   "commandHint_sendraw": "Kirim string perintah mentah ke server",
@@ -2480,7 +2076,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMoreResult": "Tidak ada hasil lagi!",
   "previous": "Sebelumnya",
   "aWhileAgo": "beberapa saat yang lalu",
   "@aWhileAgo": {
@@ -2492,12 +2087,9 @@
     "type": "text",
     "placeholders": {}
   },
-  "cannotUploadKey": "Tidak dapat menyimpan Cadangan Kunci.",
-  "searchForPeopleAndChannels": "Cari orang dan saluran",
   "sendMessage": "Kirim pesan",
   "invite": "Undang",
   "pinChat": "Sematkan",
-  "cannotUnlockBackupKey": "Tidak dapat membuka kunci cadangan kunci.",
   "onlineStatus": "daring",
   "onlineMinAgo": "daring {min}m yang lalu",
   "@onlineMinAgo": {
@@ -2520,7 +2112,6 @@
   "noMessageHereYet": "Belum ada pesan di sini",
   "sendMessageGuide": "Kirim pesan atau ketuk sapaan di bawah.",
   "youCreatedGroupChat": "Anda membuat obrolan grup",
-  "chatCanHave": "Obrolan dapat memiliki:",
   "upTo100000Members": "Hingga 100.000 anggota",
   "persistentChatHistory": "Riwayat obrolan persisten",
   "addMember": "Tambahkan anggota",
@@ -2529,8 +2120,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "channels": "Saluran",
-  "chatMessage": "Pesan baru",
   "welcomeToTwake": "Selamat datang di Twake, {user}",
   "@welcomeToTwake": {
     "placeholders": {
@@ -2538,24 +2127,11 @@
     }
   },
   "startNewChatMessage": "Menyenangkan bisa mengobrol dengan teman-teman Anda dan berkolaborasi dengan tim Anda.\nMari mulai obrolan, buat obrolan grup, atau bergabung ke obrolan yang sudah ada.",
-  "statusDot": "⬤",
   "active": "Diaktifkan",
   "inactive": "Tidak diaktifkan",
   "newGroupChat": "Obrolan Grup Baru",
-  "twakeUsers": "Pengguna Twake",
   "expand": "Perluas",
   "shrink": "Perkecil",
-  "noResultForKeyword": "Tidak ada hasil untuk \"{keyword}\"",
-  "@noResultForKeyword": {
-    "placeholders": {
-      "keyword": {}
-    }
-  },
-  "searchResultNotFound1": "• Pastikan tidak ada salah ketik dalam pencarian Anda.\n",
-  "searchResultNotFound2": "• Mungkin Anda tidak memiliki pengguna tersebut di buku alamat Anda.\n",
-  "searchResultNotFound3": "• Periksa izin akses kontak, pengguna tersebut mungkin ada di daftar kontak Anda.\n",
-  "searchResultNotFound4": "• Jika alasannya tidak tercantum di atas, ",
-  "searchResultNotFound5": "mencari bantuan.",
   "more": "Lainnya",
   "whoWouldYouLikeToAdd": "Siapa yang ingin Anda tambahkan?",
   "addAPhoto": "Tambahkan foto",
@@ -2576,7 +2152,6 @@
   "wrongServerName": "Nama server salah",
   "serverNameWrongExplain": "Alamat server telah dikirimkan kepada Anda oleh admin perusahaan. Periksa email undangan.",
   "contacts": "Kontak",
-  "searchForContacts": "Cari kontak",
   "soonThereHaveContacts": "Nanti akan ada kontak",
   "searchSuggestion": "Untuk saat ini, cari dengan mengetik nama orang atau alamat server publik",
   "loadingContacts": "Memuat kontak...",
@@ -2590,13 +2165,9 @@
       "count": {}
     }
   },
-  "addACaption": "Tambahkan keterangan...",
-  "noImagesFound": "Tidak ada gambar yang ditemukan",
-  "captionForImagesIsNotSupportYet": "Keterangan untuk gambar belum didukung.",
   "tapToAllowAccessToYourGallery": "Ketuk untuk mengizinkan akses galeri",
   "tapToAllowAccessToYourCamera": "Anda dapat mengaktifkan akses kamera di aplikasi Pengaturan untuk melakukan panggilan video di",
   "twake": "Twake Chat",
-  "permissionAccess": "Akses izin",
   "allow": "Izinkan",
   "explainStoragePermission": "Twake memerlukan akses ke penyimpanan Anda untuk melihat pratinjau file",
   "explainGoToStorageSetting": "Twake memerlukan akses ke penyimpanan Anda untuk melihat pratinjau file, buka pengaturan untuk mengizinkan izin ini",
@@ -2612,13 +2183,6 @@
   "clear": "Hapus",
   "keyboard": "Keyboard",
   "changeChatAvatar": "Ubah avatar Obrolan",
-  "roomAvatarMaxFileSize": "Ukuran avatar terlalu besar",
-  "roomAvatarMaxFileSizeLong": "Ukuran avatar harus kurang dari {max}",
-  "@roomAvatarMaxFileSizeLong": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "continueProcess": "Lanjutkan",
   "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Kesalahan unggah gambar! Apakah Anda tetap ingin melanjutkan membuat obrolan grup?",
   "hasCreatedAGroupChat": "membuat obrolan grup “{groupName}”",
@@ -2630,23 +2194,13 @@
   },
   "today": "Hari ini",
   "yesterday": "Kemarin",
-  "adminPanel": "Panel Admin",
-  "acceptInvite": "Ya, saya mau bergabung",
-  "askToInvite": " ingin Anda bergabung ke obrolan ini. Bagaimana tanggapan Anda?",
   "select": "Pilih",
   "copyMessageText": "Salin",
   "pinThisChat": "Sematkan obrolan ini",
   "unpinThisChat": "Lepas sematan obrolan ini",
   "add": "Tambahkan",
   "addMembers": "Tambahkan anggota",
-  "chatInfo": "Info obrolan",
   "mute": "Bisukan",
-  "membersInfo": "Anggota ({count})",
-  "@membersInfo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "members": "Anggota",
   "media": "Media",
   "files": "File",
@@ -2665,7 +2219,6 @@
   "errorPageTitle": "Ada yang tidak beres",
   "errorPageDescription": "Halaman itu tidak ada.",
   "errorPageButton": "Kembali ke obrolan",
-  "playVideo": "Putar",
   "done": "Selesai",
   "markThisChatAsRead": "Tandai obrolan ini sebagai dibaca",
   "markThisChatAsUnRead": "Tandai obrolan ini sebagai belum dibaca",
@@ -2686,11 +2239,8 @@
   "basicInfo": "INFO DASAR",
   "editProfileDescriptions": "Perbarui profil Anda dengan nama baru, gambar, dan perkenalan singkat.",
   "workIdentitiesInfo": "INFO IDENTITAS KERJA",
-  "editWorkIdentitiesDescriptions": "Edit pengaturan identitas kerja Anda seperti Matrix ID, email, atau nama perusahaan.",
   "copiedMatrixIdToClipboard": "Matrix ID disalin ke papan klip.",
   "changeProfileAvatar": "Ubah avatar profil",
-  "countPinChat": "OBROLAN YANG DISEMATKAN ({countPinChat})",
-  "countAllChat": "SEMUA OBROLAN ({countAllChat})",
   "thisMessageHasBeenEncrypted": "Pesan ini telah dienkripsi",
   "roomCreationFailed": "Gagal membuat room",
   "errorGettingPdf": "Kesalahan saat mengambil PDF",
@@ -2700,7 +2250,6 @@
   "pasteImageFailed": "Gagal menempel gambar",
   "copyImageFailed": "Gagal menyalin gambar",
   "fileFormatNotSupported": "Format file tidak didukung",
-  "noResultsFound": "Tidak ada hasil yang ditemukan",
   "encryptionMessage": "Lindungi pesan Anda agar tidak dibaca oleh orang lain. Mencegah pesan dicadangkan di server kami. Anda tidak dapat menonaktifkannya nanti.",
   "encryptionWarning": "Anda mungkin kehilangan pesan jika mengakses aplikasi Twake di perangkat lain.",
   "selectedUsers": "Pengguna terpilih",
@@ -2721,17 +2270,14 @@
       "count": {}
     }
   },
-  "copyImageSuccess": "Gambar disalin ke papan klip",
   "youNeedToAcceptTheInvitation": "Anda perlu menerima undangan untuk mulai mengobrol",
   "hasInvitedYouToAChat": " telah mengundang Anda ke sebuah obrolan. Terima atau tolak dan hapus percakapan?",
   "declineTheInvitation": "Tolak undangan?",
   "doYouReallyWantToDeclineThisInvitation": "Apakah Anda benar-benar ingin menolak undangan ini dan menghapus obrolan? Anda tidak akan dapat membatalkan tindakan ini.",
   "declineAndRemove": "Tolak dan hapus",
   "notNow": "Tidak sekarang",
-  "contactsWarningBannerTitle": "Untuk memastikan Anda dapat terhubung dengan semua teman Anda, harap izinkan Twake mengakses kontak perangkat Anda. Kami menghargai pengertian Anda.",
   "contactsCount": "Kontak ({count})",
   "linagoraContactsCount": "Kontak Linagora ({count})",
-  "fetchingPhonebookContacts": "Mengambil kontak dari perangkat...({progress}% selesai)",
   "languageEnglish": "Inggris",
   "@languageEnglish": {
     "type": "text",
@@ -2756,15 +2302,12 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "settingsLanguageDescription": "Atur bahasa yang Anda gunakan di Twake Chat",
   "sendImages": "{count, plural, =1{Kirim 1 gambar} other{Kirim {count} gambar}}",
   "enterCaption": "Tambahkan keterangan...",
-  "failToSend": "Gagal mengirim, harap coba lagi",
   "showLess": "Tampilkan Lebih Sedikit",
   "showMore": "Tampilkan Lebih Banyak",
   "unreadMessages": "Pesan belum dibaca",
   "groupInformation": "Detail grup",
-  "linkInvite": "Tautan undangan",
   "noDescription": "Tidak ada deskripsi",
   "description": "Deskripsi",
   "groupName": "Nama grup",
@@ -2804,17 +2347,13 @@
       }
     }
   },
-  "twakeChatUser": "Pengguna Twake Chat",
-  "sharedMediaAndLinks": "Media dan tautan bersama",
   "errorSendingFiles": "Beberapa file tidak dapat dikirim karena batasan ukuran, format, atau kesalahan tak terduga. File tersebut akan diabaikan.",
-  "removeFileBeforeSend": "Hapus file bermasalah sebelum mengirim",
   "unselect": "Batalkan pilihan",
   "searchContacts": "Cari kontak",
   "tapToAllowAccessToYourMicrophone": "Anda dapat mengaktifkan akses mikrofon di aplikasi Pengaturan untuk melakukan panggilan suara di",
   "microphonePermissionDeniedOnWeb": "Akses mikrofon diperlukan. Harap aktifkan di pengaturan browser Anda.",
   "showInChat": "Tampilkan di obrolan",
   "phone": "Telepon",
-  "viewProfile": "Lihat profil",
   "profileInfo": "Informasi profil",
   "saveToDownloads": "Simpan ke Unduhan",
   "saveToGallery": "Simpan ke Galeri",
@@ -2837,13 +2376,11 @@
   "explainPermissionToAccessVideos": "Twake Chat tidak menyinkronkan data antara perangkat Anda dan server kami. Kami hanya menyimpan media yang telah Anda kirim ke ruang obrolan. Semua file media yang dikirim ke obrolan dienkripsi dan disimpan dengan aman. Buka Pengaturan > Izin lalu aktifkan izin Penyimpanan: Video. Anda juga dapat menolak akses ke pustaka media Anda kapan saja.",
   "downloading": "Mengunduh",
   "settingUpYourTwake": "Menyiapkan Twake Anda\nIni mungkin memerlukan beberapa saat",
-  "performingAutomaticalLogin": "Melakukan login otomatis melalui SSO",
   "backingUpYourMessage": "Menyiapkan lingkungan server untuk mencadangkan pesan Anda",
   "recoveringYourEncryptedChats": "Memulihkan obrolan terenkripsi Anda",
   "configureDataEncryption": "Konfigurasikan enkripsi data",
   "configurationNotFound": "Data konfigurasi tidak ditemukan",
   "fileSavedToGallery": "File disimpan ke Galeri",
-  "saveFileToGalleryError": "Gagal menyimpan file ke Galeri",
   "explainPermissionToGallery": "Untuk melanjutkan, harap izinkan {appName} mengakses izin foto. Izin ini penting untuk menyimpan file ke galeri.",
   "@explainPermissionToGallery": {
     "placeholders": {
@@ -2855,21 +2392,12 @@
       }
     }
   },
-  "tokenNotFound": "Token login tidak ditemukan",
   "dangerZone": "Zona berbahaya",
   "leaveGroupSubtitle": "Grup ini akan tetap ada setelah Anda keluar",
   "leaveChatFailed": "Gagal meninggalkan obrolan",
   "invalidLoginToken": "Token login tidak valid",
   "copiedPublicKeyToClipboard": "Kunci publik disalin ke papan klip.",
   "removeFromGroup": "Hapus dari grup",
-  "removeUser": "Hapus Pengguna",
-  "removeReason": "Hapus {user} dari grup",
-  "@removeReason": {
-    "type": "text",
-    "placeholders": {
-      "user": {}
-    }
-  },
   "switchAccounts": "Beralih akun",
   "selectAccount": "Pilih akun",
   "privacyPolicy": "Kebijakan Privasi",
@@ -2919,7 +2447,6 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Pilih email atau telepon yang ingin Anda kirimi undangan",
   "phoneNumber": "Nomor telepon",
   "sendInvitation": "Kirim undangan",
-  "verifyWithAnotherDevice": "Verifikasi dengan perangkat lain",
   "contactLookupFailed": "Pencarian kontak gagal.",
   "invitationHasBeenSuccessfullySent": "Undangan berhasil dikirim!",
   "failedToSendInvitation": "Gagal mengirim undangan.",
@@ -3054,7 +2581,6 @@
   "terrorism": "Terorisme",
   "other": "Lainnya",
   "enableRightAndLeftMessageAlignment": "Aktifkan perataan pesan kanan/kiri",
-  "holdToRecordAudio": "Tahan untuk merekam audio.",
   "explainPermissionToAccessMicrophone": "Untuk mengirim pesan suara, izinkan Twake Chat mengakses mikrofon.",
   "allowMicrophoneAccess": "Izinkan akses mikrofon",
   "later": "Nanti",
@@ -3063,10 +2589,7 @@
   "recordingInProgress": "Perekaman sedang berlangsung",
   "pleaseFinishOrStopTheRecording": "Harap selesaikan atau hentikan perekaman sebelum melakukan tindakan lain.",
   "audioMessageFailedToSend": "Pesan audio gagal dikirim.",
-  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Untuk saat ini kami hanya dapat membuat obrolan dengan hingga 10 orang. Harap hapus pengguna tambahan dan coba lagi",
   "gotIt": "Mengerti",
-  "weCouldNotCompleteYourRequestTryAgainShortly": "Kami tidak dapat menyelesaikan permintaan Anda. Coba lagi sebentar lagi",
-  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Obrolan grup berhasil dibuat, tetapi gagal menambahkan beberapa orang. Harap undang mereka lagi melalui \"Info obrolan grup\"",
   "save": "Simpan",
   "newContact": "Kontak baru",
   "firstName": "Nama depan",

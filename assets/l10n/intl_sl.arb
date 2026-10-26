@@ -29,11 +29,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "Dodajte opis skupine",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToSpace": "Dodajte v prostor",
   "alias": "vzdevek",
   "@alias": {
@@ -67,11 +62,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "Arhivirana soba",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
   "askSSSSSign": "Če želite podpisati drugo osebo, vnesite geslo za varno trgovino ali obnovitveni ključ.",
   "@askSSSSSign": {
     "type": "text",
@@ -97,7 +87,6 @@
       "supportedVersions": {}
     }
   },
-  "sendOnEnter": "Pošlji ob vstopu",
   "banFromChat": "Prepoved klepeta",
   "@banFromChat": {
     "type": "text",
@@ -229,11 +218,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Spremenite domači strežnik",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Spremenite svoj slog",
   "@changeTheme": {
     "type": "text",
@@ -254,7 +238,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "yourUserId": "Vaš ID uporabnika:",
   "yourChatBackupHasBeenSetUp": "Varnostna kopija klepeta je nastavljena.",
   "chatBackup": "Varnostno kopiranje klepeta",
   "@chatBackup": {
@@ -274,11 +257,6 @@
   },
   "chooseAStrongPassword": "Izberite močno geslo",
   "@chooseAStrongPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "chooseAUsername": "Izberi uporabniško ime",
-  "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -355,11 +333,6 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Primerjajte in se prepričajte, da se naslednji emoji ujemajo s tistimi iz druge naprave:",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "compareNumbersMatch": "Primerjajte in se prepričajte, da se naslednje številke ujemajo s številkami druge naprave:",
   "@compareNumbersMatch": {
     "type": "text",
@@ -422,23 +395,10 @@
       "description": {}
     }
   },
-  "areGuestsAllowedToJoin": "Ali se lahko gostujoči uporabniki pridružijo",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Admin",
   "@admin": {
     "type": "text",
     "placeholders": {}
-  },
-  "badServerVersionsException": "Domači strežnik podpira različice Spec:\n{serverVersions}\nToda ta aplikacija podpira samo {supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
   },
   "changedTheChatNameTo": "{username} je spremenil ime klepeta v: '{chatname}'",
   "@changedTheChatNameTo": {
@@ -537,16 +497,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "createNewSpace": "Nov prostor",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "crossSigningEnabled": "Navzkrižno podpisovanje DA",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "Trenutno aktiven",
   "@currentlyActive": {
     "type": "text",
@@ -571,14 +521,6 @@
       "day": {}
     }
   },
-  "dateWithoutYear": "{month}-{day}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "createdTheChat": "{username} je ustvaril klepet",
   "@createdTheChat": {
     "type": "text",
@@ -593,10 +535,5 @@
       "date": {},
       "timeOfDay": {}
     }
-  },
-  "deactivateAccountWarning": "S tem boste deaktivirali vaš uporabniški račun. Tega ni mogoče razveljaviti! Ali si prepričan?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   }
 }

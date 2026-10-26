@@ -35,11 +35,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "Добавить описание чата",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Администратор",
   "@admin": {
     "type": "text",
@@ -82,16 +77,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "Архивированная комната",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Разрешено ли гостям присоединяться",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
   "areYouSure": "Вы уверены?",
   "@areYouSure": {
     "type": "text",
@@ -121,14 +106,6 @@
   },
   "badServerLoginTypesException": "Домашний сервер поддерживает следующие типы входа в систему:\n{serverVersions}\nНо это приложение поддерживает только:\n{supportedVersions}",
   "@badServerLoginTypesException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "badServerVersionsException": "Домашний сервер поддерживает следующие версии спецификации:\n{serverVersions}\nНо это приложение поддерживает только {supportedVersions}",
-  "@badServerVersionsException": {
     "type": "text",
     "placeholders": {
       "serverVersions": {},
@@ -294,11 +271,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Изменить сервер Matrix",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Тема",
   "@changeTheme": {
     "type": "text",
@@ -351,11 +323,6 @@
   },
   "chooseAStrongPassword": "Выберите надёжный пароль",
   "@chooseAStrongPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "chooseAUsername": "Выберите имя пользователя",
-  "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -447,11 +414,6 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Пожалуйста, сравните эмодзи",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "compareNumbersMatch": "Пожалуйста, сравните числа",
   "@compareNumbersMatch": {
     "type": "text",
@@ -538,16 +500,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "createNewSpace": "Новое пространство",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "crossSigningEnabled": "Кросс-подпись включена",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "В сети",
   "@currentlyActive": {
     "type": "text",
@@ -566,14 +518,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{day}-{month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{day}-{month}-{year}",
   "@dateWithYear": {
     "type": "text",
@@ -582,11 +526,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "Это действие деактивирует вашу учётную запись. Оно не может быть отменено! Вы уверены?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "defaultPermissionLevel": "Уровень разрешений по умолчанию",
   "@defaultPermissionLevel": {
@@ -633,16 +572,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Обзор",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "Отображаемое имя было изменено",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Изменить",
   "@edit": {
     "type": "text",
@@ -655,16 +584,6 @@
   },
   "editChatPermissions": "Изменить разрешения чата",
   "@editChatPermissions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Отображаемое имя",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editRoomAliases": "Редактировать псевдонимы комнаты",
-  "@editRoomAliases": {
     "type": "text",
     "placeholders": {}
   },
@@ -755,26 +674,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "enterASpacepName": "Введите название пространства",
   "enterYourHomeserver": "Введите адрес вашего сервера Matrix",
   "@enterYourHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorObtainingLocation": "Ошибка получения местоположения: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "everythingReady": "Всё готово!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "Крайне оскорбительный",
-  "@extremeOffensive": {
     "type": "text",
     "placeholders": {}
   },
@@ -823,16 +724,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Описание изменено",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "Публичный групповой чат",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groups": "Групповые чаты",
   "@groups": {
     "type": "text",
@@ -873,11 +764,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "Насколько оскорбительным является это сообщение?",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "id": "ID",
   "@id": {
     "type": "text",
@@ -898,16 +784,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Вы можете заблокировать пользователей, которые вам мешают. Вы не сможете получать сообщения или приглашения в чаты от пользователей из вашего черного списка.",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Заблокировать пользователя",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "Я перешёл по ссылке",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -918,22 +794,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Безобидный",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "inviteContact": "Пригласить контакт",
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "Пригласить контакт в {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "Приглашён",
   "@invited": {
@@ -958,14 +822,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} пригласил(а) вас в FluffyChat. \n1. Установите FluffyChat: https://fluffychat.im \n2. Зарегистрируйтесь или войдите \n3. Откройте ссылку приглашения: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "печатает…",
   "@isTyping": {
     "type": "text",
@@ -980,11 +836,6 @@
   },
   "joinRoom": "Присоединиться к комнате",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "Ключи сохранены в кэше",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -1026,16 +877,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "Покинуть чат",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Лицензия",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Светлая",
   "@lightTheme": {
     "type": "text",
@@ -1058,27 +899,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "locationDisabledNotice": "Службы определения местоположения отключены. Включите их, чтобы иметь возможность обмениваться информацией о своем местоположении.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationPermissionDeniedNotice": "Разрешение на определение местоположения отклонено. Пожалуйста, предоставьте это разрешение, чтобы иметь возможность делиться своим местоположением.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "login": "Войти",
   "@login": {
     "type": "text",
     "placeholders": {}
-  },
-  "logInTo": "Войти в {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
   },
   "loginWith": "Войти через {brand}",
   "@loginWith": {
@@ -1089,11 +913,6 @@
   },
   "logout": "Выйти",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "Убедитесь, что идентификатор действителен",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -1212,16 +1031,6 @@
       "count": {}
     }
   },
-  "obtainingLocation": "Получение местоположения…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "offensive": "Оскорбительный",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "Не в сети",
   "@offline": {
     "type": "text",
@@ -1269,11 +1078,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Необязательно) Название чата",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "or": "Или",
   "@or": {
     "type": "text",
@@ -1294,11 +1098,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "Забыли пароль",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordHasBeenChanged": "Пароль был изменён",
   "@passwordHasBeenChanged": {
     "type": "text",
@@ -1306,11 +1105,6 @@
   },
   "passwordRecovery": "Восстановление пароля",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "Люди",
-  "@people": {
     "type": "text",
     "placeholders": {}
   },
@@ -1331,18 +1125,8 @@
       "fileName": {}
     }
   },
-  "pleaseChoose": "Пожалуйста, выберите",
-  "@pleaseChoose": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseChooseAPasscode": "Код блокировки",
   "@pleaseChooseAPasscode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChooseAUsername": "Пожалуйста, выберите имя пользователя",
-  "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -1353,11 +1137,6 @@
   },
   "pleaseEnter4Digits": "Установите 4-значный PIN. Чтобы убрать блокировку, удалите код",
   "@pleaseEnter4Digits": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "Пожалуйста, введите Matrix ID.",
-  "@pleaseEnterAMatrixIdentifier": {
     "type": "text",
     "placeholders": {}
   },
@@ -1383,11 +1162,6 @@
   },
   "privacy": "Конфиденциальность",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "Публичные комнаты",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -1462,11 +1236,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "Разблокировать в чате",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "removeYourAvatar": "Удалить аватар",
   "@removeYourAvatar": {
     "type": "text",
@@ -1499,11 +1268,6 @@
   },
   "roomHasBeenUpgraded": "Комната обновлена",
   "@roomHasBeenUpgraded": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "roomVersion": "Версия комнаты",
-  "@roomVersion": {
     "type": "text",
     "placeholders": {}
   },
@@ -1559,16 +1323,6 @@
   "@sendAsText": {
     "type": "text"
   },
-  "sendAudio": "Отправить аудио",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "Отправить файл",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Отправить изображение",
   "@sendImage": {
     "type": "text",
@@ -1576,21 +1330,6 @@
   },
   "sendMessages": "Отправить сообщения",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Отправить оригинал",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "Отправить стикер",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Отправить видео",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1636,21 +1375,6 @@
       "senderName": {}
     }
   },
-  "setAsCanonicalAlias": "Установить как основной псевдоним",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "Установить пользовательские эмодзи",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "Задать описание чата",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "setInvitationLink": "Установить ссылку для приглашения",
   "@setInvitationLink": {
     "type": "text",
@@ -1683,11 +1407,6 @@
       "username": {}
     }
   },
-  "shareLocation": "Поделиться местоположением",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "showPassword": "Показать пароль",
   "@showPassword": {
     "type": "text",
@@ -1710,16 +1429,6 @@
   },
   "sourceCode": "Исходный код",
   "@sourceCode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceIsPublic": "Публичное пространство",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "Название пространства",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -1765,39 +1474,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "thisRoomHasBeenArchived": "Эта комната была заархивирована.",
-  "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
   "title": "FluffyChat",
   "@title": {
     "description": "Title for the application",
     "type": "text",
     "placeholders": {}
   },
-  "toggleFavorite": "Переключить избранное",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "Переключить без звука",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "Отметить как прочитанное/непрочитанное",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
   "tooManyRequestsWarning": "Слишком много запросов. Пожалуйста, повторите попытку позже!",
   "@tooManyRequestsWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "Перенос с другого устройства",
-  "@transferFromAnotherDevice": {
     "type": "text",
     "placeholders": {}
   },
@@ -1951,11 +1635,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "Ждем, когда партнер примет запроc…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "Ждем, когда партнер примет эмодзи…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -1981,33 +1660,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoCanPerformWhichAction": "Кто и какое действие может выполнять",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "Кому разрешено вступать в этот чат",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "Почему вы хотите сообщить об этом?",
   "@whyDoYouWantToReportThis": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "Удалить резервную копию чата, чтобы создать новый ключ восстановления?",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "withTheseAddressesRecoveryDescription": "По этим адресам вы можете восстановить свой пароль.",
   "@withTheseAddressesRecoveryDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "Напишите сообщение…",
-  "@writeAMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -2031,11 +1690,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "Вы не можете пригласить себя",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "Вы были заблокированы в этом чате",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
@@ -2049,12 +1703,8 @@
   "chatHasBeenAddedToThisSpace": "Чат был добавлен в это пространство",
   "addToSpace": "Добавить в пространство",
   "scanQrCode": "Сканировать QR-код",
-  "typeInInviteLinkManually": "Введите ссылку приглашения...",
-  "shareYourInviteLink": "Поделиться ссылкой приглашения",
-  "sendOnEnter": "Отправлять по Enter",
   "homeserver": "Сервер Matrix",
   "serverRequiresEmail": "Для регистрации этот сервер должен подтвердить ваш адрес электронной почты.",
-  "enableMultiAccounts": "(БЕТА) Включить несколько учетных записей на этом устройстве",
   "bundleName": "Название пакета",
   "removeFromBundle": "Удалить из этого пакета",
   "addToBundle": "Добавить в пакет",
@@ -2063,7 +1713,6 @@
   "link": "Ссылка",
   "oneClientLoggedOut": "Один из ваших клиентов вышел",
   "yourChatBackupHasBeenSetUp": "Резервное копирование чата настроено.",
-  "yourUserId": "Ваш ID пользователя:",
   "unverified": "Не проверено",
   "passwordsDoNotMatch": "Пароли не совпадают!",
   "commandHint_clearcache": "Очистить кэш",
@@ -2082,7 +1731,6 @@
     "description": "Usage hint for the command /dm"
   },
   "messageInfo": "Информация о сообщении",
-  "openGallery": "Открыть галерею",
   "removeFromSpace": "Удалить из пространства",
   "loginWithOneClick": "Вход одним нажатием",
   "pleaseEnterValidEmail": "Пожалуйста, введите действительный адрес электронной почты.",
@@ -2104,20 +1752,7 @@
   "time": "Время",
   "messageType": "Тип сообщения",
   "repeatPassword": "Повторите пароль",
-  "openVideoCamera": "Открыть камеру для видео",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "yourStory": "Ваша история",
   "replyHasBeenSent": "Ответ отправлен",
-  "videoWithSize": "Видео ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
   "storyFrom": "История за {date}:\n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2143,7 +1778,6 @@
   "iUnderstand": "Я понимаю",
   "dismiss": "Отклонить",
   "markAsRead": "Отметить как прочитанное",
-  "reportUser": "Сообщить о пользователе",
   "openChat": "Открыть чат",
   "matrixWidgets": "Виджеты Matrix",
   "reactedWith": "{sender} оставил(а) реакцию {reaction}",
@@ -2158,20 +1792,9 @@
   "voiceCall": "Голосовой звонок",
   "unsupportedAndroidVersion": "Неподдерживаемая версия Android",
   "unsupportedAndroidVersionLong": "Для этой функции требуется более новая версия Android. Проверьте наличие обновлений или обратитесь в поддержку Lineage OS.",
-  "placeCall": "Совершить звонок",
   "videoCallsBetaWarning": "Обратите внимание, что видеозвонки в настоящее время находятся в бета-версии. На всех платформах они могут работать не так, как ожидалось, или вообще не работать.",
   "experimentalVideoCalls": "Экспериментальные видеозвонки",
-  "emailOrUsername": "Адрес электронной почты или имя пользователя",
   "confirmEventUnpin": "Вы уверены, что хотите навсегда открепить сообщение?",
-  "switchToAccount": "Переключиться на учётную запись {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "nextAccount": "Следующая учётная запись",
-  "previousAccount": "Предыдущая учётная запись",
   "editWidgets": "Редактировать виджеты",
   "addWidget": "Добавить виджет",
   "widgetVideo": "Видео",
@@ -2238,41 +1861,20 @@
     }
   },
   "noEmailWarning": "Пожалуйста, введите действительный адрес электронной почты. В противном случае вы не сможете сбросить пароль. Если вы не хотите этого делать, нажмите еще раз на кнопку, чтобы продолжить.",
-  "recoveryKeyLost": "Ключ восстановления утерян?",
   "stories": "Истории",
   "users": "Пользователи",
-  "enableAutoBackups": "Включить автоматическое резервное копирование",
-  "unlockOldMessages": "Разблокировать старые сообщения",
   "storeInSecureStorageDescription": "Сохраните ключ восстановления в безопасном хранилище этого устройства.",
   "storeSecurlyOnThisDevice": "Сохранить на этом устройстве",
   "saveKeyManuallyDescription": "Сохраните этот ключ вручную, вызвав диалог общего доступа системы или буфера обмена.",
   "recoveryKey": "Ключ восстановления",
-  "pleaseEnterRecoveryKey": "Введите ключ восстановления:",
-  "pleaseEnterRecoveryKeyDescription": "Чтобы разблокировать старые сообщения, введите ключ восстановления, сгенерированный в предыдущем сеансе. Ваш ключ восстановления НЕ является вашим паролем.",
   "storeInAndroidKeystore": "Сохранить в Android KeyStore",
   "storeInAppleKeyChain": "Сохранить в Apple KeyChain",
-  "countFiles": "{count} файлов",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "user": "Пользователь",
-  "confirmMatrixId": "Пожалуйста, подтвердите Matrix ID, чтобы удалить свою учётную запись.",
-  "supposedMxid": "Это должно быть {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
   "dehydrateTor": "Пользователи TOR: Экспорт сеанса",
   "indexedDbErrorLong": "К сожалению, по умолчанию хранилище сообщений не включено в приватном режиме.\nПожалуйста, посетите\n  - about:config\n  - установите для dom.indexedDB.privateBrowsing.enabled значение true\nВ противном случае запуск FluffyChat будет невозможен.",
   "custom": "Пользовательское",
-  "dehydrateShare": "Это ваш личный экспорт FluffyChat. Убедитесь, что вы не потеряете его и держите его в тайне.",
   "updateAvailable": "Доступно обновление для Twake Chat",
   "updateNow": "Обновить в фоновом режиме",
-  "hydrate": "Восстановить из файла резервной копии",
   "hydrateTor": "Пользователи TOR: Импорт экспорта сессии",
   "hydrateTorLong": "В прошлый раз вы экспортировали сессию в TOR? Импортируйте ее и продолжайте общение.",
   "dehydrateTorLong": "Для пользователей TOR рекомендуется экспортировать сессию перед закрытием окна.",
@@ -2328,8 +1930,6 @@
   "commandHint_googly": "Оправить эмоджи глаз",
   "commandHint_cuddle": "Крепко обнять",
   "commandHint_hug": "Отправить обнимашки",
-  "noSearchResult": "Нет подходящих результатов поиска.",
-  "startFirstChat": "Создайте свой первый чат",
   "hideUnimportantStateEvents": "Скрывать системные события",
   "doNotShowAgain": "Больше не показывать",
   "wasDirectChatDisplayName": "Пустой чат (раньше – {oldDisplayName})",
@@ -2339,7 +1939,6 @@
       "oldDisplayName": {}
     }
   },
-  "newSpaceDescription": "Пространства позволяют объединять ваши чаты и создавать частные или публичные сообщества.",
   "encryptThisChat": "Зашифровать этот чат",
   "endToEndEncryption": "Сквозное шифрование",
   "reopenChat": "Открыть чат еще раз",
@@ -2348,9 +1947,6 @@
   "disableEncryptionWarning": "В целях безопасности вы не можете отключить шифрование в чате, где оно было включено ранее.",
   "sorryThatsNotPossible": "Нам жаль... Это невозможно",
   "deviceKeys": "Ключи устройства",
-  "letsStart": "Начнем",
-  "enterInviteLinkOrMatrixId": "Введите пригласительную ссылку или Matrix ID...",
-  "noBackupWarning": "Будьте внимательны! Без резервного копирования чата вы потеряете доступ к зашифрованным сообщениям. Мы настоятельно рекомендуем включить резервное копирование чата перед выходом из системы.",
   "onlineHourAgo": "был(а) в сети {hour} ч",
   "@onlineHourAgo": {
     "placeholders": {
@@ -2364,9 +1960,6 @@
       "min": {}
     }
   },
-  "chatCanHave": "В этом чате:",
-  "channels": "Каналы",
-  "chatMessage": "Новое сообщение",
   "welcomeToTwake": "Добро пожаловать в Twake, {user}",
   "@welcomeToTwake": {
     "placeholders": {
@@ -2378,12 +1971,6 @@
   "newGroupChat": "Новый групповой чат",
   "expand": "Развернуть",
   "shrink": "Свернуть",
-  "noResultForKeyword": "Нет результатов по запросу \"{keyword}\"",
-  "@noResultForKeyword": {
-    "placeholders": {
-      "keyword": {}
-    }
-  },
   "invite": "Пригласить",
   "enterGroupName": "Введите название",
   "@enterGroupName": {
@@ -2401,29 +1988,16 @@
     "type": "text",
     "placeholders": {}
   },
-  "statusDot": "⬤",
   "active": "Активирован",
-  "twakeUsers": "Пользователи Twake",
-  "searchResultNotFound1": "• Убедитесь, что в вашем запросе нет опечаток.\n",
   "back": "Назад",
   "loginWithSSO": "Войти с помощью единого входа",
   "wrongServerName": "Неверное имя сервера",
   "more": "Больше",
-  "adminPanel": "Панель администратора",
-  "acceptInvite": "Да, пожалуйста, присоединяйтесь",
-  "askToInvite": " хочет, чтобы вы присоединились к этому чату. Что скажешь?",
-  "addACaption": "Добавьте подпись...",
   "tapToAllowAccessToYourGallery": "Нажмите, чтобы разрешить доступ к вашей галерее",
   "changeChatAvatar": "Измените аватар в чате",
-  "noImagesFound": "Изображения не найдены",
-  "captionForImagesIsNotSupportYet": "Подписи к изображениям пока не поддерживаются.",
   "tapToAllowAccessToYourCamera": "Вы можете включить доступ к камере в приложении \"Настройки\", чтобы совершать видеозвонки в",
-  "searchResultNotFound2": "• Этого пользователя может не быть в вашей адресной книге.\n",
-  "searchResultNotFound3": "• Проверьте разрешение на доступ к контактам, пользователь может быть в вашей адресной книге.\n",
-  "searchResultNotFound4": "• Если причина не указана выше, ",
   "whoWouldYouLikeToAdd": "Кого бы вы хотели добавить?",
   "addAPhoto": "Добавить фото",
-  "searchResultNotFound5": "обратитесь за помощью.",
   "maxImageSize": "Максимальный размер файла: {max}MB",
   "@maxImageSize": {
     "placeholders": {
@@ -2433,7 +2007,6 @@
   "owner": "Владелец",
   "serverNameWrongExplain": "Адрес сервера был отправлен вам администратором компании. Проверьте адрес электронной почты приглашения.",
   "contacts": "Контакты",
-  "searchForContacts": "Поиск контактов",
   "soonThereHaveContacts": "Скоро будут контакты",
   "loadingContacts": "Загрузка контактов...",
   "recentlyChats": "Недавние чаты",
@@ -2449,7 +2022,6 @@
   "gallery": "Галерея",
   "documents": "Документы",
   "twake": "Twake Chat",
-  "permissionAccess": "Разрешение на доступ",
   "explainGoToStorageSetting": "Вам нужен доступ к вашему хранилищу для предварительного просмотра файла, перейдите в настройки, чтобы разрешить это разрешение",
   "contact": "Контакт",
   "file": "Файл",
@@ -2458,15 +2030,8 @@
   "externalContactTitle": "Пригласить новых пользователей",
   "clear": "Очистить",
   "keyboard": "Клавиатура",
-  "roomAvatarMaxFileSize": "Размер аватара слишком большой",
   "location": "Местоположение",
   "externalContactMessage": "Некоторых пользователей, которых вы хотите добавить, нет в ваших контактах. Пригласить их?",
-  "roomAvatarMaxFileSizeLong": "Размер аватара должен быть меньше {max}",
-  "@roomAvatarMaxFileSizeLong": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "continueProcess": "Продолжить",
   "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Не удалось загрузить изображение! Продолжить создание группового чата?",
   "today": "Сегодня",
@@ -2486,19 +2051,12 @@
   },
   "searchSuggestion": "Вы можете искать пользователей по имени или публичному адресу сервера",
   "forwardTo": "Переслать...",
-  "noMoreResult": "Больше нет результатов",
   "errorPageTitle": "Что-то пошло не так",
   "chatFolders": "Папки",
   "errorPageDescription": "Этой страницы не существует.",
   "downloadImageError": "Не удалось сохранить",
   "appLanguage": "Язык приложения",
   "copyMessageText": "Скопировать",
-  "membersInfo": "Участники ({count})",
-  "@membersInfo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "recentChat": "ПОСЛЕДНИЕ ЧАТЫ",
   "editProfileDescriptions": "Обновляйте профиль – имя, изображение и краткое описание.",
   "cannotEnableKeyBackup": "Невозможно включить резервное копирование. Попробуйте еще раз в настройках.",
@@ -2512,10 +2070,8 @@
   "addMembers": "Добавить",
   "email": "Email",
   "bio": "Био (опционально)",
-  "searchForPeopleAndChannels": "Искать людей и каналы",
   "downloads": "Загрузки",
   "errorPageButton": "Назад к чату",
-  "playVideo": "Проиграть",
   "copiedMatrixIdToClipboard": "Matrix ID скопирован в буфер обмена.",
   "privacyAndSecurity": "Конфиденциальность",
   "matrixId": "Matrix ID",
@@ -2537,20 +2093,16 @@
   "blankChatTitle": "Выберите чат или нажмите на #EditIcon#, чтобы создать его.",
   "links": "Ссылки",
   "downloadImageSuccess": "Изображение сохранено",
-  "chatInfo": "Информация",
   "thisMessageHasBeenEncrypted": "Это сообщение зашифровано",
   "media": "Медиа",
-  "cannotUnlockBackupKey": "Невозможно разблокировать резервную копию ключа.",
   "workIdentitiesInfo": "ИДЕНТИФИКАТОРЫ",
   "members": "Участники",
   "errorGettingPdf": "Не удалось загрузить PDF",
   "unmute": "Вкл. звук",
   "selectChat": "Выбрать чат",
   "add": "Добавить",
-  "cannotUploadKey": "Невозможно сохранить резервную копию ключа.",
   "notificationAndSounds": "Уведомления и звук",
   "done": "Готово",
-  "copyImageSuccess": "Изображение скопировано",
   "paste": "Вставить",
   "download": "Скачать",
   "@download": {
@@ -2564,15 +2116,12 @@
     "placeholders": {}
   },
   "copyImageFailed": "Не удалось скопировать изображение",
-  "countPinChat": "ЗАКРЕПЛЕННЫЕ ЧАТЫ ({countPinChat})",
-  "countAllChat": "ВСЕ ЧАТЫ ({countAllChat})",
   "cut": "Вырезать",
   "pasteImageFailed": "Не удалось вставить изображение",
   "unmuteThisChat": "Вкл. звук",
   "markThisChatAsUnRead": "Пометить как непрочитанный",
   "muteThisChat": "Откл. звук",
   "youNeedToAcceptTheInvitation": "Примите приглашение, чтобы начать общение",
-  "fetchingPhonebookContacts": "Контакты синхронизируются...({progress}%)",
   "changeProfileAvatar": "Изменить аватар",
   "countMembers": "{count, plural, =0{нет участников} =1{1 участник} other{{count} участников}}",
   "@countMembers": {
@@ -2595,11 +2144,9 @@
   "encryptionWarning": "Вы можете потерять свои сообщения, если зайдете в приложение Twake на другом устройстве.",
   "pinThisChat": "Закрепить чат",
   "markThisChatAsRead": "Пометить как прочитанный",
-  "noResultsFound": "Результаты не найдены",
   "unpinThisChat": "Открепить чат",
   "contactInfo": "О контакте",
   "newDirectMessage": "Новые личные сообщения",
-  "contactsWarningBannerTitle": "Чтобы общаться со всеми своими друзьями, предоставьте Twake доступ к вышей контактной книге. Спасибо за понимание.",
   "encryptionMessage": "Сообщения будут зашифрованы, и их копии не сохранятся на наших серверах. После включения отключить функцию будет нельзя.",
   "declineTheInvitation": "Отклонить приглашение?",
   "notNow": "Позже",
@@ -2643,9 +2190,7 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "settingsLanguageDescription": "Выберите язык Twake Chat",
   "enterCaption": "Добавить описание...",
-  "failToSend": "Отправить не удалось, повторите попытку",
   "showLess": "Свернуть",
   "showMore": "Развернуть",
   "unreadMessages": "Непрочитанные сообщения",
@@ -2657,7 +2202,6 @@
   "failedToSendFiles": "Ошибка отправки файлов",
   "groupInfo": "Сведения о чате",
   "groupInformation": "Информация о чате",
-  "linkInvite": "Приглашение по ссылке",
   "noDescription": "Нет описания",
   "description": "Описание",
   "groupName": "Название чата",
@@ -2688,10 +2232,7 @@
       }
     }
   },
-  "twakeChatUser": "Пользователь Twake Chat",
-  "sharedMediaAndLinks": "Общие медиа и ссылки",
   "errorSendingFiles": "Некоторые файлы невозможно отправить из-за размера, ограничений формата или непредвиденных ошибок. Мы пропустим их.",
-  "removeFileBeforeSend": "Удалить файлы с ошибками перед отправкой",
   "unselect": "Отменить выбор",
   "searchContacts": "Поиск контактов",
   "leaveGroupSubtitle": "Этот групповой чат останется после того, как вы его покинете",
@@ -2711,18 +2252,8 @@
   "tapToAllowAccessToYourMicrophone": "Предоставьте доступ к микрофону в «Настройках», чтобы записывать голос",
   "phone": "Телефон",
   "saveToGallery": "Скачать",
-  "saveFileToGalleryError": "Не удалось сохранить файл в \"Галерею\"",
   "copiedPublicKeyToClipboard": "Открытый ключ скопирован в буфер обмена.",
   "removeFromGroup": "Удалить из группового чата",
-  "removeUser": "Удалить пользователя",
-  "removeReason": "Удалить {user} из группового чата",
-  "@removeReason": {
-    "type": "text",
-    "placeholders": {
-      "user": {}
-    }
-  },
-  "editWorkIdentitiesDescriptions": "Просматривайте ваш профиль: идентификатор Matrix, адрес электронной почты и название компании.",
   "loading": "Загрузка...",
   "aWhileAgo": "некоторое время назад",
   "@aWhileAgo": {
@@ -2738,14 +2269,12 @@
   },
   "downloading": "Загрузка",
   "settingUpYourTwake": "Настройка аккаунта\nЭто может занять некоторое время",
-  "performingAutomaticalLogin": "Выполнение автоматического входа   через SSO",
   "backingUpYourMessage": "Подготовка серверной среды для резервного копирования сообщений",
   "recoveringYourEncryptedChats": "Восстановление зашифрованных чатов",
   "configureDataEncryption": "Настройка шифрования данных",
   "configurationNotFound": "Данные конфигурации не найдены",
   "fileSavedToGallery": "Файл сохранен в \"Галерею\"",
   "showInChat": "Показать в чате",
-  "viewProfile": "Показать профиль",
   "profileInfo": "Информация профиля",
   "saveToDownloads": "Сохранить в Загрузки",
   "explainPermissionToGallery": "Чтобы продолжить, разрешите {appName} доступ к галерее. Это необходимо, чтобы сохранить файл.",
@@ -2763,7 +2292,6 @@
   "selectAccount": "Выбор аккаунта",
   "youDontHaveAnyContactsYet": "У вас еще нет контактов.",
   "errorDialogTitle": "Что-то пошло не так",
-  "tokenNotFound": "Токен входа не найден",
   "dangerZone": "Будьте внимательны",
   "leaveChatFailed": "Не удалось покинуть чат",
   "invalidLoginToken": "Недействительный токен входа",
@@ -2851,7 +2379,6 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Выберите email или телефон, на который хотите отправить приглашение",
   "phoneNumber": "Номер телефона",
   "sendInvitation": "Отправить приглашение",
-  "verifyWithAnotherDevice": "Проверить при помощи другого устройства",
   "contactLookupFailed": "Поиск контактов был прерван",
   "youAlreadySentAnInvitationToThisContact": "Вы уже отправили приглашение этому контакту",
   "invitationHasBeenSuccessfullySent": "Приглашение успешно отправлено!",
@@ -2986,7 +2513,6 @@
   "terrorism": "Терроризм",
   "other": "Другое",
   "enableRightAndLeftMessageAlignment": "Включить выравнивание сообщений по правому/левому краю",
-  "holdToRecordAudio": "Удерживайте для записи.",
   "explainPermissionToAccessMicrophone": "Для голосовых сообщений требуется доступ к микрофону.",
   "allowMicrophoneAccess": "Доступ к микрофону",
   "later": "Позже",
@@ -2995,10 +2521,7 @@
   "recordingInProgress": "Идет запись",
   "pleaseFinishOrStopTheRecording": "Завершите или остановите запись, прежде чем выполнять другие действия.",
   "audioMessageFailedToSend": "Не удалось отправить аудиосообщение.",
-  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Сейчас можно создать чат не более чем с 10 участниками. Удалите лишних пользователей и попробуйте ещё раз",
   "gotIt": "Понятно",
-  "weCouldNotCompleteYourRequestTryAgainShortly": "Не удалось выполнить ваш запрос. Попробуйте еще раз позже",
-  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Чат успешно создан, но нам не удалось добавить нескольких участников. Пригласите их снова при помощи настроек информации чата",
   "microphonePermissionDeniedOnWeb": "Требуется доступ к микрофону. Предоставьте его в настройках браузера.",
   "save": "Сохранить",
   "newContact": "Новый контакт",

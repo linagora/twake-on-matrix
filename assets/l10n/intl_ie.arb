@@ -34,11 +34,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Decovrir",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
   "containsUserName": "Contene li nómine",
   "@containsUserName": {
     "type": "text",
@@ -56,11 +51,6 @@
   },
   "copyToClipboard": "Copiar al Paperiere",
   "@copyToClipboard": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "createNewSpace": "Crear un spacie",
-  "@createNewSpace": {
     "type": "text",
     "placeholders": {}
   },
@@ -92,16 +82,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "everythingReady": "Omni es pret!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "Extremmen offensiv",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "fileName": "Nómine de file",
   "@fileName": {
     "type": "text",
@@ -124,11 +104,6 @@
   },
   "fromTheInvitation": "Pro invitation",
   "@fromTheInvitation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "Gruppe es public",
-  "@groupIsPublic": {
     "type": "text",
     "placeholders": {}
   },
@@ -182,11 +157,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "keysCached": "Claves es in cache",
-  "@keysCached": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lastActiveAgo": "Ultim activité: {localizedTimeShort}",
   "@lastActiveAgo": {
     "type": "text",
@@ -206,11 +176,6 @@
   },
   "no": "No",
   "@no": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "offensive": "Offensiv",
-  "@offensive": {
     "type": "text",
     "placeholders": {}
   },
@@ -260,28 +225,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Facultativ) Nómine de gruppe",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "password": "Contrasigne",
   "@password": {
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "Li contrasigne esset obliviat",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordRecovery": "Reganiar li contrasigne",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChoose": "Ples selecter",
-  "@pleaseChoose": {
     "type": "text",
     "placeholders": {}
   },
@@ -311,23 +261,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendVideo": "Inviar video",
-  "@sendVideo": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "shareLocation": "Partir un localisation",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "signUp": "Inregistrar se",
   "@signUp": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "Nómine de spacie",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -338,11 +273,6 @@
   },
   "unavailable": "Índisponibil",
   "@unavailable": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "Marcar quam (ín)leet",
-  "@toggleUnread": {
     "type": "text",
     "placeholders": {}
   },
@@ -369,27 +299,9 @@
   "messageType": "Tip de missage",
   "start": "Iniciar",
   "messageInfo": "Information pri li missage",
-  "openGallery": "Aperter li galerie",
   "unsubscribeStories": "Desabonnar racontas",
-  "yourStory": "Vor raconte",
-  "videoWithSize": "Video ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
-  "reportUser": "Raportar li usator",
   "matrixWidgets": "Widgets de Matrix",
   "voiceCall": "Telefonada",
-  "nextAccount": "Sequent conto",
-  "previousAccount": "Precedent conto",
-  "countFiles": "{count} files",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "all": "Omni",
   "@all": {
     "type": "text",
@@ -579,11 +491,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Ínoffensiv",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "invited": "Invitat",
   "@invited": {
     "type": "text",
@@ -591,11 +498,6 @@
   },
   "leave": "Forlassar",
   "@leave": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Licentie",
-  "@license": {
     "type": "text",
     "placeholders": {}
   },
@@ -612,11 +514,6 @@
   },
   "reason": "Cause",
   "@reason": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "Homes",
-  "@people": {
     "type": "text",
     "placeholders": {}
   },
@@ -648,11 +545,6 @@
   "repeatPassword": "Repetir li contrasigne",
   "addEmail": "Adjunter e-post",
   "@addEmail": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "Archivat chambre",
-  "@archivedRoom": {
     "type": "text",
     "placeholders": {}
   },
@@ -738,18 +630,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendFile": "Inviar un file",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Inviar un image",
   "@sendImage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Inviar li originale",
-  "@sendOriginal": {
     "type": "text",
     "placeholders": {}
   },
@@ -763,40 +645,15 @@
     "type": "text",
     "placeholders": {}
   },
-  "obtainingLocation": "Obtenente li localisation…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iUnderstand": "Yo comprende",
   "addWidget": "Adjunter un widget",
   "addAccount": "Adjunter un conto",
-  "publicRooms": "Public chambres",
-  "@publicRooms": {
-    "type": "text",
-    "placeholders": {}
-  },
   "verifyStart": "Iniciar li verification",
   "@verifyStart": {
     "type": "text",
     "placeholders": {}
   },
   "addDescription": "Adjunter un descrition",
-  "roomVersion": "Version del chambre",
-  "@roomVersion": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendAudio": "Inviar audio",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "Inviar un nota adhesiv",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
   "setStatus": "Assignar li statu",
   "@setStatus": {
     "type": "text",
@@ -826,18 +683,12 @@
     "placeholders": {}
   },
   "updateNow": "Actualisar in li funde",
-  "confirmMatrixId": "Ples confirmar vor Matrix ID por destructer vor conto.",
   "allChats": "Omni conversationes",
   "@allChats": {
     "type": "text",
     "placeholders": {}
   },
   "addToSpace": "Adjunter al spacie",
-  "addGroupDescription": "Adjunter un descrition de gruppe",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "askVerificationRequest": "Esque acceptar ti demanda de verification de {username}?",
   "@askVerificationRequest": {
     "type": "text",
@@ -850,7 +701,6 @@
     "type": "text",
     "placeholder": {}
   },
-  "sendOnEnter": "Inviar per Enter",
   "blocked": "Blocat",
   "@blocked": {
     "type": "text",
@@ -876,11 +726,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Cambiar li hem-servitor",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "chat": "Conversation",
   "@chat": {
     "type": "text",
@@ -901,11 +746,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chooseAUsername": "Selecte un nómine de usator",
-  "@chooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "commandHint_me": "Ples descrir vos",
   "@commandHint_me": {
     "type": "text",
@@ -921,7 +761,6 @@
     "type": "text"
   },
   "updateAvailable": "Un actualisament de FluffyChat es disponibil",
-  "yourUserId": "Vor ID de usator:",
   "editWidgets": "Modificar li widgets",
   "widgetEtherpad": "Textual nota",
   "banFromChat": "Bannir del conversation",
@@ -957,11 +796,6 @@
     "type": "text",
     "description": "Usage hint for the command /plain"
   },
-  "editRoomAliases": "Modificar pseudonimos del chambre",
-  "@editRoomAliases": {
-    "type": "text",
-    "placeholders": {}
-  },
   "emoteExists": "Emotion ja existe!",
   "@emoteExists": {
     "type": "text",
@@ -992,11 +826,6 @@
       "targetName": {}
     }
   },
-  "leftTheChat": "Surtit ex li conversation",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "loadingPleaseWait": "Cargante... ples atender.",
   "@loadingPleaseWait": {
     "type": "text",
@@ -1007,13 +836,6 @@
     "type": "text",
     "placeholders": {
       "username": {}
-    }
-  },
-  "supposedMxid": "To deve esser {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
     }
   },
   "areYouSureYouWantToLogout": "Esque vu vole cluder li session?",
@@ -1034,22 +856,6 @@
     "type": "text",
     "placeholders": {
       "uri": {}
-    }
-  },
-  "badServerVersionsException": "Li hem-servitor supporta ti versiones de specification:\n{serverVersions}\nMa ti-ci application supporta solmen {supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "dateWithoutYear": "{day}.{month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
     }
   },
   "device": "Aparate",
@@ -1161,16 +967,6 @@
   "unverified": "Ínverificat",
   "deviceId": "ID de aparate",
   "@deviceId": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Redacter li visibil nómine",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Ignorar un nómine",
-  "@ignoreUsername": {
     "type": "text",
     "placeholders": {}
   },

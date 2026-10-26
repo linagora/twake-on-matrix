@@ -35,11 +35,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "Ajouter une description au groupe",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToSpace": "Ajouter à l'espace",
   "admin": "Administrateur",
   "@admin": {
@@ -83,16 +78,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "Salon archivé",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Les utilisateurs invités sont-ils autorisés à se joindre",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
   "areYouSure": "Êtes-vous sûr·e ?",
   "@areYouSure": {
     "type": "text",
@@ -122,14 +107,6 @@
   },
   "badServerLoginTypesException": "Le serveur accepte les types de connexion :\n{serverVersions}\nMais cette application ne prend en charge que :\n{supportedVersions}",
   "@badServerLoginTypesException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "badServerVersionsException": "Le serveur supporte les spécifications en version :\n{serverVersions}\nMais cette application n'est compatible qu'avec le·s version·s : {supportedVersions}",
-  "@badServerVersionsException": {
     "type": "text",
     "placeholders": {
       "serverVersions": {},
@@ -295,11 +272,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Changer l'adresse du serveur",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Changer de thème visuel",
   "@changeTheme": {
     "type": "text",
@@ -353,11 +325,6 @@
   },
   "chooseAStrongPassword": "Choisissez un mot de passe fort",
   "@chooseAStrongPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "chooseAUsername": "Choisissez un nom d'utilisateur/trice",
-  "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -449,11 +416,6 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Comparez les emojis suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "compareNumbersMatch": "Comparez les chiffres suivants avec ceux de l'autre appareil et assurez-vous qu'ils correspondent :",
   "@compareNumbersMatch": {
     "type": "text",
@@ -540,16 +502,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "createNewSpace": "Nouvel espace",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "crossSigningEnabled": "La signature croisée est activée",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "Actif en ce moment",
   "@currentlyActive": {
     "type": "text",
@@ -568,14 +520,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{day}/{month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{day}/{month}/{year}",
   "@dateWithYear": {
     "type": "text",
@@ -584,11 +528,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "Cette opération va désactiver votre compte. Une fois cette action effectuée, aucun retour en arrière n'est possible ! Voulez-vous continuer ?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "defaultPermissionLevel": "Niveau d'autorisation par défaut",
   "@defaultPermissionLevel": {
@@ -635,16 +574,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Découvrir",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "Le nom d'affichage a bien été modifié",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "download": "Télécharger",
   "@download": {
     "type": "text",
@@ -662,16 +591,6 @@
   },
   "editChatPermissions": "Modifier les permissions de la discussion",
   "@editChatPermissions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Changer de nom d'affichage",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editRoomAliases": "Modifier les adresses du salon",
-  "@editRoomAliases": {
     "type": "text",
     "placeholders": {}
   },
@@ -762,26 +681,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "enterASpacepName": "Entrer un nom d'espace",
   "enterYourHomeserver": "Renseignez l'adresse de votre serveur",
   "@enterYourHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorObtainingLocation": "Erreur lors de l'obtention de la localisation : {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "everythingReady": "Tout est prêt !",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "Extrêmement offensant",
-  "@extremeOffensive": {
     "type": "text",
     "placeholders": {}
   },
@@ -830,16 +731,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "La description du salon a été modifiée",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "Ce salon est public",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groups": "Salons",
   "@groups": {
     "type": "text",
@@ -880,11 +771,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "À quel point ce contenu est-il offensant ?",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "id": "Identifiant",
   "@id": {
     "type": "text",
@@ -905,16 +791,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Vous pouvez ignorer les utilisateurs/trices qui vous perturbent. Vous ne pourrez pas recevoir de messages ou d'invitations de la part des utilisateurs/trices figurant sur votre liste personnelle des utilisateurs/trices ignoré·es.",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Ignorer l'utilisateur/trice",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "J'ai cliqué sur le lien",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -925,22 +801,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Non offensant",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "inviteContact": "Inviter un contact",
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "Inviter un contact à {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "Invité·e",
   "@invited": {
@@ -965,14 +829,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} vous a invité·e sur FluffyChat.\n1. Installez FluffyChat : https://fluffychat.im\n2. Inscrivez-vous ou connectez-vous\n3. Ouvrez le lien d'invitation : {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "écrit",
   "@isTyping": {
     "type": "text",
@@ -987,11 +843,6 @@
   },
   "joinRoom": "Rejoindre le salon",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "Les clés sont mises en cache",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -1033,16 +884,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "A quitté la discussion",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Licence",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Clair",
   "@lightTheme": {
     "type": "text",
@@ -1065,27 +906,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "locationDisabledNotice": "Les services de localisation sont désactivés. Activez les avant de pouvoir partager votre localisation.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationPermissionDeniedNotice": "L'application n'a pas la permission d'accéder à votre localisation. Merci de l'accorder afin de pouvoir partager votre localisation.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "login": "Se connecter",
   "@login": {
     "type": "text",
     "placeholders": {}
-  },
-  "logInTo": "Se connecter à {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
   },
   "loginWith": "Se connecter avec {brand}",
   "@loginWith": {
@@ -1096,11 +920,6 @@
   },
   "logout": "Se déconnecter",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "Vérifiez que l'identifiant est valide",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -1224,16 +1043,6 @@
       "count": {}
     }
   },
-  "obtainingLocation": "Obtention de la localisation…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "offensive": "Offensant",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "Hors ligne",
   "@offline": {
     "type": "text",
@@ -1281,11 +1090,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Optionnel) Nom du salon",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "or": "Ou",
   "@or": {
     "type": "text",
@@ -1306,11 +1110,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "Mot de passe oublié",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordHasBeenChanged": "Le mot de passe a été modifié",
   "@passwordHasBeenChanged": {
     "type": "text",
@@ -1318,11 +1117,6 @@
   },
   "passwordRecovery": "Récupération du mot de passe",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "Personnes",
-  "@people": {
     "type": "text",
     "placeholders": {}
   },
@@ -1343,18 +1137,8 @@
       "fileName": {}
     }
   },
-  "pleaseChoose": "Veuillez choisir",
-  "@pleaseChoose": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseChooseAPasscode": "Veuillez choisir un code d’accès",
   "@pleaseChooseAPasscode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChooseAUsername": "Choisissez un nom d'utilisateur·ice",
-  "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -1365,11 +1149,6 @@
   },
   "pleaseEnter4Digits": "Veuillez saisir 4 chiffres, ou laissez vide pour désactiver le verrouillage",
   "@pleaseEnter4Digits": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "Renseignez un identifiant Matrix.",
-  "@pleaseEnterAMatrixIdentifier": {
     "type": "text",
     "placeholders": {}
   },
@@ -1395,11 +1174,6 @@
   },
   "privacy": "Vie privée",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "Salons publics",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -1474,11 +1248,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "Débannissement de la discussion",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "removeYourAvatar": "Supprimer votre avatar",
   "@removeYourAvatar": {
     "type": "text",
@@ -1511,11 +1280,6 @@
   },
   "roomHasBeenUpgraded": "Le salon a été mis à niveau",
   "@roomHasBeenUpgraded": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "roomVersion": "Version du salon",
-  "@roomVersion": {
     "type": "text",
     "placeholders": {}
   },
@@ -1572,16 +1336,6 @@
   "@sendAsText": {
     "type": "text"
   },
-  "sendAudio": "Envoyer un fichier audio",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "Envoyer un fichier",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Envoyer une image",
   "@sendImage": {
     "type": "text",
@@ -1589,21 +1343,6 @@
   },
   "sendMessages": "Envoyer des messages",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Envoyer le fichier original",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "Envoyer un autocollant",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Envoyer une vidéo",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1649,21 +1388,6 @@
       "senderName": {}
     }
   },
-  "setAsCanonicalAlias": "Définir comme adresse principale",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "Définir des émoticônes personnalisées",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "Définir la description du groupe",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "setInvitationLink": "Créer un lien d'invitation",
   "@setInvitationLink": {
     "type": "text",
@@ -1696,11 +1420,6 @@
       "username": {}
     }
   },
-  "shareLocation": "Partager la localisation",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "showPassword": "Afficher le mot de passe",
   "@showPassword": {
     "type": "text",
@@ -1723,16 +1442,6 @@
   },
   "sourceCode": "Code source",
   "@sourceCode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceIsPublic": "L'espace est public",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "Nom de l'espace",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -1778,39 +1487,14 @@
     "type": "text",
     "placeholders": {}
   },
-  "thisRoomHasBeenArchived": "Ce salon a été archivé.",
-  "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
   "title": "FluffyChat",
   "@title": {
     "description": "Title for the application",
     "type": "text",
     "placeholders": {}
   },
-  "toggleFavorite": "Activer/désactiver en favori",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "Activer/désactiver la sourdine",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "Marquer comme lu / non lu",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
   "tooManyRequestsWarning": "Trop de requêtes. Veuillez réessayer plus tard !",
   "@tooManyRequestsWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "Transfert à partir d'un autre appareil",
-  "@transferFromAnotherDevice": {
     "type": "text",
     "placeholders": {}
   },
@@ -1964,11 +1648,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "En attente de l'acceptation de la demande par le partenaire…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "En attente de l'acceptation de l'émoji par le partenaire…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -1994,33 +1673,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoCanPerformWhichAction": "Qui peut faire quelle action",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "Qui est autorisé à rejoindre ce salon",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "Pourquoi voulez-vous le signaler ?",
   "@whyDoYouWantToReportThis": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "Effacer la sauvegarde de votre discussion pour créer une nouvelle clé de récupération ?",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "withTheseAddressesRecoveryDescription": "Grâce à ces adresses, vous pouvez récupérer votre mot de passe si vous en avez besoin.",
   "@withTheseAddressesRecoveryDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "Écrivez un message…",
-  "@writeAMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -2044,11 +1703,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "Vous ne pouvez pas vous inviter vous-même",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "Vous avez été banni·e de cette discussion",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
@@ -2060,12 +1714,8 @@
     "placeholders": {}
   },
   "scanQrCode": "Scanner un code QR",
-  "typeInInviteLinkManually": "Entrer le lien d'invitation manuellement...",
-  "shareYourInviteLink": "Partager votre lien d'invitation",
-  "sendOnEnter": "Envoyer avec la touche \"Entrée\"",
   "homeserver": "Serveur",
   "serverRequiresEmail": "Ce serveur doit valider votre adresse e-mail pour l'inscription.",
-  "enableMultiAccounts": "(BETA) Activer les comptes multiples sur cet appareil",
   "bundleName": "Nom du groupe",
   "removeFromBundle": "Retirer de ce groupe",
   "addToBundle": "Ajouter au groupe",
@@ -2074,7 +1724,6 @@
   "oneClientLoggedOut": "Un de vos clients a été déconnecté",
   "link": "Lien",
   "yourChatBackupHasBeenSetUp": "La sauvegarde de vos discussions a été configurée.",
-  "yourUserId": "Votre identifiant utilisateur :",
   "unverified": "Non vérifié",
   "passwordsDoNotMatch": "Les mots de passe ne correspondent pas !",
   "pleaseEnterValidEmail": "Veuillez saisir une adresse e-mail valide.",
@@ -2087,7 +1736,6 @@
     }
   },
   "messageType": "Type de message",
-  "openGallery": "Ouvrir dans la Galerie",
   "time": "Heure",
   "sender": "Expéditeur/trice",
   "messageInfo": "Informations sur le message",
@@ -2115,17 +1763,11 @@
     "type": "text",
     "description": "Usage hint for the command /dm"
   },
-  "openVideoCamera": "Ouvrir la caméra pour une vidéo",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToStory": "Ajouter à la story",
   "whoCanSeeMyStories": "Qui peut voir mes stories ?",
   "publish": "Publier",
   "unsubscribeStories": "Se désinscrire des stories",
   "thisUserHasNotPostedAnythingYet": "Cet(te) utilisateur(trice) n'a encore rien posté dans sa story",
-  "yourStory": "Votre story",
   "replyHasBeenSent": "La réponse a été envoyée",
   "storyFrom": "Story du {date} : \n{body}",
   "@storyFrom": {
@@ -2133,13 +1775,6 @@
     "placeholders": {
       "date": {},
       "body": {}
-    }
-  },
-  "videoWithSize": "Vidéo ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
     }
   },
   "whoCanSeeMyStoriesDesc": "Veuillez noter que les personnes peuvent se voir et se contacter dans votre story.",
@@ -2154,7 +1789,6 @@
   "storyPrivacyWarning": "Veuillez noter que les personnes peuvent se voir et se contacter dans votre story. Vos stories seront visibles pendant 24 heures, mais il n'y a aucune garantie qu'elles seront supprimées de tous les appareils et de tous les serveurs.",
   "dismiss": "Rejeter",
   "markAsRead": "Marquer comme lu",
-  "reportUser": "Signaler l'utilisateur/trice",
   "openChat": "Ouvrir la discussion",
   "matrixWidgets": "Widgets Matrix",
   "reactedWith": "{sender} a réagi avec {reaction}",
@@ -2166,7 +1800,6 @@
     }
   },
   "emojis": "Émojis",
-  "placeCall": "Passer un appel",
   "voiceCall": "Appel vocal",
   "unsupportedAndroidVersion": "Version d'Android non prise en charge",
   "unsupportedAndroidVersionLong": "Cette fonctionnalité nécessite une nouvelle version d'Android. Veuillez vérifier les mises à jour ou la prise en charge de Lineage OS.",
@@ -2174,16 +1807,6 @@
   "confirmEventUnpin": "Voulez-vous vraiment désépingler définitivement le message ?",
   "videoCallsBetaWarning": "Veuillez noter que les appels vidéo sont actuellement en version bêta. Ils peuvent ne pas fonctionner comme prévu ou ne oas fonctionner du tout sur toutes les plateformes.",
   "experimentalVideoCalls": "Appels vidéo expérimentaux",
-  "emailOrUsername": "Adresse e-mail ou identifiant",
-  "switchToAccount": "Passer au compte {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "nextAccount": "Compte suivant",
-  "previousAccount": "Compte précédent",
   "widgetJitsi": "Jitsi Meet",
   "widgetCustom": "Personnalisé",
   "widgetUrlError": "Ceci n'est pas un lien valide.",
@@ -2250,16 +1873,13 @@
     "placeholders": {}
   },
   "users": "Utilisateurs/trices",
-  "enableAutoBackups": "Activer les sauvegardes automatiques",
   "storeInAndroidKeystore": "Stocker dans Android KeyStore",
   "storeInAppleKeyChain": "Stocker dans Apple KeyChain",
   "user": "Utilisateur/trice",
   "custom": "Personnalisé",
-  "hydrate": "Restaurer à partir du fichier de sauvegarde",
   "dehydrateWarning": "Cette action ne peut pas être annulée. Vérifiez que vous avez bien enregistrer le fichier de sauvegarde.",
   "dehydrateTorLong": "Pour les utilisateurs/trices de TOR, il est recommandé d'exporter la session avant de fermer la fenêtre.",
   "recoveryKey": "Clé de récupération",
-  "recoveryKeyLost": "Clé de récupération perdue ?",
   "indexedDbErrorLong": "Le stockage des messages n'est malheureusement pas activé par défaut en mode privé, ce qui empêche FluffyChat de fonctionner.\nPour activer le stockage local et pouvoir utiliser FluffyChat, veuillez :\n - sous Firefox : ouvrir l'adresse \"about:config\" (vous devrez accepter le message d'alerte), puis rechercher la clef \"dom.indexedDB.privateBrowsing.enabled\", et la définir à \"true\".",
   "saveKeyManuallyDescription": "Enregistrer cette clé manuellement en déclenchant la boîte de dialogue de partage du système ou le presse-papiers.",
   "storeInSecureStorageDescription": "Stocker la clé de récupération dans un espace sécurisé de cet appareil.",
@@ -2267,20 +1887,10 @@
   "stories": "Stories",
   "noEmailWarning": "Veuillez saisir une adresse e-mail valide. Sinon, vous ne pourrez pas réinitialiser votre mot de passe. Si vous ne voulez pas le faire, appuyez à nouveau sur le bouton pour continuer.",
   "dehydrate": "Exporter la session et effacer l'appareil",
-  "dehydrateShare": "Ceci est votre export privé de FluffyChat. Ne le perdez pas et gardez le privé.",
   "dehydrateTor": "Utilisateurs/trices de TOR : Exporter la session",
   "hydrateTor": "Utilisateurs/trices de TOR : Importer une session exportée",
   "hydrateTorLong": "Vous avez exporté votre session la dernière fois sur TOR ? Importez-la rapidement et continuez à discuter.",
-  "pleaseEnterRecoveryKey": "Veuillez saisir votre clé de récupération :",
-  "pleaseEnterRecoveryKeyDescription": "Pour déverrouiller vos anciens messages, veuillez entrer votre clé de récupération qui a été générée lors d'une session précédente. Votre clé de récupération n'est PAS votre mot de passe.",
-  "unlockOldMessages": "Déverrouiller les anciens messages",
   "storeSecurlyOnThisDevice": "Stocker de manière sécurisé sur cet appareil",
-  "countFiles": "{count} fichiers",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "updateAvailable": "Mise à jour de Twake Chat disponible",
   "updateNow": "Lancer la mise à jour en arrière-plan",
   "noKeyForThisMessage": "Cela peut se produire si le message a été envoyé avant que vous ne vous soyez connecté à votre compte sur cet appareil.\n\nIl est également possible que l'expéditeur ait bloqué votre appareil ou qu'un problème de connexion Internet se soit produit.\n\nÊtes-vous capable de lire le message dans une autre session ? Vous pouvez alors transférer le message à partir de celle-ci ! Allez dans Réglages > Appareils et assurez-vous que vos appareils ont été vérifiés mutuellement. Lorsque vous ouvrirez le salon la fois suivante et que les deux sessions seront au premier plan, les clés seront transmises automatiquement.\n\nVous ne voulez pas perdre les clés en vous déconnectant ou en changeant d'appareil ? Assurez-vous que vous avez activé la sauvegarde des discussions dans les Réglages.",
@@ -2288,14 +1898,6 @@
   "allSpaces": "Tous les espaces",
   "commandHint_markasdm": "Marquer comme salon de messagerie directe",
   "commandHint_markasgroup": "Marquer comme salon",
-  "confirmMatrixId": "Veuillez confirmer votre identifiant Matrix afin de supprimer votre compte.",
-  "supposedMxid": "Cela devrait être {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
   "whyIsThisMessageEncrypted": "Pourquoi ce message est-il illisible ?",
   "foregroundServiceRunning": "Cette notification s’affiche lorsque le service au premier plan est en cours d’exécution.",
   "screenSharingTitle": "Partage d'écran",
@@ -2353,15 +1955,9 @@
   "endToEndEncryption": "Chiffrement de bout en bout",
   "sorryThatsNotPossible": "Désolé, ce n'est pas possible",
   "deviceKeys": "Clés de l’appareil :",
-  "startFirstChat": "Commencez votre première discussion",
-  "newSpaceDescription": "Les espaces vous permettent de consolider vos discussions et de construire des communautés privées ou publiques.",
   "disableEncryptionWarning": "Pour des raisons de sécurité, vous ne pouvez pas désactiver le chiffrement dans une discussion s'il a été activé précédemment.",
-  "letsStart": "C'est parti",
   "reopenChat": "Rouvrir la discussion",
-  "enterInviteLinkOrMatrixId": "Entrez le lien d'invitation ou l'ID Matrix...",
-  "noSearchResult": "Aucun résultat de recherche correspondant.",
   "noOtherDevicesFound": "Aucun autre appareil trouvé",
-  "noBackupWarning": "Attention ! Sans l'activation de la sauvegarde de la discussion, vous perdrez l'accès à vos messages chiffrés. Il est fortement recommandé d'activer la sauvegarde de la discussion avant de se déconnecter.",
   "fileIsTooBigForServer": "Le serveur reporte que le fichier est trop large pour être envoyé.",
   "participantsCount": "Membres ({count})",
   "@participantsCount": {
@@ -2371,7 +1967,6 @@
   },
   "loadingContacts": "Chargement des contacts...",
   "soonThereHaveContacts": "Bientôt, il y aura des contacts",
-  "chatCanHave": "Le salon peut avoir :",
   "welcomeToTwake": "Bienvenue sur Twake Chat, {user}",
   "@welcomeToTwake": {
     "placeholders": {
@@ -2401,23 +1996,11 @@
     "placeholders": {}
   },
   "inactive": "Compte non activé",
-  "noMoreResult": "Plus de résultat !",
   "youCreatedGroupChat": "Félicitations, vous avez créé une discussion !",
-  "searchForPeopleAndChannels": "Personnes ou Salons",
-  "noResultForKeyword": "Pas de résultat pour \"{keyword}\"",
-  "@noResultForKeyword": {
-    "placeholders": {
-      "keyword": {}
-    }
-  },
-  "statusDot": "⬤",
   "onlineStatus": "en ligne",
-  "searchForContacts": "Recherche de contacts",
-  "channels": "Salons",
   "back": "Revenir en arrière",
   "contacts": "Contacts",
   "upTo100000Members": "✅ Jusqu'à 100 000 membres",
-  "chatMessage": "Nouveau message",
   "shrink": "Rétrécir",
   "persistentChatHistory": "✅ Historique des discussions persistant",
   "previous": "Précédent",
@@ -2430,19 +2013,14 @@
   "addAPhoto": "Ajouter une photo",
   "addMember": "Ajouter des membres",
   "startNewChatMessage": "Il est agréable de discuter avec vos amis et de collaborer avec vos équipes.\nEngageons une discussion, créons un salon, ou rejoignons un salon existant.",
-  "searchResultNotFound2": "• Il se peut que l'utilisateur ne figure pas dans votre carnet d'adresses.\n",
   "serverNameWrongExplain": "L'adresse du serveur vous a été envoyée par l'administrateur de l'entreprise. Vérifiez le message d'invitation.",
   "wrongServerName": "Mauvais nom de serveur",
-  "twakeUsers": "Utilisateurs de Twake",
   "enterGroupName": "Entrer le nom du salon",
   "@enterGroupName": {
     "type": "text",
     "placeholders": {}
   },
-  "cannotUnlockBackupKey": "Impossible de déverrouiller la clé de récupération.",
-  "searchResultNotFound1": "• Assurez-vous qu'il n'y a pas de fautes de frappe dans votre recherche.\n",
   "expand": "Agrandir",
-  "searchResultNotFound4": "• Si la raison n'est pas mentionnée ci-dessus, ",
   "loginWithSSO": "Connectez-vous avec SSO",
   "maxImageSize": "Taille de fichier maximum : {max}MB",
   "@maxImageSize": {
@@ -2450,9 +2028,6 @@
       "max": {}
     }
   },
-  "searchResultNotFound5": "demandez de l'aide.",
-  "searchResultNotFound3": "• Vérifiez l'autorisation d'accès au contact, il se peut que l'utilisateur figure dans votre liste de contacts.\n",
-  "cannotUploadKey": "Impossible de stocker la clé de récupération.",
   "profile": "Profil",
   "@profile": {
     "type": "text",
@@ -2463,42 +2038,24 @@
   "forwardTo": "Transférer à...",
   "chatFolders": "Dossiers de discussion",
   "errorPageDescription": "Cette page n'existe pas.",
-  "acceptInvite": "Oui s'il vous plait, rejoindre",
   "downloadImageError": "Erreur d'enregistrement de l'image",
   "externalContactMessage": "Certains des utilisateurs que vous souhaitez ajouter ne figurent pas dans vos contacts. Voulez-vous les inviter ?",
   "appLanguage": "Langue de l'application",
   "copyMessageText": "Copier le texte du message",
   "explainStoragePermission": "Twake Chat a besoin d'accéder à votre espace de stockage pour prévisualiser le fichier",
   "explainGoToStorageSetting": "Twake Chat a besoin d'accéder à votre espace de stockage pour prévisualiser les fichiers, allez dans les Réglages pour autoriser cette permission",
-  "noImagesFound": "Pas d'image trouvée",
-  "membersInfo": "Membres ({count})",
-  "@membersInfo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "recentChat": "DISCUSSION RÉCENTE",
   "muteThisMessage": "Couper le son de ce salon",
   "editProfileDescriptions": "Mettez à jour votre profil avec un nouveau nom, une nouvelle photo et une courte présentation.",
-  "addACaption": "Ajouter une légende...",
   "errorPreviewingFile": "Erreur de prévisualisation du fichier",
   "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Erreur de téléchargement d'image ! Voulez-vous toujours continuer à créer un salon ?",
   "unread": "Marquer comme non lu",
   "company": "Entreprise",
-  "adminPanel": "Administration",
   "documents": "Documents",
-  "copyImageSuccess": "Image copiée dans le presse-papiers",
   "clear": "Effacer",
-  "roomAvatarMaxFileSizeLong": "La taille de l'avatar doit être inférieure à {max}",
-  "@roomAvatarMaxFileSizeLong": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "addMembers": "Ajouter des membres",
   "changeChatAvatar": "Modifier l'image du salon",
   "email": "E-mail",
-  "permissionAccess": "Accès aux autorisations",
   "bio": "Biographie (facultatif)",
   "tapToAllowAccessToYourGallery": "Appuyez pour autoriser l'accès à votre galerie",
   "noConnection": "Pas de connexion",
@@ -2513,7 +2070,6 @@
   "downloads": "Téléchargements",
   "changeProfileAvatar": "Modifier l'avatar",
   "errorPageButton": "Retour aux discussions",
-  "playVideo": "Jouer",
   "copiedMatrixIdToClipboard": "Copie de l'identifiant Matrix dans le presse-papiers.",
   "markThisChatAsUnRead": "Marquer ce salon comme non lu",
   "privacyAndSecurity": "Vie privée & Sécurité",
@@ -2537,12 +2093,10 @@
   "files": "Fichiers",
   "fileFormatNotSupported": "Format de fichier non pris en charge",
   "read": "Lire",
-  "captionForImagesIsNotSupportYet": "La légende des images n'est pas encore prise en charge.",
   "displayName": "Nom d'affichage",
   "gallery": "Galerie",
   "twake": "Twake Chat",
   "select": "Sélectionner",
-  "roomAvatarMaxFileSize": "La taille de l'avatar est trop grande",
   "photoSelectedCounter": "{count, plural, =1{1 photo} other{{count} photos}} sélectionnée(s)",
   "@photoSelectedCounter": {
     "placeholders": {
@@ -2554,18 +2108,14 @@
   "downloadImageSuccess": "Image sauvegardée dans Images",
   "copyImageFailed": "Échec de la copie de l'image",
   "yesterday": "Hier",
-  "chatInfo": "Informations de la discussion",
   "unmuteThisMessage": "Réactiver le son",
   "pinThisChat": "Épingler ce salon",
   "thisMessageHasBeenEncrypted": "Ce message a été chiffré",
   "recent": "Récent",
-  "askToInvite": " veut que vous participiez à cette discussion. Qu'en dites-vous ?",
   "media": "Médias",
   "workIdentitiesInfo": "INFORMATIONS PROFESSIONNELLES",
   "members": "Membres",
   "allow": "Autoriser",
-  "countPinChat": "DISCUSSIONS ÉPINGLÉES ({countPinChat})",
-  "countAllChat": "TOUTES LES DISCUSSIONS ({countAllChat})",
   "keyboard": "Clavier",
   "errorGettingPdf": "Erreur de lecture du PDF",
   "cut": "Couper",
@@ -2579,8 +2129,6 @@
   "today": "Aujourd'hui",
   "pasteImageFailed": "Échec du collage de l'image",
   "done": "Terminé",
-  "twakeChatUser": "Utilisateur de Twake Chat",
-  "noResultsFound": "Aucun résultat trouvé",
   "muteThisChat": "Muet",
   "clearAllSelected": "Tout désélectionner",
   "encryptionMessage": "Les messages seront chiffrés et leurs copies ne seront pas stockées sur nos serveurs. Une fois activée, cette fonctionnalité ne peut pas être désactivée.",
@@ -2623,7 +2171,6 @@
       }
     }
   },
-  "fetchingPhonebookContacts": "Récupération des contacts de l'appareil...({progress}% complétés)",
   "activeNow": "Actif maintenant",
   "languageEnglish": "Anglais",
   "@languageEnglish": {
@@ -2649,16 +2196,13 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "settingsLanguageDescription": "Définir la langue utilisée pour Twake Chat",
   "sendImages": "{count, plural, =1{Envoyer 1 image} other{Envoyer {count} images}}",
   "enterCaption": "Ajouter une légende...",
-  "failToSend": "L'envoi a échoué, veuillez réessayer",
   "showLess": "Montrer moins",
   "showMore": "Montrer plus",
   "unreadMessages": "Messages non lus",
   "groupInfo": "Infos du groupe",
   "groupInformation": "Informations sur le salon",
-  "linkInvite": "Lien d'invitation",
   "noDescription": "Pas de description",
   "description": "Description",
   "groupName": "Nom du salon",
@@ -2687,14 +2231,10 @@
       "count": {}
     }
   },
-  "contactsWarningBannerTitle": "Pour vous vous connecter avec tous vos contacts, veuillez permettre à Twake d'accéder aux contacts de votre appareil.",
-  "sharedMediaAndLinks": "Fichiers et liens partagés",
-  "removeFileBeforeSend": "Supprimer les fichiers avec des erreurs avant l'envoi",
   "errorSendingFiles": "Certains fichiers ne peuvent pas être envoyés en raison de limite de taille, de format ou d'erreurs inattendues. Ils seront omis.",
   "unselect": "Désélectionner",
   "searchContacts": "Rechercher des contacts",
   "phone": "Téléphone",
-  "viewProfile": "Voir le profil",
   "profileInfo": "Informations du profil",
   "loading": "Chargement en cours...",
   "onlineDayAgo": "en ligne il y a {day} jours",
@@ -2705,27 +2245,17 @@
   },
   "downloading": "Téléchargement en cours",
   "settingUpYourTwake": "Configuration de votre Twake\nCela peut prendre un certain temps",
-  "performingAutomaticalLogin": "Connexion automatique via SSO en cours",
   "backingUpYourMessage": "Préparation de l'environnement serveur pour sauvegarder vos messages",
   "recoveringYourEncryptedChats": "Récupération de vos conversations chiffrées",
   "configureDataEncryption": "Configurer le chiffrement des données",
   "configurationNotFound": "Les données de configuration sont introuvables",
   "fileSavedToGallery": "Fichier enregistré dans la galerie",
-  "saveFileToGalleryError": "Échec de l'enregistrement du fichier dans la galerie",
-  "tokenNotFound": "Le jeton de connexion est introuvable",
   "dangerZone": "Zone dangereuse",
   "leaveGroupSubtitle": "Ce salon continuera d'exister après votre départ",
   "leaveChatFailed": "Échec de la sortie du salon",
   "invalidLoginToken": "Jeton de connexion invalide",
   "copiedPublicKeyToClipboard": "Clé publique copiée dans le presse-papiers.",
   "removeFromGroup": "Retirer du salon",
-  "removeReason": "Retirer {user} du salon",
-  "@removeReason": {
-    "type": "text",
-    "placeholders": {
-      "user": {}
-    }
-  },
   "selectAccount": "Sélectionner le compte",
   "privacyPolicy": "Politique de confidentialité",
   "byContinuingYourAgreeingToOur": "En continuant, vous acceptez notre",
@@ -2736,7 +2266,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "editWorkIdentitiesDescriptions": "Modifiez vos paramètres d'identité professionnelle, y compris l'ID Matrix, l'email ou le nom de votre entreprise.",
   "showInChat": "Afficher dans le chat",
   "tapToAllowAccessToYourMicrophone": "Vous pouvez activer l'accès au micro dans l'application Paramètres pour utiliser la voix",
   "saveToDownloads": "Enregistrer dans Téléchargements",
@@ -2765,7 +2294,6 @@
       }
     }
   },
-  "removeUser": "Supprimer l'utilisateur",
   "switchAccounts": "Changer de compte",
   "shootingTips": "Appuyez pour prendre une photo.",
   "shootingWithRecordingTips": "Appuyez pour prendre une photo. Appuyez longuement pour enregistrer une vidéo.",
@@ -2850,7 +2378,6 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Sélectionnez l'adresse e-mail ou le téléphone auquel vous souhaitez envoyer l'invitation",
   "phoneNumber": "Numéro de téléphone",
   "contactLookupFailed": "Échec de la recherche du contact.",
-  "verifyWithAnotherDevice": "Vérifier avec un autre appareil",
   "invitationHasBeenSuccessfullySent": "L'invitation a bien été envoyée !",
   "shareInvitationLink": "Partager le lien d'invitation",
   "failedToGenerateInvitationLink": "Échec de la génération du lien d'invitation.",
@@ -2985,7 +2512,6 @@
   "terrorism": "Terrorisme",
   "other": "Autre",
   "enableRightAndLeftMessageAlignment": "Activer l'alignement alterné des messages",
-  "holdToRecordAudio": "Maintenir pour enregistrer.",
   "explainPermissionToAccessMicrophone": "L'accès au microphone est nécessaire pour envoyer des messages vocaux.",
   "allowMicrophoneAccess": "Autoriser l'accès au microphone",
   "slideToCancel": "Glisser pour annuler",
@@ -2993,10 +2519,7 @@
   "later": "Plus tard",
   "couldNotPlayAudioFile": "Lecture du fichier audio impossible",
   "pleaseFinishOrStopTheRecording": "Terminez l'enregistrement avant d'effectuer d'autres actions.",
-  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Il n'est pas possible pour le moment de réunir plus de 10 personnes lors de la création d'une discussion. Veuillez désélectionner certains invités. Vous pourrez les inviter une fois la discussion créée",
   "gotIt": "D’accord",
-  "weCouldNotCompleteYourRequestTryAgainShortly": "Nous n’avons pas pu effectuer votre demande. Réessayez dans un instant",
-  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Discussion de groupe créée avec succès, mais l’ajout de plusieurs personnes a échoué. Veuillez les inviter à nouveau via \"Informations du groupe\"",
   "microphonePermissionDeniedOnWeb": "L'accès au microphone est requis. Merci de l'activer dans les paramètres de votre navigateur.",
   "save": "Enregistrer",
   "newContact": "Nouveau contact",
