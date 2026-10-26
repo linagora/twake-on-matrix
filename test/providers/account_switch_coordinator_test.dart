@@ -678,7 +678,7 @@ void main() {
         await accounts.holdRemoval(const AccountId('c'));
         expect(await coordinator.activateCurrent(), isTrue);
 
-        accounts.logoutLast();
+        await accounts.logoutLast();
 
         expect(state(), isA<NoAccount>());
         expect(coordinator.hasApplied, isFalse);
@@ -692,7 +692,7 @@ void main() {
       effects.log.clear();
 
       only.loggedIn = false;
-      container.read(accountsProvider.notifier).logoutLast();
+      await container.read(accountsProvider.notifier).logoutLast();
       expect(state(), isA<LastLoggedOut>());
       expect(coordinator.hasApplied, isFalse);
       expect(coordinator.isAppliedTo(only), isFalse);
@@ -715,7 +715,7 @@ void main() {
       await pump();
 
       only.loggedIn = false;
-      container.read(accountsProvider.notifier).logoutLast();
+      await container.read(accountsProvider.notifier).logoutLast();
       effects.gates['userInfo:a']!.complete();
       expect(await activation, isFalse);
 
@@ -868,7 +868,7 @@ void main() {
         await second;
       },
       'the last account logging out': () async {
-        container.read(accountsProvider.notifier).logoutLast();
+        await container.read(accountsProvider.notifier).logoutLast();
       },
     };
     // Logging out is only possible with one account left.
