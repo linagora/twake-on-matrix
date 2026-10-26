@@ -154,6 +154,37 @@ void main() {
   /// Lets the background work that nobody awaits (a restore) run to its end.
   Future<void> settle() => pumpEventQueue();
 
+  /// Starts a switch to [id] that waits at the step [gate] (opened by [held],
+  /// or by the test through `effects.gates`). The test makes another switch
+  /// replace it, so it ends superseded.
+  Future<void> supersededSwitchHeldAt(
+    String gate,
+    String id, [
+    Completer<void>? held,
+  ]) {
+    effects.gates[gate] = held ?? Completer<void>();
+    return expectLater(switchTo(id), throwsA(isA<SwitchSupersededException>()));
+  }
+
+  /// A switch to b waits at [gate]; a switch to c replaces it; the gate opens.
+  Future<void> replaceHeldSwitchToB(String gate) async {
+    final first = supersededSwitchHeldAt(gate, 'b');
+    await pump();
+    final second = switchTo('c');
+    await pump();
+    effects.gates[gate]!.complete();
+    await second;
+    await first;
+    await settle();
+  }
+
+  /// Boots with a applied and an empty log.
+  Future<void> bootApplied() async {
+    boot();
+    await coordinator.apply(a);
+    effects.log.clear();
+  }
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     effects = FakeSwitchEffects();
@@ -362,19 +393,8 @@ void main() {
 
     test('a newer switch turns the older token stale after its await, so the '
         'older write never lands', () async {
-      effects.gates['userInfo:b'] = Completer<void>();
       boot();
-      final first = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
-      await pump();
-      final second = switchTo('c');
-      await pump();
-      effects.gates['userInfo:b']!.complete();
-      await second;
-      await first;
-      await settle();
+      await replaceHeldSwitchToB('userInfo:b');
 
       expect(effects.checks, contains('userInfo:b:false'));
       expect(effects.checks, contains('userInfo:c:true'));
@@ -387,19 +407,8 @@ void main() {
     });
 
     test('is already stale when the first awaited step resumes', () async {
-      effects.gates['tom:b'] = Completer<void>();
       boot();
-      final first = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
-      await pump();
-      final second = switchTo('c');
-      await pump();
-      effects.gates['tom:b']!.complete();
-      await second;
-      await first;
-      await settle();
+      await replaceHeldSwitchToB('tom:b');
 
       expect(effects.checks, contains('tom:b:false'));
       expect(effects.store['tom'], 'c');
@@ -517,11 +526,7 @@ void main() {
     test('switching back to the origin while the switch runs stops it and '
         'applies the origin again', () async {
       await applyOrigin();
-      effects.gates['userInfo:b'] = Completer<void>();
-      final toB = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
+      final toB = supersededSwitchHeldAt('userInfo:b', 'b');
       await pump();
       expect(effects.store['tom'], 'b');
 
@@ -539,18 +544,7 @@ void main() {
 
     test('a switch superseded by another one is not rolled back', () async {
       await applyOrigin();
-      effects.gates['userInfo:b'] = Completer<void>();
-      final toB = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
-      await pump();
-      final toC = switchTo('c');
-      await pump();
-      effects.gates['userInfo:b']!.complete();
-      await toC;
-      await toB;
-      await settle();
+      await replaceHeldSwitchToB('userInfo:b');
 
       expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
       expect(effects.store.values.toSet(), {'c'});
@@ -728,17 +722,11 @@ void main() {
     test(
       'the end of an older switch to b does not end a newer one to b',
       () async {
-        boot();
-        await coordinator.apply(a);
-        effects.log.clear();
+        await bootApplied();
         final first = Completer<void>();
         final second = Completer<void>();
-        effects.gates['tom:b'] = first;
 
-        final toB = expectLater(
-          switchTo('b'),
-          throwsA(isA<SwitchSupersededException>()),
-        );
+        final toB = supersededSwitchHeldAt('tom:b', 'b', first);
         await pump();
         await switchTo('a');
         effects.gates['tom:b'] = second;
@@ -761,18 +749,12 @@ void main() {
 
     test('the failure of an older switch to b does not fail a newer one to '
         'b', () async {
-      boot();
-      await coordinator.apply(a);
-      effects.log.clear();
+      await bootApplied();
       final first = Completer<void>();
       final second = Completer<void>();
-      effects.gates['tom:b'] = first;
       effects.failing.add('persist:b');
 
-      final toB = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
+      final toB = supersededSwitchHeldAt('tom:b', 'b', first);
       await pump();
       await switchTo('a');
       effects.failing.clear();
