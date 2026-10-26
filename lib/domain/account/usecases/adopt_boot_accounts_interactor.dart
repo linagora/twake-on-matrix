@@ -14,7 +14,7 @@ class AdoptBootAccountsInteractor {
   final AccountRepository _repository;
   final AccountBootPort _bootPort;
 
-  List<Account> execute({Set<String> pendingRemovals = const {}}) {
+  List<Account> execute({required Set<String> pendingRemovals}) {
     final known = _repository.registeredAccounts();
     if (known.isNotEmpty) return known;
     return _bootPort.adopt(pendingRemovals: pendingRemovals);

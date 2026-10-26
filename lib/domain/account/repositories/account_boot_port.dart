@@ -6,5 +6,5 @@ import 'package:twake_chat/domain/account/entities/account.dart';
 abstract interface class AccountBootPort {
   /// Registers the accounts of the boot, dropping from [pendingRemovals] the
   /// ones that are gone, and returns them in store order.
-  List<Account> adopt({Set<String> pendingRemovals = const {}});
+  List<Account> adopt({required Set<String> pendingRemovals});
 }

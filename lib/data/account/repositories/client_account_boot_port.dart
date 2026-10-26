@@ -15,6 +15,6 @@ class ClientAccountBootPort implements AccountBootPort {
   final Iterable<Client> _clients;
 
   @override
-  List<Account> adopt({Set<String> pendingRemovals = const {}}) =>
+  List<Account> adopt({required Set<String> pendingRemovals}) =>
       _repository.adopt(_clients, pendingRemovals: pendingRemovals);
 }

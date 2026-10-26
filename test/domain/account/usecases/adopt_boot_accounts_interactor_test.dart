@@ -20,7 +20,7 @@ class _FakeBootPort implements AccountBootPort {
   final List<Set<String>> calls = [];
 
   @override
-  List<Account> adopt({Set<String> pendingRemovals = const {}}) {
+  List<Account> adopt({required Set<String> pendingRemovals}) {
     calls.add(pendingRemovals);
     return booted;
   }
@@ -56,7 +56,9 @@ void main() {
   test('keeps the accounts the repository already knows', () {
     final bootPort = _FakeBootPort(const [account]);
 
-    final adopted = build(const [other], bootPort).execute();
+    final adopted = build(const [
+      other,
+    ], bootPort).execute(pendingRemovals: const {});
 
     expect(adopted, const [other]);
     expect(bootPort.calls, isEmpty);
