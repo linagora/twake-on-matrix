@@ -46,8 +46,6 @@ import 'package:universal_html/html.dart' as html;
 import '../../widgets/matrix.dart';
 
 class ChatList extends StatefulWidget {
-  static BuildContext? contextForVoip;
-
   final ValueNotifier<String?> activeRoomIdNotifier;
 
   final Widget? bottomNavigationBar;
@@ -706,10 +704,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void _hackyWebRTCFixForWeb() {
-    ChatList.contextForVoip = context;
-  }
-
   Future<void> _checkTorBrowser() async {
     if (!kIsWeb) return;
     final isTor = await TorBrowserDetector.isTorBrowser;
@@ -781,9 +775,6 @@ class ChatListController extends State<ChatList>
     if (!matrixState.waitForFirstSync) {
       _trySync();
     }
-    _hackyWebRTCFixForWeb();
-    // TODO: 28Dec2023 Disable callkeep for util we support audio/video calls
-    // CallKeepManager().initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         Matrix.of(context).backgroundPush?.setupPush();
