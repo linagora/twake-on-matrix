@@ -325627,28 +325627,29 @@ $.J().br(0,"SettingsProfile::_handleUploadProfileOnError() - error: "+A.r(a)+" |
 c1J(a,b){$.J().au(0,"SettingsProfile::_handleUploadProfileOnData()")
 b.bF(0,new A.d84(this),new A.d85(this,a),t.P)},
 aaW(a){return this.bVf(a)},
-bVf(a){var s=0,r=A.m(t.H),q=this,p,o,n,m,l
+bVf(a){var s=0,r=A.m(t.H),q,p=this,o,n,m,l,k
 var $async$aaW=A.h(function(b,c){if(b===1)return A.j(c,r)
-for(;;)switch(s){case 0:l=q.c
-l.toString
-l=A.mW(l,!1)
-p=$.CS()
-o=a.R8
-o.toString
-s=2
-return A.e(l.c1(0,A.Er(o,p).gGQ(),t.UL),$async$aaW)
-case 2:n=c
-p=a.R8
-p.toString
-m=A.a6B(n,p)
-$.J().au(0,"SettingsProfileController::_getCurrentProfile() - currentProfile: "+m.k(0))
-q.z.sl(0,m)
-if(m.a==null)q.a8F()
-q.CW.sc2(0,q.gnp(0))
-l=q.c
-l.toString
-q.cx.sc2(0,A.uc(a,l))
-return A.k(null,r)}})
+for(;;)switch(s){case 0:k=p.c
+k.toString
+k=A.mW(k,!1)
+o=$.CS()
+n=a.R8
+n.toString
+s=3
+return A.e(k.c1(0,A.Er(n,o).gGQ(),t.UL),$async$aaW)
+case 3:m=c
+if(p.c==null){s=1
+break}k=a.R8
+k.toString
+l=A.a6B(m,k)
+$.J().au(0,"SettingsProfileController::_getCurrentProfile() - currentProfile: "+l.k(0))
+p.z.sl(0,l)
+if(l.a==null)p.a8F()
+p.CW.sc2(0,p.gnp(0))
+k=p.c
+k.toString
+p.cx.sc2(0,A.uc(a,k))
+case 1:return A.k(q,r)}})
 return A.l($async$aaW,r)},
 XN(a){var s,r
 switch(a.a){case 2:s=this.c
