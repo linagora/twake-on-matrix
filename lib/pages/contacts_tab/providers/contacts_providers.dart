@@ -39,7 +39,7 @@ import 'package:twake_chat/utils/platform_infos.dart';
 part 'contacts_providers.g.dart';
 
 /// Pure DI: the resolution policy has no dependency and no state.
-@riverpod
+@Riverpod(keepAlive: true)
 ContactResolutionPolicy contactResolutionPolicy(Ref ref) =>
     const ContactResolutionPolicy();
 
@@ -59,7 +59,7 @@ UnifiedContactRepository unifiedContactRepository(Ref ref) =>
 /// Legacy sources still wired through get_it until they are migrated.
 /// The TOM UserInfo enrichment source is added once its second-pass design is
 /// settled.
-@riverpod
+@Riverpod(keepAlive: true)
 List<ContactSource> contactSources(Ref ref) => [
   TomAddressBookSource(getIt.get<AddressBookRepository>()),
   PhonebookSource(getIt.get<HiveContactRepository>()),
@@ -70,7 +70,7 @@ List<ContactSource> contactSources(Ref ref) => [
 /// a new snapshot of the same `Client` instance; watching the whole snapshot
 /// would rebuild the sources → use cases → sync service → controller chain and
 /// restart the store stream (list flashes to loading) on each push.
-@riverpod
+@Riverpod(keepAlive: true)
 MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
   ref.watch(activeMatrixClientProvider.select((snapshot) => snapshot.userId));
   return MatrixRoomMemberDatasourceImpl(
@@ -83,7 +83,7 @@ MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
 /// `UserInfoRepository` talks to the ToM server of the *active* account, so the
 /// enricher is told which account is active and skips a run started for
 /// another one (account switched mid-refresh).
-@riverpod
+@Riverpod(keepAlive: true)
 TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
   repository: ref.watch(unifiedContactRepositoryProvider),
   userInfoRepository: getIt.get<UserInfoRepository>(),
@@ -91,22 +91,22 @@ TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
   activeUserId: () => ref.read(activeMatrixClientProvider).userId,
 );
 
-@riverpod
+@Riverpod(keepAlive: true)
 SyncContactsUseCase syncContactsUseCase(Ref ref) => SyncContactsUseCase(
   repository: ref.watch(unifiedContactRepositoryProvider),
   policy: ref.watch(contactResolutionPolicyProvider),
   sources: ref.watch(contactSourcesProvider),
 );
 
-@riverpod
+@Riverpod(keepAlive: true)
 WatchUnifiedContactsUseCase watchUnifiedContactsUseCase(Ref ref) =>
     WatchUnifiedContactsUseCase(ref.watch(unifiedContactRepositoryProvider));
 
-@riverpod
+@Riverpod(keepAlive: true)
 GetUnifiedContactUseCase getUnifiedContactUseCase(Ref ref) =>
     GetUnifiedContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
-@riverpod
+@Riverpod(keepAlive: true)
 AddContactUseCase addContactUseCase(Ref ref) =>
     AddContactUseCase(ref.watch(unifiedContactRepositoryProvider));
 
@@ -114,7 +114,7 @@ AddContactUseCase addContactUseCase(Ref ref) =>
 ///
 /// Scoping key for every contact provider: a multi-account session must never
 /// mix the contacts of two accounts.
-@riverpod
+@Riverpod(keepAlive: true)
 String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider).userId;
 
 @Riverpod(keepAlive: true)
