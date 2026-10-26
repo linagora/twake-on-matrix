@@ -13,10 +13,10 @@ import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
-import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_account_client_provider.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
@@ -30,29 +30,44 @@ void main() {
   late FakeAccountClient c;
   late FakeAccountClientDataSource dataSource;
 
-  /// Builds a container whose repository already adopted [clients], as
-  /// `MatrixState.initState` does before anything reads the state.
-  void boot(
+  /// A container booted with [clients], as `main` does when it creates the app
+  /// container. The state is built at the first read, which adopts them.
+  ProviderContainer bootContainer(
     List<FakeAccountClient> clients, {
     String? persistedUserId,
     Set<String> pending = const {},
     List<Override> overrides = const [],
   }) {
     dataSource = FakeAccountClientDataSource();
-    container = ProviderContainer(
+    return ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
+        bootClientsProvider.overrideWithValue(clients),
+        bootAccountSnapshotProvider.overrideWithValue(
+          AccountBootSnapshot(
+            persistedActiveUserId: persistedUserId,
+            pendingRemovalIds: pending,
+          ),
+        ),
         ...overrides,
       ],
     );
-    addTearDown(container.dispose);
-    container
-        .read(bootAccountSnapshotProvider.notifier)
-        .set(AccountBootSnapshot(persistedActiveUserId: persistedUserId));
-    container
-        .read(adoptBootAccountsUseCaseProvider(clients))
-        .execute(pendingRemovals: pending);
+  }
+
+  void boot(
+    List<FakeAccountClient> clients, {
+    String? persistedUserId,
+    Set<String> pending = const {},
+    List<Override> overrides = const [],
+  }) {
+    container = bootContainer(
+      clients,
+      persistedUserId: persistedUserId,
+      pending: pending,
+      overrides: overrides,
+    );
+    container.read(accountsProvider);
   }
 
   AccountsState state() => container.read(accountsProvider);
@@ -68,6 +83,71 @@ void main() {
     a = FakeAccountClient('a', userID: '@a:s');
     b = FakeAccountClient('b', userID: '@b:s');
     c = FakeAccountClient('c', userID: '@c:s');
+  });
+
+  group('the boot providers', () {
+    test('the first read adopts the boot clients, whichever read it is', () {
+      expect(bootContainer([a, b]).read(activeAccountClientProvider), same(a));
+      expect(bootContainer([a, b]).read(accountClientsProvider), [a, b]);
+    });
+
+    test('reading the state without the boot overrides is an error', () {
+      final bare = ProviderContainer.test(retry: (_, _) => null);
+
+      expect(() => bare.read(accountsProvider), throwsA(anything));
+    });
+  });
+
+  group('switch handlers and the clients around a switch', () {
+    test('a second switch handler is refused', () {
+      boot([a]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+
+      expect(
+        () => notifier().registerSwitchHandler(),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('the clients are not announced again around a switch', () async {
+      boot([a, b]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      var announced = 0;
+      container.listen(accountClientsProvider, (_, _) => announced++);
+      container.listen(accountsProvider, (_, next) {
+        if (next is Switching) notifier().completeSwitch(next.ticket);
+      });
+
+      await notifier().switchTo(const AccountId('b'));
+      await container.pump();
+
+      expect(state(), isA<Active>());
+      expect(announced, 0);
+    });
+
+    test('an account that logs in while a switch runs is refused and not '
+        'stored', () async {
+      boot([a, b]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      unawaited(notifier().switchTo(const AccountId('b')));
+      await pumpEventQueue();
+      expect(state(), isA<Switching>());
+      container.read(accountClientRegistryProvider).add(c);
+
+      await expectLater(
+        notifier().addAccount(const AccountId('c')),
+        throwsA(isA<InvalidAccountTransitionException>()),
+      );
+
+      expect(
+        dataSource.calls.where((call) => call.startsWith('add:')),
+        isEmpty,
+      );
+      expect(state().accounts.map((x) => x.id), ['a', 'b']);
+    });
   });
 
   group('boot', () {
@@ -553,17 +633,7 @@ void main() {
     test(
       'a boot where every account waits for its removal retains them and removes them',
       () async {
-        dataSource = FakeAccountClientDataSource();
-        container = ProviderContainer(
-          retry: (_, _) => null,
-          overrides: [
-            accountClientDataSourceProvider.overrideWithValue(dataSource),
-          ],
-        );
-        addTearDown(container.dispose);
-        container
-            .read(adoptBootAccountsUseCaseProvider([a, b]))
-            .execute(pendingRemovals: {'a', 'b'});
+        boot([a, b], pending: {'a', 'b'});
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['a', 'b']);

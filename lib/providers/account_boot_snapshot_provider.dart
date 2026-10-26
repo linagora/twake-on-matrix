@@ -3,13 +3,9 @@ import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 
 part 'account_boot_snapshot_provider.g.dart';
 
-/// What `main` read from the store before the first frame, set once before
-/// anything reads the account state. Without it nobody is persisted as active
-/// and no removal is pending.
+/// What `main` read from the store before the first frame. Overridden when the
+/// app container is created; reading it without an override is a bug.
 @Riverpod(keepAlive: true)
-class BootAccountSnapshot extends _$BootAccountSnapshot {
-  @override
-  AccountBootSnapshot build() => const AccountBootSnapshot();
-
-  void set(AccountBootSnapshot snapshot) => state = snapshot;
-}
+AccountBootSnapshot bootAccountSnapshot(Ref ref) => throw UnimplementedError(
+  'bootAccountSnapshotProvider must be overridden when the container is made',
+);

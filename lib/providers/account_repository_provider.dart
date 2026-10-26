@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/account/datasources/account_client_data_source.dart';
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.dart';
@@ -9,7 +8,8 @@ import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/data/account/sources/persisted_active_account_source.dart';
 import 'package:twake_chat/domain/account/repositories/account_boot_port.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/utils/famedlysdk_store.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
+import 'package:twake_chat/providers/store_provider.dart';
 
 part 'account_repository_provider.g.dart';
 
@@ -23,20 +23,23 @@ AccountClientDataSource accountClientDataSource(Ref ref) =>
 
 /// The implementation, read only by [accountRepository] and [accountBootPort].
 @Riverpod(keepAlive: true)
-AccountRepositoryImpl accountRepositoryImpl(Ref ref) => AccountRepositoryImpl(
-  dataSource: ref.watch(accountClientDataSourceProvider),
-  persistedActiveAccount: PersistedActiveAccountSource(Store()),
-  pendingRemovals: PendingRemovalsSource(Store()),
-  pendingPushRemovals: PendingRemovalsSource(
-    Store(),
-    storeKey: PendingRemovalsSource.pushKey,
-  ),
-  pendingCandidateDiscards: PendingRemovalsSource(
-    Store(),
-    storeKey: PendingRemovalsSource.candidateKey,
-  ),
-  registry: ref.watch(accountClientRegistryProvider),
-);
+AccountRepositoryImpl accountRepositoryImpl(Ref ref) {
+  final store = ref.watch(storeProvider);
+  return AccountRepositoryImpl(
+    dataSource: ref.watch(accountClientDataSourceProvider),
+    persistedActiveAccount: PersistedActiveAccountSource(store),
+    pendingRemovals: PendingRemovalsSource(store),
+    pendingPushRemovals: PendingRemovalsSource(
+      store,
+      storeKey: PendingRemovalsSource.pushKey,
+    ),
+    pendingCandidateDiscards: PendingRemovalsSource(
+      store,
+      storeKey: PendingRemovalsSource.candidateKey,
+    ),
+    registry: ref.watch(accountClientRegistryProvider),
+  );
+}
 
 @Riverpod(keepAlive: true)
 AccountRepository accountRepository(Ref ref) =>
@@ -44,8 +47,7 @@ AccountRepository accountRepository(Ref ref) =>
 
 /// Hands the clients created at boot to the repository.
 @Riverpod(keepAlive: true)
-AccountBootPort accountBootPort(Ref ref, List<Client> clients) =>
-    ClientAccountBootPort(
-      repository: ref.watch(accountRepositoryImplProvider),
-      clients: clients,
-    );
+AccountBootPort accountBootPort(Ref ref) => ClientAccountBootPort(
+  repository: ref.watch(accountRepositoryImplProvider),
+  clients: ref.watch(bootClientsProvider),
+);

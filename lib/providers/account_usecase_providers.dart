@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/usecases/add_account.dart';
 import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts.dart';
@@ -11,13 +10,11 @@ import 'package:twake_chat/providers/account_transitions_provider.dart';
 part 'account_usecase_providers.g.dart';
 
 @Riverpod(keepAlive: true)
-AdoptBootAccountsUseCase adoptBootAccountsUseCase(
-  Ref ref,
-  List<Client> clients,
-) => AdoptBootAccountsUseCase(
-  repository: ref.watch(accountRepositoryProvider),
-  bootPort: ref.watch(accountBootPortProvider(clients)),
-);
+AdoptBootAccountsUseCase adoptBootAccountsUseCase(Ref ref) =>
+    AdoptBootAccountsUseCase(
+      repository: ref.watch(accountRepositoryProvider),
+      bootPort: ref.watch(accountBootPortProvider),
+    );
 
 @Riverpod(keepAlive: true)
 InitializeAccountsUseCase initializeAccountsUseCase(Ref ref) =>

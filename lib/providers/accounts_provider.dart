@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:matrix/matrix.dart' show Logs;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
@@ -18,7 +20,7 @@ part 'accounts_provider.g.dart';
 @Riverpod(keepAlive: true)
 class Accounts extends _$Accounts {
   Completer<void>? _pendingSwitch;
-  int _switchHandlers = 0;
+  bool _hasSwitchHandler = false;
   int _switchSeq = 0;
 
   AccountTransitions get _transitions => ref.read(accountTransitionsProvider);
@@ -27,14 +29,18 @@ class Accounts extends _$Accounts {
   /// computed from a state that another one is about to replace.
   Future<void> _mutations = Future.value();
 
+  /// The boot clients are adopted here, so nothing has to adopt them before
+  /// the state is first read.
   @override
-  AccountsState build() => ref
-      .read(initializeAccountsUseCaseProvider)
-      .execute(
-        persistedUserId: ref
-            .read(bootAccountSnapshotProvider)
-            .persistedActiveUserId,
-      );
+  AccountsState build() {
+    final boot = ref.watch(bootAccountSnapshotProvider);
+    ref
+        .watch(adoptBootAccountsUseCaseProvider)
+        .execute(pendingRemovals: boot.pendingRemovalIds);
+    return ref
+        .watch(initializeAccountsUseCaseProvider)
+        .execute(persistedUserId: boot.persistedActiveUserId);
+  }
 
   /// Registers the account [id] that just logged in. Does nothing when it is
   /// already registered (a repeated `loggedIn` event).
@@ -42,19 +48,23 @@ class Accounts extends _$Accounts {
     final next = await ref
         .read(addAccountUseCaseProvider)
         .execute(() => state, id.value);
-    if (next != null) state = next;
+    if (next != null && ref.mounted) state = next;
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
   /// `seq`. A handler hands its [SwitchTicket] back to [completeSwitch] or
   /// [failSwitch], so that a stale handler cannot end a newer switch, even one
   /// to the same account.
+  @visibleForTesting
   int get switchSeq => _switchSeq;
 
   /// Makes [id] the active account. While the side effects of the switch run
   /// the state is `Switching` and the active account is still the old one.
   /// The returned future ends when `completeSwitch` or `failSwitch` is called
-  /// for [id]; without a registered handler it ends at once.
+  /// for [id]. It completes normally when the switch is completed and throws
+  /// the error of `failSwitch`, or [SwitchSupersededException] when a newer
+  /// switch replaces it: callers have to catch it. Without a registered
+  /// handler it ends at once, with none of the side effects of the switch.
   Future<void> switchTo(AccountId id) async {
     await _mutations;
     final next = _transitions.beginSwitch(state, id.value, seq: _switchSeq + 1);
@@ -73,7 +83,12 @@ class Accounts extends _$Accounts {
     // Before the emission: a listener may settle the switch synchronously.
     _switchSeq = next.seq;
     state = next;
-    if (_switchHandlers == 0) completeSwitch(next.ticket);
+    if (!_hasSwitchHandler) {
+      Logs().w(
+        'Switch to ${id.value} has no handler: it ends without its side effects',
+      );
+      completeSwitch(next.ticket);
+    }
     await pending.future;
   }
 
@@ -120,9 +135,10 @@ class Accounts extends _$Accounts {
   /// Removes [id]; when it was the active account the next one becomes active
   /// in the same emission.
   Future<void> removeAccount(AccountId id) => _serialized(() async {
-    state = await ref
+    final next = await ref
         .read(removeAccountUseCaseProvider)
         .execute(() => state, id.value);
+    if (ref.mounted) state = next;
   });
 
   /// The removal of [id] failed: the account stays listed as unavailable, not
@@ -141,15 +157,17 @@ class Accounts extends _$Accounts {
   /// The only account logged out; it stays in the state as `LastLoggedOut`.
   void logoutLast() => state = _transitions.logoutLast(state);
 
-  /// Declares that something reacts to `Switching` and will end it. Returns
-  /// the function that unregisters it.
+  /// Declares that something reacts to `Switching` and will end it: the
+  /// coordinator, which is the only one. Returns the function that unregisters
+  /// it.
   void Function() registerSwitchHandler() {
-    _switchHandlers++;
+    assert(!_hasSwitchHandler, 'a switch handler is already registered');
+    _hasSwitchHandler = true;
     var registered = true;
     return () {
       if (!registered) return;
       registered = false;
-      _switchHandlers--;
+      _hasSwitchHandler = false;
     };
   }
 
