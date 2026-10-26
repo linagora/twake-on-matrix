@@ -4,13 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
-import 'package:twake_chat/providers/account_usecase_providers.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
 
 import '../data/account/fakes.dart';
 
@@ -117,17 +119,20 @@ void main() {
 
   /// Wires the coordinator as `MatrixState.initState` does.
   void boot({Client? Function(String id)? clientOf, List<Client>? clients}) {
-    container = ProviderContainer(
+    final adopted = clients ?? [a, b, c];
+    container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(
           FakeAccountClientDataSource(),
         ),
+        bootClientsProvider.overrideWithValue(adopted),
+        bootAccountSnapshotProvider.overrideWithValue(
+          const AccountBootSnapshot(),
+        ),
       ],
     );
-    addTearDown(container.dispose);
-    final adopted = clients ?? [a, b, c];
-    container.read(adoptBootAccountsUseCaseProvider(adopted)).execute();
+    container.read(accountsProvider);
     final registry = {for (final client in adopted) client.clientName: client};
     coordinator = AccountSwitchCoordinator(
       effects: effects,
@@ -282,6 +287,29 @@ void main() {
       expect((state() as Active).activeId, 'a');
       expect(effects.store['tom'], 'c');
     });
+
+    test(
+      'a switch replaced by a newer one is not logged as a failure',
+      () async {
+        effects.gates['userInfo'] = Completer<void>();
+        boot();
+        Logs().outputEvents.clear();
+        final first = switchTo('b');
+        final firstResult = expectLater(
+          first,
+          throwsA(isA<SwitchSupersededException>()),
+        );
+        await pump();
+
+        final second = switchTo('c');
+        await pump();
+        effects.gates['userInfo']!.complete();
+        await second;
+        await firstResult;
+
+        expect(Logs().outputEvents.where((e) => e.level == Level.wtf), isEmpty);
+      },
+    );
 
     test('a newer switch wins; the older effects stop at their next '
         'checkpoint', () async {
