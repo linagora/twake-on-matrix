@@ -763,7 +763,10 @@ void main() {
         await session.dispose();
 
         expect(session.state, LoginSessionState.cleanupFailed);
-        expect(host.reports, contains('cannot dispose c1'));
+        expect(
+          host.reports,
+          contains(contains('discardCandidate of c1 failed')),
+        );
       },
     );
 
@@ -776,6 +779,96 @@ void main() {
       await session.dispose();
 
       expect(session.state, LoginSessionState.disposed);
+    });
+  });
+
+  group('the set-ups of an active account that failed', () {
+    Future<LoginSession> failedAt(String step) async {
+      final session = await candidate();
+      host.failing.add(step);
+      await logIn(session);
+      host.failing.clear();
+      host.calls.clear();
+      return session;
+    }
+
+    test('a ToM set-up waits until its account is the active one', () async {
+      final session = await failedAt('tom:c1');
+      host.activeName = 'a';
+
+      await session.retryCleanup();
+
+      expect(host.calls, isNot(contains('tom:c1')));
+      expect(session.needsRetry, isTrue);
+
+      host.activeName = 'c1';
+      await session.retryCleanup();
+
+      expect(host.calls, contains('tom:c1'));
+      expect(session.needsRetry, isFalse);
+    });
+
+    test(
+      'a set-up that does not write the active state runs at once',
+      () async {
+        final session = await failedAt('recoveryKey:c1');
+        host.activeName = 'a';
+
+        await session.retryCleanup();
+
+        expect(host.calls, contains('recoveryKey:c1'));
+        expect(session.needsRetry, isFalse);
+      },
+    );
+
+    test('they are dropped when the account is gone', () async {
+      final session = await failedAt('recoveryKey:c1');
+      host.stored.remove('c1');
+
+      await session.retryCleanup();
+
+      expect(host.calls, isEmpty);
+      expect(session.needsRetry, isFalse);
+    });
+  });
+
+  group('the guards of a session', () {
+    test('the client of a session that is not created yet is an error', () {
+      host.gates['createCandidate:c1'] = Completer<void>();
+      final session = LoginSession.candidate(host);
+
+      expect(() => session.client, throwsStateError);
+    });
+
+    test('a login cannot start once the session is active', () async {
+      final session = await candidate();
+      await logIn(session);
+
+      expect(() => session.trackLogin(() async {}), throwsStateError);
+    });
+
+    test(
+      'a listener of the event that throws does not undo the login',
+      () async {
+        final session = await candidate();
+        host.failing.add('emit');
+
+        await logIn(session);
+
+        expect(session.state, LoginSessionState.active);
+        expect(host.stored, {'c1'});
+        expect(host.reports, contains('event of c1 failed'));
+      },
+    );
+
+    test('nor does it stop a rollback', () async {
+      host.failing.addAll(['emit', 'switchTo:c1']);
+      final session = await candidate();
+
+      await logIn(session);
+
+      expect(session.state, LoginSessionState.disposed);
+      expect(host.stored, isEmpty);
     });
   });
 }

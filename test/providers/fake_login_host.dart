@@ -167,6 +167,7 @@ class FakeLoginHost implements LoginHost {
   void emit(ClientLoginStateEvent event) {
     calls.add('emit:${event.multipleAccountLoginType.name}');
     events.add(event);
+    if (failing.contains('emit')) throw StateError('emit failed');
   }
 
   /// How many times the pending removals of logged-out accounts were retried.

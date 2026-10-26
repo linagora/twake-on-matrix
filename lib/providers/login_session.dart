@@ -221,7 +221,7 @@ class LoginSession {
       _state == LoginSessionState.created ||
       _state == LoginSessionState.loggingIn;
 
-  void _emitLoggedIn(LoginState loginState) => _host.emit(
+  void _emitLoggedIn(LoginState loginState) => _emit(
     ClientLoginStateEvent(
       client: _host.activeClient,
       loginState: loginState,
@@ -286,6 +286,16 @@ class LoginSession {
     };
   }
 
+  /// A listener of the event that throws must not undo a login that worked
+  /// or stop the rollback.
+  void _emit(ClientLoginStateEvent event) {
+    try {
+      _host.emit(event);
+    } catch (e, s) {
+      _host.report(e, s, 'event of $id failed');
+    }
+  }
+
   Future<void> _bestEffort(String what, FutureOr<void> Function() step) async {
     try {
       await step();
@@ -307,9 +317,9 @@ class LoginSession {
     _host.report(error, stackTrace, 'login of $id failed');
     _failedCleanups.addAll(_steps());
     if (await _runCleanup()) {
-      _host.emit(_failure(MultipleAccountLoginType.loginFailed, error));
+      _emit(_failure(MultipleAccountLoginType.loginFailed, error));
     } else {
-      _host.emit(
+      _emit(
         _failure(
           MultipleAccountLoginType.cleanupFailed,
           _cleanupError ?? error,
@@ -492,13 +502,7 @@ class LoginSession {
           LoginSessionState.loggingIn,
         });
         _failedCleanups.addAll(_steps());
-        if (!await _runCleanup()) {
-          _host.report(
-            _cleanupError ?? StateError('cleanup failed'),
-            StackTrace.current,
-            'cannot dispose $id',
-          );
-        }
+        await _runCleanup();
       case LoginSessionState.cleanupFailed:
         _move(LoginSessionState.rollingBack, {LoginSessionState.cleanupFailed});
         await _runCleanup();
