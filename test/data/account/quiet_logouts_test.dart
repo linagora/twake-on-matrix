@@ -96,19 +96,20 @@ void main() {
       'softLoggedOut',
     ];
 
-    void apply(String event) {
+    bool? apply(String event) {
       switch (event) {
         case 'announce':
           quiet.announce('a');
         case 'forget':
           quiet.forget('a');
         case 'loggedIn':
-          quiet.consume('a', LoginState.loggedIn);
+          return quiet.consume('a', LoginState.loggedIn);
         case 'loggedOut':
-          quiet.consume('a', LoginState.loggedOut);
+          return quiet.consume('a', LoginState.loggedOut);
         case 'softLoggedOut':
-          quiet.consume('a', LoginState.softLoggedOut);
+          return quiet.consume('a', LoginState.softLoggedOut);
       }
+      return null;
     }
 
     for (final start in starts.entries) {
@@ -117,8 +118,11 @@ void main() {
           start.value.forEach(apply);
           final wasQuiet = start.key != 'nothing announced';
 
-          apply(event);
+          final skipped = apply(event);
 
+          if (event == 'loggedOut' || event == 'softLoggedOut') {
+            expect(skipped, wasQuiet, reason: 'quiet only when announced');
+          }
           if (event == 'loggedIn' || event == 'forget') {
             expect(quiet.consume('a', LoginState.loggedOut), isFalse);
             expect(quiet.consume('a', LoginState.softLoggedOut), isFalse);
