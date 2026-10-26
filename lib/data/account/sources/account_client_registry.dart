@@ -1,13 +1,11 @@
 import 'package:matrix/matrix.dart';
 
-/// The `Client` objects of the known accounts, by client name, in the order
-/// they were added. The only place that maps an account id to a `Client`.
+/// The `Client` objects of the known accounts, by client name. The only place
+/// that maps an account id to a `Client`.
 class AccountClientRegistry {
   final Map<String, Client> _clients = {};
 
   Client? operator [](String id) => _clients[id];
-
-  List<Client> get clients => List.unmodifiable(_clients.values);
 
   void add(Client client) => _clients[client.clientName] = client;
 

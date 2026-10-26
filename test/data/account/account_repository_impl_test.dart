@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.dart';
-import 'package:twake_chat/data/account/repositories/client_account_boot_port.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/data/account/sources/persisted_active_account_source.dart';
@@ -20,21 +19,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     dataSource = FakeAccountClientDataSource();
     registry = AccountClientRegistry();
-    repository = AccountRepositoryImpl(
-      dataSource: dataSource,
-      persistedActiveAccount: PersistedActiveAccountSource(Store()),
-      pendingRemovals: PendingRemovalsSource(Store()),
-      pendingPushRemovals: PendingRemovalsSource(
-        Store(),
-        storeKey: PendingRemovalsSource.pushKey,
-      ),
-      pendingCandidateDiscards: PendingRemovalsSource(
-        Store(),
-        storeKey: PendingRemovalsSource.candidateKey,
-      ),
-      registry: registry,
-      clientNameBuilder: () => 'new-client',
-    );
+    repository = _newRepository(dataSource, registry);
   });
 
   group('pending pusher deletions', () {
@@ -96,17 +81,62 @@ void main() {
     test('is empty when nothing was recorded', () async {
       expect(await repository.pendingRemovalIds(), isEmpty);
     });
-  });
 
-  group('ClientAccountBootPort', () {
-    test('adopts the boot clients into the repository', () {
-      final a = FakeAccountClient('a', userID: '@a:s');
-      final port = ClientAccountBootPort(repository: repository, clients: [a]);
+    test('a marked account is listed as unavailable', () async {
+      repository.adopt([
+        FakeAccountClient('a', userID: '@a:s'),
+      ], pendingRemovals: const {});
 
-      expect(port.adopt(pendingRemovals: const {}), const [
-        Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
-      ]);
-      expect(registry['a'], same(a));
+      await repository.markRemovalPending('a');
+
+      expect(repository.accountOf('a').status, AccountStatus.unavailable);
+    });
+
+    test('an unknown id or a candidate cannot be marked', () async {
+      await repository.createCandidate();
+
+      await expectLater(
+        repository.markRemovalPending('x'),
+        throwsA(isA<UnknownAccountException>()),
+      );
+      await expectLater(
+        repository.markRemovalPending('new-client'),
+        throwsA(isA<NotStoredAccountException>()),
+      );
+      expect(await repository.pendingRemovalIds(), isEmpty);
+    });
+
+    test('the ids of clients that are gone are dropped at boot', () async {
+      repository.adopt(
+        [FakeAccountClient('a', userID: '@a:s')],
+        pendingRemovals: const {'a', 'gone'},
+      );
+
+      await repository.markRemovalPending('a');
+
+      expect(await repository.pendingRemovalIds(), {'a'});
+    });
+
+    test('a record that cannot be cleared does not fail the removal', () async {
+      final failing =
+          AccountRepositoryImpl(
+            dataSource: dataSource,
+            persistedActiveAccount: PersistedActiveAccountSource(Store()),
+            pendingRemovals: _FailingWrite(),
+            pendingPushRemovals: PendingRemovalsSource(Store()),
+            pendingCandidateDiscards: PendingRemovalsSource(Store()),
+            registry: registry,
+          )..adopt(
+            [
+              FakeAccountClient('a', userID: '@a:s'),
+              FakeAccountClient('b', userID: '@b:s'),
+            ],
+            pendingRemovals: const {'a'},
+          );
+
+      await failing.removeAccount('a');
+
+      expect(registry['a'], isNull);
     });
   });
 
@@ -310,11 +340,12 @@ void main() {
         throwsA(isA<UnknownAccountException>()),
       );
       expect(dataSource.calls, isEmpty);
-      expect(registry.clients, hasLength(2));
+      expect(registry['a'], isNotNull);
+      expect(registry['b'], isNotNull);
     });
   });
 
-  group('discardCandidate (D8)', () {
+  group('discardCandidate', () {
     test('disposes the client, deletes its storage and drops it', () async {
       await repository.createCandidate();
       dataSource.calls.clear();
@@ -380,7 +411,7 @@ void main() {
     });
   });
 
-  group('persisted active account (D2: stored by userId)', () {
+  group('persisted active account', () {
     setUp(() async {
       repository.adopt([
         FakeAccountClient('a', userID: '@a:s'),
@@ -427,19 +458,16 @@ void main() {
   });
 
   group('AccountClientRegistry', () {
-    test('keeps insertion order and replaceAll swaps the content', () {
+    test('replaceAll swaps the content', () {
       registry
         ..add(FakeAccountClient('b'))
         ..add(FakeAccountClient('a'));
-      expect(registry.clients.map((c) => c.clientName), ['b', 'a']);
 
       registry.replaceAll([FakeAccountClient('c')]);
-      expect(registry.clients.map((c) => c.clientName), ['c']);
-    });
 
-    test('the exposed list cannot change the registry', () {
-      registry.add(FakeAccountClient('a'));
-      expect(() => registry.clients.clear(), throwsUnsupportedError);
+      expect(registry['a'], isNull);
+      expect(registry['b'], isNull);
+      expect(registry['c'], isNotNull);
     });
   });
 }
@@ -462,3 +490,10 @@ AccountRepositoryImpl _newRepository(
   registry: registry,
   clientNameBuilder: () => 'new-client',
 );
+
+class _FailingWrite extends PendingRemovalsSource {
+  _FailingWrite() : super(Store());
+
+  @override
+  Future<void> write(Set<String> ids) => Future.error(StateError('read-only'));
+}
