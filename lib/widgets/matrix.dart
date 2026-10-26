@@ -165,9 +165,8 @@ class MatrixState extends ConsumerState<Matrix>
   /// Every account the app lists (the former `widget.clients`).
   List<Client> get accountClients => ref.read(accountClientsProvider);
 
-  /// Read by `dispose`, where `ref` can no longer be used; closed after it.
   /// The client whose HTTP client is closed with this state. `ref` is unsafe
-  /// once the widget is unmounted, so it is kept here as the accounts change.
+  /// in `dispose`, so it is kept here as the accounts change.
   Client? _httpClientOwner;
 
   Client? _currentHttpClientOwner() =>
@@ -209,7 +208,9 @@ class MatrixState extends ConsumerState<Matrix>
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
     final id = newClient?.clientName;
     if (newClient == null || !accountClients.any((c) => c.clientName == id)) {
-      Logs().w('Tried to set an unknown client ${newClient?.userID} as active');
+      Logs().w(
+        'Tried to set an unknown client ${newClient?.clientName} as active',
+      );
       return SetActiveClientState.unknownClient;
     }
     // The lookup in progress belongs to the account being left.
@@ -226,7 +227,7 @@ class MatrixState extends ConsumerState<Matrix>
       return SetActiveClientState.unknownClient;
     } on InvalidAccountTransitionException catch (e) {
       Logs().w(
-        'Cannot switch to client ${newClient.userID}: '
+        'Cannot switch to client ${newClient.clientName}: '
         '${e.transition} is not allowed from ${e.stateName}',
       );
       return SetActiveClientState.unavailable;
@@ -881,6 +882,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _announceLogout(Client loggedOut) async {
     await _clearContactsOf(loggedOut);
+    if (!mounted) return;
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,

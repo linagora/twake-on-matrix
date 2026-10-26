@@ -682,9 +682,9 @@ class BackgroundPush {
     try {
       final result = await _matrixState!.setActiveClient(target);
       if (result.isSuccess) return true;
-      Logs().w('[Push] Cannot switch to account ${target.userID}: $result');
+      Logs().w('[Push] Cannot switch to account ${target.clientName}: $result');
     } catch (e, s) {
-      Logs().w('[Push] Cannot switch to account ${target.userID}', e, s);
+      Logs().w('[Push] Cannot switch to account ${target.clientName}', e, s);
     }
     return false;
   }

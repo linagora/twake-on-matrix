@@ -66,15 +66,13 @@ List<ContactSource> contactSources(Ref ref) => [
   MatrixRoomMemberSource(ref.watch(matrixRoomMemberDatasourceProvider)),
 ];
 
-/// Rebuilds only when the signed-in account changes: the user id is the key.
-/// Watching the `Client` itself would rebuild the sources → use cases → sync
-/// service → controller chain and restart the store stream (list flashes to
-/// loading) whenever the account state is rebuilt around the same client.
+/// Rebuilds only when the active `Client` changes: the provider keeps the same
+/// instance while the account state is rebuilt around it (a switch that ends
+/// where it began), so the sources → use cases → sync service → controller
+/// chain does not restart the store stream.
 @Riverpod(keepAlive: true)
-MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
-  ref.watch(activeUserIdProvider);
-  return MatrixRoomMemberDatasourceImpl(ref.read(activeMatrixClientProvider));
-}
+MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
+    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider));
 
 /// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
 ///
