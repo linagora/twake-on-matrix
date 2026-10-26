@@ -3,12 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
+import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
-import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_account_client_provider.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/logout_removal_plan.dart';
 
 import '../data/account/fakes.dart';
@@ -29,16 +31,17 @@ void main() {
 
   void boot(List<FakeAccountClient> clients, {Set<String> pending = const {}}) {
     dataSource = FakeAccountClientDataSource();
-    container = ProviderContainer(
+    container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
+        bootClientsProvider.overrideWithValue(clients),
+        bootAccountSnapshotProvider.overrideWithValue(
+          AccountBootSnapshot(pendingRemovalIds: pending),
+        ),
       ],
     );
-    addTearDown(container.dispose);
-    container
-        .read(adoptBootAccountsUseCaseProvider(clients))
-        .execute(pendingRemovals: pending);
+    container.read(accountsProvider);
   }
 
   Future<bool> logout(String id, {bool announce = true}) => removals.remove(
