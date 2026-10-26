@@ -30,11 +30,10 @@ AddAccountUseCase addAccountUseCase(Ref ref) => AddAccountUseCase(
 );
 
 @Riverpod(keepAlive: true)
-RemoveAccountUseCase removeAccountUseCase(Ref ref) =>
-    RemoveAccountUseCase(
-      repository: ref.watch(accountRepositoryProvider),
-      transitions: ref.watch(accountTransitionsProvider),
-    );
+RemoveAccountUseCase removeAccountUseCase(Ref ref) => RemoveAccountUseCase(
+  repository: ref.watch(accountRepositoryProvider),
+  transitions: ref.watch(accountTransitionsProvider),
+);
 
 @Riverpod(keepAlive: true)
 RecordPendingRemovalUseCase recordPendingRemovalUseCase(Ref ref) =>
