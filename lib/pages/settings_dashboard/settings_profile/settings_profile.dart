@@ -19,7 +19,7 @@ import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_item.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
@@ -39,7 +39,6 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
-import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -230,32 +229,17 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   List<Widget> listContextMenuBuilder(BuildContext context) {
-    final listAction = [
-      SettingsProfileContextMenuActions.edit,
-      SettingsProfileContextMenuActions.delete,
-    ];
-    final items = listAction.map((action) {
-      return SettingsProfileContextMenuItem(
-        action: action,
-        profileListenable: currentProfile,
-        hasAvatar: () => hasAvatar,
-        onTap: () {
-          menuController.close();
-          _handleActionContextMenu(action);
-        },
-      );
-    }).toList();
-
     return [
-      for (final item in items) ...[
-        item,
-        if (item != items.last)
-          Divider(
-            height: PopupMenuWidgetStyle.dividerHeight,
-            thickness: PopupMenuWidgetStyle.dividerThickness,
-            color: PopupMenuWidgetStyle.defaultDividerColor(context),
-          ),
-      ],
+      ValueListenableBuilder<Profile?>(
+        valueListenable: currentProfile,
+        builder: (context, profile, _) => SettingsProfileContextMenu(
+          hasAvatar: profile?.avatarUrl != null,
+          onAction: (action) {
+            menuController.close();
+            _handleActionContextMenu(action);
+          },
+        ),
+      ),
     ];
   }
 
