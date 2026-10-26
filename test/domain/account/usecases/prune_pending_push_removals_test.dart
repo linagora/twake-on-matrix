@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/domain/account/usecases/list_pending_push_removals.dart';
+import 'package:twake_chat/domain/account/usecases/prune_pending_push_removals.dart';
 
 class _FakeRepository extends Fake implements AccountRepository {
   _FakeRepository({required this.registered, required this.pending});
@@ -33,7 +33,7 @@ void main() {
       pending: {'a'},
     );
 
-    final retryable = await ListPendingPushRemovalsUseCase(
+    final retryable = await PrunePendingPushRemovalsUseCase(
       repository: repository,
     ).execute();
 
@@ -47,7 +47,7 @@ void main() {
       pending: {'a', 'gone'},
     );
 
-    final retryable = await ListPendingPushRemovalsUseCase(
+    final retryable = await PrunePendingPushRemovalsUseCase(
       repository: repository,
     ).execute();
 
