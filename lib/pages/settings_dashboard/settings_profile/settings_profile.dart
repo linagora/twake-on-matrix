@@ -459,6 +459,7 @@ class SettingsProfileController extends State<SettingsProfile>
       context,
       listen: false,
     ).read(matrixUserProfileProvider(client.userID!).future);
+    if (!mounted) return;
     final profile = data.toProfile(client.userID!);
     Logs().d(
       'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
