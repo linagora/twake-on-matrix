@@ -220,7 +220,10 @@ class MatrixState extends ConsumerState<Matrix>
     } on UnknownAccountException {
       return SetActiveClientState.unknownClient;
     } on InvalidAccountTransitionException catch (e) {
-      Logs().w('Cannot switch to client ${newClient.userID}: $e');
+      Logs().w(
+        'Cannot switch to client ${newClient.userID}: '
+        '${e.transition} is not allowed from ${e.stateName}',
+      );
       return SetActiveClientState.unknownClient;
     }
     final accounts = ref.read(accountsProvider);

@@ -20,7 +20,7 @@ import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
-import 'package:twake_chat/providers/active_account_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
@@ -89,7 +89,7 @@ void main() {
 
   group('the boot providers', () {
     test('the first read adopts the boot clients, whichever read it is', () {
-      expect(bootContainer([a, b]).read(activeAccountClientProvider), same(a));
+      expect(bootContainer([a, b]).read(activeMatrixClientProvider), same(a));
       expect(bootContainer([a, b]).read(accountClientsProvider), [a, b]);
     });
 
@@ -303,7 +303,7 @@ void main() {
       boot([a, b]);
       expect(state(), isA<Active>());
       expect((state() as Active).activeId, 'a');
-      expect(container.read(activeAccountClientProvider), same(a));
+      expect(container.read(activeMatrixClientProvider), same(a));
       expect(container.read(accountClientsProvider), [a, b]);
     });
 
@@ -346,7 +346,7 @@ void main() {
         final placeholder = FakeAccountClient('p', logged: false);
         boot([placeholder]);
         expect(state(), const NoAccount(candidateId: 'p'));
-        expect(container.read(activeAccountClientProvider), isNull);
+        expect(container.read(activeMatrixClientProvider), isNull);
         expect(container.read(loginCandidateProvider), same(placeholder));
         expect(container.read(accountClientsProvider), [placeholder]);
       },
@@ -355,7 +355,7 @@ void main() {
     test('boot with every account waiting for its removal lists them', () {
       boot([a, b], pending: {'a', 'b'});
       expect(state(), isA<NoAccount>());
-      expect(container.read(activeAccountClientProvider), isNull);
+      expect(container.read(activeMatrixClientProvider), isNull);
       expect(container.read(accountClientsProvider), [a, b]);
     });
 
@@ -384,7 +384,7 @@ void main() {
     test('the persisted account is active from the first read', () {
       boot([a, b], persistedUserId: '@b:s');
       expect((state() as Active).activeId, 'b');
-      expect(container.read(activeAccountClientProvider), same(b));
+      expect(container.read(activeMatrixClientProvider), same(b));
     });
 
     test('a persisted account that is logged out falls back to the first '
@@ -451,11 +451,11 @@ void main() {
       await handlerStarted.future;
 
       expect(state(), isA<Switching>());
-      expect(container.read(activeAccountClientProvider), same(a));
+      expect(container.read(activeMatrixClientProvider), same(a));
 
       release.complete();
       await done;
-      expect(container.read(activeAccountClientProvider), same(b));
+      expect(container.read(activeMatrixClientProvider), same(b));
     });
 
     test('the Switching state carries the number of its switch', () async {
@@ -524,7 +524,7 @@ void main() {
       await expectLater(future, throwsStateError);
       expect(seen.last, isA<Active>());
       expect((state() as Active).activeId, 'a');
-      expect(container.read(activeAccountClientProvider), same(a));
+      expect(container.read(activeMatrixClientProvider), same(a));
     });
 
     test('a second switch supersedes the first', () async {
@@ -689,7 +689,7 @@ void main() {
         expect(seen, hasLength(1));
         expect((state() as Active).activeId, 'c');
         expect(container.read(accountClientsProvider), [b, c]);
-        expect(container.read(activeAccountClientProvider), same(c));
+        expect(container.read(activeMatrixClientProvider), same(c));
       },
     );
 
@@ -703,7 +703,7 @@ void main() {
 
         expect(seen, hasLength(1));
         expect((state() as Active).activeId, 'b');
-        expect(container.read(activeAccountClientProvider), same(b));
+        expect(container.read(activeMatrixClientProvider), same(b));
       },
     );
 
@@ -757,7 +757,7 @@ void main() {
 
       expect(seen, hasLength(1));
       expect((state() as Active).activeId, 'b');
-      expect(container.read(activeAccountClientProvider), same(b));
+      expect(container.read(activeMatrixClientProvider), same(b));
     });
 
     test(
@@ -770,7 +770,7 @@ void main() {
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['a', 'b']);
-        expect(container.read(activeAccountClientProvider), isNull);
+        expect(container.read(activeMatrixClientProvider), isNull);
       },
     );
 
@@ -794,7 +794,7 @@ void main() {
 
         expect(state(), isA<NoAccount>());
         expect(state().accounts.map((x) => x.id), ['b']);
-        expect(container.read(activeAccountClientProvider), isNull);
+        expect(container.read(activeMatrixClientProvider), isNull);
       },
     );
 
@@ -853,7 +853,7 @@ void main() {
 
       expect(seen, hasLength(1));
       expect(state(), isA<LastLoggedOut>());
-      expect(container.read(activeAccountClientProvider), isNull);
+      expect(container.read(activeMatrixClientProvider), isNull);
       expect(container.read(accountClientsProvider), [a]);
     });
 
@@ -889,7 +889,7 @@ void main() {
       await notifier().addAccount(const AccountId('a'));
 
       expect((state() as Active).activeId, 'a');
-      expect(container.read(activeAccountClientProvider), same(a));
+      expect(container.read(activeMatrixClientProvider), same(a));
     });
 
     test('the placeholder becomes the first account on login', () async {
@@ -903,7 +903,7 @@ void main() {
       await notifier().addAccount(const AccountId('p'));
 
       expect((state() as Active).activeId, 'p');
-      expect(container.read(activeAccountClientProvider), same(loggedIn));
+      expect(container.read(activeMatrixClientProvider), same(loggedIn));
     });
   });
 

@@ -12,7 +12,7 @@ import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/active_account_client_provider.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/logout_removal_plan.dart';
 
@@ -53,7 +53,7 @@ void main() {
       id: id,
       accounts: notifier(),
       isActive: () =>
-          container.read(activeAccountClientProvider)?.clientName == id,
+          container.read(activeMatrixClientProvider)?.clientName == id,
       cancelSubscriptions: () async {
         events.add('cancel:$id');
         if (failCancel) throw StateError('cancel');
