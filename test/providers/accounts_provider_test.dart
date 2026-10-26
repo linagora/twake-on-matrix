@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
@@ -12,8 +12,11 @@ import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
+import 'package:twake_chat/domain/account/usecases/add_account.dart';
+import 'package:twake_chat/domain/account/usecases/remove_account.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
@@ -66,8 +69,7 @@ void main() {
       persistedUserId: persistedUserId,
       pending: pending,
       overrides: overrides,
-    );
-    container.read(accountsProvider);
+    )..read(accountsProvider);
   }
 
   AccountsState state() => container.read(accountsProvider);
@@ -94,7 +96,10 @@ void main() {
     test('reading the state without the boot overrides is an error', () {
       final bare = ProviderContainer.test(retry: (_, _) => null);
 
-      expect(() => bare.read(accountsProvider), throwsA(anything));
+      expect(
+        () => bare.read(accountsProvider),
+        throwsA(isA<ProviderException>()),
+      );
     });
   });
 
@@ -177,6 +182,54 @@ void main() {
         gate.complete();
 
         await adding;
+      },
+    );
+
+    test('a switch waiting for a write ends quietly when the container is '
+        'disposed', () async {
+      boot([a, b]);
+      final gate = Completer<void>();
+      dataSource.addGate = gate.future;
+      container.read(accountClientRegistryProvider).add(c);
+      final adding = notifier().addAccount(const AccountId('c'));
+      await pumpEventQueue();
+      final switching = notifier().switchTo(const AccountId('b'));
+      final accounts = notifier();
+
+      container.dispose();
+      gate.complete();
+
+      await adding;
+      await switching;
+      expect(accounts.switchSeq, 0);
+    });
+
+    test('a container disposed as the add returns does not fail it', () async {
+      boot(
+        [a],
+        overrides: [
+          addAccountUseCaseProvider.overrideWithValue(
+            _DisposingAddAccount(() => container.dispose()),
+          ),
+        ],
+      );
+
+      await notifier().addAccount(const AccountId('b'));
+    });
+
+    test(
+      'a container disposed as the removal returns does not fail it',
+      () async {
+        boot(
+          [a, b],
+          overrides: [
+            removeAccountUseCaseProvider.overrideWithValue(
+              _DisposingRemoveAccount(() => container.dispose()),
+            ),
+          ],
+        );
+
+        await notifier().removeAccount(const AccountId('b'));
       },
     );
 
@@ -847,7 +900,7 @@ void main() {
       expect(seen, isEmpty);
     });
 
-    test('a failing store write leaves the state unchanged (R5)', () async {
+    test('a failing store write leaves the state unchanged', () async {
       boot([a]);
       final candidate = await container
           .read(accountRepositoryProvider)
@@ -879,36 +932,69 @@ void main() {
   });
 
   test('the transitions come from the overridable provider', () {
-    final transitions = _RecordingTransitions();
     boot(
       [a],
-      overrides: [accountTransitionsProvider.overrideWithValue(transitions)],
+      overrides: [
+        accountTransitionsProvider.overrideWithValue(_StubTransitions()),
+      ],
     );
-    state();
+    expect(state(), isA<Active>());
+
     notifier().logoutLast();
-    expect(transitions.calls, ['initialize', 'logoutLast']);
+
+    expect(state(), const NoAccount(candidateId: 'stub'));
   });
 }
 
-class _RecordingTransitions implements AccountTransitions {
-  final calls = <String>[];
-
+/// Answers states that the real transitions never give for these inputs.
+class _StubTransitions implements AccountTransitions {
   @override
   AccountsState initialize(
     AccountsState state,
     List<Account> accounts, {
     String? persistedUserId,
   }) {
-    calls.add('initialize');
     return Active(accounts: accounts, activeId: accounts.first.id);
   }
 
   @override
-  AccountsState logoutLast(AccountsState state) {
-    calls.add('logoutLast');
-    return state;
-  }
+  AccountsState logoutLast(AccountsState state) =>
+      const NoAccount(candidateId: 'stub');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Disposes the container as the use case returns: the notifier resumes with a
+/// state to write and nothing to write it to.
+class _DisposingAddAccount implements AddAccountUseCase {
+  _DisposingAddAccount(this._dispose);
+
+  final void Function() _dispose;
+
+  @override
+  Future<AccountsState?> execute(
+    AccountsState Function() currentState,
+    String id,
+  ) async {
+    final state = currentState();
+    _dispose();
+    return state;
+  }
+}
+
+class _DisposingRemoveAccount implements RemoveAccountUseCase {
+  _DisposingRemoveAccount(this._dispose);
+
+  final void Function() _dispose;
+
+  @override
+  Future<AccountsState> execute(
+    AccountsState Function() currentState,
+    String id,
+  ) async {
+    final state = currentState();
+    _dispose();
+    return state;
+  }
 }

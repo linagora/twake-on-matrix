@@ -49,7 +49,7 @@ class Accounts extends _$Accounts {
     final next = await ref
         .read(addAccountUseCaseProvider)
         .execute(_current, id.value);
-    if (next != null) state = next;
+    if (next != null) _move(next);
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
@@ -78,17 +78,15 @@ class Accounts extends _$Accounts {
     }
     _supersedePendingSwitch(SwitchSupersededException(id.value));
     if (next is! Switching) {
-      state = next;
+      _move(next);
       return;
     }
     final pending = _pendingSwitch = Completer<void>();
     // Before the emission: a listener may settle the switch synchronously.
     _switchSeq = next.seq;
-    state = next;
+    _move(next);
     if (!_hasSwitchHandler) {
-      Logs().w(
-        'Switch to ${id.value} has no handler: it ends without its side effects',
-      );
+      Logs().w('A switch has no handler: it ends without its side effects');
       completeSwitch(next.ticket);
     }
     await pending.future;
@@ -122,14 +120,14 @@ class Accounts extends _$Accounts {
   void completeSwitch(SwitchTicket ticket) {
     final current = _switchingTo(ticket);
     if (current == null) return;
-    state = _transitions.completeSwitch(current, ticket.seq);
+    _move(_transitions.completeSwitch(current, ticket.seq));
     _finishPendingSwitch();
   }
 
   void failSwitch(SwitchTicket ticket, Object error, [StackTrace? stackTrace]) {
     final current = _switchingTo(ticket);
     if (current == null) return;
-    state = _transitions.failSwitch(current, ticket.seq);
+    _move(_transitions.failSwitch(current, ticket.seq));
     final pending = _pendingSwitch;
     _pendingSwitch = null;
     pending?.completeError(error, stackTrace);
@@ -138,9 +136,10 @@ class Accounts extends _$Accounts {
   /// Removes [id]; when it was the active account the next one becomes active
   /// in the same emission.
   Future<void> removeAccount(AccountId id) => _serialized(() async {
-    state = await ref
+    final next = await ref
         .read(removeAccountUseCaseProvider)
         .execute(_current, id.value);
+    _move(next);
   });
 
   /// The removal of [id] failed: the account stays listed as unavailable, not
@@ -148,7 +147,7 @@ class Accounts extends _$Accounts {
   /// active one (with none, nobody is logged in). The record that survives a
   /// restart is [recordPendingRemoval], which is retried on its own.
   Future<void> holdRemoval(AccountId id) => _serialized(() async {
-    state = _transitions.markUnavailable(_current(), id.value);
+    _move(_transitions.markUnavailable(_current(), id.value));
   });
 
   /// Records, across restarts, that the removal of [id] is pending.
@@ -157,7 +156,9 @@ class Accounts extends _$Accounts {
   );
 
   /// The only account logged out; it stays in the state as `LastLoggedOut`.
-  void logoutLast() => state = _transitions.logoutLast(state);
+  void logoutLast() {
+    if (ref.mounted) _move(_transitions.logoutLast(state));
+  }
 
   /// Declares that something reacts to `Switching` and will end it: the
   /// coordinator, which is the only one. Returns the function that unregisters
@@ -171,6 +172,12 @@ class Accounts extends _$Accounts {
       registered = false;
       _hasSwitchHandler = false;
     };
+  }
+
+  /// The only place that writes the state: a container disposed meanwhile
+  /// (a write after an `await`) ends the mutation quietly.
+  void _move(AccountsState next) {
+    if (ref.mounted) state = next;
   }
 
   /// The state the use cases read after they awaited the repository. A
