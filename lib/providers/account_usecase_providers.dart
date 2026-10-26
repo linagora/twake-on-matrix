@@ -36,8 +36,7 @@ RemoveAccountUseCase removeAccountUseCase(Ref ref) => RemoveAccountUseCase(
 );
 
 @Riverpod(keepAlive: true)
-PrunePendingPushRemovalsUseCase prunePendingPushRemovalsUseCase(
-  Ref ref,
-) => PrunePendingPushRemovalsUseCase(
-  repository: ref.watch(accountRepositoryProvider),
-);
+PrunePendingPushRemovalsUseCase prunePendingPushRemovalsUseCase(Ref ref) =>
+    PrunePendingPushRemovalsUseCase(
+      repository: ref.watch(accountRepositoryProvider),
+    );
