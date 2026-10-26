@@ -42,10 +42,10 @@ class _MessageReactionsBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    final items = [
+    final entries = [
       for (final reaction in _displayedReactions)
         for (final reactor in reaction.reactors ?? <User>[])
-          _ReactorItem(reaction: reaction, reactor: reactor),
+          (reaction, reactor),
     ];
 
     return Column(
@@ -68,8 +68,11 @@ class _MessageReactionsBottomSheetState
             controller: widget.scrollController,
             physics: const ClampingScrollPhysics(),
             padding: EdgeInsets.zero,
-            itemCount: items.length,
-            itemBuilder: (context, index) => items[index],
+            itemCount: entries.length,
+            itemBuilder: (context, index) {
+              final (reaction, reactor) = entries[index];
+              return _ReactorItem(reaction: reaction, reactor: reactor);
+            },
           ),
         ),
       ],
@@ -87,11 +90,11 @@ class _ReactorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = reactor.displayName ?? '';
+    final name = reactor.calcDisplayname();
     final avatar = Avatar(
       size: _size.avatarSize,
       mxContent: reactor.avatarUrl,
-      name: reactor.displayName,
+      name: name,
     );
     return reaction.isCustomEmoji
         ? LinagoraReactionItem.image(
@@ -102,7 +105,7 @@ class _ReactorItem extends StatelessWidget {
           )
         : LinagoraReactionItem(
             name: name,
-            emoji: reaction.key!,
+            emoji: reaction.key,
             avatar: avatar,
             size: _size,
           );

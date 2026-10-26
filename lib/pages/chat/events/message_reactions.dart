@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
-import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:linagora_design_flutter/reaction/linagora_reaction_chip.dart';
 import 'package:linagora_design_flutter/reaction/linagora_reactions.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 
@@ -81,18 +82,30 @@ class ReactionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDirectChat = event.room.isDirectChat;
+    final l10n = L10n.of(context)!;
     return LinagoraReactions(
       reactions: reactionList.map((r) {
-        final count = isDirectChat ? null : r.count;
-        void onTap() => unawaited(_toggleReaction(r));
+        final count = isDirectChat || r.count <= 1 ? null : r.count;
+        final semanticLabel = l10n.reactionSemanticLabel(
+          r.isCustomEmoji ? l10n.customEmoji : r.key,
+          r.count,
+        );
+        void onTap() => unawaited(_toggleReaction(context, r));
         return r.isCustomEmoji
             ? LinagoraReactionChip.image(
                 image: r.customEmojiImage,
                 count: count,
+                semanticLabel: semanticLabel,
                 onTap: onTap,
               )
-            : LinagoraReactionChip(emoji: r.key!, count: count, onTap: onTap);
+            : LinagoraReactionChip(
+                emoji: r.key,
+                count: count,
+                semanticLabel: semanticLabel,
+                onTap: onTap,
+              );
       }).toList(),
+      showAllSemanticLabel: isDirectChat ? null : l10n.showAllReactions,
       onShowAll: isDirectChat
           ? null
           : (details) => _handleDisplayReactionsInfo(
@@ -102,18 +115,29 @@ class ReactionsList extends StatelessWidget {
     );
   }
 
-  Future<void> _toggleReaction(ReactionEntry reaction) async {
-    if (!reaction.reacted) {
-      await event.room.sendReaction(event.eventId, reaction.key!);
-      return;
+  Future<void> _toggleReaction(
+    BuildContext context,
+    ReactionEntry reaction,
+  ) async {
+    try {
+      if (!reaction.reacted) {
+        await event.room.sendReaction(event.eventId, reaction.key);
+        return;
+      }
+      final ownReaction = allReactionEvents.firstWhereOrNull(
+        (e) =>
+            e.senderId == e.room.client.userID &&
+            e.content
+                    .tryGetMap<String, dynamic>('m.relates_to')
+                    ?.tryGet<String>('key') ==
+                reaction.key,
+      );
+      await ownReaction?.redactEvent();
+    } catch (e, s) {
+      Logs().e('Failed to toggle reaction ${reaction.key}', e, s);
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
-    final ownReaction = allReactionEvents.firstWhereOrNull((e) {
-      final relatedTo = e.content['m.relates_to'];
-      return e.senderId == e.room.client.userID &&
-          relatedTo is Map &&
-          relatedTo['key'] == reaction.key;
-    });
-    await ownReaction?.redactEvent();
   }
 
   void _handleDisplayReactionInfoWeb({
@@ -228,6 +252,7 @@ class ReactionsList extends StatelessWidget {
         ),
       ),
       isScrollControlled: true,
+      showDragHandle: true,
       builder: (context) => Container(
         width: double.infinity,
         padding: MediaQuery.viewInsetsOf(context),
@@ -237,27 +262,10 @@ class ReactionsList extends StatelessWidget {
           maxChildSize: 0.8,
           expand: false,
           builder: (BuildContext context, ScrollController scrollController) {
-            return Column(
-              children: [
-                Container(
-                  height: 4,
-                  width: 32,
-                  margin: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: LinagoraSysColors.material().outline.withValues(
-                      alpha: 0.4,
-                    ),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-                Expanded(
-                  child: MessageReactionsBottomSheet(
-                    allReactionEvents: allReactionEvents,
-                    reactionList: reactionList,
-                    scrollController: scrollController,
-                  ),
-                ),
-              ],
+            return MessageReactionsBottomSheet(
+              allReactionEvents: allReactionEvents,
+              reactionList: reactionList,
+              scrollController: scrollController,
             );
           },
         ),
@@ -269,7 +277,7 @@ class ReactionsList extends StatelessWidget {
 @freezed
 abstract class ReactionEntry with _$ReactionEntry {
   const factory ReactionEntry({
-    String? key,
+    required String key,
     required int count,
     required bool reacted,
     List<User>? reactors,
@@ -277,8 +285,8 @@ abstract class ReactionEntry with _$ReactionEntry {
 }
 
 extension ReactionEntryCustomEmoji on ReactionEntry {
-  bool get isCustomEmoji => key!.startsWith('mxc://');
+  bool get isCustomEmoji => key.startsWith('mxc://');
 
   Widget get customEmojiImage =>
-      MxcImage(uri: Uri.parse(key!), fit: BoxFit.contain);
+      MxcImage(uri: Uri.parse(key), fit: BoxFit.contain);
 }

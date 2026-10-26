@@ -2822,5 +2822,27 @@
       "serverName": {}
     }
   },
-  "groupPrivacyLimitToServerDescription": "This public chat is available only to users on this server, turn the toggle off to open it to everyone. Note that this setting can't be changed later"
+  "groupPrivacyLimitToServerDescription": "This public chat is available only to users on this server, turn the toggle off to open it to everyone. Note that this setting can't be changed later",
+  "reactionSemanticLabel": "{reaction}, {count, plural, =1{1 reaction} other{{count} reactions}}",
+  "@reactionSemanticLabel": {
+    "type": "text",
+    "placeholders": {
+      "reaction": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "customEmoji": "Custom emoji",
+  "@customEmoji": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "showAllReactions": "Show all reactions",
+  "@showAllReactions": {
+    "type": "text",
+    "placeholders": {}
+  }
 }
