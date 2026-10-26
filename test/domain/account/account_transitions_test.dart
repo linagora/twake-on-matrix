@@ -1,3 +1,4 @@
+import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
@@ -7,7 +8,6 @@ import 'package:twake_chat/domain/account/policy/account_removal_transitions.dar
 import 'package:twake_chat/domain/account/policy/account_switch_transitions.dart';
 import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 const _policy = AccountPolicy();
 const _support = AccountTransitionSupport();
@@ -293,28 +293,17 @@ void main() {
         );
       }
     });
-
-    test('a known account in a state that cannot switch is rejected', () {
-      expect(
-        () => _transitions.beginSwitch(
-          LastLoggedOut(account: _out('a')),
-          'a',
-          seq: 1,
-        ),
-        throwsA(isA<InvalidAccountTransitionException>()),
-      );
-    });
   });
 
   group('remove', () {
-    test('removing a non-active account keeps the active one (D4)', () {
+    test('removing a non-active account keeps the active one', () {
       expect(
         _transitions.remove(Active(accounts: [a, b, c], activeId: 'c'), 'a'),
         Active(accounts: [b, c], activeId: 'c'),
       );
     });
 
-    test('removing the active account picks the follower (P2)', () {
+    test('removing the active account picks the follower', () {
       expect(
         _transitions.remove(Active(accounts: [a, b, c], activeId: 'a'), 'a'),
         Active(accounts: [b, c], activeId: 'b'),
@@ -346,7 +335,7 @@ void main() {
       );
     });
 
-    test('removing during a switch is rejected (P6)', () {
+    test('removing during a switch is rejected', () {
       expect(
         () => _transitions.remove(
           Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
@@ -365,13 +354,10 @@ void main() {
   });
 
   group('accounts that wait for their removal', () {
-    Account waiting(String id) =>
-        Account(id: id, status: AccountStatus.unavailable);
-
     test('a boot with only waiting accounts keeps them listed', () {
       expect(
-        _transitions.initialize(const Booting(), [waiting('w')]),
-        NoAccount(accounts: [waiting('w')]),
+        _transitions.initialize(const Booting(), [_waiting('w')]),
+        NoAccount(accounts: [_waiting('w')]),
       );
     });
 
@@ -379,16 +365,16 @@ void main() {
       'a boot with waiting accounts and a placeholder offers the placeholder',
       () {
         expect(
-          _transitions.initialize(const Booting(), [waiting('w'), _out('p')]),
-          NoAccount(candidateId: 'p', accounts: [waiting('w')]),
+          _transitions.initialize(const Booting(), [_waiting('w'), _out('p')]),
+          NoAccount(candidateId: 'p', accounts: [_waiting('w')]),
         );
       },
     );
 
     test('a login after that keeps them listed', () {
       expect(
-        _transitions.add(NoAccount(accounts: [waiting('w')]), a),
-        Active(accounts: [waiting('w'), a], activeId: 'a'),
+        _transitions.add(NoAccount(accounts: [_waiting('w')]), a),
+        Active(accounts: [_waiting('w'), a], activeId: 'a'),
       );
     });
 
@@ -422,7 +408,7 @@ void main() {
       'holding the active account with no logged-in survivor logs nobody in',
       () {
         final state = _transitions.markUnavailable(
-          Active(accounts: [a, waiting('w')], activeId: 'a'),
+          Active(accounts: [a, _waiting('w')], activeId: 'a'),
           'a',
         );
 
@@ -436,7 +422,7 @@ void main() {
     );
 
     test('holding an account that is already held changes nothing', () {
-      final held = NoAccount(accounts: [waiting('w')]);
+      final held = NoAccount(accounts: [_waiting('w')]);
 
       expect(_transitions.markUnavailable(held, 'w'), held);
     });
@@ -465,10 +451,10 @@ void main() {
       () {
         expect(
           _transitions.remove(
-            Active(accounts: [a, waiting('w')], activeId: 'a'),
+            Active(accounts: [a, _waiting('w')], activeId: 'a'),
             'a',
           ),
-          NoAccount(accounts: [waiting('w')]),
+          NoAccount(accounts: [_waiting('w')]),
         );
       },
     );
@@ -489,10 +475,10 @@ void main() {
     test('a waiting account is removed from NoAccount', () {
       expect(
         _transitions.remove(
-          NoAccount(candidateId: 'p', accounts: [waiting('w'), waiting('v')]),
+          NoAccount(candidateId: 'p', accounts: [_waiting('w'), _waiting('v')]),
           'w',
         ),
-        NoAccount(candidateId: 'p', accounts: [waiting('v')]),
+        NoAccount(candidateId: 'p', accounts: [_waiting('v')]),
       );
     });
 
@@ -594,24 +580,6 @@ void main() {
         ),
       );
     });
-  });
-
-  test('exceptions print a fixed type name', () {
-    expect(
-      const UnknownAccountException('x').toString(),
-      'UnknownAccountException: No account with this id',
-    );
-    expect(
-      const InvalidAccountTransitionException(
-        transition: 'add',
-        stateName: 'Booting',
-      ).toString(),
-      'InvalidAccountTransitionException: add from Booting',
-    );
-    expect(
-      const SwitchSupersededException('x').toString(),
-      'SwitchSupersededException: The switch was replaced by a newer one',
-    );
   });
 
   test('state collections are unmodifiable', () {

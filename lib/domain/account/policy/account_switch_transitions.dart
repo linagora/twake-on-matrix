@@ -29,7 +29,9 @@ class AccountSwitchTransitions {
         toId == from
             ? Active(accounts: accounts, activeId: from)
             : Switching(accounts: accounts, from: from, to: toId, seq: seq),
-      _ => throw _support.invalid('beginSwitch', state),
+      Booting() ||
+      NoAccount() ||
+      LastLoggedOut() => throw _support.invalid('beginSwitch', state),
     };
   }
 

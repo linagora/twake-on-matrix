@@ -16,12 +16,11 @@ class AccountPolicy {
   }
 
   /// The persisted account when it is logged in, else the first logged-in
-  /// one by store order; null when nobody is logged in.
-  String? selectInitialActive({
+  /// one by store order. [loggedInIds] must not be empty.
+  String selectInitialActive({
     required List<String> loggedInIds,
     required String? persistedId,
   }) {
-    if (loggedInIds.isEmpty) return null;
     if (persistedId != null && loggedInIds.contains(persistedId)) {
       return persistedId;
     }

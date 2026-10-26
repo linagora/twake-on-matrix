@@ -36,6 +36,6 @@ class AccountInitTransitions {
     return _policy.selectInitialActive(
       loggedInIds: loggedIn.map((a) => a.id).toList(),
       persistedId: persisted,
-    )!;
+    );
   }
 }

@@ -1,21 +1,9 @@
 sealed class AccountException implements Exception {
-  const AccountException(this.message);
-
-  final String message;
-
-  String get _name => switch (this) {
-    UnknownAccountException() => 'UnknownAccountException',
-    InvalidAccountTransitionException() => 'InvalidAccountTransitionException',
-    SwitchSupersededException() => 'SwitchSupersededException',
-  };
-
-  @override
-  String toString() => '$_name: $message';
+  const AccountException();
 }
 
 class UnknownAccountException extends AccountException {
-  const UnknownAccountException(this.accountId)
-    : super('No account with this id');
+  const UnknownAccountException(this.accountId);
 
   final String accountId;
 }
@@ -24,19 +12,15 @@ class InvalidAccountTransitionException extends AccountException {
   const InvalidAccountTransitionException({
     required this.transition,
     required this.stateName,
-  }) : super('Transition not allowed from this state');
+  });
 
   final String transition;
   final String stateName;
-
-  @override
-  String toString() => '$_name: $transition from $stateName';
 }
 
 /// A newer switch replaced this one before it finished.
 class SwitchSupersededException extends AccountException {
-  const SwitchSupersededException(this.accountId)
-    : super('The switch was replaced by a newer one');
+  const SwitchSupersededException(this.accountId);
 
   final String accountId;
 }

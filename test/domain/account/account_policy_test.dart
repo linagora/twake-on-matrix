@@ -1,5 +1,5 @@
-import 'package:twake_chat/domain/account/policy/account_policy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/account/policy/account_policy.dart';
 
 const _policy = AccountPolicy();
 
@@ -72,12 +72,5 @@ void main() {
         );
       },
     );
-
-    test('returns null when no account is logged in', () {
-      expect(
-        _policy.selectInitialActive(loggedInIds: [], persistedId: 'a'),
-        isNull,
-      );
-    });
   });
 }
