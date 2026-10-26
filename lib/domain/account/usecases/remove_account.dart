@@ -20,6 +20,8 @@ class RemoveAccountUseCase {
     AccountsState Function() currentState,
     String id,
   ) async {
+    // Only checked: it throws when the account cannot be removed now, before
+    // anything is deleted. The state that is kept is the one computed below.
     _transitions.remove(currentState(), id);
     await _repository.removeAccount(id);
     return _transitions.remove(currentState(), id);

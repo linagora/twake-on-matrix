@@ -25,6 +25,8 @@ class AddAccountUseCase {
     final listed = before is Active || before is Switching;
     if (listed && before.accounts.any((a) => a.id == id)) return null;
     final account = _repository.accountOf(id);
+    // Only checked: it throws when the account cannot be added now, before
+    // anything is written. The state that is kept is the one computed below.
     _transitions.add(before, account);
     await _repository.addAccount(account);
     return _transitions.add(currentState(), account);
