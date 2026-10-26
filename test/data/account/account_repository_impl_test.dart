@@ -122,14 +122,7 @@ void main() {
     test(
       'a stale id persisted by a past session is not written back',
       () async {
-        await PendingRemovalsSource(Store()).write({'gone'});
-        repository.adopt(
-          [
-            FakeAccountClient('a', userID: '@a:s'),
-            FakeAccountClient('b', userID: '@b:s'),
-          ],
-          pendingRemovals: const {'gone'},
-        );
+        await _adoptWithStaleId(repository);
 
         await repository.markRemovalPending('a');
 
@@ -139,14 +132,7 @@ void main() {
     );
 
     test('removing an account drops the stale ids from the store', () async {
-      await PendingRemovalsSource(Store()).write({'gone'});
-      repository.adopt(
-        [
-          FakeAccountClient('a', userID: '@a:s'),
-          FakeAccountClient('b', userID: '@b:s'),
-        ],
-        pendingRemovals: const {'gone'},
-      );
+      await _adoptWithStaleId(repository);
 
       await repository.removeAccount('a');
 
@@ -638,6 +624,19 @@ class _GatedSource extends PendingRemovalsSource {
 
   @override
   Future<void> write(Set<String> ids) async => _ids = {...ids};
+}
+
+/// Adopts the accounts 'a' and 'b' with a removal of 'gone' persisted by a
+/// past session.
+Future<void> _adoptWithStaleId(AccountRepositoryImpl repository) async {
+  await PendingRemovalsSource(Store()).write({'gone'});
+  repository.adopt(
+    [
+      FakeAccountClient('a', userID: '@a:s'),
+      FakeAccountClient('b', userID: '@b:s'),
+    ],
+    pendingRemovals: const {'gone'},
+  );
 }
 
 AccountRepositoryImpl _newRepository(

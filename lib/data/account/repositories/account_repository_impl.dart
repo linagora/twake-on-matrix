@@ -37,8 +37,9 @@ class AccountRepositoryImpl implements AccountRepository {
   /// twice.
   final Set<String> _storedIds = {};
 
-  /// Accounts whose removal failed. They are persisted, so a restart still
-  /// knows them.
+  /// Accounts whose removal failed, for the synchronous [Account.status]. The
+  /// store under [_pendingRemovals] owns them: this copy is set by [adopt] and
+  /// then only replaced by what a serialized write stored, never by a read.
   final Set<String> _pendingIds = {};
 
   /// Until [adopt] ran, the stored ids are not known: the persisted pending
