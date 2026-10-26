@@ -10,15 +10,12 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/contact_manager/contacts_manager.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 
 import '../data/account/fakes.dart';
-
-class _FakeContactsManager extends Fake implements ContactsManager {}
 
 /// A client with the streams and the http client `MatrixState` opens at boot.
 class _BootClient extends FakeAccountClient {
@@ -66,11 +63,9 @@ class _FakeNetworkConnectionService extends Fake
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    getIt
-      ..registerSingleton<ContactsManager>(_FakeContactsManager())
-      ..registerSingleton<NetworkConnectionService>(
-        _FakeNetworkConnectionService(),
-      );
+    getIt.registerSingleton<NetworkConnectionService>(
+      _FakeNetworkConnectionService(),
+    );
   });
   tearDown(getIt.reset);
 
