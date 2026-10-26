@@ -82,8 +82,17 @@ class SettingsProfileRobot extends HomeRobot {
   }
 
   String? getValueOf(SettingsProfileEnum settingsProfileEnum) {
-    final widget = item(settingsProfileEnum).evaluate().first.widget;
-    return (widget as SettingsProfileItemBuilder).textEditingController?.text;
+    final row = item(settingsProfileEnum);
+    final title =
+        (row.evaluate().first.widget as SettingsProfileItemBuilder).title;
+    return row
+        .$(Text)
+        .evaluate()
+        .map((element) => (element.widget as Text).data)
+        .firstWhere(
+          (data) => data != null && data != title,
+          orElse: () => null,
+        );
   }
 
   Future<String> waitForValueOf(
