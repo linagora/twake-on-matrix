@@ -32,6 +32,9 @@ class _FakeRepository extends Fake implements AccountRepository {
   final List<Account> registered;
   final List<String> writes = [];
 
+  /// Runs during a write, to change the state the use case reads after it.
+  void Function()? onWrite;
+
   @override
   List<Account> registeredAccounts() => registered;
 
@@ -39,11 +42,16 @@ class _FakeRepository extends Fake implements AccountRepository {
   Account accountOf(String id) => registered.firstWhere((a) => a.id == id);
 
   @override
-  Future<void> addAccount(Account account) async =>
-      writes.add('add ${account.id}');
+  Future<void> addAccount(Account account) async {
+    writes.add('add ${account.id}');
+    onWrite?.call();
+  }
 
   @override
-  Future<void> removeAccount(String id) async => writes.add('remove $id');
+  Future<void> removeAccount(String id) async {
+    writes.add('remove $id');
+    onWrite?.call();
+  }
 
   @override
   Future<void> markRemovalPending(String id) async => writes.add('pending $id');
@@ -104,6 +112,31 @@ void main() {
       );
       expect(repository.writes, isEmpty);
     });
+
+    test('keeps the state that is current after the write', () async {
+      AccountsState current = Active(accounts: [a], activeId: 'a');
+      repository = _FakeRepository([a, b, _in('c')])
+        ..onWrite = () =>
+            current = Active(accounts: [a, _in('c')], activeId: 'a');
+      useCase = AddAccountUseCase(
+        repository: repository,
+        transitions: _transitions,
+      );
+
+      final next = await useCase.execute(() => current, 'b');
+
+      expect(next, Active(accounts: [a, _in('c'), b], activeId: 'a'));
+    });
+
+    test('does nothing for an account listed while a switch runs', () async {
+      final next = await useCase.execute(
+        () => Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
+        'b',
+      );
+
+      expect(next, isNull);
+      expect(repository.writes, isEmpty);
+    });
   });
 
   group('RemoveAccountUseCase', () {
@@ -134,6 +167,21 @@ void main() {
         throwsA(isA<UnknownAccountException>()),
       );
       expect(repository.writes, isEmpty);
+    });
+
+    test('keeps the state that is current after the delete', () async {
+      final c = _in('c');
+      AccountsState current = Active(accounts: [a, b], activeId: 'a');
+      repository = _FakeRepository([a, b, c])
+        ..onWrite = () => current = Active(accounts: [a, b, c], activeId: 'a');
+      useCase = RemoveAccountUseCase(
+        repository: repository,
+        transitions: _transitions,
+      );
+
+      final next = await useCase.execute(() => current, 'b');
+
+      expect(next, Active(accounts: [a, c], activeId: 'a'));
     });
   });
 
