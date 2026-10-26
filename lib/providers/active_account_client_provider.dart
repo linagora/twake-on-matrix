@@ -9,8 +9,12 @@ part 'active_account_client_provider.g.dart';
 
 /// The Matrix `Client` of the active account; read-only, derived from
 /// `accountsProvider`. The registry it reads does not notify, so it recomputes
-/// only when `accountsProvider` emits. During a switch it is still the account being left, and
-/// it is null when nobody is logged in (`NoAccount`, `LastLoggedOut`).
+/// only when `accountsProvider` emits. During a switch it is still the account
+/// being left, and it is null when nobody is logged in (`NoAccount`,
+/// `LastLoggedOut`).
+// TODO: [transitional] TW-3302: takes the name `activeMatrixClientProvider`
+// once `MatrixState` stops pushing its client into that notifier; until then
+// contacts keep reading that one.
 @Riverpod(keepAlive: true)
 Client? activeAccountClient(Ref ref) {
   final id = switch (ref.watch(accountsProvider)) {

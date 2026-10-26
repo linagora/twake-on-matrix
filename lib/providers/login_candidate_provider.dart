@@ -20,6 +20,10 @@ class PendingLoginCandidate extends _$PendingLoginCandidate {
 /// logged-out boot, the account that logged out last, else the pending
 /// add-account candidate, unless that one has logged in meanwhile. An account
 /// that waits for its removal is never it.
+///
+/// The registry is mutable and does not notify: this recomputes only when
+/// `accountsProvider` or `pendingLoginCandidateProvider` emits, so a registry
+/// write (a discarded candidate) has to be followed by one of those emissions.
 @Riverpod(keepAlive: true)
 Client? loginCandidate(Ref ref) {
   final registry = ref.watch(accountClientRegistryProvider);
