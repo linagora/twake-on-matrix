@@ -5,7 +5,7 @@ import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
-import 'package:twake_chat/providers/account_usecase_providers.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
@@ -36,19 +36,18 @@ void main() {
 
   void boot(List<_SdkClient> clients) {
     SharedPreferences.setMockInitialValues({});
-    container = ProviderContainer(
+    container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(
           FakeAccountClientDataSource(),
         ),
+        bootClientsProvider.overrideWithValue(clients),
+        bootAccountSnapshotProvider.overrideWithValue(
+          const AccountBootSnapshot(),
+        ),
       ],
     );
-    addTearDown(container.dispose);
-    container
-        .read(bootAccountSnapshotProvider.notifier)
-        .set(const AccountBootSnapshot());
-    container.read(adoptBootAccountsUseCaseProvider(clients)).execute();
     seen = <String?>[];
     container.listen(
       activeUserIdProvider,

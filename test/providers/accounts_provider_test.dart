@@ -307,39 +307,6 @@ void main() {
       expect(container.read(accountClientsProvider), [a, b]);
     });
 
-    group('listening to the providers while booting', () {
-      ProviderContainer bootContainer() {
-        dataSource = FakeAccountClientDataSource();
-        final booted = ProviderContainer(
-          retry: (_, _) => null,
-          overrides: [
-            accountClientDataSourceProvider.overrideWithValue(dataSource),
-          ],
-        );
-        addTearDown(booted.dispose);
-        booted
-            .read(bootAccountSnapshotProvider.notifier)
-            .set(const AccountBootSnapshot());
-        return booted;
-      }
-
-      test('adopt before listen: the boot account is the active client', () {
-        final booted = bootContainer();
-        booted.read(adoptBootAccountsUseCaseProvider([a])).execute();
-        booted.listen(activeMatrixClientProvider, (_, _) {});
-        expect(booted.read(accountsProvider), isA<Active>());
-        expect(booted.read(activeMatrixClientProvider), same(a));
-      });
-
-      test('listen before adopt: the state keeps no account (the bug)', () {
-        final booted = bootContainer();
-        booted.listen(activeMatrixClientProvider, (_, _) {});
-        booted.read(adoptBootAccountsUseCaseProvider([a])).execute();
-        expect(booted.read(accountsProvider), const NoAccount());
-        expect(booted.read(activeMatrixClientProvider), isNull);
-      });
-    });
-
     test(
       'logged-out boot: NoAccount, no active client, placeholder offered',
       () {
