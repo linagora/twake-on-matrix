@@ -4,9 +4,8 @@ import 'package:twake_chat/domain/account/repositories/account_repository.dart';
 /// again. A record whose account is gone cannot be retried: it is dropped
 /// here (this deletes records), and the accounts that remain are returned.
 class PrunePendingPushRemovalsUseCase {
-  const PrunePendingPushRemovalsUseCase({
-    required AccountRepository repository,
-  }) : _repository = repository;
+  const PrunePendingPushRemovalsUseCase({required AccountRepository repository})
+    : _repository = repository;
 
   final AccountRepository _repository;
 
