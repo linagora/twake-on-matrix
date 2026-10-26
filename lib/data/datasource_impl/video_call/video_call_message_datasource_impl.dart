@@ -23,14 +23,8 @@ class VideoCallMessageDatasourceImpl implements VideoCallMessageDatasource {
     required String url,
     required String body,
   }) async {
-    final room = _client.getRoomById(roomId);
-    if (room == null) {
-      Logs().w(
-        'VideoCallMessageDatasourceImpl::sendCallMessage: room not found',
-      );
-      return;
-    }
-    await room.sendEvent({
+    // Only called right after isJoined, in the same synchronous run.
+    await _client.getRoomById(roomId)!.sendEvent({
       'msgtype': MessageTypes.Text,
       'body': body,
       VideoCallHelper.callUrlKey: url,

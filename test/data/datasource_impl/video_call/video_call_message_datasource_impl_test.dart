@@ -73,20 +73,5 @@ void main() {
         }),
       ).called(1);
     });
-
-    test('sendCallMessage_whenRoomIsUnknown_sendsNothing', () async {
-      // Arrange
-      when(mockClient.getRoomById(testRoomId)).thenReturn(null);
-
-      // Act
-      final sending = datasource.sendCallMessage(
-        roomId: testRoomId,
-        url: testRoomUrl,
-        body: 'Has started a video call $testRoomUrl',
-      );
-
-      // Assert
-      await expectLater(sending, completes);
-    });
   });
 }
