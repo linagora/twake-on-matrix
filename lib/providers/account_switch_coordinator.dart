@@ -86,7 +86,7 @@ class AccountSwitchCoordinator {
   bool isAppliedTo(Client client) => identical(_appliedFor, client);
 
   /// The account whose effects are running, or null when none are. Until they
-  /// end, the active account is still the one being left (P4).
+  /// end, the active account is still the one being left.
   Client? get target => _target;
 
   /// Declares this coordinator as the one that ends every switch. Call
@@ -104,20 +104,22 @@ class AccountSwitchCoordinator {
     AccountsState next,
   ) async {
     if (next is LastLoggedOut || next is NoAccount) _reset();
-    if (_switchEndedElsewhere(previous, next)) {
+    final endedOn = _switchEndedElsewhere(previous, next);
+    if (endedOn != null) {
       _invalidate();
-      _restoreOrigin((next as Active).activeId);
+      _restoreOrigin(endedOn);
     }
     if (next is! Switching) return;
     if (previous is! Switching) _noteOrigin(next.from);
     await _runSwitch(next);
   }
 
-  /// A switch ended on another account than the one it was heading to.
-  bool _switchEndedElsewhere(AccountsState? previous, AccountsState next) =>
+  /// The account a switch ended on when it is not the one it was heading to.
+  String? _switchEndedElsewhere(AccountsState? previous, AccountsState next) =>
       switch ((previous, next)) {
-        (Switching(:final to), Active(:final activeId)) => activeId != to,
-        _ => false,
+        (Switching(:final to), Active(:final activeId)) when activeId != to =>
+          activeId,
+        _ => null,
       };
 
   void _noteOrigin(String fromId) {
@@ -135,7 +137,14 @@ class AccountSwitchCoordinator {
       }
       _accounts.completeSwitch(ticket);
     } catch (e, s) {
-      Logs().wtf('AccountSwitchCoordinator: switch failed', e, s);
+      if (e is SwitchSupersededException) {
+        // Expected: a newer switch or a cancel replaced this one.
+        Logs().d(
+          'AccountSwitchCoordinator: switch to ${switching.to} replaced',
+        );
+      } else {
+        Logs().wtf('AccountSwitchCoordinator: switch failed', e, s);
+      }
       _accounts.failSwitch(ticket, e, s);
     }
   }
@@ -197,7 +206,8 @@ class AccountSwitchCoordinator {
 
   Future<bool> _run(Client client, SwitchToken token) async {
     try {
-      // TODO: Multi-client VoiP support
+      // VoIP is not supported yet: `createVoipPlugin` is an empty stub, so
+      // running it on every apply is harmless.
       _effects.createVoipPlugin();
       await _effects.setUpToM(client, token);
       if (!token.isCurrent) return false;
