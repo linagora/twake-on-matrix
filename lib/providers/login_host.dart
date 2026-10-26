@@ -9,6 +9,11 @@ import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 /// and notifier.
 abstract interface class LoginHost {
   bool isStored(AccountId id);
+
+  /// Whether the client of [id] holds a session now (`Client.isLogged()`). It
+  /// is the state of the client, not of the account list: an account that
+  /// logged out stays stored, and a candidate that logged in is not stored
+  /// until it is registered.
   bool isLoggedIn(AccountId id);
   Future<void> addAccount(AccountId id);
 

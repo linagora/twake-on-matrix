@@ -1,5 +1,7 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:matrix/matrix.dart';
+
+part 'client_login_state_event.freezed.dart';
 
 enum MultipleAccountLoginType {
   firstLoggedIn,
@@ -17,31 +19,12 @@ enum MultipleAccountLoginType {
   cleanupFailed,
 }
 
-extension MultipleAccountLoginTypeFailure on MultipleAccountLoginType {
-  /// True for the two events that end a login with an error.
-  bool get isFailure =>
-      this == MultipleAccountLoginType.loginFailed ||
-      this == MultipleAccountLoginType.cleanupFailed;
-}
-
-class ClientLoginStateEvent with EquatableMixin {
-  final Client client;
-  final LoginState loginState;
-  final MultipleAccountLoginType multipleAccountLoginType;
-  final Object? error;
-
-  ClientLoginStateEvent({
-    required this.client,
-    required this.loginState,
-    required this.multipleAccountLoginType,
-    this.error,
-  });
-
-  @override
-  List<Object?> get props => [
-    client,
-    loginState,
-    multipleAccountLoginType,
-    error,
-  ];
+@freezed
+abstract class ClientLoginStateEvent with _$ClientLoginStateEvent {
+  const factory ClientLoginStateEvent({
+    required Client client,
+    required LoginState loginState,
+    required MultipleAccountLoginType multipleAccountLoginType,
+    Object? error,
+  }) = _ClientLoginStateEvent;
 }

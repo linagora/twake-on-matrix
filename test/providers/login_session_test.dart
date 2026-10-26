@@ -26,6 +26,26 @@ void main() {
   Iterable<MultipleAccountLoginType> events() =>
       host.events.map((e) => e.multipleAccountLoginType);
 
+  group('the states', () {
+    test('say which ones are live and which a screen can use', () {
+      final flags = {
+        for (final state in LoginSessionState.values)
+          state: (state.isLive, state.isUsable),
+      };
+
+      expect(flags, {
+        LoginSessionState.creating: (true, true),
+        LoginSessionState.created: (true, true),
+        LoginSessionState.loggingIn: (true, true),
+        LoginSessionState.registering: (true, false),
+        LoginSessionState.active: (false, false),
+        LoginSessionState.rollingBack: (true, false),
+        LoginSessionState.disposed: (false, false),
+        LoginSessionState.cleanupFailed: (true, false),
+      });
+    });
+  });
+
   group('creating', () {
     test(
       'creating -> created: the client exists and is the pending one',

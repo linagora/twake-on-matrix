@@ -17,15 +17,23 @@ import 'package:twake_chat/providers/login_host.dart';
 ///
 /// A session that keeps its client (the placeholder of a first login) goes back
 /// to `created` after a rollback instead of `disposed`, ready for the next try.
+///
+/// [isLive]: the session still has work to do (not `active`, not `disposed`).
+/// [isUsable]: a screen can use the client for a login try.
 enum LoginSessionState {
-  creating,
-  created,
-  loggingIn,
-  registering,
-  active,
-  rollingBack,
-  disposed,
-  cleanupFailed,
+  creating(isLive: true, isUsable: true),
+  created(isLive: true, isUsable: true),
+  loggingIn(isLive: true, isUsable: true),
+  registering(isLive: true),
+  active(),
+  rollingBack(isLive: true),
+  disposed(),
+  cleanupFailed(isLive: true);
+
+  const LoginSessionState({this.isLive = false, this.isUsable = false});
+
+  final bool isLive;
+  final bool isUsable;
 }
 
 /// A step of the rollback, in the order they run. A step that fails is
@@ -58,6 +66,8 @@ enum _SetUp { tom, federation, recoveryKey, push }
 /// one queue and is awaited, so none of them runs against a state another one
 /// is about to change. The login itself is a network call made by a screen; it
 /// is tracked with [trackLogin] and awaited before the session is disposed.
+/// [trackLogin] is the one exception to the queue: it only moves `created` and
+/// `loggingIn` into each other, outside the queue.
 class LoginSession {
   /// The session of a client that already exists. It does not listen for the
   /// login itself: the app's listener for that client hands the event to
@@ -106,20 +116,14 @@ class LoginSession {
       _client ?? (throw StateError('The candidate is not created yet'));
   String get id => client.clientName;
 
-  /// True while the session can still log in.
-  bool get isLive =>
-      _state == LoginSessionState.creating ||
-      _state == LoginSessionState.created ||
-      _state == LoginSessionState.loggingIn ||
-      _state == LoginSessionState.registering ||
-      _state == LoginSessionState.rollingBack ||
-      _state == LoginSessionState.cleanupFailed;
+  AccountId get _accountId => AccountId(id);
+
+  /// True while the session still has work to do (see
+  /// [LoginSessionState.isLive]).
+  bool get isLive => _state.isLive;
 
   /// True when a screen can use the client for a login try.
-  bool get isUsable =>
-      _state == LoginSessionState.creating ||
-      _state == LoginSessionState.created ||
-      _state == LoginSessionState.loggingIn;
+  bool get isUsable => _state.isUsable;
 
   Future<T> _enqueue<T>(Future<T> Function() operation) {
     final run = _tail.then((_) => operation());
@@ -142,7 +146,7 @@ class LoginSession {
       rethrow;
     }
     _move(LoginSessionState.created, {LoginSessionState.creating});
-    _host.setPendingCandidate(AccountId(id));
+    _host.setPendingCandidate(_accountId);
     _listen();
     return client;
   }
@@ -160,7 +164,7 @@ class LoginSession {
       throw StateError('Cannot log in: the session is being disposed');
     }
     if (_state == LoginSessionState.created) {
-      _state = LoginSessionState.loggingIn;
+      _move(LoginSessionState.loggingIn, {LoginSessionState.created});
     } else if (_state != LoginSessionState.loggingIn) {
       throw StateError('Cannot log in while the session is $_state');
     }
@@ -169,7 +173,7 @@ class LoginSession {
       (_) {},
       onError: (Object _) {
         if (_state == LoginSessionState.loggingIn) {
-          _state = LoginSessionState.created;
+          _move(LoginSessionState.created, {LoginSessionState.loggingIn});
         }
       },
     );
@@ -181,9 +185,14 @@ class LoginSession {
   /// The server accepted the login: store the account and set it up. A failure
   /// at any step rolls the login back. Never throws.
   Future<void> onLoggedIn(LoginState loginState) => _enqueue(() async {
-    if (_isNewLoginOfKeptClient) _state = LoginSessionState.created;
+    if (_isNewLoginOfKeptClient) {
+      _move(LoginSessionState.created, {LoginSessionState.active});
+    }
     if (!_acceptsLogin) return; // a repeated event, or a session ending
-    _state = LoginSessionState.registering;
+    _move(LoginSessionState.registering, {
+      LoginSessionState.created,
+      LoginSessionState.loggingIn,
+    });
     _failedSetUps.clear();
     try {
       await (keepsClient
@@ -193,7 +202,7 @@ class LoginSession {
       await _rollBack(error, stackTrace);
       return;
     }
-    _state = LoginSessionState.active;
+    _move(LoginSessionState.active, {LoginSessionState.registering});
     _emitLoggedIn(loginState);
     if (!keepsClient) {
       _release();
@@ -206,7 +215,7 @@ class LoginSession {
   bool get _isNewLoginOfKeptClient =>
       _state == LoginSessionState.active &&
       keepsClient &&
-      !_host.isLoggedIn(AccountId(id));
+      !_host.isLoggedIn(_accountId);
 
   bool get _acceptsLogin =>
       _state == LoginSessionState.created ||
@@ -227,7 +236,7 @@ class LoginSession {
   /// step, and the account stays when it fails.
   Future<void> _registerFirstAccount() async {
     _host.markFirstSyncDone();
-    await _host.addAccount(AccountId(id));
+    await _host.addAccount(_accountId);
     _accountAdded = true;
     _effectsTouched = true;
     await _setUp(_SetUp.tom);
@@ -237,10 +246,10 @@ class LoginSession {
   }
 
   Future<void> _registerAdditionalAccount() async {
-    await _host.addAccount(AccountId(id));
+    await _host.addAccount(_accountId);
     _accountAdded = true;
-    await _host.registerSubscriptions(AccountId(id));
-    final active = _host.clientByName(AccountId(id));
+    await _host.registerSubscriptions(_accountId);
+    final active = _host.clientByName(_accountId);
     if (active == null) throw StateError('No client named $id');
     _host.markFirstSyncDone();
     _effectsTouched = true;
@@ -268,7 +277,7 @@ class LoginSession {
   }
 
   Future<void> _runSetUp(_SetUp setUp) {
-    final target = _host.clientByName(AccountId(id)) ?? client;
+    final target = _host.clientByName(_accountId) ?? client;
     return switch (setUp) {
       _SetUp.tom => _host.setUpToM(target),
       _SetUp.federation => _host.setUpFederation(target),
@@ -297,12 +306,9 @@ class LoginSession {
     });
     _host.report(error, stackTrace, 'login of $id failed');
     _failedCleanups.addAll(_steps());
-    await _cleanUp();
-    if (_failedCleanups.isEmpty) {
-      _finishRollback();
+    if (await _runCleanup()) {
       _host.emit(_failure(MultipleAccountLoginType.loginFailed, error));
     } else {
-      _state = LoginSessionState.cleanupFailed;
       _host.emit(
         _failure(
           MultipleAccountLoginType.cleanupFailed,
@@ -310,6 +316,19 @@ class LoginSession {
         ),
       );
     }
+  }
+
+  /// Runs the cleanup steps that are left from `rollingBack`. True when
+  /// nothing is left behind (the session is `created` again, or `disposed`);
+  /// false leaves it in `cleanupFailed`.
+  Future<bool> _runCleanup() async {
+    await _cleanUp();
+    if (_failedCleanups.isEmpty) {
+      _finishRollback();
+      return true;
+    }
+    _move(LoginSessionState.cleanupFailed, {LoginSessionState.rollingBack});
+    return false;
   }
 
   ClientLoginStateEvent _failure(MultipleAccountLoginType type, Object error) =>
@@ -329,7 +348,7 @@ class LoginSession {
     ] else ...[
       _Cleanup.removePush,
       _Cleanup.cancelSubscriptions,
-      _host.isStored(AccountId(id))
+      _host.isStored(_accountId)
           ? _Cleanup.removeAccount
           : _Cleanup.discardCandidate,
       _Cleanup.cancelListener,
@@ -355,15 +374,15 @@ class LoginSession {
   Future<void> _run(_Cleanup step) => switch (step) {
     _Cleanup.removePush => _bestEffort(
       'push removal',
-      () => _host.removePush(AccountId(id)),
+      () => _host.removePush(_accountId),
     ),
-    _Cleanup.cancelSubscriptions => _host.cancelSubscriptions(AccountId(id)),
+    _Cleanup.cancelSubscriptions => _host.cancelSubscriptions(_accountId),
     _Cleanup.signOut => _bestEffort(
       'sign-out',
-      () => _host.signOut(AccountId(id), quiet: keepsClient),
+      () => _host.signOut(_accountId, quiet: keepsClient),
     ),
-    _Cleanup.removeAccount => _host.removeAccount(AccountId(id)),
-    _Cleanup.discardCandidate => _host.discardCandidate(AccountId(id)),
+    _Cleanup.removeAccount => _host.removeAccount(_accountId),
+    _Cleanup.discardCandidate => _host.discardCandidate(_accountId),
     _Cleanup.restoreEffects => _restoreActiveEffects(),
     _Cleanup.cancelListener => _cancelListener(),
     _Cleanup.logoutLast => Future<void>.sync(_host.logoutLast),
@@ -401,10 +420,10 @@ class LoginSession {
     if (keepsClient) {
       // Ready for the next try; the quiet-logout marks stay until it logs in,
       // because the SDK can still report a logout after the sign-out.
-      _state = LoginSessionState.created;
+      _move(LoginSessionState.created, {LoginSessionState.rollingBack});
     } else {
-      _state = LoginSessionState.disposed;
-      _host.forgetQuiet(AccountId(id));
+      _move(LoginSessionState.disposed, {LoginSessionState.rollingBack});
+      _host.forgetQuiet(_accountId);
       _release();
     }
   }
@@ -432,20 +451,15 @@ class LoginSession {
       return;
     }
     if (_state != LoginSessionState.cleanupFailed) return;
-    _state = LoginSessionState.rollingBack;
-    await _cleanUp();
-    if (_failedCleanups.isEmpty) {
-      _finishRollback();
-    } else {
-      _state = LoginSessionState.cleanupFailed;
-    }
+    _move(LoginSessionState.rollingBack, {LoginSessionState.cleanupFailed});
+    await _runCleanup();
   });
 
   /// The ToM and federation set-ups write the state of the active account, so
   /// they wait until this one is it. When the account is gone from the app the
   /// set-ups are dropped.
   Future<void> _retrySetUps() async {
-    if (!_host.isStored(AccountId(id))) {
+    if (!_host.isStored(_accountId)) {
       _failedSetUps.clear();
       return;
     }
@@ -472,17 +486,13 @@ class LoginSession {
       case LoginSessionState.loggingIn:
         if (keepsClient) return;
         // The login worked: registering takes over.
-        if (_host.isLoggedIn(AccountId(id))) return;
+        if (_host.isLoggedIn(_accountId)) return;
         _move(LoginSessionState.rollingBack, {
           LoginSessionState.created,
           LoginSessionState.loggingIn,
         });
         _failedCleanups.addAll(_steps());
-        await _cleanUp();
-        if (_failedCleanups.isEmpty) {
-          _finishRollback();
-        } else {
-          _state = LoginSessionState.cleanupFailed;
+        if (!await _runCleanup()) {
           _host.report(
             _cleanupError ?? StateError('cleanup failed'),
             StackTrace.current,
@@ -490,13 +500,8 @@ class LoginSession {
           );
         }
       case LoginSessionState.cleanupFailed:
-        _state = LoginSessionState.rollingBack;
-        await _cleanUp();
-        if (_failedCleanups.isEmpty) {
-          _finishRollback();
-        } else {
-          _state = LoginSessionState.cleanupFailed;
-        }
+        _move(LoginSessionState.rollingBack, {LoginSessionState.cleanupFailed});
+        await _runCleanup();
       case LoginSessionState.creating:
       case LoginSessionState.registering:
       case LoginSessionState.rollingBack:
