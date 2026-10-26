@@ -110,6 +110,76 @@ void main() {
       );
     });
 
+    test(
+      'unregistering lets another handler register, and twice is a no-op',
+      () async {
+        boot([a, b]);
+        final unregister = notifier().registerSwitchHandler();
+        unregister();
+        unregister();
+        final again = notifier().registerSwitchHandler();
+        addTearDown(again);
+        again();
+
+        await notifier().switchTo(const AccountId('b'));
+
+        expect((state() as Active).activeId, 'b');
+      },
+    );
+
+    test('whenSwitchSettled ends when the switch fails', () async {
+      boot([a, b]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      final switching = notifier().switchTo(const AccountId('b'));
+      final failed = expectLater(switching, throwsStateError);
+      await pumpEventQueue();
+      final settled = notifier().whenSwitchSettled();
+
+      notifier().failSwitch(
+        SwitchTicket(to: 'b', seq: notifier().switchSeq),
+        StateError('network'),
+      );
+
+      await failed;
+      await settled;
+    });
+
+    test('whenSwitchSettled ends when a newer switch replaces it', () async {
+      boot([a, b, c]);
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      final first = notifier().switchTo(const AccountId('b'));
+      final replaced = expectLater(
+        first,
+        throwsA(isA<SwitchSupersededException>()),
+      );
+      await pumpEventQueue();
+      final settled = notifier().whenSwitchSettled();
+
+      unawaited(notifier().switchTo(const AccountId('c')));
+
+      await replaced;
+      await settled;
+    });
+
+    test(
+      'a container disposed during the write does not fail the add',
+      () async {
+        boot([a]);
+        final gate = Completer<void>();
+        dataSource.addGate = gate.future;
+        container.read(accountClientRegistryProvider).add(b);
+        final adding = notifier().addAccount(const AccountId('b'));
+        await pumpEventQueue();
+
+        container.dispose();
+        gate.complete();
+
+        await adding;
+      },
+    );
+
     test('the clients are not announced again around a switch', () async {
       boot([a, b]);
       final dispose = notifier().registerSwitchHandler();
@@ -328,26 +398,23 @@ void main() {
       },
     );
 
-    test(
-      'a failed switch returns to the old account and rethrows (P7)',
-      () async {
-        final dispose = notifier().registerSwitchHandler();
-        addTearDown(dispose);
-        final seen = record();
-        final future = notifier().switchTo(const AccountId('b'));
-        await pumpEventQueue();
+    test('a failed switch returns to the old account and rethrows', () async {
+      final dispose = notifier().registerSwitchHandler();
+      addTearDown(dispose);
+      final seen = record();
+      final future = notifier().switchTo(const AccountId('b'));
+      await pumpEventQueue();
 
-        notifier().failSwitch(
-          SwitchTicket(to: 'b', seq: notifier().switchSeq),
-          StateError('effects failed'),
-        );
+      notifier().failSwitch(
+        SwitchTicket(to: 'b', seq: notifier().switchSeq),
+        StateError('effects failed'),
+      );
 
-        await expectLater(future, throwsStateError);
-        expect(seen.last, isA<Active>());
-        expect((state() as Active).activeId, 'a');
-        expect(container.read(activeAccountClientProvider), same(a));
-      },
-    );
+      await expectLater(future, throwsStateError);
+      expect(seen.last, isA<Active>());
+      expect((state() as Active).activeId, 'a');
+      expect(container.read(activeAccountClientProvider), same(a));
+    });
 
     test('a second switch supersedes the first', () async {
       boot([a, b, c]);
@@ -498,7 +565,7 @@ void main() {
     });
   });
 
-  group('removeAccount (D4, P2, P6)', () {
+  group('removeAccount', () {
     test(
       'removing a non-active account keeps the active one, one emission',
       () async {

@@ -33,6 +33,7 @@ class Accounts extends _$Accounts {
   /// the state is first read.
   @override
   AccountsState build() {
+    ref.onDispose(_finishPendingSwitch);
     final boot = ref.watch(bootAccountSnapshotProvider);
     ref
         .watch(adoptBootAccountsUseCaseProvider)
@@ -47,8 +48,8 @@ class Accounts extends _$Accounts {
   Future<void> addAccount(AccountId id) => _serialized(() async {
     final next = await ref
         .read(addAccountUseCaseProvider)
-        .execute(() => state, id.value);
-    if (next != null && ref.mounted) state = next;
+        .execute(_current, id.value);
+    if (next != null) state = next;
   });
 
   /// The number of the latest switch; the running `Switching` carries it as
@@ -67,6 +68,7 @@ class Accounts extends _$Accounts {
   /// handler it ends at once, with none of the side effects of the switch.
   Future<void> switchTo(AccountId id) async {
     await _mutations;
+    if (!ref.mounted) return;
     final next = _transitions.beginSwitch(state, id.value, seq: _switchSeq + 1);
     if (identical(next, state)) return;
     if (_isRunningSwitch(next)) {
@@ -135,10 +137,9 @@ class Accounts extends _$Accounts {
   /// Removes [id]; when it was the active account the next one becomes active
   /// in the same emission.
   Future<void> removeAccount(AccountId id) => _serialized(() async {
-    final next = await ref
+    state = await ref
         .read(removeAccountUseCaseProvider)
-        .execute(() => state, id.value);
-    if (ref.mounted) state = next;
+        .execute(_current, id.value);
   });
 
   /// The removal of [id] failed: the account stays listed as unavailable, not
@@ -146,7 +147,7 @@ class Accounts extends _$Accounts {
   /// active one (with none, nobody is logged in). The record that survives a
   /// restart is [recordPendingRemoval], which is retried on its own.
   Future<void> holdRemoval(AccountId id) => _serialized(() async {
-    state = _transitions.markUnavailable(state, id.value);
+    state = _transitions.markUnavailable(_current(), id.value);
   });
 
   /// Records, across restarts, that the removal of [id] is pending.
@@ -171,8 +172,15 @@ class Accounts extends _$Accounts {
     };
   }
 
+  /// The state the use cases read after they awaited the repository. A
+  /// container disposed meanwhile ends the mutation quietly ([_Disposed]).
+  AccountsState _current() {
+    if (!ref.mounted) throw const _Disposed();
+    return state;
+  }
+
   Future<void> _serialized(Future<void> Function() action) {
-    final run = _mutations.then((_) => action());
+    final run = _mutations.then((_) => action()).onError<_Disposed>((_, _) {});
     _mutations = run.then((_) {}, onError: (_) {});
     return run;
   }
@@ -190,4 +198,10 @@ class Accounts extends _$Accounts {
     _pendingSwitch = null;
     pending?.complete();
   }
+}
+
+/// Thrown by [Accounts._current] once the container is disposed, so a mutation
+/// that was waiting on the repository stops instead of writing to a dead state.
+class _Disposed implements Exception {
+  const _Disposed();
 }
