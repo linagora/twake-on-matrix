@@ -17,7 +17,12 @@ void main() {
 
   tearDown(() => source.close());
 
+  bool loggedError(String part) => Logs().outputEvents.any(
+    (event) => event.level == Level.error && event.title.contains(part),
+  );
+
   Future<void> run(Future<void> Function() body) async {
+    Logs().outputEvents.clear();
     await runZonedGuarded(body, (error, _) => uncaught.add(error));
     await pumpEventQueue();
   }
@@ -39,6 +44,7 @@ void main() {
     });
 
     expect(uncaught, isEmpty);
+    expect(loggedError('error on the login state'), isTrue);
   });
 
   test('states after an error still reach the handler', () async {
@@ -82,6 +88,7 @@ void main() {
       });
 
       expect(uncaught, isEmpty);
+      expect(loggedError('a handler failed'), isTrue);
     });
 
     test(

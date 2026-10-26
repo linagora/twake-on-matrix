@@ -9,6 +9,7 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 void main() {
   late LogoutRemovals removals;
   late List<String> log;
+  late List<String> worked;
   late List<String> reports;
   late Set<String> failing;
   late Map<String, Completer<void>> gates;
@@ -16,6 +17,7 @@ void main() {
   setUp(() {
     removals = LogoutRemovals();
     log = [];
+    worked = [];
     reports = [];
     failing = {};
     gates = {};
@@ -25,6 +27,7 @@ void main() {
     log.add('$name:$id');
     await gates['$name:$id']?.future;
     if (failing.contains('$name:$id')) throw StateError(name);
+    worked.add(name);
   }
 
   RemovalSteps stepsOf(String id, {bool settleOnHold = true}) => RemovalSteps(
@@ -204,28 +207,6 @@ void main() {
     },
   );
 
-  test('a record is not written again once it worked', () async {
-    failing.add('remove:a');
-    await run('a');
-    log.clear();
-
-    await removals.retryAll();
-
-    expect(log, ['remove:a']);
-  });
-
-  test('what a hold settled is not settled again by the removal', () async {
-    failing.add('remove:a');
-    await run('a');
-    failing.clear();
-    log.clear();
-
-    await removals.retryAll();
-
-    expect(log, ['remove:a']);
-    expect(removals.failedIds, isEmpty);
-  });
-
   test(
     'a settle that only follows a removal waits for it, a record is kept until then',
     () async {
@@ -331,6 +312,49 @@ void main() {
       });
     });
 
+    test('the backoff starts again once the removals are done', () {
+      fakeAsync((async) {
+        failing.add('remove:a');
+        run('a');
+        async.flushMicrotasks();
+        async.elapse(const Duration(minutes: 1));
+        async.elapse(const Duration(minutes: 2));
+        failing.clear();
+        async.elapse(const Duration(minutes: 4));
+        expect(removals.failedIds, isEmpty);
+
+        failing.add('remove:b');
+        run('b');
+        async.flushMicrotasks();
+        int tries() => log.where((e) => e == 'remove:b').length;
+        expect(tries(), 1);
+
+        async.elapse(const Duration(minutes: 1));
+
+        expect(tries(), 2);
+      });
+    });
+
+    test('a new removal starts the backoff again for the others', () {
+      fakeAsync((async) {
+        failing.addAll(['remove:a', 'remove:b']);
+        run('a');
+        async.flushMicrotasks();
+        async.elapse(const Duration(minutes: 1));
+        async.elapse(const Duration(minutes: 2));
+        run('b');
+        async.flushMicrotasks();
+        int tries() => log.where((e) => e == 'remove:b').length;
+        expect(tries(), 1);
+
+        async.elapse(const Duration(minutes: 4));
+        expect(tries(), 2);
+        async.elapse(const Duration(minutes: 2));
+
+        expect(tries(), 3);
+      });
+    });
+
     test('dispose stops the retries', () {
       fakeAsync((async) {
         removals = LogoutRemovals(retryEvery: const Duration(minutes: 1));
@@ -344,5 +368,35 @@ void main() {
         expect(log.where((e) => e == 'remove:a'), hasLength(1));
       });
     });
+  });
+
+  group('whichever steps fail', () {
+    const names = ['remove', 'hold', 'persist', 'settle'];
+    for (var mask = 0; mask < 16; mask++) {
+      for (final settleOnHold in [true, false]) {
+        final failures = [
+          for (var i = 0; i < names.length; i++)
+            if (mask & (1 << i) != 0) names[i],
+        ];
+        test('failing ${failures.isEmpty ? 'nothing' : failures.join(', ')}'
+            '${settleOnHold ? '' : ' (no settle on hold)'}: a step that worked '
+            'never runs again, and a clean retry ends it', () async {
+          failing.addAll([for (final name in failures) '$name:a']);
+          await run('a', settleOnHold: settleOnHold);
+          failing.clear();
+
+          await removals.retryAll();
+
+          for (final name in names) {
+            expect(
+              worked.where((e) => e == name).length,
+              lessThanOrEqualTo(1),
+              reason: '$name worked more than once',
+            );
+          }
+          expect(removals.failedIds, isEmpty);
+        });
+      }
+    }
   });
 }

@@ -118,7 +118,11 @@ void main() {
     await container
         .read(loginConfigurationPersisterProvider)
         .saveToM(_Client('@a:s'), _Config());
+    await container
+        .read(loginConfigurationPersisterProvider)
+        .saveFederation(_Client('@a:s'), _FedConfig());
 
     expect(tom.saved, ['@a:s']);
+    expect(federation.saved, ['@a:s']);
   });
 }

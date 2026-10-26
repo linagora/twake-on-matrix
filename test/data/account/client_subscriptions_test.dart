@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart' show Level, Logs;
 import 'package:twake_chat/data/account/client_subscriptions.dart';
 
 void main() {
@@ -21,6 +22,10 @@ void main() {
       if (failing.contains(what)) throw StateError(what);
     };
   };
+
+  bool logged(Level level, String part) => Logs().outputEvents.any(
+    (event) => event.level == level && event.title.contains(part),
+  );
 
   void openWithSync(List<String> ids) {
     for (final id in ids) {
@@ -143,12 +148,39 @@ void main() {
         () async => throw StateError('action'),
       );
 
+      Logs().outputEvents.clear();
       trigger.add(1);
       await pumpEventQueue();
+
+      expect(logged(Level.error, 'first of a failed'), isTrue);
     });
   });
 
   group('runGuarded', () {
+    test(
+      'an undo that fails is logged; the set-up error is the one thrown',
+      () async {
+        subscriptions.open('a');
+        Logs().outputEvents.clear();
+
+        await expectLater(
+          subscriptions.runGuarded(
+            'a',
+            setUp: () async {
+              await subscriptions.cancel('a');
+              throw StateError('setUp');
+            },
+            undo: () async => throw StateError('undo'),
+          ),
+          throwsA(
+            isA<StateError>().having((e) => e.message, 'message', 'setUp'),
+          ),
+        );
+
+        expect(logged(Level.warning, 'undo of a failed'), isTrue);
+      },
+    );
+
     test('does not run the set-up for a client that is not open', () async {
       await subscriptions.runGuarded(
         'a',
@@ -211,5 +243,40 @@ void main() {
 
       expect(log, ['setUp']);
     });
+  });
+
+  group('whatever the order of open, keep and cancel', () {
+    const operations = ['open', 'keep', 'cancel'];
+    final sequences = <List<String>>[
+      for (final a in operations)
+        for (final b in operations)
+          for (final c in operations)
+            for (final d in operations) [a, b, c, d],
+    ];
+
+    for (final sequence in sequences) {
+      test(
+        '${sequence.join(' > ')} leaves nothing alive after a cancel',
+        () async {
+          for (final operation in sequence) {
+            switch (operation) {
+              case 'open':
+                subscriptions.open('a');
+              case 'keep':
+                subscriptions.keep('a', 'sync', listen('a'));
+              case 'cancel':
+                await subscriptions.cancel('a');
+            }
+          }
+
+          await subscriptions.cancel('a');
+
+          final listened = log.where((e) => e.startsWith('listen:')).length;
+          final cancelled = log.where((e) => e.startsWith('cancel:')).length;
+          expect(cancelled, listened, reason: 'every listener is cancelled');
+          expect(subscriptions.isOpen('a'), isFalse);
+        },
+      );
+    }
   });
 }

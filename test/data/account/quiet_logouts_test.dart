@@ -81,4 +81,60 @@ void main() {
     expect(quiet.consume('b', LoginState.softLoggedOut), isFalse);
     expect(quiet.consume('b', LoginState.loggedOut), isFalse);
   });
+
+  group('every event from every state', () {
+    const starts = <String, List<String>>{
+      'nothing announced': [],
+      'announced': ['announce'],
+      'signed out': ['announce', 'loggedOut'],
+    };
+    const events = [
+      'announce',
+      'forget',
+      'loggedIn',
+      'loggedOut',
+      'softLoggedOut',
+    ];
+
+    void apply(String event) {
+      switch (event) {
+        case 'announce':
+          quiet.announce('a');
+        case 'forget':
+          quiet.forget('a');
+        case 'loggedIn':
+          quiet.consume('a', LoginState.loggedIn);
+        case 'loggedOut':
+          quiet.consume('a', LoginState.loggedOut);
+        case 'softLoggedOut':
+          quiet.consume('a', LoginState.softLoggedOut);
+      }
+    }
+
+    for (final start in starts.entries) {
+      for (final event in events) {
+        test('${start.key}, then $event', () {
+          start.value.forEach(apply);
+          final wasQuiet = start.key != 'nothing announced';
+
+          apply(event);
+
+          if (event == 'loggedIn' || event == 'forget') {
+            expect(quiet.consume('a', LoginState.loggedOut), isFalse);
+            expect(quiet.consume('a', LoginState.softLoggedOut), isFalse);
+          }
+          if (!wasQuiet && event != 'announce') {
+            expect(
+              quiet.consume('a', LoginState.loggedOut),
+              isFalse,
+              reason: 'nothing was announced, so no logout is quiet',
+            );
+          }
+          if (event == 'announce') {
+            expect(quiet.consume('a', LoginState.loggedOut), isTrue);
+          }
+        });
+      }
+    }
+  });
 }
