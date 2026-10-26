@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/repositories/account_boot_port.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts_interactor.dart';
+import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts.dart';
 
 class _FakeRepository extends Fake implements AccountRepository {
   _FakeRepository(this.known);
@@ -34,13 +34,11 @@ void main() {
   );
   const other = Account(id: 'b', status: AccountStatus.loggedOut);
 
-  AdoptBootAccountsInteractor build(
-    List<Account> known,
-    _FakeBootPort bootPort,
-  ) => AdoptBootAccountsInteractor(
-    repository: _FakeRepository(known),
-    bootPort: bootPort,
-  );
+  AdoptBootAccountsUseCase build(List<Account> known, _FakeBootPort bootPort) =>
+      AdoptBootAccountsUseCase(
+        repository: _FakeRepository(known),
+        bootPort: bootPort,
+      );
 
   test('adopts the boot accounts when the repository knows none', () {
     final bootPort = _FakeBootPort(const [account]);

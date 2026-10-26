@@ -4,8 +4,8 @@ import 'package:twake_chat/domain/account/repositories/account_repository.dart';
 
 /// Registers the accounts of the boot once; a repository that already knows
 /// accounts (a second call, a loaded store) is left as it is.
-class AdoptBootAccountsInteractor {
-  const AdoptBootAccountsInteractor({
+class AdoptBootAccountsUseCase {
+  const AdoptBootAccountsUseCase({
     required AccountRepository repository,
     required AccountBootPort bootPort,
   }) : _repository = repository,
