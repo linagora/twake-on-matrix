@@ -2,9 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart' show Client;
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_kind.dart';
 import 'package:twake_chat/domain/contact/entities/contact_source_value.dart';
@@ -20,10 +17,10 @@ import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 
 import '../../domain/contact/fakes/build_contact_sync_service.dart';
 import '../../domain/contact/fakes/fake_unified_contact_repository.dart';
-import 'contacts_controller_test.mocks.dart';
 
 class _FakeSource implements ContactSource {
   _FakeSource(this.contacts);
@@ -83,7 +80,6 @@ class _FakeUserInfoRepository implements UserInfoRepository {
   ) async => UserInfoVisibility();
 }
 
-@GenerateNiceMocks([MockSpec<Client>()])
 void main() {
   const userId = '@me:server';
   late FakeUnifiedContactRepository repository;
@@ -197,13 +193,15 @@ void main() {
 
   group('real provider wiring', () {
     /// Only the leaf dependencies (store, sources, enricher) are faked:
-    /// `activeMatrixClient → currentUserId → contactSyncService → use cases`
+    /// `activeUserId → currentUserId → contactSyncService → use cases`
     /// is the real generated wiring.
     ProviderContainer buildWiredContainer({
       List<ContactSource> sources = const [],
     }) {
       final container = ProviderContainer(
         overrides: [
+          activeMatrixClientProvider.overrideWithValue(null),
+          activeUserIdProvider.overrideWith((ref) => ref.watch(_activeUser)),
           unifiedContactRepositoryProvider.overrideWithValue(repository),
           contactSourcesProvider.overrideWithValue(sources),
           phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
@@ -219,22 +217,6 @@ void main() {
       addTearDown(container.dispose);
       return container;
     }
-
-    test('re-pushing the same client after login updates currentUserId', () {
-      final container = buildWiredContainer();
-      final client = MockClient();
-      when(client.userID).thenReturn(null);
-
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
-      expect(container.read(currentUserIdProvider), isNull);
-
-      // The SDK mutates `userID` in place on the same Client instance at
-      // login: the provider must still notify its consumers.
-      when(client.userID).thenReturn(userId);
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
-
-      expect(container.read(currentUserIdProvider), userId);
-    });
 
     test(
       'refresh through the real wiring keeps the stored enrichment values',
@@ -273,9 +255,7 @@ void main() {
             ]),
           ],
         );
-        final client = MockClient();
-        when(client.userID).thenReturn(userId);
-        container.read(activeMatrixClientProvider.notifier).setClient(client);
+        container.read(_activeUser.notifier).set(userId);
 
         await container.read(contactsControllerProvider.notifier).refresh();
 
@@ -296,19 +276,15 @@ void main() {
       () async {
         final source = _GatedSource();
         final container = buildWiredContainer(sources: [source]);
-        final accountA = MockClient();
-        when(accountA.userID).thenReturn(userId);
-        final accountB = MockClient();
-        when(accountB.userID).thenReturn('@other:server');
-        final active = container.read(activeMatrixClientProvider.notifier);
-        active.setClient(accountA);
+        final active = container.read(_activeUser.notifier);
+        active.set(userId);
 
         final refresh = container
             .read(contactsControllerProvider.notifier)
             .refresh();
         await pumpEventQueue();
         // The user switches to B while A's address book is still loading.
-        active.setClient(accountB);
+        active.set('@other:server');
         source.gate.complete();
         await refresh;
 
@@ -318,3 +294,13 @@ void main() {
     );
   });
 }
+
+/// The signed-in account of the wired container, switched by the tests.
+class _ActiveUser extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  void set(String? userId) => state = userId;
+}
+
+final _activeUser = NotifierProvider<_ActiveUser, String?>(_ActiveUser.new);
