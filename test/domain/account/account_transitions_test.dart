@@ -2,29 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
-import 'package:twake_chat/domain/account/policy/account_init_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_policy.dart';
-import 'package:twake_chat/domain/account/policy/account_removal_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_switch_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
-import 'package:twake_chat/domain/account/policy/account_transitions.dart';
+import 'account_test_support.dart';
 
-const _policy = AccountPolicy();
-const _support = AccountTransitionSupport();
-const _transitions = AccountTransitions(
-  init: AccountInitTransitions(_policy, _support),
-  switching: AccountSwitchTransitions(_support),
-  removal: AccountRemovalTransitions(_policy, _support),
-  support: _support,
-);
+const _transitions = accountTransitions;
 
-Account _in(String id) =>
-    Account(id: id, userId: '@$id:server', status: AccountStatus.loggedIn);
+Account _in(String id) => accountWith(id, AccountStatus.loggedIn);
 
-Account _out(String id) => Account(id: id, status: AccountStatus.loggedOut);
+Account _out(String id) => accountWith(id, AccountStatus.loggedOut);
 
-Account _waiting(String id) =>
-    Account(id: id, status: AccountStatus.unavailable);
+Account _waiting(String id) => accountWith(id, AccountStatus.unavailable);
 
 Switching _firstSwitch(Account a, Account b, Account c) =>
     _transitions.beginSwitch(

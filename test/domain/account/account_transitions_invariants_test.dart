@@ -2,30 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
-import 'package:twake_chat/domain/account/policy/account_init_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_policy.dart';
-import 'package:twake_chat/domain/account/policy/account_removal_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_switch_transitions.dart';
-import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
-import 'package:twake_chat/domain/account/policy/account_transitions.dart';
+import 'account_test_support.dart';
 
-const _policy = AccountPolicy();
-const _support = AccountTransitionSupport();
-const _transitions = AccountTransitions(
-  init: AccountInitTransitions(_policy, _support),
-  switching: AccountSwitchTransitions(_support),
-  removal: AccountRemovalTransitions(_policy, _support),
-  support: _support,
-);
+const _transitions = accountTransitions;
 
 const _ids = ['a', 'b', 'c'];
 const _probeIds = ['a', 'b', 'c', 'x'];
-
-Account _account(String id, AccountStatus status) => Account(
-  id: id,
-  status: status,
-  userId: status == AccountStatus.loggedIn ? '@$id:server' : null,
-);
 
 /// Every subset of [_ids], in order, each member in every status.
 List<List<Account>> _accountLists() {
@@ -35,7 +17,7 @@ List<List<Account>> _accountLists() {
       for (final list in lists) ...[
         list,
         for (final status in AccountStatus.values)
-          [...list, _account(id, status)],
+          [...list, accountWith(id, status)],
       ],
     ];
   }
@@ -89,7 +71,7 @@ List<String> _violations(AccountsState state) => [
 List<AccountsState> _validStates() {
   final states = <AccountsState>[
     const Booting(),
-    LastLoggedOut(account: _account('a', AccountStatus.loggedOut)),
+    LastLoggedOut(account: accountWith('a', AccountStatus.loggedOut)),
   ];
   for (final list in _accountLists()) {
     final loggedIn = [
@@ -177,12 +159,12 @@ Iterable<_Case> _idCases(AccountsState s, String id) sync* {
   final seq = s is Switching ? s.seq + 1 : 1;
   yield _Case(
     'add($id)',
-    () => _transitions.add(s, _account(id, AccountStatus.loggedIn)),
+    () => _transitions.add(s, accountWith(id, AccountStatus.loggedIn)),
     expect,
   );
   yield _Case(
     'add($id loggedOut)',
-    () => _transitions.add(s, _account(id, AccountStatus.loggedOut)),
+    () => _transitions.add(s, accountWith(id, AccountStatus.loggedOut)),
     expect,
   );
   yield _Case(
@@ -205,7 +187,8 @@ Iterable<_Case> _idCases(AccountsState s, String id) sync* {
 Iterable<_Case> _transitionCases(AccountsState s) sync* {
   yield _Case(
     'initialize(a)',
-    () => _transitions.initialize(s, [_account('a', AccountStatus.loggedIn)]),
+    () =>
+        _transitions.initialize(s, [accountWith('a', AccountStatus.loggedIn)]),
     const _Expect(),
   );
   yield _Case(
