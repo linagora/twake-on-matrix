@@ -41,12 +41,12 @@ import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
-import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/data/account/client_subscriptions.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
 import 'package:twake_chat/providers/logout_removal_plan.dart';
@@ -66,7 +66,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget, ProviderSubscription;
+    show ConsumerState, ConsumerStatefulWidget;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -166,8 +166,13 @@ class MatrixState extends ConsumerState<Matrix>
   List<Client> get accountClients => ref.read(accountClientsProvider);
 
   /// Read by `dispose`, where `ref` can no longer be used; closed after it.
-  late final ProviderSubscription<Client?> _activeClientSubscription;
-  late final ProviderSubscription<List<Client>> _accountClientsSubscription;
+  /// The client whose HTTP client is closed with this state. `ref` is unsafe
+  /// once the widget is unmounted, so it is kept here as the accounts change.
+  Client? _httpClientOwner;
+
+  Client? _currentHttpClientOwner() =>
+      ref.read(activeMatrixClientProvider) ??
+      ref.read(accountClientsProvider).firstOrNull;
 
   Client get _workingClient => _switchCoordinator.target ?? client;
 
@@ -224,7 +229,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Cannot switch to client ${newClient.userID}: '
         '${e.transition} is not allowed from ${e.stateName}',
       );
-      return SetActiveClientState.unknownClient;
+      return SetActiveClientState.unavailable;
     }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.activeId == id) {
@@ -410,15 +415,11 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  /// Every subscription kept for a client, so a rollback or a logout cancels
-  /// them all and none is started after that.
-  final _subscriptions = ClientSubscriptions();
-
-  /// Removals of logged-out accounts that failed and are retried.
-  final _logoutRemovals = LogoutRemovals();
-
-  /// Pusher deletions that failed and are retried.
-  final _pushRemovals = LogoutRemovals();
+  /// Owned by providers (`account_services_providers.dart`); read once in
+  /// `initState` because `ref` is unsafe in `dispose`.
+  late final ClientSubscriptions _subscriptions;
+  late final LogoutRemovals _logoutRemovals;
+  late final LogoutRemovals _pushRemovals;
 
   final _lastSyncErrorSentAt = <String, DateTime>{};
 
@@ -465,23 +466,11 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   void initState() {
     super.initState();
-    // The clients created at boot are read once, here; from then on the
-    // account state lives in the providers.
-    ref
-        .read(adoptBootAccountsUseCaseProvider(widget.clients))
-        .execute(
-          pendingRemovals: ref
-              .read(bootAccountSnapshotProvider)
-              .pendingRemovalIds,
-        );
-    _activeClientSubscription = ref.listenManual(
-      activeMatrixClientProvider,
-      (_, _) {},
-    );
-    _accountClientsSubscription = ref.listenManual(
-      accountClientsProvider,
-      (_, _) {},
-    );
+    // The boot clients and the persisted state are overridden by `main` when
+    // the container is made; the account state adopts them on its first read.
+    _subscriptions = ref.read(clientSubscriptionsProvider);
+    _logoutRemovals = ref.read(logoutRemovalsProvider);
+    _pushRemovals = ref.read(pushRemovalsProvider);
     final registry = ref.read(accountClientRegistryProvider);
     _switchCoordinator = AccountSwitchCoordinator(
       effects: this,
@@ -489,7 +478,11 @@ class MatrixState extends ConsumerState<Matrix>
       clientOf: (id) => registry[id],
       currentState: () => ref.read(accountsProvider),
     )..start();
-    ref.listenManual(accountsProvider, _switchCoordinator.onAccountsChanged);
+    _httpClientOwner = _currentHttpClientOwner();
+    ref.listenManual(accountsProvider, (previous, next) {
+      _httpClientOwner = _currentHttpClientOwner();
+      unawaited(_switchCoordinator.onAccountsChanged(previous, next));
+    });
     _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
@@ -551,10 +544,12 @@ class MatrixState extends ConsumerState<Matrix>
       );
       return;
     }
+    // Open before the first await: a cancel that comes while the database is
+    // built must find it open, and keep nothing after it.
+    _subscriptions.open(name);
     if (PlatformInfos.isMobile) {
       await HiveCollectionToMDatabase.databaseBuilder();
     }
-    _subscriptions.open(name);
     _subscriptions.keep(
       name,
       'roomKeyRequest',
@@ -820,7 +815,9 @@ class MatrixState extends ConsumerState<Matrix>
         isPushReady: () =>
             !PlatformInfos.isMobile || (backgroundPush?.hasPushToken ?? false),
       ).steps,
-      _report,
+      (error, stackTrace, what) => error is PushNotReadyException
+          ? Logs().w('MatrixState: $what', error, stackTrace)
+          : _report(error, stackTrace, what),
     );
   }
 
@@ -831,7 +828,7 @@ class MatrixState extends ConsumerState<Matrix>
     final registry = ref.read(accountClientRegistryProvider);
     try {
       final retryable = await ref
-          .read(listPendingPushRemovalsUseCaseProvider)
+          .read(prunePendingPushRemovalsUseCaseProvider)
           .execute();
       for (final id in retryable) {
         final pending = registry[id];
@@ -880,7 +877,6 @@ class MatrixState extends ConsumerState<Matrix>
         _removeLoggedOutAccount(LoginState.loggedOut, pending, announce: false),
       );
     }
-    unawaited(_retryPendingPushRemovalsFromLastRun());
   }
 
   Future<void> _announceLogout(Client loggedOut) async {
@@ -919,12 +915,10 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  /// Makes a failure visible: logged and sent to the error reporting.
-  void _report(Object error, StackTrace stackTrace, String what) {
-    Logs().wtf('MatrixState: $what', error, stackTrace);
-    // ignore: unawaited_futures
-    Sentry.captureException(error, stackTrace: stackTrace);
-  }
+  /// Makes a failure visible. `Logs().wtf` is what the error reporting picks
+  /// up (`SentryLogger`), so it is sent once.
+  void _report(Object error, StackTrace stackTrace, String what) =>
+      Logs().wtf('MatrixState: $what', error, stackTrace);
 
   Future<void> _handleFirstLoggedIn(
     Client newActiveClient,
@@ -1086,7 +1080,11 @@ class MatrixState extends ConsumerState<Matrix>
 
     for (final c in accountClients) {
       Logs().d('MatrixState::initMatrix: ${c.clientName} calling registerSubs');
-      await _registerSubs(c.clientName);
+      try {
+        await _registerSubs(c.clientName);
+      } catch (e, s) {
+        _report(e, s, 'subscriptions of ${c.clientName}');
+      }
       _rememberContactOwner(c);
     }
     _retryPendingRemovalsFromLastRun();
@@ -1108,6 +1106,8 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     _ensureBackgroundPush();
+    // After the push set-up started: before it, no pusher can be deleted.
+    unawaited(_retryPendingPushRemovalsFromLastRun());
 
     createVoipPlugin();
 
@@ -1918,12 +1918,7 @@ class MatrixState extends ConsumerState<Matrix>
     _pushRemovals.dispose();
     onClientLoginStateChanged.close();
     _switchCoordinator.dispose();
-    // `ref` is unsafe once the widget is unmounted, so read through the
-    // subscriptions opened in `initState`.
-    final clients = _accountClientsSubscription.read();
-    if (clients.isNotEmpty) {
-      (_activeClientSubscription.read() ?? clients.first).httpClient.close();
-    }
+    _httpClientOwner?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
     backgroundPush?.clearingPushTimer?.cancel();
