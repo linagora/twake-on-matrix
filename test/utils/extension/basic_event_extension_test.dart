@@ -52,5 +52,28 @@ void main() {
       });
       expect(reply.content['m.relates_to'], isNotNull);
     });
+
+    test('sends a sticker reply as an image without the relation', () {
+      final stickerReply = BasicEvent(
+        type: EventTypes.Sticker,
+        content: {
+          'body': 'Happy cat',
+          'url': 'mxc://example.org/sticker',
+          'info': {'mimetype': 'image/png', 'w': 256, 'h': 256},
+          'm.relates_to': {
+            'm.in_reply_to': {'event_id': r'$parent'},
+          },
+        },
+      );
+
+      expect(stickerReply.formatContentForwards(), {
+        'msgtype': MessageTypes.Image,
+        'body': 'Happy cat',
+        'url': 'mxc://example.org/sticker',
+        'info': {'mimetype': 'image/png', 'w': 256, 'h': 256},
+      });
+      expect(stickerReply.content['m.relates_to'], isNotNull);
+      expect(stickerReply.content['msgtype'], isNull);
+    });
   });
 }
