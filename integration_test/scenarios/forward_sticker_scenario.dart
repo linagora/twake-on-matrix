@@ -51,7 +51,11 @@ abstract class ForwardStickerScenario extends BaseTestScenario {
     }
     await $.pump(const Duration(seconds: 1));
 
-    await robots.messageMenuRobot().openForwardOnLast(find.byType(Sticker));
+    await robots.messageMenuRobot().openForwardOnLast(
+      find.byWidgetPredicate(
+        (widget) => widget is Sticker && widget.event.body == stickerBody,
+      ),
+    );
 
     final forward = robots.forwardRobot();
     await forward.searchRoom(_receiver);
