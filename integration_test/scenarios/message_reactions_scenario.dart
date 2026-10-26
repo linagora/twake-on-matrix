@@ -29,7 +29,6 @@ abstract class _ReactionsScenario extends BaseTestScenario {
     if (!isRoomOpened) {
       throw Exception('Test failed: Room "$group" was not found.');
     }
-    await $.pump(const Duration(seconds: 1));
 
     final message = '$prefix ${_uid()}';
     await robots.chatGroupDetailRobot().sendMessage(message);
