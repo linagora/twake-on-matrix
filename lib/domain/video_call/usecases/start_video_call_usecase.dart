@@ -19,6 +19,11 @@ class StartVideoCallUseCase {
     required String baseUrl,
     required String startedTitle,
   }) async {
+    if (!_isUsableBaseUrl(baseUrl)) {
+      throw VideoCallRoomCreationFailedException(
+        cause: FormatException('Unusable base url', baseUrl),
+      );
+    }
     final url = '$baseUrl/${await _createSlug(baseUrl)}';
     if (!_videoCallRepository.isJoined(roomId)) return;
     unawaited(
@@ -28,6 +33,13 @@ class StartVideoCallUseCase {
         body: '$startedTitle $url',
       ),
     );
+  }
+
+  // The slug is appended to the base url, so it must end with its path.
+  bool _isUsableBaseUrl(String baseUrl) {
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null) return false;
+    return !uri.hasQuery && !uri.hasFragment;
   }
 
   Future<String> _createSlug(String baseUrl) async {

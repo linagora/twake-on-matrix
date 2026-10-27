@@ -159,6 +159,28 @@ void main() {
       });
     }
 
+    for (final (name, unusableBaseUrl) in [
+      ('HasAQuery', '$baseUrl?tenant=one'),
+      ('HasAFragment', '$baseUrl#anchor'),
+    ]) {
+      test('execute_whenBaseUrl${name}_throwsAndCreatesNothing', () async {
+        // Act
+        final start = useCase.execute(
+          roomId: testRoomId,
+          baseUrl: unusableBaseUrl,
+          startedTitle: startedTitle,
+        );
+
+        // Assert
+        await expectLater(
+          start,
+          throwsA(isA<VideoCallRoomCreationFailedException>()),
+        );
+        verifyNever(mockVideoCallRepository.createRoom());
+        verifyNothingIsSent();
+      });
+    }
+
     test('execute_whenTheRoomIsLeftMeanwhile_sendsNothing', () async {
       // Arrange
       givenCreatedRoom('$baseUrl/abc-defg-hij');
