@@ -23,6 +23,7 @@ import 'package:twake_chat/data/network/interceptor/authorization_interceptor.da
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
@@ -115,25 +116,33 @@ class _FakeToMConfigurationsRepository extends Fake
   _FakeToMConfigurationsRepository(this.stored);
 
   final Map<String, ToMConfigurations> stored;
+  final saved = <String, ToMConfigurations>{};
 
   @override
   Future<ToMConfigurations> getTomConfigurations(String userId) async =>
       stored[userId] ?? (throw StateError('no ToM configuration for $userId'));
+
+  @override
+  Future<void> saveTomConfigurations(
+    String userId,
+    ToMConfigurations toMConfigurations,
+  ) async => saved[userId] = toMConfigurations;
 }
 
 /// Like [_FakeToMConfigurationsRepository], but once its [hold] is armed, the
-/// second read of [gatedId] waits for it and then returns [lateValue]: the fallback
-/// read of a switch that a newer one supersedes meanwhile.
+/// second read of [gatedId] waits for it and then returns [lateValue], or finds
+/// nothing when there is none: the fallback read of a switch that a newer one
+/// supersedes meanwhile.
 class _GatedToMConfigurationsRepository
     extends _FakeToMConfigurationsRepository {
   _GatedToMConfigurationsRepository(
     super.stored, {
     required this.gatedId,
-    required this.lateValue,
+    this.lateValue,
   });
 
   final String gatedId;
-  final ToMConfigurations lateValue;
+  final ToMConfigurations? lateValue;
   final hold = _Hold();
   int _reads = 0;
 
@@ -143,7 +152,7 @@ class _GatedToMConfigurationsRepository
       return super.getTomConfigurations(userId);
     }
     await hold.pass();
-    return lateValue;
+    return lateValue ?? (throw StateError('no ToM configuration for $userId'));
   }
 }
 
@@ -343,6 +352,52 @@ class _Harness {
       tester.runAsync(() => Future<void>.delayed(Duration.zero));
 }
 
+/// A switch from `a` to `b` that [hold] catches in its ToM set-up and that a
+/// switch to `c` overtakes before [hold] lets it go.
+class _ToMOvertaking {
+  _ToMOvertaking(WidgetTester tester, this.hold)
+    : harness = _Harness(tester, [
+        _ToMClient('a', userID: '@a:s'),
+        _ToMClient('b', userID: '@b:s'),
+        _ToMClient('c', userID: '@c:s'),
+      ]);
+
+  final _Harness harness;
+  final _Hold hold;
+
+  /// Runs it; [whenOvertaken] runs once the switch to `c` is done. Returns
+  /// whether the switch to `b` applied.
+  Future<bool?> run({void Function()? whenOvertaken}) async {
+    bool? applied;
+    await harness.run(() async {
+      final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
+
+      await harness.tester.runAsync(() async {
+        hold.armed = true;
+        final superseded = coordinator.apply(harness.clients[1]);
+        await hold.reached.future;
+        await coordinator.apply(harness.clients[2]);
+        whenOvertaken?.call();
+        hold.gate.complete();
+        applied = await superseded;
+      });
+    });
+    return applied;
+  }
+}
+
+/// A homeserver summary that announces the ToM server at [url].
+HomeserverSummary _summaryWithToM(String url) => HomeserverSummary(
+  discoveryInformation: DiscoveryInformation(
+    mHomeserver: HomeserverInformation(baseUrl: Uri.parse('https://c')),
+    additionalProperties: {
+      ToMServerInformation.tomServerKey: {'base_url': url, 'server_name': 'c'},
+    },
+  ),
+  versions: GetVersionsResponse(versions: []),
+  loginFlows: [],
+);
+
 class _FakeNetworkConnectionService extends Fake
     implements NetworkConnectionService {
   @override
@@ -523,36 +578,35 @@ void main() {
 
   testWidgets('a superseded switch does not write the ToM configuration it '
       'read late', (tester) async {
-    final stale = _ToMClient('b', userID: '@b:s');
-    final newer = _ToMClient('c', userID: '@c:s');
     final repository = _GatedToMConfigurationsRepository(
       {'@c:s': _toM('https://tom.c')},
       gatedId: '@b:s',
       lateValue: _toM('https://tom.b'),
     );
     final tomServer = _registerToM(repository);
-    final harness = _Harness(tester, [
-      _ToMClient('a', userID: '@a:s'),
-      stale,
-      newer,
-    ]);
 
-    bool? applied;
-    await harness.run(() async {
-      final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
-
-      await tester.runAsync(() async {
-        repository.hold.armed = true;
-        final superseded = coordinator.apply(stale);
-        await repository.hold.reached.future;
-        await coordinator.apply(newer);
-        repository.hold.gate.complete();
-        applied = await superseded;
-      });
-    });
+    final applied = await _ToMOvertaking(tester, repository.hold).run();
 
     expect(applied, isFalse);
     expect(tomServer.baseUrl, 'https://tom.c');
+  });
+
+  testWidgets('a superseded switch does not store the ToM configuration of the '
+      'account that overtook it', (tester) async {
+    final repository = _GatedToMConfigurationsRepository({
+      '@c:s': _toM('https://tom.c'),
+    }, gatedId: '@b:s');
+    _registerToM(repository);
+    final overtaking = _ToMOvertaking(tester, repository.hold);
+
+    // The newer switch discovered its own ToM server into the summary the
+    // fresh-install fallback of the stale one reads next.
+    await overtaking.run(
+      whenOvertaken: () => overtaking.harness.matrix.loginHomeserverSummary =
+          _summaryWithToM('https://tom.c'),
+    );
+
+    expect(repository.saved, isEmpty);
   });
 
   testWidgets('a superseded switch does not write the locale it resolved '
