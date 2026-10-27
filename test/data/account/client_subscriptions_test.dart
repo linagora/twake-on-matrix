@@ -111,13 +111,19 @@ void main() {
   group('keepOnce', () {
     late StreamController<int> trigger;
 
+    late int runs;
+
     setUp(() => trigger = StreamController<int>.broadcast());
     tearDown(() => trigger.close());
 
-    test('runs the action on the first event only', () async {
+    void openCountingFirst() {
       subscriptions.open('a');
-      var runs = 0;
+      runs = 0;
       subscriptions.keepOnce('a', 'first', trigger.stream, () async => runs++);
+    }
+
+    test('runs the action on the first event only', () async {
+      openCountingFirst();
 
       trigger
         ..add(1)
@@ -128,9 +134,7 @@ void main() {
     });
 
     test('does not run it once the client was closed', () async {
-      subscriptions.open('a');
-      var runs = 0;
-      subscriptions.keepOnce('a', 'first', trigger.stream, () async => runs++);
+      openCountingFirst();
 
       await subscriptions.cancel('a');
       trigger.add(1);
@@ -157,6 +161,25 @@ void main() {
   });
 
   group('runGuarded', () {
+    Future<void> guardedLogging() => subscriptions.runGuarded(
+      'a',
+      setUp: () async => log.add('setUp'),
+      undo: () async => log.add('undo'),
+    );
+
+    Future<void> guardedBehind(Completer<void> gate, {Object? error}) {
+      subscriptions.open('a');
+      return subscriptions.runGuarded(
+        'a',
+        setUp: () async {
+          log.add('setUp');
+          await gate.future;
+          if (error != null) throw error;
+        },
+        undo: () async => log.add('undo'),
+      );
+    }
+
     test(
       'an undo that fails is logged; the set-up error is the one thrown',
       () async {
@@ -182,26 +205,14 @@ void main() {
     );
 
     test('does not run the set-up for a client that is not open', () async {
-      await subscriptions.runGuarded(
-        'a',
-        setUp: () async => log.add('setUp'),
-        undo: () async => log.add('undo'),
-      );
+      await guardedLogging();
 
       expect(log, isEmpty);
     });
 
     test('undoes a set-up that finished after the client was closed', () async {
-      subscriptions.open('a');
       final gate = Completer<void>();
-      final run = subscriptions.runGuarded(
-        'a',
-        setUp: () async {
-          log.add('setUp');
-          await gate.future;
-        },
-        undo: () async => log.add('undo'),
-      );
+      final run = guardedBehind(gate);
       await subscriptions.cancel('a');
 
       gate.complete();
@@ -212,17 +223,8 @@ void main() {
 
     test('undoes a set-up that failed after the client was closed, and '
         'throws its error', () async {
-      subscriptions.open('a');
       final gate = Completer<void>();
-      final run = subscriptions.runGuarded(
-        'a',
-        setUp: () async {
-          log.add('setUp');
-          await gate.future;
-          throw StateError('half done');
-        },
-        undo: () async => log.add('undo'),
-      );
+      final run = guardedBehind(gate, error: StateError('half done'));
       final thrown = expectLater(run, throwsStateError);
       await subscriptions.cancel('a');
 
@@ -235,11 +237,7 @@ void main() {
     test('keeps a set-up of a client that is still open', () async {
       subscriptions.open('a');
 
-      await subscriptions.runGuarded(
-        'a',
-        setUp: () async => log.add('setUp'),
-        undo: () async => log.add('undo'),
-      );
+      await guardedLogging();
 
       expect(log, ['setUp']);
     });

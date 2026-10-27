@@ -68,6 +68,13 @@ void main() {
     (error, stackTrace, what) => reports.add(what),
   );
 
+  /// Runs [id] 'a' again with the steps of another account.
+  Future<bool> runOther() => removals.remove(
+    'a',
+    stepsOf('other'),
+    (error, stackTrace, what) => reports.add(what),
+  );
+
   Future<void> failFirst(List<String> ids) async {
     for (final id in ids) {
       failing.add('remove:$id');
@@ -120,11 +127,7 @@ void main() {
     log.clear();
     Logs().outputEvents.clear();
 
-    await removals.remove(
-      'a',
-      stepsOf('other'),
-      (error, stackTrace, what) => reports.add(what),
-    );
+    await runOther();
 
     expect(log.where((e) => e.endsWith(':other')), isEmpty);
     expect(
@@ -162,11 +165,7 @@ void main() {
     expect(removals.forget('a'), isFalse);
     log.clear();
 
-    await removals.remove(
-      'a',
-      stepsOf('other'),
-      (error, stackTrace, what) => reports.add(what),
-    );
+    await runOther();
 
     expect(log, contains('remove:other'));
     expect(log.where((e) => e.endsWith(':a')), isEmpty);
