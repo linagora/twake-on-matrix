@@ -1156,8 +1156,11 @@ class MatrixState extends ConsumerState<Matrix>
 
   /// Applies the stored ToM configuration of [forClient], or of the active
   /// account when none is given. During a switch the active account is still
-  /// the one being left, so the switch passes its target.
-  Future<void> _retrieveLocalToMConfiguration([Client? forClient]) async {
+  /// the one being left, so the switch passes its target and its [token].
+  Future<void> _retrieveLocalToMConfiguration([
+    Client? forClient,
+    SwitchToken? token,
+  ]) async {
     final account = forClient ?? clientOrNull;
     if (account == null) return;
     if (account.userID == null) return;
@@ -1173,6 +1176,7 @@ class MatrixState extends ConsumerState<Matrix>
       final toMConfigurations =
           await getTomConfigurations(account.userID!) ??
           await _discoverFreshInstallToMConfiguration(account);
+      if (!_isCurrent(token)) return;
       if (toMConfigurations == null) {
         // No ToM server for this account: drop any configuration left over
         // from a previously active account (multi-account switch).
@@ -1454,7 +1458,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        await _retrieveLocalToMConfiguration(client);
+        await _retrieveLocalToMConfiguration(client, token);
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
@@ -1498,15 +1502,26 @@ class MatrixState extends ConsumerState<Matrix>
       );
       if (!_isCurrent(token)) return;
 
-      await LocalizationService.initializeLanguage(
-        context,
-        serverLanguage: result.language,
-      );
+      await _applyInitialLocale(token, serverLanguage: result.language);
     } catch (e, s) {
       Logs().wtf('Matrix::_getUserInfoWithActiveClient(): Error', e, s);
       if (!_isCurrent(token)) return;
-      await LocalizationService.initializeLanguage(context);
+      await _applyInitialLocale(token);
     }
+  }
+
+  /// Resolves the locale, then applies it only when [token] is still current:
+  /// nothing awaits between the check and the write.
+  Future<void> _applyInitialLocale(
+    SwitchToken? token, {
+    String? serverLanguage,
+  }) async {
+    final locale = await LocalizationService.resolveInitialLocale(
+      context,
+      serverLanguage: serverLanguage,
+    );
+    if (!_isCurrent(token)) return;
+    await LocalizationService.applyLocale(locale);
   }
 
   Future<void> _getHomeserverInformation(
