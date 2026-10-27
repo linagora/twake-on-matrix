@@ -503,13 +503,10 @@ void main() {
     test('a record that cannot be cleared does not fail the discard', () async {
       const key = PendingRemovalsSource.candidateKey;
       await PendingRemovalsSource(Store(), storeKey: key).write({'old-client'});
-      final failing = AccountRepositoryImpl(
-        dataSource: dataSource,
-        persistedActiveAccount: PersistedActiveAccountSource(Store()),
-        pendingRemovals: PendingRemovalsSource(Store()),
-        pendingPushRemovals: PendingRemovalsSource(Store()),
+      final failing = _newRepository(
+        dataSource,
+        registry,
         pendingCandidateDiscards: _FailingWrite(storeKey: key),
-        registry: registry,
       );
 
       await failing.discardCandidate('old-client');
@@ -718,8 +715,9 @@ Future<void> _adoptWithStaleId(AccountRepositoryImpl repository) async {
 
 AccountRepositoryImpl _newRepository(
   FakeAccountClientDataSource dataSource,
-  AccountClientRegistry registry,
-) => AccountRepositoryImpl(
+  AccountClientRegistry registry, {
+  PendingRemovalsSource? pendingCandidateDiscards,
+}) => AccountRepositoryImpl(
   dataSource: dataSource,
   persistedActiveAccount: PersistedActiveAccountSource(Store()),
   pendingRemovals: PendingRemovalsSource(Store()),
@@ -727,10 +725,12 @@ AccountRepositoryImpl _newRepository(
     Store(),
     storeKey: PendingRemovalsSource.pushKey,
   ),
-  pendingCandidateDiscards: PendingRemovalsSource(
-    Store(),
-    storeKey: PendingRemovalsSource.candidateKey,
-  ),
+  pendingCandidateDiscards:
+      pendingCandidateDiscards ??
+      PendingRemovalsSource(
+        Store(),
+        storeKey: PendingRemovalsSource.candidateKey,
+      ),
   registry: registry,
   clientNameBuilder: () => 'new-client',
 );

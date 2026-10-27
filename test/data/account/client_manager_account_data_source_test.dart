@@ -45,6 +45,12 @@ void main() {
     source = ClientManagerAccountDataSource();
   });
 
+  Future<void> failOneDelete() async {
+    client.database.failDelete = true;
+    await expectLater(source.disposeAndDeleteStorage(client), throwsStateError);
+    client.database.failDelete = false;
+  }
+
   test('disposes the client, then deletes its database', () async {
     await source.disposeAndDeleteStorage(client);
 
@@ -70,9 +76,7 @@ void main() {
   });
 
   test('a retry after a failed delete does not dispose twice', () async {
-    client.database.failDelete = true;
-    await expectLater(source.disposeAndDeleteStorage(client), throwsStateError);
-    client.database.failDelete = false;
+    await failOneDelete();
 
     await source.disposeAndDeleteStorage(client);
 
@@ -88,9 +92,7 @@ void main() {
   });
 
   test('a repeat after a failed delete resumes, then stays done', () async {
-    client.database.failDelete = true;
-    await expectLater(source.disposeAndDeleteStorage(client), throwsStateError);
-    client.database.failDelete = false;
+    await failOneDelete();
     await source.disposeAndDeleteStorage(client);
 
     await source.disposeAndDeleteStorage(client);
