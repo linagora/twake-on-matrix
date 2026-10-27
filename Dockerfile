@@ -4,7 +4,7 @@
 # cirruslabs/flutter has no 3.47.x image, so the stage starts from the newest image
 # (FLUTTER_IMAGE_VERSION) and moves its Flutter checkout to FLUTTER_VERSION.
 ARG FLUTTER_IMAGE_VERSION=3.44.0
-ARG FLUTTER_VERSION=3.47.5
+ARG FLUTTER_VERSION=3.47.8
 # Pins both nginx stages and the source the brotli module is compiled against.
 ARG NGINX_VERSION=1.31.8
 
