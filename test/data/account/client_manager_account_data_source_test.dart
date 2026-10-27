@@ -16,8 +16,7 @@ class _FakeDatabase extends Fake implements DatabaseApi {
 }
 
 class _DisposableClient extends Fake implements Client {
-  _DisposableClient(this.calls, {this.clientName = 'c1'})
-    : database = _FakeDatabase(calls);
+  _DisposableClient(this.calls) : database = _FakeDatabase(calls);
 
   final List<String> calls;
   bool failDispose = false;
@@ -26,7 +25,7 @@ class _DisposableClient extends Fake implements Client {
   final _FakeDatabase database;
 
   @override
-  final String clientName;
+  String get clientName => 'c1';
 
   @override
   Future<void> dispose({bool closeDatabase = true}) async {

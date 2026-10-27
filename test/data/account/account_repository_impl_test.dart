@@ -501,7 +501,7 @@ void main() {
     });
 
     test('a record that cannot be cleared does not fail the discard', () async {
-      final key = PendingRemovalsSource.candidateKey;
+      const key = PendingRemovalsSource.candidateKey;
       await PendingRemovalsSource(Store(), storeKey: key).write({'old-client'});
       final failing = AccountRepositoryImpl(
         dataSource: dataSource,
@@ -736,8 +736,7 @@ AccountRepositoryImpl _newRepository(
 );
 
 class _FailingWrite extends PendingRemovalsSource {
-  _FailingWrite({String storeKey = PendingRemovalsSource.key})
-    : super(Store(), storeKey: storeKey);
+  _FailingWrite({super.storeKey = PendingRemovalsSource.key}) : super(Store());
 
   @override
   Future<void> write(Set<String> ids) => Future.error(StateError('read-only'));
