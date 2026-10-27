@@ -1,10 +1,29 @@
 import 'dart:async';
+import 'dart:math' show Random;
 
 // ignore: depend_on_referenced_packages
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart' show Level, Logs;
+import 'package:http/http.dart' as http;
+import 'package:matrix/matrix.dart' show Level, Logs, MatrixException;
 import 'package:twake_chat/data/account/logout_removals.dart';
+
+/// A source of randomness that always answers [value]: 1 keeps the whole
+/// backoff, 0.5 halves it.
+class _FixedRandom implements Random {
+  _FixedRandom(this.value);
+
+  final double value;
+
+  @override
+  double nextDouble() => value;
+
+  @override
+  bool nextBool() => value >= 0.5;
+
+  @override
+  int nextInt(int max) => (value * max).floor();
+}
 
 void main() {
   late LogoutRemovals removals;
@@ -12,20 +31,25 @@ void main() {
   late List<String> worked;
   late List<String> reports;
   late Set<String> failing;
+  late Map<String, Object> errors;
   late Map<String, Completer<void>> gates;
+  final noJitter = _FixedRandom(1);
 
   setUp(() {
-    removals = LogoutRemovals();
+    removals = LogoutRemovals(random: noJitter);
     log = [];
     worked = [];
     reports = [];
     failing = {};
+    errors = {};
     gates = {};
   });
 
   Future<void> step(String name, String id) async {
     log.add('$name:$id');
     await gates['$name:$id']?.future;
+    final error = errors['$name:$id'];
+    if (error != null) throw error;
     if (failing.contains('$name:$id')) throw StateError(name);
     worked.add(name);
   }
@@ -43,6 +67,13 @@ void main() {
     stepsOf(id, settleOnHold: settleOnHold),
     (error, stackTrace, what) => reports.add(what),
   );
+
+  Future<void> failFirst(List<String> ids) async {
+    for (final id in ids) {
+      failing.add('remove:$id');
+      await run(id);
+    }
+  }
 
   test('removes, then settles', () async {
     expect(await run('a'), isTrue);
@@ -107,9 +138,7 @@ void main() {
   test(
     'retryAll skips a removal that another call finished meanwhile',
     () async {
-      failing.addAll(['remove:a', 'remove:b']);
-      await run('a');
-      await run('b');
+      await failFirst(['a', 'b']);
       failing.clear();
       log.clear();
       gates['remove:a'] = Completer<void>();
@@ -237,9 +266,7 @@ void main() {
   );
 
   test('retryAll retries each account that is not done', () async {
-    failing.addAll(['remove:a', 'remove:b']);
-    await run('a');
-    await run('b');
+    await failFirst(['a', 'b']);
     failing.remove('remove:a');
     log.clear();
 
@@ -249,17 +276,37 @@ void main() {
     expect(removals.failedIds, {'b'});
   });
 
+  int tries([String id = 'a']) => log.where((e) => e == 'remove:$id').length;
+
+  /// Account [id] fails its removal for the first time, on the fake clock.
+  void startFailing(FakeAsync async, {String id = 'a'}) {
+    failing.add('remove:$id');
+    run(id);
+    async.flushMicrotasks();
+  }
+
+  void elapseMinutes(FakeAsync async, Iterable<int> minutes) {
+    for (final m in minutes) {
+      async.elapse(Duration(minutes: m));
+    }
+  }
+
+  /// The tries of account 'a' after each wait, as (minutes waited, tries).
+  void expectTriesAfter(FakeAsync async, List<(int, int)> steps) {
+    for (final (wait, expected) in steps) {
+      async.elapse(Duration(minutes: wait));
+      expect(tries(), expected, reason: 'after waiting $wait more minutes');
+    }
+  }
+
   group('in the background', () {
     test('a failed removal is retried every interval until it works', () {
       fakeAsync((async) {
-        removals = LogoutRemovals(retryEvery: const Duration(minutes: 1));
-        failing.add('remove:a');
-        run('a');
-        async.flushMicrotasks();
-        expect(log.where((e) => e == 'remove:a'), hasLength(1));
+        startFailing(async);
+        expect(tries(), 1);
 
         async.elapse(const Duration(minutes: 1));
-        expect(log.where((e) => e == 'remove:a'), hasLength(2));
+        expect(tries(), 2);
 
         failing.clear();
         async.elapse(const Duration(minutes: 2));
@@ -274,31 +321,18 @@ void main() {
     test('the retries back off, up to a limit', () {
       fakeAsync((async) {
         removals = LogoutRemovals(
-          retryEvery: const Duration(minutes: 1),
           maxRetryEvery: const Duration(minutes: 4),
+          random: noJitter,
         );
-        failing.add('remove:a');
-        run('a');
-        async.flushMicrotasks();
-        int tries() => log.where((e) => e == 'remove:a').length;
+        startFailing(async);
         expect(tries(), 1);
 
-        async.elapse(const Duration(minutes: 1));
-        expect(tries(), 2);
-        async.elapse(const Duration(minutes: 1));
-        expect(tries(), 2);
-        async.elapse(const Duration(minutes: 1));
-        expect(tries(), 3);
-        async.elapse(const Duration(minutes: 4));
-        expect(tries(), 4);
-        async.elapse(const Duration(minutes: 4));
-        expect(tries(), 5);
+        expectTriesAfter(async, [(1, 2), (1, 2), (1, 3), (4, 4), (4, 5)]);
       });
     });
 
     test('a settle that fails after the removal is retried too', () {
       fakeAsync((async) {
-        removals = LogoutRemovals(retryEvery: const Duration(minutes: 1));
         failing.add('settle:a');
         run('a');
         async.flushMicrotasks();
@@ -308,64 +342,217 @@ void main() {
         async.elapse(const Duration(minutes: 1));
 
         expect(removals.failedIds, isEmpty);
-        expect(log.where((e) => e == 'remove:a'), hasLength(1));
+        expect(tries(), 1);
       });
     });
 
     test('the backoff starts again once the removals are done', () {
       fakeAsync((async) {
-        failing.add('remove:a');
-        run('a');
-        async.flushMicrotasks();
-        async.elapse(const Duration(minutes: 1));
-        async.elapse(const Duration(minutes: 2));
+        startFailing(async);
+        elapseMinutes(async, [1, 2]);
         failing.clear();
         async.elapse(const Duration(minutes: 4));
         expect(removals.failedIds, isEmpty);
 
-        failing.add('remove:b');
-        run('b');
-        async.flushMicrotasks();
-        int tries() => log.where((e) => e == 'remove:b').length;
-        expect(tries(), 1);
+        startFailing(async, id: 'b');
+        expect(tries('b'), 1);
 
         async.elapse(const Duration(minutes: 1));
 
-        expect(tries(), 2);
+        expect(tries('b'), 2);
       });
     });
 
     test('a new removal starts the backoff again for the others', () {
       fakeAsync((async) {
-        failing.addAll(['remove:a', 'remove:b']);
-        run('a');
-        async.flushMicrotasks();
-        async.elapse(const Duration(minutes: 1));
-        async.elapse(const Duration(minutes: 2));
+        failing.add('remove:b');
+        startFailing(async);
+        elapseMinutes(async, [1, 2]);
         run('b');
         async.flushMicrotasks();
-        int tries() => log.where((e) => e == 'remove:b').length;
-        expect(tries(), 1);
+        expect(tries('b'), 1);
 
         async.elapse(const Duration(minutes: 4));
-        expect(tries(), 2);
+        expect(tries('b'), 2);
         async.elapse(const Duration(minutes: 2));
 
-        expect(tries(), 3);
+        expect(tries('b'), 3);
       });
     });
 
     test('dispose stops the retries', () {
       fakeAsync((async) {
-        removals = LogoutRemovals(retryEvery: const Duration(minutes: 1));
-        failing.add('remove:a');
-        run('a');
-        async.flushMicrotasks();
+        startFailing(async);
 
         removals.dispose();
         async.elapse(const Duration(minutes: 10));
 
-        expect(log.where((e) => e == 'remove:a'), hasLength(1));
+        expect(tries(), 1);
+      });
+    });
+  });
+
+  group('the retries are bounded and spread out', () {
+    /// The waits between the tries of 'a' over [total], from the first one.
+    List<Duration> waitsOver(FakeAsync async, Duration total) {
+      final times = [async.elapsed];
+      var seen = tries();
+      for (var i = 0; i < total.inSeconds; i++) {
+        async.elapse(const Duration(seconds: 1));
+        if (tries() > seen) {
+          seen = tries();
+          times.add(async.elapsed);
+        }
+      }
+      return [for (var i = 1; i < times.length; i++) times[i] - times[i - 1]];
+    }
+
+    test('the background retries stop after the limit, with no timer left', () {
+      fakeAsync((async) {
+        removals = LogoutRemovals(maxRetryRounds: 3, random: noJitter);
+        startFailing(async);
+
+        async.elapse(const Duration(days: 1));
+
+        expect(tries(), 4);
+        expect(async.nonPeriodicTimerCount, 0);
+        expect(removals.failedIds, {'a'});
+        expect(reports, ['cannot remove logged-out account a']);
+      });
+    });
+
+    /// With [under], the waits between the tries of 'a' are [seconds].
+    void expectWaits(LogoutRemovals under, List<int> seconds) {
+      fakeAsync((async) {
+        removals = under;
+        startFailing(async);
+
+        final waits = waitsOver(async, const Duration(hours: 1));
+
+        expect(waits.map((w) => w.inSeconds), seconds);
+      });
+    }
+
+    test('the delays double up to the cap', () {
+      expectWaits(
+        LogoutRemovals(
+          maxRetryEvery: const Duration(minutes: 5),
+          maxRetryRounds: 6,
+          random: noJitter,
+        ),
+        [60, 120, 240, 300, 300, 300],
+      );
+    });
+
+    test('each delay is a random share of its ceiling', () {
+      expectWaits(
+        LogoutRemovals(maxRetryRounds: 3, random: _FixedRandom(0.5)),
+        [30, 60, 120],
+      );
+    });
+
+    group('after the last round', () {
+      setUp(
+        () => removals = LogoutRemovals(maxRetryRounds: 2, random: noJitter),
+      );
+
+      /// Every try is used up; then [ask] runs and the count starts again.
+      void expectFreshCount(void Function() ask) {
+        fakeAsync((async) {
+          startFailing(async);
+          async.elapse(const Duration(days: 1));
+          expect(tries(), 3);
+          expect(async.nonPeriodicTimerCount, 0);
+
+          ask();
+          async.flushMicrotasks();
+          async.elapse(const Duration(days: 1));
+
+          expect(tries(), 6);
+          expect(async.nonPeriodicTimerCount, 0);
+        });
+      }
+
+      test('a retry asked for by the app starts the count again', () {
+        expectFreshCount(() => removals.retryAll());
+      });
+
+      test('a removal asked for again starts the count again', () {
+        expectFreshCount(() => run('a'));
+      });
+    });
+
+    group('a rate limit from the server', () {
+      MatrixException limit({
+        String? retryAfter,
+        int? retryAfterMs,
+      }) => MatrixException(
+        http.Response(
+          '{"errcode":"M_LIMIT_EXCEEDED","error":"Too many requests"'
+          '${retryAfterMs == null ? '' : ',"retry_after_ms":$retryAfterMs'}}',
+          429,
+          headers: {if (retryAfter != null) 'retry-after': retryAfter},
+        ),
+      );
+
+      /// The removal of 'a' is refused with [error]; it is tried again after
+      /// [seconds] seconds and not a second before.
+      void expectRetryAfter(Object error, int seconds) {
+        fakeAsync((async) {
+          errors['remove:a'] = error;
+          run('a');
+          async.flushMicrotasks();
+
+          async.elapse(Duration(seconds: seconds - 1));
+          expect(tries(), 1);
+          async.elapse(const Duration(seconds: 1));
+          expect(tries(), 2);
+        });
+      }
+
+      test('is waited for when it is longer than the backoff', () {
+        expectRetryAfter(limit(retryAfter: '300'), 300);
+      });
+
+      test('is used from retry_after_ms when there is no header', () {
+        expectRetryAfter(limit(retryAfterMs: 180000), 180);
+      });
+
+      test('is read from the header before the body', () {
+        expectRetryAfter(limit(retryAfter: '120', retryAfterMs: 900000), 120);
+      });
+
+      test('is ignored when it is shorter than the backoff', () {
+        expectRetryAfter(limit(retryAfter: '5'), 60);
+      });
+
+      test('is not read from another error', () {
+        expectRetryAfter(
+          MatrixException(
+            http.Response(
+              '{"errcode":"M_FORBIDDEN","retry_after_ms":900000}',
+              403,
+              headers: {'retry-after': '900'},
+            ),
+          ),
+          60,
+        );
+      });
+
+      test('only delays the next round: the delay is not kept', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '600');
+          run('a');
+          async.flushMicrotasks();
+          errors.remove('remove:a');
+          failing.add('remove:a');
+          async.elapse(const Duration(minutes: 10));
+          expect(tries(), 2);
+
+          async.elapse(const Duration(minutes: 2));
+
+          expect(tries(), 3);
+        });
       });
     });
   });

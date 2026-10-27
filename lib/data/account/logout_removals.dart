@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:math' show Random, min;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
-import 'package:matrix/matrix.dart' show Logs;
+import 'package:matrix/matrix.dart' show Logs, MatrixError, MatrixException;
 
 /// Makes a failure visible: logged and sent to the error reporting.
 typedef ReportFailure =
@@ -42,22 +43,37 @@ class RemovalSteps {
 
 /// Removals of logged-out accounts. A removal that fails is reported and
 /// kept, and runs again with [retryAll] and in the background until it works;
-/// until then the account stays listed. The background retries wait
-/// [retryEvery], then twice as long after each round, up to [maxRetryEvery].
+/// until then the account stays listed.
+///
+/// The background retries are bounded and spread out: after the first failure
+/// there are at most [maxRetryRounds] rounds. Each waits a random share
+/// ("full jitter") of a ceiling that starts at [retryEvery] and doubles after
+/// each round up to [maxRetryEvery]; when the server asked for a longer wait
+/// (a Matrix rate limit), that wait is kept. Past the last round the removal
+/// stays kept, and its record survives a restart, so [retryAll] or [remove]
+/// (a new start of the app, a new login) runs it again with a fresh count.
 /// A step is reported on its first failure only; the retries are logged.
 class LogoutRemovals {
   LogoutRemovals({
     this.retryEvery = const Duration(minutes: 1),
     this.maxRetryEvery = const Duration(minutes: 30),
-  });
+    this.maxRetryRounds = 10,
+    Random? random,
+  }) : _random = random ?? Random();
 
   final Duration retryEvery;
   final Duration maxRetryEvery;
+  final int maxRetryRounds;
+  final Random _random;
   final Map<String, _Removal> _removals = {};
   final Set<String> _running = {};
   Timer? _timer;
   bool _disposed = false;
   int _retryRounds = 0;
+
+  /// The longest wait a server asked for since the last round; used for the
+  /// next one.
+  Duration _serverDelay = Duration.zero;
 
   /// The accounts whose removal, or what follows it, is not done yet.
   @visibleForTesting
@@ -66,16 +82,20 @@ class LogoutRemovals {
   /// Runs the steps for [id], or the ones that are left when [id] was started
   /// before. Returns true when the account was removed (what follows it may
   /// still be waiting for a retry). A second call while one runs is ignored.
-  Future<bool> remove(
+  /// A call that runs starts the count of background retries again.
+  Future<bool> remove(String id, RemovalSteps steps, ReportFailure report) {
+    if (!_running.contains(id)) _retryRounds = 0;
+    return _remove(id, steps, report);
+  }
+
+  Future<bool> _remove(
     String id,
     RemovalSteps steps,
     ReportFailure report,
   ) async {
     if (!_running.add(id)) return false;
     final kept = _removals[id];
-    if (kept == null) {
-      _retryRounds = 0;
-    } else if (!identical(kept.steps, steps)) {
+    if (kept != null && !identical(kept.steps, steps)) {
       Logs().w('The removal of $id is kept: the new steps are ignored');
     }
     final removal = _removals.putIfAbsent(id, () => _Removal(steps, report));
@@ -109,7 +129,10 @@ class LogoutRemovals {
     }
     await _afterChange(id, removal);
     if (removal.done) _removals.remove(id);
-    if (_removals.isEmpty) _retryRounds = 0;
+    if (_removals.isEmpty) {
+      _retryRounds = 0;
+      _serverDelay = Duration.zero;
+    }
   }
 
   /// The account list changed (held or removed): the effects first, because
@@ -142,6 +165,7 @@ class LogoutRemovals {
       await step();
       return true;
     } catch (error, stackTrace) {
+      _serverDelay = _longer(_serverDelay, _delayAskedBy(error));
       if (removal.reported.add(what)) {
         removal.report(error, stackTrace, what);
       } else {
@@ -151,29 +175,63 @@ class LogoutRemovals {
     }
   }
 
-  /// Runs again every removal that is not done.
-  Future<void> retryAll() async {
+  /// The wait a Matrix rate limit (`M_LIMIT_EXCEEDED`) asked for: the
+  /// `Retry-After` header in seconds, else the deprecated `retry_after_ms` of
+  /// the body. Null for any other error, or when the server gave none.
+  Duration? _delayAskedBy(Object error) {
+    if (error is! MatrixException ||
+        error.error != MatrixError.M_LIMIT_EXCEEDED) {
+      return null;
+    }
+    final seconds = int.tryParse(error.response?.headers['retry-after'] ?? '');
+    if (seconds != null && seconds >= 0) return Duration(seconds: seconds);
+    final millis = error.retryAfterMs;
+    return millis == null || millis < 0 ? null : Duration(milliseconds: millis);
+  }
+
+  /// Runs again every removal that is not done, with a fresh count of
+  /// background retries.
+  Future<void> retryAll() {
+    _retryRounds = 0;
+    return _retryEach();
+  }
+
+  Future<void> _retryEach() async {
     for (final id in _removals.keys.toList()) {
       final removal = _removals[id];
       // Another call may have finished it while the ones before ran.
       if (removal == null) continue;
-      await remove(id, removal.steps, removal.report);
+      await _remove(id, removal.steps, removal.report);
     }
   }
 
   void _schedule() {
     if (_disposed || _timer != null) return;
+    if (_retryRounds >= maxRetryRounds) {
+      Logs().w(
+        'The removals are not retried in the background any more, '
+        'after $_retryRounds rounds: ${_removals.keys.join(', ')}',
+      );
+      return;
+    }
     _timer = Timer(_nextDelay(), () {
       _timer = null;
       _retryRounds++;
-      unawaited(retryAll());
+      unawaited(_retryEach());
     });
   }
 
   Duration _nextDelay() {
-    final doubled = retryEvery * (1 << (_retryRounds < 10 ? _retryRounds : 10));
-    return doubled > maxRetryEvery ? maxRetryEvery : doubled;
+    final doubled = retryEvery * (1 << min(_retryRounds, 10));
+    final ceiling = doubled > maxRetryEvery ? maxRetryEvery : doubled;
+    final spread = ceiling * _random.nextDouble();
+    final asked = _serverDelay;
+    _serverDelay = Duration.zero;
+    return _longer(spread, asked);
   }
+
+  static Duration _longer(Duration a, Duration? b) =>
+      b != null && b > a ? b : a;
 
   /// Stops the background retries.
   void dispose() {
