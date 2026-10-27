@@ -1154,21 +1154,25 @@ class MatrixState extends ConsumerState<Matrix>
     return null;
   }
 
-  Future<void> _retrieveLocalToMConfiguration() async {
-    if (clientOrNull == null) return;
-    if (client.userID == null) return;
+  /// Applies the stored ToM configuration of [forClient], or of the active
+  /// account when none is given. During a switch the active account is still
+  /// the one being left, so the switch passes its target.
+  Future<void> _retrieveLocalToMConfiguration([Client? forClient]) async {
+    final account = forClient ?? clientOrNull;
+    if (account == null) return;
+    if (account.userID == null) return;
 
     // Matrix APIs must remain available even when no optional ToM
     // configuration has been stored for the current user yet.
-    setUpAuthorization(client);
-    if (client.homeserver != null) {
-      _setUpHomeServer(client.homeserver!);
+    setUpAuthorization(account);
+    if (account.homeserver != null) {
+      _setUpHomeServer(account.homeserver!);
     }
 
     try {
       final toMConfigurations =
-          await getTomConfigurations(client.userID!) ??
-          await _discoverFreshInstallToMConfiguration(client);
+          await getTomConfigurations(account.userID!) ??
+          await _discoverFreshInstallToMConfiguration(account);
       if (toMConfigurations == null) {
         // No ToM server for this account: drop any configuration left over
         // from a previously active account (multi-account switch).
@@ -1179,6 +1183,7 @@ class MatrixState extends ConsumerState<Matrix>
       setUpToMServices(
         toMConfigurations.tomServerInformation,
         toMConfigurations.identityServerInformation,
+        forClient: account,
       );
       _setupAuthUrl(url: toMConfigurations.authUrl);
       loginType = toMConfigurations.loginType;
@@ -1449,7 +1454,7 @@ class MatrixState extends ConsumerState<Matrix>
         'Matrix::_setUpToMServicesWhenChangingActiveClient: toMConfigurations - $toMConfigurations',
       );
       if (toMConfigurations == null) {
-        await _retrieveLocalToMConfiguration();
+        await _retrieveLocalToMConfiguration(client);
       } else {
         _setupAuthUrl(url: toMConfigurations.authUrl);
         setUpToMServices(
