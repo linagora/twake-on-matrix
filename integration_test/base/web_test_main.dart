@@ -39,7 +39,8 @@ import 'package:twake_chat/widgets/twake_app.dart';
 
 /// Dead homeserver — prevents auto-connect side effects during test init.
 const _testConfig = <String, dynamic>{
-  'app_grid_dashboard_available': false,
+  // Product default; the app grid web scenarios need it.
+  'app_grid_dashboard_available': true,
   'application_name': 'Twake Chat',
   'application_welcome_message': 'Welcome to Twake Chat!',
   'default_homeserver': 'localhost',

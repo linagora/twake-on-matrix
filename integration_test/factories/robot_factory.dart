@@ -1,5 +1,6 @@
 import 'package:patrol/patrol.dart';
 
+import '../robots/abstract/abstract_app_grid_robot.dart';
 import '../robots/abstract/abstract_chat_group_detail_robot.dart';
 import '../robots/abstract/abstract_chat_list_robot.dart';
 import '../robots/abstract/abstract_chat_profile_info_robot.dart';
@@ -39,4 +40,5 @@ abstract class RobotFactory {
   AbstractContactListRobot contactListRobot();
   AbstractSettingRobot settingRobot();
   AbstractLanguageSettingRobot languageSettingRobot();
+  AbstractAppGridRobot appGridRobot();
 }

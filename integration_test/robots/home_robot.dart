@@ -16,6 +16,18 @@ class HomeRobot extends CoreRobot implements AbstractHomeRobot {
   bool isMainNavigationVisible() =>
       $(BottomNavigationBar).visible || $(NavigationRail).visible;
 
+  @override
+  Future<void> waitForMainNavigation({
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    await waitForEitherVisible(
+      $: $,
+      first: $(BottomNavigationBar),
+      second: $(NavigationRail),
+      timeout: timeout,
+    );
+  }
+
   Future<PatrolFinder> getContactTab() async {
     return $(TwakeNavigationIcon).at(0);
   }

@@ -215,7 +215,7 @@ jobs:
               integration_test/tests/chat/create_new_group_chat_test.dart
               integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart
               integration_test/tests/chat/search_external_mxid_test.dart
-          # 7 test cases (~15 min). Web-only tests (e.g. web_login_paths_test,
+          # 8 test cases (~15 min). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker
           # flow) must NOT be listed here — they can never pass on Android and
           # are covered by the patrol-web nightly workflow.
@@ -226,6 +226,7 @@ jobs:
               integration_test/tests/setting/language_test.dart
               integration_test/tests/setting/settings_contacts_visibility_test.dart
               integration_test/tests/setting/settings_recovery_key_test.dart
+              integration_test/tests/app_grid/app_grid_mobile_test.dart
 
     steps:
       - uses: actions/checkout@v4
