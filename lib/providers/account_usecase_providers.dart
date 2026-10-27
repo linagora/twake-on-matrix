@@ -2,7 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/usecases/add_account_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/initialize_accounts_usecase.dart';
-import 'package:twake_chat/domain/account/usecases/prune_pending_push_removals.dart';
+import 'package:twake_chat/domain/account/usecases/prune_pending_push_removals_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/remove_account_usecase.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
