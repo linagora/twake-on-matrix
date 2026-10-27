@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'sticker_fixture.dart';
+
 /// Web implementation of the API login helper.
 ///
 /// On Flutter Web the SSO OIDC bypass used on mobile is not available —
@@ -53,19 +55,70 @@ Future<String> fetchAuthToken({
   return accessToken;
 }
 
-/// Sends a message as the `Receiver` account by first obtaining its access
-/// token via `m.login.password`, then `PUT`-ing the event to [roomId] or
-/// the configured `GroupID`.
-Future<void> sendMessageAsReceiver({
-  required String message,
+/// Sends a message as the `Receiver` account to [roomId] or the configured
+/// `GroupID`.
+Future<void> sendMessageAsReceiver({required String message, String? roomId}) =>
+    _putEventAsReceiver(
+      roomId: roomId,
+      eventType: 'm.room.message',
+      content: (_) async => {'msgtype': 'm.text', 'body': message},
+    );
+
+Future<void> sendMessagesAsReceiver({
+  required List<String> messages,
   String? roomId,
 }) async {
-  const matrixURL = String.fromEnvironment('MATRIX_URL');
+  for (final message in messages) {
+    await sendMessageAsReceiver(message: message, roomId: roomId);
+  }
+}
+
+/// Sends an `m.sticker` event as the `Receiver` account. Twake cannot send
+/// stickers itself, so tests use this to receive one like from Element.
+Future<void> sendStickerAsReceiver({
+  required String body,
+  required String roomId,
+}) => _putEventAsReceiver(
+  roomId: roomId,
+  eventType: 'm.sticker',
+  content: (accessToken) async => stickerFixtureContent(
+    body: body,
+    url: await _uploadStickerFixture(accessToken),
+  ),
+);
+
+const _matrixURL = String.fromEnvironment('MATRIX_URL');
+
+Future<String> _uploadStickerFixture(String accessToken) async {
+  final upload = await http.post(
+    Uri.parse('$_matrixURL/_matrix/media/v3/upload'),
+    headers: {
+      'Content-Type': stickerFixtureMimeType,
+      'Authorization': 'Bearer $accessToken',
+    },
+    body: stickerFixtureBytes,
+  );
+  if (!_isSuccess(upload.statusCode)) {
+    throw Exception(
+      'Sticker upload failed [${upload.statusCode}]: ${upload.body}',
+    );
+  }
+  return (jsonDecode(upload.body) as Map<String, dynamic>)['content_uri']
+      as String;
+}
+
+/// Logs the `Receiver` account in, then `PUT`s an [eventType] event built by
+/// [content] to [roomId] or the configured `GroupID`.
+Future<void> _putEventAsReceiver({
+  required String? roomId,
+  required String eventType,
+  required Future<Map<String, Object?>> Function(String accessToken) content,
+}) async {
   const receiver = String.fromEnvironment('Receiver');
   const passOfReceiver = String.fromEnvironment('ReceiverPass');
   const groupID = String.fromEnvironment('GroupID');
   final targetRoom = roomId ?? groupID;
-  if (matrixURL.isEmpty ||
+  if (_matrixURL.isEmpty ||
       receiver.isEmpty ||
       passOfReceiver.isEmpty ||
       targetRoom.isEmpty) {
@@ -78,35 +131,28 @@ Future<void> sendMessageAsReceiver({
     username: receiver,
     password: passOfReceiver,
   );
+  final body = await content(accessToken);
 
   final encodedRoomId = Uri.encodeComponent(targetRoom);
-  final sendUri = Uri.parse(
-    '$matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/m.room.message/'
-    'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
-  );
   final response = await http.put(
-    sendUri,
+    Uri.parse(
+      '$_matrixURL/_matrix/client/v3/rooms/$encodedRoomId/send/$eventType/'
+      'patrol-web-${DateTime.now().millisecondsSinceEpoch}',
+    ),
     headers: {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $accessToken',
     },
-    body: jsonEncode({'msgtype': 'm.text', 'body': message}),
+    body: jsonEncode(body),
   );
-  if (response.statusCode != 200) {
+  if (!_isSuccess(response.statusCode)) {
     throw Exception(
-      'sendMessage failed [${response.statusCode}]: ${response.body}',
+      'Sending $eventType failed [${response.statusCode}]: ${response.body}',
     );
   }
 }
 
-Future<void> sendMessagesAsReceiver({
-  required List<String> messages,
-  String? roomId,
-}) async {
-  for (final message in messages) {
-    await sendMessageAsReceiver(message: message, roomId: roomId);
-  }
-}
+bool _isSuccess(int statusCode) => statusCode >= 200 && statusCode < 300;
 
 /// Mobile group fixtures create rooms on the device client. Web tests use
 /// the pre-provisioned Synapse [GroupID] and never invite the receiver.

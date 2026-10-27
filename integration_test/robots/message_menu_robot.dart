@@ -4,10 +4,12 @@ import 'package:twake_chat/pages/forward/forward_view.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patrol/patrol.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 import '../base/core_robot.dart';
 import 'abstract/abstract_message_menu_robot.dart';
+import 'last_message_finder.dart';
 import 'menu_robot.dart';
 import 'message_selection_appbar_helper.dart';
 
@@ -24,14 +26,17 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
 
   PullDownMenuRobot get _menu => PullDownMenuRobot($);
 
-  Future<void> _openMenu(String message) async {
+  Future<void> _openMenu(String message) => _openMenuOn(
+    $(
+      MessageContent,
+    ).containing(find.textContaining(message, findRichText: true)),
+  );
+
+  Future<void> _openMenuOn(PatrolFinder messageFinder) async {
     // The app ignores long-presses while the event is still `isSending`
     // (`MultiPlatformSelectionMode.onLongPress` is null until the server
     // acks). Waiting only for the bubble to be *visible* races that ack, so
     // press until the menu actually opens.
-    final messageFinder = $(
-      MessageContent,
-    ).containing(find.textContaining(message, findRichText: true));
     final menu = $(PullDownMenu);
     final deadline = DateTime.now().add(const Duration(seconds: 60));
     while (!menu.exists && DateTime.now().isBefore(deadline)) {
@@ -45,6 +50,17 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   @override
   Future<void> openForward(String message) async {
     await _openMenu(message);
+    await _tapForward();
+  }
+
+  @override
+  Future<void> openForwardOnLast(Finder content) async {
+    await $.waitUntilExists($(content), timeout: const Duration(seconds: 30));
+    await _openMenuOn(lastMessageContaining($, content));
+    await _tapForward();
+  }
+
+  Future<void> _tapForward() async {
     await _menu.getForwardItem().tap();
     await $.pump(const Duration(milliseconds: 300));
     await $.pumpAndTrySettle();
