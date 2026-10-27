@@ -15,8 +15,15 @@ import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/domain/model/tom_configurations.dart';
+import 'package:twake_chat/domain/model/tom_server_information.dart';
+import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/providers/account_services_providers.dart';
+import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
@@ -83,6 +90,67 @@ class _BrokenBootClient extends _BootClient {
   @override
   CachedStreamController<RoomKeyRequest> get onRoomKeyRequest =>
       throw StateError('broken client');
+}
+
+/// A client with an access token and no homeserver, which is all the ToM
+/// set-up of a switch reads.
+class _ToMClient extends _BootClient {
+  _ToMClient(super.clientName, {super.userID});
+
+  @override
+  String? get accessToken => 'token-$clientName';
+
+  @override
+  Uri? get homeserver => null;
+}
+
+/// Stores a ToM configuration for the accounts it was given and, like the real
+/// repository, throws for any other.
+class _FakeToMConfigurationsRepository extends Fake
+    implements ToMConfigurationsRepository {
+  _FakeToMConfigurationsRepository(this.stored);
+
+  final Map<String, ToMConfigurations> stored;
+
+  @override
+  Future<ToMConfigurations> getTomConfigurations(String userId) async =>
+      stored[userId] ?? (throw StateError('no ToM configuration for $userId'));
+}
+
+/// The switch effects with only the ToM set-up of `MatrixState`: it is the one
+/// step under test and the others need the whole app wiring.
+class _ToMOnlyEffects implements AccountSwitchEffects {
+  _ToMOnlyEffects(this.matrix);
+
+  final MatrixState matrix;
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) =>
+      matrix.setUpToM(client, token);
+
+  @override
+  void createVoipPlugin() {}
+
+  @override
+  Future<void> persistActiveAccount(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadUserInfo(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadHomeserverInfo(Client client, SwitchToken token) async {}
+
+  @override
+  void refreshContacts(Client client) {}
+
+  @override
+  void createSupportChat(Client client) {}
+
+  @override
+  void listenPresence(Client client) {}
+
+  @override
+  void configureSentryUser(Client client) {}
 }
 
 /// `setActiveClient` stops the contacts lookup of the account being left.
@@ -285,5 +353,63 @@ void main() {
 
     // The boot went on to the account after the broken one.
     expect(healthy.onLoginStateChanged.listened, isTrue);
+  });
+
+  testWidgets('switching to an account with no stored ToM configuration does '
+      'not keep the one of the account being left', (tester) async {
+    final left = _ToMClient('a', userID: '@a:s');
+    final target = _ToMClient('b', userID: '@b:s');
+    final tomServer = DynamicUrlInterceptors();
+    final authorization = AuthorizationInterceptor();
+    getIt
+      ..registerSingleton<DynamicUrlInterceptors>(
+        tomServer,
+        instanceName: NetworkDI.tomServerUrlInterceptorName,
+      )
+      ..registerSingleton<DynamicUrlInterceptors>(
+        DynamicUrlInterceptors(),
+        instanceName: NetworkDI.homeServerUrlInterceptorName,
+      )
+      ..registerSingleton<DynamicUrlInterceptors>(
+        DynamicUrlInterceptors(),
+        instanceName: NetworkDI.identityServerUrlInterceptorName,
+      )
+      ..registerSingleton<AuthorizationInterceptor>(authorization)
+      ..registerSingleton<ToMConfigurationsRepository>(
+        _FakeToMConfigurationsRepository({
+          '@a:s': ToMConfigurations(
+            tomServerInformation: ToMServerInformation(
+              baseUrl: Uri.parse('https://tom.a'),
+            ),
+          ),
+        }),
+      );
+    final harness = _Harness(
+      tester,
+      [left, target],
+      overrides: [
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      // The boot may have set up the active account; start from a clean state.
+      tomServer.changeBaseUrl(null);
+      authorization.accessToken = null;
+      harness.container
+          .read(accountSwitchEffectsProvider.notifier)
+          .set(_ToMOnlyEffects(harness.matrix));
+
+      final result = await tester.runAsync(
+        () => harness.matrix.setActiveClient(target),
+      );
+      expect(result, SetActiveClientState.success);
+    });
+
+    // The target has no configuration: nothing of account `a` stays bound.
+    expect(tomServer.baseUrl, isNull);
+    expect(authorization.accessToken, 'token-b');
   });
 }
