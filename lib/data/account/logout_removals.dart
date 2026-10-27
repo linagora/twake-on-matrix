@@ -189,6 +189,20 @@ class LogoutRemovals {
     return millis == null || millis < 0 ? null : Duration(milliseconds: millis);
   }
 
+  /// Drops the kept removal of [id], if any, so that the next [remove] runs
+  /// new steps (a new session opened for that account). A run in progress is
+  /// not stopped, but it is not retried. Returns true when one was kept.
+  bool forget(String id) {
+    final forgotten = _removals.remove(id) != null;
+    if (_removals.isEmpty) {
+      _retryRounds = 0;
+      _serverDelay = Duration.zero;
+      _timer?.cancel();
+      _timer = null;
+    }
+    return forgotten;
+  }
+
   /// Runs again every removal that is not done, with a fresh count of
   /// background retries.
   Future<void> retryAll() {

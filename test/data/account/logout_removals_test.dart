@@ -154,6 +154,24 @@ void main() {
     },
   );
 
+  test('forget drops a kept removal, so new steps run', () async {
+    failing.add('remove:a');
+    await run('a');
+    expect(removals.forget('a'), isTrue);
+    expect(removals.failedIds, isEmpty);
+    expect(removals.forget('a'), isFalse);
+    log.clear();
+
+    await removals.remove(
+      'a',
+      stepsOf('other'),
+      (error, stackTrace, what) => reports.add(what),
+    );
+
+    expect(log, contains('remove:other'));
+    expect(log.where((e) => e.endsWith(':a')), isEmpty);
+  });
+
   test('a retry runs the removal again and nothing that is done', () async {
     failing.add('remove:a');
     await run('a');
