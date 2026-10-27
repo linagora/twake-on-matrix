@@ -422,11 +422,47 @@ void main() {
 
         expect(dataSource.calls, ['create:old-client', 'delete:old-client']);
         expect(registry['old-client'], isNull);
-
-        await repository.clearCandidateDiscardPending('old-client');
-        expect(await repository.pendingCandidateDiscards(), isEmpty);
       },
     );
+
+    test('a successful discard clears its pending record', () async {
+      await repository.markCandidateDiscardPending('old-client');
+      await repository.markCandidateDiscardPending('other');
+
+      await repository.discardCandidate('old-client');
+
+      expect(await repository.pendingCandidateDiscards(), {'other'});
+    });
+
+    test('a failing delete keeps the pending record', () async {
+      await repository.markCandidateDiscardPending('old-client');
+      dataSource.failDelete = true;
+
+      await expectLater(
+        repository.discardCandidate('old-client'),
+        throwsA(isA<StateError>()),
+      );
+
+      expect(await repository.pendingCandidateDiscards(), {'old-client'});
+    });
+
+    test('a record that cannot be cleared does not fail the discard', () async {
+      final key = PendingRemovalsSource.candidateKey;
+      await PendingRemovalsSource(Store(), storeKey: key).write({'old-client'});
+      final failing = AccountRepositoryImpl(
+        dataSource: dataSource,
+        persistedActiveAccount: PersistedActiveAccountSource(Store()),
+        pendingRemovals: PendingRemovalsSource(Store()),
+        pendingPushRemovals: PendingRemovalsSource(Store()),
+        pendingCandidateDiscards: _FailingWrite(storeKey: key),
+        registry: registry,
+      );
+
+      await failing.discardCandidate('old-client');
+
+      expect(registry['old-client'], isNull);
+      expect(dataSource.calls, ['create:old-client', 'delete:old-client']);
+    });
 
     test('an unknown id throws', () async {
       await expectLater(
@@ -646,7 +682,8 @@ AccountRepositoryImpl _newRepository(
 );
 
 class _FailingWrite extends PendingRemovalsSource {
-  _FailingWrite() : super(Store());
+  _FailingWrite({String storeKey = PendingRemovalsSource.key})
+    : super(Store(), storeKey: storeKey);
 
   @override
   Future<void> write(Set<String> ids) => Future.error(StateError('read-only'));

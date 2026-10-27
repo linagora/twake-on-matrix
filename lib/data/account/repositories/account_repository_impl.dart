@@ -206,6 +206,18 @@ class AccountRepositoryImpl implements AccountRepository {
     await _deleteStorage(id, client);
     _registry.remove(id);
     _storageDeleted.remove(id);
+    await _forgetPendingDiscard(id);
+  }
+
+  /// The storage is gone, so the record of its failed discard is obsolete. A
+  /// record that cannot be cleared stays in the store and the discard runs
+  /// again at the next start; it never fails this one.
+  Future<void> _forgetPendingDiscard(String id) async {
+    try {
+      await clearCandidateDiscardPending(id);
+    } catch (e, s) {
+      Logs().w('Cannot clear the pending discard of $id', e, s);
+    }
   }
 
   /// Ids whose client was disposed and whose storage was deleted but whose

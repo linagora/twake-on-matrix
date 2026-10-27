@@ -54,12 +54,16 @@ abstract interface class AccountRepository {
   Future<void> markCandidateDiscardPending(String id);
 
   /// Forgets the failed discard of [id]; does nothing when none.
+  /// [discardCandidate] already does it once the storage is deleted.
   Future<void> clearCandidateDiscardPending(String id);
 
   /// Disposes a candidate that never became an account and deletes its
   /// storage; it stays known until that worked, so a failure can be retried.
   /// A candidate recorded by [markCandidateDiscardPending] is known again
-  /// after a restart (read with [pendingCandidateDiscards] first).
+  /// after a restart (read with [pendingCandidateDiscards] first). Once the
+  /// storage is deleted the record is cleared too, like [removeAccount] does
+  /// for its own: best effort, a record that cannot be cleared does not fail
+  /// the call and the discard runs again at the next start.
   /// Throws StoredAccountException for a stored account.
   Future<void> discardCandidate(String id);
 
