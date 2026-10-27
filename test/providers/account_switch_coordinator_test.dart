@@ -11,6 +11,7 @@ import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
+import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 
@@ -95,7 +96,6 @@ void main() {
   late ProviderContainer container;
   late FakeSwitchEffects effects;
   late AccountSwitchCoordinator coordinator;
-  late ProviderSubscription<AccountsState> subscription;
   late FakeAccountClient a;
   late FakeAccountClient b;
   late FakeAccountClient c;
@@ -117,7 +117,8 @@ void main() {
       if (step == 'voip') step else '$step:$id',
   ];
 
-  /// Wires the coordinator as `MatrixState.initState` does.
+  /// Wires the coordinator as `MatrixState.initState` does: sets the effects,
+  /// then reads the provider.
   void boot({Client? Function(String id)? clientOf, List<Client>? clients}) {
     final adopted = clients ?? [a, b, c];
     container = ProviderContainer.test(
@@ -130,20 +131,15 @@ void main() {
         bootAccountSnapshotProvider.overrideWithValue(
           const AccountBootSnapshot(),
         ),
+        if (clientOf != null)
+          accountSwitchCoordinatorProvider.overrideWith(
+            (ref) => AccountSwitchCoordinator(ref, clientOf: clientOf),
+          ),
       ],
     );
+    container.read(accountSwitchEffectsProvider.notifier).set(effects);
     container.read(accountsProvider);
-    final registry = {for (final client in adopted) client.clientName: client};
-    coordinator = AccountSwitchCoordinator(
-      effects: effects,
-      accounts: container.read(accountsProvider.notifier),
-      clientOf: clientOf ?? (id) => registry[id],
-      currentState: () => container.read(accountsProvider),
-    )..start();
-    subscription = container.listen(
-      accountsProvider,
-      coordinator.onAccountsChanged,
-    );
+    coordinator = container.read(accountSwitchCoordinatorProvider);
   }
 
   AccountsState state() => container.read(accountsProvider);
@@ -818,7 +814,6 @@ void main() {
 
     test('after dispose no effect runs and a switch ends at once', () async {
       boot();
-      subscription.close();
       coordinator.dispose();
       await switchTo('b');
       expect(effects.log, isEmpty);

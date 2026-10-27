@@ -1,10 +1,16 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
+import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
+
+part 'account_switch_coordinator.g.dart';
 
 /// What the app does when an account becomes the active one. The coordinator
 /// owns the order, the stale-switch guard and the error policy; an
@@ -42,23 +48,42 @@ class SwitchToken {
   bool get isCurrent => _coordinator._generation == _generation;
 }
 
-/// Runs the side effects of `Switching` and ends the switch through the
-/// notifier (`completeSwitch`, or `failSwitch` when a step throws).
-class AccountSwitchCoordinator {
-  AccountSwitchCoordinator({
-    required AccountSwitchEffects effects,
-    required Accounts accounts,
-    required Client? Function(String id) clientOf,
-    required AccountsState Function() currentState,
-  }) : _effects = effects,
-       _accounts = accounts,
-       _clientOf = clientOf,
-       _currentState = currentState;
+/// The one coordinator of the app. Read it once at boot, after
+/// `accountSwitchEffectsProvider` is set: until it is read no switch handler
+/// is registered and a switch ends at once, with no effects.
+@Riverpod(keepAlive: true)
+AccountSwitchCoordinator accountSwitchCoordinator(Ref ref) =>
+    AccountSwitchCoordinator(ref);
 
-  final AccountSwitchEffects _effects;
-  final Accounts _accounts;
+/// Runs the side effects of `Switching` and ends the switch through the
+/// notifier (`completeSwitch`, or `failSwitch` when a step throws). It
+/// registers the switch handler and listens to `accountsProvider` when it is
+/// created, and stops both when its provider is disposed. The effects are the
+/// ones `accountSwitchEffectsProvider` holds when a run starts; a run without
+/// effects fails.
+class AccountSwitchCoordinator {
+  AccountSwitchCoordinator(Ref ref, {Client? Function(String id)? clientOf})
+    : _ref = ref,
+      _clientOf =
+          clientOf ?? ((id) => ref.read(accountClientRegistryProvider)[id]) {
+    start();
+    _subscription = ref.listen(accountsProvider, onAccountsChanged);
+    ref.onDispose(dispose);
+  }
+
+  final Ref _ref;
   final Client? Function(String id) _clientOf;
-  final AccountsState Function() _currentState;
+  ProviderSubscription<AccountsState>? _subscription;
+
+  Accounts get _accounts => _ref.read(accountsProvider.notifier);
+
+  AccountsState _currentState() => _ref.read(accountsProvider);
+
+  AccountSwitchEffects _readEffects() {
+    final effects = _ref.read(accountSwitchEffectsProvider);
+    if (effects == null) throw StateError('No account switch effects set');
+    return effects;
+  }
 
   void Function()? _unregister;
   bool _disposed = false;
@@ -95,7 +120,10 @@ class AccountSwitchCoordinator {
   void start() => _unregister ??= _accounts.registerSwitchHandler();
 
   void dispose() {
+    if (_disposed) return;
     _disposed = true;
+    _subscription?.close();
+    _subscription = null;
     _unregister?.call();
     _unregister = null;
     _invalidate();
@@ -208,21 +236,22 @@ class AccountSwitchCoordinator {
 
   Future<bool> _run(Client client, SwitchToken token) async {
     try {
+      final effects = _readEffects();
       // VoIP is not supported yet: `createVoipPlugin` is an empty stub, so
       // running it on every apply is harmless.
-      _effects.createVoipPlugin();
-      await _effects.setUpToM(client, token);
+      effects.createVoipPlugin();
+      await effects.setUpToM(client, token);
       if (!token.isCurrent) return false;
-      await _effects.persistActiveAccount(client, token);
+      await effects.persistActiveAccount(client, token);
       if (!token.isCurrent) return false;
-      await _effects.loadUserInfo(client, token);
+      await effects.loadUserInfo(client, token);
       if (!token.isCurrent) return false;
-      await _effects.loadHomeserverInfo(client, token);
+      await effects.loadHomeserverInfo(client, token);
       if (!token.isCurrent) return false;
-      _effects.refreshContacts(client);
-      _effects.createSupportChat(client);
-      _effects.listenPresence(client);
-      _effects.configureSentryUser(client);
+      effects.refreshContacts(client);
+      effects.createSupportChat(client);
+      effects.listenPresence(client);
+      effects.configureSentryUser(client);
       _appliedFor = client;
       _dirty = false;
       return true;
