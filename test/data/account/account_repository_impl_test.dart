@@ -149,10 +149,10 @@ void main() {
       expect(await repository.pendingRemovalIds(), {'a'});
     });
 
-    test('before adopt the persisted ids are returned for the boot', () async {
+    test('before adopt no account is stored, so no id is reported', () async {
       await PendingRemovalsSource(Store()).write({'a'});
 
-      expect(await repository.pendingRemovalIds(), {'a'});
+      expect(await repository.pendingRemovalIds(), isEmpty);
     });
 
     test('a record that cannot be cleared does not fail the removal', () async {
@@ -191,6 +191,52 @@ void main() {
       ]);
       expect(registry['a'], same(a));
       expect(registry['p'], same(p));
+    });
+
+    test('lists the pending removals of its clients as unavailable', () {
+      final accounts = repository.adopt(
+        [
+          FakeAccountClient('a', userID: '@a:s'),
+          FakeAccountClient('b', userID: '@b:s'),
+        ],
+        pendingRemovals: const {'b', 'gone'},
+      );
+
+      expect(accounts.map((x) => x.status), [
+        AccountStatus.loggedIn,
+        AccountStatus.unavailable,
+      ]);
+    });
+
+    test('adopt twice does not reset the pending ids', () async {
+      final a = FakeAccountClient('a', userID: '@a:s');
+      final b = FakeAccountClient('b', userID: '@b:s');
+      repository.adopt([a, b], pendingRemovals: const {'a'});
+
+      final again = repository.adopt([
+        FakeAccountClient('c', userID: '@c:s'),
+      ], pendingRemovals: const {'b'});
+
+      expect(again.map((x) => (x.id, x.status)), [
+        ('a', AccountStatus.unavailable),
+        ('b', AccountStatus.loggedIn),
+      ]);
+      expect(registry['a'], same(a));
+      expect(registry['b'], same(b));
+      expect(registry['c'], isNull);
+      await repository.markRemovalPending('b');
+      expect(await repository.pendingRemovalIds(), {'a', 'b'});
+    });
+
+    test('adopt twice after an empty first call keeps the first call', () {
+      repository.adopt(const [], pendingRemovals: const {});
+
+      final again = repository.adopt([
+        FakeAccountClient('a', userID: '@a:s'),
+      ], pendingRemovals: const {});
+
+      expect(again, isEmpty);
+      expect(registry['a'], isNull);
     });
   });
 

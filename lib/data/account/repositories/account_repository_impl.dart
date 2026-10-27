@@ -42,8 +42,7 @@ class AccountRepositoryImpl implements AccountRepository {
   /// then only replaced by what a serialized write stored, never by a read.
   final Set<String> _pendingIds = {};
 
-  /// Until [adopt] ran, the stored ids are not known: the persisted pending
-  /// removals are returned as they are, for the boot to pass them to [adopt].
+  /// Whether [adopt] ran, which it does once.
   bool _adopted = false;
 
   String _newClientName() =>
@@ -56,12 +55,18 @@ class AccountRepositoryImpl implements AccountRepository {
   /// client is gone are dropped; they leave the store at the next write of
   /// the pending removals. Plain object work: safe to call while the widget
   /// tree is building.
+  ///
+  /// Called by the boot (through `accountRepositoryImplProvider`, wired in a
+  /// later PR), which may run again, for instance when the notifier that
+  /// calls it is built again: only the first call takes over, the following
+  /// ones return the accounts as they are.
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
   }) {
-    _registry.replaceAll(clients);
+    if (_adopted) return registeredAccounts();
     _adopted = true;
+    _registry.replaceAll(clients);
     _storedIds
       ..clear()
       ..addAll(clients.map((c) => c.clientName));
@@ -111,7 +116,7 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Set<String>> pendingRemovalIds() async {
     final ids = await _pendingRemovals.read();
-    return _adopted ? ids.where(_storedIds.contains).toSet() : ids;
+    return ids.where(_storedIds.contains).toSet();
   }
 
   @override
