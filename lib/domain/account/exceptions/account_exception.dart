@@ -8,6 +8,22 @@ class UnknownAccountException extends AccountException {
   final String accountId;
 }
 
+/// The account is known in memory but its name is not in the store: it is a
+/// candidate, not an account yet.
+class NotStoredAccountException extends AccountException {
+  const NotStoredAccountException(this.accountId);
+
+  final String accountId;
+}
+
+/// The name of the account is in the store: it is an account, not a
+/// candidate.
+class StoredAccountException extends AccountException {
+  const StoredAccountException(this.accountId);
+
+  final String accountId;
+}
+
 class InvalidAccountTransitionException extends AccountException {
   const InvalidAccountTransitionException({
     required this.transition,
