@@ -213,9 +213,10 @@ void main() {
       final b = FakeAccountClient('b', userID: '@b:s');
       repository.adopt([a, b], pendingRemovals: const {'a'});
 
-      final again = repository.adopt([
-        FakeAccountClient('c', userID: '@c:s'),
-      ], pendingRemovals: const {'b'});
+      final again = repository.adopt(
+        [FakeAccountClient('c', userID: '@c:s')],
+        pendingRemovals: const {'b'},
+      );
 
       expect(again.map((x) => (x.id, x.status)), [
         ('a', AccountStatus.unavailable),
