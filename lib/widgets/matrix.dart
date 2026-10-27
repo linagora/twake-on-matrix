@@ -27,8 +27,9 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_notifications/desktop_notifications.dart';
 import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
-import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/authorization_interceptor.provider.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
@@ -137,9 +138,7 @@ class MatrixState extends ConsumerState<Matrix>
   ValueNotifier<bool> showToMBootstrap = ValueNotifier(false);
 
   bool get twakeSupported {
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
-    );
+    final tomServerUrlInterceptor = ref.read(tomServerUrlInterceptorProvider);
     return tomServerUrlInterceptor.baseUrl != null;
   }
 
@@ -1084,7 +1083,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void setUpAuthorization(Client client) {
-    final authorizationInterceptor = getIt.get<AuthorizationInterceptor>();
+    final authorizationInterceptor = ref.read(authorizationInterceptorProvider);
     Logs().d(
       'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
     );
@@ -1092,9 +1091,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _setUpToMServer(ToMServerInformation? tomServer) {
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
-    );
+    final tomServerUrlInterceptor = ref.read(tomServerUrlInterceptorProvider);
     Logs().d(
       'MatrixState::_setUpToMServer: ${tomServerUrlInterceptor.hashCode}',
     );
@@ -1307,9 +1304,7 @@ class MatrixState extends ConsumerState<Matrix>
     final tomServer = loginHomeserverSummary?.tomServer;
     if (tomServer == null) return;
 
-    final tomServerUrlInterceptor = getIt.get<DynamicUrlInterceptors>(
-      instanceName: NetworkDI.tomServerUrlInterceptorName,
-    );
+    final tomServerUrlInterceptor = ref.read(tomServerUrlInterceptorProvider);
     if (tomServerUrlInterceptor.baseUrl == tomServer.baseUrl?.toString()) {
       return;
     }
