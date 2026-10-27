@@ -187,27 +187,14 @@ void main() {
 
       expect(accounts, [
         const Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
-        const Account(id: 'p', status: AccountStatus.unavailable),
+        const Account(id: 'p', status: AccountStatus.loggedOut),
       ]);
       expect(registry['a'], same(a));
       expect(registry['p'], same(p));
     });
   });
 
-  group('a logged-out client beside others is owed a removal', () {
-    test('adopt lists it as unavailable instead of deleting it', () {
-      final accounts = repository.adopt([
-        FakeAccountClient('a', userID: '@a:s'),
-        FakeAccountClient('p', logged: false),
-      ], pendingRemovals: const {});
-
-      expect(accounts.map((x) => x.status), [
-        AccountStatus.loggedIn,
-        AccountStatus.unavailable,
-      ]);
-      expect(dataSource.calls, isEmpty);
-    });
-
+  group('adopt with a logged-out client', () {
     test('alone it is only logged out (the placeholder of the next login)', () {
       final accounts = repository.adopt([
         FakeAccountClient('p', logged: false),

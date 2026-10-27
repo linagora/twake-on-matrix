@@ -67,22 +67,9 @@ class AccountRepositoryImpl implements AccountRepository {
       ..addAll(clients.map((c) => c.clientName));
     _pendingIds
       ..clear()
-      ..addAll(pendingRemovals.where(_storedIds.contains))
-      ..addAll(_loggedOutBesideOthers(clients));
+      ..addAll(pendingRemovals.where(_storedIds.contains));
     return registeredAccounts();
   }
-
-  /// With several accounts, a client that is not logged in is a leftover of a
-  /// logout whose cleanup did not finish: it is owed a removal, which the app
-  /// runs like any pending one (retried, listed as unavailable meanwhile),
-  /// instead of `ClientManager.getClients` deleting it while it loads.
-  Set<String> _loggedOutBesideOthers(Iterable<Client> clients) =>
-      clients.length > 1
-      ? {
-          for (final c in clients)
-            if (!c.isLogged()) c.clientName,
-        }
-      : const {};
 
   @override
   List<Account> registeredAccounts() => [
