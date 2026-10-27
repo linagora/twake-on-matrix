@@ -1,5 +1,10 @@
 # Specify versions
-ARG FLUTTER_VERSION=3.44.0
+# FLUTTER_VERSION is read from .fvmrc by .github/workflows/image.yaml; this default is the
+# fallback for local builds and must match .fvmrc.
+# cirruslabs/flutter has no 3.47.x image, so the stage starts from the newest image
+# (FLUTTER_IMAGE_VERSION) and moves its Flutter checkout to FLUTTER_VERSION.
+ARG FLUTTER_IMAGE_VERSION=3.44.0
+ARG FLUTTER_VERSION=3.47.5
 # Pins both nginx stages and the source the brotli module is compiled against.
 ARG NGINX_VERSION=1.31.8
 
@@ -7,7 +12,8 @@ ARG NGINX_VERSION=1.31.8
 # The web output is platform-independent: this stage runs once, on the build
 # host's platform, and only the nginx stages are built per target platform.
 # See .github/workflows/image.yaml for the CI build and its requirements.
-FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS web-builder
+FROM --platform=$BUILDPLATFORM ghcr.io/cirruslabs/flutter:${FLUTTER_IMAGE_VERSION} AS web-builder
+ARG FLUTTER_VERSION
 ARG TWAKECHAT_BASE_HREF="/web/"
 # Sentry values are injected from build args; only SENTRY_PROJECT and SENTRY_ORG
 # are required. The auth token is passed as a build secret, not an arg.
@@ -23,6 +29,13 @@ ENV SENTRY_PROJECT=${SENTRY_PROJECT} \
     SENTRY_DIST=${SENTRY_DIST} \
     SENTRY_DSN=${SENTRY_DSN} \
     SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT}
+
+# The base image ships a shallow Flutter checkout; move it to FLUTTER_VERSION and
+# download the matching Dart SDK and web artifacts.
+RUN git -C "$FLUTTER_ROOT" fetch --depth 1 origin tag "${FLUTTER_VERSION}" && \
+    git -C "$FLUTTER_ROOT" checkout "${FLUTTER_VERSION}" && \
+    flutter precache --web && \
+    flutter --version
 
 # Install build dependencies
 ENV DEBIAN_FRONTEND=noninteractive
