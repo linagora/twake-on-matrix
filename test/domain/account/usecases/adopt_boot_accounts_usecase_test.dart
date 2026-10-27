@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/repositories/account_boot_port.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts.dart';
+import 'package:twake_chat/domain/account/usecases/adopt_boot_accounts_usecase.dart';
 
 class _FakeRepository extends Fake implements AccountRepository {
   _FakeRepository(this.known);

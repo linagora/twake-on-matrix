@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 
@@ -152,7 +153,7 @@ class Accounts extends _$Accounts {
 
   /// Records, across restarts, that the removal of [id] is pending.
   Future<void> recordPendingRemoval(AccountId id) => _serialized(
-    () => ref.read(recordPendingRemovalUseCaseProvider).execute(id.value),
+    () => ref.read(accountRepositoryProvider).markRemovalPending(id.value),
   );
 
   /// The only account logged out; it stays in the state as `LastLoggedOut`.

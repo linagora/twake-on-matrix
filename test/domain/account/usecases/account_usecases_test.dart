@@ -9,10 +9,9 @@ import 'package:twake_chat/domain/account/policy/account_switch_transitions.dart
 import 'package:twake_chat/domain/account/policy/account_transition_support.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/domain/account/usecases/add_account.dart';
-import 'package:twake_chat/domain/account/usecases/initialize_accounts.dart';
-import 'package:twake_chat/domain/account/usecases/record_pending_removal.dart';
-import 'package:twake_chat/domain/account/usecases/remove_account.dart';
+import 'package:twake_chat/domain/account/usecases/add_account_usecase.dart';
+import 'package:twake_chat/domain/account/usecases/initialize_accounts_usecase.dart';
+import 'package:twake_chat/domain/account/usecases/remove_account_usecase.dart';
 
 const _policy = AccountPolicy();
 const _support = AccountTransitionSupport();
@@ -196,13 +195,5 @@ void main() {
 
       expect(next, Active(accounts: [a, c], activeId: 'a'));
     });
-  });
-
-  test('RecordPendingRemovalUseCase records the removal', () async {
-    final repository = _FakeRepository([a]);
-
-    await RecordPendingRemovalUseCase(repository: repository).execute('a');
-
-    expect(repository.writes, ['pending a']);
   });
 }
