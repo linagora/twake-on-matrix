@@ -186,6 +186,52 @@ void main() {
     effects.checks.clear();
   }
 
+  /// The failed switch left the origin `a` active, applied again and alone in
+  /// the shared state.
+  void expectOriginRestored() {
+    expect(coordinator.isAppliedTo(a), isTrue);
+    expect(effects.store.values.toSet(), {'a'});
+    expect((state() as Active).activeId, 'a');
+  }
+
+  /// The origin `a` ran no step and the shared state holds only [id].
+  void expectOriginUntouchedAndStoreOn(String id) {
+    expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
+    expect(effects.store.values.toSet(), {id});
+  }
+
+  /// The failed switch left the origin `a` active and did not apply it again.
+  Future<void> expectOriginNotRestored(Future<void> failedSwitch) async {
+    await failedSwitch;
+    await settle();
+    expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
+    expect((state() as Active).activeId, 'a');
+  }
+
+  /// [client] is the active account and its effects run once, in full.
+  Future<void> expectActivationRunsOnce(Client client) async {
+    expect(await coordinator.activateCurrent(), isTrue);
+    expect(effects.log, fullRunFor(client.clientName));
+    expect(coordinator.isAppliedTo(client), isTrue);
+  }
+
+  /// An older switch to b waits at `tom` ([first]); a switch back to a ends
+  /// it, and a newer switch to b waits at the same step ([second]). The
+  /// failures set before are cleared once the older one is replaced.
+  Future<({Future<void> older, Future<void> newer})> holdOlderAndNewerToB(
+    Completer<void> first,
+    Completer<void> second,
+  ) async {
+    final older = supersededSwitchHeldAt('tom:b', 'b', first);
+    await pump();
+    await switchTo('a');
+    effects.failing.clear();
+    effects.gates['tom:b'] = second;
+    final newer = switchTo('b');
+    await pump();
+    return (older: older, newer: newer);
+  }
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     effects = FakeSwitchEffects();
@@ -246,23 +292,18 @@ void main() {
       effects.failing.add('homeserver:b');
       boot();
       expect(coordinator.hasApplied, isFalse);
-      await expectLater(switchTo('b'), throwsStateError);
-      await settle();
+      await expectOriginNotRestored(
+        expectLater(switchTo('b'), throwsStateError),
+      );
 
-      expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
       expect(coordinator.hasApplied, isFalse);
-      expect((state() as Active).activeId, 'a');
     });
 
     test('an origin applied before a failed switch is restored even when '
         'the switch was retried first', () async {
       await bootApplied();
       effects.failing.add('homeserver:c');
-      effects.gates['tom:b'] = Completer<void>();
-      final first = expectLater(
-        switchTo('b'),
-        throwsA(isA<SwitchSupersededException>()),
-      );
+      final first = supersededSwitchHeldAt('tom:b', 'b');
       await pump();
       final second = expectLater(switchTo('c'), throwsStateError);
       await pump();
@@ -317,21 +358,10 @@ void main() {
     test(
       'a switch replaced by a newer one is not logged as a failure',
       () async {
-        effects.gates['userInfo'] = Completer<void>();
         boot();
         Logs().outputEvents.clear();
-        final first = switchTo('b');
-        final firstResult = expectLater(
-          first,
-          throwsA(isA<SwitchSupersededException>()),
-        );
-        await pump();
 
-        final second = switchTo('c');
-        await pump();
-        effects.gates['userInfo']!.complete();
-        await second;
-        await firstResult;
+        await replaceHeldSwitchToB('userInfo');
 
         expect(Logs().outputEvents.where((e) => e.level == Level.wtf), isEmpty);
       },
@@ -339,13 +369,8 @@ void main() {
 
     test('a newer switch wins; the older effects stop at their next '
         'checkpoint', () async {
-      effects.gates['userInfo'] = Completer<void>();
       boot();
-      final first = switchTo('b');
-      final firstResult = expectLater(
-        first,
-        throwsA(isA<SwitchSupersededException>()),
-      );
+      final firstResult = supersededSwitchHeldAt('userInfo', 'b');
       await pump();
       expect(effects.log.last, 'userInfo:b');
 
@@ -357,8 +382,7 @@ void main() {
       await pump();
 
       expect((state() as Active).activeId, 'c');
-      expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
-      expect(effects.store.values.toSet(), {'c'});
+      expectOriginUntouchedAndStoreOn('c');
       expect(effects.log.where((e) => e == 'homeserver:b'), isEmpty);
       expect(effects.log.where((e) => e.endsWith(':b')), [
         'tom:b',
@@ -462,9 +486,7 @@ void main() {
         'homeserver:b',
         ...fullRunFor('a'),
       ]);
-      expect(coordinator.isAppliedTo(a), isTrue);
-      expect(effects.store.values.toSet(), {'a'});
-      expect((state() as Active).activeId, 'a');
+      expectOriginRestored();
     });
 
     test('a failing restore is logged, not thrown, and the next activation '
@@ -527,10 +549,8 @@ void main() {
       await toB;
       await settle();
 
-      expect((state() as Active).activeId, 'a');
       expect(effects.checks, contains('userInfo:b:false'));
-      expect(coordinator.isAppliedTo(a), isTrue);
-      expect(effects.store.values.toSet(), {'a'});
+      expectOriginRestored();
       expect(effects.log, isNot(contains('homeserver:b')));
     });
 
@@ -538,16 +558,8 @@ void main() {
       await bootApplied();
       await replaceHeldSwitchToB('userInfo:b');
 
-      expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
-      expect(effects.store.values.toSet(), {'c'});
+      expectOriginUntouchedAndStoreOn('c');
     });
-
-    Future<void> expectOriginNotRestored(Future<void> failedSwitch) async {
-      await failedSwitch;
-      await settle();
-      expect(effects.log.where((e) => e.endsWith(':a')), isEmpty);
-      expect((state() as Active).activeId, 'a');
-    }
 
     test('an origin that never had a client is not restored after a failed '
         'switch', () async {
@@ -628,9 +640,7 @@ void main() {
 
     test('applies the active account once; later calls are no-ops', () async {
       boot();
-      expect(await coordinator.activateCurrent(), isTrue);
-      expect(effects.log, fullRunFor('a'));
-      expect(coordinator.isAppliedTo(a), isTrue);
+      await expectActivationRunsOnce(a);
 
       expect(await coordinator.activateCurrent(), isFalse);
       expect(effects.log, fullRunFor('a'));
@@ -682,8 +692,7 @@ void main() {
           .addAccount(const AccountId('a'));
       expect((state() as Active).activeId, 'a');
 
-      expect(await coordinator.activateCurrent(), isTrue);
-      expect(effects.log, fullRunFor('a'));
+      await expectActivationRunsOnce(first);
       expect(await coordinator.activateCurrent(), isFalse);
       expect(effects.log, fullRunFor('a'));
     });
@@ -722,9 +731,7 @@ void main() {
       await container
           .read(accountsProvider.notifier)
           .addAccount(const AccountId('a'));
-      expect(await coordinator.activateCurrent(), isTrue);
-      expect(effects.log, fullRunFor('a'));
-      expect(coordinator.isAppliedTo(only), isTrue);
+      await expectActivationRunsOnce(only);
     });
 
     test('a run still going when the account logs out cannot mark it '
@@ -746,23 +753,26 @@ void main() {
   });
 
   group('same-target switches', () {
-    test(
-      'the end of an older switch to b does not end a newer one to b',
-      () async {
+    // The failing step is cleared before the older switch resumes, as the
+    // older one stops at its token check without reaching it.
+    const cases = {
+      'the end of an older switch to b does not end a newer one to b': false,
+      'the failure of an older switch to b does not fail a newer one to b':
+          true,
+    };
+    for (final entry in cases.entries) {
+      test(entry.key, () async {
         await bootApplied();
         final first = Completer<void>();
         final second = Completer<void>();
+        if (entry.value) effects.failing.add('persist:b');
 
-        final toB = supersededSwitchHeldAt('tom:b', 'b', first);
-        await pump();
-        await switchTo('a');
-        effects.gates['tom:b'] = second;
+        final held = await holdOlderAndNewerToB(first, second);
         var done = false;
-        final againToB = switchTo('b').then((_) => done = true);
-        await pump();
+        final againToB = held.newer.then((_) => done = true);
 
         first.complete();
-        await toB;
+        await held.older;
         await settle();
         expect(done, isFalse);
         expect(state(), isA<Switching>());
@@ -771,33 +781,8 @@ void main() {
         await againToB;
         expect((state() as Active).activeId, 'b');
         expect(coordinator.isAppliedTo(b), isTrue);
-      },
-    );
-
-    test('the failure of an older switch to b does not fail a newer one to '
-        'b', () async {
-      await bootApplied();
-      final first = Completer<void>();
-      final second = Completer<void>();
-      effects.failing.add('persist:b');
-
-      final toB = supersededSwitchHeldAt('tom:b', 'b', first);
-      await pump();
-      await switchTo('a');
-      effects.failing.clear();
-      effects.gates['tom:b'] = second;
-      final againToB = switchTo('b');
-      await pump();
-
-      first.complete();
-      await toB;
-      await settle();
-      expect(state(), isA<Switching>());
-
-      second.complete();
-      await againToB;
-      expect((state() as Active).activeId, 'b');
-    });
+      });
+    }
   });
 
   group('first activation and lifecycle', () {
@@ -865,11 +850,7 @@ void main() {
         await expectLater(switchTo('b'), throwsStateError);
       },
       'a switch replaced by a newer one': () async {
-        effects.gates['tom:b'] = Completer<void>();
-        final first = expectLater(
-          switchTo('b'),
-          throwsA(isA<SwitchSupersededException>()),
-        );
+        final first = supersededSwitchHeldAt('tom:b', 'b');
         await pump();
         final second = switchTo('c');
         effects.gates['tom:b']!.complete();
