@@ -103,12 +103,13 @@ Future<void> _tryPushHelper(
   );
 
   if (client == null) {
-    final loggedIn = ClientManager.loggedIn(await ClientManager.getClients());
-    if (loggedIn.isEmpty) {
+    client = await ClientManager.firstLoggedIn(
+      await ClientManager.getClients(initialize: false),
+    );
+    if (client == null) {
       Logs().v('No logged-in client for the push. Stop push helper here.');
       return;
     }
-    client = loggedIn.first;
   }
   final event = await client.getEventByPushNotification(
     notification,

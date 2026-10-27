@@ -44,6 +44,7 @@ import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart'
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
+import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/account_services_providers.dart';
@@ -129,6 +130,7 @@ class MatrixState extends ConsumerState<Matrix>
   StreamSubscription<PlayerState>? _audioPlayerStateSubscription;
 
   late final AccountSwitchCoordinator _switchCoordinator;
+  late final AccountSwitchEffectsHolder _switchEffects;
   Store store = Store();
   // TODO: [transitional] migrate call sites to loginHomeserverSummaryProvider and remove this getter/setter.
   HomeserverSummary? get loginHomeserverSummary =>
@@ -472,20 +474,19 @@ class MatrixState extends ConsumerState<Matrix>
     _subscriptions = ref.read(clientSubscriptionsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
     _pushRemovals = ref.read(pushRemovalsProvider);
-    final registry = ref.read(accountClientRegistryProvider);
-    _switchCoordinator = AccountSwitchCoordinator(
-      effects: this,
-      accounts: ref.read(accountsProvider.notifier),
-      clientOf: (id) => registry[id],
-      currentState: () => ref.read(accountsProvider),
-    )..start();
+    // The coordinator registers the switch handler when it is read. It reads
+    // the effects only when a switch runs, so they are set right after the
+    // first build: a provider cannot be written while the tree is building.
+    _switchEffects = ref.read(accountSwitchEffectsProvider.notifier);
+    _switchCoordinator = ref.read(accountSwitchCoordinatorProvider);
     _httpClientOwner = _currentHttpClientOwner();
-    ref.listenManual(accountsProvider, (previous, next) {
-      _httpClientOwner = _currentHttpClientOwner();
-      unawaited(_switchCoordinator.onAccountsChanged(previous, next));
-    });
+    ref.listenManual(
+      accountsProvider,
+      (_, _) => _httpClientOwner = _currentHttpClientOwner(),
+    );
     _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) _switchEffects.set(this);
       WidgetsBinding.instance.addObserver(this);
       if (PlatformInfos.isWeb) {
         html.window.addEventListener('focus', onWindowFocus);
@@ -922,11 +923,23 @@ class MatrixState extends ConsumerState<Matrix>
   void _report(Object error, StackTrace stackTrace, String what) =>
       Logs().wtf('MatrixState: $what', error, stackTrace);
 
+  /// A new session opened for [id]: a pusher deletion kept from the session
+  /// before would run against this one, so it is dropped with its record.
+  Future<void> _dropKeptPushRemoval(String id) async {
+    if (!_pushRemovals.forget(id)) return;
+    try {
+      await ref.read(accountRepositoryProvider).clearPushRemovalPending(id);
+    } catch (e, s) {
+      _report(e, s, 'record of the dropped pusher deletion of $id');
+    }
+  }
+
   Future<void> _handleFirstLoggedIn(
     Client newActiveClient,
     LoginState loginState,
   ) async {
     waitForFirstSync = false;
+    await _dropKeptPushRemoval(newActiveClient.clientName);
     _rememberContactOwner(newActiveClient);
     try {
       await ref
@@ -1724,7 +1737,7 @@ class MatrixState extends ConsumerState<Matrix>
     }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
-      ref.read(accountsProvider.notifier).logoutLast();
+      await ref.read(accountsProvider.notifier).logoutLast();
     }
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
@@ -1919,7 +1932,9 @@ class MatrixState extends ConsumerState<Matrix>
     _logoutRemovals.dispose();
     _pushRemovals.dispose();
     onClientLoginStateChanged.close();
-    _switchCoordinator.dispose();
+    // A provider cannot be written while the tree is being finalized.
+    final switchEffects = _switchEffects;
+    unawaited(Future.microtask(() => switchEffects.clear(this)));
     _httpClientOwner?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();

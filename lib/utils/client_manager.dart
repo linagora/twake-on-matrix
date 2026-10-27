@@ -55,23 +55,29 @@ abstract class ClientManager {
     }
     final clients = await Future.wait(clientNames.map(createClient));
     if (initialize) {
-      await Future.wait(
-        clients.map(
-          (client) => client
-              .init(
-                waitForFirstSync: false,
-                waitUntilLoadCompletedLoaded: false,
-              )
-              .then((_) => _syncKeychainForClient(client))
-              .catchError(
-                (e, s) => Logs().e('Unable to initialize client', e, s),
-              ),
-        ),
-      );
+      await Future.wait(clients.map(initClient));
     }
     // A logged-out client next to others is not deleted here: the account
     // repository lists it as a pending removal, which is retried until it works.
     return clients;
+  }
+
+  /// Initialises [client] and syncs its session to the keychain. A failure is
+  /// logged, not thrown.
+  static Future<void> initClient(Client client) => client
+      .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
+      .then((_) => _syncKeychainForClient(client))
+      .catchError((e, s) => Logs().e('Unable to initialize client', e, s));
+
+  /// The first client that holds a session. It initialises one client at a
+  /// time and stops at the first logged-in one: the background isolate of a
+  /// push needs one account, not all of them.
+  static Future<Client?> firstLoggedIn(Iterable<Client> clients) async {
+    for (final client in clients) {
+      await initClient(client);
+      if (client.isLogged()) return client;
+    }
+    return null;
   }
 
   /// The clients that hold a session. A logged-out client stays loaded while

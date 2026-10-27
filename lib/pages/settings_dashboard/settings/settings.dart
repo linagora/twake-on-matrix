@@ -9,7 +9,7 @@ import 'package:twake_chat/domain/repository/federation_configurations_repositor
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
-import 'package:twake_chat/providers/logout_failure_reporter.dart';
+import 'package:twake_chat/data/account/logout_failure_reporter.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';

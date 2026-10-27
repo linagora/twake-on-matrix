@@ -26,4 +26,23 @@ void main() {
       expect(ClientManager.loggedIn([loggedOut]), isEmpty);
     });
   });
+
+  group('ClientManager.firstLoggedIn', () {
+    test('skips a logged-out client and returns the logged-in one', () async {
+      final loggedIn = await getClient();
+      final loggedOut = Client('logged-out', database: MockDatabase());
+
+      expect(
+        await ClientManager.firstLoggedIn([loggedOut, loggedIn]),
+        same(loggedIn),
+      );
+    });
+
+    test('no client holds a session: nothing is returned', () async {
+      final loggedOut = Client('logged-out', database: MockDatabase());
+
+      expect(await ClientManager.firstLoggedIn([loggedOut]), isNull);
+      expect(await ClientManager.firstLoggedIn(const []), isNull);
+    });
+  });
 }
