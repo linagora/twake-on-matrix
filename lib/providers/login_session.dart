@@ -71,12 +71,18 @@ enum _SetUp { tom, federation, recoveryKey, push }
 class LoginSession {
   /// The session of a client that already exists. It does not listen for the
   /// login itself: the app's listener for that client hands the event to
-  /// [onLoggedIn].
+  /// [onLoggedIn]. It only watches for `loggedOut`, to tell a new login of the
+  /// client from a repeated `loggedIn` (the SDK sends one after a soft logout).
+  /// The subscription is never cancelled: a session that keeps its client is
+  /// never disposed, and it lives as long as the client.
   LoginSession.placeholder(this._host, Client client)
     : _client = client,
       keepsClient = true,
       _state = LoginSessionState.created {
     ready = Future.value(client);
+    _host.listenLoginState(client, (state) {
+      if (state == LoginState.loggedOut) _loggedOutSeen = true;
+    });
   }
 
   /// Creates the candidate in the background; [ready] is its client.
@@ -98,6 +104,11 @@ class LoginSession {
   /// would run while the candidate is thrown away.
   bool _disposeRequested = false;
   StreamSubscription<LoginState>? _loggedInSubscription;
+
+  /// True once a kept client reported `loggedOut` since the last login this
+  /// session accepted. Written by the listener, outside the queue; each queued
+  /// [onLoggedIn] reads it when it runs.
+  bool _loggedOutSeen = false;
   bool _accountAdded = false;
 
   /// True once the shared state (ToM, authorization, home server) was set for
@@ -189,6 +200,7 @@ class LoginSession {
       _move(LoginSessionState.created, {LoginSessionState.active});
     }
     if (!_acceptsLogin) return; // a repeated event, or a session ending
+    _loggedOutSeen = false;
     _move(LoginSessionState.registering, {
       LoginSessionState.created,
       LoginSessionState.loggingIn,
@@ -210,12 +222,11 @@ class LoginSession {
     }
   });
 
-  /// The account of a kept client logged out since: this is a new login of the
-  /// same client, not a repeated event.
+  /// The kept client reported `loggedOut` since it became active: this is a new
+  /// login of the same client, not a repeated event. The state of the client
+  /// cannot tell: it holds a session again when the new `loggedIn` arrives.
   bool get _isNewLoginOfKeptClient =>
-      _state == LoginSessionState.active &&
-      keepsClient &&
-      !_host.isLoggedIn(_accountId);
+      _state == LoginSessionState.active && keepsClient && _loggedOutSeen;
 
   bool get _acceptsLogin =>
       _state == LoginSessionState.created ||

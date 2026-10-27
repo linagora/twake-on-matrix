@@ -530,27 +530,74 @@ void main() {
       expect(host.calls.last, 'emit:firstLoggedIn');
     });
 
+    // The SDK reports `loggedIn` after it holds the session again, so the
+    // client is logged in when the event arrives.
+    Future<void> logOutThenLogInAgain() async {
+      host.loggedIn.remove('a');
+      host.streams['a']!.add(LoginState.loggedOut);
+      await pumpEventQueue();
+      host.loggedIn.add('a');
+      host.calls.clear();
+      await session.onLoggedIn(LoginState.loggedIn);
+    }
+
     test('a new login after the account logged out runs again', () async {
       await session.onLoggedIn(LoginState.loggedIn);
-      host.loggedIn.remove('a');
+
+      await logOutThenLogInAgain();
+
+      expect(host.calls, contains('activateCurrent'));
+      expect(session.state, LoginSessionState.active);
+    });
+
+    Future<void> expectNextLoginIgnored() async {
       host.calls.clear();
 
       await session.onLoggedIn(LoginState.loggedIn);
 
-      expect(host.calls, contains('activateCurrent'));
+      expect(host.calls, isEmpty);
       expect(session.state, LoginSessionState.active);
+    }
+
+    test('the logout is forgotten once the next login is accepted', () async {
+      await session.onLoggedIn(LoginState.loggedIn);
+      await logOutThenLogInAgain();
+
+      await expectNextLoginIgnored();
+    });
+
+    test(
+      'a loggedIn after a soft logout is a repeat, not a new login',
+      () async {
+        await session.onLoggedIn(LoginState.loggedIn);
+        host.streams['a']!.add(LoginState.softLoggedOut);
+        await pumpEventQueue();
+
+        await expectNextLoginIgnored();
+      },
+    );
+
+    test('a login try is refused while the cleanup keeps failing', () async {
+      host.failing.addAll(['activateCurrent', 'logoutLast']);
+      await session.onLoggedIn(LoginState.loggedIn);
+      await session.retryCleanup();
+      expect(session.state, LoginSessionState.cleanupFailed);
+
+      expect(() => session.trackLogin<void>(() async {}), throwsStateError);
+      expect(session.state, LoginSessionState.cleanupFailed);
+
+      host.failing.clear();
+      await session.retryCleanup();
+      await session.trackLogin<void>(() async {});
+      expect(session.state, LoginSessionState.loggingIn);
     });
 
     test(
       'a repeated login event of a logged-in account does nothing',
       () async {
         await session.onLoggedIn(LoginState.loggedIn);
-        host.calls.clear();
 
-        await session.onLoggedIn(LoginState.loggedIn);
-
-        expect(host.calls, isEmpty);
-        expect(session.state, LoginSessionState.active);
+        await expectNextLoginIgnored();
       },
     );
 
