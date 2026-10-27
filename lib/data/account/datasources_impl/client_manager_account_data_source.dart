@@ -3,13 +3,24 @@ import 'package:twake_chat/data/account/datasources/account_client_data_source.d
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/open_sqflite_db.dart';
 
-/// Wraps the statics of [ClientManager], which stays as it is for now.
+/// How far disposing a client and deleting its storage got.
+enum _Stage {
+  /// The client is disposed; its storage is still there.
+  disposed,
+
+  /// The storage is deleted too: nothing is left to do.
+  storageDeleted,
+}
+
+/// Adapts the statics of [ClientManager], which stays as it is for now, and
+/// remembers per [Client] how far its disposal went, so a repeated call
+/// resumes where the last one stopped.
 class ClientManagerAccountDataSource implements AccountClientDataSource {
   ClientManagerAccountDataSource();
 
-  /// Clients whose disposal worked, so a retry after a failed delete does not
-  /// dispose them twice. A disposal that fails is not recorded and is retried.
-  final Set<Client> _disposed = {};
+  /// Keyed by identity and weak: an entry goes away with its client, so
+  /// nothing has to be cleared.
+  final Expando<_Stage> _stages = Expando<_Stage>('disposal stage');
 
   @override
   Future<Client> createClient(String clientName) =>
@@ -25,14 +36,15 @@ class ClientManagerAccountDataSource implements AccountClientDataSource {
 
   @override
   Future<void> disposeAndDeleteStorage(Client client) async {
+    if (_stages[client] == _Stage.storageDeleted) return;
     final database = client.database;
-    if (!_disposed.contains(client)) {
+    if (_stages[client] == null) {
       await client.dispose(closeDatabase: false);
-      _disposed.add(client);
+      _stages[client] = _Stage.disposed;
     }
     await database.delete();
     final path = database is MatrixSdkDatabase ? database.database?.path : null;
     if (path != null) await deleteSqfliteDb(path);
-    _disposed.remove(client);
+    _stages[client] = _Stage.storageDeleted;
   }
 }

@@ -320,7 +320,7 @@ void main() {
     );
 
     test(
-      'a name that cannot be removed does not delete the storage twice',
+      'a name that cannot be removed keeps the account, and can be retried',
       () async {
         dataSource.failRemoveName = true;
 
@@ -333,7 +333,14 @@ void main() {
         dataSource.failRemoveName = false;
         await repository.removeAccount('b');
 
-        expect(dataSource.calls, ['delete:b', 'remove:b', 'remove:b']);
+        // The fake data source does not remember; that the second delete is
+        // a no-op is the data source's guarantee (its own test).
+        expect(dataSource.calls, [
+          'delete:b',
+          'remove:b',
+          'delete:b',
+          'remove:b',
+        ]);
         expect(registry['b'], isNull);
       },
     );

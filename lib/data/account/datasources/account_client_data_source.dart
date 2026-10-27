@@ -9,6 +9,8 @@ abstract interface class AccountClientDataSource {
 
   Future<void> removeClientName(String clientName);
 
-  /// Disposes [client] and deletes its database.
+  /// Disposes [client] and deletes its database. Idempotent per [client]: a
+  /// call after a failure resumes without disposing it again, and a call after
+  /// a success does nothing.
   Future<void> disposeAndDeleteStorage(Client client);
 }

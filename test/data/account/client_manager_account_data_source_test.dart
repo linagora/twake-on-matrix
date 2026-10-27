@@ -16,7 +16,8 @@ class _FakeDatabase extends Fake implements DatabaseApi {
 }
 
 class _DisposableClient extends Fake implements Client {
-  _DisposableClient(this.calls) : database = _FakeDatabase(calls);
+  _DisposableClient(this.calls, {this.clientName = 'c1'})
+    : database = _FakeDatabase(calls);
 
   final List<String> calls;
   bool failDispose = false;
@@ -25,7 +26,7 @@ class _DisposableClient extends Fake implements Client {
   final _FakeDatabase database;
 
   @override
-  String get clientName => 'c1';
+  final String clientName;
 
   @override
   Future<void> dispose({bool closeDatabase = true}) async {
@@ -77,5 +78,42 @@ void main() {
     await source.disposeAndDeleteStorage(client);
 
     expect(calls, ['dispose', 'delete', 'delete']);
+  });
+
+  test('a repeat after a success disposes and deletes nothing again', () async {
+    await source.disposeAndDeleteStorage(client);
+
+    await source.disposeAndDeleteStorage(client);
+
+    expect(calls, ['dispose', 'delete']);
+  });
+
+  test('a repeat after a failed delete resumes, then stays done', () async {
+    client.database.failDelete = true;
+    await expectLater(source.disposeAndDeleteStorage(client), throwsStateError);
+    client.database.failDelete = false;
+    await source.disposeAndDeleteStorage(client);
+
+    await source.disposeAndDeleteStorage(client);
+
+    expect(calls, ['dispose', 'delete', 'delete']);
+  });
+
+  test('a client that is not done is not held back by another', () async {
+    final other = _DisposableClient(calls);
+    await source.disposeAndDeleteStorage(client);
+
+    await source.disposeAndDeleteStorage(other);
+
+    expect(calls, ['dispose', 'delete', 'dispose', 'delete']);
+  });
+
+  test('a new client with the same name is disposed and deleted', () async {
+    await source.disposeAndDeleteStorage(client);
+    final recreated = _DisposableClient(calls);
+
+    await source.disposeAndDeleteStorage(recreated);
+
+    expect(calls, ['dispose', 'delete', 'dispose', 'delete']);
   });
 }

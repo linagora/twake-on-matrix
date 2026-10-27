@@ -101,11 +101,10 @@ class AccountRepositoryImpl implements AccountRepository {
     if (!_storedIds.contains(id)) throw NotStoredAccountException(id);
     // The storage goes first and the bookkeeping only when that worked, so a
     // failure leaves the account listed and the call can be repeated.
-    await _deleteStorage(id, client);
+    await _dataSource.disposeAndDeleteStorage(client);
     await _dataSource.removeClientName(id);
     _storedIds.remove(id);
     _registry.remove(id);
-    _storageDeleted.remove(id);
     await _forgetPending(id);
   }
 
@@ -203,9 +202,8 @@ class AccountRepositoryImpl implements AccountRepository {
     }
     final client = _requireClient(id);
     if (_storedIds.contains(id)) throw StoredAccountException(id);
-    await _deleteStorage(id, client);
+    await _dataSource.disposeAndDeleteStorage(client);
     _registry.remove(id);
-    _storageDeleted.remove(id);
     await _forgetPendingDiscard(id);
   }
 
@@ -218,16 +216,6 @@ class AccountRepositoryImpl implements AccountRepository {
     } catch (e, s) {
       Logs().w('Cannot clear the pending discard of $id', e, s);
     }
-  }
-
-  /// Ids whose client was disposed and whose storage was deleted but whose
-  /// bookkeeping is still there: a retry does not dispose them twice.
-  final Set<String> _storageDeleted = {};
-
-  Future<void> _deleteStorage(String id, Client client) async {
-    if (_storageDeleted.contains(id)) return;
-    await _dataSource.disposeAndDeleteStorage(client);
-    _storageDeleted.add(id);
   }
 
   @override
