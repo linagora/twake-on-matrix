@@ -160,6 +160,15 @@ jobs:
           script: |
             bash scripts/ci/run-patrol-emulator.sh "$PATROL_TEST_TARGET"
 
+      - name: Upload Patrol diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patrol-diagnostics-${{ github.run_attempt }}
+          path: patrol-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Tear down Synapse
         if: always()
         run: docker rm -f synapse || true
@@ -335,6 +344,15 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none -memory 4096 -no-snapshot
           script: |
             bash scripts/ci/run-patrol-emulator.sh ${{ matrix.targets }}
+
+      - name: Upload Patrol diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: patrol-diagnostics-${{ matrix.shard }}-${{ github.run_attempt }}
+          path: patrol-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Tear down Synapse
         if: always()

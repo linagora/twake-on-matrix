@@ -18,6 +18,7 @@ fi
 
 DEVICE="${PATROL_DEVICE:-emulator-5554}"
 ADB="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}/platform-tools/adb"
+APP_PACKAGE="app.twake.android.chat"
 
 export PATH="$PATH:$HOME/.pub-cache/bin"
 
@@ -70,5 +71,17 @@ wait "$logcat_pid" 2>/dev/null || true
 echo "=== crash signatures from logcat ==="
 grep -aE -A30 "FATAL EXCEPTION|Fatal signal|SIGSEGV|SIGABRT|Process crashed|tombstone|Abort message" logcat.txt \
   | tail -n 200 || true
+
+# Collected here: the emulator is killed right after this script.
+if [[ "$status" -ne 0 ]]; then
+  diagnostics_dir="patrol-diagnostics"
+  mkdir -p "$diagnostics_dir"
+  cp logcat.txt "$diagnostics_dir/" || true
+  "$ADB" -s "$DEVICE" logcat -b crash -d > "$diagnostics_dir/logcat-crash.txt" 2>&1 || true
+  "$ADB" -s "$DEVICE" logcat -b events -d > "$diagnostics_dir/logcat-events.txt" 2>&1 || true
+  "$ADB" -s "$DEVICE" shell dumpsys activity exit-info "$APP_PACKAGE" \
+    > "$diagnostics_dir/exit-info.txt" 2>&1 || true
+  cp -R build/app/outputs/androidTest-results "$diagnostics_dir/" 2>/dev/null || true
+fi
 
 exit "$status"
