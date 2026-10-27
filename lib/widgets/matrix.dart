@@ -1175,7 +1175,7 @@ class MatrixState extends ConsumerState<Matrix>
     try {
       final toMConfigurations =
           await getTomConfigurations(account.userID!) ??
-          await _discoverFreshInstallToMConfiguration(account);
+          await _discoverFreshInstallToMConfiguration(account, token);
       if (!_isCurrent(token)) return;
       if (toMConfigurations == null) {
         // No ToM server for this account: drop any configuration left over
@@ -1199,11 +1199,15 @@ class MatrixState extends ConsumerState<Matrix>
   /// Fresh-install bootstrap: no ToM configuration has been stored for the
   /// current account yet, so the active homeserver discovery is the source of
   /// truth. When a ToM server is discovered, the configuration is persisted
-  /// so later boots stay local-only. Returns `null` for non-ToM accounts.
+  /// so later boots stay local-only. Returns `null` for non-ToM accounts, and
+  /// when a newer switch took over meanwhile: the shared summary then belongs
+  /// to that other account and must not be stored for [client].
   Future<ToMConfigurations?> _discoverFreshInstallToMConfiguration(
-    Client client,
-  ) async {
-    await _getHomeserverInformation(client);
+    Client client, [
+    SwitchToken? token,
+  ]) async {
+    await _getHomeserverInformation(client, token);
+    if (!_isCurrent(token)) return null;
     final tomServer = loginHomeserverSummary?.tomServer;
     if (tomServer == null) return null;
 
