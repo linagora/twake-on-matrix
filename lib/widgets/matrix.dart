@@ -233,6 +233,9 @@ class MatrixState extends ConsumerState<Matrix>
         '${e.transition} is not allowed from ${e.stateName}',
       );
       return SetActiveClientState.unavailable;
+    } on SwitchSupersededException {
+      // A newer request won: this one did not make the account active.
+      return SetActiveClientState.unavailable;
     }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.activeId == id) {
