@@ -10,7 +10,11 @@ import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
@@ -117,6 +121,68 @@ class _FakeToMConfigurationsRepository extends Fake
       stored[userId] ?? (throw StateError('no ToM configuration for $userId'));
 }
 
+/// Like [_FakeToMConfigurationsRepository], but once its [hold] is armed, the
+/// second read of [gatedId] waits for it and then returns [lateValue]: the fallback
+/// read of a switch that a newer one supersedes meanwhile.
+class _GatedToMConfigurationsRepository
+    extends _FakeToMConfigurationsRepository {
+  _GatedToMConfigurationsRepository(
+    super.stored, {
+    required this.gatedId,
+    required this.lateValue,
+  });
+
+  final String gatedId;
+  final ToMConfigurations lateValue;
+  final hold = _Hold();
+  int _reads = 0;
+
+  @override
+  Future<ToMConfigurations> getTomConfigurations(String userId) async {
+    if (!hold.armed || userId != gatedId || ++_reads < 2) {
+      return super.getTomConfigurations(userId);
+    }
+    await hold.pass();
+    return lateValue;
+  }
+}
+
+/// Holds the read that reaches it once [armed], until [gate] completes.
+class _Hold {
+  // Sync: the test body creates them outside the real async zone it awaits in.
+  final gate = Completer<void>.sync();
+  final reached = Completer<void>.sync();
+  bool armed = false;
+
+  Future<void> pass() {
+    reached.complete();
+    return gate.future;
+  }
+}
+
+/// The server language of each account.
+class _FakeUserInfoRepository extends Fake implements UserInfoRepository {
+  _FakeUserInfoRepository(this.languages);
+
+  final Map<String, String> languages;
+
+  @override
+  Future<UserInfo> getUserInfo(String userId) async =>
+      UserInfo(language: languages[Uri.decodeComponent(userId)]);
+}
+
+/// Once its [hold] is armed, the first read of the stored language waits for
+/// it.
+class _GatedLanguageCacheManager extends Fake implements LanguageCacheManager {
+  final hold = _Hold();
+
+  @override
+  Future<Locale?> getStoredLanguage() async {
+    if (hold.armed && !hold.reached.isCompleted) await hold.pass();
+    return null;
+  }
+}
+
 /// The switch effects with only the ToM set-up of `MatrixState`: it is the one
 /// step under test and the others need the whole app wiring.
 class _ToMOnlyEffects implements AccountSwitchEffects {
@@ -151,6 +217,58 @@ class _ToMOnlyEffects implements AccountSwitchEffects {
 
   @override
   void configureSentryUser(Client client) {}
+}
+
+/// The switch effects with only the user info step of `MatrixState`.
+class _UserInfoOnlyEffects extends _ToMOnlyEffects {
+  _UserInfoOnlyEffects(super.matrix);
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadUserInfo(Client client, SwitchToken token) =>
+      matrix.loadUserInfo(client, token);
+}
+
+/// Registers the interceptors the ToM set-up writes and [repository]; returns
+/// the ToM server interceptor.
+DynamicUrlInterceptors _registerToM(
+  ToMConfigurationsRepository repository, {
+  AuthorizationInterceptor? authorization,
+}) {
+  final tomServer = DynamicUrlInterceptors();
+  getIt
+    ..registerSingleton<DynamicUrlInterceptors>(
+      tomServer,
+      instanceName: NetworkDI.tomServerUrlInterceptorName,
+    )
+    ..registerSingleton<DynamicUrlInterceptors>(
+      DynamicUrlInterceptors(),
+      instanceName: NetworkDI.homeServerUrlInterceptorName,
+    )
+    ..registerSingleton<DynamicUrlInterceptors>(
+      DynamicUrlInterceptors(),
+      instanceName: NetworkDI.identityServerUrlInterceptorName,
+    )
+    ..registerSingleton<AuthorizationInterceptor>(
+      authorization ?? AuthorizationInterceptor(),
+    )
+    ..registerSingleton<ToMConfigurationsRepository>(repository);
+  return tomServer;
+}
+
+ToMConfigurations _toM(String url) => ToMConfigurations(
+  tomServerInformation: ToMServerInformation(baseUrl: Uri.parse(url)),
+);
+
+String _languageCode() => LocalizationService.currentLocale.value.languageCode;
+
+/// Waits, in real time, until [done] holds.
+Future<void> _until(bool Function() done) async {
+  for (var i = 0; i < 100 && !done(); i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+  }
 }
 
 /// `setActiveClient` stops the contacts lookup of the account being left.
@@ -208,6 +326,16 @@ class _Harness {
       UncontrolledProviderScope(container: container, child: const SizedBox()),
     );
     await tester.pump();
+  }
+
+  /// Mounts, lets the boot run, then makes [effects] the switch effects.
+  Future<AccountSwitchCoordinator> switchingWith(
+    AccountSwitchEffects Function(MatrixState matrix) effects,
+  ) async {
+    await mount();
+    await settle();
+    container.read(accountSwitchEffectsProvider.notifier).set(effects(matrix));
+    return container.read(accountSwitchCoordinatorProvider);
   }
 
   /// Lets the real async work of `initMatrix` and of the handlers run.
@@ -359,31 +487,11 @@ void main() {
       'not keep the one of the account being left', (tester) async {
     final left = _ToMClient('a', userID: '@a:s');
     final target = _ToMClient('b', userID: '@b:s');
-    final tomServer = DynamicUrlInterceptors();
     final authorization = AuthorizationInterceptor();
-    getIt
-      ..registerSingleton<DynamicUrlInterceptors>(
-        tomServer,
-        instanceName: NetworkDI.tomServerUrlInterceptorName,
-      )
-      ..registerSingleton<DynamicUrlInterceptors>(
-        DynamicUrlInterceptors(),
-        instanceName: NetworkDI.homeServerUrlInterceptorName,
-      )
-      ..registerSingleton<DynamicUrlInterceptors>(
-        DynamicUrlInterceptors(),
-        instanceName: NetworkDI.identityServerUrlInterceptorName,
-      )
-      ..registerSingleton<AuthorizationInterceptor>(authorization)
-      ..registerSingleton<ToMConfigurationsRepository>(
-        _FakeToMConfigurationsRepository({
-          '@a:s': ToMConfigurations(
-            tomServerInformation: ToMServerInformation(
-              baseUrl: Uri.parse('https://tom.a'),
-            ),
-          ),
-        }),
-      );
+    final tomServer = _registerToM(
+      _FakeToMConfigurationsRepository({'@a:s': _toM('https://tom.a')}),
+      authorization: authorization,
+    );
     final harness = _Harness(
       tester,
       [left, target],
@@ -411,5 +519,78 @@ void main() {
     // The target has no configuration: nothing of account `a` stays bound.
     expect(tomServer.baseUrl, isNull);
     expect(authorization.accessToken, 'token-b');
+  });
+
+  testWidgets('a superseded switch does not write the ToM configuration it '
+      'read late', (tester) async {
+    final stale = _ToMClient('b', userID: '@b:s');
+    final newer = _ToMClient('c', userID: '@c:s');
+    final repository = _GatedToMConfigurationsRepository(
+      {'@c:s': _toM('https://tom.c')},
+      gatedId: '@b:s',
+      lateValue: _toM('https://tom.b'),
+    );
+    final tomServer = _registerToM(repository);
+    final harness = _Harness(tester, [
+      _ToMClient('a', userID: '@a:s'),
+      stale,
+      newer,
+    ]);
+
+    bool? applied;
+    await harness.run(() async {
+      final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
+
+      await tester.runAsync(() async {
+        repository.hold.armed = true;
+        final superseded = coordinator.apply(stale);
+        await repository.hold.reached.future;
+        await coordinator.apply(newer);
+        repository.hold.gate.complete();
+        applied = await superseded;
+      });
+    });
+
+    expect(applied, isFalse);
+    expect(tomServer.baseUrl, 'https://tom.c');
+  });
+
+  testWidgets('a superseded switch does not write the locale it resolved '
+      'late', (tester) async {
+    final stale = _BootClient('b', userID: '@b:s');
+    final newer = _BootClient('c', userID: '@c:s');
+    final languages = _GatedLanguageCacheManager();
+    getIt
+      ..registerSingleton<UserInfoRepository>(
+        _FakeUserInfoRepository({'@b:s': 'fr', '@c:s': 'vi'}),
+      )
+      ..registerSingleton<LanguageCacheManager>(languages);
+    addTearDown(
+      () => LocalizationService.currentLocale.value =
+          LocalizationService.defaultLocale,
+    );
+    final harness = _Harness(tester, [
+      _BootClient('a', userID: '@a:s'),
+      stale,
+      newer,
+    ]);
+
+    await harness.run(() async {
+      final coordinator = await harness.switchingWith(_UserInfoOnlyEffects.new);
+
+      await tester.runAsync(() async {
+        languages.hold.armed = true;
+        unawaited(coordinator.apply(stale));
+        await languages.hold.reached.future;
+        // A locale write ends with a reassemble that waits for a frame, which
+        // no test pumps: the runs are not awaited, their writes are.
+        unawaited(coordinator.apply(newer));
+        await _until(() => _languageCode() == 'vi');
+        languages.hold.gate.complete();
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      });
+    });
+
+    expect(_languageCode(), 'vi');
   });
 }
