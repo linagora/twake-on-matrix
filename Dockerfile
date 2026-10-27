@@ -1,5 +1,6 @@
 # Specify versions
-# FLUTTER_VERSION must match .fvmrc and FLUTTER_VERSION in .github/workflows/tests.yaml.
+# FLUTTER_VERSION is read from .fvmrc by .github/workflows/image.yaml; this default is the
+# fallback for local builds and must match .fvmrc.
 # cirruslabs/flutter has no 3.47.x image, so the stage starts from the newest image
 # (FLUTTER_IMAGE_VERSION) and moves its Flutter checkout to FLUTTER_VERSION.
 ARG FLUTTER_IMAGE_VERSION=3.44.0
