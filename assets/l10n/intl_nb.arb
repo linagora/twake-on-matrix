@@ -29,11 +29,6 @@
       "username": {}
     }
   },
-  "addGroupDescription": "Legg til gruppebeskrivelse",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Administrator",
   "@admin": {
     "type": "text",
@@ -68,16 +63,6 @@
   },
   "archive": "Arkiv",
   "@archive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "Arkivert rom",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Skal gjester tillates å ta del",
-  "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
   },
@@ -250,11 +235,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Endre hjemmetjener",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Endre din stil",
   "@changeTheme": {
     "type": "text",
@@ -300,18 +280,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "chooseAUsername": "Velg et brukernavn",
-  "@chooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "close": "Lukk",
   "@close": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "compareEmojiMatch": "Sammenlign og forsikre at følgende smilefjes samsvarer med de på den andre enheten:",
-  "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
@@ -394,11 +364,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "crossSigningEnabled": "Videreformidling av tillit på",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "Aktiv nå",
   "@currentlyActive": {
     "type": "text",
@@ -417,14 +382,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{day} {month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{day} {month} {year}",
   "@dateWithYear": {
     "type": "text",
@@ -433,11 +390,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "Dette vil skru av din brukerkonto for godt, og kan ikke angres! Er du sikker?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "defaultPermissionLevel": "Forvalgt tilgangsnivå",
   "@defaultPermissionLevel": {
@@ -484,16 +436,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Oppdag",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "Visningsnavn endret",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Rediger",
   "@edit": {
     "type": "text",
@@ -506,11 +448,6 @@
   },
   "editChatPermissions": "Rediger sludringstilganger",
   "@editChatPermissions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Rediger visningsnavn",
-  "@editDisplayname": {
     "type": "text",
     "placeholders": {}
   },
@@ -606,16 +543,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "everythingReady": "Alt er klart!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "Veldig",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "fileName": "Filnavn",
   "@fileName": {
     "type": "text",
@@ -661,16 +588,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Gruppebeskrivelse endret",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "Gruppen er offentlig",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groups": "Grupper",
   "@groups": {
     "type": "text",
@@ -711,11 +628,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "Hvor støtende er innholdet?",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "id": "ID",
   "@id": {
     "type": "text",
@@ -736,16 +648,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Du kan ignorere brukere som forstyrrer deg. Du vil ikke lenger kunne motta meldinger eller rominvitasjoner fra brukere på din personlige ignoreringsliste.",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Ignorer brukernavn",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "Jeg har klikket på lenken",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -756,22 +658,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Harmløst",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "inviteContact": "Inviter kontakt",
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "Inviter kontakt til {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "Invitert",
   "@invited": {
@@ -796,14 +686,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} har invitert deg til FluffyChat. \n1. Installer FluffyChat: https://fluffychat.im \n2. Registrer deg eller logg inn \n3. Åpne invitasjonslenken: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "skriver",
   "@isTyping": {
     "type": "text",
@@ -818,11 +700,6 @@
   },
   "joinRoom": "Ta del i rom",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "Nøkler hurtiglagret",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -864,16 +741,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "Forlat sludringen",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Lisens",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Lys",
   "@lightTheme": {
     "type": "text",
@@ -901,20 +768,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "logInTo": "Logg inn på {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
-  },
   "logout": "Logg ut",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "Forsikre deg om at identifikatoren er gyldig",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -1020,11 +875,6 @@
       "count": {}
     }
   },
-  "offensive": "Støtende",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "Frakoblet",
   "@offline": {
     "type": "text",
@@ -1060,11 +910,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "Gruppenavn (valgfritt)",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "participant": "Deltager",
   "@participant": {
     "type": "text",
@@ -1077,11 +922,6 @@
   },
   "password": "Passord",
   "@password": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "passwordForgotten": "Passord glemt",
-  "@passwordForgotten": {
     "type": "text",
     "placeholders": {}
   },
@@ -1112,18 +952,8 @@
       "fileName": {}
     }
   },
-  "pleaseChooseAUsername": "Velg et brukernavn",
-  "@pleaseChooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseClickOnLink": "Klikk på lenken i e-posten og fortsett.",
   "@pleaseClickOnLink": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "Skriv inn en Matrix-ID.",
-  "@pleaseEnterAMatrixIdentifier": {
     "type": "text",
     "placeholders": {}
   },
@@ -1144,11 +974,6 @@
   },
   "privacy": "Personvern",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "Offentlige rom",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -1210,11 +1035,6 @@
   },
   "removeDevice": "Fjern enhet",
   "@removeDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "unbanFromChat": "Opphev bannlysning",
-  "@unbanFromChat": {
     "type": "text",
     "placeholders": {}
   },
@@ -1296,16 +1116,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendAudio": "Send lyd",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "Send fil",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Send bilde",
   "@sendImage": {
     "type": "text",
@@ -1313,16 +1123,6 @@
   },
   "sendMessages": "Send meldinger",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Send original",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Send video",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1367,16 +1167,6 @@
     "placeholders": {
       "senderName": {}
     }
-  },
-  "setCustomEmotes": "Sett tilpassede smilefjes",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "Sett gruppebeskrivelse",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
   },
   "setInvitationLink": "Sett invitasjonslenke",
   "@setInvitationLink": {
@@ -1467,11 +1257,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "thisRoomHasBeenArchived": "Dette rommet har blitt arkivert.",
-  "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
   "thursday": "Torsdag",
   "@thursday": {
     "type": "text",
@@ -1485,11 +1270,6 @@
   },
   "tooManyRequestsWarning": "For mange forespørsler. Prøv igjen senere!",
   "@tooManyRequestsWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "Overfør fra en annen enhet",
-  "@transferFromAnotherDevice": {
     "type": "text",
     "placeholders": {}
   },
@@ -1668,16 +1448,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoCanPerformWhichAction": "Hvem kan utføre hvilken handling",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "Hvem tillates å ta del i denne gruppen",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "Hvorfor ønsker du å rapportere dette?",
   "@whyDoYouWantToReportThis": {
     "type": "text",
@@ -1685,11 +1455,6 @@
   },
   "withTheseAddressesRecoveryDescription": "Med disse adressene kan du gjenopprette passordet ditt hvis du trenger det.",
   "@withTheseAddressesRecoveryDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "Skriv en melding …",
-  "@writeAMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -1713,11 +1478,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "Du kan ikke invitere deg selv",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "Du har blitt bannlyst fra denne sludringen",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
@@ -1725,21 +1485,6 @@
   },
   "yourPublicKey": "Din offentlige nøkkel",
   "@yourPublicKey": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "Marker som lest/ulest",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "Veksle forstumming",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleFavorite": "Veksle favorittmerking",
-  "@toggleFavorite": {
     "type": "text",
     "placeholders": {}
   },
@@ -1782,15 +1527,6 @@
       "supportedVersions": {}
     }
   },
-  "sendOnEnter": "Trykk på enter for å sende",
-  "badServerVersionsException": "Denne hjemme serveren støtter følgene Spec-versjoner:\n{serverVersions}\nMen denne applikasjonen støtter kun {supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
   "blocked": "Blokkert",
   "@blocked": {
     "type": "text",
@@ -1807,6 +1543,5 @@
   "@changeYourAvatar": {
     "type": "text",
     "placeholders": {}
-  },
-  "yourUserId": "Din bruker ID:"
+  }
 }

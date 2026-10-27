@@ -29,11 +29,6 @@
       "username": {}
     }
   },
-  "addGroupDescription": "Adaugă o descriere de",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Administrator",
   "@admin": {
     "type": "text",
@@ -58,16 +53,6 @@
   },
   "archive": "Arhivă",
   "@archive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "Grup arhivat",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Vizitatorii \"guest\" se pot alătura",
-  "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
   },

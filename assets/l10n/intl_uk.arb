@@ -30,11 +30,6 @@
       "username": {}
     }
   },
-  "addGroupDescription": "Додати опис групи",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Адміністратор",
   "@admin": {
     "type": "text",
@@ -59,16 +54,6 @@
   },
   "archive": "Архів",
   "@archive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "Заархівована кімната",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Чи дозволено гостям приєднуватись",
-  "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
   },
@@ -221,11 +206,6 @@
       "username": {}
     }
   },
-  "changeTheHomeserver": "Змінити домашній сервер",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Змінити стиль",
   "@changeTheme": {
     "type": "text",
@@ -261,18 +241,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "chooseAUsername": "Виберіть ім'я користувача",
-  "@chooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "close": "Закрити",
   "@close": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "compareEmojiMatch": "Порівняйте емодзі",
-  "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
@@ -330,11 +300,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "crossSigningEnabled": "Перехресне підписування увімкнено",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "Зараз у мережі",
   "@currentlyActive": {
     "type": "text",
@@ -351,14 +316,6 @@
     "placeholders": {
       "date": {},
       "timeOfDay": {}
-    }
-  },
-  "dateWithoutYear": "{day}-{month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
     }
   },
   "dateWithYear": "{day}-{month}-{year}",
@@ -392,16 +349,6 @@
   },
   "devices": "Пристрої",
   "@devices": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "Показуване ім'я було змінено",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Змінити показуване ім'я",
-  "@editDisplayname": {
     "type": "text",
     "placeholders": {}
   },
@@ -507,16 +454,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Опис групи було змінено",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "Загальнодоступна група",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groupWith": "Група з {displayname}",
   "@groupWith": {
     "type": "text",
@@ -567,13 +504,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteContactToGroup": "Запросити контакт до {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
-  },
   "invited": "Запрошено",
   "@invited": {
     "type": "text",
@@ -592,14 +522,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} запрошує вас у FluffyChat. \n1. Установіть FluffyChat: http://fluffychat.im \n2. Зареєструйтесь або увійдіть \n3. Відкрийте запрошувальне посилання: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "пише",
   "@isTyping": {
     "type": "text",
@@ -611,11 +533,6 @@
     "placeholders": {
       "username": {}
     }
-  },
-  "keysCached": "Ключі кешовано",
-  "@keysCached": {
-    "type": "text",
-    "placeholders": {}
   },
   "kicked": "👞 {username} вилучає {targetName}",
   "@kicked": {
@@ -655,16 +572,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "Виходить з бесіди",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Ліцензія",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Світлий",
   "@lightTheme": {
     "type": "text",
@@ -692,20 +599,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "logInTo": "Увійти до {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
-  },
   "logout": "Вийти",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "Переконайтеся, що ідентифікатор дійсний",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -789,11 +684,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Необов’язково) Назва групи",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passphraseOrKey": "парольна фраза або ключ відновлення",
   "@passphraseOrKey": {
     "type": "text",
@@ -816,16 +706,6 @@
       "fileName": {}
     }
   },
-  "pleaseChooseAUsername": "Виберіть ім'я користувача",
-  "@pleaseChooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "Введіть Matrix ID.",
-  "@pleaseEnterAMatrixIdentifier": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseEnterYourPassword": "Введіть свій пароль",
   "@pleaseEnterYourPassword": {
     "type": "text",
@@ -833,11 +713,6 @@
   },
   "pleaseEnterYourUsername": "Введіть своє ім'я користувача",
   "@pleaseEnterYourUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "Загальнодоступні кімнати",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -892,11 +767,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "Розблокувати у бесіді",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "renderRichContent": "Показувати форматований вміст повідомлення",
   "@renderRichContent": {
     "type": "text",
@@ -947,11 +817,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendFile": "Надіслати файл",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Надіслати зображення",
   "@sendImage": {
     "type": "text",
@@ -991,11 +856,6 @@
     "placeholders": {
       "username": {}
     }
-  },
-  "setGroupDescription": "Додати опис групи",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
   },
   "setInvitationLink": "Указати посилання для запрошення",
   "@setInvitationLink": {
@@ -1066,11 +926,6 @@
   },
   "theyMatch": "Вони збігаються",
   "@theyMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "thisRoomHasBeenArchived": "Цю кімнату було заархівовано.",
-  "@thisRoomHasBeenArchived": {
     "type": "text",
     "placeholders": {}
   },
@@ -1218,11 +1073,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "Очікування прийняття запиту партнером…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "Очікування прийняття емоджі партнером…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -1243,16 +1093,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoIsAllowedToJoinThisGroup": "Кому дозволено приєднуватися до цієї групи",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "Написати повідомлення…",
-  "@writeAMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
   "yes": "Так",
   "@yes": {
     "type": "text",
@@ -1270,11 +1110,6 @@
   },
   "youAreNoLongerParticipatingInThisChat": "Ви більше не берете участь у цій бесіді",
   "@youAreNoLongerParticipatingInThisChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "youCannotInviteYourself": "Ви не можете запросити себе",
-  "@youCannotInviteYourself": {
     "type": "text",
     "placeholders": {}
   },
@@ -1343,11 +1178,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "deactivateAccountWarning": "Це деактивує ваш обліковий запис. Це неможливо скасувати! Ви впевнені?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
   "containsUserName": "Містить ім’я користувача",
   "@containsUserName": {
     "type": "text",
@@ -1378,11 +1208,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "setAsCanonicalAlias": "Установити основним псевдонімом",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
   "verified": "Перевірений",
   "@verified": {
     "type": "text",
@@ -1398,7 +1223,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendOnEnter": "Надсилати натисканням Enter",
   "commandHint_ban": "Заблокувати цього користувача кімнати",
   "@commandHint_ban": {
     "type": "text",
@@ -1432,19 +1256,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "createNewSpace": "Новий простір",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
-  },
   "enableEncryption": "Увімкнути шифрування",
   "@enableEncryption": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "enterASpacepName": "Введіть назву простору",
-  "ignoreListDescription": "Ви можете нехтувати користувачів, які вас турбують. Ви не зможете отримувати повідомлення або запрошення в кімнату від користувачів у вашому особистому списку нехтування.",
-  "@ignoreListDescription": {
     "type": "text",
     "placeholders": {}
   },
@@ -1468,8 +1281,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "shareYourInviteLink": "Поділіться своїм посиланням запрошення",
-  "typeInInviteLinkManually": "Введіть посилання запрошення власноруч...",
   "scanQrCode": "Сканувати QR-код",
   "noPasswordRecoveryDescription": "Ви ще не додали спосіб відновлення пароля.",
   "@noPasswordRecoveryDescription": {
@@ -1490,16 +1301,6 @@
   },
   "oopsPushError": "Дідько! На жаль, сталася помилка під час налаштування push-сповіщень.",
   "@oopsPushError": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "passwordForgotten": "Забули пароль",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChoose": "Будь ласка, виберіть",
-  "@pleaseChoose": {
     "type": "text",
     "placeholders": {}
   },
@@ -1528,32 +1329,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendAudio": "Надіслати аудіо",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "Установити користувацькі емоджі",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
   "weSentYouAnEmail": "Ми надіслали вам електронний лист",
   "@weSentYouAnEmail": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "Стерти резервну копію бесіди, щоб створити новий ключ відновлення?",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToSpace": "Додати простір",
-  "roomVersion": "Версія кімнати",
-  "@roomVersion": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editChatPermissions": "Редагувати дозволи бесіди",
   "@editChatPermissions": {
     "type": "text",
@@ -1580,16 +1361,6 @@
   "@commandInvalid": {
     "type": "text"
   },
-  "extremeOffensive": "Украй образливий",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "howOffensiveIsThisContent": "Наскільки образливий цей вміст?",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "participant": "Паралермант",
   "@participant": {
     "type": "text",
@@ -1609,14 +1380,6 @@
   "@fontSize": {
     "type": "text",
     "placeholders": {}
-  },
-  "badServerVersionsException": "Домашній сервер підтримує такі версії специфікацій:\n{serverVersions}\nАле цей застосунок підтримує лише {supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
   },
   "areYouSureYouWantToLogout": "Ви впевнені, що хочете вийти?",
   "@areYouSureYouWantToLogout": {
@@ -1662,24 +1425,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendSticker": "Надіслати наліпку",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
   "seenByUserAndCountOthers": "{count, plural, other{Переглянули {username} і {count} інших}}",
   "@seenByUserAndCountOthers": {
     "type": "text",
     "placeholders": {
       "username": {},
       "count": {}
-    }
-  },
-  "errorObtainingLocation": "Помилка під час отримання розташування: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
     }
   },
   "synchronizingPleaseWait": "Синхронізація… Будь ласка, зачекайте.",
@@ -1729,28 +1480,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "toggleUnread": "Позначити прочитаним/непрочитаним",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "Перенесення з іншого пристрою",
-  "@transferFromAnotherDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendMessages": "Надсилати повідомлення",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Надіслати оригінал",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoCanPerformWhichAction": "Хто і яку дію може виконувати",
-  "@whoCanPerformWhichAction": {
     "type": "text",
     "placeholders": {}
   },
@@ -1769,11 +1500,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "everythingReady": "Усе готово!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
   "homeserver": "Домашній сервер",
   "goToTheNewRoom": "Перейти до нової кімнати",
   "@goToTheNewRoom": {
@@ -1782,11 +1508,6 @@
   },
   "groups": "Групи",
   "@groups": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "inoffensive": "Необразливий",
-  "@inoffensive": {
     "type": "text",
     "placeholders": {}
   },
@@ -1813,7 +1534,6 @@
     "type": "text",
     "description": "Usage hint for the command /html"
   },
-  "yourUserId": "Ваш ID користувача:",
   "commandHint_invite": "Запросіть цього користувача до цієї кімнати",
   "@commandHint_invite": {
     "type": "text",
@@ -1839,11 +1559,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreUsername": "Нехтувати ім'я користувача",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "loginWith": "Увійти за допомогою {brand}",
   "@loginWith": {
     "type": "text",
@@ -1851,23 +1566,12 @@
       "brand": {}
     }
   },
-  "obtainingLocation": "Отримання розташування…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "offensive": "Образливий",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "Офлайн",
   "@offline": {
     "type": "text",
     "placeholders": {}
   },
   "addAccount": "Додати обліковий запис",
-  "enableMultiAccounts": "(БЕТА) Увімкнути кілька облікових записів на цьому пристрої",
   "openInMaps": "Відкрити в картах",
   "@openInMaps": {
     "type": "text",
@@ -1876,11 +1580,6 @@
   "serverRequiresEmail": "Цей сервер потребує перевірки вашої адресу е-пошти для реєстрації.",
   "pleaseFollowInstructionsOnWeb": "Виконайте вказівки вебсайту та торкніться далі.",
   "@pleaseFollowInstructionsOnWeb": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Надіслати відео",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1896,11 +1595,6 @@
   },
   "setPermissionsLevel": "Указати рівні дозволів",
   "@setPermissionsLevel": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "shareLocation": "Поділитися місцеперебуванням",
-  "@shareLocation": {
     "type": "text",
     "placeholders": {}
   },
@@ -1947,11 +1641,6 @@
     "placeholders": {
       "senderName": {}
     }
-  },
-  "discover": "Огляд",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
   },
   "cantOpenUri": "Не вдалося відкрити URI {uri}",
   "@cantOpenUri": {
@@ -2005,11 +1694,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "editRoomAliases": "Змінити псевдоніми кімнати",
-  "@editRoomAliases": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editRoomAvatar": "Змінити аватар кімнати",
   "@editRoomAvatar": {
     "type": "text",
@@ -2025,11 +1709,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "people": "Люди",
-  "@people": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pin": "Закріпити",
   "@pin": {
     "type": "text",
@@ -2037,11 +1716,6 @@
   },
   "pleaseEnterYourPin": "Введіть свій PIN-код",
   "@pleaseEnterYourPin": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "Назва простору",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -2055,40 +1729,15 @@
     "type": "text",
     "placeholders": {}
   },
-  "spaceIsPublic": "Простір загальнодоступний",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "status": "Статус",
   "@status": {
     "type": "text",
     "placeholders": {}
   },
   "unverified": "Неперевірений",
-  "locationDisabledNotice": "Служби визначення місцеположення вимкнені. Увімкніть їх, щоб могти надавати доступ до вашого місцеположення.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationPermissionDeniedNotice": "Дозвіл на розташування відхилено. Надайте можливість ділитися своїм місцеперебуванням.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "oneClientLoggedOut": "На одному з ваших клієнтів виконано вихід із системи",
   "bundleName": "Назва вузла",
-  "toggleFavorite": "Перемикнути вибране",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
   "removeFromBundle": "Вилучити з цього вузла",
-  "toggleMuted": "Увімкнути/вимкнути звук",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editBundlesForAccount": "Змінити вузол для цього облікового запису",
   "addToBundle": "Додати до вузлів",
   "pleaseEnterValidEmail": "Будь ласка, введіть чинну адресу е-пошти.",
@@ -2104,7 +1753,6 @@
   "messageInfo": "Відомості про повідомлення",
   "time": "Час",
   "messageType": "Тип повідомлення",
-  "openGallery": "Відкрити галерею",
   "sender": "Відправник",
   "addToSpaceDescription": "Виберіть простір, щоб додати до нього цю бесіду.",
   "loginWithOneClick": "Увійти одним натисканням",
@@ -2130,25 +1778,12 @@
     "type": "text",
     "description": "Usage hint for the command /dm"
   },
-  "openVideoCamera": "Відкрити камеру для відео",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToStory": "Додати до історії",
   "publish": "Опублікувати",
   "whoCanSeeMyStories": "Хто може бачити мої історії?",
   "unsubscribeStories": "Скасувати підписку на історії",
   "thisUserHasNotPostedAnythingYet": "Цей користувач ще нічого не опублікував у своїй історії",
-  "yourStory": "Ваша історія",
   "replyHasBeenSent": "Відповідь надіслано",
-  "videoWithSize": "Відео ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
   "storyFrom": "Історія за {date}: \n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2169,7 +1804,6 @@
   "storyPrivacyWarning": "Зверніть увагу, що люди можуть бачити та зв'язуватися один з одним у вашій історії. Ваші історії будуть видимі впродовж 24 годин, але немає жодної гарантії, що вони будуть видалені з усіх пристроїв і серверів.",
   "dismiss": "Відхилити",
   "markAsRead": "Позначити прочитаним",
-  "reportUser": "Поскаржився на користувача",
   "openChat": "Відкрити бесіду",
   "matrixWidgets": "Віджети Matrix",
   "reactedWith": "{sender} реагує з {reaction}",
@@ -2182,22 +1816,11 @@
   },
   "emojis": "Емоджі",
   "confirmEventUnpin": "Ви впевнені, що бажаєте назавжди відкріпите подію?",
-  "placeCall": "Здійснити виклик",
   "unsupportedAndroidVersion": "Непідтримувана версія Android",
   "voiceCall": "Голосовий виклик",
   "unsupportedAndroidVersionLong": "Для цієї функції потрібна новіша версія Android. Перевірте наявність оновлень або підтримку Lineage OS.",
   "videoCallsBetaWarning": "Зауважте, що відеовиклики на ранньому етапі розробки. Вони можуть працювати не так, як очікувалося, або взагалі не працювати на всіх платформах.",
-  "emailOrUsername": "Електронна адреса або ім’я користувача",
   "experimentalVideoCalls": "Експериментальні відеовиклики",
-  "switchToAccount": "Перемкнутися на обліковий запис {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "nextAccount": "Наступний обліковий запис",
-  "previousAccount": "Попередній обліковий запис",
   "editWidgets": "Редагувати віджети",
   "addWidget": "Додати віджет",
   "widgetVideo": "Відео",
@@ -2268,28 +1891,15 @@
   "storeInAndroidKeystore": "Зберегти в Android KeyStore",
   "storeInAppleKeyChain": "Зберегти в Apple KeyChain",
   "storeSecurlyOnThisDevice": "Зберегти безпечно на цей пристрій",
-  "pleaseEnterRecoveryKeyDescription": "Щоб розблокувати старі повідомлення, введіть ключ відновлення, згенерований у попередньому сеансі. Ваш ключ відновлення це НЕ ваш пароль.",
-  "pleaseEnterRecoveryKey": "Введіть ключ відновлення:",
   "recoveryKey": "Ключ відновлення",
-  "recoveryKeyLost": "Ключ відновлення втрачено?",
-  "enableAutoBackups": "Увімкнути автоматичне резервне копіювання",
   "users": "Користувачі",
   "stories": "Історії",
-  "unlockOldMessages": "Розблокувати старі повідомлення",
   "storeInSecureStorageDescription": "Збережіть ключ відновлення в безпечному сховищі цього пристрою.",
-  "countFiles": "{count} файлів",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "hydrate": "Відновлення з файлу резервної копії",
   "hydrateTorLong": "Минулого разу ви експортували свій сеанс із TOR? Швидко імпортуйте його та продовжуйте спілкування.",
   "indexedDbErrorTitle": "Проблеми приватного режиму",
   "indexedDbErrorLong": "На жаль, сховище повідомлень не ввімкнуто у приватному режимі типово.\nВідкрийте\n - about:config\n - установіть для dom.indexedDB.privateBrowsing.enabled значення true\nІнакше запустити FluffyChat буде неможливо.",
   "dehydrate": "Експортувати сеанс та очистити пристрій",
   "dehydrateWarning": "Цю дію не можна скасувати. Переконайтеся, що ви безпечно зберігаєте файл резервної копії.",
-  "dehydrateShare": "Це ваш приватний експорт FluffyChat. Переконайтеся, що ви не втратите його та зберігайте його приватно.",
   "dehydrateTor": "Користувачі TOR: експорт сеансу",
   "dehydrateTorLong": "Для користувачів TOR рекомендується експортувати сеанс перед закриттям вікна.",
   "hydrateTor": "Користувачі TOR: імпорт експортованого сеансу",
@@ -2297,14 +1907,6 @@
   "custom": "Користувацький",
   "updateAvailable": "Доступне оновлення Twake Chat",
   "updateNow": "Почати оновлення у фоновому режимі",
-  "supposedMxid": "Це має бути {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
-  "confirmMatrixId": "Підтвердьте свій Matrix ID, щоб видалити свій обліковий запис.",
   "commandHint_markasgroup": "Позначити групою",
   "commandHint_markasdm": "Позначити кімнатою особистого спілкування",
   "whyIsThisMessageEncrypted": "Чому це повідомлення нечитабельне?",
@@ -2363,19 +1965,13 @@
       "oldDisplayName": {}
     }
   },
-  "startFirstChat": "Розпочніть свою першу бесіду",
-  "newSpaceDescription": "Простори дозволяють об'єднувати ваші бесіди та створювати приватні або загальнодоступні спільноти.",
   "encryptThisChat": "Зашифрувати цю бесіду",
   "endToEndEncryption": "Наскрізне шифрування",
   "disableEncryptionWarning": "З міркувань безпеки ви не можете вимкнути шифрування в бесіді, ув якій воно було ввімкнене раніше.",
   "sorryThatsNotPossible": "Вибачте... це неможливо",
   "deviceKeys": "Ключі пристрою:",
-  "noSearchResult": "Немає відповідних результатів пошуку.",
-  "letsStart": "Розпочнімо",
-  "enterInviteLinkOrMatrixId": "Введіть запрошувальне посилання або Matrix ID...",
   "reopenChat": "Відновити бесіду",
   "noOtherDevicesFound": "Інших пристроїв не знайдено",
-  "noBackupWarning": "Увага! Якщо ви не ввімкнете резервне копіювання бесіди, ви втратите доступ до своїх зашифрованих повідомлень. Наполегливо радимо ввімкнути резервне копіювання бесіди перед виходом.",
   "fileIsTooBigForServer": "Сервер повідомляє, що файл завеликий для надсилання.",
   "signIn": "Увійдіть",
   "countMembers": "{count, plural, =0{немає учасників} =1{1 учасники} other{{count} учасників}}",
@@ -2401,7 +1997,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "noMoreResult": "Більше жодного результату!",
   "previous": "Попередній",
   "aWhileAgo": "деякий час тому",
   "@aWhileAgo": {
@@ -2413,12 +2008,9 @@
     "type": "text",
     "placeholders": {}
   },
-  "cannotUploadKey": "Не вдається зберегти резервну копію ключа.",
-  "searchForPeopleAndChannels": "Пошук людей і каналів",
   "sendMessage": "Надіслати Повідомлення",
   "invite": "Запросити",
   "pinChat": "Закріпити",
-  "cannotUnlockBackupKey": "Не вдається розблокувати резервну копію ключа.",
   "onlineStatus": "онлайн",
   "onlineMinAgo": "онлайн {min}хв тому",
   "@onlineMinAgo": {
@@ -2441,7 +2033,6 @@
   "noMessageHereYet": "Тут ще немає повідомлень...",
   "sendMessageGuide": "Надішліть повідомлення або натисніть на привітання нижче.",
   "youCreatedGroupChat": "Ви створили груповий чат",
-  "chatCanHave": "Чат може мати:",
   "upTo100000Members": "До 100 000 учасників",
   "persistentChatHistory": "Постійна історія чату",
   "addMember": "Додати учасників",
@@ -2450,8 +2041,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "channels": "Канали",
-  "chatMessage": "Нове повідомлення",
   "welcomeToTwake": "Ласкаво просимо до Twake, {user}",
   "@welcomeToTwake": {
     "placeholders": {
@@ -2459,24 +2048,11 @@
     }
   },
   "startNewChatMessage": "Приємно спілкуватися з друзями та співпрацювати з командами.\nДавайте почнемо чат, створимо груповий чат або приєднаємося до вже існуючого.",
-  "statusDot": "⬤",
   "active": "Активовано",
   "inactive": "Неактивовано",
   "newGroupChat": "Новий груповий чат",
-  "twakeUsers": "Користувачі Twake",
   "expand": "Розгорнути",
   "shrink": "Зменшити",
-  "noResultForKeyword": "Немає результатів для \"{keyword}\"",
-  "@noResultForKeyword": {
-    "placeholders": {
-      "keyword": {}
-    }
-  },
-  "searchResultNotFound1": "• Переконайтеся, що у вашому пошуку немає друкарських помилок.\n",
-  "searchResultNotFound2": "• Можливо, цього користувача немає у вашій адресній книзі.\n",
-  "searchResultNotFound3": "• Перевірте дозвіл на доступ до контактів, користувач може бути у вашому списку контактів.\n",
-  "searchResultNotFound4": "• Якщо причина не вказана вище, ",
-  "searchResultNotFound5": "шукати допомоги.",
   "more": "Більше",
   "whoWouldYouLikeToAdd": "Кого б ви хотіли додати?",
   "addAPhoto": "Додати фотографію",
@@ -2497,7 +2073,6 @@
   "wrongServerName": "Неправильне ім'я сервера",
   "serverNameWrongExplain": "Адресу сервера вам надіслав адміністратор компанії. Перевірте електронний лист із запрошенням.",
   "contacts": "Контакти",
-  "searchForContacts": "Пошук контактів",
   "soonThereHaveContacts": "Скоро будуть контакти",
   "searchSuggestion": "Наразі шукайте, ввівши ім'я особи або адресу публічного сервера",
   "loadingContacts": "Завантаження контактів...",
@@ -2511,13 +2086,9 @@
       "count": {}
     }
   },
-  "addACaption": "Додати підпис...",
-  "noImagesFound": "Зображень не знайдено",
-  "captionForImagesIsNotSupportYet": "Підписи до зображень поки що не підтримуються.",
   "tapToAllowAccessToYourGallery": "Натисніть, щоб надати доступ до галереї",
   "tapToAllowAccessToYourCamera": "Ви можете ввімкнути доступ до камери в додатку Налаштування, щоб здійснювати відеодзвінки",
   "twake": "Twake Chat",
-  "permissionAccess": "Дозвіл на доступ",
   "allow": "Дозволити",
   "explainStoragePermission": "Twake потрібен доступ до вашого сховища для попереднього перегляду файлу",
   "explainGoToStorageSetting": "Twake потрібен доступ до вашого сховища для попереднього перегляду файлу, перейдіть до налаштувань, щоб надати цей дозвіл",
@@ -2533,13 +2104,6 @@
   "clear": "Очистити",
   "keyboard": "Клавіатура",
   "changeChatAvatar": "Зміна аватара в чаті",
-  "roomAvatarMaxFileSize": "Розмір аватара занадто великий",
-  "roomAvatarMaxFileSizeLong": "Розмір аватара має бути меншим за {max}",
-  "@roomAvatarMaxFileSizeLong": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "continueProcess": "Продовжити",
   "youAreUploadingPhotosDoYouWantToCancelOrContinue": "Помилка завантаження зображення! Ви все ще хочете продовжити створення групового чату?",
   "hasCreatedAGroupChat": "створив груповий чат “{groupName}”",
@@ -2551,23 +2115,13 @@
   },
   "today": "Сьогодні",
   "yesterday": "Вчора",
-  "adminPanel": "Панель адміністратора",
-  "acceptInvite": "Так, будь ласка, приєднуйтесь",
-  "askToInvite": " хоче, щоб ви приєдналися до цього чату. Що ви скажете?",
   "select": "Виберіть",
   "copyMessageText": "Копіювати",
   "pinThisChat": "Закріпити цей чат",
   "unpinThisChat": "Відкріпити цей чат",
   "add": "Додати",
   "addMembers": "Додати учасників",
-  "chatInfo": "Інформація про чат",
   "mute": "Вимкнути звук",
-  "membersInfo": "Учасники ({count})",
-  "@membersInfo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "members": "Учасники",
   "media": "Медіа",
   "files": "Файли",
@@ -2586,7 +2140,6 @@
   "errorPageTitle": "Щось не так",
   "errorPageDescription": "Цієї сторінки не існує.",
   "errorPageButton": "Назад до чату",
-  "playVideo": "Відтворити",
   "done": "Готово",
   "markThisChatAsRead": "Позначити цей чат як прочитаний",
   "markThisChatAsUnRead": "Позначити цей чат як непрочитаний",
@@ -2607,11 +2160,8 @@
   "basicInfo": "ОСНОВНА ІНФОРМАЦІЯ",
   "editProfileDescriptions": "Оновіть свій профіль, додавши нове ім'я, фотографію та короткий вступ.",
   "workIdentitiesInfo": "ІНФОРМАЦІЯ ПРО РОБОЧІ ІДЕНТИФІКАЦІЇ",
-  "editWorkIdentitiesDescriptions": "Відредагуйте налаштування робочої ідентифікації, такі як Matrix ID, електронна пошта або назва компанії.",
   "copiedMatrixIdToClipboard": "Ідентифікатор матриці скопійовано в буфер обміну.",
   "changeProfileAvatar": "Змінити аватар профілю",
-  "countPinChat": "ЗАКРІПЛЕНІ ЧАТИ ({countPinChat})",
-  "countAllChat": "ВСІ ЧАТИ ({countAllChat})",
   "thisMessageHasBeenEncrypted": "Це повідомлення зашифровано",
   "roomCreationFailed": "Не вдалося створити кімнату",
   "errorGettingPdf": "Помилка отримання PDF-файлу",
@@ -2621,7 +2171,6 @@
   "pasteImageFailed": "Не вдалося вставити зображення",
   "copyImageFailed": "Не вдалося скопіювати зображення",
   "fileFormatNotSupported": "Формат файлу не підтримується",
-  "noResultsFound": "Результатів не знайдено",
   "encryptionMessage": "Захистіть свої повідомлення від читання іншими. Запобігайте їх резервному копіюванню на наших серверах. Ви не зможете вимкнути цю функцію пізніше.",
   "encryptionWarning": "Ви можете втратити свої повідомлення, якщо отримаєте доступ до програми Twake на іншому пристрої.",
   "selectedUsers": "Вибрані користувачі",
@@ -2642,17 +2191,14 @@
       "count": {}
     }
   },
-  "copyImageSuccess": "Зображення скопійовано в буфер обміну",
   "youNeedToAcceptTheInvitation": "Вам потрібно прийняти запрошення, щоб розпочати чат",
   "hasInvitedYouToAChat": " запросив вас до чату. Прийняти чи відхилити та видалити розмову?",
   "declineTheInvitation": "Відхилити запрошення?",
   "doYouReallyWantToDeclineThisInvitation": "Ви справді хочете відхилити це запрошення та видалити чат? Ви не зможете скасувати цю дію.",
   "declineAndRemove": "Відхилити та вилучити",
   "notNow": "Не зараз",
-  "contactsWarningBannerTitle": "Щоб ви могли зв’язатися з усіма своїми друзями, надайте Twake доступ до контактів вашого пристрою. Дякуємо за розуміння.",
   "contactsCount": "Контакти ({count})",
   "linagoraContactsCount": "Контакти Linagora ({count})",
-  "fetchingPhonebookContacts": "Отримання контактів з пристрою...({progress}% завершено)",
   "languageEnglish": "Англійська",
   "@languageEnglish": {
     "type": "text",
@@ -2677,15 +2223,12 @@
     "placeholders_order": [],
     "placeholders": {}
   },
-  "settingsLanguageDescription": "Встановіть мову, яку ви використовуєте Twake Chat",
   "sendImages": "{count, plural, =1{Надіслати 1 зображення} other{Надіслати {count} зображень}}",
   "enterCaption": "Додати підпис...",
-  "failToSend": "Не вдалося надіслати, спробуйте ще раз",
   "showLess": "Показати менше",
   "showMore": "Показати більше",
   "unreadMessages": "Непрочитані повідомлення",
   "groupInformation": "Інформація про групу",
-  "linkInvite": "Запрошення з посиланням",
   "noDescription": "Без опису",
   "description": "Опис",
   "groupName": "Назва групи",
@@ -2724,16 +2267,12 @@
       }
     }
   },
-  "twakeChatUser": "Користувач Twake Chat",
-  "sharedMediaAndLinks": "Спільні медіафайли та посилання",
   "errorSendingFiles": "Деякі файли неможливо надіслати через розмір, обмеження формату або неочікувані помилки. Їх буде пропущено.",
-  "removeFileBeforeSend": "Вилучити файли з помилками перед надсиланням",
   "unselect": "Скасувати вибір",
   "searchContacts": "Пошук контакти",
   "tapToAllowAccessToYourMicrophone": "Ви можете ввімкнути доступ до мікрофона в додатку Налаштування, щоб вмикати голос",
   "showInChat": "Показувати в чаті",
   "phone": "Телефон",
-  "viewProfile": "Переглянути профіль",
   "profileInfo": "Інформація про профіль",
   "saveToDownloads": "Зберегти в завантаженнях",
   "saveToGallery": "Зберегти в галереї",
@@ -2756,13 +2295,11 @@
   "explainPermissionToAccessVideos": "Twake Chat не синхронізує дані між вашим пристроєм і нашими серверами. Ми зберігаємо тільки ті медіафайли, які ви надіслали в чат-кімнату. Усі медіафайли, надіслані в чат, шифруються і зберігаються в безпечному місці. Перейдіть в Налаштування > Дозволи та активуйте дозвіл «Сховище: відео». Ви також можете будь-коли заборонити доступ до вашої медіабібліотеки.",
   "downloading": "Завантажується",
   "settingUpYourTwake": "Налаштування вашого Twake\nЦе може зайняти деякий час",
-  "performingAutomaticalLogin": "Виконання автоматичного входу через SSO",
   "backingUpYourMessage": "Підготовка серверного середовища для резервного копіювання ваших повідомлень",
   "recoveringYourEncryptedChats": "Відновлення ваших зашифрованих чатів",
   "configureDataEncryption": "Налаштування шифрування даних",
   "configurationNotFound": "Дані конфігурації не знайдено",
   "fileSavedToGallery": "Файл збережено в галереї",
-  "saveFileToGalleryError": "Не вдалося зберегти файл у Галереї",
   "explainPermissionToGallery": "Щоб продовжити, надайте {appName} дозвіл на доступ до фотографій. Цей дозвіл необхідний для збереження файлу в галереї.",
   "@explainPermissionToGallery": {
     "placeholders": {
@@ -2774,21 +2311,12 @@
       }
     }
   },
-  "tokenNotFound": "Токен для входу не знайдено",
   "dangerZone": "Небезпечна Зона",
   "leaveGroupSubtitle": "Ця група залишиться і після",
   "leaveChatFailed": "Не вдалося вийти з чату",
   "invalidLoginToken": "Недійсний токен входу",
   "copiedPublicKeyToClipboard": "Відкритий ключ скопійовано в буфер обміну.",
   "removeFromGroup": "Вилучити з групи",
-  "removeUser": "Вилучити користувача",
-  "removeReason": "Вилучити {user} з групи",
-  "@removeReason": {
-    "type": "text",
-    "placeholders": {
-      "user": {}
-    }
-  },
   "switchAccounts": "Змінити обліковий запис",
   "selectAccount": "Виберіть обліковий запис",
   "privacyPolicy": "Політика конфіденційності",
@@ -2838,7 +2366,6 @@
   "selectAnEmailOrPhoneYouWantSendTheInvitationTo": "Виберіть електронну адресу або телефон, на який потрібно надіслати запрошення",
   "phoneNumber": "Номер телефону",
   "sendInvitation": "Надіслати запрошення",
-  "verifyWithAnotherDevice": "Перевірити за допомогою іншого пристрою",
   "contactLookupFailed": "Пошук контакту не вдався.",
   "invitationHasBeenSuccessfullySent": "Запрошення успішно надіслано!",
   "failedToSendInvitation": "Не вдалося надіслати запрошення.",
@@ -2973,7 +2500,6 @@
   "terrorism": "Тероризм",
   "other": "Інше",
   "enableRightAndLeftMessageAlignment": "Увімкнути вирівнювання повідомлень праворуч/ліворуч",
-  "holdToRecordAudio": "Утримуйте, щоб записати аудіо.",
   "explainPermissionToAccessMicrophone": "Щоб надсилати голосові повідомлення, надайте Twake Chat доступ до мікрофона.",
   "allowMicrophoneAccess": "Дозволити доступ до мікрофона",
   "later": "Пізніше",
@@ -2983,10 +2509,7 @@
   "pleaseFinishOrStopTheRecording": "Будь ласка, завершіть або зупиніть запис, перш ніж виконувати інші дії.",
   "audioMessageFailedToSend": "Не вдалося надіслати аудіоповідомлення.",
   "microphonePermissionDeniedOnWeb": "Потрібен доступ до мікрофона. Будь ласка, увімкніть його в налаштуваннях браузера.",
-  "forNowWeCanOnlyCreateAChatWithUpToTenPeople": "Наразі ми можемо створити чат лише з максимум 10 людьми. Будь ласка, вилучіть зайвих користувачів і спробуйте ще раз",
   "gotIt": "Зрозуміло",
-  "weCouldNotCompleteYourRequestTryAgainShortly": "Нам не вдалося виконати ваш запит. Спробуйте ще раз пізніше",
-  "groupChatCreatedSuccessfullyButWeCouldNotAddSomeParticipants": "Груповий чат успішно створено, але не вдалося додати кількох учасників. Запросіть їх знову через \"Інформацію про груповий чат\"",
   "save": "Зберегти",
   "newContact": "Новий контакт",
   "firstName": "Основні Ім'я",

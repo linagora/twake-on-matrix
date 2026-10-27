@@ -35,11 +35,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "添加一条群组介绍",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "管理员",
   "@admin": {
     "type": "text",
@@ -77,16 +72,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "已归档的群聊",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "是否允许游客加入",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
   "areYouSure": "您确定吗？",
   "@areYouSure": {
     "type": "text",
@@ -111,14 +96,6 @@
   },
   "badServerLoginTypesException": "主服务器支持的登录方式：\n{serverVersions}\n但本应用仅支持：\n{supportedVersions}",
   "@badServerLoginTypesException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "badServerVersionsException": "主服务器支持的 Spec 版本：\n{serverVersions}\n但本应用仅支持 {supportedVersions} 版本",
-  "@badServerVersionsException": {
     "type": "text",
     "placeholders": {
       "serverVersions": {},
@@ -277,11 +254,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "更改主服务器",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "改变风格",
   "@changeTheme": {
     "type": "text",
@@ -334,11 +306,6 @@
   },
   "chooseAStrongPassword": "输入一个强密码",
   "@chooseAStrongPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "chooseAUsername": "输入一个昵称",
-  "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -430,11 +397,6 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "对比并确认这些表情匹配其他那些设备:",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "compareNumbersMatch": "比较以下数字，确保它们和另一设备上的相同:",
   "@compareNumbersMatch": {
     "type": "text",
@@ -514,11 +476,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "crossSigningEnabled": "交叉签名已启用",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "目前活跃",
   "@currentlyActive": {
     "type": "text",
@@ -537,14 +494,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{month}-{day}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{year}-{month}-{day}",
   "@dateWithYear": {
     "type": "text",
@@ -553,11 +502,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "这将停用您的用户账户。这不能被撤销，您确定吗？",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "defaultPermissionLevel": "默认权限级别",
   "@defaultPermissionLevel": {
@@ -604,16 +548,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "探索",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "显示名称已被改变",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "编辑",
   "@edit": {
     "type": "text",
@@ -626,16 +560,6 @@
   },
   "editChatPermissions": "编辑聊天权限",
   "@editChatPermissions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "编辑显示名称",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editRoomAliases": "编辑聊天室别名",
-  "@editRoomAliases": {
     "type": "text",
     "placeholders": {}
   },
@@ -731,16 +655,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "everythingReady": "一切就绪！",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "令人极度反感",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "fileName": "文件名",
   "@fileName": {
     "type": "text",
@@ -791,16 +705,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "群聊描述已更改",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "群聊是公开的",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groups": "群聊",
   "@groups": {
     "type": "text",
@@ -841,11 +745,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "这些内容有多令人反感？",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "id": "ID",
   "@id": {
     "type": "text",
@@ -866,16 +765,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "您可以忽略打扰您的用户。您将不会收到来自忽略列表中用户的任何消息或聊天室邀请。",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "忽略用户名",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "我已经点击了链接",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -886,22 +775,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "不令人反感",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "inviteContact": "邀请联系人",
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "邀请联系人到 {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "已邀请",
   "@invited": {
@@ -926,14 +803,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} 邀请您使用 FluffyChat。 \n1. 安装 FluffyChat：https://fluffychat.im \n2. 注册或登录 \n3. 打开该邀请链接：{link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "正在输入",
   "@isTyping": {
     "type": "text",
@@ -948,11 +817,6 @@
   },
   "joinRoom": "加入聊天室",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "密钥已被缓存",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -994,16 +858,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "离开了聊天",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "许可证",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "浅色",
   "@lightTheme": {
     "type": "text",
@@ -1031,13 +885,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "logInTo": "登录 {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
-  },
   "loginWith": "使用 {brand} 登录",
   "@loginWith": {
     "type": "text",
@@ -1047,11 +894,6 @@
   },
   "logout": "注销",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "确保识别码正确",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -1167,11 +1009,6 @@
       "count": {}
     }
   },
-  "offensive": "令人反感",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "离线",
   "@offline": {
     "type": "text",
@@ -1212,11 +1049,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(可选) 群组名称",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "or": "或",
   "@or": {
     "type": "text",
@@ -1237,11 +1069,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "忘记密码",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordHasBeenChanged": "密码已被更改",
   "@passwordHasBeenChanged": {
     "type": "text",
@@ -1249,11 +1076,6 @@
   },
   "passwordRecovery": "密码恢复",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "联系人",
-  "@people": {
     "type": "text",
     "placeholders": {}
   },
@@ -1274,18 +1096,8 @@
       "fileName": {}
     }
   },
-  "pleaseChoose": "请选择",
-  "@pleaseChoose": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseChooseAPasscode": "请选择一个密码",
   "@pleaseChooseAPasscode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChooseAUsername": "请选择用户名",
-  "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -1296,11 +1108,6 @@
   },
   "pleaseEnter4Digits": "请输入 4 位数字或留空以停用应用锁。",
   "@pleaseEnter4Digits": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "请输入 Matrix ID。",
-  "@pleaseEnterAMatrixIdentifier": {
     "type": "text",
     "placeholders": {}
   },
@@ -1326,11 +1133,6 @@
   },
   "privacy": "隐私",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "公开聊天室",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -1405,11 +1207,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "解禁聊天",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "removeYourAvatar": "移除您的头像",
   "@removeYourAvatar": {
     "type": "text",
@@ -1442,11 +1239,6 @@
   },
   "roomHasBeenUpgraded": "聊天室已升级",
   "@roomHasBeenUpgraded": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "roomVersion": "聊天室版本",
-  "@roomVersion": {
     "type": "text",
     "placeholders": {}
   },
@@ -1507,16 +1299,6 @@
   "@sendAsText": {
     "type": "text"
   },
-  "sendAudio": "发送音频",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "发送文件",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "发送图像",
   "@sendImage": {
     "type": "text",
@@ -1524,21 +1306,6 @@
   },
   "sendMessages": "发送消息",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "发送原图",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "发送贴纸",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "发送视频",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1583,21 +1350,6 @@
     "placeholders": {
       "senderName": {}
     }
-  },
-  "setAsCanonicalAlias": "设为主要别名",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "设置自定义表情",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "设置群组描述",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
   },
   "setInvitationLink": "设置邀请链接",
   "@setInvitationLink": {
@@ -1703,11 +1455,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "thisRoomHasBeenArchived": "该聊天室已被归档。",
-  "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
   "thursday": "周四",
   "@thursday": {
     "type": "text",
@@ -1719,28 +1466,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "toggleFavorite": "切换收藏",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "切换静音",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "标记已读/未读",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
   "tooManyRequestsWarning": "请求太多。请稍后再试！",
   "@tooManyRequestsWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "从其他设备传输",
-  "@transferFromAnotherDevice": {
     "type": "text",
     "placeholders": {}
   },
@@ -1899,11 +1626,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "等待对方接受请求…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "等待对方接受 emoji…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -1934,33 +1656,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoCanPerformWhichAction": "谁可以执行哪些操作",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "谁被允许加入本群组",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "您举报的理由是什么？",
   "@whyDoYouWantToReportThis": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "确定要清除您的聊天记录备份以创建新的恢复密钥吗？",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "withTheseAddressesRecoveryDescription": "通过这些地址，您可以恢复密码。",
   "@withTheseAddressesRecoveryDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "写一条消息…",
-  "@writeAMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -1984,11 +1686,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "您不能邀请您自己",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "您已被该聊天封禁",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
@@ -2005,11 +1702,6 @@
     "placeholders": {}
   },
   "addToSpace": "加入空间",
-  "obtainingLocation": "获取位置中…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "noMatrixServer": "{server1} 不是一个Matrix服务器,试试{server2}?",
   "@noMatrixServer": {
     "type": "text",
@@ -2017,29 +1709,6 @@
       "server1": {},
       "server2": {}
     }
-  },
-  "locationPermissionDeniedNotice": "位置权限被拒绝.请授予此权限以分享你的位置.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationDisabledNotice": "位置服务已禁用.请启用此服务以分享你的位置.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorObtainingLocation": "取得地址错误: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "enterASpacepName": "输入空间名称",
-  "createNewSpace": "创建新空间",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
   },
   "cantOpenUri": "无法打开URI {uri}",
   "@cantOpenUri": {
@@ -2053,27 +1722,11 @@
     "type": "text",
     "placeholder": {}
   },
-  "spaceName": "空间名称",
-  "@spaceName": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceIsPublic": "空间是公开的",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "shareLocation": "分享位置",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "openInMaps": "在地图中打开",
   "@openInMaps": {
     "type": "text",
     "placeholders": {}
   },
-  "sendOnEnter": "按 Enter 键发送",
   "passwordsDoNotMatch": "密码不匹配！",
   "pleaseChooseAtLeastChars": "请至少输入 {min} 个字符。",
   "@pleaseChooseAtLeastChars": {
@@ -2091,19 +1744,14 @@
   "unverified": "未认证",
   "pleaseEnterValidEmail": "请输入一个有效的电子邮件地址。",
   "repeatPassword": "再次输入密码",
-  "yourUserId": "您的 ID：",
-  "shareYourInviteLink": "分享您的邀请链接",
-  "typeInInviteLinkManually": "手动输入邀请链接…",
   "addAccount": "添加账户",
   "editBundlesForAccount": "编辑该账户的集合",
-  "enableMultiAccounts": "（测试功能）在本设备上添加多个账户",
   "addToBundle": "添加到集合中",
   "bundleName": "集合名称",
   "link": "链接",
   "serverRequiresEmail": "此服务器需要验证您的电子邮件地址以进行注册。",
   "messageType": "消息类型",
   "sender": "发送者",
-  "openGallery": "打开图库",
   "messageInfo": "消息信息",
   "time": "时间",
   "loginWithOneClick": "一键登录",
@@ -2130,25 +1778,12 @@
     "type": "text",
     "description": "Usage hint for the command /create"
   },
-  "openVideoCamera": "打开相机拍摄视频",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
   "addToStory": "添加到 Story",
   "publish": "发布",
   "whoCanSeeMyStories": "谁能看到我的 Story？",
   "unsubscribeStories": "取消 Story 订阅",
   "thisUserHasNotPostedAnythingYet": "该用户尚未在 Story 发布任何内容",
-  "yourStory": "你的 Story",
   "replyHasBeenSent": "已发送回复",
-  "videoWithSize": "视频 ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
   "storyFrom": "自 {date} 起的 Story: \n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2169,7 +1804,6 @@
   "iUnderstand": "我了解",
   "dismiss": "关闭",
   "markAsRead": "标为已读",
-  "reportUser": "举报用户",
   "openChat": "打开聊天",
   "matrixWidgets": "Matrix 小部件",
   "reactedWith": "{sender} 通过 {reaction} 进行了回应",
@@ -2185,19 +1819,8 @@
   "unsupportedAndroidVersionLong": "这个功能需要较新版本的 Android 系统。请检查更新或 Lineage OS 支持。",
   "unsupportedAndroidVersion": "不受支持的 Android 版本",
   "voiceCall": "语音通话",
-  "placeCall": "打电话",
   "videoCallsBetaWarning": "请注意，视频通话目前处于测试阶段。它们可能不能像预期的那样工作，或者在所有平台上都不能工作。",
   "experimentalVideoCalls": "实验性的视频通话",
-  "emailOrUsername": "电子邮箱或用户名",
-  "switchToAccount": "切换到账户 {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "nextAccount": "下个账户",
-  "previousAccount": "上个账户",
   "editWidgets": "编辑小部件",
   "widgetVideo": "视频",
   "widgetJitsi": "Jitsi Meet",
@@ -2266,28 +1889,15 @@
   "noEmailWarning": "请输入有效电子邮件地址。否则你将无法重置密码。如果你不想输入邮件地址，再次轻点按钮以继续。",
   "storeInSecureStorageDescription": "将恢复密钥存储在此设备的安全存储中。",
   "storeInAppleKeyChain": "存储在 Apple KeyChain 中",
-  "unlockOldMessages": "解锁旧信息",
-  "pleaseEnterRecoveryKey": "请输入你的恢复密钥：",
   "recoveryKey": "恢复密钥",
-  "recoveryKeyLost": "丢失了恢复密钥？",
-  "pleaseEnterRecoveryKeyDescription": "要解锁您的旧邮件，请输入你在之前会话中生成的恢复密钥。 你的恢复密钥不是你的密码。",
   "saveKeyManuallyDescription": "通过触发系统共享对话框或剪贴板手动保存此密钥。",
   "storeInAndroidKeystore": "存储在 Android KeyStore 中",
   "storeSecurlyOnThisDevice": "安全地存储在此设备上",
-  "enableAutoBackups": "启用自动备份",
   "users": "用户",
   "stories": "故事",
-  "countFiles": "{count} 个文件",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "dehydrateShare": "这是私人的 FluffyChat 导出。 确保你不会丢失它并将其保密。",
   "dehydrateTor": "TOR 用户：导出会话",
   "dehydrateTorLong": "建议 TOR 用户在关闭窗口之前导出会话。",
   "hydrateTor": "TOR 用户：导入会话导出",
-  "hydrate": "从备份文件恢复",
   "dehydrate": "导出会话并擦除设备",
   "dehydrateWarning": "此操作无法撤消。 确保你安全地存储备份文件。",
   "indexedDbErrorTitle": "私人模式问题",
@@ -2297,14 +1907,6 @@
   "custom": "自定义",
   "updateAvailable": "Twake Chat 更新可用",
   "updateNow": "在后台开始更新",
-  "confirmMatrixId": "要删除账户，请确认你的 Matrix ID。",
-  "supposedMxid": "应为 {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
   "commandHint_markasgroup": "标记为群组",
   "commandHint_markasdm": "标记为私信聊天室",
   "whyIsThisMessageEncrypted": "为什么此消息不可读？",
@@ -2363,8 +1965,6 @@
       "oldDisplayName": {}
     }
   },
-  "startFirstChat": "发起你的第一个聊天",
-  "newSpaceDescription": "空间让您可以整合聊天并建立私人或公共讨论区。",
   "encryptThisChat": "加密这个对话",
   "endToEndEncryption": "端对端加密",
   "disableEncryptionWarning": "出于安全考虑 ，您不能在之前已启用的对话中禁用加密。",
@@ -2382,10 +1982,8 @@
     "placeholders": {}
   },
   "email": "电子邮件",
-  "channels": "频道",
   "mute": "静音",
   "showLess": "显示更少",
-  "twakeUsers": "Twake 用户",
   "jumpToMessage": "跳转到消息",
   "allow": "允许",
   "declineTheInvitation": "拒绝邀请？",
@@ -2395,16 +1993,12 @@
   "more": "更多",
   "downloadImageError": "保存图片时出错",
   "removeFromGroup": "从组中移除",
-  "chatMessage": "新消息",
   "sActionStopRecordingHint": "停止录制",
-  "cannotUploadKey": "无法存储密钥备份。",
-  "cannotUnlockBackupKey": "无法解锁密钥备份。",
   "errorGettingPdf": "获取 PDF 时出错",
   "phone": "手机",
   "groupNameCannotBeEmpty": "组名不能为空",
   "contacts": "联系人",
   "newDirectMessage": "新直接消息",
-  "copyImageSuccess": "图片已复制到剪贴板",
   "countPinnedMessage": "{count, plural, =0{已固定消息} other{已固定消息 #{count}}}",
   "@countPinnedMessage": {
     "type": "text",
@@ -2423,14 +2017,9 @@
   "useYourCompanyServer": "使用贵公司的服务器",
   "downloading": "正在下载",
   "settingUpYourTwake": "正在设置您的 Twake\n可能需要一段时间",
-  "removeUser": "移除用户",
   "loading": "正在加载…",
-  "addACaption": "添加标题…",
   "recent": "最近",
-  "roomAvatarMaxFileSize": "头像大小太大",
-  "noMoreResult": "没有更多结果！",
   "active": "已激活",
-  "countPinChat": "已固定聊天（{countPinChat}）",
   "serverNameWrongExplain": "公司管理员已将服务器地址发送给您。请查看邀请邮件。",
   "forwardTo": "转发至…",
   "twake": "Twake Chat",
@@ -2446,8 +2035,6 @@
   "privacyAndSecurity": "隐私和安全",
   "selectedUsers": "选定用户",
   "linagoraContactsCount": "Linagora 联系人（{count}）",
-  "failToSend": "无法发送，请重试",
-  "chatCanHave": "聊天可以有：",
   "countMembers": "{count, plural, =0{无成员} =1{1 位成员} other{{count} 位成员}}",
   "@countMembers": {
     "type": "text",
@@ -2455,7 +2042,6 @@
       "count": {}
     }
   },
-  "statusDot": "⬤",
   "loadingStatus": "正在加载状态…",
   "previous": "上一步",
   "onlineStatus": "在线",
@@ -2464,9 +2050,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "enterInviteLinkOrMatrixId": "输入邀请链接或 Matrix ID…",
   "reopenChat": "重新打开聊天",
-  "searchResultNotFound3": "• 检查联系人访问权限，该用户可能在您的联系人列表中。\n",
   "newGroupChat": "新群聊",
   "errorPreviewingFile": "预览文件时出错",
   "unreadMessages": "未读消息",
@@ -2520,9 +2104,7 @@
   "notNow": "以后再说",
   "contactsCount": "联系人（{count}）",
   "declineAndRemove": "拒绝并移除",
-  "fetchingPhonebookContacts": "正在从设备获取联系人…（已完成 {progress}%）",
   "hasInvitedYouToAChat": " 邀请您加入聊天。接受还是拒绝并删除对话？",
-  "editWorkIdentitiesDescriptions": "编辑您的工作身份设置，例如 Matrix ID、电子邮件或公司名称。",
   "onlineDayAgo": "{day} 天前在线",
   "@onlineDayAgo": {
     "placeholders": {
@@ -2546,9 +2128,7 @@
   "noDescription": "没有描述",
   "shootingTapRecordingTips": "点击录制视频。",
   "chatFolders": "聊天文件夹",
-  "noSearchResult": "没有匹配的搜索结果。",
   "invite": "邀请",
-  "letsStart": "让我们开始吧",
   "noOtherDevicesFound": "未找到其他设备",
   "fileIsTooBigForServer": "服务器报告文件太大，无法发送。",
   "onlineMinAgo": "{min} 分钟前在线",
@@ -2577,16 +2157,6 @@
   },
   "inactive": "未激活",
   "shrink": "收缩",
-  "noResultForKeyword": "“{keyword}”没有结果",
-  "@noResultForKeyword": {
-    "placeholders": {
-      "keyword": {}
-    }
-  },
-  "searchResultNotFound1": "• 请确保您的搜索中没有拼写错误。\n",
-  "searchResultNotFound2": "• 您的通讯录中可能没有该用户。\n",
-  "searchResultNotFound4": "• 如果原因未在上面列出， ",
-  "searchResultNotFound5": "寻求帮助。",
   "whoWouldYouLikeToAdd": "您想添加谁？",
   "addAPhoto": "添加照片",
   "maxImageSize": "最大文件大小：{max}MB",
@@ -2604,13 +2174,11 @@
   },
   "back": "返回",
   "wrongServerName": "服务器名称错误",
-  "searchForContacts": "搜索联系人",
   "profile": "个人资料",
   "@profile": {
     "type": "text",
     "placeholders": {}
   },
-  "searchForPeopleAndChannels": "搜索用户和频道",
   "gallery": "图库",
   "location": "位置",
   "clear": "清除",
@@ -2623,23 +2191,11 @@
   "members": "成员",
   "links": "链接",
   "downloads": "下载",
-  "playVideo": "播放",
   "read": "已读",
   "loadingContacts": "正在加载联系人…",
   "noConnection": "未连接",
-  "permissionAccess": "权限访问",
-  "adminPanel": "管理面板",
   "recentChat": "最近聊天",
   "selectChat": "选择聊天",
-  "chatInfo": "聊天信息",
-  "membersInfo": "成员（{count}）",
-  "@membersInfo": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "noImagesFound": "未找到图片",
-  "acceptInvite": "是的，加入",
   "errorPageButton": "返回聊天",
   "notificationAndSounds": "通知和声音",
   "changeChatAvatar": "更改聊天头像",
@@ -2657,16 +2213,9 @@
       "count": {}
     }
   },
-  "roomAvatarMaxFileSizeLong": "头像大小必须小于 {max}",
-  "@roomAvatarMaxFileSizeLong": {
-    "placeholders": {
-      "max": {}
-    }
-  },
   "explainStoragePermission": "Twake 需要访问您的存储空间才能预览文件",
   "explainGoToStorageSetting": "Twake 需要访问您的存储空间才能预览文件，请转到设置以允许此权限",
   "externalContactMessage": "您要添加的部分用户不在您的通讯录中。是否要邀请他们？",
-  "captionForImagesIsNotSupportYet": "尚不支持图片的标题。",
   "newMessageInTwake": "您有 1 条加密消息",
   "@newMessageInTwake": {
     "type": "text",
@@ -2684,16 +2233,13 @@
   "matrixId": "Matrix ID",
   "contactInfo": "联系信息",
   "showMore": "显示更多",
-  "linkInvite": "链接邀请",
   "pinnedMessagesTooltip": "已固定消息",
   "welcomeTo": "欢迎使用",
   "startMessaging": "开始发送消息",
   "noResults": "没有结果",
   "accountSettings": "账号设置",
   "roomCreationFailed": "房间创建失败",
-  "countAllChat": "所有聊天（{countAllChat}）",
   "pasteImageFailed": "粘贴图片失败",
-  "noResultsFound": "未找到结果",
   "clearAllSelected": "清除所有选定内容",
   "unmuteThisChat": "取消静音此聊天",
   "changeProfileAvatar": "更改个人资料头像",
@@ -2706,7 +2252,6 @@
   "copiedMatrixIdToClipboard": "Matrix ID 已复制到剪贴板。",
   "thisMessageHasBeenEncrypted": "此消息已加密",
   "countFilesSendPerDialog": "发送时的最大文件数为 {count}。",
-  "settingsLanguageDescription": "设置您在 Twake Chat 上使用的语言",
   "sendImages": "{count, plural, =1{发送 1 张图片} other{发送 {count} 张图片}}",
   "encryptionWarning": "如果您在另一台设备上访问 Twake 应用，您可能会丢失消息。",
   "enterCaption": "添加标题…",
@@ -2723,23 +2268,18 @@
   "sActionShootHint": "拍摄照片",
   "sActionShootingButtonTooltip": "拍摄按钮",
   "sActionManuallyFocusHint": "手动对焦",
-  "twakeChatUser": "Twake Chat 用户",
   "sCameraPreviewLabel": "相机预览：{value}",
   "sFlashModeLabel": "闪光模式：{mode}",
-  "sharedMediaAndLinks": "共享媒体和链接",
   "fileSavedToGallery": "文件已保存到图库",
   "errorDialogTitle": "糟糕，出了点问题",
   "shootingTips": "点击拍照。",
   "sCameraLensDirectionLabel": "相机镜头方向：{value}",
   "configurationNotFound": "未找到配置数据",
-  "tokenNotFound": "未找到登录令牌",
   "copiedPublicKeyToClipboard": "公钥已复制到剪贴板。",
   "shootingOnlyRecordingTips": "长按录制视频。",
   "sSwitchCameraLensDirectionLabel": "切换到 {value} 相机",
-  "saveFileToGalleryError": "无法将文件保存到图库",
   "byContinuingYourAgreeingToOur": "继续，即表示您同意我们的",
   "youDontHaveAnyContactsYet": "您还没有任何联系人。",
-  "viewProfile": "查看个人资料",
   "file": "文件",
   "files": "文件",
   "message": "消息",
@@ -2760,13 +2300,6 @@
     }
   },
   "leaveChatFailed": "无法离开聊天",
-  "removeReason": "从组中移除 {user}",
-  "@removeReason": {
-    "type": "text",
-    "placeholders": {
-      "user": {}
-    }
-  },
   "thisFieldCannotBeBlank": "此字段不能为空",
   "phoneNumberCopiedToClipboard": "电话号码已复制到剪贴板",
   "areYouSureYouWantToDeleteAccount": "是否确定要删除账号？",

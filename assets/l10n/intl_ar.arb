@@ -30,11 +30,6 @@
       "username": {}
     }
   },
-  "addGroupDescription": "أضف وصف للمجموعة",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "المدير",
   "@admin": {
     "type": "text",
@@ -59,16 +54,6 @@
   },
   "archive": "الأرشيف",
   "@archive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "archivedRoom": "غرفة مؤرشفة",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "هل يُسمح للزوار الدخول",
-  "@areGuestsAllowedToJoin": {
     "type": "text",
     "placeholders": {}
   },
@@ -221,11 +206,6 @@
       "username": {}
     }
   },
-  "changeTheHomeserver": "غيّر الخادم",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "غيّر أسلوبك",
   "@changeTheme": {
     "type": "text",
@@ -261,18 +241,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "chooseAUsername": "اختر اسم المستخدم",
-  "@chooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "close": "اغلق",
   "@close": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "compareEmojiMatch": "تأكد من أن هذه الإيموجي تطابق الموجودة على الأجهزة الأخرى:",
-  "@compareEmojiMatch": {
     "type": "text",
     "placeholders": {}
   },
@@ -330,11 +300,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "crossSigningEnabled": "التأكد المتبادل مفعل",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "نشطٌ حاليا",
   "@currentlyActive": {
     "type": "text",
@@ -353,14 +318,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{month}-{day}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{day}/{month}/{year}",
   "@dateWithYear": {
     "type": "text",
@@ -369,11 +326,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "لا مجال للعودة، أتأكد تعطيل حسابك؟",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "delete": "احذف",
   "@delete": {
@@ -402,16 +354,6 @@
   },
   "devices": "الأجهزة",
   "@devices": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "غُيِّر الاسم العلني",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "حرر الاسم العلني",
-  "@editDisplayname": {
     "type": "text",
     "placeholders": {}
   },
@@ -517,16 +459,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "غُيِّر وصف المجموعة",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "المجموعة عامة",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groupWith": "في مجموعة مع {displayname}",
   "@groupWith": {
     "type": "text",
@@ -572,16 +504,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "يمكنك تجاهل المستخدمين المزعجين، لن يتمكنوا من مراسلتك أو دعوتك لغرفة ما داموا في قائمة التجاهل.",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "تجاهل اسم المستخدم",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "incorrectPassphraseOrKey": "عبارة مرور أو مفتاح استرداد خطأ",
   "@incorrectPassphraseOrKey": {
     "type": "text",
@@ -591,13 +513,6 @@
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "أدعو مراسلا الى {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "دُعيَ",
   "@invited": {
@@ -617,14 +532,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "دعاك {username} لاستخدام فلافي-شات. \n1. ثبت فلافي-شات: https://fluffychat.im \n2. لج أو سجل\n3. افتح رابط الدعوة: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "يكتب",
   "@isTyping": {
     "type": "text",
@@ -639,11 +546,6 @@
   },
   "joinRoom": "انضم للمحادثة",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "المفاتيح محفوظة على ذاكرة التخزين المؤقتة",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -685,16 +587,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "غادر المحادثة",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "الرخصة",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "فاتح",
   "@lightTheme": {
     "type": "text",
@@ -722,20 +614,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "logInTo": "لِج ل {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
-  },
   "logout": "اخرج",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "تأكد من صحة المعرّف",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -824,11 +704,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "اسم المجموعة (اختياري)",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passphraseOrKey": "عبارة المرور أو مفتاح الاستعادة",
   "@passphraseOrKey": {
     "type": "text",
@@ -861,16 +736,6 @@
       "fileName": {}
     }
   },
-  "pleaseChooseAUsername": "اختر اسم المستخدم",
-  "@pleaseChooseAUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "أدخل معرف Matrix.",
-  "@pleaseEnterAMatrixIdentifier": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseEnterYourPassword": "أدخل كلمة السر",
   "@pleaseEnterYourPassword": {
     "type": "text",
@@ -883,11 +748,6 @@
   },
   "privacy": "الخصوصية",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "الغرف العامة",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -939,11 +799,6 @@
   },
   "removeDevice": "أزل جهازا",
   "@removeDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "unbanFromChat": "فك حجبه من المحادثة",
-  "@unbanFromChat": {
     "type": "text",
     "placeholders": {}
   },
@@ -1005,28 +860,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendAudio": "أرسل ملفًا صوتيًا",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "أرسل ملف",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "أرسل صورة",
   "@sendImage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "أرسل الملف الأصلي",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "أرسل فيديو",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1071,11 +906,6 @@
     "placeholders": {
       "senderName": {}
     }
-  },
-  "setGroupDescription": "عيّن وصفا للمجموعة",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
   },
   "setInvitationLink": "عيّن رابط الدعوة",
   "@setInvitationLink": {
@@ -1153,11 +983,6 @@
   },
   "theyMatch": "متطبقان",
   "@theyMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "thisRoomHasBeenArchived": "أُرشِفت هته الغرفة.",
-  "@thisRoomHasBeenArchived": {
     "type": "text",
     "placeholders": {}
   },
@@ -1317,11 +1142,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "ينتظر قبول الشريك للطلب…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "ينتظر قبول الشريك لإيموجي…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -1347,16 +1167,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoIsAllowedToJoinThisGroup": "من يسمح له الانضمام للمجموعة",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "اكتب رسالة…",
-  "@writeAMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
   "yes": "نعم",
   "@yes": {
     "type": "text",
@@ -1377,24 +1187,12 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "لا يمكنك دعوة نفسك",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "حُظرت من هذه المحادثة",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
     "placeholders": {}
   },
-  "people": "أشخاص",
-  "@people": {
-    "type": "text",
-    "placeholders": {}
-  },
   "scanQrCode": "امسح رمز الاستجابة السريعة",
-  "typeInInviteLinkManually": "اكتب رابط الدعوة...",
-  "shareYourInviteLink": "شارك رابط الدعوة",
   "noMatrixServer": "{server1} ليس خادم ماتريكس، بدلًا منه أتريد استخدام {server2}؟",
   "@noMatrixServer": {
     "type": "text",
@@ -1440,11 +1238,6 @@
       "brand": {}
     }
   },
-  "inoffensive": "غير مسيء",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "نقرت على الرابط",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -1452,11 +1245,6 @@
   },
   "ignore": "تجاهل",
   "@ignore": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "howOffensiveIsThisContent": "ما مدى سوء هذا المحتوى؟",
-  "@howOffensiveIsThisContent": {
     "type": "text",
     "placeholders": {}
   },
@@ -1480,18 +1268,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "extremeOffensive": "مسيئة للغاية",
-  "@extremeOffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "everythingReady": "كل شيء جاهز!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
   "homeserver": "الخادم",
-  "enterASpacepName": "أدخل اسم الفضاء",
   "enterAnEmailAddress": "أدخل عنوان بريد إلكتروني",
   "@enterAnEmailAddress": {
     "type": "text",
@@ -1527,11 +1304,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "اكتشف",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
   "directChats": "محادثات مباشرة",
   "@directChats": {
     "type": "text",
@@ -1539,11 +1311,6 @@
   },
   "deviceId": "معرّف الجهاز",
   "@deviceId": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "createNewSpace": "فضاء جديد",
-  "@createNewSpace": {
     "type": "text",
     "placeholders": {}
   },
@@ -1683,7 +1450,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "sendOnEnter": "أرسل عند الدخول",
   "autoplayImages": "شغِّل الملصقات والوجوه المتحركة تلقائيا",
   "@autoplayImages": {
     "type": "text",
@@ -1735,23 +1501,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "locationDisabledNotice": "خدمات الموقع معطلة. مكنها لتتمكن من مشاركة موقعك.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorObtainingLocation": "خطأ أثناء الحصول على الموقع: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "editRoomAliases": "عدّل الاسم المميز للغرفة",
-  "@editRoomAliases": {
-    "type": "text",
-    "placeholders": {}
-  },
   "editChatPermissions": "عدّل تصاريح المحادثة",
   "@editChatPermissions": {
     "type": "text",
@@ -1767,28 +1516,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "shareLocation": "شارك الموقع",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseChooseAPasscode": "اختر رمز المرور",
   "@pleaseChooseAPasscode": {
     "type": "text",
     "placeholders": {}
   },
-  "pleaseChoose": "اختر رجاء",
-  "@pleaseChoose": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordRecovery": "استعادة كلمة السر",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "passwordForgotten": "نسيتَ كلمة السر",
-  "@passwordForgotten": {
     "type": "text",
     "placeholders": {}
   },
@@ -1809,7 +1543,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "enableMultiAccounts": "(ميزة تجربية) فعّل تعدد الحسابات",
   "bundleName": "اسم الحزمة",
   "removeFromBundle": "أزله من الحزمة",
   "addToBundle": "أضفه الى حزمة",
@@ -1832,21 +1565,6 @@
       "count": {}
     }
   },
-  "spaceIsPublic": "الفضاء عمومي",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleFavorite": "بدّل حالة التفضيل",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "علّمه كمقروء/غير مقروء",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
   "unavailable": "غير متوفر",
   "@unavailable": {
     "type": "text",
@@ -1867,11 +1585,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "toggleMuted": "بدّل حالة الكتم",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
   "showPassword": "أظهر كلمة السر",
   "@showPassword": {
     "type": "text",
@@ -1879,11 +1592,6 @@
   },
   "verified": "موثّق",
   "@verified": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "اسم الفضاء",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -1909,16 +1617,6 @@
   },
   "status": "الحالة",
   "@status": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "أنقله من جهاز آخر",
-  "@transferFromAnotherDevice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "wipeChatBackup": "أتريد حذف النسخ الاحتياطي للمحادثة لإنشاء مفتاح أمان جديد؟",
-  "@wipeChatBackup": {
     "type": "text",
     "placeholders": {}
   },
@@ -1966,16 +1664,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "obtainingLocation": "يحصل على الموقع…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "أرسل ملصقًا",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
   "defaultPermissionLevel": "مستوى الأذونات الإفتراضي",
   "@defaultPermissionLevel": {
     "type": "text",
@@ -1983,11 +1671,6 @@
   },
   "setPermissionsLevel": "تعيين مستوى الأذونات",
   "@setPermissionsLevel": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "عيّن وجوهًا تعبيرية مخصصة",
-  "@setCustomEmotes": {
     "type": "text",
     "placeholders": {}
   },
@@ -2007,12 +1690,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "roomVersion": "إصدار الغرفة",
-  "@roomVersion": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "yourUserId": "معرّف المستخدم:",
   "passwordsDoNotMatch": "كلمتا السر لا تتطبقان!",
   "pleaseEnterValidEmail": "رجاءً أدخل بيردًا إلكترونيًا صالحًا.",
   "repeatPassword": "كرّر كلمة السر",
@@ -2025,15 +1702,9 @@
   },
   "removeFromSpace": "أزل من الفضاء",
   "unverified": "غير مؤكد",
-  "whoCanPerformWhichAction": "من يستطيع القيام بأي عمل",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
   "messageInfo": "معلومات الرسالة",
   "messageType": "نوع الرسالة",
   "sender": "المرسل",
-  "openGallery": "افتخ المعرض",
   "time": "الوقت",
   "badServerLoginTypesException": "يدعم الخادم المستخدم أنواع تسجيل الدخول التالية:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
   "@badServerLoginTypesException": {
@@ -2058,25 +1729,7 @@
     "type": "text",
     "description": "Usage hint for the command /discardsession"
   },
-  "locationPermissionDeniedNotice": "تم رفض إذن الموقع. الرجاء منح الإذن للقدرة على مشاركة موقعك.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "loginWithOneClick": "تسجيل الدخول بكبسة واحدة",
-  "badServerVersionsException": "يدعم الخادم الرئيسي المستخدم إصدارات المواصفات:\n{serverVersions}\nلكن هذا التطبيق يدعم فقط:\n{supportedVersions}",
-  "@badServerVersionsException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "offensive": "عدواني",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "bubbleSize": "حجم الفقاعة",
   "@bubbleSize": {
     "type": "text",
@@ -2121,15 +1774,7 @@
     "description": "Usage hint for the command /myroomavatar"
   },
   "videoCallsBetaWarning": "يرجى ملاحظة أن مكالمات الفيديو حالياً في مرحلة تجريبية. قد لا تعمل كما هو متوقع أو تعمل على الإطلاق على جميع المنصات.",
-  "placeCall": "إجراء مكالمة",
   "replyHasBeenSent": "تم إرسال الرد",
-  "videoWithSize": "فيديو ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
   "storyFrom": "رسالة من {date}: \n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2139,17 +1784,11 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "يرجى ملاحظة أنه يمكن للأشخاص رؤية بعضهم البعض والتواصل مع بعضهم البعض في قصتك.",
-  "emailOrUsername": "البريد الإلكتروني أو اسم المستخدم",
   "dismiss": "رفض",
   "matrixWidgets": "إضافات ماتريكس",
   "iUnderstand": "أنا أتفهم",
   "whatIsGoingOn": "ما الذي يحصل؟",
   "addDescription": "إضافة وصف",
-  "setAsCanonicalAlias": "تعيين كاسم مستعار رئيسي",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseClickOnLink": "يرجى النقر على الرابط الموجود في البريد الإلكتروني ثم المتابعة.",
   "@pleaseClickOnLink": {
     "type": "text",
@@ -2174,19 +1813,12 @@
     }
   },
   "markAsRead": "حدد كمقروء",
-  "openVideoCamera": "افتح الكاميرا لمقطع فيديو",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
   "start": "إبدأ",
   "publish": "انشر",
   "whoCanSeeMyStories": "من يمكنه رؤية قصصي؟",
   "unsubscribeStories": "إلغاء الإشتراك بالقصص",
-  "yourStory": "قصتك",
   "addToSpaceDescription": "إختر فضاء لإضافة هذه المحادثة إليه.",
   "addToStory": "إضافة للقصة",
-  "reportUser": "التبيلغ عن المستخدم",
   "openChat": "فتح المحادثة",
   "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟"
 }

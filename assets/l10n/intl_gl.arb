@@ -35,11 +35,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addGroupDescription": "Engade a descrición do grupo",
-  "@addGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "admin": "Admin",
   "@admin": {
     "type": "text",
@@ -82,16 +77,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "archivedRoom": "Sala arquivada",
-  "@archivedRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "areGuestsAllowedToJoin": "Permitir o acceso de convidadas",
-  "@areGuestsAllowedToJoin": {
-    "type": "text",
-    "placeholders": {}
-  },
   "areYouSure": "Tes a certeza?",
   "@areYouSure": {
     "type": "text",
@@ -121,14 +106,6 @@
   },
   "badServerLoginTypesException": "O servidor soporta as seguintes formas de conexión:\n{serverVersions}\nPero esta app só soporta:\n{supportedVersions}",
   "@badServerLoginTypesException": {
-    "type": "text",
-    "placeholders": {
-      "serverVersions": {},
-      "supportedVersions": {}
-    }
-  },
-  "badServerVersionsException": "O servidor soporta as seguintes características:\n{serverVersions}\nPero esta app só soporta {supportedVersions}",
-  "@badServerVersionsException": {
     "type": "text",
     "placeholders": {
       "serverVersions": {},
@@ -294,11 +271,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "changeTheHomeserver": "Mudar de servidor de inicio",
-  "@changeTheHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
   "changeTheme": "Cambiar o estilo",
   "@changeTheme": {
     "type": "text",
@@ -351,11 +323,6 @@
   },
   "chooseAStrongPassword": "Escolle un contrasinal forte",
   "@chooseAStrongPassword": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "chooseAUsername": "Escolle un nome de usuaria",
-  "@chooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -447,11 +414,6 @@
     },
     "description": "State that {command} is not a valid /command."
   },
-  "compareEmojiMatch": "Compara estes emojis",
-  "@compareEmojiMatch": {
-    "type": "text",
-    "placeholders": {}
-  },
   "compareNumbersMatch": "Compara estes números",
   "@compareNumbersMatch": {
     "type": "text",
@@ -531,16 +493,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "createNewSpace": "Novo espazo",
-  "@createNewSpace": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "crossSigningEnabled": "Sinatura-Cruzada activada",
-  "@crossSigningEnabled": {
-    "type": "text",
-    "placeholders": {}
-  },
   "currentlyActive": "Actualmente activo",
   "@currentlyActive": {
     "type": "text",
@@ -559,14 +511,6 @@
       "timeOfDay": {}
     }
   },
-  "dateWithoutYear": "{day}-{month}",
-  "@dateWithoutYear": {
-    "type": "text",
-    "placeholders": {
-      "month": {},
-      "day": {}
-    }
-  },
   "dateWithYear": "{day}-{month}-{year}",
   "@dateWithYear": {
     "type": "text",
@@ -575,11 +519,6 @@
       "month": {},
       "day": {}
     }
-  },
-  "deactivateAccountWarning": "Esto desactivará a conta. Esto non ten volta atrás. Estás segura?",
-  "@deactivateAccountWarning": {
-    "type": "text",
-    "placeholders": {}
   },
   "defaultPermissionLevel": "Nivel de permisos por omisión",
   "@defaultPermissionLevel": {
@@ -626,16 +565,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "discover": "Descubrir",
-  "@discover": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "displaynameHasBeenChanged": "O nome público mudou",
-  "@displaynameHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
   "edit": "Editar",
   "@edit": {
     "type": "text",
@@ -648,16 +577,6 @@
   },
   "editChatPermissions": "Editar permisos do chat",
   "@editChatPermissions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editDisplayname": "Editar nome público",
-  "@editDisplayname": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "editRoomAliases": "Editar alias da sala",
-  "@editRoomAliases": {
     "type": "text",
     "placeholders": {}
   },
@@ -748,26 +667,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "enterASpacepName": "Escribe o nome para o espazo",
   "enterYourHomeserver": "Escribe o teu servidor de inicio",
   "@enterYourHomeserver": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "errorObtainingLocation": "Erro ao obter a localización: {error}",
-  "@errorObtainingLocation": {
-    "type": "text",
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "everythingReady": "Todo preparado!",
-  "@everythingReady": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "extremeOffensive": "Extremadamente ofensivo",
-  "@extremeOffensive": {
     "type": "text",
     "placeholders": {}
   },
@@ -821,16 +722,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "groupDescriptionHasBeenChanged": "Cambiouse a descrición do grupo",
-  "@groupDescriptionHasBeenChanged": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "groupIsPublic": "O grupo é público",
-  "@groupIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
   "groups": "Grupos",
   "@groups": {
     "type": "text",
@@ -871,11 +762,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "howOffensiveIsThisContent": "É moi ofensivo este contido?",
-  "@howOffensiveIsThisContent": {
-    "type": "text",
-    "placeholders": {}
-  },
   "id": "ID",
   "@id": {
     "type": "text",
@@ -896,16 +782,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "ignoreListDescription": "Podes ignorar usuarias molestas. Non recibirás ningunha mensaxe nin convites a salas da túa lista personal de usuarias ignoradas.",
-  "@ignoreListDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "ignoreUsername": "Ignorar nome de usuaria",
-  "@ignoreUsername": {
-    "type": "text",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "Premín na ligazón",
   "@iHaveClickedOnLink": {
     "type": "text",
@@ -916,22 +792,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "inoffensive": "Inofensivo",
-  "@inoffensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "inviteContact": "Convidar contacto",
   "@inviteContact": {
     "type": "text",
     "placeholders": {}
-  },
-  "inviteContactToGroup": "Convidar contacto a {groupName}",
-  "@inviteContactToGroup": {
-    "type": "text",
-    "placeholders": {
-      "groupName": {}
-    }
   },
   "invited": "Convidado",
   "@invited": {
@@ -956,14 +820,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "inviteText": "{username} convidoute a FluffyChat.\n1. instala FluffyChat: https://fluffychat.im \n2. Rexístrate ou conéctate\n3. Abre a ligazón do convite: {link}",
-  "@inviteText": {
-    "type": "text",
-    "placeholders": {
-      "username": {},
-      "link": {}
-    }
-  },
   "isTyping": "está escribindo",
   "@isTyping": {
     "type": "text",
@@ -978,11 +834,6 @@
   },
   "joinRoom": "Entrar na sala",
   "@joinRoom": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "keysCached": "Chaves almacenadas",
-  "@keysCached": {
     "type": "text",
     "placeholders": {}
   },
@@ -1024,16 +875,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "leftTheChat": "Deixar a conversa",
-  "@leftTheChat": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "license": "Licenza",
-  "@license": {
-    "type": "text",
-    "placeholders": {}
-  },
   "lightTheme": "Claro",
   "@lightTheme": {
     "type": "text",
@@ -1056,27 +897,10 @@
     "type": "text",
     "placeholders": {}
   },
-  "locationDisabledNotice": "Os servizos de localización están desactivados. Actívaos para poder compartir a localización.",
-  "@locationDisabledNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "locationPermissionDeniedNotice": "Permiso de localización denegado. Concede este permiso para poder compartir a localización.",
-  "@locationPermissionDeniedNotice": {
-    "type": "text",
-    "placeholders": {}
-  },
   "login": "Acceder",
   "@login": {
     "type": "text",
     "placeholders": {}
-  },
-  "logInTo": "Entrar en {homeserver}",
-  "@logInTo": {
-    "type": "text",
-    "placeholders": {
-      "homeserver": {}
-    }
   },
   "loginWith": "Conecta con {brand}",
   "@loginWith": {
@@ -1087,11 +911,6 @@
   },
   "logout": "Saír",
   "@logout": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "makeSureTheIdentifierIsValid": "Asegúrate de que o identificador é válido",
-  "@makeSureTheIdentifierIsValid": {
     "type": "text",
     "placeholders": {}
   },
@@ -1215,16 +1034,6 @@
       "count": {}
     }
   },
-  "obtainingLocation": "Obtendo a localización…",
-  "@obtainingLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "offensive": "Ofensivo",
-  "@offensive": {
-    "type": "text",
-    "placeholders": {}
-  },
   "offline": "Desconectada",
   "@offline": {
     "type": "text",
@@ -1270,11 +1079,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "optionalGroupName": "(Optativo) Nome do grupo",
-  "@optionalGroupName": {
-    "type": "text",
-    "placeholders": {}
-  },
   "or": "Ou",
   "@or": {
     "type": "text",
@@ -1295,11 +1099,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "passwordForgotten": "Contrasinal esquecido",
-  "@passwordForgotten": {
-    "type": "text",
-    "placeholders": {}
-  },
   "passwordHasBeenChanged": "Cambiouse o contrasinal",
   "@passwordHasBeenChanged": {
     "type": "text",
@@ -1307,11 +1106,6 @@
   },
   "passwordRecovery": "Recuperación do contrasinal",
   "@passwordRecovery": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "people": "Persoas",
-  "@people": {
     "type": "text",
     "placeholders": {}
   },
@@ -1332,18 +1126,8 @@
       "fileName": {}
     }
   },
-  "pleaseChoose": "Por favor elixe",
-  "@pleaseChoose": {
-    "type": "text",
-    "placeholders": {}
-  },
   "pleaseChooseAPasscode": "Escolle un código de acceso",
   "@pleaseChooseAPasscode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseChooseAUsername": "Escolle un nome de usuaria",
-  "@pleaseChooseAUsername": {
     "type": "text",
     "placeholders": {}
   },
@@ -1354,11 +1138,6 @@
   },
   "pleaseEnter4Digits": "Escribe 4 díxitos ou deíxao baleiro para non activar o bloqueo.",
   "@pleaseEnter4Digits": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "pleaseEnterAMatrixIdentifier": "Escribe un ID Matrix.",
-  "@pleaseEnterAMatrixIdentifier": {
     "type": "text",
     "placeholders": {}
   },
@@ -1384,11 +1163,6 @@
   },
   "privacy": "Privacidade",
   "@privacy": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "publicRooms": "Salas públicas",
-  "@publicRooms": {
     "type": "text",
     "placeholders": {}
   },
@@ -1463,11 +1237,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unbanFromChat": "Retirar veto no chat",
-  "@unbanFromChat": {
-    "type": "text",
-    "placeholders": {}
-  },
   "removeYourAvatar": "Elimina o avatar",
   "@removeYourAvatar": {
     "type": "text",
@@ -1500,11 +1269,6 @@
   },
   "roomHasBeenUpgraded": "A sala foi actualizada",
   "@roomHasBeenUpgraded": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "roomVersion": "Versión da sala",
-  "@roomVersion": {
     "type": "text",
     "placeholders": {}
   },
@@ -1565,16 +1329,6 @@
   "@sendAsText": {
     "type": "text"
   },
-  "sendAudio": "Enviar audio",
-  "@sendAudio": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendFile": "Enviar ficheiro",
-  "@sendFile": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sendImage": "Enviar imaxe",
   "@sendImage": {
     "type": "text",
@@ -1582,21 +1336,6 @@
   },
   "sendMessages": "Enviar mensaxes",
   "@sendMessages": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendOriginal": "Enviar orixinal",
-  "@sendOriginal": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendSticker": "Enviar adhesivo",
-  "@sendSticker": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "sendVideo": "Enviar vídeo",
-  "@sendVideo": {
     "type": "text",
     "placeholders": {}
   },
@@ -1642,21 +1381,6 @@
       "senderName": {}
     }
   },
-  "setAsCanonicalAlias": "Establecer como alias principal",
-  "@setAsCanonicalAlias": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setCustomEmotes": "Establecer emotes personalizados",
-  "@setCustomEmotes": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "setGroupDescription": "Establecer descrición do grupo",
-  "@setGroupDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
   "setInvitationLink": "Establecer ligazón do convite",
   "@setInvitationLink": {
     "type": "text",
@@ -1689,11 +1413,6 @@
       "username": {}
     }
   },
-  "shareLocation": "Compartir localización",
-  "@shareLocation": {
-    "type": "text",
-    "placeholders": {}
-  },
   "showPassword": "Amosar contrasinal",
   "@showPassword": {
     "type": "text",
@@ -1716,16 +1435,6 @@
   },
   "sourceCode": "Código fonte",
   "@sourceCode": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceIsPublic": "O Espazo é público",
-  "@spaceIsPublic": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "spaceName": "Nome do Espazo",
-  "@spaceName": {
     "type": "text",
     "placeholders": {}
   },
@@ -1776,11 +1485,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "thisRoomHasBeenArchived": "A sala foi arquivada.",
-  "@thisRoomHasBeenArchived": {
-    "type": "text",
-    "placeholders": {}
-  },
   "thursday": "Xoves",
   "@thursday": {
     "type": "text",
@@ -1792,28 +1496,8 @@
     "type": "text",
     "placeholders": {}
   },
-  "toggleFavorite": "Marcar Favorito",
-  "@toggleFavorite": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleMuted": "Cambia Noificacións",
-  "@toggleMuted": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "toggleUnread": "Marcar como Lido/Non lido",
-  "@toggleUnread": {
-    "type": "text",
-    "placeholders": {}
-  },
   "tooManyRequestsWarning": "Demasiadas solicitudes. Inténtao máis tarde!",
   "@tooManyRequestsWarning": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "transferFromAnotherDevice": "Transferir desde outro dispositivo",
-  "@transferFromAnotherDevice": {
     "type": "text",
     "placeholders": {}
   },
@@ -1972,11 +1656,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "Agardando a que a outra parte acepte a solicitude…",
-  "@waitingPartnerAcceptRequest": {
-    "type": "text",
-    "placeholders": {}
-  },
   "waitingPartnerEmoji": "Agardando a que a outra parte acepte as emoticonas…",
   "@waitingPartnerEmoji": {
     "type": "text",
@@ -2007,33 +1686,13 @@
     "type": "text",
     "placeholders": {}
   },
-  "whoCanPerformWhichAction": "Quen pode realizar determinada acción",
-  "@whoCanPerformWhichAction": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "whoIsAllowedToJoinThisGroup": "Quen se pode unir a este grupo",
-  "@whoIsAllowedToJoinThisGroup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "whyDoYouWantToReportThis": "Por que queres denunciar esto?",
   "@whyDoYouWantToReportThis": {
     "type": "text",
     "placeholders": {}
   },
-  "wipeChatBackup": "Eliminar a copia de apoio do chat e crear unha nova chave de recuperación?",
-  "@wipeChatBackup": {
-    "type": "text",
-    "placeholders": {}
-  },
   "withTheseAddressesRecoveryDescription": "Con estos enderezos podes recuperar o contrasinal.",
   "@withTheseAddressesRecoveryDescription": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "writeAMessage": "Escribe unha mensaxe…",
-  "@writeAMessage": {
     "type": "text",
     "placeholders": {}
   },
@@ -2057,11 +1716,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "youCannotInviteYourself": "Non podes autoconvidarte",
-  "@youCannotInviteYourself": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youHaveBeenBannedFromThisChat": "Foches vetada nesta conversa",
   "@youHaveBeenBannedFromThisChat": {
     "type": "text",
@@ -2075,18 +1729,13 @@
   "chatHasBeenAddedToThisSpace": "O chat foi engadido a este espazo",
   "addToSpace": "Engadir ao espazo",
   "scanQrCode": "Escanear código QR",
-  "typeInInviteLinkManually": "Escribe manualmente a ligazón do convite...",
-  "shareYourInviteLink": "Comparte a túa ligazón de convite",
-  "sendOnEnter": "Enter para enviar",
   "homeserver": "Servidor de inicio",
   "serverRequiresEmail": "O servidor precisa validar o teu enderezo de email para rexistrarte.",
-  "enableMultiAccounts": "(BETA) Activar varias contas neste dispositivo",
   "addAccount": "Engadir conta",
   "oneClientLoggedOut": "Un dos teus clientes foi desconectado",
   "link": "Ligazón",
   "yourChatBackupHasBeenSetUp": "Configurouse a copia de apoio do chat.",
   "unverified": "Sen verificar",
-  "yourUserId": "O teu ID:",
   "pleaseEnterValidEmail": "Escribe un enderezo de email válido.",
   "passwordsDoNotMatch": "Os contrasinais non concordan!",
   "repeatPassword": "Repite o contrasinal",
@@ -2100,7 +1749,6 @@
   "messageInfo": "Info da mensaxe",
   "time": "Hora",
   "sender": "Remitente",
-  "openGallery": "Galería pública",
   "addToSpaceDescription": "Elixe un espazo ao que engadir este chat.",
   "loginWithOneClick": "Conéctate cun click",
   "messageType": "Tipo de mensaxe",
@@ -2126,20 +1774,7 @@
     "type": "text",
     "description": "Usage hint for the command /dm"
   },
-  "openVideoCamera": "Abrir a cámara para un vídeo",
-  "@openVideoCamera": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "yourStory": "A túa Historia",
   "replyHasBeenSent": "Enviouse a resposta",
-  "videoWithSize": "Vídeo ({size})",
-  "@videoWithSize": {
-    "type": "text",
-    "placeholders": {
-      "size": {}
-    }
-  },
   "storyFrom": "Historia do {date}:\n{body}",
   "@storyFrom": {
     "type": "text",
@@ -2165,11 +1800,9 @@
   "iUnderstand": "Comprendo",
   "dismiss": "Desbotar",
   "markAsRead": "Marcar como lido",
-  "reportUser": "Denunciar usuaria",
   "openChat": "Abrir Chat",
   "voiceCall": "Chamada de voz",
   "emojis": "Emojis",
-  "placeCall": "Chamar",
   "unsupportedAndroidVersionLong": "Esta característica require unha vesión máis recente de Android. Mira se hai actualizacións ou soporte de LineageOS.",
   "videoCallsBetaWarning": "Ten en conta que as chamadas de vídeo están en fase beta. Poderían non funcionar correctamente ou non funcionar nalgunhas plataformas.",
   "unsupportedAndroidVersion": "Version de Android non soportada",
@@ -2184,16 +1817,6 @@
   },
   "confirmEventUnpin": "Tes a certeza de querer desafixar o evento?",
   "experimentalVideoCalls": "Chamadas de vídeo en probas",
-  "emailOrUsername": "Email ou nome de usuaria",
-  "switchToAccount": "Cambiar á conta {number}",
-  "@switchToAccount": {
-    "type": "number",
-    "placeholders": {
-      "number": {}
-    }
-  },
-  "previousAccount": "Conta anterior",
-  "nextAccount": "Conta seguinte",
   "bundleName": "Nome do feixe",
   "widgetVideo": "Vídeo",
   "widgetJitsi": "Jitsi Meet",
@@ -2268,26 +1891,13 @@
   "saveKeyManuallyDescription": "Garda esta chave manualmente usando o sistema para compartir do dispositivo ou portapapeis.",
   "storeInAndroidKeystore": "Gardar en Android KeyStore",
   "storeInAppleKeyChain": "Gardar en Apple KeyChain",
-  "recoveryKeyLost": "Perdeches a chave de recuperación?",
-  "pleaseEnterRecoveryKey": "Escribe a túa chave de recuperación:",
   "recoveryKey": "Chave de recuperación",
   "storeSecurlyOnThisDevice": "Gardar de xeito seguro no dispositivo",
-  "pleaseEnterRecoveryKeyDescription": "Para desbloquear as mensaxes antigas, escribe a chave de recuperación creada nunha sesión existente. A chave de recuperación NON é o teu contrasinal.",
   "users": "Usuarias",
-  "enableAutoBackups": "Activar copia automática",
   "storeInSecureStorageDescription": "Gardar a chave de recuperación na almacenaxe segura deste dispositivo.",
-  "countFiles": "{count} ficheiros",
-  "@countFiles": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "unlockOldMessages": "Desbloquear mensaxes antigas",
-  "dehydrateShare": "Esta é a copia de apoio privada de FluffyChat. Pon coidado en non perdela e mantela segura.",
   "dehydrateTorLong": "Para usuarias de TOR, é recomendable exportar a sesión antes de pechar a ventál.",
   "hydrateTor": "Usuarias TOR: Importar a sesión exportada",
   "hydrateTorLong": "Exportaches a túa sesión a última vez en TOR? Importaa rápidamente e continúa cos teus chats.",
-  "hydrate": "Restablecer desde copia de apoio",
   "dehydrateWarning": "Esta acción non é reversible. Pon coidado en gardar o ficheiro de apoio.",
   "dehydrate": "Exportar sesión e eliminar dispositivo",
   "dehydrateTor": "Usuarias TOR: Exportar sesión",
@@ -2297,14 +1907,6 @@
   "custom": "Personal",
   "updateAvailable": "Actualización dispoñible para FluffyChat",
   "updateNow": "Iniciar actualización en segundo plano",
-  "confirmMatrixId": "Confirma o teu ID Matrix para poder eliminar a conta.",
-  "supposedMxid": "Debería ser {mxid}",
-  "@supposedMxid": {
-    "type": "text",
-    "placeholders": {
-      "mxid": {}
-    }
-  },
   "commandHint_markasdm": "Marcar como sala de mensaxe directa",
   "commandHint_markasgroup": "Marcar como grupo",
   "whyIsThisMessageEncrypted": "Por que non podo ler esta mensaxe?",
@@ -2356,16 +1958,11 @@
       "senderName": {}
     }
   },
-  "noSearchResult": "Non hai resultados para a busca.",
-  "enterInviteLinkOrMatrixId": "Escribe a ligazón de convite ou ID Matrix...",
   "encryptThisChat": "Cifrar esta conversa",
   "endToEndEncryption": "Cifrado de extremo a extremo",
   "disableEncryptionWarning": "Por razóns de seguridade non podes desactivar o cifrado dunha conversa onde foi activado previamente.",
   "sorryThatsNotPossible": "Lamentámolo... iso non é posible",
   "deviceKeys": "Chaves do dispositivo:",
-  "newSpaceDescription": "Os Espazos permítenche fortalecer as túas conversas e construir comunidades públicas ou privadas.",
-  "letsStart": "Imos alá",
-  "startFirstChat": "Abre a túa primeira conversa",
   "wasDirectChatDisplayName": "Conversa baleira (era {oldDisplayName})",
   "@wasDirectChatDisplayName": {
     "type": "text",
@@ -2375,6 +1972,5 @@
   },
   "reopenChat": "Reabrir conversa",
   "noOtherDevicesFound": "Non se atopan outros dispositivos",
-  "noBackupWarning": "Aviso! Se non activas a copia de apoio do chat, perderás o acceso ás túas mensaxes cifradas. É totalmente recomendable activar a copia de apoio do chat antes de pechar a sesión.",
   "fileIsTooBigForServer": "O servidor informa de que o ficheiro é demasiado grande para envialo."
 }
