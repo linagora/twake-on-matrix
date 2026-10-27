@@ -18,6 +18,7 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
+import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
@@ -247,8 +248,8 @@ void main() {
     expect(await tester.runAsync(repository.pendingPushRemovals), isEmpty);
   });
 
-  testWidgets('MatrixState sets the switch effects after the first build and '
-      'clears them when it is disposed', (tester) async {
+  testWidgets('MatrixState sets the switch effects and the push teardown after '
+      'the first build and clears them when it is disposed', (tester) async {
     final harness = _Harness(tester, [_BootClient('a', userID: '@a:s')]);
     final effects = harness.container.read(accountSwitchEffectsProvider);
     expect(effects, isNull);
@@ -259,11 +260,13 @@ void main() {
         harness.container.read(accountSwitchEffectsProvider),
         same(harness.matrix),
       );
+      expect(harness.container.read(pushRemovalsControllerProvider), isNotNull);
 
       await harness.unmount();
     });
 
     expect(harness.container.read(accountSwitchEffectsProvider), isNull);
+    expect(harness.container.read(pushRemovalsControllerProvider), isNull);
   });
 
   testWidgets('one account whose subscriptions fail does not stop the boot', (

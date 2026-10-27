@@ -22,6 +22,7 @@ import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/providers/push_removals_controller.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -118,11 +119,16 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     return;
   }
 
+  Future<void> _removePushBeforeLogout() =>
+      ProviderScope.containerOf(context, listen: false)
+          .read(pushRemovalsControllerProvider.notifier)
+          .removeBeforeLogout(matrix.client);
+
   Future<void> _logoutActionsOnMobile() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          await matrix.removePushBeforeLogout(matrix.client);
+          await _removePushBeforeLogout();
           final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),
@@ -145,7 +151,7 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          await matrix.removePushBeforeLogout(matrix.client);
+          await _removePushBeforeLogout();
           final userId = matrix.client.userID;
           await Future.wait([
             matrix.client.logout(),

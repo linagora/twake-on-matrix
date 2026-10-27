@@ -51,7 +51,7 @@ import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/data/account/client_subscriptions.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
 import 'package:twake_chat/providers/logout_removal_plan.dart';
-import 'package:twake_chat/providers/push_removal_plan.dart';
+import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -423,6 +423,8 @@ class MatrixState extends ConsumerState<Matrix>
   late final ClientSubscriptions _subscriptions;
   late final LogoutRemovals _logoutRemovals;
   late final LogoutRemovals _pushRemovals;
+  late final PushRemovalsController _pushController;
+  late final PushTeardown _pushTeardown = _MatrixPushTeardown(this);
 
   final _lastSyncErrorSentAt = <String, DateTime>{};
 
@@ -478,6 +480,7 @@ class MatrixState extends ConsumerState<Matrix>
     // the effects only when a switch runs, so they are set right after the
     // first build: a provider cannot be written while the tree is building.
     _switchEffects = ref.read(accountSwitchEffectsProvider.notifier);
+    _pushController = ref.read(pushRemovalsControllerProvider.notifier);
     _switchCoordinator = ref.read(accountSwitchCoordinatorProvider);
     _httpClientOwner = _currentHttpClientOwner();
     ref.listenManual(
@@ -486,7 +489,10 @@ class MatrixState extends ConsumerState<Matrix>
     );
     _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (mounted) _switchEffects.set(this);
+      if (mounted) {
+        _switchEffects.set(this);
+        _pushController.setTeardown(_pushTeardown);
+      }
       WidgetsBinding.instance.addObserver(this);
       if (PlatformInfos.isWeb) {
         html.window.addEventListener('focus', onWindowFocus);
@@ -800,29 +806,6 @@ class MatrixState extends ConsumerState<Matrix>
     if (kIsWeb) await removeWebPush(target, unsubscribe: false);
   }
 
-  /// The push teardown of [target], to run before its logout (while the
-  /// session can still delete the pusher), for a normal logout, the last one
-  /// and a rolled-back login. A failure is reported and kept: it is recorded
-  /// across restarts and runs again, in the background, while the session of
-  /// [target] is still open. Never throws, so the logout goes on (local
-  /// first).
-  Future<void> removePushBeforeLogout(Client target) async {
-    await _pushRemovals.remove(
-      target.clientName,
-      PushRemovalPlan(
-        id: target.clientName,
-        repository: ref.read(accountRepositoryProvider),
-        sessionToken: () => target.isLogged() ? target.accessToken : null,
-        removePush: () => _removePush(target),
-        isPushReady: () =>
-            !PlatformInfos.isMobile || (backgroundPush?.hasPushToken ?? false),
-      ).steps,
-      (error, stackTrace, what) => error is PushNotReadyException
-          ? Logs().w('MatrixState: $what', error, stackTrace)
-          : _report(error, stackTrace, what),
-    );
-  }
-
   /// Pusher deletions that failed before the last exit run again now, for the
   /// accounts whose session is still open; a record whose account is gone
   /// cannot be retried and is dropped.
@@ -834,7 +817,7 @@ class MatrixState extends ConsumerState<Matrix>
           .execute();
       for (final id in retryable) {
         final pending = registry[id];
-        if (pending != null) await removePushBeforeLogout(pending);
+        if (pending != null) await _pushController.removeBeforeLogout(pending);
       }
     } catch (e, s) {
       _report(e, s, 'retry of the pending pusher deletions');
@@ -1934,7 +1917,14 @@ class MatrixState extends ConsumerState<Matrix>
     onClientLoginStateChanged.close();
     // A provider cannot be written while the tree is being finalized.
     final switchEffects = _switchEffects;
-    unawaited(Future.microtask(() => switchEffects.clear(this)));
+    final pushController = _pushController;
+    final pushTeardown = _pushTeardown;
+    unawaited(
+      Future.microtask(() {
+        switchEffects.clear(this);
+        pushController.clearTeardown(pushTeardown);
+      }),
+    );
     _httpClientOwner?.httpClient.close();
     onFocusSub?.cancel();
     onBlurSub?.cancel();
@@ -2001,4 +1991,22 @@ extension HomeserverSummaryConversion
       rethrow;
     }
   }
+}
+
+/// The push state `MatrixState` owns, given to `PushRemovalsController`.
+class _MatrixPushTeardown implements PushTeardown {
+  _MatrixPushTeardown(this._state);
+
+  final MatrixState _state;
+
+  @override
+  Future<void> removePush(Client target) => _state._removePush(target);
+
+  @override
+  bool get isPushReady =>
+      !PlatformInfos.isMobile || (_state.backgroundPush?.hasPushToken ?? false);
+
+  @override
+  void report(Object error, StackTrace stackTrace, String what) =>
+      _state._report(error, stackTrace, what);
 }
