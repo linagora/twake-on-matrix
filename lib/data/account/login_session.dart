@@ -474,6 +474,14 @@ class LoginSession {
   /// A set-up or a cancel that fails again stays for the next [relinquish].
   Future<void> relinquish() => _enqueue(_relinquish);
 
+  /// The host that owns this session went away: closes the login listener and
+  /// the logged-out watch. Queued, so a creation that is going on ends first
+  /// and its listener is closed too. A cancel that fails is reported.
+  Future<void> cancelListeners() => _enqueue(() async {
+    await _cancelListenerReported();
+    await _cancelLoggedOutWatch();
+  });
+
   Future<void> _relinquish() async {
     await _cancelLoggedOutWatch();
     if (_state != LoginSessionState.active) return;
