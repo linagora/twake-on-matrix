@@ -9,6 +9,49 @@ import 'package:twake_chat/data/account/login_sessions.dart';
 import 'fakes.dart';
 import 'fake_login_host.dart';
 
+/// A host whose listeners fail when they are cancelled.
+class _FailingCancelHost extends FakeLoginHost {
+  @override
+  StreamSubscription<LoginState> listenLoginState(
+    Client client,
+    void Function(LoginState state) onState,
+  ) => _FailingCancel(super.listenLoginState(client, onState));
+}
+
+class _FailingCancel implements StreamSubscription<LoginState> {
+  _FailingCancel(this._inner);
+
+  final StreamSubscription<LoginState> _inner;
+
+  @override
+  Future<void> cancel() async {
+    await _inner.cancel();
+    throw StateError('cancel failed');
+  }
+
+  @override
+  void onData(void Function(LoginState data)? handleData) =>
+      _inner.onData(handleData);
+
+  @override
+  void onError(Function? handleError) => _inner.onError(handleError);
+
+  @override
+  void onDone(void Function()? handleDone) => _inner.onDone(handleDone);
+
+  @override
+  void pause([Future<void>? resumeSignal]) => _inner.pause(resumeSignal);
+
+  @override
+  void resume() => _inner.resume();
+
+  @override
+  bool get isPaused => _inner.isPaused;
+
+  @override
+  Future<E> asFuture<E>([E? futureValue]) => _inner.asFuture(futureValue);
+}
+
 void main() {
   late FakeLoginHost host;
   late LoginSessions sessions;
@@ -379,6 +422,69 @@ void main() {
 
       expect(sessions.sessionOf('c1'), isNull);
       expect(sessions.sessionOf('c2'), isNotNull);
+    });
+  });
+
+  group('the host goes away', () {
+    /// A candidate that listens for its login, and the watch of a placeholder.
+    Future<void> openSessions() async {
+      await sessions.loginClient();
+      await sessions.trackLogin(host.clientOf('boot'), () async {});
+      expect(host.openListeners('c1'), 1);
+      expect(host.openListeners('boot'), 1);
+    }
+
+    test('release cancels the listeners of the sessions it drops', () async {
+      await openSessions();
+
+      sessions.release(host);
+      await pumpEventQueue();
+
+      expect(host.openListeners('c1'), 0);
+      expect(host.openListeners('boot'), 0);
+      expect(sessions.sessionOf('c1'), isNull);
+    });
+
+    test(
+      'attach cancels the listeners of the previous host sessions',
+      () async {
+        await openSessions();
+
+        sessions.attach(FakeLoginHost());
+        await pumpEventQueue();
+
+        expect(host.openListeners('c1'), 0);
+        expect(host.openListeners('boot'), 0);
+      },
+    );
+
+    test('release by a host that is not attached drops nothing', () async {
+      await openSessions();
+
+      sessions.release(FakeLoginHost());
+      await pumpEventQueue();
+
+      expect(host.openListeners('c1'), 1);
+      expect(sessions.sessionOf('c1'), isNotNull);
+    });
+
+    test('a cancel that fails is reported and is not left uncaught', () async {
+      final failingHost = _FailingCancelHost();
+      sessions = LoginSessions(failingHost);
+      await sessions.loginClient();
+      await sessions.trackLogin(failingHost.clientOf('boot'), () async {});
+      final uncaught = <Object>[];
+
+      await runZonedGuarded(() async {
+        sessions.release(failingHost);
+        await pumpEventQueue();
+      }, (error, _) => uncaught.add(error));
+
+      expect(uncaught, isEmpty);
+      expect(failingHost.reports, [
+        'login listener cancel of c1 failed',
+        'logged-out listener cancel of boot failed',
+      ]);
     });
   });
 

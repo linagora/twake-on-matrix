@@ -28,23 +28,35 @@ class LoginSessions {
   LoginHost get _host =>
       _attached ?? (throw StateError('The login host is not set yet'));
 
-  /// Serves [host] from now on, with no session of a previous host.
+  /// Serves [host] from now on, with no session of a previous host: their
+  /// listeners are cancelled.
   void attach(LoginHost host) {
     _attached = host;
-    _byId.clear();
-    _replaced.clear();
-    _pending = null;
+    _dropSessions();
   }
 
   /// Takes [owner] out when its state goes away, so that the next
   /// `MatrixState` on the container starts with its own host. A host that
-  /// someone else has attached since stays.
+  /// someone else has attached since stays. The listeners of its sessions are
+  /// cancelled.
   void release(LoginHost owner) {
     if (!identical(_attached, owner)) return;
     _attached = null;
+    _dropSessions();
+  }
+
+  /// Forgets every session and cancels what they listen to, so a client of
+  /// the host that went away does not call a session nobody holds. The cancel
+  /// is queued behind the work of each session and does not block the caller.
+  void _dropSessions() {
+    final pending = _pending;
+    final dropped = {..._byId.values, ..._replaced, ?pending};
     _byId.clear();
     _replaced.clear();
     _pending = null;
+    for (final session in dropped) {
+      unawaited(session.cancelListeners());
+    }
   }
 
   /// The unlogged client for a login screen: the placeholder of a logged-out
