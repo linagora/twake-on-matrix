@@ -93,6 +93,31 @@ void main() {
       expect(bootContainer([a, b]).read(accountClientsProvider), [a, b]);
     });
 
+    test(
+      'the repository adopts the boot clients when it is built, and building '
+      'the state does not adopt anything',
+      () {
+        final repository = bootContainer([
+          a,
+          b,
+        ]).read(accountRepositoryProvider);
+
+        expect(repository.registeredAccounts().map((x) => x.id), ['a', 'b']);
+      },
+    );
+
+    test(
+      'rebuilding the state keeps the removals made since the boot',
+      () async {
+        boot([a, b]);
+        await notifier().removeAccount(const AccountId('b'));
+
+        container.invalidate(accountsProvider);
+
+        expect(state().accounts.map((x) => x.id), ['a']);
+      },
+    );
+
     test('reading the state without the boot overrides is an error', () {
       final bare = ProviderContainer.test(retry: (_, _) => null);
 
@@ -706,11 +731,35 @@ void main() {
 
       await expectLater(
         notifier().removeAccount(const AccountId('b')),
-        throwsA(isA<InvalidAccountTransitionException>()),
+        throwsA(isA<SwitchInProgressException>()),
       );
       expect(state(), isA<Switching>());
       expect(container.read(accountClientsProvider), [a, b]);
+      expect(dataSource.calls.where((c) => c.startsWith('delete:')), isEmpty);
     });
+
+    test(
+      'holding is rejected while switching with the same exception',
+      () async {
+        boot([a, b]);
+        final dispose = notifier().registerSwitchHandler();
+        addTearDown(dispose);
+        unawaited(notifier().switchTo(const AccountId('b')).catchError((_) {}));
+        await pumpEventQueue();
+
+        await expectLater(
+          notifier().holdRemoval(const AccountId('b')),
+          throwsA(
+            isA<SwitchInProgressException>().having(
+              (e) => e.accountId,
+              'accountId',
+              'b',
+            ),
+          ),
+        );
+        expect(state(), isA<Switching>());
+      },
+    );
 
     test('the only account must go through logoutLast', () async {
       boot([a]);
