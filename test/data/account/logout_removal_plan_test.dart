@@ -26,6 +26,10 @@ void main() {
   late bool failCancel;
   late bool failActivate;
   late bool failAnnounce;
+  late List<String> reports;
+
+  /// Runs while the subscriptions of the account are cancelled.
+  late Future<void> Function() whileCancelling;
 
   AccountsState state() => container.read(accountsProvider);
   Accounts notifier() => container.read(accountsProvider.notifier);
@@ -58,6 +62,7 @@ void main() {
               container.read(activeMatrixClientProvider)?.clientName == id,
           cancelSubscriptions: () async {
             events.add('cancel:$id');
+            await whileCancelling();
             if (failCancel) throw StateError('cancel');
           },
           activateReplacement: () async {
@@ -71,7 +76,7 @@ void main() {
                 }
               : null,
         ).steps,
-        (error, stackTrace, what) {},
+        (error, stackTrace, what) => reports.add(what),
       )
       .then((_) => !removals.isPending(id));
 
@@ -79,6 +84,8 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     removals = LogoutRemovals();
     events = [];
+    reports = [];
+    whileCancelling = () async {};
     failCancel = false;
     failActivate = false;
     failAnnounce = false;
@@ -226,4 +233,26 @@ void main() {
       expect(events, ['cancel:c', 'announce:c']);
     },
   );
+
+  test('a switch that starts while the subscriptions are cancelled is waited '
+      'for: the removal is written after it, with nothing reported', () async {
+    boot([user('a'), user('b'), user('c')]);
+    final dispose = notifier().registerSwitchHandler();
+    addTearDown(dispose);
+    whileCancelling = () async {
+      unawaited(notifier().switchTo(const AccountId('b')));
+      await pumpEventQueue();
+    };
+
+    final removal = logout('c');
+    await pumpEventQueue();
+    expect(state(), isA<Switching>());
+    notifier().completeSwitch((state() as Switching).ticket);
+
+    expect(await removal, isTrue);
+    expect(reports, isEmpty);
+    expect(state().accounts.map((x) => x.id), ['a', 'b']);
+    expect((state() as Active).activeId, 'b');
+    expect(events, ['cancel:c', 'announce:c']);
+  });
 }

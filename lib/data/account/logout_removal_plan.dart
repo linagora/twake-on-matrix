@@ -1,5 +1,6 @@
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
+import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 
 /// The steps that take a logged-out account away, wired to the account state.
@@ -44,12 +45,25 @@ class LogoutRemovalPlan {
     await _accounts.whenSwitchSettled();
     _wasActive ??= _isActive();
     await _cancelSubscriptions();
-    await _accounts.removeAccount(AccountId(id));
+    await _writeAfterSwitch(() => _accounts.removeAccount(AccountId(id)));
   }
 
   Future<void> _hold() async {
     await _accounts.whenSwitchSettled();
-    await _accounts.holdRemoval(AccountId(id));
+    await _writeAfterSwitch(() => _accounts.holdRemoval(AccountId(id)));
+  }
+
+  /// A switch can start after the wait above, while a step runs: the write is
+  /// then refused before it changes anything. That is expected, not a failure
+  /// to report, so wait for the switch and write once more. A second refusal
+  /// reaches the removals, which retry it.
+  Future<void> _writeAfterSwitch(Future<void> Function() write) async {
+    try {
+      await write();
+    } on SwitchInProgressException {
+      await _accounts.whenSwitchSettled();
+      await write();
+    }
   }
 
   /// The account list changed, by a hold or by the removal: once, however many

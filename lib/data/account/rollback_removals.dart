@@ -8,6 +8,9 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 /// across restarts and removed again in the background; a candidate that was
 /// never stored has its storage deleted again the same way. Both throw while
 /// the removal is not done, so the rollback stays unfinished.
+///
+/// The removals own the retry: while a handed-off removal is pending, a second
+/// call only reports it as pending and does not start another try.
 class RollbackRemovals {
   RollbackRemovals({
     required AccountRepository repository,
@@ -43,6 +46,7 @@ class RollbackRemovals {
     required Future<void> Function() activateReplacement,
   }) async {
     if (!_repository.registeredAccounts().any((a) => a.id == id)) return;
+    if (_storedRemovals.isPending(id)) throw RemovalPendingException(id);
     await _storedRemovals.remove(
       id,
       LogoutRemovalPlan(
@@ -61,6 +65,7 @@ class RollbackRemovals {
   /// restarts and retried.
   Future<void> discardCandidate(String id) async {
     if (_discarded.contains(id)) return;
+    if (_candidateRemovals.isPending(id)) throw RemovalPendingException(id);
     await _candidateRemovals.remove(id, _discardSteps(id), _report);
     if (_candidateRemovals.isPending(id)) throw RemovalPendingException(id);
   }
