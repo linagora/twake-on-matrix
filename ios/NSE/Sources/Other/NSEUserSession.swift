@@ -34,7 +34,9 @@ final class NSEUserSession {
         baseClient = try await ClientBuilder()
             .sessionPaths(dataPath: URL.sessionsBaseDirectory(userId: userID, deviceId: credentials.restorationToken.session.deviceId).path,
                           cachePath: URL.cacheBaseDirectory(userId: userID, deviceId: credentials.restorationToken.session.deviceId).path)
-            .username(username: credentials.userID)
+            // The session already knows its homeserver: no well-known lookup
+            // on the server name, which some deployments do not serve.
+            .homeserverUrl(url: credentials.restorationToken.session.homeserverUrl)
             .userAgent(userAgent: UserAgentBuilder.makeASCIIUserAgent())
             .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
             .crossProcessLockConfig(crossProcessLockConfig: .multiProcess(holderName: InfoPlistReader.main.bundleIdentifier))
