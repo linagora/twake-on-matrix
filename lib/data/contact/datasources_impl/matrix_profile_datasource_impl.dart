@@ -16,10 +16,13 @@ class MatrixProfileDatasourceImpl implements MatrixProfileDatasource {
 
     try {
       if (fresh) {
+        final requestedAt = DateTime.now();
         final profile = await client.getUserProfile(
           matrixId,
           maxCacheAge: Duration.zero,
         );
+        // On a failed request the SDK returns the stale cached profile.
+        if (profile.updated.isBefore(requestedAt)) return null;
         return MatrixUserProfile(
           matrixId: matrixId,
           displayName: profile.displayname,
