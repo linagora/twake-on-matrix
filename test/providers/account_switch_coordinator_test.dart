@@ -143,7 +143,7 @@ void main() {
           ),
       ],
     );
-    container.read(accountSwitchEffectsProvider.notifier).set(effects);
+    container.read(accountSwitchEffectsHolderProvider.notifier).set(effects);
     container.read(accountsProvider);
     coordinator = container.read(accountSwitchCoordinatorProvider);
   }

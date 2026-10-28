@@ -91,8 +91,8 @@ final class _Interrupted extends _Effects {
 }
 
 /// The one coordinator of the app. Read it once at boot, after
-/// `accountSwitchEffectsProvider` is set: until it is read no switch handler
-/// is registered and a switch ends at once, with no effects.
+/// `accountSwitchEffectsHolderProvider` is set: until it is read no switch
+/// handler is registered and a switch ends at once, with no effects.
 @Riverpod(keepAlive: true)
 AccountSwitchCoordinator accountSwitchCoordinator(Ref ref) =>
     AccountSwitchCoordinator(ref);
@@ -101,8 +101,8 @@ AccountSwitchCoordinator accountSwitchCoordinator(Ref ref) =>
 /// notifier (`completeSwitch`, or `failSwitch` when a step throws). It
 /// registers the switch handler and listens to `accountsProvider` when it is
 /// created, and stops both when its provider is disposed. The effects are the
-/// ones `accountSwitchEffectsProvider` holds when a run starts; a run without
-/// effects fails.
+/// ones `accountSwitchEffectsHolderProvider` holds when a run starts; a run
+/// without effects fails.
 class AccountSwitchCoordinator {
   AccountSwitchCoordinator(Ref ref, {Client? Function(String id)? clientOf})
     : _ref = ref,
@@ -122,7 +122,7 @@ class AccountSwitchCoordinator {
   AccountsState _currentState() => _ref.read(accountsProvider);
 
   AccountSwitchEffects _readEffects() {
-    final effects = _ref.read(accountSwitchEffectsProvider);
+    final effects = _ref.read(accountSwitchEffectsHolderProvider);
     if (effects == null) throw StateError('No account switch effects set');
     return effects;
   }
