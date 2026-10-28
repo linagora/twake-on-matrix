@@ -109,7 +109,6 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await openMessageInfoFromSelectionAppBar($, _l10n);
   }
 
-  @override
   Future<void> reactWithQuickEmoji(String message, String emoji) async {
     await _openMenu(message);
     await $(ReactionsPicker).$(find.text(emoji)).first.tap();
@@ -117,7 +116,6 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
     await $.pumpAndTrySettle();
   }
 
-  @override
   Future<void> openFullEmojiPicker(String message) async {
     await _openMenu(message);
     await $(ReactionsPicker).$(find.byIcon(Icons.expand_circle_down)).tap();

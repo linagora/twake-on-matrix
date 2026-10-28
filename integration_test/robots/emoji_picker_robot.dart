@@ -6,9 +6,6 @@ import 'package:patrol/patrol.dart';
 import '../base/core_robot.dart';
 
 /// Full emoji picker (`flutter_emoji_mart`) opened from the reaction row.
-///
-/// The same widget is shown on mobile (inside the long-press dialog) and on web
-/// (inside the hover reaction popup), so this robot is platform-agnostic.
 class EmojiPickerRobot extends CoreRobot {
   EmojiPickerRobot(super.$);
 
@@ -55,7 +52,7 @@ class EmojiPickerRobot extends CoreRobot {
   }
 
   Future<void> close() async {
-    // Both the mobile dialog and the web popup pop when their barrier is tapped.
+    // The long-press dialog pops on any tap outside its content.
     await $.tester.tapAt(const Offset(10, 10));
     await $.pump(const Duration(milliseconds: 300));
     await $.pumpAndTrySettle();
