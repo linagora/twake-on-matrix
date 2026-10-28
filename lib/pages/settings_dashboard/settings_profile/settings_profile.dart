@@ -120,7 +120,8 @@ class SettingsProfileController extends State<SettingsProfile>
     SettingsProfileEnum.matrixId,
   ];
 
-  bool get hasAvatar => currentProfile.value?.avatarUrl != null;
+  bool get hasAvatar =>
+      currentProfile.value?.avatarUrl?.toString().isNotEmpty ?? false;
 
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
@@ -233,7 +234,7 @@ class SettingsProfileController extends State<SettingsProfile>
       ValueListenableBuilder<Profile?>(
         valueListenable: currentProfile,
         builder: (context, profile, _) => SettingsProfileContextMenu(
-          hasAvatar: profile?.avatarUrl != null,
+          hasAvatar: profile?.avatarUrl?.toString().isNotEmpty ?? false,
           onAction: (action) {
             menuController.close();
             _handleActionContextMenu(action);
@@ -428,7 +429,7 @@ class SettingsProfileController extends State<SettingsProfile>
           );
           _sendAccountDataEvent(profile: newProfile);
           isEditedProfileNotifier.toggle();
-          _getCurrentProfile(client);
+          _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
         }
 
@@ -444,6 +445,7 @@ class SettingsProfileController extends State<SettingsProfile>
           }
           currentProfile.value = newProfile;
           _clearImageInLocal();
+          _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
@@ -453,20 +455,25 @@ class SettingsProfileController extends State<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(Client client) async {
+  void _getCurrentProfile(Client client, {bool fresh = false}) async {
+    final userId = client.userID!;
     // SDK access goes through Riverpod (transitional container read).
-    final data = await ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(matrixUserProfileProvider(client.userID!).future);
-    if (!mounted) return;
-    final profile = data.toProfile(client.userID!);
-    Logs().d(
-      'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+    final data = await ProviderScope.containerOf(context, listen: false).read(
+      fresh
+          ? freshMatrixUserProfileProvider(userId).future
+          : matrixUserProfileProvider(userId).future,
     );
-    currentProfile.value = profile;
-    if (profile.avatarUrl == null) {
-      _clearImageInLocal();
+    if (!mounted) return;
+    // A failed fresh read keeps the profile the save just confirmed.
+    if (data != null || !fresh) {
+      final profile = data.toProfile(userId);
+      Logs().d(
+        'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+      );
+      currentProfile.value = profile;
+      if (profile.avatarUrl == null) {
+        _clearImageInLocal();
+      }
     }
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = client.mxid(context);
