@@ -466,7 +466,9 @@ class BackgroundPush {
   }
 
   bool _wentToRoomOnStartup = false;
-  bool _setupPushCompleted = false;
+  /// Device the push was set up for. A new login (new device) sets it up
+  /// again: the previous session's pusher is gone.
+  String? _setupPushDeviceId;
 
   Future<void> setupPush() async {
     Logs().d(
@@ -481,11 +483,11 @@ class BackgroundPush {
       return;
     }
     // Guard against double-invocation (factory + ChatList both call setupPush).
-    if (_setupPushCompleted) {
+    if (_setupPushDeviceId == client.deviceID) {
       Logs().d('SetupPush: already completed, skip');
       return;
     }
-    _setupPushCompleted = true;
+    _setupPushDeviceId = client.deviceID;
     // Do not setup unifiedpush if this has been initialized by
     // an unifiedpush action
     if (upAction) {
