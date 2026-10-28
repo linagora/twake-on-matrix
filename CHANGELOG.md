@@ -1,3 +1,33 @@
+## [2.26.0] - 2026-10-27
+### Added
+- #3426: Create public and server-limited groups when the server allows it
+- #3437: TW-3353: Create video call rooms through ToM
+- #3458: TW-3450: Copy a reply message
+- #3459: Unified contact store
+- #3466, #3467, #3468: TW-3302: Add the account domain and repository
+
+### Changed
+- #3425: TW-3422: Upgrade Flutter and the Matrix SDK
+- #3486, #3490, #3493: Upgrade to Riverpod 3.4 and enforce riverpod_lint
+- #3464: Add Riverpod migration guardrails and plan v2
+- #3497, #3498, #3500: Remove unused assets, Dart files and l10n keys
+- #3447, #3463, #3481, #3503: Build the web image once, pin nginx 1.31.8
+- #3462: Pin Patrol web jobs to ubuntu-24.04
+- #3440, #3461, #3465: Document labels, decisions and the git workflow
+
+### Fixed
+- #3506: Update Flutter to 3.47.8 for a TLS certificate security fix
+- #3478: TW-3002: Forward stickers as images
+- #3492: Fall back to the client homeserver when login has no well-known
+- #3460: TW-2962: Open custom scheme links in their app
+- #3455: TW-3435: Keep bottom actions above the Android navigation bar
+- #3457: TW-3454: Enable swipe back on every mobile page
+- #3373: Restore web asset caching with our own service worker
+- #3479, #3480: Restore Android and iOS builds with Flutter 3.47
+
+### Tests
+- #3487: Add app grid Patrol scenarios
+
 ## [2.25.2] - 2026-10-06
 ### Fixed
 - #3439: Restore git history in the Docker build context
