@@ -762,9 +762,6 @@
   },
   "openChat": "Mở cuộc trò chuyện",
   "markAsRead": "Đánh dấu là đã đọc",
-  "unsupportedAndroidVersion": "Phiên bản Android không được hỗ trợ",
-  "unsupportedAndroidVersionLong": "Tính năng này yêu cầu phiên bản Android mới hơn. Vui lòng kiểm tra các bản cập nhật hoặc đội ngũ hỗ trợ Lineage OS.",
-  "videoCallsBetaWarning": "Xin lưu ý rằng cuộc gọi điện video hiện đang ở giai đoạn thử nghiệm. Chúng có thể không hoạt động như mong đợi hoặc không hoạt động trên tất cả các nền tảng.",
   "indexedDbErrorTitle": "Vấn đề về chế độ riêng tư",
   "indexedDbErrorLong": "Rất tiếc, tính năng lưu trữ tin nhắn không được bật ở chế độ riêng tư theo mặc định.\nVui lòng truy cập\n  - về: cấu hình\n  - đặt dom.indexedDB.privateBrowsing.enabled thành true\nNếu không, bạn không thể chạy FluffyChat.",
   "widgetName": "Tên",
@@ -803,8 +800,6 @@
   "saveKeyManuallyDescription": "Lưu khóa này thủ công bằng cách kích hoạt hộp thoại chia sẻ hệ thống hoặc bảng nhớ tạm.",
   "foregroundServiceRunning": "Thông báo này xuất hiện khi dịch vụ nền trước đang chạy.",
   "appearOnTopDetails": "Cho phép ứng dụng xuất hiện trên cùng (không cần thiết nếu bạn đã thiết lập Fluffychat làm tài khoản gọi điện)",
-  "callingAccount": "Tài khoản gọi điện",
-  "callingPermissions": "Quyền gọi điện",
   "pleaseClickOnLink": "Vui lòng nhấp vào liên kết trong email và tiếp tục.",
   "@pleaseClickOnLink": {
     "type": "text",
@@ -1359,8 +1354,6 @@
   },
   "confirmEventUnpin": "Bạn có chắc chắn bỏ ghim tin nhắn này?",
   "emojis": "Biểu tượng cảm xúc",
-  "voiceCall": "Cuộc gọi thoại",
-  "experimentalVideoCalls": "Cuộc gọi video thử nghiệm",
   "editWidgets": "Chỉnh sửa tiện ích",
   "addWidget": "Thêm tiện ích",
   "widgetVideo": "Video",
@@ -1394,9 +1387,6 @@
   "custom": "Cá nhân hóa",
   "screenSharingTitle": "Chia sẻ màn hình",
   "screenSharingDetail": "Bạn đang chia sẻ màn hình trong FuffyChat",
-  "callingAccountDetails": "Cho phép FluffyChat sử dụng ứng dụng quay số Android gốc.",
-  "appearOnTop": "Xuất hiện trên cùng",
-  "otherCallingPermissions": "Micro, máy ảnh và các quyền FluffyChat khác",
   "reason": "Lý do",
   "@reason": {
     "type": "text",
@@ -1776,11 +1766,6 @@
   "allSpaces": "Tất cả khoảng trắng",
   "explainStoragePermission": "Twake cần quyền truy cập vào bộ nhớ của bạn để xem trước tệp",
   "soonThereHaveContacts": "Sẽ sớm có liên hệ",
-  "videoCall": "Cuộc gọi Video",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "userAndOthersAreTyping": "{username} và {count} người khác đang gõ",
   "@userAndOthersAreTyping": {
     "type": "text",

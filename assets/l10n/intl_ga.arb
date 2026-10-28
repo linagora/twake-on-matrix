@@ -867,11 +867,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Físghlao",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "verifyStart": "Tosaigh Fíorú",
   "@verifyStart": {
     "type": "text",
@@ -1741,7 +1736,6 @@
     "type": "text",
     "description": "Usage hint for the command /clearcache"
   },
-  "videoCallsBetaWarning": "Tabhair faoi deara go bhfuil físglaonna i béite. B'fhéidir nach bhfeidhmíonn siad ar gach ardán chomh atá súil aige ná ar bith.",
   "passwordsDoNotMatch": "Níl na pasfhocail chéanna!",
   "pleaseEnterValidEmail": "Iontráil ríomhphost bailí le do thoil.",
   "repeatPassword": "Scríobh an pasfhocal arís",
@@ -1839,7 +1833,6 @@
   "addMember": "Cuir baill leis",
   "pinnedMessagesTooltip": "Teachtaireachtaí pinned",
   "widgetEtherpad": "Nóta téacs",
-  "callingPermissions": "Ceadanna a ghlaoch",
   "privacyAndSecurity": "Príobháideacht & Slándáil",
   "saveToGallery": "Sábháil go Gailearaí",
   "recentChat": "COMHRÁ LE DÉANAÍ",
@@ -1850,7 +1843,6 @@
     "placeholders": {}
   },
   "newSpace": "Spás nua",
-  "voiceCall": "Glao gutha",
   "errorGettingPdf": "Earráid agus PDF á fháil",
   "disableEncryptionWarning": "Ar chúiseanna slándála ní féidir leat criptiú a dhíchumasú i gcomhrá, áit ar cumasaíodh é roimhe seo.",
   "fileIsTooBigForServer": "Tuairiscíonn an freastalaí go bhfuil an comhad ró-mhór le seoladh.",
@@ -1923,7 +1915,6 @@
   "inactive": "Gan a bheith gníomhachtaithe",
   "encryptThisChat": "Criptigh an comhrá seo",
   "phone": "Fón",
-  "unsupportedAndroidVersionLong": "Éilíonn an ghné seo leagan Android níos nuaí. Seiceáil le do thoil le haghaidh nuashonruithe nó tacaíocht Lineage OS.",
   "documents": "Doiciméid",
   "languageVietnamese": "Vítneaimis",
   "@languageVietnamese": {
@@ -1966,7 +1957,6 @@
   "commandHint_markasgroup": "Marcáil mar chomhrá",
   "descriptionHelper": "Is féidir leat cur síos roghnach a sholáthar le do ghrúpa.",
   "chatsAndContacts": "Comhráite agus Teagmhálacha",
-  "callingAccountDetails": "Ceadaíonn FluffyChat an aip dhiailiú android dúchais a úsáid.",
   "groupName": "Ainm an ghrúpa",
   "widgetCustom": "Saincheaptha",
   "recoveringYourEncryptedChats": "Do chomhráite criptithe a aisghabháil",
@@ -2034,7 +2024,6 @@
   "openChat": "Oscail Comhrá",
   "dismiss": "Ruaig",
   "emojis": "Emojis",
-  "unsupportedAndroidVersion": "Leagan Android gan tacaíocht",
   "indexedDbErrorLong": "Ar an drochuair, níl stóráil na dteachtaireachtaí cumasaithe i mód príobháideach de réir réamhshocraithe.\nTabhair cuairt, le do thoil,\n - faoi:config\n - socraigh dom.indexedDB.privateBrowsing.enabled go fíor\nSeachas sin, ní féidir FluffyChat a reáchtáil.",
   "widgetNameError": "Tabhair ainm taispeána, le do thoil.",
   "errorAddingWidget": "Earráid agus an ghiuirléid á cur leis.",
@@ -2166,10 +2155,8 @@
   "start": "Tosaigh",
   "publish": "Foilsigh",
   "replyHasBeenSent": "Seoladh freagra",
-  "experimentalVideoCalls": "Glaonna físe turgnamhacha",
   "stories": "Scéalta",
   "custom": "Saincheaptha",
-  "callingAccount": "Cuntas ag glaoch",
   "enterRoom": "Iontráil seomra",
   "doNotShowAgain": "Ná taispeáin arís",
   "onlineStatus": "ar líne",
@@ -2227,8 +2214,6 @@
   "storeInAppleKeyChain": "Stóráil i Apple KeyChain",
   "foregroundServiceRunning": "Tá an fógra seo le feiceáil nuair atá an tseirbhís tulra ag rith.",
   "screenSharingDetail": "Tá do scáileán á roinnt agat i FuffyChat",
-  "appearOnTop": "Le feiceáil ar an mbarr",
-  "otherCallingPermissions": "Micreafón, ceamara agus ceadanna FluffyChat eile",
   "onlineHourAgo": "ar líne {hour}h ó shin",
   "@onlineHourAgo": {
     "placeholders": {

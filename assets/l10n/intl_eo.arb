@@ -1603,11 +1603,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Vidvoko",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Videbleco de historio de la babilo",
   "@visibilityOfTheChatHistory": {
     "type": "text",

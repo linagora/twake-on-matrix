@@ -1338,11 +1338,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videotrucada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibilitat de l’historial del xat",
   "@visibilityOfTheChatHistory": {
     "type": "text",

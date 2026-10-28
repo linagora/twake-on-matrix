@@ -1002,11 +1002,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Panggilan video",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "verifyTitle": "Memverifikasi akun lain",
   "@verifyTitle": {
     "type": "text",
@@ -1815,11 +1810,6 @@
   },
   "emojis": "Emoji",
   "confirmEventUnpin": "Apakah Anda yakin ingin melepas sematan pesan ini secara permanen?",
-  "unsupportedAndroidVersionLong": "Fitur ini memerlukan versi Android yang lebih baru. Harap periksa pembaruan atau dukungan Lineage OS.",
-  "unsupportedAndroidVersion": "Versi Android tidak didukung",
-  "voiceCall": "Panggilan suara",
-  "videoCallsBetaWarning": "Harap diperhatikan bahwa panggilan video saat ini masih dalam versi beta. Fitur ini mungkin tidak berfungsi seperti yang diharapkan atau bahkan tidak berfungsi sama sekali di semua platform.",
-  "experimentalVideoCalls": "Panggilan video eksperimental",
   "widgetEtherpad": "Catatan teks",
   "widgetJitsi": "Jitsi Meet",
   "widgetCustom": "Kustom",
@@ -1910,13 +1900,8 @@
   "commandHint_markasgroup": "Tandai sebagai obrolan",
   "screenSharingTitle": "berbagi layar",
   "appearOnTopDetails": "Memungkinkan aplikasi tampil di atas (tidak diperlukan jika Anda sudah menyiapkan Fluffychat sebagai akun panggilan)",
-  "callingAccountDetails": "Memungkinkan FluffyChat menggunakan aplikasi dialer Android bawaan.",
   "noKeyForThisMessage": "Ini dapat terjadi jika pesan dikirim sebelum Anda masuk ke akun Anda di perangkat ini.\n\nPesan ini juga mungkin tidak dapat dibaca karena pengirim telah memblokir perangkat Anda atau terjadi masalah pada koneksi internet.\n\nApakah Anda dapat membaca pesan tersebut di sesi lain? Jika ya, Anda dapat mentransfer pesan dari sana! Buka Pengaturan > Perangkat dan pastikan perangkat Anda telah saling memverifikasi. Saat Anda membuka ruang itu lagi dan kedua sesi berada di latar depan, kunci akan ditransmisikan secara otomatis.\n\nApakah Anda tidak ingin kehilangan kunci saat keluar atau berpindah perangkat? Pastikan Anda telah mengaktifkan cadangan obrolan di pengaturan.",
   "foregroundServiceRunning": "Notifikasi ini muncul ketika layanan latar depan sedang berjalan.",
-  "callingPermissions": "Izin panggilan",
-  "appearOnTop": "Tampil di atas",
-  "callingAccount": "Akun panggilan",
-  "otherCallingPermissions": "Mikrofon, kamera, dan izin FluffyChat lainnya",
   "whyIsThisMessageEncrypted": "Mengapa pesan ini tidak dapat dibaca?",
   "newGroup": "Obrolan baru",
   "newSpace": "Ruang baru",

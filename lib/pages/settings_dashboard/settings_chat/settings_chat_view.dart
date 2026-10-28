@@ -5,9 +5,7 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/settings_switch_list_tile.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
@@ -89,27 +87,6 @@ class SettingsChatView extends StatelessWidget {
                 defaultValue: AppConfig.gifAutoplay,
               ),
               const Divider(),
-              if (Matrix.of(context).webrtcIsSupported)
-                SettingsSwitchListTile.adaptive(
-                  title: L10n.of(context)!.experimentalVideoCalls,
-                  onChanged: (b) {
-                    AppConfig.experimentalVoip = b;
-                    Matrix.of(context).createVoipPlugin();
-                    return;
-                  },
-                  storeKey: SettingKeys.experimentalVoip,
-                  defaultValue: AppConfig.experimentalVoip,
-                ),
-              if (Matrix.of(context).webrtcIsSupported && !kIsWeb)
-                ListTile(
-                  title: Text(L10n.of(context)!.callingPermissions),
-                  // onTap: () =>
-                  //     CallKeepManager().checkoutPhoneAccountSetting(context),
-                  trailing: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Icon(Icons.call),
-                  ),
-                ),
               // FIXME: This is temporary for short term objective: not support separated
             ],
           ),

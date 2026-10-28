@@ -1017,11 +1017,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Vaizdo skambutis",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "yourPublicKey": "Jūsų viešasis raktas",
   "@yourPublicKey": {
     "type": "text",
@@ -1361,7 +1356,6 @@
       "reaction": {}
     }
   },
-  "unsupportedAndroidVersion": "Nepalaikoma Android versija",
   "widgetVideo": "Video",
   "widgetNameError": "Pateikite rodomą vardą.",
   "pleaseChooseAtLeastChars": "Pasirinkite bent {min} simbolius.",
@@ -1723,10 +1717,6 @@
   "iUnderstand": "Aš suprantu",
   "confirmEventUnpin": "Ar tikrai norite visam laikui atsegti įvykį?",
   "emojis": "Jaustukai",
-  "voiceCall": "Balso skambutis",
-  "unsupportedAndroidVersionLong": "Šiai funkcijai reikalinga naujesnė Android versija. Patikrinkite, ar nėra naujinimų arba Lineage OS palaikymo.",
-  "videoCallsBetaWarning": "Atminkite, kad vaizdo skambučiai šiuo metu yra beta versijos. Jie gali neveikti taip kaip tikėtasi, arba iš viso neveikti visose platformose.",
-  "experimentalVideoCalls": "Eksperimentiniai vaizdo skambučiai",
   "widgetEtherpad": "Teksto pastaba",
   "widgetJitsi": "Jitsi Meet",
   "widgetName": "Vardas",
@@ -1882,12 +1872,8 @@
   "dehydrateWarning": "Šio veiksmo negalima atšaukti. Įsitikinkite, kad saugiai saugote atsarginę kopiją.",
   "hydrateTorLong": "Ar paskutinį kartą eksportavote savo sesiją naudodami TOR? Greitai ją importuokite ir tęskite pokalbį.",
   "commandHint_markasgroup": "Pažymėti kaip grupę",
-  "callingPermissions": "Skambinimo leidimai",
   "storeInAppleKeyChain": "Saugoti Apple raktų grandinėje",
-  "callingAccount": "Skambinimo paskyra",
   "newSpace": "Nauja erdvė",
-  "callingAccountDetails": "Leidžia FluffyChat naudoti vietinę Android rinkiklio programą.",
-  "appearOnTop": "Rodyti viršuje",
   "enterSpace": "Įeiti į erdvę",
   "enterRoom": "Įeiti į kambarį",
   "allSpaces": "Visos erdvės",
@@ -1912,7 +1898,6 @@
   "foregroundServiceRunning": "Šis pranešimas rodomas, kai veikia pirmojo plano paslauga.",
   "screenSharingTitle": "ekrano bendrinimas",
   "appearOnTopDetails": "Leidžia programėlę rodyti viršuje (nebūtina, jei jau esate nustatę Fluffychat kaip skambinimo paskyrą)",
-  "otherCallingPermissions": "Mikrofonas, kamera ir kiti FluffyChat leidimai",
   "whyIsThisMessageEncrypted": "Kodėl ši žinutė neperskaitoma?",
   "newGroup": "Nauja grupė",
   "screenSharingDetail": "Bendrinate savo ekraną per FuffyChat",

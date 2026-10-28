@@ -1398,11 +1398,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videosamtale",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Sludrehistorikkens synlighet",
   "@visibilityOfTheChatHistory": {
     "type": "text",

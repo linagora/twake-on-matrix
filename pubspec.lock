@@ -982,14 +982,6 @@ packages:
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
-  flutter_foreground_task:
-    dependency: "direct main"
-    description:
-      name: flutter_foreground_task
-      sha256: "5eb81adfd98c77f4d4803ae80d7e0573fd35f706fce6aaa7376656a15ba2d1e0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.10.0"
   flutter_gen_core:
     dependency: transitive
     description:
@@ -1286,14 +1278,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.4"
-  flutter_ringtone_player:
-    dependency: "direct main"
-    description:
-      name: flutter_ringtone_player
-      sha256: ae4a2caab2cfd14902f3ee5fe0307c454b396f0077fa34700238d6c4bd99cfec
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0+4"
   flutter_riverpod:
     dependency: "direct main"
     description:
@@ -2684,14 +2668,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  qr_code_scanner:
-    dependency: "direct main"
-    description:
-      name: qr_code_scanner
-      sha256: f23b68d893505a424f0bd2e324ebea71ed88465d572d26bb8d2e78a4749591fd
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   random_string:
     dependency: transitive
     description:
@@ -2981,14 +2957,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.7"
-  shared_preferences_ios:
-    dependency: transitive
-    description:
-      name: shared_preferences_ios
-      sha256: "585a14cefec7da8c9c2fb8cd283a3bb726b4155c0952afe6a0caaa7b2272de34"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.1"
   shared_preferences_linux:
     dependency: transitive
     description:
@@ -3573,7 +3541,7 @@ packages:
     source: hosted
     version: "3.0.2"
   vibration:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: vibration
       sha256: "804ee8f9628f31ee71fbe6137a2bc6206a64e101ec22cd9dd6d3a7dc0272591b"
@@ -3760,7 +3728,7 @@ packages:
     source: hosted
     version: "1.0.1"
   webrtc_interface:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: webrtc_interface
       sha256: c6f100eac5057d9a817a60473126f9828c796d42884d498af4f339c97b21014f

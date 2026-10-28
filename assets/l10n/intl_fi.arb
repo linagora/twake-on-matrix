@@ -1693,11 +1693,6 @@
       "unreadCount": {}
     }
   },
-  "videoCall": "Videopuhelu",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "sender": "Lähettäjä",
   "startedACall": "{senderName} aloitti puhelun",
   "@startedACall": {
@@ -1796,10 +1791,6 @@
     "placeholders": {}
   },
   "emojis": "Hymiöt",
-  "unsupportedAndroidVersionLong": "Tämä ominaisuus vaatii uudemman Android-version. Tarkista päivitykset tai LineageOS-tuki.",
-  "unsupportedAndroidVersion": "Ei tuettu Android-versio",
-  "voiceCall": "Äänipuhelu",
-  "videoCallsBetaWarning": "Huomaathan videopuheluiden ovan beta-asteella. Ne eivät ehkä toimi odotetusti tai toimi ollenkaan kaikilla alustoilla.",
   "matrixWidgets": "Matrix-pienoisohjelmat",
   "reactedWith": "{sender} reagoi {reaction}",
   "@reactedWith": {
@@ -1818,7 +1809,6 @@
   "widgetName": "Nimi",
   "widgetUrlError": "Epäkelvollinen URL.",
   "errorAddingWidget": "Virhe lisättäessä pienoissovellusta.",
-  "experimentalVideoCalls": "Kokeelliset videopuhelut",
   "widgetEtherpad": "Tekstimuotoinen muistiinpano",
   "widgetNameError": "Syötä näyttönimi.",
   "addWidget": "Lisää pienoissovellus",
@@ -1903,17 +1893,12 @@
   "noKeyForThisMessage": "Tämä voi tapahtua mikäli viesti lähetettiin ennen sisäänkirjautumistasi tälle laitteelle.\n\nOn myös mahdollista, että lähettäjä on estänyt tämän laitteen tai jokin meni pieleen verkkoyhteyden kanssa.\n\nPystytkö lukemaan viestin toisella istunnolla? Siinä tapauksessa voit siirtää viestin siltä! Mene Asetukset > Laitteet ja varmista, että laitteesi ovat varmistaneet toisensa. Seuraavankerran avatessasi laitteen ja molempien istuntojen ollessa etualalla, avaimet siirretään automaattisesti.\n\nHaluatko varmistaa ettet menetä avaimia uloskirjautuessa tai laitteita vaihtaessa? Varmista avainvarmuuskopion käytössäolo asetuksista.",
   "commandHint_markasdm": "Merkitse yksityiskeskusteluksi",
   "foregroundServiceRunning": "Tämä ilmoitus näkyy etualapalvelun ollessa käynnissä.",
-  "callingPermissions": "Puheluoikeudet",
-  "callingAccount": "Soittamistunnus",
-  "callingAccountDetails": "Sallii FluffyChatin käyttää Androidin omaa Puhelut-sovellusta.",
-  "appearOnTop": "Näy päällä",
   "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt FluffyChatin puhelin-tunnukseksi)",
   "newSpace": "Uusi tila",
   "enterSpace": "Siirry tilaan",
   "enterRoom": "Siirry huoneeseen",
   "allSpaces": "Kaikki tilat",
   "screenSharingTitle": "ruudunjako",
-  "otherCallingPermissions": "Mikrofoni, kamera ja muut FluffyChatin oikeudet",
   "newGroup": "Uusi ryhmä",
   "screenSharingDetail": "Jaat ruutuasi FluffyChatissä",
   "hugContent": "{senderName} halaa sinua",

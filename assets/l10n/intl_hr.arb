@@ -1608,11 +1608,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Video poziv",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Vidljivost kronologije chata",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1805,13 +1800,11 @@
   "markAsRead": "Označi kao pročitano",
   "openChat": "Otvori chat",
   "dismiss": "Odbaci",
-  "unsupportedAndroidVersion": "Nepodržana Android verzija",
   "widgetVideo": "Video",
   "widgetEtherpad": "Tekstna bilješka",
   "widgetCustom": "Prilagođeno",
   "widgetName": "Ime",
   "widgetUrlError": "Ovo nije valjan URL.",
-  "unsupportedAndroidVersionLong": "Ova funkcija zahtijeva noviju verziju Androida. Provjeri, postoje li nove verzije ili podrška za Lineage OS.",
   "recoveryKey": "Ključ za obnavljanje",
   "youKickedAndBanned": "Izbacio/la si i isključio/la korisnika {user}",
   "@youKickedAndBanned": {
@@ -1842,9 +1835,6 @@
   },
   "matrixWidgets": "Matrix widgeti",
   "confirmEventUnpin": "Stvarno želiš trajno otkvačiti događaj?",
-  "voiceCall": "Glasovni poziv",
-  "videoCallsBetaWarning": "Napominjemo da se funkcija videopoziva trenutačno nalazi u beta stanju. Možda neće raditi ispravno ili uopće neće raditi na svim platformama.",
-  "experimentalVideoCalls": "Eksperimentalni videopozivi",
   "widgetJitsi": "Jitsi Meet",
   "editWidgets": "Uredi widgete",
   "addWidget": "Dodaj widget",

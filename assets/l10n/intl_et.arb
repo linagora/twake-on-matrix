@@ -1631,11 +1631,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videokõne",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Vestluse ajaloo nähtavus",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1799,12 +1794,7 @@
     }
   },
   "emojis": "Emotikonid",
-  "unsupportedAndroidVersion": "See Androidi versioon ei ole toetatud",
-  "voiceCall": "Häälkõne",
   "confirmEventUnpin": "Kas sa oled kindel, et tahad klammerdatud sündmuse eemaldada?",
-  "videoCallsBetaWarning": "Palun arvesta, et videokõned on veel beetajärgus. Nad ei pruugi veel toimida kõikidel platvormidel korrektselt.",
-  "experimentalVideoCalls": "Katselised videokõned",
-  "unsupportedAndroidVersionLong": "See funktsionaalsus eeldab uuemat Androidi versiooni. Palun kontrolli, kas sinu nutiseadmele leidub süsteemiuuendusi või saaks seal Lineage OS'i kasutada.",
   "separateChatTypes": "Eraldi vestlused ja jututoad",
   "@separateChatTypes": {
     "type": "text",
@@ -1911,16 +1901,11 @@
   "commandHint_markasdm": "Märgi otsevestusluseks",
   "whyIsThisMessageEncrypted": "Miks see sõnum pole loetav?",
   "noKeyForThisMessage": "See võib juhtuda, kui sõnum oli saadetud enne, kui siin seadmes oma kontoga sisse logisid.\n\nSamuti võib juhtuda siis, kui saatja on lugemises selles seadmes blokeerinud või on tekkinud tõrkeid veebiühenduses.\n\nAga mõnes teises seadmes saad seda sõnumit lugeda? Siis sa võid sõnumi sealt üle tõsta. Ava Seadistused -> Seadmed ning kontrolli, et kõik sinu seadmed on omavahel verifitseeritud. Kui avad selle vestluse või jututoa ning mõlemad sessioonid on avatud, siis vajalikud krüptovõtmed saadetakse automaatset.\n\nKas sa soovid vältida krüptovõtmete kadumist väljalogimisel ja seadmete vahetusel? Siis palun kontrolli, et seadistuses on krüptovõtmete varundus sisse lülitatud.",
-  "callingPermissions": "Helistamise õigused",
-  "callingAccountDetails": "Võimaldab FluffyChat'il kasutada Androidi helistamisrakendust.",
-  "appearOnTop": "Luba pealmise rakendusena",
-  "otherCallingPermissions": "Mikrofoni, kaamera ja muud FluffyChat'i õigused",
   "newGroup": "Uus jututuba",
   "newSpace": "Uus kogukond",
   "enterSpace": "Sisene kogukonda",
   "enterRoom": "Ava jututuba",
   "appearOnTopDetails": "Sellega lubad rakendust avada kõige pealmisena (pole vajalik, kui Fluffychat on juba seadistatud toimima helistamiskontoga)",
-  "callingAccount": "Helistamiskonto",
   "screenSharingTitle": "ekraani jagamine",
   "foregroundServiceRunning": "See teavitus toimib siis, kui esiplaaniteenus töötab.",
   "allSpaces": "Kõik kogukonnad",

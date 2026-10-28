@@ -1162,11 +1162,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videóhívás",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Csevegési előzmény láthatósága",
   "@visibilityOfTheChatHistory": {
     "type": "text",

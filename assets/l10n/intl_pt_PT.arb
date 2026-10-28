@@ -1428,7 +1428,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "unsupportedAndroidVersion": "Versão Android não suportada",
   "youAreNoLongerParticipatingInThisChat": "Ja não está a participar nesta conversa",
   "@youAreNoLongerParticipatingInThisChat": {
     "type": "text",
@@ -1437,13 +1436,11 @@
   "messageType": "Tipo da mensagem",
   "noEmailWarning": "Por favor, insira um e-mail válido. De outro modo, não conseguirá recuperar a sua palavra-passe. Caso prefira assim, toque novamente no botão para continuar.",
   "indexedDbErrorLong": "Infelizmente, o armazenamento de mensagens não é ativado por padrão no modo privado.\nPor favor, visite\n- about:config\n- atribua \"true\" a \"dom.indexedDB.privateBrowsing.enabled\"\nDe outro modo, não será possível executar o FluffyChat.",
-  "unsupportedAndroidVersionLong": "Esta funcionalidade requer uma versão mais nova do Android. Por favor, busque atualizações ou suporte ao Lineage OS.",
   "verifySuccess": "Verificação efetivada!",
   "@verifySuccess": {
     "type": "text",
     "placeholders": {}
   },
-  "callingAccount": "Conta para chamadas",
   "youAreInvitedToThisChat": "Foi convidada(o) a esta conversa",
   "@youAreInvitedToThisChat": {
     "type": "text",
@@ -1461,11 +1458,6 @@
   },
   "allSpaces": "Todos espaços",
   "user": "Utilizador",
-  "videoCall": "Vídeochamada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "youAcceptedTheInvitation": "👍 Aceitou o convite",
   "userAndOthersAreTyping": "{username} e mais {count} pessoas estão digitando",
   "@userAndOthersAreTyping": {
@@ -1528,9 +1520,7 @@
     "placeholders": {}
   },
   "youRejectedTheInvitation": "Rejeitou o convite",
-  "otherCallingPermissions": "Microfone, câmara e outras permissões do FluffyChat",
   "widgetUrlError": "Isto não é uma URL válida.",
-  "callingAccountDetails": "Permitir que o FluffyChat use o app de chamadas nativo do Android.",
   "documents": "Documentos",
   "enterSpace": "Entrar no espaço",
   "unavailable": "Indisponível",
@@ -1610,7 +1600,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCallsBetaWarning": "Por favor, note que chamadas de vídeo estão atualmente em teste. Podem não funcionar como esperado ou sequer funcionar em algumas plataformas.",
   "unmuteChat": "Cancelar silenciamento",
   "@unmuteChat": {
     "type": "text",
@@ -1640,7 +1629,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "callingPermissions": "Permissões de chamada",
   "start": "Começar",
   "numChats": "{number} conversas",
   "@numChats": {
@@ -1672,7 +1660,6 @@
     "placeholders": {}
   },
   "contact": "Contacto",
-  "experimentalVideoCalls": "Vídeo chamadas experimentais",
   "withTheseAddressesRecoveryDescription": "Pode recuperar a sua palavra-passe com estes endereços.",
   "@withTheseAddressesRecoveryDescription": {
     "type": "text",
@@ -1793,14 +1780,12 @@
   "publish": "Publicar",
   "messageInfo": "Informações da mensagem",
   "addMember": "Adicionar membros",
-  "appearOnTop": "Aparecer no topo",
   "verifyTitle": "A verificar a outra conta",
   "@verifyTitle": {
     "type": "text",
     "placeholders": {}
   },
   "foregroundServiceRunning": "Esta notificação aparece quando um serviço está a funcionar.",
-  "voiceCall": "Chamada de voz",
   "recent": "Recente",
   "unknownEncryptionAlgorithm": "Algoritmo de criptografia desconhecido",
   "@unknownEncryptionAlgorithm": {

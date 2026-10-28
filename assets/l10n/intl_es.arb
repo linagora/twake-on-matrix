@@ -1241,11 +1241,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Video llamada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibilidad del historial del chat",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1839,8 +1834,6 @@
   },
   "file": "Archivo",
   "gallery": "Galería",
-  "voiceCall": "Llamada de voz",
-  "experimentalVideoCalls": "Videollamadas experimentales",
   "copiedMatrixIdToClipboard": "Se copió el identificador Matrix en el portapapeles.",
   "profile": "Perfil",
   "@profile": {
@@ -1980,7 +1973,6 @@
   "muteThisChat": "Silenciar esta conversación",
   "addAnotherAccount": "Añadir otra cuenta",
   "deleteLater": "Eliminar después",
-  "unsupportedAndroidVersion": "No se admite la versión de Android",
   "contacts": "Contactos",
   "linagoraContactsCount": "Contactos de Linagora ({count})",
   "contact": "Contacto",
@@ -1998,7 +1990,6 @@
   "thisMessageHasBeenEncrypted": "Este mensaje se ha cifrado",
   "saveToGallery": "Guardar en Galería",
   "phoneNumber": "Número telefónico",
-  "unsupportedAndroidVersionLong": "Esta funcionalidad requiere una versión más reciente de Android. Busque actualizaciones o contacte el servicio técnico de Lineage OS.",
   "failedToUnpin": "No se pudo desanclar el mensaje",
   "privacyAndSecurity": "Privacidad y seguridad",
   "message": "Mensaje",

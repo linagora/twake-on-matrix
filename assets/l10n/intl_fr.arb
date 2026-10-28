@@ -1623,11 +1623,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Appel vidéo",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibilité de l'historique de la discussion",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1800,13 +1795,8 @@
     }
   },
   "emojis": "Émojis",
-  "voiceCall": "Appel vocal",
-  "unsupportedAndroidVersion": "Version d'Android non prise en charge",
-  "unsupportedAndroidVersionLong": "Cette fonctionnalité nécessite une nouvelle version d'Android. Veuillez vérifier les mises à jour ou la prise en charge de Lineage OS.",
   "pinChat": "Épingler",
   "confirmEventUnpin": "Voulez-vous vraiment désépingler définitivement le message ?",
-  "videoCallsBetaWarning": "Veuillez noter que les appels vidéo sont actuellement en version bêta. Ils peuvent ne pas fonctionner comme prévu ou ne oas fonctionner du tout sur toutes les plateformes.",
-  "experimentalVideoCalls": "Appels vidéo expérimentaux",
   "widgetJitsi": "Jitsi Meet",
   "widgetCustom": "Personnalisé",
   "widgetUrlError": "Ceci n'est pas un lien valide.",
@@ -1902,12 +1892,7 @@
   "foregroundServiceRunning": "Cette notification s’affiche lorsque le service au premier plan est en cours d’exécution.",
   "screenSharingTitle": "Partage d'écran",
   "screenSharingDetail": "Vous partagez votre écran dans FuffyChat",
-  "callingPermissions": "Permissions d'appel",
-  "callingAccount": "Compte d'appel",
-  "callingAccountDetails": "Permet à FluffyChat d'utiliser l'application de numérotation native d'Android.",
-  "appearOnTop": "Apparaître en haut",
   "appearOnTopDetails": "Permet à l'application d'apparaître en haut de l'écran (non nécessaire si vous avez déjà configuré Fluffychat comme compte d'appel)",
-  "otherCallingPermissions": "Microphone, caméra et autres autorisations de FluffyChat",
   "newGroup": "Nouveau groupe",
   "newSpace": "Nouvel espace",
   "enterSpace": "Entrer dans l’espace",

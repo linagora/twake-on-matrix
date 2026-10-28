@@ -471,7 +471,6 @@
   "storeInAndroidKeystore": "Guardar no mealheiro do Android",
   "storeInAppleKeyChain": "Guardar no chaveiro da Apple",
   "user": "Utilizador",
-  "callingPermissions": "Permissões de chamada",
   "inviteContact": "Convidar contacto",
   "@inviteContact": {
     "type": "text",
@@ -1443,10 +1442,6 @@
     }
   },
   "confirmEventUnpin": "Tem certeza que quer desafixar o evento permanentemente?",
-  "unsupportedAndroidVersion": "Versão Android não suportada",
-  "unsupportedAndroidVersionLong": "Esta funcionalidade requer uma versão mais nova do Android. Por favor, busque atualizações ou apoio para o Lineage OS.",
-  "videoCallsBetaWarning": "Por favor, note que chamadas de vídeo estão atualmente em teste. Podem não funcionar como esperado ou sequer funcionar em algumas plataformas.",
-  "experimentalVideoCalls": "Vídeo chamadas experimentais",
   "indexedDbErrorTitle": "Problemas no modo privado",
   "indexedDbErrorLong": "Infelizmente, o armazenamento de mensagens não é ativado por padrão no modo privado.\nPor favor, visite\n- about:config\n- atribua \"true\" a \"dom.indexedDB.privateBrowsing.enabled\"\nDe outro modo, não será possível executar o FluffyChat.",
   "editWidgets": "Editar ferramentas",
@@ -1498,11 +1493,7 @@
   "foregroundServiceRunning": "Esta notificação aparece quando um serviço está a funcionar.",
   "screenSharingTitle": "Partilhar ecrã",
   "screenSharingDetail": "Está a partilhar o seu ecrã no FluffyChat",
-  "callingAccount": "Conta para chamadas",
-  "callingAccountDetails": "Permitir que o FluffyChat use o app de chamadas nativo do Android.",
-  "appearOnTop": "Aparecer no topo",
   "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
-  "otherCallingPermissions": "Microfone, câmara e outras permissões do FluffyChat",
   "whyIsThisMessageEncrypted": "Por que esta mensagem está ilegível?",
   "noKeyForThisMessage": "Isto pode ocorrer caso a mensagem tenha sido enviada antes da entrada na sua conta com este dispositivo.\n\nTambém é possível que o remetente tenha bloqueado o seu dispositivo ou ocorreu algum problema com a conexão.\n\nConsegue ler as mensagens em outra sessão? Então, pode transferir as mensagens de lá! Vá em Configurações > Dispositivos e confira se os dispositivos verificaram um ao outro. Quando abrir a conversa da próxima vez e ambas as sessões estiverem abertas, as chaves serão transmitidas automaticamente.\n\nNão gostaria de perder as suas chaves quando sair ou trocar de dispositivos? Certifique-se que o backup de conversas esteja ativado nas configurações.",
   "newSpace": "Novo espaço",
@@ -1566,11 +1557,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Vídeochamada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "unblockDevice": "Desbloquear dispositivo",
   "@unblockDevice": {
     "type": "text",
@@ -1581,7 +1567,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "voiceCall": "Chamada de voz",
   "doNotShowAgain": "Não mostrar novamente",
   "commandHint_myroomnick": "Definir o teu nome para esta sala",
   "@commandHint_myroomnick": {
