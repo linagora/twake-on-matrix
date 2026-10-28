@@ -52,10 +52,9 @@ class AccountRepositoryImpl implements AccountRepository {
   /// the pending removals. Plain object work: safe to call while the widget
   /// tree is building.
   ///
-  /// Called by the boot (through `accountRepositoryImplProvider`), which may
-  /// run again, for instance when the notifier that calls it is built again:
-  /// only the first call takes over, the following ones return the accounts
-  /// as they are.
+  /// Called once, by `accountRepositoryProvider`, as it builds the repository.
+  /// Only the first call takes over, the following ones return the accounts as
+  /// they are.
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
