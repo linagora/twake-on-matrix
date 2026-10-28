@@ -1,14 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 
-/// The effects the coordinator runs. `MatrixState` sets them in `initState`
-/// and clears them in `dispose`; null while no `MatrixState` is mounted.
-final accountSwitchEffectsProvider =
-    NotifierProvider<AccountSwitchEffectsHolder, AccountSwitchEffects?>(
-      AccountSwitchEffectsHolder.new,
-    );
+part 'account_switch_effects_provider.g.dart';
 
-class AccountSwitchEffectsHolder extends Notifier<AccountSwitchEffects?> {
+/// The effects the coordinator runs. `MatrixState` sets them after its first
+/// frame and clears them in `dispose`; null while no `MatrixState` is mounted.
+@Riverpod(keepAlive: true)
+class AccountSwitchEffectsHolder extends _$AccountSwitchEffectsHolder {
   @override
   AccountSwitchEffects? build() => null;
 
