@@ -428,6 +428,7 @@ class SettingsProfileController extends State<SettingsProfile>
             avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
+          currentProfile.value = newProfile;
           isEditedProfileNotifier.toggle();
           _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
