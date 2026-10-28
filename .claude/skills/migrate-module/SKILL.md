@@ -38,11 +38,9 @@ gh pr list --limit 100 --json number,title,files \
 
 A module is migrated only when its flows have Patrol scenarios on `main`.
 
-- Mobile and web scenarios in separate files; no `kIsWeb` or platform switch
-  inside a test.
+- Mobile scenarios; no `kIsWeb` or platform switch inside a test.
 - Robot pattern, as in `integration_test/robots/` and
   `integration_test/scenarios/`.
-- Run the web suite locally on the new files before opening the pull request.
 
 ## 3. Mechanical recipes
 
