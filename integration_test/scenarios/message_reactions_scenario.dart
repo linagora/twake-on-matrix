@@ -73,6 +73,7 @@ abstract class _PickerReactionScenario extends _ReactionsScenario {
     await picker.search(_pickerKeyword);
     await picker.tapEmoji(_pickerEmoji);
     await MessageReactionsRobot($).expectReactionUnder(message, _pickerEmoji);
+    await MessageReactionsRobot($).expectNoReactionUnder(message, _quickEmoji);
 
     await menu.openFullEmojiPicker(message);
     await picker.waitUntilVisible();
