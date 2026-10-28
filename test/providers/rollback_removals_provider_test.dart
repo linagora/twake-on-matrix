@@ -107,6 +107,49 @@ void main() {
     });
   });
 
+  test('a discard that is pending is not started again by the session, which '
+      'still sees it as pending', () async {
+    dataSource.failDelete = true;
+    final created = container.read(rollbackRemovalsProvider);
+    container
+        .read(accountClientRegistryProvider)
+        .add(FakeAccountClient('x', userID: '@x:s'));
+    await expectLater(
+      created.discardCandidate('x'),
+      throwsA(isA<RemovalPendingException>()),
+    );
+
+    await expectLater(
+      created.discardCandidate('x'),
+      throwsA(isA<RemovalPendingException>()),
+    );
+
+    expect(dataSource.calls.where((call) => call == 'delete:x'), ['delete:x']);
+    expect(reports, hasLength(1));
+  });
+
+  test('a pending discard that the removals finished is not pending for the '
+      'session any more', () async {
+    dataSource.failDelete = true;
+    final created = container.read(rollbackRemovalsProvider);
+    container
+        .read(accountClientRegistryProvider)
+        .add(FakeAccountClient('x', userID: '@x:s'));
+    await expectLater(
+      created.discardCandidate('x'),
+      throwsA(isA<RemovalPendingException>()),
+    );
+    dataSource.failDelete = false;
+    await container.read(candidateRemovalsProvider).retryAll();
+
+    await created.discardCandidate('x');
+
+    expect(dataSource.calls.where((call) => call == 'delete:x'), [
+      'delete:x',
+      'delete:x',
+    ]);
+  });
+
   test(
     'a discard that fails is held by the candidate removals of the container '
     'and reported through the shared reporter',
