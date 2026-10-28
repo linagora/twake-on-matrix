@@ -1398,11 +1398,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videosamtal",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Chatt-historikens synlighet",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1804,10 +1799,6 @@
   "thisUserHasNotPostedAnythingYet": "Den här användaren har inte lagt till något till deras berättelse än",
   "storyPrivacyWarning": "Notera att användare kan se och kontakta varandra i din berättelse. Din berättelse är synlig i 24 timmar, men det finns ingen garanti för att berättelser raderas från alla enheter och servrar.",
   "emojis": "Emojis",
-  "voiceCall": "Röstsamtal",
-  "unsupportedAndroidVersion": "Inget stöd för denna version av Android",
-  "videoCallsBetaWarning": "Videosamtal är för närvarande under testning. De kanske inte fungerar som det är tänkt eller på alla plattformar.",
-  "unsupportedAndroidVersionLong": "Denna funktion kräver en senare version av Android.",
   "dismiss": "Avfärda",
   "matrixWidgets": "Matrix widgetar",
   "reactedWith": "{sender} reagerade med {reaction}",
@@ -1819,7 +1810,6 @@
     }
   },
   "confirmEventUnpin": "Är du säker på att händelsen inte längre skall vara fastnålad?",
-  "experimentalVideoCalls": "Experimentella videosamtal",
   "addWidget": "Lägg till widget",
   "widgetVideo": "Video",
   "widgetEtherpad": "Anteckning",
@@ -1945,12 +1935,7 @@
   "stories": "Berättelser",
   "saveKeyManuallyDescription": "Spara nyckeln manuellt genom att aktivera dela-funktionen eller urklippshanteraren på enheten.",
   "storeInAndroidKeystore": "Lagra i Androids nyckellagring (KeyStore)",
-  "callingPermissions": "Samtalsbehörighet",
-  "callingAccount": "Samtalskonto",
-  "callingAccountDetails": "Tillåt FluffyChat att använda Androids ring-app.",
-  "appearOnTop": "Visa ovanpå",
   "appearOnTopDetails": "Tillåt att appen visas ovanpå (behövs inte om du redan har FluffyChat konfigurerat som ett samtalskonto)",
-  "otherCallingPermissions": "Mikrofon, kamera och andra behörigheter för FluffyChat",
   "whyIsThisMessageEncrypted": "Varför kan inte detta meddelande läsas?",
   "newGroup": "Ny grupp",
   "enterRoom": "Gå till rummet",

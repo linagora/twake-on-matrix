@@ -1632,11 +1632,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videogesprek",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Chatgeschiedenis zichtbaarheid",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1814,12 +1809,7 @@
     }
   },
   "emojis": "Emoji's",
-  "unsupportedAndroidVersion": "Niet-ondersteunde Android-versie",
-  "unsupportedAndroidVersionLong": "Voor deze functie is een nieuwere Android-versie vereist. Controleer op updates of Lineage OS-ondersteuning.",
-  "videoCallsBetaWarning": "Houd er rekening mee dat videogesprekken momenteel in bèta zijn. Ze werken misschien niet zoals je verwacht of werken niet op alle platformen.",
-  "voiceCall": "Spraakoproep",
   "confirmEventUnpin": "Weet je zeker dat je de gebeurtenis definitief wilt losmaken?",
-  "experimentalVideoCalls": "Videogesprekken (experimenteel)",
   "widgetCustom": "Aangepast",
   "widgetName": "Naam",
   "widgetUrlError": "Dit is geen geldige link.",
@@ -1915,12 +1905,7 @@
   "foregroundServiceRunning": "Deze melding verschijnt wanneer de voorgronddienst draait.",
   "screenSharingTitle": "scherm delen",
   "screenSharingDetail": "Je deelt je scherm in FuffyChat",
-  "callingPermissions": "Telefoon-rechten",
-  "callingAccount": "Telefoon-account",
-  "callingAccountDetails": "Hiermee kan FluffyChat de Android telefoon-app gebruiken.",
-  "appearOnTop": "Bovenaan verschijnen",
   "appearOnTopDetails": "Laat de app bovenaan verschijnen (niet nodig als je FluffyChat al hebt ingesteld als een belaccount)",
-  "otherCallingPermissions": "Microfoon, camera en andere FluffyChat-rechten",
   "newGroup": "Nieuwe groep",
   "newSpace": "Nieuwe space",
   "enterRoom": "Kamer betreden",

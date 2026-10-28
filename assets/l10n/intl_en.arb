@@ -1878,11 +1878,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Video call",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibility of the chat history",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -2014,11 +2009,6 @@
   "pinChat": "Pin",
   "confirmEventUnpin": "Are you sure to permanently unpin the message?",
   "emojis": "Emojis",
-  "voiceCall": "Voice call",
-  "unsupportedAndroidVersion": "Unsupported Android version",
-  "unsupportedAndroidVersionLong": "This feature requires a newer Android version. Please check for updates or Lineage OS support.",
-  "videoCallsBetaWarning": "Please note that video calls are currently in beta. They might not work as expected or work at all on all platforms.",
-  "experimentalVideoCalls": "Experimental video calls",
   "indexedDbErrorTitle": "Private mode issues",
   "indexedDbErrorLong": "The message storage is unfortunately not enabled in private mode by default.\nPlease visit\n - about:config\n - set dom.indexedDB.privateBrowsing.enabled to true\nOtherwise, it is not possible to run FluffyChat.",
   "editWidgets": "Edit widgets",
@@ -2089,12 +2079,7 @@
   "foregroundServiceRunning": "This notification appears when the foreground service is running.",
   "screenSharingTitle": "screen sharing",
   "screenSharingDetail": "You are sharing your screen in FuffyChat",
-  "callingPermissions": "Calling permissions",
-  "callingAccount": "Calling account",
-  "callingAccountDetails": "Allows FluffyChat to use the native android dialer app.",
-  "appearOnTop": "Appear on top",
   "appearOnTopDetails": "Allows the app to appear on top (not needed if you already have Fluffychat setup as a calling account)",
-  "otherCallingPermissions": "Microphone, camera and other FluffyChat permissions",
   "whyIsThisMessageEncrypted": "Why is this message unreadable?",
   "noKeyForThisMessage": "This can happen if the message was sent before you have signed in to your account at this device.\n\nIt is also possible that the sender has blocked your device or something went wrong with the internet connection.\n\nAre you able to read the message on another session? Then you can transfer the message from it! Go to Settings > Devices and make sure that your devices have verified each other. When you open the room the next time and both sessions are in the foreground, the keys will be transmitted automatically.\n\nDo you not want to loose the keys when logging out or switching devices? Make sure that you have enabled the chat backup in the settings.",
   "newGroup": "New chat",

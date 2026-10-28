@@ -1082,11 +1082,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Bideo-deia",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Berriketa-historiaren ikusgarritasuna",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1158,9 +1153,6 @@
     "placeholders": {}
   },
   "emojis": "Emojiak",
-  "voiceCall": "Ahozko deia",
-  "unsupportedAndroidVersion": "Android bertsioa ez da bateragarria",
-  "unsupportedAndroidVersionLong": "Funtzio honek Android bertsio berriago bat behar du. Egiaztatu eguneraketak ote dauden edo begiratu Lineage OS-ek zure gailuarentzat aukerarik eskaintzen duen.",
   "commandHint_ban": "Debekatu erabiltzailea gela honetan",
   "@commandHint_ban": {
     "type": "text",
@@ -1280,7 +1272,6 @@
     }
   },
   "iUnderstand": "Ulertzen dut",
-  "videoCallsBetaWarning": "Kontuan izan bideo deiak beta fasean daudela. Litekeena da behar bezala erabili ezin izatea —erabili ahal badira—.",
   "replyHasBeenSent": "Erantzuna bidali da",
   "all": "Guztia",
   "@all": {
@@ -1302,7 +1293,6 @@
     }
   },
   "whoCanSeeMyStoriesDesc": "Kontuan izan jendeak bata bestea ikusi eta harremanetan jar daitekeela zure storyan.",
-  "experimentalVideoCalls": "Bideo-dei esperimentalak",
   "removeFromBundle": "Kendu sorta honetatik",
   "serverRequiresEmail": "Zerbitzari honek zure posta elektronikoa egiaztatu behar du izena eman dezazun.",
   "or": "Edo",
@@ -1909,11 +1899,6 @@
   "appearOnTopDetails": "Aplikazioa goikaldean agertzea baimentzen du (ez da beharrezkoa FluffyChat dei egiteko kontua bezala ezarri baduzu)",
   "screenSharingTitle": "pantaila partekatzen",
   "screenSharingDetail": "Pantaila FluffyChaten partekatzen ari zara",
-  "callingPermissions": "Deiak egiteko baimenak",
-  "callingAccount": "Deia egiteko kontua",
-  "callingAccountDetails": "Baimendu FluffyCaht Android gailuko telefono markagailua erabiltzea.",
-  "appearOnTop": "Gainean erakutsi",
-  "otherCallingPermissions": "Mikrofono, kamera eta FluffyChaten beste baimen batzuk",
   "numChats": "{number} berriketa",
   "@numChats": {
     "type": "number",

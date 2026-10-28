@@ -301,7 +301,6 @@
   "messageInfo": "Information pri li missage",
   "unsubscribeStories": "Desabonnar racontas",
   "matrixWidgets": "Widgets de Matrix",
-  "voiceCall": "Telefonada",
   "all": "Omni",
   "@all": {
     "type": "text",
@@ -604,11 +603,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videotelefonada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "openChat": "Aperter li conversation",
   "reportMessage": "Raportar li missage",
   "@reportMessage": {
@@ -776,8 +770,6 @@
   "commandHint_markasgroup": "Marcar quam gruppe",
   "widgetJitsi": "Jitsi Meet",
   "screenSharingTitle": "partir li ecran",
-  "callingPermissions": "Permissiones de telefonada",
-  "callingAccount": "Conto telefonante",
   "bannedUser": "{username} ha bannit {targetName}",
   "@bannedUser": {
     "type": "text",

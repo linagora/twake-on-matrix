@@ -1631,11 +1631,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Chamada de vídeo",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibilidade do historial da conversa",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1801,11 +1796,7 @@
   "dismiss": "Desbotar",
   "markAsRead": "Marcar como lido",
   "openChat": "Abrir Chat",
-  "voiceCall": "Chamada de voz",
   "emojis": "Emojis",
-  "unsupportedAndroidVersionLong": "Esta característica require unha vesión máis recente de Android. Mira se hai actualizacións ou soporte de LineageOS.",
-  "videoCallsBetaWarning": "Ten en conta que as chamadas de vídeo están en fase beta. Poderían non funcionar correctamente ou non funcionar nalgunhas plataformas.",
-  "unsupportedAndroidVersion": "Version de Android non soportada",
   "matrixWidgets": "Widgets de Matrix",
   "reactedWith": "{sender} reaccionou con {reaction}",
   "@reactedWith": {
@@ -1816,7 +1807,6 @@
     }
   },
   "confirmEventUnpin": "Tes a certeza de querer desafixar o evento?",
-  "experimentalVideoCalls": "Chamadas de vídeo en probas",
   "bundleName": "Nome do feixe",
   "widgetVideo": "Vídeo",
   "widgetJitsi": "Jitsi Meet",
@@ -1911,15 +1901,10 @@
   "commandHint_markasgroup": "Marcar como grupo",
   "whyIsThisMessageEncrypted": "Por que non podo ler esta mensaxe?",
   "noKeyForThisMessage": "Pode ser que a mensaxe fose enviada antes de que ti accedeses á túa conta neste dispositivo.\n\nTamén é posible que a remitente non validase o teu dispositivo ou tamén que algo fallase na conexión a internet.\n\nPodes ler a mensaxe noutro dispositivo? Entón podes transferila desde el! Vai a Axustes > Dispositivos e comproba que tes tódolos dispositivos verificados. Entón cando abras a sala a próxima vez a sincronización realizarase e as chaves transmitiranse automáticamente.\n\nNon desexas perder as chaves cando pechas sesión ou cambias de dispositivo? Comproba nos axustes que activaches a copia de apoio das conversas.",
-  "appearOnTop": "Aparecer arriba",
-  "otherCallingPermissions": "Micrófono, cámara e outros permisos para FluffyChat",
   "newGroup": "Novo grupo",
   "newSpace": "Novo espazo",
   "foregroundServiceRunning": "Esta notificación aparece cando se está a executar o servizo en segundo plano.",
   "screenSharingTitle": "compartición da pantalla",
-  "callingPermissions": "Permisos de chamada",
-  "callingAccount": "Conta que chama",
-  "callingAccountDetails": "Permite a FluffyChat usar a app marcador nativa de android.",
   "appearOnTopDetails": "Permítelle á app aparecer por enrriba (non é preciso se xa configuraches FluffyChat como unha conta para chamadas)",
   "enterSpace": "Entrar no espazo",
   "enterRoom": "Entrar na sala",

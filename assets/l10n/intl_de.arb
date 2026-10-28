@@ -1618,11 +1618,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Videoanruf",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Sichtbarkeit des Chat-Verlaufs",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1803,11 +1798,6 @@
     "placeholders": {}
   },
   "emojis": "Emojis",
-  "voiceCall": "Sprachanruf",
-  "unsupportedAndroidVersion": "Nicht unterstützte Android-Version",
-  "videoCallsBetaWarning": "Bitte beachte, dass sich Videoanrufe derzeit in der Beta-Phase befinden. Sie funktionieren möglicherweise nicht wie erwartet oder überhaupt nicht auf allen Plattformen.",
-  "unsupportedAndroidVersionLong": "Diese Funktion erfordert eine neuere Android-Version. Bitte suche nach Updates oder Lineage OS-Unterstützung.",
-  "experimentalVideoCalls": "Experimentelle Videoanrufe",
   "matrixWidgets": "Matrix-Widgets",
   "reactedWith": "{sender} reagierte mit {reaction}",
   "@reactedWith": {
@@ -1915,11 +1905,6 @@
   "noKeyForThisMessage": "Dies kann passieren, wenn die Nachricht gesendet wurde, bevor du dich auf diesem Gerät bei deinem Konto angemeldet hast.\n\nEs ist auch möglich, dass der Absender dein Gerät blockiert hat oder etwas mit der Internetverbindung schief gelaufen ist.\n\nKannst du die Nachricht in einer anderen Sitzung lesen? Dann kannst du die Nachricht davon übertragen! Gehe zu den Optionen > Geräte und vergewissere dich, dass sich deine Geräte gegenseitig verifiziert haben. Wenn du den Raum das nächste Mal öffnest und beide Sitzungen im Vordergrund sind, werden die Schlüssel automatisch übertragen.\n\nDu möchtest die Schlüssel beim Abmelden oder Gerätewechsel nicht verlieren? Stelle sicher, dass du das Chat-Backup in den Optionen aktiviert hast.",
   "foregroundServiceRunning": "Diese Benachrichtigung wird angezeigt, wenn der Vordergrunddienst ausgeführt wird.",
   "screenSharingTitle": "Bildschirm teilen",
-  "callingPermissions": "Anrufberechtigungen",
-  "callingAccount": "Anrufkonto",
-  "callingAccountDetails": "Ermöglicht FluffyChat, die native Android-Dialer-App zu verwenden.",
-  "appearOnTop": "Oben erscheinen",
-  "otherCallingPermissions": "Mikrofon, Kamera und andere FluffyChat-Berechtigungen",
   "whyIsThisMessageEncrypted": "Warum ist diese Nachricht nicht lesbar?",
   "newGroup": "Neue Gruppe",
   "newSpace": "Neuer Raum",

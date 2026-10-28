@@ -1117,11 +1117,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "مكالمة فيديو",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "مرئية تأريخ المحادثة",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1742,12 +1737,8 @@
     "placeholders": {}
   },
   "emojis": "إيموجي",
-  "voiceCall": "مكالمة صوتية",
-  "unsupportedAndroidVersion": "نسخة أندرويد غير مدعومة",
-  "unsupportedAndroidVersionLong": "تتطلب هذه الميزة إصدار Android أحدث. يرجى التحقق من وجود تحديثات أو دعم Lineage OS.",
   "thisUserHasNotPostedAnythingYet": "هذا المستخدم لم ينشر أي شيء في قصته حتى الآن",
   "storyPrivacyWarning": "يرجى ملاحظة أنه يمكن للأشخاص رؤية بعضهم البعض والتواصل مع بعضهم البعض في قصتك. ستكون قصصك مرئية لمدة 24 ساعة ولكن ليس هناك ما يضمن حذفها من جميع الأجهزة والخوادم.",
-  "experimentalVideoCalls": "مكالمات الفيديو التجريبية",
   "commandHint_create": "أنشأ محادثة جماعية فارغة\nاستخدم --لا-تشفير لتعطيل التشفير",
   "@commandHint_create": {
     "type": "text",
@@ -1773,7 +1764,6 @@
     "type": "text",
     "description": "Usage hint for the command /myroomavatar"
   },
-  "videoCallsBetaWarning": "يرجى ملاحظة أن مكالمات الفيديو حالياً في مرحلة تجريبية. قد لا تعمل كما هو متوقع أو تعمل على الإطلاق على جميع المنصات.",
   "replyHasBeenSent": "تم إرسال الرد",
   "storyFrom": "رسالة من {date}: \n{body}",
   "@storyFrom": {

@@ -1451,11 +1451,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "視訊通話",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "聊天記錄的可見性",
   "@visibilityOfTheChatHistory": {
     "type": "text",

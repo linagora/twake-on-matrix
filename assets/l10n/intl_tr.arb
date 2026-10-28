@@ -1633,11 +1633,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Görüntülü arama",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Sohbet geçmişi görünürlüğü",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1815,12 +1810,7 @@
     }
   },
   "emojis": "Emojiler",
-  "voiceCall": "Sesli arama",
-  "unsupportedAndroidVersion": "Desteklenmeyen Android sürümü",
-  "unsupportedAndroidVersionLong": "Bu özellik daha yeni bir Android sürümü gerektiriyor. Lütfen güncellemelere veya LineageOS desteğine bakın.",
   "confirmEventUnpin": "Etkinliğin sabitlemesini kalıcı olarak kaldırmak istediğinizden emin misiniz?",
-  "videoCallsBetaWarning": "Görüntülü aramaların şu anda beta aşamasında olduğunu lütfen unutmayın. Tüm platformlarda beklendiği gibi veya hiç çalışmayabilirler.",
-  "experimentalVideoCalls": "Deneysel görüntülü aramalar",
   "widgetJitsi": "Jitsi Meet",
   "widgetCustom": "Özel",
   "widgetUrlError": "Bu geçerli bir URL değil.",
@@ -1912,15 +1902,10 @@
   "whyIsThisMessageEncrypted": "Bu mesaj neden okunamıyor?",
   "noKeyForThisMessage": "Bu durum, mesaj siz bu aygıtta hesabınızda oturum açmadan önce gönderildiyse meydana gelebilir. \n \nGönderenin aygıtınızı engellemiş olması veya internet bağlantısında bir sorun olması da mümkündür. \n \nMesajı başka bir oturumda okuyabiliyor musunuz? O zaman mesajı oradan aktarabilirsiniz! Ayarlar > Aygıtlar bölümüne gidin ve aygıtlarınızın birbirini doğruladığından emin olun. Odayı bir sonraki sefer açtığınızda ve her iki oturum da ön planda olduğunda, anahtarlar otomatik olarak iletilecektir. \n \nOturumu kapatırken veya aygıt değiştirirken anahtarları kaybetmek istemiyor musunuz? Ayarlarda sohbet yedeklemesini etkinleştirdiğinizden emin olun.",
   "screenSharingTitle": "ekran paylaşımı",
-  "callingPermissions": "Arama izinleri",
-  "callingAccountDetails": "FluffyChat'in yerel android telefon uygulamasını kullanmasına izin verir.",
-  "appearOnTop": "Üstte görün",
   "enterSpace": "Alana gir",
   "enterRoom": "Odaya gir",
   "allSpaces": "Tüm alanlar",
-  "otherCallingPermissions": "Mikrofon, kamera ve diğer FluffyChat izinleri",
   "foregroundServiceRunning": "Bu bildirim, ön plan hizmeti çalışırken görünür.",
-  "callingAccount": "Arama hesabı",
   "appearOnTopDetails": "Uygulamanın üstte görünmesine izin verir (Fluffychat'ı zaten bir arama hesabı olarak ayarladıysanız gerekli değildir)",
   "newGroup": "Yeni grup",
   "newSpace": "Yeni alan",

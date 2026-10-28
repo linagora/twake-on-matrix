@@ -1630,11 +1630,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Vídeochamada",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Visibilidade do histórico da conversa",
   "@visibilityOfTheChatHistory": {
     "type": "text",
@@ -1820,12 +1815,7 @@
     }
   },
   "confirmEventUnpin": "Tem certeza que quer desafixar o evento permanentemente?",
-  "voiceCall": "Chamada de voz",
-  "unsupportedAndroidVersion": "Versão Android não suportada",
   "widgetNameError": "Por favor, forneça um nome de exibição.",
-  "unsupportedAndroidVersionLong": "Esta funcionalidade requer uma versão mais nova do Android. Por favor, busque atualizações ou suporte ao Lineage OS.",
-  "videoCallsBetaWarning": "Por favor, note que chamadas de vídeo estão atualmente em teste. Podem não funcionar como esperado ou sequer funcionar em algumas plataformas.",
-  "experimentalVideoCalls": "Vídeo chamadas experimentais",
   "widgetVideo": "Vídeo",
   "errorAddingWidget": "Erro ao adicionar a ferramenta.",
   "addWidget": "Adicionar ferramenta",
@@ -1927,12 +1917,7 @@
   "user": "Usuário",
   "custom": "Personalizado",
   "foregroundServiceRunning": "Esta notificação aparece quando um serviço está executando.",
-  "callingPermissions": "Permissões de chamada",
-  "callingAccount": "Conta para chamadas",
-  "callingAccountDetails": "Permitir que o FluffyChat use o app de chamadas nativo do Android.",
-  "appearOnTop": "Aparecer no topo",
   "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
-  "otherCallingPermissions": "Microfone, câmera e outras permissões do FluffyChat",
   "newGroup": "Novo grupo",
   "newSpace": "Novo espaço",
   "enterSpace": "Entrar no espaço",

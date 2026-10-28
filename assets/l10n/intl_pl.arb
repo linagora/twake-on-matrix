@@ -1289,11 +1289,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "videoCall": "Rozmowa wideo",
-  "@videoCall": {
-    "type": "text",
-    "placeholders": {}
-  },
   "visibilityOfTheChatHistory": "Widoczność historii czatu",
   "@visibilityOfTheChatHistory": {
     "type": "text",
