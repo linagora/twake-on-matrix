@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/model/extensions/push/push_notification_extens
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/push_decrypt_retry.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -146,6 +147,55 @@ Future<void> _tryPushHelper(
 
   // ignore: deprecated_member_use
   l10n ??= await L10n.delegate.load(window.locale);
+
+  await _showNotification(
+    flutterLocalNotificationsPlugin,
+    event,
+    notification,
+    l10n,
+  );
+
+  final sessionId = event.content.tryGet<String>('session_id');
+  final encryption = client.encryption;
+  if (event.type == EventTypes.Encrypted &&
+      sessionId != null &&
+      encryption != null) {
+    // The room key may arrive just after the push: retry for a few seconds
+    // and replace the generic notification once the event can be decrypted.
+    final decrypted = await retryUntil<Event>(
+      () async {
+        final e = await encryption.decryptRoomEvent(event);
+        return e.type == EventTypes.Encrypted ? null : e;
+      },
+      client.onSync.stream,
+      kick: encryption.keyManager.request(
+        event.room,
+        sessionId,
+        event.content.tryGet<String>('sender_key'),
+        onlineKeyBackupOnly: true,
+      ),
+    );
+    if (decrypted != null) {
+      await _showNotification(
+        flutterLocalNotificationsPlugin,
+        decrypted,
+        notification,
+        l10n,
+        replace: true,
+      );
+    }
+  }
+  Logs().v('Push helper has been completed!');
+}
+
+Future<void> _showNotification(
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+  Event event,
+  PushNotification notification,
+  L10n l10n, {
+  bool replace = false,
+}) async {
+  final client = event.room.client;
   final matrixLocals = MatrixLocals(l10n);
 
   // Calculate the body
@@ -191,6 +241,7 @@ Future<void> _tryPushHelper(
       ? await AndroidFlutterLocalNotificationsPlugin()
             .getActiveNotificationMessagingStyle(id)
       : null;
+  if (replace) messagingStyleInformation?.messages?.removeLast();
   messagingStyleInformation?.messages?.add(newMessage);
 
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -211,6 +262,7 @@ Future<void> _tryPushHelper(
     ticker: l10n.unreadChats(notification.counts?.unread ?? 1),
     importance: Importance.max,
     priority: Priority.high,
+    onlyAlertOnce: replace,
     groupKey: event.room.id,
   );
   const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
@@ -228,7 +280,6 @@ Future<void> _tryPushHelper(
     platformChannelSpecifics,
     payload: jsonEncode({'room_id': event.roomId, 'receiver_id': receiverId}),
   );
-  Logs().v('Push helper has been completed!');
 }
 
 /// Workaround for the problem that local notification IDs must be int but we
