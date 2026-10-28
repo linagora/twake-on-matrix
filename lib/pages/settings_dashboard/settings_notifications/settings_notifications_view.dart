@@ -91,6 +91,31 @@ class SettingsNotificationsView extends StatelessWidget {
                         : (enabled) => controller.toggleWebPush(enabled),
                   ),
                 },
+                if (controller.showEncryptedPreviewsTile) ...{
+                  const Divider(thickness: 1),
+                  SwitchListTile.adaptive(
+                    value: controller.encryptedPreviewsActive ?? false,
+                    title: Text(
+                      L10n.of(context)!.encryptedNotificationPreviews,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    subtitle: Text(
+                      controller.encryptedPreviewsLocked
+                          ? L10n.of(
+                              context,
+                            )!.encryptedNotificationPreviewsLocked
+                          : L10n.of(context)!.encryptedNotificationPreviewsHint,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    onChanged:
+                        controller.encryptedPreviewsLocked &&
+                            controller.encryptedPreviewsActive != true
+                        ? null
+                        : controller.toggleEncryptedPreviews,
+                  ),
+                },
                 if (!Matrix.of(context).client.allPushNotificationsMuted) ...{
                   const Divider(thickness: 1),
                   ListTile(

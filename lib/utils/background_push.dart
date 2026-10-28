@@ -165,7 +165,7 @@ class BackgroundPush {
 
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
-        await KeychainSharingManager.syncNotificationSession(targetClient);
+        await KeychainSharingManager.removeAppSession(targetClient);
       }
 
       if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {

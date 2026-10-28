@@ -33,7 +33,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
               let roomId = request.roomId,
               let eventId = request.eventId,
               let clientID = request.pusherNotificationClientIdentifier,
-              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
+              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.dedicated == true && $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
             // We cannot process this notification, it might be due to one of these:
             // - Device rebooted and locked
             // - Not a Matrix notification

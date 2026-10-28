@@ -1,4 +1,7 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/web_push/web_push.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -99,10 +102,80 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
 
+  /// Encrypted previews on iOS: the notification extension gets its own
+  /// device through a second SSO login. null while loading or unsupported.
+  bool? encryptedPreviewsActive;
+  String? _ssoProviderId;
+
+  /// The app cross-signs the extension's device, so it needs the
+  /// self-signing key in cache.
+  bool encryptedPreviewsLocked = false;
+
+  bool get showEncryptedPreviewsTile =>
+      PlatformInfos.isIOS && _ssoProviderId != null;
+
   @override
   void initState() {
     super.initState();
     if (showWebPushTile) _loadWebPushStatus();
+    if (PlatformInfos.isIOS) _loadEncryptedPreviewsStatus();
+  }
+
+  Future<void> _loadEncryptedPreviewsStatus() async {
+    final client = Matrix.of(context).client;
+    try {
+      final flows = await client.getLoginFlows();
+      final sso = flows?.firstWhereOrNull(
+        (flow) => flow.type == AuthenticationTypes.sso,
+      );
+      final providers = sso?.additionalProperties['identity_providers'];
+      // ponytail: first provider; pick the app's own one if a server ever
+      // offers several.
+      _ssoProviderId = providers is List && providers.isNotEmpty
+          ? (providers.first as Map)['id'] as String?
+          : null;
+    } catch (e, s) {
+      Logs().w('Unable to read login flows', e, s);
+    }
+    final active = await KeychainSharingManager.hasNotificationSession(client);
+    final cached = await client.encryption?.crossSigning.isCached() ?? false;
+    if (!mounted) return;
+    setState(() {
+      encryptedPreviewsActive = active;
+      encryptedPreviewsLocked = !cached;
+    });
+  }
+
+  Future<void> toggleEncryptedPreviews(bool enabled) async {
+    final client = Matrix.of(context).client;
+    final providerId = _ssoProviderId;
+    final homeserver = client.homeserver;
+    if (providerId == null || homeserver == null) return;
+    if (enabled) {
+      final String callback;
+      try {
+        callback = await ConnectPageMixin.webAuthenticate(
+          homeserver: homeserver.toString(),
+          id: providerId,
+        );
+      } catch (e) {
+        Logs().w('SSO for encrypted previews cancelled', e);
+        return;
+      }
+      final loginToken = Uri.parse(callback).queryParameters['loginToken'];
+      if (loginToken == null || loginToken.isEmpty || !mounted) return;
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
+        future: () => KeychainSharingManager.createNotificationSession(
+          client,
+          loginToken,
+        ),
+      );
+    } else {
+      await TwakeDialog.showFutureLoadingDialogFullScreen(
+        future: () => KeychainSharingManager.logoutNotificationSession(client),
+      );
+    }
+    await _loadEncryptedPreviewsStatus();
   }
 
   Future<void> _loadWebPushStatus() async {

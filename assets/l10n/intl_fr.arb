@@ -2666,6 +2666,9 @@
   },
   "webPushOnThisBrowser": "Notifications sur ce navigateur",
   "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option.",
+  "encryptedNotificationPreviews": "Aperçu des messages chiffrés",
+  "encryptedNotificationPreviewsHint": "Reconnecte ce téléphone une fois, pour les notifications seulement. L'aperçu commence avec les prochains messages.",
+  "encryptedNotificationPreviewsLocked": "Déverrouillez d'abord la sauvegarde de vos discussions.",
   "removeDeviceConfirmationTitle": "Supprimer cet appareil ?",
   "@removeDeviceConfirmationTitle": {
     "type": "text",

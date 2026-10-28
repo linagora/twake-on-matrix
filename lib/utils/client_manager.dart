@@ -111,7 +111,7 @@ abstract class ClientManager {
   }
 
   static Future<void> _syncKeychainForClient(Client client) =>
-      KeychainSharingManager.syncNotificationSession(client);
+      KeychainSharingManager.removeAppSession(client);
 
   static NativeImplementations get nativeImplementations => kIsWeb
       ? const NativeImplementationsDummy()
