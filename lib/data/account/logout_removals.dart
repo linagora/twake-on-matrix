@@ -50,8 +50,14 @@ class RemovalSteps {
 /// ("full jitter") of a ceiling that starts at [retryEvery] and doubles after
 /// each round up to [maxRetryEvery]; when the server asked for a longer wait
 /// (a Matrix rate limit), that wait is kept. Past the last round the removal
-/// stays kept, and its record survives a restart, so [retryAll] or [remove]
-/// (a new start of the app, a new login) runs it again with a fresh count.
+/// stays kept and its record survives a restart. Only a removal that is new,
+/// or a new start of the app, starts the count: [retryAll] and a repeated
+/// [remove] of a kept removal try once more and leave the count and the
+/// backoff as they are, so a screen that asks often cannot keep the
+/// background going. While the server asked for a wait, [retryAll] and a
+/// repeated [remove] of a kept removal do nothing; the background rounds
+/// already wait at least that long. Matrix rate limiting:
+/// https://spec.matrix.org/v1.16/client-server-api/#rate-limiting
 /// A step is reported on its first failure only; the retries are logged.
 class LogoutRemovals {
   LogoutRemovals({
@@ -68,6 +74,9 @@ class LogoutRemovals {
   final Map<String, _Removal> _removals = {};
   final Set<String> _running = {};
   Timer? _timer;
+
+  /// Set while the server's last wait has not passed.
+  Timer? _rateLimit;
   bool _disposed = false;
   int _retryRounds = 0;
 
@@ -88,13 +97,22 @@ class LogoutRemovals {
       !(_removals[id]?.removed ?? true);
 
   /// Runs the steps for [id], or the ones that are left when [id] was started
-  /// before. A second call while one runs is ignored. A call that runs starts
-  /// the count of background retries again. Read [isPending] to know whether
-  /// the account is removed.
+  /// before. A second call while one runs is ignored. A removal that is new
+  /// starts the count of background retries; one that is kept already does
+  /// not, and waits for the server's last wait. Read [isPending] to know
+  /// whether the account is removed.
   Future<void> remove(String id, RemovalSteps steps, ReportFailure report) {
-    if (!_running.contains(id)) _retryRounds = 0;
+    if (_removals.containsKey(id)) {
+      if (_serverAskedToWait) return Future.value();
+    } else {
+      _retryRounds = 0;
+    }
     return _remove(id, steps, report);
   }
+
+  /// True while the last wait the server asked for has not passed. The one
+  /// gate of every try that repeats a kept removal on demand.
+  bool get _serverAskedToWait => _rateLimit != null;
 
   Future<void> _remove(
     String id,
@@ -172,7 +190,9 @@ class LogoutRemovals {
       await step();
       return true;
     } catch (error, stackTrace) {
-      _serverDelay = _longer(_serverDelay, _delayAskedBy(error));
+      final asked = _delayAskedBy(error);
+      _serverDelay = _longer(_serverDelay, asked);
+      _holdOffFor(asked);
       if (removal.reported.add(what)) {
         removal.report(error, stackTrace, what);
       } else {
@@ -206,15 +226,27 @@ class LogoutRemovals {
       _serverDelay = Duration.zero;
       _timer?.cancel();
       _timer = null;
+      _rateLimit?.cancel();
+      _rateLimit = null;
     }
     return forgotten;
   }
 
-  /// Runs again every removal that is not done, with a fresh count of
-  /// background retries.
+  /// Runs again every removal that is not done, once. It does not start the
+  /// count of background retries again, and does nothing while the server's
+  /// last wait (`Retry-After`) has not passed: it returns at once, and
+  /// [isPending] still tells what is left.
   Future<void> retryAll() {
-    _retryRounds = 0;
+    if (_serverAskedToWait) return Future.value();
     return _retryEach();
+  }
+
+  /// The server asked for a wait: [retryAll] stays quiet until it passed. A
+  /// later ask replaces an earlier one, as the server's newest word.
+  void _holdOffFor(Duration? asked) {
+    if (asked == null || _disposed) return;
+    _rateLimit?.cancel();
+    _rateLimit = Timer(asked, () => _rateLimit = null);
   }
 
   Future<void> _retryEach() async {
@@ -259,6 +291,8 @@ class LogoutRemovals {
     _disposed = true;
     _timer?.cancel();
     _timer = null;
+    _rateLimit?.cancel();
+    _rateLimit = null;
   }
 }
 

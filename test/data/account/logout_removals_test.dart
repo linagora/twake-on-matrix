@@ -495,8 +495,8 @@ void main() {
         () => removals = LogoutRemovals(maxRetryRounds: 2, random: noJitter),
       );
 
-      /// Every try is used up; then [ask] runs and the count starts again.
-      void expectFreshCount(void Function() ask) {
+      /// Every try is used up; then [ask] runs one try and arms no timer.
+      void expectOneTryAndNoTimer(void Function() ask) {
         fakeAsync((async) {
           startFailing(async);
           async.elapse(const Duration(days: 1));
@@ -507,17 +507,34 @@ void main() {
           async.flushMicrotasks();
           async.elapse(const Duration(days: 1));
 
-          expect(tries(), 6);
+          expect(tries(), 4);
           expect(async.nonPeriodicTimerCount, 0);
         });
       }
 
-      test('a retry asked for by the app starts the count again', () {
-        expectFreshCount(() => removals.retryAll());
+      test('a retry asked for by the app does not start the count again', () {
+        expectOneTryAndNoTimer(() => removals.retryAll());
       });
 
-      test('a removal asked for again starts the count again', () {
-        expectFreshCount(() => run('a'));
+      test('a removal asked for again does not start the count again', () {
+        expectOneTryAndNoTimer(() => run('a'));
+      });
+    });
+
+    test('retries asked for by the app do not keep the background going', () {
+      fakeAsync((async) {
+        removals = LogoutRemovals(maxRetryRounds: 3, random: noJitter);
+        startFailing(async);
+
+        // A login screen asks every 30 seconds, for longer than the three
+        // rounds (1, 2 and 4 minutes) take.
+        for (var i = 0; i < 20; i++) {
+          async.elapse(const Duration(seconds: 30));
+          removals.retryAll();
+          async.flushMicrotasks();
+        }
+
+        expect(async.nonPeriodicTimerCount, 0);
       });
     });
 
@@ -546,6 +563,31 @@ void main() {
           expect(tries(), 1);
           async.elapse(const Duration(seconds: 1));
           expect(tries(), 2);
+        });
+      }
+
+      /// The removal of 'a' is refused with a 300 s rate limit, then [ask] is
+      /// what the app does to try it again, 299 s later or, with
+      /// [delayPassed], once the delay passed (after the background retry).
+      void expectAskedAgain(void Function() ask, {required bool delayPassed}) {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '300');
+          run('a');
+          async.flushMicrotasks();
+          if (delayPassed) {
+            errors.remove('remove:a');
+            failing.add('remove:a');
+            async.elapse(const Duration(seconds: 301));
+            expect(tries(), 2);
+          } else {
+            async.elapse(const Duration(seconds: 299));
+          }
+          final before = tries();
+
+          ask();
+          async.flushMicrotasks();
+
+          expect(tries(), delayPassed ? before + 1 : before);
         });
       }
 
@@ -591,6 +633,36 @@ void main() {
           async.elapse(const Duration(minutes: 2));
 
           expect(tries(), 3);
+        });
+      });
+
+      // https://spec.matrix.org/v1.16/client-server-api/#rate-limiting
+      test('a retry asked for by the app waits for the delay', () {
+        expectAskedAgain(() => removals.retryAll(), delayPassed: false);
+      });
+
+      test('a retry asked for by the app goes ahead once the delay passed', () {
+        expectAskedAgain(() => removals.retryAll(), delayPassed: true);
+      });
+
+      test('a removal asked for again waits for the delay, like a retry', () {
+        expectAskedAgain(() => run('a'), delayPassed: false);
+      });
+
+      test('a removal asked for again goes ahead once the delay passed', () {
+        expectAskedAgain(() => run('a'), delayPassed: true);
+      });
+
+      test('a new removal does not wait for the delay of another one', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '300');
+          run('a');
+          async.flushMicrotasks();
+
+          run('b');
+          async.flushMicrotasks();
+
+          expect(tries('b'), 1);
         });
       });
     });
