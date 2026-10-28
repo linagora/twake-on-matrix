@@ -233,7 +233,9 @@ class KeychainSharingManager {
     if (!PlatformInfos.isIOS ||
         userId == null ||
         deviceId == null ||
-        encryption == null) {
+        encryption == null ||
+        // Olm account not loaded yet: check again on the next launch.
+        client.fingerprintKey.isEmpty) {
       return false;
     }
     final checkedKey = '$_ownKeysCheckedPrefix$deviceId';

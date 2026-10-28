@@ -166,15 +166,16 @@ class BackgroundPush {
   /// healthy device.
   Future<void> _renewOverwrittenSession(Client targetClient) async {
     final context = TwakeApp.routerKey.currentContext;
-    if (context != null && context.mounted) {
-      final l10n = L10n.of(context)!;
-      await showOkAlertDialog(
-        context: context,
-        title: l10n.deviceIdentityRenewTitle,
-        message: l10n.deviceIdentityRenewMessage,
-        okLabel: l10n.ok,
-      );
-    }
+    // Never log out silently: without a screen to explain it, the check
+    // runs again on the next launch.
+    if (context == null || !context.mounted) return;
+    final l10n = L10n.of(context)!;
+    await showOkAlertDialog(
+      context: context,
+      title: l10n.deviceIdentityRenewTitle,
+      message: l10n.deviceIdentityRenewMessage,
+      okLabel: l10n.ok,
+    );
     await KeychainSharingManager.logoutNotificationSession(targetClient);
     await targetClient.logout();
   }
