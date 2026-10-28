@@ -147,6 +147,56 @@ class KeychainSharingManager {
     }
   }
 
+  /// Keeps the extension's device usable: forgets it once revoked, and
+  /// cross-signs it so senders that share keys only with cross-signed
+  /// devices (Dart SDK `crossVerifiedIfEnabled`) reach it.
+  ///
+  /// The device publishes its keys on its first push, so signing waits for
+  /// a later call (startup or own device list change).
+  static Future<void> checkNotificationDevice(Client client) async {
+    final userId = client.userID;
+    final homeserver = client.homeserver;
+    if (!PlatformInfos.isIOS || userId == null || homeserver == null) return;
+    final token = await read(userId: userId);
+    if (token?.dedicated != true) return;
+    final session = token!.session;
+    try {
+      await MatrixApi(
+        homeserver: homeserver,
+        accessToken: session.accessToken,
+        httpClient: client.httpClient,
+      ).getTokenOwner();
+    } on MatrixException catch (e) {
+      if (e.error == MatrixError.M_UNKNOWN_TOKEN) {
+        Logs().i('[KeychainSharing] Notification device revoked for $userId');
+        await delete(userId: userId);
+      }
+      return;
+    } catch (_) {
+      return; // offline: try again later
+    }
+    final encryption = client.encryption;
+    if (encryption == null || !await encryption.crossSigning.isCached()) {
+      return;
+    }
+    try {
+      await client.updateUserDeviceKeys();
+      final device =
+          client.userDeviceKeys[userId]?.deviceKeys[session.deviceId];
+      // Same check as a sender's `ShareKeysWith.crossVerifiedIfEnabled`.
+      if (device == null ||
+          device.hasValidSignatureChain(verifiedByTheirMasterKey: true)) {
+        return;
+      }
+      await encryption.crossSigning.sign([device]);
+      Logs().i(
+        '[KeychainSharing] Signed notification device ${device.deviceId}',
+      );
+    } catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to sign notification device', e, s);
+    }
+  }
+
   /// Logs the notification device out and forgets its session.
   static Future<void> logoutNotificationSession(Client client) async {
     final userId = client.userID;
