@@ -36,6 +36,7 @@ import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -160,6 +161,24 @@ class BackgroundPush {
     );
   }
 
+  /// The device's identity keys were overwritten by an older notification
+  /// extension: tell the user, then log out so the next login gets a new,
+  /// healthy device.
+  Future<void> _renewOverwrittenSession(Client targetClient) async {
+    final context = TwakeApp.routerKey.currentContext;
+    if (context != null && context.mounted) {
+      final l10n = L10n.of(context)!;
+      await showOkAlertDialog(
+        context: context,
+        title: l10n.deviceIdentityRenewTitle,
+        message: l10n.deviceIdentityRenewMessage,
+        okLabel: l10n.ok,
+      );
+    }
+    await KeychainSharingManager.logoutNotificationSession(targetClient);
+    await targetClient.logout();
+  }
+
   void _setupKeychainSyncForClient(Client targetClient) {
     String? lastAccessToken;
     bool didSyncRecoveryKey = false;
@@ -171,6 +190,12 @@ class BackgroundPush {
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
         await KeychainSharingManager.removeAppSession(targetClient);
+        if (await KeychainSharingManager.isDeviceIdentityOverwritten(
+          targetClient,
+        )) {
+          await _renewOverwrittenSession(targetClient);
+          return;
+        }
         await KeychainSharingManager.checkNotificationDevice(targetClient);
       } else if (sync.deviceLists?.changed?.contains(targetClient.userID) ==
           true) {

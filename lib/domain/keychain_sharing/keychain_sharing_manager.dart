@@ -219,6 +219,44 @@ class KeychainSharingManager {
     }
   }
 
+  static const String _ownKeysCheckedPrefix = 'own_keys_checked_';
+
+  /// Older versions let the notification extension upload its identity keys
+  /// over the app's device. Checks the server copy once per device: missing
+  /// keys are uploaded again. Returns true when they differ: other clients
+  /// pinned the extension's keys for this device id, so only a new login
+  /// (new device) restores a working identity.
+  static Future<bool> isDeviceIdentityOverwritten(Client client) async {
+    final userId = client.userID;
+    final deviceId = client.deviceID;
+    final encryption = client.encryption;
+    if (!PlatformInfos.isIOS ||
+        userId == null ||
+        deviceId == null ||
+        encryption == null) {
+      return false;
+    }
+    final checkedKey = '$_ownKeysCheckedPrefix$deviceId';
+    try {
+      if (await _secureStorage.read(key: checkedKey) != null) return false;
+      final response = await client.queryKeys({
+        userId: [deviceId],
+      });
+      final serverKey =
+          response.deviceKeys?[userId]?[deviceId]?.keys['ed25519:$deviceId'];
+      if (serverKey == null) {
+        await encryption.olmManager.uploadKeys(uploadDeviceKeys: true);
+      } else if (serverKey != client.fingerprintKey) {
+        Logs().w('[KeychainSharing] Device $deviceId identity overwritten');
+        return true;
+      }
+      await _secureStorage.write(key: checkedKey, value: 'true');
+    } catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to check device identity', e, s);
+    }
+    return false;
+  }
+
   /// Logs the notification device out and forgets its session.
   static Future<void> logoutNotificationSession(Client client) async {
     final userId = client.userID;
