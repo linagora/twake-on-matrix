@@ -769,7 +769,6 @@
   },
   "commandHint_markasgroup": "Marcar quam gruppe",
   "widgetJitsi": "Jitsi Meet",
-  "screenSharingTitle": "partir li ecran",
   "bannedUser": "{username} ha bannit {targetName}",
   "@bannedUser": {
     "type": "text",

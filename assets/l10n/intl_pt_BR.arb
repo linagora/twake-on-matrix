@@ -1916,8 +1916,6 @@
   "storeSecurlyOnThisDevice": "Guardar de modo seguro neste dispositivo",
   "user": "Usuário",
   "custom": "Personalizado",
-  "foregroundServiceRunning": "Esta notificação aparece quando um serviço está executando.",
-  "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
   "newGroup": "Novo grupo",
   "newSpace": "Novo espaço",
   "enterSpace": "Entrar no espaço",
@@ -1931,8 +1929,6 @@
   "dehydrateWarning": "Esta ação não pode ser desfeita. Certifique-se de que o arquivo backup está guardado e seguro.",
   "dehydrateTorLong": "Para usuários TOR, é recomendado exportar a sessão antes de fechar a janela.",
   "whyIsThisMessageEncrypted": "Por que esta mensagem está ilegível?",
-  "screenSharingTitle": "Compartilhar tela",
-  "screenSharingDetail": "Você está compartilhando sua tela no FluffyChat",
   "numChats": "{number} conversas",
   "@numChats": {
     "type": "number",
