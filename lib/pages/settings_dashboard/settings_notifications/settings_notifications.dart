@@ -100,6 +100,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   bool? webPushActive;
   bool webPushPermissionDenied = false;
 
+  Client get _client => Matrix.of(context).client;
+
   bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
 
   /// Encrypted previews on iOS: the notification extension gets its own
@@ -122,7 +124,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   }
 
   Future<void> _loadEncryptedPreviewsStatus() async {
-    final client = Matrix.of(context).client;
+    final client = _client;
     try {
       final flows = await client.getLoginFlows();
       final sso = flows?.firstWhereOrNull(
@@ -150,7 +152,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   }
 
   Future<void> toggleEncryptedPreviews(bool enabled) async {
-    final client = Matrix.of(context).client;
+    final client = _client;
     final providerId = _ssoProviderId;
     final homeserver = client.homeserver;
     if (providerId == null || homeserver == null) return;
@@ -194,13 +196,13 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   /// pusher stays gone) and (re)subscribes or tears down accordingly.
   Future<void> toggleWebPush(bool enabled) async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => setWebPushEnabled(Matrix.of(context).client, enabled),
+      future: () => setWebPushEnabled(_client, enabled),
     );
     await _loadWebPushStatus();
   }
 
   bool? getNotificationSetting(NotificationSettingsItem item) {
-    final pushRules = Matrix.of(context).client.globalPushRules;
+    final pushRules = _client.globalPushRules;
     if (pushRules == null) return null;
 
     if (item.key == PushRule.roomOneToOne.ruleKey) {
@@ -242,7 +244,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   void setNotificationSetting(NotificationSettingsItem item, bool enabled) {
     TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () {
-        final client = Matrix.of(context).client;
+        final client = _client;
         if (item.key == PushRule.roomOneToOne.ruleKey) {
           return Future.wait([
             client.setPushRuleEnabled(item.type, item.key, true),
@@ -285,7 +287,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     if (delete != true) return;
 
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.deletePusher(
+      future: () => _client.deletePusher(
         PusherId(appId: pusher.appId, pushkey: pusher.pushkey),
       ),
     );
