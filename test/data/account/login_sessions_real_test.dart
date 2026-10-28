@@ -269,7 +269,7 @@ void main() {
     );
     addTearDown(container.dispose);
     effects = FakeSwitchEffects();
-    container.read(accountSwitchEffectsProvider.notifier).set(effects);
+    container.read(accountSwitchEffectsHolderProvider.notifier).set(effects);
     container.read(accountsProvider);
     coordinator = container.read(accountSwitchCoordinatorProvider);
     host = _RealHost(container, coordinator);

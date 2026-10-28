@@ -19,6 +19,7 @@ import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/data/account/client_subscriptions.dart';
+import 'package:twake_chat/data/account/login_host.dart';
 import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
@@ -31,7 +32,9 @@ import 'package:twake_chat/domain/repository/tom_configurations_repository.dart'
 import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
+import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
+import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
@@ -439,7 +442,9 @@ class _Harness {
   }) async {
     await mount(routed: routed);
     await settle();
-    container.read(accountSwitchEffectsProvider.notifier).set(effects(matrix));
+    container
+        .read(accountSwitchEffectsHolderProvider.notifier)
+        .set(effects(matrix));
     return container.read(accountSwitchCoordinatorProvider);
   }
 
@@ -694,13 +699,13 @@ void main() {
   testWidgets('MatrixState sets the switch effects and the push teardown after '
       'the first build and clears them when it is disposed', (tester) async {
     final harness = _Harness(tester, [_BootClient('a', userID: '@a:s')]);
-    final effects = harness.container.read(accountSwitchEffectsProvider);
+    final effects = harness.container.read(accountSwitchEffectsHolderProvider);
     expect(effects, isNull);
 
     await harness.run(() async {
       await harness.mount();
       expect(
-        harness.container.read(accountSwitchEffectsProvider),
+        harness.container.read(accountSwitchEffectsHolderProvider),
         same(harness.matrix),
       );
       expect(harness.container.read(pushRemovalsControllerProvider), isNotNull);
@@ -708,7 +713,7 @@ void main() {
       await harness.unmount();
     });
 
-    expect(harness.container.read(accountSwitchEffectsProvider), isNull);
+    expect(harness.container.read(accountSwitchEffectsHolderProvider), isNull);
     expect(harness.container.read(pushRemovalsControllerProvider), isNull);
   });
 
@@ -754,7 +759,7 @@ void main() {
       tomServer.changeBaseUrl(null);
       authorization.accessToken = null;
       harness.container
-          .read(accountSwitchEffectsProvider.notifier)
+          .read(accountSwitchEffectsHolderProvider.notifier)
           .set(_ToMOnlyEffects(harness.matrix));
 
       final result = await tester.runAsync(
@@ -946,6 +951,62 @@ void main() {
       });
 
       expect(federation.saved, ['@a:s']);
+    });
+
+    testWidgets('a login session that outlives the widget still reads the '
+        'accounts', (tester) async {
+      final harness = _Harness(tester, [_BootClient('a', userID: '@a:s')]);
+      late LoginHost host;
+
+      await harness.run(() async {
+        await harness.mount();
+        host = harness.matrix.loginHost;
+        await harness.unmount();
+      });
+
+      expect(host.isStored(const AccountId('a')), isTrue);
+      expect(host.isLoggedIn(const AccountId('a')), isTrue);
+    });
+
+    // A session step that fails is caught by the session, but what it does in
+    // its `catch` (report) and the arguments it builds before its `try` (the
+    // active client) must not need the widget.
+    testWidgets('after the widget is gone the host still answers what a '
+        'session asks outside of a try', (tester) async {
+      final reports = <String>[];
+      final client = _BootClient('a', userID: '@a:s');
+      final harness = _Harness(
+        tester,
+        [client],
+        overrides: [
+          reportFailureProvider.overrideWithValue(
+            (error, stackTrace, what) => reports.add(what),
+          ),
+        ],
+      );
+      late LoginHost host;
+
+      await harness.run(() async {
+        await harness.mount();
+        host = harness.matrix.loginHost;
+        await harness.unmount();
+      });
+
+      expect(host.activeClient, same(client));
+      expect(host.activeClientName, 'a');
+      expect(host.clientByName(const AccountId('a')), same(client));
+      host.report(StateError('x'), StackTrace.empty, 'step');
+      // The boot of the widget may report its own failures too, and when it
+      // does depends on timing: only the report of the host matters here.
+      expect(reports, contains('MatrixState: login: step'));
+      host.emit(
+        ClientLoginStateEvent(
+          client: client,
+          loginState: LoginState.loggedOut,
+          multipleAccountLoginType: MultipleAccountLoginType.loginFailed,
+          error: StateError('x'),
+        ),
+      );
     });
   });
 }

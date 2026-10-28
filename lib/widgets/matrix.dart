@@ -78,7 +78,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget, WidgetRef;
+    show
+        ConsumerState,
+        ConsumerStatefulWidget,
+        ProviderContainer,
+        ProviderScope;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
@@ -426,6 +430,10 @@ class MatrixState extends ConsumerState<Matrix>
   /// What a rolled-back login leaves behind: held as unavailable, recorded
   /// across restarts and retried in the background.
   late final RollbackRemovals _rollbackRemovals;
+
+  /// Read in `initState`, so a failure can still be reported once the widget
+  /// is unmounted (a login session can outlive it).
+  late final ReportFailure _reportFailure;
   final _lastSyncErrorSentAt = <String, DateTime>{};
 
   static const _syncErrorSentryThrottle = Duration(minutes: 10);
@@ -485,12 +493,17 @@ class MatrixState extends ConsumerState<Matrix>
     _logoutRemovals = ref.read(logoutRemovalsProvider);
     _pushRemovals = ref.read(pushRemovalsProvider);
     _rollbackRemovals = ref.read(rollbackRemovalsProvider);
+    _reportFailure = ref.read(reportFailureProvider);
     // The coordinator registers the switch handler when it is read. It reads
     // the effects only when a switch runs, so they are set right after the
     // first build: a provider cannot be written while the tree is building.
-    _switchEffects = ref.read(accountSwitchEffectsProvider.notifier);
+    _switchEffects = ref.read(accountSwitchEffectsHolderProvider.notifier);
     _pushController = ref.read(pushRemovalsControllerProvider.notifier);
     _switchCoordinator = ref.read(accountSwitchCoordinatorProvider);
+    // TODO: [transitional] TW-3302: the login host, the switch effects and the
+    // push teardown are pushed from this widget into providers because the
+    // side effects of an account still need its state and context. They are
+    // cleared in `dispose`, and go when those effects move out of the widget.
     _loginSessions = ref.read(loginSessionsProvider)..attach(_loginHost);
     _httpClientOwner = _currentHttpClientOwner();
     ref.listenManual(
@@ -940,7 +953,7 @@ class MatrixState extends ConsumerState<Matrix>
   /// Makes a failure visible. `Logs().wtf` is what the error reporting picks
   /// up (`SentryLogger`), so it is sent once.
   void _report(Object error, StackTrace stackTrace, String what) =>
-      ref.read(reportFailureProvider)(error, stackTrace, 'MatrixState: $what');
+      _reportFailure(error, stackTrace, 'MatrixState: $what');
 
   /// A new session opened for [id]: a pusher deletion kept from the session
   /// before would run against this one, so it is dropped with its record.
@@ -1992,30 +2005,42 @@ class _MatrixPushTeardown implements PushTeardown {
 }
 
 /// Gives the login handlers what they need from [MatrixState].
+///
+/// A login session can outlive the widget, and `State.ref` throws a
+/// `StateError` once it is unmounted. What a session asks outside of a `try`
+/// (the active client, `report`, `emit`) does not use it. The other members
+/// that reach `State.ref` or the context (`switchTo`, `clearEffects`,
+/// `activateCurrent`, `signOut`, `removePush`, the set-ups, the sync, the
+/// subscriptions) are only called inside a session step that catches and
+/// reports the failure, so after the unmount they fail and the session rolls
+/// back.
 class _MatrixLoginHost implements LoginHost {
-  _MatrixLoginHost(this._state);
+  /// Takes the container now, in `initState`, for the reads that need only
+  /// the providers.
+  _MatrixLoginHost(this._state)
+    : _container = ProviderScope.containerOf(_state.context, listen: false);
 
   final MatrixState _state;
-
-  WidgetRef get _ref => _state.ref;
+  final ProviderContainer _container;
 
   @override
-  bool isStored(AccountId id) => _ref
+  bool isStored(AccountId id) => _container
       .read(accountRepositoryProvider)
       .registeredAccounts()
       .any((a) => a.id == id.value);
 
   @override
   bool isLoggedIn(AccountId id) =>
-      _ref.read(accountClientRegistryProvider)[id.value]?.isLogged() ?? false;
+      _container.read(accountClientRegistryProvider)[id.value]?.isLogged() ??
+      false;
 
   @override
   Future<void> addAccount(AccountId id) =>
-      _ref.read(accountsProvider.notifier).addAccount(id);
+      _container.read(accountsProvider.notifier).addAccount(id);
 
   @override
   Future<void> removeAccount(AccountId id) async {
-    final client = _ref.read(accountClientRegistryProvider)[id.value];
+    final client = _container.read(accountClientRegistryProvider)[id.value];
     if (client == null) return;
     await _state._rollbackRemovals.removeStored(
       id.value,
@@ -2029,16 +2054,27 @@ class _MatrixLoginHost implements LoginHost {
   }
 
   @override
-  void logoutLast() => _ref.read(accountsProvider.notifier).logoutLast();
+  void logoutLast() => _container.read(accountsProvider.notifier).logoutLast();
+
+  /// Same rule as `MatrixState.client`, read from the container so that it
+  /// does not need the widget: the active client, else the first one.
+  Client? get _activeOrNull {
+    final clients = _container.read(accountClientsProvider);
+    if (clients.isEmpty) return null;
+    return _container.read(activeMatrixClientProvider) ?? clients.first;
+  }
 
   @override
-  Client get activeClient => _state.client;
+  Client get activeClient =>
+      _activeOrNull ?? (throw StateError('No account is known'));
 
   @override
-  String? get activeClientName => _state.clientOrNull?.clientName;
+  String? get activeClientName => _activeOrNull?.clientName;
 
   @override
-  Client? clientByName(AccountId id) => _state.getClientByName(id.value);
+  Client? clientByName(AccountId id) => _container
+      .read(accountClientsProvider)
+      .firstWhereOrNull((c) => c.clientName == id.value);
 
   @override
   Future<bool> switchTo(Client client) async =>
@@ -2059,22 +2095,23 @@ class _MatrixLoginHost implements LoginHost {
   }
 
   @override
-  Client? get reusableClient => _ref.read(loginCandidateProvider);
+  Client? get reusableClient => _container.read(loginCandidateProvider);
 
   @override
   Future<Client> createCandidate() async {
-    final account = await _ref
+    final account = await _container
         .read(createAccountCandidateUseCaseProvider)
         .execute();
-    return _ref.read(accountClientRegistryProvider)[account.id]!;
+    return _container.read(accountClientRegistryProvider)[account.id]!;
   }
 
   @override
-  String? get pendingCandidateId => _ref.read(pendingLoginCandidateProvider);
+  String? get pendingCandidateId =>
+      _container.read(pendingLoginCandidateProvider);
 
   @override
   void setPendingCandidate(AccountId? id) =>
-      _ref.read(pendingLoginCandidateProvider.notifier).set(id?.value);
+      _container.read(pendingLoginCandidateProvider.notifier).set(id?.value);
 
   @override
   Future<void> discardCandidate(AccountId id) =>
@@ -2151,8 +2188,11 @@ class _MatrixLoginHost implements LoginHost {
   void markFirstSyncDone() => _state.waitForFirstSync = false;
 
   @override
-  void emit(ClientLoginStateEvent event) =>
-      _state.onClientLoginStateChanged.add(event);
+  void emit(ClientLoginStateEvent event) {
+    // Closed in `dispose`: nobody listens any more, and `add` would throw.
+    if (_state.onClientLoginStateChanged.isClosed) return;
+    _state.onClientLoginStateChanged.add(event);
+  }
 
   @override
   Future<void> retryPendingRemovals() => _state._logoutRemovals.retryAll();
