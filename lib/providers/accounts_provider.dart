@@ -12,7 +12,6 @@ import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/account_repository_provider.dart';
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
-import 'package:twake_chat/providers/boot_clients_provider.dart';
 
 part 'accounts_provider.g.dart';
 
@@ -31,18 +30,12 @@ class Accounts extends _$Accounts {
   /// computed from a state that another one is about to replace.
   Future<void> _mutations = Future.value();
 
-  /// The boot clients are adopted here, so nothing has to adopt them before
-  /// the state is first read.
+  /// The state of the accounts the repository holds, which has adopted the
+  /// boot clients when it was built.
   @override
   AccountsState build() {
     ref.onDispose(_finishPendingSwitch);
     final boot = ref.watch(bootAccountSnapshotProvider);
-    ref
-        .watch(accountRepositoryImplProvider)
-        .adopt(
-          ref.watch(bootClientsProvider),
-          pendingRemovals: boot.pendingRemovalIds,
-        );
     return ref
         .watch(initializeAccountsUseCaseProvider)
         .execute(persistedUserId: boot.persistedActiveUserId);
@@ -139,8 +132,11 @@ class Accounts extends _$Accounts {
   }
 
   /// Removes [id]; when it was the active account the next one becomes active
-  /// in the same emission.
+  /// in the same emission. Throws [SwitchInProgressException] while a switch
+  /// runs, before anything is deleted: wait with [whenSwitchSettled] and ask
+  /// again.
   Future<void> removeAccount(AccountId id) => _serialized(() async {
+    _rejectDuringSwitch(id);
     final next = await ref
         .read(removeAccountUseCaseProvider)
         .execute(_current, id.value);
@@ -150,8 +146,10 @@ class Accounts extends _$Accounts {
   /// The removal of [id] failed: the account stays listed as unavailable, not
   /// switchable; another logged-in account takes its place when it was the
   /// active one (with none, nobody is logged in). The record that survives a
-  /// restart is [recordPendingRemoval], which is retried on its own.
+  /// restart is [recordPendingRemoval], which is retried on its own. Throws
+  /// [SwitchInProgressException] while a switch runs.
   Future<void> holdRemoval(AccountId id) => _serialized(() async {
+    _rejectDuringSwitch(id);
     _move(_transitions.markUnavailable(_current(), id.value));
   });
 
@@ -192,6 +190,12 @@ class Accounts extends _$Accounts {
   AccountsState _current() {
     if (!ref.mounted) throw const _Disposed();
     return state;
+  }
+
+  /// A switch can start after a caller waited for the last one, while its
+  /// write is queued behind another mutation; the write finds `Switching` here.
+  void _rejectDuringSwitch(AccountId id) {
+    if (_current() is Switching) throw SwitchInProgressException(id.value);
   }
 
   Future<void> _serialized(Future<void> Function() action) {
