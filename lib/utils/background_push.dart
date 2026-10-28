@@ -466,6 +466,7 @@ class BackgroundPush {
   }
 
   bool _wentToRoomOnStartup = false;
+
   /// Device the push was set up for. A new login (new device) sets it up
   /// again: the previous session's pusher is gone.
   String? _setupPushDeviceId;
