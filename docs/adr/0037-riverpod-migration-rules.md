@@ -157,8 +157,8 @@ controller → use case → repository → datasource.
 - A mechanical pull request applies one pattern; its size does not matter.
 - A module pull request adds under about 500 lines in `lib/`; tests,
   generated files and deleted lines do not count.
-- A module is covered by Patrol scenarios, mobile and web, merged before its
-  migration.
+- A module is covered by Patrol scenarios (mobile only; the web suite is
+  disabled in CI), merged before its migration.
 - Every migration pull request runs the `zeus` and `migration-reviewer` agents
   and quotes their summaries.
 

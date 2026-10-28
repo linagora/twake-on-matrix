@@ -81,7 +81,7 @@ totals are in `MIGRATION_STATUS.md`.
 
 For each module:
 
-1. Patrol scenarios (mobile and web files) for its flows, merged first.
+1. Patrol scenarios (mobile) for its flows, merged first.
 2. Interactors → `Future<T>` use cases with typed exceptions, in
    `lib/domain/<feature>/usecases/`.
 3. Its dependencies get native providers; its `getIt` lookups go. A bridge
@@ -107,7 +107,7 @@ For each module:
 - [ ] The `getIt` lookups outside any module (shared widgets, `lib/utils`)
       get native providers
 - [ ] `get_it`, `dartz` and `lib/domain/app_state/` are deleted
-- [ ] Full Patrol run, mobile and web, before the next release
+- [ ] Full Patrol run (mobile) before the next release
 
 ## Risks
 

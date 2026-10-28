@@ -73,7 +73,7 @@ else; `zeus` covers [GUIDELINES.md][guidelines].
   now uses `ref.read`, not `ref.watch`.
 
 ### Module
-- Patrol scenarios for the module exist on `main` (mobile and web files).
+- Patrol scenarios for the module exist on `main` (mobile).
 - Use cases return `Future<T>` and throw typed exceptions; no `Either`, no
   `app_state` class.
 - `domain/` imports neither Riverpod, nor Flutter, nor `package:matrix`, nor
