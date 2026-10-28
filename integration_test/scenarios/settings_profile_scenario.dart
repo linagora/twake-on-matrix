@@ -15,8 +15,9 @@ abstract class _SettingsProfileScenario extends BaseTestScenario {
   }
 }
 
-class SettingsProfileOpenScenario extends _SettingsProfileScenario {
-  SettingsProfileOpenScenario(super.$, super.robots);
+/// CI Synapse allows profile edits, so only the "allowed" branch is testable.
+class SettingsProfileOverviewScenario extends _SettingsProfileScenario {
+  SettingsProfileOverviewScenario(super.$, super.robots);
 
   @override
   Future<void> runTestLogic() async {
@@ -42,32 +43,13 @@ class SettingsProfileOpenScenario extends _SettingsProfileScenario {
       true,
       'Matrix ID "$matrixId" does not start with "$expectedPrefix"',
     );
-
     s.verifyAll();
-  }
-}
-
-/// CI Synapse allows profile edits, so only the "allowed" branch is testable.
-class SettingsProfileCapabilitiesScenario extends _SettingsProfileScenario {
-  SettingsProfileCapabilitiesScenario(super.$, super.robots);
-
-  @override
-  Future<void> runTestLogic() async {
-    await openProfile();
 
     await $.waitUntilVisible(profile.displayNameEditIcon());
     await $.waitUntilVisible(profile.avatarEditBadge());
-  }
-}
 
-class SettingsProfileCopyMatrixIdScenario extends _SettingsProfileScenario {
-  SettingsProfileCopyMatrixIdScenario(super.$, super.robots);
-
-  @override
-  Future<void> runTestLogic() async {
-    await openProfile();
-    await profile.waitForValueOf(SettingsProfileEnum.matrixId);
     await profile.copyMatrixId();
+    await profile.backToSettings();
   }
 }
 
@@ -100,15 +82,5 @@ class SettingsProfileMultipleAccountsScenario extends _SettingsProfileScenario {
     await openProfile();
     await $.waitUntilVisible(profile.multipleAccountsButton());
     await profile.openMultipleAccountsPicker();
-  }
-}
-
-class SettingsProfileBackScenario extends _SettingsProfileScenario {
-  SettingsProfileBackScenario(super.$, super.robots);
-
-  @override
-  Future<void> runTestLogic() async {
-    await openProfile();
-    await profile.backToSettings();
   }
 }
