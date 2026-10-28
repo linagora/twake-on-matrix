@@ -55,37 +55,45 @@ abstract class ClientManager {
     }
     final clients = await Future.wait(clientNames.map(createClient));
     if (initialize) {
-      await Future.wait(
-        clients.map(
-          (client) => client
-              .init(
-                waitForFirstSync: false,
-                waitUntilLoadCompletedLoaded: false,
-              )
-              .then((_) => _syncKeychainForClient(client))
-              .catchError(
-                (e, s) => Logs().e('Unable to initialize client', e, s),
-              ),
-        ),
-      );
+      await Future.wait(clients.map(initClient));
     }
-    if (clients.length > 1 && clients.any((c) => !c.isLogged())) {
-      final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
-      for (final client in loggedOutClients) {
-        Logs().w(
-          'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
-        );
-        clientNames.remove(client.clientName);
-        final database = client.database;
-        await database.delete();
-        if (database is MatrixSdkDatabase && database.database?.path != null) {
-          await deleteSqfliteDb(database.database!.path);
-        }
-        clients.remove(client);
-      }
-      await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
-    }
+    // A logged-out client next to others is not deleted here: the account
+    // repository lists it as a pending removal, which is retried until it works.
     return clients;
+  }
+
+  /// Initialises [client] and syncs its session to the keychain. A failure is
+  /// logged, not thrown.
+  static Future<void> initClient(Client client) => client
+      .init(waitForFirstSync: false, waitUntilLoadCompletedLoaded: false)
+      .then((_) => _syncKeychainForClient(client))
+      .catchError((e, s) => Logs().e('Unable to initialize client', e, s));
+
+  /// The first client that holds a session. It initialises one client at a
+  /// time and stops at the first logged-in one: the background isolate of a
+  /// push needs one account, not all of them.
+  static Future<Client?> firstLoggedIn(Iterable<Client> clients) async {
+    for (final client in clients) {
+      await initClient(client);
+      if (client.isLogged()) return client;
+    }
+    return null;
+  }
+
+  /// The clients that hold a session. A logged-out client stays loaded while
+  /// its removal is pending; screens that read profiles or homeservers, and the
+  /// background push, must not treat it as an account.
+  static List<Client> loggedIn(Iterable<Client> clients) =>
+      clients.where((client) => client.isLogged()).toList();
+
+  /// Deletes what a client stored: its database and, for the SQLite one, the
+  /// file.
+  static Future<void> deleteClientStorage(DatabaseApi database) async {
+    await database.delete();
+    if (database is MatrixSdkDatabase) {
+      final path = database.database?.path;
+      if (path != null) await deleteSqfliteDb(path);
+    }
   }
 
   static Future<void> addClientNameToStore(String clientName) async {
