@@ -883,6 +883,9 @@
     elements["workflow-link"].href = web
       ? "https://github.com/linagora/twake-on-matrix/actions"
       : "https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml";
+    elements["workflow-link"].textContent = web
+      ? "Voir les workflows GitHub Actions ↗"
+      : "Voir le workflow nightly ↗";
     elements["web-diagnostic"].hidden = !web;
   }
 
