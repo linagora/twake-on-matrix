@@ -1,5 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';

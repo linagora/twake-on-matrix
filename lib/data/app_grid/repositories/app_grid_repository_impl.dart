@@ -1,4 +1,4 @@
-import 'package:matrix/matrix.dart';
+import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/config/app_grid_config/app_config_loader.dart';
 import 'package:twake_chat/domain/app_grid/repositories/app_grid_repository.dart';
 import 'package:twake_chat/domain/model/app_grid/app_grid_configuration_parser.dart';

@@ -7,5 +7,5 @@ part 'app_grid_applications.provider.g.dart';
 
 @riverpod
 Future<LinagoraApplications> appGridApplications(Ref ref) => ref
-    .watch(getAppGridConfigurationProvider)
+    .watch(getAppGridConfigurationUseCaseProvider)
     .execute(path: AppConfig.appGridConfigurationPath);

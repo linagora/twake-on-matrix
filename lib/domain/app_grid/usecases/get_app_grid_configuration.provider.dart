@@ -5,5 +5,5 @@ import 'package:twake_chat/domain/app_grid/usecases/get_app_grid_configuration.d
 part 'get_app_grid_configuration.provider.g.dart';
 
 @riverpod
-GetAppGridConfiguration getAppGridConfiguration(Ref ref) =>
-    GetAppGridConfiguration(ref.watch(appGridRepositoryProvider));
+GetAppGridConfigurationUseCase getAppGridConfigurationUseCase(Ref ref) =>
+    GetAppGridConfigurationUseCase(ref.watch(appGridRepositoryProvider));
