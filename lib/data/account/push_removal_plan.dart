@@ -40,18 +40,34 @@ class PushRemovalPlan {
     settleOnHold: false,
   );
 
+  /// The tries in this process that found the push not set up. Past
+  /// [maxNotReadyTries] (a device that never gets a push token) the deletion
+  /// is not retried in the background any more; its record stays, so a later
+  /// start of the app deletes the pusher once the token is known.
+  int _notReadyTries = 0;
+  static const maxNotReadyTries = 3;
+
   Future<void> _remove() async {
     final token = _openedWith;
     if (token == null || _sessionToken() != token) return;
-    if (!_isPushReady()) throw const PushNotReadyException();
+    if (!_isPushReady()) {
+      _notReadyTries++;
+      throw PushNotReadyException(
+        retryInBackground: _notReadyTries < maxNotReadyTries,
+      );
+    }
     await _removePush();
   }
 }
 
 /// The push set-up of this device has not finished, so a pusher cannot be
-/// deleted yet; the deletion is retried.
-class PushNotReadyException implements Exception {
-  const PushNotReadyException();
+/// deleted yet; the deletion is retried, quietly and a bounded number of
+/// times.
+class PushNotReadyException implements ExpectedRemovalFailure {
+  const PushNotReadyException({this.retryInBackground = true});
+
+  @override
+  final bool retryInBackground;
 
   @override
   String toString() => 'PushNotReadyException: push is not set up yet';
