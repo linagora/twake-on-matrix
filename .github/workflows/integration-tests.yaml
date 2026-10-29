@@ -217,7 +217,7 @@ jobs:
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart
               integration_test/tests/chat/message_reactions_mobile_test.dart
-          # 7 chat flows, isolated from the message scenarios above.
+          # 7 stateful chat flows, isolated from the message scenarios above.
           - shard: shard_4_chat_flows
             targets: >-
               integration_test/tests/chat/chat_dm_leave_test.dart

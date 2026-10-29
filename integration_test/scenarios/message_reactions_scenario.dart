@@ -16,12 +16,7 @@ Future<String> _openGroupAndSendMessage(
   String prefix,
 ) async {
   final robots = scenario.robots;
-  final group = (await prepareMobileGroupFixture(scenario)).title;
-  await robots.chatListRobot().openSearchScreen();
-  final isRoomOpened = await robots.searchViewRobot().searchAndOpenRoom(group);
-  if (!isRoomOpened) {
-    throw Exception('Test failed: Room "$group" was not found.');
-  }
+  await openMobileGroupFixture(scenario);
 
   final message = '$prefix ${_uid()}';
   await robots.chatGroupDetailRobot().sendMessage(message);

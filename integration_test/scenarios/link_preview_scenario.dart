@@ -10,7 +10,7 @@ import '../robots/link_preview_robot.dart';
 /// The app previews https links only, and the CI homeserver must reach it.
 const _previewTarget = 'https://example.com/';
 
-/// In the homeserver's url_preview_ip_range_blacklist, so the preview fails.
+/// Unreachable and blacklisted, so the preview request fails.
 const _blockedPreviewTarget = 'https://127.0.0.1/';
 
 class LinkPreviewScenario extends BaseTestScenario {
@@ -18,7 +18,7 @@ class LinkPreviewScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    final group = (await prepareMobileGroupFixture(this)).title;
+    await openMobileGroupFixture(this);
     final runId = DateTime.now().microsecondsSinceEpoch;
     final url = '$_previewTarget?e2e=$runId';
     final blockedUrl = '$_blockedPreviewTarget?e2e=$runId';
@@ -28,14 +28,6 @@ class LinkPreviewScenario extends BaseTestScenario {
       isNotEmpty,
       reason: 'The homeserver must return an og:title for $url',
     );
-
-    await robots.chatListRobot().openSearchScreen();
-    final isRoomOpened = await robots.searchViewRobot().searchAndOpenRoom(
-      group,
-    );
-    if (!isRoomOpened) {
-      throw Exception('Test failed: Room "$group" was not found.');
-    }
 
     await robots.chatGroupDetailRobot().sendMessage(url);
     final linkPreview = LinkPreviewRobot($);

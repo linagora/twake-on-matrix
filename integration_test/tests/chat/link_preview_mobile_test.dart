@@ -6,7 +6,7 @@ void main() {
     tags: ['link_preview_mobile_test01'],
     description:
         'A sent https link shows the homeserver preview title in the chat '
-        'and in the Links tab',
+        'and in the Links tab, and a refused preview renders nothing',
     mobileOnly: true,
     scenarioBuilder: ($, robots) => LinkPreviewScenario($, robots),
   );

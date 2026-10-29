@@ -63,6 +63,20 @@ Future<MobileGroupFixture> prepareMobileRoomFixture(
   );
 }
 
+Future<MobileGroupFixture> openMobileGroupFixture(
+  BaseTestScenario scenario,
+) async {
+  final fixture = await prepareMobileGroupFixture(scenario);
+  await scenario.robots.chatListRobot().openSearchScreen();
+  final opened = await scenario.robots.searchViewRobot().searchAndOpenRoom(
+    fixture.title,
+  );
+  if (!opened) {
+    throw Exception('Test failed: Room "${fixture.title}" was not found.');
+  }
+  return fixture;
+}
+
 Future<MobileGroupFixture> _prepareMobileRoomFixture(
   BaseTestScenario scenario,
   String title,
