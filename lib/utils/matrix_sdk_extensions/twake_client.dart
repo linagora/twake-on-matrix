@@ -75,13 +75,15 @@ class TwakeClient extends Client {
     super.convertLinebreaksInFormatting,
   });
 
-  /// Logs this account's notification device out first: the SDK forgets the
-  /// user in `clear`, also when the server invalidated the session.
+  /// Logs this account's notification device out and removes its recovery
+  /// key first: the SDK forgets the user in `clear`, also when the server
+  /// invalidated the session.
   @override
   Future<void> clear({
     SessionClearReason reason = SessionClearReason.unspecified,
   }) async {
     await KeychainSharingManager.logoutNotificationSession(this);
+    await KeychainSharingManager.deleteRecoveryKey(userId: userID);
     return super.clear(reason: reason);
   }
 
