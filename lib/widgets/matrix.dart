@@ -476,9 +476,6 @@ class MatrixState extends ConsumerState<Matrix>
       );
       return;
     }
-    if (PlatformInfos.isMobile) {
-      await HiveCollectionToMDatabase.databaseBuilder();
-    }
     onRoomKeyRequestSub[name] ??= currentClient.onRoomKeyRequest.stream.listen((
       RoomKeyRequest request,
     ) async {
