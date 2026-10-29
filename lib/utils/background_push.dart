@@ -170,16 +170,7 @@ class BackgroundPush {
 
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
-        final userId = targetClient.userID;
-        final homeserver = targetClient.homeserver?.toString();
-        if (userId != null && homeserver != null) {
-          await KeychainSharingManager.saveSession(
-            accessToken: accessToken,
-            userId: userId,
-            deviceId: targetClient.deviceID ?? '',
-            homeserverUrl: homeserver,
-          );
-        }
+        await KeychainSharingManager.removeAppSession(targetClient);
       }
 
       if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {

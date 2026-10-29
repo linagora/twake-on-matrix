@@ -23,6 +23,8 @@ abstract class SettingKeys {
   static const String notificationCurrentIds = 'chat.twake.notification_ids';
   static const String ownStatusMessage = 'chat.twake.status_msg';
   static const String dontAskForBootstrapKey = 'chat.twake.dont_ask_bootstrap';
+  static const String notificationPreviewsSuggested =
+      'chat.twake.notification_previews_suggested';
   static const String autoplayImages = 'chat.twake.autoplay_images';
   static const String experimentalVoip = 'chat.twake.experimental_voip';
   static const String enableRightAndLeftMessageAlignmentOnWeb =

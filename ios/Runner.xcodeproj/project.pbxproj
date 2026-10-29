@@ -1985,7 +1985,7 @@
 			repositoryURL = "https://github.com/matrix-org/matrix-rust-components-swift";
 			requirement = {
 				kind = exactVersion;
-				version = 26.01.04;
+				version = 26.04.01;
 			};
 		};
 		06EA9CAC2B21D2CA00351529 /* XCRemoteSwiftPackageReference "LRUCache" */ = {

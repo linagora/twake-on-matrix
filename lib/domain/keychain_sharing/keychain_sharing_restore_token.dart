@@ -9,7 +9,12 @@ class KeychainSharingRestoreToken {
   final KeychainSharingSession session;
   String? pusherNotificationClientIdentifier;
 
-  KeychainSharingRestoreToken({required this.session}) {
+  /// Marks a session minted for the notification extension. The extension
+  /// ignores any other session, such as the app's own one written by older
+  /// versions, so it never takes over the app's device.
+  final bool? dedicated;
+
+  KeychainSharingRestoreToken({required this.session, this.dedicated}) {
     pusherNotificationClientIdentifier = session.userId.sha256Hash;
   }
 

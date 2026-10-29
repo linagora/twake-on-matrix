@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
 import 'package:twake_chat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:flutter/foundation.dart' hide Key;
@@ -124,113 +121,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
   @override
   bool get supportsFileStoring => !kIsWeb;
-
-  @override
-  Future<void> updateClient(
-    String homeserverUrl,
-    String token,
-    DateTime? tokenExpiresAt,
-    String? refreshToken,
-    String userId,
-    String? deviceId,
-    String? deviceName,
-    String? prevBatch,
-    String? olmAccount,
-    String? oidcClientId,
-  ) async {
-    await _updateIOSKeychainSharingRestoreToken(
-      homeserverUrl: homeserverUrl,
-      token: token,
-      userId: userId,
-      deviceId: deviceId,
-    );
-    return super.updateClient(
-      homeserverUrl,
-      token,
-      tokenExpiresAt,
-      refreshToken,
-      userId,
-      deviceId,
-      deviceName,
-      prevBatch,
-      olmAccount,
-      oidcClientId,
-    );
-  }
-
-  Future<void> _updateIOSKeychainSharingRestoreToken({
-    required String homeserverUrl,
-    required String token,
-    required String userId,
-    required String? deviceId,
-  }) async {
-    if (!PlatformInfos.isIOS) {
-      return;
-    }
-    try {
-      final oldToken = await KeychainSharingManager.read(userId: userId);
-      if (oldToken?.session.accessToken != token ||
-          oldToken?.session.userId != userId ||
-          oldToken?.session.homeserverUrl != homeserverUrl ||
-          oldToken?.session.deviceId != deviceId) {
-        final restoreToken = KeychainSharingRestoreToken(
-          session: KeychainSharingSession(
-            accessToken: token,
-            userId: userId,
-            deviceId: deviceId ?? "",
-            homeserverUrl: homeserverUrl,
-          ),
-        );
-        await KeychainSharingManager.save(restoreToken);
-      }
-    } catch (e) {
-      Logs().w('insertClient::Unable to save restore token', e);
-    }
-  }
-
-  @override
-  Future<int> insertClient(
-    String name,
-    String homeserverUrl,
-    String token,
-    DateTime? tokenExpiresAt,
-    String? refreshToken,
-    String userId,
-    String? deviceId,
-    String? deviceName,
-    String? prevBatch,
-    String? olmAccount,
-    String? oidcClientId,
-  ) async {
-    await _updateIOSKeychainSharingRestoreToken(
-      homeserverUrl: homeserverUrl,
-      token: token,
-      userId: userId,
-      deviceId: deviceId,
-    );
-    return super.insertClient(
-      name,
-      homeserverUrl,
-      token,
-      tokenExpiresAt,
-      refreshToken,
-      userId,
-      deviceId,
-      deviceName,
-      prevBatch,
-      olmAccount,
-      oidcClientId,
-    );
-  }
-
-  @override
-  Future<void> clear({bool supportDeleteCollections = false}) async {
-    if (PlatformInfos.isIOS) {
-      // TODO: Should pass userId here when support multiple accounts
-      await KeychainSharingManager.delete(userId: null);
-    }
-    return super.clear(supportDeleteCollections: supportDeleteCollections);
-  }
 
   static void _onStartMigrating(int currentVersion, int newVersion) async {
     Logs().d(

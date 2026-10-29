@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 
 /// Top-level function for native isolate-based sync response parsing.
 /// Returns a fully constructed [SyncUpdate] since Dart isolates can
@@ -73,6 +74,23 @@ class TwakeClient extends Client {
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
   });
+
+  /// Logs this account's notification device out and removes its recovery
+  /// key first: the SDK forgets the user in `clear`, also when the server
+  /// invalidated the session.
+  @override
+  Future<void> clear({
+    SessionClearReason reason = SessionClearReason.unspecified,
+  }) async {
+    // Never let the notification cleanup keep the app session alive.
+    await KeychainSharingManager.logoutNotificationSession(this)
+        .timeout(const Duration(seconds: 10))
+        .catchError(
+          (e, s) => Logs().w('Unable to log the NSE device out', e, s),
+        );
+    await KeychainSharingManager.deleteRecoveryKey(userId: userID);
+    return super.clear(reason: reason);
+  }
 
   @override
   Future<SyncUpdate> sync({

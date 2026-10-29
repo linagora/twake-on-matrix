@@ -125,6 +125,9 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
           final userId = matrix.client.userID;
+          // Before client.logout(): clearing the database wipes the keychain,
+          // and the notification device would stay alive on the server.
+          await KeychainSharingManager.logoutNotificationSession(matrix.client);
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
@@ -146,6 +149,9 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
             await matrix.backgroundPush!.removeCurrentPusher();
           }
           final userId = matrix.client.userID;
+          // Before client.logout(): clearing the database wipes the keychain,
+          // and the notification device would stay alive on the server.
+          await KeychainSharingManager.logoutNotificationSession(matrix.client);
           await Future.wait([
             matrix.client.logout(),
             _deleteTomConfigurations(matrix.client),
