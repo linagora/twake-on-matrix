@@ -110,11 +110,11 @@ class _InitClientDialogState extends State<InitClientDialog>
   void _handleFunctionOnError(Object? error) {
     Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
     if (mounted) {
-      if (!_loginCompleter.isCompleted) {
-        _loginCompleter.completeError(error ?? 'Unknown error');
-      }
+      // Nothing waits for the login state once the login threw: the error
+      // goes back with the dialog.
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context, error);
     }
   }
 

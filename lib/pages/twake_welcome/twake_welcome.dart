@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:equatable/equatable.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
@@ -28,16 +31,17 @@ class TwakeWelcomeArg extends Equatable {
   List<Object?> get props => [twakeIdType];
 }
 
-class TwakeWelcome extends StatefulWidget {
+class TwakeWelcome extends ConsumerStatefulWidget {
   final TwakeWelcomeArg? arg;
 
   const TwakeWelcome({super.key, this.arg});
 
   @override
-  State<TwakeWelcome> createState() => TwakeWelcomeController();
+  ConsumerState<TwakeWelcome> createState() => TwakeWelcomeController();
 }
 
-class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
+class TwakeWelcomeController extends ConsumerState<TwakeWelcome>
+    with ConnectPageMixin {
   void goToHomeserverPicker() {
     if (widget.arg != null && widget.arg?.isAddAnotherAccount == true) {
       const AddAccountHomeserverPickerRoute().push(context);
@@ -73,10 +77,15 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         TwakeDialog.hideLoadingDialog(context);
         return;
       }
-      final client = await matrix.getLoginClient();
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
-          .toHomeserverSummary();
+      final sessions = ref.read(loginSessionsProvider);
+      final client = await sessions.loginClient();
+      ref
+          .read(loginHomeserverSummaryProvider.notifier)
+          .set(
+            await client
+                .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
+                .toHomeserverSummary(),
+          );
       final uri = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: AppConfig.appOpenUrlScheme,
@@ -85,7 +94,11 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
         ),
       );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
-      await handleTokenFromRegistrationSite(matrix: matrix, uri: uri);
+      await handleTokenFromRegistrationSite(
+        matrix: matrix,
+        sessions: sessions,
+        uri: uri,
+      );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: DONE");
       TwakeDialog.hideLoadingDialog(context);
     } catch (e) {
@@ -106,10 +119,11 @@ class TwakeWelcomeController extends State<TwakeWelcome> with ConnectPageMixin {
       return false;
     }
     try {
-      final allHomeserverLoggedIn = (await ClientManager.getClients())
-          .where((client) => client.homeserver != null)
-          .map((client) => client.homeserver.toString())
-          .toList();
+      final allHomeserverLoggedIn =
+          ClientManager.loggedIn(await ClientManager.getClients())
+              .where((client) => client.homeserver != null)
+              .map((client) => client.homeserver.toString())
+              .toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
       final homeserverExists = allHomeserverLoggedIn.any(
         (homeserver) => "$homeserver/".contains(AppConfig.homeserver),

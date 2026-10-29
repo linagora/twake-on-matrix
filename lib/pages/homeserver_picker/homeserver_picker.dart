@@ -1,7 +1,12 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
@@ -38,7 +43,7 @@ class HomeserverPickerArg {
   const HomeserverPickerArg({required this.type});
 }
 
-class HomeserverPicker extends StatefulWidget {
+class HomeserverPicker extends ConsumerStatefulWidget {
   final HomeserverPickerArg arg;
 
   const HomeserverPicker({super.key, required this.arg});
@@ -47,7 +52,7 @@ class HomeserverPicker extends StatefulWidget {
   HomeserverPickerController createState() => HomeserverPickerController();
 }
 
-class HomeserverPickerController extends State<HomeserverPicker>
+class HomeserverPickerController extends ConsumerState<HomeserverPicker>
     with ConnectPageMixin {
   HomeserverState state = HomeserverState.ssoLoginServer;
   final TextEditingController homeserverController = TextEditingController(
@@ -157,11 +162,11 @@ class HomeserverPickerController extends State<HomeserverPicker>
         homeserver = Uri.https(homeserverController.text, '');
       }
       final matrix = Matrix.of(context);
-      final allHomeserverLoggedIn = (await ClientManager.getClients())
-          .map((client) => client.homeserver.toString())
-          .toList();
+      final allHomeserverLoggedIn = ClientManager.loggedIn(
+        await ClientManager.getClients(),
+      ).map((client) => client.homeserver.toString()).toList();
       Logs().i('All homeservers: $allHomeserverLoggedIn');
-      final client = await matrix.getLoginClient();
+      final client = await _sessions.loginClient();
 
       final homeserverSummary = await client.checkHomeserver(homeserver);
 
@@ -186,12 +191,13 @@ class HomeserverPickerController extends State<HomeserverPicker>
         return;
       }
 
-      matrix.loginHomeserverSummary = HomeserverSummary(
+      final summary = HomeserverSummary(
         discoveryInformation: homeserverSummary.$1,
         versions: homeserverSummary.$2,
         loginFlows: homeserverSummary.$3,
       );
-      final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
+      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
+      final ssoSupported = summary.supportSSOLogin;
 
       try {
         await client
@@ -229,13 +235,13 @@ class HomeserverPickerController extends State<HomeserverPicker>
           handlePasswordLogin();
         } else {
           state = HomeserverState.otherLoginMethod;
-          const ConnectRoute().push(context);
+          const ConnectRoute($extra: LoginClientOwner.caller).push(context);
         }
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       } else {
         state = HomeserverState.otherLoginMethod;
-        const ConnectRoute().push(context);
+        const ConnectRoute($extra: LoginClientOwner.caller).push(context);
         FocusManager.instance.primaryFocus?.unfocus();
         setState(() {});
       }
@@ -248,9 +254,9 @@ class HomeserverPickerController extends State<HomeserverPicker>
   void handlePasswordLogin() {
     state = HomeserverState.passwordLoginMethod;
     if (widget.arg.type == HomeserverPickerType.singleAccount) {
-      const HomeLoginRoute().push(context);
+      const HomeLoginRoute($extra: LoginClientOwner.caller).push(context);
     } else {
-      const AddAccountLoginRoute().push(context);
+      const AddAccountLoginRoute($extra: LoginClientOwner.caller).push(context);
     }
   }
 
@@ -276,8 +282,14 @@ class HomeserverPickerController extends State<HomeserverPicker>
     }
   }
 
+  late final LoginSessions _sessions;
+
   @override
   void dispose() {
+    // Leaving the add-account flow without logging in drops its client.
+    if (widget.arg.type == HomeserverPickerType.multiAccount) {
+      unawaited(_sessions.discardPending());
+    }
     homeserverFocusNode.removeListener(_updateFocus);
     homeserverFocusNode.dispose();
     homeserverController.dispose();
@@ -286,6 +298,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
 
   @override
   void initState() {
+    _sessions = ref.read(loginSessionsProvider);
     homeserverFocusNode.addListener(_updateFocus);
     _checkTorBrowser();
     super.initState();
@@ -306,7 +319,7 @@ class HomeserverPickerController extends State<HomeserverPicker>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         try {
-          final client = await Matrix.of(context).getLoginClient();
+          final client = await _sessions.loginClient();
           await client.importDump(String.fromCharCodes(file.bytes!));
           Matrix.of(context).initMatrix();
         } catch (e, s) {

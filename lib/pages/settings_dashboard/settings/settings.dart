@@ -18,6 +18,8 @@ import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:twake_chat/providers/push_removals_controller.dart';
+import 'package:twake_chat/providers/report_failure_provider.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -29,7 +31,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'settings_view.dart';
 
-class Settings extends StatefulWidget {
+class Settings extends ConsumerStatefulWidget {
   final Widget? bottomNavigationBar;
 
   const Settings({super.key, this.bottomNavigationBar});
@@ -38,7 +40,7 @@ class Settings extends StatefulWidget {
   SettingsController createState() => SettingsController();
 }
 
-class SettingsController extends State<Settings> with ConnectPageMixin {
+class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
   final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
 
@@ -110,44 +112,44 @@ class SettingsController extends State<Settings> with ConnectPageMixin {
     return;
   }
 
+  Future<void> _removePushers() => ref
+      .read(pushRemovalsControllerProvider.notifier)
+      .removeBeforeLogout(matrix.client);
+
   Future<void> _logoutActionsOnMobile() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async {
-        try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
-          await logoutAndCleanUp(
-            matrix.client,
-            twakeSupported: matrix.twakeSupported,
-          );
-        } catch (e) {
-          Logs().e('SettingsController()::_logoutActionsOnMobile - error: $e');
-        }
-      },
+      future: () => _logoutClientAndLocalData('_logoutActionsOnMobile'),
     );
+  }
+
+  Future<void> _logoutClientAndLocalData(String action) async {
+    try {
+      await _removePushers();
+      // Clearing the client also removes the recovery key
+      // (`TwakeClient.clear`).
+      await logoutAndCleanUp(
+        matrix.client,
+        twakeSupported: matrix.twakeSupported,
+      );
+    } catch (e, s) {
+      ref.read(reportFailureProvider)(
+        e,
+        s,
+        'SettingsController()::$action - logout step failed, local cleanup '
+        'continues',
+      );
+    }
   }
 
   Future<void> _logoutActions() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
+        await _logoutClientAndLocalData('_logoutActions');
         try {
-          if (matrix.backgroundPush != null) {
-            await matrix.backgroundPush!.removeCurrentPusher();
-          }
-          await logoutAndCleanUp(
-            matrix.client,
-            twakeSupported: matrix.twakeSupported,
-          );
+          await tryLogoutSso(context);
         } catch (e) {
           Logs().e('SettingsController()::_logoutActions - error: $e');
-        } finally {
-          try {
-            await tryLogoutSso(context);
-          } catch (e) {
-            Logs().e('SettingsController()::_logoutActions - error: $e');
-            return;
-          }
+          return;
         }
       },
     );
