@@ -21,7 +21,7 @@ class DeviceSettingsScenario extends BaseTestScenario {
       await devices.expectCurrentSessionCannotBeRemoved();
 
       await devices.renameSession(name, renamed);
-      expect(await other.serverDisplayName(), renamed);
+      expect(await other.fetchDisplayName(), renamed);
 
       await devices.removeSession(
         renamed,

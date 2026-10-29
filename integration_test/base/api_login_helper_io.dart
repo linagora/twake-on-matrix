@@ -151,8 +151,7 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   }
 }
 
-/// A second session of the primary test account, opened over the API so a
-/// test owns the device it renames or signs out.
+/// A second API session of the primary account, owned by the test.
 class PrimaryExtraSession {
   const PrimaryExtraSession._(this._session, this.deviceId);
 
@@ -179,7 +178,7 @@ class PrimaryExtraSession {
     }
   }
 
-  Future<String?> serverDisplayName() async {
+  Future<String?> fetchDisplayName() async {
     final (status, body) = await _send('GET', ['devices', deviceId]);
     if (status != HttpStatus.ok) {
       throw Exception('GET device failed [status=$status] body=$body');
@@ -286,7 +285,7 @@ Future<_MatrixSession> _loginWithPassword({
   final json = jsonDecode(body) as Map<String, dynamic>;
   final accessToken = json['access_token'] as String?;
   if (accessToken == null) {
-    throw Exception('Receiver login response missing access_token: $body');
+    throw Exception('Login response missing access_token: $body');
   }
   return _MatrixSession(
     endpoints: endpoints,
@@ -603,7 +602,7 @@ Future<_MatrixSession> _loginWithMLoginToken({
   final accessToken =
       (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
   if (accessToken == null) {
-    throw Exception('Receiver login response missing access_token: $body');
+    throw Exception('Login response missing access_token: $body');
   }
   return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
 }

@@ -7,6 +7,8 @@ import 'package:twake_chat/pages/device_settings/change_device_name_dialog.dart'
 import 'package:twake_chat/pages/device_settings/device_settings.dart';
 import 'package:twake_chat/pages/device_settings/session_all_actions_dialog.dart';
 import 'package:twake_chat/pages/device_settings/user_device_list_item.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 import '../home_robot.dart';
 
@@ -42,9 +44,17 @@ class DeviceSettingsRobot extends HomeRobot {
   }
 
   Future<void> expectCurrentSessionCannotBeRemoved() async {
-    final current = $(DevicesSettings).$(UserDeviceListItem).first;
-    final name = current.$(Text).evaluate().first.widget as Text;
-    await _openActions(current, name: name.data!);
+    final screen = $(DevicesSettings);
+    final currentId = Matrix.of($.tester.element(screen)).client.deviceID;
+    final current = screen.$(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is UserDeviceListItem &&
+            widget.userDevice.deviceId == currentId,
+      ),
+    );
+    final row = current.evaluate().single.widget as UserDeviceListItem;
+    await _openActions(current, name: row.userDevice.displayname);
     if (_sheetAction(_l10n.removeDevice).exists) {
       throw TestFailure('The current session offers "${_l10n.removeDevice}"');
     }
@@ -57,7 +67,8 @@ class DeviceSettingsRobot extends HomeRobot {
     await _sheetAction(_l10n.changeDeviceName).tap();
 
     final dialog = $(ChangeDeviceNameView);
-    await $.waitUntilVisible(dialog);
+    // The dialog centre is empty space, so wait for its field instead.
+    await $.waitUntilVisible(dialog.$(EditableText));
     await dialog.$(EditableText).enterText(to);
     await dialog.$(_l10n.save).tap();
 
@@ -73,13 +84,13 @@ class DeviceSettingsRobot extends HomeRobot {
     final confirm = $(
       ConfirmationDialogBuilder,
     ).containing(_l10n.removeDeviceConfirmationTitle);
-    await $.waitUntilVisible(confirm);
+    await $.waitUntilVisible(confirm.$(_l10n.remove));
     await confirm.$(_l10n.remove).tap();
 
     final passwordDialog = $(
       ConfirmationDialogBuilder,
     ).containing(_l10n.pleaseEnterYourPassword);
-    await $.waitUntilVisible(passwordDialog);
+    await $.waitUntilVisible(passwordDialog.$(EditableText));
     await passwordDialog.$(EditableText).enterText(password);
     await passwordDialog.$(_l10n.ok).tap();
 
