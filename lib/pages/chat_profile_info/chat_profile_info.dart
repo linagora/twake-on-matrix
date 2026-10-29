@@ -211,17 +211,9 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
 
   ProviderSubscription<AsyncValue<List<UnifiedContact>>>? _contactsSubscription;
 
-  ProviderContainer? _tryContainer() {
-    try {
-      return ProviderScope.containerOf(context, listen: false);
-    } catch (_) {
-      return null;
-    }
-  }
-
   PresentationContact? _getContactFromId(String matrixId) {
-    final contact = _tryContainer()
-        ?.read(contactsControllerProvider)
+    final contact = ref
+        .read(contactsControllerProvider)
         .asData
         ?.value
         .firstWhereOrNull((c) => c.matrixId == matrixId);
@@ -295,12 +287,12 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
   void initState() {
     super.initState();
     _initPresentationContact();
-    _contactsSubscription = _tryContainer()?.listen(
-      contactsControllerProvider,
-      (previous, next) {
-        next.whenData((_) => _onTomContactsUpdateListener());
-      },
-    );
+    _contactsSubscription = ref.listenManual(contactsControllerProvider, (
+      previous,
+      next,
+    ) {
+      next.whenData((_) => _onTomContactsUpdateListener());
+    });
     _userInfoUserId = presentationContact?.matrixId ?? user?.id ?? '';
     listenIgnoredUser();
   }

@@ -4,10 +4,10 @@ import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/providers/user_info_provider.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Consumer;
 import 'package:matrix/matrix.dart';
 
-class SettingsProfileCapabilityCheck extends ConsumerWidget {
+class SettingsProfileCapabilityCheck extends StatelessWidget {
   const SettingsProfileCapabilityCheck({
     super.key,
     required this.builder,
@@ -25,11 +25,7 @@ class SettingsProfileCapabilityCheck extends ConsumerWidget {
   builder;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final userId = this.userId;
-    final userInfo = userId == null
-        ? null
-        : ref.watch(userInfoProvider(userId)).value;
+  Widget build(BuildContext context) {
     return StreamBuilder(
       stream: getIt.get<GetServerCapabilitiesInteractor>().execute(),
       builder: (context, snapshot) {
@@ -37,12 +33,17 @@ class SettingsProfileCapabilityCheck extends ConsumerWidget {
           (failure) => failure,
           (success) => success,
         );
-        return builder(
-          capabilitiesData is GetServerCapabilitiesSuccess
-              ? capabilitiesData.capabilities
-              : null,
-          userInfo,
-          child,
+        return Consumer(
+          builder: (context, ref, _) {
+            final userId = this.userId;
+            return builder(
+              capabilitiesData is GetServerCapabilitiesSuccess
+                  ? capabilitiesData.capabilities
+                  : null,
+              userId == null ? null : ref.watch(userInfoProvider(userId)).value,
+              child,
+            );
+          },
         );
       },
     );
