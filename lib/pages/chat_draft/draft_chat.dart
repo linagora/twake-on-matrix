@@ -11,7 +11,6 @@ import 'package:twake_chat/presentation/extensions/contact/unified_contact_exten
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
-import 'package:twake_chat/domain/reactions/exceptions/recent_reactions_exception.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.provider.dart';
 import 'package:twake_chat/domain/reactions/usecases/store_recent_reactions_usecase.provider.dart';
@@ -39,13 +38,13 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dar
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart'
-    show Category, EmojiPickerConfiguration;
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' show Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -95,6 +94,8 @@ class DraftChatController extends ConsumerState<DraftChat>
       .get<NetworkConnectionService>();
 
   final uploadManager = getIt.get<UploadManager>();
+
+  late final GetRecentReactionsUseCase _getRecentReactions;
 
   final AutoScrollController scrollController = AutoScrollController();
   final AutoScrollController forwardListController = AutoScrollController();
@@ -482,38 +483,17 @@ class DraftChatController extends ConsumerState<DraftChat>
     }
   }
 
-  late final GetRecentReactionsUseCase _getRecentReactions;
-
-  Future<Category?> getRecentEmoji() async {
-    try {
-      final emojiIds = await _getRecentReactions.execute();
-      return Category(
-        id: EmojiPickerConfiguration.recentCategoryId,
-        emojiIds: emojiIds,
-      );
-    } on GetRecentReactionsException catch (e, s) {
-      Logs().e('DraftChat::getRecentEmoji()', e, s);
-      return null;
-    }
-  }
-
-  Future<void> _storeRecentEmoji(String emojiId) async {
-    try {
-      await ref
-          .read(storeRecentReactionsUseCaseProvider)
-          .execute(emojiId: emojiId);
-    } on StoreRecentReactionsException catch (e, s) {
-      Logs().e('DraftChat::_storeRecentEmoji()', e, s);
-    }
-  }
+  Future<Category?> getRecentEmoji() => _getRecentReactions.recentCategory();
 
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
     final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji);
 
-    if (emojiId.isNotEmpty) {
-      unawaited(_storeRecentEmoji(emojiId));
-    }
+    unawaited(
+      ref
+          .read(storeRecentReactionsUseCaseProvider)
+          .executeOrLog(emojiId: emojiId),
+    );
     final text = sendController.text;
     final selection = sendController.selection;
     final newText = sendController.text.isEmpty

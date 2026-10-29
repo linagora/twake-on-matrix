@@ -15,7 +15,6 @@ import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/domain/reactions/exceptions/recent_reactions_exception.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.provider.dart';
 import 'package:twake_chat/domain/reactions/usecases/store_recent_reactions_usecase.provider.dart';
@@ -76,6 +75,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconci
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -220,6 +220,8 @@ class ChatController extends ConsumerState<Chat>
   final getPinnedMessageInteractor = getIt.get<ChatGetPinnedEventsInteractor>();
 
   final pinnedEventsController = getIt.get<PinnedEventsController>();
+
+  late final GetRecentReactionsUseCase _getRecentReactions;
 
   final ValueKey<String> chatComposerTypeAheadKey =
       ChatKeys.composerTypeAhead.valueKey;
@@ -1455,34 +1457,14 @@ class ChatController extends ConsumerState<Chat>
     _requestInputFocus();
   }
 
-  late final GetRecentReactionsUseCase _getRecentReactions;
+  Future<emoji_mart.Category?> getRecentEmoji() =>
+      _getRecentReactions.recentCategory();
 
-  Future<emoji_mart.Category?> getRecentEmoji() async {
-    try {
-      final emojiIds = await _getRecentReactions.execute();
-      return emoji_mart.Category(
-        id: emoji_mart.EmojiPickerConfiguration.recentCategoryId,
-        emojiIds: emojiIds,
+  Future<void> handleStoreRecentReactions(String? emoji) => ref
+      .read(storeRecentReactionsUseCaseProvider)
+      .executeOrLog(
+        emojiId: Matrix.of(context).emojiData.getIdByEmoji(emoji ?? ''),
       );
-    } on GetRecentReactionsException catch (e, s) {
-      Logs().e('Chat::getRecentEmoji()', e, s);
-      return null;
-    }
-  }
-
-  Future<void> handleStoreRecentReactions(String? emoji) async {
-    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
-
-    if (emojiId.isNotEmpty) {
-      try {
-        await ref
-            .read(storeRecentReactionsUseCaseProvider)
-            .execute(emojiId: emojiId);
-      } on StoreRecentReactionsException catch (e, s) {
-        Logs().e('Chat::handleStoreRecentReactions()', e, s);
-      }
-    }
-  }
 
   void sendEmojiAction({String? emoji, required Event event}) async {
     unawaited(handleStoreRecentReactions(emoji));
