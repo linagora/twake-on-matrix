@@ -697,4 +697,50 @@ void main() {
       }
     }
   });
+
+  group('an expected failure', () {
+    test('is logged at debug level, never reported or warned', () async {
+      errors['remove:a'] = const _Expected(retryInBackground: true);
+      Logs().outputEvents.clear();
+
+      await run('a');
+      await removals.retryAll();
+
+      expect(reports, isEmpty);
+      expect(
+        Logs().outputEvents.where((e) => e.level == Level.warning),
+        isEmpty,
+      );
+      expect(log, ['remove:a', 'hold:a', 'settle:a', 'persist:a', 'remove:a']);
+      expect(removals.failedIds, {'a'});
+    });
+
+    test('that asks to stop keeps the removal but does not retry it', () {
+      fakeAsync((async) {
+        errors['remove:a'] = const _Expected(retryInBackground: false);
+        unawaited(run('a'));
+        async.flushMicrotasks();
+        log.clear();
+
+        unawaited(removals.retryAll());
+        async.elapse(const Duration(hours: 2));
+
+        expect(log, isEmpty);
+        expect(removals.failedIds, {'a'});
+
+        errors.clear();
+        unawaited(run('a'));
+        async.flushMicrotasks();
+        expect(log, ['remove:a']);
+        expect(removals.failedIds, isEmpty);
+      });
+    });
+  });
+}
+
+class _Expected implements ExpectedRemovalFailure {
+  const _Expected({required this.retryInBackground});
+
+  @override
+  final bool retryInBackground;
 }

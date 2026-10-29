@@ -8,6 +8,14 @@ import 'package:matrix/matrix.dart' show Logs, MatrixError, MatrixException;
 typedef ReportFailure =
     void Function(Object error, StackTrace stackTrace, String what);
 
+/// A failure that is expected while a removal cannot run yet: it is logged
+/// at debug level and never reported. While [retryInBackground] is false the
+/// removal stays kept, with its record, but only a new [LogoutRemovals.remove]
+/// runs it again in this process.
+abstract interface class ExpectedRemovalFailure implements Exception {
+  bool get retryInBackground;
+}
+
 /// What it takes to take an account away. Each step that fails is reported
 /// and runs again on its own, so one failing step never repeats one that
 /// worked.
@@ -130,7 +138,7 @@ class LogoutRemovals {
     } finally {
       _running.remove(id);
     }
-    if (!removal.done) _schedule();
+    if (!removal.done && !removal.parked) _schedule();
   }
 
   Future<void> _run(String id, _Removal removal) async {
@@ -189,7 +197,12 @@ class LogoutRemovals {
     try {
       await step();
       return true;
+    } on ExpectedRemovalFailure catch (error) {
+      removal.parked = !error.retryInBackground;
+      Logs().d('Not yet: $what ($error)');
+      return false;
     } catch (error, stackTrace) {
+      removal.parked = false;
       final asked = _delayAskedBy(error);
       _serverDelay = _longer(_serverDelay, asked);
       _holdOffFor(asked);
@@ -253,7 +266,7 @@ class LogoutRemovals {
     for (final id in _removals.keys.toList()) {
       final removal = _removals[id];
       // Another call may have finished it while the ones before ran.
-      if (removal == null) continue;
+      if (removal == null || removal.parked) continue;
       await _remove(id, removal.steps, removal.report);
     }
   }
@@ -305,6 +318,10 @@ class _Removal {
   bool held = false;
   bool persisted = false;
   bool settled = false;
+
+  /// The last failure was expected and asked not to be retried in the
+  /// background: only a new `remove` runs it again.
+  bool parked = false;
 
   /// The steps that were reported already; their next failures are logged.
   final Set<String> reported = {};
