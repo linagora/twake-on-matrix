@@ -96,7 +96,7 @@ class ChatEventListItem extends StatelessWidget {
       onDelete: (context, event) {
         controller.deleteEventAction(context, event);
       },
-      recentEmojiFuture: controller.getRecentReactionsInteractor.execute(),
+      recentEmojiFuture: controller.getRecentEmoji(),
       onReport: controller.reportEventAction,
       onRetryTextMessage: controller.retryTextMessage,
     );

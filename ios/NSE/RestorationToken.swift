@@ -22,9 +22,13 @@ import MatrixRustSDK
 struct RestorationToken: Codable, Equatable {
     let session: MatrixRustSDK.Session
     let pusherNotificationClientIdentifier: String?
+    /// Set by the app on the session it mints for the extension. Sessions
+    /// without it (the app's own, written by older versions) are ignored.
+    let dedicated: Bool?
 
-    init(session: MatrixRustSDK.Session) {
+    init(session: MatrixRustSDK.Session, dedicated: Bool? = true) {
         self.session = session
+        self.dedicated = dedicated
         if let data = session.userId.data(using: .utf8) {
             let digest = SHA256.hash(data: data)
             pusherNotificationClientIdentifier = digest.compactMap { String(format: "%02x", $0) }.joined()

@@ -1,3 +1,4 @@
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/chat_view.dart';
 import 'package:twake_chat/pages/new_group/contacts_selection_view.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_view.dart';
@@ -14,6 +15,8 @@ import 'twake_list_item_robot.dart';
 class GroupInformationRobot extends CoreRobot
     implements AbstractGroupInformationRobot {
   GroupInformationRobot(super.$);
+
+  L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).last))!;
 
   PatrolFinder getBackIcon() {
     return $(AppBar).$(TwakeIconButton);
@@ -40,7 +43,7 @@ class GroupInformationRobot extends CoreRobot
   }
 
   PatrolFinder getLinksTab() {
-    return $(Tab).containing(find.text('Links'));
+    return $(Tab).containing(find.text(_l10n.links));
   }
 
   PatrolFinder getFilesTab() {

@@ -34,10 +34,12 @@ final class NSEUserSession {
         baseClient = try await ClientBuilder()
             .sessionPaths(dataPath: URL.sessionsBaseDirectory(userId: userID, deviceId: credentials.restorationToken.session.deviceId).path,
                           cachePath: URL.cacheBaseDirectory(userId: userID, deviceId: credentials.restorationToken.session.deviceId).path)
-            .username(username: credentials.userID)
+            // The session already knows its homeserver: no well-known lookup
+            // on the server name, which some deployments do not serve.
+            .homeserverUrl(url: credentials.restorationToken.session.homeserverUrl)
             .userAgent(userAgent: UserAgentBuilder.makeASCIIUserAgent())
             .backupDownloadStrategy(backupDownloadStrategy: .afterDecryptionFailure)
-            .crossProcessStoreLocksHolderName(holderName: InfoPlistReader.main.bundleIdentifier)
+            .crossProcessLockConfig(crossProcessLockConfig: .multiProcess(holderName: InfoPlistReader.main.bundleIdentifier))
             .setSessionDelegate(sessionDelegate: clientSessionDelegate)
             .build()
         
@@ -61,6 +63,12 @@ final class NSEUserSession {
             .notificationClient(processSetup: .multipleProcesses)
     }
     
+    /// This device's identity key: the app cross-signs the device only if the
+    /// server publishes this key for it.
+    func ed25519Key() async -> String? {
+        await baseClient.encryption().ed25519Key()
+    }
+
     // Retry delays in milliseconds; kept as ms for readability, converted to ns at call site.
     private static let retryDelaysMs: [UInt64] = [300, 800]
 
@@ -103,6 +111,9 @@ final class NSEUserSession {
             case .eventNotFound:
                 MXLog.info("NSE: Notification event not found - roomID: \(roomID) eventID: \(eventID)")
                 return nil
+            case .eventRedacted:
+                MXLog.info("NSE: Notification event redacted - roomID: \(roomID) eventID: \(eventID)")
+                return nil
             }
         } catch {
             MXLog.error("NSE: Could not get notification's content, error: \(error)")
@@ -116,5 +127,9 @@ private class ClientDelegateWrapper: ClientDelegate {
 
     func didReceiveAuthError(isSoftLogout: Bool) {
         MXLog.error("Received authentication error, the NSE can't handle this.")
+    }
+
+    func onBackgroundTaskErrorReport(taskName: String, error: BackgroundTaskFailureReason) {
+        MXLog.error("NSE: Background task \(taskName) failed: \(error)")
     }
 }

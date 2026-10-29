@@ -14,7 +14,6 @@ import 'package:twake_chat/data/datasource/invitation/invitation_datasource.dart
 import 'package:twake_chat/data/datasource/localizations/localizations_datasource.dart';
 import 'package:twake_chat/data/datasource/media/media_data_source.dart';
 import 'package:twake_chat/data/datasource/multiple_account/multiple_account_datasource.dart';
-import 'package:twake_chat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:twake_chat/data/datasource/recovery_words_data_source.dart';
 import 'package:twake_chat/utils/logging/filters/sensitive_data_filter.dart';
 import 'package:twake_chat/utils/logging/log_orchestrator.dart';
@@ -34,7 +33,6 @@ import 'package:twake_chat/data/datasource_impl/invitation/invitation_datasource
 import 'package:twake_chat/data/datasource_impl/localizations/localizations_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:twake_chat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
-import 'package:twake_chat/data/datasource_impl/reactions/reactions_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:twake_chat/data/datasource_impl/server_config_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/server_search_datasource_impl.dart';
@@ -43,7 +41,6 @@ import 'package:twake_chat/data/datasource_impl/user_info/user_info_datasource_i
 import 'package:twake_chat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/data/local/multiple_account/multiple_account_cache_manager.dart';
-import 'package:twake_chat/data/local/reaction/reaction_cache_manager.dart';
 import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dart';
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
@@ -65,7 +62,6 @@ import 'package:twake_chat/data/repository/invitation/invitation_repository_impl
 import 'package:twake_chat/data/repository/localizations/localizations_repository_impl.dart';
 import 'package:twake_chat/data/repository/media/media_repository_impl.dart';
 import 'package:twake_chat/data/repository/multiple_account/multiple_account_repository_impl.dart';
-import 'package:twake_chat/data/repository/reactions/reactions_repository_impl.dart';
 import 'package:twake_chat/data/repository/recovery_words_repository_impl.dart';
 import 'package:twake_chat/data/repository/server_config_repository_impl.dart';
 import 'package:twake_chat/data/repository/server_search_repository_impl.dart';
@@ -84,7 +80,6 @@ import 'package:twake_chat/domain/repository/invitation/invitation_repository.da
 import 'package:twake_chat/domain/repository/localizations/localizations_repository.dart';
 import 'package:twake_chat/domain/repository/multiple_account/multiple_account_repository.dart';
 import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
-import 'package:twake_chat/domain/repository/reactions/reactions_repository.dart';
 import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
 import 'package:twake_chat/domain/repository/server_config_repository.dart';
 import 'package:twake_chat/domain/repository/server_search_repository.dart';
@@ -110,8 +105,6 @@ import 'package:twake_chat/domain/usecase/invitation/hive_get_invitation_status_
 import 'package:twake_chat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/store_invitation_status_interactor.dart';
 import 'package:twake_chat/domain/usecase/preview_url/get_preview_url_interactor.dart';
-import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
-import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
@@ -218,7 +211,6 @@ class GetItInitializer {
       () => MultipleAccountCacheManager(),
     );
     getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
-    getIt.registerFactory<ReactionsCacheManager>(() => ReactionsCacheManager());
   }
 
   void bindingQueue() {
@@ -318,7 +310,6 @@ class GetItInitializer {
     getIt.registerFactory<InvitationDatasource>(
       () => InvitationDatasourceImpl(),
     );
-    getIt.registerFactory<ReactionsDatasource>(() => ReactionsDatasourceImpl());
   }
 
   void bindingRepositories() {
@@ -363,7 +354,6 @@ class GetItInitializer {
     getIt.registerFactory<HiveInvitationStatusRepository>(
       () => HiveInvitationStatusRepositoryImpl(),
     );
-    getIt.registerFactory<ReactionsRepository>(() => ReactionsRepositoryImpl());
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
     );
@@ -484,14 +474,6 @@ class GetItInitializer {
 
     getIt.registerFactory<DeleteThirdPartyContactBoxInteractor>(
       () => DeleteThirdPartyContactBoxInteractor(),
-    );
-
-    getIt.registerFactory<StoreRecentReactionsInteractor>(
-      () => StoreRecentReactionsInteractor(),
-    );
-
-    getIt.registerFactory<GetRecentReactionsInteractor>(
-      () => GetRecentReactionsInteractor(),
     );
 
     getIt.registerFactory<DeleteEventInteractor>(() => DeleteEventInteractor());

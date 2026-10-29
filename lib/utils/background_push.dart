@@ -31,11 +31,13 @@ import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/utils/client_logout.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:twake_chat/widgets/layouts/enum/adaptive_destinations_enum.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -86,7 +88,7 @@ class BackgroundPush {
   Store? _store;
 
   Store get store => _store ??= Store();
-  Timer? clearingPushTimer;
+  StreamSubscription<SyncUpdate>? onRoomSync;
 
   Future<void> loadLocale() async {
     final context = _matrixState?.context;
@@ -108,7 +110,12 @@ class BackgroundPush {
   bool upAction = false;
 
   BackgroundPush._(this.client) {
-    clearingPushTimer ??= Timer.periodic(const Duration(seconds: 20), (_) {
+    // Clear only after a sync: unread counts are stale while sync is paused
+    // in background, and a timer would cancel notifications just shown.
+    onRoomSync ??= client.onSync.stream.listen((sync) {
+      final roomIds = [...?sync.rooms?.join?.keys, ...?sync.rooms?.leave?.keys];
+      if (roomIds.isEmpty) return;
+      _syncedRoomIds.addAll(roomIds);
       _onClearingPush(getFromServer: false);
     });
     if (Platform.isAndroid) {
@@ -155,26 +162,55 @@ class BackgroundPush {
     );
   }
 
+  /// The device's identity keys were overwritten by an older notification
+  /// extension: tell the user, then log out so the next login gets a new,
+  /// healthy device.
+  Future<void> _renewOverwrittenSession(Client targetClient) async {
+    final context = TwakeApp.routerKey.currentContext;
+    // Never log out silently: without a screen to explain it, the check
+    // runs again on the next launch.
+    if (context == null || !context.mounted) return;
+    final l10n = L10n.of(context)!;
+    await showOkAlertDialog(
+      context: context,
+      title: l10n.deviceIdentityRenewTitle,
+      message: l10n.deviceIdentityRenewMessage,
+      okLabel: l10n.ok,
+    );
+    // Same steps as the settings logout: keep the room keys in the backup.
+    try {
+      await targetClient.encryption?.keyManager.uploadInboundGroupSessions();
+      if (identical(targetClient, client)) await removeCurrentPusher();
+    } catch (e, s) {
+      Logs().w('[Push] Unable to prepare the session renewal', e, s);
+    }
+    await logoutAndCleanUp(
+      targetClient,
+      twakeSupported: _matrixState?.twakeSupported ?? false,
+    );
+  }
+
   void _setupKeychainSyncForClient(Client targetClient) {
     String? lastAccessToken;
     bool didSyncRecoveryKey = false;
 
-    final sub = targetClient.onSync.stream.listen((_) async {
+    final sub = targetClient.onSync.stream.listen((sync) async {
       final accessToken = targetClient.accessToken;
       if (accessToken == null || !targetClient.isLogged()) return;
 
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
-        final userId = targetClient.userID;
-        final homeserver = targetClient.homeserver?.toString();
-        if (userId != null && homeserver != null) {
-          await KeychainSharingManager.saveSession(
-            accessToken: accessToken,
-            userId: userId,
-            deviceId: targetClient.deviceID ?? '',
-            homeserverUrl: homeserver,
-          );
+        await KeychainSharingManager.removeAppSession(targetClient);
+        if (await KeychainSharingManager.isDeviceIdentityOverwritten(
+          targetClient,
+        )) {
+          await _renewOverwrittenSession(targetClient);
+          return;
         }
+        await KeychainSharingManager.checkNotificationDevice(targetClient);
+      } else if (sync.deviceLists?.changed?.contains(targetClient.userID) ==
+          true) {
+        await KeychainSharingManager.checkNotificationDevice(targetClient);
       }
 
       if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {
@@ -348,8 +384,9 @@ class BackgroundPush {
 
   Future<void> cancelNotification(String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    final id = await mapRoomIdToInt(roomId);
-    await FlutterLocalNotificationsPlugin().cancel(id);
+    await _loadIdMap();
+    final id = idMap[roomId];
+    if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -466,7 +503,10 @@ class BackgroundPush {
   }
 
   bool _wentToRoomOnStartup = false;
-  bool _setupPushCompleted = false;
+
+  /// Device the push was set up for. A new login (new device) sets it up
+  /// again: the previous session's pusher is gone.
+  String? _setupPushDeviceId;
 
   Future<void> setupPush() async {
     Logs().d(
@@ -481,14 +521,20 @@ class BackgroundPush {
       return;
     }
     // Guard against double-invocation (factory + ChatList both call setupPush).
-    if (_setupPushCompleted) {
+    if (_setupPushDeviceId == client.deviceID) {
       Logs().d('SetupPush: already completed, skip');
       return;
     }
-    _setupPushCompleted = true;
+    final isRelogin = _setupPushDeviceId != null;
+    _setupPushDeviceId = client.deviceID;
     // Do not setup unifiedpush if this has been initialized by
     // an unifiedpush action
     if (upAction) {
+      // That action set up the previous device: give the new one a pusher.
+      final endpoint = await store.getItem(SettingKeys.unifiedPushEndpoint);
+      if (isRelogin && endpoint != null && endpoint.isNotEmpty) {
+        await _newUpEndpoint(endpoint, '');
+      }
       return;
     }
     if (!PlatformInfos.isIOS &&
@@ -800,27 +846,11 @@ class BackgroundPush {
     );
   }
 
-  Future<int> mapRoomIdToInt(String roomId) async {
-    await _loadIdMap();
-    int? currentInt;
-    try {
-      currentInt = idMap[roomId];
-    } catch (_) {
-      currentInt = null;
-    }
-    if (currentInt != null) {
-      return currentInt;
-    }
-    var nCurrentInt = 0;
-    while (idMap.values.contains(currentInt)) {
-      nCurrentInt++;
-    }
-    idMap[roomId] = nCurrentInt;
-    await store.setItem(SettingKeys.notificationCurrentIds, json.encode(idMap));
-    return nCurrentInt;
-  }
-
   bool _clearingPushLock = false;
+
+  /// Rooms refreshed by a sync and not checked yet: only their unread
+  /// counts are fresh enough to clear their notification.
+  final Set<String> _syncedRoomIds = {};
 
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
@@ -876,21 +906,26 @@ class BackgroundPush {
           }
         }
       } else {
+        final syncedRoomIds = {..._syncedRoomIds};
+        _syncedRoomIds.clear();
         emptyRooms = client.rooms
+            .where((r) => syncedRoomIds.contains(r.id))
             .where(_hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
-      var changed = false;
+      final clearedRoomIds = <String>{};
       for (final roomId in emptyRooms) {
         final id = idMap[roomId];
         if (id != null) {
-          idMap.remove(roomId);
-          changed = true;
+          clearedRoomIds.add(roomId);
           await _flutterLocalNotificationsPlugin.cancel(id);
         }
       }
-      if (changed) {
+      if (clearedRoomIds.isNotEmpty) {
+        // Reload: a notification may have mapped a new room while cancelling.
+        await _loadIdMap();
+        idMap.removeWhere((roomId, _) => clearedRoomIds.contains(roomId));
         await store.setItem(
           SettingKeys.notificationCurrentIds,
           json.encode(idMap),
@@ -899,6 +934,8 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
+    // Rooms synced while this sweep ran.
+    if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);
   }
 
   PushNotification _parseMessagePayload(dynamic message) {

@@ -33,7 +33,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
               let roomId = request.roomId,
               let eventId = request.eventId,
               let clientID = request.pusherNotificationClientIdentifier,
-              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
+              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.dedicated == true && $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
             // We cannot process this notification, it might be due to one of these:
             // - Device rebooted and locked
             // - Not a Matrix notification
@@ -77,6 +77,9 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
             let recoveryKey = keychainController.recoveryKey(forUsername: credentials.userID)
             let userSession = try await NSEUserSession(credentials: credentials, roomID: roomId, clientSessionDelegate: keychainController, recoveryKey: recoveryKey)
             self.userSession = userSession
+            if let ed25519Key = await userSession.ed25519Key() {
+                keychainController.setDeviceKey(ed25519Key, forDeviceId: credentials.restorationToken.session.deviceId)
+            }
             
             guard let itemProxy = await userSession.notificationItemProxy(roomID: roomId, eventID: eventId) else {
                 MXLog.info("\(tag) no notification for the event, discard")

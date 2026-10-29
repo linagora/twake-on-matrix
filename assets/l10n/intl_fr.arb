@@ -2666,6 +2666,13 @@
   },
   "webPushOnThisBrowser": "Notifications sur ce navigateur",
   "webPushPermissionDeniedHint": "Les notifications sont bloquées. Autorisez-les pour ce site dans les paramètres de votre navigateur, puis réactivez cette option.",
+  "encryptedNotificationPreviews": "Aperçu des messages dans les notifications",
+  "encryptedNotificationPreviewsHint": "Reconnecte ce téléphone une fois, pour les notifications seulement. L'aperçu commence avec les prochains messages.",
+  "notificationPreviewsSuggestion": "Pour protéger vos messages, les notifications n'affichent plus leur contenu. Reconnectez-vous une fois pour retrouver l'aperçu des messages.",
+  "notificationPreviewsEnable": "Activer",
+  "encryptedNotificationPreviewsLocked": "Déverrouillez d'abord la sauvegarde de vos discussions.",
+  "deviceIdentityRenewTitle": "Reconnectez-vous",
+  "deviceIdentityRenewMessage": "Pour protéger vos messages, cette session doit être renouvelée. Reconnectez-vous pour continuer.",
   "removeDeviceConfirmationTitle": "Supprimer cet appareil ?",
   "@removeDeviceConfirmationTitle": {
     "type": "text",

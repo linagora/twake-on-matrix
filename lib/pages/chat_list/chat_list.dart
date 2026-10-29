@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/config/setting_keys.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
@@ -453,6 +457,39 @@ class ChatListController extends State<ChatList>
     // Process cached sharing intents after first sync
     await matrixState.processCachedSharingIntents();
     await _maybeShowWebPushPermissionSoftAsk();
+    await _maybeSuggestNotificationPreviews();
+  }
+
+  /// iOS notifications show no content until the extension gets its own
+  /// device: suggest it once.
+  Future<void> _maybeSuggestNotificationPreviews() async {
+    if (!PlatformInfos.isIOS) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(SettingKeys.notificationPreviewsSuggested) == true) {
+      return;
+    }
+    final client = activeClient;
+    // Not marked as shown while locked: suggest it once the backup is open.
+    if (await KeychainSharingManager.hasNotificationSession(client) ||
+        await KeychainSharingManager.notificationPreviewsLocked(client) ||
+        await KeychainSharingManager.notificationSsoProviderId(client) ==
+            null ||
+        !mounted) {
+      return;
+    }
+    await prefs.setBool(SettingKeys.notificationPreviewsSuggested, true);
+    if (!mounted) return;
+    final result = await showOkCancelAlertDialog(
+      useRootNavigator: false,
+      context: context,
+      title: L10n.of(context)!.encryptedNotificationPreviews,
+      message: L10n.of(context)!.notificationPreviewsSuggestion,
+      okLabel: L10n.of(context)!.notificationPreviewsEnable,
+      cancelLabel: L10n.of(context)!.later,
+    );
+    if (result == OkCancelResult.ok && mounted) {
+      await const NotificationsRoute().push(context);
+    }
   }
 
   Future<void> _maybeShowWebPushPermissionSoftAsk() async {

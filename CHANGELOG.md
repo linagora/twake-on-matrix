@@ -1,3 +1,24 @@
+## [2.26.1] - 2026-10-29
+### Added
+- #3495: iOS: opt-in message previews in notifications, with a dedicated device
+
+### Changed
+- #3482: TW-2240: Update the avatar set, change and remove labels
+- #3448: TW-3258: Use design system components for message reactions
+- #3499: Remove dead VoIP code and unused dependencies
+- #3511: Remove the web E2E workflow and web-only scripts
+
+### Fixed
+- #3494: Keep Android notifications and honor clearing pushes
+- #3514: Android: show the message preview once the room key arrives
+- #3515: Set up the pusher again after a new login
+- #3513: iOS: cross-sign the notification device with the key it generated
+- #3516: iOS: renew sessions whose device keys the notification extension took
+- #3489: Make the display name editable from the profile pencil
+
+### Tests
+- #3485, #3488, #3507: Add profile and reaction Patrol scenarios, diagnostics
+
 ## [2.26.0] - 2026-10-27
 ### Added
 - #3426: Create public and server-limited groups when the server allows it

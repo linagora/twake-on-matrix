@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:file_saver/file_saver.dart';
-import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -404,23 +403,5 @@ extension StringCasingExtension on String {
       return MessageTypes.Audio;
     }
     return MessageTypes.File;
-  }
-}
-
-extension ListStringExtension on List<String> {
-  List<String> combineRecentReactions({required String emojiId}) {
-    final updatedReactions = List<String>.from(this);
-    final emojiExisted = updatedReactions.contains(emojiId);
-    if (emojiExisted) {
-      updatedReactions.remove(emojiId);
-    }
-    updatedReactions.insert(0, emojiId);
-    if (updatedReactions.length > AppConfig.maxRecentReactionsSize) {
-      updatedReactions.removeRange(
-        AppConfig.maxRecentReactionsSize,
-        updatedReactions.length,
-      );
-    }
-    return updatedReactions;
   }
 }

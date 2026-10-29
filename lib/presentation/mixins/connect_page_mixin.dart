@@ -56,11 +56,11 @@ mixin ConnectPageMixin {
       AppConfig.homeserver != AppConfig.sampleValue ||
       AppConfig.homeserver.isNotEmpty;
 
-  String _getRedirectUrlScheme(String redirectUrl) {
+  static String _getRedirectUrlScheme(String redirectUrl) {
     return Uri.parse(redirectUrl).scheme;
   }
 
-  String _getAuthenticateUrl({
+  static String _getAuthenticateUrl({
     required String homeserver,
     required String id,
     required String redirectUrl,
@@ -97,16 +97,24 @@ mixin ConnectPageMixin {
     if (homeserver.isEmpty) {
       throw StateError('Homeserver is not configured for SSO');
     }
+    return webAuthenticate(homeserver: homeserver, id: id);
+  }
+
+  /// Runs the SSO flow of [homeserver] with the identity provider [id] and
+  /// returns the callback URL, which carries the `loginToken`.
+  static Future<String> webAuthenticate({
+    required String homeserver,
+    required String id,
+  }) {
     final redirectUrl = _generateRedirectUrl(homeserver);
     final url = _getAuthenticateUrl(
       homeserver: homeserver,
       id: id,
       redirectUrl: redirectUrl,
     );
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    return await FlutterWebAuth2.authenticate(
+    return FlutterWebAuth2.authenticate(
       url: url,
-      callbackUrlScheme: urlScheme,
+      callbackUrlScheme: _getRedirectUrlScheme(redirectUrl),
       options: const FlutterWebAuth2Options(
         intentFlags: ephemeralIntentFlags,
         windowName: windowNameValue,
@@ -213,7 +221,7 @@ mixin ConnectPageMixin {
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
 
-  String _generateRedirectUrl(String homeserver) {
+  static String _generateRedirectUrl(String homeserver) {
     if (kIsWeb) {
       String? homeserverParam = '';
       if (homeserver.isNotEmpty) {
