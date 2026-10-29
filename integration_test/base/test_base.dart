@@ -6,6 +6,8 @@ import 'base_test_scenario.dart';
 import 'test_app_initializer.dart';
 import 'web_benign_error_filter.dart';
 
+typedef TestLogin = ({String serverUrl, String username, String password});
+
 class TestBase {
   /// Runs a Patrol integration test.
   ///
@@ -36,6 +38,8 @@ class TestBase {
     // Marks a test that needs real hardware (Wi-Fi toggling, system
     // clipboard) rather than an emulator.
     bool requiresHardware = false,
+    // Logs in to another account than the default SERVER_URL/USERNAME one.
+    TestLogin? login,
   }) {
     // On web a `mobileOnly` test must not be REGISTERED at all (not merely
     // skipped). Patrol web's Playwright runner boots the Flutter app
@@ -106,7 +110,7 @@ class TestBase {
       ($) async {
         await initTwakeChat();
         installWebBenignErrorFilter();
-        await loginAndRun($);
+        await loginAndRun($, login: login);
         final robots = createRobotFactory($);
         await scenarioBuilder($, robots).runTestLogic();
       },
@@ -117,7 +121,13 @@ class TestBase {
     await initTestApp();
   }
 
-  Future<void> loginAndRun(PatrolIntegrationTester $) async {
+  Future<void> loginAndRun(
+    PatrolIntegrationTester $, {
+    TestLogin? login,
+  }) async {
+    if (login != null && login.serverUrl.isEmpty) {
+      throw StateError('Login override has no server URL (missing define?)');
+    }
     // Route the auto-login through the platform factory so web uses
     // `WebLoginRobot` (waits for `AutoHomeserverPicker`, then
     // `m.login.password`) and mobile keeps `LoginRobot` (waits for
@@ -125,9 +135,9 @@ class TestBase {
     // to the previous `LoginScenario.login()`.
     final loginRobot = createRobotFactory($).loginRobot();
     await loginRobot.loginViaApi(
-      serverUrl: const String.fromEnvironment('SERVER_URL'),
-      username: const String.fromEnvironment('USERNAME'),
-      password: const String.fromEnvironment('PASSWORD'),
+      serverUrl: login?.serverUrl ?? const String.fromEnvironment('SERVER_URL'),
+      username: login?.username ?? const String.fromEnvironment('USERNAME'),
+      password: login?.password ?? const String.fromEnvironment('PASSWORD'),
     );
     await loginRobot.grantNotificationPermission();
   }

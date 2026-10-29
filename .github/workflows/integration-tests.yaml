@@ -136,6 +136,10 @@ jobs:
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
+      - name: Start the capabilities-disabled Synapse
+        if: ${{ contains(inputs.patrol_test_target, 'settings_profile_capabilities_test') }}
+        run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -172,6 +176,10 @@ jobs:
       - name: Tear down Synapse
         if: always()
         run: docker rm -f synapse || true
+
+      - name: Tear down the capabilities-disabled Synapse
+        if: ${{ always() && contains(inputs.patrol_test_target, 'settings_profile_capabilities_test') }}
+        run: ./scripts/ci/capabilities-disabled-synapse.sh stop
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 1b – Nightly functional suite, one shard per parallel x86_64 emulator.
@@ -226,7 +234,7 @@ jobs:
               integration_test/tests/chat/create_new_group_chat_test.dart
               integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart
               integration_test/tests/chat/search_external_mxid_test.dart
-          # 12 test cases (~22 min). Web-only tests (e.g. web_login_paths_test,
+          # 13 test cases (~22 min). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker
           # flow) must NOT be listed here — they can never pass on Android and
           # are covered by the patrol-web nightly workflow.
@@ -239,6 +247,7 @@ jobs:
               integration_test/tests/setting/settings_recovery_key_test.dart
               integration_test/tests/app_grid/app_grid_mobile_test.dart
               integration_test/tests/setting/settings_profile_test.dart
+              integration_test/tests/setting/settings_profile_capabilities_test.dart
 
     steps:
       - uses: actions/checkout@v4
@@ -329,6 +338,10 @@ jobs:
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
+      - name: Start the capabilities-disabled Synapse
+        if: ${{ matrix.shard == 'shard_5_misc' }}
+        run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -359,6 +372,10 @@ jobs:
       - name: Tear down Synapse
         if: always()
         run: docker rm -f synapse || true
+
+      - name: Tear down the capabilities-disabled Synapse
+        if: ${{ always() && matrix.shard == 'shard_5_misc' }}
+        run: ./scripts/ci/capabilities-disabled-synapse.sh stop
 
   # ────────────────────────────────────────────────────────────────────────────
   # Job 2 – Build perf APK once, upload as artifact

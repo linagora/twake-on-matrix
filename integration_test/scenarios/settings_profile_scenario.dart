@@ -84,3 +84,41 @@ class SettingsProfileMultipleAccountsScenario extends _SettingsProfileScenario {
     await profile.openMultipleAccountsPicker();
   }
 }
+
+/// Runs against a server with `m.set_displayname` and `m.set_avatar_url`
+/// disabled; the allowed case is [SettingsProfileOverviewScenario].
+class SettingsProfileEditsDisabledScenario extends _SettingsProfileScenario {
+  SettingsProfileEditsDisabledScenario(super.$, super.robots);
+
+  @override
+  Future<void> runTestLogic() async {
+    final s = SoftAssertHelper();
+    await openProfile();
+    await profile.waitForCapabilities();
+
+    final displayName = await profile.waitForValueOf(
+      SettingsProfileEnum.displayName,
+    );
+    s.softAssertEquals(
+      displayName.isNotEmpty,
+      true,
+      'display name row is empty',
+    );
+    s.softAssertEquals(
+      profile.displayNameField().exists,
+      false,
+      'display name is editable',
+    );
+    s.softAssertEquals(
+      profile.displayNameEditIcon().exists,
+      false,
+      'display name edit icon is shown',
+    );
+    s.softAssertEquals(
+      profile.avatarEditBadge().exists,
+      false,
+      'avatar edit badge is shown',
+    );
+    s.verifyAll();
+  }
+}
