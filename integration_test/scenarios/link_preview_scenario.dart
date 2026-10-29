@@ -10,14 +10,19 @@ import '../robots/link_preview_robot.dart';
 /// The app previews https links only, and the CI homeserver must reach it.
 const _previewTarget = 'https://example.com/';
 
+/// In the homeserver's url_preview_ip_range_blacklist, so the preview fails.
+const _blockedPreviewTarget = 'https://127.0.0.1/';
+
 class LinkPreviewScenario extends BaseTestScenario {
   LinkPreviewScenario(super.$, super.robots);
 
   @override
   Future<void> runTestLogic() async {
     final group = (await prepareMobileGroupFixture(this)).title;
-    final url = '$_previewTarget?e2e=${DateTime.now().microsecondsSinceEpoch}';
-    final expectedTitle = await _serverPreviewTitle(url);
+    final runId = DateTime.now().microsecondsSinceEpoch;
+    final url = '$_previewTarget?e2e=$runId';
+    final blockedUrl = '$_blockedPreviewTarget?e2e=$runId';
+    final expectedTitle = await _fetchServerPreviewTitle(url);
     expect(
       expectedTitle,
       isNotEmpty,
@@ -40,6 +45,10 @@ class LinkPreviewScenario extends BaseTestScenario {
     );
     expect(linkPreview.timelinePreviewTitle(url), expectedTitle);
 
+    await robots.chatGroupDetailRobot().sendMessage(blockedUrl);
+    await linkPreview.waitUntilTimelinePreviewSettled(blockedUrl);
+    expect(linkPreview.timelinePreview(blockedUrl).exists, isFalse);
+
     await robots.chatGroupDetailRobot().tapOnChatBarTitle();
     await GroupInformationRobot($).getLinksTab().tap();
     await $.waitUntilVisible(
@@ -48,7 +57,7 @@ class LinkPreviewScenario extends BaseTestScenario {
     );
   }
 
-  Future<String?> _serverPreviewTitle(String url) async {
+  Future<String?> _fetchServerPreviewTitle(String url) async {
     final context = $.tester.element(find.byType(Scaffold).first);
     final client = twake.Matrix.of(context).client;
     final preview = await client.getUrlPreviewAuthed(Uri.parse(url));
