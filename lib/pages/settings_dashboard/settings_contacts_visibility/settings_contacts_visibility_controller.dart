@@ -67,6 +67,7 @@ class SettingsContactsVisibilityController
         .read(updateUserInfoVisibilityUseCaseProvider)
         .execute(userId: userId, request: request);
     if (!ref.mounted) return;
+    if (ref.read(activeMatrixClientProvider).userId != userId) return;
     state = AsyncData(_toState(visibility));
   }
 

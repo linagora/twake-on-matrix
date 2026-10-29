@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
@@ -9,6 +11,7 @@ class FakeUserInfoRepository implements UserInfoRepository {
 
   UserInfoVisibility visibility;
   Object? error;
+  Completer<void>? pendingUpdate;
   final List<String> getVisibilityCalls = [];
   final List<(String, UserInfoVisibilityRequest)> updateCalls = [];
 
@@ -31,6 +34,7 @@ class FakeUserInfoRepository implements UserInfoRepository {
     UserInfoVisibilityRequest request,
   ) async {
     updateCalls.add((userId, request));
+    await pendingUpdate?.future;
     if (error != null) throw error!;
     return visibility = UserInfoVisibility(
       matrixId: userId,
