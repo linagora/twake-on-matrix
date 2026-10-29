@@ -15,7 +15,8 @@ abstract class _SettingsProfileScenario extends BaseTestScenario {
   }
 }
 
-/// CI Synapse allows profile edits, so only the "allowed" branch is testable.
+/// The default CI Synapse allows profile edits; the disabled case is
+/// [SettingsProfileEditsDisabledScenario].
 class SettingsProfileOverviewScenario extends _SettingsProfileScenario {
   SettingsProfileOverviewScenario(super.$, super.robots);
 
@@ -96,6 +97,13 @@ class SettingsProfileEditsDisabledScenario extends _SettingsProfileScenario {
     await openProfile();
     await profile.waitForCapabilities();
 
+    const username = String.fromEnvironment('CAPS_DISABLED_USERNAME');
+    final matrixId = await profile.waitForValueOf(SettingsProfileEnum.matrixId);
+    s.softAssertEquals(
+      matrixId.startsWith('@$username:'),
+      true,
+      'logged in as "$matrixId", not the edits-disabled account',
+    );
     final displayName = await profile.waitForValueOf(
       SettingsProfileEnum.displayName,
     );

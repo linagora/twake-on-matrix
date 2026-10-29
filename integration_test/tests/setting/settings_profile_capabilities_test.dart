@@ -1,8 +1,7 @@
 import '../../base/test_base.dart';
 import '../../scenarios/settings_profile_scenario.dart';
 
-// The CAPS_DISABLED_* defines come from
-// scripts/ci/capabilities-disabled-synapse.sh.
+// CAPS_DISABLED_* come from scripts/ci/capabilities-disabled-synapse.sh.
 void main() {
   TestBase().runPatrolTest(
     description:

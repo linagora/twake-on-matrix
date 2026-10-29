@@ -13,14 +13,15 @@ set -euo pipefail
 NAME="${CAPS_SYNAPSE_NAME:-synapse-capabilities-disabled}"
 PORT="${CAPS_SYNAPSE_PORT:-8481}"
 APP_HOST="${CAPS_SYNAPSE_APP_HOST:-10.0.2.2}"
-USER="${CAPS_SYNAPSE_USER:-dora}"
-PASSWORD="${CAPS_SYNAPSE_PASSWORD:-dorapassword}"
+CAPS_USER="${CAPS_SYNAPSE_USER:-dora}"
+CAPS_PASSWORD="${CAPS_SYNAPSE_PASSWORD:-dorapassword}"
 DATA="$(pwd)/integration_test/synapse/data"
 
 log() { echo "[capabilities-synapse] $*" >&2; }
 
 start() {
   local env_file="$1"
+  docker rm -f "$NAME" >/dev/null 2>&1 || true
   docker run -d --name "$NAME" --tmpfs /data \
     --volume="$DATA/homeserver.yaml":/data/homeserver.yaml:rw \
     --volume="$DATA/localhost.log.config":/data/localhost.log.config:rw \
@@ -42,14 +43,14 @@ start() {
 
   curl -sS --fail-with-body -X POST "$base/_matrix/client/v3/register" \
     -H "Content-Type: application/json" \
-    -d "$(jq -nc --arg u "$USER" --arg p "$PASSWORD" \
+    -d "$(jq -nc --arg u "$CAPS_USER" --arg p "$CAPS_PASSWORD" \
       '{username: $u, password: $p, auth: {type: "m.login.dummy"}}')" \
     >/dev/null
 
   {
     echo "CAPS_DISABLED_SERVER_URL=http://$APP_HOST:$PORT"
-    echo "CAPS_DISABLED_USERNAME=$USER"
-    echo "CAPS_DISABLED_PASSWORD=$PASSWORD"
+    echo "CAPS_DISABLED_USERNAME=$CAPS_USER"
+    echo "CAPS_DISABLED_PASSWORD=$CAPS_PASSWORD"
   } >> "$env_file"
   log "ready on port $PORT"
 }
