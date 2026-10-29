@@ -128,13 +128,13 @@ void main() {
   );
 
   test(
-    'a deletion before the push set-up is a failure that keeps the record',
+    'a deletion before the push set-up is a quiet failure that keeps the record',
     () async {
       pushReady = false;
 
       await run();
 
-      expect(events, ['reported']);
+      expect(events, isEmpty);
       expect(await repository.pendingPushRemovals(), {'a'});
       expect(removals.failedIds, {'a'});
     },
@@ -147,7 +147,48 @@ void main() {
 
     await removals.retryAll();
 
-    expect(events, ['reported', 'delete']);
+    expect(events, ['delete']);
+    expect(await repository.pendingPushRemovals(), isEmpty);
+    expect(removals.failedIds, isEmpty);
+  });
+
+  test(
+    'a push that is never set up stops being retried but keeps the record',
+    () async {
+      pushReady = false;
+      final plan = PushRemovalPlan(
+        id: 'a',
+        repository: repository,
+        sessionToken: () => sessionToken,
+        isPushReady: () {
+          events.add('checked');
+          return pushReady;
+        },
+        removePush: () async => events.add('delete'),
+      ).steps;
+      await removals.remove('a', plan, (e, s, w) => events.add('reported'));
+
+      for (var i = 0; i < PushRemovalPlan.maxNotReadyTries + 2; i++) {
+        await removals.retryAll();
+      }
+
+      expect(events, List.filled(PushRemovalPlan.maxNotReadyTries, 'checked'));
+      expect(await repository.pendingPushRemovals(), {'a'});
+      expect(removals.failedIds, {'a'});
+    },
+  );
+
+  test('a new removal runs a parked one again', () async {
+    pushReady = false;
+    await run();
+    for (var i = 0; i < PushRemovalPlan.maxNotReadyTries; i++) {
+      await removals.retryAll();
+    }
+    pushReady = true;
+
+    await run();
+
+    expect(events, ['delete']);
     expect(await repository.pendingPushRemovals(), isEmpty);
     expect(removals.failedIds, isEmpty);
   });

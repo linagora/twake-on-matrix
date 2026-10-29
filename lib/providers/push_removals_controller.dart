@@ -42,9 +42,7 @@ class PushRemovalsController extends _$PushRemovalsController {
             removePush: () => teardown.removePush(target),
             isPushReady: () => teardown.isPushReady,
           ).steps,
-          (error, stackTrace, what) => error is PushNotReadyException
-              ? Logs().w('PushRemovalsController: $what', error, stackTrace)
-              : teardown.report(error, stackTrace, what),
+          teardown.report,
         );
   }
 }
