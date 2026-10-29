@@ -86,7 +86,7 @@ class BackgroundPush {
   Store? _store;
 
   Store get store => _store ??= Store();
-  Timer? clearingPushTimer;
+  StreamSubscription<SyncUpdate>? onRoomSync;
 
   Future<void> loadLocale() async {
     final context = _matrixState?.context;
@@ -108,7 +108,12 @@ class BackgroundPush {
   bool upAction = false;
 
   BackgroundPush._(this.client) {
-    clearingPushTimer ??= Timer.periodic(const Duration(seconds: 20), (_) {
+    // Clear only after a sync: unread counts are stale while sync is paused
+    // in background, and a timer would cancel notifications just shown.
+    onRoomSync ??= client.onSync.stream.listen((sync) {
+      final roomIds = [...?sync.rooms?.join?.keys, ...?sync.rooms?.leave?.keys];
+      if (roomIds.isEmpty) return;
+      _syncedRoomIds.addAll(roomIds);
       _onClearingPush(getFromServer: false);
     });
     if (Platform.isAndroid) {
@@ -348,8 +353,9 @@ class BackgroundPush {
 
   Future<void> cancelNotification(String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    final id = await mapRoomIdToInt(roomId);
-    await FlutterLocalNotificationsPlugin().cancel(id);
+    await _loadIdMap();
+    final id = idMap[roomId];
+    if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -800,27 +806,11 @@ class BackgroundPush {
     );
   }
 
-  Future<int> mapRoomIdToInt(String roomId) async {
-    await _loadIdMap();
-    int? currentInt;
-    try {
-      currentInt = idMap[roomId];
-    } catch (_) {
-      currentInt = null;
-    }
-    if (currentInt != null) {
-      return currentInt;
-    }
-    var nCurrentInt = 0;
-    while (idMap.values.contains(currentInt)) {
-      nCurrentInt++;
-    }
-    idMap[roomId] = nCurrentInt;
-    await store.setItem(SettingKeys.notificationCurrentIds, json.encode(idMap));
-    return nCurrentInt;
-  }
-
   bool _clearingPushLock = false;
+
+  /// Rooms refreshed by a sync and not checked yet: only their unread
+  /// counts are fresh enough to clear their notification.
+  final Set<String> _syncedRoomIds = {};
 
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
@@ -876,21 +866,26 @@ class BackgroundPush {
           }
         }
       } else {
+        final syncedRoomIds = {..._syncedRoomIds};
+        _syncedRoomIds.clear();
         emptyRooms = client.rooms
+            .where((r) => syncedRoomIds.contains(r.id))
             .where(_hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
-      var changed = false;
+      final clearedRoomIds = <String>{};
       for (final roomId in emptyRooms) {
         final id = idMap[roomId];
         if (id != null) {
-          idMap.remove(roomId);
-          changed = true;
+          clearedRoomIds.add(roomId);
           await _flutterLocalNotificationsPlugin.cancel(id);
         }
       }
-      if (changed) {
+      if (clearedRoomIds.isNotEmpty) {
+        // Reload: a notification may have mapped a new room while cancelling.
+        await _loadIdMap();
+        idMap.removeWhere((roomId, _) => clearedRoomIds.contains(roomId));
         await store.setItem(
           SettingKeys.notificationCurrentIds,
           json.encode(idMap),
@@ -899,6 +894,8 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
+    // Rooms synced while this sweep ran.
+    if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);
   }
 
   PushNotification _parseMessagePayload(dynamic message) {

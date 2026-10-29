@@ -43,10 +43,9 @@ class PushNotificationExtensions {
   }
 
   PushNotificationCounts? _extractCounts(Map<String, dynamic> json) {
-    final unread = json['unread'] is int ? json['unread'] : null;
-    final missedCalls = json['missed_calls'] is int
-        ? json['missed_calls']
-        : null;
+    // FCM v1 data values are strings: Sygnal sends "unread": "0".
+    final unread = int.tryParse('${json['unread']}');
+    final missedCalls = int.tryParse('${json['missed_calls']}');
 
     if (unread != null || missedCalls != null) {
       return PushNotificationCounts(missedCalls: missedCalls, unread: unread);
