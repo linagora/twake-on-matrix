@@ -488,10 +488,16 @@ class BackgroundPush {
       Logs().d('SetupPush: already completed, skip');
       return;
     }
+    final isRelogin = _setupPushDeviceId != null;
     _setupPushDeviceId = client.deviceID;
     // Do not setup unifiedpush if this has been initialized by
     // an unifiedpush action
     if (upAction) {
+      // That action set up the previous device: give the new one a pusher.
+      final endpoint = await store.getItem(SettingKeys.unifiedPushEndpoint);
+      if (isRelogin && endpoint != null && endpoint.isNotEmpty) {
+        await _newUpEndpoint(endpoint, '');
+      }
       return;
     }
     if (!PlatformInfos.isIOS &&
