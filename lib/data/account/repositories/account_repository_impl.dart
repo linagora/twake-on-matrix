@@ -54,28 +54,37 @@ class AccountRepositoryImpl implements AccountRepository {
   ///
   /// Called once, by `accountRepositoryProvider`, as it builds the repository.
   /// Only the first call takes over, the following ones return the accounts as
-  /// they are.
+  /// they are. The registry is taken over once too: a repository built again
+  /// on it starts from its clients, not from [clients]. Those include a
+  /// candidate in flight (`createCandidate` registers it before it is stored),
+  /// which a rebuilt repository then counts as stored; fine while every
+  /// dependency of the repository is a constant, so it is never rebuilt.
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
   }) {
     if (_adopted) return registeredAccounts();
     _adopted = true;
-    _registry.replaceAll(clients);
+    // A registry that took the boot clients over already holds the accounts
+    // as they are now: they are kept, not reset to the boot ones.
+    final known = _registry.adoptOnce(clients)
+        ? clients
+        : _registry.clients.toList();
     _storedIds
       ..clear()
-      ..addAll(clients.map((c) => c.clientName));
+      ..addAll(known.map((c) => c.clientName));
     _pendingIds
       ..clear()
       ..addAll(pendingRemovals.where(_storedIds.contains))
-      ..addAll(_loggedOutBesideOthers(clients));
+      ..addAll(_loggedOutBesideOthers(known));
     return registeredAccounts();
   }
 
   /// With several accounts, a client that is not logged in is a leftover of a
   /// logout whose cleanup did not finish: it is owed a removal, which the app
-  /// runs like any pending one (retried, listed as unavailable meanwhile),
-  /// instead of `ClientManager.getClients` deleting it while it loads.
+  /// runs like any pending one (retried, listed as unavailable meanwhile).
+  /// Until the transitional deletion in `ClientManager.getClients` is gone
+  /// (TW-3302 5/5) such a client is deleted at load and none is found here.
   Set<String> _loggedOutBesideOthers(Iterable<Client> clients) =>
       clients.length > 1
       ? {

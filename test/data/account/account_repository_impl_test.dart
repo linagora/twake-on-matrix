@@ -242,6 +242,24 @@ void main() {
     });
   });
 
+  group('a repository built again on the same registry', () {
+    test('keeps the accounts added since boot', () {
+      final a = FakeAccountClient('a', userID: '@a:s');
+      final b = FakeAccountClient('b', userID: '@b:s');
+      repository.adopt([a], pendingRemovals: const {});
+      registry.add(b);
+
+      final accounts = _newRepository(
+        dataSource,
+        registry,
+      ).adopt([a], pendingRemovals: const {});
+
+      expect(registry['a'], same(a));
+      expect(registry['b'], same(b));
+      expect(accounts.map((x) => x.id), ['a', 'b']);
+    });
+  });
+
   group('adopt with a logged-out client', () {
     test('beside others it is listed as unavailable instead of deleted', () {
       final accounts = repository.adopt([
@@ -582,16 +600,25 @@ void main() {
   });
 
   group('AccountClientRegistry', () {
-    test('replaceAll swaps the content', () {
+    test('adoptOnce swaps the content the first time', () {
       registry
         ..add(FakeAccountClient('b'))
         ..add(FakeAccountClient('a'));
 
-      registry.replaceAll([FakeAccountClient('c')]);
+      expect(registry.adoptOnce([FakeAccountClient('c')]), isTrue);
 
       expect(registry['a'], isNull);
       expect(registry['b'], isNull);
       expect(registry['c'], isNotNull);
+    });
+
+    test('adoptOnce changes nothing the second time', () {
+      registry.adoptOnce([FakeAccountClient('a')]);
+      registry.add(FakeAccountClient('b'));
+
+      expect(registry.adoptOnce([FakeAccountClient('c')]), isFalse);
+
+      expect(registry.clients.map((c) => c.clientName), ['a', 'b']);
     });
   });
 

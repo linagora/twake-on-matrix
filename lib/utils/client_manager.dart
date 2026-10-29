@@ -57,10 +57,33 @@ abstract class ClientManager {
     if (initialize) {
       await Future.wait(clients.map(initClient));
     }
-    // A logged-out client next to others is not deleted here: the account
-    // repository lists it as a pending removal, which is retried until it works.
+    // TODO: [transitional] TW-3302 - drop this deletion once the account
+    // repository, which lists such a client as a pending removal, is wired in
+    // `MatrixState` (TW-3302 5/5). Until then the app still drops it here.
+    if (dropsLoggedOut(clients, initialized: initialize)) {
+      final loggedOutClients = clients.where((c) => !c.isLogged()).toList();
+      for (final client in loggedOutClients) {
+        Logs().w(
+          'Multi account is enabled but client ${client.userID} is not logged in. Removing...',
+        );
+        clientNames.remove(client.clientName);
+        await deleteClientStorage(client.database);
+        clients.remove(client);
+      }
+      await Store().setItem(clientNamespace, jsonEncode(clientNames.toList()));
+    }
     return clients;
   }
+
+  // TODO: [transitional] TW-3302 - goes with the deletion in [getClients].
+  /// Whether [getClients] deletes the logged-out [clients]: only when there
+  /// are several and they were [initialized], since before `init` none is
+  /// logged in yet.
+  @visibleForTesting
+  static bool dropsLoggedOut(
+    List<Client> clients, {
+    required bool initialized,
+  }) => initialized && clients.length > 1 && clients.any((c) => !c.isLogged());
 
   /// Initialises [client] and syncs its session to the keychain. A failure is
   /// logged, not thrown.
@@ -80,7 +103,8 @@ abstract class ClientManager {
     return null;
   }
 
-  /// The clients that hold a session. A logged-out client stays loaded while
+  /// The clients that hold a session. Once the transitional deletion in
+  /// [getClients] is gone (TW-3302 5/5), a logged-out client stays loaded while
   /// its removal is pending; screens that read profiles or homeservers, and the
   /// background push, must not treat it as an account.
   static List<Client> loggedIn(Iterable<Client> clients) =>
