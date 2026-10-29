@@ -83,6 +83,10 @@ class BackgroundPush {
   Client client;
   MatrixState? _matrixState;
   String? _pushToken;
+
+  /// The UnifiedPush endpoint of this device (Android without FCM), the push
+  /// key of its pusher in place of [_pushToken].
+  String? _upEndpoint;
   void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
   Store? _store;
@@ -227,11 +231,10 @@ class BackgroundPush {
     }
   }
 
-  void cancelKeychainSyncForClient(Client targetClient) {
+  Future<void> cancelKeychainSyncForClient(Client targetClient) async {
     final userId = targetClient.userID;
     if (userId == null) return;
-    _keychainSyncSubs[userId]?.cancel();
-    _keychainSyncSubs.remove(userId);
+    await _keychainSyncSubs.remove(userId)?.cancel();
   }
 
   Future<void> syncRecoveryKeyForClient(Client targetClient) async {
@@ -330,35 +333,70 @@ class BackgroundPush {
     );
   }
 
+  /// The push keys of the pushers of this device: the FCM or APNs token, and
+  /// the UnifiedPush endpoint.
+  Set<String> get pushKeys => {
+    if (_pushToken != null) _pushToken!,
+    if (_upEndpoint != null) _upEndpoint!,
+  };
+
+  /// Whether a push key of this device is known, so that its pusher can be
+  /// found (and deleted).
+  bool get hasPushToken => pushKeys.isNotEmpty;
+
+  /// The UnifiedPush endpoint now registered, or null when it is gone.
+  void useUpEndpoint(String? endpoint) => _upEndpoint = endpoint;
+
+  /// Deletes the pusher of this device for [targetClient]. A failure is thrown:
+  /// a caller that cannot wait for a retry reports it and goes on.
   Future<void> removePusherForClient(Client targetClient) async {
-    if (!PlatformInfos.isIOS) return;
-    final token = _pushToken;
-    if (token == null) return;
+    if (!PlatformInfos.isMobile) return;
+    final keys = pushKeys;
+    if (keys.isEmpty) return;
 
-    try {
-      final pushers =
-          await targetClient.getPushers().catchError((e) {
-            Logs().w(
-              '[Push] Unable to get pushers for ${targetClient.userID}',
-              e,
-            );
-            return <Pusher>[];
-          }) ??
-          [];
-
-      for (final pusher in pushers) {
-        if (pusher.pushkey == token) {
-          await targetClient.deletePusher(pusher);
-          Logs().i('[Push] Removed pusher for ${targetClient.userID}');
-        }
+    final pushers = await targetClient.getPushers() ?? [];
+    for (final pusher in pushers) {
+      if (keys.contains(pusher.pushkey)) {
+        await targetClient.deletePusher(pusher);
+        Logs().i('[Push] Removed pusher for ${targetClient.userID}');
       }
-    } catch (e, s) {
-      Logs().e(
-        '[Push] Failed to remove pusher for ${targetClient.userID}',
-        e,
-        s,
-      );
     }
+  }
+
+  /// True once push was set up for the device of the client this service
+  /// serves, until [forgetSetup].
+  bool get isSetUp =>
+      _setupPushDeviceId != null && _setupPushDeviceId == client.deviceID;
+
+  /// Nobody is logged in any more: the setup of the client that left is
+  /// forgotten, so [rebind] (the next login) sets push up again. The device
+  /// token stays.
+  void forgetSetup() => _forgetSetup();
+
+  /// A UnifiedPush callback of the account that left also set [upAction], which
+  /// would make [setupPush] skip the next account: the setup starts over.
+  void _forgetSetup() {
+    _setupPushDeviceId = null;
+    upAction = false;
+  }
+
+  /// Serves [newClient], the first account to be logged in after a time with
+  /// nobody, and sets push up for it.
+  void rebind(Client newClient) {
+    client = newClient;
+    _forgetSetup();
+    if (PlatformInfos.isIOS) _setupKeychainSyncForClient(newClient);
+    unawaited(setupPush());
+  }
+
+  /// The account this service serves [departed] goes away while others stay
+  /// logged in: [replacement], the account that takes its place, gets the
+  /// push setup, as its pusher does not exist yet. Does nothing when the
+  /// service serves another account. Returns true when it rebound.
+  bool rebindFrom(Client departed, Client replacement) {
+    if (client != departed || departed == replacement) return false;
+    rebind(replacement);
+    return true;
   }
 
   factory BackgroundPush.clientOnly(Client client) {
@@ -802,6 +840,7 @@ class BackgroundPush {
       oldTokens: oldTokens,
       useDeviceSpecificAppId: true,
     );
+    useUpEndpoint(newEndpoint);
     await store.setItem(SettingKeys.unifiedPushEndpoint, newEndpoint);
     await store.setItemBool(SettingKeys.unifiedPushRegistered, true);
   }
@@ -809,6 +848,7 @@ class BackgroundPush {
   Future<void> _upUnregistered(String i) async {
     upAction = true;
     Logs().i('[Push] Removing UnifiedPush endpoint...');
+    useUpEndpoint(null);
     final oldEndpoint = await store.getItem(SettingKeys.unifiedPushEndpoint);
     await store.setItemBool(SettingKeys.unifiedPushRegistered, false);
     await store.deleteItem(SettingKeys.unifiedPushEndpoint);
