@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/account/repositories/account_repository.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/data/account/push_teardown.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:matrix/matrix.dart';

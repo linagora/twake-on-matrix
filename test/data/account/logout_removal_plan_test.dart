@@ -10,7 +10,7 @@ import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
