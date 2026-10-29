@@ -48,6 +48,9 @@ class KeychainSharingManager {
 
   static const String _notificationDeviceName = 'Twake Chat notifications';
 
+  /// Written by the NSE: the ed25519 key it generated for its device.
+  static const String _nseDeviceKeyPrefix = 'nse_ed25519_';
+
   /// Gives the iOS notification extension its own device.
   ///
   /// The extension runs its own crypto engine. Sharing the app's device with
@@ -186,6 +189,17 @@ class KeychainSharingManager {
       // Same check as a sender's `ShareKeysWith.crossVerifiedIfEnabled`.
       if (device == null ||
           device.hasValidSignatureChain(verifiedByTheirMasterKey: true)) {
+        return;
+      }
+      // Sign only the keys the extension generated, never keys the server
+      // published for that device id.
+      final nseKey = await _secureStorage.read(
+        key: '$_nseDeviceKeyPrefix${session.deviceId}',
+      );
+      if (nseKey == null || nseKey != device.ed25519Key) {
+        Logs().w(
+          '[KeychainSharing] Keys of ${device.deviceId} do not match the NSE',
+        );
         return;
       }
       await encryption.crossSigning.sign([device]);
