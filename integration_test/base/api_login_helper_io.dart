@@ -151,6 +151,77 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   }
 }
 
+/// A second session of the primary test account, opened over the API so a
+/// test owns the device it renames or signs out.
+class PrimaryExtraSession {
+  const PrimaryExtraSession._(this._session, this.deviceId);
+
+  final _MatrixSession _session;
+  final String deviceId;
+
+  Uri _uri(List<String> pathSegments) => _matrixBase(
+    _session.endpoints.matrixURL,
+  ).replace(pathSegments: ['_matrix', 'client', 'v3', ...pathSegments]);
+
+  Future<(int, String)> _send(String method, List<String> pathSegments) async {
+    final client = HttpClient();
+    try {
+      final request = await client.openUrl(method, _uri(pathSegments));
+      request.headers
+        ..set(HttpHeaders.contentTypeHeader, 'application/json')
+        ..set(HttpHeaders.authorizationHeader, 'Bearer ${_session.accessToken}')
+        ..set(HttpHeaders.userAgentHeader, _userAgent);
+      if (method == 'POST') request.write('{}');
+      final response = await request.close();
+      return (response.statusCode, await utf8.decoder.bind(response).join());
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  Future<String?> serverDisplayName() async {
+    final (status, body) = await _send('GET', ['devices', deviceId]);
+    if (status != HttpStatus.ok) {
+      throw Exception('GET device failed [status=$status] body=$body');
+    }
+    return (jsonDecode(body) as Map<String, dynamic>)['display_name']
+        as String?;
+  }
+
+  Future<bool> isSignedOut() async {
+    final (status, _) = await _send('GET', ['account', 'whoami']);
+    return status == HttpStatus.unauthorized;
+  }
+
+  /// No-op once the device was removed: its token is already revoked.
+  Future<void> logout() => _send('POST', ['logout']);
+}
+
+Future<PrimaryExtraSession> loginPrimaryExtraSession({
+  required String deviceDisplayName,
+}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient();
+  try {
+    final session = await _loginWithPassword(
+      client: client,
+      endpoints: endpoints,
+      credentials: const _Credentials(
+        username: String.fromEnvironment('USERNAME'),
+        password: String.fromEnvironment('PASSWORD'),
+      ),
+      deviceDisplayName: deviceDisplayName,
+    );
+    final deviceId = session.deviceId;
+    if (deviceId == null) {
+      throw Exception('Login response missing device_id');
+    }
+    return PrimaryExtraSession._(session, deviceId);
+  } finally {
+    client.close(force: true);
+  }
+}
+
 _MatrixSession? _cachedReceiverSession;
 
 Future<_MatrixSession> _receiverSession(
@@ -186,6 +257,7 @@ Future<_MatrixSession> _loginWithPassword({
   required HttpClient client,
   required _SsoEndpoints endpoints,
   required _Credentials credentials,
+  String deviceDisplayName = _deviceDisplayName,
 }) async {
   final loginUri = _matrixBase(
     endpoints.matrixURL,
@@ -198,7 +270,7 @@ Future<_MatrixSession> _loginWithPassword({
   request.write(
     jsonEncode({
       'identifier': {'type': 'm.id.user', 'user': credentials.username},
-      'initial_device_display_name': _deviceDisplayName,
+      'initial_device_display_name': deviceDisplayName,
       'password': credentials.password,
       'type': 'm.login.password',
     }),
@@ -207,16 +279,20 @@ Future<_MatrixSession> _loginWithPassword({
   final body = await response.transform(utf8.decoder).join();
   if (response.statusCode < 200 || response.statusCode >= 300) {
     throw Exception(
-      'Receiver m.login.password failed [status=${response.statusCode}] '
+      'm.login.password failed [status=${response.statusCode}] '
       'body=${body.substring(0, body.length.clamp(0, 300))}',
     );
   }
-  final accessToken =
-      (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+  final json = jsonDecode(body) as Map<String, dynamic>;
+  final accessToken = json['access_token'] as String?;
   if (accessToken == null) {
     throw Exception('Receiver login response missing access_token: $body');
   }
-  return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
+  return _MatrixSession(
+    endpoints: endpoints,
+    accessToken: accessToken,
+    deviceId: json['device_id'] as String?,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -251,9 +327,14 @@ class _Credentials {
 /// Authenticated Matrix session — the access token plus the endpoints needed
 /// to reach `${matrixURL}` for follow-up calls.
 class _MatrixSession {
-  const _MatrixSession({required this.endpoints, required this.accessToken});
+  const _MatrixSession({
+    required this.endpoints,
+    required this.accessToken,
+    this.deviceId,
+  });
   final _SsoEndpoints endpoints;
   final String accessToken;
+  final String? deviceId;
 }
 
 /// Base URI for the Matrix client-server API.
