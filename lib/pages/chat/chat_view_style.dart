@@ -31,9 +31,7 @@ class ChatViewStyle {
     required bool active,
   }) => active
       ? Theme.of(context).colorScheme.primary
-      // TODO: change to colorSurface when its approved
-      // ignore: deprecated_member_use
-      : Theme.of(context).colorScheme.onBackground;
+      : Theme.of(context).colorScheme.onSurface;
 
   static const paddingBottomContextMenu = 16.0;
 

@@ -40,9 +40,7 @@ class SettingsView extends StatelessWidget {
       ),
       bottomNavigationBar: bottomNavigationBar,
       body: ListTileTheme(
-        // TODO: change to colorSurface when its approved
-        // ignore: deprecated_member_use
-        iconColor: colorScheme.onBackground,
+        iconColor: colorScheme.onSurface,
         child: ListView(
           key: SettingsKeys.listViewContent.key,
           children: <Widget>[

@@ -54,8 +54,7 @@ class SettingsSecurityView extends StatelessWidget {
       ),
       body: ListTileTheme(
         // TODO: remove when the color scheme is updated
-        // ignore: deprecated_member_use
-        iconColor: colorScheme.onBackground,
+        iconColor: colorScheme.onSurface,
         child: MaxWidthBody(
           withScrolling: true,
           child: Column(
@@ -67,7 +66,7 @@ class SettingsSecurityView extends StatelessWidget {
                     child: SettingsItemBuilder(
                       key: SettingsKeys.contactsVisibilityItem.key,
                       title: l10n.contactsVisibility,
-                      titleColor: colorScheme.onBackground,
+                      titleColor: colorScheme.onSurface,
                       subtitle: l10n.whoCanFindMeByMyContacts,
                       leading: Icons.phone_outlined,
                       leadingIconColor: refColorTertiary30,
@@ -93,7 +92,7 @@ class SettingsSecurityView extends StatelessWidget {
                       builder: (context, ignoredUsers, _) {
                         return SettingsItemBuilder(
                           title: l10n.blockedUsers,
-                          titleColor: colorScheme.onBackground,
+                          titleColor: colorScheme.onSurface,
                           subtitle: ignoredUsers.isEmpty
                               ? null
                               : ignoredUsers.length.toString(),
@@ -144,7 +143,7 @@ class SettingsSecurityView extends StatelessWidget {
                         child: SettingsItemBuilder(
                           key: SettingsKeys.recoveryKeyItem.key,
                           title: l10n.recoveryKey,
-                          titleColor: colorScheme.onBackground,
+                          titleColor: colorScheme.onSurface,
                           subtitle: '\u2022' * 32,
                           subtitleStyle: linagoraTextStyleBodyMedium.copyWith(
                             color: refColorTertiary30,
@@ -188,7 +187,7 @@ class SettingsSecurityView extends StatelessWidget {
                         padding: SettingsViewStyle.bodySettingsScreenPadding,
                         child: SettingsItemBuilder(
                           title: l10n.appLock,
-                          titleColor: colorScheme.onBackground,
+                          titleColor: colorScheme.onSurface,
                           leading: Icons.lock_outlined,
                           onTap: controller.setAppLockAction,
                           leadingIconColor: refColorTertiary30,
@@ -212,7 +211,7 @@ class SettingsSecurityView extends StatelessWidget {
                   child: SettingsItemBuilder(
                     height: 116,
                     title: l10n.yourPublicKey,
-                    titleColor: colorScheme.onBackground,
+                    titleColor: colorScheme.onSurface,
                     subtitle: Matrix.of(
                       context,
                     ).client.fingerprintKey.beautified,

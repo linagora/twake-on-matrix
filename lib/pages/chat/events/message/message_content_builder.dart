@@ -41,9 +41,7 @@ class MessageContentBuilder extends ConsumerWidget
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // TODO: change to colorSurface when its approved
-        // ignore: deprecated_member_use
-        final textColor = Theme.of(context).colorScheme.onBackground;
+        final textColor = Theme.of(context).colorScheme.onSurface;
         final displayEvent = event.getDisplayEventWithoutEditEvent(timeline);
         final noPadding = {
           MessageTypes.File,
