@@ -42,4 +42,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | device_settings | Controller, still on `app_state` | #3389 |
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
+| recovery | Fetching ToM recovery words on a use case; save/delete wait for their Patrol scenarios; key cache, SSSS unlock and self-verification still on interactors | |
 | Everything else | Legacy | |
