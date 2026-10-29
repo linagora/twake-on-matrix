@@ -37,12 +37,14 @@ import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
+import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/providers/configuration_repository_providers.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -534,6 +536,13 @@ class _FakeNetworkConnectionService extends Fake
 
 class _CountingRemovals extends LogoutRemovals {
   int disposes = 0;
+  int retryAlls = 0;
+
+  @override
+  Future<void> retryAll() {
+    retryAlls++;
+    return super.retryAll();
+  }
 
   @override
   void dispose() {
@@ -953,6 +962,34 @@ void main() {
       expect(federation.saved, ['@a:s']);
     });
 
+    testWidgets('retrying the pending removals retries the logout removals '
+        'and the candidate discards', (tester) async {
+      final logout = _CountingRemovals();
+      final candidate = _CountingRemovals();
+      final harness = _Harness(
+        tester,
+        [_BootClient('a', userID: '@a:s')],
+        overrides: [
+          logoutRemovalsProvider.overrideWith((ref) {
+            ref.onDispose(logout.dispose);
+            return logout;
+          }),
+          candidateRemovalsProvider.overrideWith((ref) {
+            ref.onDispose(candidate.dispose);
+            return candidate;
+          }),
+        ],
+      );
+
+      await harness.run(() async {
+        await harness.mount();
+        await harness.matrix.loginHost.retryPendingRemovals();
+      });
+
+      expect(logout.retryAlls, 1);
+      expect(candidate.retryAlls, 1);
+    });
+
     testWidgets('a login session that outlives the widget still reads the '
         'accounts', (tester) async {
       final harness = _Harness(tester, [_BootClient('a', userID: '@a:s')]);
@@ -966,6 +1003,24 @@ void main() {
 
       expect(host.isStored(const AccountId('a')), isTrue);
       expect(host.isLoggedIn(const AccountId('a')), isTrue);
+    });
+
+    testWidgets('a last logout the accounts refuse reaches the caller', (
+      tester,
+    ) async {
+      final harness = _Harness(tester, [_BootClient('a', userID: '@a:s')]);
+
+      await harness.run(() async {
+        await harness.mount();
+        final host = harness.matrix.loginHost;
+        await host.logoutLast();
+        // The state is now `LastLoggedOut`: a second one is refused, and the
+        // refusal has to come back to the session that asked, not be lost.
+        await expectLater(
+          host.logoutLast(),
+          throwsA(isA<InvalidAccountTransitionException>()),
+        );
+      });
     });
 
     // A session step that fails is caught by the session, but what it does in

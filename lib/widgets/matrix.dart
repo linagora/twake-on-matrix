@@ -41,6 +41,7 @@ import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -423,6 +424,7 @@ class MatrixState extends ConsumerState<Matrix>
   late final ClientSubscriptions _subscriptions;
   late final QuietLogouts _quietLogouts;
   late final LogoutRemovals _logoutRemovals;
+  late final LogoutRemovals _candidateRemovals;
   late final LogoutRemovals _pushRemovals;
   late final PushRemovalsController _pushController;
   late final PushTeardown _pushTeardown = _MatrixPushTeardown(this);
@@ -491,6 +493,7 @@ class MatrixState extends ConsumerState<Matrix>
     _subscriptions = ref.read(clientSubscriptionsProvider);
     _quietLogouts = ref.read(quietLogoutsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
+    _candidateRemovals = ref.read(candidateRemovalsProvider);
     _pushRemovals = ref.read(pushRemovalsProvider);
     _rollbackRemovals = ref.read(rollbackRemovalsProvider);
     _reportFailure = ref.read(reportFailureProvider);
@@ -1711,7 +1714,13 @@ class MatrixState extends ConsumerState<Matrix>
     }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
-      await ref.read(accountsProvider.notifier).logoutLast();
+      // A switch or a removal can change the state between the check and the
+      // write, which then refuses: the logout goes on, the state is reported.
+      try {
+        await ref.read(accountsProvider.notifier).logoutLast();
+      } catch (e, s) {
+        _report(e, s, 'last logout of ${loggedOut.clientName}');
+      }
     }
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
@@ -2054,7 +2063,8 @@ class _MatrixLoginHost implements LoginHost {
   }
 
   @override
-  void logoutLast() => _container.read(accountsProvider.notifier).logoutLast();
+  Future<void> logoutLast() =>
+      _container.read(accountsProvider.notifier).logoutLast();
 
   /// Same rule as `MatrixState.client`, read from the container so that it
   /// does not need the widget: the active client, else the first one.
@@ -2195,7 +2205,10 @@ class _MatrixLoginHost implements LoginHost {
   }
 
   @override
-  Future<void> retryPendingRemovals() => _state._logoutRemovals.retryAll();
+  Future<void> retryPendingRemovals() => Future.wait([
+    _state._logoutRemovals.retryAll(),
+    _state._candidateRemovals.retryAll(),
+  ]);
 
   @override
   void report(Object error, StackTrace stackTrace, String what) =>
