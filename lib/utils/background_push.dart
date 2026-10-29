@@ -110,9 +110,12 @@ class BackgroundPush {
   BackgroundPush._(this.client) {
     // Clear only after a sync: unread counts are stale while sync is paused
     // in background, and a timer would cancel notifications just shown.
-    onRoomSync ??= client.onSync.stream
-        .where((s) => s.hasRoomUpdate)
-        .listen((_) => _onClearingPush(getFromServer: false));
+    onRoomSync ??= client.onSync.stream.listen((sync) {
+      final roomIds = [...?sync.rooms?.join?.keys, ...?sync.rooms?.leave?.keys];
+      if (roomIds.isEmpty) return;
+      _syncedRoomIds.addAll(roomIds);
+      _onClearingPush(getFromServer: false);
+    });
     if (Platform.isAndroid) {
       UnifiedPush.initialize(
         onNewEndpoint: (endpoint, i) => _newUpEndpoint(endpoint.url, i),
@@ -805,6 +808,10 @@ class BackgroundPush {
 
   bool _clearingPushLock = false;
 
+  /// Rooms refreshed by a sync and not checked yet: only their unread
+  /// counts are fresh enough to clear their notification.
+  final Set<String> _syncedRoomIds = {};
+
   Future<void> _onClearingPush({bool getFromServer = true}) async {
     if (_clearingPushLock) {
       return;
@@ -859,21 +866,26 @@ class BackgroundPush {
           }
         }
       } else {
+        final syncedRoomIds = {..._syncedRoomIds};
+        _syncedRoomIds.clear();
         emptyRooms = client.rooms
+            .where((r) => syncedRoomIds.contains(r.id))
             .where(_hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
-      var changed = false;
+      final clearedRoomIds = <String>{};
       for (final roomId in emptyRooms) {
         final id = idMap[roomId];
         if (id != null) {
-          idMap.remove(roomId);
-          changed = true;
+          clearedRoomIds.add(roomId);
           await _flutterLocalNotificationsPlugin.cancel(id);
         }
       }
-      if (changed) {
+      if (clearedRoomIds.isNotEmpty) {
+        // Reload: a notification may have mapped a new room while cancelling.
+        await _loadIdMap();
+        idMap.removeWhere((roomId, _) => clearedRoomIds.contains(roomId));
         await store.setItem(
           SettingKeys.notificationCurrentIds,
           json.encode(idMap),
@@ -882,6 +894,8 @@ class BackgroundPush {
     } finally {
       _clearingPushLock = false;
     }
+    // Rooms synced while this sweep ran.
+    if (_syncedRoomIds.isNotEmpty) await _onClearingPush(getFromServer: false);
   }
 
   PushNotification _parseMessagePayload(dynamic message) {
