@@ -68,7 +68,7 @@ class KeychainSharingManager {
     final userId = client.userID;
     final homeserver = client.homeserver;
     if (userId == null || homeserver == null) return;
-    await _logoutNotificationSession(client);
+    await _logoutNotificationSession(client, userId);
     final login =
         await MatrixApi(
           homeserver: homeserver,
@@ -132,14 +132,20 @@ class KeychainSharingManager {
     final userId = client.userID;
     if (!PlatformInfos.isIOS || userId == null) return;
     await _pendingCreation?.catchError((_) {});
-    await _logoutNotificationSession(client);
+    // userId is kept: the client may have been cleared while waiting.
+    await _logoutNotificationSession(client, userId);
   }
 
-  static Future<void> _logoutNotificationSession(Client client) async {
-    final userId = client.userID;
-    if (!PlatformInfos.isIOS || userId == null) return;
+  /// Forgets the session before the network call, so the extension stops
+  /// using it even if the logout request hangs.
+  static Future<void> _logoutNotificationSession(
+    Client client,
+    String userId,
+  ) async {
+    if (!PlatformInfos.isIOS) return;
     try {
       final session = (await read(userId: userId))?.session;
+      await delete(userId: userId);
       if (session != null && session.deviceId != client.deviceID) {
         await MatrixApi(
           homeserver: Uri.parse(session.homeserverUrl),
@@ -150,7 +156,6 @@ class KeychainSharingManager {
     } catch (e, s) {
       Logs().w('[KeychainSharing] Unable to log out notification device', e, s);
     }
-    await delete(userId: userId);
   }
 
   static Future save(KeychainSharingRestoreToken token) => _secureStorage.write(
