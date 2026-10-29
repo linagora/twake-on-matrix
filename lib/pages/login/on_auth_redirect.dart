@@ -1,5 +1,10 @@
 import 'dart:async';
 
+import 'package:twake_chat/utils/login_failed_snackbar.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
@@ -13,21 +18,31 @@ import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter/material.dart';
 
-class OnAuthRedirect extends StatefulWidget {
+class OnAuthRedirect extends ConsumerStatefulWidget {
   const OnAuthRedirect({super.key});
 
   @override
-  State<OnAuthRedirect> createState() => _OnAuthRedirectState();
+  ConsumerState<OnAuthRedirect> createState() => _OnAuthRedirectState();
 }
 
-class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
+class _OnAuthRedirectState extends ConsumerState<OnAuthRedirect>
+    with ConnectPageMixin {
   Client? _clientFirstLoggedIn;
 
+  /// The client this redirect logs in with; the login events of any other
+  /// client (an earlier candidate that is still being cleaned up) are not its.
+  Client? _loginClient;
+
   StreamSubscription? _clientLoginStateChangedSubscription;
+
+  /// Read here: `ref` can't be read once the page is unmounted, and a login
+  /// that ends after the user left still drops its candidate.
+  late final LoginSessions _sessions;
 
   @override
   void initState() {
     super.initState();
+    _sessions = ref.read(loginSessionsProvider);
     _clientLoginStateChangedSubscription = Matrix.of(
       context,
     ).onClientLoginStateChanged.stream.listen(_listenClientLoginStateChanged);
@@ -53,6 +68,23 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       _handleLoginSuccess();
       return;
     }
+    if (event.multipleAccountLoginType.isFailure &&
+        event.client == _loginClient) {
+      _handleLoginFailed(event.error);
+      return;
+    }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone: tell the user and go back where they can start the
+  /// login again.
+  void _handleLoginFailed(Object? error) {
+    showLoginFailedSnackBar(error);
+    // A cleanup that failed leaves its session alive: drop the pending
+    // candidate now, not at the next login.
+    unawaited(_sessions.discardPending());
+    if (!mounted) return;
+    const HomeRoute().go(context);
   }
 
   void _handleLoginSuccess() {
@@ -74,6 +106,9 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       error,
       stackTrace,
     );
+    // A login that ended here leaves no client behind, even when the user
+    // already left.
+    unawaited(_sessions.discardPending());
     if (!mounted) return;
     const HomeRoute().go(context);
   }
@@ -134,18 +169,32 @@ class _OnAuthRedirectState extends State<OnAuthRedirect> with ConnectPageMixin {
       if (!context.mounted) return;
       Logs().i('tryLoggingUsingToken::homeserver: $homeserver');
       Matrix.of(context).loginType = LoginType.mLoginToken;
-      final client = await Matrix.of(context).getLoginClient();
-      if (!context.mounted) return;
-      Matrix.of(context).loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(homeserver))
-          .toHomeserverSummary();
+      final sessions = _sessions;
+      final client = await sessions.loginClient();
+      _loginClient = client;
+      final summary = context.mounted
+          ? await client
+                .checkHomeserver(Uri.parse(homeserver))
+                .toHomeserverSummary()
+          : null;
+      if (summary == null || !context.mounted) {
+        // The user left while the client was made or the homeserver was
+        // checked: no login follows.
+        unawaited(sessions.discardPending());
+        return;
+      }
+      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
 
-      await client.login(
-        LoginType.mLoginToken,
-        token: loginToken,
-        initialDeviceDisplayName: PlatformInfos.clientName,
+      await sessions.trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginToken,
+          token: loginToken!,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
     } catch (e, s) {
+      showLoginFailedSnackBar(e);
       _handleLoginError(e, s);
     }
   }
