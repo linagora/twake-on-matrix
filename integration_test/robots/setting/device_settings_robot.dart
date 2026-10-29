@@ -25,7 +25,29 @@ class DeviceSettingsRobot extends HomeRobot {
 
   PatrolFinder _sheetAction(String label) => _actionsSheet().$(label);
 
+  PatrolFinder _removeAllTile() =>
+      $(DevicesSettings).$(_l10n.removeAllOtherDevices);
+
+  // Rows are sorted by last activity, so a fresh API session can start below
+  // the fold; scroll from the top (current session) down to the target.
+  Future<void> _reveal(PatrolFinder target) async {
+    final list = $(DevicesSettings).$(Scrollable);
+    await $.scrollUntilVisible(
+      finder: _currentSession(),
+      view: list,
+      scrollDirection: AxisDirection.up,
+      delta: 200,
+    );
+    await $.scrollUntilVisible(
+      finder: target,
+      view: list,
+      scrollDirection: AxisDirection.down,
+      delta: 200,
+    );
+  }
+
   Future<void> _openActions(PatrolFinder row, {required String name}) async {
+    await _reveal(row);
     // The row centre can hold the Verify button; tap the name instead.
     await row.$(name).tap();
     await $.waitUntilVisible(_sheetAction(_l10n.changeDeviceName));
@@ -36,12 +58,14 @@ class DeviceSettingsRobot extends HomeRobot {
     await waitUntilAbsent($, _actionsSheet());
   }
 
-  Future<void> waitForOtherSession(String name) async {
+  Future<void> waitForOtherSessions(List<String> names) async {
     await $.waitUntilVisible(
-      _session(name),
+      _removeAllTile(),
       timeout: const Duration(seconds: 30),
     );
-    await $.waitUntilVisible($(DevicesSettings).$(_l10n.removeAllOtherDevices));
+    for (final name in names) {
+      await _reveal(_session(name));
+    }
   }
 
   Client get _client => Matrix.of($.tester.element($(DevicesSettings))).client;
@@ -70,6 +94,7 @@ class DeviceSettingsRobot extends HomeRobot {
 
   Future<void> expectCurrentSessionCannotBeRemoved() async {
     final current = _currentSession();
+    await _reveal(current);
     final row = current.evaluate().single.widget as UserDeviceListItem;
     await _openActions(current, name: row.userDevice.displayname);
     expect(_sheetAction(_l10n.removeDevice), findsNothing);
@@ -88,7 +113,7 @@ class DeviceSettingsRobot extends HomeRobot {
     await dialog.$(_l10n.save).tap();
 
     await waitUntilAbsent($, dialog);
-    await $.waitUntilVisible(_session(to));
+    await _reveal(_session(to));
     await waitUntilAbsent($, _session(from));
   }
 
@@ -104,7 +129,8 @@ class DeviceSettingsRobot extends HomeRobot {
   }
 
   Future<void> removeAllOtherSessions({required String password}) async {
-    await $(DevicesSettings).$(_l10n.removeAllOtherDevices).tap();
+    await _reveal(_removeAllTile());
+    await _removeAllTile().tap();
     await _confirmRemoval(
       _l10n.removeAllOtherDevicesConfirmationTitle,
       password,

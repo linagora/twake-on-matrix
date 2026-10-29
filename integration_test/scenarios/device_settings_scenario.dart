@@ -26,9 +26,7 @@ class DeviceSettingsScenario extends BaseTestScenario {
       await robots.settingRobot().openDevicesSetting();
 
       final devices = DeviceSettingsRobot($);
-      for (final deviceName in [name, ...bulkNames]) {
-        await devices.waitForOtherSession(deviceName);
-      }
+      await devices.waitForOtherSessions([name, ...bulkNames]);
       await devices.expectCurrentSessionCannotBeRemoved();
 
       await devices.renameSession(name, renamed);
