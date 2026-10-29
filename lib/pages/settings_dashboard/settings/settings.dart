@@ -158,10 +158,14 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   Client get client => Matrix.of(context).client;
 
   void _getCurrentProfile(Client client) async {
+    // The client has no user once the last account is logged out.
+    final userId = client.userID;
+    if (userId == null) return;
     final profile = await ProviderScope.containerOf(
       context,
       listen: false,
-    ).read(matrixUserProfileProvider(client.userID!).future);
+    ).read(matrixUserProfileProvider(userId).future);
+    if (!mounted) return;
     Logs().d('Settings::_getCurrentProfile() - currentProfile: $profile');
     avatarUriNotifier.value = profile?.avatarUrl == null
         ? null
