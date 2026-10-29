@@ -31,6 +31,7 @@ import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/utils/client_logout.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
@@ -176,8 +177,17 @@ class BackgroundPush {
       message: l10n.deviceIdentityRenewMessage,
       okLabel: l10n.ok,
     );
-    await KeychainSharingManager.logoutNotificationSession(targetClient);
-    await targetClient.logout();
+    // Same steps as the settings logout: keep the room keys in the backup.
+    try {
+      await targetClient.encryption?.keyManager.uploadInboundGroupSessions();
+      if (identical(targetClient, client)) await removeCurrentPusher();
+    } catch (e, s) {
+      Logs().w('[Push] Unable to prepare the session renewal', e, s);
+    }
+    await logoutAndCleanUp(
+      targetClient,
+      twakeSupported: _matrixState?.twakeSupported ?? false,
+    );
   }
 
   void _setupKeychainSyncForClient(Client targetClient) {
