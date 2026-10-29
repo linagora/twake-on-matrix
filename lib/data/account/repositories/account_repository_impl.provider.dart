@@ -10,7 +10,7 @@ import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/store_provider.dart';
 
-part 'account_repository_provider.g.dart';
+part 'account_repository_impl.provider.g.dart';
 
 /// The `Client` of every known account; the only id to `Client` mapping.
 @Riverpod(keepAlive: true)
