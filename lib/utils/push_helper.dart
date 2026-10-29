@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -164,6 +165,15 @@ Future<void> _tryPushHelper(
     // The generic notification is shown: a failure below must not show
     // another one from pushHelper's catch.
     try {
+      // A paused app does not sync: fetch the to-device room key once. This
+      // reuses the running sync when there is one.
+      if (!isBackgroundMessage) {
+        unawaited(
+          client.oneShotSync().catchError(
+            (e) => Logs().w('[Push] One-shot sync for the room key failed', e),
+          ),
+        );
+      }
       // The room key may arrive just after the push: retry for a few seconds
       // and replace the generic notification once the event can be decrypted.
       final decrypted = await retryUntil<Event>(
@@ -197,7 +207,31 @@ Future<void> _tryPushHelper(
   Logs().v('Push helper has been completed!');
 }
 
+/// Chains the shows: each one reads the active messaging style and writes it
+/// back, so two pushes of a room must not interleave.
+Future<void> _showQueue = Future.value();
+
 Future<void> _showNotification(
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+  Event event,
+  PushNotification notification,
+  L10n l10n, {
+  bool replace = false,
+}) {
+  final shown = _showQueue.then(
+    (_) => _showNotificationNow(
+      flutterLocalNotificationsPlugin,
+      event,
+      notification,
+      l10n,
+      replace: replace,
+    ),
+  );
+  _showQueue = shown.catchError((_) {});
+  return shown;
+}
+
+Future<void> _showNotificationNow(
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   Event event,
   PushNotification notification,
@@ -263,9 +297,10 @@ Future<void> _showNotification(
         ) ??
         -1;
     if (index < 0) return;
-    messages!.removeAt(index);
+    messages![index] = newMessage;
+  } else {
+    messagingStyleInformation?.messages?.add(newMessage);
   }
-  messagingStyleInformation?.messages?.add(newMessage);
 
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
     AppConfig.pushNotificationsChannelId,
