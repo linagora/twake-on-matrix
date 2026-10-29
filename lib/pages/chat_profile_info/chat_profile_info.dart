@@ -1,19 +1,14 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/app_state/room/block_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/usecase/room/block_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/unblock_user_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_view.dart';
 import 'package:twake_chat/presentation/enum/chat/chat_details_screen_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
@@ -22,6 +17,7 @@ import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/providers/user_info_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
@@ -34,7 +30,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-class ChatProfileInfo extends StatefulWidget {
+class ChatProfileInfo extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
   final VoidCallback? onSearch;
   final String? roomId;
@@ -53,24 +49,19 @@ class ChatProfileInfo extends StatefulWidget {
   });
 
   @override
-  State<ChatProfileInfo> createState() => ChatProfileInfoController();
+  ConsumerState<ChatProfileInfo> createState() => ChatProfileInfoController();
 }
 
-class ChatProfileInfoController extends State<ChatProfileInfo>
+class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
     with
         HandleVideoDownloadMixin,
         PlayVideoActionMixin,
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatProfileInfo>,
         LeaveChatMixin {
-  final _getUserInfoInteractor = getIt.get<GetUserInfoInteractor>();
-
-  StreamSubscription? userInfoNotifierSub;
+  late final String _userInfoUserId;
 
   StreamSubscription? ignoredUsersStreamSub;
-
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(GettingUserInfo()));
 
   final ValueNotifier<bool?> blockUserLoadingNotifier = ValueNotifier<bool?>(
     null,
@@ -92,12 +83,6 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   User? get user =>
       room?.unsafeGetUserFromMemoryOrFallback(room?.directChatMatrixID ?? '');
-
-  void getUserInfoAction() {
-    userInfoNotifierSub = _getUserInfoInteractor
-        .execute(userId: presentationContact?.matrixId ?? user?.id ?? '')
-        .listen((event) => userInfoNotifier.value = event);
-  }
 
   ScrollPhysics getScrollPhysics() {
     if (tabList.isEmpty) {
@@ -316,15 +301,13 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
         next.whenData((_) => _onTomContactsUpdateListener());
       },
     );
-    getUserInfoAction();
+    _userInfoUserId = presentationContact?.matrixId ?? user?.id ?? '';
     listenIgnoredUser();
   }
 
   @override
   void dispose() {
     _contactsSubscription?.close();
-    userInfoNotifier.dispose();
-    userInfoNotifierSub?.cancel();
     ignoredUsersStreamSub?.cancel();
     blockUserLoadingNotifier.dispose();
     isBlockedUser.dispose();
@@ -333,6 +316,9 @@ class ChatProfileInfoController extends State<ChatProfileInfo>
 
   @override
   Widget build(BuildContext context) {
-    return ChatProfileInfoView(this);
+    return ChatProfileInfoView(
+      this,
+      userInfo: ref.watch(userInfoProvider(_userInfoUserId)),
+    );
   }
 }

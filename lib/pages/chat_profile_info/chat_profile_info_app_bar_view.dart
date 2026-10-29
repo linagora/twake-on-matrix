@@ -1,7 +1,5 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show AsyncValue, AsyncValueExtensions;
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_group_actions_view.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_group_info_background_view.dart';
@@ -19,7 +17,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
     this.avatarUri,
     this.displayName,
     this.matrixId,
-    required this.userInfoNotifier,
+    required this.userInfo,
     required this.isBlockedUserNotifier,
     this.onUnblockUser,
     this.onBlockUser,
@@ -38,7 +36,7 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
   final Uri? avatarUri;
   final String? displayName;
   final String? matrixId;
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
+  final AsyncValue<UserInfo> userInfo;
   final ValueNotifier<bool> isBlockedUserNotifier;
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
@@ -55,135 +53,81 @@ class ChatProfileInfoAppBarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: userInfoNotifier,
-      builder: (context, userInfo, child) {
-        final userInfoModel = userInfo
-            .getSuccessOrNull<GetUserInfoSuccess>()
-            ?.userInfo;
-        return Column(
+    final userInfoModel = userInfo.value;
+    return Column(
+      children: [
+        Stack(
           children: [
-            Stack(
+            Positioned.fill(
+              child: _buildAvatarWidget(
+                userInfoModel: userInfoModel,
+                animationController: animationController,
+              ),
+            ),
+            Positioned.fill(
+              child: ChatDetailsGroupInfoBackgroundView(
+                animationController: animationController,
+              ),
+            ),
+            Column(
               children: [
-                Positioned.fill(
-                  child: _buildAvatarWidget(
-                    context: context,
-                    userInfo: userInfo,
-                    userInfoModel: userInfoModel,
-                    animationController: animationController,
-                  ),
+                ChatDetailsGroupInformationView(
+                  height: groupInfoHeight,
+                  maxHeight: maxGroupInfoHeight,
+                  animationController: animationController,
+                  displayName: userInfo.isLoading
+                      ? null
+                      : userInfoModel?.displayName ?? displayName ?? '',
+                  subTitle: getLocalizedStatusMessage,
+                  onTap: onChatInfoTap,
                 ),
-                Positioned.fill(
-                  child: ChatDetailsGroupInfoBackgroundView(
-                    animationController: animationController,
-                  ),
-                ),
-                Column(
-                  children: [
-                    ChatDetailsGroupInformationView(
-                      height: groupInfoHeight,
-                      maxHeight: maxGroupInfoHeight,
-                      animationController: animationController,
-                      displayName: _buildDisplayNameWidget(
-                        context: context,
-                        userInfo: userInfo,
-                        userInfoModel: userInfoModel,
-                      ),
-                      subTitle: getLocalizedStatusMessage,
-                      onTap: onChatInfoTap,
-                    ),
-                    ChatDetailsGroupActionsView(
-                      onMessage: onMessage,
-                      onSearch: onSearch,
-                      animationController: animationController,
-                    ),
-                  ],
+                ChatDetailsGroupActionsView(
+                  onMessage: onMessage,
+                  onSearch: onSearch,
+                  animationController: animationController,
                 ),
               ],
             ),
-            ChatProfileInfoDetails(
-              displayName: displayName,
-              matrixId: matrixId,
-              userInfoNotifier: userInfoNotifier,
-              isBlockedUserNotifier: isBlockedUserNotifier,
-              onUnblockUser: onUnblockUser,
-              onBlockUser: onBlockUser,
-              blockUserLoadingNotifier: blockUserLoadingNotifier,
-              room: room,
-              onLeaveChat: onLeaveChat,
-            ),
           ],
-        );
-      },
+        ),
+        ChatProfileInfoDetails(
+          displayName: displayName,
+          matrixId: matrixId,
+          userInfo: userInfo,
+          isBlockedUserNotifier: isBlockedUserNotifier,
+          onUnblockUser: onUnblockUser,
+          onBlockUser: onBlockUser,
+          blockUserLoadingNotifier: blockUserLoadingNotifier,
+          room: room,
+          onLeaveChat: onLeaveChat,
+        ),
+      ],
     );
   }
 
   Widget _buildAvatarWidget({
-    required BuildContext context,
-    required Either<Failure, Success> userInfo,
     required UserInfo? userInfoModel,
     required AnimationController animationController,
   }) {
-    return userInfo.fold(
-      (failure) {
-        return SecondaryAvatar(
-          mxContent: avatarUri,
-          name: userInfoModel?.displayName ?? displayName,
-          fontSize: ChatProfileInfoStyle.avatarFontSize,
-          animationController: animationController,
-        );
-      },
-      (success) {
-        if (success is GettingUserInfo) {
-          return SizedBox(
-            width: double.infinity,
-            height: ChatProfileInfoStyle.avatarHeight,
-            child: Center(
-              child: CupertinoActivityIndicator(
-                animating: true,
-                color: LinagoraSysColors.material().onSurfaceVariant,
-              ),
-            ),
-          );
-        }
-        if (success is GetUserInfoSuccess) {
-          return SecondaryAvatar(
-            mxContent: userInfoModel?.avatarUrl != null
-                ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
-                : avatarUri,
-            name: userInfoModel?.displayName ?? displayName,
-            fontSize: ChatProfileInfoStyle.avatarFontSize,
-            animationController: animationController,
-          );
-        }
-        return SecondaryAvatar(
-          mxContent: avatarUri,
-          name: userInfoModel?.displayName ?? displayName,
-          fontSize: ChatProfileInfoStyle.avatarFontSize,
-          animationController: animationController,
-        );
-      },
-    );
-  }
-
-  String? _buildDisplayNameWidget({
-    required BuildContext context,
-    required Either<Failure, Success> userInfo,
-    required UserInfo? userInfoModel,
-  }) {
-    return userInfo.fold(
-      (failure) {
-        return displayName ?? '';
-      },
-      (success) {
-        if (success is GettingUserInfo) {
-          return null;
-        }
-        if (success is GetUserInfoSuccess) {
-          return userInfoModel?.displayName ?? displayName ?? '';
-        }
-        return displayName ?? '';
-      },
+    if (userInfo.isLoading) {
+      return SizedBox(
+        width: double.infinity,
+        height: ChatProfileInfoStyle.avatarHeight,
+        child: Center(
+          child: CupertinoActivityIndicator(
+            animating: true,
+            color: LinagoraSysColors.material().onSurfaceVariant,
+          ),
+        ),
+      );
+    }
+    return SecondaryAvatar(
+      mxContent: userInfoModel?.avatarUrl != null
+          ? Uri.tryParse(userInfoModel?.avatarUrl ?? '')
+          : avatarUri,
+      name: userInfoModel?.displayName ?? displayName,
+      fontSize: ChatProfileInfoStyle.avatarFontSize,
+      animationController: animationController,
     );
   }
 }

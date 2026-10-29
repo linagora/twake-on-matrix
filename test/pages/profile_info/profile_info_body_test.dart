@@ -1,22 +1,24 @@
-import 'package:dartz/dartz.dart' hide State;
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderContainer, UncontrolledProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
+import 'package:twake_chat/domain/user_info/usecases/get_user_info_usecase.dart';
+import 'package:twake_chat/domain/user_info/usecases/get_user_info_usecase.provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 
-class _FakeGetUserInfoInteractor extends Fake implements GetUserInfoInteractor {
+class _PendingGetUserInfoUseCase extends Fake implements GetUserInfoUseCase {
   @override
-  Stream<Either<Failure, Success>> execute({String? userId}) =>
-      const Stream.empty();
+  Future<UserInfo> execute(String userId) => Completer<UserInfo>().future;
 }
 
 class _FakeClient extends Fake implements Client {
@@ -85,9 +87,6 @@ class _FakeUser extends Fake implements User {
 void main() {
   setUp(() {
     GetIt.instance.registerSingleton(ResponsiveUtils());
-    GetIt.instance.registerSingleton<GetUserInfoInteractor>(
-      _FakeGetUserInfoInteractor(),
-    );
   });
 
   tearDown(GetIt.instance.reset);
@@ -104,16 +103,26 @@ void main() {
 
       testWidgets('$outcome for a ${membership.name} member', (tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              extensions: [LinagoraTextThemeExtension.material()],
+          UncontrolledProviderScope(
+            container: ProviderContainer.test(
+              retry: (_, _) => null,
+              overrides: [
+                getUserInfoUseCaseProvider.overrideWithValue(
+                  _PendingGetUserInfoUseCase(),
+                ),
+              ],
             ),
-            localizationsDelegates: L10n.localizationsDelegates,
-            home: Provider<MatrixState>.value(
-              value: _FakeMatrixState(),
-              child: Scaffold(
-                body: SingleChildScrollView(
-                  child: ProfileInfoBody(user: _FakeUser(membership)),
+            child: MaterialApp(
+              theme: ThemeData(
+                extensions: [LinagoraTextThemeExtension.material()],
+              ),
+              localizationsDelegates: L10n.localizationsDelegates,
+              home: Provider<MatrixState>.value(
+                value: _FakeMatrixState(),
+                child: Scaffold(
+                  body: SingleChildScrollView(
+                    child: ProfileInfoBody(user: _FakeUser(membership)),
+                  ),
                 ),
               ),
             ),

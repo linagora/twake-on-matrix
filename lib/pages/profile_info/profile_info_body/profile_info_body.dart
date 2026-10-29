@@ -6,16 +6,15 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/default_power_level_member.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/set_permission_level_state.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/usecase/room/set_permission_level_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:twake_chat/presentation/enum/profile_info/profile_info_body_enum.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
+import 'package:twake_chat/providers/user_info_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/dialog/warning_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -24,12 +23,15 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/user_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show AsyncLoading, ConsumerState, ConsumerStatefulWidget;
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfoBody extends StatefulWidget {
+class ProfileInfoBody extends ConsumerStatefulWidget {
   const ProfileInfoBody({
     required this.user,
     this.onNewChatOpen,
@@ -47,21 +49,16 @@ class ProfileInfoBody extends StatefulWidget {
   final VoidCallback? onTransferOwnershipSuccess;
 
   @override
-  State<ProfileInfoBody> createState() => ProfileInfoBodyController();
+  ConsumerState<ProfileInfoBody> createState() => ProfileInfoBodyController();
 }
 
-class ProfileInfoBodyController extends State<ProfileInfoBody>
+class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
     with SingleTickerProviderStateMixin {
   static const int _animationDuration = 100;
 
   final ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
 
   StreamSubscription? _setPermissionLevelSubscription;
-
-  StreamSubscription? userInfoNotifierSub;
-
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier =
-      ValueNotifier<Either<Failure, Success>>(Right(GettingUserInfo()));
 
   late AnimationController animationController;
 
@@ -80,26 +77,15 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
       vsync: this,
       duration: const Duration(milliseconds: _animationDuration),
     );
-    getUserInfoAction();
   }
 
   @override
   void dispose() {
-    userInfoNotifierSub?.cancel();
     _setPermissionLevelSubscription?.cancel();
     _avatarToggleTimer?.cancel();
     animationController.dispose();
     isExpandedAvatar.dispose();
-    userInfoNotifier.dispose();
     super.dispose();
-  }
-
-  void getUserInfoAction() {
-    if (user == null) return;
-    userInfoNotifierSub = getIt
-        .get<GetUserInfoInteractor>()
-        .execute(userId: user!.id)
-        .listen((event) => userInfoNotifier.value = event);
   }
 
   void openNewChat() {
@@ -363,5 +349,10 @@ class ProfileInfoBodyController extends State<ProfileInfoBody>
   }
 
   @override
-  Widget build(BuildContext context) => ProfileInfoBodyView(controller: this);
+  Widget build(BuildContext context) => ProfileInfoBodyView(
+    controller: this,
+    userInfo: user == null
+        ? const AsyncLoading<UserInfo>()
+        : ref.watch(userInfoProvider(user!.id)),
+  );
 }

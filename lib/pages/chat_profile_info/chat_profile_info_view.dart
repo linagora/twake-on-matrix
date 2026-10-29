@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncValue;
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -10,8 +12,13 @@ import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_style.dart'
 
 class ChatProfileInfoView extends StatelessWidget {
   final ChatProfileInfoController controller;
+  final AsyncValue<UserInfo> userInfo;
 
-  const ChatProfileInfoView(this.controller, {super.key});
+  const ChatProfileInfoView(
+    this.controller, {
+    super.key,
+    required this.userInfo,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,7 @@ class ChatProfileInfoView extends StatelessWidget {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             ChatProfileInfoAppBar(
-              userInfoNotifier: controller.userInfoNotifier,
+              userInfo: userInfo,
               room: controller.room,
               user: user,
               presentationContact: contact,

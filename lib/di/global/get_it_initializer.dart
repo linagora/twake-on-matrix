@@ -134,7 +134,6 @@ import 'package:twake_chat/domain/usecase/search/search_recent_chat_interactor.d
 import 'package:twake_chat/domain/usecase/search/server_search_interactor.dart';
 import 'package:twake_chat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:twake_chat/domain/usecase/settings/update_profile_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/event/twake_event_dispatcher.dart';
 import 'package:twake_chat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
@@ -352,7 +351,7 @@ class GetItInitializer {
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
     );
-    // TODO: [transitional] Kept for matrix.dart's language lookup and GetUserInfoInteractor; Riverpod code uses userInfoRepositoryProvider.
+    // TODO: [transitional] Kept for matrix.dart's language lookup; Riverpod code uses userInfoRepositoryProvider.
     getIt.registerFactory<UserInfoRepository>(
       () => UserInfoRepositoryImpl(
         UserInfoDatasourceImpl(
@@ -500,7 +499,6 @@ class GetItInitializer {
     );
 
     getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
-    getIt.registerFactory(() => const GetUserInfoInteractor());
 
     getIt.registerFactory(() => InviteUserInteractor());
 

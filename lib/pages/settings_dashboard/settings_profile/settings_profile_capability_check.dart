@@ -1,14 +1,13 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/capabilities/get_server_capabilities_state.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
+import 'package:twake_chat/providers/user_info_provider.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
-import 'package:rxdart/rxdart.dart';
 
-class SettingsProfileCapabilityCheck extends StatelessWidget {
+class SettingsProfileCapabilityCheck extends ConsumerWidget {
   const SettingsProfileCapabilityCheck({
     super.key,
     required this.builder,
@@ -26,22 +25,15 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
   builder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userId = this.userId;
+    final userInfo = userId == null
+        ? null
+        : ref.watch(userInfoProvider(userId)).value;
     return StreamBuilder(
-      stream: Rx.combineLatest2(
-        getIt.get<GetServerCapabilitiesInteractor>().execute(),
-        getIt.get<GetUserInfoInteractor>().execute(userId: userId),
-        (capabilitiesState, userInfoState) => (
-          capabilitiesState: capabilitiesState,
-          userInfoState: userInfoState,
-        ),
-      ),
+      stream: getIt.get<GetServerCapabilitiesInteractor>().execute(),
       builder: (context, snapshot) {
-        final capabilitiesData = snapshot.data?.capabilitiesState.fold(
-          (failure) => failure,
-          (success) => success,
-        );
-        final userInfoData = snapshot.data?.userInfoState.fold(
+        final capabilitiesData = snapshot.data?.fold(
           (failure) => failure,
           (success) => success,
         );
@@ -49,7 +41,7 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
           capabilitiesData is GetServerCapabilitiesSuccess
               ? capabilitiesData.capabilities
               : null,
-          userInfoData is GetUserInfoSuccess ? userInfoData.userInfo : null,
+          userInfo,
           child,
         );
       },

@@ -1,5 +1,5 @@
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncValue;
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_contact_rows.dart';
@@ -9,9 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class ProfileInfoBodyView extends StatelessWidget {
-  const ProfileInfoBodyView({required this.controller, super.key});
+  const ProfileInfoBodyView({
+    required this.controller,
+    required this.userInfo,
+    super.key,
+  });
 
   final ProfileInfoBodyController controller;
+  final AsyncValue<UserInfo> userInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +35,7 @@ class ProfileInfoBodyView extends StatelessWidget {
           else
             _buildWebHeader(context),
           const SizedBox(height: 16),
-          ProfileInfoContactRows(
-            user: controller.user!,
-            userInfoNotifier: controller.userInfoNotifier,
-          ),
+          ProfileInfoContactRows(user: controller.user!, userInfo: userInfo),
           if (!controller.isOwnProfile) ...[
             Padding(
               padding: ProfileInfoBodyViewStyle.actionsPadding,
@@ -61,7 +63,7 @@ class ProfileInfoBodyView extends StatelessWidget {
                   children: [
                     ProfileInfoHeader(
                       user: controller.user!,
-                      userInfoNotifier: controller.userInfoNotifier,
+                      userInfo: userInfo,
                       animationController: controller.animationController,
                       onAvatarInfoTap: controller.onAvatarInfoTap,
                     ),
@@ -78,32 +80,25 @@ class ProfileInfoBodyView extends StatelessWidget {
   Widget _buildWebHeader(BuildContext context) {
     return ProfileInfoHeader(
       user: controller.user!,
-      userInfoNotifier: controller.userInfoNotifier,
+      userInfo: userInfo,
       animationController: controller.animationController,
       onAvatarInfoTap: controller.onAvatarInfoTap,
     );
   }
 
   Widget _buildAvatarBackground(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: controller.userInfoNotifier,
-      builder: (context, userInfo, _) {
-        final userInfoData = userInfo.getSuccessOrNull<GetUserInfoSuccess>();
-        final displayName =
-            userInfoData?.userInfo.displayName ??
-            controller.user?.calcDisplayname() ??
-            '';
-        final rawAvatarUrl = userInfoData?.userInfo.avatarUrl;
-        final avatarUrl = (rawAvatarUrl == null || rawAvatarUrl.isEmpty)
-            ? controller.user?.avatarUrl
-            : (Uri.tryParse(rawAvatarUrl) ?? controller.user?.avatarUrl);
-        return SecondaryAvatar(
-          animationController: controller.animationController,
-          mxContent: avatarUrl,
-          name: displayName,
-          fontSize: ProfileInfoBodyViewStyle.avatarFontSize,
-        );
-      },
+    final userInfoModel = userInfo.value;
+    final displayName =
+        userInfoModel?.displayName ?? controller.user?.calcDisplayname() ?? '';
+    final rawAvatarUrl = userInfoModel?.avatarUrl;
+    final avatarUrl = (rawAvatarUrl == null || rawAvatarUrl.isEmpty)
+        ? controller.user?.avatarUrl
+        : (Uri.tryParse(rawAvatarUrl) ?? controller.user?.avatarUrl);
+    return SecondaryAvatar(
+      animationController: controller.animationController,
+      mxContent: avatarUrl,
+      name: displayName,
+      fontSize: ProfileInfoBodyViewStyle.avatarFontSize,
     );
   }
 

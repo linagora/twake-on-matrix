@@ -1,8 +1,5 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/chat_details_page_enum.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
 import 'package:twake_chat/pages/chat_profile_info/chat_profile_info_app_bar_view.dart';
@@ -20,7 +17,7 @@ import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers
 import 'package:twake_chat/presentation/extensions/contact/matrix_user_profile_extension.dart';
 
 class ChatProfileInfoAppBar extends StatefulWidget {
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
+  final AsyncValue<UserInfo> userInfo;
   final Room? room;
   final User? user;
   final PresentationContact? presentationContact;
@@ -42,7 +39,7 @@ class ChatProfileInfoAppBar extends StatefulWidget {
 
   const ChatProfileInfoAppBar({
     super.key,
-    required this.userInfoNotifier,
+    required this.userInfo,
     this.room,
     this.user,
     this.presentationContact,
@@ -151,7 +148,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
         valueListenable: isExpandedAvatar,
         builder: (context, isExpanded, _) {
           return _SizedAppBar(
-            userInfoNotifier: widget.userInfoNotifier,
+            userInfo: widget.userInfo,
             room: widget.room,
             user: widget.user,
             contact: widget.presentationContact,
@@ -183,7 +180,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                               displayName:
                                   profile?.displayName ?? contact!.displayName,
                               matrixId: contact?.matrixId,
-                              userInfoNotifier: widget.userInfoNotifier,
+                              userInfo: widget.userInfo,
                               isBlockedUserNotifier:
                                   widget.isBlockedUserNotifier,
                               onUnblockUser: widget.onUnblockUser,
@@ -211,7 +208,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                                   ChatProfileInfoStyle.maxAvatarHeight,
                               displayName: contact.displayName,
                               matrixId: contact.matrixId,
-                              userInfoNotifier: widget.userInfoNotifier,
+                              userInfo: widget.userInfo,
                               isBlockedUserNotifier:
                                   widget.isBlockedUserNotifier,
                               onUnblockUser: widget.onUnblockUser,
@@ -240,7 +237,7 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
                             avatarUri: widget.user?.avatarUrl,
                             displayName: widget.user?.calcDisplayname(),
                             matrixId: widget.user?.id,
-                            userInfoNotifier: widget.userInfoNotifier,
+                            userInfo: widget.userInfo,
                             isBlockedUserNotifier: widget.isBlockedUserNotifier,
                             onUnblockUser: widget.onUnblockUser,
                             onBlockUser: widget.onBlockUser,
@@ -298,51 +295,35 @@ class _ChatProfileInfoAppBarState extends State<ChatProfileInfoAppBar>
 
 class _SizedAppBar extends StatelessWidget {
   const _SizedAppBar({
-    required this.userInfoNotifier,
+    required this.userInfo,
     required this.user,
     required this.contact,
     required this.builder,
     this.room,
   });
 
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
+  final AsyncValue<UserInfo> userInfo;
   final User? user;
   final PresentationContact? contact;
   final Widget Function(BuildContext context, double height) builder;
   final Room? room;
 
-  double getToolbarHeight(
-    BuildContext context,
-    Either<Failure, Success> userInfoNotifier,
-    List<UnifiedContact> contacts,
-  ) {
-    final height = userInfoNotifier.fold(
-      (failure) => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
-      (success) {
-        if (success is GettingUserInfo) {
-          return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-        }
-        if (success is GetUserInfoSuccess) {
-          if (success.userInfo.emails != null &&
-              success.userInfo.phones != null) {
-            if (room != null) {
-              return ChatDetailViewStyle.maxToolbarHeightSliverAppBar;
-            }
-            return ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-          }
-
-          if (success.userInfo.emails != null ||
-              success.userInfo.phones != null) {
-            return getIt.get<ResponsiveUtils>().isMobile(context)
-                ? ChatDetailViewStyle.minToolbarHeightSliverAppBar
-                : ChatDetailViewStyle.mediumToolbarHeightSliverAppBar;
-          }
-
-          return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
-        }
-        return ChatDetailViewStyle.minToolbarHeightSliverAppBar;
-      },
-    );
+  double getToolbarHeight(BuildContext context, List<UnifiedContact> contacts) {
+    final height = switch (userInfo) {
+      AsyncValue(isLoading: true) =>
+        ChatDetailViewStyle.mediumToolbarHeightSliverAppBar,
+      AsyncData(:final value)
+          when value.emails != null && value.phones != null =>
+        room != null
+            ? ChatDetailViewStyle.maxToolbarHeightSliverAppBar
+            : ChatDetailViewStyle.mediumToolbarHeightSliverAppBar,
+      AsyncData(:final value)
+          when value.emails != null || value.phones != null =>
+        getIt.get<ResponsiveUtils>().isMobile(context)
+            ? ChatDetailViewStyle.minToolbarHeightSliverAppBar
+            : ChatDetailViewStyle.mediumToolbarHeightSliverAppBar,
+      _ => ChatDetailViewStyle.minToolbarHeightSliverAppBar,
+    };
 
     double additionalHeight = 0;
     final matrixId = contact?.matrixId ?? user?.id;
@@ -361,20 +342,12 @@ class _SizedAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: userInfoNotifier,
-      builder: (context, lookupContact, _) {
-        return Consumer(
-          builder: (context, ref, child) {
-            final contacts =
-                ref.watch(contactsControllerProvider).asData?.value ??
-                const <UnifiedContact>[];
-            return builder(
-              context,
-              getToolbarHeight(context, lookupContact, contacts),
-            );
-          },
-        );
+    return Consumer(
+      builder: (context, ref, child) {
+        final contacts =
+            ref.watch(contactsControllerProvider).asData?.value ??
+            const <UnifiedContact>[];
+        return builder(context, getToolbarHeight(context, contacts));
       },
     );
   }

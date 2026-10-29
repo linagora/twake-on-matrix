@@ -1,9 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
@@ -28,7 +25,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
     super.key,
     this.displayName,
     this.matrixId,
-    required this.userInfoNotifier,
+    required this.userInfo,
     required this.isBlockedUserNotifier,
     this.onUnblockUser,
     this.onBlockUser,
@@ -39,7 +36,7 @@ class ChatProfileInfoDetails extends StatelessWidget {
 
   final String? displayName;
   final String? matrixId;
-  final ValueNotifier<Either<Failure, Success>> userInfoNotifier;
+  final AsyncValue<UserInfo> userInfo;
   final ValueNotifier<bool> isBlockedUserNotifier;
   final void Function()? onUnblockUser;
   final void Function()? onBlockUser;
@@ -71,40 +68,25 @@ class ChatProfileInfoDetails extends StatelessWidget {
                     text: matrixId!,
                     title: L10n.of(context)!.username,
                   ),
-                userInfoNotifier.value.fold(
-                  (failure) => const SizedBox.shrink(),
-                  (success) {
-                    if (success is GetUserInfoSuccess) {
-                      return Column(
-                        children: [
-                          if (success.userInfo.emails?.firstOrNull != null) ...{
-                            const SizedBox(
-                              height: ChatProfileInfoStyle.textSpacing,
-                            ),
-                            _CopiableRow(
-                              materialIcon: Icons.alternate_email,
-                              title: L10n.of(context)!.email,
-                              text: success.userInfo.emails?.firstOrNull ?? '',
-                              enableDivider: true,
-                            ),
-                          },
-                          if (success.userInfo.phones?.firstOrNull != null) ...{
-                            const SizedBox(
-                              height: ChatProfileInfoStyle.textSpacing,
-                            ),
-                            _CopiableRow(
-                              materialIcon: Icons.call,
-                              title: L10n.of(context)!.phoneNumber,
-                              text: success.userInfo.phones?.firstOrNull ?? '',
-                            ),
-                          },
-                        ],
-                      );
-                    }
-
-                    return const SizedBox.shrink();
-                  },
-                ),
+                if (userInfo.value case final info?) ...[
+                  if (info.emails?.firstOrNull != null) ...[
+                    const SizedBox(height: ChatProfileInfoStyle.textSpacing),
+                    _CopiableRow(
+                      materialIcon: Icons.alternate_email,
+                      title: L10n.of(context)!.email,
+                      text: info.emails?.firstOrNull ?? '',
+                      enableDivider: true,
+                    ),
+                  ],
+                  if (info.phones?.firstOrNull != null) ...[
+                    const SizedBox(height: ChatProfileInfoStyle.textSpacing),
+                    _CopiableRow(
+                      materialIcon: Icons.call,
+                      title: L10n.of(context)!.phoneNumber,
+                      text: info.phones?.firstOrNull ?? '',
+                    ),
+                  ],
+                ],
                 if (room?.isDirectChat == true) ...[
                   const SizedBox(height: ChatProfileInfoStyle.textSpacing),
                   InkWell(
