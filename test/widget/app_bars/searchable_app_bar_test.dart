@@ -1,7 +1,7 @@
 import 'package:twake_chat/pages/forward/forward_view_style.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection_view_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
-import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -18,6 +18,7 @@ void main() {
     bool isFullScreen = true,
     bool displayBackButton = true,
     bool isSearchModeEnabled = false,
+    double Function(BuildContext context)? toolbarHeight,
   }) {
     searchModeNotifier.value = isSearchModeEnabled;
     getIt.registerSingleton(ResponsiveUtils());
@@ -33,6 +34,7 @@ void main() {
             appBar: PreferredSize(
               preferredSize: ForwardViewStyle.maxPreferredSize(context),
               child: SearchableAppBar(
+                toolbarHeight: toolbarHeight?.call(context),
                 searchModeNotifier: searchModeNotifier,
                 title: "Title",
                 hintText: "Hint",
@@ -99,20 +101,22 @@ void main() {
 
     testWidgets("Clear button empties the search text", (widgetTester) async {
       addTearDown(textEditingController.clear);
-      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
+      // The dialog toolbar height only applies at tablet width and above.
+      widgetTester.view.devicePixelRatio = 1.0;
+      widgetTester.view.physicalSize = const Size(1280, 800);
+      addTearDown(widgetTester.view.reset);
+      await widgetTester.pumpWidget(
+        makeTestableAppBar(
+          isFullScreen: false,
+          toolbarHeight: ContactsSelectionViewStyle.maxToolbarHeight,
+        ),
+      );
 
       textEditingController.text = "Search text";
       await widgetTester.pump();
       expect(find.byTooltip("Clear"), findsOneWidget);
 
-      // The 48px app bar slot of this harness clips the dialog-height text
-      // field, so call the button's handler instead of a real tap.
-      final clearButton = widgetTester.widget<TwakeIconButton>(
-        find.byWidgetPredicate(
-          (widget) => widget is TwakeIconButton && widget.tooltip == "Clear",
-        ),
-      );
-      clearButton.onTap!();
+      await widgetTester.tap(find.byTooltip("Clear"));
       await widgetTester.pump();
 
       expect(textEditingController.text, isEmpty);
