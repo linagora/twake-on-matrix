@@ -54,9 +54,6 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
               linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
               textAlign: TextAlign.start,
               onTapDownLink: (tapDownDetails, link) {
-                if (link.type == LinkType.url && isFilenameUrl(link.value)) {
-                  return;
-                }
                 handleOnTappedLinkHtml(
                   context: context,
                   details: tapDownDetails,
@@ -67,7 +64,10 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
                 if (link.type != LinkType.url) return null;
                 final url = link.value;
                 if (url == null) return null;
-                if (isFilenameUrl(url)) return null;
+                // Returning null would still style the span as a link.
+                if (isFilenameUrl(url)) {
+                  return TextSpan(text: url, style: richTextStyle);
+                }
                 return buildNativeLinkSpan(
                   url: url,
                   childrenSpan: TextSpan(text: url, style: style),
