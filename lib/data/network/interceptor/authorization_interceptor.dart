@@ -11,7 +11,6 @@ class AuthorizationInterceptor extends InterceptorsWrapper {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     options.headers[HttpHeaders.authorizationHeader] = _bearerToken;
-    Logs().d('AuthorizationInterceptor::onRequest:accessToken: $_bearerToken');
     super.onRequest(options, handler);
   }
 
