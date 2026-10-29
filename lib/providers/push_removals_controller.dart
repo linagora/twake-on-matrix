@@ -2,7 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/account/push_removal_plan.dart';
 import 'package:twake_chat/data/account/push_teardown.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/providers/account_services_providers.dart';
 
 part 'push_removals_controller.g.dart';
