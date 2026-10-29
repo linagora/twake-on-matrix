@@ -1,4 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
@@ -73,7 +74,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
       if (!ssoSupported) {
         // No SSO: go straight to password login page
-        const HomeLoginRoute().push(context);
+        const HomeLoginRoute($extra: LoginClientOwner.caller).push(context);
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await client
@@ -92,7 +93,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
         }
       } else {
-        const ConnectRoute().push(context);
+        const ConnectRoute($extra: LoginClientOwner.caller).push(context);
       }
     } catch (e) {
       autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();

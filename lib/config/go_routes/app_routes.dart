@@ -12,6 +12,7 @@ import 'package:twake_chat/pages/chat_blank/chat_blank.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:twake_chat/pages/chat_encryption_settings/chat_encryption_settings.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:twake_chat/pages/device_settings/device_settings.dart';
 import 'package:twake_chat/pages/error_page/error_page.dart';
 import 'package:twake_chat/pages/invitation_link_web/invitation_link_web.dart';
@@ -156,16 +157,29 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       );
 }
 
-class HomeLoginRoute extends GoRouteData with $HomeLoginRoute {
-  const HomeLoginRoute();
+mixin _LoginRoute on GoRouteData {
+  LoginClientOwner get $extra;
+  bool get _usesLoggedOutRedirect;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      _loggedInRedirect(context, state);
+      _usesLoggedOutRedirect
+      ? _loggedOutRedirect(context, state)
+      : _loggedInRedirect(context, state);
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const Login());
+      _defaultPage(context, Login(owner: $extra));
+}
+
+class HomeLoginRoute extends GoRouteData with $HomeLoginRoute, _LoginRoute {
+  const HomeLoginRoute({this.$extra = LoginClientOwner.thisPage});
+
+  @override
+  final LoginClientOwner $extra;
+
+  @override
+  bool get _usesLoggedOutRedirect => false;
 }
 
 class HomeTwakeWelcomeRoute extends GoRouteData with $HomeTwakeWelcomeRoute {
@@ -209,11 +223,13 @@ class OnAuthRedirectRoute extends GoRouteData with $OnAuthRedirectRoute {
 
 @TypedGoRoute<ConnectRoute>(path: '/connect')
 class ConnectRoute extends GoRouteData with $ConnectRoute {
-  const ConnectRoute();
+  const ConnectRoute({this.$extra = LoginClientOwner.thisPage});
+
+  final LoginClientOwner $extra;
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const ConnectPage());
+      _defaultPage(context, ConnectPage(owner: $extra));
 }
 
 @TypedGoRoute<SignupRoute>(path: '/signup')
@@ -717,16 +733,15 @@ class AddAccountRoute extends GoRouteData with $AddAccountRoute {
       _defaultPage(context, TwakeWelcome(arg: $extra));
 }
 
-class AddAccountLoginRoute extends GoRouteData with $AddAccountLoginRoute {
-  const AddAccountLoginRoute();
+class AddAccountLoginRoute extends GoRouteData
+    with $AddAccountLoginRoute, _LoginRoute {
+  const AddAccountLoginRoute({this.$extra = LoginClientOwner.thisPage});
 
   @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      _loggedOutRedirect(context, state);
+  final LoginClientOwner $extra;
 
   @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const Login());
+  bool get _usesLoggedOutRedirect => true;
 }
 
 class AddAccountHomeserverPickerRoute extends GoRouteData

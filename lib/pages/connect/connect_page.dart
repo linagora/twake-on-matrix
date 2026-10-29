@@ -1,17 +1,26 @@
+import 'dart:async';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/connect/connect_page_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
 
-class ConnectPage extends StatefulWidget {
-  const ConnectPage({super.key});
+class ConnectPage extends ConsumerStatefulWidget {
+  const ConnectPage({super.key, this.owner = LoginClientOwner.thisPage});
+
+  /// Whether this screen or the one that pushed it drops the pending client.
+  final LoginClientOwner owner;
 
   @override
-  State<ConnectPage> createState() => ConnectPageController();
+  ConsumerState<ConnectPage> createState() => ConnectPageController();
 }
 
-class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
+class ConnectPageController extends ConsumerState<ConnectPage>
+    with ConnectPageMixin {
   final TextEditingController usernameController = TextEditingController();
   late final Future<Client> loginClientFuture;
 
@@ -19,7 +28,7 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
 
   Future<void> login() async {
     try {
-      final client = await Matrix.of(context).getLoginClient();
+      final client = await _sessions.loginClient();
       final loginTypes = await client.request(
         RequestType.GET,
         '/client/r0/login',
@@ -39,10 +48,21 @@ class ConnectPageController extends State<ConnectPage> with ConnectPageMixin {
     }
   }
 
+  late final LoginSessions _sessions;
+
+  @override
+  void dispose() {
+    if (widget.owner == LoginClientOwner.thisPage) {
+      unawaited(_sessions.discardPending());
+    }
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
-    loginClientFuture = Matrix.of(context).getLoginClient();
+    _sessions = ref.read(loginSessionsProvider);
+    loginClientFuture = _sessions.loginClient();
     if (supportsSso(context)) {
       login();
     }
