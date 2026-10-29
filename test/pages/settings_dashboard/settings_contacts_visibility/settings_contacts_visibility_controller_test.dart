@@ -100,7 +100,7 @@ void main() {
   });
 
   group('selectVisibility', () {
-    test('private shows no field, whatever was selected', () async {
+    test('private sends every field', () async {
       repository.visibility = UserInfoVisibility(
         visibility: 'public',
         visibleFields: const [VisibleEnum.email],
