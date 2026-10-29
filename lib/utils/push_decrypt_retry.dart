@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:matrix/matrix.dart';
+
 /// Calls [attempt] on every [triggers] event and when [kick] completes, until
 /// it returns non-null or [timeout] elapses. Returns null on timeout.
 Future<T?> retryUntil<T>(
@@ -11,7 +13,7 @@ Future<T?> retryUntil<T>(
   final done = Completer<T?>();
   void run() => attempt().then((v) {
     if (v != null && !done.isCompleted) done.complete(v);
-  }, onError: (_) {});
+  }, onError: (e, s) => Logs().w('[Push] Decryption attempt failed', e, s));
   final sub = triggers.listen((_) => run());
   kick?.then((_) => run(), onError: (_) {});
   try {

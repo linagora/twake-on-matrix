@@ -157,32 +157,41 @@ Future<void> _tryPushHelper(
 
   final sessionId = event.content.tryGet<String>('session_id');
   final encryption = client.encryption;
+  // getEventByPushNotification already tried to decrypt: the key is missing.
   if (event.type == EventTypes.Encrypted &&
       sessionId != null &&
       encryption != null) {
-    // The room key may arrive just after the push: retry for a few seconds
-    // and replace the generic notification once the event can be decrypted.
-    final decrypted = await retryUntil<Event>(
-      () async {
-        final e = await encryption.decryptRoomEvent(event);
-        return e.type == EventTypes.Encrypted ? null : e;
-      },
-      client.onSync.stream,
-      kick: encryption.keyManager.request(
-        event.room,
-        sessionId,
-        event.content.tryGet<String>('sender_key'),
-        onlineKeyBackupOnly: true,
-      ),
-    );
-    if (decrypted != null) {
-      await _showNotification(
-        flutterLocalNotificationsPlugin,
-        decrypted,
-        notification,
-        l10n,
-        replace: true,
+    // The generic notification is shown: a failure below must not show
+    // another one from pushHelper's catch.
+    try {
+      // The room key may arrive just after the push: retry for a few seconds
+      // and replace the generic notification once the event can be decrypted.
+      final decrypted = await retryUntil<Event>(
+        () async {
+          final e = await encryption.decryptRoomEvent(event);
+          return e.type == EventTypes.Encrypted ? null : e;
+        },
+        client.onSync.stream,
+        kick: Future(
+          () => encryption.keyManager.maybeAutoRequest(
+            event.room.id,
+            sessionId,
+            event.content.tryGet<String>('sender_key'),
+            awaitRequest: true,
+          ),
+        ),
       );
+      if (decrypted != null) {
+        await _showNotification(
+          flutterLocalNotificationsPlugin,
+          decrypted,
+          notification,
+          l10n,
+          replace: true,
+        );
+      }
+    } catch (e, s) {
+      Logs().w('[Push] Unable to show the decrypted notification', e, s);
     }
   }
   Logs().v('Push helper has been completed!');
@@ -241,7 +250,21 @@ Future<void> _showNotification(
       ? await AndroidFlutterLocalNotificationsPlugin()
             .getActiveNotificationMessagingStyle(id)
       : null;
-  if (replace) messagingStyleInformation?.messages?.removeLast();
+  if (replace && PlatformInfos.isAndroid) {
+    // Replace this event's generic message. If the user dismissed the
+    // notification meanwhile, it is gone: do not show it again.
+    final messages = messagingStyleInformation?.messages;
+    final index =
+        messages?.lastIndexWhere(
+          (m) =>
+              m.timestamp.millisecondsSinceEpoch ==
+                  event.originServerTs.millisecondsSinceEpoch &&
+              m.text == l10n.newMessageInTwake,
+        ) ??
+        -1;
+    if (index < 0) return;
+    messages!.removeAt(index);
+  }
   messagingStyleInformation?.messages?.add(newMessage);
 
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
@@ -265,7 +288,9 @@ Future<void> _showNotification(
     onlyAlertOnce: replace,
     groupKey: event.room.id,
   );
-  const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
+  final iOSPlatformChannelSpecifics = DarwinNotificationDetails(
+    presentSound: !replace,
+  );
   final platformChannelSpecifics = NotificationDetails(
     android: androidPlatformChannelSpecifics,
     iOS: iOSPlatformChannelSpecifics,
