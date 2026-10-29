@@ -26,6 +26,11 @@ import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'package:twake_chat/data/account/sources/account_boot_snapshot_source.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
+
 import 'utils/background_push.dart';
 import 'widgets/lock_screen.dart';
 import 'widgets/twake_app.dart';
@@ -61,12 +66,20 @@ Future<void> initializeApp() async {
 
   await LegacySettingsMigrationManager.migrateLegacySettingKeys();
 
-  final container = createAppProviderContainer();
-
   Logs().nativeColors = !PlatformInfos.isIOS;
   final clients = await ClientManager.getClients();
-  // Preload first client
-  final firstClient = clients.firstOrNull;
+  // The account state is built from these: they are known before the
+  // container is, so they are overridden when it is created.
+  final bootSnapshot = await AccountBootSnapshotSource(Store()).read();
+  final container = createAppProviderContainer(
+    overrides: [
+      bootClientsProvider.overrideWithValue(clients),
+      bootAccountSnapshotProvider.overrideWithValue(bootSnapshot),
+    ],
+  );
+  // Preload the first account that can be used; a logged-out client kept for
+  // its pending removal is not one.
+  final firstClient = ClientManager.loggedIn(clients).firstOrNull;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
@@ -77,7 +90,11 @@ Future<void> initializeApp() async {
       AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
     // In the background fetch mode we do not want to waste ressources with
     // starting the Flutter engine but process incoming push notifications.
-    BackgroundPush.clientOnly(clients.first);
+    if (firstClient != null) {
+      BackgroundPush.clientOnly(firstClient);
+    } else {
+      Logs().w('No logged-in client to serve push in background-fetch mode.');
+    }
     // To start the flutter engine afterwards we add an custom observer.
     WidgetsBinding.instance.addObserver(AppStarter(clients, container));
     Logs().i(
