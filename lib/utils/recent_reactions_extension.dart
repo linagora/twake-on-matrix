@@ -27,4 +27,14 @@ extension StoreRecentReactionsOrLog on StoreRecentReactionsUseCase {
       Logs().e('StoreRecentReactionsUseCase::executeOrLog()', e, s);
     }
   }
+
+  /// Runs [send] only once the recent reaction is persisted. A storage
+  /// failure is logged and does not stop [send].
+  Future<void> executeOrLogThen({
+    required String emojiId,
+    required Future<void> Function() send,
+  }) async {
+    await executeOrLog(emojiId: emojiId);
+    await send();
+  }
 }

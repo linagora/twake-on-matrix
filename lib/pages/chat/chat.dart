@@ -1460,15 +1460,23 @@ class ChatController extends ConsumerState<Chat>
   Future<emoji_mart.Category?> getRecentEmoji() =>
       _getRecentReactions.recentCategory();
 
+  /// Completes once the recent reaction is persisted. A storage failure is
+  /// logged by `executeOrLog` and never thrown, so a caller that awaits this
+  /// can still go on with the action.
   Future<void> handleStoreRecentReactions(String? emoji) => ref
       .read(storeRecentReactionsUseCaseProvider)
-      .executeOrLog(
-        emojiId: Matrix.of(context).emojiData.getIdByEmoji(emoji ?? ''),
-      );
+      .executeOrLog(emojiId: _recentReactionId(emoji));
 
-  void sendEmojiAction({String? emoji, required Event event}) async {
-    unawaited(handleStoreRecentReactions(emoji));
-    await room!.sendReaction(event.eventId, emoji!);
+  String _recentReactionId(String? emoji) =>
+      Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
+
+  Future<void> sendEmojiAction({String? emoji, required Event event}) async {
+    await ref
+        .read(storeRecentReactionsUseCaseProvider)
+        .executeOrLogThen(
+          emojiId: _recentReactionId(emoji),
+          send: () => room!.sendReaction(event.eventId, emoji!),
+        );
   }
 
   void clearSelectedEvents() {
@@ -2135,7 +2143,7 @@ class ChatController extends ConsumerState<Chat>
                                         emoji == (relatesTo?['key'] ?? '');
                                     if (myReaction == null) {
                                       Navigator.of(context).pop();
-                                      sendEmojiAction(
+                                      await sendEmojiAction(
                                         emoji: emoji,
                                         event: event,
                                       );
@@ -2151,7 +2159,7 @@ class ChatController extends ConsumerState<Chat>
                                     if (!isSelected) {
                                       Navigator.of(context).pop();
                                       await myReaction.redactEvent();
-                                      sendEmojiAction(
+                                      await sendEmojiAction(
                                         emoji: emoji,
                                         event: event,
                                       );
@@ -2172,7 +2180,10 @@ class ChatController extends ConsumerState<Chat>
                                   final isSelected =
                                       emoji == (relatesTo?['key'] ?? '');
                                   if (myReaction == null) {
-                                    sendEmojiAction(emoji: emoji, event: event);
+                                    await sendEmojiAction(
+                                      emoji: emoji,
+                                      event: event,
+                                    );
                                     return;
                                   }
 
@@ -2183,7 +2194,10 @@ class ChatController extends ConsumerState<Chat>
 
                                   if (!isSelected) {
                                     await myReaction.redactEvent();
-                                    sendEmojiAction(emoji: emoji, event: event);
+                                    await sendEmojiAction(
+                                      emoji: emoji,
+                                      event: event,
+                                    );
                                     return;
                                   }
                                 },
@@ -2852,7 +2866,7 @@ class ChatController extends ConsumerState<Chat>
                                             emoji == (relatesTo?['key'] ?? '');
                                         if (myReaction == null) {
                                           Navigator.of(context).pop();
-                                          sendEmojiAction(
+                                          await sendEmojiAction(
                                             emoji: emoji,
                                             event: event,
                                           );
@@ -2868,7 +2882,7 @@ class ChatController extends ConsumerState<Chat>
                                         if (!isSelected) {
                                           Navigator.of(context).pop();
                                           await myReaction.redactEvent();
-                                          sendEmojiAction(
+                                          await sendEmojiAction(
                                             emoji: emoji,
                                             event: event,
                                           );
@@ -2890,7 +2904,7 @@ class ChatController extends ConsumerState<Chat>
                                       final isSelected =
                                           emoji == (relatesTo?['key'] ?? '');
                                       if (myReaction == null) {
-                                        sendEmojiAction(
+                                        await sendEmojiAction(
                                           emoji: emoji,
                                           event: event,
                                         );
@@ -2904,7 +2918,7 @@ class ChatController extends ConsumerState<Chat>
 
                                       if (!isSelected) {
                                         await myReaction.redactEvent();
-                                        sendEmojiAction(
+                                        await sendEmojiAction(
                                           emoji: emoji,
                                           event: event,
                                         );
