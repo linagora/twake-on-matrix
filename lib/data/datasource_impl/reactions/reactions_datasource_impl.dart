@@ -1,9 +1,10 @@
 import 'package:twake_chat/data/datasource/reactions/reactions_datasource.dart';
 import 'package:twake_chat/data/local/reaction/reaction_cache_manager.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 
 class ReactionsDatasourceImpl implements ReactionsDatasource {
-  final reactionCacheManager = getIt.get<ReactionsCacheManager>();
+  const ReactionsDatasourceImpl(this.reactionCacheManager);
+
+  final ReactionsCacheManager reactionCacheManager;
 
   @override
   Future<List<String>> getRecentReactions() {

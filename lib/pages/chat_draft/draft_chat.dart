@@ -11,8 +11,10 @@ import 'package:twake_chat/presentation/extensions/contact/unified_contact_exten
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
-import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
-import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
+import 'package:twake_chat/domain/reactions/exceptions/recent_reactions_exception.dart';
+import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
+import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.provider.dart';
+import 'package:twake_chat/domain/reactions/usecases/store_recent_reactions_usecase.provider.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
@@ -42,6 +44,8 @@ import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_pro
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_emoji_mart/flutter_emoji_mart.dart'
+    show Category, EmojiPickerConfiguration;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -86,12 +90,6 @@ class DraftChatController extends ConsumerState<DraftChat>
   Client get client => Matrix.read(context).client;
 
   final createDirectChatInteractor = getIt.get<CreateDirectChatInteractor>();
-
-  final getRecentReactionsInteractor = getIt
-      .get<GetRecentReactionsInteractor>();
-
-  final storeRecentReactionsInteractor = getIt
-      .get<StoreRecentReactionsInteractor>();
 
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
@@ -213,6 +211,7 @@ class DraftChatController extends ConsumerState<DraftChat>
   @override
   void initState() {
     super.initState();
+    _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
     presentationContact = widget.contact;
     _contactsSubscription = _tryContainer()?.listen(
       contactsControllerProvider,
@@ -483,12 +482,37 @@ class DraftChatController extends ConsumerState<DraftChat>
     }
   }
 
+  late final GetRecentReactionsUseCase _getRecentReactions;
+
+  Future<Category?> getRecentEmoji() async {
+    try {
+      final emojiIds = await _getRecentReactions.execute();
+      return Category(
+        id: EmojiPickerConfiguration.recentCategoryId,
+        emojiIds: emojiIds,
+      );
+    } on GetRecentReactionsException catch (e, s) {
+      Logs().e('DraftChat::getRecentEmoji()', e, s);
+      return null;
+    }
+  }
+
+  Future<void> _storeRecentEmoji(String emojiId) async {
+    try {
+      await ref
+          .read(storeRecentReactionsUseCaseProvider)
+          .execute(emojiId: emojiId);
+    } on StoreRecentReactionsException catch (e, s) {
+      Logs().e('DraftChat::_storeRecentEmoji()', e, s);
+    }
+  }
+
   void typeEmoji(String emoji) {
     if (emoji.isEmpty) return;
     final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji);
 
     if (emojiId.isNotEmpty) {
-      storeRecentReactionsInteractor.execute(emojiId: emojiId);
+      unawaited(_storeRecentEmoji(emojiId));
     }
     final text = sendController.text;
     final selection = sendController.selection;

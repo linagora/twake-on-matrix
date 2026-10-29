@@ -1,11 +1,12 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 import 'package:matrix/matrix.dart';
 
 class ReactionsCacheManager {
+  ReactionsCacheManager(this.pres);
+
   static const keyRecentReactions = 'RECENT_REACTIONS';
 
-  final Store pres = getIt.get<Store>();
+  final Store pres;
 
   Future<void> storeRecentReactions(List<String> recentReactions) async {
     await pres.setItems(keyRecentReactions, recentReactions);

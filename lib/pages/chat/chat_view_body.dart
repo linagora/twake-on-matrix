@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/chat/add_contact_banner.dart';
@@ -299,8 +301,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                       ),
                       child: EmojiPicker(
                         emojiData: Matrix.of(context).emojiData,
-                        recentEmoji: controller.getRecentReactionsInteractor
-                            .execute(),
+                        recentEmoji: controller.getRecentEmoji(),
                         configuration: EmojiPickerConfiguration(
                           showRecentTab: true,
                           emojiStyle: Theme.of(
@@ -333,7 +334,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         },
                         onEmojiSelected: (emojiId, emoji) {
                           controller.typeEmoji(emoji);
-                          controller.handleStoreRecentReactions(emoji);
+                          unawaited(
+                            controller.handleStoreRecentReactions(emoji),
+                          );
                         },
                       ),
                     ),
