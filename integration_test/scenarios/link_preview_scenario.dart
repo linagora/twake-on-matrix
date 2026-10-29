@@ -46,8 +46,10 @@ class LinkPreviewScenario extends BaseTestScenario {
     expect(linkPreview.timelinePreviewTitle(url), expectedTitle);
 
     await robots.chatGroupDetailRobot().sendMessage(blockedUrl);
-    await linkPreview.waitUntilTimelinePreviewSettled(blockedUrl);
-    expect(linkPreview.timelinePreview(blockedUrl).exists, isFalse);
+    await $.waitUntilExists(
+      linkPreview.failedTimelinePreview(blockedUrl),
+      timeout: const Duration(seconds: 30),
+    );
 
     await robots.chatGroupDetailRobot().tapOnChatBarTitle();
     await GroupInformationRobot($).getLinksTab().tap();
