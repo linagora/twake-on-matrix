@@ -126,6 +126,14 @@ class KeychainSharingManager {
     }
   }
 
+  /// The app cross-signs the extension's device, so it needs the
+  /// self-signing key in cache. Without cross-signing, senders share keys with
+  /// every device anyway.
+  static Future<bool> notificationPreviewsLocked(Client client) async {
+    final cached = await client.encryption?.crossSigning.isCached() ?? false;
+    return client.userDeviceKeys[client.userID]?.masterKey != null && !cached;
+  }
+
   /// Whether the extension has its own device for [client].
   static Future<bool> hasNotificationSession(Client client) async {
     final userId = client.userID;
