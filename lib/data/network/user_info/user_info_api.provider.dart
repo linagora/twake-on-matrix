@@ -7,6 +7,6 @@ part 'user_info_api.provider.g.dart';
 
 @Riverpod(keepAlive: true)
 UserInfoApi userInfoApi(Ref ref) => UserInfoApi(
-  ref.watch(legacyTomDioClientProvider),
+  ref.watch(tomDioClientProvider),
   ref.watch(memCacheDioInterceptorProvider),
 );
