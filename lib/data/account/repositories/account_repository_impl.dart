@@ -54,21 +54,26 @@ class AccountRepositoryImpl implements AccountRepository {
   ///
   /// Called once, by `accountRepositoryProvider`, as it builds the repository.
   /// Only the first call takes over, the following ones return the accounts as
-  /// they are.
+  /// they are. The registry is taken over once too: a repository built again
+  /// on it starts from its clients, not from [clients].
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
   }) {
     if (_adopted) return registeredAccounts();
     _adopted = true;
-    _registry.replaceAll(clients);
+    // A registry that took the boot clients over already holds the accounts
+    // as they are now: they are kept, not reset to the boot ones.
+    final known = _registry.adoptOnce(clients)
+        ? clients
+        : _registry.clients.toList();
     _storedIds
       ..clear()
-      ..addAll(clients.map((c) => c.clientName));
+      ..addAll(known.map((c) => c.clientName));
     _pendingIds
       ..clear()
       ..addAll(pendingRemovals.where(_storedIds.contains))
-      ..addAll(_loggedOutBesideOthers(clients));
+      ..addAll(_loggedOutBesideOthers(known));
     return registeredAccounts();
   }
 
