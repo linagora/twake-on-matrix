@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/migrate_steps/migrate_v6_to_v7/migrate_v6_to_v7.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/hive_collections_database.dart';
 import 'package:flutter/foundation.dart' hide Key;
@@ -19,10 +18,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String super.path, {
     super.key,
     super.onStartMigrating,
-    this.client,
   });
-
-  final Client? client;
 
   @override
   int get version => 8;
@@ -76,7 +72,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       await _findDatabasePath(client),
       key: hiverCipher,
       onStartMigrating: _onStartMigrating,
-      client: client,
     );
     try {
       Logs().i('FlutterHiveCollectionsDatabase()::databaseBuilder()::open()');
@@ -126,17 +121,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
   @override
   bool get supportsFileStoring => !kIsWeb;
-
-  @override
-  Future<void> clear({bool supportDeleteCollections = false}) async {
-    // The SDK clears the database before forgetting the user, also when the
-    // server invalidated the session: log this account's NSE device out.
-    final client = this.client;
-    if (client != null) {
-      await KeychainSharingManager.logoutNotificationSession(client);
-    }
-    return super.clear(supportDeleteCollections: supportDeleteCollections);
-  }
 
   static void _onStartMigrating(int currentVersion, int newVersion) async {
     Logs().d(
