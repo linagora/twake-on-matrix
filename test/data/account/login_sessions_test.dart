@@ -52,7 +52,35 @@ class _FailingCancel implements StreamSubscription<LoginState> {
   Future<E> asFuture<E>([E? futureValue]) => _inner.asFuture(futureValue);
 }
 
+void _legacyLoginClientTests() {
+  group('with no login host attached', () {
+    test('a login uses the legacy client and runs as before', () async {
+      final legacy = FakeAccountClient('legacy');
+      final sessions = LoginSessions()
+        ..setLegacyLoginClient(() async => legacy);
+
+      expect(await sessions.loginClient(), same(legacy));
+      expect(await sessions.trackLogin(legacy, () async => 42), 42);
+    });
+
+    test('without the legacy client it fails as before', () {
+      expect(LoginSessions().loginClient(), throwsStateError);
+    });
+
+    test('an attached host wins over the legacy client', () async {
+      final host = FakeLoginHost();
+      final legacy = FakeAccountClient('legacy');
+      final sessions = LoginSessions()
+        ..setLegacyLoginClient(() async => legacy)
+        ..attach(host);
+
+      expect(await sessions.loginClient(), isNot(same(legacy)));
+    });
+  });
+}
+
 void main() {
+  _legacyLoginClientTests();
   late FakeLoginHost host;
   late LoginSessions sessions;
 
@@ -85,9 +113,10 @@ void main() {
       host.onRemovalRetry = () => throw StateError('retry failed');
 
       final client = await sessions.loginClient();
+      await pumpEventQueue();
 
       expect(client, same(host.clientOf('c1')));
-      expect(host.reports, ['retry of the failed cleanups']);
+      expect(host.reports, ['retry of the failed removals']);
     });
 
     test('registers the candidate before a slow retry ends', () async {
@@ -123,6 +152,21 @@ void main() {
 
       expect(second, same(first));
       expect(host.calls, ['createCandidate:c1']);
+    });
+
+    test('does not hand out a candidate that is being discarded', () async {
+      final gate = host.gates['createCandidate:c1'] = Completer<void>();
+      final first = sessions.loginClient();
+      final discarding = sessions.discardPending();
+
+      final second = sessions.loginClient();
+      gate.complete();
+      await discarding;
+      final next = await second;
+      await first;
+
+      expect(next.clientName, 'c2');
+      expect(sessions.sessionOf('c1')!.state, LoginSessionState.disposed);
     });
 
     test('makes a new candidate once the pending one is gone', () async {
@@ -228,20 +272,8 @@ void main() {
     });
   });
 
-  group('a retry that ends the client waited for', () {
-    test('the placeholder it ended is not handed out', () async {
-      host.reusable = host.clientOf('boot');
-      host.onRemovalRetry = () => host.reusable = null;
-
-      final client = await sessions.loginClient();
-
-      expect(client.clientName, 'c1');
-      expect(client, isNot(same(host.clientOf('boot'))));
-    });
-  });
-
   group('failed removals of logged-out accounts', () {
-    test('are retried before a client is handed out', () async {
+    test('are retried when a client is asked for', () async {
       await sessions.loginClient();
 
       expect(host.removalRetries, 1);
@@ -249,6 +281,33 @@ void main() {
       await sessions.loginClient();
 
       expect(host.removalRetries, 2);
+    });
+
+    test(
+      'do not hold back the client while they wait on the network',
+      () async {
+        host.removalGate = Completer<void>();
+
+        final client = await sessions.loginClient();
+
+        expect(client.clientName, 'c1');
+        expect(host.removalRetries, 1);
+
+        host.removalGate!.complete();
+        await pumpEventQueue();
+      },
+    );
+
+    test('do not hold back the reusable placeholder either', () async {
+      host.reusable = host.clientOf('boot');
+      host.removalGate = Completer<void>();
+
+      final client = await sessions.loginClient();
+
+      expect(client, same(host.clientOf('boot')));
+
+      host.removalGate!.complete();
+      await pumpEventQueue();
     });
   });
 
@@ -376,7 +435,7 @@ void main() {
 
       host.failing.remove('tom:a');
       host.calls.clear();
-      await sessions.retryFailedCleanups();
+      await sessions.loginClient();
 
       expect(host.calls, contains('tom:a'));
       expect(first.needsRetry, isFalse);

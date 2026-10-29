@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_host.dart';
 import 'package:twake_chat/data/account/rollback_removals.dart';
@@ -159,12 +160,24 @@ class FakeLoginHost implements LoginHost {
   Future<void> registerSubscriptions(AccountId id) =>
       _step('registerSubs:${id.value}');
 
+  /// The home server the login screen picked now.
   @override
-  Future<void> setUpToM(Client client) => _step('tom:${client.clientName}');
+  HomeserverSummary? loginHomeserverSummary;
+
+  /// The summary each ToM and federation set-up got, in order.
+  final setUpSummaries = <HomeserverSummary?>[];
 
   @override
-  Future<void> setUpFederation(Client client) =>
-      _step('federation:${client.clientName}');
+  Future<void> setUpToM(Client client, HomeserverSummary? summary) {
+    setUpSummaries.add(summary);
+    return _step('tom:${client.clientName}');
+  }
+
+  @override
+  Future<void> setUpFederation(Client client, HomeserverSummary? summary) {
+    setUpSummaries.add(summary);
+    return _step('federation:${client.clientName}');
+  }
 
   @override
   Future<void> syncRecoveryKey(Client client) =>

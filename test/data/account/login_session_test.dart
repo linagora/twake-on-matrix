@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_session.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 
 import 'fake_login_host.dart';
 
@@ -222,7 +223,18 @@ void main() {
 
       expect(session.state, LoginSessionState.disposed);
       expect(events(), [MultipleAccountLoginType.loginFailed]);
+      expect(host.events.single.error, isNotNull);
       expect(host.calls, isNot(contains('push:c1')));
+    });
+
+    test('the logged-in event carries the client of the login, not the '
+        'active one', () async {
+      final session = await candidate();
+      host.activeName = 'a';
+      await logIn(session);
+
+      expect(host.events.single.client.clientName, 'c1');
+      expect(host.activeClient.clientName, 'a');
     });
 
     test(
@@ -378,6 +390,7 @@ void main() {
 
         expect(session.state, LoginSessionState.cleanupFailed);
         expect(events(), [MultipleAccountLoginType.cleanupFailed]);
+        expect(host.events.single.error, isNotNull);
         expect(events(), isNot(contains(MultipleAccountLoginType.loginFailed)));
         expect(host.stored, {'c1'});
         expect(
@@ -402,6 +415,48 @@ void main() {
         expect(events(), [MultipleAccountLoginType.cleanupFailed]);
       },
     );
+
+    test('a removal that is still pending lets the later steps run', () async {
+      final session = await candidate();
+      host.removalPending.add('removeAccount:c1');
+      host.failing.add('switchTo:c1');
+      await logIn(session);
+
+      expect(session.state, LoginSessionState.cleanupFailed);
+      final after = host.calls.skipWhile((c) => c != 'removeAccount:c1');
+      expect(
+        after.where((c) => c.startsWith('apply') || c == 'clearEffects'),
+        isNotEmpty,
+      );
+      expect(session.needsRetry, isTrue);
+    });
+
+    test(
+      'a removal that is still pending is not reported, and the step stays',
+      () async {
+        final session = await candidate();
+        host.removalPending.add('removeAccount:c1');
+        host.failing.add('switchTo:c1');
+        await logIn(session);
+
+        expect(session.state, LoginSessionState.cleanupFailed);
+        expect(host.reports.where((r) => r.startsWith('cleanup ')), isEmpty);
+
+        host.removalPending.clear();
+        await session.retryCleanup();
+
+        expect(session.state, LoginSessionState.disposed);
+        expect(host.calls.where((c) => c == 'removeAccount:c1'), hasLength(2));
+      },
+    );
+
+    test('another error in a cleanup step is still reported', () async {
+      final session = await stuck();
+
+      await session.retryCleanup();
+
+      expect(host.reports.where((r) => r.startsWith('cleanup ')), hasLength(2));
+    });
 
     test('a retry that fails again stays in cleanupFailed', () async {
       final session = await stuck();
@@ -838,6 +893,28 @@ void main() {
       host.calls.clear();
       return session;
     }
+
+    test('a retried set-up uses the home server of its login', () async {
+      final ofLogin = HomeserverSummary(
+        discoveryInformation: null,
+        versions: GetVersionsResponse(versions: const []),
+        loginFlows: const [],
+      );
+      host.loginHomeserverSummary = ofLogin;
+      final session = await failedAt('tom:c1');
+      host.loginHomeserverSummary = HomeserverSummary(
+        discoveryInformation: null,
+        versions: GetVersionsResponse(versions: const []),
+        loginFlows: const [],
+      );
+      host.activeName = 'c1';
+      host.setUpSummaries.clear();
+
+      await session.retryCleanup();
+
+      expect(host.calls, contains('tom:c1'));
+      expect(host.setUpSummaries, [same(ofLogin)]);
+    });
 
     test('a ToM set-up waits until its account is the active one', () async {
       final session = await failedAt('tom:c1');

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 
 /// The accounts a login stores, activates or takes back.
@@ -96,10 +97,15 @@ abstract interface class LoginSetUp {
   /// reported and kept for a retry while the session is open.
   Future<void> removePush(AccountId id);
 
-  /// Saves the ToM and federation configuration; throws when saving fails.
-  Future<void> setUpToM(Client client);
+  /// The home server the login screen picked; a login keeps the one it saw
+  /// when the server accepted it.
+  HomeserverSummary? get loginHomeserverSummary;
 
-  Future<void> setUpFederation(Client client);
+  /// Saves the ToM and federation configuration of [summary], the server of
+  /// the login; throws when saving fails.
+  Future<void> setUpToM(Client client, HomeserverSummary? summary);
+
+  Future<void> setUpFederation(Client client, HomeserverSummary? summary);
 
   Future<void> syncRecoveryKey(Client client);
 

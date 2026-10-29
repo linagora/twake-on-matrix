@@ -41,6 +41,8 @@ import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
@@ -412,9 +414,15 @@ class MatrixState extends ConsumerState<Matrix>
       : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  // TODO: [transitional] TW-3302 - replaced by `attach` of the login host
+  // (TW-3302 5/5): until then the login screens get `getLoginClient`.
+  late final LoginSessions _legacyLoginSessions;
+
   @override
   void initState() {
     super.initState();
+    _legacyLoginSessions = ref.read(loginSessionsProvider)
+      ..setLegacyLoginClient(getLoginClient);
     _preloadMessageAlignmentSetting();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       WidgetsBinding.instance.addObserver(this);
@@ -1626,6 +1634,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   @override
   void dispose() {
+    _legacyLoginSessions.setLegacyLoginClient(null);
     WidgetsBinding.instance.removeObserver(this);
     if (PlatformInfos.isWeb) {
       html.window.removeEventListener('focus', onWindowFocus);

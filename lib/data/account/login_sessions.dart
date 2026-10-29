@@ -25,6 +25,18 @@ class LoginSessions {
   /// to retry. Dropping them would leak the listener and lose the set-up.
   final List<LoginSession> _replaced = [];
 
+  // TODO: [transitional] TW-3302 - drop with the legacy client source once
+  // `MatrixState` attaches its [LoginHost] (TW-3302 5/5).
+  Future<Client> Function()? _legacyLoginClient;
+
+  /// Until a [LoginHost] is attached, [loginClient] hands out the client of
+  /// [source] (`MatrixState.getLoginClient`) and [trackLogin] just runs the
+  /// login, as before the sessions existed. Null clears it.
+  void setLegacyLoginClient(Future<Client> Function()? source) =>
+      _legacyLoginClient = source;
+
+  bool get _usesLegacyClient => _attached == null && _legacyLoginClient != null;
+
   LoginHost get _host =>
       _attached ?? (throw StateError('The login host is not set yet'));
 
@@ -61,19 +73,25 @@ class LoginSessions {
 
   /// The unlogged client for a login screen: the placeholder of a logged-out
   /// boot, else the pending candidate, else a new one. Calls made while the
-  /// candidate is being made share it. Cleanups that failed before are
-  /// retried first.
+  /// candidate is being made share it. The cleanups of the sessions that
+  /// failed before are retried first; the removals of logged-out accounts are
+  /// retried in the background.
   Future<Client> loginClient() async {
+    final legacy = _legacyLoginClient;
+    if (_attached == null && legacy != null) return legacy();
     // Read before the retry starts, so a missing host fails this call only.
     final host = _host;
-    // Started here, awaited before a client is handed out. Everything up to
-    // the first await runs at once, so a candidate that is being made is
-    // already `_pending` when the user leaves and `discardPending` runs.
-    final retry = retryFailedCleanups();
+    // The removals reach the server, which may not answer: they do not hold
+    // the screen back. The session cleanups are started here and awaited
+    // before a client is handed out. Everything up to the first await runs at
+    // once, so a candidate that is being made is already `_pending` when the
+    // user leaves and `discardPending` runs.
+    unawaited(_retryRemovalsInBackground(host));
+    final retry = _retrySessionCleanups();
     _forgetDisposed();
     final reusable = _reusableClient();
     if (reusable != null) {
-      await _settled(retry);
+      await _settled(host, retry);
       // The retry may have ended the client that was read before it.
       return identical(host.reusableClient, reusable)
           ? reusable
@@ -81,10 +99,10 @@ class LoginSessions {
     }
     final pending = _pending;
     if (pending != null && pending.isUsable) {
-      await _settled(retry);
+      await _settled(host, retry);
       return pending.isUsable ? pending.ready : loginClient();
     }
-    return _newCandidate(retry);
+    return _newCandidate(host, retry);
   }
 
   /// The client the app already has for a login: the placeholder of a
@@ -107,8 +125,8 @@ class LoginSessions {
     return blocks ? null : reusable;
   }
 
-  Future<Client> _newCandidate(Future<void> retry) async {
-    final session = _pending = LoginSession.candidate(_host);
+  Future<Client> _newCandidate(LoginHost host, Future<void> retry) async {
+    final session = _pending = LoginSession.candidate(host);
     // Registered as soon as the client exists, not after the retry: an event
     // of that client must find this session, not make a placeholder.
     final registered = session.ready.then<void>(
@@ -119,18 +137,18 @@ class LoginSessions {
         if (identical(_pending, session)) _pending = null;
       },
     );
-    await _settled(retry);
+    await _settled(host, retry);
     await registered;
     return session.ready;
   }
 
   /// A retry that fails is reported and does not stop the login that waits
   /// for it: the cleanups it could not finish stay recorded and run again.
-  Future<void> _settled(Future<void> retry) async {
+  Future<void> _settled(LoginHost host, Future<void> retry) async {
     try {
       await retry;
     } catch (error, stackTrace) {
-      _host.report(error, stackTrace, 'retry of the failed cleanups');
+      host.report(error, stackTrace, 'retry of the failed cleanups');
     }
   }
 
@@ -140,6 +158,7 @@ class LoginSessions {
   /// until its listener is cancelled and its failed set-ups have been tried
   /// again, so the new login does not drop either.
   Future<T> trackLogin<T>(Client client, Future<T> Function() login) {
+    if (_usesLegacyClient) return login();
     final existing = _byId[client.clientName];
     if (existing != null && existing.isLive) return existing.trackLogin(login);
     return _trackOnPlaceholder(client, login);
@@ -164,6 +183,7 @@ class LoginSessions {
   /// A session that exists keeps the event: a candidate that is already
   /// active ignores a repeated one, and a client the app dropped gets none.
   Future<void> onLoggedIn(Client client, LoginState loginState) {
+    if (_attached == null) return Future.value();
     final name = client.clientName;
     if (_host.clientByName(AccountId(name)) == null) return Future.value();
     var session = _byId[name];
@@ -189,11 +209,17 @@ class LoginSessions {
     if (!pending.isLive && identical(_pending, pending)) _pending = null;
   }
 
-  /// Runs again the removals of logged-out accounts that failed, then the
-  /// cleanup steps that failed, for every session. The removals go first: a
-  /// session whose step is handed to them finds it done, not still running.
-  Future<void> retryFailedCleanups() async {
-    await _host.retryPendingRemovals();
+  /// A failure is reported, not thrown: nobody awaits this run, and the
+  /// removals that failed stay recorded and run again.
+  Future<void> _retryRemovalsInBackground(LoginHost host) async {
+    try {
+      await host.retryPendingRemovals();
+    } catch (error, stackTrace) {
+      host.report(error, stackTrace, 'retry of the failed removals');
+    }
+  }
+
+  Future<void> _retrySessionCleanups() async {
     await Future.wait([
       for (final session in _byId.values.toList())
         if (session.needsRetry) session.retryCleanup(),

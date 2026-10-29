@@ -8,7 +8,8 @@ enum MultipleAccountLoginType {
   otherAccountLoggedIn,
 
   /// The login succeeded on the server but a step after it failed (storing
-  /// the account, ToM or federation set-up, the switch); the login was undone
+  /// the account, its registration, the switch; a failed ToM or federation
+  /// set-up keeps the account and is retried); the login was undone
   /// and [ClientLoginStateEvent.error] says why. It is terminal: the screen
   /// shows the error and the user starts again on a fresh client.
   loginFailed,

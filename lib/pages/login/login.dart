@@ -204,6 +204,7 @@ class LoginController extends ConsumerState<Login> {
     if (mounted) setState(() => usernameError = null);
     if (!userId.isValidMatrixId) return;
     final client = await loginClientFuture;
+    if (!mounted) return;
     final oldHomeserver = client.homeserver;
     try {
       var newDomain = Uri.https(userId.domain!, '');

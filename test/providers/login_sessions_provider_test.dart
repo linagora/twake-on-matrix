@@ -10,7 +10,7 @@ void main() {
   late LoginSessions sessions;
 
   setUp(() {
-    container = ProviderContainer.test();
+    container = ProviderContainer.test(retry: (_, _) => null);
     sessions = container.read(loginSessionsProvider);
   });
 

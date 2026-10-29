@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_host.dart';
+import 'package:twake_chat/data/account/rollback_removals.dart';
 
 /// Where a login session is. The moves between states are the only ones the
 /// code makes; any other move throws.
@@ -38,8 +40,11 @@ enum LoginSessionState {
 
 /// A step of the rollback, in the order they run. A step that fails is
 /// reported and retried until it works, and the steps after it wait: the
-/// account is not dropped while a handler of it is alive, and the shared state
-/// is not put back before the account is gone.
+/// account is not dropped while a handler of it is alive.
+///
+/// A removal that is still pending does not stop the run: the removals own its
+/// retry, so the step stays recorded and the steps after it run. The shared
+/// state can therefore be put back while the account is still there.
 ///
 /// Two steps never block, because the app works locally first: [removePush]
 /// and [signOut] report a failure and the run goes on (the server session of
@@ -116,6 +121,10 @@ class LoginSession {
   /// this candidate, before the account is active: the rollback puts the
   /// active account's state back.
   bool _effectsTouched = false;
+
+  /// The home server of the login, read when the server accepted it: a set-up
+  /// that is retried later uses it, not the one a new login screen picked.
+  HomeserverSummary? _summary;
   Object? _cleanupError;
   final Set<_Cleanup> _failedCleanups = {};
   final Set<_SetUp> _failedSetUps = {};
@@ -135,7 +144,8 @@ class LoginSession {
   bool get isLive => _state.isLive;
 
   /// True when a screen can use the client for a login try.
-  bool get isUsable => _state.isUsable;
+  /// False once a discard was asked for: the next screen gets a new candidate.
+  bool get isUsable => _state.isUsable && !_disposeRequested;
 
   Future<T> _enqueue<T>(Future<T> Function() operation) {
     final run = _tail.then((_) => operation());
@@ -202,6 +212,7 @@ class LoginSession {
     }
     if (!_acceptsLogin) return; // a repeated event, or a session ending
     _loggedOutSeen = false;
+    _summary = _host.loginHomeserverSummary;
     _move(LoginSessionState.registering, {
       LoginSessionState.created,
       LoginSessionState.loggingIn,
@@ -233,9 +244,12 @@ class LoginSession {
       _state == LoginSessionState.created ||
       _state == LoginSessionState.loggingIn;
 
+  /// The event carries the client of this login: when a newer switch took the
+  /// active place, the active client is another account's, and the screen of
+  /// this login would ignore the event.
   void _emitLoggedIn(LoginState loginState) => _emit(
     ClientLoginStateEvent(
-      client: _host.activeClient,
+      client: client,
       loginState: loginState,
       multipleAccountLoginType: keepsClient
           ? MultipleAccountLoginType.firstLoggedIn
@@ -291,8 +305,8 @@ class LoginSession {
   Future<void> _runSetUp(_SetUp setUp) {
     final target = _host.clientByName(_accountId) ?? client;
     return switch (setUp) {
-      _SetUp.tom => _host.setUpToM(target),
-      _SetUp.federation => _host.setUpFederation(target),
+      _SetUp.tom => _host.setUpToM(target, _summary),
+      _SetUp.federation => _host.setUpFederation(target, _summary),
       _SetUp.recoveryKey => _host.syncRecoveryKey(target),
       _SetUp.push => _host.setUpAdditionalPush(target),
     };
@@ -378,13 +392,21 @@ class LoginSession {
   };
 
   /// Runs the steps that are left, in order. The first one that fails stops the
-  /// run and stays for the next [retryCleanup].
+  /// run and stays for the next [retryCleanup]; a removal that is still pending
+  /// stays too, but the run goes on.
   Future<void> _cleanUp() async {
     for (final step in _Cleanup.values) {
       if (!_failedCleanups.contains(step)) continue;
       try {
         await _run(step);
         _failedCleanups.remove(step);
+      } on RemovalPendingException catch (e) {
+        // The removals own the retry (the pending check keeps the same
+        // removal from running twice at once), so this is expected, not a
+        // failure to report. The step stays for the next retry, and the
+        // steps after it (restoring the active account's effects, say) run.
+        _cleanupError = e;
+        continue;
       } catch (e, s) {
         _cleanupError = e;
         _host.report(e, s, 'cleanup $step of $id failed');
@@ -407,7 +429,7 @@ class LoginSession {
     _Cleanup.discardCandidate => _host.discardCandidate(_accountId),
     _Cleanup.restoreEffects => _restoreActiveEffects(),
     _Cleanup.cancelListener => _cancelListener(),
-    _Cleanup.logoutLast => Future<void>.sync(_host.logoutLast),
+    _Cleanup.logoutLast => _host.logoutLast(),
   };
 
   /// The login set the shared state before it was active: the account that is
