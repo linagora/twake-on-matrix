@@ -9,7 +9,6 @@ class DeviceSettingsScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
-    const password = String.fromEnvironment('PASSWORD');
     final name = 'e2e-device-${DateTime.now().millisecondsSinceEpoch}';
     final renamed = '$name-renamed';
     final bulkNames = ['$name-a', '$name-b'];
@@ -26,16 +25,16 @@ class DeviceSettingsScenario extends BaseTestScenario {
       await robots.settingRobot().openDevicesSetting();
 
       final devices = DeviceSettingsRobot($);
-      await devices.waitForOtherSessions([name, ...bulkNames]);
+      await devices.waitForOtherSessions(sessions);
       await devices.expectCurrentSessionCannotBeRemoved();
 
-      await devices.renameSession(name, renamed);
+      await devices.renameSession(other, renamed);
       expect(await other.fetchDisplayName(), renamed);
 
-      await devices.removeSession(renamed, password: password);
+      await devices.removeSession(other);
       expect(await other.isSignedOut(), isTrue);
 
-      await devices.removeAllOtherSessions(password: password);
+      await devices.removeAllOtherSessions();
       for (final session in bulk) {
         expect(await session.isSignedOut(), isTrue);
       }
