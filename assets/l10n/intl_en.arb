@@ -2270,6 +2270,7 @@
   "workIdentitiesInfo": "WORK IDENTITIES INFO",
   "copiedMatrixIdToClipboard": "Copied Matrix ID to clipboard.",
   "changeProfileAvatar": "Change profile avatar",
+  "setProfileAvatar": "Set profile avatar",
   "thisMessageHasBeenEncrypted": "This message has been encrypted",
   "roomCreationFailed": "Room creation failed",
   "errorGettingPdf": "Error getting PDF",

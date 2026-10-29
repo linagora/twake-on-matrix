@@ -19,6 +19,7 @@ import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
@@ -38,8 +39,6 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/on_account_data_listen_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
-import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
-import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -61,7 +60,6 @@ class SettingsProfileController extends State<SettingsProfile>
         CommonMediaPickerMixin,
         SingleImagePickerMixin,
         PopupContextMenuActionMixin,
-        PopupMenuWidgetMixin,
         OnProfileChangeMixin,
         PickAvatarMixin,
         SingleTickerProviderStateMixin {
@@ -122,13 +120,19 @@ class SettingsProfileController extends State<SettingsProfile>
     SettingsProfileEnum.matrixId,
   ];
 
+  bool get hasAvatar =>
+      currentProfile.value?.avatarUrl?.toString().isNotEmpty ?? false;
+
   List<SheetAction<AvatarAction>> actions() => [
     SheetAction(
       key: AvatarAction.file,
-      label: L10n.of(context)!.changeProfileAvatar,
+      label: SettingsProfileContextMenuActions.edit.getTitle(
+        context,
+        hasAvatar: hasAvatar,
+      ),
       icon: Icons.add_a_photo_outlined,
     ),
-    if (currentProfile.value?.avatarUrl != null)
+    if (hasAvatar)
       SheetAction(
         key: AvatarAction.remove,
         label: L10n.of(context)!.removeYourAvatar,
@@ -163,16 +167,10 @@ class SettingsProfileController extends State<SettingsProfile>
     if (assetEntity != null || matrixFile != null) {
       isEditedProfileNotifier.toggle();
     }
-    if (currentProfile.value?.avatarUrl == null) {
+    if (!hasAvatar) {
       _clearImageInLocal();
     } else {
       TwakeDialog.showLoadingDialog(context);
-      final newProfile = Profile(
-        userId: client.userID!,
-        displayName: displayName,
-        avatarUrl: null,
-      );
-      currentProfile.value = newProfile;
       _uploadProfile(isDeleteAvatar: true);
     }
   }
@@ -232,33 +230,17 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   List<Widget> listContextMenuBuilder(BuildContext context) {
-    final listAction = [
-      SettingsProfileContextMenuActions.edit,
-      SettingsProfileContextMenuActions.delete,
-    ];
-    final items = listAction.map((action) {
-      return popupItemByTwakeAppRouter(
-        context,
-        action.getTitle(context),
-        iconAction: action.getIcon(),
-        isClearCurrentPage: false,
-        onCallbackAction: () {
-          menuController.close();
-          _handleActionContextMenu(action);
-        },
-      );
-    }).toList();
-
     return [
-      for (final item in items) ...[
-        item,
-        if (item != items.last)
-          Divider(
-            height: PopupMenuWidgetStyle.dividerHeight,
-            thickness: PopupMenuWidgetStyle.dividerThickness,
-            color: PopupMenuWidgetStyle.defaultDividerColor(context),
-          ),
-      ],
+      ValueListenableBuilder<Profile?>(
+        valueListenable: currentProfile,
+        builder: (context, profile, _) => SettingsProfileContextMenu(
+          hasAvatar: profile?.avatarUrl?.toString().isNotEmpty ?? false,
+          onAction: (action) {
+            menuController.close();
+            _handleActionContextMenu(action);
+          },
+        ),
+      ),
     ];
   }
 
@@ -446,8 +428,9 @@ class SettingsProfileController extends State<SettingsProfile>
             avatarUrl: success.avatar ?? currentProfile.value?.avatarUrl,
           );
           _sendAccountDataEvent(profile: newProfile);
+          currentProfile.value = newProfile;
           isEditedProfileNotifier.toggle();
-          _getCurrentProfile(client);
+          _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
         }
 
@@ -461,7 +444,9 @@ class SettingsProfileController extends State<SettingsProfile>
           if (isEditedProfileNotifier.value) {
             isEditedProfileNotifier.toggle();
           }
-          _getCurrentProfile(client);
+          currentProfile.value = newProfile;
+          _clearImageInLocal();
+          _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
             DeleteAvatarUIStateSuccess(),
@@ -471,19 +456,25 @@ class SettingsProfileController extends State<SettingsProfile>
     );
   }
 
-  void _getCurrentProfile(Client client) async {
+  void _getCurrentProfile(Client client, {bool fresh = false}) async {
+    final userId = client.userID!;
     // SDK access goes through Riverpod (transitional container read).
-    final data = await ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(matrixUserProfileProvider(client.userID!).future);
-    final profile = data.toProfile(client.userID!);
-    Logs().d(
-      'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+    final data = await ProviderScope.containerOf(context, listen: false).read(
+      fresh
+          ? freshMatrixUserProfileProvider(userId).future
+          : matrixUserProfileProvider(userId).future,
     );
-    currentProfile.value = profile;
-    if (profile.avatarUrl == null) {
-      _clearImageInLocal();
+    if (!mounted) return;
+    // A failed fresh read keeps the profile the save just confirmed.
+    if (data != null || !fresh) {
+      final profile = data.toProfile(userId);
+      Logs().d(
+        'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
+      );
+      currentProfile.value = profile;
+      if (profile.avatarUrl == null) {
+        _clearImageInLocal();
+      }
     }
     displayNameEditingController.text = displayName;
     matrixIdEditingController.text = client.mxid(context);
