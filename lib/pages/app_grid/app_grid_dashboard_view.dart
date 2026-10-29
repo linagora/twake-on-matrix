@@ -1,22 +1,54 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/pages/app_grid/app_grid_dashboard_controller.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_applications.provider.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_overlay.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view_style.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-class AppGridDashboardView extends StatelessWidget {
-  final AppGridDashboardController controller;
+class AppGridDashboard extends ConsumerStatefulWidget {
+  const AppGridDashboard({super.key});
 
-  const AppGridDashboardView({super.key, required this.controller});
+  @override
+  ConsumerState<AppGridDashboard> createState() => _AppGridDashboardState();
+}
+
+class _AppGridDashboardState extends ConsumerState<AppGridDashboard> {
+  final _isOpenAppGridDashboard = ValueNotifier<bool>(false);
+
+  final _hoverColorAppGrid = ValueNotifier<Color>(Colors.transparent);
+
+  final _hoverColorAppHelp = ValueNotifier<Color>(Colors.transparent);
+
+  void _hideAppGridDashboard() {
+    if (!mounted || !_isOpenAppGridDashboard.value) return;
+    _isOpenAppGridDashboard.value = false;
+  }
+
+  @override
+  void deactivate() {
+    // Close the portal before deactivation to prevent accessing
+    // the Overlay context after the widget is deactivated
+    _hideAppGridDashboard();
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _isOpenAppGridDashboard.dispose();
+    _hoverColorAppGrid.dispose();
+    _hoverColorAppHelp.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final linagoraApplications = ref.watch(appGridApplicationsProvider).value;
     return Align(
       alignment: Alignment.centerRight,
       child: Row(
@@ -32,14 +64,14 @@ class AppGridDashboardView extends StatelessWidget {
                 ).openUrlInAppBrowser();
               },
               onTapOutside: (_) {
-                controller.hoverColorAppHelp.value = Colors.transparent;
+                _hoverColorAppHelp.value = Colors.transparent;
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                onEnter: (_) => controller.hoverColorAppHelp.value =
+                onEnter: (_) => _hoverColorAppHelp.value =
                     AppGridDashboardViewStyle.hoverColor,
                 onExit: (_) {
-                  controller.hoverColorAppHelp.value = Colors.transparent;
+                  _hoverColorAppHelp.value = Colors.transparent;
                 },
                 child: TooltipVisibility(
                   visible: true,
@@ -49,7 +81,7 @@ class AppGridDashboardView extends StatelessWidget {
                     showDuration: const Duration(seconds: 1),
                     waitDuration: const Duration(seconds: 1),
                     child: ValueListenableBuilder(
-                      valueListenable: controller.hoverColorAppHelp,
+                      valueListenable: _hoverColorAppHelp,
                       builder: (context, color, _) {
                         return Container(
                           decoration: BoxDecoration(
@@ -73,28 +105,28 @@ class AppGridDashboardView extends StatelessWidget {
               ),
             ),
           ValueListenableBuilder(
-            valueListenable: controller.isOpenAppGridDashboardNotifier,
+            valueListenable: _isOpenAppGridDashboard,
             builder: (context, isOpenAppGridDashboard, _) {
               return TapRegion(
                 behavior: HitTestBehavior.opaque,
                 onTapInside: (_) {
-                  controller.isOpenAppGridDashboardNotifier.toggle();
+                  _isOpenAppGridDashboard.toggle();
                 },
                 onTapOutside: (_) {
-                  controller.hideAppGridDashboard();
-                  controller.hoverColorAppGrid.value = Colors.transparent;
+                  _hideAppGridDashboard();
+                  _hoverColorAppGrid.value = Colors.transparent;
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,
-                  onEnter: (_) => controller.hoverColorAppGrid.value =
+                  onEnter: (_) => _hoverColorAppGrid.value =
                       AppGridDashboardViewStyle.hoverColor,
                   onExit: (_) {
                     if (!isOpenAppGridDashboard) {
-                      controller.hoverColorAppGrid.value = Colors.transparent;
+                      _hoverColorAppGrid.value = Colors.transparent;
                     }
                   },
                   child: ValueListenableBuilder(
-                    valueListenable: controller.hoverColorAppGrid,
+                    valueListenable: _hoverColorAppGrid,
                     builder: (context, color, child) {
                       return PortalTarget(
                         portalFollower: const SizedBox(
@@ -106,16 +138,9 @@ class AppGridDashboardView extends StatelessWidget {
                             follower: Alignment.topRight,
                             target: Alignment.bottomRight,
                           ),
-                          portalFollower: ValueListenableBuilder(
-                            valueListenable: controller.linagoraApplications,
-                            builder: (context, linagoraApplications, child) {
-                              if (linagoraApplications == null) return child!;
-                              return AppGridDashboardOverlay(
-                                linagoraApplications,
-                              );
-                            },
-                            child: const SizedBox.shrink(),
-                          ),
+                          portalFollower: linagoraApplications == null
+                              ? const SizedBox.shrink()
+                              : AppGridDashboardOverlay(linagoraApplications),
                           visible: isOpenAppGridDashboard,
                           child: Container(
                             decoration: BoxDecoration(

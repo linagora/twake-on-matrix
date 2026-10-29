@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:twake_chat/config/app_grid_config/app_config_loader.dart';
 import 'package:twake_chat/data/datasource/capabilities/server_capabilities_datasource.dart';
 import 'package:twake_chat/data/datasource/contact/address_book_datasource.dart';
 import 'package:twake_chat/data/datasource/contact/hive_third_party_contact_datasource.dart';
@@ -90,7 +89,6 @@ import 'package:twake_chat/domain/repository/server_config_repository.dart';
 import 'package:twake_chat/domain/repository/server_search_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
-import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
 import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
@@ -207,7 +205,6 @@ class GetItInitializer {
       () => const IsolateStorageScannerService(),
     );
     getIt.registerSingleton(Store());
-    getIt.registerFactory<AppConfigLoader>(() => AppConfigLoader());
     bindingCachingManager();
     _bindingManagers();
   }
@@ -446,10 +443,6 @@ class GetItInitializer {
 
     getIt.registerFactory<GenerateThumbnailsMediaInteractor>(
       () => GenerateThumbnailsMediaInteractor(),
-    );
-
-    getIt.registerFactory<GetAppGridConfigurationInteractor>(
-      () => GetAppGridConfigurationInteractor(getIt.get<AppConfigLoader>()),
     );
 
     getIt.registerSingleton<DownloadMediaFileInteractor>(
