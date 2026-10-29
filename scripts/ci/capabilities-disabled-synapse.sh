@@ -32,7 +32,7 @@ start() {
 
   local base="http://127.0.0.1:$PORT"
   local end=$((SECONDS + 60))
-  until curl -sf "$base/_matrix/client/versions" >/dev/null 2>&1; do
+  until curl -sf --max-time 5 "$base/_matrix/client/versions" >/dev/null 2>&1; do
     if [ $SECONDS -ge $end ]; then
       log "Synapse did not become ready in 60s"
       docker logs "$NAME" >&2 || true
@@ -41,16 +41,22 @@ start() {
     sleep 1
   done
 
-  curl -sS --fail-with-body -X POST "$base/_matrix/client/v3/register" \
+  curl -sS --fail-with-body --max-time 30 -X POST "$base/_matrix/client/v3/register" \
     -H "Content-Type: application/json" \
     -d "$(jq -nc --arg u "$CAPS_USER" --arg p "$CAPS_PASSWORD" \
       '{username: $u, password: $p, auth: {type: "m.login.dummy"}}')" \
     >/dev/null
 
   if [ -f "$env_file" ]; then
-    local tmp
+    local tmp rc=0
     tmp="$(mktemp)"
-    grep -v '^CAPS_DISABLED_' "$env_file" > "$tmp" || true
+    # grep exits 1 when every line is a CAPS_DISABLED_ one; 2 is a real error.
+    grep -v '^CAPS_DISABLED_' "$env_file" > "$tmp" || rc=$?
+    if [ "$rc" -gt 1 ]; then
+      rm -f "$tmp"
+      log "could not filter $env_file"
+      exit 1
+    fi
     cat "$tmp" > "$env_file"
     rm -f "$tmp"
   fi
