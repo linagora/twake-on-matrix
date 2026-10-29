@@ -526,35 +526,31 @@ class _MessageContentWithTimestampBuilderState
       ],
     );
 
-    return OptionalStack(
-      key: key,
-      alignment: widget.event.isOwnMessage
-          ? AlignmentDirectional.bottomStart
-          : AlignmentDirectional.bottomEnd,
-      isEnabled: hasReactionEvent,
-      children: [
-        if (isDisplayOnlyEmoji)
-          Container(constraints: bubbleConstraints, child: bubbleContent)
-        else
-          MessageBubble(
-            isOwnMessage: widget.event.isOwnMessage,
-            tailDirection: tailDirection,
-            hasReactions: hasReactionEvent,
-            contentType: bubbleContentType,
-            constraints: bubbleConstraints,
-            child: bubbleContent,
-          ),
-        PositionedDirectional(
-          start: 8,
-          end: 0,
-          bottom: 0,
-          child: OptionalSelectionContainerDisabled(
+    final reactions = hasReactionEvent
+        ? OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
             child: MessageReactions(widget.event, widget.timeline),
-          ),
-        ),
-        const SizedBox(width: 4),
-      ],
+          )
+        : null;
+
+    if (isDisplayOnlyEmoji) {
+      return MessageBubble.plain(
+        key: key,
+        constraints: bubbleConstraints,
+        isAlignedToEnd: alignOwnMessageRight,
+        reactions: reactions,
+        child: bubbleContent,
+      );
+    }
+    return MessageBubble(
+      key: key,
+      isOwnMessage: widget.event.isOwnMessage,
+      tailDirection: tailDirection,
+      contentType: bubbleContentType,
+      constraints: bubbleConstraints,
+      isAlignedToEnd: alignOwnMessageRight,
+      reactions: reactions,
+      child: bubbleContent,
     );
   }
 
