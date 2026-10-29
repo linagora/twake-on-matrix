@@ -11,3 +11,7 @@ class GetUserInfoVisibilityException extends UserInfoException {
 class UpdateUserInfoVisibilityException extends UserInfoException {
   const UpdateUserInfoVisibilityException(super.cause);
 }
+
+class GetUserInfoException extends UserInfoException {
+  const GetUserInfoException(super.cause);
+}
