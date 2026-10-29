@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'dart:convert';
 
 import 'package:twake_chat/config/app_config.dart';
@@ -101,6 +102,25 @@ class KeychainSharingManager {
     Logs().i(
       '[KeychainSharing] Notification device ${login.deviceId} for $userId',
     );
+  }
+
+  /// The SSO provider that signs the extension in, or null without SSO.
+  static Future<String?> notificationSsoProviderId(Client client) async {
+    try {
+      final flows = await client.getLoginFlows();
+      final sso = flows?.firstWhereOrNull(
+        (flow) => flow.type == AuthenticationTypes.sso,
+      );
+      final providers = sso?.additionalProperties['identity_providers'];
+      // ponytail: first provider; pick the app's own one if a server ever
+      // offers several.
+      return providers is List && providers.isNotEmpty
+          ? (providers.first as Map)['id'] as String?
+          : null;
+    } catch (e, s) {
+      Logs().w('Unable to read login flows', e, s);
+      return null;
+    }
   }
 
   /// Whether the extension has its own device for [client].

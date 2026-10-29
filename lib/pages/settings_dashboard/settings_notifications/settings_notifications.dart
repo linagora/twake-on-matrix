@@ -125,20 +125,9 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   Future<void> _loadEncryptedPreviewsStatus() async {
     final client = _client;
-    try {
-      final flows = await client.getLoginFlows();
-      final sso = flows?.firstWhereOrNull(
-        (flow) => flow.type == AuthenticationTypes.sso,
-      );
-      final providers = sso?.additionalProperties['identity_providers'];
-      // ponytail: first provider; pick the app's own one if a server ever
-      // offers several.
-      _ssoProviderId = providers is List && providers.isNotEmpty
-          ? (providers.first as Map)['id'] as String?
-          : null;
-    } catch (e, s) {
-      Logs().w('Unable to read login flows', e, s);
-    }
+    _ssoProviderId = await KeychainSharingManager.notificationSsoProviderId(
+      client,
+    );
     final active = await KeychainSharingManager.hasNotificationSession(client);
     final cached = await client.encryption?.crossSigning.isCached() ?? false;
     // Without cross-signing, senders share keys with every device anyway.
