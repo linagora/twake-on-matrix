@@ -468,7 +468,7 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  void _registerSubs(String name) async {
+  void _registerSubs(String name) {
     final currentClient = getClientByName(name);
     if (currentClient == null) {
       Logs().w(
