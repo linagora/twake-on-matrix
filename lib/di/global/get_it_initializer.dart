@@ -44,14 +44,14 @@ import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dar
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
 import 'package:twake_chat/data/network/dio_cache_option.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:twake_chat/data/network/invitation/invitation_api.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:twake_chat/data/network/search/server_search_api.dart';
 import 'package:twake_chat/data/network/server_config_api.dart';
 import 'package:twake_chat/data/network/user_info/user_info_api.dart';
-import 'package:twake_chat/data/network/dio_client.dart';
-import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:twake_chat/data/repository/capabilities/server_capabilities_repository_impl.dart';
 import 'package:twake_chat/data/repository/contact/address_book_repository_impl.dart';
 import 'package:twake_chat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
@@ -352,7 +352,7 @@ class GetItInitializer {
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
     );
-    // TODO: [transitional] Kept for matrix.dart's language lookup; Riverpod code uses userInfoRepositoryProvider.
+    // TODO: [transitional] Kept for matrix.dart's language lookup and GetUserInfoInteractor; Riverpod code uses userInfoRepositoryProvider.
     getIt.registerFactory<UserInfoRepository>(
       () => UserInfoRepositoryImpl(
         UserInfoDatasourceImpl(
