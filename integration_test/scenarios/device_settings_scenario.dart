@@ -9,27 +9,43 @@ class DeviceSettingsScenario extends BaseTestScenario {
 
   @override
   Future<void> runTestLogic() async {
+    const password = String.fromEnvironment('PASSWORD');
     final name = 'e2e-device-${DateTime.now().millisecondsSinceEpoch}';
     final renamed = '$name-renamed';
-    final other = await loginPrimaryExtraSession(deviceDisplayName: name);
+    final bulkNames = ['$name-a', '$name-b'];
+    final sessions = <PrimaryExtraSession>[];
     try {
+      for (final deviceName in [name, ...bulkNames]) {
+        sessions.add(
+          await loginPrimaryExtraSession(deviceDisplayName: deviceName),
+        );
+      }
+      final [other, ...bulk] = sessions;
+
       await robots.homeRobot().gotoSettingScreen();
       await robots.settingRobot().openDevicesSetting();
 
       final devices = DeviceSettingsRobot($);
-      await devices.waitForOtherSession(name);
+      for (final deviceName in [name, ...bulkNames]) {
+        await devices.waitForOtherSession(deviceName);
+      }
       await devices.expectCurrentSessionCannotBeRemoved();
 
       await devices.renameSession(name, renamed);
       expect(await other.fetchDisplayName(), renamed);
 
-      await devices.removeSession(
-        renamed,
-        password: const String.fromEnvironment('PASSWORD'),
-      );
+      await devices.removeSession(renamed, password: password);
       expect(await other.isSignedOut(), isTrue);
+
+      await devices.removeAllOtherSessions(password: password);
+      for (final session in bulk) {
+        expect(await session.isSignedOut(), isTrue);
+      }
     } finally {
-      await other.logout();
+      for (final session in sessions) {
+        // A cleanup error must not hide the test's own failure.
+        await session.logout().catchError((_) {});
+      }
     }
   }
 }

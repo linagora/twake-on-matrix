@@ -129,20 +129,15 @@ Future<void> ensureReceiverJoined({required String roomId}) async {
   final client = HttpClient()..autoUncompress = true;
   try {
     final session = await _receiverSession(client, endpoints);
-    final joinUri = _matrixBase(endpoints.matrixURL).replace(
-      pathSegments: ['_matrix', 'client', 'v3', 'rooms', roomId, 'join'],
+    final (status, body) = await _authorizedRequest(
+      client: client,
+      session: session,
+      method: 'POST',
+      pathSegments: ['rooms', roomId, 'join'],
     );
-    final request = await client.postUrl(joinUri);
-    request.headers
-      ..set(HttpHeaders.contentTypeHeader, 'application/json')
-      ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
-      ..set(HttpHeaders.userAgentHeader, _userAgent);
-    request.write('{}');
-    final response = await request.close();
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final body = await utf8.decoder.bind(response).join();
+    if (status < 200 || status >= 300) {
       throw Exception(
-        'Receiver join failed [status=${response.statusCode}] '
+        'Receiver join failed [status=$status] '
         'body=${body.substring(0, body.length.clamp(0, 300))}',
       );
     }
@@ -158,21 +153,15 @@ class PrimaryExtraSession {
   final _MatrixSession _session;
   final String deviceId;
 
-  Uri _uri(List<String> pathSegments) => _matrixBase(
-    _session.endpoints.matrixURL,
-  ).replace(pathSegments: ['_matrix', 'client', 'v3', ...pathSegments]);
-
   Future<(int, String)> _send(String method, List<String> pathSegments) async {
     final client = HttpClient();
     try {
-      final request = await client.openUrl(method, _uri(pathSegments));
-      request.headers
-        ..set(HttpHeaders.contentTypeHeader, 'application/json')
-        ..set(HttpHeaders.authorizationHeader, 'Bearer ${_session.accessToken}')
-        ..set(HttpHeaders.userAgentHeader, _userAgent);
-      if (method == 'POST') request.write('{}');
-      final response = await request.close();
-      return (response.statusCode, await utf8.decoder.bind(response).join());
+      return await _authorizedRequest(
+        client: client,
+        session: _session,
+        method: method,
+        pathSegments: pathSegments,
+      );
     } finally {
       client.close(force: true);
     }
@@ -202,7 +191,7 @@ Future<PrimaryExtraSession> loginPrimaryExtraSession({
   const endpoints = _SsoEndpoints.fromEnvironment();
   final client = HttpClient();
   try {
-    final session = await _loginWithPassword(
+    final session = await _loginAs(
       client: client,
       endpoints: endpoints,
       credentials: const _Credentials(
@@ -230,33 +219,66 @@ Future<_MatrixSession> _receiverSession(
   final cached = _cachedReceiverSession;
   if (cached != null) return cached;
 
-  const receiver = String.fromEnvironment('Receiver');
-  const passOfReceiver = String.fromEnvironment('ReceiverPass');
-  final session = endpoints.ssoURL.isEmpty
-      ? await _loginWithPassword(
-          client: client,
-          endpoints: endpoints,
-          credentials: const _Credentials(
-            username: receiver,
-            password: passOfReceiver,
-          ),
-        )
-      : await _loginWithMLoginToken(
-          client: client,
-          endpoints: endpoints,
-          loginToken: await fetchAuthToken(
-            username: receiver,
-            password: passOfReceiver,
-          ),
-        );
-  return _cachedReceiverSession = session;
+  return _cachedReceiverSession = await _loginAs(
+    client: client,
+    endpoints: endpoints,
+    credentials: const _Credentials(
+      username: String.fromEnvironment('Receiver'),
+      password: String.fromEnvironment('ReceiverPass'),
+    ),
+  );
+}
+
+Future<_MatrixSession> _loginAs({
+  required HttpClient client,
+  required _SsoEndpoints endpoints,
+  required _Credentials credentials,
+  String? deviceDisplayName,
+}) async {
+  if (endpoints.ssoURL.isEmpty) {
+    return _loginWithPassword(
+      client: client,
+      endpoints: endpoints,
+      credentials: credentials,
+      deviceDisplayName: deviceDisplayName ?? _deviceDisplayName,
+    );
+  }
+  return _loginWithMLoginToken(
+    client: client,
+    endpoints: endpoints,
+    loginToken: await fetchAuthToken(
+      username: credentials.username,
+      password: credentials.password,
+    ),
+    deviceDisplayName:
+        deviceDisplayName ?? '${endpoints.chatURL}: $_deviceDisplayName',
+  );
+}
+
+Future<(int, String)> _authorizedRequest({
+  required HttpClient client,
+  required _MatrixSession session,
+  required String method,
+  required List<String> pathSegments,
+}) async {
+  final uri = _matrixBase(
+    session.endpoints.matrixURL,
+  ).replace(pathSegments: ['_matrix', 'client', 'v3', ...pathSegments]);
+  final request = await client.openUrl(method, uri);
+  request.headers
+    ..set(HttpHeaders.contentTypeHeader, 'application/json')
+    ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
+    ..set(HttpHeaders.userAgentHeader, _userAgent);
+  if (method == 'POST') request.write('{}');
+  final response = await request.close();
+  return (response.statusCode, await utf8.decoder.bind(response).join());
 }
 
 Future<_MatrixSession> _loginWithPassword({
   required HttpClient client,
   required _SsoEndpoints endpoints,
   required _Credentials credentials,
-  String deviceDisplayName = _deviceDisplayName,
+  required String deviceDisplayName,
 }) async {
   final loginUri = _matrixBase(
     endpoints.matrixURL,
@@ -574,6 +596,7 @@ Future<_MatrixSession> _loginWithMLoginToken({
   required HttpClient client,
   required _SsoEndpoints endpoints,
   required String loginToken,
+  required String deviceDisplayName,
 }) async {
   final loginUri = _matrixBase(
     endpoints.matrixURL,
@@ -585,8 +608,7 @@ Future<_MatrixSession> _loginWithMLoginToken({
     ..set('Origin', 'https://${endpoints.chatURL}');
   request.write(
     jsonEncode({
-      'initial_device_display_name':
-          '${endpoints.chatURL}: $_deviceDisplayName',
+      'initial_device_display_name': deviceDisplayName,
       'token': loginToken,
       'type': 'm.login.token',
     }),
@@ -595,16 +617,20 @@ Future<_MatrixSession> _loginWithMLoginToken({
   final body = await response.transform(utf8.decoder).join();
   if (response.statusCode < 200 || response.statusCode >= 300) {
     throw Exception(
-      'Receiver m.login.token failed [status=${response.statusCode}] '
+      'm.login.token failed [status=${response.statusCode}] '
       'body=${body.substring(0, body.length.clamp(0, 300))}',
     );
   }
-  final accessToken =
-      (jsonDecode(body) as Map<String, dynamic>)['access_token'] as String?;
+  final json = jsonDecode(body) as Map<String, dynamic>;
+  final accessToken = json['access_token'] as String?;
   if (accessToken == null) {
     throw Exception('Login response missing access_token: $body');
   }
-  return _MatrixSession(endpoints: endpoints, accessToken: accessToken);
+  return _MatrixSession(
+    endpoints: endpoints,
+    accessToken: accessToken,
+    deviceId: json['device_id'] as String?,
+  );
 }
 
 Future<void> _putMatrixMessage({

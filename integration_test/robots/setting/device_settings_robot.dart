@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
+import 'package:matrix/matrix.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/device_settings/change_device_name_dialog.dart';
@@ -43,21 +44,35 @@ class DeviceSettingsRobot extends HomeRobot {
     await $.waitUntilVisible($(DevicesSettings).$(_l10n.removeAllOtherDevices));
   }
 
+  Client get _client => Matrix.of($.tester.element($(DevicesSettings))).client;
+
+  PatrolFinder _currentSession() => $(DevicesSettings).$(
+    find.byWidgetPredicate(
+      (widget) =>
+          widget is UserDeviceListItem &&
+          widget.userDevice.deviceId == _client.deviceID,
+    ),
+  );
+
+  Future<void> _confirmRemoval(String title, String password) async {
+    final confirm = $(ConfirmationDialogBuilder).containing(title);
+    await $.waitUntilVisible(confirm.$(_l10n.remove));
+    await confirm.$(_l10n.remove).tap();
+
+    final passwordDialog = $(
+      ConfirmationDialogBuilder,
+    ).containing(_l10n.pleaseEnterYourPassword);
+    await $.waitUntilVisible(passwordDialog.$(EditableText));
+    await passwordDialog.$(EditableText).enterText(password);
+    await passwordDialog.$(_l10n.ok).tap();
+    await waitUntilAbsent($, passwordDialog);
+  }
+
   Future<void> expectCurrentSessionCannotBeRemoved() async {
-    final screen = $(DevicesSettings);
-    final currentId = Matrix.of($.tester.element(screen)).client.deviceID;
-    final current = screen.$(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is UserDeviceListItem &&
-            widget.userDevice.deviceId == currentId,
-      ),
-    );
+    final current = _currentSession();
     final row = current.evaluate().single.widget as UserDeviceListItem;
     await _openActions(current, name: row.userDevice.displayname);
-    if (_sheetAction(_l10n.removeDevice).exists) {
-      throw TestFailure('The current session offers "${_l10n.removeDevice}"');
-    }
+    expect(_sheetAction(_l10n.removeDevice), findsNothing);
     await _closeActions();
   }
 
@@ -80,25 +95,29 @@ class DeviceSettingsRobot extends HomeRobot {
   Future<void> removeSession(String name, {required String password}) async {
     await _openActions(_session(name), name: name);
     await _sheetAction(_l10n.removeDevice).tap();
-
-    final confirm = $(
-      ConfirmationDialogBuilder,
-    ).containing(_l10n.removeDeviceConfirmationTitle);
-    await $.waitUntilVisible(confirm.$(_l10n.remove));
-    await confirm.$(_l10n.remove).tap();
-
-    final passwordDialog = $(
-      ConfirmationDialogBuilder,
-    ).containing(_l10n.pleaseEnterYourPassword);
-    await $.waitUntilVisible(passwordDialog.$(EditableText));
-    await passwordDialog.$(EditableText).enterText(password);
-    await passwordDialog.$(_l10n.ok).tap();
-
-    await waitUntilAbsent($, passwordDialog);
+    await _confirmRemoval(_l10n.removeDeviceConfirmationTitle, password);
     await waitUntilAbsent(
       $,
       _session(name),
       timeout: const Duration(seconds: 30),
     );
+  }
+
+  Future<void> removeAllOtherSessions({required String password}) async {
+    await $(DevicesSettings).$(_l10n.removeAllOtherDevices).tap();
+    await _confirmRemoval(
+      _l10n.removeAllOtherDevicesConfirmationTitle,
+      password,
+    );
+    await $.waitUntilVisible(
+      $(DevicesSettings).$(_l10n.noOtherDevicesFound),
+      timeout: const Duration(seconds: 30),
+    );
+    expect($(DevicesSettings).$(UserDeviceListItem), findsOneWidget);
+    expect(_currentSession(), findsOneWidget);
+
+    // The server must keep the current session, and only it.
+    final devices = await _client.getDevices();
+    expect(devices?.map((d) => d.deviceId), [_client.deviceID]);
   }
 }
