@@ -125,8 +125,16 @@ class TestBase {
     PatrolIntegrationTester $, {
     TestLogin? login,
   }) async {
-    if (login != null && (login.serverUrl.isEmpty || login.username.isEmpty)) {
-      throw StateError('Login override is incomplete (missing define?)');
+    if (login != null) {
+      if (login.serverUrl.isEmpty ||
+          login.username.isEmpty ||
+          login.password.isEmpty) {
+        throw StateError('Login override is incomplete (missing define?)');
+      }
+      // The SSO bypass gets its token from SSO_URL, whatever the server URL.
+      if (const String.fromEnvironment('SSO_URL').isNotEmpty) {
+        throw StateError('Login override needs password login: unset SSO_URL');
+      }
     }
     // Route the auto-login through the platform factory so web uses
     // `WebLoginRobot` (waits for `AutoHomeserverPicker`, then

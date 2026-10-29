@@ -137,6 +137,8 @@ jobs:
           cut -d= -f1 .env.cicd
 
       - name: Start the capabilities-disabled Synapse
+        # Only one test needs it, and that test fails on the missing defines.
+        continue-on-error: true
         run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
 
       - name: Enable KVM
@@ -338,6 +340,8 @@ jobs:
           cut -d= -f1 .env.cicd
 
       - name: Start the capabilities-disabled Synapse
+        # Only one test needs it, and that test fails on the missing defines.
+        continue-on-error: true
         run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
 
       - name: Enable KVM

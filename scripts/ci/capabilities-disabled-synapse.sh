@@ -48,7 +48,11 @@ start() {
     >/dev/null
 
   if [ -f "$env_file" ]; then
-    sed -i.bak '/^CAPS_DISABLED_/d' "$env_file" && rm -f "$env_file.bak"
+    local tmp
+    tmp="$(mktemp)"
+    grep -v '^CAPS_DISABLED_' "$env_file" > "$tmp" || true
+    cat "$tmp" > "$env_file"
+    rm -f "$tmp"
   fi
   {
     echo "CAPS_DISABLED_SERVER_URL=http://$APP_HOST:$PORT"
