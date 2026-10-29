@@ -61,15 +61,19 @@ class LoginSessions {
 
   /// The unlogged client for a login screen: the placeholder of a logged-out
   /// boot, else the pending candidate, else a new one. Calls made while the
-  /// candidate is being made share it. Cleanups that failed before are
-  /// retried first.
+  /// candidate is being made share it. The cleanups of the sessions that
+  /// failed before are retried first; the removals of logged-out accounts are
+  /// retried in the background.
   Future<Client> loginClient() async {
     // Read before the retry starts, so a missing host fails this call only.
     final host = _host;
-    // Started here, awaited before a client is handed out. Everything up to
-    // the first await runs at once, so a candidate that is being made is
-    // already `_pending` when the user leaves and `discardPending` runs.
-    final retry = retryFailedCleanups();
+    // The removals reach the server, which may not answer: they do not hold
+    // the screen back. The session cleanups are started here and awaited
+    // before a client is handed out. Everything up to the first await runs at
+    // once, so a candidate that is being made is already `_pending` when the
+    // user leaves and `discardPending` runs.
+    unawaited(_retryRemovalsInBackground(host));
+    final retry = _retrySessionCleanups();
     _forgetDisposed();
     final reusable = _reusableClient();
     if (reusable != null) {
@@ -189,11 +193,17 @@ class LoginSessions {
     if (!pending.isLive && identical(_pending, pending)) _pending = null;
   }
 
-  /// Runs again the removals of logged-out accounts that failed, then the
-  /// cleanup steps that failed, for every session. The removals go first: a
-  /// session whose step is handed to them finds it done, not still running.
-  Future<void> retryFailedCleanups() async {
-    await _host.retryPendingRemovals();
+  /// A failure is reported, not thrown: nobody awaits this run, and the
+  /// removals that failed stay recorded and run again.
+  Future<void> _retryRemovalsInBackground(LoginHost host) async {
+    try {
+      await host.retryPendingRemovals();
+    } catch (error, stackTrace) {
+      host.report(error, stackTrace, 'retry of the failed removals');
+    }
+  }
+
+  Future<void> _retrySessionCleanups() async {
     await Future.wait([
       for (final session in _byId.values.toList())
         if (session.needsRetry) session.retryCleanup(),

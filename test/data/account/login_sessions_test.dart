@@ -85,9 +85,10 @@ void main() {
       host.onRemovalRetry = () => throw StateError('retry failed');
 
       final client = await sessions.loginClient();
+      await pumpEventQueue();
 
       expect(client, same(host.clientOf('c1')));
-      expect(host.reports, ['retry of the failed cleanups']);
+      expect(host.reports, ['retry of the failed removals']);
     });
 
     test('registers the candidate before a slow retry ends', () async {
@@ -228,20 +229,8 @@ void main() {
     });
   });
 
-  group('a retry that ends the client waited for', () {
-    test('the placeholder it ended is not handed out', () async {
-      host.reusable = host.clientOf('boot');
-      host.onRemovalRetry = () => host.reusable = null;
-
-      final client = await sessions.loginClient();
-
-      expect(client.clientName, 'c1');
-      expect(client, isNot(same(host.clientOf('boot'))));
-    });
-  });
-
   group('failed removals of logged-out accounts', () {
-    test('are retried before a client is handed out', () async {
+    test('are retried when a client is asked for', () async {
       await sessions.loginClient();
 
       expect(host.removalRetries, 1);
@@ -249,6 +238,33 @@ void main() {
       await sessions.loginClient();
 
       expect(host.removalRetries, 2);
+    });
+
+    test(
+      'do not hold back the client while they wait on the network',
+      () async {
+        host.removalGate = Completer<void>();
+
+        final client = await sessions.loginClient();
+
+        expect(client.clientName, 'c1');
+        expect(host.removalRetries, 1);
+
+        host.removalGate!.complete();
+        await pumpEventQueue();
+      },
+    );
+
+    test('do not hold back the reusable placeholder either', () async {
+      host.reusable = host.clientOf('boot');
+      host.removalGate = Completer<void>();
+
+      final client = await sessions.loginClient();
+
+      expect(client, same(host.clientOf('boot')));
+
+      host.removalGate!.complete();
+      await pumpEventQueue();
     });
   });
 
@@ -376,7 +392,7 @@ void main() {
 
       host.failing.remove('tom:a');
       host.calls.clear();
-      await sessions.retryFailedCleanups();
+      await sessions.loginClient();
 
       expect(host.calls, contains('tom:a'));
       expect(first.needsRetry, isFalse);

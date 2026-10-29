@@ -403,6 +403,33 @@ void main() {
       },
     );
 
+    test(
+      'a removal that is still pending is not reported, and the step stays',
+      () async {
+        final session = await candidate();
+        host.removalPending.add('removeAccount:c1');
+        host.failing.add('switchTo:c1');
+        await logIn(session);
+
+        expect(session.state, LoginSessionState.cleanupFailed);
+        expect(host.reports.where((r) => r.startsWith('cleanup ')), isEmpty);
+
+        host.removalPending.clear();
+        await session.retryCleanup();
+
+        expect(session.state, LoginSessionState.disposed);
+        expect(host.calls.where((c) => c == 'removeAccount:c1'), hasLength(2));
+      },
+    );
+
+    test('another error in a cleanup step is still reported', () async {
+      final session = await stuck();
+
+      await session.retryCleanup();
+
+      expect(host.reports.where((r) => r.startsWith('cleanup ')), hasLength(2));
+    });
+
     test('a retry that fails again stays in cleanupFailed', () async {
       final session = await stuck();
 

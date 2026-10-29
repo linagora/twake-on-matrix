@@ -4,6 +4,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_host.dart';
+import 'package:twake_chat/data/account/rollback_removals.dart';
 
 /// Where a login session is. The moves between states are the only ones the
 /// code makes; any other move throws.
@@ -385,6 +386,12 @@ class LoginSession {
       try {
         await _run(step);
         _failedCleanups.remove(step);
+      } on RemovalPendingException catch (e) {
+        // The removals own the retry (the pending check keeps the same
+        // removal from running twice at once), so this is expected, not a
+        // failure to report. The step stays for the next retry.
+        _cleanupError = e;
+        return;
       } catch (e, s) {
         _cleanupError = e;
         _host.report(e, s, 'cleanup $step of $id failed');
@@ -407,7 +414,7 @@ class LoginSession {
     _Cleanup.discardCandidate => _host.discardCandidate(_accountId),
     _Cleanup.restoreEffects => _restoreActiveEffects(),
     _Cleanup.cancelListener => _cancelListener(),
-    _Cleanup.logoutLast => Future<void>.sync(_host.logoutLast),
+    _Cleanup.logoutLast => _host.logoutLast(),
   };
 
   /// The login set the shared state before it was active: the account that is
