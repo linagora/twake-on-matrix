@@ -39,6 +39,10 @@ class SettingsProfileRobot extends HomeRobot {
     );
   }
 
+  PatrolFinder displayNameField() {
+    return item(SettingsProfileEnum.displayName).$(EditableText);
+  }
+
   PatrolFinder displayNameEditIcon() {
     return item(
       SettingsProfileEnum.displayName,
@@ -110,6 +114,16 @@ class SettingsProfileRobot extends HomeRobot {
       value = getValueOf(settingsProfileEnum) ?? '';
     }
     return value;
+  }
+
+  /// Server capabilities arrive after the profile screen is built.
+  Future<void> waitForCapabilities() async {
+    await $(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is SettingsProfileView && widget.capabilities != null,
+      ),
+    ).waitUntilExists(timeout: const Duration(seconds: 15));
   }
 
   Future<void> copyMatrixId() async {

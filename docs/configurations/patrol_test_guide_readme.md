@@ -21,6 +21,8 @@ cp integration_test/.env integration_test/.env.local.do-not-commit
 
 Then fill in the placeholder values, especially `DEVICE`, `SERVER_URL`, `MATRIX_URL`, and credentials.
 
+`settings_profile_capabilities_test.dart` also needs a Synapse with profile edits disabled: run `scripts/ci/capabilities-disabled-synapse.sh start integration_test/.env.local.do-not-commit` first (it appends the `CAPS_DISABLED_*` keys; set `CAPS_SYNAPSE_APP_HOST` to the host the device reaches), and `stop` afterwards.
+
 ### 2.1) Authentication paths
 
 The test framework supports two login modes, selected at compile time by the `SSO_URL` env variable:

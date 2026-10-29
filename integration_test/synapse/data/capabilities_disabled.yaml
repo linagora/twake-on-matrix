@@ -1,0 +1,3 @@
+# Overlay on homeserver.yaml for settings_profile_capabilities_test.
+enable_set_displayname: false
+enable_set_avatar_url: false
