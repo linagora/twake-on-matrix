@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
-import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 
 part 'active_matrix_client_provider.g.dart';

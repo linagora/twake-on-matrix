@@ -10,7 +10,8 @@ import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
-import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
+import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
@@ -144,7 +145,7 @@ void main() {
     for (final entry in table.entries) {
       test('${entry.key}: active client and user id', () {
         final (state, client, userId) = entry.value;
-        final registry = AccountClientRegistry()..replaceAll([a, b]);
+        final registry = AccountClientRegistry()..adoptOnce([a, b]);
         final fixed = ProviderContainer.test(
           overrides: [
             accountsProvider.overrideWith(() => _FixedAccounts(state)),
