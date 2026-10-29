@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
@@ -13,18 +17,22 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import '../../utils/platform_infos.dart';
 import 'login_view.dart';
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Login extends ConsumerStatefulWidget {
+  const Login({super.key, this.owner = LoginClientOwner.thisPage});
+
+  /// Whether this screen or the one that pushed it drops the pending client.
+  final LoginClientOwner owner;
 
   @override
   LoginController createState() => LoginController();
 }
 
-class LoginController extends State<Login> {
+class LoginController extends ConsumerState<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   String? usernameError;
@@ -32,9 +40,12 @@ class LoginController extends State<Login> {
   String? loginError;
   bool loading = false;
   bool showPassword = false;
-  late final Future<Client> loginClientFuture;
+  late Future<Client> loginClientFuture;
 
   Client? _pendingLoginClient;
+
+  /// The homeserver of the last login try, for the next try after a failure.
+  Uri? _loginHomeserver;
 
   void toggleShowPassword() =>
       setState(() => showPassword = !loading && !showPassword);
@@ -81,12 +92,20 @@ class LoginController extends State<Login> {
       }
       Matrix.of(context).loginType = LoginType.mLoginPassword;
       final client = await loginClientFuture;
+      // After a failed try the client was signed out and lost its homeserver,
+      // and the SDK can clear it again later: give it back right before the
+      // login.
+      client.homeserver ??= _loginHomeserver;
+      _loginHomeserver = client.homeserver;
       _pendingLoginClient = client;
-      await client.login(
-        LoginType.mLoginPassword,
-        identifier: identifier,
-        password: passwordController.text,
-        initialDeviceDisplayName: PlatformInfos.clientName,
+      await _sessions.trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginPassword,
+          identifier: identifier,
+          password: passwordController.text,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
       );
     } on MatrixException catch (exception) {
       if (!mounted) return;
@@ -129,16 +148,34 @@ class LoginController extends State<Login> {
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
-    _loginCompleter.complete();
     _pendingLoginClient = null;
     switch (event.multipleAccountLoginType) {
+      case MultipleAccountLoginType.loginFailed ||
+          MultipleAccountLoginType.cleanupFailed:
+        // Not a completed login: the user can try again.
+        _handleLoginFailed(event.error);
       case MultipleAccountLoginType.firstLoggedIn:
+        _loginCompleter.complete();
         _handleFirstLoggedIn(event.client);
-        return;
       case MultipleAccountLoginType.otherAccountLoggedIn:
+        _loginCompleter.complete();
         _handleAddAnotherAccount(event.client);
-        return;
     }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone: show why and let the user try again, on a client
+  /// that is still usable.
+  void _handleLoginFailed(Object? error) {
+    if (!mounted) return;
+    TwakeDialog.hideLoadingDialog(context);
+    setState(() {
+      loginClientFuture = _sessions.loginClient();
+      loginError =
+          error?.toLocalizedString(context) ??
+          L10n.of(context)!.oopsSomethingWentWrong;
+      loading = false;
+    });
   }
 
   void _handleFirstLoggedIn(Client client) {
@@ -179,9 +216,9 @@ class LoginController extends State<Login> {
       // from a different server are not silently redirected.
       final mxidDomain = userId.domain!;
       final currentHost = oldHomeserver?.host ?? '';
-      final cachedDiscovery = Matrix.of(
-        context,
-      ).loginHomeserverSummary?.discoveryInformation;
+      final cachedDiscovery = ref
+          .read(loginHomeserverSummaryProvider)
+          ?.discoveryInformation;
       final cachedBaseUrl =
           cachedDiscovery?.mHomeserver.baseUrl.toString() ?? '';
       if (currentHost.endsWith(mxidDomain) && cachedBaseUrl.isNotEmpty) {
@@ -233,10 +270,13 @@ class LoginController extends State<Login> {
 
   StreamSubscription? _clientLoginStateChangedSubscription;
 
+  late final LoginSessions _sessions;
+
   @override
   void initState() {
     super.initState();
-    loginClientFuture = Matrix.of(context).getLoginClient();
+    _sessions = ref.read(loginSessionsProvider);
+    loginClientFuture = _sessions.loginClient();
     _clientLoginStateChangedSubscription = Matrix.of(
       context,
     ).onClientLoginStateChanged.stream.listen(_listenClientLoginStateChanged);
@@ -244,6 +284,9 @@ class LoginController extends State<Login> {
 
   @override
   void dispose() {
+    if (widget.owner == LoginClientOwner.thisPage) {
+      unawaited(_sessions.discardPending());
+    }
     _coolDown?.cancel();
     usernameController.dispose();
     passwordController.dispose();
