@@ -56,11 +56,19 @@ class KeychainSharingManager {
   static Future<void> createNotificationSession(
     Client client,
     String loginToken,
+  ) => _pendingCreation = _createNotificationSession(client, loginToken);
+
+  /// Lets a logout wait for a session being created, which it must delete.
+  static Future<void>? _pendingCreation;
+
+  static Future<void> _createNotificationSession(
+    Client client,
+    String loginToken,
   ) async {
     final userId = client.userID;
     final homeserver = client.homeserver;
     if (userId == null || homeserver == null) return;
-    await logoutNotificationSession(client);
+    await _logoutNotificationSession(client);
     final login =
         await MatrixApi(
           homeserver: homeserver,
@@ -121,6 +129,13 @@ class KeychainSharingManager {
 
   /// Logs the notification device out and forgets its session.
   static Future<void> logoutNotificationSession(Client client) async {
+    final userId = client.userID;
+    if (!PlatformInfos.isIOS || userId == null) return;
+    await _pendingCreation?.catchError((_) {});
+    await _logoutNotificationSession(client);
+  }
+
+  static Future<void> _logoutNotificationSession(Client client) async {
     final userId = client.userID;
     if (!PlatformInfos.isIOS || userId == null) return;
     try {
