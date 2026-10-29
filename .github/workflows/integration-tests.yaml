@@ -217,7 +217,7 @@ jobs:
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart
               integration_test/tests/chat/message_reactions_mobile_test.dart
-          # 6 stateful chat flows, isolated from the message scenarios above.
+          # 7 stateful chat flows, isolated from the message scenarios above.
           - shard: shard_4_chat_flows
             targets: >-
               integration_test/tests/chat/chat_dm_leave_test.dart
@@ -226,6 +226,7 @@ jobs:
               integration_test/tests/chat/create_new_group_chat_test.dart
               integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart
               integration_test/tests/chat/search_external_mxid_test.dart
+              integration_test/tests/chat/link_preview_mobile_test.dart
           # 12 test cases (~22 min). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker
           # flow) must NOT be listed here — they can never pass on Android and
