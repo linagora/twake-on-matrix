@@ -13,6 +13,8 @@ import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
+import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
@@ -92,9 +94,9 @@ class _RealHost implements LoginHost {
   }
 
   @override
-  void logoutLast() {
+  Future<void> logoutLast() {
     calls.add('logoutLast');
-    _accounts.logoutLast();
+    return _accounts.logoutLast();
   }
 
   @override
@@ -408,7 +410,11 @@ void main() {
         );
 
         dataSource.failDelete = false;
-        await sessions.retryFailedCleanups();
+        // The removal runs in the background and owns the retry: the first
+        // call finds it pending, the next one finds the step done.
+        await sessions.loginClient();
+        await pumpEventQueue();
+        await sessions.loginClient();
 
         expect(sessions.sessionOf(id)!.state, LoginSessionState.disposed);
         expect(container.read(accountClientRegistryProvider)[id], isNull);
