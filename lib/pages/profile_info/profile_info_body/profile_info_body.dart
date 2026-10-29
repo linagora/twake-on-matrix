@@ -24,8 +24,7 @@ import 'package:twake_chat/utils/user_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show AsyncLoading, ConsumerState, ConsumerStatefulWidget;
-import 'package:twake_chat/domain/model/user_info/user_info.dart';
+    show ConsumerState, ConsumerStatefulWidget;
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -351,8 +350,6 @@ class ProfileInfoBodyController extends ConsumerState<ProfileInfoBody>
   @override
   Widget build(BuildContext context) => ProfileInfoBodyView(
     controller: this,
-    userInfo: user == null
-        ? const AsyncLoading<UserInfo>()
-        : ref.watch(userInfoProvider(user!.id)),
+    userInfo: ref.watch(userInfoProvider(user!.id)),
   );
 }

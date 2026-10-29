@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/app_state/room/block_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/unblock_user_state.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
@@ -17,7 +16,6 @@ import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
-import 'package:twake_chat/providers/user_info_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
@@ -59,7 +57,7 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatProfileInfo>,
         LeaveChatMixin {
-  late final String _userInfoUserId;
+  late final String userInfoUserId;
 
   StreamSubscription? ignoredUsersStreamSub;
 
@@ -209,8 +207,6 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
 
   PresentationContact? presentationContact;
 
-  ProviderSubscription<AsyncValue<List<UnifiedContact>>>? _contactsSubscription;
-
   PresentationContact? _getContactFromId(String matrixId) {
     final contact = ref
         .read(contactsControllerProvider)
@@ -287,19 +283,15 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
   void initState() {
     super.initState();
     _initPresentationContact();
-    _contactsSubscription = ref.listenManual(contactsControllerProvider, (
-      previous,
-      next,
-    ) {
+    ref.listenManual(contactsControllerProvider, (previous, next) {
       next.whenData((_) => _onTomContactsUpdateListener());
     });
-    _userInfoUserId = presentationContact?.matrixId ?? user?.id ?? '';
+    userInfoUserId = presentationContact?.matrixId ?? user?.id ?? '';
     listenIgnoredUser();
   }
 
   @override
   void dispose() {
-    _contactsSubscription?.close();
     ignoredUsersStreamSub?.cancel();
     blockUserLoadingNotifier.dispose();
     isBlockedUser.dispose();
@@ -308,9 +300,6 @@ class ChatProfileInfoController extends ConsumerState<ChatProfileInfo>
 
   @override
   Widget build(BuildContext context) {
-    return ChatProfileInfoView(
-      this,
-      userInfo: ref.watch(userInfoProvider(_userInfoUserId)),
-    );
+    return ChatProfileInfoView(this);
   }
 }
