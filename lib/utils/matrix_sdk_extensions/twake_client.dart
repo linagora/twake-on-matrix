@@ -82,7 +82,12 @@ class TwakeClient extends Client {
   Future<void> clear({
     SessionClearReason reason = SessionClearReason.unspecified,
   }) async {
-    await KeychainSharingManager.logoutNotificationSession(this);
+    // Never let the notification cleanup keep the app session alive.
+    await KeychainSharingManager.logoutNotificationSession(this)
+        .timeout(const Duration(seconds: 10))
+        .catchError(
+          (e, s) => Logs().w('Unable to log the NSE device out', e, s),
+        );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
     return super.clear(reason: reason);
   }
