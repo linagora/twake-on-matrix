@@ -4,6 +4,7 @@ import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/native_link_span.dart';
@@ -97,13 +98,19 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         details: tapDownDetails,
         link: link,
       ),
-      linkBuilder: (url, childrenSpan, linkStyle) => buildNativeLinkSpan(
-        url: url,
-        childrenSpan: childrenSpan,
-        linkStyle: linkStyle,
-        onTapDown: (_) =>
-            UrlLauncher(context, url: url, room: room).launchUrl(),
-      ),
+      linkBuilder: (url, childrenSpan, linkStyle) =>
+          filenameLinkAsPlainText(
+            url: url,
+            childrenSpan: childrenSpan,
+            textStyle: effectiveDefaultTextStyle,
+          ) ??
+          buildNativeLinkSpan(
+            url: url,
+            childrenSpan: childrenSpan,
+            linkStyle: linkStyle,
+            onTapDown: (_) =>
+                UrlLauncher(context, url: url, room: room).launchUrl(),
+          ),
       onPillTap: !room.isDirectChat
           ? (url) {
               UrlLauncher(context, url: url, room: room).launchUrl();
@@ -229,4 +236,17 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
       },
     );
   }
+}
+
+/// Returns a plain [TextSpan] when [url] is a filename falsely detected as a
+/// link (e.g. "test.md"), so formatted messages render it like plain ones.
+/// Returns null for real links, which keep the regular link rendering.
+@visibleForTesting
+TextSpan? filenameLinkAsPlainText({
+  required String url,
+  required InlineSpan childrenSpan,
+  required TextStyle textStyle,
+}) {
+  if (!isFilenameUrl(url)) return null;
+  return TextSpan(text: childrenSpan.toPlainText(), style: textStyle);
 }

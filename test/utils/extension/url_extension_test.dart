@@ -26,6 +26,18 @@ void main() {
       });
     });
 
+    group('GIVEN url has www prefix\n', () {
+      test('WHEN extension is a known file extension'
+          'THEN returns false', () {
+        expect(isFilenameUrl('www.point.md'), isFalse);
+      });
+
+      test('WHEN prefix is uppercase'
+          'THEN returns false', () {
+        expect(isFilenameUrl('WWW.point.md'), isFalse);
+      });
+    });
+
     group('GIVEN url is a bare domain (no scheme)\n', () {
       test('WHEN .com domain'
           'THEN returns false', () {

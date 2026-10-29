@@ -24,6 +24,8 @@ const _fileExtensions = {
 bool _hasExplicitScheme(String url) =>
     url.startsWith('http://') || url.startsWith('https://');
 
+bool _hasWwwPrefix(String url) => url.toLowerCase().startsWith('www.');
+
 bool _hasUrlStructuralIndicator(String url) =>
     url.contains('/') || url.contains('?') || url.contains('#');
 
@@ -37,14 +39,14 @@ bool _hasKnownFileExtension(String url) {
 /// by a linkify parser (e.g. "test.md" parsed as Moldova TLD).
 ///
 /// Criteria:
-/// - no explicit http/https scheme
+/// - no explicit http/https scheme and no `www.` prefix
 /// - no path, query string, or fragment (structural URL indicators)
 /// - last dot-delimited segment matches a known file extension
 ///   (multi-dot names like `my.report.pdf` or `archive.tar.gz` supported)
 bool isFilenameUrl(String? url) {
   if (url == null) return false;
   if (url.isEmpty) return false;
-  if (_hasExplicitScheme(url)) return false;
+  if (_hasExplicitScheme(url) || _hasWwwPrefix(url)) return false;
   if (_hasUrlStructuralIndicator(url)) return false;
   return _hasKnownFileExtension(url);
 }
