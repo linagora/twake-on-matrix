@@ -167,7 +167,22 @@ void main() {
 
       // Assert
       expect(reactions, emojis.reversed.take(12).toList());
-      expect(reactions.length, StoreRecentReactionsUseCase.maxRecentReactions);
+    });
+
+    test('combine_withSameEmojiRepeatedly_keepsOneEntry', () {
+      // Arrange
+      var reactions = <String>[];
+
+      // Act
+      for (var i = 0; i < 5; i++) {
+        reactions = StoreRecentReactionsUseCase.combine(
+          reactions,
+          emojiId: 'smile',
+        );
+      }
+
+      // Assert
+      expect(reactions, ['smile']);
     });
   });
 }
