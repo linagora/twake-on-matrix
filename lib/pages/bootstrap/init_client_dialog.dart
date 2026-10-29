@@ -16,7 +16,15 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 class InitClientDialog extends StatefulWidget {
   final Future Function() future;
 
-  const InitClientDialog({super.key, required this.future});
+  /// Goes to a location after a login; the app router unless a test says
+  /// otherwise.
+  final void Function(String location, {Object? extra})? navigate;
+
+  const InitClientDialog({
+    super.key,
+    required this.future,
+    @visibleForTesting this.navigate,
+  });
 
   @override
   State<InitClientDialog> createState() => _InitClientDialogState();
@@ -64,6 +72,21 @@ class _InitClientDialogState extends State<InitClientDialog>
       if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       return;
     }
+
+    if (event.multipleAccountLoginType.isFailure) {
+      _handleLoginFailed(event);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
+      return;
+    }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone. The event is the dialog result, so whoever opened
+  /// the dialog can tell the user and let them try again.
+  void _handleLoginFailed(ClientLoginStateEvent event) {
+    if (!mounted) return;
+
+    Navigator.of(context, rootNavigator: false).pop(event);
   }
 
   void _handleFunctionOnDone() async {
@@ -100,7 +123,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     Navigator.of(context, rootNavigator: false).pop();
 
-    TwakeApp.router.go(
+    (widget.navigate ?? TwakeApp.router.go)(
       '/rooms',
       extra: LoggedInBodyArgs(newActiveClient: client),
     );
@@ -111,7 +134,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     Navigator.of(context, rootNavigator: false).pop();
 
-    TwakeApp.router.go(
+    (widget.navigate ?? TwakeApp.router.go)(
       '/rooms',
       extra: LoggedInOtherAccountBodyArgs(newActiveClient: client),
     );
