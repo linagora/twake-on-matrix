@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/app_grid/repositories/app_grid_repository.provider.dart';
 import 'package:twake_chat/domain/app_grid/exceptions/app_grid_exception.dart';
@@ -8,25 +10,11 @@ import 'package:twake_chat/domain/model/app_grid/linagora_app.dart';
 import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_applications.provider.dart';
 
-class _FakeAppGridRepository implements AppGridRepository {
-  _FakeAppGridRepository({this.applications, this.error});
+import 'app_grid_applications_provider_test.mocks.dart';
 
-  final LinagoraApplications? applications;
-  final Object? error;
-  final requestedPaths = <String>[];
-
-  @override
-  Future<LinagoraApplications> getConfiguration(String path) async {
-    requestedPaths.add(path);
-    if (error != null) throw error!;
-    return applications!;
-  }
-}
-
+@GenerateNiceMocks([MockSpec<AppGridRepository>()])
 void main() {
-  final applications = LinagoraApplications([
-    LinagoraApp('Twake Mail', 'ic_twake_mail.svg', Uri.parse('https://mail')),
-  ]);
+  const path = AppConfig.appGridConfigurationPath;
 
   ProviderContainer createContainer(AppGridRepository repository) =>
       ProviderContainer.test(
@@ -37,32 +25,50 @@ void main() {
   test(
     'appGridApplications_whenTheConfigurationLoads_exposesItsApplications',
     () async {
-      final repository = _FakeAppGridRepository(applications: applications);
+      // Arrange
+      final applications = LinagoraApplications([
+        LinagoraApp(
+          'Twake Mail',
+          'ic_twake_mail.svg',
+          Uri.parse('https://mail'),
+        ),
+      ]);
+      final repository = MockAppGridRepository();
+      when(
+        repository.getConfiguration(path),
+      ).thenAnswer((_) async => applications);
       final container = createContainer(repository);
 
+      // Act
       final result = await container.read(appGridApplicationsProvider.future);
 
+      // Assert
       expect(result, applications);
-      expect(repository.requestedPaths, [AppConfig.appGridConfigurationPath]);
     },
   );
 
   test(
     'appGridApplications_whenTheConfigurationFails_exposesATypedErrorWithoutRetrying',
     () async {
-      final repository = _FakeAppGridRepository(error: Exception('missing'));
+      // Arrange
+      final repository = MockAppGridRepository();
+      when(repository.getConfiguration(path)).thenThrow(Exception('missing'));
       final container = createContainer(repository);
       final subscription = container.listen(
         appGridApplicationsProvider,
         (_, _) {},
       );
 
+      // Act
+      final result = container.read(appGridApplicationsProvider.future);
+
+      // Assert
       await expectLater(
-        container.read(appGridApplicationsProvider.future),
+        result,
         throwsA(isA<AppGridConfigurationUnavailableException>()),
       );
       expect(subscription.read().value, isNull);
-      expect(repository.requestedPaths, hasLength(1));
+      verify(repository.getConfiguration(path)).called(1);
     },
   );
 }

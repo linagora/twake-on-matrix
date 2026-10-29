@@ -1,73 +1,60 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/app_grid_config/app_config_loader.dart';
-import 'package:twake_chat/config/app_grid_config/app_config_parser.dart';
 import 'package:twake_chat/config/app_grid_config/app_grid_errors.dart';
 import 'package:twake_chat/data/app_grid/repositories/app_grid_repository_impl.dart';
+import 'package:twake_chat/domain/model/app_grid/app_grid_configuration_parser.dart';
 import 'package:twake_chat/domain/model/app_grid/linagora_app.dart';
 import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
 
-class _FakeAppConfigLoader implements AppConfigLoader {
-  _FakeAppConfigLoader({this.json, this.error});
+import 'app_grid_repository_impl_test.mocks.dart';
 
-  final String? json;
-  final Object? error;
-  final requestedPaths = <String>[];
-
-  @override
-  Future<T> load<T>(String fileName, AppConfigParser parser) async {
-    requestedPaths.add(fileName);
-    if (error != null) throw error!;
-    return await parser.parse(json!);
-  }
-
-  @override
-  Future<T> loadData<T>(String fileName, AppConfigParser parser) =>
-      throw UnimplementedError();
-}
-
+@GenerateNiceMocks([MockSpec<AppConfigLoader>()])
 void main() {
   const path = 'configurations/app_dashboard.json';
 
   test(
-    'getConfiguration_whenTheFileIsValid_parsesItWithTheAppGridParser',
+    'getConfiguration_whenTheLoaderSucceeds_loadsThePathWithTheAppGridParser',
     () async {
-      final loader = _FakeAppConfigLoader(
-        json:
-            '{"apps":[{"appName":"Twake Mail","icon":"ic_twake_mail.svg",'
-            '"appLink":"https://mail"}]}',
-      );
+      // Arrange
+      final applications = LinagoraApplications([
+        LinagoraApp(
+          'Twake Mail',
+          'ic_twake_mail.svg',
+          Uri.parse('https://mail'),
+        ),
+      ]);
+      final loader = MockAppConfigLoader();
+      when(
+        loader.load<LinagoraApplications>(path, any),
+      ).thenAnswer((_) async => applications);
 
+      // Act
       final result = await AppGridRepositoryImpl(loader).getConfiguration(path);
 
-      expect(
-        result,
-        LinagoraApplications([
-          LinagoraApp(
-            'Twake Mail',
-            'ic_twake_mail.svg',
-            Uri.parse('https://mail'),
-          ),
-        ]),
-      );
-      expect(loader.requestedPaths, [path]);
+      // Assert
+      expect(result, applications);
+      verify(
+        loader.load<LinagoraApplications>(
+          path,
+          argThat(isA<AppGridConfigurationParser>()),
+        ),
+      ).called(1);
     },
   );
 
   test('getConfiguration_whenTheLoaderFails_rethrowsItsError', () async {
-    final loader = _FakeAppConfigLoader(error: ConfigurationNotFoundError());
+    // Arrange
+    final loader = MockAppConfigLoader();
+    when(
+      loader.load<LinagoraApplications>(path, any),
+    ).thenThrow(ConfigurationNotFoundError());
 
-    await expectLater(
-      AppGridRepositoryImpl(loader).getConfiguration(path),
-      throwsA(isA<ConfigurationNotFoundError>()),
-    );
-  });
+    // Act
+    final result = AppGridRepositoryImpl(loader).getConfiguration(path);
 
-  test('getConfiguration_whenTheJsonIsInvalid_rethrowsTheParserError', () {
-    final loader = _FakeAppConfigLoader(json: '{"apps": 3}');
-
-    expect(
-      AppGridRepositoryImpl(loader).getConfiguration(path),
-      throwsA(isA<TypeError>()),
-    );
+    // Assert
+    await expectLater(result, throwsA(isA<ConfigurationNotFoundError>()));
   });
 }
