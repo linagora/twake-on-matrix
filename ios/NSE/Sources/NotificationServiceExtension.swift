@@ -77,6 +77,9 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
             let recoveryKey = keychainController.recoveryKey(forUsername: credentials.userID)
             let userSession = try await NSEUserSession(credentials: credentials, roomID: roomId, clientSessionDelegate: keychainController, recoveryKey: recoveryKey)
             self.userSession = userSession
+            if let ed25519Key = await userSession.ed25519Key() {
+                keychainController.setDeviceKey(ed25519Key, forDeviceId: credentials.restorationToken.session.deviceId)
+            }
             
             guard let itemProxy = await userSession.notificationItemProxy(roomID: roomId, eventID: eventId) else {
                 MXLog.info("\(tag) no notification for the event, discard")

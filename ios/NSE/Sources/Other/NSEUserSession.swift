@@ -63,6 +63,12 @@ final class NSEUserSession {
             .notificationClient(processSetup: .multipleProcesses)
     }
     
+    /// This device's identity key: the app cross-signs the device only if the
+    /// server publishes this key for it.
+    func ed25519Key() async -> String? {
+        await baseClient.encryption().ed25519Key()
+    }
+
     // Retry delays in milliseconds; kept as ms for readability, converted to ns at call site.
     private static let retryDelaysMs: [UInt64] = [300, 800]
 

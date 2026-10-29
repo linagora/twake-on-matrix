@@ -129,14 +129,13 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       client,
     );
     final active = await KeychainSharingManager.hasNotificationSession(client);
-    final cached = await client.encryption?.crossSigning.isCached() ?? false;
-    // Without cross-signing, senders share keys with every device anyway.
-    final hasMasterKey =
-        client.userDeviceKeys[client.userID]?.masterKey != null;
+    final locked = await KeychainSharingManager.notificationPreviewsLocked(
+      client,
+    );
     if (!mounted) return;
     setState(() {
       encryptedPreviewsActive = active;
-      encryptedPreviewsLocked = hasMasterKey && !cached;
+      encryptedPreviewsLocked = locked;
     });
   }
 

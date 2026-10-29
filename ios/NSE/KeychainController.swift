@@ -100,6 +100,16 @@ class KeychainController: KeychainControllerProtocol {
         }
     }
 
+    // MARK: - Device Key
+
+    func setDeviceKey(_ ed25519Key: String, forDeviceId deviceId: String) {
+        do {
+            try keychain.set(ed25519Key, key: "nse_ed25519_\(deviceId)")
+        } catch {
+            MXLog.error("Failed storing NSE device key: \(error)")
+        }
+    }
+
     // MARK: - ClientSessionDelegate
     
     func retrieveSessionFromKeychain(userId: String) throws -> Session {

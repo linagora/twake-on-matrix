@@ -164,13 +164,17 @@ class BackgroundPush {
     String? lastAccessToken;
     bool didSyncRecoveryKey = false;
 
-    final sub = targetClient.onSync.stream.listen((_) async {
+    final sub = targetClient.onSync.stream.listen((sync) async {
       final accessToken = targetClient.accessToken;
       if (accessToken == null || !targetClient.isLogged()) return;
 
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
         await KeychainSharingManager.removeAppSession(targetClient);
+        await KeychainSharingManager.checkNotificationDevice(targetClient);
+      } else if (sync.deviceLists?.changed?.contains(targetClient.userID) ==
+          true) {
+        await KeychainSharingManager.checkNotificationDevice(targetClient);
       }
 
       if (!didSyncRecoveryKey && _isActiveClient(targetClient)) {

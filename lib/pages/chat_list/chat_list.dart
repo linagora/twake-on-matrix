@@ -469,7 +469,9 @@ class ChatListController extends State<ChatList>
       return;
     }
     final client = activeClient;
+    // Not marked as shown while locked: suggest it once the backup is open.
     if (await KeychainSharingManager.hasNotificationSession(client) ||
+        await KeychainSharingManager.notificationPreviewsLocked(client) ||
         await KeychainSharingManager.notificationSsoProviderId(client) ==
             null ||
         !mounted) {

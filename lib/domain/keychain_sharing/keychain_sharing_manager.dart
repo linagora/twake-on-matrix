@@ -48,6 +48,9 @@ class KeychainSharingManager {
 
   static const String _notificationDeviceName = 'Twake Chat notifications';
 
+  /// Written by the NSE: the ed25519 key it generated for its device.
+  static const String _nseDeviceKeyPrefix = 'nse_ed25519_';
+
   /// Gives the iOS notification extension its own device.
   ///
   /// The extension runs its own crypto engine. Sharing the app's device with
@@ -123,6 +126,14 @@ class KeychainSharingManager {
     }
   }
 
+  /// The app cross-signs the extension's device, so it needs the
+  /// self-signing key in cache. Without cross-signing, senders share keys with
+  /// every device anyway.
+  static Future<bool> notificationPreviewsLocked(Client client) async {
+    final cached = await client.encryption?.crossSigning.isCached() ?? false;
+    return client.userDeviceKeys[client.userID]?.masterKey != null && !cached;
+  }
+
   /// Whether the extension has its own device for [client].
   static Future<bool> hasNotificationSession(Client client) async {
     final userId = client.userID;
@@ -144,6 +155,67 @@ class KeychainSharingManager {
     if (token.dedicated != true || token.session.deviceId == client.deviceID) {
       Logs().i('[KeychainSharing] Removing the app session of $userId');
       await delete(userId: userId);
+    }
+  }
+
+  /// Keeps the extension's device usable: forgets it once revoked, and
+  /// cross-signs it so senders that share keys only with cross-signed
+  /// devices (Dart SDK `crossVerifiedIfEnabled`) reach it.
+  ///
+  /// The device publishes its keys on its first push, so signing waits for
+  /// a later call (startup or own device list change).
+  static Future<void> checkNotificationDevice(Client client) async {
+    final userId = client.userID;
+    final homeserver = client.homeserver;
+    if (!PlatformInfos.isIOS || userId == null || homeserver == null) return;
+    final token = await read(userId: userId);
+    if (token?.dedicated != true) return;
+    final session = token!.session;
+    try {
+      await MatrixApi(
+        homeserver: homeserver,
+        accessToken: session.accessToken,
+        httpClient: client.httpClient,
+      ).getTokenOwner();
+    } on MatrixException catch (e) {
+      if (e.error == MatrixError.M_UNKNOWN_TOKEN) {
+        Logs().i('[KeychainSharing] Notification device revoked for $userId');
+        await delete(userId: userId);
+      }
+      return;
+    } catch (_) {
+      return; // offline: try again later
+    }
+    final encryption = client.encryption;
+    if (encryption == null || !await encryption.crossSigning.isCached()) {
+      return;
+    }
+    try {
+      await client.updateUserDeviceKeys();
+      final device =
+          client.userDeviceKeys[userId]?.deviceKeys[session.deviceId];
+      // Same check as a sender's `ShareKeysWith.crossVerifiedIfEnabled`.
+      if (device == null ||
+          device.hasValidSignatureChain(verifiedByTheirMasterKey: true)) {
+        return;
+      }
+      // Sign only the keys the extension generated, never keys the server
+      // published for that device id.
+      final nseKey = await _secureStorage.read(
+        key: '$_nseDeviceKeyPrefix${session.deviceId}',
+      );
+      if (nseKey == null || nseKey != device.ed25519Key) {
+        Logs().w(
+          '[KeychainSharing] Keys of ${device.deviceId} do not match the NSE',
+        );
+        return;
+      }
+      await encryption.crossSigning.sign([device]);
+      Logs().i(
+        '[KeychainSharing] Signed notification device ${device.deviceId}',
+      );
+    } catch (e, s) {
+      Logs().w('[KeychainSharing] Unable to sign notification device', e, s);
     }
   }
 
