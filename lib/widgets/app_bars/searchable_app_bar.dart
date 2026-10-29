@@ -43,9 +43,8 @@ class SearchableAppBar extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: const Size(double.infinity, 4),
         child: Container(
-          color: LinagoraStateLayer(
-            LinagoraSysColors.material().surfaceTint,
-          ).opacityLayer1,
+          color: LinagoraStateLayer(LinagoraSysColors.material().surfaceTint)
+              .opacityLayer1,
           height: 1,
         ),
       ),
@@ -185,13 +184,12 @@ class SearchableAppBar extends StatelessWidget {
         autofocus: true,
         maxLines: SearchableAppBarStyle.textFieldMaxLines,
         contextMenuBuilder: mobileTwakeContextMenuBuilder,
-        buildCounter:
-            (
-              BuildContext _, {
-              required int currentLength,
-              required int? maxLength,
-              required bool isFocused,
-            }) => const SizedBox.shrink(),
+        buildCounter: (
+          BuildContext _, {
+          required int currentLength,
+          required int? maxLength,
+          required bool isFocused,
+        }) => const SizedBox.shrink(),
         maxLength: SearchableAppBarStyle.textFieldMaxLength,
         cursorHeight: 26,
         scrollPadding: const EdgeInsets.all(0),
@@ -208,11 +206,26 @@ class SearchableAppBar extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onBackground,
                 )
               : null,
-          suffixIcon: const SizedBox.shrink(),
-          hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            color: LinagoraRefColors.material().neutral[60],
-          ),
+          suffixIcon: isFullScreen
+              ? const SizedBox.shrink()
+              : _clearButtonBuilder(context),
+          hintStyle: Theme.of(context).textTheme.bodyLarge
+              ?.copyWith(color: LinagoraRefColors.material().neutral[60]),
         ),
+      ),
+    );
+  }
+
+  Widget _clearButtonBuilder(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: textEditingController,
+      builder: (context, value, child) {
+        return value.text.isNotEmpty ? child! : const SizedBox.shrink();
+      },
+      child: TwakeIconButton(
+        onTap: textEditingController.clear,
+        tooltip: L10n.of(context)!.clear,
+        icon: Icons.close,
       ),
     );
   }

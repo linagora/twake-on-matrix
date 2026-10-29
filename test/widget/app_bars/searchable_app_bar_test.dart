@@ -1,6 +1,7 @@
 import 'package:twake_chat/pages/forward/forward_view_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -86,6 +87,36 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsOneWidget);
+    });
+
+    testWidgets("Hide the clear button when the search text is empty", (
+      widgetTester,
+    ) async {
+      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
+
+      expect(find.byTooltip("Clear"), findsNothing);
+    });
+
+    testWidgets("Clear button empties the search text", (widgetTester) async {
+      addTearDown(textEditingController.clear);
+      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
+
+      textEditingController.text = "Search text";
+      await widgetTester.pump();
+      expect(find.byTooltip("Clear"), findsOneWidget);
+
+      // The 48px app bar slot of this harness clips the dialog-height text
+      // field, so call the button's handler instead of a real tap.
+      final clearButton = widgetTester.widget<TwakeIconButton>(
+        find.byWidgetPredicate(
+          (widget) => widget is TwakeIconButton && widget.tooltip == "Clear",
+        ),
+      );
+      clearButton.onTap!();
+      await widgetTester.pump();
+
+      expect(textEditingController.text, isEmpty);
+      expect(find.byTooltip("Clear"), findsNothing);
     });
   });
 
