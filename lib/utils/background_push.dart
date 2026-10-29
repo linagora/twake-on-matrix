@@ -671,7 +671,7 @@ class BackgroundPush {
     );
 
     if (PlatformInfos.isIOS && _matrixState != null) {
-      for (final additionalClient in _matrixState!.widget.clients) {
+      for (final additionalClient in _matrixState!.accountClients) {
         if (additionalClient == client) continue;
         if (!additionalClient.isLogged()) continue;
         await setupPushForAdditionalClient(additionalClient);
@@ -724,7 +724,7 @@ class BackgroundPush {
   Future<Client?> _switchAccount(String? receiverId) async {
     Client? targetClient;
     if (receiverId != null && _matrixState != null) {
-      targetClient = _matrixState!.widget.clients.firstWhereOrNull(
+      targetClient = _matrixState!.accountClients.firstWhereOrNull(
         (c) => c.userID == receiverId,
       );
       if (targetClient != null &&
@@ -732,7 +732,7 @@ class BackgroundPush {
         Logs().d(
           '[Push] Switching to account ${targetClient.userID} for notification',
         );
-        await _matrixState!.setActiveClient(targetClient);
+        if (!await _setActive(targetClient)) return null;
         await _matrixState!.cancelContactsLookup();
         return targetClient;
       }
@@ -740,13 +740,17 @@ class BackgroundPush {
     return null;
   }
 
-  /// [client] is set once and does not follow the active account: when its
-  /// account logged out and another one stays, a client the app already runs
-  /// for that one serves the push.
-  Client get _pushClient => ClientManager.serving(
-    client,
-    _matrixState?.currentClients.whereType<Client>() ?? const [],
-  );
+  /// True only when [target] is the active account afterwards.
+  Future<bool> _setActive(Client target) async {
+    try {
+      final result = await _matrixState!.setActiveClient(target);
+      if (result.isSuccess) return true;
+      Logs().w('[Push] Cannot switch to account ${target.clientName}: $result');
+    } catch (e, s) {
+      Logs().w('[Push] Cannot switch to account ${target.clientName}', e, s);
+    }
+    return false;
+  }
 
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
