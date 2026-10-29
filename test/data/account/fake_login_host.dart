@@ -4,6 +4,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_host.dart';
+import 'package:twake_chat/data/account/rollback_removals.dart';
 
 import 'fakes.dart';
 
@@ -15,6 +16,10 @@ class FakeLoginHost implements LoginHost {
   final events = <ClientLoginStateEvent>[];
   final reports = <String>[];
   final failing = <String>{};
+
+  /// Steps that throw [RemovalPendingException], as a removal that is still
+  /// running in the background does.
+  final removalPending = <String>{};
   final gates = <String, Completer<void>>{};
   final stored = <String>{};
   final loggedIn = <String>{'a'};
@@ -45,6 +50,7 @@ class FakeLoginHost implements LoginHost {
   Future<void> _step(String name) async {
     calls.add(name);
     await gates[name]?.future;
+    if (removalPending.contains(name)) throw RemovalPendingException(name);
     if (failing.contains(name)) throw StateError('$name failed');
   }
 
@@ -67,7 +73,7 @@ class FakeLoginHost implements LoginHost {
   }
 
   @override
-  void logoutLast() {
+  Future<void> logoutLast() async {
     calls.add('logoutLast');
     if (failing.contains('logoutLast')) throw StateError('logoutLast failed');
   }

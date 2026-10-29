@@ -23,7 +23,9 @@ abstract interface class LoginAccounts {
   /// ([applyEffects]): a removal that worked is never repeated for them.
   Future<void> removeAccount(AccountId id);
 
-  void logoutLast();
+  /// Fails when the accounts are not in a state that allows it; the caller has
+  /// to await it, or the failure is lost.
+  Future<void> logoutLast();
 
   /// The client that is active now.
   Client get activeClient;
@@ -45,7 +47,8 @@ abstract interface class LoginAccounts {
 
   Future<void> activateCurrent();
 
-  /// Runs again the removals of logged-out accounts that failed.
+  /// Runs again the removals of logged-out accounts and the discards of
+  /// candidates that failed.
   Future<void> retryPendingRemovals();
 }
 
