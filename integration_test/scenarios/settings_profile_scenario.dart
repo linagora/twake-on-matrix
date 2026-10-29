@@ -9,6 +9,9 @@ abstract class _SettingsProfileScenario extends BaseTestScenario {
 
   late final profile = SettingsProfileRobot($);
 
+  String matrixIdPrefix(String username) =>
+      username.startsWith('@') ? username : '@$username:';
+
   Future<void> openProfile() async {
     await robots.homeRobot().gotoSettingScreen();
     await profile.openProfile();
@@ -37,7 +40,7 @@ class SettingsProfileOverviewScenario extends _SettingsProfileScenario {
     );
 
     const username = String.fromEnvironment('USERNAME');
-    final expectedPrefix = username.startsWith('@') ? username : '@$username:';
+    final expectedPrefix = matrixIdPrefix(username);
     final matrixId = await profile.waitForValueOf(SettingsProfileEnum.matrixId);
     s.softAssertEquals(
       matrixId.startsWith(expectedPrefix),
@@ -100,7 +103,7 @@ class SettingsProfileEditsDisabledScenario extends _SettingsProfileScenario {
     const username = String.fromEnvironment('CAPS_DISABLED_USERNAME');
     final matrixId = await profile.waitForValueOf(SettingsProfileEnum.matrixId);
     s.softAssertEquals(
-      matrixId.startsWith('@$username:'),
+      matrixId.startsWith(matrixIdPrefix(username)),
       true,
       'logged in as "$matrixId", not the edits-disabled account',
     );

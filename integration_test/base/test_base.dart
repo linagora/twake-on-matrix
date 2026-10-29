@@ -125,8 +125,8 @@ class TestBase {
     PatrolIntegrationTester $, {
     TestLogin? login,
   }) async {
-    if (login != null && login.serverUrl.isEmpty) {
-      throw StateError('Login override has no server URL (missing define?)');
+    if (login != null && (login.serverUrl.isEmpty || login.username.isEmpty)) {
+      throw StateError('Login override is incomplete (missing define?)');
     }
     // Route the auto-login through the platform factory so web uses
     // `WebLoginRobot` (waits for `AutoHomeserverPicker`, then

@@ -137,7 +137,6 @@ jobs:
           cut -d= -f1 .env.cicd
 
       - name: Start the capabilities-disabled Synapse
-        if: ${{ contains(inputs.patrol_test_target, 'settings_profile_capabilities_test') }}
         run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
 
       - name: Enable KVM
@@ -178,7 +177,7 @@ jobs:
         run: docker rm -f synapse || true
 
       - name: Tear down the capabilities-disabled Synapse
-        if: ${{ always() && contains(inputs.patrol_test_target, 'settings_profile_capabilities_test') }}
+        if: always()
         run: ./scripts/ci/capabilities-disabled-synapse.sh stop
 
   # ────────────────────────────────────────────────────────────────────────────
@@ -339,7 +338,6 @@ jobs:
           cut -d= -f1 .env.cicd
 
       - name: Start the capabilities-disabled Synapse
-        if: ${{ matrix.shard == 'shard_5_misc' }}
         run: ./scripts/ci/capabilities-disabled-synapse.sh start .env.cicd
 
       - name: Enable KVM
@@ -374,7 +372,7 @@ jobs:
         run: docker rm -f synapse || true
 
       - name: Tear down the capabilities-disabled Synapse
-        if: ${{ always() && matrix.shard == 'shard_5_misc' }}
+        if: always()
         run: ./scripts/ci/capabilities-disabled-synapse.sh stop
 
   # ────────────────────────────────────────────────────────────────────────────

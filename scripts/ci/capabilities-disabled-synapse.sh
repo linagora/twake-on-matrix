@@ -15,7 +15,7 @@ PORT="${CAPS_SYNAPSE_PORT:-8481}"
 APP_HOST="${CAPS_SYNAPSE_APP_HOST:-10.0.2.2}"
 CAPS_USER="${CAPS_SYNAPSE_USER:-dora}"
 CAPS_PASSWORD="${CAPS_SYNAPSE_PASSWORD:-dorapassword}"
-DATA="$(pwd)/integration_test/synapse/data"
+DATA="$(cd "$(dirname "$0")/../.." && pwd)/integration_test/synapse/data"
 
 log() { echo "[capabilities-synapse] $*" >&2; }
 
@@ -47,6 +47,9 @@ start() {
       '{username: $u, password: $p, auth: {type: "m.login.dummy"}}')" \
     >/dev/null
 
+  if [ -f "$env_file" ]; then
+    sed -i.bak '/^CAPS_DISABLED_/d' "$env_file" && rm -f "$env_file.bak"
+  fi
   {
     echo "CAPS_DISABLED_SERVER_URL=http://$APP_HOST:$PORT"
     echo "CAPS_DISABLED_USERNAME=$CAPS_USER"
