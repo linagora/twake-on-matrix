@@ -45,6 +45,7 @@ import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dar
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
 import 'package:twake_chat/data/network/dio_cache_option.dart';
+import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/invitation/invitation_api.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
@@ -222,7 +223,11 @@ class GetItInitializer {
   }
 
   void bindingAPI() {
-    getIt.registerLazySingleton<RecoveryWordsAPI>(() => RecoveryWordsAPI());
+    getIt.registerLazySingleton<RecoveryWordsAPI>(
+      () => RecoveryWordsAPI(
+        getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName),
+      ),
+    );
     getIt.registerFactory<TomContactAPI>(() => TomContactAPI());
     getIt.registerSingleton<MediaAPI>(MediaAPI());
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
@@ -277,7 +282,7 @@ class GetItInitializer {
 
   void bindingDatasourceImpl() {
     getIt.registerLazySingleton<RecoveryWordsDataSource>(
-      () => RecoveryWordsDataSourceImpl(),
+      () => RecoveryWordsDataSourceImpl(getIt.get<RecoveryWordsAPI>()),
     );
     getIt.registerFactory<TomContactsDatasource>(
       () => TomContactsDatasourceImpl(),
@@ -323,7 +328,7 @@ class GetItInitializer {
       () => HiveThirdPartyContactRepositoryImpl(),
     );
     getIt.registerLazySingleton<RecoveryWordsRepository>(
-      () => RecoveryWordsRepositoryImpl(),
+      () => RecoveryWordsRepositoryImpl(getIt.get<RecoveryWordsDataSource>()),
     );
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
     getIt.registerFactory<PhonebookContactRepository>(

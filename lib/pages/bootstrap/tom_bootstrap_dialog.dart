@@ -3,7 +3,7 @@ import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_style.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_state.dart';
-import 'package:twake_chat/pages/bootstrap/tom_bootstrap_view_model.dart';
+import 'package:twake_chat/pages/bootstrap/tom_bootstrap_controller.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -47,7 +47,7 @@ class _TomBootstrapDialogState extends ConsumerState<TomBootstrapDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = tomBootstrapViewModelProvider(
+    final provider = tomBootstrapControllerProvider(
       widget.client,
       wipe: widget.wipe,
       wipeRecovery: widget.wipeRecovery,
@@ -83,7 +83,7 @@ class _TomBootstrapDialogState extends ConsumerState<TomBootstrapDialog> {
     );
   }
 
-  String _description(BuildContext context, TomBootstrapUiState state) {
+  String _description(BuildContext context, TomBootstrapState state) {
     return switch (state) {
       TomBootstrapLoadingState() => L10n.of(context)!.backingUpYourMessage,
       TomBootstrapCheckingRecoveryState() => L10n.of(
@@ -93,7 +93,7 @@ class _TomBootstrapDialogState extends ConsumerState<TomBootstrapDialog> {
     };
   }
 
-  void _handleStateChange(BuildContext context, TomBootstrapUiState state) {
+  void _handleStateChange(BuildContext context, TomBootstrapState state) {
     switch (state) {
       case TomBootstrapWipeRecoveryFailedState():
         TwakeSnackBar.show(context, L10n.of(context)!.cannotEnableKeyBackup);

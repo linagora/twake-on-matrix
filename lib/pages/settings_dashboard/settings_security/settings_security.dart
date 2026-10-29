@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
+import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.dart';
+import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.provider.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/beautify_string_extension.dart';
@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -25,14 +26,14 @@ import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'settings_security_view.dart';
 
-class SettingsSecurity extends StatefulWidget {
+class SettingsSecurity extends ConsumerStatefulWidget {
   const SettingsSecurity({super.key});
 
   @override
   SettingsSecurityController createState() => SettingsSecurityController();
 }
 
-class SettingsSecurityController extends State<SettingsSecurity> {
+class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   StreamSubscription? ignoredUsersStreamSub;
 
   ValueNotifier<List<String>> ignoredUsersNotifier =
@@ -65,15 +66,16 @@ class SettingsSecurityController extends State<SettingsSecurity> {
   @override
   Widget build(BuildContext context) => SettingsSecurityView(this);
 
-  /// Fetches the recovery key from the ToM server via [GetRecoveryWordsInteractor].
-  /// Returns the key string or null on failure.
   Future<String?> _fetchRecoveryKey() async {
-    final result = await getIt.get<GetRecoveryWordsInteractor>().execute();
-    if (!mounted) return null;
-    return result.fold((failure) => null, (success) {
-      _recoveryKey = success.words.words;
+    final getRecoveryWords = ref.read(getRecoveryWordsUseCaseProvider);
+    try {
+      final words = await getRecoveryWords.execute();
+      if (!mounted) return null;
+      _recoveryKey = words.words;
       return _recoveryKey;
-    });
+    } on GetRecoveryWordsException {
+      return null;
+    }
   }
 
   /// Copies the recovery key to clipboard after showing a security warning dialog.

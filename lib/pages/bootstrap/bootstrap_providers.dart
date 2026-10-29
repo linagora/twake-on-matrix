@@ -3,7 +3,6 @@ import 'package:twake_chat/data/repository/recovery_key_storage_repository_impl.
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/repository/recovery_key_storage_repository.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
-import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/read_cached_recovery_key_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/start_self_verification_interactor.dart';
@@ -36,17 +35,10 @@ StoreRecoveryKeyInteractor storeRecoveryKeyInteractor(Ref ref) =>
 StartSelfVerificationInteractor startSelfVerificationInteractor(Ref ref) =>
     StartSelfVerificationInteractor();
 
-// These 3 predate this feature and are still consumed by non-Riverpod
-// call sites (e.g. background_push.dart), so they stay registered in
-// GetIt; these providers just give Riverpod consumers a `ref.read` path
-// instead of reaching into GetIt directly.
+// TODO: [transitional] GetIt interactors until save/delete get their Patrol scenarios.
 @riverpod
 SaveRecoveryWordsInteractor saveRecoveryWordsInteractor(Ref ref) =>
     getIt.get<SaveRecoveryWordsInteractor>();
-
-@riverpod
-GetRecoveryWordsInteractor getRecoveryWordsInteractor(Ref ref) =>
-    getIt.get<GetRecoveryWordsInteractor>();
 
 @riverpod
 DeleteRecoveryWordsInteractor deleteRecoveryWordsInteractor(Ref ref) =>
