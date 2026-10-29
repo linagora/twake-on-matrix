@@ -184,7 +184,6 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
         await KeychainSharingManager.save(restoreToken);
       }
     } catch (e) {
-      Logs().w('insertClient::current token: $token');
       Logs().w('insertClient::Unable to save restore token', e);
     }
   }

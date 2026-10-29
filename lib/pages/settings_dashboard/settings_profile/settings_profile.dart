@@ -20,6 +20,7 @@ import 'package:twake_chat/pages/multiple_accounts/multiple_accounts_picker.dart
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_capability_check.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu_actions.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_context_menu.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_edit_rules.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_state/get_clients_ui_state.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_view.dart';
 import 'package:twake_chat/presentation/extensions/multiple_accounts/client_profile_extension.dart';
@@ -33,7 +34,6 @@ import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
-import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -92,8 +92,20 @@ class SettingsProfileController extends State<SettingsProfile>
 
   Client get client => Matrix.of(context).client;
 
-  bool get _hasEditedDisplayName =>
-      displayNameEditingController.text != displayName;
+  String? get _editedDisplayName => SettingsProfileEditRules.editedDisplayName(
+    text: displayNameEditingController.text,
+    currentName: displayName,
+  );
+
+  bool get _hasPendingAvatar => assetEntity != null || matrixFile != null;
+
+  void _refreshEditedState() {
+    isEditedProfileNotifier.value = SettingsProfileEditRules.hasChanges(
+      text: displayNameEditingController.text,
+      currentName: displayName,
+      hasPendingAvatar: _hasPendingAvatar,
+    );
+  }
 
   String get displayName =>
       currentProfile.value?.displayName ??
@@ -164,12 +176,9 @@ class SettingsProfileController extends State<SettingsProfile>
   }
 
   void _handleRemoveAvatarAction() async {
-    if (assetEntity != null || matrixFile != null) {
-      isEditedProfileNotifier.toggle();
-    }
-    if (!hasAvatar) {
-      _clearImageInLocal();
-    } else {
+    _clearImageInLocal();
+    _refreshEditedState();
+    if (hasAvatar) {
       TwakeDialog.showLoadingDialog(context);
       _uploadProfile(isDeleteAvatar: true);
     }
@@ -205,9 +214,7 @@ class SettingsProfileController extends State<SettingsProfile>
         pickAvatarUIState.value = Right<Failure, Success>(
           GetAvatarOnMobileUIStateSuccess(assetEntity: selectedAsset?.asset),
         );
-        if (!isEditedProfileNotifier.value) {
-          isEditedProfileNotifier.toggle();
-        }
+        _refreshEditedState();
         imagePickerController.removeAllSelectedItem();
       }
     });
@@ -284,7 +291,7 @@ class SettingsProfileController extends State<SettingsProfile>
             onError: _handleUploadAvatarOnError,
           );
     } else {
-      _uploadProfile(displayName: displayNameEditingController.text);
+      _uploadProfile(displayName: _editedDisplayName);
     }
   }
 
@@ -298,7 +305,7 @@ class SettingsProfileController extends State<SettingsProfile>
             onError: _handleUploadAvatarOnError,
           );
     } else {
-      _uploadProfile(displayName: displayNameEditingController.text);
+      _uploadProfile(displayName: _editedDisplayName);
     }
   }
 
@@ -364,9 +371,7 @@ class SettingsProfileController extends State<SettingsProfile>
         if (success is UploadContentSuccess) {
           _uploadProfile(
             avatarUr: success.uri,
-            displayName: _hasEditedDisplayName
-                ? displayNameEditingController.text
-                : null,
+            displayName: _editedDisplayName,
           );
         }
       },
@@ -429,7 +434,8 @@ class SettingsProfileController extends State<SettingsProfile>
           );
           _sendAccountDataEvent(profile: newProfile);
           currentProfile.value = newProfile;
-          isEditedProfileNotifier.toggle();
+          _clearImageInLocal();
+          _refreshEditedState();
           _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
         }
@@ -441,11 +447,9 @@ class SettingsProfileController extends State<SettingsProfile>
             avatarUrl: null,
           );
           _sendAccountDataEvent(profile: newProfile);
-          if (isEditedProfileNotifier.value) {
-            isEditedProfileNotifier.toggle();
-          }
           currentProfile.value = newProfile;
           _clearImageInLocal();
+          _refreshEditedState();
           _getCurrentProfile(client, fresh: true);
           TwakeDialog.hideLoadingDialog(context);
           pickAvatarUIState.value = Right<Failure, Success>(
@@ -458,6 +462,8 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void _getCurrentProfile(Client client, {bool fresh = false}) async {
     final userId = client.userID!;
+    final textBeforeRead = displayNameEditingController.text;
+    final hadUnsavedEdit = _editedDisplayName != null;
     // SDK access goes through Riverpod (transitional container read).
     final data = await ProviderScope.containerOf(context, listen: false).read(
       fresh
@@ -472,12 +478,24 @@ class SettingsProfileController extends State<SettingsProfile>
         'SettingsProfileController::_getCurrentProfile() - currentProfile: $profile',
       );
       currentProfile.value = profile;
-      if (profile.avatarUrl == null) {
-        _clearImageInLocal();
-      }
     }
-    displayNameEditingController.text = displayName;
+    if (SettingsProfileEditRules.shouldOverwriteName(
+      textBeforeRead: textBeforeRead,
+      textAfterRead: displayNameEditingController.text,
+      hadUnsavedEditBeforeRead: hadUnsavedEdit,
+    )) {
+      displayNameEditingController.text = displayName;
+    }
     matrixIdEditingController.text = client.mxid(context);
+    _refreshEditedState();
+  }
+
+  void onDisplayNameChanged() => _refreshEditedState();
+
+  void onDisplayNameSubmitted() {
+    if (isEditedProfileNotifier.value) {
+      onUploadProfileAction();
+    }
   }
 
   void copyEventsAction(SettingsProfileEnum settingsProfileEnum) {
@@ -565,7 +583,7 @@ class SettingsProfileController extends State<SettingsProfile>
         (failure) {
           if (failure is GetAvatarBigSizeUIStateFailure ||
               failure is GetAvatarUIStateFailure) {
-            isEditedProfileNotifier.value = false;
+            _refreshEditedState();
           }
         },
         (success) {
@@ -577,6 +595,7 @@ class SettingsProfileController extends State<SettingsProfile>
             case const (GetAvatarOnWebUIStateSuccess):
               final uiState = success as GetAvatarOnWebUIStateSuccess;
               matrixFile = uiState.matrixFile;
+              _refreshEditedState();
               break;
             default:
               break;
@@ -588,15 +607,14 @@ class SettingsProfileController extends State<SettingsProfile>
 
   void updateMatrixFile(MatrixFile newMatrixFile) {
     matrixFile = newMatrixFile;
-    if (!isEditedProfileNotifier.value) {
-      isEditedProfileNotifier.toggle();
-    }
+    _refreshEditedState();
   }
 
   void _handleUpdateProfileFailure(String errorMessage) {
     TwakeDialog.hideLoadingDialog(context);
     TwakeSnackBar.show(context, errorMessage);
     _clearImageInLocal();
+    _refreshEditedState();
     if (currentProfile.value != null) {
       _sendAccountDataEvent(profile: currentProfile.value!);
     }
