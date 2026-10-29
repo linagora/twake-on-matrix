@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
+import 'package:twake_chat/domain/user_info/exceptions/user_info_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
@@ -21,18 +22,26 @@ class SettingsContactsVisibility extends ConsumerStatefulWidget {
 class _SettingsContactsVisibilityScreenState
     extends ConsumerState<SettingsContactsVisibility> {
   bool _isLoadingDialogShown = false;
+  ProviderSubscription<AsyncValue<SettingsContactsVisibilityState>>?
+  _visibilitySubscription;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      ref.listenManual(
+      _visibilitySubscription = ref.listenManual(
         settingsContactsVisibilityControllerProvider,
         _onVisibilityChanged,
         fireImmediately: true,
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _visibilitySubscription?.close();
+    super.dispose();
   }
 
   void _onVisibilityChanged(
@@ -66,7 +75,7 @@ class _SettingsContactsVisibilityScreenState
       await update(
         ref.read(settingsContactsVisibilityControllerProvider.notifier),
       );
-    } catch (_) {
+    } on UpdateUserInfoVisibilityException {
       if (!mounted) return;
       TwakeSnackBar.show(
         context,

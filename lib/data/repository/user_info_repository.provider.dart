@@ -5,7 +5,7 @@ import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart
 
 part 'user_info_repository.provider.g.dart';
 
-// Kept alive for tomUserInfoEnricher, a keepAlive provider.
+// Kept alive, with its datasource and API, for tomUserInfoEnricher (keepAlive).
 @Riverpod(keepAlive: true)
 UserInfoRepository userInfoRepository(Ref ref) =>
     UserInfoRepositoryImpl(ref.watch(userInfoDatasourceProvider));
