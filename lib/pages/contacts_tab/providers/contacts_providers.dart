@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/contact/datasources/contact_local_datasource.dart';
 import 'package:twake_chat/data/contact/datasources/matrix_room_member_datasource.dart';
@@ -33,6 +32,7 @@ import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.
 import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_contact_interactor.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/utils/contact_lookup_failed_snackbar.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 
@@ -66,17 +66,13 @@ List<ContactSource> contactSources(Ref ref) => [
   MatrixRoomMemberSource(ref.watch(matrixRoomMemberDatasourceProvider)),
 ];
 
-/// Rebuilds only when the signed-in account changes. Every `setClient` pushes
-/// a new snapshot of the same `Client` instance; watching the whole snapshot
-/// would rebuild the sources → use cases → sync service → controller chain and
-/// restart the store stream (list flashes to loading) on each push.
+/// Rebuilds only when the active `Client` changes: the provider keeps the same
+/// instance while the account state is rebuilt around it (a switch that ends
+/// where it began), so the sources → use cases → sync service → controller
+/// chain does not restart the store stream.
 @Riverpod(keepAlive: true)
-MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
-  ref.watch(activeMatrixClientProvider.select((snapshot) => snapshot.userId));
-  return MatrixRoomMemberDatasourceImpl(
-    ref.read(activeMatrixClientProvider).client,
-  );
-}
+MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) =>
+    MatrixRoomMemberDatasourceImpl(ref.watch(activeMatrixClientProvider));
 
 /// Second-pass enricher: canonical TOM `user_info` profile for stored contacts.
 ///
@@ -88,7 +84,7 @@ TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
   repository: ref.watch(unifiedContactRepositoryProvider),
   userInfoRepository: getIt.get<UserInfoRepository>(),
   policy: ref.watch(contactResolutionPolicyProvider),
-  activeUserId: () => ref.read(activeMatrixClientProvider).userId,
+  activeUserId: () => ref.read(activeUserIdProvider),
 );
 
 @Riverpod(keepAlive: true)
@@ -115,11 +111,11 @@ AddContactUseCase addContactUseCase(Ref ref) =>
 /// Scoping key for every contact provider: a multi-account session must never
 /// mix the contacts of two accounts.
 @Riverpod(keepAlive: true)
-String? currentUserId(Ref ref) => ref.watch(activeMatrixClientProvider).userId;
+String? currentUserId(Ref ref) => ref.watch(activeUserIdProvider);
 
 @Riverpod(keepAlive: true)
 AddressBookBroadcaster addressBookBroadcaster(Ref ref) =>
-    AddressBookBroadcaster(() => ref.read(activeMatrixClientProvider).client);
+    AddressBookBroadcaster(() => ref.read(activeMatrixClientProvider));
 
 /// Phonebook → Matrix ID lookup that used to live in `ContactsManager`.
 ///
