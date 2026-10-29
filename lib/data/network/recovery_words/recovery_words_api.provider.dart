@@ -6,4 +6,4 @@ part 'recovery_words_api.provider.g.dart';
 
 @riverpod
 RecoveryWordsAPI recoveryWordsApi(Ref ref) =>
-    RecoveryWordsAPI(ref.watch(legacyTomDioClientProvider));
+    RecoveryWordsAPI(ref.watch(tomDioClientProvider));

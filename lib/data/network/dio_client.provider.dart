@@ -6,8 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.provider.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.provider.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/di/global/network_di.dart';
 
 part 'dio_client.provider.g.dart';
 
@@ -30,8 +28,3 @@ DioClient tomDioClient(Ref ref) {
   ref.onDispose(dio.close);
   return DioClient(dio);
 }
-
-// TODO: [transitional] Shared with the legacy ToM consumers until they migrate.
-@Riverpod(keepAlive: true)
-DioClient legacyTomDioClient(Ref ref) =>
-    getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName);
