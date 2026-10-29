@@ -9,6 +9,8 @@
   "notificationPreviewsSuggestion": "To protect your messages, notifications no longer show their content. Sign in once more to see message previews again.",
   "notificationPreviewsEnable": "Enable",
   "encryptedNotificationPreviewsLocked": "Unlock your chat backup first.",
+  "deviceIdentityRenewTitle": "Please sign in again",
+  "deviceIdentityRenewMessage": "To keep your messages secure, this session must be renewed. Sign in again to continue.",
   "passwordsDoNotMatch": "Passwords do not match!",
   "pleaseEnterValidEmail": "Please enter a valid email address.",
   "repeatPassword": "Repeat password",
