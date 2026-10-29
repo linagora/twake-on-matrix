@@ -15,7 +15,7 @@ import 'package:twake_chat/domain/account/policy/account_transitions.dart';
 import 'package:twake_chat/domain/account/usecases/add_account_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/remove_account_usecase.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/providers/account_usecase_providers.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';

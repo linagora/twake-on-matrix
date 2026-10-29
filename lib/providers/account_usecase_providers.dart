@@ -4,7 +4,7 @@ import 'package:twake_chat/domain/account/usecases/create_account_candidate_usec
 import 'package:twake_chat/domain/account/usecases/initialize_accounts_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/prune_pending_push_removals_usecase.dart';
 import 'package:twake_chat/domain/account/usecases/remove_account_usecase.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/providers/account_transitions_provider.dart';
 
 part 'account_usecase_providers.g.dart';
