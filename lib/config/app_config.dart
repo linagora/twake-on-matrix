@@ -200,8 +200,6 @@ abstract class AppConfig {
 
   static bool devMode = false;
 
-  static const int maxRecentReactionsSize = 12;
-
   static const String appGridConfigurationPath =
       "configurations/app_dashboard.json";
 

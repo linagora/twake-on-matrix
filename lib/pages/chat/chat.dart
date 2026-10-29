@@ -15,8 +15,9 @@ import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/domain/usecase/reactions/get_recent_reactions_interactor.dart';
-import 'package:twake_chat/domain/usecase/reactions/store_recent_reactions_interactor.dart';
+import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
+import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.provider.dart';
+import 'package:twake_chat/domain/reactions/usecases/store_recent_reactions_usecase.provider.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/report_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
@@ -74,6 +75,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconci
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -219,11 +221,7 @@ class ChatController extends ConsumerState<Chat>
 
   final pinnedEventsController = getIt.get<PinnedEventsController>();
 
-  final getRecentReactionsInteractor = getIt
-      .get<GetRecentReactionsInteractor>();
-
-  final storeRecentReactionsInteractor = getIt
-      .get<StoreRecentReactionsInteractor>();
+  late final GetRecentReactionsUseCase _getRecentReactions;
 
   final ValueKey<String> chatComposerTypeAheadKey =
       ChatKeys.composerTypeAhead.valueKey;
@@ -1459,16 +1457,17 @@ class ChatController extends ConsumerState<Chat>
     _requestInputFocus();
   }
 
-  void handleStoreRecentReactions(String? emoji) async {
-    final emojiId = Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
+  Future<emoji_mart.Category?> getRecentEmoji() =>
+      _getRecentReactions.recentCategory();
 
-    if (emojiId.isNotEmpty) {
-      await storeRecentReactionsInteractor.execute(emojiId: emojiId);
-    }
-  }
+  Future<void> handleStoreRecentReactions(String? emoji) => ref
+      .read(storeRecentReactionsUseCaseProvider)
+      .executeOrLog(
+        emojiId: Matrix.of(context).emojiData.getIdByEmoji(emoji ?? ''),
+      );
 
   void sendEmojiAction({String? emoji, required Event event}) async {
-    handleStoreRecentReactions(emoji);
+    unawaited(handleStoreRecentReactions(emoji));
     await room!.sendReaction(event.eventId, emoji!);
   }
 
@@ -2096,8 +2095,7 @@ class ChatController extends ConsumerState<Chat>
                                 ),
                                 child: emoji_mart.EmojiPicker(
                                   emojiData: Matrix.of(context).emojiData,
-                                  recentEmoji: getRecentReactionsInteractor
-                                      .execute(),
+                                  recentEmoji: getRecentEmoji(),
                                   configuration:
                                       emoji_mart.EmojiPickerConfiguration(
                                         showRecentTab: true,
@@ -2811,8 +2809,7 @@ class ChatController extends ConsumerState<Chat>
                                     ),
                                     child: emoji_mart.EmojiPicker(
                                       emojiData: Matrix.of(context).emojiData,
-                                      recentEmoji: getRecentReactionsInteractor
-                                          .execute(),
+                                      recentEmoji: getRecentEmoji(),
                                       configuration:
                                           emoji_mart.EmojiPickerConfiguration(
                                             showRecentTab: true,
@@ -3080,6 +3077,7 @@ class ChatController extends ConsumerState<Chat>
   @override
   void initState() {
     super.initState();
+    _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
     _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
