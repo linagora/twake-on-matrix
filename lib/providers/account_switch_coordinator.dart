@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/entities/switch_ticket.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
-import 'package:twake_chat/providers/account_repository_provider.dart';
+import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
