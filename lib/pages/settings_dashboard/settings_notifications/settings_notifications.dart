@@ -180,6 +180,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         future: () => KeychainSharingManager.logoutNotificationSession(client),
       );
     }
+    if (!mounted) return;
     await _loadEncryptedPreviewsStatus();
   }
 

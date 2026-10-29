@@ -19,7 +19,10 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     String super.path, {
     super.key,
     super.onStartMigrating,
+    this.client,
   });
+
+  final Client? client;
 
   @override
   int get version => 8;
@@ -73,6 +76,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
       await _findDatabasePath(client),
       key: hiverCipher,
       onStartMigrating: _onStartMigrating,
+      client: client,
     );
     try {
       Logs().i('FlutterHiveCollectionsDatabase()::databaseBuilder()::open()');
@@ -125,9 +129,11 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
   @override
   Future<void> clear({bool supportDeleteCollections = false}) async {
-    if (PlatformInfos.isIOS) {
-      // TODO: Should pass userId here when support multiple accounts
-      await KeychainSharingManager.delete(userId: null);
+    // The SDK clears the database before forgetting the user, also when the
+    // server invalidated the session: log this account's NSE device out.
+    final client = this.client;
+    if (client != null) {
+      await KeychainSharingManager.logoutNotificationSession(client);
     }
     return super.clear(supportDeleteCollections: supportDeleteCollections);
   }
