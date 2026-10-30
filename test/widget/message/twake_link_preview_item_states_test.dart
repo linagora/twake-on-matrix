@@ -13,11 +13,18 @@ import '../../domain/preview_url/fake_media_repository.dart';
 void main() {
   late FakeMediaRepository repository;
 
-  setUp(() => repository = FakeMediaRepository());
+  late ProviderContainer container;
 
-  Widget app(String? link) => ProviderScope(
-    retry: (_, _) => null,
-    overrides: [mediaRepositoryProvider.overrideWithValue(repository)],
+  setUp(() {
+    repository = FakeMediaRepository();
+    container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [mediaRepositoryProvider.overrideWithValue(repository)],
+    );
+  });
+
+  Widget app(String? link) => UncontrolledProviderScope(
+    container: container,
     child: MaterialApp(
       theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
       home: Scaffold(

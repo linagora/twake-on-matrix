@@ -19,11 +19,13 @@ class _FakeMediaRepository implements MediaRepository {
   }) async => UrlPreview(title: 'Test Title', description: 'Test Description');
 }
 
-Widget _withRepository(Widget child) => ProviderScope(
-  overrides: [
-    mediaRepositoryProvider.overrideWithValue(_FakeMediaRepository()),
-  ],
-  retry: (_, _) => null,
+Widget _withRepository(Widget child) => UncontrolledProviderScope(
+  container: ProviderContainer.test(
+    overrides: [
+      mediaRepositoryProvider.overrideWithValue(_FakeMediaRepository()),
+    ],
+    retry: (_, _) => null,
+  ),
   child: child,
 );
 
