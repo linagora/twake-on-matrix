@@ -46,6 +46,23 @@ void main() {
   );
 
   test(
+    'fetchProfileEditCapabilities_withOnlyAvatarDisabled_forbidsOnlyAvatar',
+    () async {
+      // Arrange
+      final datasource = _datasource({
+        'm.set_avatar_url': {'enabled': false},
+      });
+
+      // Act
+      final result = await datasource.fetchProfileEditCapabilities();
+
+      // Assert
+      expect(result.canEditAvatar, isFalse);
+      expect(result.canEditDisplayName, isTrue);
+    },
+  );
+
+  test(
     'fetchProfileEditCapabilities_withProfileFieldsDisabled_forbidsBoth',
     () async {
       // Arrange

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +27,29 @@ class _CountingRepository implements ServerCapabilitiesRepository {
     );
   }
 }
+
+class _ScriptedRepository implements ServerCapabilitiesRepository {
+  _ScriptedRepository(this.responses);
+
+  final List<Completer<ProfileEditCapabilities>> responses;
+
+  @override
+  Future<ProfileEditCapabilities> fetchProfileEditCapabilities() {
+    final completer = Completer<ProfileEditCapabilities>();
+    responses.add(completer);
+    return completer.future;
+  }
+}
+
+const _editable = ProfileEditCapabilities(
+  canEditAvatar: true,
+  canEditDisplayName: true,
+);
+
+const _locked = ProfileEditCapabilities(
+  canEditAvatar: false,
+  canEditDisplayName: false,
+);
 
 class _CountingUserInfoInteractor extends Fake
     implements GetUserInfoInteractor {
@@ -80,5 +105,98 @@ void main() {
     expect(capabilities?.canEditAvatar, isFalse);
     expect(capabilities?.canEditDisplayName, isTrue);
     expect(userInfo?.uid, '@me:server');
+  });
+
+  group('cache', () {
+    late List<Completer<ProfileEditCapabilities>> responses;
+    late ProviderContainer container;
+    late bool shown;
+    ProfileEditCapabilities? capabilities;
+
+    Widget app() => UncontrolledProviderScope(
+      container: container,
+      child: shown
+          ? SettingsProfileCapabilityCheck(
+              userId: '@me:server',
+              builder: (caps, _, _) {
+                capabilities = caps;
+                return const SizedBox();
+              },
+            )
+          : const SizedBox(),
+    );
+
+    setUp(() {
+      responses = [];
+      container = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          serverCapabilitiesRepositoryProvider.overrideWith(
+            (ref) => _ScriptedRepository(responses),
+          ),
+        ],
+      );
+      shown = true;
+      capabilities = null;
+    });
+
+    testWidgets('reopen_afterSuccess_reusesCachedCapabilities', (tester) async {
+      // Arrange
+      await tester.pumpWidget(app());
+      responses.single.complete(_locked);
+      await tester.pumpAndSettle();
+      shown = false;
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      // Act
+      shown = true;
+      await tester.pumpWidget(app());
+
+      // Assert
+      expect(responses, hasLength(1));
+      expect(capabilities?.canEditAvatar, isFalse);
+    });
+
+    testWidgets('reopen_afterFailure_fetchesAgain', (tester) async {
+      // Arrange
+      await tester.pumpWidget(app());
+      responses.single.completeError(Exception('offline'));
+      await tester.pumpAndSettle();
+      shown = false;
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      // Act
+      shown = true;
+      await tester.pumpWidget(app());
+      responses.last.complete(_editable);
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(responses, hasLength(2));
+      expect(capabilities?.canEditAvatar, isTrue);
+    });
+
+    testWidgets('accountChange_whileLoading_hidesPreviousCapabilities', (
+      tester,
+    ) async {
+      // Arrange
+      await tester.pumpWidget(app());
+      responses.single.complete(_editable);
+      await tester.pumpAndSettle();
+      expect(capabilities?.canEditAvatar, isTrue);
+
+      // Act
+      container.invalidate(serverCapabilitiesRepositoryProvider);
+      await tester.pump();
+
+      // Assert
+      expect(responses, hasLength(2));
+      expect(capabilities, isNull);
+      responses.last.complete(_locked);
+      await tester.pumpAndSettle();
+      expect(capabilities?.canEditAvatar, isFalse);
+    });
   });
 }
