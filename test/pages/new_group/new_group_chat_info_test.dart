@@ -8,6 +8,7 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -22,7 +23,10 @@ import 'package:mockito/mockito.dart';
 
 import 'new_group_chat_info_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<NewGroupChatInfoScreenState>()])
+@GenerateNiceMocks([
+  MockSpec<NewGroupChatInfoScreenState>(),
+  MockSpec<Client>(),
+])
 void main() {
   late MockNewGroupChatInfoScreenState mockController;
 
@@ -39,7 +43,6 @@ void main() {
       mockController.enableEncryptionNotifier,
     ).thenReturn(ValueNotifier(false));
     when(mockController.haveGroupNameNotifier).thenReturn(ValueNotifier(false));
-    when(mockController.serverName).thenReturn('example.com');
     when(
       mockController.groupPrivacyNotifier,
     ).thenReturn(ValueNotifier(const GroupPrivacyState()));
@@ -52,6 +55,7 @@ void main() {
     when(mockController.groupNameFocusNode).thenReturn(FocusNode());
     when(mockController.contactsList).thenReturn(<PresentationContact>{});
     when(mockController.isCreatingRoom).thenReturn(false);
+    when(mockController.isUploadingAvatar).thenReturn(false);
     when(mockController.getErrorMessage(any)).thenReturn(null);
     when(
       mockController.avatarAssetEntityNotifier,
@@ -129,6 +133,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            activeMatrixClientProvider.overrideWithBuild((_, _) {
+              final client = MockClient();
+              when(client.userID).thenReturn('@alice:example.com');
+              return ActiveClientSnapshot(client);
+            }),
             loginHomeserverSummaryProvider.overrideWithBuild(
               (_, _) =>
                   summaryWith(isPublicGroupsEnabled: isPublicGroupsEnabled),

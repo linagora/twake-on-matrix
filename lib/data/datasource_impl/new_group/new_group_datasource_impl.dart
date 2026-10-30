@@ -70,10 +70,11 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
       try {
         await _activeClient.inviteUser(roomId, userId);
         return;
-      } on MatrixException catch (exception) {
+      } on MatrixException catch (exception, stackTrace) {
         Logs().e(
           'NewGroupDatasourceImpl::inviteUser: $userId (attempt $attempt/$_maxInviteRetries)',
           exception,
+          stackTrace,
         );
         final retryAfterMs = exception.retryAfterMs;
         if (exception.errcode != 'M_LIMIT_EXCEEDED' ||
@@ -83,8 +84,12 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
         if (retryAfterMs != null && retryAfterMs > 0) {
           await Future.delayed(Duration(milliseconds: retryAfterMs));
         }
-      } catch (exception) {
-        Logs().e('NewGroupDatasourceImpl::inviteUser: $userId', exception);
+      } catch (exception, stackTrace) {
+        Logs().e(
+          'NewGroupDatasourceImpl::inviteUser: $userId',
+          exception,
+          stackTrace,
+        );
         throw GenericInviteException(
           userId: userId,
           message: exception.toString(),
