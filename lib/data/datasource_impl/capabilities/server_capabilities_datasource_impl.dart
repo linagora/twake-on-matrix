@@ -9,10 +9,10 @@ class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {
 
   @override
   Future<ProfileEditCapabilities> fetchProfileEditCapabilities() async {
-    final client = _client;
-    if (client == null) throw StateError('No active Matrix client');
     final Capabilities capabilities;
     try {
+      final client = _client;
+      if (client == null) throw StateError('No active Matrix client');
       capabilities = await client.getCapabilities();
     } catch (e, s) {
       Logs().e('ServerCapabilitiesDatasourceImpl::fetch failed', e, s);
