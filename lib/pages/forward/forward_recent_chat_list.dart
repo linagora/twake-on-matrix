@@ -13,14 +13,14 @@ class ForwardRecentChatList extends StatelessWidget {
     required this.rooms,
     required this.recentChatScrollController,
     required this.onSelectedChat,
-    required this.selectedChatNotifier,
+    required this.selectedRoomIds,
   });
 
   final List<Room> rooms;
 
   final ScrollController recentChatScrollController;
 
-  final ValueNotifier<List<String>> selectedChatNotifier;
+  final List<String> selectedRoomIds;
 
   final void Function(String roomId) onSelectedChat;
 
@@ -44,12 +44,9 @@ class ForwardRecentChatList extends StatelessWidget {
               padding: RecentChatListStyle.paddingVerticalBetweenItem,
               child: Row(
                 children: [
-                  ValueListenableBuilder<List<String>>(
-                    valueListenable: selectedChatNotifier,
-                    builder: (context, selectedChats, _) => Checkbox(
-                      value: selectedChats.contains(room.id),
-                      onChanged: (_) => onSelectedChat(room.id),
-                    ),
+                  Checkbox(
+                    value: selectedRoomIds.contains(room.id),
+                    onChanged: (_) => onSelectedChat(room.id),
                   ),
                   Avatar(
                     mxContent: room.avatar,

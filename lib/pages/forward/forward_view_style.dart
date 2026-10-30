@@ -1,10 +1,9 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/cupertino.dart';
 
 class ForwardViewStyle {
-  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+  static final ResponsiveUtils responsive = ResponsiveUtils();
 
   static Size preferredSize(BuildContext context) =>
       Size.fromHeight(AppConfig.toolbarHeight(context));

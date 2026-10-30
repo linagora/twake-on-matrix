@@ -1,51 +1,46 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/forward/forward_message_state.dart';
-import 'package:twake_chat/pages/forward/forward.dart';
-import 'package:twake_chat/pages/forward/forward_recent_chat_list.dart';
-import 'package:twake_chat/pages/forward/recent_chat_title.dart';
-import 'package:twake_chat/pages/forward/forward_view_style.dart';
-import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
-import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
-import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/generated/assets.gen.dart';
-import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/colors/linagora_state_layer.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/forward/forward.dart';
+import 'package:twake_chat/pages/forward/forward_controller.dart';
+import 'package:twake_chat/pages/forward/forward_recent_chat_list.dart';
+import 'package:twake_chat/pages/forward/forward_state.dart';
+import 'package:twake_chat/pages/forward/forward_view_style.dart';
+import 'package:twake_chat/pages/forward/recent_chat_title.dart';
+import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
+import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
+import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 
-class ForwardView extends StatelessWidget {
-  final ForwardController controller;
+class ForwardView extends ConsumerWidget {
+  final ForwardScreenState screen;
 
-  const ForwardView(this.controller, {super.key});
+  const ForwardView(this.screen, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(forwardControllerProvider);
+    final rooms = screen.recentChats;
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: controller.isFullScreen
+        preferredSize: screen.isFullScreen
             ? ForwardViewStyle.preferredSize(context)
             : ForwardViewStyle.maxPreferredSize(context),
-        child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: controller.forwardMessageNotifier,
-          builder: (context, forwardMessageState, child) {
-            return SearchableAppBar(
-              toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
-              focusNode: controller.searchFocusNode,
-              title: L10n.of(context)!.forwardTo,
-              searchModeNotifier: controller.isSearchModeNotifier,
-              hintText: L10n.of(context)!.searchContacts,
-              textEditingController: controller.searchTextEditingController,
-              openSearchBar: controller.openSearchBar,
-              closeSearchBar: controller.closeSearchBar,
-              isFullScreen: controller.isFullScreen,
-              displayBackButton: forwardMessageState == null,
-            );
-          },
+        child: SearchableAppBar(
+          toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
+          focusNode: screen.searchFocusNode,
+          title: L10n.of(context)!.forwardTo,
+          searchModeNotifier: screen.isSearchModeNotifier,
+          hintText: L10n.of(context)!.searchContacts,
+          textEditingController: screen.searchTextEditingController,
+          openSearchBar: screen.openSearchBar,
+          closeSearchBar: screen.closeSearchBar,
+          isFullScreen: screen.isFullScreen,
+          displayBackButton: state is! ForwardSending,
         ),
       ),
       body: Column(
@@ -58,57 +53,64 @@ class ForwardView extends StatelessWidget {
               child: Column(
                 children: [
                   const RecentChatsTitle(),
-                  ValueListenableBuilder<List<Room>>(
-                    valueListenable: controller.recentlyChatsNotifier,
-                    builder: (context, rooms, child) {
-                      if (rooms.isNotEmpty) {
-                        return ForwardRecentChatList(
-                          rooms: rooms,
-                          selectedChatNotifier:
-                              controller.selectedRoomIdNotifier,
-                          onSelectedChat: (roomId) =>
-                              controller.onToggleSelectChat(roomId),
-                          recentChatScrollController:
-                              controller.recentChatScrollController,
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
-                  ),
+                  if (rooms.isNotEmpty)
+                    ForwardRecentChatList(
+                      rooms: rooms,
+                      selectedRoomIds: screen.selectedRoomIds,
+                      onSelectedChat: screen.onToggleSelectChat,
+                      recentChatScrollController:
+                          screen.recentChatScrollController,
+                    ),
                 ],
               ),
             ),
           ),
-          if (!controller.isFullScreen)
+          if (!screen.isFullScreen)
             _WebActionsButton(
-              selectedChatNotifier: controller.selectedRoomIdNotifier,
-              forwardMessageNotifier: controller.forwardMessageNotifier,
-              forwardAction: controller.forwardAction,
+              state: state,
+              hasSelection: screen.selectedRoomIds.isNotEmpty,
+              forwardAction: screen.forwardAction,
             ),
         ],
       ),
-      floatingActionButton: controller.isFullScreen
+      floatingActionButton: screen.isFullScreen
           ? _ForwardButton(
-              forwardAction: controller.forwardAction,
-              selectedChatNotifier: controller.selectedRoomIdNotifier,
-              forwardMessageNotifier: controller.forwardMessageNotifier,
+              state: state,
+              hasSelection: screen.selectedRoomIds.isNotEmpty,
+              forwardAction: screen.forwardAction,
             )
           : null,
     );
   }
 }
 
-class _WebActionsButton extends StatelessWidget {
-  final ValueNotifier<List<String>> selectedChatNotifier;
+class _SendingIndicator extends StatelessWidget {
+  const _SendingIndicator();
 
-  final ValueNotifier<Either<Failure, Success>?> forwardMessageNotifier;
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: ForwardViewStyle.bottomBarHeight,
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: TwakeFloatingActionButton(
+          customIcon: SizedBox(child: CupertinoActivityIndicator()),
+        ),
+      ),
+    );
+  }
+}
+
+class _WebActionsButton extends StatelessWidget {
+  final ForwardState state;
+
+  final bool hasSelection;
 
   final void Function() forwardAction;
 
   const _WebActionsButton({
-    required this.selectedChatNotifier,
-    required this.forwardMessageNotifier,
+    required this.state,
+    required this.hasSelection,
     required this.forwardAction,
   });
 
@@ -117,28 +119,10 @@ class _WebActionsButton extends StatelessWidget {
     final linagoraSysColors = LinagoraSysColors.material();
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
-      child: ValueListenableBuilder<Either<Failure, Success>?>(
-        valueListenable: forwardMessageNotifier,
-        builder: (context, forwardMessageState, child) {
-          if (forwardMessageState == null) {
-            return child!;
-          }
-          return forwardMessageState.fold((failure) => child!, (success) {
-            if (success is ForwardMessageLoading) {
-              return const SizedBox(
-                height: ForwardViewStyle.bottomBarHeight,
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: TwakeFloatingActionButton(
-                    customIcon: SizedBox(child: CupertinoActivityIndicator()),
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          });
-        },
-        child: Row(
+      child: switch (state) {
+        ForwardSending() => const _SendingIndicator(),
+        ForwardDone(successCount: > 0) => const SizedBox.shrink(),
+        ForwardIdle() || ForwardDone() => Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TwakeTextButton(
@@ -156,96 +140,68 @@ class _WebActionsButton extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8.0),
-            ValueListenableBuilder<List<String>>(
-              valueListenable: selectedChatNotifier,
-              builder: (context, selectedChats, _) => TwakeTextButton(
-                onTap: selectedChats.isNotEmpty ? forwardAction : null,
-                message: L10n.of(context)!.add,
-                margin: ForwardViewStyle.webActionsButtonMargin,
-                borderHover: ForwardViewStyle.webActionsButtonBorder,
-                buttonDecoration: BoxDecoration(
-                  color: selectedChats.isNotEmpty
-                      ? linagoraSysColors.primary
-                      : LinagoraStateLayer(
-                          linagoraSysColors.onSurface,
-                        ).opacityLayer2,
-                  borderRadius: BorderRadius.circular(
-                    ForwardViewStyle.webActionsButtonBorder,
-                  ),
+            TwakeTextButton(
+              onTap: hasSelection ? forwardAction : null,
+              message: L10n.of(context)!.add,
+              margin: ForwardViewStyle.webActionsButtonMargin,
+              borderHover: ForwardViewStyle.webActionsButtonBorder,
+              buttonDecoration: BoxDecoration(
+                color: hasSelection
+                    ? linagoraSysColors.primary
+                    : LinagoraStateLayer(
+                        linagoraSysColors.onSurface,
+                      ).opacityLayer2,
+                borderRadius: BorderRadius.circular(
+                  ForwardViewStyle.webActionsButtonBorder,
                 ),
-                styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: selectedChats.isNotEmpty
-                      ? linagoraSysColors.onPrimary
-                      : linagoraSysColors.inverseSurface.withOpacity(0.6),
-                ),
+              ),
+              styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: hasSelection
+                    ? linagoraSysColors.onPrimary
+                    : linagoraSysColors.inverseSurface.withOpacity(0.6),
               ),
             ),
           ],
         ),
-      ),
+      },
     );
   }
 }
 
 class _ForwardButton extends StatelessWidget {
   const _ForwardButton({
-    required this.selectedChatNotifier,
-    required this.forwardMessageNotifier,
+    required this.state,
+    required this.hasSelection,
     required this.forwardAction,
   });
 
-  final ValueNotifier<List<String>> selectedChatNotifier;
+  final ForwardState state;
+
+  final bool hasSelection;
 
   final void Function() forwardAction;
 
-  final ValueNotifier<Either<Failure, Success>?> forwardMessageNotifier;
-
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<String>>(
-      valueListenable: selectedChatNotifier,
-      builder: ((context, selectedChats, child) {
-        if (selectedChats.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        return child!;
-      }),
-      child: ValueListenableBuilder<Either<Failure, Success>?>(
-        valueListenable: forwardMessageNotifier,
-        builder: (context, forwardMessageState, child) {
-          if (forwardMessageState == null) {
-            return child!;
-          }
-          return forwardMessageState.fold((failure) => child!, (success) {
-            if (success is! ForwardMessageLoading) {
-              return const SizedBox.shrink();
-            }
-            return const SizedBox(
-              height: ForwardViewStyle.bottomBarHeight,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: TwakeFloatingActionButton(
-                  customIcon: SizedBox(child: CupertinoActivityIndicator()),
-                ),
-              ),
-            );
-          });
-        },
-        child: SizedBox(
-          height: ForwardViewStyle.bottomBarHeight,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: TwakeIconButton(
-              paddingAll: 0,
-              onTap: forwardAction,
-              tooltip: L10n.of(context)!.send,
-              imagePath: Assets.images.icSend.path,
-              imageSize: ForwardViewStyle.iconSendSize,
-            ),
+    if (!hasSelection) {
+      return const SizedBox.shrink();
+    }
+    return switch (state) {
+      ForwardSending() => const _SendingIndicator(),
+      ForwardDone(successCount: > 0) => const SizedBox.shrink(),
+      ForwardIdle() || ForwardDone() => SizedBox(
+        height: ForwardViewStyle.bottomBarHeight,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: TwakeIconButton(
+            paddingAll: 0,
+            onTap: forwardAction,
+            tooltip: L10n.of(context)!.send,
+            imagePath: Assets.images.icSend.path,
+            imageSize: ForwardViewStyle.iconSendSize,
           ),
         ),
       ),
-    );
+    };
   }
 }

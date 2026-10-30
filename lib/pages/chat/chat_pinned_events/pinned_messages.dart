@@ -401,15 +401,14 @@ class PinnedMessagesController extends State<PinnedMessages>
   }
 
   void forwardEventAction(Event event) async {
-    Matrix.of(context).shareContent = event
+    final message = event
         .getDisplayEventWithoutEditEvent(widget.timeline!)
         .formatContentForwards();
-    Logs().d(
-      "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
-    );
     final fromRoomId = event.roomId ?? room?.id;
     if (fromRoomId == null) return;
-    ForwardRoute($extra: ForwardArgument(fromRoomId: fromRoomId)).go(context);
+    ForwardRoute(
+      $extra: ForwardArgument(fromRoomId: fromRoomId, messages: [message]),
+    ).go(context);
   }
 
   void handleContextMenuAction(
