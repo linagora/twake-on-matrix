@@ -8,10 +8,16 @@ class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {
   final Client? _client;
 
   @override
-  Future<ProfileEditCapabilities> getProfileEditCapabilities() async {
+  Future<ProfileEditCapabilities> fetchProfileEditCapabilities() async {
     final client = _client;
     if (client == null) throw StateError('No active Matrix client');
-    final capabilities = await client.getCapabilities();
+    final Capabilities capabilities;
+    try {
+      capabilities = await client.getCapabilities();
+    } catch (e, s) {
+      Logs().e('ServerCapabilitiesDatasourceImpl::fetch failed', e, s);
+      rethrow;
+    }
     return ProfileEditCapabilities(
       canEditAvatar:
           capabilities.mSetAvatarUrl?.enabled != false &&

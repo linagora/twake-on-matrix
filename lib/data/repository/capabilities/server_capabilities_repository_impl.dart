@@ -8,6 +8,6 @@ class ServerCapabilitiesRepositoryImpl implements ServerCapabilitiesRepository {
   final ServerCapabilitiesDatasource _datasource;
 
   @override
-  Future<ProfileEditCapabilities> getProfileEditCapabilities() =>
-      _datasource.getProfileEditCapabilities();
+  Future<ProfileEditCapabilities> fetchProfileEditCapabilities() =>
+      _datasource.fetchProfileEditCapabilities();
 }
