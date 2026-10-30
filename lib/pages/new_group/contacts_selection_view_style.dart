@@ -1,10 +1,9 @@
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/widgets.dart';
 
 class ContactsSelectionViewStyle {
-  static ResponsiveUtils responsive = getIt.get<ResponsiveUtils>();
+  static final ResponsiveUtils responsive = ResponsiveUtils();
 
   static EdgeInsetsDirectional webActionsButtonMargin =
       const EdgeInsetsDirectional.symmetric(horizontal: 24.0);
