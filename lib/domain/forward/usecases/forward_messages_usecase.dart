@@ -18,19 +18,26 @@ class ForwardMessagesUseCase {
     if (messages.isEmpty) throw const ForwardEmptyContentException();
     var successCount = 0;
     for (final roomId in roomIds) {
-      if (!_repository.isJoined(roomId)) continue;
-      try {
-        for (final message in messages) {
-          await _repository.sendMessage(roomId: roomId, content: message);
-        }
-      } catch (_) {
-        continue;
-      }
-      successCount++;
+      if (await _forwardToRoom(roomId, messages)) successCount++;
     }
     return ForwardResult(
       successCount: successCount,
       totalCount: roomIds.length,
     );
+  }
+
+  Future<bool> _forwardToRoom(
+    String roomId,
+    List<Map<String, Object?>> messages,
+  ) async {
+    if (!_repository.isJoined(roomId)) return false;
+    try {
+      for (final message in messages) {
+        await _repository.sendMessage(roomId: roomId, content: message);
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
