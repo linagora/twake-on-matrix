@@ -78,6 +78,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/utils/room_draft_storage.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
+import 'package:twake_chat/utils/toggle_reaction.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
@@ -1477,9 +1478,26 @@ class ChatController extends ConsumerState<Chat>
     required Event event,
   }) async {
     if (!mounted) return;
+    final sendingRoom = room!;
     await handleStoreRecentReactions(emoji, emojiId: emojiId);
-    await room!.sendReaction(event.eventId, emoji);
+    await sendingRoom.sendReaction(event.eventId, emoji);
   }
+
+  Future<void> toggleReactionAction({
+    required String emoji,
+    String? emojiId,
+    required Event event,
+    required Event? myReaction,
+    required String? myReactionKey,
+  }) => toggleReaction(
+    emoji: emoji,
+    myReactionKey: myReactionKey,
+    redactMyReaction: myReaction == null
+        ? null
+        : () => myReaction.redactEvent(),
+    sendReaction: () =>
+        sendEmojiAction(emoji: emoji, emojiId: emojiId, event: event),
+  );
 
   void clearSelectedEvents() {
     showEmojiPickerNotifier.value = false;
@@ -2141,34 +2159,14 @@ class ChatController extends ConsumerState<Chat>
                                         );
                                       },
                                   onEmojiSelected: (emojiId, emoji) async {
-                                    final isSelected =
-                                        emoji == (relatesTo?['key'] ?? '');
-                                    if (myReaction == null) {
-                                      Navigator.of(context).pop();
-                                      await sendEmojiAction(
-                                        emoji: emoji,
-                                        emojiId: emojiId,
-                                        event: event,
-                                      );
-                                      return;
-                                    }
-
-                                    if (isSelected) {
-                                      Navigator.of(context).pop();
-                                      await myReaction.redactEvent();
-                                      return;
-                                    }
-
-                                    if (!isSelected) {
-                                      Navigator.of(context).pop();
-                                      await myReaction.redactEvent();
-                                      await sendEmojiAction(
-                                        emoji: emoji,
-                                        emojiId: emojiId,
-                                        event: event,
-                                      );
-                                      return;
-                                    }
+                                    Navigator.of(context).pop();
+                                    await toggleReactionAction(
+                                      emoji: emoji,
+                                      emojiId: emojiId,
+                                      event: event,
+                                      myReaction: myReaction,
+                                      myReactionKey: relatesTo?['key'],
+                                    );
                                   },
                                 ),
                               )
@@ -2181,29 +2179,12 @@ class ChatController extends ConsumerState<Chat>
                                   openingPopupMenu.value = false;
                                 },
                                 onClickEmojiReactionAction: (emoji) async {
-                                  final isSelected =
-                                      emoji == (relatesTo?['key'] ?? '');
-                                  if (myReaction == null) {
-                                    await sendEmojiAction(
-                                      emoji: emoji,
-                                      event: event,
-                                    );
-                                    return;
-                                  }
-
-                                  if (isSelected) {
-                                    await myReaction.redactEvent();
-                                    return;
-                                  }
-
-                                  if (!isSelected) {
-                                    await myReaction.redactEvent();
-                                    await sendEmojiAction(
-                                      emoji: emoji,
-                                      event: event,
-                                    );
-                                    return;
-                                  }
+                                  await toggleReactionAction(
+                                    emoji: emoji,
+                                    event: event,
+                                    myReaction: myReaction,
+                                    myReactionKey: relatesTo?['key'],
+                                  );
                                 },
                               ),
                       ),
@@ -2866,34 +2847,14 @@ class ChatController extends ConsumerState<Chat>
                                             );
                                           },
                                       onEmojiSelected: (emojiId, emoji) async {
-                                        final isSelected =
-                                            emoji == (relatesTo?['key'] ?? '');
-                                        if (myReaction == null) {
-                                          Navigator.of(context).pop();
-                                          await sendEmojiAction(
-                                            emoji: emoji,
-                                            emojiId: emojiId,
-                                            event: event,
-                                          );
-                                          return;
-                                        }
-
-                                        if (isSelected) {
-                                          Navigator.of(context).pop();
-                                          await myReaction.redactEvent();
-                                          return;
-                                        }
-
-                                        if (!isSelected) {
-                                          Navigator.of(context).pop();
-                                          await myReaction.redactEvent();
-                                          await sendEmojiAction(
-                                            emoji: emoji,
-                                            emojiId: emojiId,
-                                            event: event,
-                                          );
-                                          return;
-                                        }
+                                        Navigator.of(context).pop();
+                                        await toggleReactionAction(
+                                          emoji: emoji,
+                                          emojiId: emojiId,
+                                          event: event,
+                                          myReaction: myReaction,
+                                          myReactionKey: relatesTo?['key'],
+                                        );
                                       },
                                     ),
                                   )
@@ -2907,29 +2868,12 @@ class ChatController extends ConsumerState<Chat>
                                       openingPopupMenu.value = false;
                                     },
                                     onClickEmojiReactionAction: (emoji) async {
-                                      final isSelected =
-                                          emoji == (relatesTo?['key'] ?? '');
-                                      if (myReaction == null) {
-                                        await sendEmojiAction(
-                                          emoji: emoji,
-                                          event: event,
-                                        );
-                                        return;
-                                      }
-
-                                      if (isSelected) {
-                                        await myReaction.redactEvent();
-                                        return;
-                                      }
-
-                                      if (!isSelected) {
-                                        await myReaction.redactEvent();
-                                        await sendEmojiAction(
-                                          emoji: emoji,
-                                          event: event,
-                                        );
-                                        return;
-                                      }
+                                      await toggleReactionAction(
+                                        emoji: emoji,
+                                        event: event,
+                                        myReaction: myReaction,
+                                        myReactionKey: relatesTo?['key'],
+                                      );
                                     },
                                   ),
                             const SizedBox(height: 8),
