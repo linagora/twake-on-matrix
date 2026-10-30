@@ -27,3 +27,7 @@ and recreate it. But when we use this method, we have a DOMException error.
 1. The funcs are then blocked if deleteDisk both BoxCollection 
 2. When logging back in, can't open and put data to HiveCollectionToMDatabase
 then can't call API use configuration of HiveCollectionToMDatabase
+
+## Note (2026-10-30)
+
+Decision 2 was never implemented. Nothing reopens `HiveCollectionToMDatabase` after `deleteFromDisk()`: the GetIt singleton keeps its closed boxes, so ToM configuration writes after a re-login in the same process can fail (the error is caught in `MatrixState._storeToMConfiguration`).
