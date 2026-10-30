@@ -1463,20 +1463,22 @@ class ChatController extends ConsumerState<Chat>
   /// Completes once the recent reaction is persisted. A storage failure is
   /// logged by `executeOrLog` and never thrown, so a caller that awaits this
   /// can still go on with the action.
-  Future<void> handleStoreRecentReactions(String? emoji) => ref
-      .read(storeRecentReactionsUseCaseProvider)
-      .executeOrLog(emojiId: _recentReactionId(emoji));
+  Future<void> handleStoreRecentReactions(String? emoji, {String? emojiId}) =>
+      ref
+          .read(storeRecentReactionsUseCaseProvider)
+          .executeOrLog(emojiId: emojiId ?? _recentReactionId(emoji));
 
   String _recentReactionId(String? emoji) =>
       Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
 
-  Future<void> sendEmojiAction({String? emoji, required Event event}) async {
-    await ref
-        .read(storeRecentReactionsUseCaseProvider)
-        .executeOrLogThen(
-          emojiId: _recentReactionId(emoji),
-          send: () => room!.sendReaction(event.eventId, emoji!),
-        );
+  Future<void> sendEmojiAction({
+    required String emoji,
+    String? emojiId,
+    required Event event,
+  }) async {
+    if (!mounted) return;
+    await handleStoreRecentReactions(emoji, emojiId: emojiId);
+    await room!.sendReaction(event.eventId, emoji);
   }
 
   void clearSelectedEvents() {
@@ -2145,6 +2147,7 @@ class ChatController extends ConsumerState<Chat>
                                       Navigator.of(context).pop();
                                       await sendEmojiAction(
                                         emoji: emoji,
+                                        emojiId: emojiId,
                                         event: event,
                                       );
                                       return;
@@ -2161,6 +2164,7 @@ class ChatController extends ConsumerState<Chat>
                                       await myReaction.redactEvent();
                                       await sendEmojiAction(
                                         emoji: emoji,
+                                        emojiId: emojiId,
                                         event: event,
                                       );
                                       return;
@@ -2868,6 +2872,7 @@ class ChatController extends ConsumerState<Chat>
                                           Navigator.of(context).pop();
                                           await sendEmojiAction(
                                             emoji: emoji,
+                                            emojiId: emojiId,
                                             event: event,
                                           );
                                           return;
@@ -2884,6 +2889,7 @@ class ChatController extends ConsumerState<Chat>
                                           await myReaction.redactEvent();
                                           await sendEmojiAction(
                                             emoji: emoji,
+                                            emojiId: emojiId,
                                             event: event,
                                           );
                                           return;
