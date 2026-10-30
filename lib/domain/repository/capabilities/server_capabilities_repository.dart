@@ -1,5 +1,5 @@
-import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 
 abstract class ServerCapabilitiesRepository {
-  Future<Capabilities> getCapabilities();
+  Future<ProfileEditCapabilities> getProfileEditCapabilities();
 }

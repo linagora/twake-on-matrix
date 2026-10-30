@@ -14,8 +14,6 @@ class HomeserverEndpoint {
   static final ServicePath searchPath = ServicePath('/search');
 
   static final ServicePath configPath = ServicePath('/config');
-
-  static final ServicePath capabilitiesPath = ServicePath('/capabilities');
 }
 
 extension ServicePathHomeserver on ServicePath {
@@ -34,13 +32,6 @@ extension ServicePathHomeserver on ServicePath {
   }
 
   String generateHomeserverServerSearchPath({
-    String rootPath = HomeserverEndpoint.homeserverClientPath,
-    String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
-  }) {
-    return '$rootPath/$apiVersion$path';
-  }
-
-  String generateHomeserverCapabilitiesPath({
     String rootPath = HomeserverEndpoint.homeserverClientPath,
     String apiVersion = HomeserverEndpoint.homeserverAPIVersion,
   }) {
