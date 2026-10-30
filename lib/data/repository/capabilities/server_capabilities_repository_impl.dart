@@ -1,14 +1,13 @@
 import 'package:twake_chat/data/datasource/capabilities/server_capabilities_datasource.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
-import 'package:matrix/matrix.dart';
 
 class ServerCapabilitiesRepositoryImpl implements ServerCapabilitiesRepository {
-  const ServerCapabilitiesRepositoryImpl();
+  const ServerCapabilitiesRepositoryImpl(this._datasource);
+
+  final ServerCapabilitiesDatasource _datasource;
 
   @override
-  Future<Capabilities> getCapabilities() {
-    final dataSource = getIt.get<ServerCapabilitiesDatasource>();
-    return dataSource.getCapabilities();
-  }
+  Future<ProfileEditCapabilities> getProfileEditCapabilities() =>
+      _datasource.getProfileEditCapabilities();
 }

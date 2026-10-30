@@ -1,12 +1,11 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/capabilities/get_server_capabilities_state.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
+import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
-import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
 import 'package:flutter/widgets.dart';
-import 'package:matrix/matrix.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_profile/profile_edit_capabilities_provider.dart';
 
 class SettingsProfileCapabilityCheck extends StatelessWidget {
   const SettingsProfileCapabilityCheck({
@@ -19,7 +18,7 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
   final Widget? child;
   final String? userId;
   final Widget Function(
-    Capabilities? capabilities,
+    ProfileEditCapabilities? capabilities,
     UserInfo? userInfo,
     Widget? child,
   )
@@ -28,29 +27,19 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Rx.combineLatest2(
-        getIt.get<GetServerCapabilitiesInteractor>().execute(),
-        getIt.get<GetUserInfoInteractor>().execute(userId: userId),
-        (capabilitiesState, userInfoState) => (
-          capabilitiesState: capabilitiesState,
-          userInfoState: userInfoState,
-        ),
-      ),
+      stream: getIt.get<GetUserInfoInteractor>().execute(userId: userId),
       builder: (context, snapshot) {
-        final capabilitiesData = snapshot.data?.capabilitiesState.fold(
+        final userInfoData = snapshot.data?.fold(
           (failure) => failure,
           (success) => success,
         );
-        final userInfoData = snapshot.data?.userInfoState.fold(
-          (failure) => failure,
-          (success) => success,
-        );
-        return builder(
-          capabilitiesData is GetServerCapabilitiesSuccess
-              ? capabilitiesData.capabilities
-              : null,
-          userInfoData is GetUserInfoSuccess ? userInfoData.userInfo : null,
-          child,
+        return Consumer(
+          builder: (context, ref, child) => builder(
+            ref.watch(profileEditCapabilitiesProvider).value,
+            userInfoData is GetUserInfoSuccess ? userInfoData.userInfo : null,
+            child,
+          ),
+          child: child,
         );
       },
     );

@@ -1,6 +1,6 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
-import 'package:twake_chat/domain/model/capabilities/capabilities_extension.dart';
+import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/settings_profile_item.dart';
@@ -19,11 +19,10 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart';
 
 class SettingsProfileView extends StatelessWidget {
   final SettingsProfileController controller;
-  final Capabilities? capabilities;
+  final ProfileEditCapabilities? capabilities;
   final UserInfo? userInfo;
 
   const SettingsProfileView({

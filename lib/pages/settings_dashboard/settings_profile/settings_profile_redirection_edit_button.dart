@@ -1,4 +1,4 @@
-import 'package:twake_chat/domain/model/capabilities/capabilities_extension.dart';
+import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 import 'package:twake_chat/domain/model/extensions/common_settings/common_settings_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
@@ -17,7 +17,7 @@ class SettingsProfileRedirectionEditButton extends StatelessWidget {
     required this.userInfo,
   });
 
-  final Capabilities? capabilities;
+  final ProfileEditCapabilities? capabilities;
   final UserInfo? userInfo;
 
   @override
