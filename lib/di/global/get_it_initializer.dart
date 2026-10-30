@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:twake_chat/config/app_grid_config/app_config_loader.dart';
-import 'package:twake_chat/data/datasource/capabilities/server_capabilities_datasource.dart';
 import 'package:twake_chat/data/datasource/contact/address_book_datasource.dart';
 import 'package:twake_chat/data/datasource/contact/hive_third_party_contact_datasource.dart';
 import 'package:twake_chat/data/datasource/contact/contacts_provider.dart';
@@ -22,7 +21,6 @@ import 'package:twake_chat/data/datasource/server_search_datasource.dart';
 import 'package:twake_chat/data/datasource/tom_configurations_datasource.dart';
 import 'package:twake_chat/data/datasource/tom_contacts_datasource.dart';
 import 'package:twake_chat/data/datasource/user_info/user_info_datasource.dart';
-import 'package:twake_chat/data/datasource_impl/capabilities/server_capabilities_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/contact/address_book_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/contact/phonebook_contact_datasource_impl.dart';
@@ -41,7 +39,6 @@ import 'package:twake_chat/data/datasource_impl/user_info/user_info_datasource_i
 import 'package:twake_chat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/data/local/multiple_account/multiple_account_cache_manager.dart';
-import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dart';
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
 import 'package:twake_chat/data/network/dio_cache_option.dart';
@@ -51,7 +48,6 @@ import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
 import 'package:twake_chat/data/network/search/server_search_api.dart';
 import 'package:twake_chat/data/network/server_config_api.dart';
 import 'package:twake_chat/data/network/user_info/user_info_api.dart';
-import 'package:twake_chat/data/repository/capabilities/server_capabilities_repository_impl.dart';
 import 'package:twake_chat/data/repository/contact/address_book_repository_impl.dart';
 import 'package:twake_chat/data/repository/contact/hive_third_party_contact_repository_impl.dart';
 import 'package:twake_chat/data/repository/contact/phonebook_contact_repository_impl.dart';
@@ -70,7 +66,6 @@ import 'package:twake_chat/data/repository/user_info_repository_impl.dart';
 import 'package:twake_chat/di/global/hive_di.dart';
 import 'package:twake_chat/di/global/network_connectivity_di.dart';
 import 'package:twake_chat/di/global/network_di.dart';
-import 'package:twake_chat/domain/repository/capabilities/server_capabilities_repository.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:twake_chat/domain/repository/contact_repository.dart';
@@ -86,7 +81,6 @@ import 'package:twake_chat/domain/repository/server_search_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
-import 'package:twake_chat/domain/usecase/capabilities/get_server_capabilities_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/lookup_match_contact_interactor.dart';
@@ -228,7 +222,6 @@ class GetItInitializer {
     getIt.registerSingleton<ServerSearchAPI>(ServerSearchAPI());
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
     getIt.registerFactory<InvitationAPI>(() => InvitationAPI());
-    getIt.registerSingleton(const ServerCapabilitiesAPI());
     getIt.registerSingleton(const UserInfoApi());
   }
 
@@ -266,9 +259,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<HiveInvitationStatusDatasource>(
       () => HiveInvitationStatusDatasourceImpl(),
-    );
-    getIt.registerFactory<ServerCapabilitiesDatasource>(
-      () => const ServerCapabilitiesDatasourceImpl(),
     );
     getIt.registerFactory<UserInfoDatasource>(
       () => const UserInfoDatasourceImpl(),
@@ -353,9 +343,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<HiveInvitationStatusRepository>(
       () => HiveInvitationStatusRepositoryImpl(),
-    );
-    getIt.registerFactory<ServerCapabilitiesRepository>(
-      () => const ServerCapabilitiesRepositoryImpl(),
     );
     getIt.registerFactory<UserInfoRepository>(
       () => const UserInfoRepositoryImpl(),
@@ -494,7 +481,6 @@ class GetItInitializer {
       () => ReportContentInteractor(),
     );
 
-    getIt.registerFactory(() => const GetServerCapabilitiesInteractor());
     getIt.registerFactory(() => const GetUserInfoInteractor());
 
     getIt.registerFactory(() => InviteUserInteractor());

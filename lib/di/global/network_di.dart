@@ -196,7 +196,6 @@ class NetworkDI extends BaseDI {
     );
     dioCacheCustomInterceptor.addUriSupportsCache([
       IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
-      HomeserverEndpoint.capabilitiesPath.generateHomeserverCapabilitiesPath(),
     ]);
   }
 }
