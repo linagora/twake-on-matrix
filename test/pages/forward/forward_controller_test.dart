@@ -80,11 +80,23 @@ void main() {
     when(mockRepository.isJoined(any)).thenThrow(StateError('boom'));
 
     // Act
-    final call = controller().forward(messages: [message], roomIds: [roomId]);
+    await controller().forward(messages: [message], roomIds: [roomId]);
 
     // Assert
-    await expectLater(call, throwsStateError);
     expect(state(), const ForwardState.idle());
+  });
+
+  test('forward_afterNothingWasSent_canBeRetried', () async {
+    // Arrange
+    when(mockRepository.isJoined(any)).thenReturn(false);
+    await controller().forward(messages: [message], roomIds: [roomId]);
+    when(mockRepository.isJoined(any)).thenReturn(true);
+
+    // Act
+    await controller().forward(messages: [message], roomIds: [roomId]);
+
+    // Assert
+    expect(state(), const ForwardState.done(successCount: 1, totalCount: 1));
   });
 
   test('forward_whileSending_isIgnored', () async {
