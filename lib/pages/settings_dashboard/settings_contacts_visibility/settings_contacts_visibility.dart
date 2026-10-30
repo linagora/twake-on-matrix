@@ -21,7 +21,8 @@ class SettingsContactsVisibility extends ConsumerStatefulWidget {
 
 class _SettingsContactsVisibilityScreenState
     extends ConsumerState<SettingsContactsVisibility> {
-  bool _isLoadingDialogShown = false;
+  int _loadingDialogOwners = 0;
+  bool _isShowingLoadForBuild = false;
   ProviderSubscription<AsyncValue<SettingsContactsVisibilityState>>?
   _visibilitySubscription;
 
@@ -49,14 +50,14 @@ class _SettingsContactsVisibilityScreenState
     AsyncValue<SettingsContactsVisibilityState> next,
   ) {
     if (next.isLoading) {
-      if (_isLoadingDialogShown) return;
-      _isLoadingDialogShown = true;
-      TwakeDialog.showLoadingDialog(context);
+      if (_isShowingLoadForBuild) return;
+      _isShowingLoadForBuild = true;
+      _showLoadingDialog();
       return;
     }
-    if (_isLoadingDialogShown) {
-      _isLoadingDialogShown = false;
-      TwakeDialog.hideLoadingDialog(context);
+    if (_isShowingLoadForBuild) {
+      _isShowingLoadForBuild = false;
+      _hideLoadingDialog();
     }
     if (next.hasError && (previous == null || previous.isLoading)) {
       TwakeSnackBar.show(
@@ -66,11 +67,19 @@ class _SettingsContactsVisibilityScreenState
     }
   }
 
+  void _showLoadingDialog() {
+    if (_loadingDialogOwners++ == 0) TwakeDialog.showLoadingDialog(context);
+  }
+
+  void _hideLoadingDialog() {
+    if (--_loadingDialogOwners == 0) TwakeDialog.hideLoadingDialog(context);
+  }
+
   Future<void> _update(
     Future<void> Function(SettingsContactsVisibilityController controller)
     update,
   ) async {
-    TwakeDialog.showLoadingDialog(context);
+    _showLoadingDialog();
     try {
       await update(
         ref.read(settingsContactsVisibilityControllerProvider.notifier),
@@ -82,7 +91,7 @@ class _SettingsContactsVisibilityScreenState
         L10n.of(context)!.failedToChangeContactsVisibility,
       );
     } finally {
-      if (mounted) TwakeDialog.hideLoadingDialog(context);
+      if (mounted) _hideLoadingDialog();
     }
   }
 

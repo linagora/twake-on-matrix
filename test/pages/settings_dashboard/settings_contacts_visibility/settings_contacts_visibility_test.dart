@@ -20,20 +20,31 @@ const _loaded = SettingsContactsVisibilityState(
 );
 
 class _FakeController extends SettingsContactsVisibilityController {
-  _FakeController({this.failUpdate = false, this.pendingLoad});
+  _FakeController({
+    this.failUpdate = false,
+    Completer<SettingsContactsVisibilityState>? pendingLoad,
+    this.onSelect,
+  }) : _pendingLoad = pendingLoad;
 
   final bool failUpdate;
-  final Completer<SettingsContactsVisibilityState>? pendingLoad;
+  Completer<SettingsContactsVisibilityState>? _pendingLoad;
+  final Future<void> Function(_FakeController controller)? onSelect;
   final List<SettingsContactsVisibilityEnum> selected = [];
 
   @override
   Future<SettingsContactsVisibilityState> build() async =>
-      pendingLoad?.future ?? _loaded;
+      _pendingLoad?.future ?? _loaded;
 
   @override
   Future<void> selectVisibility(SettingsContactsVisibilityEnum option) async {
     selected.add(option);
+    await onSelect?.call(this);
     if (failUpdate) throw UpdateUserInfoVisibilityException(Exception('mock'));
+  }
+
+  void reloadWith(Completer<SettingsContactsVisibilityState> load) {
+    _pendingLoad = load;
+    ref.invalidateSelf();
   }
 }
 
@@ -104,6 +115,37 @@ void main() {
 
     expect(loadingDialog, findsNothing);
     expect(find.text('Failed to get contacts visibility'), findsOneWidget);
+  });
+
+  testWidgets('a reload during an update shows a single loading dialog', (
+    tester,
+  ) async {
+    final update = Completer<void>();
+    final reload = Completer<SettingsContactsVisibilityState>();
+    final controller = _FakeController(
+      onSelect: (controller) {
+        controller.reloadWith(reload);
+        return update.future;
+      },
+    );
+    await pumpScreen(tester, controller);
+    await tester.pumpAndSettle();
+
+    await tester.tap(option(SettingsContactsVisibilityEnum.private));
+    await pumpDialogTransition(tester);
+
+    expect(loadingDialog, findsOneWidget);
+
+    reload.complete(_loaded);
+    await pumpDialogTransition(tester);
+
+    expect(loadingDialog, findsOneWidget);
+
+    update.complete();
+    await tester.pumpAndSettle();
+
+    expect(loadingDialog, findsNothing);
+    expect(option(SettingsContactsVisibilityEnum.private), findsOneWidget);
   });
 
   testWidgets('tapping the selected option sends no update', (tester) async {
