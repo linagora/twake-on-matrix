@@ -13,6 +13,7 @@ import 'package:twake_chat/data/contact/sources/tom_address_book_source.dart';
 import 'package:twake_chat/data/contact/sources/tom_user_info_source.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
+import 'package:twake_chat/data/repository/user_info_repository.provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart';
@@ -27,7 +28,6 @@ import 'package:twake_chat/domain/contact/usecases/watch_unified_contacts.dart';
 import 'package:twake_chat/domain/repository/contact/address_book_repository.dart';
 import 'package:twake_chat/domain/repository/contact/hive_contact_repository.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
-import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/domain/usecase/contacts/federation_look_up_phonebook_contact_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/try_get_synced_phone_book_contact_interactor.dart';
@@ -86,7 +86,7 @@ MatrixRoomMemberDatasource matrixRoomMemberDatasource(Ref ref) {
 @Riverpod(keepAlive: true)
 TomUserInfoSource tomUserInfoEnricher(Ref ref) => TomUserInfoSource(
   repository: ref.watch(unifiedContactRepositoryProvider),
-  userInfoRepository: getIt.get<UserInfoRepository>(),
+  userInfoRepository: ref.watch(userInfoRepositoryProvider),
   policy: ref.watch(contactResolutionPolicyProvider),
   activeUserId: () => ref.read(activeMatrixClientProvider).userId,
 );

@@ -13,16 +13,13 @@ import 'package:twake_chat/domain/contact/policy/contact_resolution_policy.dart'
 import 'package:twake_chat/domain/contact/services/contact_sync_service.dart';
 import 'package:twake_chat/domain/contact/sources/contact_source.dart';
 import 'package:twake_chat/domain/contact/sources/phonebook_resolver.dart';
-import 'package:twake_chat/domain/model/user_info/user_info.dart';
-import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
-import 'package:twake_chat/domain/model/user_info/user_info_visibility_request.dart';
-import 'package:twake_chat/domain/repository/user_info/user_info_repository.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 import '../../domain/contact/fakes/build_contact_sync_service.dart';
 import '../../domain/contact/fakes/fake_unified_contact_repository.dart';
+import '../../domain/user_info/fake_user_info_repository.dart';
 import 'contacts_controller_test.mocks.dart';
 
 class _FakeSource implements ContactSource {
@@ -65,22 +62,6 @@ class _NoopPhonebookResolver implements PhonebookResolver {
 
   @override
   Future<void> cancel() async {}
-}
-
-class _FakeUserInfoRepository implements UserInfoRepository {
-  @override
-  Future<UserInfo> getUserInfo(String userId) async =>
-      UserInfo(uid: Uri.decodeComponent(userId));
-
-  @override
-  Future<UserInfoVisibility> getUserVisibility(String userId) async =>
-      UserInfoVisibility();
-
-  @override
-  Future<UserInfoVisibility> updateUserInfoVisibility(
-    String userId,
-    UserInfoVisibilityRequest userInfoVisibility,
-  ) async => UserInfoVisibility();
 }
 
 @GenerateNiceMocks([MockSpec<Client>()])
@@ -210,7 +191,7 @@ void main() {
           tomUserInfoEnricherProvider.overrideWith(
             (ref) => TomUserInfoSource(
               repository: repository,
-              userInfoRepository: _FakeUserInfoRepository(),
+              userInfoRepository: FakeUserInfoRepository(),
               policy: policy,
             ),
           ),
