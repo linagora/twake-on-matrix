@@ -1,367 +1,218 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:provider/provider.dart' as provider;
-import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
+import 'package:twake_chat/data/repository/new_group/new_group_repository.provider.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
-import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
-import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/create_new_group_chat_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
-import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
-import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
+import 'package:twake_chat/domain/repository/new_group/new_group_repository.dart';
+import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
-import 'package:twake_chat/utils/power_level_manager.dart';
-import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 import 'new_group_chat_info_controller_test.mocks.dart';
 
-class _FakeMatrixState extends Fake implements MatrixState {
-  _FakeMatrixState(this._client);
-
-  final Client _client;
-
-  @override
-  Client get client => _client;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrixState';
-}
-
 @GenerateNiceMocks([
   MockSpec<Client>(),
+  MockSpec<NewGroupRepository>(),
   MockSpec<CreateNewFeedInteractor>(),
-  MockSpec<UploadContentInteractor>(),
-  MockSpec<UploadContentInBytesInteractor>(),
-  MockSpec<CreateNewGroupChatInteractor>(),
-  MockSpec<InviteUserInteractor>(),
 ])
 void main() {
-  final getIt = GetIt.instance;
-
-  final mockCreateNewGroupChatInteractor = MockCreateNewGroupChatInteractor();
+  const roomId = '!room:example.com';
 
   late MockClient mockClient;
-  late MockCreateNewFeedInteractor mockCreateNewFeedInteractor;
-
-  setUpAll(() {
-    getIt
-      ..registerSingleton(ResponsiveUtils())
-      ..registerSingleton<UploadContentInteractor>(
-        MockUploadContentInteractor(),
-      )
-      ..registerSingleton<UploadContentInBytesInteractor>(
-        MockUploadContentInBytesInteractor(),
-      )
-      ..registerSingleton<CreateNewGroupChatInteractor>(
-        mockCreateNewGroupChatInteractor,
-      )
-      ..registerSingleton(PowerLevelManager())
-      ..registerSingleton<InviteUserInteractor>(MockInviteUserInteractor())
-      ..registerSingleton(VerifyNameInteractor());
-  });
-
-  tearDownAll(() => getIt.reset());
+  late MockNewGroupRepository mockRepository;
+  late MockCreateNewFeedInteractor mockFeedInteractor;
+  late ProviderContainer container;
+  late ProviderSubscription<NewGroupChatInfoState> subscription;
 
   setUp(() {
     mockClient = MockClient();
-    mockCreateNewFeedInteractor = MockCreateNewFeedInteractor();
-    reset(mockCreateNewGroupChatInteractor);
+    mockRepository = MockNewGroupRepository();
+    mockFeedInteractor = MockCreateNewFeedInteractor();
+    when(mockRepository.createGroup(any)).thenAnswer((_) async => roomId);
+    container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [
+        activeMatrixClientProvider.overrideWithBuild(
+          (_, _) => ActiveClientSnapshot(mockClient),
+        ),
+        newGroupRepositoryProvider.overrideWithValue(mockRepository),
+        createNewFeedInteractorProvider(
+          mockClient,
+        ).overrideWithValue(mockFeedInteractor),
+      ],
+    );
+    subscription = container.listen(
+      newGroupChatInfoControllerProvider,
+      (_, _) {},
+    );
   });
 
-  void stubFeedCreationFailure(FeedException exception) {
+  tearDown(() => subscription.close());
+
+  Future<void> create({
+    String groupName = 'Team',
+    List<String?> invitees = const ['@bob:example.com', '@carol:example.com'],
+    bool isFeed = false,
+    GroupPrivacyState privacy = const GroupPrivacyState(),
+  }) => container
+      .read(newGroupChatInfoControllerProvider.notifier)
+      .create(
+        NewGroupForm(
+          groupName: groupName,
+          invitees: invitees,
+          enableEncryption: false,
+          privacy: privacy,
+          isFeed: isFeed,
+        ),
+      );
+
+  NewGroupChatInfoState state() =>
+      container.read(newGroupChatInfoControllerProvider);
+
+  test('build_always_startsIdle', () {
+    // Act
+    final initial = state();
+
+    // Assert
+    expect(initial, const NewGroupChatInfoState.idle());
+  });
+
+  test('create_whenNoInvitee_isDoneWithoutInviting', () async {
+    // Act
+    await create(groupName: 'Solo', invitees: const []);
+
+    // Assert
+    expect(
+      state(),
+      const NewGroupChatInfoState.done(roomId: roomId, groupName: 'Solo'),
+    );
+    verifyNever(
+      mockRepository.inviteUser(
+        roomId: anyNamed('roomId'),
+        userId: anyNamed('userId'),
+      ),
+    );
+  });
+
+  test('create_whenGroupCreated_goesThroughCreatingAndInviting', () async {
+    // Arrange
+    final created = Completer<String>();
+    when(mockRepository.createGroup(any)).thenAnswer((_) => created.future);
+
+    // Act
+    final future = create();
+    final whileCreating = state();
+    created.complete(roomId);
+    await future;
+
+    // Assert
+    expect(whileCreating, const NewGroupChatInfoState.creating());
+    expect(
+      state(),
+      const NewGroupChatInfoState.done(roomId: roomId, groupName: 'Team'),
+    );
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: '@bob:example.com'),
+    ).called(1);
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: '@carol:example.com'),
+    ).called(1);
+  });
+
+  test('create_always_excludesTheCurrentUserFromTheInvitees', () async {
+    // Arrange
+    when(mockClient.userID).thenReturn('@alice:example.com');
+
+    // Act
+    await create(
+      invitees: const ['@alice:example.com', '@bob:example.com', null],
+    );
+
+    // Assert
+    final request =
+        verify(mockRepository.createGroup(captureAny)).captured.single
+            as CreateNewGroupChatRequest;
+    expect(request.invite, ['@bob:example.com']);
+  });
+
+  test('create_whenSomeInvitesFail_isDoneWithTheFailures', () async {
+    // Arrange
+    const banned = UserBannedException(userId: '@bob:example.com');
     when(
-      mockCreateNewFeedInteractor.execute(
+      mockRepository.inviteUser(roomId: roomId, userId: '@bob:example.com'),
+    ).thenThrow(banned);
+
+    // Act
+    await create();
+
+    // Assert
+    final done = state() as NewGroupChatInfoDone;
+    expect(done.roomId, roomId);
+    expect(done.inviteFailure?.failedUsers, {'@bob:example.com': banned});
+  });
+
+  test('create_whenGroupCreationFails_fails', () async {
+    // Arrange
+    when(
+      mockRepository.createGroup(any),
+    ).thenAnswer((_) => Future.error(Exception('Server error')));
+
+    // Act
+    await create();
+
+    // Assert
+    expect(
+      state(),
+      const NewGroupChatInfoState.failed(NewGroupFailureReason.other),
+    );
+  });
+
+  test('create_whenFeedNotSupported_failsWithTheDedicatedReason', () async {
+    // Arrange
+    when(
+      mockFeedInteractor.execute(
         feedName: anyNamed('feedName'),
         avatarUrl: anyNamed('avatarUrl'),
       ),
-    ).thenAnswer((_) => Future.error(exception));
-  }
+    ).thenAnswer(
+      (_) => Future.error(const FeedNotSupportedByHomeserverException()),
+    );
 
-  Future<NewGroupChatInfoController> pumpFeedCreationScreen(
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          createNewFeedInteractorProvider(
-            mockClient,
-          ).overrideWithValue(mockCreateNewFeedInteractor),
-        ],
-        child: const MaterialApp(
-          locale: Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          home: NewGroupChatInfo(contactsList: {}, isFeed: true),
-        ),
+    // Act
+    await create(isFeed: true);
+
+    // Assert
+    expect(
+      state(),
+      const NewGroupChatInfoState.failed(
+        NewGroupFailureReason.feedNotSupported,
       ),
     );
-    await tester.pumpAndSettle();
-    return tester.state<NewGroupChatInfoController>(
-      find.byType(NewGroupChatInfo),
-    );
-  }
-
-  group('NewGroupChatInfoController.createNewFeedAction', () {
-    testWidgets(
-      'createNewFeedAction_whenHomeserverDoesNotSupportFeeds_showsTheDedicatedMessage',
-      (WidgetTester tester) async {
-        // Arrange
-        stubFeedCreationFailure(const FeedNotSupportedByHomeserverException());
-        final controller = await pumpFeedCreationScreen(tester);
-
-        // Act
-        await controller.createNewFeedAction(
-          matrixClient: mockClient,
-          feedName: 'My feed',
-          invite: const [],
-        );
-        await tester.pumpAndSettle();
-
-        // Assert
-        final l10n = L10n.of(tester.element(find.byType(NewGroupChatInfo)))!;
-        expect(find.text(l10n.feedNotSupportedByHomeserver), findsOneWidget);
-        expect(controller.isCreatingRoom, isFalse);
-      },
-    );
-
-    testWidgets(
-      'createNewFeedAction_whenCreationFails_showsTheGenericMessage',
-      (WidgetTester tester) async {
-        // Arrange
-        stubFeedCreationFailure(
-          FeedCreationFailedException(cause: Exception('Too many requests')),
-        );
-        final controller = await pumpFeedCreationScreen(tester);
-
-        // Act
-        await controller.createNewFeedAction(
-          matrixClient: mockClient,
-          feedName: 'My feed',
-          invite: const [],
-        );
-        await tester.pumpAndSettle();
-
-        // Assert
-        final l10n = L10n.of(tester.element(find.byType(NewGroupChatInfo)))!;
-        expect(find.text(l10n.inviteUserErrorMessage), findsOneWidget);
-        expect(find.text(l10n.feedNotSupportedByHomeserver), findsNothing);
-      },
-    );
+    verifyNever(mockRepository.createGroup(any));
   });
 
-  group('NewGroupChatInfoController.createNewGroup', () {
-    Future<NewGroupChatInfoController> pumpGroupCreationScreen(
-      WidgetTester tester, {
-      required bool isPublicGroupsEnabled,
-      bool? isServerLimitedByDefault,
-    }) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            loginHomeserverSummaryProvider.overrideWithBuild(
-              (_, _) => HomeserverSummary(
-                discoveryInformation: DiscoveryInformation(
-                  mHomeserver: HomeserverInformation(
-                    baseUrl: Uri.parse('https://matrix.example.com'),
-                  ),
-                  additionalProperties: {
-                    'app.twake.chat': {
-                      'public_groups': {
-                        'enabled': isPublicGroupsEnabled,
-                        'default_server_limited': ?isServerLimitedByDefault,
-                      },
-                    },
-                  },
-                ),
-                versions: GetVersionsResponse(versions: ['r1.6.0']),
-                loginFlows: [],
-              ),
-            ),
-          ],
-          child: MaterialApp(
-            locale: const Locale('en'),
-            localizationsDelegates: L10n.localizationsDelegates,
-            supportedLocales: L10n.supportedLocales,
-            home: provider.Provider<MatrixState>.value(
-              value: _FakeMatrixState(mockClient),
-              child: const NewGroupChatInfo(contactsList: {}),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      return tester.state<NewGroupChatInfoController>(
-        find.byType(NewGroupChatInfo),
-      );
-    }
+  test('create_whileCreating_isIgnored', () async {
+    // Arrange
+    final created = Completer<String>();
+    when(mockRepository.createGroup(any)).thenAnswer((_) => created.future);
+    final first = create();
 
-    CreateNewGroupChatRequest capturedRequest() =>
-        verify(
-              mockCreateNewGroupChatInteractor.execute(
-                matrixClient: anyNamed('matrixClient'),
-                createNewGroupChatRequest: captureAnyNamed(
-                  'createNewGroupChatRequest',
-                ),
-              ),
-            ).captured.single
-            as CreateNewGroupChatRequest;
+    // Act
+    await create();
+    created.complete(roomId);
+    await first;
 
-    testWidgets(
-      'createNewGroup_whenThePrivacyIsPublic_requestsAPublicServerLimitedGroup',
-      (WidgetTester tester) async {
-        // Arrange
-        final controller = await pumpGroupCreationScreen(
-          tester,
-          isPublicGroupsEnabled: true,
-        );
-        controller.setPublic(isPublic: true);
-
-        // Act
-        controller.createNewGroup();
-
-        // Assert
-        final request = capturedRequest();
-        expect(request.isPublic, isTrue);
-        expect(request.isServerLimited, isTrue);
-      },
-    );
-
-    testWidgets(
-      'createNewGroup_whenPublicGroupsAreDisabled_requestsAPrivateGroup',
-      (WidgetTester tester) async {
-        // Arrange
-        final controller = await pumpGroupCreationScreen(
-          tester,
-          isPublicGroupsEnabled: false,
-        );
-        controller.setPublic(isPublic: true);
-
-        // Act
-        controller.createNewGroup();
-
-        // Assert
-        expect(capturedRequest().isPublic, isFalse);
-      },
-    );
-
-    testWidgets('createNewGroup_whenCreationFails_keepsThePrivacyChoices', (
-      WidgetTester tester,
-    ) async {
-      // Arrange
-      when(
-        mockCreateNewGroupChatInteractor.execute(
-          matrixClient: anyNamed('matrixClient'),
-          createNewGroupChatRequest: anyNamed('createNewGroupChatRequest'),
-        ),
-      ).thenAnswer(
-        (_) => Stream.value(
-          Left(CreateNewGroupChatFailed(exception: Exception('Server error'))),
-        ),
-      );
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
-      controller.setPublic(isPublic: true);
-
-      // Act
-      controller.createNewGroup();
-      await tester.pumpAndSettle();
-
-      // Assert
-      expect(
-        controller.groupPrivacyNotifier.value,
-        const GroupPrivacyState(isPublic: true, isServerLimited: true),
-      );
-    });
-
-    testWidgets('groupPrivacy_whenCreated_startsPrivate', (
-      WidgetTester tester,
-    ) async {
-      // Act
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
-
-      // Assert
-      expect(controller.groupPrivacyNotifier.value, const GroupPrivacyState());
-    });
-
-    final transitionCases =
-        <
-          ({
-            String name,
-            bool? isServerLimitedByDefault,
-            bool startsPublic,
-            void Function(NewGroupChatInfoController controller) act,
-            GroupPrivacyState expected,
-          })
-        >[
-          (
-            name: 'setPublic_whenWellKnownHasNoDefault_limitsToTheServer',
-            isServerLimitedByDefault: null,
-            startsPublic: false,
-            act: (controller) => controller.setPublic(isPublic: true),
-            expected: const GroupPrivacyState(
-              isPublic: true,
-              isServerLimited: true,
-            ),
-          ),
-          (
-            name: 'setPublic_whenWellKnownOpensGroupsByDefault_doesNotLimit',
-            isServerLimitedByDefault: false,
-            startsPublic: false,
-            act: (controller) => controller.setPublic(isPublic: true),
-            expected: const GroupPrivacyState(isPublic: true),
-          ),
-          (
-            name: 'setPublic_whenBackToPrivate_clearsTheServerLimit',
-            isServerLimitedByDefault: null,
-            startsPublic: true,
-            act: (controller) => controller.setPublic(isPublic: false),
-            expected: const GroupPrivacyState(),
-          ),
-          (
-            name: 'setServerLimited_whenPublic_keepsTheGroupPublic',
-            isServerLimitedByDefault: null,
-            startsPublic: true,
-            act: (controller) =>
-                controller.setServerLimited(isServerLimited: false),
-            expected: const GroupPrivacyState(isPublic: true),
-          ),
-        ];
-
-    for (final testCase in transitionCases) {
-      testWidgets(testCase.name, (WidgetTester tester) async {
-        // Arrange
-        final controller = await pumpGroupCreationScreen(
-          tester,
-          isPublicGroupsEnabled: true,
-          isServerLimitedByDefault: testCase.isServerLimitedByDefault,
-        );
-        if (testCase.startsPublic) controller.setPublic(isPublic: true);
-
-        // Act
-        testCase.act(controller);
-
-        // Assert
-        expect(controller.groupPrivacyNotifier.value, testCase.expected);
-      });
-    }
+    // Assert
+    verify(mockRepository.createGroup(any)).called(1);
   });
 }

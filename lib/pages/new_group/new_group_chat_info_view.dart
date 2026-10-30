@@ -6,10 +6,11 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
-import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -24,13 +25,16 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
-class NewGroupChatInfoView extends StatelessWidget {
-  final NewGroupChatInfoController newGroupInfoController;
+class NewGroupChatInfoView extends ConsumerWidget {
+  final NewGroupChatInfoScreenState newGroupInfoController;
 
   const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isControllerBusy = ref.watch(
+      newGroupChatInfoControllerProvider.select((state) => state.isBusy),
+    );
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: _buildAppBar(context),
@@ -66,7 +70,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    _buildGroupNameTextField(context),
+                    _buildGroupNameTextField(context, isBusy: isControllerBusy),
                     if (!newGroupInfoController.isFeed) ...[
                       const SizedBox(height: 16),
                       _GroupPrivacySettings(controller: newGroupInfoController),
@@ -80,7 +84,7 @@ class NewGroupChatInfoView extends StatelessWidget {
         body: Padding(
           padding: NewGroupChatInfoStyle.padding,
           child: ExpansionParticipantsList(
-            contactsList: newGroupInfoController.contactsList ?? {},
+            contactsList: newGroupInfoController.contactsList,
           ),
         ),
       ),
@@ -93,21 +97,16 @@ class NewGroupChatInfoView extends StatelessWidget {
           return child!;
         },
         child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: newGroupInfoController.createRoomStateNotifier,
-          builder: (context, _, __) {
-            return ValueListenableBuilder<Either<Failure, Success>?>(
-              valueListenable: newGroupInfoController.inviteUserStateNotifier,
-              builder: (context, _, ___) {
-                if (newGroupInfoController.isCreatingRoom) {
-                  return const TwakeFloatingActionButton(
-                    customIcon: SizedBox(child: CircularProgressIndicator()),
-                  );
-                }
-                return TwakeFloatingActionButton(
-                  icon: Icons.done,
-                  onTap: () => newGroupInfoController.moveToGroupChatScreen(),
-                );
-              },
+          valueListenable: newGroupInfoController.avatarUploadStateNotifier,
+          builder: (context, _, _) {
+            if (isControllerBusy || newGroupInfoController.isUploadingAvatar) {
+              return const TwakeFloatingActionButton(
+                customIcon: SizedBox(child: CircularProgressIndicator()),
+              );
+            }
+            return TwakeFloatingActionButton(
+              icon: Icons.done,
+              onTap: newGroupInfoController.moveToGroupChatScreen,
             );
           },
         ),
@@ -164,12 +163,15 @@ class NewGroupChatInfoView extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupNameTextField(BuildContext context) {
+  Widget _buildGroupNameTextField(
+    BuildContext context, {
+    required bool isBusy,
+  }) {
     final l10n = L10n.of(context)!;
     return Padding(
       padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
       child: ValueListenableBuilder(
-        valueListenable: newGroupInfoController.createRoomStateNotifier,
+        valueListenable: newGroupInfoController.avatarUploadStateNotifier,
         builder: (context, value, child) {
           return ValueListenableBuilder(
             valueListenable:
@@ -179,7 +181,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                 controller:
                     newGroupInfoController.groupNameTextEditingController,
                 focusNode: newGroupInfoController.groupNameFocusNode,
-                enabled: !newGroupInfoController.isCreatingRoom,
+                enabled: !isBusy && !newGroupInfoController.isUploadingAvatar,
                 decoration: InputDecoration(
                   errorBorder: OutlineInputBorder(
                     borderSide: BorderSide(
@@ -316,7 +318,7 @@ class _AvatarForWebBuilder extends StatelessWidget {
 }
 
 class _GroupPrivacySettings extends ConsumerWidget {
-  final NewGroupChatInfoController controller;
+  final NewGroupChatInfoScreenState controller;
 
   const _GroupPrivacySettings({required this.controller});
 
@@ -326,6 +328,9 @@ class _GroupPrivacySettings extends ConsumerWidget {
       loginHomeserverSummaryProvider.select(
         (summary) => summary.isPublicGroupsEnabled,
       ),
+    );
+    final serverName = ref.watch(
+      activeMatrixClientProvider.select((snapshot) => snapshot.userId?.domain),
     );
     final l10n = L10n.of(context)!;
     return ValueListenableBuilder<GroupPrivacyState>(
@@ -342,7 +347,7 @@ class _GroupPrivacySettings extends ConsumerWidget {
             ),
           if (privacy.isPublic)
             LinagoraSettingItem.selectable(
-              title: l10n.groupPrivacyLimitToServer(controller.serverName),
+              title: l10n.groupPrivacyLimitToServer(serverName ?? ''),
               subtitle: l10n.groupPrivacyLimitToServerDescription,
               subtitleMaxLines: null,
               value: privacy.isServerLimited,

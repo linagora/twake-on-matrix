@@ -3,41 +3,33 @@ import 'dart:async';
 import 'package:dartz/dartz.dart' hide State;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
-import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
-import 'package:twake_chat/domain/model/server_config.dart';
+import 'package:twake_chat/domain/model/verification/composite_name_validator.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
-import 'package:twake_chat/domain/usecase/room/invite_user_interactor.dart';
-import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
+import 'package:twake_chat/domain/model/verification/new_name_request.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
-import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
-import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
-import 'package:twake_chat/utils/power_level_manager.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'
-    show ConsumerState, ConsumerStatefulWidget, ProviderScope;
-import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
-import 'package:twake_chat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
@@ -61,47 +53,31 @@ class NewGroupChatInfo extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<NewGroupChatInfo> createState() => NewGroupChatInfoController();
+  ConsumerState<NewGroupChatInfo> createState() =>
+      NewGroupChatInfoScreenState();
 }
 
-class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
+class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
   final enableEncryptionNotifier = ValueNotifier(false);
   final groupPrivacyNotifier = ValueNotifier(const GroupPrivacyState());
   final haveGroupNameNotifier = ValueNotifier(false);
-  final createRoomStateNotifier = ValueNotifier<Either<Failure, Success>>(
-    Right(CreateNewGroupInitial()),
+  final avatarUploadStateNotifier = ValueNotifier<Either<Failure, Success>?>(
+    null,
   );
-  final inviteUserStateNotifier = ValueNotifier<Either<Failure, Success>>(
-    Right(InviteUserInitial()),
-  );
+  // TODO: [transitional] Shared with settings_profile and chat_details_edit; the upload migrates with those modules.
   final uploadContentInteractor = getIt.get<UploadContentInteractor>();
   final uploadContentWebInteractor = getIt
       .get<UploadContentInBytesInteractor>();
-  final createNewGroupChatInteractor = getIt
-      .get<CreateNewGroupChatInteractor>();
-  final inviteUserInteractor = getIt.get<InviteUserInteractor>();
-  StreamSubscription? inviteUserInteractorStreamSubscription;
   final groupNameTextEditingController = TextEditingController();
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
   final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
-  VerifyNameInteractor verifyNameInteractor = getIt.get<VerifyNameInteractor>();
-
   final groupNameFocusNode = FocusNode();
-  StreamSubscription? createNewGroupChatInteractorStreamSubscription;
+  final responsiveUtils = ResponsiveUtils();
 
-  final responsiveUtils = getIt.get<ResponsiveUtils>();
+  Set<PresentationContact> get contactsList => widget.contactsList;
 
-  String groupName = "";
-
-  Set<PresentationContact>? contactsList;
-
-  Client get _client => Matrix.of(context).client;
-
-  Future<ServerConfig> getServerConfig() async {
-    final mediaConfig = await _client.getConfig();
-    return ServerConfig(mUploadSize: mediaConfig.mUploadSize);
-  }
+  bool get isFeed => widget.isFeed;
 
   void toggleEnableEncryption() {
     enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
@@ -125,78 +101,58 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     );
   }
 
-  String get serverName => _client.userID?.domain ?? '';
+  bool get isUploadingAvatar =>
+      avatarUploadStateNotifier.value?.fold(
+        (_) => false,
+        (success) => success is UploadContentLoading,
+      ) ??
+      false;
 
-  Future<Set<PresentationContact>> getAllContactsGroupChat({
-    bool isCustomDisplayName = true,
-  }) async {
-    final userId = _client.userID;
-    final profile = await ProviderScope.containerOf(
-      context,
-      listen: false,
-    ).read(matrixUserProfileProvider(userId ?? '').future);
-    final newContactsList = {
-      PresentationContact(
-        displayName: isCustomDisplayName
-            ? L10n.of(context)!.you
-            : profile?.displayName,
-        matrixId: userId,
-      ),
-    };
-    newContactsList.addAll(getSelectedValidContacts(contactsList ?? {}));
-    return newContactsList;
+  bool get isCreatingRoom =>
+      isUploadingAvatar || ref.read(newGroupChatInfoControllerProvider).isBusy;
+
+  void moveToGroupChatScreen() {
+    final client = ref.read(activeMatrixClientProvider).client;
+    if (client == null) return;
+    if (PlatformInfos.isMobile) {
+      groupNameFocusNode.unfocus();
+      final entity = avatarAssetEntityNotifier.value;
+      if (entity == null) return createNewGroup();
+      uploadContentInteractor
+          .execute(matrixClient: client, entity: entity)
+          .listen(_handleUploadAvatarOnData);
+    } else {
+      final matrixFile = avatarFilePickerNotifier.value;
+      if (matrixFile == null) return createNewGroup();
+      uploadContentWebInteractor
+          .execute(matrixClient: client, matrixFile: matrixFile)
+          .listen(_handleUploadAvatarOnData);
+    }
   }
 
-  bool get isFeed => widget.isFeed;
-
   void createNewGroup({String? urlAvatar}) {
-    final invite = getSelectedValidContacts(
-      contactsList ?? {},
-    ).map((contact) => contact.matrixId).whereNotNull().toList();
-    if (isFeed) {
-      unawaited(
-        createNewFeedAction(
-          matrixClient: _client,
-          feedName: groupName,
-          urlAvatar: urlAvatar,
-          invite: invite,
-        ),
-      );
-      return;
-    }
-    final powerLevelManager = getIt.get<PowerLevelManager>();
-    final privacy = groupPrivacyNotifier.value;
-    createNewGroupChatAction(
-      matrixClient: _client,
-      createNewGroupChatRequest: CreateNewGroupChatRequest(
-        groupName: groupName,
-        invite: invite,
-        enableEncryption: enableEncryptionNotifier.value,
-        isPublic:
-            privacy.isPublic &&
-            ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-        isServerLimited: privacy.isServerLimited,
-        urlAvatar: urlAvatar,
-        powerLevelContentOverride: {
-          'events': powerLevelManager.getDefaultPowerLevelEventForMember(),
-          'invite': powerLevelManager.getAdminPowerLevel(),
-          'kick': powerLevelManager.getAdminPowerLevel(),
-        },
-      ),
+    unawaited(
+      ref
+          .read(newGroupChatInfoControllerProvider.notifier)
+          .create(
+            NewGroupForm(
+              groupName: groupNameTextEditingController.text,
+              invitees: contactsList.map((contact) => contact.matrixId),
+              enableEncryption: enableEncryptionNotifier.value,
+              privacy: groupPrivacyNotifier.value,
+              isFeed: isFeed,
+              urlAvatar: urlAvatar,
+            ),
+          ),
     );
   }
 
-  void _handleUploadAvatarNewGroupChatOnData(
-    BuildContext context,
-    Either<Failure, Success> event,
-  ) {
-    Logs().d('NewGroupController::_handleUploadAvatarNewGroupChatOnData()');
-    createRoomStateNotifier.value = event;
+  void _handleUploadAvatarOnData(Either<Failure, Success> event) {
+    if (!mounted) return;
+    avatarUploadStateNotifier.value = event;
     event.fold(
       (failure) {
-        Logs().e(
-          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - failure: $failure',
-        );
+        Logs().e('NewGroupChatInfo::upload avatar failed: $failure');
         WarningDialog.showCancelable(
           context,
           message: L10n.of(
@@ -210,156 +166,51 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
         );
       },
       (success) {
-        Logs().d(
-          'NewGroupController::_handleUploadAvatarNewGroupChatOnData() - success: $success',
-        );
         if (success is UploadContentSuccess) {
-          final urlAvatar = success.uri.toString();
-          createNewGroup(urlAvatar: urlAvatar);
+          createNewGroup(urlAvatar: success.uri.toString());
         }
       },
     );
   }
 
-  void _handleUploadAvatarNewGroupChatOnDone() {
-    Logs().d(
-      'NewGroupController::_handleUploadAvatarNewGroupChatOnDone() - done',
-    );
-  }
-
-  void _handleUploadAvatarNewGroupChatOnError(
-    dynamic error,
-    StackTrace? stackTrace,
-  ) {
-    Logs().e(
-      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
-    );
-  }
-
-  void _handleCreateNewGroupChatChatOnData(
-    BuildContext context,
-    Either<Failure, Success> event,
-  ) {
-    Logs().d('NewGroupController::_handleCreateNewGroupChatChatOnData()');
-    createRoomStateNotifier.value = event;
-    event.fold(
-      (failure) async {
-        Logs().e(
-          'NewGroupController::_handleCreateNewGroupChatChatOnData() - failure: $failure',
+  Future<void> _onStateChanged(
+    NewGroupChatInfoState? previous,
+    NewGroupChatInfoState next,
+  ) async {
+    final l10n = L10n.of(context)!;
+    switch (next) {
+      case NewGroupChatInfoFailed(:final reason):
+        await showConfirmAlertDialog(
+          context: context,
+          message: reason == NewGroupFailureReason.feedNotSupported
+              ? l10n.feedNotSupportedByHomeserver
+              : l10n.inviteUserErrorMessage,
+          isArrangeActionButtonsVertical: true,
+          okLabel: l10n.gotIt,
         );
-
-        if (failure is CreateNewGroupChatFailed) {
-          final l10n = L10n.of(context)!;
+      case NewGroupChatInfoDone(:final roomId, :final groupName):
+        final inviteFailure = next.inviteFailure;
+        if (inviteFailure != null) {
           await showConfirmAlertDialog(
             context: context,
-            message: failure.exception is FeedNotSupportedByHomeserverException
-                ? l10n.feedNotSupportedByHomeserver
-                : l10n.inviteUserErrorMessage,
+            message: inviteFailure.getLocalizedErrorMessage(context),
             isArrangeActionButtonsVertical: true,
             okLabel: l10n.gotIt,
           );
-          return;
         }
-      },
-      (success) {
-        Logs().d(
-          'NewGroupController::_handleCreateNewGroupChatChatOnData() - success: $success',
-        );
-        if (success is CreateNewGroupChatSuccess) {
-          _handleInviteUsers(
-            userIds: success.userIds,
-            roomId: success.roomId,
-            groupName: success.groupName,
-          );
-        }
-      },
-    );
-  }
-
-  void _handleCreateNewGroupChatOnDone() {
-    Logs().d('NewGroupController::_handleCreateNewGroupChatOnDone() - done');
-  }
-
-  void _handleCreateNewGroupChatOnError(dynamic error, StackTrace? stackTrace) {
-    Logs().e(
-      'NewGroupController::_handleUploadAvatarNewGroupChatOnError() - error: $error | stackTrace: $stackTrace',
-    );
-  }
-
-  void uploadAvatarNewGroupChat({
-    required Client matrixClient,
-    required AssetEntity entity,
-  }) {
-    uploadContentInteractor
-        .execute(matrixClient: matrixClient, entity: entity)
-        .listen(
-          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
-          onDone: _handleUploadAvatarNewGroupChatOnDone,
-          onError: _handleUploadAvatarNewGroupChatOnError,
-        );
-  }
-
-  void uploadAvatarNewGroupChatInBytes({
-    required Client matrixClient,
-    required MatrixFile matrixFile,
-  }) {
-    uploadContentWebInteractor
-        .execute(matrixClient: matrixClient, matrixFile: matrixFile)
-        .listen(
-          (event) => _handleUploadAvatarNewGroupChatOnData(context, event),
-          onDone: _handleUploadAvatarNewGroupChatOnDone,
-          onError: _handleUploadAvatarNewGroupChatOnError,
-        );
-  }
-
-  void createNewGroupChatAction({
-    required Client matrixClient,
-    required CreateNewGroupChatRequest createNewGroupChatRequest,
-  }) {
-    createNewGroupChatInteractorStreamSubscription =
-        createNewGroupChatInteractor
-            .execute(
-              matrixClient: matrixClient,
-              createNewGroupChatRequest: createNewGroupChatRequest,
-            )
-            .listen(
-              (event) => _handleCreateNewGroupChatChatOnData(context, event),
-              onDone: _handleCreateNewGroupChatOnDone,
-              onError: _handleCreateNewGroupChatOnError,
-            );
-  }
-
-  Future<void> createNewFeedAction({
-    required Client matrixClient,
-    required String feedName,
-    required List<String> invite,
-    String? urlAvatar,
-  }) async {
-    final createNewFeedInteractor = ref.read(
-      createNewFeedInteractorProvider(matrixClient),
-    );
-    createRoomStateNotifier.value = Right(CreateNewGroupChatLoading());
-    Either<Failure, Success> result;
-    try {
-      final roomId = await createNewFeedInteractor.execute(
-        feedName: feedName,
-        avatarUrl: urlAvatar,
-      );
-      result = Right(
-        CreateNewGroupChatSuccess(
-          roomId: roomId,
-          userIds: invite,
-          groupName: feedName,
-        ),
-      );
-    } on Exception catch (exception) {
-      result = Left(CreateNewGroupChatFailed(exception: exception));
+        if (!mounted) return;
+        _completeGroupCreation(roomId: roomId, groupName: groupName);
+      case NewGroupChatInfoIdle() ||
+          NewGroupChatInfoCreating() ||
+          NewGroupChatInfoInviting():
+        break;
     }
-    if (!mounted) return;
-    _handleCreateNewGroupChatChatOnData(context, result);
   }
 
-  void _goToRoom({required String roomId, String? groupName}) {
+  void _completeGroupCreation({required String roomId, String? groupName}) {
+    if (!responsiveUtils.isSingleColumnLayout(context)) {
+      context.popInnerAll();
+    }
     RoomRoute(
       roomid: roomId,
       $extra: ChatRouterInputArgument(
@@ -412,115 +263,28 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     return imagePickerController;
   }
 
-  bool get isCreatingRoom {
-    final roomCreating = createRoomStateNotifier.value.fold(
-      (failure) => false,
-      (success) =>
-          success is UploadContentLoading ||
-          success is CreateNewGroupChatLoading,
-    );
-
-    final invitingUsers = inviteUserStateNotifier.value.fold(
-      (failure) => false,
-      (success) => success is InviteUserLoading,
-    );
-
-    return roomCreating || invitingUsers;
-  }
-
   String? getErrorMessage(String content) {
-    return verifyNameInteractor
-        .execute(content, [NameWithSpaceOnlyValidator()])
-        .fold((failure) {
-          if (failure is VerifyNameFailure) {
-            return failure.getMessage(context);
-          } else {
-            return null;
-          }
-        }, (success) => null);
+    return CompositeNameValidator([
+      NameWithSpaceOnlyValidator(),
+    ]).validate(NewNameRequest(content)).fold((failure) {
+      if (failure is VerifyNameFailure) {
+        return failure.getMessage(context);
+      } else {
+        return null;
+      }
+    }, (success) => null);
   }
 
-  void _completeGroupCreation({required String groundId, String? groupName}) {
-    if (!responsiveUtils.isSingleColumnLayout(context)) {
-      context.popInnerAll();
-    }
-    _goToRoom(roomId: groundId, groupName: groupName);
-  }
-
-  void _handleInviteUsers({
-    required List<String> userIds,
-    required String roomId,
-    String? groupName,
-  }) {
-    if (userIds.isEmpty) {
-      _completeGroupCreation(groundId: roomId, groupName: groupName);
-      return;
-    }
-
-    inviteUserInteractorStreamSubscription = inviteUserInteractor
-        .execute(
-          matrixClient: _client,
-          roomId: roomId,
-          groupName: groupName,
-          userIds: userIds,
-        )
-        .listen(
-          (event) => _handleInviteUsersOnEvent(
-            event: event,
-            roomId: roomId,
-            groupName: groupName,
-          ),
-        );
-  }
-
-  void _handleInviteUsersOnEvent({
-    required Either<Failure, Success> event,
-    required String roomId,
-    String? groupName,
-  }) {
-    inviteUserStateNotifier.value = event;
-    event.fold(
-      (failure) async {
-        Logs().e(
-          'NewGroupController::_handleInviteUsersOnEvent - failure: $failure',
-        );
-
-        if (failure is InviteUserSomeFailed) {
-          final exception = failure.inviteUserPartialFailureException;
-          Logs().e(
-            'NewGroupController::_handleInviteUsersOnEvent - failed to invite users: ${failure.inviteUserPartialFailureException}',
-          );
-
-          final errorMessage = exception.getLocalizedErrorMessage(context);
-
-          await showConfirmAlertDialog(
-            context: context,
-            message: errorMessage,
-            isArrangeActionButtonsVertical: true,
-            okLabel: L10n.of(context)!.gotIt,
-          );
-        }
-        _completeGroupCreation(groundId: roomId, groupName: groupName);
-      },
-      (success) {
-        Logs().d(
-          'NewGroupController::_handleInviteUsersOnEvent - success: $success',
-        );
-        if (success is InviteUserSuccess) {
-          _completeGroupCreation(
-            groundId: success.roomId,
-            groupName: success.groupName,
-          );
-        }
-      },
-    );
+  void _onGroupNameChanged() {
+    final text = groupNameTextEditingController.text;
+    haveGroupNameNotifier.value =
+        text.isNotEmpty && getErrorMessage(text) == null;
   }
 
   @override
   void initState() {
-    listenGroupNameChanged();
+    groupNameTextEditingController.addListener(_onGroupNameChanged);
     listenToPickAvatarUIState(context);
-    contactsList = widget.contactsList;
     super.initState();
   }
 
@@ -532,15 +296,18 @@ class NewGroupChatInfoController extends ConsumerState<NewGroupChatInfo>
     enableEncryptionNotifier.dispose();
     groupPrivacyNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
-    createNewGroupChatInteractorStreamSubscription?.cancel();
+    avatarUploadStateNotifier.dispose();
     groupNameTextEditingController.dispose();
     groupNameFocusNode.dispose();
     avatarFilePickerNotifier.dispose();
-    inviteUserInteractorStreamSubscription?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      newGroupChatInfoControllerProvider,
+      (previous, next) => unawaited(_onStateChanged(previous, next)),
+    );
     return NewGroupChatInfoView(this);
   }
 }
