@@ -1,6 +1,11 @@
-class ForwardResult {
-  const ForwardResult({required this.successCount, required this.totalCount});
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final int successCount;
-  final int totalCount;
+part 'forward_result.freezed.dart';
+
+@freezed
+abstract class ForwardResult with _$ForwardResult {
+  const factory ForwardResult({
+    required int successCount,
+    required int totalCount,
+  }) = _ForwardResult;
 }

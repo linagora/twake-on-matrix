@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
@@ -44,6 +46,10 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   late final List<Room> _rooms;
 
+  late List<Room> recentChats;
+
+  List<String> selectedRoomIds = [];
+
   String _keyword = '';
 
   bool get isFullScreen => widget.isFullScreen == true;
@@ -57,6 +63,7 @@ class ForwardScreenState extends ConsumerState<Forward> {
             .client
             ?.filteredRoomsForAll(ActiveFilter.acceptedChats) ??
         [];
+    recentChats = _rooms;
     searchTextEditingController.addListener(_onSearchChanged);
   }
 
@@ -71,20 +78,21 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   void _onSearchChanged() {
     final keyword = searchTextEditingController.text;
-    if (keyword != _keyword) setState(() => _keyword = keyword);
-  }
-
-  List<Room> recentChats(BuildContext context) {
-    if (_keyword.isEmpty) return _rooms;
+    if (keyword == _keyword) return;
+    _keyword = keyword;
     final matrixLocals = MatrixLocals(L10n.of(context)!);
-    return const SearchEngine().match(
-      _keyword,
-      _rooms,
-      fieldExtractors: [
-        (Room room) => [room.getLocalizedDisplayname(matrixLocals)],
-      ],
-      options: const SearchOptions(diacriticSensitive: false),
-    );
+    setState(() {
+      recentChats = keyword.isEmpty
+          ? _rooms
+          : const SearchEngine().match(
+              keyword,
+              _rooms,
+              fieldExtractors: [
+                (Room room) => [room.getLocalizedDisplayname(matrixLocals)],
+              ],
+              options: const SearchOptions(diacriticSensitive: false),
+            );
+    });
   }
 
   void openSearchBar() {
@@ -98,11 +106,20 @@ class ForwardScreenState extends ConsumerState<Forward> {
     isSearchModeNotifier.value = false;
   }
 
-  void onToggleSelectChat(String roomId) =>
-      ref.read(forwardControllerProvider.notifier).toggleRoom(roomId);
+  void onToggleSelectChat(String roomId) {
+    if (ref.read(forwardControllerProvider) is ForwardSending) return;
+    setState(() {
+      selectedRoomIds = selectedRoomIds.contains(roomId)
+          ? selectedRoomIds.where((id) => id != roomId).toList()
+          : [...selectedRoomIds, roomId];
+    });
+  }
 
-  void forwardAction() =>
-      ref.read(forwardControllerProvider.notifier).forward(widget.messages);
+  void forwardAction() => unawaited(
+    ref
+        .read(forwardControllerProvider.notifier)
+        .forward(messages: widget.messages, roomIds: selectedRoomIds),
+  );
 
   void _onStateChanged(ForwardState? previous, ForwardState next) {
     switch (next) {
@@ -111,7 +128,7 @@ class ForwardScreenState extends ConsumerState<Forward> {
       case ForwardDone():
         TwakeDialog.hideLoadingDialog(context);
         _handleAllDone(next);
-      case ForwardSelecting():
+      case ForwardIdle():
         if (previous is ForwardSending) TwakeDialog.hideLoadingDialog(context);
     }
   }
@@ -134,7 +151,7 @@ class ForwardScreenState extends ConsumerState<Forward> {
       return;
     }
 
-    final roomId = done.selectedRoomIds.firstOrNull;
+    final roomId = selectedRoomIds.firstOrNull;
     if (navigator.canPop()) {
       navigator.pop(const PopResultFromForward());
     }

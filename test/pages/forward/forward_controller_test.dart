@@ -14,9 +14,11 @@ import 'forward_controller_test.mocks.dart';
 @GenerateNiceMocks([MockSpec<ForwardRepository>()])
 void main() {
   const message = {'msgtype': 'm.text', 'body': 'hello'};
+  const roomId = '!a:example.com';
 
   late MockForwardRepository mockRepository;
   late ProviderContainer container;
+  late ProviderSubscription<ForwardState> subscription;
 
   setUp(() {
     mockRepository = MockForwardRepository();
@@ -25,23 +27,22 @@ void main() {
       retry: (_, _) => null,
       overrides: [forwardRepositoryProvider.overrideWithValue(mockRepository)],
     );
+    subscription = container.listen(forwardControllerProvider, (_, _) {});
   });
+
+  tearDown(() => subscription.close());
 
   ForwardController controller() =>
       container.read(forwardControllerProvider.notifier);
 
   ForwardState state() => container.read(forwardControllerProvider);
 
-  test('build_always_startsWithNoSelection', () {
-    expect(state(), const ForwardState.selecting());
-  });
+  test('build_always_startsIdle', () {
+    // Act
+    final initial = state();
 
-  test('toggleRoom_twice_selectsThenUnselectsTheRoom', () {
-    controller().toggleRoom('!a:example.com');
-    expect(state().selectedRoomIds, ['!a:example.com']);
-
-    controller().toggleRoom('!a:example.com');
-    expect(state().selectedRoomIds, isEmpty);
+    // Assert
+    expect(initial, const ForwardState.idle());
   });
 
   test('forward_whenSent_emitsSendingThenDone', () async {
@@ -53,47 +54,40 @@ void main() {
         content: anyNamed('content'),
       ),
     ).thenAnswer((_) => completer.future);
-    final sub = container.listen(forwardControllerProvider, (_, _) {});
-    controller().toggleRoom('!a:example.com');
 
     // Act
-    final future = controller().forward([message]);
-
-    // Assert
-    expect(
-      state(),
-      const ForwardState.sending(selectedRoomIds: ['!a:example.com']),
-    );
+    final future = controller().forward(messages: [message], roomIds: [roomId]);
+    final whileSending = state();
     completer.complete();
     await future;
-    expect(
-      state(),
-      const ForwardState.done(
-        selectedRoomIds: ['!a:example.com'],
-        successCount: 1,
-        totalCount: 1,
-      ),
-    );
-    sub.close();
-  });
-
-  test('forward_whenNoMessage_goesBackToSelecting', () async {
-    // Arrange
-    final sub = container.listen(forwardControllerProvider, (_, _) {});
-    controller().toggleRoom('!a:example.com');
-
-    // Act
-    await controller().forward([]);
 
     // Assert
-    expect(
-      state(),
-      const ForwardState.selecting(selectedRoomIds: ['!a:example.com']),
-    );
-    sub.close();
+    expect(whileSending, const ForwardState.sending());
+    expect(state(), const ForwardState.done(successCount: 1, totalCount: 1));
   });
 
-  test('toggleRoom_whileSending_isIgnored', () async {
+  test('forward_whenNoMessage_staysIdleAndSendsNothing', () async {
+    // Act
+    await controller().forward(messages: [], roomIds: [roomId]);
+
+    // Assert
+    expect(state(), const ForwardState.idle());
+    verifyNever(mockRepository.isJoined(any));
+  });
+
+  test('forward_whenUnexpectedError_goesBackToIdle', () async {
+    // Arrange
+    when(mockRepository.isJoined(any)).thenThrow(StateError('boom'));
+
+    // Act
+    final call = controller().forward(messages: [message], roomIds: [roomId]);
+
+    // Assert
+    await expectLater(call, throwsStateError);
+    expect(state(), const ForwardState.idle());
+  });
+
+  test('forward_whileSending_isIgnored', () async {
     // Arrange
     final completer = Completer<void>();
     when(
@@ -102,17 +96,16 @@ void main() {
         content: anyNamed('content'),
       ),
     ).thenAnswer((_) => completer.future);
-    final sub = container.listen(forwardControllerProvider, (_, _) {});
-    controller().toggleRoom('!a:example.com');
-    final future = controller().forward([message]);
+    final first = controller().forward(messages: [message], roomIds: [roomId]);
 
     // Act
-    controller().toggleRoom('!b:example.com');
+    await controller().forward(messages: [message], roomIds: [roomId]);
+    completer.complete();
+    await first;
 
     // Assert
-    expect(state().selectedRoomIds, ['!a:example.com']);
-    completer.complete();
-    await future;
-    sub.close();
+    verify(
+      mockRepository.sendMessage(roomId: roomId, content: message),
+    ).called(1);
   });
 }

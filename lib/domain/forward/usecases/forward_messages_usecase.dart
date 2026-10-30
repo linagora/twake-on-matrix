@@ -7,6 +7,9 @@ class ForwardMessagesUseCase {
 
   final ForwardRepository _repository;
 
+  /// Rooms not joined or failing are skipped but still count in
+  /// [ForwardResult.totalCount]; a failing room may get only some messages.
+  ///
   /// Throws a [ForwardEmptyContentException] when [messages] is empty.
   Future<ForwardResult> execute({
     required List<Map<String, Object?>> messages,
