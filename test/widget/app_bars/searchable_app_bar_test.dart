@@ -12,7 +12,8 @@ final getIt = GetIt.instance;
 
 void main() {
   final searchModeNotifier = ValueNotifier(false);
-  final textEditingController = TextEditingController();
+  late TextEditingController textEditingController;
+  final clearTooltip = lookupL10n(const Locale('en')).clear;
 
   Widget makeTestableAppBar({
     bool isFullScreen = true,
@@ -55,7 +56,10 @@ void main() {
 
   setUp(() {
     getIt.reset();
+    textEditingController = TextEditingController();
   });
+
+  tearDown(() => textEditingController.dispose());
 
   group("fullscreen = false", () {
     testWidgets("Display title and search button", (widgetTester) async {
@@ -96,11 +100,10 @@ void main() {
     ) async {
       await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
 
-      expect(find.byTooltip("Clear"), findsNothing);
+      expect(find.byTooltip(clearTooltip), findsNothing);
     });
 
     testWidgets("Clear button empties the search text", (widgetTester) async {
-      addTearDown(textEditingController.clear);
       // The dialog toolbar height only applies at tablet width and above.
       widgetTester.view.devicePixelRatio = 1.0;
       widgetTester.view.physicalSize = const Size(1280, 800);
@@ -114,13 +117,13 @@ void main() {
 
       textEditingController.text = "Search text";
       await widgetTester.pump();
-      expect(find.byTooltip("Clear"), findsOneWidget);
+      expect(find.byTooltip(clearTooltip), findsOneWidget);
 
-      await widgetTester.tap(find.byTooltip("Clear"));
+      await widgetTester.tap(find.byTooltip(clearTooltip));
       await widgetTester.pump();
 
       expect(textEditingController.text, isEmpty);
-      expect(find.byTooltip("Clear"), findsNothing);
+      expect(find.byTooltip(clearTooltip), findsNothing);
     });
   });
 
@@ -176,6 +179,8 @@ void main() {
         await widgetTester.pumpWidget(
           makeTestableAppBar(isSearchModeEnabled: true),
         );
+        textEditingController.text = "Search text";
+        await widgetTester.pump();
 
         await widgetTester.tap(find.byIcon(Icons.close));
         await widgetTester.pump();

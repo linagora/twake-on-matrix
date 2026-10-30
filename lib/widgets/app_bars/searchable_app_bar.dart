@@ -220,16 +220,16 @@ class SearchableAppBar extends StatelessWidget {
   }
 
   Widget _clearButtonBuilder(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<TextEditingValue>(
       valueListenable: textEditingController,
-      builder: (context, value, child) {
-        return value.text.isNotEmpty ? child! : const SizedBox.shrink();
+      builder: (context, value, _) {
+        if (value.text.isEmpty) return const SizedBox.shrink();
+        return TwakeIconButton(
+          onTap: textEditingController.clear,
+          tooltip: L10n.of(context)!.clear,
+          icon: Icons.close,
+        );
       },
-      child: TwakeIconButton(
-        onTap: textEditingController.clear,
-        tooltip: L10n.of(context)!.clear,
-        icon: Icons.close,
-      ),
     );
   }
 }
