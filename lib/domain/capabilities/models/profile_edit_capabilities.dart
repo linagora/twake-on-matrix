@@ -1,9 +1,11 @@
-class ProfileEditCapabilities {
-  const ProfileEditCapabilities({
-    required this.canEditAvatar,
-    required this.canEditDisplayName,
-  });
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  final bool canEditAvatar;
-  final bool canEditDisplayName;
+part 'profile_edit_capabilities.freezed.dart';
+
+@freezed
+abstract class ProfileEditCapabilities with _$ProfileEditCapabilities {
+  const factory ProfileEditCapabilities({
+    required bool canEditAvatar,
+    required bool canEditDisplayName,
+  }) = _ProfileEditCapabilities;
 }

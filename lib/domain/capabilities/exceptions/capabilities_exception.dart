@@ -7,6 +7,6 @@ sealed class CapabilitiesException implements Exception {
   String toString() => '$runtimeType: $cause';
 }
 
-class GetProfileEditCapabilitiesException extends CapabilitiesException {
-  const GetProfileEditCapabilitiesException(super.cause);
+class FetchProfileEditCapabilitiesException extends CapabilitiesException {
+  const FetchProfileEditCapabilitiesException(super.cause);
 }
