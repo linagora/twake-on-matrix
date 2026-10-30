@@ -15,16 +15,21 @@ class CreateGroupUseCase {
     try {
       roomId = await _repository.createGroup(request);
     } catch (exception) {
-      final message = exception.toString();
-      if (message.contains('M_FORBIDDEN: Federation denied')) {
-        throw FederationDeniedWithMatrixOrgException();
-      }
-      if (message.contains('M_UNKNOWN: Cannot invite so many users at once')) {
-        throw CannotCreateNewGroupChatWithLimitedPermissionsException();
-      }
+      final knownException = _toKnownException(exception.toString());
+      if (knownException != null) throw knownException;
       rethrow;
     }
     if (roomId.isEmpty) throw CannotCreateNewGroupChatException();
     return roomId;
+  }
+
+  Exception? _toKnownException(String message) {
+    if (message.contains('M_FORBIDDEN: Federation denied')) {
+      return FederationDeniedWithMatrixOrgException();
+    }
+    if (message.contains('M_UNKNOWN: Cannot invite so many users at once')) {
+      return CannotCreateNewGroupChatWithLimitedPermissionsException();
+    }
+    return null;
   }
 }
