@@ -47,5 +47,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | settings_app_language | Use case + native providers; `LanguageCacheManager` still in GetIt for `LocalizationService` | #3538 |
 | forward | Use case + native providers + controller, GetIt removed | #3540 |
 | new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | #3541 |
-| capabilities | Use case + native providers, GetIt removed | |
+| capabilities | Use case + native providers, GetIt removed | #3539 |
 | Everything else | Legacy | |
