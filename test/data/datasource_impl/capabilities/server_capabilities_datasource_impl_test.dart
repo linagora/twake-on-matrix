@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/datasource_impl/capabilities/server_capabilities_datasource_impl.dart';
-import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 
 class _FakeClient extends Fake implements Client {
   _FakeClient(this.json);
@@ -12,72 +11,105 @@ class _FakeClient extends Fake implements Client {
   Future<Capabilities> getCapabilities() async => Capabilities.fromJson(json);
 }
 
-Future<ProfileEditCapabilities> _read(Map<String, Object?> json) =>
-    ServerCapabilitiesDatasourceImpl(
-      _FakeClient(json),
-    ).getProfileEditCapabilities();
+ServerCapabilitiesDatasourceImpl _datasource(Map<String, Object?> json) =>
+    ServerCapabilitiesDatasourceImpl(_FakeClient(json));
 
 void main() {
-  test('getProfileEditCapabilities_withNoCapability_allowsBoth', () async {
-    final result = await _read({});
+  test('fetchProfileEditCapabilities_withNoCapability_allowsBoth', () async {
+    // Arrange
+    final datasource = _datasource({});
 
+    // Act
+    final result = await datasource.fetchProfileEditCapabilities();
+
+    // Assert
     expect(result.canEditAvatar, isTrue);
     expect(result.canEditDisplayName, isTrue);
   });
 
   test(
-    'getProfileEditCapabilities_withSetCapabilitiesDisabled_forbidsBoth',
+    'fetchProfileEditCapabilities_withSetCapabilitiesDisabled_forbidsBoth',
     () async {
-      final result = await _read({
+      // Arrange
+      final datasource = _datasource({
         'm.set_avatar_url': {'enabled': false},
         'm.set_displayname': {'enabled': false},
       });
 
+      // Act
+      final result = await datasource.fetchProfileEditCapabilities();
+
+      // Assert
       expect(result.canEditAvatar, isFalse);
       expect(result.canEditDisplayName, isFalse);
     },
   );
 
   test(
-    'getProfileEditCapabilities_withProfileFieldsDisabled_forbidsBoth',
+    'fetchProfileEditCapabilities_withProfileFieldsDisabled_forbidsBoth',
     () async {
-      final result = await _read({
+      // Arrange
+      final datasource = _datasource({
         'm.profile_fields': {'enabled': false},
       });
 
+      // Act
+      final result = await datasource.fetchProfileEditCapabilities();
+
+      // Assert
       expect(result.canEditAvatar, isFalse);
       expect(result.canEditDisplayName, isFalse);
     },
   );
 
-  test('getProfileEditCapabilities_withAllowedList_allowsOnlyListed', () async {
-    final result = await _read({
-      'm.profile_fields': {
-        'enabled': true,
-        'allowed': ['displayname'],
-      },
-    });
+  test(
+    'fetchProfileEditCapabilities_withAllowedList_allowsOnlyListed',
+    () async {
+      // Arrange
+      final datasource = _datasource({
+        'm.profile_fields': {
+          'enabled': true,
+          'allowed': ['displayname'],
+        },
+      });
 
-    expect(result.canEditAvatar, isFalse);
-    expect(result.canEditDisplayName, isTrue);
-  });
+      // Act
+      final result = await datasource.fetchProfileEditCapabilities();
 
-  test('getProfileEditCapabilities_withDisallowedList_forbidsListed', () async {
-    final result = await _read({
-      'm.profile_fields': {
-        'enabled': true,
-        'disallowed': ['displayname'],
-      },
-    });
+      // Assert
+      expect(result.canEditAvatar, isFalse);
+      expect(result.canEditDisplayName, isTrue);
+    },
+  );
 
-    expect(result.canEditAvatar, isTrue);
-    expect(result.canEditDisplayName, isFalse);
-  });
+  test(
+    'fetchProfileEditCapabilities_withDisallowedList_forbidsListed',
+    () async {
+      // Arrange
+      final datasource = _datasource({
+        'm.profile_fields': {
+          'enabled': true,
+          'disallowed': ['displayname'],
+        },
+      });
 
-  test('getProfileEditCapabilities_withNoClient_throws', () async {
-    expect(
-      const ServerCapabilitiesDatasourceImpl(null).getProfileEditCapabilities(),
-      throwsStateError,
-    );
+      // Act
+      final result = await datasource.fetchProfileEditCapabilities();
+
+      // Assert
+      expect(result.canEditAvatar, isTrue);
+      expect(result.canEditDisplayName, isFalse);
+    },
+  );
+
+  test('fetchProfileEditCapabilities_withNoClient_throws', () async {
+    // Arrange
+    const datasource = ServerCapabilitiesDatasourceImpl(null);
+
+    // Act
+    final result = datasource.fetchProfileEditCapabilities();
+
+    // Assert
+    await expectLater(result, throwsStateError);
   });
 }
