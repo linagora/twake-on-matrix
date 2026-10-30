@@ -468,6 +468,7 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
+  // No await before the listens: onLoginStateChanged does not replay.
   void _registerSubs(String name) {
     final currentClient = getClientByName(name);
     if (currentClient == null) {
