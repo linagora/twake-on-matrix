@@ -5,6 +5,7 @@ import '../base/api_login_helper_io.dart';
 import '../base/base_test_scenario.dart';
 import '../robots/setting/device_settings_robot.dart';
 
+// Mobile-only, so it uses the io helper and a concrete robot directly.
 class DeviceSettingsScenario extends BaseTestScenario {
   DeviceSettingsScenario(super.$, super.robots);
 
