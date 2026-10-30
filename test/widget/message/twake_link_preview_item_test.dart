@@ -1,22 +1,32 @@
-import 'package:dartz/dartz.dart';
-import 'package:twake_chat/domain/app_state/preview_url/get_preview_url_success.dart';
+import 'package:twake_chat/data/repository/media/media_repository.provider.dart';
 import 'package:twake_chat/domain/model/media/url_preview.dart';
-import 'package:twake_chat/domain/usecase/preview_url/get_preview_url_interactor.dart';
+import 'package:twake_chat/domain/repository/media/media_repository.dart';
 import 'package:twake_chat/presentation/model/media/url_preview_presentation.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 
-import 'twake_link_preview_item_test.mocks.dart';
+class _FakeMediaRepository implements MediaRepository {
+  @override
+  Future<UrlPreview> getUrlPreview({
+    required Uri uri,
+    int? preferredPreviewTime,
+  }) async => UrlPreview(title: 'Test Title', description: 'Test Description');
+}
 
-@GenerateNiceMocks([MockSpec<GetPreviewURLInteractor>()])
+Widget _withRepository(Widget child) => ProviderScope(
+  overrides: [
+    mediaRepositoryProvider.overrideWithValue(_FakeMediaRepository()),
+  ],
+  retry: (_, _) => null,
+  child: child,
+);
+
 void main() {
   group('[WIDGET TEST] - LinkPreviewBuilder content\n', () {
     testWidgets('GIVEN no image uri\n'
@@ -233,46 +243,22 @@ void main() {
   });
 
   group('[WIDGET TEST] - TwakeLinkPreviewItem ownMessage color\n', () {
-    late MockGetPreviewURLInteractor mockInteractor;
-
-    setUp(() {
-      mockInteractor = MockGetPreviewURLInteractor();
-      when(
-        mockInteractor.execute(
-          uri: anyNamed('uri'),
-          preferredPreviewTime: anyNamed('preferredPreviewTime'),
-        ),
-      ).thenAnswer(
-        (_) => Stream.value(
-          Right(
-            GetPreviewUrlSuccess(
-              urlPreview: UrlPreview(
-                title: 'Test Title',
-                description: 'Test Description',
-              ),
-            ),
-          ),
-        ),
-      );
-      GetIt.instance.registerSingleton<GetPreviewURLInteractor>(mockInteractor);
-    });
-
-    tearDown(() {
-      GetIt.instance.unregister<GetPreviewURLInteractor>();
-    });
-
     testWidgets('GIVEN ownMessage is true\n'
         'THEN container uses primaryContainer color', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-          home: Scaffold(
-            body: TwakeLinkPreviewItem(
-              key: TwakeLinkPreview.twakeLinkPreviewItemKey,
-              ownMessage: true,
-              previewLink: 'https://test.com',
+        _withRepository(
+          MaterialApp(
+            theme: ThemeData(
+              extensions: [LinagoraTextThemeExtension.material()],
+            ),
+            home: Scaffold(
+              body: TwakeLinkPreviewItem(
+                key: TwakeLinkPreview.twakeLinkPreviewItemKey,
+                ownMessage: true,
+                previewLink: 'https://test.com',
+              ),
             ),
           ),
         ),
@@ -305,13 +291,17 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-          home: Scaffold(
-            body: TwakeLinkPreviewItem(
-              key: TwakeLinkPreview.twakeLinkPreviewItemKey,
-              ownMessage: false,
-              previewLink: 'https://test.com',
+        _withRepository(
+          MaterialApp(
+            theme: ThemeData(
+              extensions: [LinagoraTextThemeExtension.material()],
+            ),
+            home: Scaffold(
+              body: TwakeLinkPreviewItem(
+                key: TwakeLinkPreview.twakeLinkPreviewItemKey,
+                ownMessage: false,
+                previewLink: 'https://test.com',
+              ),
             ),
           ),
         ),
