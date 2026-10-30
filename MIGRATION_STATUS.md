@@ -46,5 +46,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | user_info | Contacts visibility: Controller and `Future` use cases; get user info still on its interactor. Patrol: backend-only, run manually against a mock ToM | #3532 |
 | settings_app_language | Use case + native providers; `LanguageCacheManager` still in GetIt for `LocalizationService` | #3538 |
 | forward | Use case + native providers + controller, GetIt removed | #3540 |
-| new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | |
+| new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | #3541 |
 | Everything else | Legacy | |
