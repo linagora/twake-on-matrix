@@ -17,7 +17,7 @@ class _CountingRepository implements ServerCapabilitiesRepository {
   int calls = 0;
 
   @override
-  Future<ProfileEditCapabilities> getProfileEditCapabilities() async {
+  Future<ProfileEditCapabilities> fetchProfileEditCapabilities() async {
     calls++;
     return const ProfileEditCapabilities(
       canEditAvatar: false,
@@ -47,11 +47,15 @@ void main() {
 
   tearDown(GetIt.instance.reset);
 
-  testWidgets('loads capabilities and user info once each', (tester) async {
+  testWidgets('build_withCapabilitiesAndUserInfo_loadsEachOnce', (
+    tester,
+  ) async {
+    // Arrange
     final repository = _CountingRepository();
     ProfileEditCapabilities? capabilities;
     UserInfo? userInfo;
 
+    // Act
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
@@ -70,6 +74,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // Assert
     expect(repository.calls, 1);
     expect(userInfoInteractor.calls, 1);
     expect(capabilities?.canEditAvatar, isFalse);
