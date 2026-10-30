@@ -305,6 +305,43 @@ void main() {
       verify(mockController.setServerLimited(isServerLimited: false)).called(1);
     });
 
+    testWidgets(
+      'build_whenKeyboardLeavesLittleRoomUnderPublicSettings_doesNotOverflow',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(411, 914);
+        addTearDown(tester.view.reset);
+
+        for (
+          var keyboardHeight = 0;
+          keyboardHeight <= 600;
+          keyboardHeight += 5
+        ) {
+          // Act
+          tester.view.viewInsets = FakeViewPadding(
+            bottom: keyboardHeight.toDouble(),
+          );
+          await tester.pumpWidget(const SizedBox.shrink());
+          await pumpView(
+            tester,
+            privacy: const GroupPrivacyState(
+              isPublic: true,
+              isServerLimited: true,
+            ),
+          );
+
+          // Assert
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: 'Overflow with a $keyboardHeight px keyboard',
+          );
+        }
+      },
+    );
+
     testWidgets('build_whenEncryptionIsEnabled_showsTheWarning', (
       WidgetTester tester,
     ) async {
