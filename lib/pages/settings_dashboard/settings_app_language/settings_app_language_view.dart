@@ -1,4 +1,3 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language_view_style.dart';
 import 'package:twake_chat/presentation/extensions/localizations/locale_extension.dart';
@@ -13,7 +12,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsAppLanguageView extends StatelessWidget {
   final SettingsAppLanguageController controller;
-  final ResponsiveUtils responsiveUtils = getIt.get<ResponsiveUtils>();
+  final ResponsiveUtils responsiveUtils = ResponsiveUtils();
 
   SettingsAppLanguageView({super.key, required this.controller});
 
