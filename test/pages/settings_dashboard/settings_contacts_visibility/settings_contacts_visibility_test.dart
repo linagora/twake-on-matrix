@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,18 +14,21 @@ import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_state.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
+const _loaded = SettingsContactsVisibilityState(
+  visibility: SettingsContactsVisibilityEnum.public,
+  visibleFields: [VisibleEnum.email],
+);
+
 class _FakeController extends SettingsContactsVisibilityController {
-  _FakeController({this.failUpdate = false});
+  _FakeController({this.failUpdate = false, this.pendingLoad});
 
   final bool failUpdate;
+  final Completer<SettingsContactsVisibilityState>? pendingLoad;
   final List<SettingsContactsVisibilityEnum> selected = [];
 
   @override
   Future<SettingsContactsVisibilityState> build() async =>
-      const SettingsContactsVisibilityState(
-        visibility: SettingsContactsVisibilityEnum.public,
-        visibleFields: [VisibleEnum.email],
-      );
+      pendingLoad?.future ?? _loaded;
 
   @override
   Future<void> selectVisibility(SettingsContactsVisibilityEnum option) async {
@@ -62,6 +67,44 @@ void main() {
 
   Finder option(SettingsContactsVisibilityEnum option) =>
       find.byKey(Key('visibility_option_${option.name}'));
+
+  final loadingDialog = find.text('Loading...');
+
+  Future<void> pumpDialogTransition(WidgetTester tester) =>
+      tester.pump(const Duration(seconds: 1));
+
+  testWidgets('shows the loading dialog until the visibility is loaded', (
+    tester,
+  ) async {
+    final load = Completer<SettingsContactsVisibilityState>();
+    await pumpScreen(tester, _FakeController(pendingLoad: load));
+    await pumpDialogTransition(tester);
+
+    expect(loadingDialog, findsOneWidget);
+
+    load.complete(_loaded);
+    await tester.pumpAndSettle();
+
+    expect(loadingDialog, findsNothing);
+    expect(
+      find.byKey(const Key('visibility_option_selected_public')),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a failed load shows a snackbar and closes the dialog', (
+    tester,
+  ) async {
+    final load = Completer<SettingsContactsVisibilityState>();
+    await pumpScreen(tester, _FakeController(pendingLoad: load));
+    await pumpDialogTransition(tester);
+
+    load.completeError(GetUserInfoVisibilityException(Exception('mock')));
+    await tester.pumpAndSettle();
+
+    expect(loadingDialog, findsNothing);
+    expect(find.text('Failed to get contacts visibility'), findsOneWidget);
+  });
 
   testWidgets('tapping the selected option sends no update', (tester) async {
     final controller = _FakeController();
