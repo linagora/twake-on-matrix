@@ -42,5 +42,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | device_settings | Controller, still on `app_state` | #3389 |
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
-| forward | Use case + native providers + controller, GetIt removed | |
+| forward | Use case + native providers + controller, GetIt removed | #3540 |
 | Everything else | Legacy | |
