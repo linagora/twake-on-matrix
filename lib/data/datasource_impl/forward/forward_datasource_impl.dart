@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/datasource/forward/forward_datasource.dart';
+import 'package:twake_chat/domain/forward/exceptions/forward_exception.dart';
 
 class ForwardDatasourceImpl implements ForwardDatasource {
   const ForwardDatasourceImpl(this._client);
@@ -15,9 +16,9 @@ class ForwardDatasourceImpl implements ForwardDatasource {
     required String roomId,
     required Map<String, Object?> content,
   }) async {
-    final room = _client?.getRoomById(roomId);
-    if (room == null) throw StateError('Room $roomId not found');
     try {
+      final room = _client?.getRoomById(roomId);
+      if (room == null) throw ForwardRoomNotFoundException(roomId);
       await room.sendEvent(content);
     } catch (e, s) {
       Logs().e('ForwardDatasourceImpl::sendMessage() failed', e, s);

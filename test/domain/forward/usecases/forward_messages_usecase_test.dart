@@ -22,6 +22,7 @@ void main() {
   });
 
   test('execute_whenNoMessage_throwsForwardEmptyContentException', () async {
+    // Act & Assert
     await expectLater(
       useCase.execute(messages: [], roomIds: ['!a:example.com']),
       throwsA(isA<ForwardEmptyContentException>()),

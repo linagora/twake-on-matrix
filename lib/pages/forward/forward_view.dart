@@ -24,7 +24,7 @@ class ForwardView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(forwardControllerProvider);
-    final rooms = controller.recentChats(context);
+    final rooms = controller.recentChats;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: controller.isFullScreen
@@ -40,7 +40,7 @@ class ForwardView extends ConsumerWidget {
           openSearchBar: controller.openSearchBar,
           closeSearchBar: controller.closeSearchBar,
           isFullScreen: controller.isFullScreen,
-          displayBackButton: state is ForwardSelecting,
+          displayBackButton: state is! ForwardSending,
         ),
       ),
       body: Column(
@@ -56,7 +56,7 @@ class ForwardView extends ConsumerWidget {
                   if (rooms.isNotEmpty)
                     ForwardRecentChatList(
                       rooms: rooms,
-                      selectedRoomIds: state.selectedRoomIds,
+                      selectedRoomIds: controller.selectedRoomIds,
                       onSelectedChat: controller.onToggleSelectChat,
                       recentChatScrollController:
                           controller.recentChatScrollController,
@@ -68,6 +68,7 @@ class ForwardView extends ConsumerWidget {
           if (!controller.isFullScreen)
             _WebActionsButton(
               state: state,
+              hasSelection: controller.selectedRoomIds.isNotEmpty,
               forwardAction: controller.forwardAction,
             ),
         ],
@@ -75,6 +76,7 @@ class ForwardView extends ConsumerWidget {
       floatingActionButton: controller.isFullScreen
           ? _ForwardButton(
               state: state,
+              hasSelection: controller.selectedRoomIds.isNotEmpty,
               forwardAction: controller.forwardAction,
             )
           : null,
@@ -102,20 +104,25 @@ class _SendingIndicator extends StatelessWidget {
 class _WebActionsButton extends StatelessWidget {
   final ForwardState state;
 
+  final bool hasSelection;
+
   final void Function() forwardAction;
 
-  const _WebActionsButton({required this.state, required this.forwardAction});
+  const _WebActionsButton({
+    required this.state,
+    required this.hasSelection,
+    required this.forwardAction,
+  });
 
   @override
   Widget build(BuildContext context) {
     final linagoraSysColors = LinagoraSysColors.material();
-    final hasSelection = state.selectedRoomIds.isNotEmpty;
     return Padding(
       padding: ForwardViewStyle.webActionsButtonPadding,
       child: switch (state) {
         ForwardSending() => const _SendingIndicator(),
         ForwardDone() => const SizedBox.shrink(),
-        ForwardSelecting() => Row(
+        ForwardIdle() => Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TwakeTextButton(
@@ -162,21 +169,27 @@ class _WebActionsButton extends StatelessWidget {
 }
 
 class _ForwardButton extends StatelessWidget {
-  const _ForwardButton({required this.state, required this.forwardAction});
+  const _ForwardButton({
+    required this.state,
+    required this.hasSelection,
+    required this.forwardAction,
+  });
 
   final ForwardState state;
+
+  final bool hasSelection;
 
   final void Function() forwardAction;
 
   @override
   Widget build(BuildContext context) {
-    if (state.selectedRoomIds.isEmpty) {
+    if (!hasSelection) {
       return const SizedBox.shrink();
     }
     return switch (state) {
       ForwardSending() => const _SendingIndicator(),
       ForwardDone() => const SizedBox.shrink(),
-      ForwardSelecting() => SizedBox(
+      ForwardIdle() => SizedBox(
         height: ForwardViewStyle.bottomBarHeight,
         child: Align(
           alignment: Alignment.centerRight,

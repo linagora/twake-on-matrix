@@ -3,6 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/datasource_impl/forward/forward_datasource_impl.dart';
+import 'package:twake_chat/domain/forward/exceptions/forward_exception.dart';
 
 import 'forward_datasource_impl_test.mocks.dart';
 
@@ -40,13 +41,22 @@ void main() {
     }
 
     test('isJoined_whenRoomIsUnknown_returnsFalse', () {
+      // Arrange
       when(mockClient.getRoomById(testRoomId)).thenReturn(null);
 
-      expect(datasource.isJoined(testRoomId), isFalse);
+      // Act
+      final joined = datasource.isJoined(testRoomId);
+
+      // Assert
+      expect(joined, isFalse);
     });
 
     test('isJoined_whenNoClient_returnsFalse', () {
-      expect(const ForwardDatasourceImpl(null).isJoined(testRoomId), isFalse);
+      // Act
+      final joined = const ForwardDatasourceImpl(null).isJoined(testRoomId);
+
+      // Assert
+      expect(joined, isFalse);
     });
   });
 
@@ -64,11 +74,13 @@ void main() {
     });
 
     test('sendMessage_whenRoomIsUnknown_throws', () async {
+      // Arrange
       when(mockClient.getRoomById(testRoomId)).thenReturn(null);
 
+      // Act & Assert
       await expectLater(
         datasource.sendMessage(roomId: testRoomId, content: testContent),
-        throwsStateError,
+        throwsA(isA<ForwardRoomNotFoundException>()),
       );
     });
 
