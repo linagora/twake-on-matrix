@@ -64,37 +64,43 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
     required String roomId,
     required String userId,
   }) async {
-    var attempt = 0;
-    while (true) {
-      attempt++;
-      try {
-        await _activeClient.inviteUser(roomId, userId);
-        return;
-      } on MatrixException catch (exception, stackTrace) {
-        Logs().e(
-          'NewGroupDatasourceImpl::inviteUser: $userId (attempt $attempt/$_maxInviteRetries)',
-          exception,
-          stackTrace,
-        );
-        final retryAfterMs = exception.retryAfterMs;
-        if (exception.errcode != 'M_LIMIT_EXCEEDED' ||
-            attempt >= _maxInviteRetries) {
-          throw _toInviteUserException(userId, exception);
-        }
-        if (retryAfterMs != null && retryAfterMs > 0) {
-          await Future.delayed(Duration(milliseconds: retryAfterMs));
-        }
-      } catch (exception, stackTrace) {
-        Logs().e(
-          'NewGroupDatasourceImpl::inviteUser: $userId',
-          exception,
-          stackTrace,
-        );
-        throw GenericInviteException(
-          userId: userId,
-          message: exception.toString(),
-        );
+    for (var attempt = 1; ; attempt++) {
+      final retryAfter = await _tryInvite(roomId, userId, attempt);
+      if (retryAfter == null) return;
+      if (retryAfter > Duration.zero) await Future.delayed(retryAfter);
+    }
+  }
+
+  /// Returns null once invited, or the delay before the next attempt.
+  Future<Duration?> _tryInvite(
+    String roomId,
+    String userId,
+    int attempt,
+  ) async {
+    try {
+      await _activeClient.inviteUser(roomId, userId);
+      return null;
+    } on MatrixException catch (exception, stackTrace) {
+      Logs().e(
+        'NewGroupDatasourceImpl::inviteUser: $userId (attempt $attempt/$_maxInviteRetries)',
+        exception,
+        stackTrace,
+      );
+      if (exception.errcode != 'M_LIMIT_EXCEEDED' ||
+          attempt >= _maxInviteRetries) {
+        throw _toInviteUserException(userId, exception);
       }
+      return Duration(milliseconds: exception.retryAfterMs ?? 0);
+    } catch (exception, stackTrace) {
+      Logs().e(
+        'NewGroupDatasourceImpl::inviteUser: $userId',
+        exception,
+        stackTrace,
+      );
+      throw GenericInviteException(
+        userId: userId,
+        message: exception.toString(),
+      );
     }
   }
 
