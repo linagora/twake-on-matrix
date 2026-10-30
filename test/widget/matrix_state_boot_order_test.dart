@@ -744,6 +744,29 @@ void main() {
     expect(healthy.onLoginStateChanged.listened, isTrue);
   });
 
+  testWidgets('registering the subscriptions listens to the login state '
+      'before its first await', (tester) async {
+    final client = _BootClient('a', userID: '@a:s');
+    final harness = _Harness(tester, [client]);
+
+    await harness.run(() async {
+      await harness.mount();
+      final host = harness.matrix.loginHost;
+      await tester.runAsync(
+        () => host.cancelSubscriptions(const AccountId('a')),
+      );
+      client.onLoginStateChanged.listened = false;
+
+      final registering = host.registerSubscriptions(const AccountId('a'));
+
+      // onLoginStateChanged does not replay: a login state sent before the
+      // listen would be lost.
+      expect(client.onLoginStateChanged.listened, isTrue);
+      unawaited(registering);
+      await harness.settle();
+    });
+  });
+
   testWidgets('switching to an account with no stored ToM configuration does '
       'not keep the one of the account being left', (tester) async {
     final left = _ToMClient('a', userID: '@a:s');

@@ -578,12 +578,8 @@ class MatrixState extends ConsumerState<Matrix>
       );
       return;
     }
-    // Open before the first await: a cancel that comes while the database is
-    // built must find it open, and keep nothing after it.
+    // No await before the listens: onLoginStateChanged does not replay.
     _subscriptions.open(name);
-    if (PlatformInfos.isMobile) {
-      await HiveCollectionToMDatabase.databaseBuilder();
-    }
     _subscriptions.keep(
       name,
       'roomKeyRequest',
