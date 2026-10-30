@@ -1,8 +1,8 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.dart';
+import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
-import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
@@ -32,17 +32,25 @@ enum TomEncryptionResetResult {
 /// popping up over the first, and only finish loading once this completes.
 class TomEncryptionResetService {
   final Client client;
+  final GetRecoveryWordsUseCase _getRecoveryWordsUseCase;
+  final DeleteRecoveryWordsInteractor _deleteRecoveryWordsInteractor;
+  final SaveRecoveryWordsInteractor _saveRecoveryWordsInteractor;
 
-  TomEncryptionResetService({required this.client});
-
-  final _deleteRecoveryWordsInteractor = getIt
-      .get<DeleteRecoveryWordsInteractor>();
-  final _getRecoveryWordsInteractor = getIt.get<GetRecoveryWordsInteractor>();
-  final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
+  TomEncryptionResetService({
+    required this.client,
+    required GetRecoveryWordsUseCase getRecoveryWordsUseCase,
+    required DeleteRecoveryWordsInteractor deleteRecoveryWordsInteractor,
+    required SaveRecoveryWordsInteractor saveRecoveryWordsInteractor,
+  }) : _getRecoveryWordsUseCase = getRecoveryWordsUseCase,
+       _deleteRecoveryWordsInteractor = deleteRecoveryWordsInteractor,
+       _saveRecoveryWordsInteractor = saveRecoveryWordsInteractor;
 
   Future<RecoveryWords?> _getRecoveryWords() async {
-    final result = await _getRecoveryWordsInteractor.execute();
-    return result.fold((failure) => null, (success) => success.words);
+    try {
+      return await _getRecoveryWordsUseCase.execute();
+    } on GetRecoveryWordsException {
+      return null;
+    }
   }
 
   /// Deletes the old recovery words from the ToM vault, generates a brand
