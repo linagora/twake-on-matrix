@@ -228,7 +228,8 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
             context: context,
             id: identitiesProvider!.single.id!,
           );
-          if (result == SsoLoginState.error) {
+          if (!mounted) return;
+          if (result != SsoLoginState.success) {
             state = HomeserverState.ssoLoginServer;
           }
         } else if (supportsLogin(context)) {

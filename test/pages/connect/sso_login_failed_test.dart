@@ -1,12 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel, PlatformException;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/init_client_dialog.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
@@ -22,6 +27,15 @@ import 'package:twake_chat/widgets/twake_app.dart';
 class _FakeLoginClient extends Fake implements Client {
   int logins = 0;
   Object? loginError;
+
+  @override
+  Uri? homeserver;
+
+  /// Whether the server accepted the login: the client holds a token.
+  bool logged = false;
+
+  @override
+  bool isLogged() => logged;
 
   /// `login` has many optional parameters that do not matter here.
   @override
@@ -40,6 +54,11 @@ class _FakeLoginClient extends Fake implements Client {
 }
 
 class _FakeMatrixState extends Fake implements MatrixState {
+  List<Client?> clients = [];
+
+  @override
+  List<Client?> get currentClients => clients;
+
   @override
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController<ClientLoginStateEvent>.broadcast();
@@ -50,6 +69,15 @@ class _FakeMatrixState extends Fake implements MatrixState {
 }
 
 class _Host with ConnectPageMixin {}
+
+class _FixedSummary extends LoginHomeserverSummary {
+  _FixedSummary(this._summary);
+
+  final HomeserverSummary _summary;
+
+  @override
+  HomeserverSummary? build() => _summary;
+}
 
 void main() {
   late _FakeLoginClient client;
@@ -156,18 +184,282 @@ void main() {
     expect(await second, SsoLoginState.error);
   });
 
-  testWidgets('closing the dialog without a failure is not an error', (
+  testWidgets('a login that never reports closes the dialog as a failure '
+      'after the timeout', (tester) async {
+    await pumpApp(tester);
+    final result = host.loginWithToken(sessions, client, 'token');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(InitClientDialog), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 31));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(await result, SsoLoginState.error);
+    expect(find.byType(InitClientDialog), findsNothing);
+  });
+
+  group('a login the server accepted but that is slow to report', () {
+    Future<List<(String, Object?)>> openDialog(WidgetTester tester) async {
+      final went = <(String, Object?)>[];
+      await pumpApp(tester);
+      unawaited(
+        showDialog<Object?>(
+          context: TwakeApp.routerKey.currentContext!,
+          useRootNavigator: false,
+          builder: (context) => InitClientDialog(
+            future: () async => client.login(LoginType.mLoginToken),
+            account: client,
+            navigate: (location, {extra}) => went.add((location, extra)),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(InitClientDialog), findsOneWidget);
+      return went;
+    }
+
+    testWidgets('of the first account goes to the rooms, not to a failure', (
+      tester,
+    ) async {
+      client.logged = true;
+      matrix.clients = [client];
+      final went = await openDialog(tester);
+
+      await tester.pump(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(InitClientDialog), findsNothing);
+      expect(went.single.$1, '/rooms');
+      expect(
+        (went.single.$2 as LoggedInBodyArgs).newActiveClient,
+        same(client),
+      );
+    });
+
+    testWidgets('of another account goes to the rooms as that account', (
+      tester,
+    ) async {
+      final other = _FakeLoginClient()..logged = true;
+      client.logged = true;
+      matrix.clients = [other, client];
+      final went = await openDialog(tester);
+
+      await tester.pump(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(InitClientDialog), findsNothing);
+      expect(went.single.$1, '/rooms');
+      expect(went.single.$2, isA<LoggedInOtherAccountBodyArgs>());
+    });
+
+    testWidgets('does not go to the rooms twice when the event comes late', (
+      tester,
+    ) async {
+      client.logged = true;
+      matrix.clients = [client];
+      final went = await openDialog(tester);
+
+      await tester.pump(const Duration(seconds: 31));
+      await tester.pump(const Duration(seconds: 1));
+      matrix.onClientLoginStateChanged.add(
+        ClientLoginStateEvent(
+          client: client,
+          loginState: LoginState.loggedIn,
+          multipleAccountLoginType: MultipleAccountLoginType.firstLoggedIn,
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(went, hasLength(1));
+    });
+  });
+
+  testWidgets('the SSO of a new candidate uses the homeserver the user '
+      'picked', (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    final picked = Uri.parse('https://matrix.example.com');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          loginSessionsProvider.overrideWithValue(
+            FakeLoginSessions(loginClient: () async => client),
+          ),
+          loginHomeserverSummaryProvider.overrideWith(
+            () => _FixedSummary(
+              HomeserverSummary(
+                discoveryInformation: DiscoveryInformation(
+                  mHomeserver: HomeserverInformation(baseUrl: picked),
+                ),
+                versions: GetVersionsResponse(versions: ['r1.6.0']),
+                loginFlows: [],
+              ),
+            ),
+          ),
+        ],
+        child: const MaterialApp(home: Scaffold(body: SizedBox())),
+      ),
+    );
+    expect(client.homeserver, isNull);
+
+    const channel = MethodChannel('flutter_web_auth_2');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async => 'twake://done');
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    final callback = await host.authenticateWithWebAuth(
+      context: tester.element(find.byType(Scaffold)),
+      id: 'oidc',
+    );
+
+    expect(callback, 'twake://done');
+    expect(client.homeserver, picked);
+  });
+
+  testWidgets('a callback with no login token tells the user', (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          loginSessionsProvider.overrideWithValue(
+            FakeLoginSessions(loginClient: () async => client),
+          ),
+        ],
+        child: MaterialApp(
+          navigatorKey: TwakeApp.routerKey,
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: const Scaffold(body: SizedBox()),
+        ),
+      ),
+    );
+    client.homeserver = Uri.parse('https://matrix.example.com');
+    const channel = MethodChannel('flutter_web_auth_2');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async => 'twake://done');
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    final result = await host.ssoLoginActionMobile(
+      context: tester.element(find.byType(Scaffold)),
+      id: 'oidc',
+    );
+    await tester.pump();
+
+    expect(result, SsoLoginState.tokenEmpty);
+    final l10n = L10n.of(tester.element(find.byType(Scaffold)))!;
+    expect(find.text(l10n.oopsSomethingWentWrong), findsOneWidget);
+  });
+
+  group('the web auth of the SSO fails', () {
+    Future<(SsoLoginState, L10n)> failWith(
+      WidgetTester tester,
+      PlatformException error,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            loginSessionsProvider.overrideWithValue(
+              FakeLoginSessions(loginClient: () async => client),
+            ),
+          ],
+          child: MaterialApp(
+            navigatorKey: TwakeApp.routerKey,
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            home: const Scaffold(body: SizedBox()),
+          ),
+        ),
+      );
+      client.homeserver = Uri.parse('https://matrix.example.com');
+      const channel = MethodChannel('flutter_web_auth_2');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async => throw error);
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+      final context = tester.element(find.byType(Scaffold));
+      final result = await host.ssoLoginActionMobile(
+        context: context,
+        id: 'oidc',
+      );
+      await tester.pump();
+      return (result, L10n.of(context)!);
+    }
+
+    testWidgets('a cancel by the user stays silent', (tester) async {
+      final (result, l10n) = await failWith(
+        tester,
+        PlatformException(code: 'CANCELED'),
+      );
+
+      expect(result, SsoLoginState.error);
+      expect(find.text(l10n.oopsSomethingWentWrong), findsNothing);
+    });
+
+    testWidgets('any other error tells the user', (tester) async {
+      final (result, l10n) = await failWith(
+        tester,
+        PlatformException(code: 'FAILED'),
+      );
+
+      expect(result, SsoLoginState.error);
+      expect(find.text(l10n.oopsSomethingWentWrong), findsOneWidget);
+    });
+  });
+
+  testWidgets('the system back does not close the dialog', (tester) async {
+    await pumpApp(tester);
+    final result = host.loginWithToken(sessions, client, 'token');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(InitClientDialog), findsOneWidget);
+
+    // maybePop reports that it handled the request even when the route stays.
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(find.byType(InitClientDialog), findsOneWidget);
+
+    matrix.onClientLoginStateChanged.add(loginFailed());
+    await tester.pump(const Duration(seconds: 1));
+    expect(await result, SsoLoginState.error);
+    expect(find.byType(InitClientDialog), findsNothing);
+  });
+
+  testWidgets('a failure of another account leaves this dialog open', (
     tester,
   ) async {
     await pumpApp(tester);
     final result = host.loginWithToken(sessions, client, 'token');
     await tester.pump(const Duration(milliseconds: 100));
 
-    Navigator.of(TwakeApp.routerKey.currentContext!).pop();
-    // The dialog waits up to 30 seconds for a login state, as it always did.
-    await tester.pump(const Duration(seconds: 31));
+    final other = _FakeLoginClient();
+    matrix.onClientLoginStateChanged.add(
+      ClientLoginStateEvent(
+        client: other,
+        loginState: LoginState.loggedOut,
+        multipleAccountLoginType: MultipleAccountLoginType.loginFailed,
+        error: StateError('other'),
+      ),
+    );
+    await tester.pump();
+    expect(find.byType(InitClientDialog), findsOneWidget);
 
-    expect(await result, SsoLoginState.success);
+    matrix.onClientLoginStateChanged.add(loginFailed());
+    await tester.pump(const Duration(seconds: 1));
+    expect(await result, SsoLoginState.error);
+    expect(find.byType(InitClientDialog), findsNothing);
   });
 
   testWidgets(

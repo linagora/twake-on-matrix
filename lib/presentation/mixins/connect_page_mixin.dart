@@ -13,6 +13,7 @@ import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:matrix/matrix.dart';
@@ -104,7 +105,17 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    final client = await _sessionsOf(context).loginClient();
+    // Read before the await: `loginClient` waits for the cleanup retries and
+    // the screen may be gone by then.
+    final container = ProviderScope.containerOf(context, listen: false);
+    final client = await container.read(loginSessionsProvider).loginClient();
+    // After a rollback the sessions hand out a new candidate, which has no
+    // homeserver yet: it is the one the user picked.
+    client.homeserver ??= container
+        .read(loginHomeserverSummaryProvider)
+        ?.discoveryInformation
+        ?.mHomeserver
+        .baseUrl;
     final homeserver = client.homeserver?.toString() ?? '';
     if (homeserver.isEmpty) {
       throw StateError('Homeserver is not configured for SSO');
@@ -159,20 +170,24 @@ mixin ConnectPageMixin {
   }) async {
     try {
       final result = await authenticateWithWebAuth(context: context, id: id);
+      if (!context.mounted) return SsoLoginState.error;
       final token = Uri.parse(result).queryParameters['loginToken'];
-      if (token == null || token.isEmpty) return SsoLoginState.tokenEmpty;
+      if (token == null || token.isEmpty) {
+        showLoginFailedSnackBar(null);
+        return SsoLoginState.tokenEmpty;
+      }
       Matrix.of(context).loginType = LoginType.mLoginToken;
-      final client = await _sessionsOf(context).loginClient();
-      return await loginWithToken(
-        ProviderScope.containerOf(
-          context,
-          listen: false,
-        ).read(loginSessionsProvider),
-        client,
-        token,
-      );
+      final sessions = _sessionsOf(context);
+      final client = await sessions.loginClient();
+      return await loginWithToken(sessions, client, token);
     } catch (e) {
-      Logs().e('ConnectPageMixin:: ssoLoginActionMobil(): error: $e');
+      // Only a cancel of the web auth stays silent, and it is not an error.
+      if (e is PlatformException && e.code == 'CANCELED') {
+        Logs().i('ConnectPageMixin:: ssoLoginActionMobile(): cancelled');
+        return SsoLoginState.error;
+      }
+      Logs().e('ConnectPageMixin:: ssoLoginActionMobile(): error: $e');
+      showLoginFailedSnackBar(e);
       return SsoLoginState.error;
     }
   }
@@ -296,6 +311,7 @@ mixin ConnectPageMixin {
     String token,
   ) async {
     final dialogResult = await TwakeDialog.showStreamDialogFullScreen(
+      account: client,
       future: () async => sessions.trackLogin(
         client,
         () => client.login(
@@ -335,6 +351,7 @@ mixin ConnectPageMixin {
       Logs().e(
         'ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e',
       );
+      showLoginFailedSnackBar(e);
       return SsoLoginState.error;
     }
   }

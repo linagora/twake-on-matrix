@@ -14,6 +14,9 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:twake_chat/pages/connect/sso_login_state.dart';
+import 'package:twake_chat/utils/login_failed_snackbar.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -110,16 +113,25 @@ class TwakeWelcomeController extends ConsumerState<TwakeWelcome>
       );
       Logs().d("TwakeIdController:_redirectRegistrationUrl: URI - $uri");
       if (!mounted) return;
-      await handleTokenFromRegistrationSite(
+      final result = await handleTokenFromRegistrationSite(
         matrix: matrix,
         sessions: sessions,
         uri: uri,
       );
-      Logs().d("TwakeIdController:_redirectRegistrationUrl: DONE");
+      Logs().d("TwakeIdController:_redirectRegistrationUrl: $result");
+      if (result != SsoLoginState.success) {
+        // A failed login has told the user already; a missing token has not.
+        if (result == SsoLoginState.tokenEmpty) showLoginFailedSnackBar(null);
+        unawaited(_sessions.discardPending());
+      }
       if (!mounted) return;
       TwakeDialog.hideLoadingDialog(context);
     } catch (e) {
       Logs().e("TwakeIdController::_redirectRegistrationUrl: $e");
+      // Only a cancel by the user stays silent.
+      if (e is! PlatformException || e.code != 'CANCELED') {
+        showLoginFailedSnackBar(e);
+      }
       // Cancelled or failed: the login client of this attempt is dropped.
       unawaited(_sessions.discardPending());
       if (!mounted) return;
