@@ -30,4 +30,4 @@ then can't call API use configuration of HiveCollectionToMDatabase
 
 ## Note (2026-10-30)
 
-Decision 2 was never implemented. Nothing reopens `HiveCollectionToMDatabase` after `deleteFromDisk()`: the GetIt singleton keeps its closed boxes, so ToM configuration writes after a re-login in the same process can fail (the error is caught in `MatrixState._storeToMConfiguration`).
+Decision 2 was never implemented: nothing reopens `HiveCollectionToMDatabase` after `deleteFromDisk()`. With hive 2.2.3 that call deletes nothing on mobile: `BoxCollection.deleteFromDisk()` passes the bare box names, while the boxes are named `<collection>_<box>`. The boxes stay open, already emptied by `clear()`.
