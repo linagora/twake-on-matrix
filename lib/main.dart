@@ -152,11 +152,11 @@ Future<void> startGui(List<Client> clients, ProviderContainer container) async {
       container: container,
       child: PlatformInfos.isMobile
           ? AppLock(
-              builder: (args) => TwakeApp(clients: clients),
+              builder: (args) => const TwakeApp(),
               lockScreen: const LockScreen(),
               enabled: pin?.isNotEmpty ?? false,
             )
-          : TwakeApp(clients: clients),
+          : const TwakeApp(),
     ),
   );
 }

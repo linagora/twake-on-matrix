@@ -422,7 +422,6 @@ class _Harness {
               ? L10n.supportedLocales
               : const [Locale('en', 'US')],
           home: Matrix(
-            clients: clients,
             child: routed ? const Scaffold(body: SizedBox()) : const SizedBox(),
           ),
         ),

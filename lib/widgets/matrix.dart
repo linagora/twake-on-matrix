@@ -108,16 +108,9 @@ import 'local_notifications_extension.dart';
 class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
 
-  final List<Client> clients;
-
   final Map<String, String>? queryParameters;
 
-  const Matrix({
-    this.child,
-    required this.clients,
-    this.queryParameters,
-    super.key,
-  });
+  const Matrix({this.child, this.queryParameters, super.key});
 
   @override
   MatrixState createState() => MatrixState();
