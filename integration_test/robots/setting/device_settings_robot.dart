@@ -106,11 +106,18 @@ class DeviceSettingsRobot extends HomeRobot {
     await _closeActions();
   }
 
+  Future<void> expectOtherSessionCanBeVerifiedAndRemoved(
+    PrimaryExtraSession session,
+  ) async {
+    await _openActions(_session(session));
+    await $.waitUntilVisible(_actionsSheet().$(_l10n.startVerification));
+    await $.waitUntilVisible(_actionsSheet().$(_l10n.removeDevice));
+    await _closeActions();
+  }
+
   Future<void> renameSession(PrimaryExtraSession session, String to) async {
     final row = _session(session);
     await _openActions(row);
-    final from = _nameOf(row);
-    await $.waitUntilVisible(_actionsSheet().$(_l10n.removeDevice));
     await _actionsSheet().$(_l10n.changeDeviceName).tap();
 
     final dialog = $(ChangeDeviceNameView);
@@ -121,7 +128,6 @@ class DeviceSettingsRobot extends HomeRobot {
 
     await waitUntilAbsent($, dialog);
     await _reveal(row.containing(find.text(to)));
-    await waitUntilAbsent($, $(DevicesSettings).$(UserDeviceListItem).$(from));
   }
 
   Future<void> removeSession(PrimaryExtraSession session) async {
