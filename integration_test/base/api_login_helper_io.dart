@@ -153,19 +153,8 @@ class PrimaryExtraSession {
   final _MatrixSession _session;
   final String deviceId;
 
-  Future<(int, String)> _send(String method, List<String> pathSegments) async {
-    final client = HttpClient();
-    try {
-      return await _authorizedRequest(
-        client: client,
-        session: _session,
-        method: method,
-        pathSegments: pathSegments,
-      );
-    } finally {
-      client.close(force: true);
-    }
-  }
+  Future<(int, String)> _send(String method, List<String> pathSegments) =>
+      _sendAs(_session, method, pathSegments);
 
   Future<String?> fetchDisplayName() async {
     final (status, body) = await _send('GET', ['devices', deviceId]);
@@ -182,7 +171,32 @@ class PrimaryExtraSession {
   }
 
   /// No-op once the device was removed: its token is already revoked.
-  Future<void> logout() => _send('POST', ['logout']);
+  Future<void> logout() => _logout(_session);
+}
+
+Future<(int, String)> _sendAs(
+  _MatrixSession session,
+  String method,
+  List<String> pathSegments,
+) async {
+  final client = HttpClient();
+  try {
+    return await _authorizedRequest(
+      client: client,
+      session: session,
+      method: method,
+      pathSegments: pathSegments,
+    );
+  } finally {
+    client.close(force: true);
+  }
+}
+
+Future<void> _logout(_MatrixSession session) async {
+  final (status, body) = await _sendAs(session, 'POST', ['logout']);
+  if (status != HttpStatus.ok && status != HttpStatus.unauthorized) {
+    throw Exception('Logout failed [status=$status] body=$body');
+  }
 }
 
 Future<PrimaryExtraSession> loginPrimaryExtraSession({
@@ -202,6 +216,7 @@ Future<PrimaryExtraSession> loginPrimaryExtraSession({
     );
     final deviceId = session.deviceId;
     if (deviceId == null) {
+      await _logout(session);
       throw Exception('Login response missing device_id');
     }
     return PrimaryExtraSession._(session, deviceId);

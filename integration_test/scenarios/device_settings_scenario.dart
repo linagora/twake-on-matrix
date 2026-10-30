@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper_io.dart';
@@ -41,7 +42,10 @@ class DeviceSettingsScenario extends BaseTestScenario {
     } finally {
       for (final session in sessions) {
         // A cleanup error must not hide the test's own failure.
-        await session.logout().catchError((_) {});
+        await session.logout().catchError(
+          (Object error) =>
+              debugPrint('Cleanup of ${session.deviceId}: $error'),
+        );
       }
     }
   }
