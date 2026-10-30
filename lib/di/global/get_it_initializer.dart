@@ -96,7 +96,6 @@ import 'package:twake_chat/domain/usecase/contacts/twake_look_up_phonebook_conta
 import 'package:twake_chat/domain/usecase/create_direct_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/device_settings/get_devices_interactor.dart';
 import 'package:twake_chat/domain/usecase/download_file_for_preview_interactor.dart';
-import 'package:twake_chat/domain/usecase/forward/forward_message_interactor.dart';
 import 'package:twake_chat/domain/usecase/generate_thumbnails_media_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/generate_invitation_link_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/get_invitation_status_interactor.dart';
@@ -398,9 +397,6 @@ class GetItInitializer {
       CreateDirectChatInteractor(),
     );
     getIt.registerFactory<GetDevicesInteractor>(() => GetDevicesInteractor());
-    getIt.registerSingleton<ForwardMessageInteractor>(
-      ForwardMessageInteractor(),
-    );
     getIt.registerSingleton<PreSearchRecentContactsInteractor>(
       PreSearchRecentContactsInteractor(),
     );
