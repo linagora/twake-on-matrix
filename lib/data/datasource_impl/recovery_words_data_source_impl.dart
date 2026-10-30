@@ -15,7 +15,7 @@ class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
       final response = await _recoveryWordsAPI.getRecoveryWords();
       return response.toRecoveryWords();
     } catch (e, s) {
-      Logs().wtf('RecoveryWordsDataSourceImpl::getRecoveryWords()', e, s);
+      Logs().w('RecoveryWordsDataSourceImpl::getRecoveryWords()', e, s);
       rethrow;
     }
   }

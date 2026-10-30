@@ -1,4 +1,3 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.dart';
@@ -34,15 +33,17 @@ enum TomEncryptionResetResult {
 class TomEncryptionResetService {
   final Client client;
   final GetRecoveryWordsUseCase _getRecoveryWordsUseCase;
+  final DeleteRecoveryWordsInteractor _deleteRecoveryWordsInteractor;
+  final SaveRecoveryWordsInteractor _saveRecoveryWordsInteractor;
 
   TomEncryptionResetService({
     required this.client,
     required GetRecoveryWordsUseCase getRecoveryWordsUseCase,
-  }) : _getRecoveryWordsUseCase = getRecoveryWordsUseCase;
-
-  final _deleteRecoveryWordsInteractor = getIt
-      .get<DeleteRecoveryWordsInteractor>();
-  final _saveRecoveryWordsInteractor = getIt.get<SaveRecoveryWordsInteractor>();
+    required DeleteRecoveryWordsInteractor deleteRecoveryWordsInteractor,
+    required SaveRecoveryWordsInteractor saveRecoveryWordsInteractor,
+  }) : _getRecoveryWordsUseCase = getRecoveryWordsUseCase,
+       _deleteRecoveryWordsInteractor = deleteRecoveryWordsInteractor,
+       _saveRecoveryWordsInteractor = saveRecoveryWordsInteractor;
 
   Future<RecoveryWords?> _getRecoveryWords() async {
     try {

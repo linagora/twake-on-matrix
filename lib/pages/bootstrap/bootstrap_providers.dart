@@ -35,7 +35,7 @@ StoreRecoveryKeyInteractor storeRecoveryKeyInteractor(Ref ref) =>
 StartSelfVerificationInteractor startSelfVerificationInteractor(Ref ref) =>
     StartSelfVerificationInteractor();
 
-// TODO: [transitional] GetIt interactors until save/delete get their Patrol scenarios.
+// TODO: [transitional] GetIt interactors for TomBootstrapController and TomEncryptionResetService until save/delete get their Patrol scenarios.
 @riverpod
 SaveRecoveryWordsInteractor saveRecoveryWordsInteractor(Ref ref) =>
     getIt.get<SaveRecoveryWordsInteractor>();
