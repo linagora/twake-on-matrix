@@ -12,8 +12,9 @@ class AccountSwitchEffectsHolder extends _$AccountSwitchEffectsHolder {
 
   void set(AccountSwitchEffects effects) => state = effects;
 
-  /// Clears [effects] only when they are still the ones set.
+  /// Clears [effects] only when they are still the ones set. Does nothing
+  /// once the container is disposed: `MatrixState.dispose` can run after it.
   void clear(AccountSwitchEffects effects) {
-    if (identical(state, effects)) state = null;
+    if (ref.mounted && identical(state, effects)) state = null;
   }
 }

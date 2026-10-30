@@ -113,7 +113,7 @@ Future<void> main() async {
           ),
         ],
       ),
-      child: TwakeApp(clients: clients),
+      child: const TwakeApp(),
     ),
   );
 }

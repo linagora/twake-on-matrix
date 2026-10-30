@@ -5,7 +5,8 @@ import 'package:twake_chat/data/model/federation_server/federation_configuration
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
-import 'package:twake_chat/providers/configuration_repository_providers.dart';
+import 'package:twake_chat/data/repository/federation_configurations_repository_impl.provider.dart';
+import 'package:twake_chat/data/repository/tom_configurations_repository_impl.provider.dart';
 import 'package:twake_chat/data/account/login_configuration_persister.dart';
 import 'package:twake_chat/providers/login_configuration_persister_provider.dart';
 

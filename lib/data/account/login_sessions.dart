@@ -25,18 +25,6 @@ class LoginSessions {
   /// to retry. Dropping them would leak the listener and lose the set-up.
   final List<LoginSession> _replaced = [];
 
-  // TODO: [transitional] TW-3302 - drop with the legacy client source once
-  // `MatrixState` attaches its [LoginHost] (TW-3302 5/5).
-  Future<Client> Function()? _legacyLoginClient;
-
-  /// Until a [LoginHost] is attached, [loginClient] hands out the client of
-  /// [source] (`MatrixState.getLoginClient`) and [trackLogin] just runs the
-  /// login, as before the sessions existed. Null clears it.
-  void setLegacyLoginClient(Future<Client> Function()? source) =>
-      _legacyLoginClient = source;
-
-  bool get _usesLegacyClient => _attached == null && _legacyLoginClient != null;
-
   LoginHost get _host =>
       _attached ?? (throw StateError('The login host is not set yet'));
 
@@ -77,8 +65,6 @@ class LoginSessions {
   /// failed before are retried first; the removals of logged-out accounts are
   /// retried in the background.
   Future<Client> loginClient() async {
-    final legacy = _legacyLoginClient;
-    if (_attached == null && legacy != null) return legacy();
     // Read before the retry starts, so a missing host fails this call only.
     final host = _host;
     // The removals reach the server, which may not answer: they do not hold
@@ -158,7 +144,6 @@ class LoginSessions {
   /// until its listener is cancelled and its failed set-ups have been tried
   /// again, so the new login does not drop either.
   Future<T> trackLogin<T>(Client client, Future<T> Function() login) {
-    if (_usesLegacyClient) return login();
     final existing = _byId[client.clientName];
     if (existing != null && existing.isLive) return existing.trackLogin(login);
     return _trackOnPlaceholder(client, login);

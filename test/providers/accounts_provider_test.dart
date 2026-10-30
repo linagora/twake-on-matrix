@@ -22,7 +22,6 @@ import 'package:twake_chat/domain/account/usecases/add_account_usecase.provider.
 import 'package:twake_chat/domain/account/usecases/remove_account_usecase.provider.dart';
 import 'package:twake_chat/domain/account/policy/account_transitions.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_candidate_provider.dart';
@@ -50,7 +49,6 @@ void main() {
       retry: (_, _) => null,
       overrides: [
         accountClientDataSourceProvider.overrideWithValue(dataSource),
-        accountsDriveActiveClientProvider.overrideWithValue(true),
         bootClientsProvider.overrideWithValue(clients),
         bootAccountSnapshotProvider.overrideWithValue(
           AccountBootSnapshot(

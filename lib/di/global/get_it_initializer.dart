@@ -31,7 +31,6 @@ import 'package:twake_chat/data/datasource_impl/tom_configurations_datasource_im
 import 'package:twake_chat/data/datasource_impl/user_info/user_info_datasource_impl.dart';
 import 'package:twake_chat/data/local/contact/shared_preferences_contact_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
-import 'package:twake_chat/data/network/capabilities/server_capabilities_api.dart';
 import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
 import 'package:twake_chat/data/network/dio_cache_option.dart';
@@ -64,7 +63,6 @@ import 'package:twake_chat/domain/repository/contact_repository.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
 import 'package:twake_chat/domain/repository/invitation/hive_invitation_status_repository.dart';
 import 'package:twake_chat/domain/repository/invitation/invitation_repository.dart';
-import 'package:twake_chat/domain/repository/localizations/localizations_repository.dart';
 import 'package:twake_chat/domain/repository/phonebook_contact_repository.dart';
 import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
 import 'package:twake_chat/domain/repository/server_config_repository.dart';
@@ -185,7 +183,9 @@ class GetItInitializer {
 
   void bindingCachingManager() {
     getIt.registerSingleton(PowerLevelManager());
-    getIt.registerFactory<LanguageCacheManager>(() => LanguageCacheManager());
+    getIt.registerFactory<LanguageCacheManager>(
+      () => LanguageCacheManager(getIt.get<Store>()),
+    );
   }
 
   void bindingQueue() {

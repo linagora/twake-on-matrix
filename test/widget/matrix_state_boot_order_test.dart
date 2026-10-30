@@ -1,16 +1,23 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart' hide State;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' show MockClient;
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/domain/app_state/room/create_support_chat_state.dart';
+import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
@@ -26,6 +33,7 @@ import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart
 import 'package:twake_chat/di/global/network_di.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/domain/model/tom_configurations.dart';
 import 'package:twake_chat/domain/model/tom_server_information.dart';
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
@@ -46,7 +54,8 @@ import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/domain/repository/federation_configurations_repository.dart';
-import 'package:twake_chat/providers/configuration_repository_providers.dart';
+import 'package:twake_chat/data/repository/federation_configurations_repository_impl.provider.dart';
+import 'package:twake_chat/data/repository/tom_configurations_repository_impl.provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -76,7 +85,11 @@ class _BootClient extends FakeAccountClient {
   final _onUiaRequest = CachedStreamController<UiaRequest>();
   final _onSyncStatus = CachedStreamController<SyncStatusUpdate>();
   final _onToDeviceEvent = CachedStreamController<ToDeviceEvent>();
+  final _onSync = CachedStreamController<SyncUpdate>();
   final _httpClient = http.Client();
+
+  @override
+  CachedStreamController<SyncUpdate> get onSync => _onSync;
 
   @override
   CachedStreamController<RoomKeyRequest> get onRoomKeyRequest =>
@@ -101,6 +114,12 @@ class _BootClient extends FakeAccountClient {
 
   @override
   http.Client get httpClient => _httpClient;
+
+  /// A client that has not synced yet. The real getter is a stored batch; the
+  /// fake would throw, and on Linux that throw escapes the unawaited
+  /// registration.
+  @override
+  String? get prevBatch => null;
 }
 
 /// A client whose subscriptions cannot be registered.
@@ -145,25 +164,27 @@ class _FakeToMConfigurationsRepository extends Fake
 }
 
 /// Like [_FakeToMConfigurationsRepository], but once its [hold] is armed, the
-/// second read of [gatedId] waits for it and then returns [lateValue], or finds
-/// nothing when there is none: the fallback read of a switch that a newer one
-/// supersedes meanwhile.
+/// [heldRead]-th read of [gatedId] (the second by default) waits for it and
+/// then returns [lateValue], or finds nothing when there is none: the fallback
+/// read of a switch that a newer one supersedes meanwhile.
 class _GatedToMConfigurationsRepository
     extends _FakeToMConfigurationsRepository {
   _GatedToMConfigurationsRepository(
     super.stored, {
     required this.gatedId,
     this.lateValue,
+    this.heldRead = 2,
   });
 
   final String gatedId;
   final ToMConfigurations? lateValue;
+  final int heldRead;
   final hold = _Hold();
   int _reads = 0;
 
   @override
   Future<ToMConfigurations> getTomConfigurations(String userId) async {
-    if (!hold.armed || userId != gatedId || ++_reads < 2) {
+    if (!hold.armed || userId != gatedId || ++_reads < heldRead) {
       return super.getTomConfigurations(userId);
     }
     await hold.pass();
@@ -181,6 +202,22 @@ class _Hold {
   Future<void> pass() {
     reached.complete();
     return gate.future;
+  }
+}
+
+/// Records the accounts it looks the support chat up for, and finds the room
+/// `!support-<account>`.
+class _RecordingSupportChat extends Fake
+    implements CreateSupportChatInteractor {
+  final lookedUp = <String>[];
+
+  @override
+  Stream<Either<Failure, Success>> execute(
+    Client client, {
+    DiscoveryInformation? cachedDiscovery,
+  }) async* {
+    lookedUp.add(client.clientName);
+    yield Right(SupportChatExisted(roomId: '!support-${client.clientName}'));
   }
 }
 
@@ -267,6 +304,83 @@ class _RecordingEffects extends _ToMOnlyEffects {
       applied.add(client.clientName);
 }
 
+/// The switch effects with only the homeserver step of `MatrixState`.
+class _HomeserverOnlyEffects extends _ToMOnlyEffects {
+  _HomeserverOnlyEffects(super.matrix);
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) async {}
+
+  @override
+  Future<void> loadHomeserverInfo(Client client, SwitchToken token) =>
+      matrix.loadHomeserverInfo(client, token);
+}
+
+/// The switch effects whose ToM step, once [hold] is armed, persists the
+/// account of `b` only after it was held: with the token of a switch that was
+/// overtaken by then. The persist step of the others is the one of
+/// `MatrixState`.
+class _PersistingEffects extends _ToMOnlyEffects {
+  _PersistingEffects(super.matrix, this.hold);
+
+  final _Hold hold;
+
+  @override
+  Future<void> setUpToM(Client client, SwitchToken token) async {
+    if (client.clientName != 'b' || !hold.armed) return;
+    await hold.pass();
+    await matrix.persistActiveAccount(client, token);
+  }
+
+  @override
+  Future<void> persistActiveAccount(Client client, SwitchToken token) =>
+      matrix.persistActiveAccount(client, token);
+}
+
+/// A client whose well-known names its own homeserver. Once [useNetwork] is
+/// called it is not logged in, so the well-known is read from [httpClient]
+/// and not from the database, and that read waits for [hold] once armed.
+class _WellKnownClient extends _BootClient {
+  _WellKnownClient(super.clientName, {super.userID, this.hold});
+
+  final _Hold? hold;
+  Uri? _homeserver;
+  bool _logged = true;
+
+  late final _answering = MockClient((request) async {
+    final held = hold;
+    if (held != null && held.armed && !held.reached.isCompleted) {
+      await held.pass();
+    }
+    return http.Response(
+      jsonEncode({
+        'm.homeserver': {'base_url': 'https://hs.$clientName'},
+      }),
+      200,
+    );
+  });
+
+  /// Gives the client its homeserver, as a boot that found one would have.
+  void announce() => _homeserver = _announcedBy(clientName);
+
+  @override
+  Uri? get homeserver => _homeserver;
+
+  @override
+  set homeserver(Uri? value) => _homeserver = value;
+
+  void useNetwork() => _logged = false;
+
+  @override
+  bool isLogged() => _logged;
+
+  @override
+  http.Client get httpClient => _answering;
+}
+
+/// The homeserver that [_WellKnownClient] `name` announces.
+Uri _announcedBy(String name) => Uri.parse('https://hs.$name');
+
 /// Registers the interceptors the ToM set-up writes and [repository]; returns
 /// the ToM server interceptor.
 DynamicUrlInterceptors _registerToM(
@@ -294,11 +408,28 @@ DynamicUrlInterceptors _registerToM(
   return tomServer;
 }
 
+/// The ToM repository [_registerToM] put in GetIt, for the provider that now
+/// builds it natively.
+final _tomFromGetIt = tomConfigurationsRepositoryProvider.overrideWith(
+  (ref) => getIt.get<ToMConfigurationsRepository>(),
+);
+
 ToMConfigurations _toM(String url) => ToMConfigurations(
   tomServerInformation: ToMServerInformation(baseUrl: Uri.parse(url)),
 );
 
 String _languageCode() => LocalizationService.currentLocale.value.languageCode;
+
+/// A service of the app wiring that these tests do not register, read
+/// directly or through a provider that failed on it.
+bool _isMissingWiring(Object error) {
+  Object current = error;
+  while (current is ProviderException) {
+    current = current.exception;
+  }
+  return current is StateError &&
+      current.message.contains('is not registered inside GetIt');
+}
 
 /// Waits, in real time, until [done] holds.
 Future<void> _until(bool Function() done) async {
@@ -378,9 +509,11 @@ class _Harness {
     AccountBootSnapshot snapshot = const AccountBootSnapshot(),
     List<Override> overrides = const [],
     bool disposeContainer = true,
+    bool tomFromGetIt = true,
   }) : container = ProviderContainer(
          retry: (_, _) => null,
          overrides: [
+           if (tomFromGetIt) _tomFromGetIt,
            accountClientDataSourceProvider.overrideWithValue(
              FakeAccountClientDataSource(),
            ),
@@ -399,10 +532,27 @@ class _Harness {
   MatrixState get matrix => tester.state<MatrixState>(find.byType(Matrix));
 
   /// The post-frame `initMatrix` needs the whole app wiring, which these tests
-  /// do not cover: its failures are dropped, what the tests read is set by
-  /// `initState` and by the subscriptions of `initMatrix`.
+  /// do not cover: the services it reads from GetIt are missing, and only
+  /// those failures are dropped. Any other error, of [body] or of the boot,
+  /// fails the test.
   Future<void> run(Future<void> Function() body) async {
-    await runZonedGuarded(body, (_, _) {});
+    final done = Completer<void>();
+    final unexpected = <Object>[];
+    runZonedGuarded(
+      () async {
+        try {
+          await body();
+          done.complete();
+        } catch (e, s) {
+          done.completeError(e, s);
+        }
+      },
+      (e, s) {
+        if (!_isMissingWiring(e)) unexpected.add(e);
+      },
+    );
+    await done.future;
+    expect(unexpected, isEmpty, reason: 'errors outside of the app wiring');
   }
 
   /// [routed]: the app navigator and the translations are there, for the
@@ -422,7 +572,6 @@ class _Harness {
               ? L10n.supportedLocales
               : const [Locale('en', 'US')],
           home: Matrix(
-            clients: clients,
             child: routed ? const Scaffold(body: SizedBox()) : const SizedBox(),
           ),
         ),
@@ -459,11 +608,7 @@ class _Harness {
 /// switch to `c` overtakes before [hold] lets it go.
 class _ToMOvertaking {
   _ToMOvertaking(WidgetTester tester, this.hold)
-    : harness = _Harness(tester, [
-        _ToMClient('a', userID: '@a:s'),
-        _ToMClient('b', userID: '@b:s'),
-        _ToMClient('c', userID: '@c:s'),
-      ]);
+    : harness = _toMHarness(tester);
 
   final _Harness harness;
   final _Hold hold;
@@ -488,6 +633,24 @@ class _ToMOvertaking {
     return applied;
   }
 }
+
+/// Accounts `a`, `b` and `c` with a ToM token. The login configuration
+/// persister, which the fresh-install fallback saves through, can be built:
+/// its federation repository is a fake, not the GetIt one.
+_Harness _toMHarness(WidgetTester tester) => _Harness(
+  tester,
+  [
+    _ToMClient('a', userID: '@a:s'),
+    _ToMClient('b', userID: '@b:s'),
+    _ToMClient('c', userID: '@c:s'),
+  ],
+  overrides: [
+    federationConfigurationsRepositoryProvider.overrideWithValue(
+      _RecordingFederation(),
+    ),
+    phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+  ],
+);
 
 /// A homeserver summary that announces a federation server.
 HomeserverSummary _summaryWithFederation() => HomeserverSummary(
@@ -619,6 +782,41 @@ void main() {
     expect(candidate.disposes, 1);
   });
 
+  testWidgets('the set-up of a login uses the authentication server of the '
+      'summary it is given, not the one the picker holds now', (tester) async {
+    HomeserverSummary summaryWith(String issuer) => HomeserverSummary(
+      discoveryInformation: DiscoveryInformation(
+        mHomeserver: HomeserverInformation(
+          baseUrl: Uri.parse('https://hs.example.com'),
+        ),
+        additionalProperties: {
+          'm.authentication': {'issuer': issuer},
+        },
+      ),
+      versions: GetVersionsResponse(versions: ['r1.6.0']),
+      loginFlows: [],
+    );
+    final client = _BootClient('a', userID: '@a:s');
+    final harness = _Harness(tester, [client]);
+
+    await harness.run(() async {
+      await harness.mount();
+      harness.container
+          .read(loginHomeserverSummaryProvider.notifier)
+          .set(summaryWith('https://auth.picked'));
+      try {
+        await harness.matrix.setUpToMServicesInLogin(
+          client,
+          summaryWith('https://auth.of-the-login'),
+        );
+      } catch (_) {
+        // The rest of the set-up needs the app wiring that is missing here.
+      }
+    });
+
+    expect(harness.matrix.authUrl, 'https://auth.of-the-login');
+  });
+
   testWidgets('MatrixState starts on the boot accounts that main overrode', (
     tester,
   ) async {
@@ -724,6 +922,36 @@ void main() {
 
     expect(harness.container.read(accountSwitchEffectsHolderProvider), isNull);
     expect(harness.container.read(pushRemovalsControllerProvider), isNull);
+  });
+
+  testWidgets('a sync of the account left behind does not look up its '
+      'support chat any more', (tester) async {
+    final left = _BootClient('a', userID: '@a:s');
+    final active = _BootClient('b', userID: '@b:s');
+    final supportChat = _RecordingSupportChat();
+    getIt.registerSingleton<CreateSupportChatInteractor>(supportChat);
+    final harness = _Harness(tester, [left, active]);
+
+    String? roomId;
+    await harness.run(() async {
+      await harness.mount();
+      harness.matrix
+        ..createSupportChat(left)
+        ..createSupportChat(active);
+      await tester.runAsync(() async {
+        left.onSync.add(SyncUpdate(nextBatch: 'a1'));
+        await Future<void>.delayed(Duration.zero);
+        active.onSync.add(SyncUpdate(nextBatch: 'b1'));
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      });
+      // The lookup listens in the test zone: its events need a pump.
+      await tester.pump();
+      roomId = harness.matrix.supportChatRoomId;
+      await harness.unmount();
+    });
+
+    expect(supportChat.lookedUp, ['b']);
+    expect(roomId, '!support-b');
   });
 
   testWidgets('one account whose subscriptions fail does not stop the boot', (
@@ -838,6 +1066,27 @@ void main() {
     expect(repository.saved, isEmpty);
   });
 
+  testWidgets('a switch still current stores the ToM configuration it '
+      'discovered', (tester) async {
+    // The positive case of the test above: there, an empty `saved` means the
+    // stale run was stopped, not that saving cannot work in this harness.
+    final repository = _FakeToMConfigurationsRepository({});
+    _registerToM(repository);
+    final harness = _toMHarness(tester);
+
+    await harness.run(() async {
+      final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
+      harness.matrix.loginHomeserverSummary = _summaryWithToM('https://tom.c');
+      await tester.runAsync(() => coordinator.apply(harness.clients[1]));
+    });
+
+    expect(repository.saved.keys, ['@b:s']);
+    expect(
+      repository.saved['@b:s']!.tomServerInformation.baseUrl,
+      Uri.parse('https://tom.c'),
+    );
+  });
+
   testWidgets('a superseded switch does not write the locale it resolved '
       'late', (tester) async {
     final stale = _BootClient('b', userID: '@b:s');
@@ -875,6 +1124,197 @@ void main() {
     });
 
     expect(_languageCode(), 'vi');
+  });
+
+  group('a switch that is overtaken stops writing the shared state', () {
+    // The switch to `stale` is held and the one to `c` overtakes it; `stale`
+    // goes on when the hold opens and must leave what `c` wrote.
+    Future<void> overtakeWith(
+      _Harness harness,
+      AccountSwitchEffects Function(MatrixState matrix) effects,
+      _Hold hold, {
+      int stale = 1,
+      void Function()? afterBoot,
+    }) async {
+      final coordinator = await harness.switchingWith(effects);
+      afterBoot?.call();
+      await harness.tester.runAsync(() async {
+        hold.armed = true;
+        final older = coordinator.apply(harness.clients[stale]);
+        await hold.reached.future;
+        await coordinator.apply(harness.clients[2]);
+        hold.gate.complete();
+        await older;
+      });
+    }
+
+    testWidgets('the homeserver summary of the account that overtook it '
+        'stays', (tester) async {
+      final hold = _Hold();
+      // `a` is the active account, so only the token tells its late result
+      // from the one of the account that is wanted.
+      final harness = _Harness(tester, [
+        _WellKnownClient('a', userID: '@a:s', hold: hold),
+        _WellKnownClient('b', userID: '@b:s'),
+        _WellKnownClient('c', userID: '@c:s'),
+      ]);
+
+      await harness.run(() async {
+        await overtakeWith(
+          harness,
+          _HomeserverOnlyEffects.new,
+          hold,
+          stale: 0,
+          // After the boot, which would otherwise fetch the well-known of the
+          // active account in the fake-async zone.
+          afterBoot: () => harness.clients.cast<_WellKnownClient>().forEach(
+            (client) => client
+              ..announce()
+              ..useNetwork(),
+          ),
+        );
+
+        expect(
+          harness
+              .matrix
+              .loginHomeserverSummary
+              ?.discoveryInformation
+              ?.mHomeserver
+              .baseUrl,
+          _announcedBy('c'),
+        );
+      });
+    });
+
+    testWidgets('the account that overtook it stays the persisted one', (
+      tester,
+    ) async {
+      final hold = _Hold();
+      final harness = _Harness(tester, [
+        _BootClient('a', userID: '@a:s'),
+        _BootClient('b', userID: '@b:s'),
+        _BootClient('c', userID: '@c:s'),
+      ]);
+
+      await harness.run(() async {
+        await overtakeWith(
+          harness,
+          (matrix) => _PersistingEffects(matrix, hold),
+          hold,
+        );
+
+        final persisted = await tester.runAsync(
+          () => harness.container
+              .read(accountRepositoryProvider)
+              .persistedActiveUserId(),
+        );
+        expect(persisted, '@c:s');
+      });
+    });
+
+    testWidgets('the ToM configuration read first by the switch that was '
+        'overtaken is not applied', (tester) async {
+      final repository = _GatedToMConfigurationsRepository(
+        {'@b:s': _toM('https://tom.b'), '@c:s': _toM('https://tom.c')},
+        gatedId: '@b:s',
+        heldRead: 1,
+        lateValue: _toM('https://tom.b'),
+      );
+      final tomServer = _registerToM(repository);
+
+      final applied = await _ToMOvertaking(tester, repository.hold).run();
+
+      expect(applied, isFalse);
+      expect(tomServer.baseUrl, 'https://tom.c');
+    });
+  });
+
+  group('a switch request that is overtaken', () {
+    /// `a` is active; the switch to `b` is held at its ToM read and the one to
+    /// `c` overtakes it. Returns what [first] answered for `b`.
+    Future<T?> overtaken<T>(
+      WidgetTester tester,
+      Future<T> Function(_Harness harness, Client b) first,
+    ) async {
+      final repository = _GatedToMConfigurationsRepository(
+        {'@b:s': _toM('https://tom.b'), '@c:s': _toM('https://tom.c')},
+        gatedId: '@b:s',
+        heldRead: 1,
+      );
+      _registerToM(repository);
+      final harness = _toMHarness(tester);
+      T? answer;
+      await harness.run(() async {
+        await harness.switchingWith(_ToMOnlyEffects.new);
+        await tester.runAsync(() async {
+          repository.hold.armed = true;
+          final pending = first(harness, harness.clients[1]);
+          await repository.hold.reached.future;
+          expect(
+            await harness.matrix.setActiveClient(harness.clients[2]),
+            SetActiveClientState.success,
+          );
+          repository.hold.gate.complete();
+          answer = await pending;
+        });
+      });
+      return answer;
+    }
+
+    testWidgets('is answered as superseded, not as unavailable', (
+      tester,
+    ) async {
+      final answer = await overtaken(
+        tester,
+        (harness, b) => harness.matrix.setActiveClient(b),
+      );
+
+      expect(answer, SetActiveClientState.superseded);
+    });
+
+    testWidgets('does not undo the login that asked for it', (tester) async {
+      final answer = await overtaken(
+        tester,
+        (harness, b) => harness.matrix.loginHost.switchTo(b),
+      );
+
+      expect(answer, isTrue);
+    });
+  });
+
+  testWidgets('an account is not settled while a switch away from it runs', (
+    tester,
+  ) async {
+    final repository = _GatedToMConfigurationsRepository(
+      {'@b:s': _toM('https://tom.b')},
+      gatedId: '@b:s',
+      heldRead: 1,
+    );
+    _registerToM(repository);
+    final harness = _toMHarness(tester);
+    final origin = harness.clients[0];
+    final target = harness.clients[1];
+    late List<bool> whileSwitching;
+
+    await harness.run(() async {
+      await harness.switchingWith(_ToMOnlyEffects.new);
+      expect(harness.matrix.isSettledOn(origin), isTrue);
+      await tester.runAsync(() async {
+        repository.hold.armed = true;
+        final switching = harness.matrix.setActiveClient(target);
+        await repository.hold.reached.future;
+        whileSwitching = [
+          harness.matrix.isSettledOn(origin),
+          harness.matrix.isSettledOn(target),
+        ];
+        repository.hold.gate.complete();
+        await switching;
+      });
+      expect(harness.matrix.isSettledOn(target), isTrue);
+      expect(harness.matrix.isSettledOn(origin), isFalse);
+    });
+
+    expect(whileSwitching, [false, false]);
   });
 
   group('the logout hand-over of MatrixState', () {
@@ -925,7 +1365,7 @@ void main() {
 
       expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
       expect(harness.container.read(activeMatrixClientProvider), isNull);
-      expect(coordinator.hasApplied, isFalse);
+      expect(coordinator.isAppliedTo(last), isFalse);
       expect(effects.applied, isEmpty);
     });
   });
@@ -968,6 +1408,7 @@ void main() {
       final harness = _Harness(
         tester,
         [client],
+        tomFromGetIt: false,
         overrides: [
           tomConfigurationsRepositoryProvider.overrideWithValue(_UnusedTom()),
           federationConfigurationsRepositoryProvider.overrideWithValue(

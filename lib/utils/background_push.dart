@@ -21,7 +21,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:collection/collection.dart';
 import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -33,6 +32,7 @@ import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/client_logout.dart';
+import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
@@ -711,46 +711,37 @@ class BackgroundPush {
       }
     }
 
-    final switchedClient = await _switchAccount(receiverId);
-    await goToRoom(roomId, eventId: eventId, switchedClient: switchedClient);
+    final outcome = await _switchAccount(receiverId);
+    if (outcome is NotificationAccountFailed) return;
+    await goToRoom(
+      roomId,
+      eventId: eventId,
+      switchedClient: outcome is NotificationAccountSwitched
+          ? outcome.client
+          : null,
+    );
   }
 
   /// Switches the active client to the account matching [receiverId], if it
   /// differs from the current one.
   ///
-  /// Returns the newly active [Client] when a switch happened, so callers
-  /// can propagate it to navigation and force dependent UI (e.g. the bottom
-  /// bar avatar) to refresh.
-  Future<Client?> _switchAccount(String? receiverId) async {
-    Client? targetClient;
-    if (receiverId != null && _matrixState != null) {
-      targetClient = _matrixState!.accountClients.firstWhereOrNull(
-        (c) => c.userID == receiverId,
-      );
-      if (targetClient != null &&
-          targetClient.userID != _matrixState!.client.userID) {
-        Logs().d(
-          '[Push] Switching to account ${targetClient.userID} for notification',
-        );
-        if (!await _setActive(targetClient)) return null;
-        await _matrixState!.cancelContactsLookup();
-        return targetClient;
-      }
-    }
-    return null;
+  /// The outcome carries the newly active [Client] when a switch happened, so
+  /// callers can propagate it to navigation and force dependent UI (e.g. the
+  /// bottom bar avatar) to refresh, and tells a failed switch from none
+  /// needed.
+  Future<NotificationAccountOutcome> _switchAccount(String? receiverId) async {
+    final host = _matrixState;
+    if (host == null) return const NotificationAccountReady();
+    return NotificationAccountSwitch(host).switchTo(receiverId);
   }
 
-  /// True only when [target] is the active account afterwards.
-  Future<bool> _setActive(Client target) async {
-    try {
-      final result = await _matrixState!.setActiveClient(target);
-      if (result.isSuccess) return true;
-      Logs().w('[Push] Cannot switch to account ${target.clientName}: $result');
-    } catch (e, s) {
-      Logs().w('[Push] Cannot switch to account ${target.clientName}', e, s);
-    }
-    return false;
-  }
+  /// [client] is set once and does not follow the active account: when its
+  /// account logged out and another one stays, a client the app already runs
+  /// for that one serves the push.
+  Client get _pushClient => ClientManager.serving(
+    client,
+    _matrixState?.currentClients.whereType<Client>() ?? const [],
+  );
 
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
@@ -781,11 +772,14 @@ class BackgroundPush {
     Logs().d(
       'BackgroundPush::onSelectNotification() roomId - ${payload.roomId} ||eventId - $eventId',
     );
-    final switchedClient = await _switchAccount(payload.receiverId);
+    final outcome = await _switchAccount(payload.receiverId);
+    if (outcome is NotificationAccountFailed) return;
     await goToRoom(
       payload.roomId,
       eventId: eventId,
-      switchedClient: switchedClient,
+      switchedClient: outcome is NotificationAccountSwitched
+          ? outcome.client
+          : null,
     );
   }
 

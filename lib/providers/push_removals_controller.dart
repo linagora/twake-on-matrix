@@ -16,9 +16,10 @@ class PushRemovalsController extends _$PushRemovalsController {
 
   void setTeardown(PushTeardown teardown) => state = teardown;
 
-  /// Clears [teardown] only when it is still the one set.
+  /// Clears [teardown] only when it is still the one set. Does nothing once
+  /// the container is disposed: `MatrixState.dispose` can run after it.
   void clearTeardown(PushTeardown teardown) {
-    if (identical(state, teardown)) state = null;
+    if (ref.mounted && identical(state, teardown)) state = null;
   }
 
   /// The push teardown of [target], to run before its logout (while the

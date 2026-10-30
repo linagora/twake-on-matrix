@@ -13,7 +13,6 @@ import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 
@@ -38,7 +37,6 @@ class _SdkClient extends FakeAccountClient {
 }
 
 void main() {
-  _legacyPushTests();
   late ProviderContainer container;
   late List<String?> seen;
 
@@ -50,7 +48,6 @@ void main() {
         accountClientDataSourceProvider.overrideWithValue(
           FakeAccountClientDataSource(),
         ),
-        accountsDriveActiveClientProvider.overrideWithValue(true),
         bootClientsProvider.overrideWithValue(clients),
         bootAccountSnapshotProvider.overrideWithValue(
           const AccountBootSnapshot(),
@@ -152,7 +149,6 @@ void main() {
         final fixed = ProviderContainer.test(
           retry: (_, _) => null,
           overrides: [
-            accountsDriveActiveClientProvider.overrideWithValue(true),
             accountsProvider.overrideWith(() => _FixedAccounts(state)),
             accountClientRegistryProvider.overrideWithValue(registry),
           ],
@@ -162,42 +158,6 @@ void main() {
         expect(fixed.read(activeUserIdProvider), userId);
       });
     }
-  });
-}
-
-void _legacyPushTests() {
-  group('before the account providers drive the active client', () {
-    test(
-      'both follow the client MatrixState pushes, with no boot override',
-      () {
-        final a = _SdkClient('a', userId: '@a:s');
-        final container = ProviderContainer.test(retry: (_, _) => null);
-        expect(container.read(activeMatrixClientProvider), isNull);
-        expect(container.read(activeUserIdProvider), isNull);
-
-        container.read(legacyActiveClientProvider.notifier).setClient(a);
-        expect(container.read(activeMatrixClientProvider), same(a));
-        expect(container.read(activeUserIdProvider), '@a:s');
-
-        container.read(legacyActiveClientProvider.notifier).setClient(null);
-        expect(container.read(activeMatrixClientProvider), isNull);
-        expect(container.read(activeUserIdProvider), isNull);
-      },
-    );
-
-    test('pushing the same client again after the SDK logged it in in place '
-        'updates the user id', () {
-      final a = _SdkClient('a');
-      final container = ProviderContainer.test(retry: (_, _) => null);
-      container.read(legacyActiveClientProvider.notifier).setClient(a);
-      expect(container.read(activeUserIdProvider), isNull);
-
-      a.logIn('@a:s');
-      container.read(legacyActiveClientProvider.notifier).setClient(a);
-
-      expect(container.read(activeMatrixClientProvider), same(a));
-      expect(container.read(activeUserIdProvider), '@a:s');
-    });
   });
 }
 

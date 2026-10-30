@@ -138,10 +138,8 @@ class AccountSwitchCoordinator {
   /// effects applied: only then is there a configuration to put back.
   bool _originApplied = false;
 
-  /// True once the effects of the active account ran to their end and no run
-  /// has started since.
-  bool get hasApplied => _effects is _Applied;
-
+  /// True once the effects of [client] ran to their end and no run has
+  /// started since.
   bool isAppliedTo(Client client) => switch (_effects) {
     _Applied(client: final applied) => identical(applied, client),
     _ => false,
@@ -187,6 +185,9 @@ class AccountSwitchCoordinator {
       _restoreOrigin(endedOn);
     }
     if (next is! Switching) return;
+    // The same switch with one more account in the list (a login that ended
+    // meanwhile): the run that is going on stays valid.
+    if (previous is Switching && previous.seq == next.seq) return;
     if (previous is! Switching) _noteOrigin(next.from);
     await _runSwitch(next);
   }

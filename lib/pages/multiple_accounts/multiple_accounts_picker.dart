@@ -2,8 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
 import 'package:twake_chat/presentation/multiple_account/twake_chat_presentation_account.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/widgets/set_active_client_state.dart';
 import 'package:twake_chat/widgets/twake_components/twake_header_style.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -74,7 +76,7 @@ class MultipleAccountsPickerController {
     final client = multipleAccounts
         .firstWhereOrNull((element) => element.accountId == account.accountId)
         ?.clientAccount;
-    if (client == null || client == _matrixState.client) return;
+    if (client == null || _matrixState.isSettledOn(client)) return;
     await _setActiveClient(client);
   }
 
@@ -85,21 +87,32 @@ class MultipleAccountsPickerController {
   }
 
   Future<void> _setActiveClient(Client newClient) async {
+    var switched = false;
     try {
       TwakeDialog.showLoadingDialog(context);
       final result = await _matrixState.setActiveClient(newClient);
-      if (result.isSuccess) {
+      switched = result.isSuccess;
+      if (switched) {
         await _matrixState.cancelContactsLookup();
         if (!context.mounted) return;
         context.go(
           '/rooms',
           extra: SwitchActiveAccountBodyArgs(newActiveClient: newClient),
         );
+      } else if (result != SetActiveClientState.superseded) {
+        // A superseded request is answered by the newer one.
+        _showNotSwitched();
       }
     } catch (e) {
       Logs().e('MultipleAccountsPickerController::_setActiveClient', e);
+      if (!switched) _showNotSwitched();
     } finally {
       if (context.mounted) TwakeDialog.hideLoadingDialog(context);
     }
+  }
+
+  void _showNotSwitched() {
+    if (!context.mounted) return;
+    TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
   }
 }

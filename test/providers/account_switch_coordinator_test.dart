@@ -12,7 +12,10 @@ import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
+import 'package:twake_chat/data/account/push_teardown.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
+import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
@@ -21,6 +24,17 @@ import '../data/account/fakes.dart';
 
 /// A client that can log in after it was adopted, as the placeholder of a
 /// first login does.
+class _PushTeardown implements PushTeardown {
+  @override
+  bool get isPushReady => true;
+
+  @override
+  Future<void> removePush(Client target) async {}
+
+  @override
+  void report(Object error, StackTrace stackTrace, String what) {}
+}
+
 class LoginableClient extends FakeAccountClient {
   LoginableClient(super.clientName, {super.userID}) : super(logged: false);
 
@@ -105,6 +119,10 @@ void main() {
   late FakeAccountClient a;
   late FakeAccountClient b;
   late FakeAccountClient c;
+
+  /// True when the effects of [a], [b], [c] or one of [others] are applied.
+  bool anyApplied([List<Client> others = const []]) =>
+      [a, b, c, ...others].any(coordinator.isAppliedTo);
 
   const fullRun = [
     'voip',
@@ -208,8 +226,7 @@ void main() {
   }
 
   void expectNotAppliedFor(Client client, {Client? pending}) {
-    expect(coordinator.hasApplied, isFalse);
-    expect(coordinator.isAppliedTo(client), isFalse);
+    expect(anyApplied([client]), isFalse);
     expect(coordinator.target, pending == null ? isNull : same(pending));
   }
 
@@ -266,7 +283,6 @@ void main() {
 
       effects.gates['tom:a']!.complete();
       expect(await applying, isTrue);
-      expect(coordinator.hasApplied, isTrue);
       expect(coordinator.isAppliedTo(only), isTrue);
       expect(coordinator.target, isNull);
 
@@ -281,7 +297,7 @@ void main() {
       await switchTo('b');
       expect(effects.log, fullRunFor('b'));
       expect((state() as Active).activeId, 'b');
-      expect(coordinator.hasApplied, isTrue);
+      expect(coordinator.isAppliedTo(b), isTrue);
       expect(coordinator.target, isNull);
     });
 
@@ -326,12 +342,12 @@ void main() {
     test('the origin that was never applied is not restored', () async {
       effects.failing.add('homeserver:b');
       boot();
-      expect(coordinator.hasApplied, isFalse);
+      expect(anyApplied(), isFalse);
       await expectOriginNotRestored(
         expectLater(switchTo('b'), throwsStateError),
       );
 
-      expect(coordinator.hasApplied, isFalse);
+      expect(anyApplied(), isFalse);
     });
 
     test('an origin applied before a failed switch is restored even when '
@@ -371,6 +387,29 @@ void main() {
   });
 
   group('stale switch', () {
+    test(
+      'an account that logs in during a switch does not run it again',
+      () async {
+        effects.gates['tom:b'] = Completer<void>();
+        boot(clients: [a, b]);
+        container.read(accountClientRegistryProvider).add(c);
+        final switching = switchTo('b');
+        await pump();
+
+        await container
+            .read(accountsProvider.notifier)
+            .addAccount(const AccountId('c'));
+        await pump();
+        effects.gates['tom:b']!.complete();
+        await switching;
+        await settle();
+
+        expect(effects.log, fullRunFor('b'));
+        expect((state() as Active).activeId, 'b');
+        expect(coordinator.isAppliedTo(b), isTrue);
+      },
+    );
+
     test('an apply from elsewhere makes the running switch fail, not '
         'complete', () async {
       effects.gates['tom:b'] = Completer<void>();
@@ -435,6 +474,23 @@ void main() {
         'sentry:c',
       ]);
     });
+  });
+
+  group('a switch replaced while a step is held', () {
+    const steps = ['tom', 'persist', 'userInfo', 'homeserver'];
+    for (var held = 0; held < steps.length; held++) {
+      test('at ${steps[held]} it runs no step after it', () async {
+        boot();
+
+        await replaceHeldSwitchToB(steps[held]);
+
+        expect(
+          effects.log.where((e) => e.endsWith(':b')),
+          steps.sublist(0, held + 1).map((step) => '$step:b'),
+        );
+        expect((state() as Active).activeId, 'c');
+      });
+    }
   });
 
   group('generation token', () {
@@ -530,7 +586,7 @@ void main() {
       effects.failing.add('homeserver');
       await expectFailedSwitch(throwsStateError);
       expect(coordinator.isAppliedTo(a), isFalse);
-      expect(coordinator.hasApplied, isFalse);
+      expect(anyApplied(), isFalse);
 
       effects.failing.clear();
       expect(await coordinator.activateCurrent(), isTrue);
@@ -806,7 +862,7 @@ void main() {
         await accounts.logoutLast();
 
         expect(state(), isA<NoAccount>());
-        expect(coordinator.hasApplied, isFalse);
+        expect(anyApplied(), isFalse);
       },
     );
 
@@ -819,7 +875,7 @@ void main() {
       only.loggedIn = false;
       await container.read(accountsProvider.notifier).logoutLast();
       expect(state(), isA<LastLoggedOut>());
-      expect(coordinator.hasApplied, isFalse);
+      expect(anyApplied(), isFalse);
       expect(coordinator.isAppliedTo(only), isFalse);
 
       only.loggedIn = true;
@@ -842,7 +898,7 @@ void main() {
       effects.gates['userInfo:a']!.complete();
       expect(await activation, isFalse);
 
-      expect(coordinator.hasApplied, isFalse);
+      expect(anyApplied([only]), isFalse);
       expect(effects.log, isNot(contains('homeserver:a')));
     });
   });
@@ -885,10 +941,10 @@ void main() {
       'apply runs the effects for the active account with no switch',
       () async {
         boot();
-        expect(coordinator.hasApplied, isFalse);
+        expect(anyApplied(), isFalse);
         expect(await coordinator.apply(a), isTrue);
         expect(effects.log, fullRunFor('a'));
-        expect(coordinator.hasApplied, isTrue);
+        expect(coordinator.isAppliedTo(a), isTrue);
         expect((state() as Active).activeId, 'a');
       },
     );
@@ -925,12 +981,12 @@ void main() {
       expect(coordinator.target, isNull);
       final current = state();
       if (current is LastLoggedOut || current is NoAccount) {
-        expect(coordinator.hasApplied, isFalse);
+        expect(anyApplied(), isFalse);
       }
       if (current is Active) {
         final active = {'a': a, 'b': b, 'c': c}[current.activeId]!;
         expect(
-          !coordinator.hasApplied || coordinator.isAppliedTo(active),
+          !anyApplied() || coordinator.isAppliedTo(active),
           isTrue,
           reason: 'what is applied is the active account, or nothing',
         );
@@ -974,5 +1030,43 @@ void main() {
         );
       }
     }
+  });
+
+  group('effects holder', () {
+    test('clearing after the container is disposed does nothing', () {
+      final holderContainer = ProviderContainer.test(retry: (_, _) => null);
+      final holder = holderContainer.read(
+        accountSwitchEffectsHolderProvider.notifier,
+      );
+      holder.set(effects);
+      holderContainer.dispose();
+
+      expect(() => holder.clear(effects), returnsNormally);
+    });
+
+    test('clearing the push teardown after dispose does nothing', () {
+      final holderContainer = ProviderContainer.test(retry: (_, _) => null);
+      final controller = holderContainer.read(
+        pushRemovalsControllerProvider.notifier,
+      );
+      final teardown = _PushTeardown();
+      controller.setTeardown(teardown);
+      holderContainer.dispose();
+
+      expect(() => controller.clearTeardown(teardown), returnsNormally);
+    });
+
+    test('clears only the effects still set', () {
+      final holderContainer = ProviderContainer.test(retry: (_, _) => null);
+      final holder = holderContainer.read(
+        accountSwitchEffectsHolderProvider.notifier,
+      );
+      holder.set(effects);
+      holder.clear(FakeSwitchEffects());
+      expect(holderContainer.read(accountSwitchEffectsHolderProvider), effects);
+
+      holder.clear(effects);
+      expect(holderContainer.read(accountSwitchEffectsHolderProvider), isNull);
+    });
   });
 }

@@ -14,7 +14,6 @@ import 'package:twake_chat/data/account/datasources_impl/client_manager_account_
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/data/account/logout_removal_plan.dart';
 
 import 'fakes.dart';
@@ -42,7 +41,6 @@ void main() {
     container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
-        accountsDriveActiveClientProvider.overrideWithValue(true),
         accountClientDataSourceProvider.overrideWithValue(dataSource),
         bootClientsProvider.overrideWithValue(clients),
         bootAccountSnapshotProvider.overrideWithValue(

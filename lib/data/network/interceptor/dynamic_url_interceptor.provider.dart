@@ -13,3 +13,10 @@ DynamicUrlInterceptors tomServerUrlInterceptor(Ref ref) =>
     getIt.get<DynamicUrlInterceptors>(
       instanceName: NetworkDI.tomServerUrlInterceptorName,
     );
+
+// TODO: [transitional] TW-3302 Bridge: the interceptor registered under
+// [name] (`NetworkDI.*InterceptorName`) is the GetIt singleton the legacy
+// Dio clients of NetworkDI share; kept alive like it.
+@Riverpod(keepAlive: true)
+DynamicUrlInterceptors dynamicUrlInterceptors(Ref ref, String name) =>
+    getIt.get<DynamicUrlInterceptors>(instanceName: name);

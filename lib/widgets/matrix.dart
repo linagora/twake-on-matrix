@@ -39,14 +39,16 @@ import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/domain/account/exceptions/account_exception.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
-import 'package:twake_chat/providers/account_usecase_providers.dart';
+import 'package:twake_chat/domain/account/usecases/create_account_candidate_usecase.provider.dart';
+import 'package:twake_chat/domain/account/usecases/prune_pending_push_removals_usecase.provider.dart';
+import 'package:twake_chat/domain/account/usecases/retryable_push_removals_usecase.provider.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/configuration_repository_providers.dart';
-import 'package:twake_chat/providers/url_interceptor_providers.dart';
+import 'package:twake_chat/data/repository/federation_configurations_repository_impl.provider.dart';
+import 'package:twake_chat/data/repository/tom_configurations_repository_impl.provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/data/account/client_subscriptions.dart';
@@ -67,6 +69,7 @@ import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
+import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -108,16 +111,9 @@ import 'local_notifications_extension.dart';
 class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
 
-  final List<Client> clients;
-
   final Map<String, String>? queryParameters;
 
-  const Matrix({
-    this.child,
-    required this.clients,
-    this.queryParameters,
-    super.key,
-  });
+  const Matrix({this.child, this.queryParameters, super.key});
 
   @override
   MatrixState createState() => MatrixState();
@@ -135,7 +131,7 @@ class MatrixState extends ConsumerState<Matrix>
         ReceiveSharingIntentMixin,
         InitConfigMixin,
         ConnectivityMixin
-    implements AccountSwitchEffects {
+    implements AccountSwitchEffects, NotificationAccountHost {
   AudioPlayer audioPlayer = AudioPlayer();
   final ValueNotifier<Event?> voiceMessageEvent = ValueNotifier(null);
 
@@ -174,11 +170,10 @@ class MatrixState extends ConsumerState<Matrix>
 
   BackgroundPush? backgroundPush;
 
-  bool get isValidActiveClient =>
-      _switchCoordinator.hasApplied &&
-      ref.read(activeMatrixClientProvider) != null;
+  bool get isValidActiveClient => ref.read(activeMatrixClientProvider) != null;
 
   /// Every account the app lists (the former `widget.clients`).
+  @override
   List<Client> get accountClients => ref.read(accountClientsProvider);
 
   /// The client whose HTTP client is closed with this state. `ref` is unsafe
@@ -221,6 +216,14 @@ class MatrixState extends ConsumerState<Matrix>
   RequestTokenResponse? currentThreepidCreds;
   String? supportChatRoomId;
 
+  /// True when [target] is the active account and no switch away from it is
+  /// running. During a switch the active account is still the one being left,
+  /// and asking for it cancels the switch, so it is not "already active".
+  @override
+  bool isSettledOn(Client target) =>
+      ref.read(accountsProvider) is! Switching && target == client;
+
+  @override
   Future<SetActiveClientState> setActiveClient(Client? newClient) async {
     final id = newClient?.clientName;
     if (newClient == null || !accountClients.any((c) => c.clientName == id)) {
@@ -248,8 +251,9 @@ class MatrixState extends ConsumerState<Matrix>
       );
       return SetActiveClientState.unavailable;
     } on SwitchSupersededException {
-      // A newer request won: this one did not make the account active.
-      return SetActiveClientState.unavailable;
+      // A newer request won: this one did not make the account active, but
+      // the account itself is fine.
+      return SetActiveClientState.superseded;
     }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.activeId == id) {
@@ -291,41 +295,47 @@ class MatrixState extends ConsumerState<Matrix>
         scope.setUser(SentryUser(username: client.userID, name: client.userID)),
   );
 
+  /// The support chat lookup of the active account. Kept to be cancelled by
+  /// the next run: a sync of an account left behind must not write its room
+  /// with the discovery of the account now active.
+  StreamSubscription? _supportChatSyncSubscription;
+  StreamSubscription? _supportChatSubscription;
+
+  void _cancelSupportChat() {
+    _supportChatSyncSubscription?.cancel();
+    _supportChatSyncSubscription = null;
+    _supportChatSubscription?.cancel();
+    _supportChatSubscription = null;
+  }
+
   @override
   void createSupportChat(Client client) {
+    _cancelSupportChat();
     Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
-    StreamSubscription? syncListener;
-    syncListener = client.onSync.stream.listen((_) {
+    _supportChatSyncSubscription = client.onSync.stream.listen((_) {
       if (createSupportChatState is! CreateSupportChatInitial) return;
       createSupportChatState = CreatingSupportChat();
-      StreamSubscription? createSupportChatListener;
-      createSupportChatListener = getIt
+      _supportChatSubscription = getIt
           .get<CreateSupportChatInteractor>()
           .execute(
             client,
             cachedDiscovery: loginHomeserverSummary?.discoveryInformation,
           )
-          .listen(
-            (state) {
-              createSupportChatState = state.fold(
-                (failure) => failure,
-                (success) => success,
-              );
-              supportChatRoomId = state.fold(
-                (failure) => null,
-                (success) => switch (success) {
-                  SupportChatExisted(:final roomId) => roomId,
-                  SupportChatCreated(:final roomId) => roomId,
-                  _ => null,
-                },
-              );
-            },
-            onDone: () {
-              createSupportChatListener?.cancel();
-              syncListener?.cancel();
-            },
-          );
+          .listen((state) {
+            createSupportChatState = state.fold(
+              (failure) => failure,
+              (success) => success,
+            );
+            supportChatRoomId = state.fold(
+              (failure) => null,
+              (success) => switch (success) {
+                SupportChatExisted(:final roomId) => roomId,
+                SupportChatCreated(:final roomId) => roomId,
+                _ => null,
+              },
+            );
+          }, onDone: _cancelSupportChat);
     });
   }
 
@@ -944,8 +954,11 @@ class MatrixState extends ConsumerState<Matrix>
       await _handleLastLogout(loggedOut: currentClient);
       return;
     }
+    // Waits for a switch that started meanwhile: applying the replacement
+    // now would overtake it. Read after the wait, a switch may have replaced
+    // it.
+    await _switchCoordinator.activateCurrent();
     final newActiveClient = client;
-    await _switchCoordinator.apply(newActiveClient);
     // Push serves one account: the replacement gets its pusher now.
     if (PlatformInfos.isMobile && newActiveClient.isLogged()) {
       backgroundPush?.rebindFrom(currentClient, newActiveClient);
@@ -1262,7 +1275,7 @@ class MatrixState extends ConsumerState<Matrix>
     final homeServer =
         loginSummary?.discoveryInformation?.mHomeserver.baseUrl ??
         client.homeserver;
-    _setupAuthUrl();
+    _setupAuthUrl(summary: loginSummary);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -1665,12 +1678,15 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  void _setupAuthUrl({String? url}) {
+  /// Without [url], the authentication server comes from [summary], or from
+  /// the one the picker holds when none is given. A login set-up that is
+  /// retried passes the summary of its own login.
+  void _setupAuthUrl({String? url, HomeserverSummary? summary}) {
     if (url != null) {
       Logs().e('Matrix::_setupAuthUrl: newAuthUrl - $url');
       _authUrl = url;
     } else {
-      final authData = loginHomeserverSummary
+      final authData = (summary ?? loginHomeserverSummary)
           ?.discoveryInformation
           ?.additionalProperties["m.authentication"];
       final newAuthUrl = authData is Map<String, dynamic>
@@ -1726,6 +1742,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   /// Stops the phonebook lookup in progress (logout, account switch): its
   /// results belong to the account that started it.
+  @override
   Future<void> cancelContactsLookup() =>
       ref.read(phonebookResolverProvider).cancel();
 
@@ -1929,6 +1946,7 @@ class MatrixState extends ConsumerState<Matrix>
     audioPlayer.dispose();
     voiceMessageEvent.dispose();
     _presenceSubscription?.cancel();
+    _cancelSupportChat();
     onLatestPresenceChanged.close();
     super.dispose();
   }
@@ -2078,8 +2096,12 @@ class _MatrixLoginHost implements LoginHost {
       .firstWhereOrNull((c) => c.clientName == id.value);
 
   @override
-  Future<bool> switchTo(Client client) async =>
-      (await _state.setActiveClient(client)).isSuccess;
+  Future<bool> switchTo(Client client) async {
+    final result = await _state.setActiveClient(client);
+    // A newer switch took the active place: the account is still stored and
+    // logged in, so the login does not fail for it.
+    return result.isSuccess || result == SetActiveClientState.superseded;
+  }
 
   @override
   Future<void> applyEffects(Client client) =>

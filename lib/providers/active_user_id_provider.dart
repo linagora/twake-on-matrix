@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 
 part 'active_user_id_provider.g.dart';
 
@@ -15,10 +14,6 @@ part 'active_user_id_provider.g.dart';
 /// A `String?`, so consumers keyed on it rebuild only when the user changes.
 @Riverpod(keepAlive: true)
 String? activeUserId(Ref ref) {
-  // TODO: [transitional] TW-3302 - removed in 5/5 with the legacy push.
-  if (!ref.watch(accountsDriveActiveClientProvider)) {
-    return ref.watch(legacyActiveClientProvider).userId;
-  }
   final state = ref.watch(accountsProvider);
   final id = switch (state) {
     Active(:final activeId) => activeId,

@@ -96,7 +96,7 @@ Future<void> initializeApp() async {
       Logs().w('No logged-in client to serve push in background-fetch mode.');
     }
     // To start the flutter engine afterwards we add an custom observer.
-    WidgetsBinding.instance.addObserver(AppStarter(clients, container));
+    WidgetsBinding.instance.addObserver(AppStarter(container));
     Logs().i(
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
@@ -113,7 +113,7 @@ Future<void> initializeApp() async {
   Logs().i(
     '${AppConfig.applicationName} started in foreground mode. Rendering GUI...',
   );
-  await startGui(clients, container);
+  await startGui(container);
 }
 
 /// Opts the Android `image_picker` implementation into the modern, system
@@ -130,7 +130,7 @@ void _enableAndroidPhotoPicker() {
 }
 
 /// Fetch the pincode for the applock and start the flutter engine.
-Future<void> startGui(List<Client> clients, ProviderContainer container) async {
+Future<void> startGui(ProviderContainer container) async {
   // Fetch the pin for the applock if existing for mobile applications.
   String? pin;
   if (PlatformInfos.isMobile) {
@@ -152,11 +152,11 @@ Future<void> startGui(List<Client> clients, ProviderContainer container) async {
       container: container,
       child: PlatformInfos.isMobile
           ? AppLock(
-              builder: (args) => TwakeApp(clients: clients),
+              builder: (args) => const TwakeApp(),
               lockScreen: const LockScreen(),
               enabled: pin?.isNotEmpty ?? false,
             )
-          : TwakeApp(clients: clients),
+          : const TwakeApp(),
     ),
   );
 }
@@ -164,11 +164,10 @@ Future<void> startGui(List<Client> clients, ProviderContainer container) async {
 /// Watches the lifecycle changes to start the application when it
 /// is no longer detached.
 class AppStarter with WidgetsBindingObserver {
-  final List<Client> clients;
   final ProviderContainer container;
   bool guiStarted = false;
 
-  AppStarter(this.clients, this.container);
+  AppStarter(this.container);
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -178,7 +177,7 @@ class AppStarter with WidgetsBindingObserver {
     Logs().i(
       '${AppConfig.applicationName} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
     );
-    unawaited(startGui(clients, container));
+    unawaited(startGui(container));
     // We must make sure that the GUI is only started once.
     guiStarted = true;
   }

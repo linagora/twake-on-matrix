@@ -52,35 +52,10 @@ class _FailingCancel implements StreamSubscription<LoginState> {
   Future<E> asFuture<E>([E? futureValue]) => _inner.asFuture(futureValue);
 }
 
-void _legacyLoginClientTests() {
-  group('with no login host attached', () {
-    test('a login uses the legacy client and runs as before', () async {
-      final legacy = FakeAccountClient('legacy');
-      final sessions = LoginSessions()
-        ..setLegacyLoginClient(() async => legacy);
-
-      expect(await sessions.loginClient(), same(legacy));
-      expect(await sessions.trackLogin(legacy, () async => 42), 42);
-    });
-
-    test('without the legacy client it fails as before', () {
-      expect(LoginSessions().loginClient(), throwsStateError);
-    });
-
-    test('an attached host wins over the legacy client', () async {
-      final host = FakeLoginHost();
-      final legacy = FakeAccountClient('legacy');
-      final sessions = LoginSessions()
-        ..setLegacyLoginClient(() async => legacy)
-        ..attach(host);
-
-      expect(await sessions.loginClient(), isNot(same(legacy)));
-    });
-  });
-}
-
 void main() {
-  _legacyLoginClientTests();
+  test('with no login host attached a login client cannot be had', () {
+    expect(LoginSessions().loginClient(), throwsStateError);
+  });
   late FakeLoginHost host;
   late LoginSessions sessions;
 

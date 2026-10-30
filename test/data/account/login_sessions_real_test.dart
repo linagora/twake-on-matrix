@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/account/entities/account.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.provider.dart';
@@ -192,10 +193,14 @@ class _RealHost implements LoginHost {
       _step('registerSubs:${id.value}');
 
   @override
-  Future<void> setUpToM(Client client) => _step('tom:${client.clientName}');
+  HomeserverSummary? get loginHomeserverSummary => null;
 
   @override
-  Future<void> setUpFederation(Client client) =>
+  Future<void> setUpToM(Client client, HomeserverSummary? summary) =>
+      _step('tom:${client.clientName}');
+
+  @override
+  Future<void> setUpFederation(Client client, HomeserverSummary? summary) =>
       _step('federation:${client.clientName}');
 
   @override
