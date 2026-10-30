@@ -30,6 +30,7 @@ class _FakeController extends SettingsContactsVisibilityController {
   Completer<SettingsContactsVisibilityState>? _pendingLoad;
   final Future<void> Function(_FakeController controller)? onSelect;
   final List<SettingsContactsVisibilityEnum> selected = [];
+  final List<VisibleEnum> toggled = [];
 
   @override
   Future<SettingsContactsVisibilityState> build() async =>
@@ -39,6 +40,12 @@ class _FakeController extends SettingsContactsVisibilityController {
   Future<void> selectVisibility(SettingsContactsVisibilityEnum option) async {
     selected.add(option);
     await onSelect?.call(this);
+    if (failUpdate) throw UpdateUserInfoVisibilityException(Exception('mock'));
+  }
+
+  @override
+  Future<void> toggleVisibleField(VisibleEnum field) async {
+    toggled.add(field);
     if (failUpdate) throw UpdateUserInfoVisibilityException(Exception('mock'));
   }
 
@@ -176,5 +183,20 @@ void main() {
       find.byKey(const Key('visibility_option_selected_public')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a failed field update shows a snackbar and closes the dialog', (
+    tester,
+  ) async {
+    final controller = _FakeController(failUpdate: true);
+    await pumpScreen(tester, controller);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('visible_field_option_phone')));
+    await tester.pumpAndSettle();
+
+    expect(controller.toggled, [VisibleEnum.phone]);
+    expect(find.text('Failed to change contacts visibility'), findsOneWidget);
+    expect(loadingDialog, findsNothing);
   });
 }
