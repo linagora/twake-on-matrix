@@ -80,17 +80,8 @@ class LogoutRemovals {
   final int maxRetryRounds;
   final Random _random;
   final Map<String, _Removal> _removals = {};
-  final Set<String> _running = {};
-  Timer? _timer;
-
-  /// Set while the server's last wait has not passed.
-  Timer? _rateLimit;
+  final Map<String, Future<void>> _running = {};
   bool _disposed = false;
-  int _retryRounds = 0;
-
-  /// The longest wait a server asked for since the last round; used for the
-  /// next one.
-  Duration _serverDelay = Duration.zero;
 
   /// The accounts whose removal, or what follows it, is not done yet.
   @visibleForTesting
@@ -101,7 +92,7 @@ class LogoutRemovals {
   /// run that has already started stays pending until it settles. What follows
   /// a removal (settling) does not count, except for that forgotten run.
   bool isPending(String id) =>
-      (_running.contains(id) && !_removals.containsKey(id)) ||
+      (_running.containsKey(id) && !_removals.containsKey(id)) ||
       !(_removals[id]?.removed ?? true);
 
   /// Runs the steps for [id], or the ones that are left when [id] was started
@@ -110,35 +101,46 @@ class LogoutRemovals {
   /// not, and waits for the server's last wait. Read [isPending] to know
   /// whether the account is removed.
   Future<void> remove(String id, RemovalSteps steps, ReportFailure report) {
-    if (_removals.containsKey(id)) {
-      if (_serverAskedToWait) return Future.value();
-    } else {
-      _retryRounds = 0;
-    }
+    if (_removals[id]?.serverAskedToWait ?? false) return Future.value();
     return _remove(id, steps, report);
   }
-
-  /// True while the last wait the server asked for has not passed. The one
-  /// gate of every try that repeats a kept removal on demand.
-  bool get _serverAskedToWait => _rateLimit != null;
 
   Future<void> _remove(
     String id,
     RemovalSteps steps,
     ReportFailure report,
   ) async {
-    if (!_running.add(id)) return;
+    final inFlight = _running[id];
+    if (inFlight != null) {
+      if (_removals.containsKey(id)) return;
+      // A forgotten run is still in flight: run the new steps once it ends,
+      // instead of dropping them with no record and no retry.
+      await inFlight;
+      return _remove(id, steps, report);
+    }
+    final run = _start(id, steps, report);
+    _running[id] = run;
+    try {
+      await run;
+    } finally {
+      if (identical(_running[id], run)) _running.remove(id);
+    }
+  }
+
+  Future<void> _start(
+    String id,
+    RemovalSteps steps,
+    ReportFailure report,
+  ) async {
     final kept = _removals[id];
     if (kept != null && !identical(kept.steps, steps)) {
       Logs().w('The removal of $id is kept: the new steps are ignored');
     }
     final removal = _removals.putIfAbsent(id, () => _Removal(steps, report));
-    try {
-      await _run(id, removal);
-    } finally {
-      _running.remove(id);
+    await _run(id, removal);
+    if (!removal.done && !removal.parked && identical(_removals[id], removal)) {
+      _schedule(id, removal);
     }
-    if (!removal.done && !removal.parked) _schedule();
   }
 
   Future<void> _run(String id, _Removal removal) async {
@@ -150,6 +152,8 @@ class LogoutRemovals {
       );
     }
     if (!removal.removed) {
+      // Forgotten meanwhile: a new session owns this id.
+      if (!identical(_removals[id], removal)) return;
       if (!removal.held) {
         removal.held = await _attempt(
           removal,
@@ -161,10 +165,8 @@ class LogoutRemovals {
       return;
     }
     await _afterChange(id, removal);
-    if (removal.done) _removals.remove(id);
-    if (_removals.isEmpty) {
-      _retryRounds = 0;
-      _serverDelay = Duration.zero;
+    if (removal.done && identical(_removals[id], removal)) {
+      _removals.remove(id)?.cancelTimers();
     }
   }
 
@@ -204,8 +206,8 @@ class LogoutRemovals {
     } catch (error, stackTrace) {
       removal.parked = false;
       final asked = _delayAskedBy(error);
-      _serverDelay = _longer(_serverDelay, asked);
-      _holdOffFor(asked);
+      removal.serverDelay = _longer(removal.serverDelay, asked);
+      _holdOffFor(removal, asked);
       if (removal.reported.add(what)) {
         removal.report(error, stackTrace, what);
       } else {
@@ -233,66 +235,62 @@ class LogoutRemovals {
   /// new steps (a new session opened for that account). A run in progress is
   /// not stopped, but it is not retried. Returns true when one was kept.
   bool forget(String id) {
-    final forgotten = _removals.remove(id) != null;
-    if (_removals.isEmpty) {
-      _retryRounds = 0;
-      _serverDelay = Duration.zero;
-      _timer?.cancel();
-      _timer = null;
-      _rateLimit?.cancel();
-      _rateLimit = null;
-    }
-    return forgotten;
+    final forgotten = _removals.remove(id);
+    forgotten?.cancelTimers();
+    return forgotten != null;
   }
 
   /// Runs again every removal that is not done, once. It does not start the
-  /// count of background retries again, and does nothing while the server's
-  /// last wait (`Retry-After`) has not passed: it returns at once, and
-  /// [isPending] still tells what is left.
-  Future<void> retryAll() {
-    if (_serverAskedToWait) return Future.value();
-    return _retryEach();
-  }
+  /// count of background retries again, and skips a removal while the wait
+  /// its server asked for (`Retry-After`) has not passed; [isPending] still
+  /// tells what is left.
+  Future<void> retryAll() => _retryEach();
 
-  /// The server asked for a wait: [retryAll] stays quiet until it passed. A
-  /// later ask replaces an earlier one, as the server's newest word.
-  void _holdOffFor(Duration? asked) {
+  /// The server asked for a wait for [removal]: a retry on demand of that
+  /// removal stays quiet until it passed. A later ask replaces an earlier
+  /// one, as the server's newest word. Other removals are not held off.
+  void _holdOffFor(_Removal removal, Duration? asked) {
     if (asked == null || _disposed) return;
-    _rateLimit?.cancel();
-    _rateLimit = Timer(asked, () => _rateLimit = null);
+    removal.rateLimit?.cancel();
+    removal.rateLimit = Timer(asked, () => removal.rateLimit = null);
   }
 
   Future<void> _retryEach() async {
     for (final id in _removals.keys.toList()) {
       final removal = _removals[id];
       // Another call may have finished it while the ones before ran.
-      if (removal == null || removal.parked) continue;
+      if (removal == null || removal.parked || removal.serverAskedToWait) {
+        continue;
+      }
       await _remove(id, removal.steps, removal.report);
     }
   }
 
-  void _schedule() {
-    if (_disposed || _timer != null) return;
-    if (_retryRounds >= maxRetryRounds) {
+  /// Each removal has its own background rounds and backoff: a wait the
+  /// server asked for one account does not delay another.
+  void _schedule(String id, _Removal removal) {
+    if (_disposed || removal.timer != null) return;
+    if (removal.retryRounds >= maxRetryRounds) {
       Logs().w(
-        'The removals are not retried in the background any more, '
-        'after $_retryRounds rounds: ${_removals.keys.join(', ')}',
+        'The removal of $id is not retried in the background any more, '
+        'after ${removal.retryRounds} rounds',
       );
       return;
     }
-    _timer = Timer(_nextDelay(), () {
-      _timer = null;
-      _retryRounds++;
-      unawaited(_retryEach());
+    removal.timer = Timer(_nextDelay(removal), () {
+      removal.timer = null;
+      removal.retryRounds++;
+      if (!identical(_removals[id], removal) || removal.parked) return;
+      unawaited(_remove(id, removal.steps, removal.report));
     });
   }
 
-  Duration _nextDelay() {
-    final doubled = retryEvery * (1 << min(_retryRounds, 10));
+  Duration _nextDelay(_Removal removal) {
+    final doubled = retryEvery * (1 << min(removal.retryRounds, 10));
     final ceiling = doubled > maxRetryEvery ? maxRetryEvery : doubled;
     final spread = ceiling * _random.nextDouble();
-    final asked = _serverDelay;
-    _serverDelay = Duration.zero;
+    final asked = removal.serverDelay;
+    removal.serverDelay = Duration.zero;
     return _longer(spread, asked);
   }
 
@@ -302,10 +300,9 @@ class LogoutRemovals {
   /// Stops the background retries.
   void dispose() {
     _disposed = true;
-    _timer?.cancel();
-    _timer = null;
-    _rateLimit?.cancel();
-    _rateLimit = null;
+    for (final removal in _removals.values) {
+      removal.cancelTimers();
+    }
   }
 }
 
@@ -328,4 +325,27 @@ class _Removal {
 
   /// Nothing is left to run: removed and settled.
   bool get done => removed && settled;
+
+  /// The next background round of this removal.
+  Timer? timer;
+
+  /// The background rounds run since this removal was first kept.
+  int retryRounds = 0;
+
+  /// The longest wait the server asked for since the last round of this
+  /// removal; used for its next one.
+  Duration serverDelay = Duration.zero;
+
+  /// Set while the last wait the server asked for this removal has not
+  /// passed: a retry on demand of this removal does nothing until then.
+  Timer? rateLimit;
+
+  bool get serverAskedToWait => rateLimit != null;
+
+  void cancelTimers() {
+    timer?.cancel();
+    timer = null;
+    rateLimit?.cancel();
+    rateLimit = null;
+  }
 }

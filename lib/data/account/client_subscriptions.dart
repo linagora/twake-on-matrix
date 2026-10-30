@@ -15,6 +15,9 @@ class ClientSubscriptions {
   final Map<String, Map<String, CancelSubscription>> _byClient = {};
   final Set<String> _open = {};
 
+  /// Cancels that failed or did not run yet, by client name.
+  final Map<String, List<CancelSubscription>> _unfinished = {};
+
   /// Starts accepting subscriptions for [name]. Calling it again changes
   /// nothing.
   void open(String name) => _open.add(name);
@@ -87,23 +90,30 @@ class ClientSubscriptions {
     }
   }
 
-  /// Stops accepting subscriptions for [name] and cancels what it has. A
-  /// cancel that fails stops the run and is thrown; the subscriptions not yet
-  /// cancelled stay, so calling it again finishes the job.
+  /// Stops accepting subscriptions for [name] and cancels what it has. The
+  /// entries are taken off before the first await, so what a re-login keeps
+  /// meanwhile, of any kind, is tracked on its own. A cancel that fails stops
+  /// the run and is thrown; it and the ones not yet run are kept, so calling it
+  /// again finishes the job.
   Future<void> cancel(String name) async {
     _open.remove(name);
-    final kept = _byClient[name];
-    if (kept == null) return;
-    for (final entry in kept.entries.toList()) {
-      await entry.value();
-      kept.remove(entry.key);
+    final pending = [
+      ...?_unfinished.remove(name),
+      ...?_byClient.remove(name)?.values,
+    ];
+    for (var i = 0; i < pending.length; i++) {
+      try {
+        await pending[i]();
+      } catch (_) {
+        _unfinished.putIfAbsent(name, () => []).addAll(pending.skip(i));
+        rethrow;
+      }
     }
-    _byClient.remove(name);
   }
 
   /// Cancels everything, for every client.
   Future<void> cancelAll() async {
-    final names = {..._open, ..._byClient.keys};
+    final names = {..._open, ..._byClient.keys, ..._unfinished.keys};
     await Future.wait([for (final name in names) cancel(name)]);
   }
 }

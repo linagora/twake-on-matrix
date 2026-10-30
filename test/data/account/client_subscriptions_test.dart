@@ -71,6 +71,54 @@ void main() {
     expect(subscriptions.isOpen('a'), isFalse);
   });
 
+  test('what a re-login keeps while a cancel awaits stays tracked', () async {
+    final gate = Completer<void>();
+    subscriptions
+      ..open('a')
+      ..keep(
+        'a',
+        'sync',
+        () =>
+            () => gate.future,
+      );
+    final cancelling = subscriptions.cancel('a');
+
+    subscriptions
+      ..open('a')
+      ..keep('a', 'uia', listen('a-uia'));
+    gate.complete();
+    await cancelling;
+    await subscriptions.cancel('a');
+
+    expect(log, ['listen:a-uia', 'cancel:a-uia']);
+  });
+
+  test(
+    'a re-login of the same kind while a cancel awaits stays tracked',
+    () async {
+      final gate = Completer<void>();
+      subscriptions
+        ..open('a')
+        ..keep(
+          'a',
+          'sync',
+          () =>
+              () => gate.future,
+        );
+      final cancelling = subscriptions.cancel('a');
+
+      subscriptions
+        ..open('a')
+        ..keep('a', 'sync', listen('a-sync'));
+      gate.complete();
+      await cancelling;
+      expect(log, ['listen:a-sync']);
+
+      await subscriptions.cancel('a');
+      expect(log, ['listen:a-sync', 'cancel:a-sync']);
+    },
+  );
+
   test('a client can be opened again after a cancel', () async {
     subscriptions.open('a');
     await subscriptions.cancel('a');

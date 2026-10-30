@@ -13,6 +13,7 @@ import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
+import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 
@@ -37,6 +38,7 @@ class _SdkClient extends FakeAccountClient {
 }
 
 void main() {
+  _legacyPushTests();
   late ProviderContainer container;
   late List<String?> seen;
 
@@ -48,6 +50,7 @@ void main() {
         accountClientDataSourceProvider.overrideWithValue(
           FakeAccountClientDataSource(),
         ),
+        accountsDriveActiveClientProvider.overrideWithValue(true),
         bootClientsProvider.overrideWithValue(clients),
         bootAccountSnapshotProvider.overrideWithValue(
           const AccountBootSnapshot(),
@@ -118,7 +121,7 @@ void main() {
         b,
         '@b:s',
       ),
-      'Switching keeps the account that is left': (
+      'Switching keeps the client but exposes no user id': (
         const Switching(
           accounts: [accountA, accountB],
           from: 'a',
@@ -126,7 +129,7 @@ void main() {
           seq: 1,
         ),
         a,
-        '@a:s',
+        null,
       ),
       'LastLoggedOut': (
         const LastLoggedOut(
@@ -148,6 +151,7 @@ void main() {
         final registry = AccountClientRegistry()..adoptOnce([a, b]);
         final fixed = ProviderContainer.test(
           overrides: [
+            accountsDriveActiveClientProvider.overrideWithValue(true),
             accountsProvider.overrideWith(() => _FixedAccounts(state)),
             accountClientRegistryProvider.overrideWithValue(registry),
           ],
@@ -157,6 +161,28 @@ void main() {
         expect(fixed.read(activeUserIdProvider), userId);
       });
     }
+  });
+}
+
+void _legacyPushTests() {
+  group('before the account providers drive the active client', () {
+    test(
+      'both follow the client MatrixState pushes, with no boot override',
+      () {
+        final a = _SdkClient('a', userId: '@a:s');
+        final container = ProviderContainer.test();
+        expect(container.read(activeMatrixClientProvider), isNull);
+        expect(container.read(activeUserIdProvider), isNull);
+
+        container.read(legacyActiveClientProvider.notifier).setClient(a);
+        expect(container.read(activeMatrixClientProvider), same(a));
+        expect(container.read(activeUserIdProvider), '@a:s');
+
+        container.read(legacyActiveClientProvider.notifier).setClient(null);
+        expect(container.read(activeMatrixClientProvider), isNull);
+        expect(container.read(activeUserIdProvider), isNull);
+      },
+    );
   });
 }
 

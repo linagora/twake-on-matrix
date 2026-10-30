@@ -174,6 +174,41 @@ void main() {
     expect(removals.isPending('a'), isFalse);
   });
 
+  test('a remove after forget runs once the forgotten run ends', () async {
+    gates['remove:a'] = Completer<void>();
+    final running = run('a');
+    await pumpEventQueue();
+    removals.forget('a');
+
+    final again = runOther();
+    await pumpEventQueue();
+    expect(log, isNot(contains('remove:other')));
+    gates['remove:a']!.complete();
+    await running;
+    await again;
+
+    expect(log, contains('remove:other'));
+    expect(removals.isPending('a'), isFalse);
+  });
+
+  test(
+    'a forgotten run whose removal fails holds and records nothing',
+    () async {
+      failing.add('remove:a');
+      gates['remove:a'] = Completer<void>();
+      final running = run('a');
+      await pumpEventQueue();
+      removals.forget('a');
+
+      gates['remove:a']!.complete();
+      await running;
+
+      expect(log, ['remove:a']);
+      expect(removals.failedIds, isEmpty);
+      expect(removals.isPending('a'), isFalse);
+    },
+  );
+
   test('forget drops a kept removal, so new steps run', () async {
     failing.add('remove:a');
     await run('a');
@@ -402,7 +437,7 @@ void main() {
       });
     });
 
-    test('a new removal starts the backoff again for the others', () {
+    test('a new removal has its own backoff, from the start', () {
       fakeAsync((async) {
         failing.add('remove:b');
         startFailing(async);
@@ -411,7 +446,7 @@ void main() {
         async.flushMicrotasks();
         expect(tries('b'), 1);
 
-        async.elapse(const Duration(minutes: 4));
+        async.elapse(const Duration(minutes: 1));
         expect(tries('b'), 2);
         async.elapse(const Duration(minutes: 2));
 
@@ -651,6 +686,37 @@ void main() {
 
       test('a removal asked for again goes ahead once the delay passed', () {
         expectAskedAgain(() => run('a'), delayPassed: true);
+      });
+
+      test('the delay asked for one removal does not delay another one', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '900');
+          run('a');
+          failing.add('remove:b');
+          run('b');
+          async.flushMicrotasks();
+
+          async.elapse(const Duration(minutes: 1));
+
+          expect(tries('a'), 1);
+          expect(tries('b'), 2);
+        });
+      });
+
+      test('a retry asked for by the app still runs the other removals', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '900');
+          run('a');
+          failing.add('remove:b');
+          run('b');
+          async.flushMicrotasks();
+
+          removals.retryAll();
+          async.flushMicrotasks();
+
+          expect(tries('a'), 1);
+          expect(tries('b'), 2);
+        });
       });
 
       test('a new removal does not wait for the delay of another one', () {

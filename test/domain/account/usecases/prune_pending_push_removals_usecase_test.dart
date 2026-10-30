@@ -9,6 +9,7 @@ class _FakeRepository extends Fake implements AccountRepository {
   final List<Account> registered;
   final Set<String> pending;
   final List<String> cleared = [];
+  final Set<String> failing = {};
 
   @override
   List<Account> registeredAccounts() => registered;
@@ -17,7 +18,10 @@ class _FakeRepository extends Fake implements AccountRepository {
   Future<Set<String>> pendingPushRemovals() async => pending;
 
   @override
-  Future<void> clearPushRemovalPending(String id) async => cleared.add(id);
+  Future<void> clearPushRemovalPending(String id) async {
+    if (failing.contains(id)) throw StateError(id);
+    cleared.add(id);
+  }
 }
 
 void main() {
@@ -27,31 +31,63 @@ void main() {
     status: AccountStatus.loggedIn,
   );
 
-  test('returns the pending accounts that still exist', () async {
-    final repository = _FakeRepository(
-      registered: const [account],
-      pending: {'a'},
-    );
+  group('RetryablePushRemovalsUseCase', () {
+    test('returns the pending accounts that still exist', () async {
+      final repository = _FakeRepository(
+        registered: const [account],
+        pending: {'a', 'gone'},
+      );
 
-    final retryable = await PrunePendingPushRemovalsUseCase(
-      repository: repository,
-    ).execute();
+      final retryable = await RetryablePushRemovalsUseCase(
+        repository: repository,
+      ).execute();
 
-    expect(retryable, ['a']);
-    expect(repository.cleared, isEmpty);
+      expect(retryable, ['a']);
+      expect(repository.cleared, isEmpty);
+    });
+
+    test('does not depend on the drops', () async {
+      final repository = _FakeRepository(
+        registered: const [account],
+        pending: {'gone', 'a'},
+      )..failing.add('gone');
+
+      await expectLater(
+        PrunePendingPushRemovalsUseCase(repository: repository).execute(),
+        throwsStateError,
+      );
+      final retryable = await RetryablePushRemovalsUseCase(
+        repository: repository,
+      ).execute();
+
+      expect(retryable, ['a']);
+    });
   });
 
-  test('drops the record of an account that is gone', () async {
-    final repository = _FakeRepository(
-      registered: const [account],
-      pending: {'a', 'gone'},
-    );
+  group('PrunePendingPushRemovalsUseCase', () {
+    test('drops the record of an account that is gone only', () async {
+      final repository = _FakeRepository(
+        registered: const [account],
+        pending: {'a', 'gone'},
+      );
 
-    final retryable = await PrunePendingPushRemovalsUseCase(
-      repository: repository,
-    ).execute();
+      await PrunePendingPushRemovalsUseCase(repository: repository).execute();
 
-    expect(retryable, ['a']);
-    expect(repository.cleared, ['gone']);
+      expect(repository.cleared, ['gone']);
+    });
+
+    test('one failing drop does not stop the others', () async {
+      final repository = _FakeRepository(
+        registered: const [account],
+        pending: {'gone-1', 'gone-2', 'a'},
+      )..failing.add('gone-1');
+
+      await expectLater(
+        PrunePendingPushRemovalsUseCase(repository: repository).execute(),
+        throwsStateError,
+      );
+
+      expect(repository.cleared, ['gone-2']);
+    });
   });
 }

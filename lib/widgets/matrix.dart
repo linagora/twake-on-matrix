@@ -39,6 +39,7 @@ import 'package:twake_chat/domain/repository/multiple_account/multiple_account_r
 import 'package:twake_chat/domain/repository/tom_configurations_repository.dart';
 import 'package:twake_chat/pages/chat_list/receive_sharing_intent_mixin.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/contacts_providers.dart';
+import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
@@ -191,10 +192,16 @@ class MatrixState extends ConsumerState<Matrix>
       _rememberContactOwner(newClient);
       // TODO: Multi-client VoiP support
       createVoipPlugin();
+      // No account is active while the ToM URL/token switch: a refresh of the
+      // previous account in flight must not read with the new configuration.
+      ref.read(legacyActiveClientProvider.notifier).setClient(null);
       await _setUpToMServicesWhenChangingActiveClient(newClient);
       await _storePersistActiveAccount(newClient);
       await _getUserInfoWithActiveClient(newClient);
       await _getHomeserverInformation(newClient);
+      // TODO: [transitional] TW-3302 - expose the active client to Riverpod consumers,
+      // only once the ToM URL/token of the new account are applied.
+      ref.read(legacyActiveClientProvider.notifier).setClient(newClient);
       if (userId != null) {
         unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
       }
@@ -693,6 +700,9 @@ class MatrixState extends ConsumerState<Matrix>
     await _storePersistActiveAccount(newActiveClient);
     await _getUserInfoWithActiveClient(newActiveClient);
     await _getHomeserverInformation(newActiveClient);
+    // The client pushed at boot was still logged out: re-publish it now that
+    // the login set its userID, so Riverpod consumers (contacts…) wake up.
+    ref.read(legacyActiveClientProvider.notifier).setClient(newActiveClient);
     final userId = newActiveClient.userID;
     if (userId != null) {
       unawaited(ref.read(contactSyncServiceProvider(userId)).refresh());
@@ -809,6 +819,9 @@ class MatrixState extends ConsumerState<Matrix>
       _registerSubs(c.clientName);
       _rememberContactOwner(c);
     }
+
+    // TODO: [transitional] TW-3302 - publish the initial active client to Riverpod.
+    ref.read(legacyActiveClientProvider.notifier).setClient(clientOrNull);
 
     await _retrieveLocalToMConfiguration();
 
@@ -1432,6 +1445,7 @@ class MatrixState extends ConsumerState<Matrix>
     // Clear first: unpublishing the client rebuilds the contact services, and
     // the wipe must run behind the refresh of the instance that owns it.
     await _clearContactsOf(loggedOutClient);
+    ref.read(legacyActiveClientProvider.notifier).setClient(null);
     Sentry.configureScope((scope) => scope.setUser(null));
     if (PlatformInfos.isMobile) {
       await _deletePersistActiveAccount();
