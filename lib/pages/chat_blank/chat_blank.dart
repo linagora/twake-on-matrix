@@ -127,7 +127,7 @@ class _ChatBlankRichText extends StatelessWidget with GoToGroupChatMixin {
             leadingIcon: const Icon(Icons.group),
             onPressed: () => goToNewGroupChat(innerNavigatorContext()),
             child: Text(
-              L10n.of(context)!.newChat,
+              L10n.of(context)!.newGroupChat,
               style: PopupMenuWidgetStyle.defaultItemTextStyle(context),
             ),
           ),
