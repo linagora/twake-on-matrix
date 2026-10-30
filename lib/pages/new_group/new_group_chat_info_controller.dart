@@ -7,7 +7,7 @@ import 'package:twake_chat/domain/new_group/usecases/create_group_usecase.provid
 import 'package:twake_chat/domain/new_group/usecases/invite_users_usecase.provider.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
-import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
@@ -19,66 +19,70 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
   NewGroupChatInfoState build() => const NewGroupChatInfoState.idle();
 
   /// Ignored while busy; a partial invite failure still ends in `done`.
-  Future<void> create({
-    required String groupName,
-    required Iterable<String?> invitees,
-    required bool enableEncryption,
-    required GroupPrivacyState privacy,
-    required bool isFeed,
-    String? urlAvatar,
-  }) async {
+  Future<void> create(NewGroupForm form) async {
     if (state.isBusy) return;
-    final userId = ref.read(activeMatrixClientProvider).userId;
-    final request = CreateNewGroupChatRequest(
-      groupName: groupName,
-      invite: invitees.nonNulls.where((id) => id != userId).toList(),
-      enableEncryption: enableEncryption,
-      isPublic:
-          privacy.isPublic &&
-          ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-      isServerLimited: privacy.isServerLimited,
-      urlAvatar: urlAvatar,
-    );
+    final request = _toRequest(form);
     state = const NewGroupChatInfoState.creating();
-    final String roomId;
-    try {
-      roomId = isFeed
-          ? await _createFeed(request)
-          : await ref.read(createGroupUseCaseProvider).execute(request);
-    } on FeedNotSupportedByHomeserverException {
-      if (!ref.mounted) return;
-      state = const NewGroupChatInfoState.failed(
-        NewGroupFailureReason.feedNotSupported,
-      );
-      return;
-    } on Object {
-      if (!ref.mounted) return;
-      state = const NewGroupChatInfoState.failed(NewGroupFailureReason.other);
-      return;
-    }
-    if (!ref.mounted) return;
-    if (request.invite.isEmpty) {
-      state = NewGroupChatInfoState.done(
-        roomId: roomId,
-        groupName: request.groupName,
-      );
-      return;
-    }
-    state = const NewGroupChatInfoState.inviting();
-    InviteUserPartialFailureException? inviteFailure;
-    try {
-      await ref
-          .read(inviteUsersUseCaseProvider)
-          .execute(roomId: roomId, userIds: request.invite);
-    } on InviteUserPartialFailureException catch (exception) {
-      inviteFailure = exception;
-    }
+    final roomId = await _createRoom(request, isFeed: form.isFeed);
+    if (!ref.mounted || roomId == null) return;
+    final inviteFailure = await _invite(roomId, request.invite);
     if (!ref.mounted) return;
     state = NewGroupChatInfoState.done(
       roomId: roomId,
       groupName: request.groupName,
       inviteFailure: inviteFailure,
     );
+  }
+
+  CreateNewGroupChatRequest _toRequest(NewGroupForm form) {
+    final userId = ref.read(activeMatrixClientProvider).userId;
+    return CreateNewGroupChatRequest(
+      groupName: form.groupName,
+      invite: form.invitees.nonNulls.where((id) => id != userId).toList(),
+      enableEncryption: form.enableEncryption,
+      isPublic:
+          form.privacy.isPublic &&
+          ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
+      isServerLimited: form.privacy.isServerLimited,
+      urlAvatar: form.urlAvatar,
+    );
+  }
+
+  Future<String?> _createRoom(
+    CreateNewGroupChatRequest request, {
+    required bool isFeed,
+  }) async {
+    try {
+      return isFeed
+          ? await _createFeed(request)
+          : await ref.read(createGroupUseCaseProvider).execute(request);
+    } on FeedNotSupportedByHomeserverException {
+      _fail(NewGroupFailureReason.feedNotSupported);
+    } on Object {
+      _fail(NewGroupFailureReason.other);
+    }
+    return null;
+  }
+
+  void _fail(NewGroupFailureReason reason) {
+    if (!ref.mounted) return;
+    state = NewGroupChatInfoState.failed(reason);
+  }
+
+  Future<InviteUserPartialFailureException?> _invite(
+    String roomId,
+    List<String> userIds,
+  ) async {
+    if (userIds.isEmpty) return null;
+    state = const NewGroupChatInfoState.inviting();
+    try {
+      await ref
+          .read(inviteUsersUseCaseProvider)
+          .execute(roomId: roomId, userIds: userIds);
+      return null;
+    } on InviteUserPartialFailureException catch (exception) {
+      return exception;
+    }
   }
 
   Future<String> _createFeed(CreateNewGroupChatRequest request) {

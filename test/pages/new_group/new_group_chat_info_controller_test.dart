@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/domain/repository/new_group/new_group_repository.dart';
 import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
@@ -66,11 +67,13 @@ void main() {
   }) => container
       .read(newGroupChatInfoControllerProvider.notifier)
       .create(
-        groupName: groupName,
-        invitees: invitees,
-        enableEncryption: false,
-        privacy: privacy,
-        isFeed: isFeed,
+        NewGroupForm(
+          groupName: groupName,
+          invitees: invitees,
+          enableEncryption: false,
+          privacy: privacy,
+          isFeed: isFeed,
+        ),
       );
 
   NewGroupChatInfoState state() =>

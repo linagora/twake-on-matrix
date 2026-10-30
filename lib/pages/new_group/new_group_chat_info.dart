@@ -14,6 +14,7 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -134,12 +135,14 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
       ref
           .read(newGroupChatInfoControllerProvider.notifier)
           .create(
-            groupName: groupNameTextEditingController.text,
-            invitees: contactsList.map((contact) => contact.matrixId),
-            enableEncryption: enableEncryptionNotifier.value,
-            privacy: groupPrivacyNotifier.value,
-            isFeed: isFeed,
-            urlAvatar: urlAvatar,
+            NewGroupForm(
+              groupName: groupNameTextEditingController.text,
+              invitees: contactsList.map((contact) => contact.matrixId),
+              enableEncryption: enableEncryptionNotifier.value,
+              privacy: groupPrivacyNotifier.value,
+              isFeed: isFeed,
+              urlAvatar: urlAvatar,
+            ),
           ),
     );
   }
