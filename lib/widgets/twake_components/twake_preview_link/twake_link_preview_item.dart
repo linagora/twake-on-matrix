@@ -1,16 +1,16 @@
-import 'package:twake_chat/domain/app_state/preview_url/get_preview_url_success.dart';
 import 'package:twake_chat/presentation/extensions/media/url_preview_extension.dart';
 import 'package:twake_chat/presentation/model/media/url_preview_presentation.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
+import 'package:twake_chat/providers/url_preview_provider.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
-import 'package:twake_chat/widgets/mixins/get_preview_url_mixin.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview_item_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class TwakeLinkPreviewItem extends StatefulWidget {
+class TwakeLinkPreviewItem extends ConsumerStatefulWidget {
   final bool ownMessage;
   final String? previewLink;
 
@@ -27,139 +27,118 @@ class TwakeLinkPreviewItem extends StatefulWidget {
       LinkPreviewKeys.linkPreviewLarge.valueKey;
 
   @override
-  State<TwakeLinkPreviewItem> createState() => _TwakeLinkPreviewItemState();
+  ConsumerState<TwakeLinkPreviewItem> createState() =>
+      _TwakeLinkPreviewItemState();
 }
 
-class _TwakeLinkPreviewItemState extends State<TwakeLinkPreviewItem>
-    with AutomaticKeepAliveClientMixin, GetPreviewUrlMixin {
-  void _getPreviewInfo() {
-    if (widget.previewLink == null || widget.previewLink!.trim().isEmpty) {
-      clearPreviewUrlState();
-      return;
-    }
-    final uri = Uri.tryParse(widget.previewLink!);
-    if (uri == null) {
-      clearPreviewUrlState();
-      return;
-    }
-    getPreviewUrl(uri: uri);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getPreviewInfo();
-  }
-
-  @override
-  void didUpdateWidget(covariant TwakeLinkPreviewItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.previewLink != widget.previewLink) {
-      _getPreviewInfo();
-    }
+class _TwakeLinkPreviewItemState extends ConsumerState<TwakeLinkPreviewItem>
+    with AutomaticKeepAliveClientMixin {
+  Uri? get _previewUri {
+    final link = widget.previewLink;
+    if (link == null || link.trim().isEmpty) return null;
+    return Uri.tryParse(link);
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ValueListenableBuilder(
-      valueListenable: getPreviewUrlStateNotifier,
-      builder: (context, state, child) {
-        return state.fold((failure) => const SizedBox.shrink(), (success) {
-          if (success is GetPreviewUrlSuccess) {
-            final previewPresentation = success.urlPreview.toPresentation();
-            return Container(
-              key: TwakeLinkPreviewItem.linkPreviewBodyKey,
-              constraints: const BoxConstraints(minWidth: double.infinity),
-              height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
-              decoration: ShapeDecoration(
-                color: widget.ownMessage
-                    ? LinagoraSysColors.material().primaryContainer
-                    : LinagoraSysColors.material().onSurface.withOpacity(0.08),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    TwakeLinkPreviewItemStyle.radiusBorder,
-                  ),
-                ),
-              ),
-              child: LinkPreviewBuilder(
-                key: TwakeLinkPreviewItem.linkPreviewLargeKey,
-                urlPreviewPresentation: previewPresentation,
-                previewLink: widget.previewLink,
-              ),
-            );
-          }
-          return child!;
-        });
-      },
-      child: Skeletonizer.zone(
-        child: Container(
+    final uri = _previewUri;
+    final preview = uri == null ? null : ref.watch(urlPreviewProvider(uri));
+    switch (preview) {
+      case AsyncError():
+        return const SizedBox.shrink();
+      case AsyncData(:final value):
+        return Container(
+          key: TwakeLinkPreviewItem.linkPreviewBodyKey,
           constraints: const BoxConstraints(minWidth: double.infinity),
           height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
           decoration: ShapeDecoration(
             color: widget.ownMessage
-                ? LinagoraRefColors.material().primary[95]
-                : LinagoraStateLayer(
-                    LinagoraSysColors.material().surfaceTint,
-                  ).opacityLayer1,
+                ? LinagoraSysColors.material().primaryContainer
+                : LinagoraSysColors.material().onSurface.withOpacity(0.08),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(
                 TwakeLinkPreviewItemStyle.radiusBorder,
               ),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Bone.button(
-                width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-                height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
-                  bottom: Radius.circular(
-                    TwakeLinkPreviewItemStyle.radiusBorder,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      key: LinkPreviewBuilder.paddingTitleKey,
-                      padding: TwakeLinkPreviewItemStyle.paddingTitle,
-                      child: Column(
-                        children: [
-                          Bone.text(
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
-                          Bone.text(
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      key: LinkPreviewBuilder.paddingSubtitleKey,
-                      padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
-                      child: Column(
-                        children: [
-                          Bone.text(
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
-                          Bone.text(
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          child: LinkPreviewBuilder(
+            key: TwakeLinkPreviewItem.linkPreviewLargeKey,
+            urlPreviewPresentation: value.toPresentation(),
+            previewLink: widget.previewLink,
           ),
+        );
+      default:
+        return _buildSkeleton(context);
+    }
+  }
+
+  Widget _buildSkeleton(BuildContext context) {
+    return Skeletonizer.zone(
+      child: Container(
+        constraints: const BoxConstraints(minWidth: double.infinity),
+        height: TwakeLinkPreviewItemStyle.maxHeightPreviewItem,
+        decoration: ShapeDecoration(
+          color: widget.ownMessage
+              ? LinagoraRefColors.material().primary[95]
+              : LinagoraStateLayer(
+                  LinagoraSysColors.material().surfaceTint,
+                ).opacityLayer1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              TwakeLinkPreviewItemStyle.radiusBorder,
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Bone.button(
+              width: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
+              height: TwakeLinkPreviewItemStyle.heightMxcImagePreview,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+                bottom: Radius.circular(TwakeLinkPreviewItemStyle.radiusBorder),
+              ),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    key: LinkPreviewBuilder.paddingTitleKey,
+                    padding: TwakeLinkPreviewItemStyle.paddingTitle,
+                    child: Column(
+                      children: [
+                        Bone.text(
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
+                        Bone.text(
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    key: LinkPreviewBuilder.paddingSubtitleKey,
+                    padding: TwakeLinkPreviewItemStyle.paddingSubtitle,
+                    child: Column(
+                      children: [
+                        Bone.text(
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        TwakeLinkPreviewItemStyle.skeletonizerTextPadding,
+                        Bone.text(
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -167,9 +146,6 @@ class _TwakeLinkPreviewItemState extends State<TwakeLinkPreviewItem>
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  String debugLabel = 'TwakeLinkPreviewItem';
 }
 
 class LinkPreviewBuilder extends StatelessWidget {
