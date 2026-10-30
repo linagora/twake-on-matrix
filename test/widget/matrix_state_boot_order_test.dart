@@ -32,7 +32,7 @@ import 'package:twake_chat/domain/repository/tom_configurations_repository.dart'
 import 'package:twake_chat/providers/account_services_providers.dart';
 import 'package:twake_chat/providers/account_switch_coordinator.dart';
 import 'package:twake_chat/providers/account_switch_effects_provider.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/providers/push_removals_controller.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
