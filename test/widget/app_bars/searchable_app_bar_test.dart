@@ -1,4 +1,5 @@
 import 'package:twake_chat/pages/forward/forward_view_style.dart';
+import 'package:twake_chat/pages/new_group/contacts_selection_view_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -11,12 +12,14 @@ final getIt = GetIt.instance;
 
 void main() {
   final searchModeNotifier = ValueNotifier(false);
-  final textEditingController = TextEditingController();
+  late TextEditingController textEditingController;
+  final clearTooltip = lookupL10n(const Locale('en')).clear;
 
   Widget makeTestableAppBar({
     bool isFullScreen = true,
     bool displayBackButton = true,
     bool isSearchModeEnabled = false,
+    double Function(BuildContext context)? toolbarHeight,
   }) {
     searchModeNotifier.value = isSearchModeEnabled;
     getIt.registerSingleton(ResponsiveUtils());
@@ -32,6 +35,7 @@ void main() {
             appBar: PreferredSize(
               preferredSize: ForwardViewStyle.maxPreferredSize(context),
               child: SearchableAppBar(
+                toolbarHeight: toolbarHeight?.call(context),
                 searchModeNotifier: searchModeNotifier,
                 title: "Title",
                 hintText: "Hint",
@@ -52,7 +56,10 @@ void main() {
 
   setUp(() {
     getIt.reset();
+    textEditingController = TextEditingController();
   });
+
+  tearDown(() => textEditingController.dispose());
 
   group("fullscreen = false", () {
     testWidgets("Display title and search button", (widgetTester) async {
@@ -86,6 +93,37 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
       expect(find.byIcon(Icons.close), findsNothing);
       expect(find.byIcon(Icons.search_outlined), findsOneWidget);
+    });
+
+    testWidgets("Hide the clear button when the search text is empty", (
+      widgetTester,
+    ) async {
+      await widgetTester.pumpWidget(makeTestableAppBar(isFullScreen: false));
+
+      expect(find.byTooltip(clearTooltip), findsNothing);
+    });
+
+    testWidgets("Clear button empties the search text", (widgetTester) async {
+      // The dialog toolbar height only applies at tablet width and above.
+      widgetTester.view.devicePixelRatio = 1.0;
+      widgetTester.view.physicalSize = const Size(1280, 800);
+      addTearDown(widgetTester.view.reset);
+      await widgetTester.pumpWidget(
+        makeTestableAppBar(
+          isFullScreen: false,
+          toolbarHeight: ContactsSelectionViewStyle.maxToolbarHeight,
+        ),
+      );
+
+      textEditingController.text = "Search text";
+      await widgetTester.pump();
+      expect(find.byTooltip(clearTooltip), findsOneWidget);
+
+      await widgetTester.tap(find.byTooltip(clearTooltip));
+      await widgetTester.pump();
+
+      expect(textEditingController.text, isEmpty);
+      expect(find.byTooltip(clearTooltip), findsNothing);
     });
   });
 
@@ -141,6 +179,8 @@ void main() {
         await widgetTester.pumpWidget(
           makeTestableAppBar(isSearchModeEnabled: true),
         );
+        textEditingController.text = "Search text";
+        await widgetTester.pump();
 
         await widgetTester.tap(find.byIcon(Icons.close));
         await widgetTester.pump();
