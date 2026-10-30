@@ -2,7 +2,8 @@ import 'package:matrix/matrix.dart' show Client;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/keychain_sharing/tom_encryption_reset_service.dart';
 import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.provider.dart';
-import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.provider.dart';
+import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.provider.dart';
 
 part 'tom_encryption_reset_service.provider.g.dart';
 

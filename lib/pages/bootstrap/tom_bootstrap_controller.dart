@@ -10,6 +10,8 @@ import 'package:twake_chat/domain/usecase/recovery/unlock_ssss_with_recovery_key
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.provider.dart';
+import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.provider.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_state.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
