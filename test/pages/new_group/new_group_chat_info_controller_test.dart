@@ -9,6 +9,7 @@ import 'package:twake_chat/data/repository/new_group/new_group_repository.provid
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
+import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/domain/repository/new_group/new_group_repository.dart';
 import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
@@ -25,10 +26,6 @@ import 'new_group_chat_info_controller_test.mocks.dart';
 ])
 void main() {
   const roomId = '!room:example.com';
-  const request = CreateNewGroupChatRequest(
-    groupName: 'Team',
-    invite: ['@bob:example.com', '@carol:example.com'],
-  );
 
   late MockClient mockClient;
   late MockNewGroupRepository mockRepository;
@@ -61,8 +58,20 @@ void main() {
 
   tearDown(() => subscription.close());
 
-  NewGroupChatInfoController controller() =>
-      container.read(newGroupChatInfoControllerProvider.notifier);
+  Future<void> create({
+    String groupName = 'Team',
+    List<String?> invitees = const ['@bob:example.com', '@carol:example.com'],
+    bool isFeed = false,
+    GroupPrivacyState privacy = const GroupPrivacyState(),
+  }) => container
+      .read(newGroupChatInfoControllerProvider.notifier)
+      .create(
+        groupName: groupName,
+        invitees: invitees,
+        enableEncryption: false,
+        privacy: privacy,
+        isFeed: isFeed,
+      );
 
   NewGroupChatInfoState state() =>
       container.read(newGroupChatInfoControllerProvider);
@@ -77,10 +86,7 @@ void main() {
 
   test('create_whenNoInvitee_isDoneWithoutInviting', () async {
     // Act
-    await controller().create(
-      const CreateNewGroupChatRequest(groupName: 'Solo'),
-      isFeed: false,
-    );
+    await create(groupName: 'Solo', invitees: const []);
 
     // Assert
     expect(
@@ -101,7 +107,7 @@ void main() {
     when(mockRepository.createGroup(any)).thenAnswer((_) => created.future);
 
     // Act
-    final future = controller().create(request, isFeed: false);
+    final future = create();
     final whileCreating = state();
     created.complete(roomId);
     await future;
@@ -120,6 +126,22 @@ void main() {
     ).called(1);
   });
 
+  test('create_always_excludesTheCurrentUserFromTheInvitees', () async {
+    // Arrange
+    when(mockClient.userID).thenReturn('@alice:example.com');
+
+    // Act
+    await create(
+      invitees: const ['@alice:example.com', '@bob:example.com', null],
+    );
+
+    // Assert
+    final request =
+        verify(mockRepository.createGroup(captureAny)).captured.single
+            as CreateNewGroupChatRequest;
+    expect(request.invite, ['@bob:example.com']);
+  });
+
   test('create_whenSomeInvitesFail_isDoneWithTheFailures', () async {
     // Arrange
     const banned = UserBannedException(userId: '@bob:example.com');
@@ -128,7 +150,7 @@ void main() {
     ).thenThrow(banned);
 
     // Act
-    await controller().create(request, isFeed: false);
+    await create();
 
     // Assert
     final done = state() as NewGroupChatInfoDone;
@@ -143,7 +165,7 @@ void main() {
     ).thenAnswer((_) => Future.error(Exception('Server error')));
 
     // Act
-    await controller().create(request, isFeed: false);
+    await create();
 
     // Assert
     expect(
@@ -164,7 +186,7 @@ void main() {
     );
 
     // Act
-    await controller().create(request, isFeed: true);
+    await create(isFeed: true);
 
     // Assert
     expect(
@@ -180,10 +202,10 @@ void main() {
     // Arrange
     final created = Completer<String>();
     when(mockRepository.createGroup(any)).thenAnswer((_) => created.future);
-    final first = controller().create(request, isFeed: false);
+    final first = create();
 
     // Act
-    await controller().create(request, isFeed: false);
+    await create();
     created.complete(roomId);
     await first;
 

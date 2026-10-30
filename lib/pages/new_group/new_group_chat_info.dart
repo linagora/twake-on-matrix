@@ -7,7 +7,6 @@ import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
-import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/domain/model/verification/composite_name_validator.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/model/verification/new_name_request.dart';
@@ -25,7 +24,6 @@ import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
@@ -80,9 +78,6 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
 
   bool get isFeed => widget.isFeed;
 
-  String get serverName =>
-      ref.read(activeMatrixClientProvider).userId?.domain ?? '';
-
   void toggleEnableEncryption() {
     enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
   }
@@ -103,18 +98,6 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     groupPrivacyNotifier.value = groupPrivacyNotifier.value.copyWith(
       isServerLimited: isServerLimited,
     );
-  }
-
-  Set<PresentationContact> getSelectedValidContacts(
-    Iterable<PresentationContact> contacts,
-  ) {
-    return contacts
-        .where(
-          (contact) =>
-              contact.matrixId != null &&
-              !contact.matrixId!.isCurrentMatrixId(context),
-        )
-        .toSet();
   }
 
   bool get isUploadingAvatar =>
@@ -147,23 +130,17 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
   }
 
   void createNewGroup({String? urlAvatar}) {
-    final privacy = groupPrivacyNotifier.value;
-    final request = CreateNewGroupChatRequest(
-      groupName: groupNameTextEditingController.text,
-      invite: getSelectedValidContacts(
-        contactsList,
-      ).map((contact) => contact.matrixId).nonNulls.toList(),
-      enableEncryption: enableEncryptionNotifier.value,
-      isPublic:
-          privacy.isPublic &&
-          ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-      isServerLimited: privacy.isServerLimited,
-      urlAvatar: urlAvatar,
-    );
     unawaited(
       ref
           .read(newGroupChatInfoControllerProvider.notifier)
-          .create(request, isFeed: isFeed),
+          .create(
+            groupName: groupNameTextEditingController.text,
+            invitees: contactsList.map((contact) => contact.matrixId),
+            enableEncryption: enableEncryptionNotifier.value,
+            privacy: groupPrivacyNotifier.value,
+            isFeed: isFeed,
+            urlAvatar: urlAvatar,
+          ),
     );
   }
 
@@ -324,7 +301,10 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(newGroupChatInfoControllerProvider, _onStateChanged);
+    ref.listen(
+      newGroupChatInfoControllerProvider,
+      (previous, next) => unawaited(_onStateChanged(previous, next)),
+    );
     return NewGroupChatInfoView(this);
   }
 }
