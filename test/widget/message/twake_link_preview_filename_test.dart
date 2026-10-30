@@ -81,7 +81,10 @@ void main() {
 
       final filename = harness.spanWithText(spans, 'test.md');
       expect(filename, isNot(isA<LinkTextSpan>()));
-      expect(filename.style, _TwakeLinkPreviewHarness.richTextStyle);
+      expect(
+        filename.style?.color,
+        _TwakeLinkPreviewHarness.richTextStyle.color,
+      );
       expect(filename.style?.decoration, isNot(TextDecoration.underline));
     });
 

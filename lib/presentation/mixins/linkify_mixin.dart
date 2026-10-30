@@ -1,5 +1,6 @@
 import 'package:twake_chat/pages/chat/phone_number_context_menu_actions.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
@@ -15,6 +16,29 @@ import 'package:pull_down_button/pull_down_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 mixin LinkifyMixin {
+  /// Returns a plain [TextSpan] when [url] is a filename falsely detected as a
+  /// link (e.g. "test.md"), or null for a real link.
+  ///
+  /// The span keeps [linkStyle] (which carries the inherited formatting such
+  /// as bold or italic) and only takes the color and decoration of
+  /// [textStyle], so the filename looks like the text around it.
+  TextSpan? filenameLinkAsPlainText({
+    required String url,
+    required InlineSpan childrenSpan,
+    required TextStyle? linkStyle,
+    TextStyle? textStyle,
+  }) {
+    if (!isFilenameUrl(url)) return null;
+    return TextSpan(
+      text: childrenSpan.toPlainText(),
+      style: (linkStyle ?? const TextStyle()).copyWith(
+        color: textStyle?.color,
+        decoration: textStyle?.decoration ?? TextDecoration.none,
+        decorationColor: textStyle?.decorationColor,
+      ),
+    );
+  }
+
   List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
     PhoneNumberContextMenuActions.copy,
   ];
