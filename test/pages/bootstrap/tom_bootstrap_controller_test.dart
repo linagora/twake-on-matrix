@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -57,29 +58,37 @@ void main() {
     unlockSsss = MockUnlockSsssWithRecoveryKeyInteractor();
   });
 
+  ProviderContainer createContainer() => ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: <Override>[
+      deleteRecoveryWordsInteractorProvider.overrideWithValue(
+        deleteRecoveryWords,
+      ),
+      getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
+      saveRecoveryWordsInteractorProvider.overrideWithValue(
+        MockSaveRecoveryWordsInteractor(),
+      ),
+      unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(unlockSsss),
+    ],
+  );
+
+  TomBootstrapControllerProvider controllerProvider({
+    required bool wipeRecovery,
+    bool twakeSupported = true,
+  }) => tomBootstrapControllerProvider(
+    client,
+    wipe: false,
+    wipeRecovery: wipeRecovery,
+    twakeSupported: twakeSupported,
+  );
+
   Future<TomBootstrapState> runController({
     required bool wipeRecovery,
     bool twakeSupported = true,
     Future<void> Function()? afterBuild,
   }) async {
-    final container = ProviderContainer.test(
-      retry: (_, _) => null,
-      overrides: <Override>[
-        deleteRecoveryWordsInteractorProvider.overrideWithValue(
-          deleteRecoveryWords,
-        ),
-        getRecoveryWordsUseCaseProvider.overrideWithValue(getRecoveryWords),
-        saveRecoveryWordsInteractorProvider.overrideWithValue(
-          MockSaveRecoveryWordsInteractor(),
-        ),
-        unlockSsssWithRecoveryKeyInteractorProvider.overrideWithValue(
-          unlockSsss,
-        ),
-      ],
-    );
-    final provider = tomBootstrapControllerProvider(
-      client,
-      wipe: false,
+    final container = createContainer();
+    final provider = controllerProvider(
       wipeRecovery: wipeRecovery,
       twakeSupported: twakeSupported,
     );
@@ -133,6 +142,31 @@ void main() {
         ),
       );
     });
+
+    test(
+      'build_whenFetchingRecoveryWordsFails_popsFalseAfterTheCloseDelay',
+      () {
+        fakeAsync((async) {
+          // Arrange
+          when(
+            getRecoveryWords.execute(),
+          ).thenThrow(GetRecoveryWordsException(StateError('no host')));
+          final container = createContainer();
+          final provider = controllerProvider(wipeRecovery: false);
+          container.listen(provider, (_, _) {});
+          async.flushMicrotasks();
+          onSync.add(SyncUpdate(nextBatch: 'batch'));
+          async.flushMicrotasks();
+          expect(container.read(provider).popValue, isNull);
+
+          // Act
+          async.elapse(TomBootstrapController.noRecoveryWordsCloseDelay);
+
+          // Assert
+          expect(container.read(provider).popValue, isFalse);
+        });
+      },
+    );
 
     test('build_whenRecoveryWordsFetched_unlocksSsssWithThem', () async {
       // Arrange
