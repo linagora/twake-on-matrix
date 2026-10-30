@@ -42,5 +42,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | device_settings | Controller, still on `app_state` | #3389 |
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
-| user_info | Contacts visibility: Controller and `Future` use cases; get user info still on its interactor | #3532 |
+| user_info | Contacts visibility: Controller and `Future` use cases; get user info still on its interactor. Patrol: backend-only, run manually against a mock ToM | #3532 |
 | Everything else | Legacy | |
