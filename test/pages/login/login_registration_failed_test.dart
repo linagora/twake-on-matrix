@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/login/login.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';

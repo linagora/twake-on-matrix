@@ -11,7 +11,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/init_client_dialog.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';

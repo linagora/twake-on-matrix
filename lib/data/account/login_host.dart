@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 
 /// The accounts a login stores, activates or takes back.
 abstract interface class LoginAccounts {

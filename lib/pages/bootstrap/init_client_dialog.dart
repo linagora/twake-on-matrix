@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_mobile_view.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog_web_view.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';

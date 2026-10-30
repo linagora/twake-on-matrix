@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';

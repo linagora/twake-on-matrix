@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/data/account/login_session.dart';
 
 import 'fake_login_host.dart';

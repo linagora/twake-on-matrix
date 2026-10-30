@@ -7,7 +7,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
