@@ -112,7 +112,6 @@ import 'package:twake_chat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/block_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/chat_room_search_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/create_new_group_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/delete_event_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.dart';
@@ -386,9 +385,6 @@ class GetItInitializer {
     );
     getIt.registerSingleton<DownloadFileForPreviewInteractor>(
       DownloadFileForPreviewInteractor(),
-    );
-    getIt.registerSingleton<CreateNewGroupChatInteractor>(
-      CreateNewGroupChatInteractor(),
     );
     getIt.registerSingleton<UploadContentInteractor>(UploadContentInteractor());
     getIt.registerSingleton<UploadContentInBytesInteractor>(

@@ -6,7 +6,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
-import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
@@ -24,13 +24,14 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
-class NewGroupChatInfoView extends StatelessWidget {
-  final NewGroupChatInfoController newGroupInfoController;
+class NewGroupChatInfoView extends ConsumerWidget {
+  final NewGroupChatInfoScreenState newGroupInfoController;
 
   const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(newGroupChatInfoControllerProvider);
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: _buildAppBar(context),
@@ -80,7 +81,7 @@ class NewGroupChatInfoView extends StatelessWidget {
         body: Padding(
           padding: NewGroupChatInfoStyle.padding,
           child: ExpansionParticipantsList(
-            contactsList: newGroupInfoController.contactsList ?? {},
+            contactsList: newGroupInfoController.contactsList,
           ),
         ),
       ),
@@ -93,21 +94,16 @@ class NewGroupChatInfoView extends StatelessWidget {
           return child!;
         },
         child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: newGroupInfoController.createRoomStateNotifier,
-          builder: (context, _, __) {
-            return ValueListenableBuilder<Either<Failure, Success>?>(
-              valueListenable: newGroupInfoController.inviteUserStateNotifier,
-              builder: (context, _, ___) {
-                if (newGroupInfoController.isCreatingRoom) {
-                  return const TwakeFloatingActionButton(
-                    customIcon: SizedBox(child: CircularProgressIndicator()),
-                  );
-                }
-                return TwakeFloatingActionButton(
-                  icon: Icons.done,
-                  onTap: () => newGroupInfoController.moveToGroupChatScreen(),
-                );
-              },
+          valueListenable: newGroupInfoController.avatarUploadStateNotifier,
+          builder: (context, _, _) {
+            if (newGroupInfoController.isCreatingRoom) {
+              return const TwakeFloatingActionButton(
+                customIcon: SizedBox(child: CircularProgressIndicator()),
+              );
+            }
+            return TwakeFloatingActionButton(
+              icon: Icons.done,
+              onTap: newGroupInfoController.moveToGroupChatScreen,
             );
           },
         ),
@@ -169,7 +165,7 @@ class NewGroupChatInfoView extends StatelessWidget {
     return Padding(
       padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
       child: ValueListenableBuilder(
-        valueListenable: newGroupInfoController.createRoomStateNotifier,
+        valueListenable: newGroupInfoController.avatarUploadStateNotifier,
         builder: (context, value, child) {
           return ValueListenableBuilder(
             valueListenable:
@@ -316,7 +312,7 @@ class _AvatarForWebBuilder extends StatelessWidget {
 }
 
 class _GroupPrivacySettings extends ConsumerWidget {
-  final NewGroupChatInfoController controller;
+  final NewGroupChatInfoScreenState controller;
 
   const _GroupPrivacySettings({required this.controller});
 

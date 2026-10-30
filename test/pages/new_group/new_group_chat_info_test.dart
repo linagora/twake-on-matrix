@@ -1,14 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -23,21 +22,17 @@ import 'package:mockito/mockito.dart';
 
 import 'new_group_chat_info_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<NewGroupChatInfoController>()])
+@GenerateNiceMocks([MockSpec<NewGroupChatInfoScreenState>()])
 void main() {
-  final getIt = GetIt.instance;
+  late MockNewGroupChatInfoScreenState mockController;
 
-  late MockNewGroupChatInfoController mockController;
+  // TwakeAppBar still reads ResponsiveUtils from GetIt.
+  setUpAll(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
 
-  setUpAll(() {
-    // Register ResponsiveUtils for the view
-    if (!getIt.isRegistered<ResponsiveUtils>()) {
-      getIt.registerSingleton(ResponsiveUtils());
-    }
-  });
+  tearDownAll(() => GetIt.instance.reset());
 
   setUp(() {
-    mockController = MockNewGroupChatInfoController();
+    mockController = MockNewGroupChatInfoScreenState();
 
     // Setup default mock values for controller properties
     when(
@@ -48,12 +43,9 @@ void main() {
     when(
       mockController.groupPrivacyNotifier,
     ).thenReturn(ValueNotifier(const GroupPrivacyState()));
-    when(mockController.createRoomStateNotifier).thenReturn(
-      ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial())),
-    );
-    when(mockController.inviteUserStateNotifier).thenReturn(
-      ValueNotifier<Either<Failure, Success>>(Right(InviteUserInitial())),
-    );
+    when(
+      mockController.avatarUploadStateNotifier,
+    ).thenReturn(ValueNotifier<Either<Failure, Success>?>(null));
     when(
       mockController.groupNameTextEditingController,
     ).thenReturn(TextEditingController());
@@ -66,16 +58,10 @@ void main() {
     ).thenReturn(ValueNotifier(null));
     when(mockController.pickAvatarUIState).thenReturn(
       ValueNotifierCustom<Either<Failure, Success>>(
-        Right(CreateNewGroupInitial()),
+        Right(GetAvatarInitialUIState()),
       ),
     );
-    when(
-      mockController.responsiveUtils,
-    ).thenReturn(getIt.get<ResponsiveUtils>());
-  });
-
-  tearDownAll(() {
-    getIt.reset();
+    when(mockController.responsiveUtils).thenReturn(ResponsiveUtils());
   });
 
   group('NewGroupChatInfo AppBar verification - widget test', () {
