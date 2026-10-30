@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:twake_chat/domain/forward/exceptions/forward_exception.dart';
 import 'package:twake_chat/domain/forward/usecases/forward_messages_usecase.provider.dart';
 import 'package:twake_chat/pages/forward/forward_state.dart';
 
@@ -14,7 +13,8 @@ class ForwardController extends _$ForwardController {
     required List<Map<String, Object?>> messages,
     required List<String> roomIds,
   }) async {
-    if (state is ForwardSending || messages.isEmpty || roomIds.isEmpty) return;
+    if (state is ForwardSending) return;
+    if (_hasNothingToSend(messages, roomIds)) return;
     state = const ForwardState.sending();
     try {
       final result = await ref
@@ -25,7 +25,7 @@ class ForwardController extends _$ForwardController {
         successCount: result.successCount,
         totalCount: result.totalCount,
       );
-    } on ForwardException {
+    } catch (_) {
       // The finally block puts the screen back so the user can retry or leave.
     } finally {
       if (ref.mounted && state is ForwardSending) {
@@ -33,4 +33,9 @@ class ForwardController extends _$ForwardController {
       }
     }
   }
+
+  bool _hasNothingToSend(
+    List<Map<String, Object?>> messages,
+    List<String> roomIds,
+  ) => messages.isEmpty || roomIds.isEmpty;
 }

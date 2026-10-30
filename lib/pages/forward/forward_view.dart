@@ -17,29 +17,29 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:twake_chat/widgets/twake_components/twake_text_button.dart';
 
 class ForwardView extends ConsumerWidget {
-  final ForwardScreenState controller;
+  final ForwardScreenState screen;
 
-  const ForwardView(this.controller, {super.key});
+  const ForwardView(this.screen, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(forwardControllerProvider);
-    final rooms = controller.recentChats;
+    final rooms = screen.recentChats;
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: controller.isFullScreen
+        preferredSize: screen.isFullScreen
             ? ForwardViewStyle.preferredSize(context)
             : ForwardViewStyle.maxPreferredSize(context),
         child: SearchableAppBar(
           toolbarHeight: ForwardViewStyle.maxToolbarHeight(context),
-          focusNode: controller.searchFocusNode,
+          focusNode: screen.searchFocusNode,
           title: L10n.of(context)!.forwardTo,
-          searchModeNotifier: controller.isSearchModeNotifier,
+          searchModeNotifier: screen.isSearchModeNotifier,
           hintText: L10n.of(context)!.searchContacts,
-          textEditingController: controller.searchTextEditingController,
-          openSearchBar: controller.openSearchBar,
-          closeSearchBar: controller.closeSearchBar,
-          isFullScreen: controller.isFullScreen,
+          textEditingController: screen.searchTextEditingController,
+          openSearchBar: screen.openSearchBar,
+          closeSearchBar: screen.closeSearchBar,
+          isFullScreen: screen.isFullScreen,
           displayBackButton: state is! ForwardSending,
         ),
       ),
@@ -56,28 +56,28 @@ class ForwardView extends ConsumerWidget {
                   if (rooms.isNotEmpty)
                     ForwardRecentChatList(
                       rooms: rooms,
-                      selectedRoomIds: controller.selectedRoomIds,
-                      onSelectedChat: controller.onToggleSelectChat,
+                      selectedRoomIds: screen.selectedRoomIds,
+                      onSelectedChat: screen.onToggleSelectChat,
                       recentChatScrollController:
-                          controller.recentChatScrollController,
+                          screen.recentChatScrollController,
                     ),
                 ],
               ),
             ),
           ),
-          if (!controller.isFullScreen)
+          if (!screen.isFullScreen)
             _WebActionsButton(
               state: state,
-              hasSelection: controller.selectedRoomIds.isNotEmpty,
-              forwardAction: controller.forwardAction,
+              hasSelection: screen.selectedRoomIds.isNotEmpty,
+              forwardAction: screen.forwardAction,
             ),
         ],
       ),
-      floatingActionButton: controller.isFullScreen
+      floatingActionButton: screen.isFullScreen
           ? _ForwardButton(
               state: state,
-              hasSelection: controller.selectedRoomIds.isNotEmpty,
-              forwardAction: controller.forwardAction,
+              hasSelection: screen.selectedRoomIds.isNotEmpty,
+              forwardAction: screen.forwardAction,
             )
           : null,
     );
@@ -121,8 +121,8 @@ class _WebActionsButton extends StatelessWidget {
       padding: ForwardViewStyle.webActionsButtonPadding,
       child: switch (state) {
         ForwardSending() => const _SendingIndicator(),
-        ForwardDone() => const SizedBox.shrink(),
-        ForwardIdle() => Row(
+        ForwardDone(successCount: > 0) => const SizedBox.shrink(),
+        ForwardIdle() || ForwardDone() => Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TwakeTextButton(
@@ -188,8 +188,8 @@ class _ForwardButton extends StatelessWidget {
     }
     return switch (state) {
       ForwardSending() => const _SendingIndicator(),
-      ForwardDone() => const SizedBox.shrink(),
-      ForwardIdle() => SizedBox(
+      ForwardDone(successCount: > 0) => const SizedBox.shrink(),
+      ForwardIdle() || ForwardDone() => SizedBox(
         height: ForwardViewStyle.bottomBarHeight,
         child: Align(
           alignment: Alignment.centerRight,
