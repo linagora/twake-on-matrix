@@ -35,7 +35,7 @@ class SettingsProfileCapabilityCheck extends StatelessWidget {
         );
         return Consumer(
           builder: (context, ref, child) => builder(
-            ref.watch(profileEditCapabilitiesProvider).value,
+            ref.watch(profileEditCapabilitiesProvider).unwrapPrevious().value,
             userInfoData is GetUserInfoSuccess ? userInfoData.userInfo : null,
             child,
           ),
