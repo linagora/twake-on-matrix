@@ -402,7 +402,7 @@ void main() {
       });
     });
 
-    test('a new removal starts the backoff again for the others', () {
+    test('a new removal has its own backoff, from the start', () {
       fakeAsync((async) {
         failing.add('remove:b');
         startFailing(async);
@@ -411,7 +411,7 @@ void main() {
         async.flushMicrotasks();
         expect(tries('b'), 1);
 
-        async.elapse(const Duration(minutes: 4));
+        async.elapse(const Duration(minutes: 1));
         expect(tries('b'), 2);
         async.elapse(const Duration(minutes: 2));
 
@@ -651,6 +651,37 @@ void main() {
 
       test('a removal asked for again goes ahead once the delay passed', () {
         expectAskedAgain(() => run('a'), delayPassed: true);
+      });
+
+      test('the delay asked for one removal does not delay another one', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '900');
+          run('a');
+          failing.add('remove:b');
+          run('b');
+          async.flushMicrotasks();
+
+          async.elapse(const Duration(minutes: 1));
+
+          expect(tries('a'), 1);
+          expect(tries('b'), 2);
+        });
+      });
+
+      test('a retry asked for by the app still runs the other removals', () {
+        fakeAsync((async) {
+          errors['remove:a'] = limit(retryAfter: '900');
+          run('a');
+          failing.add('remove:b');
+          run('b');
+          async.flushMicrotasks();
+
+          removals.retryAll();
+          async.flushMicrotasks();
+
+          expect(tries('a'), 1);
+          expect(tries('b'), 2);
+        });
       });
 
       test('a new removal does not wait for the delay of another one', () {
