@@ -1905,11 +1905,7 @@
   "newSpace": "Uus kogukond",
   "enterSpace": "Sisene kogukonda",
   "enterRoom": "Ava jututuba",
-  "appearOnTopDetails": "Sellega lubad rakendust avada kõige pealmisena (pole vajalik, kui Fluffychat on juba seadistatud toimima helistamiskontoga)",
-  "screenSharingTitle": "ekraani jagamine",
-  "foregroundServiceRunning": "See teavitus toimib siis, kui esiplaaniteenus töötab.",
   "allSpaces": "Kõik kogukonnad",
-  "screenSharingDetail": "Sa jagad oma ekraani FuffyChat'i vahendusel",
   "numChats": "{number} vestlust",
   "@numChats": {
     "type": "number",

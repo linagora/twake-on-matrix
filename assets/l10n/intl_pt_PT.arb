@@ -1676,7 +1676,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
   "enterRoom": "Entrar na conversa",
   "download": "Descarregar",
   "@download": {
@@ -1735,7 +1734,6 @@
   "hideUnimportantStateEvents": "Ocultar eventos desimportantes",
   "more": "Mais",
   "select": "Escolher",
-  "screenSharingTitle": "Partilhar ecrã",
   "widgetCustom": "Personalizado",
   "sentCallInformations": "{senderName} enviou informações de chamada",
   "@sentCallInformations": {
@@ -1785,7 +1783,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "foregroundServiceRunning": "Esta notificação aparece quando um serviço está a funcionar.",
   "recent": "Recente",
   "unknownEncryptionAlgorithm": "Algoritmo de criptografia desconhecido",
   "@unknownEncryptionAlgorithm": {
@@ -1950,7 +1947,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "screenSharingDetail": "Está a partilhar o seu ecrã no FluffyChat",
   "profile": "Perfil",
   "@profile": {
     "type": "text",

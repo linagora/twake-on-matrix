@@ -127,10 +127,7 @@ Future<void> _tryPushHelper(
     client.backgroundSync = true;
   }
 
-  if (event.type == EventTypes.CallInvite) {
-    // TODO: 28Dec2023 Disable until we support audio/video call
-    // CallKeepManager().initialize();
-  } else if (event.type == EventTypes.CallHangup) {
+  if (event.type == EventTypes.CallHangup) {
     client.backgroundSync = false;
   }
 

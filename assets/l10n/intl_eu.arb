@@ -1896,9 +1896,6 @@
   "allSpaces": "Gune guztiak",
   "newGroup": "Talde berria",
   "enterSpace": "Batu gunera",
-  "appearOnTopDetails": "Aplikazioa goikaldean agertzea baimentzen du (ez da beharrezkoa FluffyChat dei egiteko kontua bezala ezarri baduzu)",
-  "screenSharingTitle": "pantaila partekatzen",
-  "screenSharingDetail": "Pantaila FluffyChaten partekatzen ari zara",
   "numChats": "{number} berriketa",
   "@numChats": {
     "type": "number",
@@ -1909,7 +1906,6 @@
   "hideUnimportantStateEvents": "Izkutatu garrantzirik gabeko gertaerak",
   "noKeyForThisMessage": "Mezua gailu honetan saioa hasi baino lehen bidali bazen gertatu daiteke.\n\nBeste aukera bat igorleak zure gailua blokeatu izana da, edo zerbaitek huts egin izana interneteko konexioan.\n\nMezua beste saio batean irakur dezakezu? Hala bada, mezua transferitu dezakezu! Zoaz Ezrpenetara > Gailuak eta baieztatu zure gailuek bata bestea egiaztatu dutela. Gela irakiko duzun hurrengo aldian eta bi saioak aurreko planoan irekita daudenean, gakoak automatikoki partekatuko dira.\n\nEz duzu gakorik galdu nahi saioa amaitu edo gailuak aldatzen dituzunean? Baieztatu ezarpenetan berriketen babeskopiak gaituta dituzula.",
   "commandHint_markasgroup": "Markatu talde bezala",
-  "foregroundServiceRunning": "Jakinarazpen hau zerbitzua martxan dagoenean agertzen da.",
   "commandHint_markasdm": "Markatu mezu-zuzen gela bezala",
   "wasDirectChatDisplayName": "Txata hutsik dago ({oldDisplayName} zen lehen)",
   "@wasDirectChatDisplayName": {
