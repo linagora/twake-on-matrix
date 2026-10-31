@@ -881,8 +881,11 @@
       ? "Chrome headless · GitHub runner · médiane de 3 répétitions"
       : "Pixel 6 physique · APK profile · médiane de 3 runs séquentiels";
     elements["workflow-link"].href = web
-      ? "https://github.com/linagora/twake-on-matrix/actions/workflows/patrol-web-integration-test.yaml"
+      ? "https://github.com/linagora/twake-on-matrix/actions"
       : "https://github.com/linagora/twake-on-matrix/actions/workflows/integration-tests.yaml";
+    elements["workflow-link"].textContent = web
+      ? "Voir les workflows GitHub Actions ↗"
+      : "Voir le workflow nightly ↗";
     elements["web-diagnostic"].hidden = !web;
   }
 
