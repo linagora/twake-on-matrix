@@ -21,6 +21,9 @@ class FakeAccountClientDataSource implements AccountClientDataSource {
   final calls = <String>[];
   bool failDelete = false;
   bool failAddName = false;
+
+  /// Holds `addClientName` until it completes, to act while a write runs.
+  Future<void>? addGate;
   bool failRemoveName = false;
   bool createLoggedIn = false;
 
@@ -42,6 +45,7 @@ class FakeAccountClientDataSource implements AccountClientDataSource {
   @override
   Future<void> addClientName(String clientName) async {
     calls.add('add:$clientName');
+    await addGate;
     if (failAddName) throw StateError('store');
   }
 

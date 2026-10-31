@@ -34,6 +34,14 @@ class InvalidAccountTransitionException extends AccountException {
   final String stateName;
 }
 
+/// A switch is running, which refuses a change of the account list. Expected,
+/// not a failure: the caller waits for the switch to end and asks again.
+class SwitchInProgressException extends AccountException {
+  const SwitchInProgressException(this.accountId);
+
+  final String accountId;
+}
+
 /// A newer switch replaced this one before it finished.
 class SwitchSupersededException extends AccountException {
   const SwitchSupersededException(this.accountId);

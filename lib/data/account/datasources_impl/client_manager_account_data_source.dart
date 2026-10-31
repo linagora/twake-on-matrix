@@ -1,7 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/account/datasources/account_client_data_source.dart';
 import 'package:twake_chat/utils/client_manager.dart';
-import 'package:twake_chat/utils/open_sqflite_db.dart';
 
 /// How far disposing a client and deleting its storage got.
 enum _Stage {
@@ -42,9 +41,7 @@ class ClientManagerAccountDataSource implements AccountClientDataSource {
       await client.dispose(closeDatabase: false);
       _stages[client] = _Stage.disposed;
     }
-    await database.delete();
-    final path = database is MatrixSdkDatabase ? database.database?.path : null;
-    if (path != null) await deleteSqfliteDb(path);
+    await ClientManager.deleteClientStorage(database);
     _stages[client] = _Stage.storageDeleted;
   }
 }

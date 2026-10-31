@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/account/repositories/account_repository_impl.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.dart';
 import 'package:twake_chat/data/account/sources/pending_removals_source.dart';
@@ -95,14 +96,14 @@ void main() {
     });
 
     test('an unknown id or a candidate cannot be marked', () async {
-      await repository.createCandidate();
+      final name = (await repository.createCandidate()).id;
 
       await expectLater(
         repository.markRemovalPending('x'),
         throwsA(isA<UnknownAccountException>()),
       );
       await expectLater(
-        repository.markRemovalPending('new-client'),
+        repository.markRemovalPending(name),
         throwsA(isA<NotStoredAccountException>()),
       );
       expect(await repository.pendingRemovalIds(), isEmpty);
@@ -187,7 +188,7 @@ void main() {
 
       expect(accounts, [
         const Account(id: 'a', userId: '@a:s', status: AccountStatus.loggedIn),
-        const Account(id: 'p', status: AccountStatus.loggedOut),
+        const Account(id: 'p', status: AccountStatus.unavailable),
       ]);
       expect(registry['a'], same(a));
       expect(registry['p'], same(p));
@@ -241,7 +242,36 @@ void main() {
     });
   });
 
+  group('a repository built again on the same registry', () {
+    test('keeps the accounts added since boot', () {
+      final a = FakeAccountClient('a', userID: '@a:s');
+      final b = FakeAccountClient('b', userID: '@b:s');
+      repository.adopt([a], pendingRemovals: const {});
+      registry.add(b);
+
+      final accounts = _newRepository(
+        dataSource,
+        registry,
+      ).adopt([a], pendingRemovals: const {});
+
+      expect(registry['a'], same(a));
+      expect(registry['b'], same(b));
+      expect(accounts.map((x) => x.id), ['a', 'b']);
+    });
+  });
+
   group('adopt with a logged-out client', () {
+    test('beside others it is listed as unavailable instead of deleted', () {
+      final accounts = repository.adopt([
+        FakeAccountClient('x', userID: '@x:s'),
+        FakeAccountClient('left', logged: false),
+      ], pendingRemovals: const {});
+
+      expect(accounts.first.status, AccountStatus.loggedIn);
+      expect(accounts.last.status, AccountStatus.unavailable);
+      expect(dataSource.calls, isEmpty);
+    });
+
     test('alone it is only logged out (the placeholder of the next login)', () {
       final accounts = repository.adopt([
         FakeAccountClient('p', logged: false),
@@ -279,16 +309,16 @@ void main() {
     test('a candidate is unlogged, registered and not yet persisted', () async {
       final candidate = await repository.createCandidate();
 
-      expect(candidate.id, 'new-client');
+      expect(candidate.id, startsWith(AppConfig.applicationName));
       expect(candidate.status, AccountStatus.loggedOut);
-      expect(registry['new-client'], isNotNull);
-      expect(dataSource.calls, ['create:new-client']);
+      expect(registry[candidate.id], isNotNull);
+      expect(dataSource.calls, ['create:${candidate.id}']);
     });
 
     test('addAccount stores the name once', () async {
-      await repository.createCandidate();
-      const account = Account(
-        id: 'new-client',
+      final name = (await repository.createCandidate()).id;
+      final account = Account(
+        id: name,
         userId: '@n:s',
         status: AccountStatus.loggedIn,
       );
@@ -297,7 +327,7 @@ void main() {
       await repository.addAccount(account);
 
       expect(dataSource.calls.where((c) => c.startsWith('add:')), [
-        'add:new-client',
+        'add:$name',
       ]);
     });
 
@@ -395,15 +425,15 @@ void main() {
     test(
       'a candidate that was never stored must be discarded instead',
       () async {
-        await repository.createCandidate();
+        final name = (await repository.createCandidate()).id;
         dataSource.calls.clear();
 
         await expectLater(
-          repository.removeAccount('new-client'),
+          repository.removeAccount(name),
           throwsA(isA<NotStoredAccountException>()),
         );
         expect(dataSource.calls, isEmpty);
-        expect(registry['new-client'], isNotNull);
+        expect(registry[name], isNotNull);
       },
     );
 
@@ -426,29 +456,29 @@ void main() {
 
   group('discardCandidate', () {
     test('disposes the client, deletes its storage and drops it', () async {
-      await repository.createCandidate();
+      final name = (await repository.createCandidate()).id;
       dataSource.calls.clear();
 
-      await repository.discardCandidate('new-client');
+      await repository.discardCandidate(name);
 
-      expect(dataSource.calls, ['delete:new-client']);
-      expect(registry['new-client'], isNull);
+      expect(dataSource.calls, ['delete:$name']);
+      expect(registry[name], isNull);
     });
 
     test('a failing delete keeps the candidate so it can be retried', () async {
-      await repository.createCandidate();
+      final name = (await repository.createCandidate()).id;
       dataSource.failDelete = true;
 
       await expectLater(
-        repository.discardCandidate('new-client'),
+        repository.discardCandidate(name),
         throwsA(isA<StateError>()),
       );
-      expect(registry['new-client'], isNotNull);
+      expect(registry[name], isNotNull);
 
       dataSource.failDelete = false;
-      await repository.discardCandidate('new-client');
+      await repository.discardCandidate(name);
 
-      expect(registry['new-client'], isNull);
+      expect(registry[name], isNull);
     });
 
     test('a stored account is never discarded', () async {
@@ -570,16 +600,25 @@ void main() {
   });
 
   group('AccountClientRegistry', () {
-    test('replaceAll swaps the content', () {
+    test('adoptOnce swaps the content the first time', () {
       registry
         ..add(FakeAccountClient('b'))
         ..add(FakeAccountClient('a'));
 
-      registry.replaceAll([FakeAccountClient('c')]);
+      expect(registry.adoptOnce([FakeAccountClient('c')]), isTrue);
 
       expect(registry['a'], isNull);
       expect(registry['b'], isNull);
       expect(registry['c'], isNotNull);
+    });
+
+    test('adoptOnce changes nothing the second time', () {
+      registry.adoptOnce([FakeAccountClient('a')]);
+      registry.add(FakeAccountClient('b'));
+
+      expect(registry.adoptOnce([FakeAccountClient('c')]), isFalse);
+
+      expect(registry.clients.map((c) => c.clientName), ['a', 'b']);
     });
   });
 
@@ -732,7 +771,6 @@ AccountRepositoryImpl _newRepository(
         storeKey: PendingRemovalsSource.candidateKey,
       ),
   registry: registry,
-  clientNameBuilder: () => 'new-client',
 );
 
 class _FailingWrite extends PendingRemovalsSource {

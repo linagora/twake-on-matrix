@@ -16,14 +16,12 @@ class AccountRepositoryImpl implements AccountRepository {
     required PendingRemovalsSource pendingPushRemovals,
     required AccountClientRegistry registry,
     required PendingRemovalsSource pendingCandidateDiscards,
-    String Function()? clientNameBuilder,
   }) : _dataSource = dataSource,
        _persistedActiveAccount = persistedActiveAccount,
        _pendingRemovals = pendingRemovals,
        _pendingPushRemovals = pendingPushRemovals,
        _pendingCandidateDiscards = pendingCandidateDiscards,
-       _registry = registry,
-       _clientNameBuilder = clientNameBuilder;
+       _registry = registry;
 
   final AccountClientDataSource _dataSource;
   final PersistedActiveAccountSource _persistedActiveAccount;
@@ -31,7 +29,6 @@ class AccountRepositoryImpl implements AccountRepository {
   final PendingRemovalsSource _pendingPushRemovals;
   final PendingRemovalsSource _pendingCandidateDiscards;
   final AccountClientRegistry _registry;
-  final String Function()? _clientNameBuilder;
 
   /// Names that are in the store, in store order, so a name is never written
   /// twice.
@@ -46,7 +43,6 @@ class AccountRepositoryImpl implements AccountRepository {
   bool _adopted = false;
 
   String _newClientName() =>
-      _clientNameBuilder?.call() ??
       '${AppConfig.applicationName}-${DateTime.now().microsecondsSinceEpoch}';
 
   /// Takes over clients that were already created and initialised at boot
@@ -56,25 +52,42 @@ class AccountRepositoryImpl implements AccountRepository {
   /// the pending removals. Plain object work: safe to call while the widget
   /// tree is building.
   ///
-  /// Called by the boot (through `accountRepositoryImplProvider`, wired in a
-  /// later PR), which may run again, for instance when the notifier that
-  /// calls it is built again: only the first call takes over, the following
-  /// ones return the accounts as they are.
+  /// Called once, by `accountRepositoryProvider`, as it builds the repository.
+  /// Only the first call takes over, the following ones return the accounts as
+  /// they are. The registry is taken over once too: a repository built again
+  /// on it starts from its clients, not from [clients].
   List<Account> adopt(
     Iterable<Client> clients, {
     required Set<String> pendingRemovals,
   }) {
     if (_adopted) return registeredAccounts();
     _adopted = true;
-    _registry.replaceAll(clients);
+    // A registry that took the boot clients over already holds the accounts
+    // as they are now: they are kept, not reset to the boot ones.
+    final known = _registry.adoptOnce(clients)
+        ? clients
+        : _registry.clients.toList();
     _storedIds
       ..clear()
-      ..addAll(clients.map((c) => c.clientName));
+      ..addAll(known.map((c) => c.clientName));
     _pendingIds
       ..clear()
-      ..addAll(pendingRemovals.where(_storedIds.contains));
+      ..addAll(pendingRemovals.where(_storedIds.contains))
+      ..addAll(_loggedOutBesideOthers(known));
     return registeredAccounts();
   }
+
+  /// With several accounts, a client that is not logged in is a leftover of a
+  /// logout whose cleanup did not finish: it is owed a removal, which the app
+  /// runs like any pending one (retried, listed as unavailable meanwhile),
+  /// instead of `ClientManager.getClients` deleting it while it loads.
+  Set<String> _loggedOutBesideOthers(Iterable<Client> clients) =>
+      clients.length > 1
+      ? {
+          for (final c in clients)
+            if (!c.isLogged()) c.clientName,
+        }
+      : const {};
 
   @override
   List<Account> registeredAccounts() => [
