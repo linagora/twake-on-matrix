@@ -1,7 +1,13 @@
+import 'package:twake_chat/utils/login_failed_snackbar.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -22,13 +28,19 @@ mixin ConnectPageMixin {
 
   static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
 
+  LoginSessions _sessionsOf(BuildContext context) => ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(loginSessionsProvider);
+
   bool supportsFlow({
     required BuildContext context,
     required String flowType,
   }) =>
-      Matrix.of(context).loginHomeserverSummary?.loginFlows.any(
-        (flow) => flow.type == flowType,
-      ) ??
+      ProviderScope.containerOf(context, listen: false)
+          .read(loginHomeserverSummaryProvider)
+          ?.loginFlows
+          .any((flow) => flow.type == flowType) ??
       false;
 
   bool supportsSso(BuildContext context) =>
@@ -92,7 +104,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    final client = await Matrix.of(context).getLoginClient();
+    final client = await _sessionsOf(context).loginClient();
     final homeserver = client.homeserver?.toString() ?? '';
     if (homeserver.isEmpty) {
       throw StateError('Homeserver is not configured for SSO');
@@ -150,15 +162,15 @@ mixin ConnectPageMixin {
       final token = Uri.parse(result).queryParameters['loginToken'];
       if (token == null || token.isEmpty) return SsoLoginState.tokenEmpty;
       Matrix.of(context).loginType = LoginType.mLoginToken;
-      final client = await Matrix.of(context).getLoginClient();
-      await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => client.login(
-          LoginType.mLoginToken,
-          token: token,
-          initialDeviceDisplayName: PlatformInfos.clientName,
-        ),
+      final client = await _sessionsOf(context).loginClient();
+      return await loginWithToken(
+        ProviderScope.containerOf(
+          context,
+          listen: false,
+        ).read(loginSessionsProvider),
+        client,
+        token,
       );
-      return SsoLoginState.success;
     } catch (e) {
       Logs().e('ConnectPageMixin:: ssoLoginActionMobil(): error: $e');
       return SsoLoginState.error;
@@ -274,8 +286,36 @@ mixin ConnectPageMixin {
     }
   }
 
+  /// Logs in with [token] in the full screen dialog. When the login worked on
+  /// the server but the account could not be stored, the login was undone: the
+  /// user is told and the result is an error, so they can try again.
+  @visibleForTesting
+  Future<SsoLoginState> loginWithToken(
+    LoginSessions sessions,
+    Client client,
+    String token,
+  ) async {
+    final dialogResult = await TwakeDialog.showStreamDialogFullScreen(
+      future: () async => sessions.trackLogin(
+        client,
+        () => client.login(
+          LoginType.mLoginToken,
+          token: token,
+          initialDeviceDisplayName: PlatformInfos.clientName,
+        ),
+      ),
+    );
+    if (dialogResult is! ClientLoginStateEvent ||
+        !dialogResult.multipleAccountLoginType.isFailure) {
+      return SsoLoginState.success;
+    }
+    showLoginFailedSnackBar(dialogResult.error);
+    return SsoLoginState.error;
+  }
+
   Future<SsoLoginState> handleTokenFromRegistrationSite({
     required MatrixState matrix,
+    required LoginSessions sessions,
     required String uri,
   }) async {
     try {
@@ -285,15 +325,8 @@ mixin ConnectPageMixin {
         return SsoLoginState.tokenEmpty;
       }
       matrix.loginType = LoginType.mLoginToken;
-      final client = await matrix.getLoginClient();
-      await TwakeDialog.showStreamDialogFullScreen(
-        future: () async => client.login(
-          LoginType.mLoginToken,
-          token: token,
-          initialDeviceDisplayName: PlatformInfos.clientName,
-        ),
-      );
-      return SsoLoginState.success;
+      final client = await sessions.loginClient();
+      return await loginWithToken(sessions, client, token);
     } catch (e) {
       Logs().e(
         'ConnectPageMixin:: handleTokenFromRegistrationSite(): error: $e',

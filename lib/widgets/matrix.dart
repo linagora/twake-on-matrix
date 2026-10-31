@@ -15,7 +15,7 @@ import 'package:twake_chat/event/twake_event_types.dart';
 import 'package:twake_chat/pages/chat/events/audio_message/audio_player_widget.dart';
 import 'package:twake_chat/presentation/mixins/connectivity_mixin.dart';
 import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
-import 'package:twake_chat/presentation/model/client_login_state_event.dart';
+import 'package:twake_chat/domain/account/entities/client_login_state_event.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logout_body_args.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:just_audio/just_audio.dart';
