@@ -25,7 +25,10 @@ library;
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
+import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/app_provider_container.dart';
+import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/utils/logging/init_matrix_logger.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
@@ -102,8 +105,15 @@ Future<void> main() async {
   final clients = <Client>[];
   runApp(
     UncontrolledProviderScope(
-      container: createAppProviderContainer(),
-      child: TwakeApp(clients: clients),
+      container: createAppProviderContainer(
+        overrides: [
+          bootClientsProvider.overrideWithValue(clients),
+          bootAccountSnapshotProvider.overrideWithValue(
+            const AccountBootSnapshot(),
+          ),
+        ],
+      ),
+      child: const TwakeApp(),
     ),
   );
 }
