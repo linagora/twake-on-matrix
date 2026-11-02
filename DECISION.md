@@ -64,8 +64,8 @@ nothing and shows that the call could not be started.
 
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 
-The Edit screen of a group has a « Who can join » section, as twake-space-chat
-(its D516): « Invite only », « On request » or « Public », then « In
+The Edit screen of a group has a « Who can join » section, as in
+twake-space-chat: « Invite only », « On request » or « Public », then « In
 directory ». It is saved with the rest of Edit, the rule first, then the
 listing, and Edit stays open after the save, as it does today.
 
@@ -80,9 +80,12 @@ listing, and Edit stays open after the save, as it does today.
 - While the public web page is on (`app.twake.chat.public_page`), only
   « Public » is offered and the listing is locked; the save refuses the rest.
 - `m.federate` is fixed at creation, so a group made « Public » here can be
-  joined from another server. Only the server ACL of twake-space-chat D543
-  closes it; it is the condition for using this outside one server.
+  joined from another server. A server ACL is the condition for using this
+  outside one server.
 - A public room cannot be encrypted: the encryption switch of Edit is greyed
+  out, with the reason, while the room is public, readable by anyone, or
+  « Public » is chosen.
+
   out, with the reason, while the room is public or « Public » is chosen.
 
 ## D7. Group creation: public and encryption exclude each other (proposed by Johann, 2026-11-03)

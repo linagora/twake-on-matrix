@@ -160,7 +160,7 @@ extension RoomExtension on Room {
         ownPowerLevel.level;
   }
 
-  /// D203: a room anyone can join or read is never encrypted.
+  /// A room anyone can join or read is never encrypted.
   bool get isOpenToAnyone =>
       joinRules == JoinRules.public ||
       historyVisibility == HistoryVisibility.worldReadable;
