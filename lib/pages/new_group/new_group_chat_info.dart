@@ -7,7 +7,6 @@ import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
-import 'package:twake_chat/domain/model/verification/composite_name_validator.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/model/verification/new_name_request.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
@@ -184,10 +183,7 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     _handleUploadAvatarOnData(Left(UploadContentFailed(exception: error)));
   }
 
-  Future<void> _onStateChanged(
-    NewGroupChatInfoState? previous,
-    NewGroupChatInfoState next,
-  ) async {
+  Future<void> _onStateChanged(NewGroupChatInfoState next) async {
     final l10n = L10n.of(context)!;
     switch (next) {
       case NewGroupChatInfoFailed(:final reason):
@@ -199,8 +195,11 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
           isArrangeActionButtonsVertical: true,
           okLabel: l10n.gotIt,
         );
-      case NewGroupChatInfoDone(:final roomId, :final groupName):
-        final inviteFailure = next.inviteFailure;
+      case NewGroupChatInfoDone(
+        :final roomId,
+        :final groupName,
+        :final inviteFailure,
+      ):
         if (inviteFailure != null) {
           await showConfirmAlertDialog(
             context: context,
@@ -274,17 +273,13 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     return imagePickerController;
   }
 
-  String? getErrorMessage(String content) {
-    return CompositeNameValidator([
-      NameWithSpaceOnlyValidator(),
-    ]).validate(NewNameRequest(content)).fold((failure) {
-      if (failure is VerifyNameFailure) {
-        return failure.getMessage(context);
-      } else {
-        return null;
-      }
-    }, (success) => null);
-  }
+  String? getErrorMessage(String content) => NameWithSpaceOnlyValidator()
+      .validate(NewNameRequest(content))
+      .fold(
+        (failure) =>
+            failure is VerifyNameFailure ? failure.getMessage(context) : null,
+        (_) => null,
+      );
 
   void _onGroupNameChanged() {
     final text = groupNameTextEditingController.text;
@@ -317,7 +312,7 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
   Widget build(BuildContext context) {
     ref.listen(
       newGroupChatInfoControllerProvider,
-      (previous, next) => unawaited(_onStateChanged(previous, next)),
+      (_, next) => unawaited(_onStateChanged(next)),
     );
     return NewGroupChatInfoView(this);
   }
