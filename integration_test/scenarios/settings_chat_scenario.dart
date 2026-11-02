@@ -27,9 +27,9 @@ class SettingsChatToggleScenario extends BaseTestScenario {
     await chatRobot.switchTile(_title).waitUntilVisible();
 
     final initialValue = await chatRobot.waitForStoredValue(_title);
-    await chatRobot.toggleSwitch(_title);
 
     try {
+      await chatRobot.toggleSwitch(_title);
       await chatRobot.backToSettingScreen();
       s.softAssertEquals(
         $(SettingsView).exists,
@@ -54,9 +54,7 @@ class SettingsChatToggleScenario extends BaseTestScenario {
         await settingRobot.openChatSetting();
         await chatRobot.waitForView();
       }
-      if (await chatRobot.waitForStoredValue(_title) != initialValue) {
-        await chatRobot.toggleSwitch(_title);
-      }
+      await chatRobot.restoreStoredValue(_title, initialValue);
     }
 
     s.verifyAll();

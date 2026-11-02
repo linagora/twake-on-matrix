@@ -66,6 +66,21 @@ class SettingsChatRobot extends HomeRobot {
     await $.pumpAndSettle();
   }
 
+  /// Writes [value] for the [title] setting the same way the tile does
+  /// (its `onChanged`, then storage), without waiting for the switch to show
+  /// it. Used for cleanup, so it still works when the switch is out of sync.
+  Future<void> restoreStoredValue(String title, bool value) async {
+    final tileFinder = find.ancestor(
+      of: find.text(title),
+      matching: find.byType(SettingsSwitchListTile),
+    );
+    await $.waitUntilExists($(tileFinder));
+    final tile = $.tester.widget<SettingsSwitchListTile>(tileFinder.first);
+    final context = $.tester.element(tileFinder.first);
+    tile.onChanged?.call(value);
+    await Matrix.of(context).store.setItemBool(tile.storeKey, value);
+  }
+
   Future<void> backToSettingScreen() async {
     await goBack();
     await $.pumpAndSettle();
