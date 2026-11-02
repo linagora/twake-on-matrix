@@ -1,4 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/app_grid/app_grid_dashboard.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_controller.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_overlay.dart';
 import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view_style.dart';
@@ -6,17 +7,21 @@ import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
-class AppGridDashboardView extends StatelessWidget {
-  final AppGridDashboardController controller;
+class AppGridDashboardView extends ConsumerWidget {
+  final AppGridDashboardState controller;
 
   const AppGridDashboardView({super.key, required this.controller});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final linagoraApplications = ref
+        .watch(appGridDashboardControllerProvider)
+        .value;
     return Align(
       alignment: Alignment.centerRight,
       child: Row(
@@ -106,16 +111,9 @@ class AppGridDashboardView extends StatelessWidget {
                             follower: Alignment.topRight,
                             target: Alignment.bottomRight,
                           ),
-                          portalFollower: ValueListenableBuilder(
-                            valueListenable: controller.linagoraApplications,
-                            builder: (context, linagoraApplications, child) {
-                              if (linagoraApplications == null) return child!;
-                              return AppGridDashboardOverlay(
-                                linagoraApplications,
-                              );
-                            },
-                            child: const SizedBox.shrink(),
-                          ),
+                          portalFollower: linagoraApplications == null
+                              ? const SizedBox.shrink()
+                              : AppGridDashboardOverlay(linagoraApplications),
                           visible: isOpenAppGridDashboard,
                           child: Container(
                             decoration: BoxDecoration(

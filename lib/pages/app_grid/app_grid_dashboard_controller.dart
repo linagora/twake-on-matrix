@@ -1,99 +1,24 @@
-import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/app_grid/get_app_grid_configuration_state.dart';
-import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
-import 'package:twake_chat/domain/usecase/app_grid/get_app_grid_configuration_interactor.dart';
-import 'package:twake_chat/pages/app_grid/app_grid_dashboard_view.dart';
-import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/app_grid/usecases/get_app_grid_configuration_usecase.provider.dart';
+import 'package:twake_chat/domain/model/app_grid/linagora_applications.dart';
 
-class AppGridDashboard extends StatefulWidget {
-  const AppGridDashboard({super.key});
+part 'app_grid_dashboard_controller.g.dart';
 
+/// The apps listed in the app grid.
+@riverpod
+class AppGridDashboardController extends _$AppGridDashboardController {
   @override
-  State<AppGridDashboard> createState() => AppGridDashboardController();
-}
-
-class AppGridDashboardController extends State<AppGridDashboard> {
-  final _getAppGridConfigurationInteractor = getIt
-      .get<GetAppGridConfigurationInteractor>();
-
-  final isOpenAppGridDashboardNotifier = ValueNotifier<bool>(false);
-
-  final linagoraApplications = ValueNotifier<LinagoraApplications?>(null);
-
-  final hoverColorAppGrid = ValueNotifier<Color>(Colors.transparent);
-
-  final hoverColorAppHelp = ValueNotifier<Color>(Colors.transparent);
-
-  void _getAppGridConfiguration() {
-    _getAppGridConfigurationInteractor
-        .execute(appGridConfigurationPath: AppConfig.appGridConfigurationPath)
-        .listen((event) {
-          event.fold(
-            (failure) {
-              if (failure is GetAppGridConfigurationFailure) {
-                Logs().e(
-                  'AppGridDashboardController::_getAppGridConfiguration(): $failure',
-                );
-              }
-            },
-            (success) {
-              if (success is GetAppGridConfigurationSuccess) {
-                handleGetAppGridDashboardSuccess(success.linagoraApplications);
-              }
-            },
-          );
-        });
-  }
-
-  void handleGetAppGridDashboardSuccess(LinagoraApplications linagoraApps) {
+  Future<LinagoraApplications> build() async {
     try {
-      if (!mounted) return;
-      Logs().d(
-        'AppGridDashboardController::handleGetAppGridDashboardSuccess(): $linagoraApps',
-      );
-      linagoraApplications.value = linagoraApps;
-    } on FlutterError catch (e) {
-      Logs().e('AppGridDashboardController::handleShowAppDashboard(): $e');
+      // TODO: [transitional] The path is still read from the static AppConfig.
+      return await ref
+          .read(getAppGridConfigurationUseCaseProvider)
+          .execute(AppConfig.appGridConfigurationPath);
+    } catch (e, s) {
+      Logs().e('AppGridDashboardController::build()', e, s);
+      rethrow;
     }
-  }
-
-  void hideAppGridDashboard() {
-    try {
-      if (!mounted) return;
-      if (isOpenAppGridDashboardNotifier.value == false) return;
-      isOpenAppGridDashboardNotifier.value = false;
-    } on FlutterError catch (e) {
-      Logs().e('AppGridDashboardController::hideAppGridDashboard(): $e');
-    }
-  }
-
-  @override
-  void initState() {
-    _getAppGridConfiguration();
-    super.initState();
-  }
-
-  @override
-  void deactivate() {
-    // Close the portal before deactivation to prevent accessing
-    // the Overlay context after the widget is deactivated
-    hideAppGridDashboard();
-    super.deactivate();
-  }
-
-  @override
-  void dispose() {
-    isOpenAppGridDashboardNotifier.dispose();
-    linagoraApplications.dispose();
-    hoverColorAppGrid.dispose();
-    hoverColorAppHelp.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AppGridDashboardView(controller: this);
   }
 }
