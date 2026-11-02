@@ -164,10 +164,7 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
             context,
           )!.youAreUploadingPhotosDoYouWantToCancelOrContinue,
           acceptText: L10n.of(context)!.continueProcess,
-          onAccept: () {
-            WarningDialog.hideWarningDialog(context);
-            createNewGroup();
-          },
+          onAccept: createNewGroup,
         );
       },
       (success) {
