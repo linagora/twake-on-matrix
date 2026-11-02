@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:twake_chat/data/datasource_impl/room_access/room_access_datasource_impl.dart';
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
+import 'package:twake_chat/data/room_access/datasources_impl/room_access_datasource_impl.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
 
 import 'room_access_datasource_impl_test.mocks.dart';
 
@@ -14,12 +18,17 @@ void main() {
 
   late MockClient client;
   late MockRoom room;
+  late CachedStreamController<String> roomUpdates;
   late RoomAccessDatasourceImpl datasource;
 
   setUp(() {
     client = MockClient();
     room = MockRoom();
+    roomUpdates = CachedStreamController();
     when(client.getRoomById(roomId)).thenReturn(room);
+    when(room.id).thenReturn(roomId);
+    when(room.client).thenReturn(client);
+    when(room.onUpdate).thenReturn(roomUpdates);
     when(room.canChangeJoinRules).thenReturn(true);
     when(room.isDirectChat).thenReturn(false);
     when(room.encrypted).thenReturn(false);
@@ -30,9 +39,9 @@ void main() {
     datasource = RoomAccessDatasourceImpl(client);
   });
 
-  test('getRoomAccess_always_readsTheRuleAndTheListing', () async {
+  test('watchRoomAccess_atStart_readsTheRuleAndTheListing', () async {
     // Act
-    final access = await datasource.getRoomAccess(roomId);
+    final access = await datasource.watchRoomAccess(roomId).first;
 
     // Assert
     expect(
@@ -46,51 +55,70 @@ void main() {
     );
   });
 
-  test('getRoomAccess_restrictedRoom_hasNoRuleChoice', () async {
+  test('watchRoomAccess_whenEncryptionTurnsOn_emitsAgain', () async {
+    // Arrange
+    final emitted = <RoomAccess>[];
+    final subscription = datasource.watchRoomAccess(roomId).listen(emitted.add);
+    await pumpEventQueue();
+
+    // Act
+    roomUpdates.add(roomId);
+    await pumpEventQueue();
+    when(room.encrypted).thenReturn(true);
+    roomUpdates.add(roomId);
+    await pumpEventQueue();
+
+    // Assert
+    expect(emitted.map((access) => access.isEncrypted), [false, true]);
+    verify(client.getRoomVisibilityOnDirectory(roomId)).called(2);
+    unawaited(subscription.cancel());
+  });
+
+  test('watchRoomAccess_restrictedRoom_hasNoRuleChoice', () async {
     // Arrange
     when(room.joinRules).thenReturn(JoinRules.restricted);
 
     // Act
-    final access = await datasource.getRoomAccess(roomId);
+    final access = await datasource.watchRoomAccess(roomId).first;
 
     // Assert
     expect(access.joinRule, isNull);
   });
 
-  test('getRoomAccess_unreadableDirectory_countsAsNotListed', () async {
+  test('watchRoomAccess_unreadableDirectory_countsAsNotListed', () async {
     // Arrange
     when(
       client.getRoomVisibilityOnDirectory(roomId),
     ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
 
     // Act
-    final access = await datasource.getRoomAccess(roomId);
+    final access = await datasource.watchRoomAccess(roomId).first;
 
     // Assert
     expect(access.isListed, isFalse);
   });
 
-  test('getRoomAccess_directChat_cannotChangeNorReadsTheDirectory', () async {
+  test('watchRoomAccess_directChat_cannotChangeNorReadsTheDirectory', () async {
     // Arrange
     when(room.isDirectChat).thenReturn(true);
 
     // Act
-    final access = await datasource.getRoomAccess(roomId);
+    final access = await datasource.watchRoomAccess(roomId).first;
 
     // Assert
     expect(access.canChange, isFalse);
     verifyNever(client.getRoomVisibilityOnDirectory(any));
   });
 
-  test('getRoomAccess_unknownRoom_throwsNotFound', () async {
+  test('watchRoomAccess_unknownRoom_throwsNotFound', () async {
     // Arrange
     when(client.getRoomById(roomId)).thenReturn(null);
 
-    // Act & Assert
-    await expectLater(
-      datasource.getRoomAccess(roomId),
-      throwsA(isA<RoomAccessRoomNotFoundException>()),
-    );
+    // Act
+    final result = datasource.watchRoomAccess(roomId).first;
+
+    // Assert
+    await expectLater(result, throwsA(isA<RoomAccessRoomNotFoundException>()));
   });
 
   test('setJoinRule_public_sendsThePublicRule', () async {
@@ -123,21 +151,21 @@ void main() {
       ),
     ).thenThrow(MatrixException.fromJson({'errcode': 'M_FORBIDDEN'}));
 
-    // Act & Assert
-    await expectLater(
-      datasource.setListed(roomId, isListed: true),
-      throwsA(isA<RoomAccessForbiddenException>()),
-    );
+    // Act
+    final result = datasource.setListed(roomId, isListed: true);
+
+    // Assert
+    await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
   });
 
   test('setJoinRule_otherError_throwsSaveFailed', () async {
     // Arrange
     when(room.setJoinRules(any)).thenThrow(Exception('network'));
 
-    // Act & Assert
-    await expectLater(
-      datasource.setJoinRule(roomId, JoinRuleChoice.invite),
-      throwsA(isA<RoomAccessSaveFailedException>()),
-    );
+    // Act
+    final result = datasource.setJoinRule(roomId, JoinRuleChoice.invite);
+
+    // Assert
+    await expectLater(result, throwsA(isA<RoomAccessSaveFailedException>()));
   });
 }

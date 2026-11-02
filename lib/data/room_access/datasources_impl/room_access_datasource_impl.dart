@@ -1,7 +1,7 @@
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/data/datasource/room_access/room_access_datasource.dart';
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
+import 'package:twake_chat/data/room_access/datasources/room_access_datasource.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
 
 class RoomAccessDatasourceImpl implements RoomAccessDatasource {
   const RoomAccessDatasourceImpl(this._client);
@@ -15,15 +15,16 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
   };
 
   @override
-  Future<RoomAccess> getRoomAccess(String roomId) async {
+  Stream<RoomAccess> watchRoomAccess(String roomId) async* {
     final room = _room(roomId);
-    final canChange = room.canChangeJoinRules && !room.isDirectChat;
-    return RoomAccess(
-      joinRule: _choiceOf(room.joinRules),
-      isListed: canChange && await _isListed(roomId),
-      isEncrypted: room.encrypted,
-      canChange: canChange,
-    );
+    var state = _stateOf(room);
+    yield await _accessOf(room);
+    await for (final _ in room.onUpdate.stream) {
+      final next = _stateOf(room);
+      if (next == state) continue;
+      state = next;
+      yield await _accessOf(room);
+    }
   }
 
   @override
@@ -35,7 +36,7 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
 
   @override
   Future<void> setListed(String roomId, {required bool isListed}) => _guard(
-    () => _client!.setRoomVisibilityOnDirectory(
+    () => _room(roomId).client.setRoomVisibilityOnDirectory(
       roomId,
       visibility: isListed ? Visibility.public : Visibility.private,
     ),
@@ -47,18 +48,36 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
     return room;
   }
 
-  JoinRuleChoice? _choiceOf(JoinRules? joinRule) => _joinRules.entries
-      .where((entry) => entry.value == joinRule)
-      .firstOrNull
-      ?.key;
+  ({JoinRules? joinRule, bool isEncrypted, bool canChange}) _stateOf(
+    Room room,
+  ) => (
+    joinRule: room.joinRules,
+    isEncrypted: room.encrypted,
+    canChange: room.canChangeJoinRules && !room.isDirectChat,
+  );
 
-  Future<bool> _isListed(String roomId) async {
+  Future<RoomAccess> _accessOf(Room room) async {
+    final state = _stateOf(room);
+    return RoomAccess(
+      joinRule: _joinRules.entries
+          .where((entry) => entry.value == state.joinRule)
+          .firstOrNull
+          ?.key,
+      isListed: state.canChange && await _isListed(room),
+      isEncrypted: state.isEncrypted,
+      canChange: state.canChange,
+    );
+  }
+
+  Future<bool> _isListed(Room room) async {
     try {
-      final visibility = await _client!.getRoomVisibilityOnDirectory(roomId);
+      final visibility = await room.client.getRoomVisibilityOnDirectory(
+        room.id,
+      );
       return visibility == Visibility.public;
-    } catch (e) {
+    } catch (e, s) {
       // An unreadable directory counts as not listing the room.
-      Logs().w('RoomAccessDatasourceImpl::_isListed(): $e');
+      Logs().w('RoomAccessDatasourceImpl::_isListed()', e, s);
       return false;
     }
   }

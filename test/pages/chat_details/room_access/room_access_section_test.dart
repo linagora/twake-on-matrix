@@ -2,28 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:twake_chat/data/repository/room_access/room_access_repository.provider.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:twake_chat/data/room_access/repositories/room_access_repository.provider.dart';
+import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_section.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
-import '../../../domain/room_access/fake_room_access_repository.dart';
 import 'public_groups_summary.dart';
+import 'room_access_section_test.mocks.dart';
 
+@GenerateNiceMocks([MockSpec<RoomAccessRepository>()])
 void main() {
   const roomId = '!room:example.com';
+  const invite = RoomAccess(
+    joinRule: JoinRuleChoice.invite,
+    isListed: false,
+    isEncrypted: false,
+    canChange: true,
+  );
 
-  late FakeRoomAccessRepository repository;
+  late MockRoomAccessRepository repository;
+  late ValueNotifier<RoomAccessDraft> draft;
 
   setUp(() {
-    repository = FakeRoomAccessRepository();
+    repository = MockRoomAccessRepository();
+    draft = ValueNotifier(const RoomAccessDraft());
   });
 
-  Future<ProviderContainer> pumpSection(
+  tearDown(() => draft.dispose());
+
+  Future<void> pumpSection(
     WidgetTester tester, {
+    RoomAccess access = invite,
     bool isPublicGroupsEnabled = true,
   }) async {
+    when(
+      repository.watchRoomAccess(roomId),
+    ).thenAnswer((_) => Stream.value(access));
     final container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
@@ -36,20 +55,19 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(
-          locale: Locale('en'),
+        child: MaterialApp(
+          locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
           home: Scaffold(
             body: SingleChildScrollView(
-              child: RoomAccessSection(roomId: roomId),
+              child: RoomAccessSection(roomId: roomId, draft: draft),
             ),
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
-    return container;
   }
 
   testWidgets('build_whenPublicGroupsAreDisabled_showsNothing', (tester) async {
@@ -91,16 +109,14 @@ void main() {
       find.widgetWithText(LinagoraSettingItem, 'In directory'),
     );
     expect(listed.value, isTrue);
+    expect(draft.value.joinRule, JoinRuleChoice.public);
   });
 
   testWidgets('build_encryptedRoom_offersNeitherPublicNorTheListing', (
     tester,
   ) async {
-    // Arrange
-    repository.access = repository.access.copyWith(isEncrypted: true);
-
     // Act
-    await pumpSection(tester);
+    await pumpSection(tester, access: invite.copyWith(isEncrypted: true));
 
     // Assert
     expect(find.text('Public'), findsNothing);
@@ -112,11 +128,8 @@ void main() {
   });
 
   testWidgets('build_restrictedRoom_saysSoAndKeepsTheListing', (tester) async {
-    // Arrange
-    repository.access = repository.access.copyWith(joinRule: null);
-
     // Act
-    final container = await pumpSection(tester);
+    await pumpSection(tester, access: invite.copyWith(joinRule: null));
 
     // Assert
     expect(find.byType(LinagoraRadioItem), findsNothing);
@@ -125,13 +138,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('In directory'), findsOneWidget);
-    expect(
-      container.read(roomAccessControllerProvider(roomId)).value?.joinRule,
-      isNull,
-    );
   });
 
-  testWidgets('build_alwaysOffersTheRulesInOrder', (tester) async {
+  testWidgets('build_always_offersTheRulesInOrder', (tester) async {
     // Act
     await pumpSection(tester);
 

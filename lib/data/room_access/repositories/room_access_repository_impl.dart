@@ -1,6 +1,6 @@
-import 'package:twake_chat/data/datasource/room_access/room_access_datasource.dart';
-import 'package:twake_chat/domain/repository/room_access/room_access_repository.dart';
+import 'package:twake_chat/data/room_access/datasources/room_access_datasource.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 
 class RoomAccessRepositoryImpl implements RoomAccessRepository {
   const RoomAccessRepositoryImpl(this._roomAccessDatasource);
@@ -8,8 +8,8 @@ class RoomAccessRepositoryImpl implements RoomAccessRepository {
   final RoomAccessDatasource _roomAccessDatasource;
 
   @override
-  Future<RoomAccess> getRoomAccess(String roomId) =>
-      _roomAccessDatasource.getRoomAccess(roomId);
+  Stream<RoomAccess> watchRoomAccess(String roomId) =>
+      _roomAccessDatasource.watchRoomAccess(roomId);
 
   @override
   bool isEncrypted(String roomId) => _roomAccessDatasource.isEncrypted(roomId);

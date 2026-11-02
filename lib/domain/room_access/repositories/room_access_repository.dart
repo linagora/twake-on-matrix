@@ -1,7 +1,9 @@
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 
 abstract class RoomAccessRepository {
-  Future<RoomAccess> getRoomAccess(String roomId);
+  /// Emits again whenever the rule, the encryption or the permission change;
+  /// the listing is read from the directory at each emission.
+  Stream<RoomAccess> watchRoomAccess(String roomId);
 
   bool isEncrypted(String roomId);
 

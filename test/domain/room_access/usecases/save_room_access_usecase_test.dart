@@ -1,25 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
-import 'package:twake_chat/domain/room_access/usecases/get_room_access_usecase.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
+import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 import 'package:twake_chat/domain/room_access/usecases/save_room_access_usecase.dart';
 
-import '../fake_room_access_repository.dart';
+import 'save_room_access_usecase_test.mocks.dart';
 
+@GenerateNiceMocks([MockSpec<RoomAccessRepository>()])
 void main() {
   const roomId = '!room:example.com';
-  const encrypted = RoomAccess(
-    joinRule: JoinRuleChoice.invite,
-    isListed: false,
-    isEncrypted: true,
-    canChange: true,
-  );
 
-  late FakeRoomAccessRepository repository;
+  late MockRoomAccessRepository repository;
   late SaveRoomAccessUseCase useCase;
 
   setUp(() {
-    repository = FakeRoomAccessRepository();
+    repository = MockRoomAccessRepository();
+    when(repository.isEncrypted(roomId)).thenReturn(false);
     useCase = SaveRoomAccessUseCase(repository);
   });
 
@@ -32,14 +30,17 @@ void main() {
     );
 
     // Assert
-    expect(repository.calls, ['joinRule:public', 'listed:true']);
+    verifyInOrder([
+      repository.setJoinRule(roomId, JoinRuleChoice.public),
+      repository.setListed(roomId, isListed: true),
+    ]);
   });
 
   test('execute_whenTheRuleIsRefused_neverListsTheRoom', () async {
     // Arrange
-    repository.setJoinRuleError = const RoomAccessForbiddenException(
-      cause: 'x',
-    );
+    when(
+      repository.setJoinRule(roomId, JoinRuleChoice.public),
+    ).thenThrow(const RoomAccessForbiddenException(cause: 'x'));
 
     // Act
     final result = useCase.execute(
@@ -50,7 +51,7 @@ void main() {
 
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
-    expect(repository.calls, ['joinRule:public']);
+    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
   });
 
   test('execute_withNothingChanged_sendsNothing', () async {
@@ -58,36 +59,37 @@ void main() {
     await useCase.execute(roomId);
 
     // Assert
-    expect(repository.calls, isEmpty);
+    verifyNever(repository.setJoinRule(any, any));
+    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
   });
 
   test('execute_publicOnAnEncryptedRoom_throwsAndSendsNothing', () async {
     // Arrange
-    repository.access = encrypted;
+    when(repository.isEncrypted(roomId)).thenReturn(true);
 
     // Act
     final result = useCase.execute(roomId, joinRule: JoinRuleChoice.public);
 
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessEncryptedException>()));
-    expect(repository.calls, isEmpty);
+    verifyNever(repository.setJoinRule(any, any));
   });
 
   test('execute_listingAnEncryptedRoom_throwsAndSendsNothing', () async {
     // Arrange
-    repository.access = encrypted;
+    when(repository.isEncrypted(roomId)).thenReturn(true);
 
     // Act
     final result = useCase.execute(roomId, isListed: true);
 
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessEncryptedException>()));
-    expect(repository.calls, isEmpty);
+    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
   });
 
   test('execute_unlistingAnEncryptedRoom_isAllowed', () async {
     // Arrange
-    repository.access = encrypted;
+    when(repository.isEncrypted(roomId)).thenReturn(true);
 
     // Act
     await useCase.execute(
@@ -97,14 +99,9 @@ void main() {
     );
 
     // Assert
-    expect(repository.calls, ['joinRule:invite', 'listed:false']);
-  });
-
-  test('getRoomAccess_execute_returnsTheRepositoryAccess', () async {
-    // Act
-    final access = await GetRoomAccessUseCase(repository).execute(roomId);
-
-    // Assert
-    expect(access, repository.access);
+    verifyInOrder([
+      repository.setJoinRule(roomId, JoinRuleChoice.invite),
+      repository.setListed(roomId, isListed: false),
+    ]);
   });
 }

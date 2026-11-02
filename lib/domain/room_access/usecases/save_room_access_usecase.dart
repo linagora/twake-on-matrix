@@ -1,5 +1,5 @@
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
-import 'package:twake_chat/domain/repository/room_access/room_access_repository.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
+import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 
 class SaveRoomAccessUseCase {

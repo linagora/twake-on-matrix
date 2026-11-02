@@ -17,7 +17,7 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view.dart';
@@ -25,6 +25,7 @@ import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart'
 import 'package:twake_chat/pages/chat_details/exceptions/exceptions.dart';
 import 'package:twake_chat/pages/chat_details/removed/removed.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -91,6 +92,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
   final isEditedGroupInfoNotifier = ValueNotifier<bool>(false);
   final isValidGroupNameNotifier = ValueNotifier<bool>(true);
   final isRoomEnabledEncryptionNotifier = ValueNotifier<bool>(false);
+  final roomAccessDraftNotifier = ValueNotifier(const RoomAccessDraft());
 
   Client get client => Matrix.of(context).client;
 
@@ -358,9 +360,9 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     final provider = roomAccessControllerProvider(widget.roomId);
     if (!ref.exists(provider)) return;
     try {
-      await ref.read(provider.notifier).save();
+      await ref.read(provider.notifier).save(roomAccessDraftNotifier.value);
+      if (mounted) roomAccessDraftNotifier.value = const RoomAccessDraft();
     } on RoomAccessException catch (e) {
-      Logs().e('ChatDetailsEdit::_saveRoomAccess() - error: $e');
       if (!mounted) return;
       final l10n = L10n.of(context)!;
       TwakeSnackBar.show(context, switch (e) {
@@ -471,6 +473,11 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
 
   void enableEncryption(_) async {
     if (room == null) return;
+    final access = ref.read(roomAccessControllerProvider(widget.roomId)).value;
+    if (room!.joinRules == JoinRules.public ||
+        roomAccessDraftNotifier.value.blocksEncryptionOn(access)) {
+      return;
+    }
     if (room!.encrypted == true) {
       showOkAlertDialog(
         context: context,
@@ -547,6 +554,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     descriptionFocusNode.dispose();
     groupNameFocusNode.dispose();
     isRoomEnabledEncryptionNotifier.dispose();
+    roomAccessDraftNotifier.dispose();
     isValidGroupNameNotifier.dispose();
     groupNameEmptyNotifier.dispose();
     descriptionEmptyNotifier.dispose();
@@ -594,6 +602,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
     listenToPickAvatarUIState(context);
+    roomAccessDraftNotifier.addListener(() => setState(() {}));
     super.initState();
   }
 

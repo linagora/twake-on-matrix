@@ -4,11 +4,18 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 
 class RoomAccessSection extends ConsumerWidget {
-  const RoomAccessSection({super.key, required this.roomId});
+  const RoomAccessSection({
+    super.key,
+    required this.roomId,
+    required this.draft,
+  });
 
   final String roomId;
+
+  final ValueNotifier<RoomAccessDraft> draft;
 
   static const EdgeInsets _textPadding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base * 2,
@@ -22,51 +29,54 @@ class RoomAccessSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = roomAccessControllerProvider(roomId);
-    final access = ref.watch(provider).value;
-    if (access == null) return const SizedBox.shrink();
+    final saved = ref.watch(roomAccessControllerProvider(roomId)).value;
+    if (saved == null) return const SizedBox.shrink();
     final l10n = L10n.of(context)!;
     final textStyle = LinagoraTextStyle.material().bodySmall.copyWith(
       color: LinagoraSysColors.material().tertiary,
     );
-    final rules = access.offeredJoinRules;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        LinagoraSectionHeader(label: l10n.roomAccessTitle),
-        if (access.joinRule == null)
+    final rules = saved.offeredJoinRules;
+    return ValueListenableBuilder<RoomAccessDraft>(
+      valueListenable: draft,
+      builder: (context, chosen, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LinagoraSectionHeader(label: l10n.roomAccessTitle),
+          if (saved.joinRule == null)
+            Padding(
+              padding: _textPadding,
+              child: Text(l10n.roomAccessRestricted, style: textStyle),
+            )
+          else
+            for (final rule in rules)
+              LinagoraRadioItem(
+                key: ValueKey(rule),
+                title: _ruleTitle(l10n, rule),
+                selected: chosen.joinRuleOn(saved) == rule,
+                showDivider: rule != rules.last,
+                onTap: () => draft.value = chosen.choose(rule),
+              ),
           Padding(
             padding: _textPadding,
-            child: Text(l10n.roomAccessRestricted, style: textStyle),
-          )
-        else
-          for (final rule in rules)
-            LinagoraRadioItem(
-              key: ValueKey(rule),
-              title: _ruleTitle(l10n, rule),
-              selected: access.joinRule == rule,
-              showDivider: rule != rules.last,
-              onTap: () => ref.read(provider.notifier).chooseJoinRule(rule),
+            child: Text(
+              saved.isEncrypted
+                  ? l10n.roomAccessEncrypted
+                  : l10n.roomAccessHelp,
+              style: textStyle,
             ),
-        Padding(
-          padding: _textPadding,
-          child: Text(
-            access.saved.isEncrypted
-                ? l10n.roomAccessEncrypted
-                : l10n.roomAccessHelp,
-            style: textStyle,
           ),
-        ),
-        if (access.showsListing)
-          LinagoraSettingItem.selectable(
-            title: l10n.roomAccessListed,
-            subtitle: l10n.roomAccessListedHelp,
-            subtitleMaxLines: null,
-            padding: _togglePadding,
-            value: access.isListed,
-            onChanged: ref.read(provider.notifier).setListed,
-          ),
-      ],
+          if (saved.offersListing)
+            LinagoraSettingItem.selectable(
+              title: l10n.roomAccessListed,
+              subtitle: l10n.roomAccessListedHelp,
+              subtitleMaxLines: null,
+              padding: _togglePadding,
+              value: chosen.isListedOn(saved),
+              onChanged: (isListed) =>
+                  draft.value = chosen.copyWith(isListed: isListed),
+            ),
+        ],
+      ),
     );
   }
 

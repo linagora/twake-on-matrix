@@ -33,17 +33,14 @@ class ChatDetailsEditView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roomAccess = roomAccessControllerProvider(controller.widget.roomId);
-    final isAccessEdited = ref.watch(
-      roomAccess.select((access) => access.value?.isDirty ?? false),
-    );
+    final access = ref
+        .watch(roomAccessControllerProvider(controller.widget.roomId))
+        .value;
+    final draft = controller.roomAccessDraftNotifier.value;
+    final isAccessEdited = draft.isDirtyOn(access);
     final isPublic =
         controller.room?.joinRules == JoinRules.public ||
-        ref.watch(
-          roomAccess.select(
-            (access) => access.value?.isOrWillBePublic ?? false,
-          ),
-        );
+        draft.blocksEncryptionOn(access);
     final canEnableEncryption =
         controller.room?.encrypted == false &&
         controller.room?.canEnableEncryption == true &&
@@ -292,7 +289,10 @@ class ChatDetailsEditView extends ConsumerWidget {
                       );
                     },
                   ),
-                  RoomAccessSection(roomId: controller.widget.roomId),
+                  RoomAccessSection(
+                    roomId: controller.widget.roomId,
+                    draft: controller.roomAccessDraftNotifier,
+                  ),
                   const SizedBox(height: 16),
                 ],
               ),

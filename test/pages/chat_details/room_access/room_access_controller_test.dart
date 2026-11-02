@@ -1,24 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/data/repository/room_access/room_access_repository.provider.dart';
-import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
+import 'package:mockito/annotations.dart';
+import 'package:mockito/mockito.dart';
+import 'package:twake_chat/data/room_access/repositories/room_access_repository.provider.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
+import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
-import '../../../domain/room_access/fake_room_access_repository.dart';
 import 'public_groups_summary.dart';
+import 'room_access_controller_test.mocks.dart';
 
+@GenerateNiceMocks([MockSpec<RoomAccessRepository>()])
 void main() {
   const roomId = '!room:example.com';
+  const invite = RoomAccess(
+    joinRule: JoinRuleChoice.invite,
+    isListed: false,
+    isEncrypted: false,
+    canChange: true,
+  );
 
-  late FakeRoomAccessRepository repository;
+  late MockRoomAccessRepository repository;
 
   setUp(() {
-    repository = FakeRoomAccessRepository();
+    repository = MockRoomAccessRepository();
+    when(repository.isEncrypted(roomId)).thenReturn(false);
   });
 
-  ProviderContainer createContainer({bool isPublicGroupsEnabled = true}) {
+  ProviderContainer createContainer({
+    RoomAccess access = invite,
+    bool isPublicGroupsEnabled = true,
+  }) {
+    when(
+      repository.watchRoomAccess(roomId),
+    ).thenAnswer((_) => Stream.value(access));
     final container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
@@ -37,154 +55,94 @@ void main() {
     final container = createContainer(isPublicGroupsEnabled: false);
 
     // Act
-    final state = await container.read(
+    final access = await container.read(
       roomAccessControllerProvider(roomId).future,
     );
 
     // Assert
-    expect(state, isNull);
+    expect(access, isNull);
+    verifyNever(repository.watchRoomAccess(any));
   });
 
   test('build_whenTheUserCannotChangeTheRule_showsNothing', () async {
     // Arrange
-    repository.access = repository.access.copyWith(canChange: false);
-    final container = createContainer();
+    final container = createContainer(
+      access: invite.copyWith(canChange: false),
+    );
 
     // Act
-    final state = await container.read(
+    final access = await container.read(
       roomAccessControllerProvider(roomId).future,
     );
 
     // Assert
-    expect(state, isNull);
+    expect(access, isNull);
   });
 
-  test('build_always_startsFromTheSavedAccess', () async {
+  test('build_always_emitsTheSavedAccess', () async {
     // Arrange
     final container = createContainer();
 
     // Act
-    final state = await container.read(
+    final access = await container.read(
       roomAccessControllerProvider(roomId).future,
     );
 
     // Assert
-    expect(state?.joinRule, JoinRuleChoice.invite);
-    expect(state?.isListed, isFalse);
-    expect(state?.isDirty, isFalse);
+    expect(access, invite);
   });
 
-  test('chooseJoinRule_public_turnsTheListingOn', () async {
+  test('save_publicThenUnlisted_sendsOnlyTheRuleAndKeepsIt', () async {
     // Arrange
     final container = createContainer();
     await container.read(roomAccessControllerProvider(roomId).future);
+    final draft = const RoomAccessDraft()
+        .choose(JoinRuleChoice.public)
+        .copyWith(isListed: false);
 
     // Act
-    container
+    await container
         .read(roomAccessControllerProvider(roomId).notifier)
-        .chooseJoinRule(JoinRuleChoice.public);
+        .save(draft);
 
     // Assert
-    final state = container.read(roomAccessControllerProvider(roomId)).value;
-    expect(state?.joinRule, JoinRuleChoice.public);
-    expect(state?.isListed, isTrue);
-    expect(state?.isDirty, isTrue);
-  });
-
-  test('chooseJoinRule_knock_keepsTheListing', () async {
-    // Arrange
-    repository.access = repository.access.copyWith(isListed: true);
-    final container = createContainer();
-    await container.read(roomAccessControllerProvider(roomId).future);
-
-    // Act
-    container
-        .read(roomAccessControllerProvider(roomId).notifier)
-        .chooseJoinRule(JoinRuleChoice.knock);
-
-    // Assert
-    final state = container.read(roomAccessControllerProvider(roomId)).value;
-    expect(state?.joinRule, JoinRuleChoice.knock);
-    expect(state?.isListed, isTrue);
-  });
-
-  test('save_afterPublicThenUnlisted_sendsOnlyTheRule', () async {
-    // Arrange
-    final container = createContainer();
-    await container.read(roomAccessControllerProvider(roomId).future);
-    final controller = container.read(
-      roomAccessControllerProvider(roomId).notifier,
-    );
-    controller
-      ..chooseJoinRule(JoinRuleChoice.public)
-      ..setListed(false);
-
-    // Act
-    await controller.save();
-
-    // Assert
-    expect(repository.calls, ['joinRule:public']);
+    verify(repository.setJoinRule(roomId, JoinRuleChoice.public)).called(1);
+    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
     expect(
-      container.read(roomAccessControllerProvider(roomId)).value?.isDirty,
-      isFalse,
+      container.read(roomAccessControllerProvider(roomId)).value?.joinRule,
+      JoinRuleChoice.public,
     );
   });
 
-  test('save_whenRefused_keepsTheChoiceToRetry', () async {
+  test('save_whenRefused_keepsTheSavedAccess', () async {
     // Arrange
-    repository.setListedError = const RoomAccessForbiddenException(cause: 'x');
+    when(
+      repository.setListed(roomId, isListed: true),
+    ).thenThrow(const RoomAccessForbiddenException(cause: 'x'));
     final container = createContainer();
     await container.read(roomAccessControllerProvider(roomId).future);
-    final controller = container.read(
-      roomAccessControllerProvider(roomId).notifier,
-    );
-    controller.chooseJoinRule(JoinRuleChoice.public);
 
     // Act
-    final result = controller.save();
+    final result = container
+        .read(roomAccessControllerProvider(roomId).notifier)
+        .save(const RoomAccessDraft().choose(JoinRuleChoice.public));
 
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
-    final state = container.read(roomAccessControllerProvider(roomId)).value;
-    expect(state?.joinRule, JoinRuleChoice.public);
-    expect(state?.isDirty, isTrue);
+    expect(container.read(roomAccessControllerProvider(roomId)).value, invite);
   });
 
-  test('offeredJoinRules_onAnEncryptedRoom_leavesOutPublic', () async {
+  test('save_unchangedDraft_sendsNothing', () async {
     // Arrange
-    repository.access = repository.access.copyWith(isEncrypted: true);
     final container = createContainer();
+    await container.read(roomAccessControllerProvider(roomId).future);
 
     // Act
-    final state = await container.read(
-      roomAccessControllerProvider(roomId).future,
-    );
+    await container
+        .read(roomAccessControllerProvider(roomId).notifier)
+        .save(const RoomAccessDraft(joinRule: JoinRuleChoice.invite));
 
     // Assert
-    expect(state?.offeredJoinRules, [
-      JoinRuleChoice.invite,
-      JoinRuleChoice.knock,
-    ]);
-    expect(state?.showsListing, isFalse);
-  });
-
-  test('offeredJoinRules_onAnEncryptedPublicListedRoom_keepsThem', () async {
-    // Arrange
-    repository.access = const RoomAccess(
-      joinRule: JoinRuleChoice.public,
-      isListed: true,
-      isEncrypted: true,
-      canChange: true,
-    );
-    final container = createContainer();
-
-    // Act
-    final state = await container.read(
-      roomAccessControllerProvider(roomId).future,
-    );
-
-    // Assert
-    expect(state?.offeredJoinRules, JoinRuleChoice.values);
-    expect(state?.showsListing, isTrue);
+    verifyNever(repository.setJoinRule(any, any));
   });
 }
