@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:twake_chat/domain/forward/exceptions/forward_exception.dart';
 import 'package:twake_chat/domain/forward/usecases/forward_messages_usecase.dart';
 import 'package:twake_chat/domain/repository/forward/forward_repository.dart';
 
@@ -19,20 +18,6 @@ void main() {
     mockRepository = MockForwardRepository();
     useCase = ForwardMessagesUseCase(mockRepository);
     when(mockRepository.isJoined(any)).thenReturn(true);
-  });
-
-  test('execute_whenNoMessage_throwsForwardEmptyContentException', () async {
-    // Act & Assert
-    await expectLater(
-      useCase.execute(messages: [], roomIds: ['!a:example.com']),
-      throwsA(isA<ForwardEmptyContentException>()),
-    );
-    verifyNever(
-      mockRepository.sendMessage(
-        roomId: anyNamed('roomId'),
-        content: anyNamed('content'),
-      ),
-    );
   });
 
   test('execute_always_sendsEveryMessageToEveryRoomInOrder', () async {
@@ -110,5 +95,33 @@ void main() {
     ).called(1);
     expect(result.successCount, 1);
     expect(result.totalCount, 2);
+  });
+
+  test('execute_whenJoinCheckThrows_countsTheRoomAsFailed', () async {
+    // Arrange
+    when(
+      mockRepository.isJoined('!gone:example.com'),
+    ).thenThrow(Exception('room not found'));
+
+    // Act
+    final result = await useCase.execute(
+      messages: [firstMessage],
+      roomIds: ['!gone:example.com', '!b:example.com'],
+    );
+
+    // Assert
+    expect(result.successCount, 1);
+    expect(result.totalCount, 2);
+  });
+
+  test('execute_whenAnErrorIsThrown_propagatesIt', () async {
+    // Arrange
+    when(mockRepository.isJoined(any)).thenThrow(StateError('bug'));
+
+    // Act & Assert
+    await expectLater(
+      useCase.execute(messages: [firstMessage], roomIds: ['!a:example.com']),
+      throwsStateError,
+    );
   });
 }

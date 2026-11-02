@@ -75,14 +75,15 @@ void main() {
     verifyNever(mockRepository.isJoined(any));
   });
 
-  test('forward_whenUnexpectedError_goesBackToIdle', () async {
+  test('forward_whenAnErrorIsThrown_goesBackToIdleAndRethrows', () async {
     // Arrange
     when(mockRepository.isJoined(any)).thenThrow(StateError('boom'));
 
-    // Act
-    await controller().forward(messages: [message], roomIds: [roomId]);
-
-    // Assert
+    // Act & Assert
+    await expectLater(
+      controller().forward(messages: [message], roomIds: [roomId]),
+      throwsStateError,
+    );
     expect(state(), const ForwardState.idle());
   });
 

@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/forward/usecases/forward_messages_usecase.provider.dart';
 import 'package:twake_chat/pages/forward/forward_state.dart';
@@ -25,8 +26,8 @@ class ForwardController extends _$ForwardController {
         successCount: result.successCount,
         totalCount: result.totalCount,
       );
-    } catch (_) {
-      // The finally block puts the screen back so the user can retry or leave.
+    } on Exception catch (exception, stackTrace) {
+      Logs().e('ForwardController::forward', exception, stackTrace);
     } finally {
       if (ref.mounted && state is ForwardSending) {
         state = const ForwardState.idle();
