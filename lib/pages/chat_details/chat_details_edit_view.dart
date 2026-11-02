@@ -34,6 +34,7 @@ class ChatDetailsEditView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = L10n.of(context)!;
     final access = ref
         .watch(roomAccessControllerProvider(controller.widget.roomId))
         .value;
@@ -255,12 +256,8 @@ class ChatDetailsEditView extends ConsumerWidget {
                         ),
                         subtitle: Text(
                           isPublic && !isRoomEnabledEncryption
-                              ? L10n.of(
-                                  context,
-                                )!.encryptionUnavailableInPublicRoom
-                              : L10n.of(
-                                  context,
-                                )!.yourDataIsEncryptedForSecurity,
+                              ? l10n.encryptionUnavailableInPublicRoom
+                              : l10n.yourDataIsEncryptedForSecurity,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: LinagoraSysColors.material().tertiary,
@@ -304,9 +301,7 @@ class ChatDetailsEditView extends ConsumerWidget {
                 builder: (context, snapshot) {
                   return Column(
                     children: [
-                      ChatDetailsEditCategory(
-                        title: L10n.of(context)!.administration,
-                      ),
+                      ChatDetailsEditCategory(title: l10n.administration),
                       ChatDetailsEditOption(
                         title: L10n.of(context)!.assignRoles,
                         counterText:
@@ -355,7 +350,7 @@ class ChatDetailsEditView extends ConsumerWidget {
                 },
               ),
             if (!controller.isSupportChat) ...[
-              ChatDetailsEditCategory(title: L10n.of(context)!.dangerZone),
+              ChatDetailsEditCategory(title: l10n.dangerZone),
               ChatDetailsEditOption(
                 title: L10n.of(context)!.commandHint_leave,
                 subtitle: L10n.of(context)!.leaveGroupSubtitle,
