@@ -75,7 +75,9 @@ class RoomAccessSection extends ConsumerWidget {
               value: chosen.isListedOn(saved),
               onChanged: (isListed) =>
                   draft.value = chosen.copyWith(isListed: isListed),
-            ),
+            )
+          else
+            const SizedBox(height: LinagoraSpacing.base),
         ],
       ),
     );
