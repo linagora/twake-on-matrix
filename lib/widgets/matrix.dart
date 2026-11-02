@@ -661,6 +661,7 @@ class MatrixState extends ConsumerState<Matrix>
     if (kIsWeb) await removeWebPush(currentClient, unsubscribe: false);
 
     await _cancelSubs(currentClient.clientName);
+    final activeClient = client;
     widget.clients.remove(currentClient);
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
     await _clearContactsOf(currentClient);
@@ -668,8 +669,10 @@ class MatrixState extends ConsumerState<Matrix>
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
-    // The removal shifted the indexes: force the switch even if it stays 0.
-    _activeClient = -1;
+    // The removal shifts the indexes; only a logged-out active client forces a switch.
+    _activeClient = activeClient == currentClient
+        ? -1
+        : widget.clients.indexOf(activeClient);
     final result = await setActiveClient(widget.clients.first);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
