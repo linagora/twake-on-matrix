@@ -30,4 +30,4 @@ then can't call API use configuration of HiveCollectionToMDatabase
 
 ## Note (2026-10-30)
 
-Decision 2 was never implemented: nothing reopens `HiveCollectionToMDatabase` after `deleteFromDisk()`. With hive 2.2.3 that call deletes nothing on mobile: `BoxCollection.deleteFromDisk()` passes the bare box names, while the boxes are named `<collection>_<box>`. The boxes stay open, already emptied by `clear()`.
+Decision 2 was never implemented: nothing reopens `HiveCollectionToMDatabase` after `deleteFromDisk()`. Per the hive 2.2.3 source (not observed on a device), that call deletes nothing on mobile: `BoxCollection.deleteFromDisk()` passes the bare box names, while the boxes are named `<collection>_<box>`. The boxes stay open, already emptied by `clear()`.
