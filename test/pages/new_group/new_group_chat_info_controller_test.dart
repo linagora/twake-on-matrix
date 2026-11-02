@@ -177,7 +177,7 @@ void main() {
     );
   });
 
-  test('create_whenAnErrorIsThrownWhileInviting_failsAndRethrows', () async {
+  test('create_whenAnErrorIsThrownWhileInviting_isDoneAndRethrows', () async {
     // Arrange
     when(
       mockRepository.inviteUser(
@@ -190,7 +190,53 @@ void main() {
     await expectLater(create(), throwsStateError);
     expect(
       state(),
+      const NewGroupChatInfoState.done(roomId: roomId, groupName: 'Team'),
+    );
+  });
+
+  test('create_whenAnErrorIsThrownWhileCreating_failsAndRethrows', () async {
+    // Arrange
+    when(mockRepository.createGroup(any)).thenThrow(StateError('bug'));
+
+    // Act & Assert
+    await expectLater(create(), throwsStateError);
+    expect(
+      state(),
       const NewGroupChatInfoState.failed(NewGroupFailureReason.other),
+    );
+  });
+
+  test('create_whenFeedCreated_invitesThenIsDone', () async {
+    // Arrange
+    when(
+      mockFeedInteractor.execute(
+        feedName: 'News',
+        avatarUrl: 'mxc://example.com/avatar',
+      ),
+    ).thenAnswer((_) async => roomId);
+
+    // Act
+    await container
+        .read(newGroupChatInfoControllerProvider.notifier)
+        .create(
+          const NewGroupForm(
+            groupName: 'News',
+            invitees: ['@bob:example.com'],
+            enableEncryption: false,
+            privacy: GroupPrivacyState(),
+            isFeed: true,
+            urlAvatar: 'mxc://example.com/avatar',
+          ),
+        );
+
+    // Assert
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: '@bob:example.com'),
+    ).called(1);
+    verifyNever(mockRepository.createGroup(any));
+    expect(
+      state(),
+      const NewGroupChatInfoState.done(roomId: roomId, groupName: 'News'),
     );
   });
 

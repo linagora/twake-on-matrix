@@ -19,23 +19,31 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
   @override
   NewGroupChatInfoState build() => const NewGroupChatInfoState.idle();
 
-  /// Ignored while busy; a partial invite failure still ends in `done`.
+  /// Ignored while busy. Once the room exists it always ends in `done`,
+  /// even when some invites fail.
   Future<void> create(NewGroupForm form) async {
     if (state.isBusy) return;
     final request = _toRequest(form);
     state = const NewGroupChatInfoState.creating();
+    final String? roomId;
     try {
-      final roomId = await _createRoom(request, isFeed: form.isFeed);
-      if (!ref.mounted || roomId == null) return;
-      final inviteFailure = await _invite(roomId, request.invite);
-      if (!ref.mounted) return;
-      state = NewGroupChatInfoState.done(
-        roomId: roomId,
-        groupName: request.groupName,
-        inviteFailure: inviteFailure,
-      );
+      roomId = await _createRoom(request, isFeed: form.isFeed);
+    } catch (_) {
+      _fail(NewGroupFailureReason.other);
+      rethrow;
+    }
+    if (!ref.mounted || roomId == null) return;
+    InviteUserPartialFailureException? inviteFailure;
+    try {
+      inviteFailure = await _invite(roomId, request.invite);
     } finally {
-      if (ref.mounted && state.isBusy) _fail(NewGroupFailureReason.other);
+      if (ref.mounted) {
+        state = NewGroupChatInfoState.done(
+          roomId: roomId,
+          groupName: request.groupName,
+          inviteFailure: inviteFailure,
+        );
+      }
     }
   }
 
@@ -94,6 +102,7 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
   Future<String> _createFeed(CreateNewGroupChatRequest request) {
     final client = ref.read(activeMatrixClientProvider).client;
     if (client == null) throw StateError('No active Matrix client');
+    // TODO: [transitional] Keyed by Client until matrixClientProvider exists (plan v2, Step 1).
     return ref
         .read(createNewFeedInteractorProvider(client))
         .execute(feedName: request.groupName, avatarUrl: request.urlAvatar);
