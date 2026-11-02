@@ -16,57 +16,82 @@ class MultipleAccountsScenario extends BaseTestScenario {
   static const _receiver = String.fromEnvironment('Receiver');
   static const _receiverPass = String.fromEnvironment('ReceiverPass');
 
+  final _s = SoftAssertHelper();
+  late final _robot = MultipleAccountsRobot($);
+
   @override
   Future<void> runTestLogic() async {
-    if (_serverUrl.isEmpty || _receiver.isEmpty || _receiverPass.isEmpty) {
-      throw StateError(
-        'Missing SERVER_URL, Receiver or ReceiverPass dart-define',
-      );
-    }
-    final s = SoftAssertHelper();
-    final robot = MultipleAccountsRobot($);
-    final accountA = robot.activeUserId()!;
+    _checkDefines();
+    final accountA = _robot.activeUserId()!;
     String? accountB;
 
     try {
-      accountB = await robot.addAccount(
-        serverUrl: _serverUrl,
-        username: _receiver,
-        password: _receiverPass,
-      );
-      s.softAssertEquals(
-        accountB != accountA,
-        true,
-        'the added account is the same as the first one',
-      );
-
-      final listed = await robot.listedAccounts();
-      s.softAssertEquals(
-        listed.contains(accountA) && listed.contains(accountB),
-        true,
-        'account picker does not list both accounts: $listed',
-      );
-
-      await robot.switchTo(accountA);
-      s.softAssertEquals(robot.activeUserId(), accountA, 'A is not active');
-
-      await robot.switchTo(accountB);
-      s.softAssertEquals(robot.activeUserId(), accountB, 'B is not active');
-
-      await robot.logoutActiveAccount();
-      await robot.waitForActiveAccount(accountA);
-      s.softAssertEquals(robot.loggedInUserIds(), [
-        accountA,
-      ], 'A is not the only remaining account after logging B out');
+      accountB = await _addSecondAccount(accountA);
+      await _verifyBothListed(accountA, accountB);
+      await _switchAndVerify(accountA, 'A');
+      await _switchAndVerify(accountB, 'B');
+      await _logoutSecondAndVerify(accountA);
     } finally {
-      // Leave only account A logged in, even if a step above failed.
-      if (accountB != null && robot.loggedInUserIds().contains(accountB)) {
-        if (robot.activeUserId() != accountB) await robot.switchTo(accountB);
-        await robot.logoutActiveAccount();
-        await robot.waitForActiveAccount(accountA);
-      }
+      await _cleanup(accountA, accountB);
     }
 
-    s.verifyAll();
+    _s.verifyAll();
+  }
+
+  void _checkDefines() {
+    final missing = [
+      _serverUrl,
+      _receiver,
+      _receiverPass,
+    ].any((value) => value.isEmpty);
+    if (!missing) return;
+    throw StateError(
+      'Missing SERVER_URL, Receiver or ReceiverPass dart-define',
+    );
+  }
+
+  Future<String> _addSecondAccount(String accountA) async {
+    final accountB = await _robot.addAccount(
+      serverUrl: _serverUrl,
+      username: _receiver,
+      password: _receiverPass,
+    );
+    _s.softAssertEquals(
+      accountB != accountA,
+      true,
+      'the added account is the same as the first one',
+    );
+    return accountB;
+  }
+
+  Future<void> _verifyBothListed(String accountA, String accountB) async {
+    final listed = await _robot.listedAccounts();
+    _s.softAssertEquals(
+      [accountA, accountB].every(listed.contains),
+      true,
+      'account picker does not list both accounts: $listed',
+    );
+  }
+
+  Future<void> _switchAndVerify(String account, String label) async {
+    await _robot.switchTo(account);
+    _s.softAssertEquals(_robot.activeUserId(), account, '$label is not active');
+  }
+
+  Future<void> _logoutSecondAndVerify(String accountA) async {
+    await _robot.logoutActiveAccount();
+    await _robot.waitForActiveAccount(accountA);
+    _s.softAssertEquals(_robot.loggedInUserIds(), [
+      accountA,
+    ], 'A is not the only remaining account after logging B out');
+  }
+
+  /// Leaves only account A logged in, even if a step above failed.
+  Future<void> _cleanup(String accountA, String? accountB) async {
+    if (accountB == null) return;
+    if (!_robot.loggedInUserIds().contains(accountB)) return;
+    if (_robot.activeUserId() != accountB) await _robot.switchTo(accountB);
+    await _robot.logoutActiveAccount();
+    await _robot.waitForActiveAccount(accountA);
   }
 }
