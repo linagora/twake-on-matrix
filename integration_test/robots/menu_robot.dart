@@ -3,45 +3,52 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/reaction/reaction_dialog_widget.dart';
 import 'package:patrol/patrol.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+
 import '../base/core_robot.dart';
 
 class PullDownMenuRobot extends CoreRobot {
   PullDownMenuRobot(super.$);
 
   PatrolFinder getHeartIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('💜'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('💜'));
   }
 
   PatrolFinder getLikeIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👍'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('👍'));
   }
 
   PatrolFinder getDisLikeIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('👎'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('👎'));
   }
 
   PatrolFinder getCryIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😂'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('😂'));
   }
 
   PatrolFinder getSadIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('🥲'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('🥲'));
   }
 
   PatrolFinder getSuppriseIcon() {
-    return $(
-      Overlay,
-    ).$(ReactionsDialogWidget).$(InkWell).containing(find.text('😮'));
+    return $(Overlay)
+        .$(ReactionsDialogWidget)
+        .$(InkWell)
+        .containing(find.text('😮'));
   }
 
   PatrolFinder getExpandIcon() {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+
 import '../base/core_robot.dart';
 
 class SettingForNewGroupRobot extends CoreRobot {

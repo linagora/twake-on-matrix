@@ -25,5 +25,7 @@ abstract class BaseTestScenario extends BaseScenario {
 
 /// Builds a [BaseTestScenario] from the Patrol tester and the platform
 /// [RobotFactory]. Passed to `TestBase.runPatrolTest` as `scenarioBuilder`.
-typedef ScenarioBuilder =
-    BaseTestScenario Function(PatrolIntegrationTester $, RobotFactory robots);
+typedef ScenarioBuilder = BaseTestScenario Function(
+  PatrolIntegrationTester $,
+  RobotFactory robots,
+);

@@ -10,6 +10,7 @@ import 'package:twake_chat/widgets/twake_components/twake_fab.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
 import 'package:patrol/patrol.dart';
+
 import 'abstract/abstract_chat_list_robot.dart';
 import 'add_member_robot.dart';
 import 'chat_group_detail_robot.dart';
@@ -96,9 +97,8 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
   }
 
   TwakeListItemRobot getChatGroupByTitle(String title) {
-    final finder = $(
-      SlidableChatListItem,
-    ).containing($(ChatListItemTitle).containing($(title)));
+    final finder = $(SlidableChatListItem)
+        .containing($(ChatListItemTitle).containing($(title)));
     return TwakeListItemRobot($, finder);
   }
 
@@ -233,9 +233,8 @@ class ChatListRobot extends HomeRobot implements AbstractChatListRobot {
     await AddMemberRobot($).makeASearch(memberSearchKey);
     await AddMemberRobot($).selectAllFilteredAccounts();
     await AddMemberRobot($).clickOnNextIcon();
-    await SettingForNewGroupRobot(
-      $,
-    ).settingForNewGroup(name, isPublic: isPublic);
+    await SettingForNewGroupRobot($)
+        .settingForNewGroup(name, isPublic: isPublic);
     await SettingForNewGroupRobot($).getConfirmIcon().tap();
     await $.pump(const Duration(seconds: 10));
     await $.waitUntilVisible($(ChatView));

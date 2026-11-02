@@ -26,9 +26,8 @@ Future<void> openMessageInfoFromSelectionAppBar(
   await $.tester.tap(more.first);
   await $.pumpAndSettle();
 
-  final info = $(
-    ContextMenuActionItemWidget,
-  ).containing(find.text(l10n.messageInfo));
+  final info = $(ContextMenuActionItemWidget)
+      .containing(find.text(l10n.messageInfo));
   await $.waitUntilVisible(info, timeout: const Duration(seconds: 10));
   await info.tap();
 

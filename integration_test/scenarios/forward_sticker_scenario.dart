@@ -90,9 +90,8 @@ abstract class ForwardStickerScenario extends BaseTestScenario {
       timeout: const Duration(seconds: 30),
     );
     expect(
-      $(
-        MessageContent,
-      ).containing(find.textContaining(stickerBody, findRichText: true)),
+      $(MessageContent)
+          .containing(find.textContaining(stickerBody, findRichText: true)),
       findsNothing,
       reason: 'the sticker must not be forwarded as its text description',
     );

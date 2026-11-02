@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:pull_down_button/pull_down_button.dart';
+
 import '../base/core_robot.dart';
 import 'abstract/abstract_chat_group_detail_robot.dart';
 import 'menu_robot.dart';
@@ -98,9 +99,8 @@ class ChatGroupDetailRobot extends CoreRobot
   Future<PatrolFinder> getText(String text) async {
     // Text messages render through a linkified RichText (`TwakeLinkPreview`),
     // so match rich text too — on web the body is not a plain `Text` widget.
-    return $(
-      MessageContent,
-    ).containing(find.textContaining(text, findRichText: true));
+    return $(MessageContent)
+        .containing(find.textContaining(text, findRichText: true));
   }
 
   Future<PatrolFinder> getInputTextField() async {
@@ -156,9 +156,8 @@ class ChatGroupDetailRobot extends CoreRobot
   Future<PullDownMenuRobot> openPullDownMenu(String message) async {
     // Long-press is ignored while the event is still sending, so retry until
     // the menu opens instead of pressing once right after the bubble appears.
-    final messageFinder = $(
-      MessageContent,
-    ).containing(find.textContaining(message, findRichText: true));
+    final messageFinder = $(MessageContent)
+        .containing(find.textContaining(message, findRichText: true));
     final menu = $(PullDownMenu);
     final deadline = DateTime.now().add(const Duration(seconds: 60));
     while (!menu.exists && DateTime.now().isBefore(deadline)) {

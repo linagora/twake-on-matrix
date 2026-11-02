@@ -44,15 +44,13 @@ class SettingsProfileRobot extends HomeRobot {
   }
 
   PatrolFinder displayNameEditIcon() {
-    return item(
-      SettingsProfileEnum.displayName,
-    ).$(find.byIcon(Icons.edit_outlined));
+    return item(SettingsProfileEnum.displayName)
+        .$(find.byIcon(Icons.edit_outlined));
   }
 
   PatrolFinder matrixIdCopyIcon() {
-    return item(
-      SettingsProfileEnum.matrixId,
-    ).$(find.byIcon(Icons.content_copy));
+    return item(SettingsProfileEnum.matrixId)
+        .$(find.byIcon(Icons.content_copy));
   }
 
   PatrolFinder avatarEditBadge() {

@@ -119,12 +119,13 @@ class ContactSearchScenario extends BaseTestScenario {
           ],
         );
 
-    await container
-        .read(unifiedContactRepositoryProvider)
-        .upsertAll(_currentAccount, [
-          fixture(_currentAccountTitle, 'alice@example.test', _currentAccount),
-          fixture('charlie', 'charlie@example.test', _searchByMatrixAddress),
-        ]);
+    await container.read(unifiedContactRepositoryProvider).upsertAll(
+      _currentAccount,
+      [
+        fixture(_currentAccountTitle, 'alice@example.test', _currentAccount),
+        fixture('charlie', 'charlie@example.test', _searchByMatrixAddress),
+      ],
+    );
   }
 
   /// Enters [text] in the search field, then polls until the result state is

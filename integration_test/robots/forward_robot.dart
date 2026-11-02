@@ -9,6 +9,7 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+
 import '../base/core_robot.dart';
 import 'abstract/abstract_forward_robot.dart';
 
@@ -104,9 +105,9 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   @override
   Future<void> searchRoom(String query) async {
     // Search icon has tooltip L10n.search – tap it to reveal the TextField.
-    final searchIcon = $(
-      SearchableAppBar,
-    ).$(TwakeIconButton).containing(find.byTooltip(_l10n.search));
+    final searchIcon = $(SearchableAppBar)
+        .$(TwakeIconButton)
+        .containing(find.byTooltip(_l10n.search));
     if (searchIcon.exists) {
       // Use tester.tap to skip Patrol's internal waitUntilVisible overhead.
       await $.waitUntilVisible(searchIcon, timeout: const Duration(seconds: 5));
@@ -125,9 +126,9 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
   /// Clears the search field to restore the full room list.
   @override
   Future<void> clearSearch() async {
-    final closeIcon = $(
-      SearchableAppBar,
-    ).$(TwakeIconButton).containing(find.byTooltip(_l10n.close));
+    final closeIcon = $(SearchableAppBar)
+        .$(TwakeIconButton)
+        .containing(find.byTooltip(_l10n.close));
     if (closeIcon.exists) {
       await closeIcon.tap();
       await $.pump(const Duration(milliseconds: 300));
@@ -201,9 +202,8 @@ class ForwardRobot extends CoreRobot implements AbstractForwardRobot {
     // Wait on the target room title directly: during the route transition the
     // source chat's ChatView can surface before the receiver's, so gating on
     // `$(ChatView)` then asserting the title risks reading the wrong room.
-    final roomTitle = $(
-      ChatAppBarTitle,
-    ).containing(find.textContaining(roomName));
+    final roomTitle = $(ChatAppBarTitle)
+        .containing(find.textContaining(roomName));
     await $.waitUntilVisible(roomTitle, timeout: const Duration(seconds: 15));
     expect(
       roomTitle.exists,

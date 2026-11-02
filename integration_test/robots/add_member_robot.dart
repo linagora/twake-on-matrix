@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+
 import '../base/core_robot.dart';
 import 'twake_list_item_robot.dart';
 
@@ -39,9 +40,9 @@ class AddMemberRobot extends CoreRobot {
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('YES'));
     } else {
-      return $(
-        CupertinoAlertDialog,
-      ).$(CupertinoDialogAction).containing(find.text('Yes'));
+      return $(CupertinoAlertDialog)
+          .$(CupertinoDialogAction)
+          .containing(find.text('Yes'));
     }
   }
 
@@ -49,9 +50,9 @@ class AddMemberRobot extends CoreRobot {
     if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
     } else {
-      return $(
-        CupertinoAlertDialog,
-      ).$(CupertinoDialogAction).containing(find.text('Cancel'));
+      return $(CupertinoAlertDialog)
+          .$(CupertinoDialogAction)
+          .containing(find.text('Cancel'));
     }
   }
 

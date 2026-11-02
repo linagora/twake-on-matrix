@@ -160,9 +160,8 @@ class ChatScenario extends CoreRobot {
     if (inputCtx.mounted == false) {
       throw StateError('Input context is not mounted');
     }
-    final String pasteLabel = MaterialLocalizations.of(
-      inputCtx,
-    ).pasteButtonLabel;
+    final String pasteLabel = MaterialLocalizations.of(inputCtx)
+        .pasteButtonLabel;
 
     // 3) Try Flutter tree first (Android usually)
     final flutterMenu = find.text(pasteLabel);
@@ -274,9 +273,8 @@ class ChatScenario extends CoreRobot {
   }
 
   PatrolFinder _tileByText(String text) {
-    final msg = $(
-      MatrixLinkifyText,
-    ).containing(text); //_richTextWithExact(text);
+    final msg = $(MatrixLinkifyText)
+        .containing(text); //_richTextWithExact(text);
     final container = find.ancestor(
       of: msg,
       matching: find.byType(MultiPlatformsMessageContainer),
@@ -343,9 +341,8 @@ class ChatScenario extends CoreRobot {
       timeout: const Duration(seconds: 30),
     );
     await $.waitUntilVisible(
-      $(
-        PinnedMessagesScreen,
-      ).containing(find.textContaining(_l10n.unpinAllMessages)),
+      $(PinnedMessagesScreen)
+          .containing(find.textContaining(_l10n.unpinAllMessages)),
     );
   }
 
@@ -564,9 +561,8 @@ class ChatScenario extends CoreRobot {
 
   Future<void> verifyChatListCanBeScrollable(SoftAssertHelper s) async {
     s.softAssertEquals(
-      await CoreRobot(
-        $,
-      ).isActuallyScrollable($, root: $(SingleChildScrollView)),
+      await CoreRobot($)
+          .isActuallyScrollable($, root: $(SingleChildScrollView)),
       true,
       'Chat list is not scrollable',
     );
@@ -641,9 +637,9 @@ class ChatScenario extends CoreRobot {
   }
 
   Future<void> retryImageUpload() async {
-    final retryBtn = $(
-      SendingImageInfoWidget,
-    ).$(IconButton).containing(find.byIcon(Icons.refresh));
+    final retryBtn = $(SendingImageInfoWidget)
+        .$(IconButton)
+        .containing(find.byIcon(Icons.refresh));
     await retryBtn.tap();
     await $.pumpAndTrySettle();
   }

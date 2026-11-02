@@ -28,9 +28,8 @@ class MessageMenuRobot extends CoreRobot implements AbstractMessageMenuRobot {
   PullDownMenuRobot get _menu => PullDownMenuRobot($);
 
   Future<void> _openMenu(String message) => _openMenuOn(
-    $(
-      MessageContent,
-    ).containing(find.textContaining(message, findRichText: true)),
+    $(MessageContent)
+        .containing(find.textContaining(message, findRichText: true)),
   );
 
   Future<void> _openMenuOn(PatrolFinder messageFinder) async {

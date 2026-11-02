@@ -59,8 +59,7 @@ class SettingsRecoveryKeyScenario extends BaseTestScenario {
     expect(
       clipboardText,
       isNot(equals('•' * 32)),
-      reason:
-          'Clipboard should contain the actual recovery key, not the masked value',
+      reason: 'Clipboard should contain the actual recovery key, not the masked value',
     );
   }
 }
