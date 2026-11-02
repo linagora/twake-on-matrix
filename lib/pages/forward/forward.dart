@@ -21,15 +21,9 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 
 class Forward extends ConsumerStatefulWidget {
   final List<Map<String, Object?>> messages;
-  final String? sendFromRoomId;
   final bool? isFullScreen;
 
-  const Forward({
-    super.key,
-    required this.messages,
-    this.sendFromRoomId,
-    this.isFullScreen = true,
-  });
+  const Forward({super.key, required this.messages, this.isFullScreen = true});
 
   @override
   ForwardScreenState createState() => ForwardScreenState();

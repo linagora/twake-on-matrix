@@ -404,11 +404,7 @@ class PinnedMessagesController extends State<PinnedMessages>
     final message = event
         .getDisplayEventWithoutEditEvent(widget.timeline!)
         .formatContentForwards();
-    final fromRoomId = event.roomId ?? room?.id;
-    if (fromRoomId == null) return;
-    ForwardRoute(
-      $extra: ForwardArgument(fromRoomId: fromRoomId, messages: [message]),
-    ).go(context);
+    ForwardRoute($extra: ForwardArgument(messages: [message])).go(context);
   }
 
   void handleContextMenuAction(

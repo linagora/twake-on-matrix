@@ -1182,9 +1182,7 @@ class ChatController extends ConsumerState<Chat>
         )
         .toList();
     _clearSelectEvent();
-    ForwardRoute(
-      $extra: ForwardArgument(fromRoomId: roomId ?? '', messages: messages),
-    ).push(context);
+    ForwardRoute($extra: ForwardArgument(messages: messages)).push(context);
   }
 
   void sendAgainAction() {
