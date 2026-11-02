@@ -56,6 +56,32 @@ void main() {
     expect(isDirty, isFalse);
   });
 
+  test('isDirtyOn_roomEncryptedAfterChoosingPublic_dropsTheChoices', () {
+    // Arrange
+    final draft = const RoomAccessDraft().choose(JoinRuleChoice.public);
+    final encrypted = saved.copyWith(isEncrypted: true);
+
+    // Act
+    final isDirty = draft.isDirtyOn(encrypted);
+
+    // Assert
+    expect(isDirty, isFalse);
+    expect(draft.joinRuleOn(encrypted), JoinRuleChoice.invite);
+    expect(draft.isListedOn(encrypted), isFalse);
+  });
+
+  test('isDirtyOn_encryptedListedRoomUnlisted_keepsTheChoice', () {
+    // Arrange
+    const draft = RoomAccessDraft(isListed: false);
+    final encryptedListed = saved.copyWith(isEncrypted: true, isListed: true);
+
+    // Act
+    final changed = draft.changedIsListedOn(encryptedListed);
+
+    // Assert
+    expect(changed, isFalse);
+  });
+
   test('blocksEncryptionOn_publicChosenNotSaved_isTrue', () {
     // Act
     final blocks = const RoomAccessDraft(

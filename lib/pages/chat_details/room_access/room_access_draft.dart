@@ -17,9 +17,18 @@ abstract class RoomAccessDraft with _$RoomAccessDraft {
     isListed: rule == JoinRuleChoice.public ? true : isListed,
   );
 
-  JoinRuleChoice? joinRuleOn(RoomAccess saved) => joinRule ?? saved.joinRule;
+  // A choice the room no longer offers (encrypted meanwhile) is dropped.
+  JoinRuleChoice? joinRuleOn(RoomAccess saved) {
+    final chosen = joinRule;
+    return chosen != null && saved.offeredJoinRules.contains(chosen)
+        ? chosen
+        : saved.joinRule;
+  }
 
-  bool isListedOn(RoomAccess saved) => isListed ?? saved.isListed;
+  bool isListedOn(RoomAccess saved) {
+    final chosen = isListed;
+    return chosen != null && saved.offersListing ? chosen : saved.isListed;
+  }
 
   JoinRuleChoice? changedJoinRuleOn(RoomAccess saved) {
     final chosen = joinRuleOn(saved);
