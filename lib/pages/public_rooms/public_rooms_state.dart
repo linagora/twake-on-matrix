@@ -18,6 +18,10 @@ abstract class PublicRoomsState with _$PublicRoomsState {
 
   static const _searchOptions = SearchOptions(diacriticSensitive: false);
 
+  /// No other room is pending and no request is already sent for [roomId].
+  bool canOpen(String roomId) =>
+      pendingRoomId == null && !requestedRoomIds.contains(roomId);
+
   /// The rooms whose name contains [query], ignoring case and accents.
   List<PublicRoom> roomsMatching(String query) =>
       const SearchEngine().matchAnyField(

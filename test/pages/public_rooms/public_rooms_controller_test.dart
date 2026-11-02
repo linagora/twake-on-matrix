@@ -26,6 +26,17 @@ void main() {
     return container.read(publicRoomsControllerProvider.notifier);
   }
 
+  Future<(ProviderContainer, PublicRoomsState)> loadFirstPage(
+    StreamController<List<PublicRoom>> pages,
+  ) async {
+    repository.directoryController = pages;
+    final container = makeContainer();
+    container.listen(publicRoomsControllerProvider, (_, _) {});
+    pages.add([publicRoom('!first')]);
+    final first = await container.read(publicRoomsControllerProvider.future);
+    return (container, first);
+  }
+
   setUp(() {
     repository = FakePublicRoomsRepository(
       directory: [
@@ -136,11 +147,7 @@ void main() {
   test('build_whenMorePagesCome_appendsThemAndStopsLoading', () async {
     // Arrange
     final pages = StreamController<List<PublicRoom>>();
-    repository.directoryController = pages;
-    final container = makeContainer();
-    container.listen(publicRoomsControllerProvider, (_, _) {});
-    pages.add([publicRoom('!first')]);
-    final first = await container.read(publicRoomsControllerProvider.future);
+    final (container, first) = await loadFirstPage(pages);
 
     // Act
     pages.add([publicRoom('!second')]);
@@ -158,11 +165,7 @@ void main() {
   test('build_whenALaterPageFails_keepsTheRoomsShown', () async {
     // Arrange
     final pages = StreamController<List<PublicRoom>>();
-    repository.directoryController = pages;
-    final container = makeContainer();
-    container.listen(publicRoomsControllerProvider, (_, _) {});
-    pages.add([publicRoom('!first')]);
-    await container.read(publicRoomsControllerProvider.future);
+    final (container, _) = await loadFirstPage(pages);
 
     // Act
     pages.addError(PublicRoomsFetchFailedException(cause: Exception('down')));

@@ -28,9 +28,7 @@ class PublicRoomsController extends _$PublicRoomsController {
 
   Future<PublicRoomOpenResult> open(PublicRoom room) async {
     final current = state.value;
-    if (current == null ||
-        current.pendingRoomId != null ||
-        current.requestedRoomIds.contains(room.roomId)) {
+    if (current == null || !current.canOpen(room.roomId)) {
       return const PublicRoomOpenIgnored();
     }
     state = AsyncData(current.copyWith(pendingRoomId: room.roomId));

@@ -38,6 +38,22 @@ void main() {
         nextBatch: next,
       );
 
+  void stubDirectory(Map<String?, Object> responsesBySince) {
+    responsesBySince.forEach((since, response) {
+      final call = when(mockClient.queryPublicRooms(limit: 100, since: since));
+      if (response is Exception) {
+        call.thenThrow(response);
+      } else {
+        call.thenAnswer((_) async => response as QueryPublicRoomsResponse);
+      }
+    });
+  }
+
+  Future<List<int>> pageSizes() async {
+    final pages = await datasource.fetchDirectory(limit: 1000).toList();
+    return pages.map((page) => page.length).toList();
+  }
+
   setUp(() {
     mockClient = MockClient();
     datasource = PublicRoomsDatasourceImpl(mockClient);
@@ -48,18 +64,13 @@ void main() {
       'fetchDirectory_always_readsTheUsersHomeserverPageAfterPage',
       () async {
         // Arrange
-        when(
-          mockClient.queryPublicRooms(limit: 100, since: null),
-        ).thenAnswer((_) async => page(0, 100, next: 'p2'));
-        when(
-          mockClient.queryPublicRooms(limit: 100, since: 'p2'),
-        ).thenAnswer((_) async => page(100, 5));
+        stubDirectory({null: page(0, 100, next: 'p2'), 'p2': page(100, 5)});
 
         // Act
-        final pages = await datasource.fetchDirectory(limit: 1000).toList();
+        final sizes = await pageSizes();
 
         // Assert
-        expect(pages.map((page) => page.length), [100, 5]);
+        expect(sizes, [100, 5]);
         verifyNever(mockClient.queryPublicRooms(server: anyNamed('server')));
       },
     );
@@ -85,51 +96,42 @@ void main() {
 
     test('fetchDirectory_whenALaterPageFails_keepsThePagesRead', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: null),
-      ).thenAnswer((_) async => page(0, 100, next: 'p2'));
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: 'p2'),
-      ).thenThrow(Exception('timeout'));
+      stubDirectory({
+        null: page(0, 100, next: 'p2'),
+        'p2': Exception('timeout'),
+      });
 
       // Act
-      final pages = await datasource.fetchDirectory(limit: 1000).toList();
+      final sizes = await pageSizes();
 
       // Assert
-      expect(pages.map((page) => page.length), [100]);
+      expect(sizes, [100]);
     });
 
     test('fetchDirectory_whenTheTokenRepeats_stopsAfterThatPage', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: null),
-      ).thenAnswer((_) async => page(0, 100, next: 'p2'));
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: 'p2'),
-      ).thenAnswer((_) async => page(100, 3, next: 'p2'));
+      stubDirectory({
+        null: page(0, 100, next: 'p2'),
+        'p2': page(100, 3, next: 'p2'),
+      });
 
       // Act
-      final pages = await datasource.fetchDirectory(limit: 1000).toList();
+      final sizes = await pageSizes();
 
       // Assert
-      expect(pages.map((page) => page.length), [100, 3]);
+      expect(sizes, [100, 3]);
       verify(mockClient.queryPublicRooms(limit: 100, since: 'p2')).called(1);
     });
 
     test('fetchDirectory_whenAPageIsEmptyWithAToken_keepsGoing', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: null),
-      ).thenAnswer((_) async => page(0, 0, next: 'p2'));
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: 'p2'),
-      ).thenAnswer((_) async => page(0, 4));
+      stubDirectory({null: page(0, 0, next: 'p2'), 'p2': page(0, 4)});
 
       // Act
-      final pages = await datasource.fetchDirectory(limit: 1000).toList();
+      final sizes = await pageSizes();
 
       // Assert
-      expect(pages.map((page) => page.length), [0, 4]);
+      expect(sizes, [0, 4]);
     });
 
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
@@ -217,25 +219,16 @@ void main() {
       when(
         mockClient.getRoomSummary('!none'),
       ).thenAnswer((_) async => summary('!none', null));
-
-      // Act
-      final ids = await datasource.getKnockedRoomIds(['!knock', '!none']);
-
-      // Assert
-      expect(ids, {'!knock'});
-    });
-
-    test('getKnockedRoomIds_whenASummaryFails_leavesThatRoomOut', () async {
-      // Arrange
-      when(
-        mockClient.getRoomSummary('!knock'),
-      ).thenAnswer((_) async => summary('!knock', Membership.knock));
       when(
         mockClient.getRoomSummary('!broken'),
       ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}));
 
       // Act
-      final ids = await datasource.getKnockedRoomIds(['!broken', '!knock']);
+      final ids = await datasource.getKnockedRoomIds([
+        '!broken',
+        '!knock',
+        '!none',
+      ]);
 
       // Assert
       expect(ids, {'!knock'});
