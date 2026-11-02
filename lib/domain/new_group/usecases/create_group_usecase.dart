@@ -7,29 +7,11 @@ class CreateGroupUseCase {
 
   final NewGroupRepository _repository;
 
-  /// Returns the room id. Throws a [FederationDeniedWithMatrixOrgException],
-  /// a [CannotCreateNewGroupChatWithLimitedPermissionsException] or a
-  /// [CannotCreateNewGroupChatException]; other errors are rethrown.
+  /// Returns the room id. Throws a [CannotCreateNewGroupChatException] when
+  /// the server returns none; other errors are rethrown.
   Future<String> execute(CreateNewGroupChatRequest request) async {
-    final String roomId;
-    try {
-      roomId = await _repository.createGroup(request);
-    } catch (exception) {
-      final knownException = _toKnownException(exception.toString());
-      if (knownException != null) throw knownException;
-      rethrow;
-    }
+    final roomId = await _repository.createGroup(request);
     if (roomId.isEmpty) throw CannotCreateNewGroupChatException();
     return roomId;
-  }
-
-  Exception? _toKnownException(String message) {
-    if (message.contains('M_FORBIDDEN: Federation denied')) {
-      return FederationDeniedWithMatrixOrgException();
-    }
-    if (message.contains('M_UNKNOWN: Cannot invite so many users at once')) {
-      return CannotCreateNewGroupChatWithLimitedPermissionsException();
-    }
-    return null;
   }
 }

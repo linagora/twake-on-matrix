@@ -44,29 +44,6 @@ void main() {
     );
   });
 
-  for (final (name, message, matcher) in [
-    (
-      'FederationDenied',
-      'M_FORBIDDEN: Federation denied with matrix.org.',
-      isA<FederationDeniedWithMatrixOrgException>(),
-    ),
-    (
-      'TooManyInvites',
-      'M_UNKNOWN: Cannot invite so many users at once',
-      isA<CannotCreateNewGroupChatWithLimitedPermissionsException>(),
-    ),
-  ]) {
-    test('execute_when${name}_throwsTheTypedException', () async {
-      // Arrange
-      when(
-        mockRepository.createGroup(request),
-      ).thenAnswer((_) => Future.error(Exception(message)));
-
-      // Act & Assert
-      await expectLater(useCase.execute(request), throwsA(matcher));
-    });
-  }
-
   test('execute_whenOtherError_rethrowsIt', () async {
     // Arrange
     final error = Exception('boom');
