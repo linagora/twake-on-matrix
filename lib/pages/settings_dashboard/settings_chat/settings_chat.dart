@@ -2,14 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'settings_chat_view.dart';
 
-class SettingsChat extends StatefulWidget {
+class SettingsChat extends StatelessWidget {
   const SettingsChat({super.key});
 
   @override
-  SettingsChatController createState() => SettingsChatController();
-}
-
-class SettingsChatController extends State<SettingsChat> {
-  @override
-  Widget build(BuildContext context) => SettingsChatView(this);
+  Widget build(BuildContext context) => const SettingsChatView();
 }

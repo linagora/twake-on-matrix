@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/utils/famedlysdk_store.provider.dart';
 
-import 'matrix.dart';
-
-class SettingsSwitchListTile extends StatefulWidget {
+class SettingsSwitchListTile extends ConsumerStatefulWidget {
   final bool defaultValue;
   final String storeKey;
   final String title;
@@ -20,19 +20,20 @@ class SettingsSwitchListTile extends StatefulWidget {
   SettingsSwitchListTileState createState() => SettingsSwitchListTileState();
 }
 
-class SettingsSwitchListTileState extends State<SettingsSwitchListTile> {
+class SettingsSwitchListTileState
+    extends ConsumerState<SettingsSwitchListTile> {
   @override
   Widget build(BuildContext context) {
+    final store = ref.watch(storeProvider);
     return FutureBuilder<bool>(
-      future: Matrix.of(
-        context,
-      ).store.getItemBool(widget.storeKey, widget.defaultValue),
+      future: store.getItemBool(widget.storeKey, widget.defaultValue),
       builder: (context, snapshot) => SwitchListTile.adaptive(
         value: snapshot.data ?? widget.defaultValue,
         title: Text(widget.title),
         onChanged: (bool newValue) async {
           widget.onChanged?.call(newValue);
-          await Matrix.of(context).store.setItemBool(widget.storeKey, newValue);
+          await store.setItemBool(widget.storeKey, newValue);
+          if (!mounted) return;
           setState(() {});
         },
       ),
