@@ -19,7 +19,9 @@ class ForwardDatasourceImpl implements ForwardDatasource {
     try {
       final room = _client?.getRoomById(roomId);
       if (room == null) throw ForwardRoomNotFoundException(roomId);
-      await room.sendEvent(content);
+      // The SDK returns null instead of throwing on most send failures.
+      final eventId = await room.sendEvent(content);
+      if (eventId == null) throw ForwardSendFailedException(roomId);
     } catch (e, s) {
       Logs().e('ForwardDatasourceImpl::sendMessage() failed', e, s);
       rethrow;

@@ -10,3 +10,12 @@ class ForwardRoomNotFoundException extends ForwardException {
   @override
   String toString() => 'ForwardRoomNotFoundException($roomId)';
 }
+
+class ForwardSendFailedException extends ForwardException {
+  const ForwardSendFailedException(this.roomId);
+
+  final String roomId;
+
+  @override
+  String toString() => 'ForwardSendFailedException($roomId)';
+}

@@ -65,6 +65,7 @@ void main() {
       // Arrange
       final mockRoom = MockRoom();
       when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+      when(mockRoom.sendEvent(testContent)).thenAnswer((_) async => r'$event');
 
       // Act
       await datasource.sendMessage(roomId: testRoomId, content: testContent);
@@ -94,6 +95,19 @@ void main() {
       await expectLater(
         datasource.sendMessage(roomId: testRoomId, content: testContent),
         throwsException,
+      );
+    });
+
+    test('sendMessage_whenTheSdkReturnsNoEventId_throws', () async {
+      // Arrange
+      final mockRoom = MockRoom();
+      when(mockClient.getRoomById(testRoomId)).thenReturn(mockRoom);
+      when(mockRoom.sendEvent(testContent)).thenAnswer((_) async => null);
+
+      // Act & Assert
+      await expectLater(
+        datasource.sendMessage(roomId: testRoomId, content: testContent),
+        throwsA(isA<ForwardSendFailedException>()),
       );
     });
   });
