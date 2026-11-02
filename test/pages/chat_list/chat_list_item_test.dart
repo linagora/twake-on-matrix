@@ -1,4 +1,5 @@
 import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/pages/chat/events/message_time_style.dart';
@@ -6,6 +7,7 @@ import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -125,5 +127,98 @@ void main() {
       find.descendant(of: find.byType(SeenByRow), matching: find.byType(Icon)),
     );
     expect(icon.color, MessageTimeStyle.seenByRowIconPrimaryColor(false));
+  });
+
+  group('kind badge', () {
+    void makeFeed(MockRoom room, JoinRules? joinRules) {
+      when(room.getState(EventTypes.RoomCreate)).thenReturn(
+        StrippedStateEvent(
+          type: EventTypes.RoomCreate,
+          content: {'type': FeedConfig.roomType},
+          senderId: '@owner:server.tld',
+          stateKey: '',
+        ),
+      );
+      when(room.joinRules).thenReturn(joinRules);
+    }
+
+    AvatarKindBadge? shownBadge(WidgetTester tester) {
+      final finder = find.byType(AvatarWithKindBadge);
+      if (finder.evaluate().isEmpty) return null;
+      return tester.widget<AvatarWithKindBadge>(finder).badge;
+    }
+
+    testWidgets('build_whenDirectChat_showsNoBadge', (tester) async {
+      // Arrange
+      final room = buildRoom(name: 'Alice');
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room)));
+      await tester.pump();
+
+      // Assert
+      expect(shownBadge(tester), isNull);
+    });
+
+    testWidgets('build_whenGroup_showsTheGroupBadge', (tester) async {
+      // Arrange
+      final room = buildRoom(name: 'Team');
+      when(room.isDirectChat).thenReturn(false);
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room)));
+      await tester.pump();
+
+      // Assert
+      expect(shownBadge(tester), AvatarKindBadge.group);
+    });
+
+    testWidgets('build_whenPublicFeed_showsThePublicChannelBadge', (
+      tester,
+    ) async {
+      // Arrange
+      final room = buildRoom(name: 'News');
+      when(room.isDirectChat).thenReturn(false);
+      makeFeed(room, JoinRules.public);
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room)));
+      await tester.pump();
+
+      // Assert
+      expect(shownBadge(tester), AvatarKindBadge.publicChannel);
+    });
+
+    testWidgets('build_whenFeedJoinRulesAreNotLoaded_showsThePrivateBadge', (
+      tester,
+    ) async {
+      // Arrange
+      final room = buildRoom(name: 'News');
+      when(room.isDirectChat).thenReturn(false);
+      makeFeed(room, null);
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room)));
+      await tester.pump();
+
+      // Assert
+      expect(shownBadge(tester), AvatarKindBadge.privateChannel);
+    });
+
+    testWidgets('build_whenPrivateFeed_showsThePrivateChannelBadge', (
+      tester,
+    ) async {
+      // Arrange
+      final room = buildRoom(name: 'Board');
+      when(room.isDirectChat).thenReturn(false);
+      makeFeed(room, JoinRules.invite);
+
+      // Act
+      await tester.pumpWidget(wrap(ChatListItem(room)));
+      await tester.pump();
+
+      // Assert
+      expect(shownBadge(tester), AvatarKindBadge.privateChannel);
+    });
   });
 }

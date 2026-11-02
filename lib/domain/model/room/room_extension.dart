@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/default_power_level_member.dart';
+import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/data/network/extensions/file_info_extension.dart';
@@ -21,6 +22,10 @@ final Map<String, MatrixFile> _globalSendingFilePlaceholders = {};
 
 extension RoomExtension on Room {
   static const _kRefreshingLastEventType = 'com.famedly.refreshing_last_event';
+
+  bool get isFeed =>
+      getState(EventTypes.RoomCreate)?.content.tryGet<String>('type') ==
+      FeedConfig.roomType;
 
   // ignore: library_private_types_in_public_api
   Map<String, MatrixFile> get sendingFilePlaceholders =>

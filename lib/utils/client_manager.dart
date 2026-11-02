@@ -179,6 +179,9 @@ abstract class ClientManager {
         'im.ponies.room_emotes',
         // To check which story room we can post in
         EventTypes.RoomPowerLevels,
+        // Public vs private feed badge in the chat list; rooms synced before
+        // this was added only get it on their next join_rules change.
+        EventTypes.RoomJoinRules,
       },
       // Matrix 12+ no longer caches loadArchive() results for getRoomById().
       // Persist left rooms via sync; keep SDK default member lazy-loading.

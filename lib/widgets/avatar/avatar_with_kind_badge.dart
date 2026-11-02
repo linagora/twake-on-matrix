@@ -15,6 +15,8 @@ class AvatarWithKindBadge extends StatelessWidget {
     this.mxContent,
     this.name,
     this.size = AvatarStyle.defaultSize,
+    this.onTap,
+    this.keepAlive = false,
   });
 
   static const _designSize = 56.0;
@@ -27,6 +29,8 @@ class AvatarWithKindBadge extends StatelessWidget {
   final Uri? mxContent;
   final String? name;
   final double size;
+  final VoidCallback? onTap;
+  final bool keepAlive;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +45,13 @@ class AvatarWithKindBadge extends StatelessWidget {
               center: Offset(_notchCenter * scale, _notchCenter * scale),
               radius: _notchRadius * scale,
             ),
-            child: Avatar(mxContent: mxContent, name: name, size: size),
+            child: Avatar(
+              mxContent: mxContent,
+              name: name,
+              size: size,
+              onTap: onTap,
+              keepAlive: keepAlive,
+            ),
           ),
           Positioned(
             left: _badgeOffset * scale,
