@@ -1,4 +1,5 @@
 import 'package:twake_chat/pages/chat/chat_audio_player_widget.dart';
+import 'package:twake_chat/pages/chat_list/browse_public_groups_button.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
 import 'package:twake_chat/pages/search/search.dart';
@@ -61,17 +62,21 @@ class ChatListHeader extends StatelessWidget {
   }
 
   Widget _normalModeWidgetsMobile(BuildContext context) {
-    return Row(
+    return Stack(
+      alignment: AlignmentDirectional.centerEnd,
       children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _navigateWithSlideAnimation(context),
-            child: TextField(
-              textInputAction: TextInputAction.search,
-              enabled: false,
-              decoration: ChatListHeaderStyle.searchInputDecoration(context),
-            ),
+        GestureDetector(
+          onTap: () => _navigateWithSlideAnimation(context),
+          child: TextField(
+            textInputAction: TextInputAction.search,
+            enabled: false,
+            decoration: ChatListHeaderStyle.searchInputDecoration(context),
           ),
+        ),
+        // A disabled TextField ignores pointers, so its suffixIcon can't be tapped.
+        const Padding(
+          padding: EdgeInsetsDirectional.only(end: 4),
+          child: BrowsePublicGroupsButton(),
         ),
       ],
     );

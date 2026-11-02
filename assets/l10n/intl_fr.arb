@@ -2731,5 +2731,54 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
+  },
+  "browsePublicGroups": "Parcourir les groupes publics",
+  "@browsePublicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroups": "Groupes publics",
+  "@publicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchPublicGroups": "Rechercher un groupe public",
+  "@searchPublicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPublicGroupToJoin": "Aucun groupe public à rejoindre.",
+  "@noPublicGroupToJoin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "joinPublicGroupMembers": "{count, plural, =1{Rejoindre · 1 membre} other{Rejoindre · {count} membres}}",
+  "@joinPublicGroupMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "askToJoinPublicGroupMembers": "{count, plural, =1{Demander à rejoindre · 1 membre} other{Demander à rejoindre · {count} membres}}",
+  "@askToJoinPublicGroupMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "joinRequestSentAdminMustApprove": "Demande envoyée : un administrateur doit l'approuver.",
+  "@joinRequestSentAdminMustApprove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroupJoinFailed": "Impossible de rejoindre ce groupe.",
+  "@publicGroupJoinFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroupsLoadFailed": "Impossible de charger les groupes publics.",
+  "@publicGroupsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
   }
 }

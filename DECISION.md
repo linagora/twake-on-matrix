@@ -62,6 +62,24 @@ before room creation existed. The call works, but its first participant may
 not be able to open it without logging in to Meet. Any other failure sends
 nothing and shows that the call could not be started.
 
+## D5. Browse public groups on mobile (decided by Johann, 2026-11-02)
+
+A planet inside the search field of the chat list, at its right, opens a full
+screen page of the public directory of the user's homeserver, as
+twake-space-chat does (its D206, D416, D450). Shown only when the well-known
+enables public groups (`app.twake.chat.public_groups.enabled`).
+
+- The directory of the homeserver alone, read page after page up to 1,000
+  rooms, minus the rooms already joined. Groups and feeds only: no spaces.
+- Each row: avatar, name, « Join · N members » or « Ask to join · N
+  members » for a room on approval (`knock`), and the topic. A search field
+  on top filters by name, ignoring case and accents.
+- A tap joins and opens the room. On a room on approval it sends the request
+  and says an administrator has to approve it; the page stays open. A failed
+  join says so. Both messages are snackbars, where twake-space-chat shows an
+  inline alert in its dialog.
+- No badge of the room kind on the avatar yet: the design system has none.
+
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 
 The Edit screen of a group has a « Who can join » section, as in
