@@ -15,8 +15,8 @@ class ChatDetailsHeaderStack extends StatelessWidget {
     required this.animationController,
     required this.groupInfoHeight,
     required this.maxGroupInfoHeight,
-    required this.onMessage,
-    required this.onSearch,
+    this.onMessage,
+    this.onSearch,
     required this.onToggleNotification,
     required this.muteNotifier,
     required this.onGroupInfoTap,
@@ -26,8 +26,8 @@ class ChatDetailsHeaderStack extends StatelessWidget {
   final AnimationController animationController;
   final double groupInfoHeight;
   final double maxGroupInfoHeight;
-  final VoidCallback onMessage;
-  final VoidCallback onSearch;
+  final VoidCallback? onMessage;
+  final VoidCallback? onSearch;
   final VoidCallback onToggleNotification;
   final ValueNotifier<PushRuleState> muteNotifier;
   final VoidCallback onGroupInfoTap;

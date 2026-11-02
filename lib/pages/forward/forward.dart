@@ -9,7 +9,6 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/forward/forward_controller.dart';
 import 'package:twake_chat/pages/forward/forward_state.dart';
 import 'package:twake_chat/pages/forward/forward_view.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/model/pop_result_from_forward.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
@@ -53,11 +52,7 @@ class ForwardScreenState extends ConsumerState<Forward> {
   @override
   void initState() {
     super.initState();
-    _rooms =
-        ref
-            .read(activeMatrixClientProvider)
-            ?.filteredRoomsForAll(ActiveFilter.acceptedChats) ??
-        [];
+    _rooms = ref.read(activeMatrixClientProvider)?.acceptedRooms ?? [];
     recentChats = _rooms;
     searchTextEditingController.addListener(_onSearchChanged);
   }

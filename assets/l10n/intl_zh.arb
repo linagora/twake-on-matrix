@@ -1696,7 +1696,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "加入空间",
   "noMatrixServer": "{server1} 不是一个Matrix服务器,试试{server2}?",
   "@noMatrixServer": {
     "type": "text",
@@ -1732,7 +1731,6 @@
   },
   "yourChatBackupHasBeenSetUp": "您的聊天记录备份已设置。",
   "scanQrCode": "扫描二维码",
-  "chatHasBeenAddedToThisSpace": "会话已添加到此空间",
   "homeserver": "服务器",
   "oneClientLoggedOut": "您的一个客户端已登出",
   "removeFromBundle": "从此集合中移除",
@@ -1750,8 +1748,6 @@
   "messageInfo": "消息信息",
   "time": "时间",
   "loginWithOneClick": "一键登录",
-  "addToSpaceDescription": "选择一个空间以添加此聊天。",
-  "removeFromSpace": "从空间删除",
   "start": "开始",
   "commandHint_discardsession": "舍弃会话",
   "@commandHint_discardsession": {
@@ -1903,9 +1899,6 @@
   "noKeyForThisMessage": "如果消息是在你在此设备上登录账户前发送的，就可能发生这种情况。\n\n也有可能是发送者屏蔽了你的设备或网络连接出了问题。\n\n你能在另一个会话中读取消息吗？如果是的话，你可以从它那里传递信息！点击设置 > 设备，并确保你的设备已经相互验证。当你下次打开聊天室，且两个会话都在前台，密钥就会自动传输。\n\n你不想在注销或切换设备时丢失密钥？请确保在设置中启用了聊天备份。",
   "newGroup": "新群组",
   "newSpace": "新空间",
-  "enterSpace": "进入空间",
-  "enterRoom": "进入聊天室",
-  "allSpaces": "所有空间",
   "appearOnTopDetails": "允许应用显示在顶部（如果你已经将 Fluffychat 设置为呼叫账户，则不需要授予此权限）",
   "foregroundServiceRunning": "此通知在前台服务运行时出现。",
   "screenSharingTitle": "屏幕共享",

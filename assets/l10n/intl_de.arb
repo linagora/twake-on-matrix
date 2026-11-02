@@ -1717,13 +1717,11 @@
     }
   },
   "scanQrCode": "QR-Code scannen",
-  "chatHasBeenAddedToThisSpace": "Chat wurde zum Space hinzugefügt",
   "autoplayImages": "Animierte Sticker und Emotes automatisch abspielen",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
   },
-  "addToSpace": "Zum Space hinzufügen",
   "serverRequiresEmail": "Dieser Server muss deine E-Mail-Adresse für die Registrierung überprüfen.",
   "bundleName": "Name des Bundles",
   "removeFromBundle": "Von diesem Bundle entfernen",
@@ -1739,8 +1737,6 @@
   "time": "Zeit",
   "messageType": "Nachrichtentyp",
   "sender": "Absender:in",
-  "removeFromSpace": "Aus dem Space entfernen",
-  "addToSpaceDescription": "Wähle einen Space aus, um diesen Chat hinzuzufügen.",
   "loginWithOneClick": "Anmelden mit einem Klick",
   "start": "Start",
   "passwordsDoNotMatch": "Passwörter stimmen nicht überein!",
@@ -1908,9 +1904,6 @@
   "whyIsThisMessageEncrypted": "Warum ist diese Nachricht nicht lesbar?",
   "newGroup": "Neue Gruppe",
   "newSpace": "Neuer Raum",
-  "enterSpace": "Raum betreten",
-  "enterRoom": "Raum betreten",
-  "allSpaces": "Alle Spaces",
   "screenSharingDetail": "Du teilst deinen Bildschirm in FuffyChat",
   "numChats": "{number} Chats",
   "@numChats": {

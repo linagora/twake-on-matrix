@@ -194,11 +194,6 @@ class UrlLauncher with GoToDraftChatMixin {
           (room.membership == Membership.join ||
               room.membership == Membership.invite);
       if (canOpenDirectly) {
-        if (room.isSpace) {
-          // TODO: Implement navigate to space
-          const RoomsRoute().go(context);
-          return;
-        }
         // we have the room, so....just open it
         if (event != null) {
           RoomRoute(roomid: room.id, event: event).go(context);

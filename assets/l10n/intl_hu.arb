@@ -1325,7 +1325,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Hozzáadás térhez",
   "areYouSureYouWantToLogout": "Biztos, hogy kijelentkezel?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
@@ -1487,7 +1486,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "A beszélgetés hozzá lett adva ehhez a térhez",
   "chats": "Beszélgetések",
   "@chats": {
     "type": "text",

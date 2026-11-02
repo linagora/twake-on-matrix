@@ -53,6 +53,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     SettingEnum.chatSettings,
     SettingEnum.privacyAndSecurity,
     SettingEnum.notificationAndSounds,
+    SettingEnum.chatFolders,
     SettingEnum.appLanguage,
     SettingEnum.devices,
     if (PlatformInfos.isMobile) SettingEnum.dataAndStorage,
@@ -248,6 +249,10 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
         }
         break;
       case SettingEnum.chatFolders:
+        final result = await const FoldersRoute().push(context);
+        if (result == null) {
+          optionsSelectNotifier.value = null;
+        }
         break;
       case SettingEnum.appLanguage:
         final result = await const AppLanguageRoute().push(context);

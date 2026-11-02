@@ -96,7 +96,7 @@ class ContactsSelectionView extends StatelessWidget {
                   .selectedContactsMapNotifier
                   .haveSelectedContactsNotifier,
               builder: (context, haveSelectedContacts, child) {
-                if (!haveSelectedContacts) {
+                if (!haveSelectedContacts && controller.isSelectionRequired) {
                   return const SizedBox.shrink();
                 }
                 return child!;
@@ -424,14 +424,15 @@ class ContactsSelectionView extends StatelessWidget {
                 .selectedContactsMapNotifier
                 .haveSelectedContactsNotifier,
             builder: (context, haveSelectedContacts, _) {
+              final canSubmit =
+                  haveSelectedContacts || !controller.isSelectionRequired;
               return TwakeTextButton(
-                onTap: () =>
-                    haveSelectedContacts ? controller.trySubmit(context) : null,
+                onTap: () => canSubmit ? controller.trySubmit(context) : null,
                 message: L10n.of(context)!.add,
                 margin: ContactsSelectionViewStyle.webActionsButtonMargin,
                 borderHover: ContactsSelectionViewStyle.webActionsButtonBorder,
                 buttonDecoration: BoxDecoration(
-                  color: haveSelectedContacts
+                  color: canSubmit
                       ? LinagoraSysColors.material().primary
                       : LinagoraStateLayer(
                           LinagoraSysColors.material().onSurface,
@@ -441,7 +442,7 @@ class ContactsSelectionView extends StatelessWidget {
                   ),
                 ),
                 styleMessage: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: haveSelectedContacts
+                  color: canSubmit
                       ? LinagoraSysColors.material().onPrimary
                       : LinagoraSysColors.material().inverseSurface.withOpacity(
                           0.6,

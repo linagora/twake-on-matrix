@@ -3,7 +3,7 @@ import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 
 part 'new_group_chat_info_state.freezed.dart';
 
-enum NewGroupFailureReason { feedNotSupported, other }
+enum NewGroupFailureReason { feedNotSupported, spaceRefused, other }
 
 @freezed
 sealed class NewGroupChatInfoState with _$NewGroupChatInfoState {

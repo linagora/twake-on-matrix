@@ -1,5 +1,4 @@
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart';
@@ -12,46 +11,6 @@ enum SelectMode {
 }
 
 enum PopupMenuAction { settings, invite, newGroup, setStatus, archive }
-
-enum ActiveFilter {
-  allChats,
-  acceptedChats,
-  groups,
-  messages,
-  spaces;
-
-  bool Function(Room) getRoomFilterByActiveFilter() {
-    bool isListedMembership(Room room) =>
-        room.membership == Membership.join ||
-        room.membership == Membership.invite;
-
-    switch (this) {
-      case ActiveFilter.allChats:
-        return (room) =>
-            isListedMembership(room) && !room.isSpace && !room.isStoryRoom;
-      case ActiveFilter.groups:
-        return (room) =>
-            isListedMembership(room) &&
-            !room.isSpace &&
-            !room.isDirectChat &&
-            !room.isStoryRoom;
-      case ActiveFilter.messages:
-        return (room) =>
-            isListedMembership(room) &&
-            !room.isSpace &&
-            room.isDirectChat &&
-            !room.isStoryRoom;
-      case ActiveFilter.spaces:
-        return (r) => isListedMembership(r) && r.isSpace;
-      case ActiveFilter.acceptedChats:
-        return (room) =>
-            isListedMembership(room) &&
-            !room.isSpace &&
-            !room.isStoryRoom &&
-            !room.isInvitation;
-    }
-  }
-}
 
 enum ChatListSelectionActions {
   read,

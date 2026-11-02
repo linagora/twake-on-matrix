@@ -1428,7 +1428,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Afegeix a un espai",
   "areYouSureYouWantToLogout": "Segur que voleu finalitzar la sessió?",
   "@areYouSureYouWantToLogout": {
     "type": "text",
@@ -1470,7 +1469,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "El xat s’ha afegit a aquest espai",
   "autoplayImages": "Reprodueix automàticament enganxines i emoticones animades",
   "@autoplayImages": {
     "type": "text",

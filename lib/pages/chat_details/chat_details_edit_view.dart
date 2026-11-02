@@ -231,6 +231,10 @@ class ChatDetailsEditView extends ConsumerWidget {
                       controller.roomAccessDraftNotifier,
                     ]),
                     builder: (context, child) {
+                      // A space is no conversation: nothing to encrypt.
+                      if (controller.room?.isSpace == true) {
+                        return const SizedBox.shrink();
+                      }
                       final isRoomEnabledEncryption =
                           controller.isRoomEnabledEncryptionNotifier.value;
                       final isPublic =
@@ -359,8 +363,12 @@ class ChatDetailsEditView extends ConsumerWidget {
             if (!controller.isSupportChat) ...[
               ChatDetailsEditCategory(title: l10n.dangerZone),
               ChatDetailsEditOption(
-                title: L10n.of(context)!.commandHint_leave,
-                subtitle: L10n.of(context)!.leaveGroupSubtitle,
+                title: controller.room?.isSpace == true
+                    ? L10n.of(context)!.spaceLeave
+                    : L10n.of(context)!.commandHint_leave,
+                subtitle: controller.room?.isSpace == true
+                    ? L10n.of(context)!.spaceLeaveSubtitle
+                    : L10n.of(context)!.leaveGroupSubtitle,
                 leading: Icons.logout_outlined,
                 titleColor: Theme.of(context).colorScheme.error,
                 leadingIconColor: Theme.of(context).colorScheme.error,

@@ -401,7 +401,6 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "Bản sao lưu trò chuyện đã được thiết lập.",
-  "chatHasBeenAddedToThisSpace": "Cuộc trò chuyện đã được thêm vào",
   "chats": "Tin nhắn",
   "@chats": {
     "type": "text",
@@ -471,7 +470,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Thêm vào khoảng trống",
   "commandHint_cuddle": "Ôm một cái",
   "allChats": "Tất cả cuộc trò chuyện",
   "@allChats": {
@@ -1320,8 +1318,6 @@
   "time": "Thời gian",
   "messageType": "Loại tin nhắn",
   "sender": "Người gửi",
-  "removeFromSpace": "Xóa khỏi không gian",
-  "addToSpaceDescription": "Chọn một không gian để thêm cuộc trò chuyện này vào đó.",
   "start": "Bắt đầu",
   "addToStory": "Thêm vào câu chuyện",
   "publish": "Xuất bản",
@@ -1763,7 +1759,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "allSpaces": "Tất cả khoảng trắng",
   "explainStoragePermission": "Twake cần quyền truy cập vào bộ nhớ của bạn để xem trước tệp",
   "soonThereHaveContacts": "Sẽ sớm có liên hệ",
   "userAndOthersAreTyping": "{username} và {count} người khác đang gõ",
@@ -1821,7 +1816,6 @@
     "placeholders": {}
   },
   "documents": "Tài liệu",
-  "enterSpace": "Nhập khoảng trắng",
   "encryptThisChat": "Mã hóa cuộc trò chuyện này",
   "unavailable": "Không khả dụng",
   "@unavailable": {
@@ -1927,7 +1921,6 @@
   "contact": "Liên hệ",
   "shrink": "Thu nhỏ",
   "persistentChatHistory": "Lịch sử trò chuyện liên tục",
-  "enterRoom": "Vào phòng",
   "pleaseChooseAPasscode": "Vui lòng chọn một mã mật khẩu",
   "@pleaseChooseAPasscode": {
     "type": "text",

@@ -35,7 +35,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Alana ekle",
   "admin": "Yönetici",
   "@admin": {
     "type": "text",
@@ -317,7 +316,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Sohbet bu alana eklendi",
   "chats": "Sohbetler",
   "@chats": {
     "type": "text",
@@ -1749,8 +1747,6 @@
   "time": "Zaman",
   "messageType": "Mesaj Türü",
   "sender": "Gönderen",
-  "removeFromSpace": "Alandan kaldır",
-  "addToSpaceDescription": "Bu sohbeti eklemek için bir alan seçin.",
   "loginWithOneClick": "Tek tıklamayla oturum aç",
   "start": "Başla",
   "commandHint_clearcache": "Önbelleği temizleyin",
@@ -1902,9 +1898,6 @@
   "whyIsThisMessageEncrypted": "Bu mesaj neden okunamıyor?",
   "noKeyForThisMessage": "Bu durum, mesaj siz bu aygıtta hesabınızda oturum açmadan önce gönderildiyse meydana gelebilir. \n \nGönderenin aygıtınızı engellemiş olması veya internet bağlantısında bir sorun olması da mümkündür. \n \nMesajı başka bir oturumda okuyabiliyor musunuz? O zaman mesajı oradan aktarabilirsiniz! Ayarlar > Aygıtlar bölümüne gidin ve aygıtlarınızın birbirini doğruladığından emin olun. Odayı bir sonraki sefer açtığınızda ve her iki oturum da ön planda olduğunda, anahtarlar otomatik olarak iletilecektir. \n \nOturumu kapatırken veya aygıt değiştirirken anahtarları kaybetmek istemiyor musunuz? Ayarlarda sohbet yedeklemesini etkinleştirdiğinizden emin olun.",
   "screenSharingTitle": "ekran paylaşımı",
-  "enterSpace": "Alana gir",
-  "enterRoom": "Odaya gir",
-  "allSpaces": "Tüm alanlar",
   "foregroundServiceRunning": "Bu bildirim, ön plan hizmeti çalışırken görünür.",
   "appearOnTopDetails": "Uygulamanın üstte görünmesine izin verir (Fluffychat'ı zaten bir arama hesabı olarak ayarladıysanız gerekli değildir)",
   "newGroup": "Yeni grup",

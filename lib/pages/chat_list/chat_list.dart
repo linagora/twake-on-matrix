@@ -19,13 +19,12 @@ import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_security/settings_security.dart';
 import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
-import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_room_list_extension.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/chat_list/chat_selection_actions.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/tor_stub.dart'
     if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
@@ -85,8 +84,6 @@ class ChatListController extends State<ChatList>
 
   final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
 
-  final ValueNotifier<bool> expandRoomsForPinNotifier = ValueNotifier(true);
-
   final ValueNotifier<bool> sortingRoomsNotifier = ValueNotifier(true);
 
   final ValueNotifier<SelectMode> selectModeNotifier = ValueNotifier(
@@ -104,8 +101,6 @@ class ChatListController extends State<ChatList>
 
   StreamSubscription? _roomUpdateSubscription;
 
-  String? activeSpaceId;
-
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
 
   SearchUserDirectoryResponse? userSearchResult;
@@ -120,18 +115,9 @@ class ChatListController extends State<ChatList>
 
   MatrixState get matrixState => Matrix.of(context);
 
-  ActiveFilter activeFilter = AppConfig.separateChatTypes
-      ? ActiveFilter.messages
-      : ActiveFilter.allChats;
-
+  /// Spaces hold no conversation: they do not count for the first steps.
   List<Room> get _filteredRooms =>
-      activeClient.filteredRoomsForAll(activeFilter);
-
-  List<Room> get filteredRoomsForAll =>
-      _filteredRooms.where((room) => !room.isFavourite).toList();
-
-  List<Room> get filteredRoomsForPin =>
-      _filteredRooms.where((room) => room.isFavourite).toList();
+      activeClient.listedRooms.where((room) => !room.isSpace).toList();
 
   bool get displayNavigationBar => false;
 
@@ -163,13 +149,6 @@ class ChatListController extends State<ChatList>
         ).client.getRoomById(conversation.roomId)!.pushRuleState ==
         PushRuleState.notify,
   );
-
-  bool get filteredRoomsForAllIsEmpty => filteredRoomsForAll.isEmpty;
-
-  bool get filteredRoomsForPinIsEmpty => filteredRoomsForPin.isEmpty;
-
-  bool get chatListBodyIsEmpty =>
-      filteredRoomsForAllIsEmpty && filteredRoomsForPinIsEmpty;
 
   bool get conversationSelectionNotifierIsEmpty =>
       conversationSelectionNotifier.value.isEmpty;
@@ -241,18 +220,6 @@ class ChatListController extends State<ChatList>
 
   void onClickClearSelection() {
     toggleSelectMode();
-  }
-
-  void resetActiveSpaceId() {
-    setState(() {
-      activeSpaceId = null;
-    });
-  }
-
-  void setActiveSpace(String? spaceId) {
-    setState(() {
-      activeSpaceId = spaceId;
-    });
   }
 
   Future<void> toggleUnreadSelections() async {
@@ -357,46 +324,6 @@ class ChatListController extends State<ChatList>
         toggleSelection(conversation.roomId);
       }
     }
-  }
-
-  Future<void> addToSpace() async {
-    final selectedSpace = await showConfirmationDialog<String>(
-      context: context,
-      title: L10n.of(context)!.addToSpace,
-      message: L10n.of(context)!.addToSpaceDescription,
-      fullyCapitalizedForMaterial: false,
-      actions: Matrix.of(context).client.joinedOrInvitedRooms
-          .where((r) => r.isSpace)
-          .map(
-            (space) => AlertDialogAction(
-              key: space.id,
-              label: space.getLocalizedDisplayname(
-                MatrixLocals(L10n.of(context)!),
-              ),
-            ),
-          )
-          .toList(),
-    );
-    if (selectedSpace == null) return;
-    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () async {
-        final space = activeClient.getRoomById(selectedSpace)!;
-        if (space.canSendDefaultStates) {
-          for (final conversation in conversationSelectionNotifier.value) {
-            await space.setSpaceChild(conversation.roomId);
-          }
-        }
-      },
-    );
-    if (result.error == null) {
-      if (!mounted) return;
-      TwakeSnackBar.show(
-        context,
-        L10n.of(context)!.chatHasBeenAddedToThisSpace,
-      );
-    }
-
-    conversationSelectionNotifier.value.clear();
   }
 
   Future<void> setupAdditionalDioCacheOption(String userId) async {
@@ -899,7 +826,6 @@ class ChatListController extends State<ChatList>
     scrollController.removeListener(_onScroll);
     _roomUpdateSubscription?.cancel();
     expandRoomsForAllNotifier.dispose();
-    expandRoomsForPinNotifier.dispose();
     selectModeNotifier.dispose();
     conversationSelectionNotifier.dispose();
     searchChatController.dispose();
