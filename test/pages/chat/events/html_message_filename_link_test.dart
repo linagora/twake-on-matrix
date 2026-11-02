@@ -28,14 +28,12 @@ const _linkStyle = TextStyle(
 /// styles of its parent spans).
 typedef _RenderedSpan = ({TextSpan span, TextStyle style});
 
-void main() {
-  late Room room;
+class _HtmlMessageHarness {
+  final Room room;
 
-  setUpAll(() async {
-    room = Room(id: '!room:example.org', client: await getClient());
-  });
+  _HtmlMessageHarness(this.room);
 
-  void collect(
+  void _collect(
     InlineSpan span,
     TextStyle parentStyle,
     List<_RenderedSpan> out,
@@ -44,7 +42,7 @@ void main() {
     final style = parentStyle.merge(span.style);
     if (span.text != null) out.add((span: span, style: style));
     for (final child in span.children ?? const <InlineSpan>[]) {
-      collect(child, style, out);
+      _collect(child, style, out);
     }
   }
 
@@ -70,39 +68,54 @@ void main() {
     );
     final spans = <_RenderedSpan>[];
     for (final richText in tester.widgetList<RichText>(find.byType(RichText))) {
-      collect(richText.text, const TextStyle(), spans);
+      _collect(richText.text, const TextStyle(), spans);
     }
     return spans.firstWhere((rendered) => rendered.span.text == text);
   }
+
+  void expectPlainText(_RenderedSpan rendered) {
+    expect(rendered.span.recognizer, isNull);
+    expect(rendered.style.color, _textStyle.color);
+    expect(rendered.style.decoration, TextDecoration.none);
+  }
+}
+
+void main() {
+  late _HtmlMessageHarness harness;
+
+  setUpAll(() async {
+    final room = Room(id: '!room:example.org', client: await getClient());
+    harness = _HtmlMessageHarness(room);
+  });
 
   group('HtmlMessage filename links', () {
     testWidgets('renders a filename in a formatted message as plain text', (
       tester,
     ) async {
-      final filename = await pumpAndFind(tester, '<p>test.md</p>', 'test.md');
+      final filename = await harness.pumpAndFind(
+        tester,
+        '<p>test.md</p>',
+        'test.md',
+      );
 
-      expect(filename.span.recognizer, isNull);
-      expect(filename.style.color, _textStyle.color);
-      expect(filename.style.decoration, TextDecoration.none);
+      harness.expectPlainText(filename);
     });
 
     testWidgets('keeps the nested formatting of a filename anchor', (
       tester,
     ) async {
-      final bold = await pumpAndFind(
+      final bold = await harness.pumpAndFind(
         tester,
         '<p><a href="report.md"><b>my</b> report</a></p>',
         'my',
       );
 
-      expect(bold.span.recognizer, isNull);
+      harness.expectPlainText(bold);
       expect(bold.style.fontWeight, FontWeight.bold);
-      expect(bold.style.color, _textStyle.color);
-      expect(bold.style.decoration, TextDecoration.none);
     });
 
     testWidgets('keeps a web address as a link', (tester) async {
-      final link = await pumpAndFind(
+      final link = await harness.pumpAndFind(
         tester,
         '<p>example.com</p>',
         'example.com',
