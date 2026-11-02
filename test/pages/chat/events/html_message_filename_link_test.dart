@@ -114,6 +114,21 @@ void main() {
       expect(bold.style.fontWeight, FontWeight.bold);
     });
 
+    testWidgets(
+      'keeps a mailto link whose domain looks like a file extension',
+      (tester) async {
+        final link = await harness.pumpAndFind(
+          tester,
+          '<p><a href="mailto:bob@acme.rs">write to bob</a></p>',
+          'write to bob',
+        );
+
+        expect(link.span.recognizer, isNotNull);
+        expect(link.style.color, _linkStyle.color);
+        expect(link.style.decoration, TextDecoration.underline);
+      },
+    );
+
     testWidgets('keeps a web address as a link', (tester) async {
       final link = await harness.pumpAndFind(
         tester,

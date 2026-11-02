@@ -26,6 +26,22 @@ void main() {
       });
     });
 
+    group('GIVEN url has a non-http scheme\n', () {
+      for (final url in [
+        'mailto:bob@acme.rs',
+        'mailto:bob@acme.md',
+        'mailto:bob@acme.py',
+        'mailto:bob@acme.sh',
+        'mailto:bob@acme.zip',
+        'example.rs:8080',
+      ]) {
+        test('WHEN $url\n'
+            'THEN returns false', () {
+          expect(isFilenameUrl(url), isFalse);
+        });
+      }
+    });
+
     group('GIVEN url has www prefix\n', () {
       test('WHEN extension is a known file extension'
           'THEN returns false', () {
