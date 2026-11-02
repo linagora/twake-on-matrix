@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
@@ -71,8 +70,7 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
           : await ref.read(createGroupUseCaseProvider).execute(request);
     } on FeedNotSupportedByHomeserverException {
       _fail(NewGroupFailureReason.feedNotSupported);
-    } on Exception catch (exception, stackTrace) {
-      Logs().e('NewGroupChatInfoController::create', exception, stackTrace);
+    } on Exception {
       _fail(NewGroupFailureReason.other);
     }
     return null;
