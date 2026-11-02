@@ -3,12 +3,14 @@ import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.provider.dart';
 import 'package:twake_chat/data/repository/localizations/localizations_repository.provider.dart';
 import 'package:twake_chat/domain/localizations/exceptions/save_language_exception.dart';
 import 'package:twake_chat/domain/localizations/usecases/save_language_usecase.dart';
 import 'package:twake_chat/domain/localizations/usecases/save_language_usecase.provider.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import '../fake_localizations_repository.dart';
 
@@ -79,6 +81,15 @@ void main() {
       await container.read(saveLanguageUseCaseProvider).execute(locale);
 
       expect(cacheManager.persisted, [locale]);
+    });
+
+    test('stores the locale where LocalizationService reads it', () async {
+      SharedPreferences.setMockInitialValues({});
+      final container = createContainer();
+
+      await container.read(saveLanguageUseCaseProvider).execute(locale);
+
+      expect(await LanguageCacheManager(Store()).getStoredLanguage(), locale);
     });
   });
 }
