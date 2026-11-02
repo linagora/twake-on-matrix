@@ -129,11 +129,18 @@ class ForwardScreenState extends ConsumerState<Forward> {
         TwakeDialog.hideLoadingDialog(context);
         _handleAllDone(next);
       case ForwardIdle():
-        if (previous is ForwardSending) TwakeDialog.hideLoadingDialog(context);
+        if (previous is! ForwardSending) return;
+        TwakeDialog.hideLoadingDialog(context);
+        TwakeSnackBar.show(context, L10n.of(context)!.forwardFailed);
     }
   }
 
   void _handleAllDone(ForwardDone done) {
+    if (done.successCount == 0) {
+      TwakeSnackBar.show(context, L10n.of(context)!.forwardFailed);
+      return;
+    }
+
     final navigator = Navigator.of(context);
     if (done.totalCount != 1) {
       final message = _buildMultiForwardSnackbarMessage(done);
@@ -143,11 +150,6 @@ class ForwardScreenState extends ConsumerState<Forward> {
         const RoomsRoute().go(context);
       }
       TwakeSnackBar.show(context, message);
-      return;
-    }
-
-    if (done.successCount == 0) {
-      TwakeSnackBar.show(context, L10n.of(context)!.forwardFailed);
       return;
     }
 
@@ -162,9 +164,6 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   String _buildMultiForwardSnackbarMessage(ForwardDone done) {
     final l10n = L10n.of(context)!;
-    if (done.successCount == 0) {
-      return l10n.forwardFailed;
-    }
     if (done.successCount == done.totalCount) {
       return l10n.forwardedToChats(done.successCount);
     }
