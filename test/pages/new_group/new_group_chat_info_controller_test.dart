@@ -177,6 +177,23 @@ void main() {
     );
   });
 
+  test('create_whenAnErrorIsThrownWhileInviting_failsAndRethrows', () async {
+    // Arrange
+    when(
+      mockRepository.inviteUser(
+        roomId: anyNamed('roomId'),
+        userId: anyNamed('userId'),
+      ),
+    ).thenThrow(StateError('bug'));
+
+    // Act & Assert
+    await expectLater(create(), throwsStateError);
+    expect(
+      state(),
+      const NewGroupChatInfoState.failed(NewGroupFailureReason.other),
+    );
+  });
+
   test('create_whenFeedNotSupported_failsWithTheDedicatedReason', () async {
     // Arrange
     when(

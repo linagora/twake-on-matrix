@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
@@ -23,15 +24,19 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
     if (state.isBusy) return;
     final request = _toRequest(form);
     state = const NewGroupChatInfoState.creating();
-    final roomId = await _createRoom(request, isFeed: form.isFeed);
-    if (!ref.mounted || roomId == null) return;
-    final inviteFailure = await _invite(roomId, request.invite);
-    if (!ref.mounted) return;
-    state = NewGroupChatInfoState.done(
-      roomId: roomId,
-      groupName: request.groupName,
-      inviteFailure: inviteFailure,
-    );
+    try {
+      final roomId = await _createRoom(request, isFeed: form.isFeed);
+      if (!ref.mounted || roomId == null) return;
+      final inviteFailure = await _invite(roomId, request.invite);
+      if (!ref.mounted) return;
+      state = NewGroupChatInfoState.done(
+        roomId: roomId,
+        groupName: request.groupName,
+        inviteFailure: inviteFailure,
+      );
+    } finally {
+      if (ref.mounted && state.isBusy) _fail(NewGroupFailureReason.other);
+    }
   }
 
   CreateNewGroupChatRequest _toRequest(NewGroupForm form) {
@@ -58,7 +63,8 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
           : await ref.read(createGroupUseCaseProvider).execute(request);
     } on FeedNotSupportedByHomeserverException {
       _fail(NewGroupFailureReason.feedNotSupported);
-    } on Object {
+    } on Exception catch (exception, stackTrace) {
+      Logs().e('NewGroupChatInfoController::create', exception, stackTrace);
       _fail(NewGroupFailureReason.other);
     }
     return null;
