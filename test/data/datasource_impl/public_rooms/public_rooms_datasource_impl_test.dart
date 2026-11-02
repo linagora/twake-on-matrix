@@ -68,7 +68,10 @@ void main() {
       // Arrange
       when(
         mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
-      ).thenAnswer((_) async => page(0, 100, next: 'more'));
+      ).thenAnswer(
+        (invocation) async =>
+            page(0, 100, next: '${invocation.namedArguments[#since] ?? ''}+'),
+      );
 
       // Act
       final pages = await datasource.fetchDirectory(limit: 250).toList();
@@ -94,6 +97,39 @@ void main() {
 
       // Assert
       expect(pages.map((page) => page.length), [100]);
+    });
+
+    test('fetchDirectory_whenTheTokenRepeats_stopsAfterThatPage', () async {
+      // Arrange
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: null),
+      ).thenAnswer((_) async => page(0, 100, next: 'p2'));
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: 'p2'),
+      ).thenAnswer((_) async => page(100, 3, next: 'p2'));
+
+      // Act
+      final pages = await datasource.fetchDirectory(limit: 1000).toList();
+
+      // Assert
+      expect(pages.map((page) => page.length), [100, 3]);
+      verify(mockClient.queryPublicRooms(limit: 100, since: 'p2')).called(1);
+    });
+
+    test('fetchDirectory_whenAPageIsEmptyWithAToken_keepsGoing', () async {
+      // Arrange
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: null),
+      ).thenAnswer((_) async => page(0, 0, next: 'p2'));
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: 'p2'),
+      ).thenAnswer((_) async => page(0, 4));
+
+      // Act
+      final pages = await datasource.fetchDirectory(limit: 1000).toList();
+
+      // Assert
+      expect(pages.map((page) => page.length), [0, 4]);
     });
 
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {

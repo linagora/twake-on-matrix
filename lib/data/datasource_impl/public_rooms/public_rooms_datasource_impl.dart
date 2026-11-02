@@ -54,7 +54,12 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       final rooms = page.chunk.take(limit - count).map(_toPublicRoom).toList();
       count += rooms.length;
       yield rooms;
-      since = page.nextBatch;
+      final next = page.nextBatch;
+      if (next != null && next == since) {
+        Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: token repeated');
+        return;
+      }
+      since = next;
     } while (since != null && count < limit);
   }
 
