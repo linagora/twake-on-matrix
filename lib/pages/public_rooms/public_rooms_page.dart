@@ -43,8 +43,8 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
     if (!mounted) return;
     switch (result) {
       case PublicRoomJoined(:final roomId):
-        RoomRoute(roomid: roomId).go(context);
         Navigator.of(context).pop();
+        RoomRoute(roomid: roomId).go(context);
       case PublicRoomRequested():
         TwakeSnackBar.show(context, l10n.joinRequestSentAdminMustApprove);
       case PublicRoomOpenFailed():
