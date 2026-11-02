@@ -159,9 +159,6 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   String _buildMultiForwardSnackbarMessage(ForwardDone done) {
     final l10n = L10n.of(context)!;
-    if (done.successCount == 0) {
-      return l10n.forwardFailed;
-    }
     if (done.successCount == done.totalCount) {
       return l10n.forwardedToChats(done.successCount);
     }

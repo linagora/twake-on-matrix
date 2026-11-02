@@ -34,7 +34,10 @@ void main() {
     when(mockRepository.isJoined(any)).thenReturn(true);
   });
 
-  Future<L10n> pumpForwardScreen(WidgetTester tester) async {
+  Future<L10n> pumpForwardScreen(
+    WidgetTester tester, {
+    List<Map<String, Object?>> messages = const [message],
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -50,7 +53,7 @@ void main() {
               builder: (context) => TextButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => const Forward(messages: [message]),
+                    builder: (_) => Forward(messages: messages),
                   ),
                 ),
                 child: const Text('open'),
@@ -159,4 +162,29 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'forward_whenEveryRoomGotOnlySomeMessages_closesWithThePartialSummary',
+    (tester) async {
+      // Arrange
+      const second = {'msgtype': 'm.text', 'body': 'second'};
+      final l10n = await pumpForwardScreen(tester, messages: [message, second]);
+      when(
+        mockRepository.sendMessage(roomId: anyNamed('roomId'), content: second),
+      ).thenAnswer((_) => Future.error(Exception('network')));
+      selectRooms(tester);
+
+      // Act
+      screen(tester).forwardAction();
+      await settleSend(tester);
+
+      // Assert
+      expect(find.byType(Forward), findsNothing);
+      expect(find.text(l10n.forwardFailed), findsNothing);
+      expect(
+        find.text(l10n.forwardedToChatsPartial(0, roomIds.length)),
+        findsOneWidget,
+      );
+    },
+  );
 }
