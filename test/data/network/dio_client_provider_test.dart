@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/dio_client.provider.dart';
-import 'package:twake_chat/data/network/homeserver_endpoint.dart';
 import 'package:twake_chat/data/network/identity_endpoint.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.provider.dart';
@@ -81,7 +80,6 @@ void main() {
       userInfoPath,
       '${TomEndpoint.invitationServicePath.generateTomEndpoint()}/id/status',
       IdentityEndpoint.hashDetailsServicePath.generateTwakeIdentityEndpoint(),
-      HomeserverEndpoint.capabilitiesPath.generateHomeserverCapabilitiesPath(),
     ]);
 
     await client.postToGetBody(videoCallPath, data: const {});
