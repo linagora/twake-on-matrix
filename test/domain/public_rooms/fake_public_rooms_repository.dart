@@ -9,15 +9,12 @@ PublicRoom publicRoom(
   String? name,
   PublicRoomKind kind = PublicRoomKind.group,
   PublicRoomAccess access = PublicRoomAccess.open,
-  int memberCount = 3,
-  String? topic,
 }) => PublicRoom(
   roomId: id,
   name: name ?? id,
-  memberCount: memberCount,
+  memberCount: 3,
   access: access,
   kind: kind,
-  topic: topic,
 );
 
 class FakePublicRoomsRepository implements PublicRoomsRepository {

@@ -43,13 +43,20 @@ void main() {
   setUp(() {
     repository = FakePublicRoomsRepository(
       directory: [
-        publicRoom('!eq', name: 'Équipe', topic: 'The team', memberCount: 1),
-        publicRoom(
-          '!news',
+        const PublicRoom(
+          roomId: '!eq',
+          name: 'Équipe',
+          memberCount: 1,
+          access: PublicRoomAccess.open,
+          kind: PublicRoomKind.group,
+          topic: 'The team',
+        ),
+        const PublicRoom(
+          roomId: '!news',
           name: 'News',
-          kind: PublicRoomKind.feed,
-          access: PublicRoomAccess.approval,
           memberCount: 12,
+          access: PublicRoomAccess.approval,
+          kind: PublicRoomKind.feed,
         ),
       ],
     );
