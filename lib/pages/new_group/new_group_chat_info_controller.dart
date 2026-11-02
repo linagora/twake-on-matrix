@@ -35,6 +35,15 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
     InviteUserPartialFailureException? inviteFailure;
     try {
       inviteFailure = await _invite(roomId, request.invite);
+    } catch (_) {
+      // Unknown progress: report every invitee rather than claim success.
+      inviteFailure = InviteUserPartialFailureException(
+        failedUsers: {
+          for (final userId in request.invite)
+            userId: GenericInviteException(userId: userId),
+        },
+      );
+      rethrow;
     } finally {
       if (ref.mounted) {
         state = NewGroupChatInfoState.done(

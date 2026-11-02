@@ -177,22 +177,31 @@ void main() {
     );
   });
 
-  test('create_whenAnErrorIsThrownWhileInviting_isDoneAndRethrows', () async {
-    // Arrange
-    when(
-      mockRepository.inviteUser(
-        roomId: anyNamed('roomId'),
-        userId: anyNamed('userId'),
-      ),
-    ).thenThrow(StateError('bug'));
+  test(
+    'create_whenAnErrorIsThrownWhileInviting_isDoneWithEveryInviteeFailedAndRethrows',
+    () async {
+      // Arrange
+      when(
+        mockRepository.inviteUser(
+          roomId: anyNamed('roomId'),
+          userId: anyNamed('userId'),
+        ),
+      ).thenThrow(StateError('bug'));
 
-    // Act & Assert
-    await expectLater(create(), throwsStateError);
-    expect(
-      state(),
-      const NewGroupChatInfoState.done(roomId: roomId, groupName: 'Team'),
-    );
-  });
+      // Act & Assert
+      await expectLater(create(), throwsStateError);
+      final done = state() as NewGroupChatInfoDone;
+      expect(done.roomId, roomId);
+      expect(done.inviteFailure?.failedUsers, {
+        '@bob:example.com': const GenericInviteException(
+          userId: '@bob:example.com',
+        ),
+        '@carol:example.com': const GenericInviteException(
+          userId: '@carol:example.com',
+        ),
+      });
+    },
+  );
 
   test('create_whenAnErrorIsThrownWhileCreating_failsAndRethrows', () async {
     // Arrange
