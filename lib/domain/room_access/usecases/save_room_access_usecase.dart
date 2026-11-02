@@ -2,6 +2,10 @@ import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.d
 import 'package:twake_chat/domain/room_access/repositories/room_access_repository.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 
+extension on JoinRuleChoice {
+  bool get isPrivate => this != JoinRuleChoice.public;
+}
+
 class SaveRoomAccessUseCase {
   const SaveRoomAccessUseCase(this._roomAccessRepository);
 
@@ -16,22 +20,28 @@ class SaveRoomAccessUseCase {
     JoinRuleChoice? joinRule,
     bool? isListed,
   }) async {
-    final opensTheRoom = joinRule == JoinRuleChoice.public || isListed == true;
-    if (opensTheRoom && _roomAccessRepository.isEncrypted(roomId)) {
-      throw const RoomAccessEncryptedException();
-    }
-    final closesTheRoom =
-        (joinRule != null && joinRule != JoinRuleChoice.public) ||
-        isListed == false;
-    if (closesTheRoom && _roomAccessRepository.hasPublicPage(roomId)) {
-      throw const RoomAccessPublicPageException();
-    }
+    _checkAllowed(roomId, joinRule: joinRule, isListed: isListed);
     // The rule first: a room is never listed under a rule that was refused.
     if (joinRule != null) {
       await _roomAccessRepository.setJoinRule(roomId, joinRule);
     }
     if (isListed != null) {
       await _roomAccessRepository.setListed(roomId, isListed: isListed);
+    }
+  }
+
+  void _checkAllowed(
+    String roomId, {
+    required JoinRuleChoice? joinRule,
+    required bool? isListed,
+  }) {
+    final opensTheRoom = joinRule == JoinRuleChoice.public || isListed == true;
+    if (opensTheRoom && _roomAccessRepository.isEncrypted(roomId)) {
+      throw const RoomAccessEncryptedException();
+    }
+    final closesTheRoom = joinRule?.isPrivate == true || isListed == false;
+    if (closesTheRoom && _roomAccessRepository.hasPublicPage(roomId)) {
+      throw const RoomAccessPublicPageException();
     }
   }
 }

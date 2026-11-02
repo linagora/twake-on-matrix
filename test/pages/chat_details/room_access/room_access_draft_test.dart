@@ -128,4 +128,17 @@ void main() {
     expect(isDirty, isFalse);
     expect(draft.isListedOn(withPage), isTrue);
   });
+
+  test('joinRuleOn_roomRestrictedMeanwhile_dropsTheChoice', () {
+    // Arrange
+    final draft = const RoomAccessDraft().choose(JoinRuleChoice.public);
+    final restricted = saved.copyWith(joinRule: null);
+
+    // Act
+    final changed = draft.changedJoinRuleOn(restricted);
+
+    // Assert
+    expect(changed, isNull);
+    expect(draft.changedIsListedOn(restricted), isTrue);
+  });
 }

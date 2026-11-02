@@ -20,7 +20,10 @@ abstract class RoomAccessDraft with _$RoomAccessDraft {
   // A choice the room no longer offers (encrypted meanwhile) is dropped.
   JoinRuleChoice? joinRuleOn(RoomAccess saved) {
     final chosen = joinRule;
-    return chosen != null && saved.offeredJoinRules.contains(chosen)
+    // A restricted room offers no rule, so a choice made before is dropped.
+    return chosen != null &&
+            saved.joinRule != null &&
+            saved.offeredJoinRules.contains(chosen)
         ? chosen
         : saved.joinRule;
   }

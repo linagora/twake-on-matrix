@@ -96,14 +96,16 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
       await change();
     } on RoomAccessException {
       rethrow;
-    } on MatrixException catch (e) {
-      // Synapse refuses a publication with M_UNKNOWN and a 403 too.
-      if (e.error == MatrixError.M_FORBIDDEN || e.response?.statusCode == 403) {
-        throw RoomAccessForbiddenException(cause: e);
-      }
-      throw RoomAccessSaveFailedException(cause: e);
     } catch (e) {
-      throw RoomAccessSaveFailedException(cause: e);
+      throw _isForbidden(e)
+          ? RoomAccessForbiddenException(cause: e)
+          : RoomAccessSaveFailedException(cause: e);
     }
   }
+
+  // Synapse refuses a publication with M_UNKNOWN and a 403 too.
+  bool _isForbidden(Object error) =>
+      error is MatrixException &&
+      (error.error == MatrixError.M_FORBIDDEN ||
+          error.response?.statusCode == 403);
 }

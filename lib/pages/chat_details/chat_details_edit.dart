@@ -480,31 +480,36 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
       roomAccessDraftNotifier.value.blocksEncryptionOn(access);
 
   void enableEncryption(_) async {
-    if (room == null) return;
-    final access = ref.read(roomAccessControllerProvider(widget.roomId)).value;
-    if (blocksEncryption(access)) return;
+    if (room == null || _blocksEncryptionNow()) return;
+    final l10n = L10n.of(context)!;
     if (room!.encrypted == true) {
       showOkAlertDialog(
         context: context,
-        title: L10n.of(context)!.sorryThatsNotPossible,
-        message: L10n.of(context)!.disableEncryptionWarning,
+        title: l10n.sorryThatsNotPossible,
+        message: l10n.disableEncryptionWarning,
       );
       return;
     }
     final consent = await showOkCancelAlertDialog(
       context: context,
-      title: L10n.of(context)!.areYouSure,
-      message: L10n.of(context)!.enableEncryptionWarning,
-      okLabel: L10n.of(context)!.yes,
-      cancelLabel: L10n.of(context)!.cancel,
+      title: l10n.areYouSure,
+      message: l10n.enableEncryptionWarning,
+      okLabel: l10n.yes,
+      cancelLabel: l10n.cancel,
     );
     if (consent != OkCancelResult.ok) return;
+    // The room may have become public while the dialog was open.
+    if (!mounted || _blocksEncryptionNow()) return;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () => room!.enableEncryption(),
         )
         .then((_) => isRoomEnabledEncryptionNotifier.value = true)
         .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
   }
+
+  bool _blocksEncryptionNow() => blocksEncryption(
+    ref.read(roomAccessControllerProvider(widget.roomId)).value,
+  );
 
   void openAssignRolesPage() {
     if (room == null) return;

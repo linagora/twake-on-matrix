@@ -180,37 +180,26 @@ void main() {
     ).called(1);
   });
 
-  test('setListed_refusedByPublicationRules_throwsForbidden', () async {
-    // Arrange
-    when(
-      client.setRoomVisibilityOnDirectory(
-        roomId,
-        visibility: anyNamed('visibility'),
-      ),
-    ).thenThrow(MatrixException(http.Response('{"errcode":"M_UNKNOWN"}', 403)));
+  for (final (name, refusal) in [
+    ('forbidden', '{"errcode":"M_FORBIDDEN"}'),
+    ('refusedByPublicationRules', '{"errcode":"M_UNKNOWN"}'),
+  ]) {
+    test('setListed_${name}_throwsForbidden', () async {
+      // Arrange
+      when(
+        client.setRoomVisibilityOnDirectory(
+          roomId,
+          visibility: anyNamed('visibility'),
+        ),
+      ).thenThrow(MatrixException(http.Response(refusal, 403)));
 
-    // Act
-    final result = datasource.setListed(roomId, isListed: true);
+      // Act
+      final result = datasource.setListed(roomId, isListed: true);
 
-    // Assert
-    await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
-  });
-
-  test('setListed_forbidden_throwsForbidden', () async {
-    // Arrange
-    when(
-      client.setRoomVisibilityOnDirectory(
-        roomId,
-        visibility: anyNamed('visibility'),
-      ),
-    ).thenThrow(MatrixException.fromJson({'errcode': 'M_FORBIDDEN'}));
-
-    // Act
-    final result = datasource.setListed(roomId, isListed: true);
-
-    // Assert
-    await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
-  });
+      // Assert
+      await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
+    });
+  }
 
   test('setJoinRule_otherError_throwsSaveFailed', () async {
     // Arrange
