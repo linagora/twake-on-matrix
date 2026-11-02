@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/settings_switch_list_tile.dart';
@@ -11,7 +12,9 @@ import '../home_robot.dart';
 class SettingsChatRobot extends HomeRobot {
   SettingsChatRobot(super.$);
 
-  static const gifAutoplayTitle = 'GIF autoplay';
+  L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
+
+  String get gifAutoplayTitle => _l10n.gifAutoplay;
 
   PatrolFinder view() => $(SettingsChatView);
 
@@ -24,10 +27,7 @@ class SettingsChatRobot extends HomeRobot {
 
   /// Waits until the tile shows the value read from storage, not the
   /// default it renders while that read is still pending.
-  Future<bool> waitForStoredValue(
-    String title, {
-    Duration timeout = const Duration(seconds: 10),
-  }) async {
+  Future<bool> waitForStoredValue(String title) async {
     final tileFinder = find.ancestor(
       of: find.text(title),
       matching: find.byType(SettingsSwitchListTile),
@@ -38,31 +38,18 @@ class SettingsChatRobot extends HomeRobot {
     final stored = await Matrix.of(
       context,
     ).store.getItemBool(tile.storeKey, tile.defaultValue);
-    final end = DateTime.now().add(timeout);
-    while (isSwitchOn(title) != stored) {
-      if (DateTime.now().isAfter(end)) {
-        throw StateError('"$title" switch never showed its stored value');
-      }
-      await $.pump(const Duration(milliseconds: 100));
-    }
+    await switchTile(
+      title,
+    ).which<SwitchListTile>((tile) => tile.value == stored).waitUntilVisible();
     return stored;
-  }
-
-  bool isSwitchOn(String title) {
-    final tile = $.tester.widget<SwitchListTile>(switchTile(title).first);
-    return tile.value;
   }
 
   Future<void> toggleSwitch(String title) async {
     final before = await waitForStoredValue(title);
     await switchTile(title).tap();
-    final end = DateTime.now().add(const Duration(seconds: 10));
-    while (isSwitchOn(title) == before) {
-      if (DateTime.now().isAfter(end)) {
-        throw StateError('"$title" switch did not change after tapping it');
-      }
-      await $.pump(const Duration(milliseconds: 100));
-    }
+    await switchTile(
+      title,
+    ).which<SwitchListTile>((tile) => tile.value != before).waitUntilVisible();
     await $.pumpAndSettle();
   }
 

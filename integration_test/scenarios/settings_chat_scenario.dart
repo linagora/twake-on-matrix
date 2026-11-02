@@ -14,8 +14,6 @@ import '../robots/setting/settings_chat_robot.dart';
 class SettingsChatToggleScenario extends BaseTestScenario {
   SettingsChatToggleScenario(super.$, super.robots);
 
-  static const _title = SettingsChatRobot.gifAutoplayTitle;
-
   @override
   Future<void> runTestLogic() async {
     final s = SoftAssertHelper();
@@ -24,12 +22,13 @@ class SettingsChatToggleScenario extends BaseTestScenario {
 
     await settingRobot.openChatSetting();
     await chatRobot.waitForView();
-    await chatRobot.switchTile(_title).waitUntilVisible();
+    final title = chatRobot.gifAutoplayTitle;
+    await chatRobot.switchTile(title).waitUntilVisible();
 
-    final initialValue = await chatRobot.waitForStoredValue(_title);
+    final initialValue = await chatRobot.waitForStoredValue(title);
 
     try {
-      await chatRobot.toggleSwitch(_title);
+      await chatRobot.toggleSwitch(title);
       await chatRobot.backToSettingScreen();
       s.softAssertEquals(
         $(SettingsView).exists,
@@ -39,11 +38,11 @@ class SettingsChatToggleScenario extends BaseTestScenario {
 
       await settingRobot.openChatSetting();
       await chatRobot.waitForView();
-      await chatRobot.switchTile(_title).waitUntilVisible();
+      await chatRobot.switchTile(title).waitUntilVisible();
       s.softAssertEquals(
-        await chatRobot.waitForStoredValue(_title),
+        await chatRobot.waitForStoredValue(title),
         !initialValue,
-        '"$_title" was not persisted after reopening Settings > Chat',
+        '"$title" was not persisted after reopening Settings > Chat',
       );
     } finally {
       // Restore the original value, even if a step above failed.
@@ -54,7 +53,7 @@ class SettingsChatToggleScenario extends BaseTestScenario {
         await settingRobot.openChatSetting();
         await chatRobot.waitForView();
       }
-      await chatRobot.restoreStoredValue(_title, initialValue);
+      await chatRobot.restoreStoredValue(title, initialValue);
     }
 
     s.verifyAll();
