@@ -673,14 +673,17 @@ class MatrixState extends ConsumerState<Matrix>
     _activeClient = activeClient == currentClient
         ? -1
         : widget.clients.indexOf(activeClient);
-    final result = await setActiveClient(widget.clients.first);
+    final nextClient = activeClient == currentClient
+        ? widget.clients.first
+        : activeClient;
+    final result = await setActiveClient(nextClient);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
     );
     if (state != LoginState.loggedIn && result.isSuccess) {
       TwakeApp.router.go(
         '/rooms',
-        extra: LogoutBodyArgs(newActiveClient: widget.clients.first),
+        extra: LogoutBodyArgs(newActiveClient: nextClient),
       );
     }
   }
