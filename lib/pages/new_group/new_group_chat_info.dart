@@ -120,13 +120,19 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
       if (entity == null) return createNewGroup();
       uploadContentInteractor
           .execute(matrixClient: client, entity: entity)
-          .listen(_handleUploadAvatarOnData);
+          .listen(
+            _handleUploadAvatarOnData,
+            onError: _handleUploadAvatarOnError,
+          );
     } else {
       final matrixFile = avatarFilePickerNotifier.value;
       if (matrixFile == null) return createNewGroup();
       uploadContentWebInteractor
           .execute(matrixClient: client, matrixFile: matrixFile)
-          .listen(_handleUploadAvatarOnData);
+          .listen(
+            _handleUploadAvatarOnData,
+            onError: _handleUploadAvatarOnError,
+          );
     }
   }
 
@@ -171,6 +177,11 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
         }
       },
     );
+  }
+
+  void _handleUploadAvatarOnError(Object error, StackTrace stackTrace) {
+    Logs().e('NewGroupChatInfo::upload avatar', error, stackTrace);
+    _handleUploadAvatarOnData(Left(UploadContentFailed(exception: error)));
   }
 
   Future<void> _onStateChanged(
