@@ -78,7 +78,9 @@ enables public groups (`app.twake.chat.public_groups.enabled`).
   and says an administrator has to approve it; the page stays open. A failed
   join says so. Both messages are snackbars, where twake-space-chat shows an
   inline alert in its dialog.
-- No badge of the room kind on the avatar yet: the design system has none.
+- The avatar carries the badge of the room kind, as the Figma « Avatar
+  icon » component: people for a group, a globe for a public feed. The
+  megaphone of a private feed exists for later screens.
 
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 
