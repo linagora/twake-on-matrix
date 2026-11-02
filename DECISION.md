@@ -62,12 +62,12 @@ before room creation existed. The call works, but its first participant may
 not be able to open it without logging in to Meet. Any other failure sends
 nothing and shows that the call could not be started.
 
-## D5. Browse public groups on mobile (decided by Johann, 2026-11-02)
+## D5. Browse public groups on mobile (proposed by Johann, 2026-11-02)
 
 A planet inside the search field of the chat list, at its right, opens a full
 screen page of the public directory of the user's homeserver, as
-twake-space-chat does (its D206, D416, D450). Shown only when the well-known
-enables public groups (`app.twake.chat.public_groups.enabled`).
+twake-space-chat does. Shown only when the well-known enables public groups
+(`app.twake.chat.public_groups.enabled`).
 
 - The directory of the homeserver alone, read page after page up to 1,000
   rooms, minus the rooms already joined. Groups and feeds only: no spaces.
@@ -79,8 +79,8 @@ enables public groups (`app.twake.chat.public_groups.enabled`).
   join says so. Both messages are snackbars, where twake-space-chat shows an
   inline alert in its dialog.
 - The avatar carries the badge of the room kind, as the Figma « Avatar
-  icon » component: people for a group, a globe for a public feed. The
-  megaphone of a private feed exists for later screens.
+  icon » component: people for a group, a globe for a public feed. The chat
+  list uses the same badge, with a megaphone for a private feed.
 
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 
