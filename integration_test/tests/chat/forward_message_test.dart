@@ -2,7 +2,7 @@ import '../../base/test_base.dart';
 import '../../scenarios/forward_message_scenario.dart';
 
 void main() {
-  // After single forward: ForwardController pops itself then routes to the
+  // After single forward: ForwardScreenState pops itself then routes to the
   // receiver's ChatView.
   TestBase().runPatrolTest(
     tags: ['forward_message_test01'],
@@ -10,7 +10,7 @@ void main() {
     scenarioBuilder: ($, robots) => ForwardSingleRecipientScenario($, robots),
   );
 
-  // After multi forward: ForwardController pops back to the source ChatView and
+  // After multi forward: ForwardScreenState pops back to the source ChatView and
   // shows a success snackbar.
   TestBase().runPatrolTest(
     tags: ['forward_message_test02'],

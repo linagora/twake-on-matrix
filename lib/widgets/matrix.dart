@@ -661,21 +661,30 @@ class MatrixState extends ConsumerState<Matrix>
     if (kIsWeb) await removeWebPush(currentClient, unsubscribe: false);
 
     await _cancelSubs(currentClient.clientName);
+    final activeClient = client;
     widget.clients.remove(currentClient);
+    // Indexes shift on removal; -1 (active logged out or unset) runs a full switch.
+    if (_activeClient != -1) {
+      _activeClient = activeClient == currentClient
+          ? -1
+          : widget.clients.indexOf(activeClient);
+    }
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
     await _clearContactsOf(currentClient);
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
-    final result = await setActiveClient(widget.clients.first);
+    // Read after the cleanup so an account switch made meanwhile is kept.
+    final nextClient = client;
+    final result = await setActiveClient(nextClient);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
     );
     if (state != LoginState.loggedIn && result.isSuccess) {
       TwakeApp.router.go(
         '/rooms',
-        extra: LogoutBodyArgs(newActiveClient: widget.clients.first),
+        extra: LogoutBodyArgs(newActiveClient: nextClient),
       );
     }
   }

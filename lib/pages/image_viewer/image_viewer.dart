@@ -13,7 +13,6 @@ import 'package:twake_chat/pages/image_viewer/image_viewer_style.dart';
 import 'package:twake_chat/utils/image_zoom_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -207,12 +206,12 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Forward this image to another room.
   void forwardAction() async {
-    Matrix.of(context).shareContent = widget.event?.content;
+    final content = widget.event?.content;
     final result = await showDialog(
       context: context,
       useSafeArea: false,
       useRootNavigator: false,
-      builder: (c) => const Forward(),
+      builder: (c) => Forward(messages: [?content]),
     );
     if (result is PopResultFromForward) {
       Navigator.of(context).pop<PopResultFromForward>();

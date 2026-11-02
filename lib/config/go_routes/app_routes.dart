@@ -576,7 +576,7 @@ class ForwardRoute extends GoRouteData with $ForwardRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, Forward(sendFromRoomId: $extra?.fromRoomId));
+      _defaultPage(context, Forward(messages: $extra?.messages ?? const []));
 }
 
 // --- Share ---
