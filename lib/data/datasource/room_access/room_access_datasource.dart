@@ -1,0 +1,11 @@
+import 'package:twake_chat/domain/room_access/entities/room_access.dart';
+
+abstract class RoomAccessDatasource {
+  Future<RoomAccess> getRoomAccess(String roomId);
+
+  bool isEncrypted(String roomId);
+
+  Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule);
+
+  Future<void> setListed(String roomId, {required bool isListed});
+}

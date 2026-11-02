@@ -5,6 +5,8 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_option.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_section.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -16,6 +18,7 @@ import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:twake_chat/widgets/stream_image_view.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -23,13 +26,28 @@ import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
-class ChatDetailsEditView extends StatelessWidget {
+class ChatDetailsEditView extends ConsumerWidget {
   final ChatDetailsEditController controller;
 
   const ChatDetailsEditView(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final roomAccess = roomAccessControllerProvider(controller.widget.roomId);
+    final isAccessEdited = ref.watch(
+      roomAccess.select((access) => access.value?.isDirty ?? false),
+    );
+    final isPublic =
+        controller.room?.joinRules == JoinRules.public ||
+        ref.watch(
+          roomAccess.select(
+            (access) => access.value?.isOrWillBePublic ?? false,
+          ),
+        );
+    final canEnableEncryption =
+        controller.room?.encrypted == false &&
+        controller.room?.canEnableEncryption == true &&
+        !isPublic;
     if (controller.room == null) {
       return Scaffold(
         backgroundColor: LinagoraSysColors.material().onPrimary,
@@ -66,7 +84,7 @@ class ChatDetailsEditView extends StatelessWidget {
               return ValueListenableBuilder(
                 valueListenable: controller.isEditedGroupInfoNotifier,
                 builder: (context, value, child) {
-                  if (!value || !isValid) {
+                  if ((!value && !isAccessEdited) || !isValid) {
                     return const SizedBox.shrink();
                   }
                   return child!;
@@ -238,7 +256,13 @@ class ChatDetailsEditView extends StatelessWidget {
                               ),
                         ),
                         subtitle: Text(
-                          L10n.of(context)!.yourDataIsEncryptedForSecurity,
+                          isPublic && !isRoomEnabledEncryption
+                              ? L10n.of(
+                                  context,
+                                )!.encryptionUnavailableInPublicRoom
+                              : L10n.of(
+                                  context,
+                                )!.yourDataIsEncryptedForSecurity,
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(
                                 color: LinagoraSysColors.material().tertiary,
@@ -250,19 +274,13 @@ class ChatDetailsEditView extends StatelessWidget {
                           child: FittedBox(
                             fit: BoxFit.fill,
                             child: Switch(
-                              activeTrackColor:
-                                  controller.room?.canEnableEncryption !=
-                                          true ||
-                                      controller.room?.encrypted == true
+                              activeTrackColor: !canEnableEncryption
                                   ? LinagoraStateLayer(
                                       LinagoraSysColors.material().onSurface,
                                     ).opacityLayer3
                                   : Theme.of(context).colorScheme.primary,
                               value: isRoomEnabledEncryption,
-                              onChanged:
-                                  controller.room?.encrypted == false &&
-                                      controller.room?.canEnableEncryption ==
-                                          true
+                              onChanged: canEnableEncryption
                                   ? (value) {
                                       if (!value) return;
                                       controller.enableEncryption(context);
@@ -274,6 +292,7 @@ class ChatDetailsEditView extends StatelessWidget {
                       );
                     },
                   ),
+                  RoomAccessSection(roomId: controller.widget.roomId),
                   const SizedBox(height: 16),
                 ],
               ),

@@ -62,6 +62,24 @@ before room creation existed. The call works, but its first participant may
 not be able to open it without logging in to Meet. Any other failure sends
 nothing and shows that the call could not be started.
 
+## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
+
+The Edit screen of a group has a « Who can join » section, as twake-space-chat
+(its D516): « Invite only », « On request » or « Public », then « In
+directory ». It is saved with the rest of Edit, the rule first, then the
+listing, and Edit stays open after the save, as it does today.
+
+- Choosing « Public » turns « In directory » on; it can still be turned off
+  before saving. Otherwise the two are independent.
+- Shown only when the well-known enables public groups, to someone allowed to
+  change the join rule, never in a direct chat. A refusal of the server shows
+  an error.
+- An encrypted room is never offered « Public » nor the listing, unless it
+  already has them, so it can be taken out.
+- A room restricted to a space says so and offers no rule; the listing stays.
+- A public room cannot be encrypted: the encryption switch of Edit is greyed
+  out, with the reason, while the room is public or « Public » is chosen.
+
 ## D7. Group creation: public and encryption exclude each other (proposed by Johann, 2026-11-03)
 
 When the server enables public groups, the group creation screen always shows

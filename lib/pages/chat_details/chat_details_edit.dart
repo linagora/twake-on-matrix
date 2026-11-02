@@ -17,12 +17,14 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/exception/room_access/room_access_exception.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:twake_chat/pages/chat_details/exceptions/exceptions.dart';
 import 'package:twake_chat/pages/chat_details/removed/removed.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -38,13 +40,14 @@ import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart' as photo_manager;
 
-class ChatDetailsEdit extends StatefulWidget {
+class ChatDetailsEdit extends ConsumerStatefulWidget {
   final String roomId;
 
   const ChatDetailsEdit({super.key, required this.roomId});
@@ -53,7 +56,7 @@ class ChatDetailsEdit extends StatefulWidget {
   ChatDetailsEditController createState() => ChatDetailsEditController();
 }
 
-class ChatDetailsEditController extends State<ChatDetailsEdit>
+class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     with
         PopupMenuWidgetMixin,
         CommonMediaPickerMixin,
@@ -342,10 +345,29 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (groupNameFocusNode.hasFocus) groupNameFocusNode.unfocus();
     if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
     TwakeDialog.showLoadingDialog(context);
+    await _saveRoomAccess();
+    if (!mounted) return;
     if (PlatformInfos.isMobile) {
       _setAvatarInStream();
     } else {
       _setAvatarInBytes();
+    }
+  }
+
+  Future<void> _saveRoomAccess() async {
+    final provider = roomAccessControllerProvider(widget.roomId);
+    if (!ref.exists(provider)) return;
+    try {
+      await ref.read(provider.notifier).save();
+    } on RoomAccessException catch (e) {
+      Logs().e('ChatDetailsEdit::_saveRoomAccess() - error: $e');
+      if (!mounted) return;
+      final l10n = L10n.of(context)!;
+      TwakeSnackBar.show(context, switch (e) {
+        RoomAccessEncryptedException() => l10n.roomAccessEncrypted,
+        RoomAccessForbiddenException() => l10n.roomAccessForbidden,
+        _ => l10n.oopsSomethingWentWrong,
+      });
     }
   }
 
