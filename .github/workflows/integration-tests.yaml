@@ -210,9 +210,11 @@ jobs:
           # 7 test cases (~15 min)
           - shard: shard_1_chat_group
             targets: integration_test/tests/chat/chat_group_test.dart
-          # 4 test cases (~8 min)
+          # 5 test cases (~29 min with the APK build)
           - shard: shard_2_chat_list
-            targets: integration_test/tests/chat/chat_list_test.dart
+            targets: >-
+              integration_test/tests/chat/chat_list_test.dart
+              integration_test/tests/setting/device_settings_test.dart
           # 11 repeatable message test cases. transfer_ownership_test is
           # intentionally excluded: it transfers the persistent fixture to a
           # different owner. It stays covered by the web workflow, whose
