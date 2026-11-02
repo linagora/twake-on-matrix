@@ -187,4 +187,53 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'forward_whenTheOnlyRoomGotSomeMessages_closesWithThePartialSummary',
+    (tester) async {
+      // Arrange
+      const second = {'msgtype': 'm.text', 'body': 'second'};
+      final l10n = await pumpForwardScreen(tester, messages: [message, second]);
+      when(
+        mockRepository.sendMessage(roomId: roomIds.first, content: second),
+      ).thenAnswer((_) => Future.error(Exception('network')));
+      screen(tester).onToggleSelectChat(roomIds.first);
+
+      // Act
+      screen(tester).forwardAction();
+      await settleSend(tester);
+
+      // Assert
+      expect(find.byType(Forward), findsNothing);
+      expect(find.text(l10n.forwardedToChatsPartial(0, 1)), findsOneWidget);
+    },
+  );
+
+  testWidgets('forward_whenTheUseCaseThrowsAnError_hidesTheDialogAndStays', (
+    tester,
+  ) async {
+    // Arrange
+    final l10n = await pumpForwardScreen(tester);
+    when(mockRepository.isJoined(any)).thenThrow(StateError('bug'));
+    selectRooms(tester);
+    final errors = <Object>[];
+
+    // Act
+    runZonedGuarded(
+      screen(tester).forwardAction,
+      (error, _) => errors.add(error),
+    );
+    await settleSend(tester);
+    final snackBarShown = find.text(l10n.forwardFailed).evaluate().isNotEmpty;
+    when(mockRepository.isJoined(any)).thenReturn(true);
+    screen(tester).forwardAction();
+    await settleSend(tester);
+
+    // Assert
+    expect(errors.single, isStateError);
+    expect(snackBarShown, isTrue);
+    expect(find.byType(ProgressDialog), findsNothing);
+    expect(find.byType(Forward), findsNothing);
+    expect(find.text(l10n.forwardedToChats(2)), findsOneWidget);
+  });
 }
