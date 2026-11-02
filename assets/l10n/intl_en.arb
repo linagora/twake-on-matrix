@@ -2849,6 +2849,6 @@
   "roomAccessRestricted": "Members of a space can join. This isn't changed here.",
   "roomAccessListed": "In directory",
   "roomAccessListedHelp": "Anyone can find this room in the public directory.",
-  "roomAccessForbidden": "The server refused to change who can join this room.",
+  "roomAccessForbidden": "The server refused this change.",
   "encryptionUnavailableInPublicRoom": "A public room can't be encrypted."
 }

@@ -15,6 +15,11 @@ class RoomAccessSection extends ConsumerWidget {
     vertical: LinagoraSpacing.base,
   );
 
+  // Aligns the switch row with the radio items above it.
+  static const EdgeInsets _togglePadding = EdgeInsets.all(
+    LinagoraSpacing.base * 2,
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = roomAccessControllerProvider(roomId);
@@ -57,6 +62,7 @@ class RoomAccessSection extends ConsumerWidget {
             title: l10n.roomAccessListed,
             subtitle: l10n.roomAccessListedHelp,
             subtitleMaxLines: null,
+            padding: _togglePadding,
             value: access.isListed,
             onChanged: ref.read(provider.notifier).setListed,
           ),
