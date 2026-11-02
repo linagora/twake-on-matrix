@@ -26,6 +26,7 @@ class _FakeClient extends Fake implements Client {
 void main() {
   late FakeUserInfoRepository repository;
   late ProviderContainer container;
+  late ProviderSubscription<Object?> subscription;
 
   setUp(() => repository = FakeUserInfoRepository());
 
@@ -47,7 +48,10 @@ void main() {
           .read(activeMatrixClientProvider.notifier)
           .setClient(_FakeClient());
     }
-    container.listen(settingsContactsVisibilityControllerProvider, (_, _) {});
+    subscription = container.listen(
+      settingsContactsVisibilityControllerProvider,
+      (_, _) {},
+    );
     return container.read(settingsContactsVisibilityControllerProvider.future);
   }
 
@@ -181,6 +185,24 @@ void main() {
         expect(currentState(), otherState);
       },
     );
+  });
+
+  test('an update finishing after dispose leaves the state alone', () async {
+    await load(visibility: 'public');
+    repository.pendingUpdate = Completer<void>();
+    final update = controller().selectVisibility(
+      SettingsContactsVisibilityEnum.private,
+    );
+
+    subscription.close();
+    await Future<void>.delayed(Duration.zero);
+    expect(
+      container.exists(settingsContactsVisibilityControllerProvider),
+      isFalse,
+    );
+    repository.pendingUpdate!.complete();
+
+    await expectLater(update, completes);
   });
 
   group('toggleVisibleField', () {

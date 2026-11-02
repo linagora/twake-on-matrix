@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart' hide Visibility;
+import 'package:twake_chat/data/repository/user_info_repository.provider.dart';
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
 import 'package:twake_chat/domain/user_info/exceptions/user_info_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -12,7 +14,15 @@ import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_state.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+
+import '../../../domain/user_info/fake_user_info_repository.dart';
+
+class _FakeClient extends Fake implements Client {
+  @override
+  String? get userID => '@me:server';
+}
 
 const _loaded = SettingsContactsVisibilityState(
   visibility: SettingsContactsVisibilityEnum.public,
@@ -60,17 +70,20 @@ void main() {
 
   tearDown(GetIt.instance.reset);
 
-  Future<void> pumpScreen(WidgetTester tester, _FakeController controller) =>
+  ProviderContainer withController(_FakeController controller) =>
+      ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          settingsContactsVisibilityControllerProvider.overrideWith(
+            () => controller,
+          ),
+        ],
+      );
+
+  Future<void> pumpScreen(WidgetTester tester, ProviderContainer container) =>
       tester.pumpWidget(
         UncontrolledProviderScope(
-          container: ProviderContainer.test(
-            retry: (_, _) => null,
-            overrides: [
-              settingsContactsVisibilityControllerProvider.overrideWith(
-                () => controller,
-              ),
-            ],
-          ),
+          container: container,
           child: MaterialApp(
             theme: ThemeData(
               extensions: [LinagoraTextThemeExtension.material()],
@@ -95,7 +108,10 @@ void main() {
     tester,
   ) async {
     final load = Completer<SettingsContactsVisibilityState>();
-    await pumpScreen(tester, _FakeController(pendingLoad: load));
+    await pumpScreen(
+      tester,
+      withController(_FakeController(pendingLoad: load)),
+    );
     await pumpDialogTransition(tester);
 
     expect(loadingDialog, findsOneWidget);
@@ -114,7 +130,10 @@ void main() {
     tester,
   ) async {
     final load = Completer<SettingsContactsVisibilityState>();
-    await pumpScreen(tester, _FakeController(pendingLoad: load));
+    await pumpScreen(
+      tester,
+      withController(_FakeController(pendingLoad: load)),
+    );
     await pumpDialogTransition(tester);
 
     load.completeError(GetUserInfoVisibilityException(Exception('mock')));
@@ -135,7 +154,7 @@ void main() {
         return update.future;
       },
     );
-    await pumpScreen(tester, controller);
+    await pumpScreen(tester, withController(controller));
     await tester.pumpAndSettle();
 
     await tester.tap(option(SettingsContactsVisibilityEnum.private));
@@ -157,7 +176,7 @@ void main() {
 
   testWidgets('tapping the selected option sends no update', (tester) async {
     final controller = _FakeController();
-    await pumpScreen(tester, controller);
+    await pumpScreen(tester, withController(controller));
     await tester.pumpAndSettle();
 
     await tester.tap(option(SettingsContactsVisibilityEnum.public));
@@ -170,7 +189,7 @@ void main() {
     tester,
   ) async {
     final controller = _FakeController(failUpdate: true);
-    await pumpScreen(tester, controller);
+    await pumpScreen(tester, withController(controller));
     await tester.pumpAndSettle();
 
     await tester.tap(option(SettingsContactsVisibilityEnum.private));
@@ -189,7 +208,7 @@ void main() {
     tester,
   ) async {
     final controller = _FakeController(failUpdate: true);
-    await pumpScreen(tester, controller);
+    await pumpScreen(tester, withController(controller));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(const Key('visible_field_option_phone')));
@@ -197,6 +216,41 @@ void main() {
 
     expect(controller.toggled, [VisibleEnum.phone]);
     expect(find.text('Failed to change contacts visibility'), findsOneWidget);
+    expect(loadingDialog, findsNothing);
+  });
+
+  testWidgets('selecting an option with the real controller sends the update', (
+    tester,
+  ) async {
+    final repository = FakeUserInfoRepository(
+      visibility: UserInfoVisibility(
+        visibility: 'public',
+        visibleFields: [VisibleEnum.email],
+      ),
+    );
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [userInfoRepositoryProvider.overrideWithValue(repository)],
+    );
+    container
+        .read(activeMatrixClientProvider.notifier)
+        .setClient(_FakeClient());
+    await pumpScreen(tester, container);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('visibility_option_selected_public')),
+      findsOneWidget,
+    );
+
+    await tester.tap(option(SettingsContactsVisibilityEnum.private));
+    await tester.pumpAndSettle();
+
+    expect(repository.updateCalls.single.$2.visibility, 'private');
+    expect(
+      find.byKey(const Key('visibility_option_selected_private')),
+      findsOneWidget,
+    );
     expect(loadingDialog, findsNothing);
   });
 }
