@@ -68,4 +68,34 @@ void main() {
       ),
     );
   });
+
+  test('execute_whenNoActiveAccount_rethrowsItUnwrapped', () async {
+    // Arrange
+    final container = createContainer(
+      _FakeRepository(error: const NoActiveAccountException()),
+    );
+
+    // Act
+    final result = container
+        .read(fetchProfileEditCapabilitiesUseCaseProvider)
+        .execute();
+
+    // Assert
+    await expectLater(result, throwsA(isA<NoActiveAccountException>()));
+  });
+
+  test('execute_whenRepositoryThrowsError_doesNotWrapIt', () async {
+    // Arrange
+    final container = createContainer(
+      _FakeRepository(error: StateError('bug')),
+    );
+
+    // Act
+    final result = container
+        .read(fetchProfileEditCapabilitiesUseCaseProvider)
+        .execute();
+
+    // Assert
+    await expectLater(result, throwsStateError);
+  });
 }
