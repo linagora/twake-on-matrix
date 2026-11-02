@@ -56,7 +56,7 @@ class ForwardView extends ConsumerWidget {
                   if (rooms.isNotEmpty)
                     ForwardRecentChatList(
                       rooms: rooms,
-                      selectedRoomIds: screen.selectedRoomIds,
+                      selectedChatNotifier: screen.selectedRoomIdsNotifier,
                       onSelectedChat: screen.onToggleSelectChat,
                       recentChatScrollController:
                           screen.recentChatScrollController,
@@ -66,18 +66,24 @@ class ForwardView extends ConsumerWidget {
             ),
           ),
           if (!screen.isFullScreen)
-            _WebActionsButton(
-              state: state,
-              hasSelection: screen.selectedRoomIds.isNotEmpty,
-              forwardAction: screen.forwardAction,
+            ValueListenableBuilder<List<String>>(
+              valueListenable: screen.selectedRoomIdsNotifier,
+              builder: (context, selectedRoomIds, _) => _WebActionsButton(
+                state: state,
+                hasSelection: selectedRoomIds.isNotEmpty,
+                forwardAction: screen.forwardAction,
+              ),
             ),
         ],
       ),
       floatingActionButton: screen.isFullScreen
-          ? _ForwardButton(
-              state: state,
-              hasSelection: screen.selectedRoomIds.isNotEmpty,
-              forwardAction: screen.forwardAction,
+          ? ValueListenableBuilder<List<String>>(
+              valueListenable: screen.selectedRoomIdsNotifier,
+              builder: (context, selectedRoomIds, _) => _ForwardButton(
+                state: state,
+                hasSelection: selectedRoomIds.isNotEmpty,
+                forwardAction: screen.forwardAction,
+              ),
             )
           : null,
     );

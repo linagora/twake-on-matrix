@@ -48,7 +48,9 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   late List<Room> recentChats;
 
-  List<String> selectedRoomIds = [];
+  final selectedRoomIdsNotifier = ValueNotifier<List<String>>([]);
+
+  List<String> get selectedRoomIds => selectedRoomIdsNotifier.value;
 
   String _keyword = '';
 
@@ -72,6 +74,7 @@ class ForwardScreenState extends ConsumerState<Forward> {
     searchTextEditingController.dispose();
     searchFocusNode.dispose();
     isSearchModeNotifier.dispose();
+    selectedRoomIdsNotifier.dispose();
     recentChatScrollController.dispose();
     super.dispose();
   }
@@ -108,11 +111,9 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   void onToggleSelectChat(String roomId) {
     if (ref.read(forwardControllerProvider) is ForwardSending) return;
-    setState(() {
-      selectedRoomIds = selectedRoomIds.contains(roomId)
-          ? selectedRoomIds.where((id) => id != roomId).toList()
-          : [...selectedRoomIds, roomId];
-    });
+    selectedRoomIdsNotifier.value = selectedRoomIds.contains(roomId)
+        ? selectedRoomIds.where((id) => id != roomId).toList()
+        : [...selectedRoomIds, roomId];
   }
 
   void forwardAction() => unawaited(
