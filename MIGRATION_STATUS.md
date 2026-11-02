@@ -43,4 +43,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
 | recovery | Fetching ToM recovery words on a use case (login path covered by unit tests and a manual iOS check, no Patrol scenario with ToM); save/delete wait for their Patrol scenarios; key cache, SSSS unlock and self-verification still on interactors | #3530 |
+| user_info | Contacts visibility: Controller and `Future` use cases; get user info still on its interactor. Patrol: backend-only, run manually against a mock ToM | #3532 |
 | Everything else | Legacy | |

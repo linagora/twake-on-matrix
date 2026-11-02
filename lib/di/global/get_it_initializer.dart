@@ -21,7 +21,6 @@ import 'package:twake_chat/data/datasource/server_config_datasource.dart';
 import 'package:twake_chat/data/datasource/server_search_datasource.dart';
 import 'package:twake_chat/data/datasource/tom_configurations_datasource.dart';
 import 'package:twake_chat/data/datasource/tom_contacts_datasource.dart';
-import 'package:twake_chat/data/datasource/user_info/user_info_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/capabilities/server_capabilities_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/contact/address_book_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/contact/hive_third_party_contact_datasource_impl.dart';
@@ -46,6 +45,7 @@ import 'package:twake_chat/data/network/contact/address_book_api.dart';
 import 'package:twake_chat/data/network/contact/tom_contact_api.dart';
 import 'package:twake_chat/data/network/dio_cache_option.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
+import 'package:twake_chat/data/network/interceptor/matrix_dio_cache_interceptor.dart';
 import 'package:twake_chat/data/network/invitation/invitation_api.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
@@ -135,8 +135,6 @@ import 'package:twake_chat/domain/usecase/search/server_search_interactor.dart';
 import 'package:twake_chat/domain/usecase/settings/save_language_interactor.dart';
 import 'package:twake_chat/domain/usecase/settings/update_profile_interactor.dart';
 import 'package:twake_chat/domain/usecase/user_info/get_user_info_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/get_user_info_visibility_interactor.dart';
-import 'package:twake_chat/domain/usecase/user_info/update_user_info_visibility_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/event/twake_event_dispatcher.dart';
 import 'package:twake_chat/modules/federation_identity_lookup/manager/federation_identity_lookup_manager.dart';
@@ -234,7 +232,6 @@ class GetItInitializer {
     getIt.registerSingleton<ServerConfigAPI>(ServerConfigAPI());
     getIt.registerFactory<InvitationAPI>(() => InvitationAPI());
     getIt.registerSingleton(const ServerCapabilitiesAPI());
-    getIt.registerSingleton(const UserInfoApi());
   }
 
   void bindingManager() {
@@ -274,9 +271,6 @@ class GetItInitializer {
     );
     getIt.registerFactory<ServerCapabilitiesDatasource>(
       () => const ServerCapabilitiesDatasourceImpl(),
-    );
-    getIt.registerFactory<UserInfoDatasource>(
-      () => const UserInfoDatasourceImpl(),
     );
   }
 
@@ -362,8 +356,18 @@ class GetItInitializer {
     getIt.registerFactory<ServerCapabilitiesRepository>(
       () => const ServerCapabilitiesRepositoryImpl(),
     );
+    // TODO: [transitional] Kept for matrix.dart's language lookup and GetUserInfoInteractor; Riverpod code uses userInfoRepositoryProvider.
     getIt.registerFactory<UserInfoRepository>(
-      () => const UserInfoRepositoryImpl(),
+      () => UserInfoRepositoryImpl(
+        UserInfoDatasourceImpl(
+          UserInfoApi(
+            getIt.get<DioClient>(instanceName: NetworkDI.tomDioClientName),
+            getIt.get<MatrixDioCacheInterceptor>(
+              instanceName: NetworkDI.memCacheDioInterceptorName,
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -503,10 +507,6 @@ class GetItInitializer {
     getIt.registerFactory(() => const GetUserInfoInteractor());
 
     getIt.registerFactory(() => InviteUserInteractor());
-
-    getIt.registerFactory(() => const GetUserInfoVisibilityInteractor());
-
-    getIt.registerFactory(() => const UpdateUserInfoVisibilityInteractor());
 
     getIt.registerFactory(() => const CreateSupportChatInteractor());
 
