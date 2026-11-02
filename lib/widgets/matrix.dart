@@ -668,6 +668,8 @@ class MatrixState extends ConsumerState<Matrix>
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
+    // The removal shifted the indexes: force the switch even if it stays 0.
+    _activeClient = -1;
     final result = await setActiveClient(widget.clients.first);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
