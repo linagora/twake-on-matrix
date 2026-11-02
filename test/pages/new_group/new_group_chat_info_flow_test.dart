@@ -180,6 +180,36 @@ void main() {
     );
   });
 
+  group('NewGroupChatInfoScreenState busy', () {
+    testWidgets('createNewGroup_whileCreating_disablesTheFormAndShowsALoader', (
+      tester,
+    ) async {
+      // Arrange
+      await pumpScreen(tester);
+      final created = Completer<String>();
+      when(mockRepository.createGroup(any)).thenAnswer((_) => created.future);
+
+      // Act
+      createWithBob(tester);
+      await tester.pump();
+      final nameFieldEnabled = tester
+          .widget<TextField>(find.byType(TextField))
+          .enabled;
+      final loaderShown = find
+          .byType(CircularProgressIndicator)
+          .evaluate()
+          .isNotEmpty;
+      final doneButtonShown = find.byIcon(Icons.done).evaluate().isNotEmpty;
+      created.complete(roomId);
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(nameFieldEnabled, isFalse);
+      expect(loaderShown, isTrue);
+      expect(doneButtonShown, isFalse);
+    });
+  });
+
   group('NewGroupChatInfoScreenState done', () {
     testWidgets(
       'createNewGroup_whenSomeInvitesFail_opensTheRoomAfterTheDialog',
