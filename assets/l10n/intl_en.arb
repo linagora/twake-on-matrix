@@ -2879,6 +2879,13 @@
       "count": {}
     }
   },
+  "publicGroupRequestSentMembers": "{count, plural, =1{Request sent · 1 member} other{Request sent · {count} members}}",
+  "@publicGroupRequestSentMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "askToJoinPublicGroupMembers": "{count, plural, =1{Ask to join · 1 member} other{Ask to join · {count} members}}",
   "@askToJoinPublicGroupMembers": {
     "type": "text",

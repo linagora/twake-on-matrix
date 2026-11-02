@@ -8,11 +8,15 @@ class PublicRoomsRepositoryImpl implements PublicRoomsRepository {
   final PublicRoomsDatasource _datasource;
 
   @override
-  Future<List<PublicRoom>> fetchDirectory({required int limit}) =>
+  Stream<List<PublicRoom>> fetchDirectory({required int limit}) =>
       _datasource.fetchDirectory(limit: limit);
 
   @override
   Set<String> getJoinedRoomIds() => _datasource.getJoinedRoomIds();
+
+  @override
+  Future<Set<String>> getKnockedRoomIds(List<String> roomIds) =>
+      _datasource.getKnockedRoomIds(roomIds);
 
   @override
   Future<String> join(String roomIdOrAlias) => _datasource.join(roomIdOrAlias);

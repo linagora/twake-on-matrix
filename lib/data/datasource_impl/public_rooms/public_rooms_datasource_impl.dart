@@ -11,6 +11,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
 
   static const pageSize = 100;
 
+  static const _summaryBatchSize = 5;
+
   static const _joinSyncTimeout = Duration(seconds: 30);
 
   static final _knockRules = {
@@ -24,9 +26,9 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       _maybeClient ?? (throw const PublicRoomsNoClientException());
 
   @override
-  Future<List<PublicRoom>> fetchDirectory({required int limit}) async {
+  Stream<List<PublicRoom>> fetchDirectory({required int limit}) async* {
     final client = _client;
-    final rooms = <PublicRoom>[];
+    var count = 0;
     String? since;
     do {
       final QueryPublicRoomsResponse page;
@@ -34,7 +36,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         // No `server`: the directory of the user's homeserver only.
         page = await client.queryPublicRooms(limit: pageSize, since: since);
       } on Exception catch (exception, stackTrace) {
-        if (rooms.isEmpty) {
+        if (count == 0) {
           Logs().e(
             'PublicRoomsDatasourceImpl::fetchDirectory',
             exception,
@@ -47,12 +49,13 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           exception,
           stackTrace,
         );
-        break;
+        return;
       }
-      rooms.addAll(page.chunk.map(_toPublicRoom));
+      final rooms = page.chunk.take(limit - count).map(_toPublicRoom).toList();
+      count += rooms.length;
+      yield rooms;
       since = page.nextBatch;
-    } while (since != null && rooms.length < limit);
-    return rooms.take(limit).toList();
+    } while (since != null && count < limit);
   }
 
   @override
@@ -60,6 +63,38 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       .where((room) => room.membership == Membership.join)
       .map((room) => room.id)
       .toSet();
+
+  @override
+  Future<Set<String>> getKnockedRoomIds(List<String> roomIds) async {
+    final client = _client;
+    final knocked = <String>{};
+    for (var start = 0; start < roomIds.length; start += _summaryBatchSize) {
+      final batch = roomIds.skip(start).take(_summaryBatchSize);
+      final results = await Future.wait(
+        batch.map((roomId) => _isKnocked(client, roomId)),
+      );
+      knocked.addAll([
+        for (final (index, roomId) in batch.indexed)
+          if (results[index]) roomId,
+      ]);
+    }
+    return knocked;
+  }
+
+  // The SDK ignores the rooms in the `knock` section of the sync.
+  Future<bool> _isKnocked(Client client, String roomId) async {
+    try {
+      final summary = await client.getRoomSummary(roomId);
+      return summary.membership == Membership.knock;
+    } on Exception catch (exception, stackTrace) {
+      Logs().w(
+        'PublicRoomsDatasourceImpl::getKnockedRoomIds',
+        exception,
+        stackTrace,
+      );
+      return false;
+    }
+  }
 
   @override
   Future<String> join(String roomIdOrAlias) async {

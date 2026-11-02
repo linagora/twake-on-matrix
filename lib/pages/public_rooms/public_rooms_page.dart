@@ -59,12 +59,17 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
     final l10n = L10n.of(context)!;
     final state = ref.watch(publicRoomsControllerProvider);
     return Scaffold(
-      appBar: _buildAppBar(isPending: state.value?.pendingRoomId != null),
+      appBar: _buildAppBar(
+        isBusy:
+            state.value?.pendingRoomId != null ||
+            (state.value?.isLoadingMore ?? false),
+      ),
       body: switch (state) {
         AsyncData(:final value) => ValueListenableBuilder(
           valueListenable: _searchController,
           builder: (context, query, _) => _PublicRoomList(
             rooms: value.roomsMatching(query.text),
+            requestedRoomIds: value.requestedRoomIds,
             onOpen: (room) => unawaited(_open(room)),
           ),
         ),
@@ -82,7 +87,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar({required bool isPending}) {
+  PreferredSizeWidget _buildAppBar({required bool isBusy}) {
     final l10n = L10n.of(context)!;
     return AppBar(
       automaticallyImplyLeading: false,
@@ -105,7 +110,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
           ],
         ),
       ),
-      bottom: isPending
+      bottom: isBusy
           ? const PreferredSize(
               preferredSize: Size.fromHeight(2),
               child: LinearProgressIndicator(minHeight: 2),
@@ -116,12 +121,17 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
 }
 
 class _PublicRoomList extends StatelessWidget {
-  const _PublicRoomList({required this.rooms, required this.onOpen});
+  const _PublicRoomList({
+    required this.rooms,
+    required this.requestedRoomIds,
+    required this.onOpen,
+  });
 
   // Same insets as the chat list rows.
   static const _padding = EdgeInsets.symmetric(horizontal: 8);
 
   final List<PublicRoom> rooms;
+  final Set<String> requestedRoomIds;
   final ValueChanged<PublicRoom> onOpen;
 
   @override
@@ -135,10 +145,12 @@ class _PublicRoomList extends StatelessWidget {
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         final room = rooms[index];
+        final isRequested = requestedRoomIds.contains(room.roomId);
         return _PublicRoomRow(
           key: ValueKey(room.roomId),
           room: room,
-          onTap: () => onOpen(room),
+          isRequested: isRequested,
+          onTap: isRequested ? null : () => onOpen(room),
         );
       },
     );
@@ -146,15 +158,23 @@ class _PublicRoomList extends StatelessWidget {
 }
 
 class _PublicRoomRow extends StatelessWidget {
-  const _PublicRoomRow({super.key, required this.room, required this.onTap});
+  const _PublicRoomRow({
+    super.key,
+    required this.room,
+    required this.isRequested,
+    required this.onTap,
+  });
 
   final PublicRoom room;
-  final VoidCallback onTap;
+  final bool isRequested;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final access = room.access == PublicRoomAccess.approval
+    final access = isRequested
+        ? l10n.publicGroupRequestSentMembers(room.memberCount)
+        : room.access == PublicRoomAccess.approval
         ? l10n.askToJoinPublicGroupMembers(room.memberCount)
         : l10n.joinPublicGroupMembers(room.memberCount);
     final topic = room.topic;

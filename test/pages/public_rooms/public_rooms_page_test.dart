@@ -105,7 +105,7 @@ void main() {
     tester,
   ) async {
     // Arrange
-    repository.directory = [];
+    repository.pages = [[]];
 
     // Act
     await pumpPage(tester);
@@ -147,6 +147,25 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(PublicRoomsPage), findsOneWidget);
+    expect(find.text('Request sent · 12 members'), findsOneWidget);
+  });
+
+  testWidgets('tap_onARoomAlreadyRequested_doesNothing', (tester) async {
+    // Arrange
+    repository.knocked = {'!news'};
+    await pumpPage(tester);
+
+    // Act
+    await tester.tap(find.text('News'));
+    await tester.pump();
+
+    // Assert
+    expect(find.text('Request sent · 12 members'), findsOneWidget);
+    expect(repository.knockedIds, isEmpty);
+    expect(
+      find.text('Request sent: an administrator has to approve it.'),
+      findsNothing,
+    );
   });
 
   testWidgets('tap_whenTheJoinFails_saysSo', (tester) async {

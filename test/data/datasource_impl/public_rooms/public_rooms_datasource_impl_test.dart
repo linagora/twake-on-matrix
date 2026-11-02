@@ -56,10 +56,10 @@ void main() {
         ).thenAnswer((_) async => page(100, 5));
 
         // Act
-        final rooms = await datasource.fetchDirectory(limit: 1000);
+        final pages = await datasource.fetchDirectory(limit: 1000).toList();
 
         // Assert
-        expect(rooms, hasLength(105));
+        expect(pages.map((page) => page.length), [100, 5]);
         verifyNever(mockClient.queryPublicRooms(server: anyNamed('server')));
       },
     );
@@ -71,10 +71,10 @@ void main() {
       ).thenAnswer((_) async => page(0, 100, next: 'more'));
 
       // Act
-      final rooms = await datasource.fetchDirectory(limit: 250);
+      final pages = await datasource.fetchDirectory(limit: 250).toList();
 
       // Assert
-      expect(rooms, hasLength(250));
+      expect(pages.map((page) => page.length), [100, 100, 50]);
       verify(
         mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
       ).called(3);
@@ -90,10 +90,10 @@ void main() {
       ).thenThrow(Exception('timeout'));
 
       // Act
-      final rooms = await datasource.fetchDirectory(limit: 1000);
+      final pages = await datasource.fetchDirectory(limit: 1000).toList();
 
       // Assert
-      expect(rooms, hasLength(100));
+      expect(pages.map((page) => page.length), [100]);
     });
 
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
@@ -103,7 +103,7 @@ void main() {
       ).thenThrow(Exception('down'));
 
       // Act
-      final result = datasource.fetchDirectory(limit: 1000);
+      final result = datasource.fetchDirectory(limit: 1000).toList();
 
       // Assert
       await expectLater(
@@ -126,7 +126,7 @@ void main() {
       );
 
       // Act
-      final rooms = await datasource.fetchDirectory(limit: 1000);
+      final rooms = await datasource.fetchDirectory(limit: 1000).first;
 
       // Assert
       expect(rooms.map((room) => room.kind), [
@@ -161,6 +161,74 @@ void main() {
 
     // Assert
     expect(ids, {'!joined'});
+  });
+
+  group('getKnockedRoomIds', () {
+    GetRoomSummaryResponse$3 summary(String id, Membership? membership) =>
+        GetRoomSummaryResponse$3(
+          roomId: id,
+          guestCanJoin: false,
+          numJoinedMembers: 1,
+          worldReadable: false,
+          membership: membership,
+        );
+
+    test('getKnockedRoomIds_always_keepsOnlyRoomsInKnock', () async {
+      // Arrange
+      when(
+        mockClient.getRoomSummary('!knock'),
+      ).thenAnswer((_) async => summary('!knock', Membership.knock));
+      when(
+        mockClient.getRoomSummary('!none'),
+      ).thenAnswer((_) async => summary('!none', null));
+
+      // Act
+      final ids = await datasource.getKnockedRoomIds(['!knock', '!none']);
+
+      // Assert
+      expect(ids, {'!knock'});
+    });
+
+    test('getKnockedRoomIds_whenASummaryFails_leavesThatRoomOut', () async {
+      // Arrange
+      when(
+        mockClient.getRoomSummary('!knock'),
+      ).thenAnswer((_) async => summary('!knock', Membership.knock));
+      when(
+        mockClient.getRoomSummary('!broken'),
+      ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}));
+
+      // Act
+      final ids = await datasource.getKnockedRoomIds(['!broken', '!knock']);
+
+      // Assert
+      expect(ids, {'!knock'});
+    });
+
+    test('getKnockedRoomIds_always_asksAtMostFiveRoomsAtATime', () async {
+      // Arrange
+      var inFlight = 0;
+      var maxInFlight = 0;
+      when(mockClient.getRoomSummary(any)).thenAnswer((invocation) async {
+        inFlight++;
+        maxInFlight = inFlight > maxInFlight ? inFlight : maxInFlight;
+        await Future<void>.delayed(Duration.zero);
+        inFlight--;
+        return summary(
+          invocation.positionalArguments.first as String,
+          Membership.knock,
+        );
+      });
+
+      // Act
+      final ids = await datasource.getKnockedRoomIds([
+        for (var i = 0; i < 12; i++) '!$i',
+      ]);
+
+      // Assert
+      expect(ids, hasLength(12));
+      expect(maxInFlight, 5);
+    });
   });
 
   group('join', () {
@@ -254,7 +322,7 @@ void main() {
     // Act
     final result = const PublicRoomsDatasourceImpl(
       null,
-    ).fetchDirectory(limit: 1000);
+    ).fetchDirectory(limit: 1000).toList();
 
     // Assert
     await expectLater(result, throwsA(isA<PublicRoomsNoClientException>()));

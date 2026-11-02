@@ -71,6 +71,8 @@ twake-space-chat does. Shown only when the well-known enables public groups
 
 - The directory of the homeserver alone, read page after page up to 1,000
   rooms, minus the rooms already joined. Groups and feeds only: no spaces.
+  Each page shows as soon as it arrives, with a thin progress bar until the
+  last one, where twake-space-chat waits for the whole directory.
 - Each row: avatar, name, « Join · N members » or « Ask to join · N
   members » for a room on approval (`knock`), and the topic. A search field
   on top filters by name, ignoring case and accents.
@@ -78,6 +80,10 @@ twake-space-chat does. Shown only when the well-known enables public groups
   and says an administrator has to approve it; the page stays open. A failed
   join says so. Both messages are snackbars, where twake-space-chat shows an
   inline alert in its dialog.
+- A room where the user's request is pending shows « Request sent · N
+  members » and a tap does nothing, where twake-space-chat lets the user ask
+  again. The row switches right after the request. The pending state is read
+  through room_summary (MSC3266), because the SDK ignores the rooms in knock.
 - The avatar carries the badge of the room kind, as the Figma « Avatar
   icon » component: people for a group, a globe for a public feed. The chat
   list uses the same badge, with a megaphone for a private feed.

@@ -11,7 +11,7 @@ void main() {
     final repository = FakePublicRoomsRepository();
 
     // Act
-    await FetchJoinablePublicRoomsUseCase(repository).execute();
+    await FetchJoinablePublicRoomsUseCase(repository).execute().toList();
 
     // Assert
     expect(repository.requestedLimit, 1000);
@@ -31,10 +31,33 @@ void main() {
     );
 
     // Act
-    final rooms = await FetchJoinablePublicRoomsUseCase(repository).execute();
+    final rooms = await FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute().first;
 
     // Assert
     expect(rooms.map((room) => room.roomId), ['!group', '!feed']);
+  });
+
+  test('execute_always_emitsOnePageAtATime', () async {
+    // Arrange
+    final repository = FakePublicRoomsRepository(
+      pages: [
+        [publicRoom('!a'), publicRoom('!b')],
+        [publicRoom('!c')],
+      ],
+    );
+
+    // Act
+    final pages = await FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute().toList();
+
+    // Assert
+    expect(pages.map((page) => page.map((room) => room.roomId).toList()), [
+      ['!a', '!b'],
+      ['!c'],
+    ]);
   });
 
   test('execute_whenTheDirectoryFails_throwsItsTypedException', () async {
@@ -44,7 +67,9 @@ void main() {
     );
 
     // Act
-    final result = FetchJoinablePublicRoomsUseCase(repository).execute();
+    final result = FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute().toList();
 
     // Assert
     await expectLater(result, throwsA(isA<PublicRoomsFetchFailedException>()));

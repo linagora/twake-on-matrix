@@ -11,6 +11,8 @@ abstract class PublicRoomsState with _$PublicRoomsState {
 
   const factory PublicRoomsState({
     required List<PublicRoom> rooms,
+    @Default({}) Set<String> requestedRoomIds,
+    @Default(false) bool isLoadingMore,
     String? pendingRoomId,
   }) = _PublicRoomsState;
 
@@ -46,7 +48,8 @@ class PublicRoomOpenFailed extends PublicRoomOpenResult {
   const PublicRoomOpenFailed();
 }
 
-/// Busy with another room: the tap is ignored.
+/// Busy with another room, or a request is already pending: the tap is
+/// ignored.
 class PublicRoomOpenIgnored extends PublicRoomOpenResult {
   const PublicRoomOpenIgnored();
 }

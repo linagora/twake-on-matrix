@@ -132,4 +132,116 @@ void main() {
       '!open',
     );
   });
+
+  test('build_whenMorePagesCome_appendsThemAndStopsLoading', () async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    repository.directoryController = pages;
+    final container = makeContainer();
+    container.listen(publicRoomsControllerProvider, (_, _) {});
+    pages.add([publicRoom('!first')]);
+    final first = await container.read(publicRoomsControllerProvider.future);
+
+    // Act
+    pages.add([publicRoom('!second')]);
+    await pages.close();
+    await pumpEventQueue();
+
+    // Assert
+    expect(first.rooms.map((room) => room.roomId), ['!first']);
+    expect(first.isLoadingMore, isTrue);
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!first', '!second']);
+    expect(state.isLoadingMore, isFalse);
+  });
+
+  test('build_whenALaterPageFails_keepsTheRoomsShown', () async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    repository.directoryController = pages;
+    final container = makeContainer();
+    container.listen(publicRoomsControllerProvider, (_, _) {});
+    pages.add([publicRoom('!first')]);
+    await container.read(publicRoomsControllerProvider.future);
+
+    // Act
+    pages.addError(PublicRoomsFetchFailedException(cause: Exception('down')));
+    await pages.close();
+    await pumpEventQueue();
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!first']);
+    expect(state.isLoadingMore, isFalse);
+  });
+
+  test('build_always_asksTheRequestStateOfRoomsOnApprovalOnly', () async {
+    // Arrange
+    repository.knocked = {'!knock'};
+    final container = makeContainer();
+
+    // Act
+    await loadedController(container);
+    await pumpEventQueue();
+
+    // Assert
+    expect(repository.knockedQueries, [
+      ['!knock'],
+    ]);
+    expect(
+      container
+          .read(publicRoomsControllerProvider)
+          .requireValue
+          .requestedRoomIds,
+      {'!knock'},
+    );
+  });
+
+  test('build_whenTheRequestStateFails_leavesTheRoomsAskable', () async {
+    // Arrange
+    repository.knockedError = const PublicRoomsNoClientException();
+    final container = makeContainer();
+
+    // Act
+    await loadedController(container);
+    await pumpEventQueue();
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.requestedRoomIds, isEmpty);
+    expect(state.rooms.map((room) => room.roomId), ['!open', '!knock']);
+  });
+
+  test('open_whenTheRequestIsSent_marksTheRoomRequested', () async {
+    // Arrange
+    final container = makeContainer();
+    final controller = await loadedController(container);
+
+    // Act
+    await controller.open(
+      publicRoom('!knock', access: PublicRoomAccess.approval),
+    );
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.requestedRoomIds, {'!knock'});
+    expect(state.pendingRoomId, isNull);
+  });
+
+  test('open_whenTheRequestIsAlreadyPending_ignoresTheTap', () async {
+    // Arrange
+    repository.knocked = {'!knock'};
+    final container = makeContainer();
+    final controller = await loadedController(container);
+    await pumpEventQueue();
+
+    // Act
+    final result = await controller.open(
+      publicRoom('!knock', access: PublicRoomAccess.approval),
+    );
+
+    // Assert
+    expect(result, isA<PublicRoomOpenIgnored>());
+    expect(repository.knockedIds, isEmpty);
+  });
 }

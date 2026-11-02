@@ -19,33 +19,50 @@ PublicRoom publicRoom(
 
 class FakePublicRoomsRepository implements PublicRoomsRepository {
   FakePublicRoomsRepository({
-    this.directory = const [],
+    List<PublicRoom> directory = const [],
+    List<List<PublicRoom>>? pages,
     this.joined = const {},
+    this.knocked = const {},
     this.fetchError,
+    this.knockedError,
     this.joinError,
     this.knockError,
-  });
+  }) : pages = pages ?? [directory];
 
-  List<PublicRoom> directory;
+  /// Set it to emit the directory pages one by one from a test.
+  StreamController<List<PublicRoom>>? directoryController;
+
+  List<List<PublicRoom>> pages;
   Set<String> joined;
+  Set<String> knocked;
   PublicRoomsException? fetchError;
+  PublicRoomsException? knockedError;
   PublicRoomsException? joinError;
   PublicRoomsException? knockError;
   Completer<void>? joinGate;
 
   int? requestedLimit;
+  final knockedQueries = <List<String>>[];
   final joinedIds = <String>[];
   final knockedIds = <String>[];
 
   @override
-  Future<List<PublicRoom>> fetchDirectory({required int limit}) async {
+  Stream<List<PublicRoom>> fetchDirectory({required int limit}) {
     requestedLimit = limit;
-    if (fetchError case final error?) throw error;
-    return directory;
+    if (fetchError case final error?) return Stream.error(error);
+    if (directoryController case final controller?) return controller.stream;
+    return Stream.fromIterable(pages);
   }
 
   @override
   Set<String> getJoinedRoomIds() => joined;
+
+  @override
+  Future<Set<String>> getKnockedRoomIds(List<String> roomIds) async {
+    knockedQueries.add(roomIds);
+    if (knockedError case final error?) throw error;
+    return roomIds.where(knocked.contains).toSet();
+  }
 
   @override
   Future<String> join(String roomIdOrAlias) async {
