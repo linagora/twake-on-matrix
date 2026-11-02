@@ -14,8 +14,8 @@ class SaveRoomAccessUseCase {
     JoinRuleChoice? joinRule,
     bool? isListed,
   }) async {
-    if ((joinRule == JoinRuleChoice.public || isListed == true) &&
-        _roomAccessRepository.isEncrypted(roomId)) {
+    final opensTheRoom = joinRule == JoinRuleChoice.public || isListed == true;
+    if (opensTheRoom && _roomAccessRepository.isEncrypted(roomId)) {
       throw const RoomAccessEncryptedException();
     }
     // The rule first: a room is never listed under a rule that was refused.
