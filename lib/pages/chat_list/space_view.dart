@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,7 @@ import 'package:twake_chat/pages/chat_list/search_title.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+
 import '../../utils/localized_exception_extension.dart';
 import '../../widgets/matrix.dart';
 
@@ -157,9 +159,7 @@ class _SpaceViewState extends State<SpaceView> {
             MatrixLocals(L10n.of(context)!),
           );
           return Material(
-            // TODO: change to colorSurface when its approved
-            // ignore: deprecated_member_use
-            color: Theme.of(context).colorScheme.background,
+            color: TwakeThemes.backgroundColor(context),
             child: ListTile(
               leading: Avatar(mxContent: rootSpace.avatar, name: displayname),
               title: Text(

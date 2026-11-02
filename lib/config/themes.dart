@@ -26,6 +26,16 @@ abstract class TwakeThemes {
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Curve animationCurve = Curves.easeInOut;
 
+  /// Design-system background color for the current brightness.
+  ///
+  /// Replaces the deprecated `ColorScheme.background`: in light mode the
+  /// Linagora `background` token (0xFFFFFBFE) differs from `surface`
+  /// (0xFFF4F4F4), so `colorScheme.surface` would change the look.
+  static Color backgroundColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light
+      ? LinagoraSysColors.material().background
+      : LinagoraSysColors.material().backgroundDark;
+
   static ThemeData buildTheme(
     BuildContext context,
     Brightness brightness, [
