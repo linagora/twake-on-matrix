@@ -1326,7 +1326,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Agregar al espacio",
   "cantOpenUri": "No se puede abrir el URI {uri}",
   "@cantOpenUri": {
     "type": "text",
@@ -1411,7 +1410,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "El chat se ha agregado a este espacio",
   "commandInvalid": "Orden no válida",
   "@commandInvalid": {
     "type": "text"
@@ -1753,8 +1751,6 @@
       "min": {}
     }
   },
-  "removeFromSpace": "Eliminar del espacio",
-  "addToSpaceDescription": "Seleccione un espacio para añadir esta conversación a él.",
   "start": "Iniciar",
   "replyHasBeenSent": "La respuesta se ha enviado",
   "whatIsGoingOn": "¿Qué está pasando?",
@@ -1807,7 +1803,6 @@
   "showLess": "Mostrar menos",
   "newGroup": "Conversación nueva",
   "invite": "Invitar",
-  "allSpaces": "Todos los espacios",
   "searchContacts": "Buscar contactos",
   "loadingStatus": "Cargando estado…",
   "users": "Usuarios",
@@ -2002,7 +1997,6 @@
     }
   },
   "addToStory": "Añadir a historia",
-  "enterRoom": "Entrar en la sala",
   "links": "Enlaces",
   "more": "Más",
   "phone": "Teléfono",

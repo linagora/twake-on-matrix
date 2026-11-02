@@ -1,13 +1,18 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
+import 'package:twake_chat/domain/exception/spaces/space_exception.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/domain/new_group/usecases/create_group_usecase.provider.dart';
+import 'package:twake_chat/domain/new_group/usecases/invite_users_usecase.dart';
 import 'package:twake_chat/domain/new_group/usecases/invite_users_usecase.provider.dart';
+import 'package:twake_chat/domain/spaces/new_space.dart';
+import 'package:twake_chat/domain/spaces/usecases/create_space_usecase.provider.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
@@ -22,26 +27,29 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
   /// even when some invites fail.
   Future<void> create(NewGroupForm form) async {
     if (state.isBusy) return;
+    // Read now: the screen may go, the invitations must still leave.
+    final inviteUsers = ref.read(inviteUsersUseCaseProvider);
     final request = _toRequest(form);
     state = const NewGroupChatInfoState.creating();
     final String? roomId;
     try {
-      roomId = await _createRoom(request, isFeed: form.isFeed);
+      roomId = await _createRoom(request, form);
     } catch (_) {
       _fail(NewGroupFailureReason.other);
       rethrow;
     }
-    if (!ref.mounted || roomId == null) return;
-    await _inviteThenFinish(roomId, request);
+    if (roomId == null) return;
+    await _inviteThenFinish(roomId, request, inviteUsers);
   }
 
   Future<void> _inviteThenFinish(
     String roomId,
     CreateNewGroupChatRequest request,
+    InviteUsersUseCase inviteUsers,
   ) async {
     InviteUserPartialFailureException? inviteFailure;
     try {
-      inviteFailure = await _invite(roomId, request.invite);
+      inviteFailure = await _invite(roomId, request.invite, inviteUsers);
     } catch (_) {
       // Unknown progress: report every invitee rather than claim success.
       inviteFailure = InviteUserPartialFailureException(
@@ -73,19 +81,37 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
           ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
       isServerLimited: form.privacy.isServerLimited,
       urlAvatar: form.urlAvatar,
+      parentSpaceId: form.parentSpaceId,
     );
   }
 
   Future<String?> _createRoom(
-    CreateNewGroupChatRequest request, {
-    required bool isFeed,
-  }) async {
+    CreateNewGroupChatRequest request,
+    NewGroupForm form,
+  ) async {
     try {
-      return isFeed
-          ? await _createFeed(request)
-          : await ref.read(createGroupUseCaseProvider).execute(request);
+      return switch (form.kind) {
+        NewGroupKind.feed => await _createFeed(request),
+        NewGroupKind.group =>
+          await ref.read(createGroupUseCaseProvider).execute(request),
+        NewGroupKind.space =>
+          await ref
+              .read(createSpaceUseCaseProvider)
+              .execute(
+                NewSpace(
+                  name: form.groupName.trim(),
+                  topic: form.topic.trim(),
+                  isPublic: request.isPublic,
+                  isServerLimited: request.isServerLimited,
+                  parentSpaceId: request.parentSpaceId,
+                  urlAvatar: request.urlAvatar,
+                ),
+              ),
+      };
     } on FeedNotSupportedByHomeserverException {
       _fail(NewGroupFailureReason.feedNotSupported);
+    } on SpaceForbiddenException {
+      _fail(NewGroupFailureReason.spaceRefused);
     } on Exception {
       _fail(NewGroupFailureReason.other);
     }
@@ -100,13 +126,12 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
   Future<InviteUserPartialFailureException?> _invite(
     String roomId,
     List<String> userIds,
+    InviteUsersUseCase inviteUsers,
   ) async {
     if (userIds.isEmpty) return null;
-    state = const NewGroupChatInfoState.inviting();
+    if (ref.mounted) state = const NewGroupChatInfoState.inviting();
     try {
-      await ref
-          .read(inviteUsersUseCaseProvider)
-          .execute(roomId: roomId, userIds: userIds);
+      await inviteUsers.execute(roomId: roomId, userIds: userIds);
       return null;
     } on InviteUserPartialFailureException catch (exception) {
       return exception;

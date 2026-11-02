@@ -118,9 +118,12 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   void _initTabList() {
     tabList = [
       if (chatType == ChatDetailsScreenEnum.group) ChatDetailsPage.members,
-      ChatDetailsPage.media,
-      ChatDetailsPage.links,
-      ChatDetailsPage.files,
+      // A space holds no messages: nothing to show in these.
+      if (room?.isSpace != true) ...[
+        ChatDetailsPage.media,
+        ChatDetailsPage.links,
+        ChatDetailsPage.files,
+      ],
     ];
   }
 

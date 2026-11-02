@@ -1721,8 +1721,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Do tohoto prostoru byl přidán chat",
-  "addToSpace": "Přidat do prostoru",
   "scanQrCode": "Naskenujte QR kód",
   "homeserver": "Domácí server",
   "serverRequiresEmail": "Tento server potřebuje k registraci ověřit vaši e -mailovou adresu.",
@@ -1749,10 +1747,8 @@
   "passwordsDoNotMatch": "Hesla se neshodují!",
   "repeatPassword": "Zopakujte heslo",
   "pleaseEnterValidEmail": "Prosím zadejte platnou emailovou adresu.",
-  "addToSpaceDescription": "Vyberte umístění, do kterého chcete tento chat přidat.",
   "loginWithOneClick": "Přihlaste se jedním kliknutím",
   "start": "Start",
-  "removeFromSpace": "Odstranit z tohoto místa",
   "commandHint_clearcache": "Vymazat mezipamět",
   "@commandHint_clearcache": {
     "type": "text",

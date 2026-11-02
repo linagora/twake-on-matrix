@@ -1721,8 +1721,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Chat je dodan u ovaj prostor",
-  "addToSpace": "Dodaj u prostor",
   "serverRequiresEmail": "Za registraciju ovaj poslužitelj mora potvrditi tvoju e-mail adresu.",
   "scanQrCode": "Snimi QR kod",
   "homeserver": "Domaći poslužitelj",
@@ -1750,8 +1748,6 @@
   "sender": "Pošiljatelj",
   "loginWithOneClick": "Prijavi se samo s jednim pritiskom",
   "time": "Vrijeme",
-  "removeFromSpace": "Ukloni iz prostora",
-  "addToSpaceDescription": "Odaberi prostor za dodavanje ovog chata.",
   "start": "Početak",
   "commandHint_clearcache": "Isprazni predmemoriju",
   "@commandHint_clearcache": {

@@ -381,7 +381,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "צ'אט נוסף למרחב הזה",
   "chats": "צ'אטים",
   "@chats": {
     "type": "text",
@@ -408,7 +407,6 @@
     "type": "text",
     "description": "Usage hint for the command /myroomnick"
   },
-  "addToSpace": "הוסף לחלל",
   "commandHint_unban": "בטל את החסימה של המשתמש הנתון מהחדר הזה",
   "@commandHint_unban": {
     "type": "text",

@@ -1434,7 +1434,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Berriketa gune honetara gehitu da",
   "configureChat": "Konfiguratu berriketa",
   "@configureChat": {
     "type": "text",
@@ -1455,7 +1454,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Gehitu gunera",
   "allChats": "Txat guztiak",
   "@allChats": {
     "type": "text",
@@ -1795,8 +1793,6 @@
   },
   "messageInfo": "Mezuaren xehetasunak",
   "sender": "Igorlea",
-  "removeFromSpace": "Kendu gunetik",
-  "addToSpaceDescription": "Aukeratu gune bat berriketa hau gehitzeko.",
   "start": "Hasi",
   "addToStory": "Gehitu storyra",
   "publish": "Argitaratu",
@@ -1891,11 +1887,8 @@
   "saveKeyManuallyDescription": "Gorde eskuz gako hau gailuko partekatze-menua edo arbela erabiliz.",
   "indexedDbErrorTitle": "Modu pribatuaren arazoak",
   "newSpace": "Gune berria",
-  "enterRoom": "Batu gelara",
   "whyIsThisMessageEncrypted": "Zergatik ezin da mezu hau irakurri?",
-  "allSpaces": "Gune guztiak",
   "newGroup": "Talde berria",
-  "enterSpace": "Batu gunera",
   "appearOnTopDetails": "Aplikazioa goikaldean agertzea baimentzen du (ez da beharrezkoa FluffyChat dei egiteko kontua bezala ezarri baduzu)",
   "screenSharingTitle": "pantaila partekatzen",
   "screenSharingDetail": "Pantaila FluffyChaten partekatzen ari zara",

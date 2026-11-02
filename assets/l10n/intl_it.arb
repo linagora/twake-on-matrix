@@ -1599,7 +1599,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Aggiungi a uno spazio",
   "passwordsDoNotMatch": "Le password non corrispondono!",
   "pleaseEnterValidEmail": "Inserire un indirizzo email valido.",
   "commandHint_leave": "Lascia questa stanza",

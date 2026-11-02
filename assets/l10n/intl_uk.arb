@@ -1329,7 +1329,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Додати простір",
   "editChatPermissions": "Редагувати дозволи бесіди",
   "@editChatPermissions": {
     "type": "text",
@@ -1511,7 +1510,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Бесіду додано до цього простору",
   "chatBackupDescription": "Ваші старі повідомлення захищені ключем відновлення. Переконайтеся, що ви не втратите його.",
   "@chatBackupDescription": {
     "type": "text",
@@ -1749,9 +1747,7 @@
   "time": "Час",
   "messageType": "Тип повідомлення",
   "sender": "Відправник",
-  "addToSpaceDescription": "Виберіть простір, щоб додати до нього цю бесіду.",
   "loginWithOneClick": "Увійти одним натисканням",
-  "removeFromSpace": "Вилучити з простору",
   "start": "Почати",
   "commandHint_discardsession": "Відкинути сеанс",
   "@commandHint_discardsession": {
@@ -1906,9 +1902,6 @@
   "appearOnTopDetails": "Дозволяє застосунку показуватися зверху (не потрібно, якщо Fluffychat вже налаштований обліковим записом для викликів)",
   "newGroup": "Нова група",
   "newSpace": "Новий простір",
-  "enterSpace": "Увійти в простір",
-  "enterRoom": "Увійти в кімнату",
-  "allSpaces": "Усі простори",
   "screenSharingDetail": "Ви ділитеся своїм екраном FuffyChat",
   "numChats": "{number} бесід",
   "@numChats": {

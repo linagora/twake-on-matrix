@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:byte_converter/byte_converter.dart';
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
@@ -7,7 +8,10 @@ import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
+import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
+import 'package:twake_chat/providers/room_list/room_list_providers.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
@@ -20,6 +24,7 @@ import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -68,8 +73,13 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
+                    if (screen.isSpace) ...[
+                      const SizedBox(height: 16),
+                      _SpaceDescriptionField(screen: screen),
+                    ],
                     if (!screen.isFeed) ...[
                       const SizedBox(height: 16),
+                      _ParentSpaceSetting(screen: screen),
                       _GroupPrivacySettings(screen: screen),
                     ],
                   ],
@@ -99,9 +109,21 @@ class NewGroupChatInfoView extends StatelessWidget {
                 customIcon: SizedBox(child: CircularProgressIndicator()),
               );
             }
-            return TwakeFloatingActionButton(
-              icon: Icons.done,
-              onTap: screen.moveToGroupChatScreen,
+            // The parent may be dropped or set to None: ask again.
+            return ValueListenableBuilder<String?>(
+              valueListenable: screen.parentSpaceNotifier,
+              builder: (context, _, _) => Consumer(
+                builder: (context, ref, _) {
+                  // `canSubmit` checks the parent among these.
+                  ref.watch(addableSpacesProvider);
+                  return screen.canSubmit
+                      ? TwakeFloatingActionButton(
+                          icon: Icons.done,
+                          onTap: screen.moveToGroupChatScreen,
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
             );
           },
         ),
@@ -114,7 +136,11 @@ class NewGroupChatInfoView extends StatelessWidget {
     return PreferredSize(
       preferredSize: const Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight),
       child: TwakeAppBar(
-        title: screen.isFeed ? l10n.newFeed : l10n.newGroupChat,
+        title: switch (screen.kind) {
+          NewGroupKind.feed => l10n.newFeed,
+          NewGroupKind.space => l10n.newSpace,
+          NewGroupKind.group => l10n.newGroupChat,
+        },
         context: context,
         centerTitle: true,
         withDivider: true,
@@ -167,6 +193,7 @@ class NewGroupChatInfoView extends StatelessWidget {
             valueListenable: screen.groupNameTextEditingController,
             builder: (context, value, _) {
               return TextField(
+                key: const ValueKey('new_group_name'),
                 controller: screen.groupNameTextEditingController,
                 focusNode: screen.groupNameFocusNode,
                 enabled: !isBusy,
@@ -191,9 +218,11 @@ class NewGroupChatInfoView extends StatelessWidget {
                   labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  hintText: screen.isFeed
-                      ? l10n.enterFeedName
-                      : l10n.enterGroupName,
+                  hintText: switch (screen.kind) {
+                    NewGroupKind.feed => l10n.enterFeedName,
+                    NewGroupKind.space => l10n.enterSpaceName,
+                    NewGroupKind.group => l10n.enterGroupName,
+                  },
                   hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     color: LinagoraRefColors.material().neutral[60],
                   ),
@@ -345,12 +374,13 @@ class _GroupPrivacySettings extends ConsumerWidget {
       valueListenable: screen.groupPrivacyNotifier,
       builder: (context, privacy, _) => Column(
         children: [
-          _EncryptionSettingTile(
-            isEncrypted: privacy.isEncrypted,
-            isEnabled: privacy.canBeEncrypted,
-            onChanged: (isEncrypted) =>
-                screen.setEncrypted(isEncrypted: isEncrypted),
-          ),
+          if (!screen.isSpace)
+            _EncryptionSettingTile(
+              isEncrypted: privacy.isEncrypted,
+              isEnabled: privacy.canBeEncrypted,
+              onChanged: (isEncrypted) =>
+                  screen.setEncrypted(isEncrypted: isEncrypted),
+            ),
           if (isPublicGroupsEnabled) ...[
             LinagoraSettingItem.selectable(
               title: l10n.makeChatPublic,
@@ -373,6 +403,77 @@ class _GroupPrivacySettings extends ConsumerWidget {
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// What a space is for.
+class _SpaceDescriptionField extends StatelessWidget {
+  final NewGroupChatInfoScreenState screen;
+
+  const _SpaceDescriptionField({required this.screen});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
+      child: _BusyBuilder(
+        screen: screen,
+        builder: (context, isBusy) => LinagoraTextField(
+          key: const ValueKey('new_space_description'),
+          controller: screen.topicTextEditingController,
+          label: L10n.of(context)!.description,
+          variant: LinagoraTextFieldVariant.outline,
+          enabled: !isBusy,
+        ),
+      ),
+    );
+  }
+}
+
+/// The space the new room goes in, among those the user may add to.
+class _ParentSpaceSetting extends ConsumerWidget {
+  final NewGroupChatInfoScreenState screen;
+
+  const _ParentSpaceSetting({required this.screen});
+
+  Future<void> _pick(BuildContext context, List<SpaceSummary> spaces) async {
+    final l10n = L10n.of(context)!;
+    final picked = await showDialog<LinagoraDialogOption<String?>>(
+      context: context,
+      builder: (context) => OptionsDialog<String?>(
+        title: l10n.createInTheSpace,
+        isBottomSheet: MediaQuery.sizeOf(context).width < 600,
+        availableOptions: [
+          LinagoraDialogOption(name: l10n.none, value: null),
+          for (final space in spaces)
+            LinagoraDialogOption(name: space.name, value: space.id),
+        ],
+        onSelected: (selected) => Navigator.pop(context, selected),
+      ),
+    );
+    if (picked != null && context.mounted) {
+      screen.parentSpaceNotifier.value = picked.value;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final spaces = ref.watch(addableSpacesProvider);
+    if (spaces.isEmpty) return const SizedBox.shrink();
+    final l10n = L10n.of(context)!;
+    return ValueListenableBuilder<String?>(
+      valueListenable: screen.parentSpaceNotifier,
+      builder: (context, parentId, _) => LinagoraSettingItem(
+        key: const ValueKey('new_group_parent_space'),
+        title: l10n.createInTheSpace,
+        subtitle:
+            spaces.firstWhereOrNull((space) => space.id == parentId)?.name ??
+            l10n.none,
+        onTap: () {
+          if (!screen.isCreatingRoom) _pick(context, spaces);
+        },
       ),
     );
   }

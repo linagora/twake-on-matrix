@@ -25,6 +25,7 @@ class ExpansionList extends StatelessWidget {
   presentationPhonebookContactNotifier;
   final Function() goToNewGroupChat;
   final Function() goToNewFeed;
+  final Function() goToNewSpace;
   final Function(BuildContext context, PresentationContact contact)
   onExternalContactTap;
   final Function(BuildContext context, PresentationContact contact)
@@ -41,6 +42,7 @@ class ExpansionList extends StatelessWidget {
     required this.presentationContactsNotifier,
     required this.goToNewGroupChat,
     required this.goToNewFeed,
+    required this.goToNewSpace,
     required this.onExternalContactTap,
     required this.onContactTap,
     required this.textEditingController,
@@ -214,6 +216,7 @@ class ExpansionList extends StatelessWidget {
     return [
       _NewGroupButton(onPressed: goToNewGroupChat),
       _NewFeedButton(onPressed: goToNewFeed),
+      _NewSpaceButton(onPressed: goToNewSpace),
       if (PlatformInfos.isMobile)
         _CreateContactButton(onPressed: goToCreateContact),
     ];
@@ -297,6 +300,22 @@ class _NewFeedButton extends StatelessWidget {
       onPressed: onPressed,
       iconData: Icons.campaign_outlined,
       text: L10n.of(context)!.newFeed,
+    );
+  }
+}
+
+class _NewSpaceButton extends StatelessWidget {
+  final Function() onPressed;
+
+  const _NewSpaceButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconTextTileButton(
+      context: context,
+      onPressed: onPressed,
+      iconData: Icons.view_in_ar,
+      text: L10n.of(context)!.newSpace,
     );
   }
 }

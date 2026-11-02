@@ -8,9 +8,14 @@ import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/repository/new_group/new_group_repository.provider.dart';
 import 'package:twake_chat/domain/exception/feed/feed_exception.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
+import 'package:twake_chat/domain/exception/spaces/space_exception.dart';
+import 'package:twake_chat/domain/spaces/new_space.dart';
+import 'package:twake_chat/domain/spaces/usecases/create_space_usecase.dart';
+import 'package:twake_chat/domain/spaces/usecases/create_space_usecase.provider.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
 import 'package:twake_chat/domain/repository/new_group/new_group_repository.dart';
 import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
@@ -24,13 +29,17 @@ import 'new_group_chat_info_controller_test.mocks.dart';
   MockSpec<Client>(),
   MockSpec<NewGroupRepository>(),
   MockSpec<CreateNewFeedInteractor>(),
+  MockSpec<CreateSpaceUseCase>(),
 ])
 void main() {
+  provideDummy<NewSpace>(const NewSpace(name: ''));
+
   const roomId = '!room:example.com';
 
   late MockClient mockClient;
   late MockNewGroupRepository mockRepository;
   late MockCreateNewFeedInteractor mockFeedInteractor;
+  late MockCreateSpaceUseCase mockCreateSpaceUseCase;
   late ProviderContainer container;
   late ProviderSubscription<NewGroupChatInfoState> subscription;
 
@@ -38,6 +47,7 @@ void main() {
     mockClient = MockClient();
     mockRepository = MockNewGroupRepository();
     mockFeedInteractor = MockCreateNewFeedInteractor();
+    mockCreateSpaceUseCase = MockCreateSpaceUseCase();
     when(mockRepository.createGroup(any)).thenAnswer((_) async => roomId);
     container = ProviderContainer.test(
       retry: (_, _) => null,
@@ -46,6 +56,7 @@ void main() {
           (_, _) => ActiveClientSnapshot(mockClient),
         ),
         newGroupRepositoryProvider.overrideWithValue(mockRepository),
+        createSpaceUseCaseProvider.overrideWithValue(mockCreateSpaceUseCase),
         createNewFeedInteractorProvider(
           mockClient,
         ).overrideWithValue(mockFeedInteractor),
@@ -62,7 +73,8 @@ void main() {
   Future<void> create({
     String groupName = 'Team',
     List<String?> invitees = const ['@bob:example.com', '@carol:example.com'],
-    bool isFeed = false,
+    NewGroupKind kind = NewGroupKind.group,
+    String? parentSpaceId,
     GroupPrivacyState privacy = const GroupPrivacyState(),
   }) => container
       .read(newGroupChatInfoControllerProvider.notifier)
@@ -71,12 +83,64 @@ void main() {
           groupName: groupName,
           invitees: invitees,
           privacy: privacy,
-          isFeed: isFeed,
+          kind: kind,
+          parentSpaceId: parentSpaceId,
         ),
       );
 
   NewGroupChatInfoState state() =>
       container.read(newGroupChatInfoControllerProvider);
+
+  test('create_whenGroupInASpace_passesTheSpace', () async {
+    // Act
+    await create(parentSpaceId: '!space');
+
+    // Assert
+    final request =
+        verify(mockRepository.createGroup(captureAny)).captured.single
+            as CreateNewGroupChatRequest;
+    expect(request.parentSpaceId, '!space');
+  });
+
+  test('create_whenSpaceRefusesTheGroup_tellsIt', () async {
+    // Arrange
+    when(
+      mockRepository.createGroup(any),
+    ).thenThrow(const SpaceForbiddenException());
+
+    // Act
+    await create(parentSpaceId: '!space');
+
+    // Assert
+    expect(
+      state(),
+      const NewGroupChatInfoState.failed(NewGroupFailureReason.spaceRefused),
+    );
+  });
+
+  test('create_whenSpace_createsTheSpaceAndInvites', () async {
+    // Arrange
+    when(mockCreateSpaceUseCase.execute(any)).thenAnswer((_) async => roomId);
+
+    // Act
+    await create(
+      groupName: 'Team',
+      kind: NewGroupKind.space,
+      parentSpaceId: '!parent',
+    );
+
+    // Assert
+    verify(
+      mockCreateSpaceUseCase.execute(
+        const NewSpace(name: 'Team', parentSpaceId: '!parent'),
+      ),
+    ).called(1);
+    verifyNever(mockRepository.createGroup(any));
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: anyNamed('userId')),
+    ).called(2);
+    expect(state(), isA<NewGroupChatInfoDone>());
+  });
 
   test('build_always_startsIdle', () {
     // Act
@@ -96,6 +160,28 @@ void main() {
             as CreateNewGroupChatRequest;
     expect(request.enableEncryption, isTrue);
     expect(request.isPublic, isFalse);
+  });
+
+  test('create_whenListenerClosesDuringCreation_stillInvites', () async {
+    // Arrange
+    final creation = Completer<String>();
+    when(mockRepository.createGroup(any)).thenAnswer((_) => creation.future);
+
+    // Act
+    final created = create();
+    await pumpEventQueue();
+    subscription.close();
+    await pumpEventQueue();
+    creation.complete(roomId);
+    await created;
+
+    // Assert
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: '@bob:example.com'),
+    ).called(1);
+    verify(
+      mockRepository.inviteUser(roomId: roomId, userId: '@carol:example.com'),
+    ).called(1);
   });
 
   test('create_whenNoInvitee_isDoneWithoutInviting', () async {
@@ -243,7 +329,7 @@ void main() {
             groupName: 'News',
             invitees: ['@bob:example.com'],
             privacy: GroupPrivacyState(),
-            isFeed: true,
+            kind: NewGroupKind.feed,
             urlAvatar: 'mxc://example.com/avatar',
           ),
         );
@@ -271,7 +357,7 @@ void main() {
     );
 
     // Act
-    await create(isFeed: true);
+    await create(kind: NewGroupKind.feed);
 
     // Assert
     expect(

@@ -24,6 +24,7 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
@@ -127,7 +128,7 @@ void main() {
             groupName: 'Team',
             invitees: [bob],
             privacy: GroupPrivacyState(),
-            isFeed: false,
+            kind: NewGroupKind.group,
           ),
         ),
   );

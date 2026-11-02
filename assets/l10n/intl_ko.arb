@@ -429,7 +429,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "이 스페이스에 채팅이 추가되었습니다",
   "chatDetails": "채팅 정보",
   "@chatDetails": {
     "type": "text",
@@ -694,7 +693,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "스페이스에 추가",
   "addEmail": "이메일 추가",
   "@addEmail": {
     "type": "text",
@@ -1750,8 +1748,6 @@
   "repeatPassword": "비밀번호 다시 입력",
   "loginWithOneClick": "클릭 한 번으로 로그인",
   "start": "시작",
-  "removeFromSpace": "스페이스에서 삭제",
-  "addToSpaceDescription": "이 채팅을 추가할 스페이스를 선택하세요.",
   "commandHint_discardsession": "세션 삭제",
   "@commandHint_discardsession": {
     "type": "text",

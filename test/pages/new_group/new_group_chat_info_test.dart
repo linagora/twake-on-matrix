@@ -3,7 +3,10 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
+import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
+import 'package:twake_chat/providers/room_list/room_list_providers.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
@@ -63,7 +66,6 @@ void main() {
         Right(GetAvatarInitialUIState()),
       ),
     );
-    when(mockController.responsiveUtils).thenReturn(ResponsiveUtils());
   });
 
   group('NewGroupChatInfo AppBar verification - widget test', () {
@@ -120,14 +122,28 @@ void main() {
           loginFlows: [],
         );
 
+    void stubKind(NewGroupKind kind) {
+      when(mockController.kind).thenReturn(kind);
+      when(mockController.isFeed).thenReturn(kind.isFeed);
+      when(mockController.isSpace).thenReturn(kind.isSpace);
+    }
+
     Future<ValueNotifier<GroupPrivacyState>> pumpView(
       WidgetTester tester, {
       bool isPublicGroupsEnabled = true,
       GroupPrivacyState privacy = const GroupPrivacyState(),
+      List<SpaceSummary> spaces = const [],
+      String? parentSpaceId,
     }) async {
       final privacyNotifier = ValueNotifier(privacy);
       addTearDown(privacyNotifier.dispose);
       when(mockController.groupPrivacyNotifier).thenReturn(privacyNotifier);
+      final parentNotifier = ValueNotifier<String?>(parentSpaceId);
+      addTearDown(parentNotifier.dispose);
+      when(mockController.parentSpaceNotifier).thenReturn(parentNotifier);
+      final topic = TextEditingController();
+      addTearDown(topic.dispose);
+      when(mockController.topicTextEditingController).thenReturn(topic);
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -140,6 +156,7 @@ void main() {
               (_, _) =>
                   summaryWith(isPublicGroupsEnabled: isPublicGroupsEnabled),
             ),
+            addableSpacesProvider.overrideWithValue(spaces),
           ],
           child: MaterialApp(
             locale: const Locale('en'),
@@ -158,11 +175,104 @@ void main() {
           find.widgetWithText(LinagoraSettingItem, title),
         );
 
+    const team = SpaceSummary(
+      id: '!team',
+      name: 'Team',
+      memberCount: 1,
+      isPublic: false,
+      canInvite: true,
+      canAddChildren: true,
+    );
+
+    testWidgets('build_whenSpace_keepsTheFormWithoutEncryption', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      stubKind(NewGroupKind.space);
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      final context = tester.element(find.byType(TwakeAppBar));
+      final l10n = L10n.of(context)!;
+      expect(
+        tester.widget<TwakeAppBar>(find.byType(TwakeAppBar)).title,
+        l10n.newSpace,
+      );
+      expect(find.text(l10n.enableEncryption), findsNothing);
+      expect(find.text(l10n.makeChatPublic), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('new_space_description')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('build_whenGroup_hasNoDescription', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      stubKind(NewGroupKind.group);
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      expect(find.byKey(const ValueKey('new_space_description')), findsNothing);
+    });
+
+    testWidgets('build_whenUserHasSpaces_offersThemForAGroup', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      stubKind(NewGroupKind.group);
+
+      // Act
+      await pumpView(tester, spaces: const [team], parentSpaceId: '!team');
+
+      // Assert
+      expect(
+        find.byKey(const ValueKey('new_group_parent_space')),
+        findsOneWidget,
+      );
+      expect(find.text('Team'), findsOneWidget);
+    });
+
+    testWidgets('build_whenUserHasNoSpace_offersNothing', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      stubKind(NewGroupKind.group);
+
+      // Act
+      await pumpView(tester);
+
+      // Assert
+      expect(
+        find.byKey(const ValueKey('new_group_parent_space')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('build_whenFeed_offersNoSpace', (WidgetTester tester) async {
+      // Arrange
+      stubKind(NewGroupKind.feed);
+
+      // Act
+      await pumpView(tester, spaces: const [team]);
+
+      // Assert
+      expect(
+        find.byKey(const ValueKey('new_group_parent_space')),
+        findsNothing,
+      );
+    });
+
     testWidgets('build_whenFeed_titlesTheScreenAfterTheFeed', (
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(true);
+      stubKind(NewGroupKind.feed);
 
       // Act
       await pumpView(tester);
@@ -177,7 +287,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(true);
+      stubKind(NewGroupKind.feed);
 
       // Act
       await pumpView(tester);
@@ -191,7 +301,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
 
       // Act
       await pumpView(tester);
@@ -209,7 +319,7 @@ void main() {
       'build_whenPublic_showsTheServerLimitToggleAndGreysOutEncryption',
       (WidgetTester tester) async {
         // Arrange
-        when(mockController.isFeed).thenReturn(false);
+        stubKind(NewGroupKind.group);
 
         // Act
         await pumpView(
@@ -288,7 +398,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
 
       // Act
       await pumpView(tester, isPublicGroupsEnabled: false);
@@ -309,7 +419,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
       await pumpView(tester);
       final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
 
@@ -324,7 +434,7 @@ void main() {
       'build_whenPrivacyBecomesPublic_showsTheServerLimitToggleAndGreysOutEncryption',
       (WidgetTester tester) async {
         // Arrange
-        when(mockController.isFeed).thenReturn(false);
+        stubKind(NewGroupKind.group);
         final privacyNotifier = await pumpView(tester);
         final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
 
@@ -381,7 +491,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
       await pumpView(
         tester,
         privacy: const GroupPrivacyState(isPublic: true, isServerLimited: true),
@@ -399,7 +509,7 @@ void main() {
       'build_whenKeyboardLeavesLittleRoomUnderPublicSettings_doesNotOverflow',
       (WidgetTester tester) async {
         // Arrange
-        when(mockController.isFeed).thenReturn(false);
+        stubKind(NewGroupKind.group);
         tester.view.devicePixelRatio = 1;
         tester.view.physicalSize = const Size(411, 914);
         addTearDown(tester.view.reset);
@@ -436,7 +546,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
 
       // Act
       await pumpView(
@@ -453,7 +563,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      when(mockController.isFeed).thenReturn(false);
+      stubKind(NewGroupKind.group);
 
       // Act
       await pumpView(tester);

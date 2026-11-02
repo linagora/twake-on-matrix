@@ -1,13 +1,17 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_subtitle.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/space_row_actions.dart';
+import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
@@ -29,6 +33,12 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
   final void Function()? onLongPress;
   final RoomPreviewResult? previewResult;
 
+  /// How deep the row is in its space.
+  final int depth;
+
+  /// What the row of a space shows and does beyond a room's.
+  final SpaceRowData? space;
+
   const ChatListItem(
     this.room, {
     this.checkBoxWidget,
@@ -40,6 +50,8 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     this.onSecondaryTapDown,
     this.onLongPress,
     this.previewResult,
+    this.depth = 0,
+    this.space,
     super.key,
   });
 
@@ -88,8 +100,11 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
 
   bool get _isGroupChat => !room.isDirectChat;
 
+  IconData get _kindIcon => space != null ? Icons.view_in_ar : Icons.group;
+
   @override
   Widget build(BuildContext context) {
+    final isChild = depth > 0;
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -105,8 +120,14 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                 MatrixLocals(L10n.of(context)!),
               );
               return Container(
-                height: ChatListItemStyle.chatItemHeight,
-                padding: ChatListItemStyle.paddingBody,
+                height: space != null
+                    ? ChatListItemStyle.spaceItemHeight
+                    : ChatListItemStyle.chatItemHeight,
+                padding: ChatListItemStyle.paddingBody.add(
+                  EdgeInsetsDirectional.only(
+                    start: depth * ChatListItemStyle.depthIndent,
+                  ),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -118,6 +139,9 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                           Avatar(
                             mxContent: room.avatar,
                             name: displayName,
+                            size: isChild
+                                ? ChatListItemStyle.childAvatarSize
+                                : AvatarStyle.defaultSize,
                             onTap: onTapAvatar,
                             keepAlive: true,
                           ),
@@ -134,8 +158,10 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                                   ).colorScheme.onPrimary,
                                 ),
                                 child: Icon(
-                                  Icons.group,
-                                  size: ChatListItemStyle.groupIconSize,
+                                  _kindIcon,
+                                  size: isChild
+                                      ? ChatListItemStyle.childKindIconSize
+                                      : ChatListItemStyle.groupIconSize,
                                   color: room.isUnreadOrInvited
                                       ? LinagoraSysColors.material()
                                             .onSurfaceVariant
@@ -149,23 +175,38 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                     ),
                     Expanded(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: space != null
+                            ? MainAxisAlignment.center
+                            : MainAxisAlignment.start,
                         children: [
                           ChatListItemTitle(
                             room: room,
                             originServerTs: switch (previewResult) {
-                              RoomPreviewFound(:final event) =>
+                              RoomPreviewFound(:final event)
+                                  when space == null =>
                                 event.originServerTs,
                               _ => null,
                             },
                           ),
-                          ChatListItemSubtitle(
-                            room: room,
-                            previewResult: previewResult,
-                          ),
+                          // A space is no conversation: nothing to preview.
+                          if (space == null)
+                            ChatListItemSubtitle(
+                              room: room,
+                              previewResult: previewResult,
+                            )
+                          else if (room.isInvitation)
+                            Text(
+                              L10n.of(context)!.invited,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: LinagoraSysColors.material().primary,
+                                  ),
+                            ),
                         ],
                       ),
                     ),
+                    if (space case final space?)
+                      SpaceRowActions(name: displayName, space: space),
                   ],
                 ),
               );

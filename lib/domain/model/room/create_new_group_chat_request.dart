@@ -15,5 +15,11 @@ abstract class CreateNewGroupChatRequest with _$CreateNewGroupChatRequest {
 
     /// Sets `m.federate: false` on a public room; cannot be changed later.
     @Default(false) bool isServerLimited,
+
+    /// The space that holds the group; its members may join it.
+    String? parentSpaceId,
+
+    /// A channel the space offers to everyone first.
+    @Default(false) bool isSuggested,
   }) = _CreateNewGroupChatRequest;
 }

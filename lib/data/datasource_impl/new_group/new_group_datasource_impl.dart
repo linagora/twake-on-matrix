@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/datasource/new_group/new_group_datasource.dart';
+import 'package:twake_chat/data/datasource_impl/spaces/space_relations.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/utils/power_level_manager.dart';
@@ -17,7 +18,17 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
   @override
   Future<String> createGroup(CreateNewGroupChatRequest request) async {
     try {
-      return await _createGroupChat(request);
+      final parentId = request.parentSpaceId;
+      if (parentId != null) _activeClient.ensureMayAddToSpace(parentId);
+      final roomId = await _createGroupChat(request);
+      if (parentId != null) {
+        await _activeClient.listRoomInSpace(
+          roomId,
+          parentId,
+          isSuggested: request.isSuggested,
+        );
+      }
+      return roomId;
     } catch (exception, stackTrace) {
       Logs().e('NewGroupDatasourceImpl::createGroup', exception, stackTrace);
       rethrow;
@@ -40,6 +51,8 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
       visibility: isPublic ? Visibility.public : null,
       federated: !(isPublic && request.isServerLimited),
       initialState: [
+        if (request.parentSpaceId case final parentId?)
+          ..._activeClient.spaceParentState(parentId, isPublic: isPublic),
         StateEvent(
           type: EventTypes.RoomAvatar,
           content: {'url': request.urlAvatar},

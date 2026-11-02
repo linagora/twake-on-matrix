@@ -1503,7 +1503,6 @@
   },
   "repeatPassword": "Gjenta passord",
   "passwordsDoNotMatch": "Passordet samsvarer ikke!",
-  "addToSpace": "Legg til space",
   "allChats": "Alle samtaler",
   "@allChats": {
     "type": "text",

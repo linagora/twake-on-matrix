@@ -1710,12 +1710,10 @@
     "type": "text",
     "description": "Usage hint for the command /send"
   },
-  "chatHasBeenAddedToThisSpace": "Babilo aldoniĝis al ĉi tiu aro",
   "autoplayImages": "Memage ludi movbildajn glumarkojn kaj mienetojn",
   "@autoplayImages": {
     "type": "text",
     "placeholder": {}
   },
-  "addToSpace": "Aldoni al aro",
   "homeserver": "Hejmservilo"
 }

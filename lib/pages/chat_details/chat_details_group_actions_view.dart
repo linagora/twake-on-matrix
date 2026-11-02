@@ -9,15 +9,16 @@ import 'package:matrix/matrix.dart';
 class ChatDetailsGroupActionsView extends StatelessWidget {
   const ChatDetailsGroupActionsView({
     super.key,
-    required this.onMessage,
-    required this.onSearch,
+    this.onMessage,
+    this.onSearch,
     this.onToggleNotification,
     this.muteNotifier,
     required this.animationController,
   });
 
-  final VoidCallback onMessage;
-  final VoidCallback onSearch;
+  /// `null` where there is no conversation: a space.
+  final VoidCallback? onMessage;
+  final VoidCallback? onSearch;
   final VoidCallback? onToggleNotification;
   final ValueNotifier<PushRuleState>? muteNotifier;
   final AnimationController animationController;
@@ -31,26 +32,40 @@ class ChatDetailsGroupActionsView extends StatelessWidget {
     // directly; otherwise listen to the notifier so the mute icon updates.
     if (muteNotifier == null) {
       return _buildActions(context, sysColor, textTheme, [
-        ChatDetailsMessageAction(onMessage: onMessage),
-        ChatDetailsSearchAction(onSearch: onSearch),
+        ?_messageAction,
+        ?_searchAction,
       ]);
     }
 
     return ValueListenableBuilder(
       valueListenable: muteNotifier!,
       builder: (context, value, child) {
-        final actions = [
-          ChatDetailsMessageAction(onMessage: onMessage),
+        final actions = <ChatDetailsGroupAction>[
+          ?_messageAction,
           ChatDetailsMuteAction(
             onMute: onToggleNotification ?? () {},
             isMute: value != PushRuleState.notify,
           ),
-          ChatDetailsSearchAction(onSearch: onSearch),
+          ?_searchAction,
         ];
 
         return _buildActions(context, sysColor, textTheme, actions);
       },
     );
+  }
+
+  ChatDetailsGroupAction? get _searchAction {
+    final onSearch = this.onSearch;
+    return onSearch == null
+        ? null
+        : ChatDetailsSearchAction(onSearch: onSearch);
+  }
+
+  ChatDetailsGroupAction? get _messageAction {
+    final onMessage = this.onMessage;
+    return onMessage == null
+        ? null
+        : ChatDetailsMessageAction(onMessage: onMessage);
   }
 
   Widget _buildActions(
