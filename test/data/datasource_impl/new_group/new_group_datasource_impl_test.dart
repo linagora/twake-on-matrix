@@ -62,6 +62,59 @@ void main() {
 
   group('NewGroupDatasourceImpl.createGroup', () {
     test(
+      'createGroup_always_setsTheAvatarHistoryAndPowerLevelsLikeBefore',
+      () async {
+        // Act
+        await datasource.createGroup(
+          const CreateNewGroupChatRequest(
+            groupName: 'Team',
+            enableEncryption: true,
+            urlAvatar: 'mxc://example.com/avatar',
+          ),
+        );
+
+        // Assert
+        final captured = verify(
+          mockClient.createGroupChat(
+            groupName: anyNamed('groupName'),
+            enableEncryption: anyNamed('enableEncryption'),
+            preset: anyNamed('preset'),
+            initialState: captureAnyNamed('initialState'),
+            visibility: anyNamed('visibility'),
+            federated: anyNamed('federated'),
+            powerLevelContentOverride: captureAnyNamed(
+              'powerLevelContentOverride',
+            ),
+          ),
+        ).captured;
+        final initialState = captured[0] as List<StateEvent>;
+        expect(initialState.map((event) => event.toJson()), [
+          {
+            'type': EventTypes.RoomAvatar,
+            'content': {'url': 'mxc://example.com/avatar'},
+            'state_key': '',
+          },
+          {
+            'type': EventTypes.HistoryVisibility,
+            'content': {'history_visibility': 'joined'},
+            'state_key': '',
+          },
+        ]);
+        expect(captured[1], {
+          'events': {
+            EventTypes.RoomPinnedEvents: 10,
+            EventTypes.RoomName: 80,
+            EventTypes.RoomAvatar: 80,
+            EventTypes.RoomMember: 10,
+            EventTypes.RoomTopic: 80,
+          },
+          'invite': 80,
+          'kick': 80,
+        });
+      },
+    );
+
+    test(
       'createGroup_whenPublicAndServerLimited_createsAnUnencryptedUnfederatedPublicRoom',
       () async {
         // Act
@@ -126,6 +179,16 @@ void main() {
   });
 
   group('NewGroupDatasourceImpl.inviteUser', () {
+    test('inviteUser_whenNoClient_throwsAStateError', () async {
+      // Act & Assert
+      await expectLater(
+        const NewGroupDatasourceImpl(
+          null,
+        ).inviteUser(roomId: roomId, userId: userId),
+        throwsStateError,
+      );
+    });
+
     test('inviteUser_whenRateLimitedOnce_retriesThenSucceeds', () async {
       // Arrange
       var calls = 0;

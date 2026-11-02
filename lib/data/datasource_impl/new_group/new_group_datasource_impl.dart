@@ -64,8 +64,9 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
     required String roomId,
     required String userId,
   }) async {
+    final client = _activeClient;
     for (var attempt = 1; ; attempt++) {
-      final retryAfter = await _tryInvite(roomId, userId, attempt);
+      final retryAfter = await _tryInvite(client, roomId, userId, attempt);
       if (retryAfter == null) return;
       if (retryAfter > Duration.zero) await Future.delayed(retryAfter);
     }
@@ -73,16 +74,17 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
 
   /// Returns null once invited, or the delay before the next attempt.
   Future<Duration?> _tryInvite(
+    Client client,
     String roomId,
     String userId,
     int attempt,
   ) async {
     try {
-      await _activeClient.inviteUser(roomId, userId);
+      await client.inviteUser(roomId, userId);
       return null;
     } on MatrixException catch (exception, stackTrace) {
       Logs().e(
-        'NewGroupDatasourceImpl::inviteUser: $userId (attempt $attempt/$_maxInviteRetries)',
+        'NewGroupDatasourceImpl::inviteUser: attempt $attempt/$_maxInviteRetries',
         exception,
         stackTrace,
       );
@@ -91,12 +93,8 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
         throw _toInviteUserException(userId, exception);
       }
       return Duration(milliseconds: exception.retryAfterMs ?? 0);
-    } catch (exception, stackTrace) {
-      Logs().e(
-        'NewGroupDatasourceImpl::inviteUser: $userId',
-        exception,
-        stackTrace,
-      );
+    } on Exception catch (exception, stackTrace) {
+      Logs().e('NewGroupDatasourceImpl::inviteUser', exception, stackTrace);
       throw GenericInviteException(
         userId: userId,
         message: exception.toString(),
