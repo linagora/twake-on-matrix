@@ -63,15 +63,15 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     final l10n = L10n.of(context)!;
 
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      final copyButton = $(AlertDialog)
-          .$(TextButton)
-          .containing(find.text(l10n.copy.toUpperCase()));
+      final copyButton = $(
+        AlertDialog,
+      ).$(TextButton).containing(find.text(l10n.copy.toUpperCase()));
       await $.waitUntilVisible(copyButton);
       await copyButton.tap();
     } else {
-      final copyButton = $(CupertinoAlertDialog)
-          .$(CupertinoDialogAction)
-          .containing(find.text(l10n.copy));
+      final copyButton = $(
+        CupertinoAlertDialog,
+      ).$(CupertinoDialogAction).containing(find.text(l10n.copy));
       await $.waitUntilVisible(copyButton);
       await copyButton.tap();
     }

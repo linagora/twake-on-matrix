@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:pull_down_button/pull_down_button.dart';
-
 import '../base/core_robot.dart';
 
 /// Robot for interacting with message context menu dialog

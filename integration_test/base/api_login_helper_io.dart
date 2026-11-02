@@ -89,8 +89,9 @@ Future<void> sendStickerAsReceiver({
   final client = HttpClient()..autoUncompress = true;
   try {
     final session = await _receiverSession(client, endpoints);
-    final uploadUri = _matrixBase(endpoints.matrixURL)
-        .replace(path: '/_matrix/media/v3/upload');
+    final uploadUri = _matrixBase(
+      endpoints.matrixURL,
+    ).replace(path: '/_matrix/media/v3/upload');
     final request = await client.postUrl(uploadUri);
     request.headers
       ..set(HttpHeaders.contentTypeHeader, stickerFixtureMimeType)
@@ -294,8 +295,9 @@ Future<_MatrixSession> _loginWithPassword({
   required _Credentials credentials,
   required String deviceDisplayName,
 }) async {
-  final loginUri = _matrixBase(endpoints.matrixURL)
-      .replace(path: '/_matrix/client/v3/login');
+  final loginUri = _matrixBase(
+    endpoints.matrixURL,
+  ).replace(path: '/_matrix/client/v3/login');
   final request = await client.postUrl(loginUri);
   request.headers
     ..set(HttpHeaders.contentTypeHeader, 'application/json')
@@ -563,15 +565,12 @@ Future<String> _exchangeCodeForLoginToken({
   required _OidcRedirect redirect,
   required _SsoSubmitResult submitResult,
 }) async {
-  final callbackUri = Uri.https(
-    endpoints.matrixURL,
-    '/_synapse/client/oidc/callback',
-    {
-      'code': submitResult.code,
-      'session_state': submitResult.sessionState,
-      'state': redirect.params['state'],
-    },
-  );
+  final callbackUri =
+      Uri.https(endpoints.matrixURL, '/_synapse/client/oidc/callback', {
+        'code': submitResult.code,
+        'session_state': submitResult.sessionState,
+        'state': redirect.params['state'],
+      });
   final request = await client.getUrl(callbackUri);
   request.followRedirects = false;
   request.headers
@@ -614,8 +613,9 @@ Future<_MatrixSession> _loginWithMLoginToken({
   required String loginToken,
   required String deviceDisplayName,
 }) async {
-  final loginUri = _matrixBase(endpoints.matrixURL)
-      .replace(path: '/_matrix/client/v3/login');
+  final loginUri = _matrixBase(
+    endpoints.matrixURL,
+  ).replace(path: '/_matrix/client/v3/login');
   final request = await client.postUrl(loginUri);
   request.headers
     ..set(HttpHeaders.contentTypeHeader, 'application/json')

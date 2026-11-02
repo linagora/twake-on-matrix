@@ -210,8 +210,9 @@ class ChatProfileInfoRobot extends CoreRobot
   }) async {
     if (expected) {
       try {
-        await getProfileActionButton(action)
-            .waitUntilVisible(timeout: const Duration(seconds: 5));
+        await getProfileActionButton(
+          action,
+        ).waitUntilVisible(timeout: const Duration(seconds: 5));
       } catch (_) {
         // Fall through to the expect below for a clear error message
       }

@@ -241,14 +241,16 @@ class ChatGroupDisplayMenuScenario extends BaseTestScenario {
 
     await _waitShown(this, senderMsg);
     await ChatGroupDetailRobot($).openPullDownMenu(senderMsg);
-    await ChatScenario($)
-        .verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
+    await ChatScenario(
+      $,
+    ).verifyTheDisplayOfPullDownMenu(senderMsg, level: UserLevel.owner);
     await ChatGroupDetailRobot($).closePullDownMenu();
 
     await _waitShown(this, receiverMsg, searchTimeline: true);
     await ChatGroupDetailRobot($).openPullDownMenu(receiverMsg);
-    await ChatScenario($)
-        .verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
+    await ChatScenario(
+      $,
+    ).verifyTheDisplayOfPullDownMenu(receiverMsg, level: UserLevel.member);
   }
 }
 

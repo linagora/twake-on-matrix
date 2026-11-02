@@ -96,8 +96,9 @@ class ChatDmLeaveScenario extends BaseTestScenario {
     // (pumpAndSettle times out due to TextField cursor animation).
     // Match the row for this exact account so we don't open an unrelated chat
     // if the search ever returns more than one result.
-    final searchResult = $(TwakeListItem)
-        .containing(find.textContaining(timestampAccount));
+    final searchResult = $(
+      TwakeListItem,
+    ).containing(find.textContaining(timestampAccount));
     await $.waitUntilVisible(searchResult.first, timeout: _kNavigationTimeout);
 
     // Verify the search result for this account exists.

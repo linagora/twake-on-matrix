@@ -47,9 +47,9 @@ class WebMessageMenuRobot extends CoreRobot
     PatrolFinder target, {
     Duration timeout = const Duration(seconds: 15),
   }) => _hoverBubbleUntilVisible(
-    $(MessageContent)
-        .containing(find.textContaining(message, findRichText: true))
-        .first,
+    $(
+      MessageContent,
+    ).containing(find.textContaining(message, findRichText: true)).first,
     target,
     label: message,
     timeout: timeout,
@@ -104,9 +104,9 @@ class WebMessageMenuRobot extends CoreRobot
   /// label is [itemLabel].
   Future<void> _tapOverflowItem(String message, String itemLabel) =>
       _tapOverflowItemOn(
-        $(MessageContent)
-            .containing(find.textContaining(message, findRichText: true))
-            .first,
+        $(
+          MessageContent,
+        ).containing(find.textContaining(message, findRichText: true)).first,
         itemLabel,
         label: message,
       );
@@ -118,8 +118,9 @@ class WebMessageMenuRobot extends CoreRobot
   }) async {
     // All overflow actions live behind the "more" button; open it, then tap
     // the row labelled [itemLabel].
-    final moreButton = $(TwakeIconButton)
-        .containing(find.byIcon(Icons.more_horiz));
+    final moreButton = $(
+      TwakeIconButton,
+    ).containing(find.byIcon(Icons.more_horiz));
     final gesture = await _hoverBubbleUntilVisible(
       bubble,
       moreButton,
@@ -128,8 +129,9 @@ class WebMessageMenuRobot extends CoreRobot
     await $.tester.tap(moreButton.finder);
     await gesture.removePointer();
 
-    final item = $(ContextMenuActionItemWidget)
-        .containing(find.text(itemLabel));
+    final item = $(
+      ContextMenuActionItemWidget,
+    ).containing(find.text(itemLabel));
     await $.waitUntilVisible(item, timeout: const Duration(seconds: 10));
     await $.tester.tap(item.finder);
     await $.pump(const Duration(milliseconds: 300));
@@ -162,8 +164,9 @@ class WebMessageMenuRobot extends CoreRobot
   @override
   Future<void> openReply(String message) async {
     // Reply is a first-class bar button (it is not in the "more" menu).
-    final replyButton = $(TwakeIconButton)
-        .containing(find.byTooltip(_l10n.reply));
+    final replyButton = $(
+      TwakeIconButton,
+    ).containing(find.byTooltip(_l10n.reply));
     final gesture = await _hoverUntilVisible(message, replyButton);
     await $.tester.tap(replyButton.finder);
     await gesture.removePointer();

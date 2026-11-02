@@ -3,7 +3,6 @@ import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_view.dart';
 import 'package:flutter/material.dart';
 import 'package:patrol/patrol.dart';
-
 import '../home_robot.dart';
 
 class SettingsContactsVisibilityRobot extends HomeRobot {

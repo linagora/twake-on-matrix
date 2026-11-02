@@ -237,8 +237,9 @@ class CoreRobot {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
-        : $(find.descendant(of: root.finder, matching: find.byType(Scrollable)))
-              .first;
+        : $(
+            find.descendant(of: root.finder, matching: find.byType(Scrollable)),
+          ).first;
 
     var lastPixels = -1.0;
     for (var i = 0; i < maxDrags; i++) {
@@ -262,8 +263,9 @@ class CoreRobot {
     // Find the Scrollable to act on
     final PatrolFinder scrollable = root == null
         ? $(Scrollable).first
-        : $(find.descendant(of: root.finder, matching: find.byType(Scrollable)))
-              .first;
+        : $(
+            find.descendant(of: root.finder, matching: find.byType(Scrollable)),
+          ).first;
 
     for (var i = 0; i < maxDrags; i++) {
       // drag down a bit

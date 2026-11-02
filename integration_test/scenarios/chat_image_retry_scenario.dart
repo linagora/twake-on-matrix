@@ -32,9 +32,9 @@ class ChatImageRetryScenario extends BaseTestScenario {
     await $.native.disableCellular();
     await $.pumpAndTrySettle();
 
-    final retryBtn = $(SendingImageInfoWidget)
-        .$(IconButton)
-        .containing(find.byIcon(Icons.refresh));
+    final retryBtn = $(
+      SendingImageInfoWidget,
+    ).$(IconButton).containing(find.byIcon(Icons.refresh));
 
     try {
       // 3. Send an image.

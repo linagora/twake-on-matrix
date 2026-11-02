@@ -2,7 +2,6 @@ import 'package:twake_chat/pages/contacts_tab/contacts_tab_body_view.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import '../base/base_scenario.dart';
 import '../base/core_robot.dart';
 import '../help/soft_assertion_helper.dart';

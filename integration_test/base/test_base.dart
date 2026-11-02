@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
-
 import '../factories/robot_factory_provider.dart';
 import 'base_test_scenario.dart';
 import 'test_app_initializer.dart';

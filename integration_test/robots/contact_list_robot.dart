@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/list_item/twake_list_item.dart';
-
 import 'abstract/abstract_contact_list_robot.dart';
 import 'home_robot.dart';
 

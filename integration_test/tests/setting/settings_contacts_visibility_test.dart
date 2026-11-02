@@ -3,7 +3,8 @@ import '../../scenarios/settings_contacts_visibility_scenario.dart';
 
 void main() {
   TestBase().runPatrolTest(
-    description: 'Open settings contact visibility screen test and verify everyone option is present',
+    description:
+        'Open settings contact visibility screen test and verify everyone option is present',
     mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.
@@ -13,7 +14,8 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'Open settings contact visibility screen test and my contacts option is present',
+    description:
+        'Open settings contact visibility screen test and my contacts option is present',
     mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.
@@ -23,7 +25,8 @@ void main() {
   );
 
   TestBase().runPatrolTest(
-    description: 'Open settings contact visibility screen test and nobody option is present',
+    description:
+        'Open settings contact visibility screen test and nobody option is present',
     mobileOnly: true,
     // Contacts visibility is persisted through the staging TOM backend
     // (`/_twake`), which the local-Synapse harness does not provide.

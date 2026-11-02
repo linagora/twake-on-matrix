@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:patrol/patrol.dart';
-
 import '../base/core_robot.dart';
 import 'abstract/abstract_group_information_robot.dart';
 import 'twake_list_item_robot.dart';
@@ -67,8 +66,9 @@ class GroupInformationRobot extends CoreRobot
     final loadMoreTextFinder = find.byWidgetPredicate(
       (w) =>
           w is Text &&
-          RegExp(r'^Load\s+\d+\s+more\s+participant(s)?$')
-              .hasMatch(w.data ?? ''),
+          RegExp(
+            r'^Load\s+\d+\s+more\s+participant(s)?$',
+          ).hasMatch(w.data ?? ''),
       description: 'Load N more participants text',
     );
 
