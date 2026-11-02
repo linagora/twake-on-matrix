@@ -233,7 +233,10 @@ class ChatDetailsEditView extends ConsumerWidget {
                     builder: (context, child) {
                       final isRoomEnabledEncryption =
                           controller.isRoomEnabledEncryptionNotifier.value;
-                      final isPublic = controller.blocksEncryption(access);
+                      final isPublic =
+                          controller.room?.isOpenToAnyone == true ||
+                          controller.roomAccessDraftNotifier.value
+                              .blocksEncryptionOn(access);
                       final canEnableEncryption =
                           controller.room?.encrypted == false &&
                           controller.room?.canEnableEncryption == true &&
