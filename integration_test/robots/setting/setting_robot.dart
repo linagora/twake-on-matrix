@@ -4,6 +4,7 @@ import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_
 import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_security/settings_security_view.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
+import 'package:twake_chat/presentation/widget_keys/settings_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:patrol/patrol.dart';
@@ -88,6 +89,11 @@ class SettingRobot extends HomeRobot implements AbstractSettingRobot {
 
   @override
   Future<void> logoutOfApp() async {
+    // Logout is below the fold on a phone, and `tap` does not scroll.
+    await $.scrollUntilVisible(
+      finder: logout(),
+      view: $(SettingsKeys.listViewContent.key).$(Scrollable),
+    );
     await logout().tap();
     await $.waitUntilVisible($(ConfirmationDialogBuilder));
   }

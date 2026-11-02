@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/dialog/confirmation_dialog_builder.dart';
 import 'package:linagora_design_flutter/multiple_account/multiple_account_view.dart';
@@ -7,6 +8,7 @@ import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
@@ -14,7 +16,6 @@ import 'package:twake_chat/widgets/twake_app.dart';
 import '../../base/api_login_helper.dart';
 import '../../base/matrix_login_retry.dart';
 import '../home_robot.dart';
-import 'setting_robot.dart';
 import 'settings_profile_robot.dart';
 
 /// Drives the legacy multiple-account flow: Settings > Profile > account
@@ -26,14 +27,22 @@ class MultipleAccountsRobot extends HomeRobot {
 
   L10n get _l10n => L10n.of($.tester.element(find.byType(Scaffold).first))!;
 
-  MatrixState get _matrix =>
-      Matrix.of($.tester.element(find.byType(Scaffold).first));
+  BuildContext get _context => $.tester.element(find.byType(Scaffold).first);
 
-  /// Matrix ID of the account currently active in the app.
-  String? activeUserId() => _matrix.client.userID;
+  MatrixState get _matrix => Matrix.of(_context);
+
+  /// Matrix ID of the account the Riverpod consumers see as active. It is read
+  /// from `activeMatrixClientProvider`, not from `MatrixState.client`: the
+  /// state stays right when the provider is stale, which is the failure this
+  /// scenario has to see.
+  String? activeUserId() => ProviderScope.containerOf(
+    _context,
+    listen: false,
+  ).read(activeMatrixClientProvider)?.userID;
 
   /// Matrix IDs of every logged-in account known to the app.
-  List<String> loggedInUserIds() => _matrix.widget.clients
+  List<String> loggedInUserIds() => _matrix.currentClients
+      .whereType<Client>()
       .where((client) => client.isLogged())
       .map((client) => client.userID!)
       .toList();
@@ -69,6 +78,7 @@ class MultipleAccountsRobot extends HomeRobot {
         .where((text) => text.startsWith('@') && text.contains(':'))
         .toList();
     await closePicker();
+    await SettingsProfileRobot($).backToSettings();
     return ids;
   }
 
@@ -128,6 +138,11 @@ class MultipleAccountsRobot extends HomeRobot {
       () => activeUserId() != null && activeUserId() != before,
       'added account did not become active',
     );
+    // The scaffold is still on the Settings tab: the real flow does not jump
+    // to the rooms either, so the test goes to the chat list tab itself.
+    TwakeApp.router.go('/rooms');
+    await waitForMainNavigation();
+    await gotoChatListScreen();
     await _ensureChatList();
     return activeUserId()!;
   }
@@ -150,6 +165,11 @@ class MultipleAccountsRobot extends HomeRobot {
     await $(ConfirmationDialogBuilder).$(_l10n.logout).tap();
   }
 
+  /// The welcome screen is shown once the last account logged out.
+  Future<void> waitForWelcome() async {
+    await $(TwakeWelcome).waitUntilVisible(timeout: _timeout);
+  }
+
   Future<void> waitForActiveAccount(String userId) async {
     await _waitUntil(
       () => activeUserId() == userId,
@@ -159,14 +179,7 @@ class MultipleAccountsRobot extends HomeRobot {
   }
 
   Future<void> _ensureChatList() async {
-    if (!$(ChatList).exists) {
-      try {
-        await $(ChatList).waitUntilVisible(timeout: _timeout);
-      } catch (_) {
-        TwakeApp.router.go('/rooms');
-        await $(ChatList).waitUntilVisible(timeout: _timeout);
-      }
-    }
+    await $(ChatList).waitUntilVisible(timeout: _timeout);
   }
 
   Future<void> _waitUntil(bool Function() condition, String reason) async {
@@ -176,7 +189,4 @@ class MultipleAccountsRobot extends HomeRobot {
       await $.pump(const Duration(milliseconds: 200));
     }
   }
-
-  // Kept for symmetry with other robots that expose the settings robot.
-  SettingRobot settings() => SettingRobot($);
 }

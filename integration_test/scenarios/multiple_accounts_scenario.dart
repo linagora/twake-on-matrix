@@ -1,10 +1,20 @@
+import 'package:flutter/foundation.dart';
+import 'package:twake_chat/presentation/enum/settings/settings_profile_enum.dart';
+
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/setting/multiple_accounts_robot.dart';
 
-/// Mobile-only: with account A logged in, add account B through
-/// "Add another account", check the picker lists both, switch to B and back
-/// to A, then log B out and check A is still active.
+/// Mobile-only: with account A logged in, add account B, check the picker
+/// lists both, switch to A, then to B, then back to A (B is already active after
+/// the add step, so the first switch is the one that changes the account), then
+/// log A out (the first account of the list) and check B became active, then log
+/// B out and check the app is back on the welcome screen.
+///
+/// The add step logs B in through the same path as the initial test login: it
+/// does not go through the sign-in of the welcome screen, so the guard against
+/// a second account on the same homeserver is not covered. Switching and both
+/// logouts are.
 ///
 /// Guards the legacy multiple-account behaviour before the account module
 /// migration (ADR 0037 §7). Account B is the existing `Receiver` /
@@ -23,17 +33,14 @@ class MultipleAccountsScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     _checkDefines();
     final accountA = _robot.activeUserId()!;
-    String? accountB;
 
-    try {
-      accountB = await _addSecondAccount(accountA);
-      await _verifyBothListed(accountA, accountB);
-      await _switchAndVerify(accountA, 'A');
-      await _switchAndVerify(accountB, 'B');
-      await _logoutSecondAndVerify(accountA);
-    } finally {
-      await _cleanup(accountA, accountB);
-    }
+    final accountB = await _addSecondAccount(accountA);
+    await _verifyBothListed(accountA, accountB);
+    await _switchAndVerify(accountA, 'A');
+    await _switchAndVerify(accountB, 'B');
+    await _switchAndVerify(accountA, 'A');
+    await _logoutFirstAndVerify(accountB);
+    await _logoutLastAndVerify();
 
     _s.verifyAll();
   }
@@ -56,10 +63,13 @@ class MultipleAccountsScenario extends BaseTestScenario {
       username: _receiver,
       password: _receiverPass,
     );
+    final expectedPrefix = _receiver.startsWith('@')
+        ? _receiver
+        : '@$_receiver:';
     _s.softAssertEquals(
-      accountB != accountA,
+      accountB != accountA && accountB.startsWith(expectedPrefix),
       true,
-      'the added account is the same as the first one',
+      'the added account is "$accountB", not the "$_receiver" user',
     );
     return accountB;
   }
@@ -76,22 +86,44 @@ class MultipleAccountsScenario extends BaseTestScenario {
   Future<void> _switchAndVerify(String account, String label) async {
     await _robot.switchTo(account);
     _s.softAssertEquals(_robot.activeUserId(), account, '$label is not active');
+    // The provider is only one side of the switch: the profile reads the
+    // account from `MatrixState`.
+    final profile = await _robot.openProfile();
+    _s.softAssertEquals(
+      await profile.waitForValueOf(SettingsProfileEnum.matrixId),
+      account,
+      'Profile does not show $label after the switch',
+    );
+    await profile.backToSettings();
   }
 
-  Future<void> _logoutSecondAndVerify(String accountA) async {
+  /// A is the active account and the first of the list: logging it out must
+  /// leave B active and alone.
+  Future<void> _logoutFirstAndVerify(String accountB) async {
+    // The case of #3540 needs the active account to be the first of the list;
+    // the scenario stops covering it if the order changes.
+    _s.softAssertEquals(
+      _robot.loggedInUserIds().first,
+      _robot.activeUserId(),
+      'the active account is not the first of the list',
+    );
     await _robot.logoutActiveAccount();
-    await _robot.waitForActiveAccount(accountA);
-    _s.softAssertEquals(_robot.loggedInUserIds(), [
-      accountA,
-    ], 'A is not the only remaining account after logging B out');
+    await _robot.waitForActiveAccount(accountB);
+    final remaining = _robot.loggedInUserIds();
+    _s.softAssertEquals(
+      listEquals(remaining, [accountB]),
+      true,
+      'B is not the only remaining account after logging A out: $remaining',
+    );
   }
 
-  /// Leaves only account A logged in, even if a step above failed.
-  Future<void> _cleanup(String accountA, String? accountB) async {
-    if (accountB == null) return;
-    if (!_robot.loggedInUserIds().contains(accountB)) return;
-    if (_robot.activeUserId() != accountB) await _robot.switchTo(accountB);
+  Future<void> _logoutLastAndVerify() async {
     await _robot.logoutActiveAccount();
-    await _robot.waitForActiveAccount(accountA);
+    await _robot.waitForWelcome();
+    _s.softAssertEquals(
+      _robot.loggedInUserIds().isEmpty,
+      true,
+      'an account is still logged in after the last logout',
+    );
   }
 }
