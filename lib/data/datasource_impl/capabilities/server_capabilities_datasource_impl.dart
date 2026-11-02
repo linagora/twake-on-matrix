@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/datasource/capabilities/server_capabilities_datasource.dart';
+import 'package:twake_chat/domain/capabilities/exceptions/capabilities_exception.dart';
 import 'package:twake_chat/domain/capabilities/models/profile_edit_capabilities.dart';
 
 class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {
@@ -12,7 +13,7 @@ class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {
     final Capabilities capabilities;
     try {
       final client = _client;
-      if (client == null) throw StateError('No active Matrix client');
+      if (client == null) throw const NoActiveAccountException();
       capabilities = await client.getCapabilities();
     } catch (e, s) {
       Logs().e('ServerCapabilitiesDatasourceImpl::fetch failed', e, s);
@@ -28,6 +29,7 @@ class ServerCapabilitiesDatasourceImpl implements ServerCapabilitiesDatasource {
     );
   }
 
+  // https://spec.matrix.org/v1.16/client-server-api/#mprofile_fields-capability
   bool _canEditProfileField(Capabilities capabilities, String field) {
     final profileFields = capabilities.mProfileFields;
     if (profileFields == null) return true;

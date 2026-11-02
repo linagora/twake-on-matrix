@@ -10,7 +10,9 @@ class FetchProfileEditCapabilitiesUseCase {
   Future<ProfileEditCapabilities> execute() async {
     try {
       return await _repository.fetchProfileEditCapabilities();
-    } catch (e, s) {
+    } on CapabilitiesException {
+      rethrow;
+    } on Exception catch (e, s) {
       Error.throwWithStackTrace(FetchProfileEditCapabilitiesException(e), s);
     }
   }
