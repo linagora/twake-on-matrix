@@ -44,8 +44,9 @@ void main() {
       expect(span?.style?.color, textStyle.color);
     });
 
-    test('keeps the inherited formatting of a filename', () {
-      // e.g. **test.md**: the parent bold/italic is merged into linkStyle.
+    test('keeps the formatting carried by linkStyle', () {
+      // The formatting is only kept when it reaches linkStyle: the app's own
+      // link style can still override it (e.g. bold) before linkBuilder runs.
       final span = host.filenameLinkAsPlainText(
         url: 'test.md',
         childrenSpan: const TextSpan(text: 'test.md'),
@@ -59,6 +60,59 @@ void main() {
       expect(span?.style?.fontStyle, FontStyle.italic);
       expect(span?.style?.color, textStyle.color);
       expect(span?.style?.decoration, TextDecoration.none);
+    });
+
+    test('keeps an inline widget inside a filename anchor', () {
+      // e.g. <a href="report.md"><img src="mxc://..."></a>
+      const image = WidgetSpan(child: SizedBox(key: Key('anchor-image')));
+      final span = host.filenameLinkAsPlainText(
+        url: 'report.md',
+        childrenSpan: const TextSpan(
+          children: [
+            image,
+            TextSpan(text: 'report', style: linkStyle),
+          ],
+        ),
+        linkStyle: linkStyle,
+        textStyle: textStyle,
+      );
+
+      final widgets = <WidgetSpan>[];
+      span!.visitChildren((child) {
+        if (child is WidgetSpan) widgets.add(child);
+        return true;
+      });
+      expect(widgets, [image]);
+    });
+
+    test('keeps nested formatting inside a filename anchor', () {
+      // e.g. <a href="report.md"><b>my</b> report</a>
+      final span = host.filenameLinkAsPlainText(
+        url: 'report.md',
+        childrenSpan: TextSpan(
+          children: [
+            TextSpan(
+              text: 'my',
+              style: linkStyle.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: ' report', style: linkStyle),
+          ],
+        ),
+        linkStyle: linkStyle,
+        textStyle: textStyle,
+      );
+
+      final texts = <TextSpan>[];
+      span!.visitChildren((child) {
+        if (child is TextSpan && child.text != null) texts.add(child);
+        return true;
+      });
+      expect(texts.map((text) => text.text), ['my', ' report']);
+      expect(texts.first.style?.fontWeight, FontWeight.bold);
+      for (final text in texts) {
+        expect(text.style?.color, textStyle.color);
+        expect(text.style?.decoration, TextDecoration.none);
+      }
     });
 
     test('keeps a www. link as a link', () {

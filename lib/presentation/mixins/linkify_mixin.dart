@@ -19,8 +19,9 @@ mixin LinkifyMixin {
   /// Returns a plain [TextSpan] when [url] is a filename falsely detected as a
   /// link (e.g. "test.md"), or null for a real link.
   ///
-  /// The span keeps [linkStyle] (which carries the inherited formatting such
-  /// as bold or italic) and only takes the color and decoration of
+  /// The span keeps the tree of [childrenSpan] (inline widgets and nested
+  /// formatting) and [linkStyle] (which carries the inherited formatting such
+  /// as bold or italic). Only the color and decoration are taken from
   /// [textStyle], so the filename looks like the text around it.
   TextSpan? filenameLinkAsPlainText({
     required String url,
@@ -30,12 +31,28 @@ mixin LinkifyMixin {
   }) {
     if (!isFilenameUrl(url)) return null;
     return TextSpan(
-      text: childrenSpan.toPlainText(),
-      style: (linkStyle ?? const TextStyle()).copyWith(
-        color: textStyle?.color,
-        decoration: textStyle?.decoration ?? TextDecoration.none,
-        decorationColor: textStyle?.decorationColor,
-      ),
+      style: _withoutLinkLook(linkStyle ?? const TextStyle(), textStyle),
+      children: [_withoutLinkLookSpan(childrenSpan, textStyle)],
+    );
+  }
+
+  TextStyle _withoutLinkLook(TextStyle style, TextStyle? textStyle) {
+    return style.copyWith(
+      color: textStyle?.color,
+      decoration: textStyle?.decoration ?? TextDecoration.none,
+      decorationColor: textStyle?.decorationColor,
+    );
+  }
+
+  InlineSpan _withoutLinkLookSpan(InlineSpan span, TextStyle? textStyle) {
+    if (span is! TextSpan) return span;
+    final style = span.style;
+    return TextSpan(
+      text: span.text,
+      style: style == null ? null : _withoutLinkLook(style, textStyle),
+      children: span.children
+          ?.map((child) => _withoutLinkLookSpan(child, textStyle))
+          .toList(),
     );
   }
 

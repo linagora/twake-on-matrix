@@ -60,6 +60,25 @@ class _TwakeLinkPreviewHarness {
 
   TextSpan spanWithText(List<TextSpan> spans, String text) =>
       spans.firstWhere((span) => span.text == text);
+
+  /// The style a span is painted with: its own style merged over the styles of
+  /// its parent spans.
+  TextStyle paintedStyleOf(WidgetTester tester, String text) {
+    TextStyle? painted;
+    void visit(InlineSpan span, TextStyle parentStyle) {
+      if (span is! TextSpan) return;
+      final style = parentStyle.merge(span.style);
+      if (span.text == text) painted = style;
+      for (final child in span.children ?? const <InlineSpan>[]) {
+        visit(child, style);
+      }
+    }
+
+    for (final richText in tester.widgetList<RichText>(find.byType(RichText))) {
+      visit(richText.text, const TextStyle());
+    }
+    return painted!;
+  }
 }
 
 void main() {
@@ -80,12 +99,10 @@ void main() {
       );
 
       final filename = harness.spanWithText(spans, 'test.md');
+      final painted = harness.paintedStyleOf(tester, 'test.md');
       expect(filename, isNot(isA<LinkTextSpan>()));
-      expect(
-        filename.style?.color,
-        _TwakeLinkPreviewHarness.richTextStyle.color,
-      );
-      expect(filename.style?.decoration, isNot(TextDecoration.underline));
+      expect(painted.color, _TwakeLinkPreviewHarness.richTextStyle.color);
+      expect(painted.decoration, isNot(TextDecoration.underline));
     });
 
     testWidgets('keeps styling a web address as a link', (tester) async {

@@ -86,6 +86,21 @@ void main() {
       expect(filename.style.decoration, TextDecoration.none);
     });
 
+    testWidgets('keeps the nested formatting of a filename anchor', (
+      tester,
+    ) async {
+      final bold = await pumpAndFind(
+        tester,
+        '<p><a href="report.md"><b>my</b> report</a></p>',
+        'my',
+      );
+
+      expect(bold.span.recognizer, isNull);
+      expect(bold.style.fontWeight, FontWeight.bold);
+      expect(bold.style.color, _textStyle.color);
+      expect(bold.style.decoration, TextDecoration.none);
+    });
+
     testWidgets('keeps a web address as a link', (tester) async {
       final link = await pumpAndFind(
         tester,
