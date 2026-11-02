@@ -2,11 +2,6 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 
-class InviteUserInitial extends Success {
-  @override
-  List<Object?> get props => [];
-}
-
 class InviteUserLoading extends Success {
   @override
   List<Object?> get props => [];

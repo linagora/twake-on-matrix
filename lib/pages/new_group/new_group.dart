@@ -1,5 +1,4 @@
 import 'package:twake_chat/config/first_column_inner_routes.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/new_group/contacts_selection.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -18,7 +17,7 @@ class NewGroup extends ConsumerStatefulWidget {
 }
 
 class NewGroupController extends ContactsSelectionController<NewGroup> {
-  final responsiveUtils = getIt.get<ResponsiveUtils>();
+  final responsiveUtils = ResponsiveUtils();
 
   @override
   String getTitle(BuildContext context) {
