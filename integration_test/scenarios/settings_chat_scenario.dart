@@ -26,28 +26,37 @@ class SettingsChatToggleScenario extends BaseTestScenario {
     await chatRobot.waitForView();
     await chatRobot.switchTile(_title).waitUntilVisible();
 
-    final initialValue = chatRobot.isSwitchOn(_title);
+    final initialValue = await chatRobot.waitForStoredValue(_title);
     await chatRobot.toggleSwitch(_title);
 
-    await chatRobot.backToSettingScreen();
-    s.softAssertEquals(
-      $(SettingsView).exists,
-      true,
-      'did not navigate back to Setting View',
-    );
+    try {
+      await chatRobot.backToSettingScreen();
+      s.softAssertEquals(
+        $(SettingsView).exists,
+        true,
+        'did not navigate back to Setting View',
+      );
 
-    await settingRobot.openChatSetting();
-    await chatRobot.waitForView();
-    await chatRobot.switchTile(_title).waitUntilVisible();
-    s.softAssertEquals(
-      chatRobot.isSwitchOn(_title),
-      !initialValue,
-      '"$_title" was not persisted after reopening Settings > Chat',
-    );
-
-    // Restore the original value.
-    if (chatRobot.isSwitchOn(_title) != initialValue) {
-      await chatRobot.toggleSwitch(_title);
+      await settingRobot.openChatSetting();
+      await chatRobot.waitForView();
+      await chatRobot.switchTile(_title).waitUntilVisible();
+      s.softAssertEquals(
+        await chatRobot.waitForStoredValue(_title),
+        !initialValue,
+        '"$_title" was not persisted after reopening Settings > Chat',
+      );
+    } finally {
+      // Restore the original value, even if a step above failed.
+      if (!chatRobot.view().exists) {
+        if (!$(SettingsView).exists) {
+          await HomeRobot($).gotoSettingScreen();
+        }
+        await settingRobot.openChatSetting();
+        await chatRobot.waitForView();
+      }
+      if (await chatRobot.waitForStoredValue(_title) != initialValue) {
+        await chatRobot.toggleSwitch(_title);
+      }
     }
 
     s.verifyAll();
