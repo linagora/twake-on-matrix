@@ -97,13 +97,20 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         details: tapDownDetails,
         link: link,
       ),
-      linkBuilder: (url, childrenSpan, linkStyle) => buildNativeLinkSpan(
-        url: url,
-        childrenSpan: childrenSpan,
-        linkStyle: linkStyle,
-        onTapDown: (_) =>
-            UrlLauncher(context, url: url, room: room).launchUrl(),
-      ),
+      linkBuilder: (url, childrenSpan, linkStyle) =>
+          filenameLinkAsPlainText(
+            url: url,
+            childrenSpan: childrenSpan,
+            linkStyle: linkStyle,
+            textStyle: effectiveDefaultTextStyle,
+          ) ??
+          buildNativeLinkSpan(
+            url: url,
+            childrenSpan: childrenSpan,
+            linkStyle: linkStyle,
+            onTapDown: (_) =>
+                UrlLauncher(context, url: url, room: room).launchUrl(),
+          ),
       onPillTap: !room.isDirectChat
           ? (url) {
               UrlLauncher(context, url: url, room: room).launchUrl();

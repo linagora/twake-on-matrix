@@ -1,5 +1,6 @@
 import 'package:twake_chat/pages/chat/phone_number_context_menu_actions.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
@@ -15,6 +16,46 @@ import 'package:pull_down_button/pull_down_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 mixin LinkifyMixin {
+  /// Returns a plain [TextSpan] when [url] is a filename falsely detected as a
+  /// link (e.g. "test.md"), or null for a real link.
+  ///
+  /// The span keeps the tree of [childrenSpan] (inline widgets and nested
+  /// formatting) and [linkStyle] (which carries the inherited formatting such
+  /// as bold or italic). Only the color and decoration are taken from
+  /// [textStyle], so the filename looks like the text around it.
+  TextSpan? filenameLinkAsPlainText({
+    required String url,
+    required InlineSpan childrenSpan,
+    required TextStyle? linkStyle,
+    TextStyle? textStyle,
+  }) {
+    if (!isFilenameUrl(url)) return null;
+    return TextSpan(
+      style: _withoutLinkLook(linkStyle ?? const TextStyle(), textStyle),
+      children: [_withoutLinkLookSpan(childrenSpan, textStyle)],
+    );
+  }
+
+  TextStyle _withoutLinkLook(TextStyle style, TextStyle? textStyle) {
+    return style.copyWith(
+      color: textStyle?.color,
+      decoration: textStyle?.decoration ?? TextDecoration.none,
+      decorationColor: textStyle?.decorationColor,
+    );
+  }
+
+  InlineSpan _withoutLinkLookSpan(InlineSpan span, TextStyle? textStyle) {
+    if (span is! TextSpan) return span;
+    final style = span.style;
+    return TextSpan(
+      text: span.text,
+      style: style == null ? null : _withoutLinkLook(style, textStyle),
+      children: span.children
+          ?.map((child) => _withoutLinkLookSpan(child, textStyle))
+          .toList(),
+    );
+  }
+
   List<PhoneNumberContextMenuActions> get phoneNumberContextMenuOnWeb => [
     PhoneNumberContextMenuActions.copy,
   ];
