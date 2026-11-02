@@ -145,4 +145,18 @@ void main() {
     // Assert
     verifyNever(repository.setJoinRule(any, any));
   });
+
+  test('save_whenTheSectionIsHidden_sendsNothing', () async {
+    // Arrange
+    final container = createContainer(isPublicGroupsEnabled: false);
+
+    // Act
+    await container
+        .read(roomAccessControllerProvider(roomId).notifier)
+        .save(const RoomAccessDraft(joinRule: JoinRuleChoice.public));
+
+    // Assert
+    verifyNever(repository.setJoinRule(any, any));
+    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
+  });
 }

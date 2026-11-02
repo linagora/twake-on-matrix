@@ -357,10 +357,10 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
   }
 
   Future<void> _saveRoomAccess() async {
-    final provider = roomAccessControllerProvider(widget.roomId);
-    if (!ref.exists(provider)) return;
     try {
-      await ref.read(provider.notifier).save(roomAccessDraftNotifier.value);
+      await ref
+          .read(roomAccessControllerProvider(widget.roomId).notifier)
+          .save(roomAccessDraftNotifier.value);
       if (mounted) roomAccessDraftNotifier.value = const RoomAccessDraft();
     } on RoomAccessException catch (e) {
       if (!mounted) return;
