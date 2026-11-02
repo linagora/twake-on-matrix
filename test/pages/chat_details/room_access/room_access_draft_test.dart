@@ -109,4 +109,23 @@ void main() {
     // Assert
     expect(blocks, isFalse);
   });
+
+  test('isListedOn_withPublicPage_keepsTheSavedListing', () {
+    // Arrange
+    final withPage = saved.copyWith(
+      joinRule: JoinRuleChoice.public,
+      isListed: true,
+      hasPublicPage: true,
+    );
+    final draft = const RoomAccessDraft(
+      isListed: false,
+    ).choose(JoinRuleChoice.invite);
+
+    // Act
+    final isDirty = draft.isDirtyOn(withPage);
+
+    // Assert
+    expect(isDirty, isFalse);
+    expect(draft.isListedOn(withPage), isTrue);
+  });
 }

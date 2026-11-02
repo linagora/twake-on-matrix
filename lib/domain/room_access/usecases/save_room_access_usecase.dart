@@ -8,7 +8,9 @@ class SaveRoomAccessUseCase {
   final RoomAccessRepository _roomAccessRepository;
 
   /// Throws a `RoomAccessEncryptedException` when [roomId] is encrypted and
-  /// the change makes it public or listed.
+  /// the change makes it public or listed, and a
+  /// `RoomAccessPublicPageException` when its public page is on and the change
+  /// makes it private or unlisted.
   Future<void> execute(
     String roomId, {
     JoinRuleChoice? joinRule,
@@ -17,6 +19,12 @@ class SaveRoomAccessUseCase {
     final opensTheRoom = joinRule == JoinRuleChoice.public || isListed == true;
     if (opensTheRoom && _roomAccessRepository.isEncrypted(roomId)) {
       throw const RoomAccessEncryptedException();
+    }
+    final closesTheRoom =
+        (joinRule != null && joinRule != JoinRuleChoice.public) ||
+        isListed == false;
+    if (closesTheRoom && _roomAccessRepository.hasPublicPage(roomId)) {
+      throw const RoomAccessPublicPageException();
     }
     // The rule first: a room is never listed under a rule that was refused.
     if (joinRule != null) {

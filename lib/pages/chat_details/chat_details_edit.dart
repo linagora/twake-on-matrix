@@ -17,6 +17,7 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
@@ -368,6 +369,7 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
       TwakeSnackBar.show(context, switch (e) {
         RoomAccessEncryptedException() => l10n.roomAccessEncrypted,
         RoomAccessForbiddenException() => l10n.roomAccessForbidden,
+        RoomAccessPublicPageException() => l10n.roomAccessPublicPage,
         _ => l10n.oopsSomethingWentWrong,
       });
     }
@@ -471,13 +473,16 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     );
   }
 
+  /// D203: never encrypted while public or readable by anyone.
+  bool blocksEncryption(RoomAccess? access) =>
+      room?.joinRules == JoinRules.public ||
+      room?.historyVisibility == HistoryVisibility.worldReadable ||
+      roomAccessDraftNotifier.value.blocksEncryptionOn(access);
+
   void enableEncryption(_) async {
     if (room == null) return;
     final access = ref.read(roomAccessControllerProvider(widget.roomId)).value;
-    if (room!.joinRules == JoinRules.public ||
-        roomAccessDraftNotifier.value.blocksEncryptionOn(access)) {
-      return;
-    }
+    if (blocksEncryption(access)) return;
     if (room!.encrypted == true) {
       showOkAlertDialog(
         context: context,
@@ -602,7 +607,6 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     _setupGroupNameTextEditingController();
     _setupDescriptionTextEditingController();
     listenToPickAvatarUIState(context);
-    roomAccessDraftNotifier.addListener(() => setState(() {}));
     super.initState();
   }
 

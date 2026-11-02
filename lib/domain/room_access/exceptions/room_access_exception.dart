@@ -15,6 +15,11 @@ class RoomAccessEncryptedException extends RoomAccessException {
     : super('An encrypted room cannot be public or listed');
 }
 
+class RoomAccessPublicPageException extends RoomAccessException {
+  const RoomAccessPublicPageException()
+    : super('A room with a public page stays public and listed');
+}
+
 class RoomAccessForbiddenException extends RoomAccessException {
   const RoomAccessForbiddenException({required Object super.cause})
     : super('The server refused the change');

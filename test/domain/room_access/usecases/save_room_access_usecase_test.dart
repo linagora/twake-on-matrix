@@ -104,4 +104,39 @@ void main() {
       repository.setListed(roomId, isListed: false),
     ]);
   });
+
+  group('with the public page on', () {
+    setUp(() => when(repository.hasPublicPage(roomId)).thenReturn(true));
+
+    test('execute_privateRule_throwsAndSendsNothing', () async {
+      // Act
+      final result = useCase.execute(roomId, joinRule: JoinRuleChoice.knock);
+
+      // Assert
+      await expectLater(result, throwsA(isA<RoomAccessPublicPageException>()));
+      verifyNever(repository.setJoinRule(any, any));
+    });
+
+    test('execute_unlisting_throwsAndSendsNothing', () async {
+      // Act
+      final result = useCase.execute(roomId, isListed: false);
+
+      // Assert
+      await expectLater(result, throwsA(isA<RoomAccessPublicPageException>()));
+      verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
+    });
+
+    test('execute_publicAndListed_isAllowed', () async {
+      // Act
+      await useCase.execute(
+        roomId,
+        joinRule: JoinRuleChoice.public,
+        isListed: true,
+      );
+
+      // Assert
+      verify(repository.setJoinRule(roomId, JoinRuleChoice.public)).called(1);
+      verify(repository.setListed(roomId, isListed: true)).called(1);
+    });
+  });
 }

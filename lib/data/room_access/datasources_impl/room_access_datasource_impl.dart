@@ -8,6 +8,8 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
 
   final Client? _client;
 
+  static const _publicPageType = 'app.twake.chat.public_page';
+
   static const _joinRules = {
     JoinRuleChoice.invite: JoinRules.invite,
     JoinRuleChoice.knock: JoinRules.knock,
@@ -31,6 +33,9 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
   bool isEncrypted(String roomId) => _room(roomId).encrypted;
 
   @override
+  bool hasPublicPage(String roomId) => _hasPublicPage(_room(roomId));
+
+  @override
   Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule) =>
       _guard(() => _room(roomId).setJoinRules(_joinRules[joinRule]!));
 
@@ -48,13 +53,16 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
     return room;
   }
 
-  ({JoinRules? joinRule, bool isEncrypted, bool canChange}) _stateOf(
-    Room room,
-  ) => (
+  ({JoinRules? joinRule, bool isEncrypted, bool canChange, bool hasPublicPage})
+  _stateOf(Room room) => (
     joinRule: room.joinRules,
     isEncrypted: room.encrypted,
     canChange: room.canChangeJoinRules && !room.isDirectChat,
+    hasPublicPage: _hasPublicPage(room),
   );
+
+  bool _hasPublicPage(Room room) =>
+      room.getState(_publicPageType)?.content.tryGet<bool>('enabled') == true;
 
   Future<RoomAccess> _accessOf(Room room) async {
     final state = _stateOf(room);
@@ -66,6 +74,7 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
       isListed: state.canChange && await _isListed(room),
       isEncrypted: state.isEncrypted,
       canChange: state.canChange,
+      hasPublicPage: state.hasPublicPage,
     );
   }
 
@@ -88,7 +97,8 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
     } on RoomAccessException {
       rethrow;
     } on MatrixException catch (e) {
-      if (e.error == MatrixError.M_FORBIDDEN) {
+      // Synapse refuses a publication with M_UNKNOWN and a 403 too.
+      if (e.error == MatrixError.M_FORBIDDEN || e.response?.statusCode == 403) {
         throw RoomAccessForbiddenException(cause: e);
       }
       throw RoomAccessSaveFailedException(cause: e);

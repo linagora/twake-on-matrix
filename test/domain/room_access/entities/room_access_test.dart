@@ -45,4 +45,19 @@ void main() {
     expect(rules, JoinRuleChoice.values);
     expect(access.offersListing, isTrue);
   });
+
+  test('offeredJoinRules_withPublicPage_offersOnlyPublic', () {
+    // Arrange
+    final access = invite.copyWith(
+      joinRule: JoinRuleChoice.public,
+      isListed: true,
+      hasPublicPage: true,
+    );
+
+    // Act
+    final rules = access.offeredJoinRules;
+
+    // Assert
+    expect(rules, [JoinRuleChoice.public]);
+  });
 }

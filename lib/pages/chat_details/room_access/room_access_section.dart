@@ -59,12 +59,7 @@ class RoomAccessSection extends ConsumerWidget {
               ),
           Padding(
             padding: _textPadding,
-            child: Text(
-              saved.isEncrypted
-                  ? l10n.roomAccessEncrypted
-                  : l10n.roomAccessHelp,
-              style: textStyle,
-            ),
+            child: Text(_helpOf(l10n, saved), style: textStyle),
           ),
           if (saved.offersListing)
             LinagoraSettingItem.selectable(
@@ -73,6 +68,7 @@ class RoomAccessSection extends ConsumerWidget {
               subtitleMaxLines: null,
               padding: _togglePadding,
               value: chosen.isListedOn(saved),
+              enabled: !saved.hasPublicPage,
               onChanged: (isListed) =>
                   draft.value = chosen.copyWith(isListed: isListed),
             )
@@ -81,6 +77,12 @@ class RoomAccessSection extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _helpOf(L10n l10n, RoomAccess saved) {
+    if (saved.hasPublicPage) return l10n.roomAccessPublicPage;
+    if (saved.isEncrypted) return l10n.roomAccessEncrypted;
+    return l10n.roomAccessHelp;
   }
 
   String _ruleTitle(L10n l10n, JoinRuleChoice rule) => switch (rule) {

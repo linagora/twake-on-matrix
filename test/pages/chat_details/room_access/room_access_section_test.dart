@@ -150,4 +150,30 @@ void main() {
         .map((item) => item.title);
     expect(titles, ['Invite only', 'On request', 'Public']);
   });
+
+  testWidgets('build_withPublicPage_locksPublicAndTheListing', (tester) async {
+    // Act
+    await pumpSection(
+      tester,
+      access: invite.copyWith(
+        joinRule: JoinRuleChoice.public,
+        isListed: true,
+        hasPublicPage: true,
+      ),
+    );
+
+    // Assert
+    final titles = tester
+        .widgetList<LinagoraRadioItem>(find.byType(LinagoraRadioItem))
+        .map((item) => item.title);
+    expect(titles, ['Public']);
+    final listed = tester.widget<LinagoraSettingItem>(
+      find.byType(LinagoraSettingItem),
+    );
+    expect(listed.enabled, isFalse);
+    expect(
+      find.text('The public web page is on: the room stays public and listed.'),
+      findsOneWidget,
+    );
+  });
 }

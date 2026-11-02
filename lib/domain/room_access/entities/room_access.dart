@@ -14,17 +14,22 @@ abstract class RoomAccess with _$RoomAccess {
     required bool isListed,
     required bool isEncrypted,
     required bool canChange,
+
+    /// While the public web page is on, the room stays public and listed.
+    @Default(false) bool hasPublicPage,
   }) = _RoomAccess;
 
   /// An encrypted room keeps what it already has, so it can be taken out.
-  List<JoinRuleChoice> get offeredJoinRules => JoinRuleChoice.values
-      .where(
-        (rule) =>
-            rule != JoinRuleChoice.public ||
-            !isEncrypted ||
-            joinRule == JoinRuleChoice.public,
-      )
-      .toList();
+  List<JoinRuleChoice> get offeredJoinRules => hasPublicPage
+      ? const [JoinRuleChoice.public]
+      : JoinRuleChoice.values
+            .where(
+              (rule) =>
+                  rule != JoinRuleChoice.public ||
+                  !isEncrypted ||
+                  joinRule == JoinRuleChoice.public,
+            )
+            .toList();
 
   bool get offersListing => !isEncrypted || isListed;
 }

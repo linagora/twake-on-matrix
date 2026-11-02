@@ -38,15 +38,6 @@ class ChatDetailsEditView extends ConsumerWidget {
     final access = ref
         .watch(roomAccessControllerProvider(controller.widget.roomId))
         .value;
-    final draft = controller.roomAccessDraftNotifier.value;
-    final isAccessEdited = draft.isDirtyOn(access);
-    final isPublic =
-        controller.room?.joinRules == JoinRules.public ||
-        draft.blocksEncryptionOn(access);
-    final canEnableEncryption =
-        controller.room?.encrypted == false &&
-        controller.room?.canEnableEncryption == true &&
-        !isPublic;
     if (controller.room == null) {
       return Scaffold(
         backgroundColor: LinagoraSysColors.material().onPrimary,
@@ -78,28 +69,31 @@ class ChatDetailsEditView extends ConsumerWidget {
         withDivider: true,
         actions: [
           ValueListenableBuilder(
-            valueListenable: controller.isValidGroupNameNotifier,
-            builder: (context, isValid, child) {
-              return ValueListenableBuilder(
-                valueListenable: controller.isEditedGroupInfoNotifier,
-                builder: (context, value, child) {
-                  if ((!value && !isAccessEdited) || !isValid) {
-                    return const SizedBox.shrink();
-                  }
-                  return child!;
-                },
-                child: Padding(
-                  padding: ChatDetailEditViewStyle.doneIconPadding,
-                  child: IconButton(
-                    highlightColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    splashColor: Colors.transparent,
-                    onPressed: () => controller.handleSaveAction(context),
-                    icon: const Icon(Icons.done),
+            valueListenable: controller.roomAccessDraftNotifier,
+            builder: (context, draft, _) => ValueListenableBuilder(
+              valueListenable: controller.isValidGroupNameNotifier,
+              builder: (context, isValid, child) {
+                return ValueListenableBuilder(
+                  valueListenable: controller.isEditedGroupInfoNotifier,
+                  builder: (context, value, child) {
+                    if ((!value && !draft.isDirtyOn(access)) || !isValid) {
+                      return const SizedBox.shrink();
+                    }
+                    return child!;
+                  },
+                  child: Padding(
+                    padding: ChatDetailEditViewStyle.doneIconPadding,
+                    child: IconButton(
+                      highlightColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onPressed: () => controller.handleSaveAction(context),
+                      icon: const Icon(Icons.done),
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
         context: context,
@@ -231,9 +225,19 @@ class ChatDetailsEditView extends ConsumerWidget {
                   const SizedBox(height: ChatDetailEditViewStyle.textFieldsGap),
                   _DescriptionField(controller: controller),
                   const SizedBox(height: 20),
-                  ValueListenableBuilder(
-                    valueListenable: controller.isRoomEnabledEncryptionNotifier,
-                    builder: (context, isRoomEnabledEncryption, child) {
+                  ListenableBuilder(
+                    listenable: Listenable.merge([
+                      controller.isRoomEnabledEncryptionNotifier,
+                      controller.roomAccessDraftNotifier,
+                    ]),
+                    builder: (context, child) {
+                      final isRoomEnabledEncryption =
+                          controller.isRoomEnabledEncryptionNotifier.value;
+                      final isPublic = controller.blocksEncryption(access);
+                      final canEnableEncryption =
+                          controller.room?.encrypted == false &&
+                          controller.room?.canEnableEncryption == true &&
+                          !isPublic;
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,

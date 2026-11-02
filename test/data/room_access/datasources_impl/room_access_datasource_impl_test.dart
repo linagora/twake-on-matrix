@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
 import 'package:matrix/src/utils/cached_stream_controller.dart';
@@ -121,13 +122,37 @@ void main() {
     await expectLater(result, throwsA(isA<RoomAccessRoomNotFoundException>()));
   });
 
-  test('setJoinRule_public_sendsThePublicRule', () async {
+  test('watchRoomAccess_withPublicPage_saysSo', () async {
+    // Arrange
+    when(room.getState('app.twake.chat.public_page')).thenReturn(
+      StrippedStateEvent(
+        type: 'app.twake.chat.public_page',
+        content: {'enabled': true},
+        senderId: '@admin:example.com',
+        stateKey: '',
+      ),
+    );
+
     // Act
-    await datasource.setJoinRule(roomId, JoinRuleChoice.public);
+    final access = await datasource.watchRoomAccess(roomId).first;
 
     // Assert
-    verify(room.setJoinRules(JoinRules.public)).called(1);
+    expect(access.hasPublicPage, isTrue);
   });
+
+  for (final (choice, rule) in [
+    (JoinRuleChoice.invite, JoinRules.invite),
+    (JoinRuleChoice.knock, JoinRules.knock),
+    (JoinRuleChoice.public, JoinRules.public),
+  ]) {
+    test('setJoinRule_${choice.name}_sendsThe${rule.name}Rule', () async {
+      // Act
+      await datasource.setJoinRule(roomId, choice);
+
+      // Assert
+      verify(room.setJoinRules(rule)).called(1);
+    });
+  }
 
   test('setListed_true_publishesTheRoom', () async {
     // Act
@@ -140,6 +165,35 @@ void main() {
         visibility: Visibility.public,
       ),
     ).called(1);
+  });
+
+  test('setListed_false_unpublishesTheRoom', () async {
+    // Act
+    await datasource.setListed(roomId, isListed: false);
+
+    // Assert
+    verify(
+      client.setRoomVisibilityOnDirectory(
+        roomId,
+        visibility: Visibility.private,
+      ),
+    ).called(1);
+  });
+
+  test('setListed_refusedByPublicationRules_throwsForbidden', () async {
+    // Arrange
+    when(
+      client.setRoomVisibilityOnDirectory(
+        roomId,
+        visibility: anyNamed('visibility'),
+      ),
+    ).thenThrow(MatrixException(http.Response('{"errcode":"M_UNKNOWN"}', 403)));
+
+    // Act
+    final result = datasource.setListed(roomId, isListed: true);
+
+    // Assert
+    await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
   });
 
   test('setListed_forbidden_throwsForbidden', () async {

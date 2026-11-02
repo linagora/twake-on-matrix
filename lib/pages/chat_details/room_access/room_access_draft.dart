@@ -27,7 +27,9 @@ abstract class RoomAccessDraft with _$RoomAccessDraft {
 
   bool isListedOn(RoomAccess saved) {
     final chosen = isListed;
-    return chosen != null && saved.offersListing ? chosen : saved.isListed;
+    return chosen != null && saved.offersListing && !saved.hasPublicPage
+        ? chosen
+        : saved.isListed;
   }
 
   JoinRuleChoice? changedJoinRuleOn(RoomAccess saved) {

@@ -7,6 +7,8 @@ abstract class RoomAccessDatasource {
 
   bool isEncrypted(String roomId);
 
+  bool hasPublicPage(String roomId);
+
   Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule);
 
   Future<void> setListed(String roomId, {required bool isListed});
