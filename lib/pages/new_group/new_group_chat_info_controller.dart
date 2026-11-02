@@ -32,6 +32,13 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
       rethrow;
     }
     if (!ref.mounted || roomId == null) return;
+    await _inviteThenFinish(roomId, request);
+  }
+
+  Future<void> _inviteThenFinish(
+    String roomId,
+    CreateNewGroupChatRequest request,
+  ) async {
     InviteUserPartialFailureException? inviteFailure;
     try {
       inviteFailure = await _invite(roomId, request.invite);
