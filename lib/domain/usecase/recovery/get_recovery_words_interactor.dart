@@ -4,7 +4,6 @@ import 'package:twake_chat/domain/app_state/recovery_words/get_recovery_words_fa
 import 'package:twake_chat/domain/app_state/recovery_words/get_recovery_words_success.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
 import 'package:twake_chat/domain/repository/recovery_words_repository.dart';
-import 'package:matrix/matrix.dart';
 
 class GetRecoveryWordsInteractor {
   final RecoveryWordsRepository _recoveryWordsRepository = getIt
@@ -16,8 +15,7 @@ class GetRecoveryWordsInteractor {
       final RecoveryWords response = await _recoveryWordsRepository
           .getRecoveryWords();
       return Right(GetRecoveryWordsSuccess(words: response));
-    } catch (e, s) {
-      Logs().wtf('GetRecoveryWordsInteractor::execute()', e, s);
+    } catch (e) {
       return Left(GetRecoveryWordsFailed(exception: e));
     }
   }

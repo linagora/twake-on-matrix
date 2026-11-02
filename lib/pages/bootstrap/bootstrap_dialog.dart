@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/keychain_sharing/tom_encryption_reset_service.dart';
+import 'package:twake_chat/domain/keychain_sharing/tom_encryption_reset_service.provider.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_modal_chrome.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_state.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_view_model.dart';
@@ -37,9 +38,11 @@ class BootstrapDialog extends ConsumerWidget {
   /// dialog of its own; accounts without a ToM backend have nowhere to
   /// recover a lost key from, so they fall back to the legacy local
   /// bootstrap flow via [TomBootstrapDialog].
-  Future<bool> _resetEncryption(BuildContext context) async {
+  Future<bool> _resetEncryption(BuildContext context, WidgetRef ref) async {
     if (Matrix.of(context).twakeSupported) {
-      final result = await TomEncryptionResetService(client: client).reset();
+      final result = await ref
+          .read(tomEncryptionResetServiceProvider(client))
+          .reset();
       if (!context.mounted) return result == TomEncryptionResetResult.success;
       switch (result) {
         case TomEncryptionResetResult.success:
@@ -74,7 +77,7 @@ class BootstrapDialog extends ConsumerWidget {
       BootstrapVerifyDeviceState() => VerifyDeviceScreen(
         client: client,
         wipe: wipe,
-        onResetEncryption: () => _resetEncryption(context),
+        onResetEncryption: () => _resetEncryption(context, ref),
         options: [
           VerifyDeviceOption(
             icon: Icons.smartphone_outlined,

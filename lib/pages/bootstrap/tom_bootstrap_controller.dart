@@ -3,25 +3,29 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/recovery/unlock_ssss_state.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
+import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.dart';
+import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.dart';
+import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.provider.dart';
 import 'package:twake_chat/domain/usecase/recovery/unlock_ssss_with_recovery_key_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
-import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_providers.dart';
+import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.provider.dart';
+import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.provider.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_state.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/encryption/utils/bootstrap.dart';
 import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'tom_bootstrap_view_model.g.dart';
+part 'tom_bootstrap_controller.g.dart';
 
 @riverpod
-class TomBootstrapViewModel extends _$TomBootstrapViewModel {
+class TomBootstrapController extends _$TomBootstrapController {
   static const noRecoveryWordsCloseDelay = Duration(seconds: 5);
 
   late final SaveRecoveryWordsInteractor _saveRecoveryWordsInteractor;
-  late final GetRecoveryWordsInteractor _getRecoveryWordsInteractor;
+  late final GetRecoveryWordsUseCase _getRecoveryWordsUseCase;
   late final DeleteRecoveryWordsInteractor _deleteRecoveryWordsInteractor;
   late final UnlockSsssWithRecoveryKeyInteractor
   _unlockSsssWithRecoveryKeyInteractor;
@@ -32,7 +36,7 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
   int _popTick = 0;
 
   @override
-  TomBootstrapUiState build(
+  TomBootstrapState build(
     Client client, {
     required bool wipe,
     required bool wipeRecovery,
@@ -41,7 +45,7 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
     _saveRecoveryWordsInteractor = ref.read(
       saveRecoveryWordsInteractorProvider,
     );
-    _getRecoveryWordsInteractor = ref.read(getRecoveryWordsInteractorProvider);
+    _getRecoveryWordsUseCase = ref.read(getRecoveryWordsUseCaseProvider);
     _deleteRecoveryWordsInteractor = ref.read(
       deleteRecoveryWordsInteractorProvider,
     );
@@ -64,7 +68,7 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
   /// two terminal states of the same subtype would otherwise compare equal
   /// via [Equatable] and Riverpod would skip the notification, silently
   /// dropping the pop/snackbar side effect.
-  void _refresh(TomBootstrapUiState Function({int popTick}) build) {
+  void _refresh(TomBootstrapState Function({int popTick}) build) {
     if (!ref.mounted) return;
     _popTick++;
     state = build(popTick: _popTick);
@@ -88,8 +92,11 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
   }
 
   Future<RecoveryWords?> _getRecoveryWords() async {
-    final result = await _getRecoveryWordsInteractor.execute();
-    return result.fold((failure) => null, (success) => success.words);
+    try {
+      return await _getRecoveryWordsUseCase.execute();
+    } on GetRecoveryWordsException {
+      return null;
+    }
   }
 
   void _createBootstrap() {
@@ -152,7 +159,7 @@ class TomBootstrapViewModel extends _$TomBootstrapViewModel {
             .then((_) => _handleNewRecoveryKeyCreated())
             .catchError((Object e, StackTrace s) {
               Logs().w(
-                'TomBootstrapViewModel::_handleBootstrapState() newSsss failed',
+                'TomBootstrapController::_handleBootstrapState() newSsss failed',
                 e,
                 s,
               );
