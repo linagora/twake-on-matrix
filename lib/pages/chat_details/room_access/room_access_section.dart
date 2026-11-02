@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/domain/room_access/entities/room_access.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_edit_category.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 
@@ -41,7 +42,7 @@ class RoomAccessSection extends ConsumerWidget {
       builder: (context, chosen, _) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          LinagoraSectionHeader(label: l10n.roomAccessTitle),
+          ChatDetailsEditCategory(title: l10n.roomAccessTitle),
           if (saved.joinRule == null)
             Padding(
               padding: _textPadding,

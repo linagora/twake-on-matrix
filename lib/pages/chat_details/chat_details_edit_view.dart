@@ -3,6 +3,7 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
+import 'package:twake_chat/pages/chat_details/chat_details_edit_category.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_option.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
@@ -289,13 +290,13 @@ class ChatDetailsEditView extends ConsumerWidget {
                       );
                     },
                   ),
-                  RoomAccessSection(
-                    roomId: controller.widget.roomId,
-                    draft: controller.roomAccessDraftNotifier,
-                  ),
                   const SizedBox(height: 16),
                 ],
               ),
+            ),
+            RoomAccessSection(
+              roomId: controller.widget.roomId,
+              draft: controller.roomAccessDraftNotifier,
             ),
             if (controller.room?.canAssignRoles == true)
               StreamBuilder(
@@ -303,19 +304,8 @@ class ChatDetailsEditView extends ConsumerWidget {
                 builder: (context, snapshot) {
                   return Column(
                     children: [
-                      Container(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        alignment: Alignment.centerLeft,
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          L10n.of(context)!.administration,
-                          style:
-                              ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
-                                context,
-                              ),
-                        ),
+                      ChatDetailsEditCategory(
+                        title: L10n.of(context)!.administration,
                       ),
                       ChatDetailsEditOption(
                         title: L10n.of(context)!.assignRoles,
@@ -365,18 +355,7 @@ class ChatDetailsEditView extends ConsumerWidget {
                 },
               ),
             if (!controller.isSupportChat) ...[
-              Container(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  L10n.of(context)!.dangerZone,
-                  style:
-                      ChatDetailEditViewStyle.textChatDetailsEditCategoryStyle(
-                        context,
-                      ),
-                ),
-              ),
+              ChatDetailsEditCategory(title: L10n.of(context)!.dangerZone),
               ChatDetailsEditOption(
                 title: L10n.of(context)!.commandHint_leave,
                 subtitle: L10n.of(context)!.leaveGroupSubtitle,
