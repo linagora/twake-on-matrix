@@ -31,12 +31,23 @@ class _ChatDetailsGroupInformationViewState
   late final LinagoraRefColors refColors;
   late final LinagoraSysColors sysColors;
   bool isTextSelected = false;
+  final GlobalKey _displayNameKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     refColors = LinagoraRefColors.material();
     sysColors = LinagoraSysColors.material();
+  }
+
+  /// Taps on the group name are left to the [SelectionArea] so the name can
+  /// be selected and copied without toggling the avatar.
+  bool _isOnDisplayName(Offset globalPosition) {
+    final renderBox =
+        _displayNameKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.hasSize) return false;
+    final localPosition = renderBox.globalToLocal(globalPosition);
+    return renderBox.size.contains(localPosition);
   }
 
   @override
@@ -52,7 +63,10 @@ class _ChatDetailsGroupInformationViewState
       },
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () {
+        onTapUp: (details) {
+          if (_isOnDisplayName(details.globalPosition)) {
+            return;
+          }
           if (!isTextSelected) {
             widget.onTap?.call();
             return;
@@ -81,6 +95,7 @@ class _ChatDetailsGroupInformationViewState
                 ).transform(widget.animationController.value),
                 child: Text(
                   widget.displayName ?? '',
+                  key: _displayNameKey,
                   style: textTheme.titleLarge?.copyWith(
                     color: ColorTween(
                       begin: sysColors.onSurface,
