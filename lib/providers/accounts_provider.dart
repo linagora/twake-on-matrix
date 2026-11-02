@@ -65,7 +65,9 @@ class Accounts extends _$Accounts {
   /// for [id]. It completes normally when the switch is completed and throws
   /// the error of `failSwitch`, or [SwitchSupersededException] when a newer
   /// switch replaces it: callers have to catch it. Without a registered
-  /// handler it ends at once, with none of the side effects of the switch.
+  /// handler it ends at once, with none of the side effects of the switch. It
+  /// also ends normally, and changes nothing, when [id] is already active and
+  /// when the container is disposed meanwhile.
   Future<void> switchTo(AccountId id) async {
     await _mutations;
     if (!ref.mounted) return;
@@ -201,7 +203,9 @@ class Accounts extends _$Accounts {
   }
 
   Future<void> _serialized(Future<void> Function() action) {
-    final run = _mutations.then((_) => action()).onError<_Disposed>((_, _) {});
+    final run = _mutations
+        .then((_) => ref.mounted ? action() : throw const _Disposed())
+        .onError<_Disposed>((_, _) {});
     _mutations = run.then((_) {}, onError: (_) {});
     return run;
   }

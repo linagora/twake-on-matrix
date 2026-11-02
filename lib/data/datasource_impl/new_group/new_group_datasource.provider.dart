@@ -7,4 +7,4 @@ part 'new_group_datasource.provider.g.dart';
 
 @riverpod
 NewGroupDatasource newGroupDatasource(Ref ref) =>
-    NewGroupDatasourceImpl(ref.watch(activeMatrixClientProvider).client);
+    NewGroupDatasourceImpl(ref.watch(activeMatrixClientProvider));

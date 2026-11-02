@@ -14,10 +14,10 @@ import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_state.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../../domain/user_info/fake_user_info_repository.dart';
+import '../../../providers/fake_active_account.dart';
 
 class _FakeClient extends Fake implements Client {
   @override
@@ -230,11 +230,12 @@ void main() {
     );
     final container = ProviderContainer.test(
       retry: (_, _) => null,
-      overrides: [userInfoRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        userInfoRepositoryProvider.overrideWithValue(repository),
+        ...activeAccountOverridesFollowing(),
+      ],
     );
-    container
-        .read(activeMatrixClientProvider.notifier)
-        .setClient(_FakeClient());
+    container.read(fakeActiveAccountProvider.notifier).set(_FakeClient());
     await pumpScreen(tester, container);
     await tester.pumpAndSettle();
 

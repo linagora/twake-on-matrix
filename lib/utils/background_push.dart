@@ -30,6 +30,7 @@ import 'package:twake_chat/domain/model/extensions/push/push_notification_extens
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
+import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/client_logout.dart';
 import 'package:twake_chat/utils/push_helper.dart';
@@ -686,12 +687,20 @@ class BackgroundPush {
     return null;
   }
 
+  /// [client] is set once and does not follow the active account: when its
+  /// account logged out and another one stays, a client the app already runs
+  /// for that one serves the push.
+  Client get _pushClient => ClientManager.serving(
+    client,
+    _matrixState?.currentClients.whereType<Client>() ?? const [],
+  );
+
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
-      client: client,
+      client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
       onSelectNotification: (data) =>
@@ -827,7 +836,7 @@ class BackgroundPush {
     data['devices'] ??= [];
     await pushHelper(
       PushNotification.fromJson(data),
-      client: client,
+      client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
     );

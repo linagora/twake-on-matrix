@@ -151,15 +151,28 @@ void main() {
       );
     });
 
-    test('is rejected while Booting or Switching', () {
+    test('is rejected while Booting', () {
       expect(
         () => _transitions.add(const Booting(), a),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
+    });
+
+    test('add while Switching appends and keeps the switch running', () {
+      expect(
+        _transitions.add(
+          Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
+          c,
+        ),
+        Switching(accounts: [a, b, c], from: 'a', to: 'b', seq: 1),
+      );
+    });
+
+    test('add while Switching rejects a listed account', () {
       expect(
         () => _transitions.add(
           Switching(accounts: [a, b], from: 'a', to: 'b', seq: 1),
-          c,
+          b,
         ),
         throwsA(isA<InvalidAccountTransitionException>()),
       );
@@ -550,7 +563,7 @@ void main() {
       'Booting': () => _transitions.add(const Booting(), a),
       'NoAccount': () => _transitions.completeSwitch(const NoAccount(), 1),
       'Active': () => _transitions.completeSwitch(active, 1),
-      'Switching': () => _transitions.add(switching, c),
+      'Switching': () => _transitions.add(switching, b),
       'LastLoggedOut': () =>
           _transitions.completeSwitch(LastLoggedOut(account: _out('a')), 1),
     };

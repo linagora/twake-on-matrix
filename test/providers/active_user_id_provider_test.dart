@@ -150,6 +150,7 @@ void main() {
         final (state, client, userId) = entry.value;
         final registry = AccountClientRegistry()..adoptOnce([a, b]);
         final fixed = ProviderContainer.test(
+          retry: (_, _) => null,
           overrides: [
             accountsDriveActiveClientProvider.overrideWithValue(true),
             accountsProvider.overrideWith(() => _FixedAccounts(state)),
@@ -170,7 +171,7 @@ void _legacyPushTests() {
       'both follow the client MatrixState pushes, with no boot override',
       () {
         final a = _SdkClient('a', userId: '@a:s');
-        final container = ProviderContainer.test();
+        final container = ProviderContainer.test(retry: (_, _) => null);
         expect(container.read(activeMatrixClientProvider), isNull);
         expect(container.read(activeUserIdProvider), isNull);
 
@@ -183,6 +184,20 @@ void _legacyPushTests() {
         expect(container.read(activeUserIdProvider), isNull);
       },
     );
+
+    test('pushing the same client again after the SDK logged it in in place '
+        'updates the user id', () {
+      final a = _SdkClient('a');
+      final container = ProviderContainer.test(retry: (_, _) => null);
+      container.read(legacyActiveClientProvider.notifier).setClient(a);
+      expect(container.read(activeUserIdProvider), isNull);
+
+      a.logIn('@a:s');
+      container.read(legacyActiveClientProvider.notifier).setClient(a);
+
+      expect(container.read(activeMatrixClientProvider), same(a));
+      expect(container.read(activeUserIdProvider), '@a:s');
+    });
   });
 }
 

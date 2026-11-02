@@ -7,7 +7,7 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 
 void main() {
   test('each service is one instance for the whole container', () {
-    final container = ProviderContainer.test();
+    final container = ProviderContainer.test(retry: (_, _) => null);
 
     expect(
       container.read(clientSubscriptionsProvider),
@@ -42,7 +42,7 @@ void main() {
   }.entries) {
     test('the ${entry.key} stop retrying when the container is disposed', () {
       fakeAsync((async) {
-        final container = ProviderContainer.test();
+        final container = ProviderContainer.test(retry: (_, _) => null);
         final removals = container.read(entry.value);
         var tries = 0;
         removals.remove(
@@ -71,7 +71,7 @@ void main() {
   test(
     'the subscriptions are cancelled when the container is disposed',
     () async {
-      final container = ProviderContainer.test();
+      final container = ProviderContainer.test(retry: (_, _) => null);
       final subscriptions = container.read(clientSubscriptionsProvider);
       var cancelled = false;
       subscriptions

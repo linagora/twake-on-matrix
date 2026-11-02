@@ -9,9 +9,3 @@ PrunePendingPushRemovalsUseCase prunePendingPushRemovalsUseCase(Ref ref) =>
     PrunePendingPushRemovalsUseCase(
       repository: ref.watch(accountRepositoryProvider),
     );
-
-@riverpod
-RetryablePushRemovalsUseCase retryablePushRemovalsUseCase(Ref ref) =>
-    RetryablePushRemovalsUseCase(
-      repository: ref.watch(accountRepositoryProvider),
-    );

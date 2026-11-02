@@ -9,7 +9,7 @@ void main() {
     final previous = Logs().onLog;
     Logs().onLog = events.add;
     addTearDown(() => Logs().onLog = previous);
-    final container = ProviderContainer.test();
+    final container = ProviderContainer.test(retry: (_, _) => null);
     final error = Exception('/logout failed');
     final stackTrace = StackTrace.current;
 

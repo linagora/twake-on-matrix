@@ -33,7 +33,8 @@ class AccountTransitions {
 
   /// Registers a logged-in [account]. After the last logout only that same
   /// account can come back. From [Active] the active account does
-  /// not change; follow with [beginSwitch] to make it active. From [NoAccount]
+  /// not change; follow with [beginSwitch] to make it active. From [Switching]
+  /// the running switch goes on. From [NoAccount]
   /// the accounts that wait for their removal stay listed.
   AccountsState add(AccountsState state, Account account) {
     if (!account.isLoggedIn) {
@@ -45,6 +46,15 @@ class AccountTransitions {
       Active(:final accounts, :final activeId)
           when !_support.has(accounts, account.id) =>
         Active(accounts: [...accounts, account], activeId: activeId),
+      // A switch keeps running: add never changes the active account.
+      Switching(:final accounts, :final from, :final to, :final seq)
+          when !_support.has(accounts, account.id) =>
+        Switching(
+          accounts: [...accounts, account],
+          from: from,
+          to: to,
+          seq: seq,
+        ),
       LastLoggedOut(account: final last) when last.id == account.id => Active(
         accounts: [account],
         activeId: account.id,

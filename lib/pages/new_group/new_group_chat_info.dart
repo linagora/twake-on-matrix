@@ -109,7 +109,7 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
       isUploadingAvatar || ref.read(newGroupChatInfoControllerProvider).isBusy;
 
   void moveToGroupChatScreen() {
-    final client = ref.read(activeMatrixClientProvider).client;
+    final client = ref.read(activeMatrixClientProvider);
     if (client == null) return;
     if (PlatformInfos.isMobile) {
       groupNameFocusNode.unfocus();

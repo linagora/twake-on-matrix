@@ -251,6 +251,10 @@ class LogoutRemovals {
   /// one, as the server's newest word. Other removals are not held off.
   void _holdOffFor(_Removal removal, Duration? asked) {
     if (asked == null || _disposed) return;
+    // A background round armed earlier would fire before the wait ends: it is
+    // armed again once this run ends, with the wait in its delay.
+    removal.timer?.cancel();
+    removal.timer = null;
     removal.rateLimit?.cancel();
     removal.rateLimit = Timer(asked, () => removal.rateLimit = null);
   }

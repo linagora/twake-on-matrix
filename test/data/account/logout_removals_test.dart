@@ -655,6 +655,29 @@ void main() {
         );
       });
 
+      // https://spec.matrix.org/v1.16/client-server-api/#rate-limiting
+      test('a delay met after a background round was armed delays that '
+          'round too', () {
+        fakeAsync((async) {
+          failing.add('remove:a');
+          run('a');
+          async.flushMicrotasks();
+          async.elapse(const Duration(seconds: 30));
+          errors['remove:a'] = limit(retryAfter: '600');
+
+          // The app asks again before the armed round: the server answers
+          // with a wait that is longer than what is left of that round.
+          removals.retryAll();
+          async.flushMicrotasks();
+          final before = tries();
+          async.elapse(const Duration(seconds: 599));
+
+          expect(tries(), before);
+          async.elapse(const Duration(seconds: 1));
+          expect(tries(), before + 1);
+        });
+      });
+
       test('only delays the next round: the delay is not kept', () {
         fakeAsync((async) {
           errors['remove:a'] = limit(retryAfter: '600');

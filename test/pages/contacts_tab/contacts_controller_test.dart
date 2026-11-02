@@ -82,13 +82,13 @@ void main() {
   tearDown(() => repository.dispose());
 
   ProviderContainer buildContainer() {
-    final container = ProviderContainer(
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
       overrides: [
         currentUserIdProvider.overrideWithValue(userId),
         contactSyncServiceProvider.overrideWith((ref, _) => service),
       ],
     );
-    addTearDown(container.dispose);
     return container;
   }
 
@@ -179,7 +179,8 @@ void main() {
     ProviderContainer buildWiredContainer({
       List<ContactSource> sources = const [],
     }) {
-      final container = ProviderContainer(
+      final container = ProviderContainer.test(
+        retry: (_, _) => null,
         overrides: [
           activeMatrixClientProvider.overrideWithValue(null),
           activeUserIdProvider.overrideWith((ref) => ref.watch(_activeUser)),
@@ -195,7 +196,6 @@ void main() {
           ),
         ],
       );
-      addTearDown(container.dispose);
       return container;
     }
 

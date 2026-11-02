@@ -16,9 +16,9 @@ import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 import 'new_group_chat_info_controller_test.mocks.dart';
+import '../../providers/fake_active_account.dart';
 
 @GenerateNiceMocks([
   MockSpec<Client>(),
@@ -42,9 +42,7 @@ void main() {
     container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
-        activeMatrixClientProvider.overrideWithBuild(
-          (_, _) => ActiveClientSnapshot(mockClient),
-        ),
+        ...activeAccountOverrides(mockClient),
         newGroupRepositoryProvider.overrideWithValue(mockRepository),
         createNewFeedInteractorProvider(
           mockClient,

@@ -19,11 +19,11 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import 'new_group_chat_info_screen_test.mocks.dart';
+import '../../providers/fake_active_account.dart';
 
 @GenerateNiceMocks([
   MockSpec<Client>(),
@@ -78,9 +78,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          activeMatrixClientProvider.overrideWithBuild(
-            (_, _) => ActiveClientSnapshot(mockClient),
-          ),
+          ...activeAccountOverrides(mockClient),
           newGroupRepositoryProvider.overrideWithValue(mockRepository),
           createNewFeedInteractorProvider(
             mockClient,

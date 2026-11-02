@@ -10,9 +10,9 @@ import 'package:twake_chat/domain/user_info/exceptions/user_info_exception.dart'
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_controller.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_state.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 import '../../../domain/user_info/fake_user_info_repository.dart';
+import '../../../providers/fake_active_account.dart';
 
 const _userId = '@me:server';
 
@@ -41,12 +41,13 @@ void main() {
     );
     container = ProviderContainer.test(
       retry: (_, _) => null,
-      overrides: [userInfoRepositoryProvider.overrideWithValue(repository)],
+      overrides: [
+        userInfoRepositoryProvider.overrideWithValue(repository),
+        ...activeAccountOverridesFollowing(),
+      ],
     );
     if (loggedIn) {
-      container
-          .read(activeMatrixClientProvider.notifier)
-          .setClient(_FakeClient());
+      container.read(fakeActiveAccountProvider.notifier).set(_FakeClient());
     }
     subscription = container.listen(
       settingsContactsVisibilityControllerProvider,
@@ -173,8 +174,8 @@ void main() {
 
         repository.visibility = UserInfoVisibility(visibility: 'contacts');
         container
-            .read(activeMatrixClientProvider.notifier)
-            .setClient(_FakeClient('@other:server'));
+            .read(fakeActiveAccountProvider.notifier)
+            .set(_FakeClient('@other:server'));
         final otherState = await container.read(
           settingsContactsVisibilityControllerProvider.future,
         );

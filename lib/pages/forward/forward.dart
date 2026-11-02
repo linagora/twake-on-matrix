@@ -56,7 +56,6 @@ class ForwardScreenState extends ConsumerState<Forward> {
     _rooms =
         ref
             .read(activeMatrixClientProvider)
-            .client
             ?.filteredRoomsForAll(ActiveFilter.acceptedChats) ??
         [];
     recentChats = _rooms;

@@ -110,6 +110,15 @@ abstract class ClientManager {
   static List<Client> loggedIn(Iterable<Client> clients) =>
       clients.where((client) => client.isLogged()).toList();
 
+  /// The client that serves a push: [preferred] while it holds a session, else
+  /// the first of [held] that does, else [preferred]. It only picks among
+  /// clients the app already runs: building another one for the same account
+  /// would start a second sync on the same database.
+  static Client serving(Client preferred, Iterable<Client> held) =>
+      preferred.isLogged()
+      ? preferred
+      : loggedIn(held).firstOrNull ?? preferred;
+
   /// Deletes what a client stored: its database and, for the SQLite one, the
   /// file.
   static Future<void> deleteClientStorage(DatabaseApi database) async {

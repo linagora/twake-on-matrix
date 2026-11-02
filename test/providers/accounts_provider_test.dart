@@ -215,6 +215,25 @@ void main() {
       },
     );
 
+    test('a mutation queued behind a write ends quietly when the container is '
+        'disposed', () async {
+      boot([a]);
+      final gate = Completer<void>();
+      dataSource.addGate = gate.future;
+      container.read(accountClientRegistryProvider)
+        ..add(b)
+        ..add(c);
+      final adding = notifier().addAccount(const AccountId('b'));
+      final queued = notifier().addAccount(const AccountId('c'));
+      await pumpEventQueue();
+
+      container.dispose();
+      gate.complete();
+
+      await adding;
+      await queued;
+    });
+
     test('a switch waiting for a write ends quietly when the container is '
         'disposed', () async {
       boot([a, b]);
@@ -305,26 +324,24 @@ void main() {
       expect(announced, 0);
     });
 
-    test('an account that logs in while a switch runs is refused and not '
-        'stored', () async {
+    test('an account that logs in while a switch runs is stored and the '
+        'switch keeps running', () async {
       boot([a, b]);
       final dispose = notifier().registerSwitchHandler();
       addTearDown(dispose);
       unawaited(notifier().switchTo(const AccountId('b')));
       await pumpEventQueue();
-      expect(state(), isA<Switching>());
+      final switching = state() as Switching;
       container.read(accountClientRegistryProvider).add(c);
 
-      await expectLater(
-        notifier().addAccount(const AccountId('c')),
-        throwsA(isA<InvalidAccountTransitionException>()),
-      );
+      await notifier().addAccount(const AccountId('c'));
 
-      expect(
-        dataSource.calls.where((call) => call.startsWith('add:')),
-        isEmpty,
-      );
-      expect(state().accounts.map((x) => x.id), ['a', 'b']);
+      expect(dataSource.calls, contains('add:c'));
+      final after = state() as Switching;
+      expect(after.from, switching.from);
+      expect(after.to, switching.to);
+      expect(after.seq, switching.seq);
+      expect(state().accounts.map((x) => x.id), ['a', 'b', 'c']);
     });
   });
 
