@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.dart';
 import 'package:twake_chat/data/local/localizations/language_cache_manager.provider.dart';
@@ -25,6 +26,9 @@ class _FakeLanguageCacheManager implements LanguageCacheManager {
 
 void main() {
   const locale = Locale('fr', 'FR');
+
+  ProviderContainer createContainer({List<Override> overrides = const []}) =>
+      ProviderContainer.test(retry: (_, _) => null, overrides: overrides);
 
   group('SaveLanguageUseCase', () {
     test('persists the locale through the repository', () async {
@@ -53,7 +57,7 @@ void main() {
   group('saveLanguageUseCaseProvider', () {
     test('uses the overridden repository', () async {
       final repository = FakeLocalizationsRepository();
-      final container = ProviderContainer.test(
+      final container = createContainer(
         overrides: [
           localizationsRepositoryProvider.overrideWithValue(repository),
         ],
@@ -66,7 +70,7 @@ void main() {
 
     test('persists the locale down to the language cache', () async {
       final cacheManager = _FakeLanguageCacheManager();
-      final container = ProviderContainer.test(
+      final container = createContainer(
         overrides: [
           languageCacheManagerProvider.overrideWithValue(cacheManager),
         ],
