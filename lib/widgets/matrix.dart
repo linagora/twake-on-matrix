@@ -663,19 +663,20 @@ class MatrixState extends ConsumerState<Matrix>
     await _cancelSubs(currentClient.clientName);
     final activeClient = client;
     widget.clients.remove(currentClient);
+    // Indexes shift on removal; -1 (active logged out or unset) runs a full switch.
+    if (_activeClient != -1) {
+      _activeClient = activeClient == currentClient
+          ? -1
+          : widget.clients.indexOf(activeClient);
+    }
     await ClientManager.removeClientNameFromStore(currentClient.clientName);
     await _clearContactsOf(currentClient);
     TwakeSnackBar.show(
       TwakeApp.routerKey.currentContext!,
       L10n.of(context)!.oneClientLoggedOut,
     );
-    // The removal shifts the indexes; only a logged-out active client forces a switch.
-    _activeClient = activeClient == currentClient
-        ? -1
-        : widget.clients.indexOf(activeClient);
-    final nextClient = activeClient == currentClient
-        ? widget.clients.first
-        : activeClient;
+    // Read after the cleanup so an account switch made meanwhile is kept.
+    final nextClient = client;
     final result = await setActiveClient(nextClient);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
