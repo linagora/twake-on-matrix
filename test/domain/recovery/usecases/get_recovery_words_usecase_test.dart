@@ -64,4 +64,17 @@ void main() {
       );
     },
   );
+
+  test('toString_doesNotIncludeTheCause', () {
+    // Arrange
+    const exception = GetRecoveryWordsException(
+      FormatException('{"words": "alpha beta"'),
+    );
+
+    // Act
+    final text = exception.toString();
+
+    // Assert
+    expect(text, 'GetRecoveryWordsException');
+  });
 }
