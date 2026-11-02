@@ -136,13 +136,13 @@ class ForwardScreenState extends ConsumerState<Forward> {
   }
 
   void _handleAllDone(ForwardDone done) {
-    if (done.successCount == 0) {
+    if (done.successCount == 0 && done.partialCount == 0) {
       TwakeSnackBar.show(context, L10n.of(context)!.forwardFailed);
       return;
     }
 
     final navigator = Navigator.of(context);
-    if (done.totalCount != 1) {
+    if (done.totalCount != 1 || done.successCount == 0) {
       final message = _buildMultiForwardSnackbarMessage(done);
       if (navigator.canPop()) {
         navigator.pop();
@@ -164,6 +164,9 @@ class ForwardScreenState extends ConsumerState<Forward> {
 
   String _buildMultiForwardSnackbarMessage(ForwardDone done) {
     final l10n = L10n.of(context)!;
+    if (done.successCount == 0) {
+      return l10n.forwardFailed;
+    }
     if (done.successCount == done.totalCount) {
       return l10n.forwardedToChats(done.successCount);
     }

@@ -7,33 +7,43 @@ class ForwardMessagesUseCase {
   final ForwardRepository _repository;
 
   /// Rooms not joined or failing are skipped but still count in
-  /// [ForwardResult.totalCount]; a failing room may get only some messages.
+  /// [ForwardResult.totalCount]; a room that got only some messages counts in
+  /// [ForwardResult.partialCount].
   Future<ForwardResult> execute({
     required List<Map<String, Object?>> messages,
     required List<String> roomIds,
   }) async {
     var successCount = 0;
+    var partialCount = 0;
     for (final roomId in roomIds) {
-      if (await _forwardToRoom(roomId, messages)) successCount++;
+      final sentCount = await _forwardToRoom(roomId, messages);
+      if (sentCount == messages.length) {
+        successCount++;
+      } else if (sentCount > 0) {
+        partialCount++;
+      }
     }
     return ForwardResult(
       successCount: successCount,
+      partialCount: partialCount,
       totalCount: roomIds.length,
     );
   }
 
-  Future<bool> _forwardToRoom(
+  Future<int> _forwardToRoom(
     String roomId,
     List<Map<String, Object?>> messages,
   ) async {
+    var sentCount = 0;
     try {
-      if (!_repository.isJoined(roomId)) return false;
+      if (!_repository.isJoined(roomId)) return 0;
       for (final message in messages) {
         await _repository.sendMessage(roomId: roomId, content: message);
+        sentCount++;
       }
-      return true;
     } on Exception {
-      return false;
+      // A failing room keeps the messages already sent.
     }
+    return sentCount;
   }
 }

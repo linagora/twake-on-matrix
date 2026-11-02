@@ -6,6 +6,7 @@ part 'forward_result.freezed.dart';
 abstract class ForwardResult with _$ForwardResult {
   const factory ForwardResult({
     required int successCount,
+    required int partialCount,
     required int totalCount,
   }) = _ForwardResult;
 }

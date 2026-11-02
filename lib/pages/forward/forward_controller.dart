@@ -1,4 +1,3 @@
-import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/forward/usecases/forward_messages_usecase.provider.dart';
 import 'package:twake_chat/pages/forward/forward_state.dart';
@@ -24,10 +23,9 @@ class ForwardController extends _$ForwardController {
       if (!ref.mounted) return;
       state = ForwardState.done(
         successCount: result.successCount,
+        partialCount: result.partialCount,
         totalCount: result.totalCount,
       );
-    } on Exception catch (exception, stackTrace) {
-      Logs().e('ForwardController::forward', exception, stackTrace);
     } finally {
       if (ref.mounted && state is ForwardSending) {
         state = const ForwardState.idle();

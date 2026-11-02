@@ -63,7 +63,10 @@ void main() {
 
     // Assert
     expect(whileSending, const ForwardState.sending());
-    expect(state(), const ForwardState.done(successCount: 1, totalCount: 1));
+    expect(
+      state(),
+      const ForwardState.done(successCount: 1, partialCount: 0, totalCount: 1),
+    );
   });
 
   test('forward_whenNoMessage_staysIdleAndSendsNothing', () async {
@@ -97,7 +100,10 @@ void main() {
     await controller().forward(messages: [message], roomIds: [roomId]);
 
     // Assert
-    expect(state(), const ForwardState.done(successCount: 1, totalCount: 1));
+    expect(
+      state(),
+      const ForwardState.done(successCount: 1, partialCount: 0, totalCount: 1),
+    );
   });
 
   test('forward_whileSending_isIgnored', () async {

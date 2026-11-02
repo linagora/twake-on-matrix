@@ -10,6 +10,7 @@ sealed class ForwardState with _$ForwardState {
 
   const factory ForwardState.done({
     required int successCount,
+    required int partialCount,
     required int totalCount,
   }) = ForwardDone;
 }

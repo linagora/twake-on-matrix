@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/domain/forward/models/forward_result.dart';
 import 'package:twake_chat/domain/forward/usecases/forward_messages_usecase.dart';
 import 'package:twake_chat/domain/repository/forward/forward_repository.dart';
 
@@ -122,6 +123,28 @@ void main() {
     await expectLater(
       useCase.execute(messages: [firstMessage], roomIds: ['!a:example.com']),
       throwsStateError,
+    );
+  });
+
+  test('execute_whenARoomFailsMidway_countsItAsPartial', () async {
+    // Arrange
+    when(
+      mockRepository.sendMessage(
+        roomId: '!a:example.com',
+        content: secondMessage,
+      ),
+    ).thenThrow(Exception('network'));
+
+    // Act
+    final result = await useCase.execute(
+      messages: [firstMessage, secondMessage],
+      roomIds: ['!a:example.com', '!b:example.com'],
+    );
+
+    // Assert
+    expect(
+      result,
+      const ForwardResult(successCount: 1, partialCount: 1, totalCount: 2),
     );
   });
 }
