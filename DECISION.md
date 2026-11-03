@@ -79,10 +79,9 @@ listing, and Edit stays open after the save, as it does today.
 - A room restricted to a space says so and offers no rule; the listing stays.
 - While the public web page is on (`app.twake.chat.public_page`), only
   « Public » is offered and the listing is locked; the save refuses the rest.
-- A group made « Public » from Edit stays on its server: the homeserver sets
-  an `m.room.server_acl` that allows only itself while the join rule is
-  public. Once the group is no longer public, the homeserver removes that
-  limit, and people from other servers can join it again on invitation.
+- A group made « Public » from Edit stays on its server when it was created
+  with `m.federate: false`, or when its server announces that it applies the
+  server ACL (see D8). Otherwise, people from other servers can join it.
 - A public room cannot be encrypted: the encryption switch of Edit is greyed
   out, with the reason, while the room is public, readable by anyone, or
   « Public » is chosen.
