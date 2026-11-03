@@ -5,7 +5,7 @@ import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 
-enum AvatarKindBadge { group, publicChannel, privateChannel }
+enum AvatarKindBadge { people, public, broadcast }
 
 /// Figma "Avatar icon md (56)": the badge sits in a notch cut out of the avatar.
 class AvatarWithKindBadge extends StatelessWidget {
@@ -72,11 +72,9 @@ class AvatarWithKindBadge extends StatelessWidget {
   }
 
   String get _assetPath => switch (badge) {
-    AvatarKindBadge.group => Assets.images.icAvatarBadgeGroup.path,
-    AvatarKindBadge.publicChannel =>
-      Assets.images.icAvatarBadgeChannelPublic.path,
-    AvatarKindBadge.privateChannel =>
-      Assets.images.icAvatarBadgeChannelPrivate.path,
+    AvatarKindBadge.people => Assets.images.icAvatarBadgePeople.path,
+    AvatarKindBadge.public => Assets.images.icAvatarBadgePublic.path,
+    AvatarKindBadge.broadcast => Assets.images.icAvatarBadgeBroadcast.path,
   };
 }
 

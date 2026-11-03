@@ -85,8 +85,13 @@ twake-space-chat does. Shown only when the well-known enables public groups
   again. The row switches right after the request. The pending state is read
   through room_summary (MSC3266), because the SDK ignores the rooms in knock.
 - The avatar carries the badge of the room kind, as the Figma « Avatar
-  icon » component: people for a group, a globe for a public feed. The chat
-  list uses the same badge, with a megaphone for a private feed.
+  icon » component: a megaphone for a feed, a globe for a public room,
+  people for any other room, none for a direct chat. A room whose join rule
+  is unknown counts as not public.
+- The room-kind badge is shown on every room avatar in the chat list, not
+  behind the public-groups flag, read from each room's join rule (hence
+  `m.room.join_rules` in the important state events), as twake-space-chat
+  does.
 
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 

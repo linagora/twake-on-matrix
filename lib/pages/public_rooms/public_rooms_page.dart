@@ -182,10 +182,11 @@ class _PublicRoomRow extends StatelessWidget {
       avatar: AvatarWithKindBadge(
         mxContent: room.avatarUri,
         name: room.name,
-        // The directory only lists public rooms.
-        badge: room.kind == PublicRoomKind.feed
-            ? AvatarKindBadge.publicChannel
-            : AvatarKindBadge.group,
+        badge: switch (room) {
+          PublicRoom(kind: PublicRoomKind.feed) => AvatarKindBadge.broadcast,
+          PublicRoom(access: PublicRoomAccess.open) => AvatarKindBadge.public,
+          _ => AvatarKindBadge.people,
+        },
       ),
       title: room.name,
       subtitle: topic == null || topic.isEmpty ? access : '$access · $topic',

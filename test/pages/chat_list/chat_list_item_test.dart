@@ -130,7 +130,7 @@ void main() {
   });
 
   group('kind badge', () {
-    void makeFeed(MockRoom room, JoinRules? joinRules) {
+    void makeFeed(MockRoom room) {
       when(room.getState(EventTypes.RoomCreate)).thenReturn(
         StrippedStateEvent(
           type: EventTypes.RoomCreate,
@@ -139,7 +139,6 @@ void main() {
           stateKey: '',
         ),
       );
-      when(room.joinRules).thenReturn(joinRules);
     }
 
     AvatarKindBadge? shownBadge(WidgetTester tester) {
@@ -160,65 +159,29 @@ void main() {
       expect(shownBadge(tester), isNull);
     });
 
-    testWidgets('build_whenGroup_showsTheGroupBadge', (tester) async {
-      // Arrange
-      final room = buildRoom(name: 'Team');
-      when(room.isDirectChat).thenReturn(false);
+    for (final (description, joinRules, isFeed, badge) in [
+      ('UnknownJoinRule', null, false, AvatarKindBadge.people),
+      ('InviteOnlyGroup', JoinRules.invite, false, AvatarKindBadge.people),
+      ('PublicGroup', JoinRules.public, false, AvatarKindBadge.public),
+      ('PublicFeed', JoinRules.public, true, AvatarKindBadge.broadcast),
+      ('PrivateFeed', JoinRules.invite, true, AvatarKindBadge.broadcast),
+    ]) {
+      testWidgets('build_when${description}_shows${badge.name}Badge', (
+        tester,
+      ) async {
+        // Arrange
+        final room = buildRoom(name: 'Team');
+        when(room.isDirectChat).thenReturn(false);
+        when(room.joinRules).thenReturn(joinRules);
+        if (isFeed) makeFeed(room);
 
-      // Act
-      await tester.pumpWidget(wrap(ChatListItem(room)));
-      await tester.pump();
+        // Act
+        await tester.pumpWidget(wrap(ChatListItem(room)));
+        await tester.pump();
 
-      // Assert
-      expect(shownBadge(tester), AvatarKindBadge.group);
-    });
-
-    testWidgets('build_whenPublicFeed_showsThePublicChannelBadge', (
-      tester,
-    ) async {
-      // Arrange
-      final room = buildRoom(name: 'News');
-      when(room.isDirectChat).thenReturn(false);
-      makeFeed(room, JoinRules.public);
-
-      // Act
-      await tester.pumpWidget(wrap(ChatListItem(room)));
-      await tester.pump();
-
-      // Assert
-      expect(shownBadge(tester), AvatarKindBadge.publicChannel);
-    });
-
-    testWidgets('build_whenFeedJoinRulesAreNotLoaded_showsThePrivateBadge', (
-      tester,
-    ) async {
-      // Arrange
-      final room = buildRoom(name: 'News');
-      when(room.isDirectChat).thenReturn(false);
-      makeFeed(room, null);
-
-      // Act
-      await tester.pumpWidget(wrap(ChatListItem(room)));
-      await tester.pump();
-
-      // Assert
-      expect(shownBadge(tester), AvatarKindBadge.privateChannel);
-    });
-
-    testWidgets('build_whenPrivateFeed_showsThePrivateChannelBadge', (
-      tester,
-    ) async {
-      // Arrange
-      final room = buildRoom(name: 'Board');
-      when(room.isDirectChat).thenReturn(false);
-      makeFeed(room, JoinRules.invite);
-
-      // Act
-      await tester.pumpWidget(wrap(ChatListItem(room)));
-      await tester.pump();
-
-      // Assert
-      expect(shownBadge(tester), AvatarKindBadge.privateChannel);
-    });
+        // Assert
+        expect(shownBadge(tester), badge);
+      });
+    }
   });
 }

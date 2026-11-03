@@ -158,10 +158,10 @@ class _ChatListAvatar extends StatelessWidget {
 
   AvatarKindBadge? get _badge {
     if (room.isDirectChat) return null;
-    if (!room.isFeed) return AvatarKindBadge.group;
+    if (room.isFeed) return AvatarKindBadge.broadcast;
     return room.joinRules == JoinRules.public
-        ? AvatarKindBadge.publicChannel
-        : AvatarKindBadge.privateChannel;
+        ? AvatarKindBadge.public
+        : AvatarKindBadge.people;
   }
 
   @override

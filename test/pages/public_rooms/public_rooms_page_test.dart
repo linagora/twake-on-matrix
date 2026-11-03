@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/public_rooms/public_rooms_page.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 
 import '../../domain/public_rooms/fake_public_rooms_repository.dart';
 
@@ -71,6 +72,30 @@ void main() {
     expect(find.text('Équipe'), findsOneWidget);
     expect(find.text('Join · 1 member · The team'), findsOneWidget);
     expect(find.text('Ask to join · 12 members'), findsOneWidget);
+  });
+
+  testWidgets('build_always_showsTheRoomKindBadge', (tester) async {
+    // Arrange
+    repository.pages = [
+      [
+        publicRoom('!open'),
+        publicRoom('!knock', access: PublicRoomAccess.approval),
+        publicRoom('!feed', kind: PublicRoomKind.feed),
+      ],
+    ];
+
+    // Act
+    await pumpPage(tester);
+
+    // Assert
+    final badges = tester
+        .widgetList<AvatarWithKindBadge>(find.byType(AvatarWithKindBadge))
+        .map((avatar) => avatar.badge);
+    expect(badges, [
+      AvatarKindBadge.public,
+      AvatarKindBadge.people,
+      AvatarKindBadge.broadcast,
+    ]);
   });
 
   testWidgets('search_whenTypedWithoutAccents_findsTheAccentedName', (

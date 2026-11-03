@@ -23,15 +23,9 @@ void main() {
   }
 
   for (final (badge, asset) in [
-    (AvatarKindBadge.group, Assets.images.icAvatarBadgeGroup.path),
-    (
-      AvatarKindBadge.publicChannel,
-      Assets.images.icAvatarBadgeChannelPublic.path,
-    ),
-    (
-      AvatarKindBadge.privateChannel,
-      Assets.images.icAvatarBadgeChannelPrivate.path,
-    ),
+    (AvatarKindBadge.people, Assets.images.icAvatarBadgePeople.path),
+    (AvatarKindBadge.public, Assets.images.icAvatarBadgePublic.path),
+    (AvatarKindBadge.broadcast, Assets.images.icAvatarBadgeBroadcast.path),
   ]) {
     testWidgets('build_whenBadgeIs${badge.name}_showsItsIcon', (tester) async {
       // Act
@@ -45,7 +39,7 @@ void main() {
 
   testWidgets('build_always_placesTheBadgeAsInFigma', (tester) async {
     // Act
-    await pumpBadge(tester, AvatarKindBadge.group);
+    await pumpBadge(tester, AvatarKindBadge.people);
 
     // Assert
     final avatarOrigin = tester.getTopLeft(find.byType(AvatarWithKindBadge));
