@@ -76,6 +76,11 @@ Future<void> _tryPushHelper(
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   final isBackgroundMessage = client == null;
+  if (client != null && !client.isLogged()) {
+    // A client kept for its pending removal cannot fetch the event.
+    Logs().v('Push client is logged out. Stop push helper here.');
+    return;
+  }
   Logs().v(
     'Push helper has been started (background=$isBackgroundMessage).',
     notification.toJson(),
@@ -99,7 +104,15 @@ Future<void> _tryPushHelper(
     onDidReceiveNotificationResponse: onSelectNotification,
   );
 
-  client ??= (await ClientManager.getClients(initialize: false)).first;
+  if (client == null) {
+    client = await ClientManager.firstLoggedIn(
+      await ClientManager.getClients(initialize: false),
+    );
+    if (client == null) {
+      Logs().v('No logged-in client for the push. Stop push helper here.');
+      return;
+    }
+  }
   final event = await client.getEventByPushNotification(
     notification,
     storeInDatabase: isBackgroundMessage,
