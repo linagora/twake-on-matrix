@@ -125,9 +125,7 @@ dependencies:
   linagora_design_flutter:
     git:
       url: https://github.com/linagora/linagora-design-flutter.git
-      # TODO(#3518): switch to the merged commit/tag of
-      # linagora/linagora-design-flutter#134 before merging.
-      ref: f1104e9600ac3ba160f11a352ef74e762a96909e
+      ref: v0.4.2
   linkfy_text:
     git:
       # HTTPS so CI runners work without an SSH key (public repo)
@@ -307,13 +305,6 @@ dependency_overrides:
       # HTTPS so CI runners work without an SSH key (public repo)
       url: https://github.com/zhouzhuo810/keyboard_shortcuts.git
       ref: master
-  # flutter_emoji_mart pins the design system at v0.4.1.
-  # TODO(#3518): switch to the merged commit/tag of
-  # linagora/linagora-design-flutter#134 before merging.
-  linagora_design_flutter:
-    git:
-      url: https://github.com/linagora/linagora-design-flutter.git
-      ref: f1104e9600ac3ba160f11a352ef74e762a96909e
   # Force HTTPS for transitive deps pulled via SSH by flutter_matrix_html
   linkfy_text:
     git:
