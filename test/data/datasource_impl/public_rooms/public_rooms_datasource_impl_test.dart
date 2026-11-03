@@ -150,6 +150,27 @@ void main() {
       expect(sizes, hasLength(12));
     });
 
+    test('fetchDirectory_always_skipsRoomsNobodyCanJoin', () async {
+      // Arrange
+      when(mockClient.queryPublicRooms(limit: 100, since: null)).thenAnswer(
+        (_) async => QueryPublicRoomsResponse(
+          chunk: [
+            chunk('!public', joinRule: 'public'),
+            chunk('!unset'),
+            chunk('!invite', joinRule: 'invite'),
+            chunk('!private', joinRule: 'private'),
+            chunk('!knock', joinRule: 'knock'),
+          ],
+        ),
+      );
+
+      // Act
+      final rooms = await datasource.fetchDirectory(limit: 1000).first;
+
+      // Assert
+      expect(rooms.map((room) => room.roomId), ['!public', '!unset', '!knock']);
+    });
+
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
       // Arrange
       when(
@@ -200,7 +221,7 @@ void main() {
     });
   });
 
-  test('joinedRoomIds_always_listsOnlyJoinedRooms', () {
+  test('memberRoomIds_always_listsJoinedAndInvitedRooms', () {
     // Arrange
     final joined = MockRoom();
     when(joined.id).thenReturn('!joined');
@@ -208,13 +229,16 @@ void main() {
     final invited = MockRoom();
     when(invited.id).thenReturn('!invited');
     when(invited.membership).thenReturn(Membership.invite);
-    when(mockClient.rooms).thenReturn([joined, invited]);
+    final left = MockRoom();
+    when(left.id).thenReturn('!left');
+    when(left.membership).thenReturn(Membership.leave);
+    when(mockClient.rooms).thenReturn([joined, invited, left]);
 
     // Act
-    final ids = datasource.getJoinedRoomIds();
+    final ids = datasource.getMemberRoomIds();
 
     // Assert
-    expect(ids, {'!joined'});
+    expect(ids, {'!joined', '!invited'});
   });
 
   group('getKnockedRoomIds', () {
@@ -248,31 +272,6 @@ void main() {
 
       // Assert
       expect(ids, {'!knock'});
-    });
-
-    test('getKnockedRoomIds_always_asksAtMostFiveRoomsAtATime', () async {
-      // Arrange
-      var inFlight = 0;
-      var maxInFlight = 0;
-      when(mockClient.getRoomSummary(any)).thenAnswer((invocation) async {
-        inFlight++;
-        maxInFlight = inFlight > maxInFlight ? inFlight : maxInFlight;
-        await Future<void>.delayed(Duration.zero);
-        inFlight--;
-        return summary(
-          invocation.positionalArguments.first as String,
-          Membership.knock,
-        );
-      });
-
-      // Act
-      final ids = await datasource.getKnockedRoomIds([
-        for (var i = 0; i < 12; i++) '!$i',
-      ]);
-
-      // Assert
-      expect(ids, hasLength(12));
-      expect(maxInFlight, 5);
     });
   });
 

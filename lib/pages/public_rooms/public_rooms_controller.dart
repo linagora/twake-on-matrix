@@ -13,6 +13,11 @@ part 'public_rooms_controller.g.dart';
 
 @riverpod
 class PublicRoomsController extends _$PublicRoomsController {
+  static const _lookupBatchSize = 5;
+
+  // One lookup at a time across pages, so the batch size holds overall.
+  Future<void> _lookups = Future<void>.value();
+
   @override
   Future<PublicRoomsState> build() async {
     final pages = StreamIterator(
@@ -67,7 +72,7 @@ class PublicRoomsController extends _$PublicRoomsController {
   ) async {
     await future;
     if (!ref.mounted) return;
-    unawaited(_markRequested(firstPage));
+    _queueLookup(firstPage);
     try {
       while (await pages.moveNext()) {
         if (!ref.mounted) return;
@@ -81,7 +86,7 @@ class PublicRoomsController extends _$PublicRoomsController {
             ],
           );
         });
-        unawaited(_markRequested(page));
+        _queueLookup(page);
       }
     } on PublicRoomsException {
       // Logged by the datasource: keep the rooms already shown.
@@ -92,26 +97,34 @@ class PublicRoomsController extends _$PublicRoomsController {
     }
   }
 
+  void _queueLookup(List<PublicRoom> page) {
+    _lookups = _lookups.then((_) => _markRequested(page));
+  }
+
   Future<void> _markRequested(List<PublicRoom> page) async {
     final roomIds = [
       for (final room in page)
         if (room.access == PublicRoomAccess.approval) room.roomId,
     ];
-    if (roomIds.isEmpty) return;
-    final Set<String> requested;
-    try {
-      requested = await ref
-          .read(getKnockedPublicRoomIdsUseCaseProvider)
-          .execute(roomIds);
-    } on PublicRoomsException {
-      return;
+    for (var start = 0; start < roomIds.length; start += _lookupBatchSize) {
+      if (!ref.mounted) return;
+      final batch = roomIds.skip(start).take(_lookupBatchSize).toList();
+      final Set<String> requested;
+      try {
+        requested = await ref
+            .read(getKnockedPublicRoomIdsUseCaseProvider)
+            .execute(batch);
+      } on PublicRoomsException {
+        return;
+      }
+      if (!ref.mounted) return;
+      if (requested.isEmpty) continue;
+      _update(
+        (state) => state.copyWith(
+          requestedRoomIds: {...state.requestedRoomIds, ...requested},
+        ),
+      );
     }
-    if (!ref.mounted || requested.isEmpty) return;
-    _update(
-      (state) => state.copyWith(
-        requestedRoomIds: {...state.requestedRoomIds, ...requested},
-      ),
-    );
   }
 
   void _update(PublicRoomsState Function(PublicRoomsState state) change) {

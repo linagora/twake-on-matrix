@@ -179,7 +179,7 @@ abstract class ClientManager {
         'im.ponies.room_emotes',
         // To check which story room we can post in
         EventTypes.RoomPowerLevels,
-        // Public vs private feed badge in the chat list; rooms synced before
+        // Globe badge on public rooms in the chat list; rooms synced before
         // this was added only get it on their next join_rules change.
         EventTypes.RoomJoinRules,
       },

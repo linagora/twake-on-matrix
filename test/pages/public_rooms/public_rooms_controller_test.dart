@@ -299,4 +299,97 @@ void main() {
     // Assert
     expect(result, isA<PublicRoomJoinedNotInSync>());
   });
+
+  List<PublicRoom> approvalRooms(String prefix, int count) => [
+    for (var i = 0; i < count; i++)
+      publicRoom('!$prefix$i', access: PublicRoomAccess.approval),
+  ];
+
+  test('build_always_looksUpRequestsFiveAtATimeAcrossPages', () async {
+    // Arrange
+    repository.pages = [approvalRooms('a', 7), approvalRooms('b', 7)];
+    final container = makeContainer();
+
+    // Act
+    await loadedController(container);
+    await pumpEventQueue();
+
+    // Assert
+    expect(repository.knockedQueries.map((query) => query.length), [
+      5,
+      2,
+      5,
+      2,
+    ]);
+    expect(repository.maxLookupsInFlight, 1);
+  });
+
+  test('build_whenDisposedDuringLookups_stopsAskingTheServer', () async {
+    // Arrange
+    final gate = Completer<void>();
+    repository
+      ..pages = [approvalRooms('a', 12)]
+      ..knocked = {'!a0'}
+      ..lookupGate = gate;
+    final container = makeContainer();
+    await loadedController(container);
+    await pumpEventQueue();
+
+    // Act
+    container.dispose();
+    gate.complete();
+    await pumpEventQueue();
+
+    // Assert
+    expect(repository.knockedQueries, hasLength(1));
+  });
+
+  test('open_whenDisposedDuringTheJoin_stillReturnsTheResult', () async {
+    // Arrange
+    final gate = Completer<void>();
+    repository.joinGate = gate;
+    final container = makeContainer();
+    final controller = await loadedController(container);
+    final result = controller.open(publicRoom('!open'));
+
+    // Act
+    container.dispose();
+    gate.complete();
+
+    // Assert
+    expect(await result, isA<PublicRoomJoined>());
+  });
+
+  test('open_whenDisposedDuringTheRequest_stillReturnsTheResult', () async {
+    // Arrange
+    final gate = Completer<void>();
+    repository.knockGate = gate;
+    final container = makeContainer();
+    final controller = await loadedController(container);
+    final result = controller.open(
+      publicRoom('!knock', access: PublicRoomAccess.approval),
+    );
+
+    // Act
+    container.dispose();
+    gate.complete();
+
+    // Assert
+    expect(await result, isA<PublicRoomRequested>());
+  });
+
+  test('build_whenDisposedWhileALaterPageLoads_stopsQuietly', () async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    final (container, _) = await loadFirstPage(pages);
+
+    // Act
+    container.dispose();
+    pages.add([publicRoom('!second')]);
+    await pages.close();
+    await pumpEventQueue();
+
+    // Assert
+    expect(pages.hasListener, isFalse);
+  });
 }

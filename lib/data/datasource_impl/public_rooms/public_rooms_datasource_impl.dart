@@ -11,9 +11,12 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
 
   static const pageSize = 100;
 
-  static const _summaryBatchSize = 5;
-
   static const _joinSyncTimeout = Duration(seconds: 30);
+
+  // Listed for their world-readable history, but nobody can join them.
+  static final _closedRules = {JoinRules.invite.text, JoinRules.private.text};
+
+  static const _memberships = {Membership.join, Membership.invite};
 
   static final _knockRules = {
     JoinRules.knock.text,
@@ -56,7 +59,11 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         );
         return;
       }
-      final rooms = page.chunk.take(limit - count).map(_toPublicRoom).toList();
+      final rooms = page.chunk
+          .where((chunk) => !_closedRules.contains(chunk.joinRule))
+          .take(limit - count)
+          .map(_toPublicRoom)
+          .toList();
       count += rooms.length;
       yield rooms;
       final next = page.nextBatch;
@@ -70,26 +77,21 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   }
 
   @override
-  Set<String> getJoinedRoomIds() => _client.rooms
-      .where((room) => room.membership == Membership.join)
+  Set<String> getMemberRoomIds() => _client.rooms
+      .where((room) => _memberships.contains(room.membership))
       .map((room) => room.id)
       .toSet();
 
   @override
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds) async {
     final client = _client;
-    final knocked = <String>{};
-    for (var start = 0; start < roomIds.length; start += _summaryBatchSize) {
-      final batch = roomIds.skip(start).take(_summaryBatchSize);
-      final results = await Future.wait(
-        batch.map((roomId) => _isKnocked(client, roomId)),
-      );
-      knocked.addAll([
-        for (final (index, roomId) in batch.indexed)
-          if (results[index]) roomId,
-      ]);
-    }
-    return knocked;
+    final results = await Future.wait(
+      roomIds.map((roomId) => _isKnocked(client, roomId)),
+    );
+    return {
+      for (final (index, roomId) in roomIds.indexed)
+        if (results[index]) roomId,
+    };
   }
 
   // The SDK ignores the rooms in the `knock` section of the sync.

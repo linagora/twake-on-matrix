@@ -40,6 +40,10 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   PublicRoomsException? joinError;
   PublicRoomsException? knockError;
   Completer<void>? joinGate;
+  Completer<void>? knockGate;
+  Completer<void>? lookupGate;
+  int lookupsInFlight = 0;
+  int maxLookupsInFlight = 0;
   bool isJoinInSync = true;
 
   int? requestedLimit;
@@ -56,11 +60,17 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   }
 
   @override
-  Set<String> getJoinedRoomIds() => joined;
+  Set<String> getMemberRoomIds() => joined;
 
   @override
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds) async {
     knockedQueries.add(roomIds);
+    lookupsInFlight++;
+    if (lookupsInFlight > maxLookupsInFlight) {
+      maxLookupsInFlight = lookupsInFlight;
+    }
+    await (lookupGate?.future ?? Future<void>.delayed(Duration.zero));
+    lookupsInFlight--;
     if (knockedError case final error?) throw error;
     return roomIds.where(knocked.contains).toSet();
   }
@@ -75,6 +85,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
 
   @override
   Future<void> knock(String roomIdOrAlias) async {
+    await knockGate?.future;
     if (knockError case final error?) throw error;
     knockedIds.add(roomIdOrAlias);
   }

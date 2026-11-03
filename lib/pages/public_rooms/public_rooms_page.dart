@@ -78,11 +78,13 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
           builder: (context, query, _) => _PublicRoomList(
             rooms: value.roomsMatching(query.text),
             isDirectoryEmpty: value.rooms.isEmpty,
+            isLoadingMore: value.isLoadingMore,
             requestedRoomIds: value.requestedRoomIds,
             onOpen: (room) => unawaited(_open(room)),
           ),
         ),
         AsyncError() => GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () => ref.invalidate(publicRoomsControllerProvider),
           child: _PublicRoomsEmptyState(
             title: l10n.publicGroupsLoadFailed,
@@ -133,6 +135,7 @@ class _PublicRoomList extends StatelessWidget {
   const _PublicRoomList({
     required this.rooms,
     required this.isDirectoryEmpty,
+    required this.isLoadingMore,
     required this.requestedRoomIds,
     required this.onOpen,
   });
@@ -142,12 +145,15 @@ class _PublicRoomList extends StatelessWidget {
 
   final List<PublicRoom> rooms;
   final bool isDirectoryEmpty;
+  final bool isLoadingMore;
   final Set<String> requestedRoomIds;
   final ValueChanged<PublicRoom> onOpen;
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
+    // The next pages may still bring a match: the progress bar is enough.
+    if (rooms.isEmpty && isLoadingMore) return const SizedBox.shrink();
     if (rooms.isEmpty) {
       return _PublicRoomsEmptyState(
         title: isDirectoryEmpty

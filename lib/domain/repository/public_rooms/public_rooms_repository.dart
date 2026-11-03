@@ -5,7 +5,8 @@ abstract class PublicRoomsRepository {
   /// [limit] rooms. When a page after the first one fails, the stream ends.
   Stream<List<PublicRoom>> fetchDirectory({required int limit});
 
-  Set<String> getJoinedRoomIds();
+  /// The rooms the user has joined or is invited to.
+  Set<String> getMemberRoomIds();
 
   /// The rooms among [roomIds] where the user's join request is pending. A
   /// room whose state cannot be read is left out.

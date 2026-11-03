@@ -10,19 +10,19 @@ class FetchJoinablePublicRoomsUseCase {
 
   final PublicRoomsRepository _repository;
 
-  /// The groups and feeds of the homeserver directory the user has not joined,
-  /// one page at a time. Throws a `PublicRoomsFetchFailedException` when the
-  /// first page fails.
+  /// The groups and feeds of the homeserver directory the user has neither
+  /// joined nor been invited to, one page at a time. Throws a
+  /// `PublicRoomsFetchFailedException` when the first page fails.
   Stream<List<PublicRoom>> execute() async* {
     await for (final page in _repository.fetchDirectory(
       limit: directoryLimit,
     )) {
-      final joined = _repository.getJoinedRoomIds();
+      final members = _repository.getMemberRoomIds();
       yield page
           .where(
             (room) =>
                 _listedKinds.contains(room.kind) &&
-                !joined.contains(room.roomId),
+                !members.contains(room.roomId),
           )
           .toList();
     }

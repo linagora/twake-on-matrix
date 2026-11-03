@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/empty_state/linagora_empty_state.dart';
 import 'package:linagora_design_flutter/list_item/linagora_avatar_list_item.dart';
 import 'package:twake_chat/data/repository/public_rooms/public_rooms_repository.provider.dart';
@@ -39,6 +42,52 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  /// The page pushed over a home route, as the chat list does, in a router
+  /// that knows the room location.
+  Future<GoRouter> pumpPageInRouter(WidgetTester tester) async {
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, _) => Scaffold(
+            body: TextButton(
+              onPressed: () => unawaited(
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PublicRoomsPage(),
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/rooms/:roomid',
+          builder: (_, state) => Text('room ${state.pathParameters['roomid']}'),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          publicRoomsRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    return router;
   }
 
   setUp(() {
@@ -155,6 +204,70 @@ void main() {
     expect(find.byType(LinagoraAvatarListItem), findsNWidgets(2));
   });
 
+  testWidgets('build_whenTheDirectoryFails_retriesOnATapAnywhere', (
+    tester,
+  ) async {
+    // Arrange
+    repository.fetchError = PublicRoomsFetchFailedException(
+      cause: Exception('down'),
+    );
+    await pumpPage(tester);
+    repository.fetchError = null;
+
+    // Act
+    await tester.tapAt(const Offset(10, 500));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(find.byType(LinagoraAvatarListItem), findsNWidgets(2));
+  });
+
+  testWidgets('build_whileLaterPagesLoad_showsNoEmptyState', (tester) async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    repository.directoryController = pages;
+    pages.add([]);
+
+    // Act
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          publicRoomsRepositoryProvider.overrideWithValue(repository),
+        ],
+        child: const MaterialApp(
+          locale: Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: PublicRoomsPage(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // Assert
+    expect(find.byType(LinagoraEmptyState), findsNothing);
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    await pages.close();
+    await tester.pumpAndSettle();
+    expect(find.text('No public group to join.'), findsOneWidget);
+  });
+
+  testWidgets('tap_onAnOpenRoom_closesThePageAndOpensTheRoom', (tester) async {
+    // Arrange
+    final router = await pumpPageInRouter(tester);
+
+    // Act
+    await tester.tap(find.text('Équipe'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(find.byType(PublicRoomsPage), findsNothing);
+    expect(find.text('room !eq'), findsOneWidget);
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/rooms/!eq');
+  });
+
   testWidgets('tap_onARoomOnApproval_saysAnAdminMustApproveAndStays', (
     tester,
   ) async {
@@ -228,13 +341,15 @@ void main() {
   ) async {
     // Arrange
     repository.isJoinInSync = false;
-    await pumpPage(tester);
+    final router = await pumpPageInRouter(tester);
 
     // Act
     await tester.tap(find.text('Équipe'));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     // Assert
     expect(find.text('You joined the chat'), findsOneWidget);
+    expect(find.byType(PublicRoomsPage), findsNothing);
+    expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
   });
 }
