@@ -5,7 +5,7 @@ sealed class PublicRoomsException implements Exception {
   final Object? cause;
 
   @override
-  String toString() => '$runtimeType: $message ($cause)';
+  String toString() => 'PublicRoomsException: $message ($cause)';
 }
 
 class PublicRoomsNoClientException extends PublicRoomsException {
