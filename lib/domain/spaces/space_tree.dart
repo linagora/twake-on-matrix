@@ -45,12 +45,29 @@ ArrangedRooms arrangeRooms(List<RoomListEntry> entries) {
   bool isTop(RoomListEntry entry) =>
       !entry.isDirect && parentSpaceOf(entry, byId) == null;
 
-  final childrenOf = <String, List<RoomListEntry>>{};
-  for (final entry in entries.where((entry) => !entry.isDirect)) {
-    final parent = parentSpaceOf(entry, byId);
-    if (parent != null) (childrenOf[parent.id] ??= []).add(entry);
-  }
+  return ArrangedRooms(
+    spaces: _growSpaces(
+      entries.where((entry) => entry.isSpace),
+      _childrenBySpace(entries, byId),
+      isTop,
+    ),
+    channels: entries.where((e) => !e.isSpace && isTop(e)).toList(),
+    directs: entries.where((e) => e.isDirect).toList(),
+  );
+}
 
+Map<String, List<RoomListEntry>> _childrenBySpace(
+  List<RoomListEntry> entries,
+  Map<String, RoomListEntry> byId,
+) => entries
+    .where((entry) => !entry.isDirect && parentSpaceOf(entry, byId) != null)
+    .groupListsBy((entry) => parentSpaceOf(entry, byId)!.id);
+
+List<SpaceNode> _growSpaces(
+  Iterable<RoomListEntry> spaces,
+  Map<String, List<RoomListEntry>> childrenOf,
+  bool Function(RoomListEntry) isTop,
+) {
   // A space listed in its own descendants (a loop) is shown once.
   final placed = <String>{};
   SpaceNode grow(RoomListEntry entry) {
@@ -61,18 +78,9 @@ ArrangedRooms arrangeRooms(List<RoomListEntry> entries) {
     ]);
   }
 
-  final spaces = [
-    for (final entry in entries)
-      if (entry.isSpace && isTop(entry)) grow(entry),
-  ];
-  // Spaces that only hold each other: start from one of them.
-  for (final entry in entries.where((entry) => entry.isSpace)) {
-    if (!placed.contains(entry.id)) spaces.add(grow(entry));
-  }
-
-  return ArrangedRooms(
-    spaces: spaces,
-    channels: entries.where((e) => !e.isSpace && isTop(e)).toList(),
-    directs: entries.where((e) => e.isDirect).toList(),
-  );
+  final nodes = spaces.where(isTop).map(grow).toList();
+  // Spaces that only hold each other: start from one of them. The check is
+  // lazy, so growing one takes the others of its loop away.
+  nodes.addAll(spaces.where((space) => !placed.contains(space.id)).map(grow));
+  return nodes;
 }

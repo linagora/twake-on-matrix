@@ -14,34 +14,13 @@ List<RoomListEntry> roomListEntriesOf(
   List<Room> rooms, {
   required Map<String, List<String>> directChats,
 }) {
-  // `Room.directChatMatrixID` rebuilds `Client.directChats` at each call.
-  // As in the SDK, the first user listing a room decides, valid or not.
-  final directByRoom = <String, String>{};
-  for (final chat in directChats.entries) {
-    for (final roomId in chat.value) {
-      directByRoom.putIfAbsent(roomId, () => chat.key);
-    }
-  }
-  directByRoom.removeWhere((_, userId) => !userId.isValidMatrixIdStrict());
+  final directByRoom = _directByRoom(directChats);
   final spaces = rooms.where((room) => room.isSpace).toList();
   final joinedSpaces = {
-    for (final space in spaces)
-      if (space.membership == Membership.join) space.id: space,
+    for (final space in spaces.where(_isJoined)) space.id: space,
   };
-  final childIdsOf = {
-    for (final space in spaces)
-      space.id: space.spaceChildren
-          .map((child) => child.roomId)
-          .whereType<String>()
-          .toList(),
-  };
-  final listedBy = <String, List<String>>{};
-  // By id, so the first space does not move with the order of `client.rooms`.
-  for (final spaceId in joinedSpaces.keys.toList()..sort()) {
-    for (final childId in childIdsOf[spaceId]!) {
-      (listedBy[childId] ??= []).add(spaceId);
-    }
-  }
+  final childIdsOf = {for (final space in spaces) space.id: _childIdsOf(space)};
+  final listedBy = _listedBy(joinedSpaces.keys, childIdsOf);
   return [
     for (final room in rooms)
       _entryOf(
@@ -56,18 +35,53 @@ List<RoomListEntry> roomListEntriesOf(
   ];
 }
 
+bool _isJoined(Room room) => room.membership == Membership.join;
+
+List<String> _childIdsOf(Room space) => space.spaceChildren
+    .map((child) => child.roomId)
+    .whereType<String>()
+    .toList();
+
+/// `Room.directChatMatrixID` rebuilds `Client.directChats` at each call.
+/// As in the SDK, the first user listing a room decides, valid or not.
+Map<String, String> _directByRoom(Map<String, List<String>> directChats) {
+  final directByRoom = <String, String>{};
+  directChats.forEach((userId, roomIds) {
+    for (final roomId in roomIds) {
+      directByRoom.putIfAbsent(roomId, () => userId);
+    }
+  });
+  return directByRoom
+    ..removeWhere((_, userId) => !userId.isValidMatrixIdStrict());
+}
+
+/// By id, so the first space does not move with the order of `client.rooms`.
+Map<String, List<String>> _listedBy(
+  Iterable<String> spaceIds,
+  Map<String, List<String>> childIdsOf,
+) {
+  final listedBy = <String, List<String>>{};
+  for (final spaceId in spaceIds.toList()..sort()) {
+    for (final childId in childIdsOf[spaceId]!) {
+      (listedBy[childId] ??= []).add(spaceId);
+    }
+  }
+  return listedBy;
+}
+
 /// The spec keeps a parent only if its sender may list children in that space.
 Iterable<String> _parentsNamedBy(Room room, Map<String, Room> joinedSpaces) =>
-    room.spaceParents.map((parent) => parent.roomId).whereType<String>().where((
-      parentId,
-    ) {
-      final space = joinedSpaces[parentId];
-      final sender = room.getState(EventTypes.SpaceParent, parentId)?.senderId;
-      return space != null &&
-          sender != null &&
-          space.powerForChangingStateEvent(EventTypes.SpaceChild) <=
-              space.getPowerLevelByUserId(sender);
-    });
+    room.spaceParents
+        .map((parent) => parent.roomId)
+        .whereType<String>()
+        .where((parentId) => _mayName(room, joinedSpaces[parentId], parentId));
+
+bool _mayName(Room room, Room? space, String parentId) {
+  final sender = room.getState(EventTypes.SpaceParent, parentId)?.senderId;
+  if (space == null || sender == null) return false;
+  return space.powerForChangingStateEvent(EventTypes.SpaceChild) <=
+      space.getPowerLevelByUserId(sender);
+}
 
 RoomListEntry _entryOf(
   Room room, {
@@ -79,7 +93,7 @@ RoomListEntry _entryOf(
   name: _nameOf(room, directId),
   avatar: room.avatar,
   kind: _kindOf(room, directId),
-  isJoined: room.membership == Membership.join,
+  isJoined: _isJoined(room),
   canAddChildren:
       room.isSpace && room.canChangeStateEvent(EventTypes.SpaceChild),
   isFavourite: room.isFavourite,
@@ -88,12 +102,11 @@ RoomListEntry _entryOf(
   mentionCount: room.highlightCount,
   parentSpaceIds: parentSpaceIds,
   childIds: childIds,
-  folders: [
-    for (final tag in room.tags.keys)
-      if (tag.startsWith(folderTagPrefix) &&
-          tag.length > folderTagPrefix.length)
-        tag.substring(folderTagPrefix.length),
-  ],
+  folders: room.tags.keys
+      .where((tag) => tag.startsWith(folderTagPrefix))
+      .map((tag) => tag.substring(folderTagPrefix.length))
+      .where((name) => name.isNotEmpty)
+      .toList(),
 );
 
 /// An invitation names its sender, which only the room can tell.
@@ -105,12 +118,17 @@ String? _directIdOf(Room room, Map<String, String> directByRoom) =>
 /// The name `Room.getLocalizedDisplayname` gives to a DM with no name: it asks
 /// the SDK three times who the partner is, each time rebuilding `directChats`.
 String _nameOf(Room room, String? directId) {
-  if (directId == null ||
-      room.membership != Membership.join ||
-      room.name.isNotEmpty ||
-      (room.canonicalAlias.localpart?.isNotEmpty ?? false)) {
-    return room.getLocalizedDisplayname();
-  }
+  final isUnnamedDm = directId != null && _isJoined(room) && !_hasOwnName(room);
+  return isUnnamedDm
+      ? _nameOfUnnamedDm(room, directId)
+      : room.getLocalizedDisplayname();
+}
+
+bool _hasOwnName(Room room) =>
+    room.name.isNotEmpty ||
+    (room.canonicalAlias.localpart?.isNotEmpty ?? false);
+
+String _nameOfUnnamedDm(Room room, String directId) {
   final heroes = room.summary.mHeroes ?? [directId];
   final name = (heroes.isEmpty ? [directId] : heroes)
       .where((hero) => hero.isNotEmpty && hero != room.client.userID)
