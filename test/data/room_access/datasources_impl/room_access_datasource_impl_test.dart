@@ -99,6 +99,19 @@ void main() {
     expect(access.isListed, isFalse);
   });
 
+  test('watchRoomAccess_bugWhileReadingTheDirectory_isNotHidden', () async {
+    // Arrange
+    when(
+      client.getRoomVisibilityOnDirectory(roomId),
+    ).thenAnswer((_) async => throw StateError('bug'));
+
+    // Act
+    final result = datasource.watchRoomAccess(roomId).first;
+
+    // Assert
+    await expectLater(result, throwsA(isA<StateError>()));
+  });
+
   test('watchRoomAccess_directChat_cannotChangeNorReadsTheDirectory', () async {
     // Arrange
     when(room.isDirectChat).thenReturn(true);

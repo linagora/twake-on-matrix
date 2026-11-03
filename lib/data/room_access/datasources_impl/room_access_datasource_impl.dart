@@ -84,7 +84,7 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
         room.id,
       );
       return visibility == Visibility.public;
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       // An unreadable directory counts as not listing the room.
       Logs().w('RoomAccessDatasourceImpl::_isListed()', e, s);
       return false;
