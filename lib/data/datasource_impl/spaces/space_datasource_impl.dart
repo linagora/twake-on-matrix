@@ -22,6 +22,11 @@ class SpaceDatasourceImpl implements SpaceDatasource {
 
   static const Duration _changesRate = Duration(seconds: 1);
 
+  static final Set<String> _joinableRules = {
+    JoinRules.public.name,
+    JoinRules.restricted.name,
+  };
+
   /// What `order` may hold, by the Matrix spec.
   static final RegExp _validOrder = RegExp(r'^[\x20-\x7E]{1,50}$');
 
@@ -29,9 +34,6 @@ class SpaceDatasourceImpl implements SpaceDatasource {
 
   Client get _client =>
       _activeClient ?? (throw StateError('No active Matrix client'));
-
-  bool _isJoinableRule(String? rule) =>
-      rule == JoinRules.public.name || rule == JoinRules.restricted.name;
 
   @override
   Stream<int> watchRoomChanges() async* {
@@ -124,7 +126,7 @@ class SpaceDatasourceImpl implements SpaceDatasource {
             isSpace: room.roomType == RoomCreationTypes.mSpace,
             isJoined:
                 _client.getRoomById(room.roomId)?.membership == Membership.join,
-            isJoinable: _isJoinableRule(room.joinRule),
+            isJoinable: _joinableRules.contains(room.joinRule),
             via: relation?.content.tryGetList<String>('via') ?? const [],
             order: order != null && _validOrder.hasMatch(order) ? order : null,
             listedAt: relation?.originServerTs.millisecondsSinceEpoch,

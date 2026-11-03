@@ -66,31 +66,43 @@ List<RoomListEntry> entriesOf(
   Map<String, List<String>> directChats = const {},
 }) => roomListEntriesOf(rooms, directChats: directChats);
 
-StrippedStateEvent _state(String type, Map<String, Object?> content) =>
-    StrippedStateEvent(
-      type: type,
-      senderId: '@a:b',
-      stateKey: '',
-      content: content,
-    );
-
 RoomKind _kindWithState(
   String eventType,
   Map<String, Object?> content, {
   bool isSpace = false,
 }) {
   final room = _room('!c', isSpace: isSpace);
-  when(room.getState(eventType)).thenReturn(_state(eventType, content));
+  when(room.getState(eventType)).thenReturn(
+    StrippedStateEvent(
+      type: eventType,
+      senderId: '@a:b',
+      stateKey: '',
+      content: content,
+    ),
+  );
   return entriesOf([room]).single.kind;
 }
 
-RoomKind _directKind(String partner, {String name = ''}) {
+RoomKind _directKind(String partner) {
   final room = _room('!c');
-  when(room.name).thenReturn(name);
+  when(room.name).thenReturn('Named');
   final directChats = {
     partner: ['!c'],
   };
   return entriesOf([room], directChats: directChats).single.kind;
+}
+
+List<String> _parentsWhenSenderHas(PowerLevel level, {bool isListed = false}) {
+  final space = _room(
+    '!space',
+    isSpace: true,
+    children: isListed ? const ['!c'] : const [],
+  );
+  when(space.getPowerLevelByUserId(_parentSender)).thenReturn(level);
+  return entriesOf([
+    space,
+    _room('!c', parents: const ['!space']),
+  ]).last.parentSpaceIds;
 }
 
 void main() {
@@ -137,31 +149,11 @@ Room _direct({
 void _roomListEntriesOfTests() {
   group('roomListEntriesOf', () {
     test('whenSenderMayNotListInTheSpace_ignoresTheParentItNames', () {
-      final space = _room('!space', isSpace: true);
-      when(
-        space.getPowerLevelByUserId(_parentSender),
-      ).thenReturn(PowerLevel(49));
-
-      final entries = entriesOf([
-        space,
-        _room('!squatter', parents: ['!space']),
-      ]);
-
-      expect(entries.last.parentSpaceIds, isEmpty);
+      expect(_parentsWhenSenderHas(PowerLevel(49)), isEmpty);
     });
 
     test('whenTheSpaceListsTheRoom_keepsItWhoeverNamedTheParent', () {
-      final space = _room('!space', isSpace: true, children: ['!c']);
-      when(
-        space.getPowerLevelByUserId(_parentSender),
-      ).thenReturn(PowerLevel(0));
-
-      final entries = entriesOf([
-        space,
-        _room('!c', parents: ['!space']),
-      ]);
-
-      expect(entries.last.parentSpaceIds, ['!space']);
+      expect(_parentsWhenSenderHas(PowerLevel(0), isListed: true), ['!space']);
     });
 
     test('whenSpacesListAndAreNamed_putsThoseListingFirst', () {
@@ -315,13 +307,13 @@ void _kindTests() {
       });
 
       test('whenDirectWithABot_isBot', () {
-        final kind = _directKind('@bot_x:b.org', name: 'Bot');
+        final kind = _directKind('@bot_x:b.org');
 
         expect(kind, RoomKind.bot);
       });
 
       test('whenDirectWithAPerson_isDirect', () {
-        final kind = _directKind('@alice:b.org', name: 'Alice');
+        final kind = _directKind('@alice:b.org');
 
         expect(kind, RoomKind.direct);
       });

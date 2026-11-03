@@ -28,7 +28,6 @@ SpaceSummary _summary({
   bool isPublic = false,
   bool canInvite = true,
   bool canAddChildren = true,
-  String topic = '',
   int memberCount = 2,
 }) => SpaceSummary(
   id: _spaceId,
@@ -37,7 +36,6 @@ SpaceSummary _summary({
   isPublic: isPublic,
   canInvite: canInvite,
   canAddChildren: canAddChildren,
-  topic: topic,
 );
 
 Future<void> _pump(
@@ -71,7 +69,7 @@ Future<void> _pump(
 void _spaceHomeTests() {
   group('SpaceHome', () {
     testWidgets('whenPrivate_tellsWhoMayComeInAndWhatItIsFor', (tester) async {
-      await _pump(tester, _summary(topic: 'For the team'));
+      await _pump(tester, _summary().copyWith(topic: 'For the team'));
 
       expect(find.text('Private space'), findsOneWidget);
       expect(find.text('2 members'), findsNWidgets(2));
