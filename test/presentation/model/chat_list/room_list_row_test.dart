@@ -8,13 +8,12 @@ RoomListEntry _space(
   bool isFavourite = false,
   int unread = 0,
   List<String> parents = const [],
-}) => RoomListEntry(
-  id: id,
-  kind: RoomKind.space,
+}) => _room(
+  id,
   isFavourite: isFavourite,
-  unreadCount: unread,
-  parentSpaceIds: parents,
-);
+  unread: unread,
+  parents: parents,
+).copyWith(kind: RoomKind.space);
 
 RoomListEntry _room(
   String id, {
@@ -33,12 +32,11 @@ RoomListEntry _mentioned(
   required int mentions,
   int unread = 0,
   List<String> parents = const [],
-}) => RoomListEntry(
-  id: id,
-  unreadCount: unread,
-  mentionCount: mentions,
-  parentSpaceIds: parents,
-);
+}) => _room(
+  id,
+  unread: unread,
+  parents: parents,
+).copyWith(mentionCount: mentions);
 
 const _dm = RoomListEntry(id: '!dm', kind: RoomKind.direct);
 
