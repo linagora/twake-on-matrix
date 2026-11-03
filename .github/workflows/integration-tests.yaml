@@ -228,7 +228,7 @@ jobs:
               integration_test/tests/chat/message_context_menu_safe_area_patrol_test.dart
               integration_test/tests/chat/custom_scheme_link_test.dart
               integration_test/tests/chat/message_reactions_mobile_test.dart
-          # 7 stateful chat flows, isolated from the message scenarios above.
+          # 8 stateful chat flows, isolated from the message scenarios above.
           - shard: shard_4_chat_flows
             targets: >-
               integration_test/tests/chat/chat_dm_leave_test.dart
@@ -238,7 +238,8 @@ jobs:
               integration_test/tests/chat/create_direct_chat_with_unsupported_matrix_user_test.dart
               integration_test/tests/chat/search_external_mxid_test.dart
               integration_test/tests/chat/link_preview_mobile_test.dart
-          # 13 test cases (~30 min, build included). Web-only tests (e.g. web_login_paths_test,
+              integration_test/tests/chat/create_space_test.dart
+          # 14 test cases (~30 min, build included). Web-only tests (e.g. web_login_paths_test,
           # which boots web_test_main and expects the web AutoHomeserverPicker
           # flow) must NOT be listed here — they can never pass on Android and
           # are covered by the patrol-web nightly workflow.
@@ -248,6 +249,7 @@ jobs:
               integration_test/tests/login/login_with_password_test.dart
               integration_test/tests/setting/language_test.dart
               integration_test/tests/setting/settings_contacts_visibility_test.dart
+              integration_test/tests/setting/manage_folder_test.dart
               integration_test/tests/setting/settings_recovery_key_test.dart
               integration_test/tests/app_grid/app_grid_mobile_test.dart
               integration_test/tests/setting/settings_profile_test.dart

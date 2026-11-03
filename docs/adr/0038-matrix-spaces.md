@@ -44,6 +44,8 @@ D17, D42, D170, D237, D286, D348, D354, D483, D542):
   in the `nonPreload` box until a cache reset.
 - The chat picker of a folder names an unnamed group in English: the data
   layer has no locale.
+- A parent a room names counts only if its sender may list children in that
+  space, as the spec asks; React trusts it.
 
 ## Structure
 

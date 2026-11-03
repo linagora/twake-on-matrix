@@ -82,6 +82,22 @@ void main() {
       verifyNever(repository.joinRoom(any, via: anyNamed('via')));
     });
 
+    testWidgets('whenOnAPhone_backReturnsToTheCard', (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpAndTap(
+        tester,
+        const SpaceChannel(roomId: 'c', name: 'Dev', isJoined: true),
+      );
+      expect(find.text('room c'), findsOneWidget);
+
+      GoRouter.of(tester.element(find.text('room c'))).pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text('open'), findsOneWidget);
+    });
+
     testWidgets('whenNotJoined_joinsThroughItsViaThenOpensIt', (tester) async {
       await pumpAndTap(
         tester,
