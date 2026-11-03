@@ -14,7 +14,6 @@ abstract class PublicRoom with _$PublicRoom {
     required int memberCount,
     required PublicRoomAccess access,
     required PublicRoomKind kind,
-    String? alias,
     String? topic,
     Uri? avatarUri,
   }) = _PublicRoom;

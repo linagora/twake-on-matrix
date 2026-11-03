@@ -146,7 +146,6 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
 
   PublicRoom _toPublicRoom(PublicRoomsChunk chunk) => PublicRoom(
     roomId: chunk.roomId,
-    alias: chunk.canonicalAlias,
     name: chunk.name ?? chunk.canonicalAlias ?? chunk.roomId,
     topic: chunk.topic,
     avatarUri: chunk.avatarUrl,
