@@ -129,6 +129,7 @@ void main() {
       [
         publicRoom('!open'),
         publicRoom('!knock', access: PublicRoomAccess.approval),
+        publicRoom('!restricted', access: PublicRoomAccess.restricted),
         publicRoom('!feed', kind: PublicRoomKind.feed),
       ],
     ];
@@ -142,6 +143,7 @@ void main() {
         .map((avatar) => avatar.badge);
     expect(badges, [
       AvatarKindBadge.public,
+      AvatarKindBadge.people,
       AvatarKindBadge.people,
       AvatarKindBadge.broadcast,
     ]);

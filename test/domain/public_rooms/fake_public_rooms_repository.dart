@@ -80,7 +80,10 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
     await joinGate?.future;
     if (joinError case final error?) throw error;
     joinedIds.add(roomIdOrAlias);
-    return (roomId: roomIdOrAlias, isInSync: isJoinInSync);
+    final roomId = roomIdOrAlias.startsWith('#')
+        ? '!${roomIdOrAlias.substring(1)}'
+        : roomIdOrAlias;
+    return (roomId: roomId, isInSync: isJoinInSync);
   }
 
   @override

@@ -13,7 +13,7 @@ void main() {
     final joined = await JoinPublicRoomUseCase(repository).execute('#a:hs');
 
     // Assert
-    expect(joined.roomId, '#a:hs');
+    expect(joined.roomId, '!a:hs');
     expect(repository.joinedIds, ['#a:hs']);
   });
 

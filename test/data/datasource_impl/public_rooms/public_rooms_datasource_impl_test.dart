@@ -134,7 +134,7 @@ void main() {
       expect(sizes, [0, 4]);
     });
 
-    test('fetchDirectory_whenPagesNeverEnd_stopsAfterACap', () async {
+    test('fetchDirectory_whenEmptyPagesNeverEnd_stopsAfterThree', () async {
       // Arrange
       when(
         mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
@@ -147,7 +147,23 @@ void main() {
       final sizes = await pageSizes();
 
       // Assert
-      expect(sizes, hasLength(12));
+      expect(sizes, [0, 0, 0]);
+    });
+
+    test('fetchDirectory_whenPagesAreShort_keepsReading', () async {
+      // Arrange
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
+      ).thenAnswer((invocation) async {
+        final since = invocation.namedArguments[#since] as String? ?? '';
+        return page(0, 1, next: since.length < 5 ? '$since+' : null);
+      });
+
+      // Act
+      final sizes = await pageSizes();
+
+      // Assert
+      expect(sizes, hasLength(6));
     });
 
     test('fetchDirectory_always_skipsRoomsNobodyCanJoin', () async {
@@ -196,6 +212,9 @@ void main() {
             chunk('!f', roomType: FeedConfig.roomType, joinRule: 'knock'),
             chunk('!s', roomType: 'm.space'),
             chunk('!o', roomType: 'org.other', joinRule: 'knock_restricted'),
+            chunk('!p', joinRule: 'public'),
+            chunk('!r', joinRule: 'restricted'),
+            chunk('!u', joinRule: 'org.unknown'),
           ],
         ),
       );
@@ -209,12 +228,18 @@ void main() {
         PublicRoomKind.feed,
         PublicRoomKind.space,
         PublicRoomKind.other,
+        PublicRoomKind.group,
+        PublicRoomKind.group,
+        PublicRoomKind.group,
       ]);
       expect(rooms.map((room) => room.access), [
         PublicRoomAccess.open,
         PublicRoomAccess.approval,
         PublicRoomAccess.open,
         PublicRoomAccess.approval,
+        PublicRoomAccess.open,
+        PublicRoomAccess.restricted,
+        PublicRoomAccess.restricted,
       ]);
       expect(rooms.first.name, 'Group');
       expect(rooms[1].name, '!f');

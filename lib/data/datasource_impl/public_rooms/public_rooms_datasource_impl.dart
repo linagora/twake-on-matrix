@@ -18,6 +18,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
 
   static const _memberships = {Membership.join, Membership.invite};
 
+  static const _maxEmptyPages = 3;
+
   static final _knockRules = {
     JoinRules.knock.text,
     JoinRules.knockRestricted.text,
@@ -32,13 +34,9 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   Stream<List<PublicRoom>> fetchDirectory({required int limit}) async* {
     final client = _client;
     var count = 0;
-    var requests = 0;
+    var emptyPages = 0;
     String? since;
     do {
-      if (requests++ == limit ~/ pageSize + 2) {
-        Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: too many pages');
-        return;
-      }
       final QueryPublicRoomsResponse page;
       try {
         // No `server`: the directory of the user's homeserver only.
@@ -66,6 +64,10 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           .toList();
       count += rooms.length;
       yield rooms;
+      if (page.chunk.isEmpty && ++emptyPages == _maxEmptyPages) {
+        Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: empty pages');
+        return;
+      }
       final next = page.nextBatch;
       // Defensive: the spec does not cover a server repeating the token.
       if (next != null && next == since) {
@@ -150,9 +152,12 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     topic: chunk.topic,
     avatarUri: chunk.avatarUrl,
     memberCount: chunk.numJoinedMembers,
-    access: _knockRules.contains(chunk.joinRule)
-        ? PublicRoomAccess.approval
-        : PublicRoomAccess.open,
+    access: switch (chunk.joinRule) {
+      // An absent rule means public in the directory.
+      null || 'public' => PublicRoomAccess.open,
+      final rule when _knockRules.contains(rule) => PublicRoomAccess.approval,
+      _ => PublicRoomAccess.restricted,
+    },
     kind: switch (chunk.roomType) {
       null => PublicRoomKind.group,
       FeedConfig.roomType => PublicRoomKind.feed,

@@ -26,7 +26,10 @@ class PublicRoomsController extends _$PublicRoomsController {
     ref.onDispose(() => unawaited(pages.cancel()));
     final hasFirstPage = await pages.moveNext();
     if (!ref.mounted || !hasFirstPage) return const PublicRoomsState(rooms: []);
-    final firstPage = pages.current;
+    final loadedIds = <String>{};
+    final firstPage = pages.current
+        .where((room) => loadedIds.add(room.roomId))
+        .toList();
     unawaited(_loadMore(firstPage, pages));
     return PublicRoomsState(rooms: firstPage, isLoadingMore: true);
   }

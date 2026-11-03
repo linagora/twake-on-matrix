@@ -2,7 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'public_room.freezed.dart';
 
-enum PublicRoomAccess { open, approval }
+/// `restricted`: any other join rule; joining may work, but not for everyone.
+enum PublicRoomAccess { open, approval, restricted }
 
 enum PublicRoomKind { group, feed, space, other }
 

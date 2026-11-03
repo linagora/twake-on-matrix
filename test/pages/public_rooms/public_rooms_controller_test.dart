@@ -392,4 +392,18 @@ void main() {
     // Assert
     expect(pages.hasListener, isFalse);
   });
+
+  test('build_whenTheFirstPageRepeatsARoom_listsItOnce', () async {
+    // Arrange
+    repository.pages = [
+      [publicRoom('!a'), publicRoom('!a'), publicRoom('!b')],
+    ];
+    final container = makeContainer();
+
+    // Act
+    final state = await container.read(publicRoomsControllerProvider.future);
+
+    // Assert
+    expect(state.rooms.map((room) => room.roomId), ['!a', '!b']);
+  });
 }
