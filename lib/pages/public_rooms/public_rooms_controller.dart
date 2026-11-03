@@ -79,17 +79,15 @@ class PublicRoomsController extends _$PublicRoomsController {
     try {
       while (await pages.moveNext()) {
         if (!ref.mounted) return;
-        final page = pages.current;
-        _update((state) {
-          final loadedIds = {for (final room in state.rooms) room.roomId};
-          return state.copyWith(
-            rooms: [
-              ...state.rooms,
-              ...page.where((room) => loadedIds.add(room.roomId)),
-            ],
-          );
-        });
-        _queueLookup(page);
+        final loadedIds = {
+          for (final room in state.value?.rooms ?? const <PublicRoom>[])
+            room.roomId,
+        };
+        final added = pages.current
+            .where((room) => loadedIds.add(room.roomId))
+            .toList();
+        _update((state) => state.copyWith(rooms: [...state.rooms, ...added]));
+        _queueLookup(added);
       }
     } on PublicRoomsException {
       // Logged by the datasource: keep the rooms already shown.

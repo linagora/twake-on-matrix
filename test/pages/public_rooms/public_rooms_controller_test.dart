@@ -406,4 +406,26 @@ void main() {
     // Assert
     expect(state.rooms.map((room) => room.roomId), ['!a', '!b']);
   });
+
+  test('build_whenALaterPageRepeatsARoom_looksItUpOnce', () async {
+    // Arrange
+    repository.pages = [
+      [publicRoom('!a', access: PublicRoomAccess.approval)],
+      [
+        publicRoom('!a', access: PublicRoomAccess.approval),
+        publicRoom('!b', access: PublicRoomAccess.approval),
+      ],
+    ];
+    final container = makeContainer();
+
+    // Act
+    await loadedController(container);
+    await pumpEventQueue();
+
+    // Assert
+    expect(repository.knockedQueries, [
+      ['!a'],
+      ['!b'],
+    ]);
+  });
 }

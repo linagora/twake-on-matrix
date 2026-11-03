@@ -60,7 +60,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   }
 
   @override
-  Set<String> getMemberRoomIds() => joined;
+  Set<String> getKnownRoomIds() => joined;
 
   @override
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds) async {

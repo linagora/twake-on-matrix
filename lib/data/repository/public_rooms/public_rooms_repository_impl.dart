@@ -12,7 +12,7 @@ class PublicRoomsRepositoryImpl implements PublicRoomsRepository {
       _datasource.fetchDirectory(limit: limit);
 
   @override
-  Set<String> getMemberRoomIds() => _datasource.getMemberRoomIds();
+  Set<String> getKnownRoomIds() => _datasource.getKnownRoomIds();
 
   @override
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds) =>

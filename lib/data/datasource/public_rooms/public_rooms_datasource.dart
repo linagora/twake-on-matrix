@@ -3,7 +3,7 @@ import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 abstract class PublicRoomsDatasource {
   Stream<List<PublicRoom>> fetchDirectory({required int limit});
 
-  Set<String> getMemberRoomIds();
+  Set<String> getKnownRoomIds();
 
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds);
 

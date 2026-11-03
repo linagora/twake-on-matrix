@@ -16,7 +16,11 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   // Listed for their world-readable history, but nobody can join them.
   static final _closedRules = {JoinRules.invite.text, JoinRules.private.text};
 
-  static const _memberships = {Membership.join, Membership.invite};
+  static const _knownMemberships = {
+    Membership.join,
+    Membership.invite,
+    Membership.ban,
+  };
 
   static const _maxEmptyPages = 3;
 
@@ -35,6 +39,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     final client = _client;
     var count = 0;
     var emptyPages = 0;
+    var isFirstPage = true;
     String? since;
     do {
       final QueryPublicRoomsResponse page;
@@ -42,7 +47,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         // No `server`: the directory of the user's homeserver only.
         page = await client.queryPublicRooms(limit: pageSize, since: since);
       } on Exception catch (exception, stackTrace) {
-        if (count == 0) {
+        if (isFirstPage) {
           Logs().e(
             'PublicRoomsDatasourceImpl::fetchDirectory',
             exception,
@@ -57,6 +62,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         );
         return;
       }
+      isFirstPage = false;
       final rooms = page.chunk
           .where((chunk) => !_closedRules.contains(chunk.joinRule))
           .take(limit - count)
@@ -79,8 +85,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   }
 
   @override
-  Set<String> getMemberRoomIds() => _client.rooms
-      .where((room) => _memberships.contains(room.membership))
+  Set<String> getKnownRoomIds() => _client.rooms
+      .where((room) => _knownMemberships.contains(room.membership))
       .map((room) => room.id)
       .toSet();
 
@@ -101,10 +107,11 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     try {
       final summary = await client.getRoomSummary(roomId);
       return summary.membership == Membership.knock;
-    } on Exception catch (exception, stackTrace) {
+    } on Object catch (error, stackTrace) {
+      // A malformed summary must not stop the other lookups.
       Logs().w(
         'PublicRoomsDatasourceImpl::getKnockedRoomIds',
-        exception,
+        error,
         stackTrace,
       );
       return false;

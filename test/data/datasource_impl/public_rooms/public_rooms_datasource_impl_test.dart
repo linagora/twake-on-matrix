@@ -187,6 +187,23 @@ void main() {
       expect(rooms.map((room) => room.roomId), ['!public', '!unset', '!knock']);
     });
 
+    test('fetchDirectory_whenOnlyClosedRoomsCameBeforeAFailure_ends', () async {
+      // Arrange
+      stubDirectory({
+        null: QueryPublicRoomsResponse(
+          chunk: [chunk('!invite', joinRule: 'invite')],
+          nextBatch: 'p2',
+        ),
+        'p2': Exception('timeout'),
+      });
+
+      // Act
+      final sizes = await pageSizes();
+
+      // Assert
+      expect(sizes, [0]);
+    });
+
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
       // Arrange
       when(
@@ -246,7 +263,7 @@ void main() {
     });
   });
 
-  test('memberRoomIds_always_listsJoinedAndInvitedRooms', () {
+  test('knownRoomIds_always_listsJoinedInvitedAndBannedRooms', () {
     // Arrange
     final joined = MockRoom();
     when(joined.id).thenReturn('!joined');
@@ -254,16 +271,19 @@ void main() {
     final invited = MockRoom();
     when(invited.id).thenReturn('!invited');
     when(invited.membership).thenReturn(Membership.invite);
+    final banned = MockRoom();
+    when(banned.id).thenReturn('!banned');
+    when(banned.membership).thenReturn(Membership.ban);
     final left = MockRoom();
     when(left.id).thenReturn('!left');
     when(left.membership).thenReturn(Membership.leave);
-    when(mockClient.rooms).thenReturn([joined, invited, left]);
+    when(mockClient.rooms).thenReturn([joined, invited, banned, left]);
 
     // Act
-    final ids = datasource.getMemberRoomIds();
+    final ids = datasource.getKnownRoomIds();
 
     // Assert
-    expect(ids, {'!joined', '!invited'});
+    expect(ids, {'!joined', '!invited', '!banned'});
   });
 
   group('getKnockedRoomIds', () {
@@ -287,10 +307,12 @@ void main() {
       when(
         mockClient.getRoomSummary('!broken'),
       ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}));
+      when(mockClient.getRoomSummary('!malformed')).thenThrow(TypeError());
 
       // Act
       final ids = await datasource.getKnockedRoomIds([
         '!broken',
+        '!malformed',
         '!knock',
         '!none',
       ]);
