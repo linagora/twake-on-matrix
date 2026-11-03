@@ -37,6 +37,17 @@ void main() {
     return (container, first);
   }
 
+  Future<PublicRoomsState> stateAfterLaterPages(
+    void Function(StreamController<List<PublicRoom>> pages) sendLaterPages,
+  ) async {
+    final pages = StreamController<List<PublicRoom>>();
+    final (container, _) = await loadFirstPage(pages);
+    sendLaterPages(pages);
+    await pages.close();
+    await pumpEventQueue();
+    return container.read(publicRoomsControllerProvider).requireValue;
+  }
+
   setUp(() {
     repository = FakePublicRoomsRepository(
       directory: [
@@ -163,17 +174,14 @@ void main() {
   });
 
   test('build_whenALaterPageFails_keepsTheRoomsShown', () async {
-    // Arrange
-    final pages = StreamController<List<PublicRoom>>();
-    final (container, _) = await loadFirstPage(pages);
-
     // Act
-    pages.addError(PublicRoomsFetchFailedException(cause: Exception('down')));
-    await pages.close();
-    await pumpEventQueue();
+    final state = await stateAfterLaterPages(
+      (pages) => pages.addError(
+        PublicRoomsFetchFailedException(cause: Exception('down')),
+      ),
+    );
 
     // Assert
-    final state = container.read(publicRoomsControllerProvider).requireValue;
     expect(state.rooms.map((room) => room.roomId), ['!first']);
     expect(state.isLoadingMore, isFalse);
   });
@@ -249,17 +257,12 @@ void main() {
   });
 
   test('build_whenALaterPageRepeatsARoom_listsItOnce', () async {
-    // Arrange
-    final pages = StreamController<List<PublicRoom>>();
-    final (container, _) = await loadFirstPage(pages);
-
     // Act
-    pages.add([publicRoom('!first'), publicRoom('!second')]);
-    await pages.close();
-    await pumpEventQueue();
+    final state = await stateAfterLaterPages(
+      (pages) => pages.add([publicRoom('!first'), publicRoom('!second')]),
+    );
 
     // Assert
-    final state = container.read(publicRoomsControllerProvider).requireValue;
     expect(state.rooms.map((room) => room.roomId), ['!first', '!second']);
   });
 
