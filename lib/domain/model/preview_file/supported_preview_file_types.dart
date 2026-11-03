@@ -69,6 +69,7 @@ class SupportedPreviewFileTypes {
     'video/quicktime',
     'video/mov',
     'video/mpeg',
+    'video/webm',
   ];
 
   static const audioMimeTypes = ['audio/mpeg', 'audio/wav', 'audio/x-ms-wmv'];
