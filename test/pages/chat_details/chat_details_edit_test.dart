@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show ProviderContainer, UncontrolledProviderScope;
@@ -19,6 +21,7 @@ import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
@@ -231,5 +234,26 @@ void main() {
 
     // Assert
     expect(controller.isRoomEnabledEncryptionNotifier.value, isFalse);
+  });
+
+  testWidgets('save_whenABugThrows_closesTheLoadingDialog', (tester) async {
+    // Arrange
+    when(
+      repository.setJoinRule(roomId, JoinRuleChoice.public),
+    ).thenAnswer((_) async => throw StateError('bug'));
+    final controller = await pumpEdit(tester);
+    await choosePublic(tester);
+    Object? error;
+
+    // Act
+    runZonedGuarded(
+      () => controller.handleSaveAction(controller.context),
+      (e, _) => error = e,
+    );
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(error, isA<StateError>());
+    expect(find.byType(ProgressDialog), findsNothing);
   });
 }
