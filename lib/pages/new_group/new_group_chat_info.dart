@@ -5,7 +5,6 @@ import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/app_state/validator/verify_name_view_state.dart';
-import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/extensions/validator_failure_extension.dart';
 import 'package:twake_chat/domain/model/verification/name_with_space_only_validator.dart';
 import 'package:twake_chat/domain/model/verification/new_name_request.dart';
@@ -20,7 +19,6 @@ import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
 import 'package:twake_chat/presentation/mixins/single_image_picker_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -86,15 +84,6 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
   void setPublic({required bool isPublic}) {
     groupPrivacyNotifier.value = groupPrivacyNotifier.value.withPublic(
       isPublic: isPublic,
-      isServerLimitedByDefault: ref
-          .read(loginHomeserverSummaryProvider)
-          .isPublicGroupsServerLimitedByDefault,
-    );
-  }
-
-  void setServerLimited({required bool isServerLimited}) {
-    groupPrivacyNotifier.value = groupPrivacyNotifier.value.copyWith(
-      isServerLimited: isServerLimited,
     );
   }
 

@@ -36,7 +36,6 @@ void main() {
     required bool? enableEncryption,
     required CreateRoomPreset preset,
     required Visibility? visibility,
-    required bool federated,
   }) {
     verify(
       mockClient.createGroupChat(
@@ -45,7 +44,7 @@ void main() {
         preset: preset,
         initialState: anyNamed('initialState'),
         visibility: visibility,
-        federated: federated,
+        federated: true,
         powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
       ),
     ).called(1);
@@ -115,7 +114,7 @@ void main() {
     );
 
     test(
-      'createGroup_whenPublicAndServerLimited_createsAnUnencryptedUnfederatedPublicRoom',
+      'createGroup_whenPublic_createsAnUnencryptedPublicRoomWithoutMFederate',
       () async {
         // Act
         await datasource.createGroup(
@@ -123,7 +122,6 @@ void main() {
             groupName: 'Paris Business',
             enableEncryption: true,
             isPublic: true,
-            isServerLimited: true,
           ),
         );
 
@@ -132,39 +130,16 @@ void main() {
           enableEncryption: false,
           preset: CreateRoomPreset.publicChat,
           visibility: Visibility.public,
-          federated: false,
         );
       },
     );
 
-    test(
-      'createGroup_whenPublicWithoutServerLimit_createsAFederatedPublicRoom',
-      () async {
-        // Act
-        await datasource.createGroup(
-          const CreateNewGroupChatRequest(
-            groupName: 'Open Lab',
-            isPublic: true,
-          ),
-        );
-
-        // Assert
-        verifyRoomCreatedWith(
-          enableEncryption: false,
-          preset: CreateRoomPreset.publicChat,
-          visibility: Visibility.public,
-          federated: true,
-        );
-      },
-    );
-
-    test('createGroup_whenPrivate_ignoresTheServerLimit', () async {
+    test('createGroup_whenPrivate_createsAPrivateRoom', () async {
       // Act
       await datasource.createGroup(
         const CreateNewGroupChatRequest(
           groupName: 'Team',
           enableEncryption: true,
-          isServerLimited: true,
         ),
       );
 
@@ -173,7 +148,6 @@ void main() {
         enableEncryption: true,
         preset: CreateRoomPreset.privateChat,
         visibility: null,
-        federated: true,
       );
     });
   });

@@ -72,7 +72,6 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
       isPublic:
           form.privacy.isPublic &&
           ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-      isServerLimited: form.privacy.isServerLimited,
       urlAvatar: form.urlAvatar,
     );
   }

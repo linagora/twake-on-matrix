@@ -197,14 +197,10 @@ void main() {
       // Assert
       final context = tester.element(find.byType(TwakeAppBar));
       expect(find.text(L10n.of(context)!.enableEncryption), findsOneWidget);
-      expect(
-        find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
-        findsNothing,
-      );
     });
 
     testWidgets(
-      'build_whenPublic_showsTheServerLimitToggleAndGreysOutEncryption',
+      'build_whenPublic_greysOutEncryptionWithoutAServerLimitToggle',
       (WidgetTester tester) async {
         // Arrange
         when(mockController.isFeed).thenReturn(false);
@@ -212,18 +208,12 @@ void main() {
         // Act
         await pumpView(
           tester,
-          privacy: const GroupPrivacyState(
-            isPublic: true,
-            isServerLimited: true,
-          ),
+          privacy: const GroupPrivacyState(isPublic: true),
         );
 
         // Assert
         final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
-        expect(
-          find.text(l10n.groupPrivacyLimitToServer('example.com')),
-          findsOneWidget,
-        );
+        expect(find.byType(LinagoraSettingItem), findsNWidgets(2));
         expect(settingItem(tester, l10n.enableEncryption).enabled, isFalse);
         expect(
           find.text(l10n.encryptionUnavailableForPublicChat),
@@ -233,32 +223,24 @@ void main() {
       },
     );
 
-    testWidgets(
-      'build_whenEncrypted_greysOutPublicAndHidesTheServerLimitToggle',
-      (WidgetTester tester) async {
-        // Arrange
-        when(mockController.isFeed).thenReturn(false);
+    testWidgets('build_whenEncrypted_greysOutPublic', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
 
-        // Act
-        await pumpView(
-          tester,
-          privacy: const GroupPrivacyState(isEncrypted: true),
-        );
+      // Act
+      await pumpView(
+        tester,
+        privacy: const GroupPrivacyState(isEncrypted: true),
+      );
 
-        // Assert
-        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
-        expect(settingItem(tester, l10n.makeChatPublic).enabled, isFalse);
-        expect(
-          find.text(l10n.publicUnavailableForEncryptedChat),
-          findsOneWidget,
-        );
-        expect(settingItem(tester, l10n.enableEncryption).enabled, isTrue);
-        expect(
-          find.text(l10n.groupPrivacyLimitToServer('example.com')),
-          findsNothing,
-        );
-      },
-    );
+      // Assert
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+      expect(settingItem(tester, l10n.makeChatPublic).enabled, isFalse);
+      expect(find.text(l10n.publicUnavailableForEncryptedChat), findsOneWidget);
+      expect(settingItem(tester, l10n.enableEncryption).enabled, isTrue);
+    });
 
     testWidgets(
       'build_whenPrivateAndUnencrypted_showsBothTogglesEnabledEncryptionFirst',
@@ -318,29 +300,21 @@ void main() {
       verify(mockController.setPublic(isPublic: true)).called(1);
     });
 
-    testWidgets(
-      'build_whenPrivacyBecomesPublic_showsTheServerLimitToggleAndGreysOutEncryption',
-      (WidgetTester tester) async {
-        // Arrange
-        when(mockController.isFeed).thenReturn(false);
-        final privacyNotifier = await pumpView(tester);
-        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+    testWidgets('build_whenPrivacyBecomesPublic_greysOutEncryption', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      final privacyNotifier = await pumpView(tester);
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
 
-        // Act
-        privacyNotifier.value = const GroupPrivacyState(
-          isPublic: true,
-          isServerLimited: true,
-        );
-        await tester.pumpAndSettle();
+      // Act
+      privacyNotifier.value = const GroupPrivacyState(isPublic: true);
+      await tester.pumpAndSettle();
 
-        // Assert
-        expect(
-          find.text(l10n.groupPrivacyLimitToServer('example.com')),
-          findsOneWidget,
-        );
-        expect(settingItem(tester, l10n.enableEncryption).enabled, isFalse);
-      },
-    );
+      // Assert
+      expect(settingItem(tester, l10n.enableEncryption).enabled, isFalse);
+    });
 
     testWidgets('encryptionToggle_whenTapped_encryptsTheGroup', (
       WidgetTester tester,
@@ -375,24 +349,6 @@ void main() {
       verifyNever(mockController.setPublic(isPublic: anyNamed('isPublic')));
     });
 
-    testWidgets('serverLimitToggle_whenTapped_opensTheGroupToOtherServers', (
-      WidgetTester tester,
-    ) async {
-      // Arrange
-      when(mockController.isFeed).thenReturn(false);
-      await pumpView(
-        tester,
-        privacy: const GroupPrivacyState(isPublic: true, isServerLimited: true),
-      );
-      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
-
-      // Act
-      await tapSetting(tester, l10n.groupPrivacyLimitToServer('example.com'));
-
-      // Assert
-      verify(mockController.setServerLimited(isServerLimited: false)).called(1);
-    });
-
     testWidgets(
       'build_whenKeyboardLeavesLittleRoomUnderPublicSettings_doesNotOverflow',
       (WidgetTester tester) async {
@@ -414,10 +370,7 @@ void main() {
           await tester.pumpWidget(const SizedBox.shrink());
           await pumpView(
             tester,
-            privacy: const GroupPrivacyState(
-              isPublic: true,
-              isServerLimited: true,
-            ),
+            privacy: const GroupPrivacyState(isPublic: true),
           );
 
           // Assert

@@ -332,51 +332,5 @@ void main() {
       // Assert
       expect(isEnabled, isFalse);
     });
-
-    test(
-      'isPublicGroupsServerLimitedByDefault_whenWellKnownOpensGroups_returnsFalse',
-      () {
-        // Arrange
-        final summary = summaryWith({
-          'app.twake.chat': {
-            'public_groups': {'default_server_limited': false},
-          },
-        });
-
-        // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
-
-        // Assert
-        expect(isLimited, isFalse);
-      },
-    );
-
-    test(
-      'isPublicGroupsServerLimitedByDefault_whenKeyIsMissing_returnsTrue',
-      () {
-        // Arrange
-        final summary = summaryWith({'app.twake.chat': <String, dynamic>{}});
-
-        // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
-
-        // Assert
-        expect(isLimited, isTrue);
-      },
-    );
-
-    test(
-      'isPublicGroupsServerLimitedByDefault_whenSummaryIsNull_returnsTrue',
-      () {
-        // Arrange
-        const HomeserverSummary? summary = null;
-
-        // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
-
-        // Assert
-        expect(isLimited, isTrue);
-      },
-    );
   });
 }

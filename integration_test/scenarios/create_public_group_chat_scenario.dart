@@ -8,11 +8,11 @@ import 'package:twake_chat/widgets/matrix.dart' as twake;
 
 import '../base/base_test_scenario.dart';
 
-/// Cross-platform scenario: create a public group limited to the homeserver.
+/// Cross-platform scenario: create a public group.
 ///
 /// Turns the public groups flag on, creates a group with "Make chat public",
-/// then asserts on the homeserver that the room is public, unfederated,
-/// unencrypted and listed in the room directory.
+/// then asserts on the homeserver that the room is public, has no
+/// `m.federate`, is unencrypted and listed in the room directory.
 ///
 /// The flag is injected because the test homeserver serves no HTTPS
 /// well-known.
@@ -41,10 +41,7 @@ class CreatePublicGroupChatScenario extends BaseTestScenario {
               additionalProperties: {
                 ...?summary?.discoveryInformation?.additionalProperties,
                 'app.twake.chat': {
-                  'public_groups': {
-                    'enabled': true,
-                    'default_server_limited': true,
-                  },
+                  'public_groups': {'enabled': true},
                 },
               },
             ),
@@ -90,9 +87,9 @@ class CreatePublicGroupChatScenario extends BaseTestScenario {
 
     expect(joinRules['join_rule'], 'public', reason: 'Group is not public');
     expect(
-      create['m.federate'],
+      create.containsKey('m.federate'),
       isFalse,
-      reason: 'Group is not limited to the homeserver',
+      reason: 'Group sets m.federate',
     );
     expect(room.encrypted, isFalse, reason: 'Public group is encrypted');
     expect(

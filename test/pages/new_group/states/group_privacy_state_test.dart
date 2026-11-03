@@ -25,16 +25,10 @@ void main() {
 
     test('withPublic_whenPrivate_makesPublicAndBlocksEncryption', () {
       // Act
-      final privacy = const GroupPrivacyState().withPublic(
-        isPublic: true,
-        isServerLimitedByDefault: true,
-      );
+      final privacy = const GroupPrivacyState().withPublic(isPublic: true);
 
       // Assert
-      expect(
-        privacy,
-        const GroupPrivacyState(isPublic: true, isServerLimited: true),
-      );
+      expect(privacy, const GroupPrivacyState(isPublic: true));
       expect(privacy.canBeEncrypted, isFalse);
     });
 
@@ -43,10 +37,7 @@ void main() {
       const encrypted = GroupPrivacyState(isEncrypted: true);
 
       // Act
-      final privacy = encrypted.withPublic(
-        isPublic: true,
-        isServerLimitedByDefault: true,
-      );
+      final privacy = encrypted.withPublic(isPublic: true);
 
       // Assert
       expect(privacy, encrypted);
@@ -54,7 +45,7 @@ void main() {
 
     test('withEncryption_whenPublic_isRefused', () {
       // Arrange
-      const public = GroupPrivacyState(isPublic: true, isServerLimited: true);
+      const public = GroupPrivacyState(isPublic: true);
 
       // Act
       final privacy = public.withEncryption(isEncrypted: true);
@@ -74,12 +65,12 @@ void main() {
       expect(privacy.canBePublic, isTrue);
     });
 
-    test('withPublic_whenTurnedOff_clearsServerLimitAndUnblocksEncryption', () {
+    test('withPublic_whenTurnedOff_unblocksEncryption', () {
+      // Arrange
+      const public = GroupPrivacyState(isPublic: true);
+
       // Act
-      final privacy = const GroupPrivacyState(
-        isPublic: true,
-        isServerLimited: true,
-      ).withPublic(isPublic: false, isServerLimitedByDefault: true);
+      final privacy = public.withPublic(isPublic: false);
 
       // Assert
       expect(privacy, const GroupPrivacyState());

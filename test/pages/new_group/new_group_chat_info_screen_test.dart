@@ -73,7 +73,6 @@ void main() {
     WidgetTester tester, {
     bool isFeed = false,
     bool isPublicGroupsEnabled = true,
-    bool? isServerLimitedByDefault,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -91,10 +90,7 @@ void main() {
                 ),
                 additionalProperties: {
                   'app.twake.chat': {
-                    'public_groups': {
-                      'enabled': isPublicGroupsEnabled,
-                      'default_server_limited': ?isServerLimitedByDefault,
-                    },
+                    'public_groups': {'enabled': isPublicGroupsEnabled},
                   },
                 },
               ),
@@ -161,40 +157,25 @@ void main() {
         verify(mockRepository.createGroup(captureAny)).captured.single
             as CreateNewGroupChatRequest;
 
-    Future<NewGroupChatInfoScreenState> pumpGroupCreationScreen(
-      WidgetTester tester, {
-      required bool isPublicGroupsEnabled,
-      bool? isServerLimitedByDefault,
-    }) => pumpScreen(
-      tester,
-      isPublicGroupsEnabled: isPublicGroupsEnabled,
-      isServerLimitedByDefault: isServerLimitedByDefault,
-    );
-    testWidgets(
-      'createNewGroup_whenThePrivacyIsPublic_requestsAPublicServerLimitedGroup',
-      (WidgetTester tester) async {
-        // Arrange
-        final controller = await pumpGroupCreationScreen(
-          tester,
-          isPublicGroupsEnabled: true,
-        );
-        controller.setPublic(isPublic: true);
+    testWidgets('createNewGroup_whenThePrivacyIsPublic_requestsAPublicGroup', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      final controller = await pumpScreen(tester, isPublicGroupsEnabled: true);
+      controller.setPublic(isPublic: true);
 
-        // Act
-        controller.createNewGroup();
+      // Act
+      controller.createNewGroup();
 
-        // Assert
-        final request = capturedRequest();
-        expect(request.isPublic, isTrue);
-        expect(request.isServerLimited, isTrue);
-      },
-    );
+      // Assert
+      expect(capturedRequest().isPublic, isTrue);
+    });
 
     testWidgets(
       'createNewGroup_whenPublicGroupsAreDisabled_requestsAPrivateGroup',
       (WidgetTester tester) async {
         // Arrange
-        final controller = await pumpGroupCreationScreen(
+        final controller = await pumpScreen(
           tester,
           isPublicGroupsEnabled: false,
         );
@@ -215,10 +196,7 @@ void main() {
       when(
         mockRepository.createGroup(any),
       ).thenAnswer((_) => Future.error(Exception('Server error')));
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
+      final controller = await pumpScreen(tester, isPublicGroupsEnabled: true);
       controller.setPublic(isPublic: true);
 
       // Act
@@ -228,7 +206,7 @@ void main() {
       // Assert
       expect(
         controller.groupPrivacyNotifier.value,
-        const GroupPrivacyState(isPublic: true, isServerLimited: true),
+        const GroupPrivacyState(isPublic: true),
       );
     });
 
@@ -236,7 +214,7 @@ void main() {
       'createNewGroup_whenEncrypted_requestsAnEncryptedPrivateGroup',
       (WidgetTester tester) async {
         // Arrange
-        final controller = await pumpGroupCreationScreen(
+        final controller = await pumpScreen(
           tester,
           isPublicGroupsEnabled: true,
         );
@@ -256,10 +234,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
+      final controller = await pumpScreen(tester, isPublicGroupsEnabled: true);
       controller.setEncrypted(isEncrypted: true);
 
       // Act
@@ -276,10 +251,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
+      final controller = await pumpScreen(tester, isPublicGroupsEnabled: true);
       controller.setPublic(isPublic: true);
 
       // Act
@@ -288,7 +260,7 @@ void main() {
       // Assert
       expect(
         controller.groupPrivacyNotifier.value,
-        const GroupPrivacyState(isPublic: true, isServerLimited: true),
+        const GroupPrivacyState(isPublic: true),
       );
     });
 
@@ -296,10 +268,7 @@ void main() {
       WidgetTester tester,
     ) async {
       // Act
-      final controller = await pumpGroupCreationScreen(
-        tester,
-        isPublicGroupsEnabled: true,
-      );
+      final controller = await pumpScreen(tester, isPublicGroupsEnabled: true);
 
       // Assert
       expect(controller.groupPrivacyNotifier.value, const GroupPrivacyState());
@@ -309,58 +278,36 @@ void main() {
         <
           ({
             String name,
-            bool? isServerLimitedByDefault,
             bool startsPublic,
-            void Function(NewGroupChatInfoScreenState controller) act,
+            bool isPublic,
             GroupPrivacyState expected,
           })
         >[
           (
-            name: 'setPublic_whenWellKnownHasNoDefault_limitsToTheServer',
-            isServerLimitedByDefault: null,
+            name: 'setPublic_whenPrivate_makesThePrivacyPublic',
             startsPublic: false,
-            act: (controller) => controller.setPublic(isPublic: true),
-            expected: const GroupPrivacyState(
-              isPublic: true,
-              isServerLimited: true,
-            ),
-          ),
-          (
-            name: 'setPublic_whenWellKnownOpensGroupsByDefault_doesNotLimit',
-            isServerLimitedByDefault: false,
-            startsPublic: false,
-            act: (controller) => controller.setPublic(isPublic: true),
+            isPublic: true,
             expected: const GroupPrivacyState(isPublic: true),
           ),
           (
-            name: 'setPublic_whenBackToPrivate_clearsTheServerLimit',
-            isServerLimitedByDefault: null,
+            name: 'setPublic_whenBackToPrivate_makesThePrivacyPrivate',
             startsPublic: true,
-            act: (controller) => controller.setPublic(isPublic: false),
+            isPublic: false,
             expected: const GroupPrivacyState(),
-          ),
-          (
-            name: 'setServerLimited_whenPublic_keepsTheGroupPublic',
-            isServerLimitedByDefault: null,
-            startsPublic: true,
-            act: (controller) =>
-                controller.setServerLimited(isServerLimited: false),
-            expected: const GroupPrivacyState(isPublic: true),
           ),
         ];
 
     for (final testCase in transitionCases) {
       testWidgets(testCase.name, (WidgetTester tester) async {
         // Arrange
-        final controller = await pumpGroupCreationScreen(
+        final controller = await pumpScreen(
           tester,
           isPublicGroupsEnabled: true,
-          isServerLimitedByDefault: testCase.isServerLimitedByDefault,
         );
         if (testCase.startsPublic) controller.setPublic(isPublic: true);
 
         // Act
-        testCase.act(controller);
+        controller.setPublic(isPublic: testCase.isPublic);
 
         // Assert
         expect(controller.groupPrivacyNotifier.value, testCase.expected);

@@ -12,8 +12,5 @@ abstract class CreateNewGroupChatRequest with _$CreateNewGroupChatRequest {
 
     /// Public preset, listed in the room directory and never encrypted.
     @Default(false) bool isPublic,
-
-    /// Sets `m.federate: false` on a public room; cannot be changed later.
-    @Default(false) bool isServerLimited,
   }) = _CreateNewGroupChatRequest;
 }

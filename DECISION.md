@@ -68,8 +68,17 @@ When the server enables public groups, the group creation screen always shows
 "Enable end-to-end encryption" then "Make chat public", both off. While one is
 on, the other is greyed out and its subtitle says why, so a group can never be
 created both public and encrypted. Turning it off makes the other available
-again. "Limit to users of <server>" still appears under "Make chat public"
-when the group is public.
+again. There is no "Limit to users of <server>" toggle under "Make chat
+public" (see D8).
 
 When the server does not enable public groups, only the encryption toggle is
 shown, as before.
+
+## D8. A public group stays on its server through a server ACL (proposed by Johann, 2026-11-03)
+
+The homeserver sets an `m.room.server_acl` that allows only itself on every
+room whose join rule is public, and opens it again when the room stops being
+public. The client no longer sets `m.federate: false` when it creates a public
+group, since that value is fixed forever at creation, and the group creation
+screen no longer offers "Limit to users of <server>". Keeping public groups on
+their server relies on that server module being deployed.

@@ -38,7 +38,6 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
           ? CreateRoomPreset.publicChat
           : CreateRoomPreset.privateChat,
       visibility: isPublic ? Visibility.public : null,
-      federated: !(isPublic && request.isServerLimited),
       initialState: [
         StateEvent(
           type: EventTypes.RoomAvatar,
