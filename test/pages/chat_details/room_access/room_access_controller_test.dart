@@ -149,6 +149,7 @@ void main() {
   test('save_whenTheSectionIsHidden_sendsNothing', () async {
     // Arrange
     final container = createContainer(isPublicGroupsEnabled: false);
+    await container.read(roomAccessControllerProvider(roomId).future);
 
     // Act
     await container

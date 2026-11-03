@@ -79,14 +79,13 @@ listing, and Edit stays open after the save, as it does today.
 - A room restricted to a space says so and offers no rule; the listing stays.
 - While the public web page is on (`app.twake.chat.public_page`), only
   « Public » is offered and the listing is locked; the save refuses the rest.
-- `m.federate` is fixed at creation, so a group made « Public » here can be
-  joined from another server. A server ACL is the condition for using this
-  outside one server.
+- `m.federate` is fixed at creation. A group created without the server limit
+  can be joined from another server once it is made « Public »; one created
+  with it stays on this server. A server ACL is the condition for using a
+  federated group outside one server.
 - A public room cannot be encrypted: the encryption switch of Edit is greyed
   out, with the reason, while the room is public, readable by anyone, or
   « Public » is chosen.
-
-  out, with the reason, while the room is public or « Public » is chosen.
 
 ## D7. Group creation: public and encryption exclude each other (proposed by Johann, 2026-11-03)
 
