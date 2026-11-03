@@ -347,7 +347,12 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     if (groupNameFocusNode.hasFocus) groupNameFocusNode.unfocus();
     if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
     TwakeDialog.showLoadingDialog(context);
-    await _saveRoomAccess();
+    try {
+      await _saveRoomAccess();
+    } catch (_) {
+      if (mounted) TwakeDialog.hideLoadingDialog(context);
+      rethrow;
+    }
     if (!mounted) return;
     if (PlatformInfos.isMobile) {
       _setAvatarInStream();
@@ -493,11 +498,11 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     if (consent != OkCancelResult.ok) return;
     // The room may have become public while the dialog was open.
     if (!mounted || _blocksEncryptionNow()) return;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => room!.enableEncryption(),
-        )
-        .then((_) => isRoomEnabledEncryptionNotifier.value = true)
-        .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => room!.enableEncryption(),
+    );
+    if (!mounted) return;
+    isRoomEnabledEncryptionNotifier.value = result.error == null;
   }
 
   bool _blocksEncryptionNow() =>
