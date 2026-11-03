@@ -126,7 +126,6 @@ void main() {
           const NewGroupForm(
             groupName: 'Team',
             invitees: [bob],
-            enableEncryption: false,
             privacy: GroupPrivacyState(),
             isFeed: false,
           ),

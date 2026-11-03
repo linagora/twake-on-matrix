@@ -70,7 +70,6 @@ void main() {
         NewGroupForm(
           groupName: groupName,
           invitees: invitees,
-          enableEncryption: false,
           privacy: privacy,
           isFeed: isFeed,
         ),
@@ -85,6 +84,18 @@ void main() {
 
     // Assert
     expect(initial, const NewGroupChatInfoState.idle());
+  });
+
+  test('create_whenEncrypted_requestsAnEncryptedPrivateGroup', () async {
+    // Act
+    await create(privacy: const GroupPrivacyState(isEncrypted: true));
+
+    // Assert
+    final request =
+        verify(mockRepository.createGroup(captureAny)).captured.single
+            as CreateNewGroupChatRequest;
+    expect(request.enableEncryption, isTrue);
+    expect(request.isPublic, isFalse);
   });
 
   test('create_whenNoInvitee_isDoneWithoutInviting', () async {
@@ -231,7 +242,6 @@ void main() {
           const NewGroupForm(
             groupName: 'News',
             invitees: ['@bob:example.com'],
-            enableEncryption: false,
             privacy: GroupPrivacyState(),
             isFeed: true,
             urlAvatar: 'mxc://example.com/avatar',

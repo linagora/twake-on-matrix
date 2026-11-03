@@ -345,28 +345,33 @@ class _GroupPrivacySettings extends ConsumerWidget {
       valueListenable: screen.groupPrivacyNotifier,
       builder: (context, privacy, _) => Column(
         children: [
-          if (isPublicGroupsEnabled)
+          _EncryptionSettingTile(
+            isEncrypted: privacy.isEncrypted,
+            isEnabled: privacy.canBeEncrypted,
+            onChanged: (isEncrypted) =>
+                screen.setEncrypted(isEncrypted: isEncrypted),
+          ),
+          if (isPublicGroupsEnabled) ...[
             LinagoraSettingItem.selectable(
               title: l10n.makeChatPublic,
-              subtitle: l10n.makeChatPublicDescription,
+              subtitle: privacy.canBePublic
+                  ? l10n.makeChatPublicDescription
+                  : l10n.publicUnavailableForEncryptedChat,
               subtitleMaxLines: null,
               value: privacy.isPublic,
+              enabled: privacy.canBePublic,
               onChanged: (isPublic) => screen.setPublic(isPublic: isPublic),
             ),
-          if (privacy.isPublic)
-            LinagoraSettingItem.selectable(
-              title: l10n.groupPrivacyLimitToServer(serverName ?? ''),
-              subtitle: l10n.groupPrivacyLimitToServerDescription,
-              subtitleMaxLines: null,
-              value: privacy.isServerLimited,
-              onChanged: (isServerLimited) =>
-                  screen.setServerLimited(isServerLimited: isServerLimited),
-            )
-          else
-            _EncryptionSettingTile(
-              enableEncryptionNotifier: screen.enableEncryptionNotifier,
-              onChanged: (_) => screen.toggleEnableEncryption(),
-            ),
+            if (privacy.isPublic)
+              LinagoraSettingItem.selectable(
+                title: l10n.groupPrivacyLimitToServer(serverName ?? ''),
+                subtitle: l10n.groupPrivacyLimitToServerDescription,
+                subtitleMaxLines: null,
+                value: privacy.isServerLimited,
+                onChanged: (isServerLimited) =>
+                    screen.setServerLimited(isServerLimited: isServerLimited),
+              ),
+          ],
         ],
       ),
     );
@@ -374,49 +379,50 @@ class _GroupPrivacySettings extends ConsumerWidget {
 }
 
 class _EncryptionSettingTile extends StatelessWidget {
-  final ValueNotifier<bool> enableEncryptionNotifier;
+  final bool isEncrypted;
 
-  final ValueChanged<bool>? onChanged;
+  final bool isEnabled;
+
+  final ValueChanged<bool> onChanged;
 
   const _EncryptionSettingTile({
-    required this.enableEncryptionNotifier,
-    this.onChanged,
+    required this.isEncrypted,
+    required this.isEnabled,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    return ValueListenableBuilder<bool>(
-      valueListenable: enableEncryptionNotifier,
-      builder: (context, isEnabled, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LinagoraSettingItem.selectable(
-              title: l10n.enableEncryption,
-              subtitle: l10n.encryptionMessage,
-              subtitleMaxLines: null,
-              value: isEnabled,
-              onChanged: onChanged,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinagoraSettingItem.selectable(
+          title: l10n.enableEncryption,
+          subtitle: isEnabled
+              ? l10n.encryptionMessage
+              : l10n.encryptionUnavailableForPublicChat,
+          subtitleMaxLines: null,
+          value: isEncrypted,
+          enabled: isEnabled,
+          onChanged: onChanged,
+        ),
+        if (isEncrypted)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: LinagoraSpacing.base * 3,
+              right: LinagoraSpacing.base * 3,
+              bottom: LinagoraSpacing.base * 2,
             ),
-            if (isEnabled)
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: LinagoraSpacing.base * 3,
-                  right: LinagoraSpacing.base * 3,
-                  bottom: LinagoraSpacing.base * 2,
-                ),
-                child: Text(
-                  l10n.encryptionWarning,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    letterSpacing: 0.4,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
+            child: Text(
+              l10n.encryptionWarning,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                letterSpacing: 0.4,
+                color: Theme.of(context).colorScheme.error,
               ),
-          ],
-        );
-      },
+            ),
+          ),
+      ],
     );
   }
 }
