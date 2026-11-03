@@ -1483,10 +1483,10 @@ packages:
     dependency: "direct main"
     description:
       name: gal
-      sha256: "54c9b72528efce7c66234f3b6dd01cb0304fd8af8196de15571d7bdddb940977"
+      sha256: f71e79840fe023a21f2f949771375444b6efcd34b9e625d5f4f5504971380a77
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.3.3"
   get_it:
     dependency: "direct main"
     description:
@@ -2986,10 +2986,10 @@ packages:
     dependency: "direct main"
     description:
       name: share_plus
-      sha256: "468c43f285207c84bcabf5737f33b914ceb8eb38398b91e5e3ad1698d1b72a52"
+      sha256: "334fcdf0ef9c0df0e3b428faebcac9568f35c747d59831474b2fc56e156d244e"
       url: "https://pub.dev"
     source: hosted
-    version: "10.0.2"
+    version: "10.1.0"
   share_plus_platform_interface:
     dependency: transitive
     description:
@@ -3257,10 +3257,10 @@ packages:
     dependency: "direct main"
     description:
       name: storage_space
-      sha256: "8a3fbc61c20ce3b926b663b4ae77064e2bc5351a49756a41fa415e302f4063cd"
+      sha256: "5c48522c386d74e0add041ae12d5a94ca94e0a608896e07c45aba43c1fd7100d"
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.0"
+    version: "1.3.0"
   stream_channel:
     dependency: transitive
     description:
