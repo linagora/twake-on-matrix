@@ -332,5 +332,53 @@ void main() {
       // Assert
       expect(isEnabled, isFalse);
     });
+
+    test('isPublicGroupsServerAclEnabled_whenWellKnownSetsIt_returnsTrue', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': true, 'server_acl': true},
+        },
+      });
+
+      // Act
+      final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
+
+      // Assert
+      expect(isServerAclEnabled, isTrue);
+    });
+
+    test(
+      'isPublicGroupsServerAclEnabled_whenWellKnownSetsFalse_returnsFalse',
+      () {
+        // Arrange
+        final summary = summaryWith({
+          'app.twake.chat': {
+            'public_groups': {'enabled': true, 'server_acl': false},
+          },
+        });
+
+        // Act
+        final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
+
+        // Assert
+        expect(isServerAclEnabled, isFalse);
+      },
+    );
+
+    test('isPublicGroupsServerAclEnabled_whenKeyIsMissing_returnsFalse', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': true},
+        },
+      });
+
+      // Act
+      final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
+
+      // Assert
+      expect(isServerAclEnabled, isFalse);
+    });
   });
 }

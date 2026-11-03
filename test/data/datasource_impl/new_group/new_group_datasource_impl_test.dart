@@ -36,6 +36,7 @@ void main() {
     required bool? enableEncryption,
     required CreateRoomPreset preset,
     required Visibility? visibility,
+    required bool federated,
   }) {
     verify(
       mockClient.createGroupChat(
@@ -44,7 +45,7 @@ void main() {
         preset: preset,
         initialState: anyNamed('initialState'),
         visibility: visibility,
-        federated: true,
+        federated: federated,
         powerLevelContentOverride: anyNamed('powerLevelContentOverride'),
       ),
     ).called(1);
@@ -114,7 +115,7 @@ void main() {
     );
 
     test(
-      'createGroup_whenPublic_createsAnUnencryptedPublicRoomWithoutMFederate',
+      'createGroup_whenPublicWithoutServerAcl_createsAnUnencryptedUnfederatedPublicRoom',
       () async {
         // Act
         await datasource.createGroup(
@@ -130,6 +131,29 @@ void main() {
           enableEncryption: false,
           preset: CreateRoomPreset.publicChat,
           visibility: Visibility.public,
+          federated: false,
+        );
+      },
+    );
+
+    test(
+      'createGroup_whenPublicWithServerAcl_createsAPublicRoomWithoutMFederate',
+      () async {
+        // Act
+        await datasource.createGroup(
+          const CreateNewGroupChatRequest(
+            groupName: 'Open Lab',
+            isPublic: true,
+            isServerAclEnabled: true,
+          ),
+        );
+
+        // Assert
+        verifyRoomCreatedWith(
+          enableEncryption: false,
+          preset: CreateRoomPreset.publicChat,
+          visibility: Visibility.public,
+          federated: true,
         );
       },
     );
@@ -148,6 +172,7 @@ void main() {
         enableEncryption: true,
         preset: CreateRoomPreset.privateChat,
         visibility: null,
+        federated: true,
       );
     });
   });

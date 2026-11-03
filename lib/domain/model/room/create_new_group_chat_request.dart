@@ -12,5 +12,9 @@ abstract class CreateNewGroupChatRequest with _$CreateNewGroupChatRequest {
 
     /// Public preset, listed in the room directory and never encrypted.
     @Default(false) bool isPublic,
+
+    /// The homeserver keeps public rooms on itself with `m.room.server_acl`,
+    /// so a public room does not need `m.federate: false`.
+    @Default(false) bool isServerAclEnabled,
   }) = _CreateNewGroupChatRequest;
 }

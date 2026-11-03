@@ -109,6 +109,10 @@ extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
   bool get isPublicGroupsEnabled =>
       this?.appTwakeInformation?.publicGroupsInformation?.isEnabled ?? false;
 
+  bool get isPublicGroupsServerAclEnabled =>
+      this?.appTwakeInformation?.publicGroupsInformation?.isServerAclEnabled ??
+      false;
+
   bool get supportSSOLogin {
     return this?.loginFlows.any(
           (flow) => flow.type == AppConstants.ssoLoginType,

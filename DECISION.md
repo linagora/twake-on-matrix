@@ -74,17 +74,21 @@ public" (see D8).
 When the server does not enable public groups, only the encryption toggle is
 shown, as before.
 
-## D8. A public group stays on its server through a server ACL (proposed by Johann, 2026-11-03)
+## D8. A public group stays on its server through a server ACL when the server says so (proposed by Johann, 2026-11-03)
 
-The homeserver sets an
+A homeserver that keeps public rooms on itself sets an
 [`m.room.server_acl`](https://spec.matrix.org/v1.16/client-server-api/#mroomserver_acl)
 that allows only itself on every room whose join rule is public, and opens it
 again when the room stops being public. If a room admin changes that ACL from
-another client, the server module puts it back. The client no longer sets
-`m.federate: false` in the `creation_content` of
-[`createRoom`](https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3createroom)
-when it creates a public group, since that value of
+another client, the server module puts it back. Such a server announces it in
+its well-known with `app.twake.chat.public_groups.server_acl: true`.
+
+When it does, the client creates a public group without `m.federate`. When the
+key is false or missing, the client sets `m.federate: false` in the
+`creation_content` of
+[`createRoom`](https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3createroom),
+as before. That value of
 [`m.room.create`](https://spec.matrix.org/v1.16/client-server-api/#mroomcreate)
-is fixed forever at creation, and the group creation screen no longer offers
-"Limit to users of <server>". Keeping public groups on their server relies on
-that server module being deployed.
+is fixed forever, so the room can never be opened to other servers later. In
+both cases the group creation screen offers no "Limit to users of <server>"
+toggle.

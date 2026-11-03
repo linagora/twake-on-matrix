@@ -9,6 +9,7 @@ part 'public_groups_information.g.dart';
 abstract class PublicGroupsInformation with _$PublicGroupsInformation {
   const factory PublicGroupsInformation({
     @JsonKey(name: 'enabled') bool? isEnabled,
+    @JsonKey(name: 'server_acl') bool? isServerAclEnabled,
   }) = _PublicGroupsInformation;
 
   factory PublicGroupsInformation.fromJson(Map<String, dynamic> json) =>

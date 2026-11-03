@@ -73,6 +73,7 @@ void main() {
     WidgetTester tester, {
     bool isFeed = false,
     bool isPublicGroupsEnabled = true,
+    bool? isServerAclEnabled,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -90,7 +91,10 @@ void main() {
                 ),
                 additionalProperties: {
                   'app.twake.chat': {
-                    'public_groups': {'enabled': isPublicGroupsEnabled},
+                    'public_groups': {
+                      'enabled': isPublicGroupsEnabled,
+                      'server_acl': ?isServerAclEnabled,
+                    },
                   },
                 },
               ),
@@ -168,8 +172,31 @@ void main() {
       controller.createNewGroup();
 
       // Assert
-      expect(capturedRequest().isPublic, isTrue);
+      final request = capturedRequest();
+      expect(request.isPublic, isTrue);
+      expect(request.isServerAclEnabled, isFalse);
     });
+
+    testWidgets(
+      'createNewGroup_whenTheServerAppliesTheAcl_requestsAGroupKeptLocalByTheAcl',
+      (WidgetTester tester) async {
+        // Arrange
+        final controller = await pumpScreen(
+          tester,
+          isPublicGroupsEnabled: true,
+          isServerAclEnabled: true,
+        );
+        controller.setPublic(isPublic: true);
+
+        // Act
+        controller.createNewGroup();
+
+        // Assert
+        final request = capturedRequest();
+        expect(request.isPublic, isTrue);
+        expect(request.isServerAclEnabled, isTrue);
+      },
+    );
 
     testWidgets(
       'createNewGroup_whenPublicGroupsAreDisabled_requestsAPrivateGroup',
