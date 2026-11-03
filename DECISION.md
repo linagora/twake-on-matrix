@@ -76,9 +76,15 @@ shown, as before.
 
 ## D8. A public group stays on its server through a server ACL (proposed by Johann, 2026-11-03)
 
-The homeserver sets an `m.room.server_acl` that allows only itself on every
-room whose join rule is public, and opens it again when the room stops being
-public. The client no longer sets `m.federate: false` when it creates a public
-group, since that value is fixed forever at creation, and the group creation
-screen no longer offers "Limit to users of <server>". Keeping public groups on
-their server relies on that server module being deployed.
+The homeserver sets an
+[`m.room.server_acl`](https://spec.matrix.org/v1.16/client-server-api/#mroomserver_acl)
+that allows only itself on every room whose join rule is public, and opens it
+again when the room stops being public. If a room admin changes that ACL from
+another client, the server module puts it back. The client no longer sets
+`m.federate: false` in the `creation_content` of
+[`createRoom`](https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3createroom)
+when it creates a public group, since that value of
+[`m.room.create`](https://spec.matrix.org/v1.16/client-server-api/#mroomcreate)
+is fixed forever at creation, and the group creation screen no longer offers
+"Limit to users of <server>". Keeping public groups on their server relies on
+that server module being deployed.
