@@ -22,39 +22,47 @@ import 'room_list_providers_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<SpaceRepository>(), MockSpec<Client>()])
 void main() {
-  const space = RoomListEntry(id: '!s', kind: RoomKind.space, childIds: ['!a']);
-  late MockSpaceRepository repository;
-  late StreamController<int> changes;
-
   setUp(() {
-    repository = MockSpaceRepository();
-    changes = StreamController<int>.broadcast();
-    addTearDown(changes.close);
-    when(repository.watchRoomChanges()).thenAnswer((_) => changes.stream);
-    when(repository.getRoomListEntries()).thenReturn(const [space]);
+    _repository = MockSpaceRepository();
+    _changes = StreamController<int>.broadcast();
+    addTearDown(_changes.close);
+    when(_repository.watchRoomChanges()).thenAnswer((_) => _changes.stream);
+    when(_repository.getRoomListEntries()).thenReturn(const [_space]);
     when(
-      repository.getSpaceChildren('!s'),
+      _repository.getSpaceChildren('!s'),
     ).thenAnswer((_) async => const [SpaceChannel(roomId: '!a', name: 'A')]);
   });
 
-  ProviderContainer newContainer({List overrides = const []}) =>
-      ProviderContainer.test(
-        retry: (_, _) => null,
-        overrides: [
-          spaceRepositoryProvider.overrideWithValue(repository),
-          savedFoldersProvider.overrideWith((ref) => const Stream.empty()),
-          foldedSpacesControllerProvider.overrideWith(_NoFold.new),
-          ...overrides.cast(),
-        ],
-      );
+  _roomListFilterControllerTests();
+  _shownRoomListFilterTests();
+  _spaceChildrenTests();
+  _spaceJoinControllerTests();
+  _roomListContentTests();
+}
 
+const _space = RoomListEntry(id: '!s', kind: RoomKind.space, childIds: ['!a']);
+late MockSpaceRepository _repository;
+late StreamController<int> _changes;
+
+ProviderContainer _newContainer({List overrides = const []}) =>
+    ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [
+        spaceRepositoryProvider.overrideWithValue(_repository),
+        savedFoldersProvider.overrideWith((ref) => const Stream.empty()),
+        foldedSpacesControllerProvider.overrideWith(_NoFold.new),
+        ...overrides.cast(),
+      ],
+    );
+
+void _roomListFilterControllerTests() {
   group('RoomListFilterController', () {
     test('whenAccountChanges_startsOnAll', () {
       final first = MockClient();
       when(first.userID).thenReturn('@a:own.org');
       final second = MockClient();
       when(second.userID).thenReturn('@b:own.org');
-      final container = newContainer();
+      final container = _newContainer();
       final active = container.read(activeMatrixClientProvider.notifier);
       active.setClient(first);
       container
@@ -69,78 +77,68 @@ void main() {
       );
     });
   });
+}
 
+RoomListFilter _shownFilterWith(List<Folder> folders) {
+  final container = _newContainer(
+    overrides: [roomListFoldersProvider.overrideWithValue(folders)],
+  );
+  container
+      .read(roomListFilterControllerProvider.notifier)
+      .select(const RoomListFilter.folder('Work'));
+  return container.read(shownRoomListFilterProvider);
+}
+
+void _shownRoomListFilterTests() {
   group('shownRoomListFilter', () {
     test('whenSelectedFolderIsGone_fallsBackOnAll', () {
-      final container = newContainer(
-        overrides: [
-          roomListFoldersProvider.overrideWithValue(const [
-            Folder.user('Other'),
-          ]),
-        ],
-      );
-      container
-          .read(roomListFilterControllerProvider.notifier)
-          .select(const RoomListFilter.folder('Work'));
+      final shown = _shownFilterWith(const [Folder.user('Other')]);
 
-      expect(
-        container.read(shownRoomListFilterProvider),
-        const RoomListFilter.all(),
-      );
+      expect(shown, const RoomListFilter.all());
     });
 
     test('whenSelectedFolderExists_showsIt', () {
-      final container = newContainer(
-        overrides: [
-          roomListFoldersProvider.overrideWithValue(const [
-            Folder.user('Work'),
-          ]),
-        ],
-      );
-      container
-          .read(roomListFilterControllerProvider.notifier)
-          .select(const RoomListFilter.folder('Work'));
+      final shown = _shownFilterWith(const [Folder.user('Work')]);
 
-      expect(
-        container.read(shownRoomListFilterProvider),
-        const RoomListFilter.folder('Work'),
-      );
+      expect(shown, const RoomListFilter.folder('Work'));
     });
   });
+}
 
+void _spaceChildrenTests() {
   group('spaceChildren', () {
     test('whenOtherRoomsChange_doesNotReadAgain', () async {
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
       await pumpEventQueue();
 
-      changes.add(1);
+      _changes.add(1);
       await pumpEventQueue();
 
-      verify(repository.getSpaceChildren('!s')).called(1);
+      verify(_repository.getSpaceChildren('!s')).called(1);
     });
 
     test('whenSpaceListsSomethingElse_readsAgain', () async {
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
       await pumpEventQueue();
 
-      when(repository.getRoomListEntries()).thenReturn([
-        space.copyWith(childIds: ['!a', '!b']),
+      when(_repository.getRoomListEntries()).thenReturn([
+        _space.copyWith(childIds: ['!a', '!b']),
       ]);
-      changes.add(1);
+      _changes.add(1);
       await pumpEventQueue();
 
-      verify(repository.getSpaceChildren('!s')).called(2);
+      verify(_repository.getSpaceChildren('!s')).called(2);
     });
 
     test('whenReadingFailsAfterASuccess_keepsWhatWasRead', () async {
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
       await pumpEventQueue();
 
       when(
-        repository.getSpaceChildren('!s'),
+        _repository.getSpaceChildren('!s'),
       ).thenThrow(const SpaceChildrenUnavailableException());
       container.invalidate(spaceChildrenProvider('!s'));
       await pumpEventQueue();
@@ -150,15 +148,17 @@ void main() {
       ]);
     });
   });
+}
 
+void _spaceJoinControllerTests() {
   group('SpaceJoinController', () {
     test('join_always_joinsThroughItsViaAndReadsTheSpaceAgain', () async {
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
       await pumpEventQueue();
 
       // Long enough for a provider nobody listens to to be disposed.
-      when(repository.joinRoom(any, via: anyNamed('via'))).thenAnswer((
+      when(_repository.joinRoom(any, via: anyNamed('via'))).thenAnswer((
         _,
       ) async {
         await pumpEventQueue();
@@ -171,14 +171,16 @@ void main() {
           );
       await pumpEventQueue();
 
-      verify(repository.joinRoom('!a', via: ['good.org'])).called(1);
-      verify(repository.getSpaceChildren('!s')).called(2);
+      verify(_repository.joinRoom('!a', via: ['good.org'])).called(1);
+      verify(_repository.getSpaceChildren('!s')).called(2);
     });
   });
+}
 
+void _roomListContentTests() {
   group('roomListContent', () {
     test('whenAll_offersJoinableSubSpaces', () async {
-      when(repository.getSpaceChildren('!s')).thenAnswer(
+      when(_repository.getSpaceChildren('!s')).thenAnswer(
         (_) async => const [
           SpaceChannel(
             roomId: '!sub',
@@ -188,29 +190,29 @@ void main() {
           ),
         ],
       );
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(roomListContentProvider(null), (_, _) {});
       await pumpEventQueue();
 
       final content = container.read(roomListContentProvider(null));
 
-      expect(content.visible, const [space]);
+      expect(content.visible, const [_space]);
       expect(content.joinableBySpace['!s']!.single.roomId, '!sub');
     });
 
     test('whenSpaceIsOnlyInvited_readsNoHierarchy', () async {
       when(
-        repository.getRoomListEntries(),
-      ).thenReturn([space.copyWith(isJoined: false)]);
-      final container = newContainer();
+        _repository.getRoomListEntries(),
+      ).thenReturn([_space.copyWith(isJoined: false)]);
+      final container = _newContainer();
       container.listen(roomListContentProvider(null), (_, _) {});
       await pumpEventQueue();
 
-      verifyNever(repository.getSpaceChildren(any));
+      verifyNever(_repository.getSpaceChildren(any));
     });
 
     test('whenOtherView_offersNothingButKeepsWhatWasRead', () async {
-      final container = newContainer();
+      final container = _newContainer();
       container.listen(roomListContentProvider(null), (_, _) {});
       await pumpEventQueue();
       final views = container.read(roomListFilterControllerProvider.notifier);
@@ -224,7 +226,7 @@ void main() {
       views.select(const RoomListFilter.all());
       await pumpEventQueue();
 
-      verify(repository.getSpaceChildren('!s')).called(1);
+      verify(_repository.getSpaceChildren('!s')).called(1);
     });
   });
 }

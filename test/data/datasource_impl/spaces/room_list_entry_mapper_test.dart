@@ -25,14 +25,13 @@ const String _parentSender = '@sender:b.org';
 MockRoom _room(
   String id, {
   bool isSpace = false,
-  Membership membership = Membership.join,
   List<String> children = const [],
   List<String> parents = const [],
 }) {
   final room = MockRoom();
   when(room.id).thenReturn(id);
   when(room.isSpace).thenReturn(isSpace);
-  when(room.membership).thenReturn(membership);
+  when(room.membership).thenReturn(Membership.join);
   when(room.tags).thenReturn({});
   when(room.spaceChildren).thenReturn([
     for (final child in children)
@@ -75,7 +74,67 @@ StrippedStateEvent _state(String type, Map<String, Object?> content) =>
       content: content,
     );
 
+RoomKind _kindWithState(
+  String eventType,
+  Map<String, Object?> content, {
+  bool isSpace = false,
+}) {
+  final room = _room('!c', isSpace: isSpace);
+  when(room.getState(eventType)).thenReturn(_state(eventType, content));
+  return entriesOf([room]).single.kind;
+}
+
+RoomKind _directKind(String partner, {String name = ''}) {
+  final room = _room('!c');
+  when(room.name).thenReturn(name);
+  final directChats = {
+    partner: ['!c'],
+  };
+  return entriesOf([room], directChats: directChats).single.kind;
+}
+
 void main() {
+  _roomListEntriesOfTests();
+  _roomListEntriesOfSpacesTests();
+  _unnamedDirectChatTests();
+  _kindTests();
+  _kindDirectTests();
+  _kindPowerLevelTests();
+}
+
+late Client _client;
+
+Room _direct({
+  required Map<String, Object?> summary,
+  String partner = '@alice:b.org',
+  Membership partnerMembership = Membership.join,
+}) {
+  final room = Room(
+    id: '!dm',
+    client: _client,
+    summary: RoomSummary.fromJson(summary),
+  );
+  room.setState(
+    Event(
+      type: EventTypes.RoomMember,
+      content: {'membership': partnerMembership.name, 'displayname': 'Alice'},
+      stateKey: partner,
+      eventId: r'$m',
+      senderId: partner,
+      originServerTs: DateTime(2020),
+      room: room,
+    ),
+  );
+  _client.accountData['m.direct'] = BasicEvent(
+    type: 'm.direct',
+    content: {
+      partner: ['!dm'],
+    },
+  );
+  return room;
+}
+
+void _roomListEntriesOfTests() {
   group('roomListEntriesOf', () {
     test('whenSenderMayNotListInTheSpace_ignoresTheParentItNames', () {
       final space = _room('!space', isSpace: true);
@@ -125,15 +184,16 @@ void main() {
       expect(one.last.parentSpaceIds, ['!a', '!b']);
       expect(other.last.parentSpaceIds, ['!a', '!b']);
     });
+  });
+}
 
+void _roomListEntriesOfSpacesTests() {
+  group('roomListEntriesOf', () {
     test('whenSpaceIsNotJoined_holdsNothing', () {
+      final invited = _room('!invited', isSpace: true, children: ['!c']);
+      when(invited.membership).thenReturn(Membership.invite);
       final entries = entriesOf([
-        _room(
-          '!invited',
-          isSpace: true,
-          membership: Membership.invite,
-          children: ['!c'],
-        ),
+        invited,
         _room('!c', parents: ['!invited', '!unknown']),
       ]);
 
@@ -165,69 +225,42 @@ void main() {
 
       expect(entriesOf([room]).single.folders, ['Work']);
     });
+  });
+}
 
+void _unnamedDirectChatTests() {
+  group('roomListEntriesOf', () {
     group('nameOfAnUnnamedDirectChat', () {
-      late Client client;
-
-      Room direct({
-        required Map<String, Object?> summary,
-        String partner = '@alice:b.org',
-        Membership partnerMembership = Membership.join,
-      }) {
-        final room = Room(
-          id: '!dm',
-          client: client,
-          summary: RoomSummary.fromJson(summary),
-        );
-        room.setState(
-          Event(
-            type: EventTypes.RoomMember,
-            content: {
-              'membership': partnerMembership.name,
-              'displayname': 'Alice',
-            },
-            stateKey: partner,
-            eventId: r'$m',
-            senderId: partner,
-            originServerTs: DateTime(2020),
-            room: room,
-          ),
-        );
-        client.accountData['m.direct'] = BasicEvent(
-          type: 'm.direct',
-          content: {
-            partner: ['!dm'],
-          },
-        );
-        return room;
-      }
-
-      setUp(() => client = Client('names', database: MockDatabase()));
+      setUp(() => _client = Client('names', database: MockDatabase()));
 
       test('whenHeroesAreKnown_isTheNameTheSdkGives', () {
-        final room = direct(
+        final room = _direct(
           summary: {
             'm.heroes': ['@alice:b.org'],
           },
         );
 
-        final entry = entriesOf([room], directChats: client.directChats).single;
+        final entry = entriesOf([
+          room,
+        ], directChats: _client.directChats).single;
 
         expect(entry.name, 'Alice');
         expect(entry.name, room.getLocalizedDisplayname());
       });
 
       test('whenNoHeroes_isThePartner', () {
-        final room = direct(summary: {});
+        final room = _direct(summary: {});
 
-        final entry = entriesOf([room], directChats: client.directChats).single;
+        final entry = entriesOf([
+          room,
+        ], directChats: _client.directChats).single;
 
         expect(entry.name, 'Alice');
         expect(entry.name, room.getLocalizedDisplayname());
       });
 
       test('whenPartnerLeft_isTheNameTheSdkGives', () {
-        final room = direct(
+        final room = _direct(
           summary: {
             'm.heroes': ['@alice:b.org'],
             'm.joined_member_count': 1,
@@ -236,13 +269,19 @@ void main() {
           partnerMembership: Membership.leave,
         );
 
-        final entry = entriesOf([room], directChats: client.directChats).single;
+        final entry = entriesOf([
+          room,
+        ], directChats: _client.directChats).single;
 
         expect(entry.name, isNot('Alice'));
         expect(entry.name, room.getLocalizedDisplayname());
       });
     });
+  });
+}
 
+void _kindTests() {
+  group('roomListEntriesOf', () {
     group('kind', () {
       test('always_carriesTheAvatar', () {
         final room = _room('!c');
@@ -276,44 +315,29 @@ void main() {
       });
 
       test('whenDirectWithABot_isBot', () {
-        final room = _room('!c');
-        when(room.name).thenReturn('Bot');
+        final kind = _directKind('@bot_x:b.org', name: 'Bot');
 
-        final entries = entriesOf(
-          [room],
-          directChats: {
-            '@bot_x:b.org': ['!c'],
-          },
-        );
-
-        expect(entries.single.kind, RoomKind.bot);
+        expect(kind, RoomKind.bot);
       });
 
       test('whenDirectWithAPerson_isDirect', () {
-        final room = _room('!c');
-        when(room.name).thenReturn('Alice');
+        final kind = _directKind('@alice:b.org', name: 'Alice');
 
-        final entries = entriesOf(
-          [room],
-          directChats: {
-            '@alice:b.org': ['!c'],
-          },
-        );
-
-        expect(entries.single.kind, RoomKind.direct);
+        expect(kind, RoomKind.direct);
       });
 
       test('whenPartnerIsNotAnId_isNotDirect', () {
-        final entries = entriesOf(
-          [_room('!c')],
-          directChats: {
-            'alice': ['!c'],
-          },
-        );
+        final kind = _directKind('alice');
 
-        expect(entries.single.kind, RoomKind.group);
+        expect(kind, RoomKind.group);
       });
+    });
+  });
+}
 
+void _kindDirectTests() {
+  group('roomListEntriesOf', () {
+    group('kind', () {
       test('whenDirect_doesNotAskTheRoomForItsPartner', () {
         final room = _room('!c');
         when(room.name).thenReturn('Alice');
@@ -331,72 +355,67 @@ void main() {
       });
 
       test('whenInvitedToADirectChat_asksTheRoomForTheSender', () {
-        final room = _room('!c', membership: Membership.invite);
+        final room = _room('!c');
+        when(room.membership).thenReturn(Membership.invite);
         when(room.directChatMatrixID).thenReturn('@bot_x:b.org');
 
         expect(entriesOf([room]).single.kind, RoomKind.bot);
       });
 
       test('whenFeed_isBroadcast', () {
-        final room = _room('!c');
-        when(room.getState(EventTypes.RoomCreate)).thenReturn(
-          _state(EventTypes.RoomCreate, {'type': 'app.twake.chat.feed'}),
-        );
+        final kind = _kindWithState(EventTypes.RoomCreate, {
+          'type': 'app.twake.chat.feed',
+        });
 
-        expect(entriesOf([room]).single.kind, RoomKind.broadcast);
+        expect(kind, RoomKind.broadcast);
       });
 
       test('whenMembersMayNotPost_isBroadcast', () {
-        final room = _room('!c');
-        when(room.getState(EventTypes.RoomPowerLevels)).thenReturn(
-          _state(EventTypes.RoomPowerLevels, {'events_default': 50}),
-        );
+        final kind = _kindWithState(EventTypes.RoomPowerLevels, {
+          'events_default': 50,
+        });
 
-        expect(entriesOf([room]).single.kind, RoomKind.broadcast);
+        expect(kind, RoomKind.broadcast);
       });
+    });
+  });
+}
 
+void _kindPowerLevelTests() {
+  group('roomListEntriesOf', () {
+    group('kind', () {
       test('whenMembersMayNotPostMessages_isBroadcast', () {
-        final room = _room('!c');
-        when(room.getState(EventTypes.RoomPowerLevels)).thenReturn(
-          _state(EventTypes.RoomPowerLevels, {
-            'events': {EventTypes.Message: 50},
-          }),
-        );
+        final kind = _kindWithState(EventTypes.RoomPowerLevels, {
+          'events': {EventTypes.Message: 50},
+        });
 
-        expect(entriesOf([room]).single.kind, RoomKind.broadcast);
+        expect(kind, RoomKind.broadcast);
       });
 
       test('whenMessagesAreOpenButDefaultIsNot_isGroup', () {
-        final room = _room('!c');
-        when(room.getState(EventTypes.RoomPowerLevels)).thenReturn(
-          _state(EventTypes.RoomPowerLevels, {
-            'events': {EventTypes.Message: 0},
-            'events_default': 50,
-          }),
-        );
+        final kind = _kindWithState(EventTypes.RoomPowerLevels, {
+          'events': {EventTypes.Message: 0},
+          'events_default': 50,
+        });
 
-        expect(entriesOf([room]).single.kind, RoomKind.group);
+        expect(kind, RoomKind.group);
       });
 
       test('whenMembersMayPost_isGroup', () {
-        final room = _room('!c');
-        when(room.getState(EventTypes.RoomPowerLevels)).thenReturn(
-          _state(EventTypes.RoomPowerLevels, {
-            'events_default': 50,
-            'users_default': 50,
-          }),
-        );
+        final kind = _kindWithState(EventTypes.RoomPowerLevels, {
+          'events_default': 50,
+          'users_default': 50,
+        });
 
-        expect(entriesOf([room]).single.kind, RoomKind.group);
+        expect(kind, RoomKind.group);
       });
 
       test('whenSpaceLooksLikeABroadcast_staysASpace', () {
-        final room = _room('!c', isSpace: true);
-        when(room.getState(EventTypes.RoomPowerLevels)).thenReturn(
-          _state(EventTypes.RoomPowerLevels, {'events_default': 100}),
-        );
+        final kind = _kindWithState(EventTypes.RoomPowerLevels, {
+          'events_default': 100,
+        }, isSpace: true);
 
-        expect(entriesOf([room]).single.kind, RoomKind.space);
+        expect(kind, RoomKind.space);
       });
     });
   });

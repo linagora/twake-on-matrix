@@ -15,58 +15,63 @@ import 'space_home_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<SpaceRepository>()])
 void main() {
-  const spaceId = '!s';
-  late bool isInfoShown;
-  late MockSpaceRepository repository;
-  late ProviderContainer container;
+  _spaceHomeTests();
+  _spaceHomeChannelsTests();
+}
 
-  SpaceSummary summary({
-    bool isPublic = false,
-    bool canInvite = true,
-    bool canAddChildren = true,
-    String topic = '',
-    int memberCount = 2,
-  }) => SpaceSummary(
-    id: spaceId,
-    name: 'Team',
-    memberCount: memberCount,
-    isPublic: isPublic,
-    canInvite: canInvite,
-    canAddChildren: canAddChildren,
-    topic: topic,
+const _spaceId = '!s';
+late bool _isInfoShown;
+late MockSpaceRepository _repository;
+late ProviderContainer _container;
+
+SpaceSummary _summary({
+  bool isPublic = false,
+  bool canInvite = true,
+  bool canAddChildren = true,
+  String topic = '',
+  int memberCount = 2,
+}) => SpaceSummary(
+  id: _spaceId,
+  name: 'Team',
+  memberCount: memberCount,
+  isPublic: isPublic,
+  canInvite: canInvite,
+  canAddChildren: canAddChildren,
+  topic: topic,
+);
+
+Future<void> _pump(
+  WidgetTester tester,
+  SpaceSummary? space, {
+  List<SpaceChannel> children = const [],
+  bool childrenError = false,
+}) async {
+  _repository = MockSpaceRepository();
+  _isInfoShown = false;
+  when(_repository.getSpace(_spaceId)).thenReturn(space);
+  when(_repository.watchRoomChanges()).thenAnswer((_) => const Stream.empty());
+  when(_repository.getRoomListEntries()).thenReturn(const []);
+  when(_repository.getSpaceChildren(_spaceId)).thenAnswer((_) async {
+    if (childrenError) throw const SpaceChildrenUnavailableException();
+    return children;
+  });
+  _container = ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: [spaceRepositoryProvider.overrideWithValue(_repository)],
   );
+  await pumpLocalized(
+    tester,
+    _container,
+    SpaceHome(roomId: _spaceId, onShowInfo: () => _isInfoShown = true),
+  );
+  await tester.pump();
+  await tester.pump();
+}
 
-  Future<void> pump(
-    WidgetTester tester,
-    SpaceSummary? space, {
-    List<SpaceChannel> children = const [],
-    bool childrenError = false,
-  }) async {
-    repository = MockSpaceRepository();
-    isInfoShown = false;
-    when(repository.getSpace(spaceId)).thenReturn(space);
-    when(repository.watchRoomChanges()).thenAnswer((_) => const Stream.empty());
-    when(repository.getRoomListEntries()).thenReturn(const []);
-    when(repository.getSpaceChildren(spaceId)).thenAnswer((_) async {
-      if (childrenError) throw const SpaceChildrenUnavailableException();
-      return children;
-    });
-    container = ProviderContainer.test(
-      retry: (_, _) => null,
-      overrides: [spaceRepositoryProvider.overrideWithValue(repository)],
-    );
-    await pumpLocalized(
-      tester,
-      container,
-      SpaceHome(roomId: spaceId, onShowInfo: () => isInfoShown = true),
-    );
-    await tester.pump();
-    await tester.pump();
-  }
-
+void _spaceHomeTests() {
   group('SpaceHome', () {
     testWidgets('whenPrivate_tellsWhoMayComeInAndWhatItIsFor', (tester) async {
-      await pump(tester, summary(topic: 'For the team'));
+      await _pump(tester, _summary(topic: 'For the team'));
 
       expect(find.text('Private space'), findsOneWidget);
       expect(find.text('2 members'), findsNWidgets(2));
@@ -81,21 +86,21 @@ void main() {
       addTearDown(tester.view.reset);
       addTearDown(tester.platformDispatcher.clearAllTestValues);
 
-      await pump(tester, summary(isPublic: true, memberCount: 1234));
+      await _pump(tester, _summary(isPublic: true, memberCount: 1234));
 
       final error = tester.takeException();
       expect(error, isNull, reason: error?.toString());
     });
 
     testWidgets('whenPublic_saysSo', (tester) async {
-      await pump(tester, summary(isPublic: true));
+      await _pump(tester, _summary(isPublic: true));
 
       expect(find.text('Public space'), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
     testWidgets('whenUserMayDoNothing_offersOnlyTheInfo', (tester) async {
-      await pump(tester, summary(canInvite: false, canAddChildren: false));
+      await _pump(tester, _summary(canInvite: false, canAddChildren: false));
 
       expect(find.byKey(const ValueKey('space_invite')), findsNothing);
       expect(find.byKey(const ValueKey('space_new_group')), findsNothing);
@@ -103,17 +108,21 @@ void main() {
     });
 
     testWidgets('whenGearIsTapped_opensTheInfo', (tester) async {
-      await pump(tester, summary());
+      await _pump(tester, _summary());
 
       await tester.tap(find.byKey(const ValueKey('space_open_info')));
 
-      expect(isInfoShown, isTrue);
+      expect(_isInfoShown, isTrue);
     });
+  });
+}
 
+void _spaceHomeChannelsTests() {
+  group('SpaceHome', () {
     testWidgets('whenItHasChannels_listsThem', (tester) async {
-      await pump(
+      await _pump(
         tester,
-        summary(),
+        _summary(),
         children: const [SpaceChannel(roomId: '!c', name: 'Dev')],
       );
 
@@ -122,16 +131,16 @@ void main() {
     });
 
     testWidgets('whenItHasNoChannel_showsNoList', (tester) async {
-      await pump(tester, summary());
+      await _pump(tester, _summary());
 
       expect(find.text('Channels of the space'), findsNothing);
     });
 
     testWidgets('whenChannelsCannotBeRead_offersToTryAgain', (tester) async {
-      await pump(tester, summary(), childrenError: true);
+      await _pump(tester, _summary(), childrenError: true);
       expect(find.text('Could not read the channels.'), findsOneWidget);
 
-      when(repository.getSpaceChildren(spaceId)).thenAnswer(
+      when(_repository.getSpaceChildren(_spaceId)).thenAnswer(
         (_) async => const [SpaceChannel(roomId: '!c', name: 'Dev')],
       );
       await tester.tap(find.byKey(const ValueKey('space_channels_retry')));
@@ -144,13 +153,13 @@ void main() {
     testWidgets('whenARefreshFailsOnAnEmptySpace_offersToTryAgain', (
       tester,
     ) async {
-      await pump(tester, summary());
+      await _pump(tester, _summary());
       expect(find.text('Channels of the space'), findsNothing);
 
       when(
-        repository.getSpaceChildren(spaceId),
+        _repository.getSpaceChildren(_spaceId),
       ).thenThrow(const SpaceChildrenUnavailableException());
-      container.invalidate(spaceChildrenProvider(spaceId));
+      _container.invalidate(spaceChildrenProvider(_spaceId));
       await tester.pump();
       await tester.pump();
 
@@ -162,7 +171,7 @@ void main() {
     });
 
     testWidgets('whenRoomIsNoSpace_showsNothing', (tester) async {
-      await pump(tester, null);
+      await _pump(tester, null);
 
       expect(find.byType(Scaffold), findsNothing);
     });
