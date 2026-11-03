@@ -6,7 +6,6 @@ import 'package:twake_chat/pages/chat/events/message_reactions_bottom_sheet.dart
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/reaction/linagora_reaction_chip.dart';
 import 'package:linagora_design_flutter/reaction/linagora_reactions.dart';
@@ -32,27 +31,8 @@ class MessageReactions extends StatelessWidget {
       timeline,
       RelationshipTypes.reaction,
     );
-    final reactionMap = <String, ReactionEntry>{};
     final client = Matrix.of(context).client;
-
-    for (final e in allReactionEvents) {
-      final key = e.content
-          .tryGetMap<String, dynamic>('m.relates_to')
-          ?.tryGet<String>('key');
-      if (key != null) {
-        final entry =
-            reactionMap[key] ??
-            ReactionEntry(key: key, count: 0, reacted: false, reactors: []);
-        reactionMap[key] = entry.copyWith(
-          count: entry.count + 1,
-          reactors: [...?entry.reactors, e.senderFromMemoryOrFallback],
-          reacted: entry.reacted || e.senderId == e.room.client.userID,
-        );
-      }
-    }
-
-    final reactionList = reactionMap.values.toList();
-    reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
+    final reactionList = groupReactions(allReactionEvents, client.userID);
     return Material(
       color: Colors.transparent,
       child: ReactionsList(
@@ -63,6 +43,36 @@ class MessageReactions extends StatelessWidget {
       ),
     );
   }
+}
+
+final _variationSelectors = RegExp('[\uFE0E\uFE0F]');
+
+String _groupKey(String key) => key.replaceAll(_variationSelectors, '');
+
+String? _reactionKey(Event event) => event.content
+    .tryGetMap<String, dynamic>('m.relates_to')
+    ?.tryGet<String>('key');
+
+List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
+  final reactionMap = <String, ReactionEntry>{};
+  final sendersByGroup = <String, Set<String>>{};
+  for (final e in events) {
+    final key = _reactionKey(e);
+    if (key == null) continue;
+    final groupKey = _groupKey(key);
+    if (!(sendersByGroup[groupKey] ??= {}).add(e.senderId)) continue;
+    final entry =
+        reactionMap[groupKey] ??
+        ReactionEntry(key: key, count: 0, reacted: false, reactors: []);
+    reactionMap[groupKey] = entry.copyWith(
+      count: entry.count + 1,
+      reactors: [...?entry.reactors, e.senderFromMemoryOrFallback],
+      reacted: entry.reacted || e.senderId == userId,
+    );
+  }
+  final reactionList = reactionMap.values.toList();
+  reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
+  return reactionList;
 }
 
 class ReactionsList extends StatelessWidget {
@@ -124,15 +134,13 @@ class ReactionsList extends StatelessWidget {
         await event.room.sendReaction(event.eventId, reaction.key);
         return;
       }
-      final ownReaction = allReactionEvents.firstWhereOrNull(
+      final groupKey = _groupKey(reaction.key);
+      final ownReactions = allReactionEvents.where(
         (e) =>
             e.senderId == e.room.client.userID &&
-            e.content
-                    .tryGetMap<String, dynamic>('m.relates_to')
-                    ?.tryGet<String>('key') ==
-                reaction.key,
+            _groupKey(_reactionKey(e) ?? '') == groupKey,
       );
-      await ownReaction?.redactEvent();
+      await Future.wait(ownReactions.map((e) => e.redactEvent()));
     } catch (e, s) {
       Logs().e('Failed to toggle reaction ${reaction.key}', e, s);
       if (!context.mounted) return;
