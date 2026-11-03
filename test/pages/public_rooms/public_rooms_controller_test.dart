@@ -247,4 +247,53 @@ void main() {
     expect(result, isA<PublicRoomOpenIgnored>());
     expect(repository.knockedIds, isEmpty);
   });
+
+  test('build_whenALaterPageRepeatsARoom_listsItOnce', () async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    final (container, _) = await loadFirstPage(pages);
+
+    // Act
+    pages.add([publicRoom('!first'), publicRoom('!second')]);
+    await pages.close();
+    await pumpEventQueue();
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!first', '!second']);
+  });
+
+  test('build_whenALaterPageThrowsAnUntypedError_stopsLoading', () async {
+    // Arrange
+    final errors = <Object>[];
+    late ProviderContainer container;
+    final pages = StreamController<List<PublicRoom>>();
+
+    // Act
+    await runZonedGuarded(() async {
+      (container, _) = await loadFirstPage(pages);
+      pages.addError(StateError('malformed page'));
+      await pumpEventQueue();
+    }, (error, _) => errors.add(error));
+
+    // Assert
+    expect(errors.single, isA<StateError>());
+    expect(
+      container.read(publicRoomsControllerProvider).requireValue.isLoadingMore,
+      isFalse,
+    );
+  });
+
+  test('open_whenTheJoinedRoomIsNotInSyncYet_saysSo', () async {
+    // Arrange
+    repository.isJoinInSync = false;
+    final container = makeContainer();
+    final controller = await loadedController(container);
+
+    // Act
+    final result = await controller.open(publicRoom('!open'));
+
+    // Assert
+    expect(result, isA<PublicRoomJoinedNotInSync>());
+  });
 }

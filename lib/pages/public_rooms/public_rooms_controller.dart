@@ -44,12 +44,15 @@ class PublicRoomsController extends _$PublicRoomsController {
         );
         return const PublicRoomRequested();
       }
-      final roomId = await ref
+      final joined = await ref
           .read(joinPublicRoomUseCaseProvider)
           .execute(room.roomId);
-      if (!ref.mounted) return PublicRoomJoined(roomId);
+      final result = joined.isInSync
+          ? PublicRoomJoined(joined.roomId)
+          : const PublicRoomJoinedNotInSync();
+      if (!ref.mounted) return result;
       _update((state) => state.copyWith(pendingRoomId: null));
-      return PublicRoomJoined(roomId);
+      return result;
     } on PublicRoomsException {
       if (ref.mounted) {
         _update((state) => state.copyWith(pendingRoomId: null));
@@ -69,14 +72,24 @@ class PublicRoomsController extends _$PublicRoomsController {
       while (await pages.moveNext()) {
         if (!ref.mounted) return;
         final page = pages.current;
-        _update((state) => state.copyWith(rooms: [...state.rooms, ...page]));
+        _update((state) {
+          final loadedIds = {for (final room in state.rooms) room.roomId};
+          return state.copyWith(
+            rooms: [
+              ...state.rooms,
+              ...page.where((room) => loadedIds.add(room.roomId)),
+            ],
+          );
+        });
         unawaited(_markRequested(page));
       }
     } on PublicRoomsException {
       // Logged by the datasource: keep the rooms already shown.
+    } finally {
+      if (ref.mounted) {
+        _update((state) => state.copyWith(isLoadingMore: false));
+      }
     }
-    if (!ref.mounted) return;
-    _update((state) => state.copyWith(isLoadingMore: false));
   }
 
   Future<void> _markRequested(List<PublicRoom> page) async {

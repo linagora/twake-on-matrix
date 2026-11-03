@@ -123,7 +123,7 @@ void main() {
 
     // Assert
     expect(find.byType(LinagoraEmptyState), findsOneWidget);
-    expect(find.text('No public group to join.'), findsOneWidget);
+    expect(find.text('No public group matches your search.'), findsOneWidget);
   });
 
   testWidgets('build_whenTheDirectoryIsEmpty_showsTheEmptyState', (
@@ -206,5 +206,35 @@ void main() {
 
     // Assert
     expect(find.text('This group could not be joined.'), findsOneWidget);
+  });
+
+  testWidgets('tap_whenTheRequestFails_saysTheRequestFailed', (tester) async {
+    // Arrange
+    repository.knockError = PublicRoomKnockFailedException(
+      cause: Exception('forbidden'),
+    );
+    await pumpPage(tester);
+
+    // Act
+    await tester.tap(find.text('News'));
+    await tester.pump();
+
+    // Assert
+    expect(find.text('Your request could not be sent.'), findsOneWidget);
+  });
+
+  testWidgets('tap_whenTheJoinedRoomIsNotInSyncYet_saysItIsJoined', (
+    tester,
+  ) async {
+    // Arrange
+    repository.isJoinInSync = false;
+    await pumpPage(tester);
+
+    // Act
+    await tester.tap(find.text('Équipe'));
+    await tester.pump();
+
+    // Assert
+    expect(find.text('You joined the chat'), findsOneWidget);
   });
 }

@@ -2898,6 +2898,31 @@
     "type": "text",
     "placeholders": {}
   },
+  "publicGroupRequestFailed": "Your request could not be sent.",
+  "@publicGroupRequestFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPublicGroupMatchesSearch": "No public group matches your search.",
+  "@noPublicGroupMatchesSearch": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindBroadcast": "Feed",
+  "@roomKindBroadcast": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindPublic": "Public group",
+  "@roomKindPublic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindPeople": "Group",
+  "@roomKindPeople": {
+    "type": "text",
+    "placeholders": {}
+  },
   "publicGroupJoinFailed": "This group could not be joined.",
   "@publicGroupJoinFailed": {
     "type": "text",

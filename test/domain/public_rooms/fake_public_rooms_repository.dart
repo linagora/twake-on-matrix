@@ -40,6 +40,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   PublicRoomsException? joinError;
   PublicRoomsException? knockError;
   Completer<void>? joinGate;
+  bool isJoinInSync = true;
 
   int? requestedLimit;
   final knockedQueries = <List<String>>[];
@@ -65,11 +66,11 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   }
 
   @override
-  Future<String> join(String roomIdOrAlias) async {
+  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias) async {
     await joinGate?.future;
     if (joinError case final error?) throw error;
     joinedIds.add(roomIdOrAlias);
-    return roomIdOrAlias;
+    return (roomId: roomIdOrAlias, isInSync: isJoinInSync);
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 
@@ -58,6 +59,7 @@ class AvatarWithKindBadge extends StatelessWidget {
             top: _badgeOffset * scale,
             child: SvgPicture.asset(
               _assetPath,
+              semanticsLabel: _label(L10n.of(context)!),
               width: _badgeSize * scale,
               height: _badgeSize * scale,
               colorFilter: ColorFilter.mode(
@@ -70,6 +72,12 @@ class AvatarWithKindBadge extends StatelessWidget {
       ),
     );
   }
+
+  String _label(L10n l10n) => switch (badge) {
+    AvatarKindBadge.people => l10n.roomKindPeople,
+    AvatarKindBadge.public => l10n.roomKindPublic,
+    AvatarKindBadge.broadcast => l10n.roomKindBroadcast,
+  };
 
   String get _assetPath => switch (badge) {
     AvatarKindBadge.people => Assets.images.icAvatarBadgePeople.path,

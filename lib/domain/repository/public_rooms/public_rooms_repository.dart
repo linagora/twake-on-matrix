@@ -11,9 +11,9 @@ abstract class PublicRoomsRepository {
   /// room whose state cannot be read is left out.
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds);
 
-  /// Returns the id of the joined room once it has reached the sync, or after
-  /// 30 seconds if it has not.
-  Future<String> join(String roomIdOrAlias);
+  /// Waits up to 30 seconds for the joined room to reach the sync;
+  /// `isInSync` is false when it has not.
+  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias);
 
   Future<void> knock(String roomIdOrAlias);
 }

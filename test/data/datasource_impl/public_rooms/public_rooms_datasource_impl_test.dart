@@ -134,6 +134,22 @@ void main() {
       expect(sizes, [0, 4]);
     });
 
+    test('fetchDirectory_whenPagesNeverEnd_stopsAfterACap', () async {
+      // Arrange
+      when(
+        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
+      ).thenAnswer(
+        (invocation) async =>
+            page(0, 0, next: '${invocation.namedArguments[#since] ?? ''}+'),
+      );
+
+      // Act
+      final sizes = await pageSizes();
+
+      // Assert
+      expect(sizes, hasLength(12));
+    });
+
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
       // Arrange
       when(
@@ -269,10 +285,10 @@ void main() {
       when(mockClient.getRoomById('!a:hs')).thenReturn(room);
 
       // Act
-      final roomId = await datasource.join('#a:hs');
+      final joined = await datasource.join('#a:hs');
 
       // Assert
-      expect(roomId, '!a:hs');
+      expect(joined, (roomId: '!a:hs', isInSync: true));
       verifyNever(mockClient.waitForRoomInSync(any, join: anyNamed('join')));
     });
 
@@ -284,10 +300,11 @@ void main() {
       ).thenAnswer((_) async => SyncUpdate(nextBatch: 'n'));
 
       // Act
-      await datasource.join('!a:hs');
+      final joined = await datasource.join('!a:hs');
 
       // Assert
       verify(mockClient.waitForRoomInSync('!a:hs', join: true)).called(1);
+      expect(joined.isInSync, isTrue);
     });
 
     test('join_whenTheHomeserverRefuses_throwsJoinFailed', () async {
@@ -302,21 +319,21 @@ void main() {
       // Assert
       await expectLater(result, throwsA(isA<PublicRoomJoinFailedException>()));
     });
-    test('join_whenTheRoomNeverReachesTheSync_stillReturnsItsId', () {
+    test('join_whenTheRoomNeverReachesTheSync_saysItIsNotInSync', () {
       fakeAsync((async) {
         // Arrange
         when(mockClient.joinRoom('!a:hs')).thenAnswer((_) async => '!a:hs');
         when(
           mockClient.waitForRoomInSync('!a:hs', join: true),
         ).thenAnswer((_) => Completer<SyncUpdate>().future);
-        String? roomId;
+        ({String roomId, bool isInSync})? joined;
 
         // Act
-        datasource.join('!a:hs').then((id) => roomId = id);
+        datasource.join('!a:hs').then((result) => joined = result);
         async.elapse(const Duration(seconds: 31));
 
         // Assert
-        expect(roomId, '!a:hs');
+        expect(joined, (roomId: '!a:hs', isInSync: false));
       });
     });
   });

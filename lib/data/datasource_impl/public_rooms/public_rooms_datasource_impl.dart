@@ -29,8 +29,13 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   Stream<List<PublicRoom>> fetchDirectory({required int limit}) async* {
     final client = _client;
     var count = 0;
+    var requests = 0;
     String? since;
     do {
+      if (requests++ == limit ~/ pageSize + 2) {
+        Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: too many pages');
+        return;
+      }
       final QueryPublicRoomsResponse page;
       try {
         // No `server`: the directory of the user's homeserver only.
@@ -103,7 +108,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   }
 
   @override
-  Future<String> join(String roomIdOrAlias) async {
+  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias) async {
     final client = _client;
     final String roomId;
     try {
@@ -113,17 +118,17 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       throw PublicRoomJoinFailedException(cause: exception);
     }
     if (client.getRoomById(roomId)?.membership == Membership.join) {
-      return roomId;
+      return (roomId: roomId, isInSync: true);
     }
     try {
       await client
           .waitForRoomInSync(roomId, join: true)
           .timeout(_joinSyncTimeout);
     } on TimeoutException catch (exception) {
-      // Joined on the server: opening the room still works once it syncs.
       Logs().w('PublicRoomsDatasourceImpl::join', exception);
+      return (roomId: roomId, isInSync: false);
     }
-    return roomId;
+    return (roomId: roomId, isInSync: true);
   }
 
   @override

@@ -10,10 +10,10 @@ void main() {
     final repository = FakePublicRoomsRepository();
 
     // Act
-    final roomId = await JoinPublicRoomUseCase(repository).execute('#a:hs');
+    final joined = await JoinPublicRoomUseCase(repository).execute('#a:hs');
 
     // Assert
-    expect(roomId, '#a:hs');
+    expect(joined.roomId, '#a:hs');
     expect(repository.joinedIds, ['#a:hs']);
   });
 

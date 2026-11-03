@@ -5,7 +5,7 @@ class JoinPublicRoomUseCase {
 
   final PublicRoomsRepository _repository;
 
-  /// Returns the room id. Throws a `PublicRoomJoinFailedException`.
-  Future<String> execute(String roomIdOrAlias) =>
+  /// Throws a `PublicRoomJoinFailedException`.
+  Future<({String roomId, bool isInSync})> execute(String roomIdOrAlias) =>
       _repository.join(roomIdOrAlias);
 }

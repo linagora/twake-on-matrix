@@ -45,10 +45,18 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
       case PublicRoomJoined(:final roomId):
         Navigator.of(context).pop();
         RoomRoute(roomid: roomId).go(context);
+      case PublicRoomJoinedNotInSync():
+        TwakeSnackBar.show(context, l10n.youJoinedTheChat);
+        Navigator.of(context).pop();
       case PublicRoomRequested():
         TwakeSnackBar.show(context, l10n.joinRequestSentAdminMustApprove);
       case PublicRoomOpenFailed():
-        TwakeSnackBar.show(context, l10n.publicGroupJoinFailed);
+        TwakeSnackBar.show(
+          context,
+          room.access == PublicRoomAccess.approval
+              ? l10n.publicGroupRequestFailed
+              : l10n.publicGroupJoinFailed,
+        );
       case PublicRoomOpenIgnored():
         break;
     }
@@ -69,6 +77,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
           valueListenable: _searchController,
           builder: (context, query, _) => _PublicRoomList(
             rooms: value.roomsMatching(query.text),
+            isDirectoryEmpty: value.rooms.isEmpty,
             requestedRoomIds: value.requestedRoomIds,
             onOpen: (room) => unawaited(_open(room)),
           ),
@@ -123,6 +132,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
 class _PublicRoomList extends StatelessWidget {
   const _PublicRoomList({
     required this.rooms,
+    required this.isDirectoryEmpty,
     required this.requestedRoomIds,
     required this.onOpen,
   });
@@ -131,6 +141,7 @@ class _PublicRoomList extends StatelessWidget {
   static const _padding = EdgeInsets.symmetric(horizontal: 8);
 
   final List<PublicRoom> rooms;
+  final bool isDirectoryEmpty;
   final Set<String> requestedRoomIds;
   final ValueChanged<PublicRoom> onOpen;
 
@@ -138,7 +149,11 @@ class _PublicRoomList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     if (rooms.isEmpty) {
-      return _PublicRoomsEmptyState(title: l10n.noPublicGroupToJoin);
+      return _PublicRoomsEmptyState(
+        title: isDirectoryEmpty
+            ? l10n.noPublicGroupToJoin
+            : l10n.noPublicGroupMatchesSearch,
+      );
     }
     return ListView.builder(
       padding: _padding,

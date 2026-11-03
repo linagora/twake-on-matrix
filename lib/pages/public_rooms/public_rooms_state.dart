@@ -44,6 +44,11 @@ class PublicRoomJoined extends PublicRoomOpenResult {
   final String roomId;
 }
 
+/// Joined on the server, but the room has not reached the sync yet.
+class PublicRoomJoinedNotInSync extends PublicRoomOpenResult {
+  const PublicRoomJoinedNotInSync();
+}
+
 class PublicRoomRequested extends PublicRoomOpenResult {
   const PublicRoomRequested();
 }

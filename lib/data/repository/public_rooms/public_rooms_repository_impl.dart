@@ -19,7 +19,8 @@ class PublicRoomsRepositoryImpl implements PublicRoomsRepository {
       _datasource.getKnockedRoomIds(roomIds);
 
   @override
-  Future<String> join(String roomIdOrAlias) => _datasource.join(roomIdOrAlias);
+  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias) =>
+      _datasource.join(roomIdOrAlias);
 
   @override
   Future<void> knock(String roomIdOrAlias) => _datasource.knock(roomIdOrAlias);

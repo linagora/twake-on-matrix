@@ -7,7 +7,7 @@ abstract class PublicRoomsDatasource {
 
   Future<Set<String>> getKnockedRoomIds(List<String> roomIds);
 
-  Future<String> join(String roomIdOrAlias);
+  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias);
 
   Future<void> knock(String roomIdOrAlias);
 }
