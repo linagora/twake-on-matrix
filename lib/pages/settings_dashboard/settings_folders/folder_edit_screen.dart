@@ -18,9 +18,9 @@ import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 
 /// Back where the form was opened from, or the folders after a reload.
 void _leaveForm(BuildContext context) {
@@ -497,21 +497,20 @@ class _ChatRow extends StatelessWidget {
 }
 
 /// The emoji of the folder, from the picker of the chat.
-class _EmojiButton extends StatelessWidget {
+class _EmojiButton extends ConsumerWidget {
   const _EmojiButton({required this.emoji, required this.onChanged});
 
   final String? emoji;
   final ValueChanged<String?> onChanged;
 
-  Future<void> _pick(BuildContext context) async {
+  Future<void> _pick(BuildContext context, WidgetRef ref) async {
     final textTheme = Theme.of(context).textTheme;
     final picked = await showAdaptiveBottomSheet<String>(
       context: context,
       builder: (sheetContext) => SizedBox(
         height: SettingsFoldersStyle.emojiPickerHeight,
         child: emoji_mart.EmojiPicker(
-          // TODO: [transitional] No provider holds the emoji data yet.
-          emojiData: Matrix.of(context).emojiData,
+          emojiData: ref.read(emojiDataProvider).requireValue,
           configuration: emoji_mart.EmojiPickerConfiguration(
             emojiStyle: textTheme.headlineLarge!,
           ),
@@ -524,7 +523,7 @@ class _EmojiButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
     final emoji = this.emoji;
     return Row(
@@ -536,7 +535,7 @@ class _EmojiButton extends StatelessWidget {
             key: const ValueKey('folder_emoji'),
             label: emoji ?? SettingsFoldersStyle.defaultEmoji,
             variant: LinagoraButtonVariant.outlined,
-            onPressed: () => _pick(context),
+            onPressed: () => _pick(context, ref),
           ),
         ),
         if (emoji != null)
