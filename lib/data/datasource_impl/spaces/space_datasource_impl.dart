@@ -68,11 +68,12 @@ class SpaceDatasourceImpl implements SpaceDatasource {
   @override
   SpaceSummary? getSpace(String roomId) {
     final room = _activeClient?.getRoomById(roomId);
-    if (room == null || !room.isSpace || room.membership != Membership.join) {
-      return null;
-    }
-    return _summaryOf(room);
+    if (room == null) return null;
+    return _isJoinedSpace(room) ? _summaryOf(room) : null;
   }
+
+  bool _isJoinedSpace(Room room) =>
+      room.isSpace && room.membership == Membership.join;
 
   SpaceSummary _summaryOf(Room room) => SpaceSummary(
     id: room.id,
@@ -92,8 +93,7 @@ class SpaceDatasourceImpl implements SpaceDatasource {
     if (client == null) return const [];
     return [
       for (final room in client.listedRooms)
-        if (room.isSpace &&
-            room.membership == Membership.join &&
+        if (_isJoinedSpace(room) &&
             room.canChangeStateEvent(EventTypes.SpaceChild))
           _summaryOf(room),
     ];
@@ -175,28 +175,7 @@ class SpaceDatasourceImpl implements SpaceDatasource {
     final parentId = space.parentSpaceId;
     if (parentId != null) _client.ensureMayAddToSpace(parentId);
     try {
-      final roomId = await _client.createRoom(
-        name: space.name,
-        topic: space.topic.isEmpty ? null : space.topic,
-        preset: space.isPublic
-            ? CreateRoomPreset.publicChat
-            : CreateRoomPreset.privateChat,
-        visibility: space.isPublic ? Visibility.public : null,
-        creationContent: {
-          'type': RoomCreationTypes.mSpace,
-          if (space.isPublic && !space.isServerAclEnabled) 'm.federate': false,
-        },
-        initialState: [
-          if (space.urlAvatar case final url?)
-            StateEvent(
-              type: EventTypes.RoomAvatar,
-              stateKey: '',
-              content: {'url': url},
-            ),
-          if (parentId != null)
-            ..._client.spaceParentState(parentId, isPublic: space.isPublic),
-        ],
-      );
+      final roomId = await _createSpaceRoom(space);
       if (parentId != null) await _client.listRoomInSpace(roomId, parentId);
       // Opening the room fails if it has not reached the sync yet.
       if (_client.getRoomById(roomId) == null) {
@@ -205,14 +184,40 @@ class SpaceDatasourceImpl implements SpaceDatasource {
       return roomId;
     } on SpaceException {
       rethrow;
-    } on MatrixException catch (exception, stackTrace) {
-      Logs().e('SpaceDatasourceImpl::createSpace', exception, stackTrace);
-      throw exception.error == MatrixError.M_FORBIDDEN
-          ? const SpaceForbiddenException()
-          : const SpaceCreationFailedException();
     } on Exception catch (exception, stackTrace) {
       Logs().e('SpaceDatasourceImpl::createSpace', exception, stackTrace);
-      throw const SpaceCreationFailedException();
+      throw _isForbidden(exception)
+          ? const SpaceForbiddenException()
+          : const SpaceCreationFailedException();
     }
   }
+
+  bool _isForbidden(Exception exception) =>
+      exception is MatrixException &&
+      exception.error == MatrixError.M_FORBIDDEN;
+
+  Future<String> _createSpaceRoom(NewSpace space) => _client.createRoom(
+    name: space.name,
+    topic: space.topic.isEmpty ? null : space.topic,
+    preset: space.isPublic
+        ? CreateRoomPreset.publicChat
+        : CreateRoomPreset.privateChat,
+    visibility: space.isPublic ? Visibility.public : null,
+    creationContent: {
+      'type': RoomCreationTypes.mSpace,
+      if (space.isPublic && !space.isServerAclEnabled) 'm.federate': false,
+    },
+    initialState: _initialStateOf(space),
+  );
+
+  List<StateEvent> _initialStateOf(NewSpace space) => [
+    if (space.urlAvatar case final url?)
+      StateEvent(
+        type: EventTypes.RoomAvatar,
+        stateKey: '',
+        content: {'url': url},
+      ),
+    if (space.parentSpaceId case final parentId?)
+      ..._client.spaceParentState(parentId, isPublic: space.isPublic),
+  ];
 }
