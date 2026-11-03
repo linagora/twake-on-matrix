@@ -234,6 +234,66 @@ void main() {
       );
     });
 
+    testWidgets(
+      'createNewGroup_whenEncrypted_requestsAnEncryptedPrivateGroup',
+      (WidgetTester tester) async {
+        // Arrange
+        final controller = await pumpGroupCreationScreen(
+          tester,
+          isPublicGroupsEnabled: true,
+        );
+        controller.setEncrypted(isEncrypted: true);
+
+        // Act
+        controller.createNewGroup();
+
+        // Assert
+        final request = capturedRequest();
+        expect(request.enableEncryption, isTrue);
+        expect(request.isPublic, isFalse);
+      },
+    );
+
+    testWidgets('setPublic_whenEncrypted_isRefused', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      final controller = await pumpGroupCreationScreen(
+        tester,
+        isPublicGroupsEnabled: true,
+      );
+      controller.setEncrypted(isEncrypted: true);
+
+      // Act
+      controller.setPublic(isPublic: true);
+
+      // Assert
+      expect(
+        controller.groupPrivacyNotifier.value,
+        const GroupPrivacyState(isEncrypted: true),
+      );
+    });
+
+    testWidgets('setEncrypted_whenPublic_isRefused', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      final controller = await pumpGroupCreationScreen(
+        tester,
+        isPublicGroupsEnabled: true,
+      );
+      controller.setPublic(isPublic: true);
+
+      // Act
+      controller.setEncrypted(isEncrypted: true);
+
+      // Assert
+      expect(
+        controller.groupPrivacyNotifier.value,
+        const GroupPrivacyState(isPublic: true, isServerLimited: true),
+      );
+    });
+
     testWidgets('groupPrivacy_whenCreated_startsPrivate', (
       WidgetTester tester,
     ) async {

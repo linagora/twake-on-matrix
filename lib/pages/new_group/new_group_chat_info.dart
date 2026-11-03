@@ -58,7 +58,6 @@ class NewGroupChatInfo extends ConsumerStatefulWidget {
 
 class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     with CommonMediaPickerMixin, SingleImagePickerMixin, PickAvatarMixin {
-  final enableEncryptionNotifier = ValueNotifier(false);
   final groupPrivacyNotifier = ValueNotifier(const GroupPrivacyState());
   final haveGroupNameNotifier = ValueNotifier(false);
   final avatarUploadStateNotifier = ValueNotifier<Either<Failure, Success>?>(
@@ -78,19 +77,18 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
 
   bool get isFeed => widget.isFeed;
 
-  void toggleEnableEncryption() {
-    enableEncryptionNotifier.value = !enableEncryptionNotifier.value;
+  void setEncrypted({required bool isEncrypted}) {
+    groupPrivacyNotifier.value = groupPrivacyNotifier.value.withEncryption(
+      isEncrypted: isEncrypted,
+    );
   }
 
-  /// Also resets [GroupPrivacyState.isServerLimited] to the well-known default.
   void setPublic({required bool isPublic}) {
-    groupPrivacyNotifier.value = GroupPrivacyState(
+    groupPrivacyNotifier.value = groupPrivacyNotifier.value.withPublic(
       isPublic: isPublic,
-      isServerLimited:
-          isPublic &&
-          ref
-              .read(loginHomeserverSummaryProvider)
-              .isPublicGroupsServerLimitedByDefault,
+      isServerLimitedByDefault: ref
+          .read(loginHomeserverSummaryProvider)
+          .isPublicGroupsServerLimitedByDefault,
     );
   }
 
@@ -143,7 +141,6 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
             NewGroupForm(
               groupName: groupNameTextEditingController.text,
               invitees: contactsList.map((contact) => contact.matrixId),
-              enableEncryption: enableEncryptionNotifier.value,
               privacy: groupPrivacyNotifier.value,
               isFeed: isFeed,
               urlAvatar: urlAvatar,
@@ -296,7 +293,6 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     super.dispose();
     disposePickAvatarMixin();
     haveGroupNameNotifier.dispose();
-    enableEncryptionNotifier.dispose();
     groupPrivacyNotifier.dispose();
     avatarAssetEntityNotifier.dispose();
     avatarUploadStateNotifier.dispose();

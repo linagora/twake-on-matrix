@@ -67,7 +67,7 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
     return CreateNewGroupChatRequest(
       groupName: form.groupName,
       invite: form.invitees.nonNulls.where((id) => id != userId).toList(),
-      enableEncryption: form.enableEncryption,
+      enableEncryption: form.privacy.isEncrypted,
       isPublic:
           form.privacy.isPublic &&
           ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,

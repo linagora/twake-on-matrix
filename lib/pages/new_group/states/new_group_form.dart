@@ -8,7 +8,6 @@ abstract class NewGroupForm with _$NewGroupForm {
   const factory NewGroupForm({
     required String groupName,
     required Iterable<String?> invitees,
-    required bool enableEncryption,
     required GroupPrivacyState privacy,
     required bool isFeed,
     String? urlAvatar,
