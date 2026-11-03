@@ -20,65 +20,72 @@ import 'folder_edit_screen_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<FoldersRepository>()])
 void main() {
-  late MockFoldersRepository repository;
-  late StreamController<List<Folder>> saved;
-  late ProviderContainer container;
-
   setUpAll(() {
     if (!getIt.isRegistered<ResponsiveUtils>()) {
       getIt.registerSingleton(ResponsiveUtils());
     }
   });
+  _folderEditScreenTests();
+  _folderEditScreenChatsTests();
+  _folderEditScreenSaveTests();
+  _folderEditScreenLiveTests();
+  _builtinFolderEditScreenTests();
+}
 
-  Future<void> pump(
-    WidgetTester tester,
-    Widget screen, {
-    List<RoomListEntry> Function()? entries,
-  }) async {
-    tester.view.physicalSize = const Size(900, 1400);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    repository = MockFoldersRepository();
-    saved = StreamController<List<Folder>>.broadcast();
-    addTearDown(saved.close);
-    when(repository.watchFolders()).thenAnswer((_) => saved.stream);
-    // Never resolves: the screen would navigate once saved.
-    when(
-      repository.saveFolders(any, changes: anyNamed('changes')),
-    ).thenAnswer((_) => Completer<void>().future);
-    container = ProviderContainer.test(
-      retry: (_, _) => null,
-      overrides: [
-        foldersRepositoryProvider.overrideWithValue(repository),
-        roomListEntriesProvider.overrideWith(
-          (ref) =>
-              entries?.call() ??
-              const [
-                RoomListEntry(id: '!dm', name: 'Alice', kind: RoomKind.direct),
-                RoomListEntry(id: '!tagged', name: 'Tagged', folders: ['Work']),
-                RoomListEntry(id: '!s', name: 'A space', kind: RoomKind.space),
-              ],
-        ),
-      ],
-    );
-    await pumpLocalized(tester, container, screen);
-  }
+late MockFoldersRepository _repository;
+late StreamController<List<Folder>> _saved;
+late ProviderContainer _container;
 
-  Future<void> loadFolders(WidgetTester tester, List<Folder> folders) async {
-    saved.add(folders);
-    await tester.pump();
-    await tester.pump();
-  }
+Future<void> _pump(
+  WidgetTester tester,
+  Widget screen, {
+  List<RoomListEntry> Function()? entries,
+}) async {
+  tester.view.physicalSize = const Size(900, 1400);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  _repository = MockFoldersRepository();
+  _saved = StreamController<List<Folder>>.broadcast();
+  addTearDown(_saved.close);
+  when(_repository.watchFolders()).thenAnswer((_) => _saved.stream);
+  // Never resolves: the screen would navigate once _saved.
+  when(
+    _repository.saveFolders(any, changes: anyNamed('changes')),
+  ).thenAnswer((_) => Completer<void>().future);
+  _container = ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: [
+      foldersRepositoryProvider.overrideWithValue(_repository),
+      roomListEntriesProvider.overrideWith(
+        (ref) =>
+            entries?.call() ??
+            const [
+              RoomListEntry(id: '!dm', name: 'Alice', kind: RoomKind.direct),
+              RoomListEntry(id: '!tagged', name: 'Tagged', folders: ['Work']),
+              RoomListEntry(id: '!s', name: 'A space', kind: RoomKind.space),
+            ],
+      ),
+    ],
+  );
+  await pumpLocalized(tester, _container, screen);
+}
 
+Future<void> _loadFolders(WidgetTester tester, List<Folder> folders) async {
+  _saved.add(folders);
+  await tester.pump();
+  await tester.pump();
+}
+
+void _folderEditScreenTests() {
   group('FolderEditScreen', () {
     testWidgets('whenFoldersAreNotReadYet_waitsThenFillsTheForm', (
       tester,
     ) async {
-      await pump(tester, const FolderEditScreen(name: 'Work'));
+      await _pump(tester, const FolderEditScreen(name: 'Work'));
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
-      await loadFolders(tester, const [Folder.user('Work', emoji: '💼')]);
+      await _loadFolders(tester, const [Folder.user('Work', emoji: '💼')]);
 
       expect(find.text('Edit folder'), findsOneWidget);
       expect(find.widgetWithText(TextField, 'Work'), findsOneWidget);
@@ -90,9 +97,9 @@ void main() {
     testWidgets('whenNameIsTooLong_keepsTheFirstSixtyCharacters', (
       tester,
     ) async {
-      await pump(tester, const FolderEditScreen());
+      await _pump(tester, const FolderEditScreen());
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       await tester.enterText(
         find.byKey(const ValueKey('folder_name')),
@@ -106,9 +113,9 @@ void main() {
     testWidgets('whenFullAndTypingInTheMiddle_keepsTheEndAndTheCaret', (
       tester,
     ) async {
-      await pump(tester, const FolderEditScreen());
+      await _pump(tester, const FolderEditScreen());
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
       final field = find.descendant(
         of: find.byKey(const ValueKey('folder_name')),
         matching: find.byType(EditableText),
@@ -127,11 +134,15 @@ void main() {
       expect(value.text, '${'a' * 30}${'b' * 30}');
       expect(value.selection.baseOffset, 30);
     });
+  });
+}
 
+void _folderEditScreenChatsTests() {
+  group('FolderEditScreen', () {
     testWidgets('whenChatsShareAName_showsTheirSpaceToTellThemApart', (
       tester,
     ) async {
-      await pump(
+      await _pump(
         tester,
         const FolderEditScreen(),
         entries: () => const [
@@ -142,7 +153,7 @@ void main() {
         ],
       );
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       final first = find.byKey(const ValueKey('folder_chat_!g1'));
       final second = find.byKey(const ValueKey('folder_chat_!g2'));
@@ -157,7 +168,7 @@ void main() {
     });
 
     testWidgets('whenThereAreManyChats_buildsOnlyThoseInView', (tester) async {
-      await pump(
+      await _pump(
         tester,
         const FolderEditScreen(),
         entries: () => [
@@ -166,24 +177,28 @@ void main() {
         ],
       );
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       expect(find.byType(LinagoraSettingItem).evaluate().length, lessThan(100));
     });
 
     testWidgets('always_namesEachColourForAScreenReader', (tester) async {
-      await pump(tester, const FolderEditScreen());
+      await _pump(tester, const FolderEditScreen());
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       expect(find.byTooltip('Folder colour 1'), findsOneWidget);
       expect(find.byTooltip('Folder colour 8'), findsOneWidget);
     });
+  });
+}
 
+void _folderEditScreenSaveTests() {
+  group('FolderEditScreen', () {
     testWidgets('whenNew_tagsWhatIsTickedAndListsNoSpace', (tester) async {
-      await pump(tester, const FolderEditScreen());
+      await _pump(tester, const FolderEditScreen());
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
       expect(find.text('A space'), findsNothing);
 
       await tester.enterText(find.byKey(const ValueKey('folder_name')), 'New');
@@ -194,7 +209,7 @@ void main() {
       await tester.pump();
 
       verify(
-        repository.saveFolders(
+        _repository.saveFolders(
           argThat(contains(const Folder.user('New'))),
           changes: const [
             FolderTagChange(roomId: '!dm', folderName: 'New', isIn: true),
@@ -202,30 +217,34 @@ void main() {
         ),
       ).called(1);
     });
+  });
+}
 
+void _folderEditScreenLiveTests() {
+  group('FolderEditScreen', () {
     testWidgets('whenAChatArrivesWhileEditing_doesNotExcludeIt', (
       tester,
     ) async {
       final entries = ValueNotifierEntries();
-      await pump(
+      await _pump(
         tester,
         const FolderEditScreen(name: 'Directs'),
         entries: entries.read,
       );
       await tester.pump();
-      await loadFolders(tester, const [
+      await _loadFolders(tester, const [
         Folder.user('Directs', include: [FolderChatType.direct]),
       ]);
 
       entries.add(const RoomListEntry(id: '!new', kind: RoomKind.direct));
-      container.invalidate(roomListEntriesProvider);
+      _container.invalidate(roomListEntriesProvider);
       await tester.pump();
       await tester.ensureVisible(find.byKey(const ValueKey('folder_save')));
       await tester.tap(find.byKey(const ValueKey('folder_save')));
       await tester.pump();
 
       verify(
-        repository.saveFolders(
+        _repository.saveFolders(
           argThat(
             contains(
               const Folder.user('Directs', include: [FolderChatType.direct]),
@@ -237,9 +256,9 @@ void main() {
     });
 
     testWidgets('whenAKindIsTicked_ticksItsChats', (tester) async {
-      await pump(tester, const FolderEditScreen());
+      await _pump(tester, const FolderEditScreen());
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       await tester.tap(find.byKey(const ValueKey('folder_type_direct')));
       await tester.pump();
@@ -254,15 +273,17 @@ void main() {
       );
     });
   });
+}
 
+void _builtinFolderEditScreenTests() {
   group('BuiltinFolderEditScreen', () {
     testWidgets('always_offersItsLooksOnly', (tester) async {
-      await pump(
+      await _pump(
         tester,
         const BuiltinFolderEditScreen(kind: BuiltinFolder.spaces),
       );
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       expect(find.byKey(const ValueKey('folder_name')), findsOneWidget);
       expect(find.byKey(const ValueKey('folder_type_direct')), findsNothing);
@@ -270,12 +291,12 @@ void main() {
     });
 
     testWidgets('whenItsOwnNameIsTyped_savesNoName', (tester) async {
-      await pump(
+      await _pump(
         tester,
         const BuiltinFolderEditScreen(kind: BuiltinFolder.spaces),
       );
       await tester.pump();
-      await loadFolders(tester, const []);
+      await _loadFolders(tester, const []);
 
       await tester.enterText(
         find.byKey(const ValueKey('folder_name')),
@@ -285,7 +306,7 @@ void main() {
       await tester.pump();
 
       verify(
-        repository.saveFolders(
+        _repository.saveFolders(
           argThat(contains(const Folder.builtin(BuiltinFolder.spaces))),
           changes: anyNamed('changes'),
         ),

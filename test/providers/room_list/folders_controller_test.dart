@@ -21,57 +21,98 @@ import 'folders_controller_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<FoldersRepository>(), MockSpec<Client>()])
 void main() {
-  const work = Folder.user('Work');
-  const spaces = Folder.builtin(BuiltinFolder.spaces);
-  const unread = Folder.builtin(BuiltinFolder.unread);
-  const others = [
-    Folder.builtin(BuiltinFolder.broadcasts, hidden: true),
-    Folder.builtin(BuiltinFolder.directs, hidden: true),
-    Folder.builtin(BuiltinFolder.favourites, hidden: true),
-  ];
-  late MockFoldersRepository repository;
-  late StreamController<List<Folder>> saved;
-  late ProviderContainer container;
-
   setUp(() async {
-    repository = MockFoldersRepository();
-    saved = StreamController<List<Folder>>.broadcast();
-    addTearDown(saved.close);
-    when(repository.watchFolders()).thenAnswer((_) => saved.stream);
-    container = ProviderContainer.test(
+    _repository = MockFoldersRepository();
+    _saved = StreamController<List<Folder>>.broadcast();
+    addTearDown(_saved.close);
+    when(_repository.watchFolders()).thenAnswer((_) => _saved.stream);
+    _container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
-        foldersRepositoryProvider.overrideWithValue(repository),
+        foldersRepositoryProvider.overrideWithValue(_repository),
         roomListEntriesProvider.overrideWithValue(const [
           RoomListEntry(id: '!tagged', folders: ['Work']),
           RoomListEntry(id: '!other'),
         ]),
       ],
     );
-    container.listen(foldersControllerProvider, (_, _) {});
-    container.listen(roomListFoldersProvider, (_, _) {});
+    _container.listen(foldersControllerProvider, (_, _) {});
+    _container.listen(roomListFoldersProvider, (_, _) {});
     await pumpEventQueue();
-    saved.add(const [work, spaces, unread, ...others]);
-    await pumpEventQueue();
+    await _emit(const [_work, _spaces, _unread, ..._others]);
   });
 
-  FoldersController controller() =>
-      container.read(foldersControllerProvider.notifier);
+  _foldersControllerTests();
+  _foldersControllerTagOnlyTests();
+  _foldersControllerSavesTests();
+  _foldersControllerOverlapTests();
+  _foldersControllerAccountTests();
+  _foldersControllerReorderTests();
+  _saveUserFolderTests();
+  _saveUserFolderReservedTests();
+  _saveUserFolderRenameTests();
+  _saveBuiltinTests();
+}
 
-  List<Folder> shown() => container.read(roomListFoldersProvider);
+const _work = Folder.user('Work');
+const _spaces = Folder.builtin(BuiltinFolder.spaces);
+const _unread = Folder.builtin(BuiltinFolder.unread);
+const _others = [
+  Folder.builtin(BuiltinFolder.broadcasts, hidden: true),
+  Folder.builtin(BuiltinFolder.directs, hidden: true),
+  Folder.builtin(BuiltinFolder.favourites, hidden: true),
+];
+late MockFoldersRepository _repository;
+late StreamController<List<Folder>> _saved;
+late ProviderContainer _container;
 
+FoldersController _controller() =>
+    _container.read(foldersControllerProvider.notifier);
+
+List<Folder> _shown() => _container.read(roomListFoldersProvider);
+
+void _failSaves() {
+  when(
+    _repository.saveFolders(any, changes: anyNamed('changes')),
+  ).thenThrow(const FolderSaveFailedException());
+}
+
+Future<void> _expectSaveFails(Future<void> save) =>
+    expectLater(save, throwsA(isA<FolderSaveFailedException>()));
+
+Future<void> _emit(List<Folder> folders) async {
+  _saved.add(folders);
+  await pumpEventQueue();
+}
+
+void _verifySavedOnce(List<Folder> folders) {
+  verify(
+    _repository.saveFolders(folders, changes: anyNamed('changes')),
+  ).called(1);
+}
+
+Future<void> _save(String name, {UserFolder? previous}) =>
+    _controller().saveUserFolder(
+      edited: UserFolder(name),
+      previous: previous,
+      picked: const {},
+      chats: const [],
+      reservedNames: const {'Spaces'},
+    );
+
+void _foldersControllerTests() {
   group('FoldersController', () {
     test('whenAccountDataIsRead_isLoaded', () {
-      expect(container.read(foldersControllerProvider).isLoaded, isTrue);
-      expect(shown(), [work, spaces, unread]);
+      expect(_container.read(foldersControllerProvider).isLoaded, isTrue);
+      expect(_shown(), [_work, _spaces, _unread]);
     });
 
     test('remove_whenUserFolder_takesItsTagOffAndSavesTheRest', () async {
-      await controller().remove(work);
+      await _controller().remove(_work);
 
       verify(
-        repository.saveFolders(
-          const [spaces, unread, ...others],
+        _repository.saveFolders(
+          const [_spaces, _unread, ..._others],
           changes: const [
             FolderTagChange(roomId: '!tagged', folderName: 'Work', isIn: false),
           ],
@@ -80,15 +121,15 @@ void main() {
     });
 
     test('remove_whenTagStaysUntilTheSyncEchoes_dropsTheNameAtOnce', () async {
-      await controller().remove(work);
+      await _controller().remove(_work);
 
-      expect(shown(), [spaces, unread]);
+      expect(_shown(), [_spaces, _unread]);
 
-      await controller().remove(spaces);
+      await _controller().remove(_spaces);
 
       final lastSaved =
           verify(
-                repository.saveFolders(
+                _repository.saveFolders(
                   captureAny,
                   changes: anyNamed('changes'),
                 ),
@@ -98,35 +139,31 @@ void main() {
     });
 
     test('remove_whenSaveFails_bringsTheNameBack', () async {
-      when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
-      ).thenThrow(const FolderSaveFailedException());
+      _failSaves();
 
-      await expectLater(
-        controller().remove(work),
-        throwsA(isA<FolderSaveFailedException>()),
-      );
+      await _expectSaveFails(_controller().remove(_work));
 
-      expect(shown(), [work, spaces, unread]);
+      expect(_shown(), [_work, _spaces, _unread]);
     });
 
     test('remove_whenListEchoesBeforeTheTags_keepsTheNameAway', () async {
-      await controller().remove(work);
+      await _controller().remove(_work);
 
-      saved.add(const [spaces, unread, ...others]);
-      await pumpEventQueue();
+      await _emit(const [_spaces, _unread, ..._others]);
 
-      expect(shown(), [spaces, unread]);
+      expect(_shown(), [_spaces, _unread]);
     });
+  });
+}
 
+void _foldersControllerTagOnlyTests() {
+  group('FoldersController', () {
     test('remove_whenTagOnlyFolderAndSaveFails_bringsTheNameBack', () async {
-      when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
-      ).thenThrow(const FolderSaveFailedException());
+      _failSaves();
       final tagOnly = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
-          foldersRepositoryProvider.overrideWithValue(repository),
+          foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWithValue(const [
             RoomListEntry(id: '!z', folders: ['Zed']),
           ]),
@@ -135,14 +172,12 @@ void main() {
       tagOnly.listen(foldersControllerProvider, (_, _) {});
       tagOnly.listen(roomListFoldersProvider, (_, _) {});
       await pumpEventQueue();
-      saved.add(const [spaces, unread, ...others]);
-      await pumpEventQueue();
+      await _emit(const [_spaces, _unread, ..._others]);
 
-      await expectLater(
+      await _expectSaveFails(
         tagOnly
             .read(foldersControllerProvider.notifier)
             .remove(const Folder.user('Zed')),
-        throwsA(isA<FolderSaveFailedException>()),
       );
 
       expect(
@@ -160,17 +195,16 @@ void main() {
       final live = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
-          foldersRepositoryProvider.overrideWithValue(repository),
+          foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWith((ref) => ref.watch(entries)),
         ],
       );
       live.listen(foldersControllerProvider, (_, _) {});
       live.listen(roomListFoldersProvider, (_, _) {});
       await pumpEventQueue();
-      saved.add(const [work, spaces, unread, ...others]);
-      await pumpEventQueue();
+      await _emit(const [_work, _spaces, _unread, ..._others]);
 
-      await live.read(foldersControllerProvider.notifier).remove(work);
+      await live.read(foldersControllerProvider.notifier).remove(_work);
       live.read(entries.notifier).state = const [RoomListEntry(id: '!tagged')];
       await pumpEventQueue();
       live.read(entries.notifier).state = const [
@@ -178,14 +212,18 @@ void main() {
       ];
       await pumpEventQueue();
 
-      expect(live.read(roomListFoldersProvider), contains(work));
+      expect(live.read(roomListFoldersProvider), contains(_work));
     });
+  });
+}
 
+void _foldersControllerSavesTests() {
+  group('FoldersController', () {
     test('whenTwoFoldersAreKnownByTagsAlone_showsBoth', () async {
       final tagged = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
-          foldersRepositoryProvider.overrideWithValue(repository),
+          foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWithValue(const [
             RoomListEntry(id: '!a', folders: ['Home']),
             RoomListEntry(id: '!b', folders: ['Work']),
@@ -201,30 +239,28 @@ void main() {
     });
 
     test('whenTwoSavesFail_goesBackToWhatWasLastConfirmed', () async {
-      when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
-      ).thenThrow(const FolderSaveFailedException());
+      _failSaves();
 
-      final first = controller().reorder(0, 2);
-      final second = controller().reorder(0, 1);
+      final first = _controller().reorder(0, 2);
+      final second = _controller().reorder(0, 1);
       await expectLater(first, throwsA(isA<FolderSaveFailedException>()));
       await expectLater(second, throwsA(isA<FolderSaveFailedException>()));
 
-      expect(shown(), [work, spaces, unread]);
+      expect(_shown(), [_work, _spaces, _unread]);
     });
 
     test('whenTwoSavesOverlap_sendsThemOneAtATime', () async {
       final firstSave = Completer<void>();
       var calls = 0;
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) {
         calls++;
         return calls == 1 ? firstSave.future : Future.value();
       });
 
-      final first = controller().reorder(0, 2);
-      final second = controller().reorder(0, 1);
+      final first = _controller().reorder(0, 2);
+      final second = _controller().reorder(0, 1);
       await pumpEventQueue();
       expect(calls, 1);
 
@@ -233,35 +269,38 @@ void main() {
 
       expect(calls, 2);
     });
+  });
+}
 
+void _foldersControllerOverlapTests() {
+  group('FoldersController', () {
     test('whenFirstSaveFailsAndSecondWorks_keepsWhatTheServerHolds', () async {
       var calls = 0;
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) async {
         if (++calls == 1) throw const FolderSaveFailedException();
       });
 
-      final first = controller().reorder(0, 2);
-      final second = controller().reorder(0, 1);
+      final first = _controller().reorder(0, 2);
+      final second = _controller().reorder(0, 1);
       await expectLater(first, throwsA(isA<FolderSaveFailedException>()));
       await second;
 
-      expect(shown(), [unread, spaces, work]);
+      expect(_shown(), [_unread, _spaces, _work]);
     });
 
     test('whenAnEchoComesDuringASave_keepsWhatTheUserSees', () async {
       final pending = Completer<void>();
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) => pending.future);
 
-      final save = controller().reorder(0, 2);
+      final save = _controller().reorder(0, 2);
       await pumpEventQueue();
-      saved.add(const [work, spaces, unread, ...others]);
-      await pumpEventQueue();
+      await _emit(const [_work, _spaces, _unread, ..._others]);
 
-      expect(shown(), [spaces, unread, work]);
+      expect(_shown(), [_spaces, _unread, _work]);
       pending.complete();
       await save;
     });
@@ -269,83 +308,78 @@ void main() {
     test('whenAccountChangesDuringASave_ignoresItsOutcome', () async {
       final pending = Completer<void>();
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) => pending.future);
       final client = MockClient();
       when(client.userID).thenReturn('@other:own.org');
 
-      final save = controller().reorder(0, 2);
+      final save = _controller().reorder(0, 2);
       await pumpEventQueue();
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
+      _container.read(activeMatrixClientProvider.notifier).setClient(client);
       await pumpEventQueue();
       pending.completeError(const FolderSaveFailedException());
       await expectLater(save, throwsA(isA<FolderSaveFailedException>()));
 
-      expect(container.read(foldersControllerProvider).saved, isEmpty);
+      expect(_container.read(foldersControllerProvider).saved, isEmpty);
 
       // The failure of the old account must not leave the counter below zero:
       // the echo of the new account still shows.
-      saved.add(const [spaces, unread, ...others]);
-      await pumpEventQueue();
-      expect(container.read(foldersControllerProvider).saved, const [
-        spaces,
-        unread,
-        ...others,
+      await _emit(const [_spaces, _unread, ..._others]);
+      expect(_container.read(foldersControllerProvider).saved, const [
+        _spaces,
+        _unread,
+        ..._others,
       ]);
     });
+  });
+}
 
+void _foldersControllerAccountTests() {
+  group('FoldersController', () {
     test('whenOldAccountSaveFailsWhileNewOneSaves_keepsTheNewList', () async {
       final oldSave = Completer<void>();
       final newSave = Completer<void>();
       var calls = 0;
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) => ++calls == 1 ? oldSave.future : newSave.future);
       final client = MockClient();
       when(client.userID).thenReturn('@other:own.org');
 
-      final first = controller().reorder(0, 2);
+      final first = _controller().reorder(0, 2);
       await pumpEventQueue();
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
+      _container.read(activeMatrixClientProvider.notifier).setClient(client);
       await pumpEventQueue();
-      saved.add(const [spaces, unread, ...others]);
-      await pumpEventQueue();
-      unawaited(controller().reorder(0, 1));
+      await _emit(const [_spaces, _unread, ..._others]);
+      unawaited(_controller().reorder(0, 1));
       await pumpEventQueue();
       oldSave.completeError(const FolderSaveFailedException());
       await expectLater(first, throwsA(isA<FolderSaveFailedException>()));
 
-      expect(shown(), [unread, spaces, work]);
+      expect(_shown(), [_unread, _spaces, _work]);
       newSave.complete();
     });
 
     test('remove_whenFolderChangedElsewhere_stillRemovesIt', () async {
-      saved.add(const [
+      await _emit(const [
         Folder.user('Work', emoji: '💼'),
-        spaces,
-        unread,
-        ...others,
+        _spaces,
+        _unread,
+        ..._others,
       ]);
-      await pumpEventQueue();
 
-      await controller().remove(work);
+      await _controller().remove(_work);
 
-      verify(
-        repository.saveFolders(const [
-          spaces,
-          unread,
-          ...others,
-        ], changes: anyNamed('changes')),
-      ).called(1);
+      _verifySavedOnce(const [_spaces, _unread, ..._others]);
     });
 
     test('remove_whenBuiltin_touchesNoTagAndHidesIt', () async {
-      await controller().remove(spaces);
+      await _controller().remove(_spaces);
 
       verify(
-        repository.saveFolders(const [
-          work,
-          unread,
+        _repository.saveFolders(const [
+          _work,
+          _unread,
           Folder.builtin(BuiltinFolder.broadcasts, hidden: true),
           Folder.builtin(BuiltinFolder.directs, hidden: true),
           Folder.builtin(BuiltinFolder.spaces, hidden: true),
@@ -353,103 +387,104 @@ void main() {
         ], changes: const []),
       ).called(1);
     });
+  });
+}
 
+void _foldersControllerReorderTests() {
+  group('FoldersController', () {
     test('reorder_always_showsAtOnceAndNextSaveStartsFromIt', () async {
       final firstSave = Completer<void>();
       when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
+        _repository.saveFolders(any, changes: anyNamed('changes')),
       ).thenAnswer((_) => firstSave.future);
 
-      unawaited(controller().reorder(0, 2));
+      unawaited(_controller().reorder(0, 2));
       await pumpEventQueue();
-      expect(shown(), [spaces, unread, work]);
+      expect(_shown(), [_spaces, _unread, _work]);
 
-      unawaited(controller().reorder(0, 1));
+      unawaited(_controller().reorder(0, 1));
       await pumpEventQueue();
-      expect(shown(), [unread, spaces, work]);
+      expect(_shown(), [_unread, _spaces, _work]);
       firstSave.complete();
     });
 
     test('whenSaveFails_putsTheListBackAndThrows', () async {
-      when(
-        repository.saveFolders(any, changes: anyNamed('changes')),
-      ).thenThrow(const FolderSaveFailedException());
+      _failSaves();
 
-      await expectLater(
-        controller().reorder(0, 2),
-        throwsA(isA<FolderSaveFailedException>()),
-      );
+      await _expectSaveFails(_controller().reorder(0, 2));
 
-      expect(shown(), [work, spaces, unread]);
+      expect(_shown(), [_work, _spaces, _unread]);
     });
 
     test('addBuiltin_always_bringsItBackLast', () async {
-      await controller().addBuiltin(BuiltinFolder.directs);
+      await _controller().addBuiltin(BuiltinFolder.directs);
 
-      expect(shown().last, const Folder.builtin(BuiltinFolder.directs));
+      expect(_shown().last, const Folder.builtin(BuiltinFolder.directs));
     });
+  });
+}
 
+void _saveUserFolderTests() {
+  group('FoldersController', () {
     group('saveUserFolder', () {
-      Future<void> save(String name, {UserFolder? previous}) =>
-          controller().saveUserFolder(
-            edited: UserFolder(name),
-            previous: previous,
-            picked: const {},
-            chats: const [],
-            reservedNames: const {'Spaces'},
-          );
-
       test('whenNameIsBlank_throws', () async {
         await expectLater(
-          save('  '),
+          _save('  '),
           throwsA(isA<FolderNameRequiredException>()),
         );
       });
 
       test('whenAnotherFolderHasIt_throwsWhateverTheCase', () async {
         await expectLater(
-          save('WORK'),
+          _save('WORK'),
           throwsA(isA<FolderNameTakenException>()),
         );
       });
 
       test('whenItIsTheNameOfABuiltin_throws', () async {
         await expectLater(
-          save('spaces'),
+          _save('spaces'),
           throwsA(isA<FolderNameTakenException>()),
         );
         await expectLater(
-          save('favourites'),
+          _save('favourites'),
           throwsA(isA<FolderNameTakenException>()),
         );
       });
 
       test('whenFolderChangedElsewhere_stillReplacesIt', () async {
-        saved.add(const [
+        await _emit(const [
           Folder.user('Work', emoji: '💼'),
-          spaces,
-          unread,
-          ...others,
+          _spaces,
+          _unread,
+          ..._others,
         ]);
-        await pumpEventQueue();
 
-        await save('Job', previous: work as UserFolder);
+        await _save('Job', previous: _work as UserFolder);
 
-        verify(
-          repository.saveFolders(const [
-            Folder.user('Job'),
-            spaces,
-            unread,
-            ...others,
-          ], changes: anyNamed('changes')),
-        ).called(1);
+        _verifySavedOnce(const [
+          Folder.user('Job'),
+          _spaces,
+          _unread,
+          ..._others,
+        ]);
       });
+    });
+  });
+}
 
+void _saveUserFolderReservedTests() {
+  group('FoldersController', () {
+    group('saveUserFolder', () {
       test('whenExistingFolderKeepsAReservedName_saves', () async {
-        saved.add(const [Folder.user('spaces'), spaces, unread, ...others]);
-        await pumpEventQueue();
+        await _emit(const [
+          Folder.user('spaces'),
+          _spaces,
+          _unread,
+          ..._others,
+        ]);
 
-        await controller().saveUserFolder(
+        await _controller().saveUserFolder(
           edited: const UserFolder('spaces', emoji: '😀'),
           previous: const UserFolder('spaces'),
           picked: const {},
@@ -457,15 +492,14 @@ void main() {
           reservedNames: const {},
         );
 
-        expect(shown().first, const Folder.user('spaces', emoji: '😀'));
+        expect(_shown().first, const Folder.user('spaces', emoji: '😀'));
       });
 
       test('whenABuiltinTakesANameOnlyTheTagsKnow_throws', () async {
-        saved.add(const [spaces, unread, ...others]);
-        await pumpEventQueue();
+        await _emit(const [_spaces, _unread, ..._others]);
 
         await expectLater(
-          controller().saveBuiltin(
+          _controller().saveBuiltin(
             edited: const BuiltinFolderEntry(
               BuiltinFolder.unread,
               name: 'Work',
@@ -475,12 +509,18 @@ void main() {
           throwsA(isA<FolderNameTakenException>()),
         );
       });
+    });
+  });
+}
 
+void _saveUserFolderRenameTests() {
+  group('FoldersController', () {
+    group('saveUserFolder', () {
       test('whenRenameFailedHalfway_retryDoesNotThrow', () async {
         final halfway = ProviderContainer.test(
           retry: (_, _) => null,
           overrides: [
-            foldersRepositoryProvider.overrideWithValue(repository),
+            foldersRepositoryProvider.overrideWithValue(_repository),
             roomListEntriesProvider.overrideWithValue(const [
               RoomListEntry(id: '!a', folders: ['Work', 'Job']),
             ]),
@@ -488,14 +528,13 @@ void main() {
         );
         halfway.listen(foldersControllerProvider, (_, _) {});
         await pumpEventQueue();
-        saved.add(const [work, spaces, unread, ...others]);
-        await pumpEventQueue();
+        await _emit(const [_work, _spaces, _unread, ..._others]);
 
         await halfway
             .read(foldersControllerProvider.notifier)
             .saveUserFolder(
               edited: const UserFolder('Job'),
-              previous: work as UserFolder,
+              previous: _work as UserFolder,
               picked: const {'!a'},
               chats: const [
                 RoomListEntry(id: '!a', folders: ['Work', 'Job']),
@@ -503,42 +542,44 @@ void main() {
               reservedNames: const {},
             );
 
-        verify(
-          repository.saveFolders(const [
-            Folder.user('Job'),
-            spaces,
-            unread,
-            ...others,
-          ], changes: anyNamed('changes')),
-        ).called(1);
+        _verifySavedOnce(const [
+          Folder.user('Job'),
+          _spaces,
+          _unread,
+          ..._others,
+        ]);
       });
 
       test('whenItKeepsItsOwnName_saves', () async {
-        await save('Work', previous: work as UserFolder);
+        await _save('Work', previous: _work as UserFolder);
 
         verify(
-          repository.saveFolders(any, changes: anyNamed('changes')),
+          _repository.saveFolders(any, changes: anyNamed('changes')),
         ).called(1);
       });
 
       test('whenSelectedFolderIsRenamed_followsItsNewName', () async {
-        container
+        _container
             .read(roomListFilterControllerProvider.notifier)
             .select(const RoomListFilter.folder('Work'));
 
-        await save('Job', previous: work as UserFolder);
+        await _save('Job', previous: _work as UserFolder);
 
         expect(
-          container.read(roomListFilterControllerProvider),
+          _container.read(roomListFilterControllerProvider),
           const RoomListFilter.folder('Job'),
         );
       });
     });
+  });
+}
 
+void _saveBuiltinTests() {
+  group('FoldersController', () {
     group('saveBuiltin', () {
       test('whenNamedAfterAnotherFilter_throws', () async {
         await expectLater(
-          controller().saveBuiltin(
+          _controller().saveBuiltin(
             edited: const BuiltinFolderEntry(BuiltinFolder.spaces, name: 'New'),
             reservedNames: const {'new'},
           ),
@@ -549,12 +590,12 @@ void main() {
       test('whenRenamed_keepsItsPlace', () async {
         const renamed = Folder.builtin(BuiltinFolder.spaces, name: 'Mine');
 
-        await controller().saveBuiltin(
+        await _controller().saveBuiltin(
           edited: renamed as BuiltinFolderEntry,
           reservedNames: const {},
         );
 
-        expect(shown(), [work, renamed, unread]);
+        expect(_shown(), [_work, renamed, _unread]);
       });
     });
   });

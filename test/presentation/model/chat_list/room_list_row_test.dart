@@ -20,11 +20,21 @@ RoomListEntry _room(
   String id, {
   bool isFavourite = false,
   int unread = 0,
-  int mentions = 0,
   List<String> parents = const [],
 }) => RoomListEntry(
   id: id,
   isFavourite: isFavourite,
+  unreadCount: unread,
+  parentSpaceIds: parents,
+);
+
+RoomListEntry _mentioned(
+  String id, {
+  required int mentions,
+  int unread = 0,
+  List<String> parents = const [],
+}) => RoomListEntry(
+  id: id,
   unreadCount: unread,
   mentionCount: mentions,
   parentSpaceIds: parents,
@@ -44,6 +54,12 @@ String _shape(List<RoomListRow> rows) => rows
     .join(' ');
 
 void main() {
+  _buildRoomListRowsTests();
+  _buildRoomListRowsPinnedTests();
+  _buildRoomListRowsJoinableTests();
+}
+
+void _buildRoomListRowsTests() {
   group('buildRoomListRows', () {
     test('whenAChannelIsRecent_placesItsSpaceThere', () {
       final rows = buildRoomListRows([
@@ -60,7 +76,7 @@ void main() {
         [
           _space('!s', unread: 1),
           _space('!sub', parents: ['!s']),
-          _room('!c', parents: ['!sub'], unread: 2, mentions: 1),
+          _mentioned('!c', parents: ['!sub'], unread: 2, mentions: 1),
           _room('!d', parents: ['!s'], unread: 4),
         ],
         foldedSpaceIds: const {'!s'},
@@ -102,7 +118,11 @@ void main() {
 
       expect(_shape(rows), '0:!s 1:!sub');
     });
+  });
+}
 
+void _buildRoomListRowsPinnedTests() {
+  group('buildRoomListRows', () {
     test('whenChannelIsPinned_showsOnTopAndInItsSpace', () {
       final rows = buildRoomListRows([
         _space('!s'),
@@ -142,7 +162,11 @@ void main() {
       expect(_shape(rows), '0:!c 0:!s');
       expect((rows.last as RoomListSpaceRow).unreadCount, 1);
     });
+  });
+}
 
+void _buildRoomListRowsJoinableTests() {
+  group('buildRoomListRows', () {
     group('whenASubSpaceIsJoinable', () {
       const subspace = SpaceChannel(roomId: '!sub', name: 'Sub');
       const joinable = {

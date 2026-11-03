@@ -11,29 +11,35 @@ import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart'
 import '../../../utils/pump_localized.dart';
 
 void main() {
-  late ProviderContainer container;
+  _roomListFilterBarTests();
+  _roomListFilterBarOverflowTests();
+  _roomListFilterBarScrollTests();
+}
 
-  Future<void> pump(
-    WidgetTester tester,
-    List<Folder> folders, {
-    bool enabled = true,
-  }) async {
-    container = ProviderContainer.test(
-      retry: (_, _) => null,
-      overrides: [roomListFoldersProvider.overrideWithValue(folders)],
-    );
-    await pumpLocalized(
-      tester,
-      container,
-      Scaffold(body: RoomListFilterBar(enabled: enabled)),
-    );
-  }
+late ProviderContainer _container;
 
-  RoomListFilter selected() => container.read(roomListFilterControllerProvider);
+Future<void> _pump(
+  WidgetTester tester,
+  List<Folder> folders, {
+  bool enabled = true,
+}) async {
+  _container = ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: [roomListFoldersProvider.overrideWithValue(folders)],
+  );
+  await pumpLocalized(
+    tester,
+    _container,
+    Scaffold(body: RoomListFilterBar(enabled: enabled)),
+  );
+}
 
+RoomListFilter _selected() => _container.read(roomListFilterControllerProvider);
+
+void _roomListFilterBarTests() {
   group('RoomListFilterBar', () {
     testWidgets('always_showsAllThenTheFoldersByName', (tester) async {
-      await pump(tester, const [
+      await _pump(tester, const [
         Folder.builtin(BuiltinFolder.spaces),
         Folder.builtin(BuiltinFolder.unread, name: 'New'),
         Folder.user('Work', emoji: '💼'),
@@ -49,28 +55,28 @@ void main() {
     testWidgets('whenChipIsTapped_selectsItsViewAndShowsItsMenu', (
       tester,
     ) async {
-      await pump(tester, const [Folder.builtin(BuiltinFolder.spaces)]);
+      await _pump(tester, const [Folder.builtin(BuiltinFolder.spaces)]);
       expect(find.byIcon(Icons.more_vert), findsNothing);
 
       await tester.tap(find.text('Spaces'));
       await tester.pump();
 
-      expect(selected(), const RoomListFilter.builtin(BuiltinFolder.spaces));
+      expect(_selected(), const RoomListFilter.builtin(BuiltinFolder.spaces));
       expect(find.byIcon(Icons.more_vert), findsOneWidget);
     });
 
     testWidgets('whenAllIsSelected_hasNoMenu', (tester) async {
-      await pump(tester, const []);
+      await _pump(tester, const []);
 
       await tester.tap(find.text('All'));
       await tester.pump();
 
-      expect(selected(), const RoomListFilter.all());
+      expect(_selected(), const RoomListFilter.all());
       expect(find.byIcon(Icons.more_vert), findsNothing);
     });
 
     testWidgets('whenMenuIsOpened_offersToEditAndDelete', (tester) async {
-      await pump(tester, const [Folder.user('Work')]);
+      await _pump(tester, const [Folder.user('Work')]);
       await tester.tap(find.text('Work'));
       await tester.pump();
 
@@ -82,18 +88,22 @@ void main() {
     });
 
     testWidgets('whenNothingOverflows_hasNoArrow', (tester) async {
-      await pump(tester, const [Folder.user('Work')]);
+      await _pump(tester, const [Folder.user('Work')]);
       await tester.pump();
 
       expect(find.byTooltip('Previous'), findsNothing);
       expect(find.byTooltip('Next'), findsNothing);
     });
+  });
+}
 
+void _roomListFilterBarOverflowTests() {
+  group('RoomListFilterBar', () {
     testWidgets('whenTheRowOverflows_showsLabelledArrows', (tester) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await pump(tester, [
+      await _pump(tester, [
         for (var i = 0; i < 8; i++) Folder.user('Folder number $i'),
       ]);
       await tester.pump();
@@ -107,12 +117,16 @@ void main() {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await pump(tester, [Folder.user('W' * 60)]);
+      await _pump(tester, [Folder.user('W' * 60)]);
 
       final chip = find.byType(FilterChip);
       expect(tester.getSize(chip.last).width, lessThanOrEqualTo(240));
     });
+  });
+}
 
+void _roomListFilterBarScrollTests() {
+  group('RoomListFilterBar', () {
     testWidgets('whenTheSelectedChipEndsOffScreen_scrollsItIntoView', (
       tester,
     ) async {
@@ -120,7 +134,7 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       final longName = 'L' * 60;
-      await pump(tester, [const Folder.user('A'), Folder.user(longName)]);
+      await _pump(tester, [const Folder.user('A'), Folder.user(longName)]);
       await tester.pump();
 
       // The chip starts in view and its menu button is far out of it.
@@ -136,16 +150,16 @@ void main() {
     });
 
     testWidgets('whenDisabled_ignoresATap', (tester) async {
-      await pump(tester, const [Folder.user('Work')], enabled: false);
+      await _pump(tester, const [Folder.user('Work')], enabled: false);
 
       await tester.tap(find.text('Work'));
       await tester.pump();
 
-      expect(selected(), const RoomListFilter.all());
+      expect(_selected(), const RoomListFilter.all());
     });
 
     testWidgets('whenRightClicked_opensTheMenuAtThePointer', (tester) async {
-      await pump(tester, const [Folder.user('Work')]);
+      await _pump(tester, const [Folder.user('Work')]);
 
       await tester.tapAt(
         tester.getCenter(find.text('Work')),
