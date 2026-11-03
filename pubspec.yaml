@@ -216,7 +216,7 @@ dev_dependencies:
   flutter_gen_runner: ^5.15.0
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^3.0.2
-  flutter_native_splash: ^2.0.3+1
+  flutter_native_splash: ^2.4.5
   flutter_test:
     sdk: flutter
   freezed: ^4.0.1
@@ -304,6 +304,11 @@ dependency_overrides:
   # Required by freezed 4 while flutter_emoji_mart still pins
   # freezed_annotation ^2.4.1.
   freezed_annotation: 3.1.0
+  # flutter_native_splash >=2.4.5 is the first release whose iOS Package.swift
+  # resolves under Swift Package Manager. It needs html ^0.15.5, which needs
+  # csslib ^1.0.0, but flutter_matrix_html pins csslib ^0.17.1. Keep html on the
+  # version already locked until that fork moves to csslib 1.x.
+  html: 0.15.4
   http: 1.6.0
   #  # fake secure storage plugin for Windows
   #  # See: https://gitlab.com/gitlab-com/gl-infra/reliability/-/issues/15161
