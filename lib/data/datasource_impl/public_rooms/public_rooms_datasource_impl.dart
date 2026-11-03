@@ -55,6 +55,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       count += rooms.length;
       yield rooms;
       final next = page.nextBatch;
+      // Defensive: the spec does not cover a server repeating the token.
       if (next != null && next == since) {
         Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: token repeated');
         return;
