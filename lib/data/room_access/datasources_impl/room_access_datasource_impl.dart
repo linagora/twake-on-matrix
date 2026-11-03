@@ -96,14 +96,17 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
       await change();
     } on RoomAccessException {
       rethrow;
-    } catch (e) {
-      throw _isForbidden(e)
-          ? RoomAccessForbiddenException(cause: e)
-          : RoomAccessSaveFailedException(cause: e);
+    } on Exception catch (e, s) {
+      if (_isForbidden(e)) {
+        Logs().w('RoomAccessDatasourceImpl::_guard()', e, s);
+        throw RoomAccessForbiddenException(cause: e);
+      }
+      Logs().e('RoomAccessDatasourceImpl::_guard()', e, s);
+      throw RoomAccessSaveFailedException(cause: e);
     }
   }
 
-  // Synapse refuses a publication with M_UNKNOWN and a 403 too.
+  // Synapse, not the spec: a refused publication may be M_UNKNOWN with a 403.
   bool _isForbidden(Object error) =>
       error is MatrixException &&
       (error.error == MatrixError.M_FORBIDDEN ||

@@ -211,4 +211,15 @@ void main() {
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessSaveFailedException>()));
   });
+
+  test('setJoinRule_programmingError_isNotWrapped', () async {
+    // Arrange
+    when(room.setJoinRules(any)).thenThrow(StateError('bug'));
+
+    // Act
+    final result = datasource.setJoinRule(roomId, JoinRuleChoice.invite);
+
+    // Assert
+    await expectLater(result, throwsA(isA<StateError>()));
+  });
 }
