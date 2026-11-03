@@ -8,7 +8,8 @@ const String folderTagPrefix = 'u.';
 final RegExp _botId = RegExp(r'^@(bot_|hermes_)');
 
 /// A room's spaces: every joined space listing it, then the joined spaces it
-/// names, so a new room shows under its space before the space lists it.
+/// names with the right to, so a new room shows under its space before the
+/// space lists it.
 List<RoomListEntry> roomListEntriesOf(
   List<Room> rooms, {
   required Map<String, List<String>> directChats,
@@ -23,9 +24,9 @@ List<RoomListEntry> roomListEntriesOf(
   }
   directByRoom.removeWhere((_, userId) => !userId.isValidMatrixIdStrict());
   final spaces = rooms.where((room) => room.isSpace).toList();
-  final joinedSpaceIds = {
+  final joinedSpaces = {
     for (final space in spaces)
-      if (space.membership == Membership.join) space.id,
+      if (space.membership == Membership.join) space.id: space,
   };
   final childIdsOf = {
     for (final space in spaces)
@@ -36,7 +37,7 @@ List<RoomListEntry> roomListEntriesOf(
   };
   final listedBy = <String, List<String>>{};
   // By id, so the first space does not move with the order of `client.rooms`.
-  for (final spaceId in joinedSpaceIds.toList()..sort()) {
+  for (final spaceId in joinedSpaces.keys.toList()..sort()) {
     for (final childId in childIdsOf[spaceId]!) {
       (listedBy[childId] ??= []).add(spaceId);
     }
@@ -49,14 +50,24 @@ List<RoomListEntry> roomListEntriesOf(
         childIds: childIdsOf[room.id] ?? const [],
         parentSpaceIds: {
           ...?listedBy[room.id],
-          ...room.spaceParents
-              .map((parent) => parent.roomId)
-              .where(joinedSpaceIds.contains)
-              .whereType<String>(),
+          ..._parentsNamedBy(room, joinedSpaces),
         }.toList(),
       ),
   ];
 }
+
+/// The spec keeps a parent only if its sender may list children in that space.
+Iterable<String> _parentsNamedBy(Room room, Map<String, Room> joinedSpaces) =>
+    room.spaceParents.map((parent) => parent.roomId).whereType<String>().where((
+      parentId,
+    ) {
+      final space = joinedSpaces[parentId];
+      final sender = room.getState(EventTypes.SpaceParent, parentId)?.senderId;
+      return space != null &&
+          sender != null &&
+          space.powerForChangingStateEvent(EventTypes.SpaceChild) <=
+              space.getPowerLevelByUserId(sender);
+    });
 
 RoomListEntry _entryOf(
   Room room, {

@@ -225,10 +225,25 @@ void main() {
       verifyNever(client.waitForRoomInSync(any, join: anyNamed('join')));
     });
 
-    test('whenListingInTheSpaceFailsOtherwise_removesTheRoom', () async {
+    test('whenListingNeverGotAnAnswer_keepsTheRoom', () async {
       when(
         client.setRoomStateWithKey(any, any, any, any),
-      ).thenThrow(Exception('down'));
+      ).thenThrow(TimeoutException('no answer'));
+
+      await expectLater(
+        datasource.createSpace(
+          const NewSpace(name: 'Sub', parentSpaceId: '!space:other.org'),
+        ),
+        throwsA(isA<SpaceCreationFailedException>()),
+      );
+      verifyNever(client.leaveRoom(newRoomId));
+      verifyNever(client.forgetRoom(newRoomId));
+    });
+
+    test('whenTheServerAnswersAnotherError_removesTheRoom', () async {
+      when(client.setRoomStateWithKey(any, any, any, any)).thenThrow(
+        MatrixException.fromJson({'errcode': 'M_UNKNOWN', 'error': 'down'}),
+      );
 
       await expectLater(
         datasource.createSpace(

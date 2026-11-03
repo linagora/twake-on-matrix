@@ -71,5 +71,14 @@ class CreateSpaceScenario extends BaseTestScenario {
         .takeWhile((row) => row.depth > rows[spaceAt].depth)
         .map((row) => row.room.name);
     expect(children, containsAll(['General', groupName]));
+
+    // Spaces show in All: leave nothing behind on the shared account.
+    final created = rows
+        .skip(spaceAt)
+        .take(children.length + 1)
+        .map((row) => row.room);
+    for (final room in created.toList().reversed) {
+      await room.leave();
+    }
   }
 }

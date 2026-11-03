@@ -20,6 +20,8 @@ StrippedStateEvent _relation(String type, String key) => StrippedStateEvent(
   },
 );
 
+const String _parentSender = '@sender:b.org';
+
 MockRoom _room(
   String id, {
   bool isSpace = false,
@@ -40,6 +42,23 @@ MockRoom _room(
     for (final parent in parents)
       SpaceParent.fromState(_relation(EventTypes.SpaceParent, parent)),
   ]);
+  for (final parent in parents) {
+    when(room.getState(EventTypes.SpaceParent, parent)).thenReturn(
+      Event(
+        type: EventTypes.SpaceParent,
+        stateKey: parent,
+        senderId: _parentSender,
+        eventId: '\$parent',
+        originServerTs: DateTime(2026),
+        content: const {},
+        room: room,
+      ),
+    );
+  }
+  when(
+    room.powerForChangingStateEvent(EventTypes.SpaceChild),
+  ).thenReturn(PowerLevel(50));
+  when(room.getPowerLevelByUserId(_parentSender)).thenReturn(PowerLevel(50));
   return room;
 }
 
@@ -58,6 +77,34 @@ StrippedStateEvent _state(String type, Map<String, Object?> content) =>
 
 void main() {
   group('roomListEntriesOf', () {
+    test('whenSenderMayNotListInTheSpace_ignoresTheParentItNames', () {
+      final space = _room('!space', isSpace: true);
+      when(
+        space.getPowerLevelByUserId(_parentSender),
+      ).thenReturn(PowerLevel(49));
+
+      final entries = entriesOf([
+        space,
+        _room('!squatter', parents: ['!space']),
+      ]);
+
+      expect(entries.last.parentSpaceIds, isEmpty);
+    });
+
+    test('whenTheSpaceListsTheRoom_keepsItWhoeverNamedTheParent', () {
+      final space = _room('!space', isSpace: true, children: ['!c']);
+      when(
+        space.getPowerLevelByUserId(_parentSender),
+      ).thenReturn(PowerLevel(0));
+
+      final entries = entriesOf([
+        space,
+        _room('!c', parents: ['!space']),
+      ]);
+
+      expect(entries.last.parentSpaceIds, ['!space']);
+    });
+
     test('whenSpacesListAndAreNamed_putsThoseListingFirst', () {
       final entries = entriesOf([
         _room('!named', isSpace: true),
