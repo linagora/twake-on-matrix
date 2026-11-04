@@ -78,10 +78,13 @@ shown, as before.
 
 A homeserver that keeps public rooms on itself sets an
 [`m.room.server_acl`](https://spec.matrix.org/v1.16/client-server-api/#mroomserver_acl)
-that allows only itself on every room whose join rule is public, and opens it
+that allows only itself on a room whose join rule becomes public, and opens it
 again when the room stops being public. If a room admin changes that ACL from
-another client, the server module puts it back. Such a server announces it in
-its well-known with `app.twake.chat.public_groups.server_acl: true`.
+another client, the server module puts it back. The module acts only on rooms
+created on its own server, and only when a local member has the power level to
+send the ACL; otherwise it logs an error and the room stays public and open to
+other servers. Such a server announces it in its well-known with
+`app.twake.chat.public_groups.server_acl: true`.
 
 When it does, the client creates a public group without `m.federate`. When the
 key is false or missing, the client sets `m.federate: false` in the
