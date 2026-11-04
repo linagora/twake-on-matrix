@@ -1,0 +1,46 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'room_access.freezed.dart';
+
+enum JoinRuleChoice { invite, knock, public }
+
+class RoomAccessGuards {
+  const RoomAccessGuards({
+    required this.isEncrypted,
+    required this.hasPublicPage,
+  });
+
+  final bool isEncrypted;
+
+  final bool hasPublicPage;
+}
+
+@freezed
+abstract class RoomAccess with _$RoomAccess {
+  const RoomAccess._();
+
+  const factory RoomAccess({
+    /// Null for a rule that is none of the choices, such as `restricted`.
+    required JoinRuleChoice? joinRule,
+    required bool isListed,
+    required bool isEncrypted,
+    required bool canChange,
+
+    /// While the public web page is on, the room stays public and listed.
+    required bool hasPublicPage,
+  }) = _RoomAccess;
+
+  /// An encrypted room keeps what it already has, so it can be taken out.
+  List<JoinRuleChoice> get offeredJoinRules => hasPublicPage
+      ? const [JoinRuleChoice.public]
+      : JoinRuleChoice.values
+            .where(
+              (rule) =>
+                  rule != JoinRuleChoice.public ||
+                  !isEncrypted ||
+                  joinRule == JoinRuleChoice.public,
+            )
+            .toList();
+
+  bool get offersListing => !isEncrypted || isListed;
+}

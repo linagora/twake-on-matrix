@@ -51,7 +51,8 @@ class InvitationSelectionController
   @override
   List<String> get disabledContactIds => Matrix.of(context).client
       .getRoomById(_roomId!)!
-      .getParticipants()
+      // Someone who knocked can still be invited.
+      .getParticipants([Membership.join, Membership.invite])
       .map((participant) => participant.id)
       .toList();
 

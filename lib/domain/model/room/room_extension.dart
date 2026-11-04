@@ -160,6 +160,11 @@ extension RoomExtension on Room {
         ownPowerLevel.level;
   }
 
+  /// A room anyone can join or read is never encrypted.
+  bool get isOpenToAnyone =>
+      joinRules == JoinRules.public ||
+      historyVisibility == HistoryVisibility.worldReadable;
+
   bool get canEnableEncryption {
     final currentPowerLevelsMap = getState(EventTypes.RoomPowerLevels)?.content;
     if (currentPowerLevelsMap == null) return PowerLevel(0) <= ownPowerLevel;

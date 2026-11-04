@@ -17,12 +17,15 @@ import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/domain/usecase/verify_name_interactor.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/room_access/exceptions/room_access_exception.dart';
 import 'package:twake_chat/pages/chat_details/assign_roles/assign_roles.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_context_menu_actions.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_edit_view_style.dart';
 import 'package:twake_chat/pages/chat_details/exceptions/exceptions.dart';
 import 'package:twake_chat/pages/chat_details/removed/removed.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_controller.dart';
+import 'package:twake_chat/pages/chat_details/room_access/room_access_draft.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -38,13 +41,14 @@ import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker_grid.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:photo_manager/photo_manager.dart' as photo_manager;
 
-class ChatDetailsEdit extends StatefulWidget {
+class ChatDetailsEdit extends ConsumerStatefulWidget {
   final String roomId;
 
   const ChatDetailsEdit({super.key, required this.roomId});
@@ -53,7 +57,7 @@ class ChatDetailsEdit extends StatefulWidget {
   ChatDetailsEditController createState() => ChatDetailsEditController();
 }
 
-class ChatDetailsEditController extends State<ChatDetailsEdit>
+class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
     with
         PopupMenuWidgetMixin,
         CommonMediaPickerMixin,
@@ -88,6 +92,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   final isEditedGroupInfoNotifier = ValueNotifier<bool>(false);
   final isValidGroupNameNotifier = ValueNotifier<bool>(true);
   final isRoomEnabledEncryptionNotifier = ValueNotifier<bool>(false);
+  final roomAccessDraftNotifier = ValueNotifier(const RoomAccessDraft());
 
   Client get client => Matrix.of(context).client;
 
@@ -342,10 +347,36 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     if (groupNameFocusNode.hasFocus) groupNameFocusNode.unfocus();
     if (descriptionFocusNode.hasFocus) descriptionFocusNode.unfocus();
     TwakeDialog.showLoadingDialog(context);
+    try {
+      await _saveRoomAccess();
+    } catch (_) {
+      if (mounted) TwakeDialog.hideLoadingDialog(context);
+      rethrow;
+    }
+    if (!mounted) return;
     if (PlatformInfos.isMobile) {
       _setAvatarInStream();
     } else {
       _setAvatarInBytes();
+    }
+  }
+
+  Future<void> _saveRoomAccess() async {
+    try {
+      await ref
+          .read(roomAccessControllerProvider(widget.roomId).notifier)
+          .save(roomAccessDraftNotifier.value);
+      if (mounted) roomAccessDraftNotifier.value = const RoomAccessDraft();
+    } on RoomAccessException catch (e) {
+      if (!mounted) return;
+      final l10n = L10n.of(context)!;
+      TwakeSnackBar.show(context, switch (e) {
+        RoomAccessEncryptedException() => l10n.roomAccessEncrypted,
+        RoomAccessForbiddenException() => l10n.roomAccessForbidden,
+        RoomAccessPublicPageException() => l10n.roomAccessPublicPage,
+        RoomAccessRoomNotFoundException() ||
+        RoomAccessSaveFailedException() => l10n.oopsSomethingWentWrong,
+      });
     }
   }
 
@@ -448,29 +479,38 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
   }
 
   void enableEncryption(_) async {
-    if (room == null) return;
+    if (room == null || _blocksEncryptionNow()) return;
+    final l10n = L10n.of(context)!;
     if (room!.encrypted == true) {
       showOkAlertDialog(
         context: context,
-        title: L10n.of(context)!.sorryThatsNotPossible,
-        message: L10n.of(context)!.disableEncryptionWarning,
+        title: l10n.sorryThatsNotPossible,
+        message: l10n.disableEncryptionWarning,
       );
       return;
     }
     final consent = await showOkCancelAlertDialog(
       context: context,
-      title: L10n.of(context)!.areYouSure,
-      message: L10n.of(context)!.enableEncryptionWarning,
-      okLabel: L10n.of(context)!.yes,
-      cancelLabel: L10n.of(context)!.cancel,
+      title: l10n.areYouSure,
+      message: l10n.enableEncryptionWarning,
+      okLabel: l10n.yes,
+      cancelLabel: l10n.cancel,
     );
     if (consent != OkCancelResult.ok) return;
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => room!.enableEncryption(),
-        )
-        .then((_) => isRoomEnabledEncryptionNotifier.value = true)
-        .onError((_, __) => isRoomEnabledEncryptionNotifier.value = false);
+    // The room may have become public while the dialog was open.
+    if (!mounted || _blocksEncryptionNow()) return;
+    final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: () => room!.enableEncryption(),
+    );
+    if (!mounted) return;
+    isRoomEnabledEncryptionNotifier.value = result.error == null;
   }
+
+  bool _blocksEncryptionNow() =>
+      room?.isOpenToAnyone == true ||
+      roomAccessDraftNotifier.value.blocksEncryptionOn(
+        ref.read(roomAccessControllerProvider(widget.roomId)).value,
+      );
 
   void openAssignRolesPage() {
     if (room == null) return;
@@ -525,6 +565,7 @@ class ChatDetailsEditController extends State<ChatDetailsEdit>
     descriptionFocusNode.dispose();
     groupNameFocusNode.dispose();
     isRoomEnabledEncryptionNotifier.dispose();
+    roomAccessDraftNotifier.dispose();
     isValidGroupNameNotifier.dispose();
     groupNameEmptyNotifier.dispose();
     descriptionEmptyNotifier.dispose();

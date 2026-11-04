@@ -2839,5 +2839,17 @@
   "@showAllReactions": {
     "type": "text",
     "placeholders": {}
-  }
+  },
+  "roomAccessTitle": "Who can join",
+  "roomAccessInvite": "Invite only",
+  "roomAccessKnock": "On request",
+  "roomAccessPublic": "Public",
+  "roomAccessHelp": "Public: anyone can join. On request: anyone can ask, and an administrator lets them in with an invitation.",
+  "roomAccessEncrypted": "An encrypted room can't be public or listed.",
+  "roomAccessPublicPage": "The public web page is on: the room stays public and listed.",
+  "roomAccessRestricted": "Members of a space can join. This isn't changed here.",
+  "roomAccessListed": "In directory",
+  "roomAccessListedHelp": "Anyone can find this room in the public directory.",
+  "roomAccessForbidden": "The server refused this change.",
+  "encryptionUnavailableInPublicRoom": "A public room can't be encrypted."
 }
