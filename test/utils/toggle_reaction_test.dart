@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/utils/toggle_reaction.dart';
 
@@ -45,4 +47,36 @@ void main() {
       expect(calls, ['redact']);
     },
   );
+
+  test(
+    'only redacts when the selected emoji differs by a text variation selector',
+    () async {
+      await run(emoji: '\u2764', key: '\u2764\uFE0E');
+      expect(calls, ['redact']);
+
+      calls.clear();
+      await run(emoji: '\u2764\uFE0E', key: '\u2764');
+      expect(calls, ['redact']);
+    },
+  );
+
+  test('waits for the redaction before sending the replacement', () async {
+    final redaction = Completer<void>();
+    final replacement = toggleReaction(
+      emoji: '\uD83D\uDE02',
+      myReactionKey: '\uD83D\uDC4D',
+      redactMyReaction: () {
+        calls.add('redact');
+        return redaction.future;
+      },
+      sendReaction: () async => calls.add('send'),
+    );
+    await Future<void>.delayed(Duration.zero);
+    expect(calls, ['redact']);
+
+    redaction.complete();
+    await replacement;
+
+    expect(calls, ['redact', 'send']);
+  });
 }
