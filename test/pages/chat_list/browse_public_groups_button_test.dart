@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/data/repository/public_rooms/public_rooms_repository.provider.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -28,10 +30,25 @@ void main() {
         loginFlows: [],
       );
 
+  late GoRouter router;
+
   Future<void> pumpButton(
     WidgetTester tester, {
     required bool isPublicGroupsEnabled,
   }) async {
+    router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, _) => const Scaffold(body: BrowsePublicGroupsButton()),
+        ),
+        GoRoute(
+          path: const PublicRoomsRoute().location,
+          builder: (_, _) => const PublicRoomsPage(),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
@@ -43,11 +60,11 @@ void main() {
             FakePublicRoomsRepository(),
           ),
         ],
-        child: const MaterialApp(
-          locale: Locale('en'),
+        child: MaterialApp.router(
+          routerConfig: router,
+          locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: Scaffold(body: BrowsePublicGroupsButton()),
         ),
       ),
     );
@@ -71,5 +88,9 @@ void main() {
 
     // Assert
     expect(find.byType(PublicRoomsPage), findsOneWidget);
+    expect(
+      router.routerDelegate.currentConfiguration.last.matchedLocation,
+      const PublicRoomsRoute().location,
+    );
   });
 }

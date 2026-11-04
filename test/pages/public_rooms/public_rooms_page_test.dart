@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/empty_state/linagora_empty_state.dart';
 import 'package:linagora_design_flutter/list_item/linagora_avatar_list_item.dart';
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/data/repository/public_rooms/public_rooms_repository.provider.dart';
 import 'package:twake_chat/domain/exception/public_rooms/public_rooms_exception.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
@@ -44,8 +45,8 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// The page pushed over a home route, as the chat list does, in a router
-  /// that knows the room location.
+  /// The page pushed through its route over a home route, as the chat list
+  /// does, in a router that also knows the room location.
   Future<GoRouter> pumpPageInRouter(WidgetTester tester) async {
     final router = GoRouter(
       routes: [
@@ -54,15 +55,15 @@ void main() {
           builder: (context, _) => Scaffold(
             body: TextButton(
               onPressed: () => unawaited(
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const PublicRoomsPage(),
-                  ),
-                ),
+                context.push<void>(const PublicRoomsRoute().location),
               ),
               child: const Text('open'),
             ),
           ),
+        ),
+        GoRoute(
+          path: const PublicRoomsRoute().location,
+          builder: (_, _) => const PublicRoomsPage(),
         ),
         GoRoute(
           path: '/rooms/:roomid',
@@ -353,5 +354,18 @@ void main() {
     expect(find.text('You joined the chat'), findsOneWidget);
     expect(find.byType(PublicRoomsPage), findsNothing);
     expect(router.routerDelegate.currentConfiguration.uri.toString(), '/');
+  });
+
+  testWidgets('tap_onBack_closesThePage', (tester) async {
+    // Arrange
+    final router = await pumpPageInRouter(tester);
+
+    // Act
+    await tester.tap(find.byTooltip('Back'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(find.byType(PublicRoomsPage), findsNothing);
+    expect(router.routerDelegate.currentConfiguration.uri.path, '/');
   });
 }

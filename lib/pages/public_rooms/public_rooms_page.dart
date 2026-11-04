@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/empty_state/linagora_empty_state.dart';
 import 'package:linagora_design_flutter/list_item/linagora_avatar_list_item.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
@@ -43,11 +44,11 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
     if (!mounted) return;
     switch (result) {
       case PublicRoomJoined(:final roomId):
-        Navigator.of(context).pop();
+        context.pop();
         RoomRoute(roomid: roomId).go(context);
       case PublicRoomJoinedNotInSync():
         TwakeSnackBar.show(context, l10n.youJoinedTheChat);
-        Navigator.of(context).pop();
+        context.pop();
       case PublicRoomRequested():
         TwakeSnackBar.show(context, l10n.joinRequestSentAdminMustApprove);
       case PublicRoomOpenFailed():
@@ -110,7 +111,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
             TwakeIconButton(
               tooltip: l10n.back,
               icon: Icons.arrow_back_ios,
-              onTap: () => Navigator.of(context).pop(),
+              onTap: () => context.pop(),
             ),
             Expanded(
               child: SearchTextField(
