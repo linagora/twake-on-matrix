@@ -10,7 +10,6 @@ import 'package:twake_chat/data/datasource/contact/sim_country/sim_country_provi
 import 'package:twake_chat/data/datasource/federation_configurations_datasource.dart';
 import 'package:twake_chat/data/datasource/invitation/hive_invitation_status_datasource.dart';
 import 'package:twake_chat/data/datasource/invitation/invitation_datasource.dart';
-import 'package:twake_chat/data/datasource/media/media_data_source.dart';
 import 'package:twake_chat/data/datasource/multiple_account/multiple_account_datasource.dart';
 import 'package:twake_chat/data/datasource/recovery_words_data_source.dart';
 import 'package:twake_chat/utils/logging/filters/sensitive_data_filter.dart';
@@ -26,7 +25,6 @@ import 'package:twake_chat/data/datasource_impl/contact/tom_contacts_datasource_
 import 'package:twake_chat/data/datasource_impl/federation_configurations_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/invitation/hive_invitation_status_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/invitation/invitation_datasource_impl.dart';
-import 'package:twake_chat/data/datasource_impl/media/media_data_source_impl.dart';
 import 'package:twake_chat/data/datasource_impl/multiple_account/multiple_account_datasource_impl.dart';
 import 'package:twake_chat/data/datasource_impl/recovery_words_data_source_impl.dart';
 import 'package:twake_chat/data/datasource_impl/server_config_datasource_impl.dart';
@@ -54,7 +52,6 @@ import 'package:twake_chat/data/repository/contact/tom_contact_repository_impl.d
 import 'package:twake_chat/data/repository/federation_configurations_repository_impl.dart';
 import 'package:twake_chat/data/repository/invitation/hive_invitation_status_repository_impl.dart';
 import 'package:twake_chat/data/repository/invitation/invitation_repository_impl.dart';
-import 'package:twake_chat/data/repository/media/media_repository_impl.dart';
 import 'package:twake_chat/data/repository/multiple_account/multiple_account_repository_impl.dart';
 import 'package:twake_chat/data/repository/recovery_words_repository_impl.dart';
 import 'package:twake_chat/data/repository/server_config_repository_impl.dart';
@@ -94,7 +91,6 @@ import 'package:twake_chat/domain/usecase/invitation/hive_delete_invitation_stat
 import 'package:twake_chat/domain/usecase/invitation/hive_get_invitation_status_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/send_invitation_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/store_invitation_status_interactor.dart';
-import 'package:twake_chat/domain/usecase/preview_url/get_preview_url_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/delete_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interactor.dart';
@@ -239,9 +235,6 @@ class GetItInitializer {
     getIt.registerFactory<HiveThirdPartyContactDatasource>(
       () => HiveThirdPartyContactDatasourceImpl(),
     );
-    getIt.registerFactory<MediaDataSource>(
-      () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
-    );
     getIt.registerFactory<ServerSearchDatasource>(
       () => ServerSearchDatasourceImpl(),
     );
@@ -275,9 +268,6 @@ class GetItInitializer {
         getIt.get<SimCountryProvider>(),
       ),
     );
-    getIt.registerLazySingleton(
-      () => MediaDataSourceImpl(getIt.get<MediaAPI>()),
-    );
 
     getIt.registerFactory<ServerSearchDatasourceImpl>(
       () => ServerSearchDatasourceImpl(),
@@ -306,9 +296,6 @@ class GetItInitializer {
     getIt.registerFactory<ContactRepository>(() => TomContactRepositoryImpl());
     getIt.registerFactory<PhonebookContactRepository>(
       () => PhonebookContactRepositoryImpl(),
-    );
-    getIt.registerFactory<MediaRepositoryImpl>(
-      () => MediaRepositoryImpl(getIt.get<MediaDataSourceImpl>()),
     );
     getIt.registerFactory<ServerSearchRepository>(
       () => ServerSearchRepositoryImpl(),
@@ -384,9 +371,6 @@ class GetItInitializer {
     );
     getIt.registerSingleton<ChatRoomSearchInteractor>(
       ChatRoomSearchInteractor(),
-    );
-    getIt.registerSingleton<GetPreviewURLInteractor>(
-      GetPreviewURLInteractor(getIt.get<MediaRepositoryImpl>()),
     );
     getIt.registerSingleton<TimelineSearchEventInteractor>(
       TimelineSearchEventInteractor(),

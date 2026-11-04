@@ -48,4 +48,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | forward | Use case + native providers + controller, GetIt removed | #3540 |
 | new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | #3541 |
 | capabilities | Use case + native providers, GetIt removed | #3539 |
+| preview_url | Use case + native providers, GetIt registrations removed; `MediaAPI` still reads the home `DioClient` from GetIt (shared with upload and download) | #3537 |
 | Everything else | Legacy | |
