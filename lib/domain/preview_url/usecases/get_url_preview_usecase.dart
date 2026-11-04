@@ -7,6 +7,11 @@ class GetUrlPreviewUseCase {
 
   final MediaRepository _repository;
 
+  /// Fetches the preview of [uri].
+  ///
+  /// Throws a [GetUrlPreviewException] holding the cause when the repository
+  /// throws an [Exception]. An [Error] is a programming mistake and surfaces
+  /// unchanged.
   Future<UrlPreview> execute({
     required Uri uri,
     int? preferredPreviewTime,
@@ -16,7 +21,7 @@ class GetUrlPreviewUseCase {
         uri: uri,
         preferredPreviewTime: preferredPreviewTime,
       );
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Error.throwWithStackTrace(GetUrlPreviewException(e), s);
     }
   }

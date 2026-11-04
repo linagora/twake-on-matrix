@@ -49,17 +49,29 @@ void main() {
     test('keeps the stack trace of the repository error', () async {
       final trace = StackTrace.fromString('repository');
       final repository = FakeMediaRepository(
-        onGetUrlPreview: (_) => Future.error(StateError('boom'), trace),
+        onGetUrlPreview: (_) => Future.error(Exception('boom'), trace),
       );
 
       try {
         await GetUrlPreviewUseCase(repository).execute(uri: uri);
         fail('should throw');
       } on GetUrlPreviewException catch (e, s) {
-        expect(e.cause, isA<StateError>());
+        expect(e.cause, isA<Exception>());
         expect(s, same(trace));
         expect(e.toString(), contains('GetUrlPreviewException'));
       }
+    });
+
+    test('lets an Error surface unwrapped', () async {
+      final error = StateError('bug');
+      final repository = FakeMediaRepository(
+        onGetUrlPreview: (_) => Future.error(error),
+      );
+
+      await expectLater(
+        GetUrlPreviewUseCase(repository).execute(uri: uri),
+        throwsA(same(error)),
+      );
     });
   });
 }

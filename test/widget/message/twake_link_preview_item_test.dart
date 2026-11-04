@@ -1,6 +1,5 @@
 import 'package:twake_chat/data/repository/media/media_repository.provider.dart';
 import 'package:twake_chat/domain/model/media/url_preview.dart';
-import 'package:twake_chat/domain/repository/media/media_repository.dart';
 import 'package:twake_chat/presentation/model/media/url_preview_presentation.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview.dart';
@@ -11,18 +10,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
-class _FakeMediaRepository implements MediaRepository {
-  @override
-  Future<UrlPreview> getUrlPreview({
-    required Uri uri,
-    int? preferredPreviewTime,
-  }) async => UrlPreview(title: 'Test Title', description: 'Test Description');
-}
+import '../../domain/preview_url/fake_media_repository.dart';
 
 Widget _withRepository(Widget child) => UncontrolledProviderScope(
   container: ProviderContainer.test(
     overrides: [
-      mediaRepositoryProvider.overrideWithValue(_FakeMediaRepository()),
+      mediaRepositoryProvider.overrideWithValue(
+        FakeMediaRepository(
+          onGetUrlPreview: (_) async =>
+              UrlPreview(title: 'Test Title', description: 'Test Description'),
+        ),
+      ),
     ],
     retry: (_, _) => null,
   ),

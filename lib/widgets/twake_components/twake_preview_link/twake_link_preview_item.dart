@@ -68,7 +68,7 @@ class _TwakeLinkPreviewItemState extends ConsumerState<TwakeLinkPreviewItem>
             previewLink: widget.previewLink,
           ),
         );
-      default:
+      case AsyncLoading() || null:
         return _buildSkeleton(context);
     }
   }
