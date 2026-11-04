@@ -29,21 +29,6 @@ void main() {
     useCase = SaveRoomAccessUseCase(repository);
   });
 
-  test('execute_withRuleAndListing_setsTheRuleBeforeTheListing', () async {
-    // Act
-    await useCase.execute(
-      roomId,
-      joinRule: JoinRuleChoice.public,
-      isListed: true,
-    );
-
-    // Assert
-    verifyInOrder([
-      repository.setJoinRule(roomId, JoinRuleChoice.public),
-      repository.setListed(roomId, isListed: true),
-    ]);
-  });
-
   test('execute_whenTheRuleIsRefused_neverListsTheRoom', () async {
     // Arrange
     when(
@@ -123,37 +108,23 @@ void main() {
     });
   }
 
-  test('execute_unlistingAnEncryptedRoom_isAllowed', () async {
-    // Arrange
-    guard(isEncrypted: true);
+  for (final (name, encrypted, page, joinRule, isListed) in [
+    ('openRoom', false, false, JoinRuleChoice.public, true),
+    ('closingAnEncryptedRoom', true, false, JoinRuleChoice.invite, false),
+    ('keepingAPublicPageOpen', false, true, JoinRuleChoice.public, true),
+  ]) {
+    test('execute_${name}_setsTheRuleBeforeTheListing', () async {
+      // Arrange
+      guard(isEncrypted: encrypted, hasPublicPage: page);
 
-    // Act
-    await useCase.execute(
-      roomId,
-      joinRule: JoinRuleChoice.invite,
-      isListed: false,
-    );
+      // Act
+      await useCase.execute(roomId, joinRule: joinRule, isListed: isListed);
 
-    // Assert
-    verifyInOrder([
-      repository.setJoinRule(roomId, JoinRuleChoice.invite),
-      repository.setListed(roomId, isListed: false),
-    ]);
-  });
-
-  test('execute_publicAndListedWithAPublicPage_isAllowed', () async {
-    // Arrange
-    guard(hasPublicPage: true);
-
-    // Act
-    await useCase.execute(
-      roomId,
-      joinRule: JoinRuleChoice.public,
-      isListed: true,
-    );
-
-    // Assert
-    verify(repository.setJoinRule(roomId, JoinRuleChoice.public)).called(1);
-    verify(repository.setListed(roomId, isListed: true)).called(1);
-  });
+      // Assert
+      verifyInOrder([
+        repository.setJoinRule(roomId, joinRule),
+        repository.setListed(roomId, isListed: isListed),
+      ]);
+    });
+  }
 }
