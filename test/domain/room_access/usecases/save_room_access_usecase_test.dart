@@ -71,29 +71,57 @@ void main() {
     verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
   });
 
-  test('execute_publicOnAnEncryptedRoom_throwsAndSendsNothing', () async {
-    // Arrange
-    guard(isEncrypted: true);
+  for (final (name, encrypted, page, joinRule, isListed, refusal) in [
+    (
+      'publicOnAnEncryptedRoom',
+      true,
+      false,
+      JoinRuleChoice.public,
+      null,
+      isA<RoomAccessEncryptedException>(),
+    ),
+    (
+      'listingAnEncryptedRoom',
+      true,
+      false,
+      null,
+      true,
+      isA<RoomAccessEncryptedException>(),
+    ),
+    (
+      'privateRuleWithAPublicPage',
+      false,
+      true,
+      JoinRuleChoice.knock,
+      null,
+      isA<RoomAccessPublicPageException>(),
+    ),
+    (
+      'unlistingWithAPublicPage',
+      false,
+      true,
+      null,
+      false,
+      isA<RoomAccessPublicPageException>(),
+    ),
+  ]) {
+    test('execute_${name}_throwsAndSendsNothing', () async {
+      // Arrange
+      guard(isEncrypted: encrypted, hasPublicPage: page);
 
-    // Act
-    final result = useCase.execute(roomId, joinRule: JoinRuleChoice.public);
+      // Act
+      final result = useCase.execute(
+        roomId,
+        joinRule: joinRule,
+        isListed: isListed,
+      );
 
-    // Assert
-    await expectLater(result, throwsA(isA<RoomAccessEncryptedException>()));
-    verifyNever(repository.setJoinRule(any, any));
-  });
-
-  test('execute_listingAnEncryptedRoom_throwsAndSendsNothing', () async {
-    // Arrange
-    guard(isEncrypted: true);
-
-    // Act
-    final result = useCase.execute(roomId, isListed: true);
-
-    // Assert
-    await expectLater(result, throwsA(isA<RoomAccessEncryptedException>()));
-    verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
-  });
+      // Assert
+      await expectLater(result, throwsA(refusal));
+      verifyNever(repository.setJoinRule(any, any));
+      verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
+    });
+  }
 
   test('execute_unlistingAnEncryptedRoom_isAllowed', () async {
     // Arrange
@@ -113,38 +141,19 @@ void main() {
     ]);
   });
 
-  group('with the public page on', () {
-    setUp(() => guard(hasPublicPage: true));
+  test('execute_publicAndListedWithAPublicPage_isAllowed', () async {
+    // Arrange
+    guard(hasPublicPage: true);
 
-    test('execute_privateRule_throwsAndSendsNothing', () async {
-      // Act
-      final result = useCase.execute(roomId, joinRule: JoinRuleChoice.knock);
+    // Act
+    await useCase.execute(
+      roomId,
+      joinRule: JoinRuleChoice.public,
+      isListed: true,
+    );
 
-      // Assert
-      await expectLater(result, throwsA(isA<RoomAccessPublicPageException>()));
-      verifyNever(repository.setJoinRule(any, any));
-    });
-
-    test('execute_unlisting_throwsAndSendsNothing', () async {
-      // Act
-      final result = useCase.execute(roomId, isListed: false);
-
-      // Assert
-      await expectLater(result, throwsA(isA<RoomAccessPublicPageException>()));
-      verifyNever(repository.setListed(any, isListed: anyNamed('isListed')));
-    });
-
-    test('execute_publicAndListed_isAllowed', () async {
-      // Act
-      await useCase.execute(
-        roomId,
-        joinRule: JoinRuleChoice.public,
-        isListed: true,
-      );
-
-      // Assert
-      verify(repository.setJoinRule(roomId, JoinRuleChoice.public)).called(1);
-      verify(repository.setListed(roomId, isListed: true)).called(1);
-    });
+    // Assert
+    verify(repository.setJoinRule(roomId, JoinRuleChoice.public)).called(1);
+    verify(repository.setListed(roomId, isListed: true)).called(1);
   });
 }

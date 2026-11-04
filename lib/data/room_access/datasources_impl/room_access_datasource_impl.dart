@@ -18,7 +18,7 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
 
   @override
   Stream<RoomAccess> watchRoomAccess(String roomId) async* {
-    final room = _room(roomId);
+    final room = _client?.getRoomById(roomId) ?? _notFound();
     var state = _stateOf(room);
     yield await _accessOf(room);
     await for (final _ in room.onUpdate.stream) {
@@ -31,7 +31,7 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
 
   @override
   RoomAccessGuards guardsOf(String roomId) {
-    final state = _stateOf(_room(roomId));
+    final state = _stateOf(_client?.getRoomById(roomId) ?? _notFound());
     return RoomAccessGuards(
       isEncrypted: state.isEncrypted,
       hasPublicPage: state.hasPublicPage,
@@ -39,22 +39,21 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
   }
 
   @override
-  Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule) =>
-      _guard(() => _room(roomId).setJoinRules(_joinRules[joinRule]!));
+  Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule) => _guard(
+    () => (_client?.getRoomById(roomId) ?? _notFound()).setJoinRules(
+      _joinRules[joinRule]!,
+    ),
+  );
 
   @override
   Future<void> setListed(String roomId, {required bool isListed}) => _guard(
-    () => _room(roomId).client.setRoomVisibilityOnDirectory(
+    () => (_client ?? _notFound()).setRoomVisibilityOnDirectory(
       roomId,
       visibility: isListed ? Visibility.public : Visibility.private,
     ),
   );
 
-  Room _room(String roomId) {
-    final room = _client?.getRoomById(roomId);
-    if (room == null) throw const RoomAccessRoomNotFoundException();
-    return room;
-  }
+  Never _notFound() => throw const RoomAccessRoomNotFoundException();
 
   ({JoinRules? joinRule, bool isEncrypted, bool canChange, bool hasPublicPage})
   _stateOf(Room room) => (
