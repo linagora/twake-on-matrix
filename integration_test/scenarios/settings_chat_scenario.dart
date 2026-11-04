@@ -1,13 +1,17 @@
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings_view.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import '../base/base_test_scenario.dart';
 import '../help/soft_assertion_helper.dart';
 import '../robots/home_robot.dart';
 import '../robots/setting/settings_chat_robot.dart';
 
-/// Mobile-only: toggle "GIF autoplay" in Settings > Chat, leave the screen,
-/// open it again and verify the new value was persisted. The switch is
-/// toggled back at the end so the account keeps its original setting.
+/// Mobile-only: toggle "GIF autoplay" in Settings > Chat and verify the new
+/// value reaches `AppConfig` and the real storage key, leave the screen, open
+/// it again and verify the value was persisted, then toggle it back through
+/// the switch so the account keeps its original setting.
 ///
 /// Drives the concrete settings robots directly, so this is registered with
 /// `mobileOnly: true`.
@@ -25,10 +29,30 @@ class SettingsChatToggleScenario extends BaseTestScenario {
     final title = chatRobot.gifAutoplayTitle;
     await chatRobot.switchTile(title).waitUntilVisible();
 
-    final initialValue = await chatRobot.waitForStoredValue(title);
+    // The expectation comes from the storage key the app reads at startup,
+    // not from the tile under test.
+    final initialValue = await Store().getItemBool(
+      SettingKeys.gifAutoplay,
+      AppConfig.gifAutoplay,
+    );
+    var restoredThroughSwitch = false;
+
+    Future<void> verifyApplied(bool expected, String step) async {
+      s.softAssertEquals(
+        AppConfig.gifAutoplay,
+        expected,
+        'AppConfig.gifAutoplay did not follow the switch $step',
+      );
+      s.softAssertEquals(
+        await Store().getItemBool(SettingKeys.gifAutoplay, !expected),
+        expected,
+        '"$title" was not stored under SettingKeys.gifAutoplay $step',
+      );
+    }
 
     try {
-      await chatRobot.toggleSwitch(title);
+      await chatRobot.toggleSwitch(title, from: initialValue);
+      await verifyApplied(!initialValue, 'after the first toggle');
       await chatRobot.backToSettingScreen();
       s.softAssertEquals(
         $(SettingsView).exists,
@@ -38,22 +62,23 @@ class SettingsChatToggleScenario extends BaseTestScenario {
 
       await settingRobot.openChatSetting();
       await chatRobot.waitForView();
-      await chatRobot.switchTile(title).waitUntilVisible();
-      s.softAssertEquals(
-        await chatRobot.waitForStoredValue(title),
-        !initialValue,
-        '"$title" was not persisted after reopening Settings > Chat',
-      );
+      await chatRobot.waitForSwitchValue(title, !initialValue);
+
+      await chatRobot.toggleSwitch(title, from: !initialValue);
+      await verifyApplied(initialValue, 'after toggling back');
+      restoredThroughSwitch = true;
     } finally {
-      // Restore the original value, even if a step above failed.
-      if (!chatRobot.view().exists) {
-        if (!$(SettingsView).exists) {
-          await HomeRobot($).gotoSettingScreen();
+      // Only a failed step leaves the setting changed: restore it by hand.
+      if (!restoredThroughSwitch) {
+        if (!chatRobot.view().exists) {
+          if (!$(SettingsView).exists) {
+            await HomeRobot($).gotoSettingScreen();
+          }
+          await settingRobot.openChatSetting();
+          await chatRobot.waitForView();
         }
-        await settingRobot.openChatSetting();
-        await chatRobot.waitForView();
+        await chatRobot.restoreStoredValue(title, initialValue);
       }
-      await chatRobot.restoreStoredValue(title, initialValue);
     }
 
     s.verifyAll();

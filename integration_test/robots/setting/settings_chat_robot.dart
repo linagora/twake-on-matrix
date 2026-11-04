@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/utils/famedlysdk_store.dart';
 import 'package:twake_chat/widgets/settings_switch_list_tile.dart';
 
 import '../home_robot.dart';
@@ -25,31 +25,20 @@ class SettingsChatRobot extends HomeRobot {
     await $.waitUntilVisible(view());
   }
 
-  /// Waits until the tile shows the value read from storage, not the
-  /// default it renders while that read is still pending.
-  Future<bool> waitForStoredValue(String title) async {
-    final tileFinder = find.ancestor(
-      of: find.text(title),
-      matching: find.byType(SettingsSwitchListTile),
-    );
-    await $.waitUntilExists($(tileFinder));
-    final tile = $.tester.widget<SettingsSwitchListTile>(tileFinder.first);
-    final context = $.tester.element(tileFinder.first);
-    final stored = await Matrix.of(
-      context,
-    ).store.getItemBool(tile.storeKey, tile.defaultValue);
-    await switchTile(
-      title,
-    ).which<SwitchListTile>((tile) => tile.value == stored).waitUntilVisible();
-    return stored;
+  /// Waits until the switch of [title] shows [expected]. The tile renders its
+  /// default first and the stored value once the read completes, so the
+  /// expected value must come from outside the tile.
+  Future<void> waitForSwitchValue(String title, bool expected) async {
+    await switchTile(title)
+        .which<SwitchListTile>((tile) => tile.value == expected)
+        .waitUntilVisible();
   }
 
-  Future<void> toggleSwitch(String title) async {
-    final before = await waitForStoredValue(title);
+  /// Taps the switch of [title] once it shows [from] and waits for it to flip.
+  Future<void> toggleSwitch(String title, {required bool from}) async {
+    await waitForSwitchValue(title, from);
     await switchTile(title).tap();
-    await switchTile(
-      title,
-    ).which<SwitchListTile>((tile) => tile.value != before).waitUntilVisible();
+    await waitForSwitchValue(title, !from);
     await $.pumpAndSettle();
   }
 
@@ -63,9 +52,8 @@ class SettingsChatRobot extends HomeRobot {
     );
     await $.waitUntilExists($(tileFinder));
     final tile = $.tester.widget<SettingsSwitchListTile>(tileFinder.first);
-    final context = $.tester.element(tileFinder.first);
     tile.onChanged?.call(value);
-    await Matrix.of(context).store.setItemBool(tile.storeKey, value);
+    await Store().setItemBool(tile.storeKey, value);
   }
 
   Future<void> backToSettingScreen() async {
