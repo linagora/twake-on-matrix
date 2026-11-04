@@ -5,6 +5,7 @@ import 'package:twake_chat/pages/image_viewer/image_viewer.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/native_link_span.dart';
 import 'package:twake_chat/widgets/mentioned_user.dart';
@@ -42,21 +43,7 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
 
   @override
   Widget build(BuildContext context) {
-    // riot-web is notorious for creating bad reply fallback events from invalid messages which, if
-    // not handled properly, can lead to impersination. As such, we strip the entire `<mx-reply>` tags
-    // here already, to prevent that from happening.
-    // We do *not* do this in an AST and just with simple regex here, as riot-web tends to create
-    // miss-matching tags, and this way we actually correctly identify what we want to strip and, well,
-    // strip it.
-    final renderHtml = html.replaceAll(
-      RegExp(
-        '<mx-reply>.*?</mx-reply>',
-        caseSensitive: false,
-        multiLine: false,
-        dotAll: true,
-      ),
-      '',
-    );
+    final renderHtml = html.removeReplyFallback();
 
     // there is no need to pre-validate the html, as we validate it while rendering
 

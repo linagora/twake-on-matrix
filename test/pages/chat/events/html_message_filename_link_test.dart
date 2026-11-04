@@ -46,10 +46,9 @@ class _HtmlMessageHarness {
     }
   }
 
-  Future<_RenderedSpan> pumpAndFind(
+  Future<List<_RenderedSpan>> pumpAndCollect(
     WidgetTester tester,
     String html,
-    String text,
   ) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -70,6 +69,15 @@ class _HtmlMessageHarness {
     for (final richText in tester.widgetList<RichText>(find.byType(RichText))) {
       _collect(richText.text, const TextStyle(), spans);
     }
+    return spans;
+  }
+
+  Future<_RenderedSpan> pumpAndFind(
+    WidgetTester tester,
+    String html,
+    String text,
+  ) async {
+    final spans = await pumpAndCollect(tester, html);
     return spans.firstWhere((rendered) => rendered.span.text == text);
   }
 
@@ -139,6 +147,24 @@ void main() {
       expect(link.span.recognizer, isNotNull);
       expect(link.style.color, _linkStyle.color);
       expect(link.style.decoration, TextDecoration.underline);
+    });
+  });
+
+  group('HtmlMessage reply fallback', () {
+    testWidgets('hides a nested reply fallback entirely (#3237)', (
+      tester,
+    ) async {
+      final spans = await harness.pumpAndCollect(
+        tester,
+        '<mx-reply><blockquote>In reply to @bob<br>'
+        '<mx-reply><blockquote>In reply to @alice<br>First message'
+        '</blockquote></mx-reply>'
+        'Second message</blockquote></mx-reply>'
+        'My answer',
+      );
+      final rendered = spans.map((rendered) => rendered.span.text).join();
+
+      expect(rendered, 'My answer');
     });
   });
 }
