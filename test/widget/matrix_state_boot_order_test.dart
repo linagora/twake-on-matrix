@@ -134,13 +134,17 @@ class _BrokenBootClient extends _BootClient {
 /// A client with an access token and no homeserver, which is all the ToM
 /// set-up of a switch reads.
 class _ToMClient extends _BootClient {
-  _ToMClient(super.clientName, {super.userID});
+  _ToMClient(super.clientName, {super.userID, this.server});
+
+  /// The homeserver of the account; none by default, which skips the
+  /// discovery of the switch.
+  final Uri? server;
 
   @override
   String? get accessToken => 'token-$clientName';
 
   @override
-  Uri? get homeserver => null;
+  Uri? get homeserver => server;
 }
 
 /// Stores a ToM configuration for the accounts it was given and, like the real
@@ -637,11 +641,11 @@ class _ToMOvertaking {
 /// Accounts `a`, `b` and `c` with a ToM token. The login configuration
 /// persister, which the fresh-install fallback saves through, can be built:
 /// its federation repository is a fake, not the GetIt one.
-_Harness _toMHarness(WidgetTester tester) => _Harness(
+_Harness _toMHarness(WidgetTester tester, {Uri? serverOfB}) => _Harness(
   tester,
   [
     _ToMClient('a', userID: '@a:s'),
-    _ToMClient('b', userID: '@b:s'),
+    _ToMClient('b', userID: '@b:s', server: serverOfB),
     _ToMClient('c', userID: '@c:s'),
   ],
   overrides: [
@@ -680,9 +684,12 @@ class _RecordingFederation extends Fake
 class _UnusedTom extends Fake implements ToMConfigurationsRepository {}
 
 /// A homeserver summary that announces the ToM server at [url].
-HomeserverSummary _summaryWithToM(String url) => HomeserverSummary(
+HomeserverSummary _summaryWithToM(
+  String url, {
+  String homeserver = 'https://c',
+}) => HomeserverSummary(
   discoveryInformation: DiscoveryInformation(
-    mHomeserver: HomeserverInformation(baseUrl: Uri.parse('https://c')),
+    mHomeserver: HomeserverInformation(baseUrl: Uri.parse(homeserver)),
     additionalProperties: {
       ToMServerInformation.tomServerKey: {'base_url': url, 'server_name': 'c'},
     },
@@ -995,6 +1002,33 @@ void main() {
     });
   });
 
+  testWidgets('a ToM configuration without identity server does not keep the '
+      'one of the account before', (tester) async {
+    _registerToM(_FakeToMConfigurationsRepository({}));
+    final identity = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.identityServerUrlInterceptorName,
+    );
+    final harness = _Harness(
+      tester,
+      [_ToMClient('a', userID: '@a:s')],
+      overrides: [
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      identity.changeBaseUrl('https://id.a');
+      harness.matrix.setUpToMServices(
+        ToMServerInformation(baseUrl: Uri.parse('https://tom.b')),
+        null,
+      );
+    });
+
+    expect(identity.baseUrl, isNull);
+  });
+
   testWidgets('switching to an account with no stored ToM configuration does '
       'not keep the one of the account being left', (tester) async {
     final left = _ToMClient('a', userID: '@a:s');
@@ -1003,6 +1037,9 @@ void main() {
     final tomServer = _registerToM(
       _FakeToMConfigurationsRepository({'@a:s': _toM('https://tom.a')}),
       authorization: authorization,
+    );
+    final identity = getIt.get<DynamicUrlInterceptors>(
+      instanceName: NetworkDI.identityServerUrlInterceptorName,
     );
     final harness = _Harness(
       tester,
@@ -1017,6 +1054,7 @@ void main() {
       await harness.settle();
       // The boot may have set up the active account; start from a clean state.
       tomServer.changeBaseUrl(null);
+      identity.changeBaseUrl('https://id.a');
       authorization.accessToken = null;
       harness.container
           .read(accountSwitchEffectsHolderProvider.notifier)
@@ -1030,7 +1068,72 @@ void main() {
 
     // The target has no configuration: nothing of account `a` stays bound.
     expect(tomServer.baseUrl, isNull);
+    expect(identity.baseUrl, isNull);
     expect(authorization.accessToken, 'token-b');
+  });
+
+  group('a switch to an account whose homeserver cannot be reached', () {
+    // Nothing can be fetched in the harness: `checkHomeserver` and the
+    // well-known of the fake clients both fail, as they do offline.
+    final serverA = Uri.parse('https://a.example');
+    final serverB = Uri.parse('https://b.example');
+
+    _Harness harnessOf(WidgetTester tester) => _Harness(
+      tester,
+      [
+        _ToMClient('a', userID: '@a:s', server: serverA),
+        _ToMClient('b', userID: '@b:s', server: serverB),
+      ],
+      overrides: [
+        federationConfigurationsRepositoryProvider.overrideWithValue(
+          _RecordingFederation(),
+        ),
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    testWidgets('does not take the ToM server of the account it leaves', (
+      tester,
+    ) async {
+      final repository = _FakeToMConfigurationsRepository({});
+      final tomServer = _registerToM(repository);
+      final harness = harnessOf(tester);
+
+      await harness.run(() async {
+        final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
+        tomServer.changeBaseUrl(null);
+        harness.matrix.loginHomeserverSummary = _summaryWithToM(
+          'https://tom.a',
+          homeserver: serverA.toString(),
+        );
+        await tester.runAsync(() => coordinator.apply(harness.clients[1]));
+      });
+
+      expect(repository.saved, isEmpty);
+      expect(tomServer.baseUrl, isNull);
+      expect(harness.matrix.loginHomeserverSummary, isNull);
+    });
+
+    testWidgets('keeps the summary held for its own homeserver', (
+      tester,
+    ) async {
+      final repository = _FakeToMConfigurationsRepository({});
+      final tomServer = _registerToM(repository);
+      final harness = harnessOf(tester);
+
+      await harness.run(() async {
+        final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
+        tomServer.changeBaseUrl(null);
+        harness.matrix.loginHomeserverSummary = _summaryWithToM(
+          'https://tom.b',
+          homeserver: serverB.toString(),
+        );
+        await tester.runAsync(() => coordinator.apply(harness.clients[1]));
+      });
+
+      expect(repository.saved.keys, ['@b:s']);
+      expect(tomServer.baseUrl, 'https://tom.b');
+    });
   });
 
   testWidgets('a superseded switch does not write the ToM configuration it '
@@ -1072,7 +1175,9 @@ void main() {
     // stale run was stopped, not that saving cannot work in this harness.
     final repository = _FakeToMConfigurationsRepository({});
     _registerToM(repository);
-    final harness = _toMHarness(tester);
+    // B has the homeserver the held summary describes, so the discovery of
+    // the switch reuses it; without one the summary would not be B's.
+    final harness = _toMHarness(tester, serverOfB: Uri.parse('https://c'));
 
     await harness.run(() async {
       final coordinator = await harness.switchingWith(_ToMOnlyEffects.new);
@@ -1280,6 +1385,35 @@ void main() {
 
       expect(answer, isTrue);
     });
+  });
+
+  testWidgets('a boot read that a switch overtakes does not apply the '
+      'configuration of the account it left', (tester) async {
+    final repository = _GatedToMConfigurationsRepository(
+      {'@b:s': _toM('https://tom.b')},
+      gatedId: '@a:s',
+      lateValue: _toM('https://tom.a'),
+      heldRead: 1,
+    );
+    final tomServer = _registerToM(repository);
+    final harness = _toMHarness(tester);
+
+    await harness.run(() async {
+      repository.hold.armed = true;
+      await harness.mount();
+      await harness.settle();
+      harness.container
+          .read(accountSwitchEffectsHolderProvider.notifier)
+          .set(_ToMOnlyEffects(harness.matrix));
+      await tester.runAsync(() async {
+        await repository.hold.reached.future;
+        await harness.matrix.setActiveClient(harness.clients[1]);
+        repository.hold.gate.complete();
+        await Future<void>.delayed(Duration.zero);
+      });
+    });
+
+    expect(tomServer.baseUrl, 'https://tom.b');
   });
 
   testWidgets('an account is not settled while a switch away from it runs', (

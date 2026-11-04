@@ -1199,7 +1199,7 @@ class MatrixState extends ConsumerState<Matrix>
       final toMConfigurations =
           await getTomConfigurations(account.userID!) ??
           await _discoverFreshInstallToMConfiguration(account, token);
-      if (!_isCurrent(token)) return;
+      if (!_stillApplies(account, token)) return;
       if (toMConfigurations == null) {
         // No ToM server for this account: drop any configuration left over
         // from a previously active account (multi-account switch).
@@ -1231,7 +1231,7 @@ class MatrixState extends ConsumerState<Matrix>
     SwitchToken? token,
   ]) async {
     await _getHomeserverInformation(client, token);
-    if (!_isCurrent(token)) return null;
+    if (!_stillApplies(client, token)) return null;
     final tomServer = loginHomeserverSummary?.tomServer;
     if (tomServer == null) return null;
 
@@ -1450,6 +1450,13 @@ class MatrixState extends ConsumerState<Matrix>
   /// body stops before its next write. Without a token the call is not part
   /// of a switch and always writes.
   bool _isCurrent(SwitchToken? token) => token?.isCurrent ?? true;
+
+  /// Whether a read of [client] that began with [token] still applies. The
+  /// boot has no token: it applies only while [client] is still the account
+  /// the app is on, or the one a switch is moving to.
+  bool _stillApplies(Client client, SwitchToken? token) =>
+      _isCurrent(token) &&
+      (token != null || (_switchCoordinator.target ?? clientOrNull) == client);
 
   Future<void> _setUpToMServicesWhenChangingActiveClient(
     Client? client, [
