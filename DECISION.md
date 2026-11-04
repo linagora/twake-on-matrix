@@ -92,3 +92,7 @@ as before. That value of
 is fixed forever, so the room can never be opened to other servers later. In
 both cases the group creation screen offers no "Limit to users of <server>"
 toggle.
+
+A server whose well-known set `default_server_limited: false` used to create
+public groups that federate by default. It now gets `m.federate: false` too,
+unless it announces `server_acl: true`.
