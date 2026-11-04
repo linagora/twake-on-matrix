@@ -743,7 +743,8 @@ class BackgroundPush {
       if (_matrixState == null || roomId == null) {
         return;
       }
-      final activeClient = switchedClient ?? client;
+      final activeClient =
+          switchedClient ?? _matrixState!.clientOrNull ?? client;
       await activeClient.roomsLoading;
       await activeClient.accountDataLoading;
       // ignore: unused_local_variable
