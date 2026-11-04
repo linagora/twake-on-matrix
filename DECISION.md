@@ -70,7 +70,9 @@ twake-space-chat does. Shown only when the well-known enables public groups
 (`app.twake.chat.public_groups.enabled`).
 
 - The directory of the homeserver alone, read page after page up to 1,000
-  rooms, minus the rooms already joined. Groups and feeds only: no spaces.
+  rooms, minus the rooms the user has joined or is invited to, and the rooms
+  nobody can join (`invite` or `private` rules). Groups and feeds only: no
+  spaces.
   Each page shows as soon as it arrives, with a thin progress bar until the
   last one, where twake-space-chat waits for the whole directory.
 - Each row: avatar, name, « Join · N members » or « Ask to join · N

@@ -96,7 +96,10 @@ class PublicRoomsController extends _$PublicRoomsController {
   }
 
   void _queueLookup(List<PublicRoom> page) {
-    _lookups = _lookups.then((_) => _markRequested(page));
+    // An untyped error still surfaces, but the next pages are looked up.
+    _lookups = _lookups
+        .then((_) => _markRequested(page))
+        .onError<Object>(Zone.current.handleUncaughtError);
   }
 
   Future<void> _markRequested(List<PublicRoom> page) async {

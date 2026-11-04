@@ -38,6 +38,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   PublicRoomsException? fetchError;
   PublicRoomsException? knockedError;
   Object? knockedUntypedError;
+  Set<String> malformedSummaryRoomIds = {};
   PublicRoomsException? joinError;
   Object? joinUntypedError;
   PublicRoomsException? knockError;
@@ -75,6 +76,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
     lookupsInFlight--;
     if (knockedError case final error?) throw error;
     if (knockedUntypedError case final error?) throw error;
+    if (roomIds.any(malformedSummaryRoomIds.contains)) throw TypeError();
     return roomIds.where(knocked.contains).toSet();
   }
 

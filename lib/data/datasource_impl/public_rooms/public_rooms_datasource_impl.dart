@@ -16,11 +16,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   // Listed for their world-readable history, but nobody can join them.
   static final _closedRules = {JoinRules.invite.text, JoinRules.private.text};
 
-  static const _knownMemberships = {
-    Membership.join,
-    Membership.invite,
-    Membership.ban,
-  };
+  static const _knownMemberships = {Membership.join, Membership.invite};
 
   static const _maxEmptyPages = 3;
 
@@ -42,10 +38,14 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     var isFirstPage = true;
     String? since;
     do {
-      final QueryPublicRoomsResponse page;
+      final Map<String, Object?> page;
       try {
         // No `server`: the directory of the user's homeserver only.
-        page = await client.queryPublicRooms(limit: pageSize, since: since);
+        page = await client.request(
+          RequestType.GET,
+          '/client/v3/publicRooms',
+          query: {'limit': '$pageSize', 'since': ?since},
+        );
       } on Exception catch (exception, stackTrace) {
         if (isFirstPage) {
           Logs().e(
@@ -63,18 +63,18 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         return;
       }
       isFirstPage = false;
-      final rooms = page.chunk
+      final rooms = _parseChunks(page['chunk'])
           .where((chunk) => !_closedRules.contains(chunk.joinRule))
           .take(limit - count)
           .map(_toPublicRoom)
           .toList();
       count += rooms.length;
       yield rooms;
-      if (page.chunk.isEmpty && ++emptyPages == _maxEmptyPages) {
+      if (rooms.isEmpty && ++emptyPages == _maxEmptyPages) {
         Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: empty pages');
         return;
       }
-      final next = page.nextBatch;
+      final next = page['next_batch'] as String?;
       // Defensive: the spec does not cover a server repeating the token.
       if (next != null && next == since) {
         Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: token repeated');
@@ -150,6 +150,23 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     } on Exception catch (exception, stackTrace) {
       Logs().e('PublicRoomsDatasourceImpl::knock', exception, stackTrace);
       throw PublicRoomKnockFailedException(cause: exception);
+    }
+  }
+
+  // Parsed one by one: the SDK parses the whole page, so one room with a
+  // malformed field (an invalid avatar URL) would drop all the others.
+  List<PublicRoomsChunk> _parseChunks(Object? chunks) => [
+    if (chunks is List)
+      for (final json in chunks)
+        if (_parseChunk(json) case final chunk?) chunk,
+  ];
+
+  PublicRoomsChunk? _parseChunk(Object? json) {
+    try {
+      return PublicRoomsChunk.fromJson(json as Map<String, Object?>);
+    } on Object catch (error, stackTrace) {
+      Logs().w('PublicRoomsDatasourceImpl: skipped a room', error, stackTrace);
+      return null;
     }
   }
 

@@ -10,8 +10,8 @@ class FetchJoinablePublicRoomsUseCase {
 
   final PublicRoomsRepository _repository;
 
-  /// The groups and feeds of the homeserver directory the user has not joined,
-  /// been invited to or banned from, one page at a time. Throws a
+  /// The groups and feeds of the homeserver directory the user has neither
+  /// joined nor been invited to, one page at a time. Throws a
   /// `PublicRoomsFetchFailedException` when the first page fails.
   Stream<List<PublicRoom>> execute() async* {
     await for (final page in _repository.fetchDirectory(

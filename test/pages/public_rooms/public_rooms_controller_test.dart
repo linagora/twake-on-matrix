@@ -464,4 +464,37 @@ void main() {
       },
     );
   }
+
+  test(
+    'build_whenALookupThrowsAnUntypedError_stillLooksUpLaterPages',
+    () async {
+      // Arrange
+      final errors = <Object>[];
+      repository
+        ..pages = [
+          [publicRoom('!bad', access: PublicRoomAccess.approval)],
+          [publicRoom('!pending', access: PublicRoomAccess.approval)],
+        ]
+        ..malformedSummaryRoomIds = {'!bad'}
+        ..knocked = {'!pending'};
+      late ProviderContainer container;
+
+      // Act
+      await runZonedGuarded(() async {
+        container = makeContainer();
+        await loadedController(container);
+        await pumpEventQueue();
+      }, (error, _) => errors.add(error));
+
+      // Assert
+      expect(errors.single, isA<TypeError>());
+      expect(
+        container
+            .read(publicRoomsControllerProvider)
+            .requireValue
+            .requestedRoomIds,
+        {'!pending'},
+      );
+    },
+  );
 }

@@ -38,16 +38,36 @@ void main() {
         nextBatch: next,
       );
 
-  void stubDirectory(Map<String?, Object> responsesBySince) {
-    responsesBySince.forEach((since, response) {
-      final call = when(mockClient.queryPublicRooms(limit: 100, since: since));
-      if (response is Exception) {
-        call.thenThrow(response);
-      } else {
-        call.thenAnswer((_) async => response as QueryPublicRoomsResponse);
-      }
+  /// [answer] gets the `since` token sent and returns a response, its JSON,
+  /// or an exception to throw.
+  void respond(Object Function(String? since) answer) {
+    when(
+      mockClient.request(
+        RequestType.GET,
+        '/client/v3/publicRooms',
+        query: anyNamed('query'),
+      ),
+    ).thenAnswer((invocation) async {
+      final query = invocation.namedArguments[#query] as Map<String, Object?>;
+      final response = answer(query['since'] as String?);
+      if (response is Exception) throw response;
+      if (response is QueryPublicRoomsResponse) return response.toJson();
+      return response as Map<String, Object?>;
     });
   }
+
+  void stubDirectory(Map<String?, Object> responsesBySince) =>
+      respond((since) => responsesBySince[since]!);
+
+  VerificationResult verifyRequests({String? since}) => verify(
+    mockClient.request(
+      RequestType.GET,
+      '/client/v3/publicRooms',
+      query: since == null
+          ? anyNamed('query')
+          : argThat(containsPair('since', since), named: 'query'),
+    ),
+  );
 
   Future<List<int>> pageSizes() async {
     final pages = await datasource.fetchDirectory(limit: 1000).toList();
@@ -71,27 +91,26 @@ void main() {
 
         // Assert
         expect(sizes, [100, 5]);
-        verifyNever(mockClient.queryPublicRooms(server: anyNamed('server')));
+        verifyNever(
+          mockClient.request(
+            RequestType.GET,
+            any,
+            query: argThat(contains('server'), named: 'query'),
+          ),
+        );
       },
     );
 
     test('fetchDirectory_whenOverTheLimit_stopsAndCutsAtTheLimit', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
-      ).thenAnswer(
-        (invocation) async =>
-            page(0, 100, next: '${invocation.namedArguments[#since] ?? ''}+'),
-      );
+      respond((since) => page(0, 100, next: '${since ?? ''}+'));
 
       // Act
       final pages = await datasource.fetchDirectory(limit: 250).toList();
 
       // Assert
       expect(pages.map((page) => page.length), [100, 100, 50]);
-      verify(
-        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
-      ).called(3);
+      verifyRequests().called(3);
     });
 
     test('fetchDirectory_whenALaterPageFails_keepsThePagesRead', () async {
@@ -120,7 +139,7 @@ void main() {
 
       // Assert
       expect(sizes, [100, 3]);
-      verify(mockClient.queryPublicRooms(limit: 100, since: 'p2')).called(1);
+      verifyRequests(since: 'p2').called(1);
     });
 
     test('fetchDirectory_whenAPageIsEmptyWithAToken_keepsGoing', () async {
@@ -136,12 +155,7 @@ void main() {
 
     test('fetchDirectory_whenEmptyPagesNeverEnd_stopsAfterThree', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
-      ).thenAnswer(
-        (invocation) async =>
-            page(0, 0, next: '${invocation.namedArguments[#since] ?? ''}+'),
-      );
+      respond((since) => page(0, 0, next: '${since ?? ''}+'));
 
       // Act
       final sizes = await pageSizes();
@@ -152,11 +166,9 @@ void main() {
 
     test('fetchDirectory_whenPagesAreShort_keepsReading', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: anyNamed('since')),
-      ).thenAnswer((invocation) async {
-        final since = invocation.namedArguments[#since] as String? ?? '';
-        return page(0, 1, next: since.length < 5 ? '$since+' : null);
+      respond((since) {
+        final token = since ?? '';
+        return page(0, 1, next: token.length < 5 ? '$token+' : null);
       });
 
       // Act
@@ -168,8 +180,8 @@ void main() {
 
     test('fetchDirectory_always_skipsRoomsNobodyCanJoin', () async {
       // Arrange
-      when(mockClient.queryPublicRooms(limit: 100, since: null)).thenAnswer(
-        (_) async => QueryPublicRoomsResponse(
+      stubDirectory({
+        null: QueryPublicRoomsResponse(
           chunk: [
             chunk('!public', joinRule: 'public'),
             chunk('!unset'),
@@ -178,7 +190,7 @@ void main() {
             chunk('!knock', joinRule: 'knock'),
           ],
         ),
-      );
+      });
 
       // Act
       final rooms = await datasource.fetchDirectory(limit: 1000).first;
@@ -204,11 +216,44 @@ void main() {
       expect(sizes, [0]);
     });
 
+    test('fetchDirectory_whenARoomIsMalformed_skipsOnlyThatRoom', () async {
+      // Arrange
+      stubDirectory({
+        null: {
+          'chunk': [
+            chunk('!a').toJson(),
+            {...chunk('!bad').toJson(), 'avatar_url': 'http://['},
+            chunk('!b').toJson(),
+          ],
+        },
+      });
+
+      // Act
+      final rooms = await datasource.fetchDirectory(limit: 1000).first;
+
+      // Assert
+      expect(rooms.map((room) => room.roomId), ['!a', '!b']);
+    });
+
+    test('fetchDirectory_whenPagesListNoRoomForever_stopsAfterThree', () async {
+      // Arrange
+      respond(
+        (since) => QueryPublicRoomsResponse(
+          chunk: [chunk('!closed', joinRule: 'invite')],
+          nextBatch: '${since ?? ''}+',
+        ),
+      );
+
+      // Act
+      final sizes = await pageSizes();
+
+      // Assert
+      expect(sizes, [0, 0, 0]);
+    });
+
     test('fetchDirectory_whenTheFirstPageFails_throwsFetchFailed', () async {
       // Arrange
-      when(
-        mockClient.queryPublicRooms(limit: 100, since: null),
-      ).thenThrow(Exception('down'));
+      stubDirectory({null: Exception('down')});
 
       // Act
       final result = datasource.fetchDirectory(limit: 1000).toList();
@@ -222,8 +267,8 @@ void main() {
 
     test('fetchDirectory_always_mapsKindAccessAndName', () async {
       // Arrange
-      when(mockClient.queryPublicRooms(limit: 100, since: null)).thenAnswer(
-        (_) async => QueryPublicRoomsResponse(
+      stubDirectory({
+        null: QueryPublicRoomsResponse(
           chunk: [
             chunk('!g', name: 'Group'),
             chunk('!f', roomType: FeedConfig.roomType, joinRule: 'knock'),
@@ -234,7 +279,7 @@ void main() {
             chunk('!u', joinRule: 'org.unknown'),
           ],
         ),
-      );
+      });
 
       // Act
       final rooms = await datasource.fetchDirectory(limit: 1000).first;
@@ -263,7 +308,7 @@ void main() {
     });
   });
 
-  test('knownRoomIds_always_listsJoinedInvitedAndBannedRooms', () {
+  test('knownRoomIds_always_listsJoinedAndInvitedRooms', () {
     // Arrange
     final joined = MockRoom();
     when(joined.id).thenReturn('!joined');
@@ -271,19 +316,16 @@ void main() {
     final invited = MockRoom();
     when(invited.id).thenReturn('!invited');
     when(invited.membership).thenReturn(Membership.invite);
-    final banned = MockRoom();
-    when(banned.id).thenReturn('!banned');
-    when(banned.membership).thenReturn(Membership.ban);
     final left = MockRoom();
     when(left.id).thenReturn('!left');
     when(left.membership).thenReturn(Membership.leave);
-    when(mockClient.rooms).thenReturn([joined, invited, banned, left]);
+    when(mockClient.rooms).thenReturn([joined, invited, left]);
 
     // Act
     final ids = datasource.getKnownRoomIds();
 
     // Assert
-    expect(ids, {'!joined', '!invited', '!banned'});
+    expect(ids, {'!joined', '!invited'});
   });
 
   group('getKnockedRoomIds', () {
