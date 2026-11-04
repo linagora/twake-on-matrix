@@ -136,9 +136,9 @@ void main() {
     expect(container.read(roomAccessControllerProvider(roomId)).value, invite);
   });
 
-  test('save_whenTheRoomChangesMeanwhile_keepsTheNewState', () async {
-    // Arrange
+  Future<RoomAccess?> listWhileTheRoomBecomes(RoomAccess next) async {
     final updates = StreamController<RoomAccess>();
+    addTearDown(updates.close);
     final listed = Completer<void>();
     final container = createContainer(updates: updates.stream);
     when(
@@ -146,46 +146,35 @@ void main() {
     ).thenAnswer((_) => listed.future);
     updates.add(invite);
     await container.read(roomAccessControllerProvider(roomId).future);
-
-    // Act
     final saving = container
         .read(roomAccessControllerProvider(roomId).notifier)
         .save(const RoomAccessDraft(isListed: true));
-    updates.add(invite.copyWith(isEncrypted: true));
+    updates.add(next);
     await pumpEventQueue();
     listed.complete();
     await saving;
+    return container.read(roomAccessControllerProvider(roomId)).value;
+  }
+
+  test('save_whenTheRoomChangesMeanwhile_keepsTheNewState', () async {
+    // Act
+    final access = await listWhileTheRoomBecomes(
+      invite.copyWith(isEncrypted: true),
+    );
 
     // Assert
-    final access = container.read(roomAccessControllerProvider(roomId)).value;
     expect(access?.isEncrypted, isTrue);
     expect(access?.isListed, isTrue);
-    await updates.close();
   });
 
   test('save_whenTheSectionHidesMeanwhile_staysHidden', () async {
-    // Arrange
-    final updates = StreamController<RoomAccess>();
-    final listed = Completer<void>();
-    final container = createContainer(updates: updates.stream);
-    when(
-      repository.setListed(roomId, isListed: true),
-    ).thenAnswer((_) => listed.future);
-    updates.add(invite);
-    await container.read(roomAccessControllerProvider(roomId).future);
-
     // Act
-    final saving = container
-        .read(roomAccessControllerProvider(roomId).notifier)
-        .save(const RoomAccessDraft(isListed: true));
-    updates.add(invite.copyWith(canChange: false));
-    await pumpEventQueue();
-    listed.complete();
-    await saving;
+    final access = await listWhileTheRoomBecomes(
+      invite.copyWith(canChange: false),
+    );
 
     // Assert
-    expect(container.read(roomAccessControllerProvider(roomId)).value, isNull);
-    await updates.close();
+    expect(access, isNull);
   });
 
   test('save_unchangedDraft_sendsNothing', () async {
