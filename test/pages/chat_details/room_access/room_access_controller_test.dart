@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -32,11 +34,12 @@ void main() {
 
   ProviderContainer createContainer({
     RoomAccess access = invite,
+    Stream<RoomAccess>? updates,
     bool isPublicGroupsEnabled = true,
   }) {
     when(
       repository.watchRoomAccess(roomId),
-    ).thenAnswer((_) => Stream.value(access));
+    ).thenAnswer((_) => updates ?? Stream.value(access));
     final container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
@@ -130,6 +133,33 @@ void main() {
     // Assert
     await expectLater(result, throwsA(isA<RoomAccessForbiddenException>()));
     expect(container.read(roomAccessControllerProvider(roomId)).value, invite);
+  });
+
+  test('save_whenTheRoomChangesMeanwhile_keepsTheNewState', () async {
+    // Arrange
+    final updates = StreamController<RoomAccess>();
+    final listed = Completer<void>();
+    final container = createContainer(updates: updates.stream);
+    when(
+      repository.setListed(roomId, isListed: true),
+    ).thenAnswer((_) => listed.future);
+    updates.add(invite);
+    await container.read(roomAccessControllerProvider(roomId).future);
+
+    // Act
+    final saving = container
+        .read(roomAccessControllerProvider(roomId).notifier)
+        .save(const RoomAccessDraft(isListed: true));
+    updates.add(invite.copyWith(isEncrypted: true));
+    await pumpEventQueue();
+    listed.complete();
+    await saving;
+
+    // Assert
+    final access = container.read(roomAccessControllerProvider(roomId)).value;
+    expect(access?.isEncrypted, isTrue);
+    expect(access?.isListed, isTrue);
+    await updates.close();
   });
 
   test('save_unchangedDraft_sendsNothing', () async {

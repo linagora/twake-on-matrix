@@ -374,7 +374,8 @@ class ChatDetailsEditController extends ConsumerState<ChatDetailsEdit>
         RoomAccessEncryptedException() => l10n.roomAccessEncrypted,
         RoomAccessForbiddenException() => l10n.roomAccessForbidden,
         RoomAccessPublicPageException() => l10n.roomAccessPublicPage,
-        _ => l10n.oopsSomethingWentWrong,
+        RoomAccessRoomNotFoundException() ||
+        RoomAccessSaveFailedException() => l10n.oopsSomethingWentWrong,
       });
     }
   }
