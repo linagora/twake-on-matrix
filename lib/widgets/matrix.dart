@@ -43,7 +43,7 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/uia_request_manager.dart';
@@ -1254,41 +1254,15 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
-    if (newClient.homeserver == null) return;
-    final previousSummary = loginHomeserverSummary;
-
-    HomeserverSummary? checkedSummary;
-    try {
-      checkedSummary = await newClient
-          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
-          .toHomeserverSummary();
-    } catch (e) {
-      Logs().w(
-        'Matrix::_getHomeserverInformation: homeserver unreachable, using '
-        'cached discovery information',
-        e,
-      );
-    }
-
-    final discovery = await newClient.getWellKnownOrFallback(
-      fallback: previousSummary?.discoveryInformation,
+    final summary = await newClient.fetchHomeserverSummary(
+      previous: loginHomeserverSummary,
     );
-
-    if (checkedSummary == null && discovery == null) return;
 
     // The active client may have changed while awaiting: a late result must
     // not overwrite the newer account's summary.
     if (clientOrNull != newClient) return;
 
-    loginHomeserverSummary = HomeserverSummary(
-      discoveryInformation: discovery,
-      versions:
-          checkedSummary?.versions ??
-          previousSummary?.versions ??
-          GetVersionsResponse(versions: []),
-      loginFlows:
-          checkedSummary?.loginFlows ?? previousSummary?.loginFlows ?? [],
-    );
+    loginHomeserverSummary = summary;
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
     );
