@@ -706,7 +706,7 @@ packages:
     source: hosted
     version: "2.2.0"
   fake_async:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: fake_async
       sha256: "5368f224a74523e8d2e7399ea1638b37aecfca824a3cc4dfdf77bf1fa905ac44"
@@ -978,7 +978,7 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: bc52977705f401d8874421e9e0544673a9030cc3
+      resolved-ref: "1171329c57606a2a01fbcbddce887cc663455e26"
       url: "https://github.com/linagora/emoji_mart.git"
     source: git
     version: "1.0.2"
@@ -1890,11 +1890,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.4.1"
-      resolved-ref: "0b2cf6812c680a2d1e8a7a8a560b6cebe317201f"
+      ref: "v0.4.2"
+      resolved-ref: "6649323f354ab319e48f6b79e500650a38caac7d"
       url: "https://github.com/linagora/linagora-design-flutter.git"
     source: git
-    version: "0.4.1"
+    version: "0.4.2"
   linkfy_text:
     dependency: "direct main"
     description:

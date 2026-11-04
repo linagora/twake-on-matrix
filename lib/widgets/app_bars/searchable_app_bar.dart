@@ -206,12 +206,28 @@ class SearchableAppBar extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                 )
               : null,
-          suffixIcon: const SizedBox.shrink(),
+          suffixIcon: isFullScreen
+              ? const SizedBox.shrink()
+              : _clearButtonBuilder(context),
           hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
             color: LinagoraRefColors.material().neutral[60],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _clearButtonBuilder(BuildContext context) {
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: textEditingController,
+      builder: (context, value, _) {
+        if (value.text.isEmpty) return const SizedBox.shrink();
+        return TwakeIconButton(
+          onTap: textEditingController.clear,
+          tooltip: L10n.of(context)!.clear,
+          icon: Icons.close,
+        );
+      },
     );
   }
 }

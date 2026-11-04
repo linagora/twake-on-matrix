@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 import 'package:matrix/matrix.dart';
 
@@ -7,7 +6,9 @@ class LanguageCacheManager {
   static const keyLanguageCode = 'LANGUAGE_CODE';
   static const keyCountryCode = 'COUNTRY_CODE';
 
-  final Store pres = getIt.get<Store>();
+  LanguageCacheManager(this.pres);
+
+  final Store pres;
 
   Future<void> persistLanguage(Locale localeCurrent) async {
     await Future.wait([

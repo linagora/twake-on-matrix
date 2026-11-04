@@ -13,6 +13,8 @@ import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:twake_chat/utils/size_string.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -27,6 +29,9 @@ import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'matrix_file_extension.dart';
+
+const _searchEngine = SearchEngine();
+const _searchOptions = SearchOptions(diacriticSensitive: false);
 
 extension LocalizedBody on Event {
   Future<LoadingDialogResult<MatrixFile?>> getFile(
@@ -82,8 +87,11 @@ extension LocalizedBody on Event {
 
   bool get isCopyable => messageType == MessageTypes.Text;
 
-  bool isContains(String? searchTerm) =>
-      plaintextBody.toLowerCase().contains(searchTerm?.toLowerCase() ?? '');
+  bool isContains(String? searchTerm) => _searchEngine.matchesText(
+    searchTerm ?? '',
+    plaintextBody,
+    options: _searchOptions,
+  );
 
   bool get isSearchable =>
       messageType == MessageTypes.Text || messageType == MessageTypes.File;

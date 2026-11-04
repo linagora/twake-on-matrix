@@ -42,5 +42,11 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | device_settings | Controller, still on `app_state` | #3389 |
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
+| recovery | Fetching ToM recovery words on a use case (login path covered by unit tests and a manual iOS check, no Patrol scenario with ToM); save/delete wait for their Patrol scenarios; key cache, SSSS unlock and self-verification still on interactors | #3530 |
+| user_info | Contacts visibility: Controller and `Future` use cases; get user info still on its interactor. Patrol: backend-only, run manually against a mock ToM | #3532 |
+| settings_app_language | Use case + native providers; `LanguageCacheManager` still in GetIt for `LocalizationService` | #3538 |
+| forward | Use case + native providers + controller, GetIt removed | #3540 |
+| new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | #3541 |
+| capabilities | Use case + native providers, GetIt removed | #3539 |
 | preview_url | Use case + native providers, GetIt registrations removed; `MediaAPI` still reads the home `DioClient` from GetIt (shared with upload and download) | #3537 |
 | Everything else | Legacy | |

@@ -2816,6 +2816,8 @@
     }
   },
   "groupPrivacyLimitToServerDescription": "This public chat is available only to users on this server, turn the toggle off to open it to everyone. Note that this setting can't be changed later",
+  "encryptionUnavailableForPublicChat": "A public chat can't be end-to-end encrypted. Turn off \"Make chat public\" to enable encryption",
+  "publicUnavailableForEncryptedChat": "An encrypted chat can't be public. Turn off encryption to make it public",
   "reactionSemanticLabel": "{reaction}, {count, plural, =1{1 reaction} other{{count} reactions}}",
   "@reactionSemanticLabel": {
     "type": "text",

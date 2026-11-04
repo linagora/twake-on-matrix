@@ -64,8 +64,10 @@ void main() {
 
   MockEvent reactionEvent(String key, {String senderId = myUserId}) {
     final event = MockEvent();
+    final sender = user(senderId);
     when(event.room).thenReturn(room);
     when(event.senderId).thenReturn(senderId);
+    when(event.senderFromMemoryOrFallback).thenReturn(sender);
     when(event.content).thenReturn({
       'm.relates_to': {
         'rel_type': RelationshipTypes.reaction,
@@ -99,6 +101,56 @@ void main() {
       ),
     ),
   );
+
+  group('groupReactions', () {
+    const bob = '@bob:example.com';
+    const carol = '@carol:example.com';
+    const thumbsUpVs16 = '👍\uFE0F';
+    const thumbsUpVs15 = '👍\uFE0E';
+
+    test('merges keys that differ only by a variation selector', () {
+      final reactions = groupReactions([
+        reactionEvent('👍', senderId: bob),
+        reactionEvent(thumbsUpVs16, senderId: carol),
+        reactionEvent(thumbsUpVs15),
+      ], myUserId);
+
+      expect(reactions, hasLength(1));
+      expect(reactions.single.key, '👍');
+      expect(reactions.single.count, 3);
+      expect(reactions.single.reactors, hasLength(3));
+      expect(reactions.single.reacted, isTrue);
+    });
+
+    test('marks as reacted when my reaction used the other variant', () {
+      final reactions = groupReactions([
+        reactionEvent('👍', senderId: bob),
+        reactionEvent(thumbsUpVs16),
+      ], myUserId);
+
+      expect(reactions.single.reacted, isTrue);
+    });
+
+    test('counts a sender once when they sent both variants', () {
+      final reactions = groupReactions([
+        reactionEvent('👍', senderId: bob),
+        reactionEvent(thumbsUpVs16, senderId: bob),
+      ], myUserId);
+
+      expect(reactions.single.count, 1);
+      expect(reactions.single.reacted, isFalse);
+    });
+
+    test('keeps different emojis apart', () {
+      final reactions = groupReactions([
+        reactionEvent('👍'),
+        reactionEvent('❤️', senderId: bob),
+        reactionEvent('❤️', senderId: carol),
+      ], myUserId);
+
+      expect(reactions.map((r) => (r.key, r.count)), [('❤️', 2), ('👍', 1)]);
+    });
+  });
 
   group('ReactionsList', () {
     testWidgets('hides a count of 1 and shows higher counts', (tester) async {
@@ -158,6 +210,26 @@ void main() {
     testWidgets('redacts my own reaction when already reacted', (tester) async {
       final othersReaction = reactionEvent('👍', senderId: '@bob:example.com');
       final myReaction = reactionEvent('👍');
+      when(myReaction.redactEvent()).thenAnswer((_) async => r'$redaction');
+
+      await pumpReactions(
+        tester,
+        [reaction('👍', count: 2, reacted: true)],
+        allReactionEvents: {othersReaction, myReaction},
+      );
+      await tester.tap(find.text('👍'));
+      await tester.pump();
+
+      verify(myReaction.redactEvent()).called(1);
+      verifyNever(othersReaction.redactEvent());
+      verifyNever(room.sendReaction(any, any));
+    });
+
+    testWidgets('redacts my reaction sent with the other variant', (
+      tester,
+    ) async {
+      final othersReaction = reactionEvent('👍', senderId: '@bob:example.com');
+      final myReaction = reactionEvent('👍\uFE0F');
       when(myReaction.redactEvent()).thenAnswer((_) async => r'$redaction');
 
       await pumpReactions(

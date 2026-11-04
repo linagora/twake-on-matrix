@@ -19,66 +19,58 @@ class _ExpansionParticipantsListState extends State<ExpansionParticipantsList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(16.0),
-          onTap: () => toggleExpansionList(),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 2.0),
-            child: Row(
-              children: [
-                SizedBox(
-                  height: 44,
-                  child: Row(
-                    children: [
-                      Text(
-                        L10n.of(
-                          context,
-                        )!.participantsCount(widget.contactsList.length),
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: LinagoraRefColors.material().neutral[40],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Expanded(child: SizedBox.shrink()),
-                TwakeIconButton(
-                  paddingAll: 6,
-                  buttonDecoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Theme.of(
+    final contacts = widget.contactsList.toList();
+    return ListView.builder(
+      key: const ValueKey("participants list"),
+      padding: EdgeInsets.zero,
+      physics: const BouncingScrollPhysics(),
+      itemCount: isExpanded ? contacts.length + 1 : 1,
+      itemBuilder: (context, index) => index == 0
+          ? _buildHeader(context)
+          : ExpansionContactListTile(contact: contacts[index - 1]),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16.0),
+      onTap: () => toggleExpansionList(),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0, right: 2.0),
+        child: Row(
+          children: [
+            SizedBox(
+              height: 44,
+              child: Row(
+                children: [
+                  Text(
+                    L10n.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.12),
+                    )!.participantsCount(widget.contactsList.length),
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: LinagoraRefColors.material().neutral[40],
+                    ),
                   ),
-                  icon: isExpanded ? Icons.expand_less : Icons.expand_more,
-                  tooltip: isExpanded
-                      ? L10n.of(context)!.shrink
-                      : L10n.of(context)!.expand,
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+            const Expanded(child: SizedBox.shrink()),
+            TwakeIconButton(
+              paddingAll: 6,
+              buttonDecoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withOpacity(0.12),
+              ),
+              icon: isExpanded ? Icons.expand_less : Icons.expand_more,
+              tooltip: isExpanded
+                  ? L10n.of(context)!.shrink
+                  : L10n.of(context)!.expand,
+            ),
+          ],
         ),
-        isExpanded
-            ? Expanded(
-                child: SingleChildScrollView(
-                  key: const ValueKey("participants list"),
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: widget.contactsList
-                        .map(
-                          (contact) =>
-                              ExpansionContactListTile(contact: contact),
-                        )
-                        .toList(),
-                  ),
-                ),
-              )
-            : const Offstage(),
-      ],
+      ),
     );
   }
 

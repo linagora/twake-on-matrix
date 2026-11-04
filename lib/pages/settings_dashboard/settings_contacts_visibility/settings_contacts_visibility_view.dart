@@ -1,6 +1,6 @@
 import 'package:twake_chat/domain/model/user_info/user_info_visibility.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_enum.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility_state.dart';
 import 'package:twake_chat/presentation/extensions/settings/user_info_visibility_extension.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
@@ -10,9 +10,26 @@ import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class SettingsContactsVisibilityView extends StatelessWidget {
-  final SettingsContactsVisibilityController controller;
+  const SettingsContactsVisibilityView({
+    super.key,
+    required this.state,
+    required this.onBack,
+    required this.onSelectVisibilityOption,
+    required this.onUpdateVisibleFields,
+  });
 
-  const SettingsContactsVisibilityView({super.key, required this.controller});
+  static const _visibilityOptions = [
+    SettingsContactsVisibilityEnum.public,
+    SettingsContactsVisibilityEnum.contacts,
+    SettingsContactsVisibilityEnum.private,
+  ];
+
+  static const _visibleFieldsOptions = [VisibleEnum.phone, VisibleEnum.email];
+
+  final SettingsContactsVisibilityState state;
+  final VoidCallback onBack;
+  final void Function(SettingsContactsVisibilityEnum) onSelectVisibilityOption;
+  final void Function(VisibleEnum) onUpdateVisibleFields;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +47,7 @@ class SettingsContactsVisibilityView extends StatelessWidget {
           splashColor: Colors.transparent,
           hoverColor: Colors.transparent,
           highlightColor: Colors.transparent,
-          onTap: controller.onBack,
+          onTap: onBack,
           icon: Icons.arrow_back_ios,
         ),
       ),
@@ -71,111 +88,70 @@ class SettingsContactsVisibilityView extends StatelessWidget {
                       ),
                     ),
                     child: Column(
-                      children: controller.visibilityOptions
+                      children: _visibilityOptions
                           .map(
-                            (option) => ValueListenableBuilder(
-                              valueListenable:
-                                  controller.getUserInfoVisibilityNotifier,
-                              builder: (context, state, _) {
-                                return ValueListenableBuilder(
-                                  valueListenable: controller
-                                      .selectedVisibilityOptionNotifier,
-                                  builder: (context, _, __) {
-                                    final isVisibilitySelected =
-                                        controller
-                                            .selectedVisibilityOptionNotifier
-                                            .value ==
-                                        option;
-                                    return _buildVisibilityOptionItem(
-                                      context: context,
-                                      option: option,
-                                      enableDivider: option.enableDivider(),
-                                      isSelected: isVisibilitySelected,
-                                      onTap:
-                                          controller.onSelectVisibilityOption,
-                                    );
-                                  },
-                                );
-                              },
+                            (option) => _buildVisibilityOptionItem(
+                              context: context,
+                              option: option,
+                              enableDivider: option.enableDivider(),
+                              isSelected: state.visibility == option,
+                              onTap: onSelectVisibilityOption,
                             ),
                           )
                           .toList(),
                     ),
                   ),
-                  ValueListenableBuilder(
-                    valueListenable:
-                        controller.selectedVisibilityOptionNotifier,
-                    builder: (context, selectedOption, _) {
-                      if (selectedOption ==
-                          SettingsContactsVisibilityEnum.private) {
-                        return const SizedBox.shrink();
-                      }
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(
-                              left: 32,
-                              right: 32,
-                              top: 32,
-                              bottom: 8,
-                            ),
-                            child: Text(
-                              L10n.of(
-                                context,
-                              )!.chooseWhichDetailsAreVisibleToOtherUsers,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color:
-                                        LinagoraSysColors.material().tertiary,
-                                  ),
-                              textAlign: TextAlign.center,
+                  if (state.visibility !=
+                      SettingsContactsVisibilityEnum.private)
+                    Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            left: 32,
+                            right: 32,
+                            top: 32,
+                            bottom: 8,
+                          ),
+                          child: Text(
+                            L10n.of(
+                              context,
+                            )!.chooseWhichDetailsAreVisibleToOtherUsers,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: LinagoraSysColors.material().tertiary,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color:
+                                  LinagoraRefColors.material().neutral[90] ??
+                                  Colors.transparent,
+                              width: 1,
                             ),
                           ),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color:
-                                    LinagoraRefColors.material().neutral[90] ??
-                                    Colors.transparent,
-                                width: 1,
-                              ),
-                            ),
-                            child: Column(
-                              children: controller.visibleFieldsOptions
-                                  .map(
-                                    (option) => ValueListenableBuilder(
-                                      valueListenable: controller
-                                          .getUserInfoVisibilityNotifier,
-                                      builder: (context, state, _) {
-                                        return ValueListenableBuilder(
-                                          valueListenable: controller
-                                              .selectedVisibleFieldNotifier,
-                                          builder:
-                                              (context, selectedFields, child) {
-                                                return _buildVisibleFieldItem(
-                                                  context: context,
-                                                  option: option,
-                                                  enableDivider: option
-                                                      .enableDivider(),
-                                                  isSelected: selectedFields
-                                                      .contains(option),
-                                                  onTap: controller
-                                                      .onUpdateVisibleFields,
-                                                );
-                                              },
-                                        );
-                                      },
+                          child: Column(
+                            children: _visibleFieldsOptions
+                                .map(
+                                  (option) => _buildVisibleFieldItem(
+                                    context: context,
+                                    option: option,
+                                    enableDivider: option.enableDivider(),
+                                    isSelected: state.visibleFields.contains(
+                                      option,
                                     ),
-                                  )
-                                  .toList(),
-                            ),
+                                    onTap: onUpdateVisibleFields,
+                                  ),
+                                )
+                                .toList(),
                           ),
-                        ],
-                      );
-                    },
-                  ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

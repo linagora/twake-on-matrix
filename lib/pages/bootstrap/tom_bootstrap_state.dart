@@ -14,48 +14,44 @@ part 'tom_bootstrap_state.freezed.dart';
 /// otherwise compare equal to the previous one via freezed's generated
 /// `==`) so `ref.listen` always sees a change and never misses a pop.
 @freezed
-sealed class TomBootstrapUiState with _$TomBootstrapUiState {
+sealed class TomBootstrapState with _$TomBootstrapState {
   /// Waiting on `client.firstSyncReceived`/`userDeviceKeysLoading`/
   /// `roomsLoading`/`accountDataLoading`, or a `matrix` SDK auto-driven
   /// `BootstrapState` transition — both render the same spinner.
-  const factory TomBootstrapUiState.loading({@Default(0) int popTick}) =
+  const factory TomBootstrapState.loading({@Default(0) int popTick}) =
       TomBootstrapLoadingState;
 
-  const factory TomBootstrapUiState.checkingRecovery({
-    @Default(0) int popTick,
-  }) = TomBootstrapCheckingRecoveryState;
+  const factory TomBootstrapState.checkingRecovery({@Default(0) int popTick}) =
+      TomBootstrapCheckingRecoveryState;
 
-  const factory TomBootstrapUiState.uploadingCrossSigningKeys({
+  const factory TomBootstrapState.uploadingCrossSigningKeys({
     @Default(0) int popTick,
   }) = TomBootstrapUploadingCrossSigningKeysState;
 
-  /// No recovery words to fall back on and no `Bootstrap` was even started —
-  /// stays on the spinner (no error UI, matching the original) until
-  /// `TomBootstrapViewModel.noRecoveryWordsCloseDelay` elapses and closes
-  /// itself with `popValue == false`.
-  const factory TomBootstrapUiState.noRecoveryWords({
+  /// Pops `false` after `TomBootstrapController.noRecoveryWordsCloseDelay`.
+  const factory TomBootstrapState.noRecoveryWords({
     @Default(0) int popTick,
     bool? popValue,
   }) = TomBootstrapNoRecoveryWordsState;
 
-  const factory TomBootstrapUiState.wipeRecoveryFailed({
+  const factory TomBootstrapState.wipeRecoveryFailed({
     @Default(0) int popTick,
   }) = TomBootstrapWipeRecoveryFailedState;
 
-  const factory TomBootstrapUiState.unlockError({@Default(0) int popTick}) =
+  const factory TomBootstrapState.unlockError({@Default(0) int popTick}) =
       TomBootstrapUnlockErrorState;
 
-  const factory TomBootstrapUiState.uploadError({@Default(0) int popTick}) =
+  const factory TomBootstrapState.uploadError({@Default(0) int popTick}) =
       TomBootstrapUploadErrorState;
 
-  const factory TomBootstrapUiState.error({@Default(0) int popTick}) =
+  const factory TomBootstrapState.error({@Default(0) int popTick}) =
       TomBootstrapErrorState;
 
-  const factory TomBootstrapUiState.done({@Default(0) int popTick}) =
+  const factory TomBootstrapState.done({@Default(0) int popTick}) =
       TomBootstrapDoneState;
 }
 
-extension TomBootstrapUiStateX on TomBootstrapUiState {
+extension TomBootstrapStateX on TomBootstrapState {
   /// `null` while non-terminal; the value `Navigator.pop<bool>` should use
   /// once terminal (`popTrue`/`popFalse` map to `true`/`false`, `popNull`
   /// maps to `null` itself — [isTerminal] disambiguates "not terminal yet"

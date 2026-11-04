@@ -81,8 +81,8 @@ class ChatSearchController extends State<ChatSearch> {
       sameTypeEventsBuilderController = SameTypeEventsBuilderController(
         getTimeline: getTimeline,
         searchFunc: (event) =>
-            event.isContains(serverSearchController.debouncerValue) &&
-            event.isSearchable,
+            event.isSearchable &&
+            event.isContains(serverSearchController.debouncerValue),
         limit: _pageLimit,
       );
     }

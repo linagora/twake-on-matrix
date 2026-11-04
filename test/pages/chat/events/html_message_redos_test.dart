@@ -1,23 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 
 /// ReDoS unit tests for HTML mx-reply tag removal regex
 /// Reference: ADR 0033 - Fix ReDoS vulnerabilities in regex patterns
-/// Vulnerability: lib/pages/chat/events/html_message.dart:48
-/// Before: <mx-reply>.*</mx-reply> (greedy, causes catastrophic backtracking)
-/// After: <mx-reply>.*?</mx-reply> (non-greedy, bounded)
+/// Covers String.removeReplyFallback, used by HtmlMessage
 void main() {
   group('HTML mx-reply tag removal ReDoS tests', () {
-    // The actual regex pattern used in HtmlMessage
-    final mxReplyRegex = RegExp(
-      '<mx-reply>.*?</mx-reply>',
-      caseSensitive: false,
-      multiLine: false,
-      dotAll: true,
-    );
-
-    String removeMxReplyTags(String html) {
-      return html.replaceAll(mxReplyRegex, '');
-    }
+    String removeMxReplyTags(String html) => html.removeReplyFallback();
 
     group('Valid mx-reply tag removal', () {
       test('should remove simple mx-reply tag', () {
@@ -97,15 +86,44 @@ void main() {
         expect(result, equals(html));
       });
 
-      test('should handle nested mx-reply tags (non-greedy behavior)', () {
+      test('should remove the whole outer block when mx-reply is nested', () {
         const html =
-            '<mx-reply>Outer <mx-reply>Inner</mx-reply> Outer</mx-reply>';
-        final result = removeMxReplyTags(html);
-        // Non-greedy .*? matches shortest possible
-        // First match: <mx-reply>Outer <mx-reply>Inner</mx-reply>
-        // This gets removed, leaving " Outer</mx-reply>"
-        // The outer closing tag remains because its opening was consumed
-        expect(result.trim(), equals('Outer</mx-reply>'));
+            '<mx-reply>Outer <mx-reply>Inner</mx-reply> Outer</mx-reply>Reply';
+        expect(removeMxReplyTags(html), equals('Reply'));
+      });
+
+      test('should strip a nested reply fallback sent by iamb (#3237)', () {
+        const html =
+            '<mx-reply><blockquote>'
+            '<a href="https://matrix.to/#/!room/\$b">In reply to</a> '
+            '<a href="https://matrix.to/#/@bob:localhost">@bob:localhost</a><br>'
+            '<mx-reply><blockquote>'
+            '<a href="https://matrix.to/#/!room/\$a">In reply to</a> '
+            '<a href="https://matrix.to/#/@alice:localhost">@alice:localhost</a><br>'
+            'First message'
+            '</blockquote></mx-reply>'
+            'Second message'
+            '</blockquote></mx-reply>'
+            'My answer';
+        expect(removeMxReplyTags(html), equals('My answer'));
+      });
+
+      test('should keep content between two nested reply blocks', () {
+        const html =
+            '<mx-reply>A<mx-reply>B</mx-reply></mx-reply>Middle'
+            '<mx-reply>C</mx-reply>End';
+        expect(removeMxReplyTags(html), equals('MiddleEnd'));
+      });
+
+      test('should strip up to the last closing tag when the outer block is '
+          'never closed', () {
+        const html = '<mx-reply>A<mx-reply>B</mx-reply>C';
+        expect(removeMxReplyTags(html), equals('C'));
+      });
+
+      test('should ignore a stray closing tag', () {
+        const html = 'Before</mx-reply><mx-reply>Reply</mx-reply>After';
+        expect(removeMxReplyTags(html), equals('Before</mx-reply>After'));
       });
 
       test('should handle very long content inside mx-reply', () {

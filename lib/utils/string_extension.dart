@@ -308,6 +308,39 @@ extension StringCasingExtension on String {
     return replaceAll('+', '-').replaceAll('/', '_');
   }
 
+  /// Counts nesting so a nested `<mx-reply>` cannot leave the outer
+  /// block's tail visible.
+  String removeReplyFallback() {
+    final result = StringBuffer();
+    var copiedUpTo = 0;
+    var depth = 0;
+    var blockStart = 0;
+    var lastCloseEnd = -1;
+    for (final tag in RegExp(
+      '</?mx-reply>',
+      caseSensitive: false,
+    ).allMatches(this)) {
+      final isClosing = tag[0]![1] == '/';
+      if (!isClosing) {
+        if (depth == 0) blockStart = tag.start;
+        depth++;
+      } else if (depth > 0) {
+        depth--;
+        lastCloseEnd = tag.end;
+        if (depth == 0) {
+          result.write(substring(copiedUpTo, blockStart));
+          copiedUpTo = tag.end;
+        }
+      }
+    }
+    if (depth > 0 && lastCloseEnd > blockStart) {
+      result.write(substring(copiedUpTo, blockStart));
+      copiedUpTo = lastCloseEnd;
+    }
+    result.write(substring(copiedUpTo));
+    return result.toString();
+  }
+
   String get sha256Hash {
     return sha256.convert(utf8.encode(this)).toString();
   }

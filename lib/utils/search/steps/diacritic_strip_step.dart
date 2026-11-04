@@ -13,6 +13,8 @@ class DiacriticStripStep extends NormalizationStep {
 
   @override
   String normalize(String input) {
+    // NFD/NFKD leave ASCII untouched and ASCII has no combining marks.
+    if (input.codeUnits.every((c) => c < 0x80)) return input;
     final decomposed = decomposition == UnicodeDecomposition.nfkd
         ? unorm.nfkd(input)
         : unorm.nfd(input);
