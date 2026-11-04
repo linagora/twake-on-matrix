@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,15 +8,26 @@ import 'package:twake_chat/utils/famedlysdk_store.dart';
 import 'package:twake_chat/utils/famedlysdk_store.provider.dart';
 import 'package:twake_chat/widgets/settings_switch_list_tile.dart';
 
+/// A store whose writes complete only when the test says so.
+class _GatedStore extends Store {
+  final writeGate = Completer<void>();
+
+  @override
+  Future<void> setItemBool(String key, bool value) async {
+    await writeGate.future;
+    await super.setItemBool(key, value);
+  }
+}
+
 void main() {
   const key = 'chat.test.setting';
 
-  Future<List<bool>> pumpTile(WidgetTester tester) async {
+  Future<List<bool>> pumpTile(WidgetTester tester, {Store? store}) async {
     final changes = <bool>[];
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
-        overrides: [storeProvider.overrideWithValue(Store())],
+        overrides: [storeProvider.overrideWithValue(store ?? Store())],
         child: MaterialApp(
           home: Scaffold(
             body: SettingsSwitchListTile.adaptive(
@@ -54,5 +67,21 @@ void main() {
     expect(changes, [true]);
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool(key), isTrue);
+  });
+
+  testWidgets('does not touch its state when removed during the write', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final store = _GatedStore();
+    await pumpTile(tester, store: store);
+
+    await tester.tap(find.byType(SwitchListTile));
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox());
+    store.writeGate.complete();
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
   });
 }
