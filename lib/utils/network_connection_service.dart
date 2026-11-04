@@ -6,7 +6,7 @@ import 'package:matrix/matrix.dart';
 class NetworkConnectionService {
   final Connectivity connectivity;
   late StreamController<ConnectivityResult> networkStreamController;
-  late StreamSubscription<ConnectivityResult> networkStreamSubscription;
+  late StreamSubscription<List<ConnectivityResult>> networkStreamSubscription;
 
   NetworkConnectionService(this.connectivity);
 
@@ -31,7 +31,7 @@ class NetworkConnectionService {
         Logs().d(
           'NetworkConnectionService::_listenNetworkConnectionChanged():onConnectivityChanged: $result',
         );
-        _setNetworkConnectivityState(result);
+        _setNetworkConnectivityState(result.primary);
       },
       onError: (error, stackTrace) {
         Logs().e(
@@ -52,7 +52,8 @@ class NetworkConnectionService {
   }
 
   Future<bool> isNetworkConnectionAvailable() async {
-    return (await connectivity.checkConnectivity()) != ConnectivityResult.none;
+    return (await connectivity.checkConnectivity()).primary !=
+        ConnectivityResult.none;
   }
 
   void getCurrentNetworkConnectionState() async {
@@ -60,7 +61,7 @@ class NetworkConnectionService {
     Logs().d(
       'NetworkConnectionService::onReady():_getCurrentNetworkConnectionState: $currentConnectionResult',
     );
-    _setNetworkConnectivityState(currentConnectionResult);
+    _setNetworkConnectivityState(currentConnectionResult.primary);
   }
 
   Stream<ConnectivityResult> getStreamInstance() {
@@ -69,4 +70,8 @@ class NetworkConnectionService {
     getCurrentNetworkConnectionState();
     return networkStreamController.stream;
   }
+}
+
+extension ConnectivityResultsExtension on List<ConnectivityResult> {
+  ConnectivityResult get primary => firstOrNull ?? ConnectivityResult.none;
 }
