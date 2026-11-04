@@ -2851,5 +2851,86 @@
   "roomAccessListed": "In directory",
   "roomAccessListedHelp": "Anyone can find this room in the public directory.",
   "roomAccessForbidden": "The server refused this change.",
-  "encryptionUnavailableInPublicRoom": "A public room can't be encrypted."
+  "encryptionUnavailableInPublicRoom": "A public room can't be encrypted.",
+  "browsePublicGroups": "Browse public groups",
+  "@browsePublicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroups": "Public groups",
+  "@publicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "searchPublicGroups": "Search public groups",
+  "@searchPublicGroups": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPublicGroupToJoin": "No public group to join.",
+  "@noPublicGroupToJoin": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "joinPublicGroupMembers": "{count, plural, =1{Join · 1 member} other{Join · {count} members}}",
+  "@joinPublicGroupMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "publicGroupRequestSentMembers": "{count, plural, =1{Request sent · 1 member} other{Request sent · {count} members}}",
+  "@publicGroupRequestSentMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "askToJoinPublicGroupMembers": "{count, plural, =1{Ask to join · 1 member} other{Ask to join · {count} members}}",
+  "@askToJoinPublicGroupMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "joinRequestSentAdminMustApprove": "Request sent: an administrator has to approve it.",
+  "@joinRequestSentAdminMustApprove": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroupRequestFailed": "Your request could not be sent.",
+  "@publicGroupRequestFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "noPublicGroupMatchesSearch": "No public group matches your search.",
+  "@noPublicGroupMatchesSearch": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindBroadcast": "Feed",
+  "@roomKindBroadcast": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindPublic": "Public group",
+  "@roomKindPublic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindPeople": "Group",
+  "@roomKindPeople": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroupJoinFailed": "This group could not be joined.",
+  "@publicGroupJoinFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "publicGroupsLoadFailed": "Public groups could not be loaded.",
+  "@publicGroupsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
+  }
 }

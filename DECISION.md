@@ -62,6 +62,39 @@ before room creation existed. The call works, but its first participant may
 not be able to open it without logging in to Meet. Any other failure sends
 nothing and shows that the call could not be started.
 
+## D5. Browse public groups on mobile (proposed by Johann, 2026-11-02)
+
+A planet inside the search field of the chat list, at its right, opens a full
+screen page of the public directory of the user's homeserver, as
+twake-space-chat does. Shown only when the well-known enables public groups
+(`app.twake.chat.public_groups.enabled`).
+
+- The directory of the homeserver alone, read page after page up to 1,000
+  rooms, minus the rooms the user has joined or is invited to, and the rooms
+  nobody can join (`invite` or `private` rules). Groups and feeds only: no
+  spaces.
+  Each page shows as soon as it arrives, with a thin progress bar until the
+  last one, where twake-space-chat waits for the whole directory.
+- Each row: avatar, name, « Join · N members » or « Ask to join · N
+  members » for a room on approval (`knock`), and the topic. A search field
+  on top filters by name, ignoring case and accents.
+- A tap joins and opens the room. On a room on approval it sends the request
+  and says an administrator has to approve it; the page stays open. A failed
+  join says so. Both messages are snackbars, where twake-space-chat shows an
+  inline alert in its dialog.
+- A room where the user's request is pending shows « Request sent · N
+  members » and a tap does nothing, where twake-space-chat lets the user ask
+  again. The row switches right after the request. The pending state is read
+  through room_summary (MSC3266), because the SDK ignores the rooms in knock.
+- The avatar carries the badge of the room kind, as the Figma « Avatar
+  icon » component: a megaphone for a feed, a globe for a public room,
+  people for any other room, none for a direct chat. A room whose join rule
+  is unknown counts as not public.
+- The room-kind badge is shown on every room avatar in the chat list, not
+  behind the public-groups flag, read from each room's join rule (hence
+  `m.room.join_rules` in the important state events), as twake-space-chat
+  does.
+
 ## D6. Who can join a group, and the directory, are set from Edit (proposed by Johann, 2026-11-02)
 
 The Edit screen of a group has a « Who can join » section, as in

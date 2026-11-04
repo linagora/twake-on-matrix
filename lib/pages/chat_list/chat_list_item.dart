@@ -7,7 +7,9 @@ import 'package:twake_chat/pages/chat_list/chat_list_item_title.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
@@ -86,8 +88,6 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     }
   }
 
-  bool get _isGroupChat => !room.isDirectChat;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -113,38 +113,10 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                     if (isEnableSelectMode) checkBoxWidget ?? const SizedBox(),
                     Padding(
                       padding: ChatListItemStyle.paddingAvatar,
-                      child: Stack(
-                        children: [
-                          Avatar(
-                            mxContent: room.avatar,
-                            name: displayName,
-                            onTap: onTapAvatar,
-                            keepAlive: true,
-                          ),
-                          if (_isGroupChat)
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                padding: ChatListItemStyle.paddingIconGroup,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                ),
-                                child: Icon(
-                                  Icons.group,
-                                  size: ChatListItemStyle.groupIconSize,
-                                  color: room.isUnreadOrInvited
-                                      ? LinagoraSysColors.material()
-                                            .onSurfaceVariant
-                                      : LinagoraRefColors.material()
-                                            .tertiary[30],
-                                ),
-                              ),
-                            ),
-                        ],
+                      child: _ChatListAvatar(
+                        room: room,
+                        name: displayName,
+                        onTap: onTapAvatar,
                       ),
                     ),
                     Expanded(
@@ -173,6 +145,42 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ChatListAvatar extends StatelessWidget {
+  const _ChatListAvatar({required this.room, required this.name, this.onTap});
+
+  final Room room;
+  final String name;
+  final VoidCallback? onTap;
+
+  AvatarKindBadge? get _badge {
+    if (room.isDirectChat) return null;
+    if (room.isFeed) return AvatarKindBadge.broadcast;
+    return room.joinRules == JoinRules.public
+        ? AvatarKindBadge.public
+        : AvatarKindBadge.people;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final badge = _badge;
+    if (badge == null) {
+      return Avatar(
+        mxContent: room.avatar,
+        name: name,
+        onTap: onTap,
+        keepAlive: true,
+      );
+    }
+    return AvatarWithKindBadge(
+      badge: badge,
+      mxContent: room.avatar,
+      name: name,
+      onTap: onTap,
+      keepAlive: true,
     );
   }
 }

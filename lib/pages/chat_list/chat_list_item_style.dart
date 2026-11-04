@@ -9,8 +9,6 @@ class ChatListItemStyle {
 
   static const double readIconSize = 20;
 
-  static const double groupIconSize = 16;
-
   static const double mentionIconWidth = 20;
 
   static const double chatItemHeight = 72;
@@ -34,9 +32,6 @@ class ChatListItemStyle {
   static const EdgeInsetsDirectional paddingAvatar = EdgeInsetsDirectional.only(
     end: 8,
   );
-
-  static const EdgeInsetsDirectional paddingIconGroup =
-      EdgeInsetsDirectional.all(4);
 
   static const EdgeInsetsDirectional paddingBody =
       EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4);

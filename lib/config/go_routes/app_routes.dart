@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:twake_chat/config/first_column_inner_routes.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/add_story/add_story.dart';
 import 'package:twake_chat/pages/archive/archive.dart';
@@ -24,6 +25,7 @@ import 'package:twake_chat/pages/new_group/new_group.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat.dart';
 import 'package:twake_chat/pages/personal_qr/personal_qr.dart';
+import 'package:twake_chat/pages/public_rooms/public_rooms_page.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_blocked_users/settings_blocked_user.dart';
@@ -42,6 +44,7 @@ import 'package:twake_chat/pages/splash/splash.dart';
 import 'package:twake_chat/pages/story/story_page.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
 import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -54,6 +57,7 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -304,6 +308,7 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
           routes: [TypedGoRoute<ProfileQrRoute>(path: 'qr')],
         ),
         TypedGoRoute<NotificationsRoute>(path: 'notifications'),
+        TypedGoRoute<PublicRoomsRoute>(path: 'publicgroups'),
         TypedGoRoute<StyleRoute>(path: 'style'),
         TypedGoRoute<DevicesRoute>(path: 'devices'),
         TypedGoRoute<AppLanguageRoute>(path: 'appLanguage'),
@@ -627,6 +632,24 @@ class NotificationsRoute extends GoRouteData with $NotificationsRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _defaultPage(context, const SettingsNotifications());
+}
+
+class PublicRoomsRoute extends GoRouteData with $PublicRoomsRoute {
+  const PublicRoomsRoute();
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
+    final isEnabled = ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(loginHomeserverSummaryProvider).isPublicGroupsEnabled;
+    if (!isEnabled) return const RoomsRoute().location;
+    return _loggedOutRedirect(context, state);
+  }
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const PublicRoomsPage());
 }
 
 class StyleRoute extends GoRouteData with $StyleRoute {
