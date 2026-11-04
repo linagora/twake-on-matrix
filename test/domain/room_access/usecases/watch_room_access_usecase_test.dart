@@ -16,6 +16,7 @@ void main() {
       isListed: true,
       isEncrypted: false,
       canChange: true,
+      hasPublicPage: false,
     );
     final repository = MockRoomAccessRepository();
     when(

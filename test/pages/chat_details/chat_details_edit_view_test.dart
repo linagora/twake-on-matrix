@@ -36,6 +36,7 @@ void main() {
     isListed: false,
     isEncrypted: false,
     canChange: true,
+    hasPublicPage: false,
   );
 
   late MockChatDetailsEditController controller;

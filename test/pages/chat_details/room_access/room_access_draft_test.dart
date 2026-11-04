@@ -8,6 +8,7 @@ void main() {
     isListed: false,
     isEncrypted: false,
     canChange: true,
+    hasPublicPage: false,
   );
 
   test('choose_public_turnsTheListingOn', () {

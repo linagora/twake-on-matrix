@@ -59,6 +59,7 @@ void main() {
     isListed: false,
     isEncrypted: false,
     canChange: true,
+    hasPublicPage: false,
   );
 
   late MockClient client;

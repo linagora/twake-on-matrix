@@ -16,7 +16,7 @@ abstract class RoomAccess with _$RoomAccess {
     required bool canChange,
 
     /// While the public web page is on, the room stays public and listed.
-    @Default(false) bool hasPublicPage,
+    required bool hasPublicPage,
   }) = _RoomAccess;
 
   /// An encrypted room keeps what it already has, so it can be taken out.
