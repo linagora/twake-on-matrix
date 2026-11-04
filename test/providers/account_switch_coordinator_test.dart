@@ -815,8 +815,13 @@ void main() {
       boot();
       final switching = switchTo('b');
       await pump();
-      final activation = coordinator.activateCurrent();
+      var ended = false;
+      final activation = coordinator.activateCurrent().whenComplete(
+        () => ended = true,
+      );
       await pump();
+      // It waits for the switch: it does not answer while the switch runs.
+      expect(ended, isFalse);
       effects.gates['homeserver:b']!.complete();
       await switching;
 
