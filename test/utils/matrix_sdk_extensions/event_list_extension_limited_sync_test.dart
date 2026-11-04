@@ -6,20 +6,22 @@ import '../../fake_client.dart';
 
 late Room _room;
 
-Event _message(String id, int minute, {String type = EventTypes.Message}) =>
-    Event(
-      senderId: '@khaled:example.com',
-      type: type,
-      room: _room,
-      eventId: id,
-      content: {'body': id},
-      originServerTs: DateTime.utc(
-        2026,
-        11,
-        4,
-        10,
-      ).add(Duration(minutes: minute)),
-    );
+Event _message(
+  String id,
+  int minute, {
+  String type = EventTypes.Message,
+  String senderId = '@khaled:example.com',
+}) => Event(
+  senderId: senderId,
+  type: type,
+  room: _room,
+  eventId: id,
+  content: {'body': id},
+  originServerTs: DateTime.utc(2026, 11, 4, 10).add(Duration(minutes: minute)),
+);
+
+Event _ownMessage(String id, int minute) =>
+    _message(id, minute, senderId: _room.client.userID!);
 
 EventListSyncResult _sync({
   required List<Event> oldEvents,
@@ -51,6 +53,14 @@ void main() {
   test(
     'shows the new events in the bottom list when no shown event is left',
     _resetsWhenNoShownEventIsLeft,
+  );
+  test(
+    'does not scroll to the bottom for an own message filling a gap',
+    _ownGapMessageDoesNotScrollToBottom,
+  );
+  test(
+    'scrolls to the bottom for an own message newer than the shown ones',
+    _newOwnMessageScrollsToBottom,
   );
 }
 
@@ -85,7 +95,8 @@ void _keepsGapEventsAfterLimitedSync() {
     currentBottom: firstBuild.bottom,
   );
 
-  expect([...secondBuild.top, ...secondBuild.bottom], contains(khaled));
+  expect(secondBuild.top, [khaled, reaction1, reaction2]);
+  expect(secondBuild.bottom, [anton, older]);
 }
 
 void _splitsAroundTopAnchor() {
@@ -118,4 +129,35 @@ void _resetsWhenNoShownEventIsLeft() {
 
   expect(result.top, isEmpty);
   expect(result.bottom, [replacement]);
+}
+
+void _ownGapMessageDoesNotScrollToBottom() {
+  final shown = _message(r'$shown', 0);
+  final newestShown = _message(r'$newestShown', 20);
+  final ownInGap = _ownMessage(r'$ownInGap', 10);
+
+  final result = _sync(
+    oldEvents: [newestShown, shown],
+    newEvents: [newestShown, ownInGap, shown],
+    currentTop: [newestShown],
+    currentBottom: [shown],
+  );
+
+  expect(result.top, [ownInGap, newestShown]);
+  expect(result.shouldScrollToBottom, isFalse);
+}
+
+void _newOwnMessageScrollsToBottom() {
+  final shown = _message(r'$shown', 0);
+  final ownNewer = _ownMessage(r'$ownNewer', 10);
+
+  final result = _sync(
+    oldEvents: [shown],
+    newEvents: [ownNewer, shown],
+    currentTop: const [],
+    currentBottom: [shown],
+  );
+
+  expect(result.top, [ownNewer]);
+  expect(result.shouldScrollToBottom, isTrue);
 }

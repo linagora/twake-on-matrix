@@ -64,34 +64,13 @@ extension EventListExtension on List<Event> {
         ? -1
         : newEvents.indexWhere((event) => identical(event, anchor));
 
-    if (anchorIndex == -1) {
-      if (oldEvents.isNotEmpty && newEvents.isNotEmpty) {
-        final oldNewest = oldEvents.first.eventId;
-        final newNewest = newEvents.first.eventId;
-        if (oldNewest != newNewest) {
-          Logs().d(
-            '${SentryTrackedEvents.missingLastMessage.message}: '
-            'syncEventLists() no common items — full reset '
-            '(oldCount=${oldEvents.length}, newCount=${newEvents.length}, '
-            'oldNewest=$oldNewest, newNewest=$newNewest)',
-          );
-        }
-      }
-      return EventListSyncResult(
-        top: const [],
-        bottom: List.from(newEvents),
-        shouldScrollToBottom: false,
-        hasNewEvents:
-            newEvents.isNotEmpty &&
-            (oldEvents.isEmpty ||
-                newEvents.first.eventId != oldEvents.first.eventId),
-      );
-    }
+    if (anchorIndex == -1) return _reset(oldEvents, newEvents);
 
     final splitIndex = bottomAnchor != null ? anchorIndex : anchorIndex + 1;
     final shownEventsMap = buildEventMap([...currentTop, ...currentBottom]);
     bool isAdded(Event event) => event.findEventInMap(shownEventsMap) == null;
     final top = newEvents.sublist(0, splitIndex).reversed.toList();
+    final newestShown = currentTop.lastOrNull ?? currentBottom.first;
 
     return EventListSyncResult(
       top: top,
@@ -100,9 +79,39 @@ extension EventListExtension on List<Event> {
           !wasRequestingFuture &&
           top.any(
             (event) =>
-                isAdded(event) && event.isVisibleInGui && event.isOwnMessage,
+                isAdded(event) &&
+                event.originServerTs.isAfter(newestShown.originServerTs) &&
+                event.isVisibleInGui &&
+                event.isOwnMessage,
           ),
       hasNewEvents: newEvents.any(isAdded),
+    );
+  }
+
+  static EventListSyncResult _reset(
+    List<Event> oldEvents,
+    List<Event> newEvents,
+  ) {
+    if (oldEvents.isNotEmpty && newEvents.isNotEmpty) {
+      final oldNewest = oldEvents.first.eventId;
+      final newNewest = newEvents.first.eventId;
+      if (oldNewest != newNewest) {
+        Logs().d(
+          '${SentryTrackedEvents.missingLastMessage.message}: '
+          'syncEventLists() no common items — full reset '
+          '(oldCount=${oldEvents.length}, newCount=${newEvents.length}, '
+          'oldNewest=$oldNewest, newNewest=$newNewest)',
+        );
+      }
+    }
+    return EventListSyncResult(
+      top: const [],
+      bottom: List.from(newEvents),
+      shouldScrollToBottom: false,
+      hasNewEvents:
+          newEvents.isNotEmpty &&
+          (oldEvents.isEmpty ||
+              newEvents.first.eventId != oldEvents.first.eventId),
     );
   }
 }
