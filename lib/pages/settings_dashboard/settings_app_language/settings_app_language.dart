@@ -1,24 +1,19 @@
-import 'package:dartz/dartz.dart' hide State;
-import 'package:twake_chat/app_state/failure.dart';
-import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/config/localizations/localization_service.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/app_state/localizations/save_language_state.dart';
-import 'package:twake_chat/domain/usecase/settings/save_language_interactor.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/domain/localizations/usecases/save_language_usecase.provider.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language_view.dart';
 
-class SettingsAppLanguage extends StatefulWidget {
+class SettingsAppLanguage extends ConsumerStatefulWidget {
   const SettingsAppLanguage({super.key});
 
   @override
-  State<SettingsAppLanguage> createState() => SettingsAppLanguageController();
+  ConsumerState<SettingsAppLanguage> createState() =>
+      SettingsAppLanguageController();
 }
 
-class SettingsAppLanguageController extends State<SettingsAppLanguage> {
-  final saveLanguageInteractor = getIt.get<SaveLanguageInteractor>();
-
+class SettingsAppLanguageController extends ConsumerState<SettingsAppLanguage> {
   List<Locale> get supportedLocales {
     final List<Locale> copySupportedLocales = List.from(
       LocalizationService.supportedLocales,
@@ -31,41 +26,19 @@ class SettingsAppLanguageController extends State<SettingsAppLanguage> {
     return copySupportedLocales;
   }
 
+  // TODO: [transitional] The current locale is still owned by LocalizationService.
   ValueNotifier<Locale> get currentLocale => LocalizationService.currentLocale;
 
-  void changeLanguage(Locale selectedLocale) {
+  Future<void> changeLanguage(Locale selectedLocale) async {
     currentLocale.value = selectedLocale;
-    saveLanguageInteractor
-        .execute(selectedLocale)
-        .listen(
-          (event) => _handleSaveLanguageOnData(context, event),
-          onDone: _handleSaveLanguageOnDone,
-          onError: _handleSaveLanguageOnError,
-        );
-  }
-
-  void _handleSaveLanguageOnData(
-    BuildContext context,
-    Either<Failure, Success> event,
-  ) {
-    event.fold((failure) => null, (success) {
-      if (success is SaveLanguageSuccess) {
-        LocalizationService.changeLocale(
-          context,
-          success.localeStored.languageCode,
-        );
-      }
-    });
-  }
-
-  void _handleSaveLanguageOnDone() {
-    Logs().d('SettingsAppLanguageController::_handleSaveLanguageOnDone()');
-  }
-
-  void _handleSaveLanguageOnError(Object error) {
-    Logs().e(
-      'SettingsAppLanguageController::_handleSaveLanguageOnError():error: $error',
-    );
+    try {
+      await ref.read(saveLanguageUseCaseProvider).execute(selectedLocale);
+    } catch (e, s) {
+      Logs().e('SettingsAppLanguageController::changeLanguage()', e, s);
+      return;
+    }
+    if (!mounted) return;
+    LocalizationService.changeLocale(context, selectedLocale.languageCode);
   }
 
   @override

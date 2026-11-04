@@ -61,3 +61,15 @@ this user, who has no usable email), Chat sends a link it generates itself, as
 before room creation existed. The call works, but its first participant may
 not be able to open it without logging in to Meet. Any other failure sends
 nothing and shows that the call could not be started.
+
+## D7. Group creation: public and encryption exclude each other (proposed by Johann, 2026-11-03)
+
+When the server enables public groups, the group creation screen always shows
+"Enable end-to-end encryption" then "Make chat public", both off. While one is
+on, the other is greyed out and its subtitle says why, so a group can never be
+created both public and encrypted. Turning it off makes the other available
+again. "Limit to users of <server>" still appears under "Make chat public"
+when the group is public.
+
+When the server does not enable public groups, only the encryption toggle is
+shown, as before.

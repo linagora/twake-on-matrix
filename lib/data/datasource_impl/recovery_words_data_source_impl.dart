@@ -1,17 +1,23 @@
 import 'package:twake_chat/data/datasource/recovery_words_data_source.dart';
 import 'package:twake_chat/data/model/recovery_words_json.dart';
 import 'package:twake_chat/data/network/recovery_words/recovery_words_api.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/recovery_words/recovery_words.dart';
+import 'package:matrix/matrix.dart';
 
 class RecoveryWordsDataSourceImpl implements RecoveryWordsDataSource {
-  final RecoveryWordsAPI _recoveryWordsAPI = getIt.get<RecoveryWordsAPI>();
+  const RecoveryWordsDataSourceImpl(this._recoveryWordsAPI);
+
+  final RecoveryWordsAPI _recoveryWordsAPI;
 
   @override
-  Future<RecoveryWords> getRecoveryWords() {
-    return _recoveryWordsAPI.getRecoveryWords().then(
-      (response) => response.toRecoveryWords(),
-    );
+  Future<RecoveryWords> getRecoveryWords() async {
+    try {
+      final response = await _recoveryWordsAPI.getRecoveryWords();
+      return response.toRecoveryWords();
+    } catch (e, s) {
+      Logs().w('RecoveryWordsDataSourceImpl::getRecoveryWords()', e, s);
+      rethrow;
+    }
   }
 
   @override

@@ -35,7 +35,7 @@ class SettingRobot extends HomeRobot implements AbstractSettingRobot {
   }
 
   PatrolFinder deviceSetting() {
-    return $("Devices");
+    return $(Key(SettingEnum.devices.name));
   }
 
   PatrolFinder helpSetting() {

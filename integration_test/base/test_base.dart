@@ -38,6 +38,8 @@ class TestBase {
     // Marks a test that needs real hardware (Wi-Fi toggling, system
     // clipboard) rather than an emulator.
     bool requiresHardware = false,
+    // Changes server state the test does not own: LOCAL_HARNESS only.
+    bool requiresDisposableServer = false,
     // Logs in to another account than the default SERVER_URL/USERNAME one.
     TestLogin? login,
   }) {
@@ -53,13 +55,10 @@ class TestBase {
     if (kIsWeb && mobileOnly) return;
     if (!kIsWeb && webOnly) return;
 
-    // The local-Synapse emulator harness cannot provide the staging TOM backend
-    // or real hardware, so those tests are not registered there instead of
-    // failing. They stay registered everywhere else.
-    if (const bool.fromEnvironment('LOCAL_HARNESS') &&
-        (requiresBackend || requiresHardware)) {
-      return;
-    }
+    // LOCAL_HARNESS: throwaway Synapse, no TOM backend or real hardware.
+    const localHarness = bool.fromEnvironment('LOCAL_HARNESS');
+    if (localHarness && (requiresBackend || requiresHardware)) return;
+    if (!localHarness && requiresDisposableServer) return;
 
     const testTimeoutMs = int.fromEnvironment(
       'GLOBAL_TEST_TIMEOUT_MS',

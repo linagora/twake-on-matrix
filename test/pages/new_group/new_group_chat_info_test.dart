@@ -1,20 +1,21 @@
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
-import 'package:twake_chat/domain/app_state/room/create_new_group_chat_state.dart';
-import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
+import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -23,59 +24,46 @@ import 'package:mockito/mockito.dart';
 
 import 'new_group_chat_info_test.mocks.dart';
 
-@GenerateNiceMocks([MockSpec<NewGroupChatInfoController>()])
+@GenerateNiceMocks([
+  MockSpec<NewGroupChatInfoScreenState>(),
+  MockSpec<Client>(),
+])
 void main() {
-  final getIt = GetIt.instance;
+  late MockNewGroupChatInfoScreenState mockController;
 
-  late MockNewGroupChatInfoController mockController;
+  // TwakeAppBar still reads ResponsiveUtils from GetIt.
+  setUpAll(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
 
-  setUpAll(() {
-    // Register ResponsiveUtils for the view
-    if (!getIt.isRegistered<ResponsiveUtils>()) {
-      getIt.registerSingleton(ResponsiveUtils());
-    }
-  });
+  tearDownAll(() => GetIt.instance.reset());
 
   setUp(() {
-    mockController = MockNewGroupChatInfoController();
+    mockController = MockNewGroupChatInfoScreenState();
 
     // Setup default mock values for controller properties
-    when(
-      mockController.enableEncryptionNotifier,
-    ).thenReturn(ValueNotifier(false));
     when(mockController.haveGroupNameNotifier).thenReturn(ValueNotifier(false));
-    when(mockController.serverName).thenReturn('example.com');
     when(
       mockController.groupPrivacyNotifier,
     ).thenReturn(ValueNotifier(const GroupPrivacyState()));
-    when(mockController.createRoomStateNotifier).thenReturn(
-      ValueNotifier<Either<Failure, Success>>(Right(CreateNewGroupInitial())),
-    );
-    when(mockController.inviteUserStateNotifier).thenReturn(
-      ValueNotifier<Either<Failure, Success>>(Right(InviteUserInitial())),
-    );
+    when(
+      mockController.avatarUploadStateNotifier,
+    ).thenReturn(ValueNotifier<Either<Failure, Success>?>(null));
     when(
       mockController.groupNameTextEditingController,
     ).thenReturn(TextEditingController());
     when(mockController.groupNameFocusNode).thenReturn(FocusNode());
     when(mockController.contactsList).thenReturn(<PresentationContact>{});
     when(mockController.isCreatingRoom).thenReturn(false);
+    when(mockController.isUploadingAvatar).thenReturn(false);
     when(mockController.getErrorMessage(any)).thenReturn(null);
     when(
       mockController.avatarAssetEntityNotifier,
     ).thenReturn(ValueNotifier(null));
     when(mockController.pickAvatarUIState).thenReturn(
       ValueNotifierCustom<Either<Failure, Success>>(
-        Right(CreateNewGroupInitial()),
+        Right(GetAvatarInitialUIState()),
       ),
     );
-    when(
-      mockController.responsiveUtils,
-    ).thenReturn(getIt.get<ResponsiveUtils>());
-  });
-
-  tearDownAll(() {
-    getIt.reset();
+    when(mockController.responsiveUtils).thenReturn(ResponsiveUtils());
   });
 
   group('NewGroupChatInfo AppBar verification - widget test', () {
@@ -143,6 +131,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            activeMatrixClientProvider.overrideWithBuild((_, _) {
+              final client = MockClient();
+              when(client.userID).thenReturn('@alice:example.com');
+              return ActiveClientSnapshot(client);
+            }),
             loginHomeserverSummaryProvider.overrideWithBuild(
               (_, _) =>
                   summaryWith(isPublicGroupsEnabled: isPublicGroupsEnabled),
@@ -159,6 +152,11 @@ void main() {
       await tester.pumpAndSettle();
       return privacyNotifier;
     }
+
+    LinagoraSettingItem settingItem(WidgetTester tester, String title) =>
+        tester.widget<LinagoraSettingItem>(
+          find.widgetWithText(LinagoraSettingItem, title),
+        );
 
     testWidgets('build_whenFeed_titlesTheScreenAfterTheFeed', (
       WidgetTester tester,
@@ -208,7 +206,7 @@ void main() {
     });
 
     testWidgets(
-      'build_whenPublic_showsTheServerLimitToggleAndHidesEncryption',
+      'build_whenPublic_showsTheServerLimitToggleAndGreysOutEncryption',
       (WidgetTester tester) async {
         // Arrange
         when(mockController.isFeed).thenReturn(false);
@@ -223,12 +221,66 @@ void main() {
         );
 
         // Assert
-        final context = tester.element(find.byType(TwakeAppBar));
+        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
         expect(
-          find.text(L10n.of(context)!.groupPrivacyLimitToServer('example.com')),
+          find.text(l10n.groupPrivacyLimitToServer('example.com')),
           findsOneWidget,
         );
-        expect(find.text(L10n.of(context)!.enableEncryption), findsNothing);
+        expect(settingItem(tester, l10n.enableEncryption).enabled, isFalse);
+        expect(
+          find.text(l10n.encryptionUnavailableForPublicChat),
+          findsOneWidget,
+        );
+        expect(settingItem(tester, l10n.makeChatPublic).enabled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'build_whenEncrypted_greysOutPublicAndHidesTheServerLimitToggle',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+
+        // Act
+        await pumpView(
+          tester,
+          privacy: const GroupPrivacyState(isEncrypted: true),
+        );
+
+        // Assert
+        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+        expect(settingItem(tester, l10n.makeChatPublic).enabled, isFalse);
+        expect(
+          find.text(l10n.publicUnavailableForEncryptedChat),
+          findsOneWidget,
+        );
+        expect(settingItem(tester, l10n.enableEncryption).enabled, isTrue);
+        expect(
+          find.text(l10n.groupPrivacyLimitToServer('example.com')),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets(
+      'build_whenPrivateAndUnencrypted_showsBothTogglesEnabledEncryptionFirst',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+
+        // Act
+        await pumpView(tester);
+
+        // Assert
+        final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+        final encryption = settingItem(tester, l10n.enableEncryption);
+        final public = settingItem(tester, l10n.makeChatPublic);
+        expect(encryption.enabled && !encryption.value, isTrue);
+        expect(public.enabled && !public.value, isTrue);
+        expect(
+          tester.getTopLeft(find.text(l10n.enableEncryption)).dy,
+          lessThan(tester.getTopLeft(find.text(l10n.makeChatPublic)).dy),
+        );
       },
     );
 
@@ -269,7 +321,7 @@ void main() {
     });
 
     testWidgets(
-      'build_whenPrivacyBecomesPublic_showsTheServerLimitToggleAndHidesEncryption',
+      'build_whenPrivacyBecomesPublic_showsTheServerLimitToggleAndGreysOutEncryption',
       (WidgetTester tester) async {
         // Arrange
         when(mockController.isFeed).thenReturn(false);
@@ -288,9 +340,42 @@ void main() {
           find.text(l10n.groupPrivacyLimitToServer('example.com')),
           findsOneWidget,
         );
-        expect(find.text(l10n.enableEncryption), findsNothing);
+        expect(settingItem(tester, l10n.enableEncryption).enabled, isFalse);
       },
     );
+
+    testWidgets('encryptionToggle_whenTapped_encryptsTheGroup', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      await pumpView(tester);
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+      // Act
+      await tapSetting(tester, l10n.enableEncryption);
+
+      // Assert
+      verify(mockController.setEncrypted(isEncrypted: true)).called(1);
+    });
+
+    testWidgets('makeChatPublicToggle_whenEncrypted_ignoresTaps', (
+      WidgetTester tester,
+    ) async {
+      // Arrange
+      when(mockController.isFeed).thenReturn(false);
+      await pumpView(
+        tester,
+        privacy: const GroupPrivacyState(isEncrypted: true),
+      );
+      final l10n = L10n.of(tester.element(find.byType(TwakeAppBar)))!;
+
+      // Act
+      await tapSetting(tester, l10n.makeChatPublic);
+
+      // Assert
+      verifyNever(mockController.setPublic(isPublic: anyNamed('isPublic')));
+    });
 
     testWidgets('serverLimitToggle_whenTapped_opensTheGroupToOtherServers', (
       WidgetTester tester,
@@ -310,17 +395,54 @@ void main() {
       verify(mockController.setServerLimited(isServerLimited: false)).called(1);
     });
 
+    testWidgets(
+      'build_whenKeyboardLeavesLittleRoomUnderPublicSettings_doesNotOverflow',
+      (WidgetTester tester) async {
+        // Arrange
+        when(mockController.isFeed).thenReturn(false);
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize = const Size(411, 914);
+        addTearDown(tester.view.reset);
+
+        for (
+          var keyboardHeight = 0;
+          keyboardHeight <= 600;
+          keyboardHeight += 5
+        ) {
+          // Act
+          tester.view.viewInsets = FakeViewPadding(
+            bottom: keyboardHeight.toDouble(),
+          );
+          await tester.pumpWidget(const SizedBox.shrink());
+          await pumpView(
+            tester,
+            privacy: const GroupPrivacyState(
+              isPublic: true,
+              isServerLimited: true,
+            ),
+          );
+
+          // Assert
+          expect(
+            tester.takeException(),
+            isNull,
+            reason: 'Overflow with a $keyboardHeight px keyboard',
+          );
+        }
+      },
+    );
+
     testWidgets('build_whenEncryptionIsEnabled_showsTheWarning', (
       WidgetTester tester,
     ) async {
       // Arrange
       when(mockController.isFeed).thenReturn(false);
-      when(
-        mockController.enableEncryptionNotifier,
-      ).thenReturn(ValueNotifier(true));
 
       // Act
-      await pumpView(tester);
+      await pumpView(
+        tester,
+        privacy: const GroupPrivacyState(isEncrypted: true),
+      );
 
       // Assert
       final context = tester.element(find.byType(TwakeAppBar));

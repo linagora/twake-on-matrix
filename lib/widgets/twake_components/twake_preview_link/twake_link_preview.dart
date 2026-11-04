@@ -2,7 +2,6 @@ import 'package:twake_chat/pages/chat/events/formatted_text_widget.dart';
 import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
 import 'package:twake_chat/presentation/widget_keys/link_preview_keys.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
-import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/native_link_span.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
@@ -54,9 +53,6 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
               linkTypes: const [LinkType.url, LinkType.phone, LinkType.date],
               textAlign: TextAlign.start,
               onTapDownLink: (tapDownDetails, link) {
-                if (link.type == LinkType.url && isFilenameUrl(link.value)) {
-                  return;
-                }
                 handleOnTappedLinkHtml(
                   context: context,
                   details: tapDownDetails,
@@ -67,17 +63,23 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
                 if (link.type != LinkType.url) return null;
                 final url = link.value;
                 if (url == null) return null;
-                if (isFilenameUrl(url)) return null;
-                return buildNativeLinkSpan(
-                  url: url,
-                  childrenSpan: TextSpan(text: url, style: style),
-                  linkStyle: style,
-                  onTapDown: (details) => handleOnTappedLinkHtml(
-                    context: context,
-                    details: details,
-                    link: link,
-                  ),
-                );
+                // Returning null would still style the span as a link.
+                return filenameLinkAsPlainText(
+                      url: url,
+                      childrenSpan: TextSpan(text: url),
+                      linkStyle: richTextStyle,
+                      textStyle: richTextStyle,
+                    ) ??
+                    buildNativeLinkSpan(
+                      url: url,
+                      childrenSpan: TextSpan(text: url, style: style),
+                      linkStyle: style,
+                      onTapDown: (details) => handleOnTappedLinkHtml(
+                        context: context,
+                        details: details,
+                        link: link,
+                      ),
+                    );
               },
             ),
       previewItemWidget: TwakeLinkPreviewItem(

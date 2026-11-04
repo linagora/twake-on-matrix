@@ -23,6 +23,8 @@ Then fill in the placeholder values, especially `DEVICE`, `SERVER_URL`, `MATRIX_
 
 `settings_profile_capabilities_test.dart` also needs a Synapse with profile edits disabled: run `scripts/ci/capabilities-disabled-synapse.sh start integration_test/.env.local.do-not-commit` first (it appends the `CAPS_DISABLED_*` keys; set `CAPS_SYNAPSE_APP_HOST` to the host the device reaches), and `stop` afterwards.
 
+`device_settings_test.dart` signs out every other session of the account, so it only runs against a throwaway Synapse: add `LOCAL_HARNESS=true` to the env file. That flag also skips the tests that need the staging TOM backend or real hardware.
+
 ### 2.1) Authentication paths
 
 The test framework supports two login modes, selected at compile time by the `SSO_URL` env variable:

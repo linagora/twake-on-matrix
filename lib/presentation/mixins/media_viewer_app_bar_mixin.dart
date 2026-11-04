@@ -8,7 +8,6 @@ import 'package:twake_chat/presentation/model/pop_result_from_forward.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_adaptive_scaffold/flutter_adaptive_scaffold.dart';
 import 'package:matrix/matrix.dart';
@@ -29,12 +28,12 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   /// Forward this image to another room.
   void forwardAction(BuildContext context, Event? event) async {
-    Matrix.of(context).shareContent = event?.content;
+    final messages = [?event?.content];
     final responsive = getIt.get<ResponsiveUtils>();
 
     final result = responsive.isMobile(context)
-        ? await _showForwardMobileDialog(context)
-        : await _showForwardWebDialog(context);
+        ? await _showForwardMobileDialog(context, messages)
+        : await _showForwardWebDialog(context, messages);
 
     if (result is PopResultFromForward) {
       Navigator.of(context).pop<PopResultFromForward>();
@@ -43,11 +42,12 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   Future<PopResultFromForward?> _showForwardMobileDialog(
     BuildContext context,
+    List<Map<String, Object?>> messages,
   ) async => await showDialog(
     context: context,
     useSafeArea: false,
     useRootNavigator: false,
-    builder: (c) => const Forward(),
+    builder: (c) => Forward(messages: messages),
   );
 
   final forwardSelectionMobileAndTabletKey =
@@ -58,6 +58,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
 
   Future<PopResultFromForward?> _showForwardWebDialog(
     BuildContext context,
+    List<Map<String, Object?>> messages,
   ) async => await showDialog(
     context: context,
     barrierDismissible: false,
@@ -70,13 +71,13 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
             begin: ResponsiveUtils.minTabletWidth,
           ): SlotLayout.from(
             key: forwardSelectionWebAndDesktopKey,
-            builder: (_) => const ForwardWebView(),
+            builder: (_) => ForwardWebView(messages: messages),
           ),
           const WidthPlatformBreakpoint(
             end: ResponsiveUtils.minTabletWidth,
           ): SlotLayout.from(
             key: forwardSelectionMobileAndTabletKey,
-            builder: (_) => const Forward(),
+            builder: (_) => Forward(messages: messages),
           ),
         },
       );

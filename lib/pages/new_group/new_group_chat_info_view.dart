@@ -6,10 +6,11 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_style.dart';
-import 'package:twake_chat/pages/new_group/new_group_info_controller.dart';
+import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -25,9 +26,9 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photo_manager_image_provider/photo_manager_image_provider.dart';
 
 class NewGroupChatInfoView extends StatelessWidget {
-  final NewGroupChatInfoController newGroupInfoController;
+  final NewGroupChatInfoScreenState screen;
 
-  const NewGroupChatInfoView(this.newGroupInfoController, {super.key});
+  const NewGroupChatInfoView(this.screen, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +68,9 @@ class NewGroupChatInfoView extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
                     _buildGroupNameTextField(context),
-                    if (!newGroupInfoController.isFeed) ...[
+                    if (!screen.isFeed) ...[
                       const SizedBox(height: 16),
-                      _GroupPrivacySettings(controller: newGroupInfoController),
+                      _GroupPrivacySettings(screen: screen),
                     ],
                   ],
                 ),
@@ -79,35 +80,28 @@ class NewGroupChatInfoView extends StatelessWidget {
         },
         body: Padding(
           padding: NewGroupChatInfoStyle.padding,
-          child: ExpansionParticipantsList(
-            contactsList: newGroupInfoController.contactsList ?? {},
-          ),
+          child: ExpansionParticipantsList(contactsList: screen.contactsList),
         ),
       ),
       floatingActionButton: ValueListenableBuilder<bool>(
-        valueListenable: newGroupInfoController.haveGroupNameNotifier,
+        valueListenable: screen.haveGroupNameNotifier,
         builder: (context, value, child) {
           if (!value) {
             return const SizedBox.shrink();
           }
           return child!;
         },
-        child: ValueListenableBuilder<Either<Failure, Success>?>(
-          valueListenable: newGroupInfoController.createRoomStateNotifier,
-          builder: (context, _, __) {
-            return ValueListenableBuilder<Either<Failure, Success>?>(
-              valueListenable: newGroupInfoController.inviteUserStateNotifier,
-              builder: (context, _, ___) {
-                if (newGroupInfoController.isCreatingRoom) {
-                  return const TwakeFloatingActionButton(
-                    customIcon: SizedBox(child: CircularProgressIndicator()),
-                  );
-                }
-                return TwakeFloatingActionButton(
-                  icon: Icons.done,
-                  onTap: () => newGroupInfoController.moveToGroupChatScreen(),
-                );
-              },
+        child: _BusyBuilder(
+          screen: screen,
+          builder: (context, isBusy) {
+            if (isBusy) {
+              return const TwakeFloatingActionButton(
+                customIcon: SizedBox(child: CircularProgressIndicator()),
+              );
+            }
+            return TwakeFloatingActionButton(
+              icon: Icons.done,
+              onTap: screen.moveToGroupChatScreen,
             );
           },
         ),
@@ -120,7 +114,7 @@ class NewGroupChatInfoView extends StatelessWidget {
     return PreferredSize(
       preferredSize: const Size.fromHeight(NewGroupChatInfoStyle.toolbarHeight),
       child: TwakeAppBar(
-        title: newGroupInfoController.isFeed ? l10n.newFeed : l10n.newGroupChat,
+        title: screen.isFeed ? l10n.newFeed : l10n.newGroupChat,
         context: context,
         centerTitle: true,
         withDivider: true,
@@ -140,8 +134,7 @@ class NewGroupChatInfoView extends StatelessWidget {
 
   Widget _buildChangeProfileWidget(BuildContext context) {
     return InkWell(
-      onTap: () =>
-          newGroupInfoController.showImagesPickerAction(context: context),
+      onTap: () => screen.showImagesPickerAction(context: context),
       customBorder: const CircleBorder(),
       child: Container(
         width: NewGroupChatInfoStyle.profileSize(context),
@@ -153,12 +146,11 @@ class NewGroupChatInfoView extends StatelessWidget {
         alignment: Alignment.center,
         child: NewGroupChatInfoStyle.responsive.isMobile(context)
             ? _AvatarForMobileBuilder(
-                avatarMobileNotifier:
-                    newGroupInfoController.avatarAssetEntityNotifier,
+                avatarMobileNotifier: screen.avatarAssetEntityNotifier,
               )
             : _AvatarForWebBuilder(
-                avatarWebNotifier: newGroupInfoController.pickAvatarUIState,
-                onImageLoaded: newGroupInfoController.updateAvatarFilePicker,
+                avatarWebNotifier: screen.pickAvatarUIState,
+                onImageLoaded: screen.updateAvatarFilePicker,
               ),
       ),
     );
@@ -168,18 +160,16 @@ class NewGroupChatInfoView extends StatelessWidget {
     final l10n = L10n.of(context)!;
     return Padding(
       padding: NewGroupChatInfoStyle.groupNameTextFieldPadding,
-      child: ValueListenableBuilder(
-        valueListenable: newGroupInfoController.createRoomStateNotifier,
-        builder: (context, value, child) {
+      child: _BusyBuilder(
+        screen: screen,
+        builder: (context, isBusy) {
           return ValueListenableBuilder(
-            valueListenable:
-                newGroupInfoController.groupNameTextEditingController,
+            valueListenable: screen.groupNameTextEditingController,
             builder: (context, value, _) {
               return TextField(
-                controller:
-                    newGroupInfoController.groupNameTextEditingController,
-                focusNode: newGroupInfoController.groupNameFocusNode,
-                enabled: !newGroupInfoController.isCreatingRoom,
+                controller: screen.groupNameTextEditingController,
+                focusNode: screen.groupNameFocusNode,
+                enabled: !isBusy,
                 decoration: InputDecoration(
                   errorBorder: OutlineInputBorder(
                     borderSide: BorderSide(
@@ -191,8 +181,8 @@ class NewGroupChatInfoView extends StatelessWidget {
                       color: Theme.of(context).colorScheme.shadow,
                     ),
                   ),
-                  errorText: newGroupInfoController.getErrorMessage(
-                    newGroupInfoController.groupNameTextEditingController.text,
+                  errorText: screen.getErrorMessage(
+                    screen.groupNameTextEditingController.text,
                   ),
                   errorStyle: TextStyle(
                     color: LinagoraSysColors.material().error,
@@ -201,7 +191,7 @@ class NewGroupChatInfoView extends StatelessWidget {
                   labelStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
-                  hintText: newGroupInfoController.isFeed
+                  hintText: screen.isFeed
                       ? l10n.enterFeedName
                       : l10n.enterGroupName,
                   hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -215,6 +205,26 @@ class NewGroupChatInfoView extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _BusyBuilder extends ConsumerWidget {
+  final NewGroupChatInfoScreenState screen;
+
+  final Widget Function(BuildContext context, bool isBusy) builder;
+
+  const _BusyBuilder({required this.screen, required this.builder});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isCreating = ref.watch(
+      newGroupChatInfoControllerProvider.select((state) => state.isBusy),
+    );
+    return ValueListenableBuilder<Either<Failure, Success>?>(
+      valueListenable: screen.avatarUploadStateNotifier,
+      builder: (context, _, _) =>
+          builder(context, isCreating || screen.isUploadingAvatar),
     );
   }
 }
@@ -316,9 +326,9 @@ class _AvatarForWebBuilder extends StatelessWidget {
 }
 
 class _GroupPrivacySettings extends ConsumerWidget {
-  final NewGroupChatInfoController controller;
+  final NewGroupChatInfoScreenState screen;
 
-  const _GroupPrivacySettings({required this.controller});
+  const _GroupPrivacySettings({required this.screen});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -327,33 +337,41 @@ class _GroupPrivacySettings extends ConsumerWidget {
         (summary) => summary.isPublicGroupsEnabled,
       ),
     );
+    final serverName = ref.watch(
+      activeMatrixClientProvider.select((snapshot) => snapshot.userId?.domain),
+    );
     final l10n = L10n.of(context)!;
     return ValueListenableBuilder<GroupPrivacyState>(
-      valueListenable: controller.groupPrivacyNotifier,
+      valueListenable: screen.groupPrivacyNotifier,
       builder: (context, privacy, _) => Column(
         children: [
-          if (isPublicGroupsEnabled)
+          _EncryptionSettingTile(
+            isEncrypted: privacy.isEncrypted,
+            isEnabled: privacy.canBeEncrypted,
+            onChanged: (isEncrypted) =>
+                screen.setEncrypted(isEncrypted: isEncrypted),
+          ),
+          if (isPublicGroupsEnabled) ...[
             LinagoraSettingItem.selectable(
               title: l10n.makeChatPublic,
-              subtitle: l10n.makeChatPublicDescription,
+              subtitle: privacy.canBePublic
+                  ? l10n.makeChatPublicDescription
+                  : l10n.publicUnavailableForEncryptedChat,
               subtitleMaxLines: null,
               value: privacy.isPublic,
-              onChanged: (isPublic) => controller.setPublic(isPublic: isPublic),
+              enabled: privacy.canBePublic,
+              onChanged: (isPublic) => screen.setPublic(isPublic: isPublic),
             ),
-          if (privacy.isPublic)
-            LinagoraSettingItem.selectable(
-              title: l10n.groupPrivacyLimitToServer(controller.serverName),
-              subtitle: l10n.groupPrivacyLimitToServerDescription,
-              subtitleMaxLines: null,
-              value: privacy.isServerLimited,
-              onChanged: (isServerLimited) =>
-                  controller.setServerLimited(isServerLimited: isServerLimited),
-            )
-          else
-            _EncryptionSettingTile(
-              enableEncryptionNotifier: controller.enableEncryptionNotifier,
-              onChanged: (_) => controller.toggleEnableEncryption(),
-            ),
+            if (privacy.isPublic)
+              LinagoraSettingItem.selectable(
+                title: l10n.groupPrivacyLimitToServer(serverName ?? ''),
+                subtitle: l10n.groupPrivacyLimitToServerDescription,
+                subtitleMaxLines: null,
+                value: privacy.isServerLimited,
+                onChanged: (isServerLimited) =>
+                    screen.setServerLimited(isServerLimited: isServerLimited),
+              ),
+          ],
         ],
       ),
     );
@@ -361,49 +379,50 @@ class _GroupPrivacySettings extends ConsumerWidget {
 }
 
 class _EncryptionSettingTile extends StatelessWidget {
-  final ValueNotifier<bool> enableEncryptionNotifier;
+  final bool isEncrypted;
 
-  final ValueChanged<bool>? onChanged;
+  final bool isEnabled;
+
+  final ValueChanged<bool> onChanged;
 
   const _EncryptionSettingTile({
-    required this.enableEncryptionNotifier,
-    this.onChanged,
+    required this.isEncrypted,
+    required this.isEnabled,
+    required this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    return ValueListenableBuilder<bool>(
-      valueListenable: enableEncryptionNotifier,
-      builder: (context, isEnabled, _) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            LinagoraSettingItem.selectable(
-              title: l10n.enableEncryption,
-              subtitle: l10n.encryptionMessage,
-              subtitleMaxLines: null,
-              value: isEnabled,
-              onChanged: onChanged,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinagoraSettingItem.selectable(
+          title: l10n.enableEncryption,
+          subtitle: isEnabled
+              ? l10n.encryptionMessage
+              : l10n.encryptionUnavailableForPublicChat,
+          subtitleMaxLines: null,
+          value: isEncrypted,
+          enabled: isEnabled,
+          onChanged: onChanged,
+        ),
+        if (isEncrypted)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: LinagoraSpacing.base * 3,
+              right: LinagoraSpacing.base * 3,
+              bottom: LinagoraSpacing.base * 2,
             ),
-            if (isEnabled)
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: LinagoraSpacing.base * 3,
-                  right: LinagoraSpacing.base * 3,
-                  bottom: LinagoraSpacing.base * 2,
-                ),
-                child: Text(
-                  l10n.encryptionWarning,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    letterSpacing: 0.4,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                ),
+            child: Text(
+              l10n.encryptionWarning,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                letterSpacing: 0.4,
+                color: Theme.of(context).colorScheme.error,
               ),
-          ],
-        );
-      },
+            ),
+          ),
+      ],
     );
   }
 }

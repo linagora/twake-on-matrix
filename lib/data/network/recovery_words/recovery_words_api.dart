@@ -2,16 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:twake_chat/data/model/recovery_words_json.dart';
 import 'package:twake_chat/data/network/dio_client.dart';
 import 'package:twake_chat/data/network/tom_endpoint.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/di/global/network_di.dart';
 import 'package:matrix/matrix.dart';
 
 class RecoveryWordsAPI {
-  final DioClient _client = getIt.get<DioClient>(
-    instanceName: NetworkDI.tomDioClientName,
-  );
+  const RecoveryWordsAPI(this._client);
 
-  RecoveryWordsAPI();
+  final DioClient _client;
 
   Future<RecoveryWordsResponse> getRecoveryWords() async {
     final response = await _client

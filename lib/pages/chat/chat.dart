@@ -1171,28 +1171,18 @@ class ChatController extends ConsumerState<Chat>
     if (event != null && !event.status.isAvailable) {
       return;
     }
-    if (selectedEvents.isEmpty && event != null) {
-      Matrix.of(context).shareContent = event
-          .getDisplayEventWithoutEditEvent(timeline!)
-          .formatContentForwards();
-      Logs().d(
-        "forwardEventsAction():: shareContent: ${Matrix.of(context).shareContent}",
-      );
-    } else {
-      Matrix.of(context).shareContentList = selectedEvents.map((msg) {
-        final content = msg
-            .getDisplayEventWithoutEditEvent(timeline!)
-            .formatContentForwards();
-        return content;
-      }).toList();
-      Logs().d(
-        "forwardEventsAction():: shareContentList: ${Matrix.of(context).shareContentList}",
-      );
-    }
+    final events = selectedEvents.isEmpty && event != null
+        ? [event]
+        : selectedEvents;
+    final messages = events
+        .map(
+          (msg) => msg
+              .getDisplayEventWithoutEditEvent(timeline!)
+              .formatContentForwards(),
+        )
+        .toList();
     _clearSelectEvent();
-    ForwardRoute(
-      $extra: ForwardArgument(fromRoomId: roomId ?? ''),
-    ).push(context);
+    ForwardRoute($extra: ForwardArgument(messages: messages)).push(context);
   }
 
   void sendAgainAction() {
