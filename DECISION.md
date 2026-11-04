@@ -158,3 +158,25 @@ toggle.
 A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
+
+## D9. Call events in the timeline and the chat list follow Twake Space Chat (proposed by Johann, 2026-11-04)
+
+Twake Chat reads call events as Twake Space Chat does, so that both clients
+of the same room tell the same story:
+
+- A MatrixRTC call shows only while it goes on. Its membership, its ring and
+  the old call signalling (hangup, answer, candidates) never show in the
+  timeline or the chat list, whatever the setting for unknown events.
+- The message that opens the chat of a call (marked
+  `app.twake.chat.call_thread`) reads « Meeting started at 14:32 », at the
+  time of its event on the reader's clock, in the bubble and in the chat
+  list. The body sent carries the caller's time, for the other clients.
+- A legacy `m.call.invite` (the one-to-one call of Element) shows one line,
+  « Call from an app Twake Chat does not support », with no answer button.
+  It is not the chat-list preview, does not make the room unread on this
+  device, and its push shows no notification.
+
+Known limit: the unread badge counts what the server counts. Synapse's
+default rule for `m.call.invite` still adds 1 to the badge until the room is
+read. The ring push rules will be settled with the in-app and the system
+ring.

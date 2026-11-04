@@ -1,4 +1,5 @@
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 /// How a given event type behaves in the chat timeline.
 enum EventVisibilityGroup {
@@ -121,14 +122,39 @@ abstract final class EventTypeRules {
       group: EventVisibilityGroup.neverInTimeline,
     ),
 
-    // -- Unknown (hidden by hideUnknownEvents) --------------------------------
-    // SDK-defined call types are listed explicitly; any other unregistered type
-    // falls through to unknown via getGroup's default.
-    EventTypes.CallInvite: EventTypeRule(group: EventVisibilityGroup.unknown),
-    EventTypes.CallAnswer: EventTypeRule(group: EventVisibilityGroup.unknown),
-    EventTypes.CallHangup: EventTypeRule(group: EventVisibilityGroup.unknown),
+    // MatrixRTC calls only show live; the legacy invite is a single line.
+    CallEventTypes.callMember: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    CallEventTypes.rtcNotification: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    CallEventTypes.callNotify: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.GroupCallMember: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.CallInvite: EventTypeRule(
+      group: EventVisibilityGroup.alwaysVisible,
+    ),
+    EventTypes.CallAnswer: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.CallReject: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.CallSelectAnswer: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.CallNegotiate: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
+    EventTypes.CallHangup: EventTypeRule(
+      group: EventVisibilityGroup.neverInTimeline,
+    ),
     EventTypes.CallCandidates: EventTypeRule(
-      group: EventVisibilityGroup.unknown,
+      group: EventVisibilityGroup.neverInTimeline,
     ),
   };
 

@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
 import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
@@ -21,6 +22,7 @@ import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
@@ -646,7 +648,17 @@ extension LocalizedBody on Event {
 }
 
 extension FutureEventExtension on Event {
+  bool get isCallThreadRoot =>
+      type == EventTypes.Message &&
+      !redacted &&
+      content.containsKey(CallEventTypes.callThreadKey);
+
+  // The sent body holds the caller's time; each reader sees their own.
+  String callThreadRootText(L10n l10n) =>
+      l10n.callStartedAt(DateFormat('HH:mm').format(originServerTs));
+
   Future<String> calcLocalizedBodyRemoveBreakLine(L10n l10n) async {
+    if (isCallThreadRoot) return callThreadRootText(l10n);
     final body = await calcLocalizedBody(
       MatrixLocals(l10n),
       hideReply: true,
@@ -659,6 +671,7 @@ extension FutureEventExtension on Event {
   }
 
   String calcLocalizedBodyFallbackRemoveBreakLine(L10n l10n) {
+    if (isCallThreadRoot) return callThreadRootText(l10n);
     final body = calcLocalizedBodyFallback(
       MatrixLocals(l10n),
       hideReply: true,
