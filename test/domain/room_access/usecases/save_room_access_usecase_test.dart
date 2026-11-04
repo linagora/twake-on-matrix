@@ -15,9 +15,17 @@ void main() {
   late MockRoomAccessRepository repository;
   late SaveRoomAccessUseCase useCase;
 
+  void guard({bool isEncrypted = false, bool hasPublicPage = false}) =>
+      when(repository.guardsOf(roomId)).thenReturn(
+        RoomAccessGuards(
+          isEncrypted: isEncrypted,
+          hasPublicPage: hasPublicPage,
+        ),
+      );
+
   setUp(() {
     repository = MockRoomAccessRepository();
-    when(repository.isEncrypted(roomId)).thenReturn(false);
+    guard();
     useCase = SaveRoomAccessUseCase(repository);
   });
 
@@ -65,7 +73,7 @@ void main() {
 
   test('execute_publicOnAnEncryptedRoom_throwsAndSendsNothing', () async {
     // Arrange
-    when(repository.isEncrypted(roomId)).thenReturn(true);
+    guard(isEncrypted: true);
 
     // Act
     final result = useCase.execute(roomId, joinRule: JoinRuleChoice.public);
@@ -77,7 +85,7 @@ void main() {
 
   test('execute_listingAnEncryptedRoom_throwsAndSendsNothing', () async {
     // Arrange
-    when(repository.isEncrypted(roomId)).thenReturn(true);
+    guard(isEncrypted: true);
 
     // Act
     final result = useCase.execute(roomId, isListed: true);
@@ -89,7 +97,7 @@ void main() {
 
   test('execute_unlistingAnEncryptedRoom_isAllowed', () async {
     // Arrange
-    when(repository.isEncrypted(roomId)).thenReturn(true);
+    guard(isEncrypted: true);
 
     // Act
     await useCase.execute(
@@ -106,7 +114,7 @@ void main() {
   });
 
   group('with the public page on', () {
-    setUp(() => when(repository.hasPublicPage(roomId)).thenReturn(true));
+    setUp(() => guard(hasPublicPage: true));
 
     test('execute_privateRule_throwsAndSendsNothing', () async {
       // Act

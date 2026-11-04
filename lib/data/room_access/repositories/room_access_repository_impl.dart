@@ -12,11 +12,8 @@ class RoomAccessRepositoryImpl implements RoomAccessRepository {
       _roomAccessDatasource.watchRoomAccess(roomId);
 
   @override
-  bool isEncrypted(String roomId) => _roomAccessDatasource.isEncrypted(roomId);
-
-  @override
-  bool hasPublicPage(String roomId) =>
-      _roomAccessDatasource.hasPublicPage(roomId);
+  RoomAccessGuards guardsOf(String roomId) =>
+      _roomAccessDatasource.guardsOf(roomId);
 
   @override
   Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule) =>

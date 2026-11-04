@@ -30,10 +30,13 @@ class RoomAccessDatasourceImpl implements RoomAccessDatasource {
   }
 
   @override
-  bool isEncrypted(String roomId) => _room(roomId).encrypted;
-
-  @override
-  bool hasPublicPage(String roomId) => _hasPublicPage(_room(roomId));
+  RoomAccessGuards guardsOf(String roomId) {
+    final state = _stateOf(_room(roomId));
+    return RoomAccessGuards(
+      isEncrypted: state.isEncrypted,
+      hasPublicPage: state.hasPublicPage,
+    );
+  }
 
   @override
   Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule) =>

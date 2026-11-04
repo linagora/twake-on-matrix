@@ -4,6 +4,17 @@ part 'room_access.freezed.dart';
 
 enum JoinRuleChoice { invite, knock, public }
 
+class RoomAccessGuards {
+  const RoomAccessGuards({
+    required this.isEncrypted,
+    required this.hasPublicPage,
+  });
+
+  final bool isEncrypted;
+
+  final bool hasPublicPage;
+}
+
 @freezed
 abstract class RoomAccess with _$RoomAccess {
   const RoomAccess._();

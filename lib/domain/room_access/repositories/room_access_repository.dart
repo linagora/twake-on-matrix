@@ -5,9 +5,7 @@ abstract class RoomAccessRepository {
   /// the listing is read from the directory at each emission.
   Stream<RoomAccess> watchRoomAccess(String roomId);
 
-  bool isEncrypted(String roomId);
-
-  bool hasPublicPage(String roomId);
+  RoomAccessGuards guardsOf(String roomId);
 
   Future<void> setJoinRule(String roomId, JoinRuleChoice joinRule);
 

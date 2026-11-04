@@ -116,6 +116,9 @@ void main() {
     when(
       repository.watchRoomAccess(roomId),
     ).thenAnswer((_) => Stream.value(invite));
+    when(repository.guardsOf(roomId)).thenReturn(
+      const RoomAccessGuards(isEncrypted: false, hasPublicPage: false),
+    );
   });
 
   tearDown(() => GetIt.instance.reset());

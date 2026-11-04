@@ -76,6 +76,18 @@ void main() {
     unawaited(subscription.cancel());
   });
 
+  test('guardsOf_encryptedRoom_readsBothGuards', () {
+    // Arrange
+    when(room.encrypted).thenReturn(true);
+
+    // Act
+    final guards = datasource.guardsOf(roomId);
+
+    // Assert
+    expect(guards.isEncrypted, isTrue);
+    expect(guards.hasPublicPage, isFalse);
+  });
+
   test('watchRoomAccess_restrictedRoom_hasNoRuleChoice', () async {
     // Arrange
     when(room.joinRules).thenReturn(JoinRules.restricted);

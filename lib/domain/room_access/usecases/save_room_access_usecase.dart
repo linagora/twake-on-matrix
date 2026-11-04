@@ -35,12 +35,13 @@ class SaveRoomAccessUseCase {
     required JoinRuleChoice? joinRule,
     required bool? isListed,
   }) {
+    final guards = _roomAccessRepository.guardsOf(roomId);
     final opensTheRoom = joinRule == JoinRuleChoice.public || isListed == true;
-    if (opensTheRoom && _roomAccessRepository.isEncrypted(roomId)) {
+    if (opensTheRoom && guards.isEncrypted) {
       throw const RoomAccessEncryptedException();
     }
     final closesTheRoom = joinRule?.isPrivate == true || isListed == false;
-    if (closesTheRoom && _roomAccessRepository.hasPublicPage(roomId)) {
+    if (closesTheRoom && guards.hasPublicPage) {
       throw const RoomAccessPublicPageException();
     }
   }

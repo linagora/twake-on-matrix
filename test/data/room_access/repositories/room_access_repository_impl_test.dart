@@ -35,14 +35,15 @@ void main() {
     verify(datasource.setListed(roomId, isListed: false)).called(1);
   });
 
-  test('isEncrypted_always_readsTheDatasource', () {
+  test('guardsOf_always_readsTheDatasource', () {
     // Arrange
-    when(datasource.isEncrypted(roomId)).thenReturn(true);
+    const guards = RoomAccessGuards(isEncrypted: true, hasPublicPage: false);
+    when(datasource.guardsOf(roomId)).thenReturn(guards);
 
     // Act
-    final isEncrypted = repository.isEncrypted(roomId);
+    final result = repository.guardsOf(roomId);
 
     // Assert
-    expect(isEncrypted, isTrue);
+    expect(result, same(guards));
   });
 }

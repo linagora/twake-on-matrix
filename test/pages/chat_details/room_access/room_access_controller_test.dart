@@ -30,7 +30,9 @@ void main() {
 
   setUp(() {
     repository = MockRoomAccessRepository();
-    when(repository.isEncrypted(roomId)).thenReturn(false);
+    when(repository.guardsOf(roomId)).thenReturn(
+      const RoomAccessGuards(isEncrypted: false, hasPublicPage: false),
+    );
   });
 
   ProviderContainer createContainer({
