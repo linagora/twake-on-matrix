@@ -46,6 +46,9 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           '/client/v3/publicRooms',
           query: {'limit': '$pageSize', 'since': ?since},
         );
+        if (page['chunk'] is! List) {
+          throw const FormatException('publicRooms: no chunk list');
+        }
       } on Exception catch (exception, stackTrace) {
         if (isFirstPage) {
           Logs().e(
@@ -63,7 +66,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         return;
       }
       isFirstPage = false;
-      final rooms = _parseChunks(page['chunk'])
+      final rooms = _parseChunks(page['chunk'] as List)
           .where((chunk) => !_closedRules.contains(chunk.joinRule))
           .take(limit - count)
           .map(_toPublicRoom)
@@ -155,10 +158,9 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
 
   // Parsed one by one: the SDK parses the whole page, so one room with a
   // malformed field (an invalid avatar URL) would drop all the others.
-  List<PublicRoomsChunk> _parseChunks(Object? chunks) => [
-    if (chunks is List)
-      for (final json in chunks)
-        if (_parseChunk(json) case final chunk?) chunk,
+  List<PublicRoomsChunk> _parseChunks(List chunks) => [
+    for (final json in chunks)
+      if (_parseChunk(json) case final chunk?) chunk,
   ];
 
   PublicRoomsChunk? _parseChunk(Object? json) {

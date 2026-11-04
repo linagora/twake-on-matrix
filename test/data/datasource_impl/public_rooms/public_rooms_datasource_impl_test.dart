@@ -127,6 +127,20 @@ void main() {
       expect(sizes, [100]);
     });
 
+    test('fetchDirectory_whenALaterPageHasNoChunk_keepsThePagesRead', () async {
+      // Arrange
+      stubDirectory({
+        null: page(0, 100, next: 'p2'),
+        'p2': <String, Object?>{'next_batch': 'p3'},
+      });
+
+      // Act
+      final sizes = await pageSizes();
+
+      // Assert
+      expect(sizes, [100]);
+    });
+
     test('fetchDirectory_whenTheTokenRepeats_stopsAfterThatPage', () async {
       // Arrange
       stubDirectory({
@@ -264,6 +278,23 @@ void main() {
         throwsA(isA<PublicRoomsFetchFailedException>()),
       );
     });
+
+    test(
+      'fetchDirectory_whenTheFirstPageHasNoChunk_throwsFetchFailed',
+      () async {
+        // Arrange
+        stubDirectory({null: <String, Object?>{}});
+
+        // Act
+        final result = datasource.fetchDirectory(limit: 1000).toList();
+
+        // Assert
+        await expectLater(
+          result,
+          throwsA(isA<PublicRoomsFetchFailedException>()),
+        );
+      },
+    );
 
     test('fetchDirectory_always_mapsKindAccessAndName', () async {
       // Arrange
