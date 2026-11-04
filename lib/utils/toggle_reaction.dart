@@ -14,6 +14,6 @@ Future<void> toggleReaction({
     return;
   }
   await redactMyReaction();
-  if (emoji == (myReactionKey ?? '')) return;
+  if (emoji == myReactionKey) return;
   await sendReaction();
 }

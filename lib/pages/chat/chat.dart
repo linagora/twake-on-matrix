@@ -1464,13 +1464,13 @@ class ChatController extends ConsumerState<Chat>
   /// Completes once the recent reaction is persisted. A storage failure is
   /// logged by `executeOrLog` and never thrown, so a caller that awaits this
   /// can still go on with the action.
-  Future<void> handleStoreRecentReactions(String? emoji, {String? emojiId}) =>
+  Future<void> handleStoreRecentReactions(String emoji, {String? emojiId}) =>
       ref
           .read(storeRecentReactionsUseCaseProvider)
           .executeOrLog(emojiId: emojiId ?? _recentReactionId(emoji));
 
-  String _recentReactionId(String? emoji) =>
-      Matrix.of(context).emojiData.getIdByEmoji(emoji ?? '');
+  String _recentReactionId(String emoji) =>
+      Matrix.of(context).emojiData.getIdByEmoji(emoji);
 
   Future<void> sendEmojiAction({
     required String emoji,
@@ -1488,13 +1488,11 @@ class ChatController extends ConsumerState<Chat>
     String? emojiId,
     required Event event,
     required Event? myReaction,
-    required String? myReactionKey,
   }) => toggleReaction(
     emoji: emoji,
-    myReactionKey: myReactionKey,
-    redactMyReaction: myReaction == null
-        ? null
-        : () => myReaction.redactEvent(),
+    myReactionKey:
+        (myReaction?.content['m.relates_to'] as Map?)?['key'] as String?,
+    redactMyReaction: myReaction?.redactEvent,
     sendReaction: () =>
         sendEmojiAction(emoji: emoji, emojiId: emojiId, event: event),
   );
@@ -2165,7 +2163,6 @@ class ChatController extends ConsumerState<Chat>
                                       emojiId: emojiId,
                                       event: event,
                                       myReaction: myReaction,
-                                      myReactionKey: relatesTo?['key'],
                                     );
                                   },
                                 ),
@@ -2183,7 +2180,6 @@ class ChatController extends ConsumerState<Chat>
                                     emoji: emoji,
                                     event: event,
                                     myReaction: myReaction,
-                                    myReactionKey: relatesTo?['key'],
                                   );
                                 },
                               ),
@@ -2853,7 +2849,6 @@ class ChatController extends ConsumerState<Chat>
                                           emojiId: emojiId,
                                           event: event,
                                           myReaction: myReaction,
-                                          myReactionKey: relatesTo?['key'],
                                         );
                                       },
                                     ),
@@ -2872,7 +2867,6 @@ class ChatController extends ConsumerState<Chat>
                                         emoji: emoji,
                                         event: event,
                                         myReaction: myReaction,
-                                        myReactionKey: relatesTo?['key'],
                                       );
                                     },
                                   ),
