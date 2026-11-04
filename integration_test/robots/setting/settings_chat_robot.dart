@@ -3,8 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
-import 'package:twake_chat/utils/famedlysdk_store.dart';
-import 'package:twake_chat/widgets/settings_switch_list_tile.dart';
 
 import '../home_robot.dart';
 
@@ -40,20 +38,6 @@ class SettingsChatRobot extends HomeRobot {
     await switchTile(title).tap();
     await waitForSwitchValue(title, !from);
     await $.pumpAndSettle();
-  }
-
-  /// Writes [value] for the [title] setting the same way the tile does
-  /// (its `onChanged`, then storage), without waiting for the switch to show
-  /// it. Used for cleanup, so it still works when the switch is out of sync.
-  Future<void> restoreStoredValue(String title, bool value) async {
-    final tileFinder = find.ancestor(
-      of: find.text(title),
-      matching: find.byType(SettingsSwitchListTile),
-    );
-    await $.waitUntilExists($(tileFinder));
-    final tile = $.tester.widget<SettingsSwitchListTile>(tileFinder.first);
-    tile.onChanged?.call(value);
-    await Store().setItemBool(tile.storeKey, value);
   }
 
   Future<void> backToSettingScreen() async {

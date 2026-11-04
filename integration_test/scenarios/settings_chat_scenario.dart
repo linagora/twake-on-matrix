@@ -35,8 +35,6 @@ class SettingsChatToggleScenario extends BaseTestScenario {
       SettingKeys.gifAutoplay,
       AppConfig.gifAutoplay,
     );
-    var restoredThroughSwitch = false;
-
     Future<void> verifyApplied(bool expected, String step) async {
       s.softAssertEquals(
         AppConfig.gifAutoplay,
@@ -50,36 +48,26 @@ class SettingsChatToggleScenario extends BaseTestScenario {
       );
     }
 
-    try {
-      await chatRobot.toggleSwitch(title, from: initialValue);
-      await verifyApplied(!initialValue, 'after the first toggle');
-      await chatRobot.backToSettingScreen();
-      s.softAssertEquals(
-        $(SettingsView).exists,
-        true,
-        'did not navigate back to Setting View',
-      );
+    await chatRobot.toggleSwitch(title, from: initialValue);
+    await verifyApplied(!initialValue, 'after the first toggle');
+    await chatRobot.backToSettingScreen();
+    s.softAssertEquals(
+      $(SettingsView).exists,
+      true,
+      'did not navigate back to Setting View',
+    );
 
-      await settingRobot.openChatSetting();
-      await chatRobot.waitForView();
-      await chatRobot.waitForSwitchValue(title, !initialValue);
+    // The tile defaults to `AppConfig.gifAutoplay`, which the first toggle
+    // already changed: reset it so only a real read of the store can show the
+    // persisted value when the screen is opened again.
+    AppConfig.gifAutoplay = initialValue;
+    await settingRobot.openChatSetting();
+    await chatRobot.waitForView();
+    await chatRobot.waitForSwitchValue(title, !initialValue);
 
-      await chatRobot.toggleSwitch(title, from: !initialValue);
-      await verifyApplied(initialValue, 'after toggling back');
-      restoredThroughSwitch = true;
-    } finally {
-      // Only a failed step leaves the setting changed: restore it by hand.
-      if (!restoredThroughSwitch) {
-        if (!chatRobot.view().exists) {
-          if (!$(SettingsView).exists) {
-            await HomeRobot($).gotoSettingScreen();
-          }
-          await settingRobot.openChatSetting();
-          await chatRobot.waitForView();
-        }
-        await chatRobot.restoreStoredValue(title, initialValue);
-      }
-    }
+    // Toggling back through the switch also leaves the account as it was.
+    await chatRobot.toggleSwitch(title, from: !initialValue);
+    await verifyApplied(initialValue, 'after toggling back');
 
     s.verifyAll();
   }
