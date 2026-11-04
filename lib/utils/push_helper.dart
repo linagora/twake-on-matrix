@@ -147,8 +147,8 @@ Future<void> _tryPushHelper(
     client.backgroundSync = false;
   }
 
-  if (event.type.startsWith('m.call') && event.type != EventTypes.CallInvite) {
-    Logs().v('Push message is a m.call but not invite. Do not display.');
+  if (event.type.startsWith('m.call')) {
+    Logs().v('Push message is a m.call. Do not display.');
     return;
   }
 

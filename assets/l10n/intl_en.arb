@@ -2924,5 +2924,19 @@
   "@publicGroupsLoadFailed": {
     "type": "text",
     "placeholders": {}
+  },
+  "callFromUnsupportedApp": "Call from an app Twake Chat does not support",
+  "@callFromUnsupportedApp": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callStartedAt": "Meeting started at {time}",
+  "@callStartedAt": {
+    "type": "text",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

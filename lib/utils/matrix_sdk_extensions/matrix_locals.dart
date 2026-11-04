@@ -238,7 +238,7 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String startedACall(String senderName) {
-    return unknownEvent(EventTypes.CallInvite);
+    return l10n.callFromUnsupportedApp;
   }
 
   @override
