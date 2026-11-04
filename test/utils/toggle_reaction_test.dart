@@ -33,4 +33,16 @@ void main() {
     await run(emoji: '😂');
     expect(calls, ['redact', 'send']);
   });
+
+  test(
+    'only redacts when the selected emoji differs by a variation selector',
+    () async {
+      await run(emoji: '\u2764', key: '\u2764\uFE0F');
+      expect(calls, ['redact']);
+
+      calls.clear();
+      await run(emoji: '\u2764\uFE0F', key: '\u2764');
+      expect(calls, ['redact']);
+    },
+  );
 }
