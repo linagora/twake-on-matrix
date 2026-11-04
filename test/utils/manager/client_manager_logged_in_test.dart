@@ -56,6 +56,29 @@ void main() {
     });
   });
 
+  group('ClientManager.serving', () {
+    test('the preferred client is kept while it holds a session', () async {
+      final preferred = await getClient();
+      final other = await getClient();
+
+      expect(ClientManager.serving(preferred, [other]), same(preferred));
+    });
+
+    test('a logged-out preferred client gives way to a held logged-in '
+        'one, without a new client', () async {
+      final loggedOut = Client('logged-out', database: MockDatabase());
+      final held = await getClient();
+
+      expect(ClientManager.serving(loggedOut, [loggedOut, held]), same(held));
+    });
+
+    test('nobody holds a session: the preferred client stays', () {
+      final loggedOut = Client('logged-out', database: MockDatabase());
+
+      expect(ClientManager.serving(loggedOut, [loggedOut]), same(loggedOut));
+    });
+  });
+
   group('ClientManager.firstLoggedIn', () {
     test('skips a logged-out client and returns the logged-in one', () async {
       final loggedIn = await getClient();

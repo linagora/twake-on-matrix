@@ -32,4 +32,14 @@ void main() {
 
     expect(isDisposed, isTrue);
   });
+
+  test('the overrides it is made with are applied', () {
+    final value = Provider<int>((ref) => 1);
+    final container = createAppProviderContainer(
+      overrides: [value.overrideWithValue(7)],
+    );
+    addTearDown(container.dispose);
+
+    expect(container.read(value), 7);
+  });
 }

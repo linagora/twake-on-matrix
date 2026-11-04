@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_profile/profile_edit_capabilities_provider.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import '../../../providers/fake_active_account.dart';
 
 class _FakeClient extends Fake implements Client {
   _FakeClient(this.response);
@@ -25,12 +25,15 @@ void main() {
   late ProviderContainer container;
 
   setUp(() {
-    container = ProviderContainer.test(retry: (_, _) => null);
+    container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: activeAccountOverridesFollowing(),
+    );
     container.listen(profileEditCapabilitiesProvider, (_, _) {});
   });
 
   void setClient(Client client) =>
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
+      container.read(fakeActiveAccountProvider.notifier).set(client);
 
   test('activeClientChange_afterLoad_fetchesFromNewClient', () async {
     // Arrange

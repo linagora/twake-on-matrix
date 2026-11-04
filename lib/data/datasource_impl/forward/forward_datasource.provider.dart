@@ -7,4 +7,4 @@ part 'forward_datasource.provider.g.dart';
 
 @riverpod
 ForwardDatasource forwardDatasource(Ref ref) =>
-    ForwardDatasourceImpl(ref.watch(activeMatrixClientProvider).client);
+    ForwardDatasourceImpl(ref.watch(activeMatrixClientProvider));

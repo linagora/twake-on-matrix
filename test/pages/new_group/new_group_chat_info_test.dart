@@ -8,7 +8,6 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
@@ -23,6 +22,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 import 'new_group_chat_info_test.mocks.dart';
+import '../../providers/fake_active_account.dart';
 
 @GenerateNiceMocks([
   MockSpec<NewGroupChatInfoScreenState>(),
@@ -127,15 +127,13 @@ void main() {
     }) async {
       final privacyNotifier = ValueNotifier(privacy);
       addTearDown(privacyNotifier.dispose);
+      final aliceClient = MockClient();
+      when(aliceClient.userID).thenReturn('@alice:example.com');
       when(mockController.groupPrivacyNotifier).thenReturn(privacyNotifier);
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            activeMatrixClientProvider.overrideWithBuild((_, _) {
-              final client = MockClient();
-              when(client.userID).thenReturn('@alice:example.com');
-              return ActiveClientSnapshot(client);
-            }),
+            ...activeAccountOverrides(aliceClient),
             loginHomeserverSummaryProvider.overrideWithBuild(
               (_, _) =>
                   summaryWith(isPublicGroupsEnabled: isPublicGroupsEnabled),
