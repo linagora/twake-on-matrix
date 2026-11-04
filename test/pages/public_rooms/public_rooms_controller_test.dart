@@ -116,25 +116,6 @@ void main() {
     expect(repository.joinedIds, isEmpty);
   });
 
-  test('open_whenTheJoinFails_reportsItAndClearsThePendingRoom', () async {
-    // Arrange
-    repository.joinError = PublicRoomJoinFailedException(
-      cause: Exception('forbidden'),
-    );
-    final container = makeContainer();
-    final controller = await loadedController(container);
-
-    // Act
-    final result = await controller.open(publicRoom('!open'));
-
-    // Assert
-    expect(result, isA<PublicRoomOpenFailed>());
-    expect(
-      container.read(publicRoomsControllerProvider).value?.pendingRoomId,
-      isNull,
-    );
-  });
-
   test('open_whileAnotherRoomIsPending_ignoresTheTap', () async {
     // Arrange
     final gate = Completer<void>();
@@ -344,40 +325,6 @@ void main() {
     expect(repository.knockedQueries, hasLength(1));
   });
 
-  test('open_whenDisposedDuringTheJoin_stillReturnsTheResult', () async {
-    // Arrange
-    final gate = Completer<void>();
-    repository.joinGate = gate;
-    final container = makeContainer();
-    final controller = await loadedController(container);
-    final result = controller.open(publicRoom('!open'));
-
-    // Act
-    container.dispose();
-    gate.complete();
-
-    // Assert
-    expect(await result, isA<PublicRoomJoined>());
-  });
-
-  test('open_whenDisposedDuringTheRequest_stillReturnsTheResult', () async {
-    // Arrange
-    final gate = Completer<void>();
-    repository.knockGate = gate;
-    final container = makeContainer();
-    final controller = await loadedController(container);
-    final result = controller.open(
-      publicRoom('!knock', access: PublicRoomAccess.approval),
-    );
-
-    // Act
-    container.dispose();
-    gate.complete();
-
-    // Assert
-    expect(await result, isA<PublicRoomRequested>());
-  });
-
   test('build_whenDisposedWhileALaterPageLoads_stopsQuietly', () async {
     // Arrange
     final pages = StreamController<List<PublicRoom>>();
@@ -429,23 +376,6 @@ void main() {
     ]);
   });
 
-  test('open_whenTheJoinThrowsAnUntypedError_clearsThePendingRoom', () async {
-    // Arrange
-    repository.joinUntypedError = StateError('unexpected');
-    final container = makeContainer();
-    final controller = await loadedController(container);
-
-    // Act
-    final result = controller.open(publicRoom('!open'));
-
-    // Assert
-    await expectLater(result, throwsA(isA<StateError>()));
-    expect(
-      container.read(publicRoomsControllerProvider).requireValue.pendingRoomId,
-      isNull,
-    );
-  });
-
   test('build_whenALookupThrowsAnUntypedError_leavesTheRowsAskable', () async {
     // Arrange
     final errors = <Object>[];
@@ -469,4 +399,69 @@ void main() {
       isEmpty,
     );
   });
+
+  for (final (description, fail, outcome) in [
+    (
+      'TypedError',
+      (FakePublicRoomsRepository repository) => repository.joinError =
+          PublicRoomJoinFailedException(cause: Exception('forbidden')),
+      completion(isA<PublicRoomOpenFailed>()),
+    ),
+    (
+      'UntypedError',
+      (FakePublicRoomsRepository repository) =>
+          repository.joinUntypedError = StateError('unexpected'),
+      throwsA(isA<StateError>()),
+    ),
+  ]) {
+    test(
+      'open_whenTheJoinThrowsA${description}_clearsThePendingRoom',
+      () async {
+        // Arrange
+        fail(repository);
+        final container = makeContainer();
+        final controller = await loadedController(container);
+
+        // Act
+        final result = controller.open(publicRoom('!open'));
+
+        // Assert
+        await expectLater(result, outcome);
+        expect(
+          container.read(publicRoomsControllerProvider).value?.pendingRoomId,
+          isNull,
+        );
+      },
+    );
+  }
+
+  for (final (description, room, outcome) in [
+    ('Join', publicRoom('!open'), isA<PublicRoomJoined>()),
+    (
+      'Request',
+      publicRoom('!knock', access: PublicRoomAccess.approval),
+      isA<PublicRoomRequested>(),
+    ),
+  ]) {
+    test(
+      'open_whenDisposedDuringThe${description}_stillReturnsTheResult',
+      () async {
+        // Arrange
+        final gate = Completer<void>();
+        repository
+          ..joinGate = gate
+          ..knockGate = gate;
+        final container = makeContainer();
+        final controller = await loadedController(container);
+        final result = controller.open(room);
+
+        // Act
+        container.dispose();
+        gate.complete();
+
+        // Assert
+        expect(await result, outcome);
+      },
+    );
+  }
 }
