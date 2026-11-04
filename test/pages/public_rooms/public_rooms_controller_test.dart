@@ -445,4 +445,28 @@ void main() {
       isNull,
     );
   });
+
+  test('build_whenALookupThrowsAnUntypedError_leavesTheRowsAskable', () async {
+    // Arrange
+    final errors = <Object>[];
+    repository.knockedUntypedError = TypeError();
+    late ProviderContainer container;
+
+    // Act
+    await runZonedGuarded(() async {
+      container = makeContainer();
+      await loadedController(container);
+      await pumpEventQueue();
+    }, (error, _) => errors.add(error));
+
+    // Assert
+    expect(errors.single, isA<TypeError>());
+    expect(
+      container
+          .read(publicRoomsControllerProvider)
+          .requireValue
+          .requestedRoomIds,
+      isEmpty,
+    );
+  });
 }

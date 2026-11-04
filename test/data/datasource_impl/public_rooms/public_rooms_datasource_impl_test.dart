@@ -307,12 +307,10 @@ void main() {
       when(
         mockClient.getRoomSummary('!broken'),
       ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNRECOGNIZED'}));
-      when(mockClient.getRoomSummary('!malformed')).thenThrow(TypeError());
 
       // Act
       final ids = await datasource.getKnockedRoomIds([
         '!broken',
-        '!malformed',
         '!knock',
         '!none',
       ]);
@@ -321,6 +319,20 @@ void main() {
       expect(ids, {'!knock'});
     });
   });
+
+  test(
+    'getKnockedRoomIds_whenASummaryIsMalformed_letsTheErrorThrough',
+    () async {
+      // Arrange
+      when(mockClient.getRoomSummary('!malformed')).thenThrow(TypeError());
+
+      // Act
+      final result = datasource.getKnockedRoomIds(['!malformed']);
+
+      // Assert
+      await expectLater(result, throwsA(isA<TypeError>()));
+    },
+  );
 
   group('join', () {
     test('join_whenTheRoomIsAlreadyInSync_returnsItsId', () async {

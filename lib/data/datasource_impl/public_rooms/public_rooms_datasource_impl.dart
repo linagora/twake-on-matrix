@@ -107,11 +107,10 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     try {
       final summary = await client.getRoomSummary(roomId);
       return summary.membership == Membership.knock;
-    } on Object catch (error, stackTrace) {
-      // A malformed summary must not stop the other lookups.
+    } on Exception catch (exception, stackTrace) {
       Logs().w(
         'PublicRoomsDatasourceImpl::getKnockedRoomIds',
-        error,
+        exception,
         stackTrace,
       );
       return false;
