@@ -37,7 +37,8 @@ class RoomAccessController extends _$RoomAccessController {
         .execute(roomId, joinRule: joinRule, isListed: isListed);
     if (!ref.mounted) return;
     // The listing is not room state: no sync would report it.
-    final latest = state.value ?? saved;
+    final latest = state.value;
+    if (latest == null) return;
     state = AsyncData(
       latest.copyWith(
         joinRule: joinRule ?? latest.joinRule,

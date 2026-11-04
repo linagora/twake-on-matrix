@@ -163,6 +163,31 @@ void main() {
     await updates.close();
   });
 
+  test('save_whenTheSectionHidesMeanwhile_staysHidden', () async {
+    // Arrange
+    final updates = StreamController<RoomAccess>();
+    final listed = Completer<void>();
+    final container = createContainer(updates: updates.stream);
+    when(
+      repository.setListed(roomId, isListed: true),
+    ).thenAnswer((_) => listed.future);
+    updates.add(invite);
+    await container.read(roomAccessControllerProvider(roomId).future);
+
+    // Act
+    final saving = container
+        .read(roomAccessControllerProvider(roomId).notifier)
+        .save(const RoomAccessDraft(isListed: true));
+    updates.add(invite.copyWith(canChange: false));
+    await pumpEventQueue();
+    listed.complete();
+    await saving;
+
+    // Assert
+    expect(container.read(roomAccessControllerProvider(roomId)).value, isNull);
+    await updates.close();
+  });
+
   test('save_unchangedDraft_sendsNothing', () async {
     // Arrange
     final container = createContainer();
