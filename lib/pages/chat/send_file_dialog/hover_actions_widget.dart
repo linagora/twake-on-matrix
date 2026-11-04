@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog_style.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +21,7 @@ class SendFileDialogActionsWidget extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          // TODO: change to colorSurface when its approved
-          // ignore: deprecated_member_use
-          color: Theme.of(context).colorScheme.background,
+          color: TwakeThemes.backgroundColor(context),
         ),
         margin: SendFileDialogStyle.paddingRemoveButton,
         child: Row(

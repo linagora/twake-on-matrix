@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/themes.dart';
 import 'package:flutter/material.dart';
 
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -36,9 +37,7 @@ class VerificationRequestContent extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-            // TODO: change to colorSurface when its approved
-            // ignore: deprecated_member_use
-            color: Theme.of(context).colorScheme.background,
+            color: TwakeThemes.backgroundColor(context),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

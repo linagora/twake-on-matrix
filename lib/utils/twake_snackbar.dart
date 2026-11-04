@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -39,9 +40,7 @@ class TwakeSnackBar {
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  // TODO: change to colorSurface when its approved
-                  // ignore: deprecated_member_use
-                  color: Theme.of(context).colorScheme.background,
+                  color: TwakeThemes.backgroundColor(context),
                 ),
               ),
             ),

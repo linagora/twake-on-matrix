@@ -17,6 +17,7 @@ import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_color.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
+
 import '../../config/themes.dart';
 
 class StoryView extends StatelessWidget {
@@ -359,9 +360,7 @@ class StoryView extends StatelessWidget {
                                   onPressed: controller.replyAction,
                                   icon: const Icon(Icons.send_outlined),
                                 ),
-                          // TODO: change to colorSurface when its approved
-                          // ignore: deprecated_member_use
-                          fillColor: Theme.of(context).colorScheme.background,
+                          fillColor: TwakeThemes.backgroundColor(context),
                         ),
                       ),
                     ),

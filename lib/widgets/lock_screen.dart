@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
 import 'package:twake_chat/config/themes.dart';
+
 import 'layouts/login_scaffold.dart';
 
 class LockScreen extends StatefulWidget {
@@ -41,9 +42,7 @@ class LockScreenState extends State<LockScreen> {
           ),
           body: Container(
             decoration: BoxDecoration(
-              // TODO: change to colorSurface when its approved
-              // ignore: deprecated_member_use
-              color: Theme.of(context).colorScheme.background,
+              color: TwakeThemes.backgroundColor(context),
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
@@ -52,9 +51,7 @@ class LockScreenState extends State<LockScreen> {
                   Theme.of(context).secondaryHeaderColor.withAlpha(16),
                   Theme.of(context).primaryColor.withAlpha(16),
                   Theme.of(context).colorScheme.secondary.withAlpha(16),
-                  // TODO: change to colorSurface when its approved
-                  // ignore: deprecated_member_use
-                  Theme.of(context).colorScheme.background.withAlpha(16),
+                  TwakeThemes.backgroundColor(context).withAlpha(16),
                 ],
               ),
             ),
