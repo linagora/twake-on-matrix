@@ -135,8 +135,9 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       await client
           .waitForRoomInSync(roomId, join: true)
           .timeout(_joinSyncTimeout);
-    } on TimeoutException catch (exception) {
-      Logs().w('PublicRoomsDatasourceImpl::join', exception);
+    } on Exception catch (exception, stackTrace) {
+      // Joined on the server either way: only the local sync is missing.
+      Logs().w('PublicRoomsDatasourceImpl::join', exception, stackTrace);
       return (roomId: roomId, isInSync: false);
     }
     return (roomId: roomId, isInSync: true);

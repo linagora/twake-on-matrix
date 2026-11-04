@@ -46,7 +46,6 @@ class PublicRoomsController extends _$PublicRoomsController {
         if (!ref.mounted) return const PublicRoomRequested();
         _update(
           (state) => state.copyWith(
-            pendingRoomId: null,
             requestedRoomIds: {...state.requestedRoomIds, room.roomId},
           ),
         );
@@ -55,17 +54,15 @@ class PublicRoomsController extends _$PublicRoomsController {
       final joined = await ref
           .read(joinPublicRoomUseCaseProvider)
           .execute(room.roomId);
-      final result = joined.isInSync
+      return joined.isInSync
           ? PublicRoomJoined(joined.roomId)
           : const PublicRoomJoinedNotInSync();
-      if (!ref.mounted) return result;
-      _update((state) => state.copyWith(pendingRoomId: null));
-      return result;
     } on PublicRoomsException {
+      return const PublicRoomOpenFailed();
+    } finally {
       if (ref.mounted) {
         _update((state) => state.copyWith(pendingRoomId: null));
       }
-      return const PublicRoomOpenFailed();
     }
   }
 

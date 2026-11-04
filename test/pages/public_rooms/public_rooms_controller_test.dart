@@ -428,4 +428,21 @@ void main() {
       ['!b'],
     ]);
   });
+
+  test('open_whenTheJoinThrowsAnUntypedError_clearsThePendingRoom', () async {
+    // Arrange
+    repository.joinUntypedError = StateError('unexpected');
+    final container = makeContainer();
+    final controller = await loadedController(container);
+
+    // Act
+    final result = controller.open(publicRoom('!open'));
+
+    // Assert
+    await expectLater(result, throwsA(isA<StateError>()));
+    expect(
+      container.read(publicRoomsControllerProvider).requireValue.pendingRoomId,
+      isNull,
+    );
+  });
 }

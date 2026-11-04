@@ -353,6 +353,20 @@ void main() {
       expect(joined.isInSync, isTrue);
     });
 
+    test('join_whenWaitingForTheSyncFails_saysItIsNotInSync', () async {
+      // Arrange
+      when(mockClient.joinRoom('!a:hs')).thenAnswer((_) async => '!a:hs');
+      when(
+        mockClient.waitForRoomInSync('!a:hs', join: true),
+      ).thenThrow(Exception('sync stopped'));
+
+      // Act
+      final joined = await datasource.join('!a:hs');
+
+      // Assert
+      expect(joined, (roomId: '!a:hs', isInSync: false));
+    });
+
     test('join_whenTheHomeserverRefuses_throwsJoinFailed', () async {
       // Arrange
       when(

@@ -38,6 +38,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   PublicRoomsException? fetchError;
   PublicRoomsException? knockedError;
   PublicRoomsException? joinError;
+  Object? joinUntypedError;
   PublicRoomsException? knockError;
   Completer<void>? joinGate;
   Completer<void>? knockGate;
@@ -79,6 +80,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   Future<({String roomId, bool isInSync})> join(String roomIdOrAlias) async {
     await joinGate?.future;
     if (joinError case final error?) throw error;
+    if (joinUntypedError case final error?) throw error;
     joinedIds.add(roomIdOrAlias);
     final roomId = roomIdOrAlias.startsWith('#')
         ? '!${roomIdOrAlias.substring(1)}'
