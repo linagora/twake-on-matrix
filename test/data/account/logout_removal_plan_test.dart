@@ -28,6 +28,9 @@ void main() {
   late bool failAnnounce;
   late List<String> reports;
 
+  /// The accounts push is asked to move away from.
+  late List<String> rebinds;
+
   /// Runs while the subscriptions of the account are cancelled.
   late Future<void> Function() whileCancelling;
 
@@ -69,6 +72,7 @@ void main() {
             events.add('activate:${state().runtimeType}');
             if (failActivate) throw StateError('effects');
           },
+          rebindPush: () async => rebinds.add(id),
           announce: announce
               ? () async {
                   events.add('announce:$id');
@@ -85,6 +89,7 @@ void main() {
     removals = LogoutRemovals();
     events = [];
     reports = [];
+    rebinds = [];
     whileCancelling = () async {};
     failCancel = false;
     failActivate = false;
@@ -113,9 +118,20 @@ void main() {
       await logout('b');
 
       expect(events, ['cancel:b', 'announce:b']);
+      // Push may still serve the account that left, whatever it was.
+      expect(rebinds, ['b']);
       expect((state() as Active).activeId, 'a');
     },
   );
+
+  test('the active account that is removed also moves push to the replacement '
+      'once', () async {
+    boot([user('a'), user('b')]);
+
+    await logout('a');
+
+    expect(rebinds, ['a']);
+  });
 
   test(
     'when the subscriptions cannot be cancelled the active account is held, and the replacement still gets its effects',
@@ -164,6 +180,16 @@ void main() {
       expect(events.where((e) => e.startsWith('activate')), hasLength(2));
     },
   );
+
+  test('push moves to the replacement even when its effects fail', () async {
+    boot([user('a'), user('b')]);
+    failActivate = true;
+
+    await logout('a');
+
+    expect(removals.failedIds, {'a'});
+    expect(rebinds, ['a']);
+  });
 
   test(
     'a removal that fails with no logged-in survivor holds the account and logs nobody in',

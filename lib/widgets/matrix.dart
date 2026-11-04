@@ -898,6 +898,7 @@ class MatrixState extends ConsumerState<Matrix>
         isActive: () => ref.read(activeMatrixClientProvider) == currentClient,
         cancelSubscriptions: () => _cancelSubs(currentClient.clientName),
         activateReplacement: () => _activateAfterLogout(state, currentClient),
+        rebindPush: () async => _rebindPushFrom(currentClient),
         announce: announce ? () => _announceLogout(currentClient) : null,
       ).steps,
       _report,
@@ -959,10 +960,7 @@ class MatrixState extends ConsumerState<Matrix>
     // it.
     await _switchCoordinator.activateCurrent();
     final newActiveClient = client;
-    // Push serves one account: the replacement gets its pusher now.
-    if (PlatformInfos.isMobile && newActiveClient.isLogged()) {
-      backgroundPush?.rebindFrom(currentClient, newActiveClient);
-    }
+    _rebindPushFrom(currentClient);
     Logs().v(
       '[MATRIX]:_handleLogoutWithMultipleAccount:: Log out Client ${currentClient.clientName} successful',
     );
@@ -971,6 +969,16 @@ class MatrixState extends ConsumerState<Matrix>
         '/rooms',
         extra: LogoutBodyArgs(newActiveClient: newActiveClient),
       );
+    }
+  }
+
+  /// Push serves one account: when it serves [departed], the active account
+  /// gets its pusher now. This holds whether [departed] was the active account
+  /// or not.
+  void _rebindPushFrom(Client departed) {
+    final active = clientOrNull;
+    if (PlatformInfos.isMobile && active != null && active.isLogged()) {
+      backgroundPush?.rebindFrom(departed, active);
     }
   }
 
