@@ -30,3 +30,25 @@ class CallMembershipFailedException extends CallException {
   const CallMembershipFailedException({super.cause})
     : super('Failed to send the call membership');
 }
+
+/// The well-known has no token service: the call link is the fallback.
+class CallServiceUnavailableException extends CallException {
+  const CallServiceUnavailableException()
+    : super('No MatrixRTC token service in the well-known');
+}
+
+/// Until media keys are exchanged (DECISION.md D10).
+class CallEncryptionUnsupportedException extends CallException {
+  const CallEncryptionUnsupportedException()
+    : super('Calls in encrypted rooms are not supported yet');
+}
+
+class CallConnectionFailedException extends CallException {
+  const CallConnectionFailedException({super.cause})
+    : super('Failed to connect to LiveKit');
+}
+
+class CallMediaFailedException extends CallException {
+  const CallMediaFailedException({super.cause})
+    : super('Failed to open the microphone or the camera');
+}
