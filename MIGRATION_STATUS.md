@@ -42,4 +42,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | device_settings | Controller, still on `app_state` | #3389 |
 | contacts | In review | #3459 |
 | reactions | Use cases + native providers, GetIt removed | #3527 |
+| preview_url | Use case + native providers, GetIt registrations removed; `MediaAPI` still reads the home `DioClient` from GetIt (shared with upload and download) | #3537 |
 | Everything else | Legacy | |

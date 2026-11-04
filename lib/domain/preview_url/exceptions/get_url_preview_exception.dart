@@ -4,5 +4,5 @@ class GetUrlPreviewException implements Exception {
   final Object cause;
 
   @override
-  String toString() => '$runtimeType: $cause';
+  String toString() => 'GetUrlPreviewException: $cause';
 }

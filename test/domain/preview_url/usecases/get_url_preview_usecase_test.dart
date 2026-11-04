@@ -47,8 +47,9 @@ void main() {
     });
 
     test('keeps the stack trace of the repository error', () async {
+      final trace = StackTrace.fromString('repository');
       final repository = FakeMediaRepository(
-        onGetUrlPreview: (_) => Future.error(StateError('boom')),
+        onGetUrlPreview: (_) => Future.error(StateError('boom'), trace),
       );
 
       try {
@@ -56,7 +57,7 @@ void main() {
         fail('should throw');
       } on GetUrlPreviewException catch (e, s) {
         expect(e.cause, isA<StateError>());
-        expect(s, isNotNull);
+        expect(s, same(trace));
         expect(e.toString(), contains('GetUrlPreviewException'));
       }
     });

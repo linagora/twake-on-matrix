@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/repository/media/media_repository.provider.dart';
 import 'package:twake_chat/domain/model/media/url_preview.dart';
 import 'package:twake_chat/domain/preview_url/exceptions/get_url_preview_exception.dart';
@@ -49,7 +50,7 @@ void main() {
       expect(defaultPreferredPreviewTimeInMilliseconds, 2000);
     });
 
-    test('exposes a typed error and does not retry', () async {
+    test('exposes a typed error', () async {
       repository.onGetUrlPreview = (_) async => throw Exception('refused');
       final container = createContainer();
       container.listen(urlPreviewProvider(uri), (_, _) {});
@@ -62,8 +63,23 @@ void main() {
       final state = container.read(urlPreviewProvider(uri));
       expect(state, isA<AsyncError>());
       expect(state.value, isNull);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      expect(repository.calls, hasLength(1));
+    });
+
+    test('does not log a refused preview as an error', () async {
+      Logs().outputEvents.clear();
+      repository.onGetUrlPreview = (_) async => throw Exception('refused');
+      final container = createContainer();
+      container.listen(urlPreviewProvider(uri), (_, _) {});
+
+      await expectLater(
+        container.read(urlPreviewProvider(uri).future),
+        throwsA(isA<GetUrlPreviewException>()),
+      );
+
+      expect(
+        Logs().outputEvents.where((event) => event.level == Level.error),
+        isEmpty,
+      );
     });
 
     test('fetches once per link while listened', () async {

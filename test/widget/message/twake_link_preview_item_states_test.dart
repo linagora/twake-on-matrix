@@ -66,7 +66,7 @@ void main() {
       expect(repository.calls, hasLength(1));
     });
 
-    for (final link in [null, '', '   ']) {
+    for (final link in [null, '', '   ', 'http://[']) {
       testWidgets('shows the skeleton without a request for "$link"', (
         tester,
       ) async {
