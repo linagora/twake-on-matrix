@@ -335,7 +335,10 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         onEmojiSelected: (emojiId, emoji) {
                           controller.typeEmoji(emoji);
                           unawaited(
-                            controller.handleStoreRecentReactions(emoji),
+                            controller.handleStoreRecentReactions(
+                              emoji,
+                              emojiId: emojiId,
+                            ),
                           );
                         },
                       ),

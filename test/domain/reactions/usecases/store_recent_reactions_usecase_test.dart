@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +80,34 @@ void main() {
         verifyNever(repository.storeRecentReactions(any));
       },
     );
+
+    test('execute_whileWriteIsPending_completesOnlyAfterTheWrite', () async {
+      // Arrange
+      final writeGate = Completer<void>();
+      final repository = MockReactionsRepository();
+      when(repository.getRecentReactions()).thenAnswer((_) async => []);
+      when(
+        repository.storeRecentReactions(any),
+      ).thenAnswer((_) => writeGate.future);
+      final container = createContainer(
+        overrides: [reactionsRepositoryProvider.overrideWithValue(repository)],
+      );
+      var completed = false;
+
+      // Act
+      final result = container
+          .read(storeRecentReactionsUseCaseProvider)
+          .execute(emojiId: 'smile')
+          .then((_) => completed = true);
+      await Future<void>.delayed(Duration.zero);
+
+      // Assert
+      verify(repository.storeRecentReactions(['smile'])).called(1);
+      expect(completed, isFalse);
+      writeGate.complete();
+      await result;
+      expect(completed, isTrue);
+    });
 
     test(
       'execute_whenWriteFails_throwsStoreRecentReactionsException',

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -73,7 +75,7 @@ class ChatEventListItem extends StatelessWidget {
       }).toList(),
       onPickEmojiReaction: () {},
       onSelectEmojiReaction: (emoji, event) {
-        controller.sendEmojiAction(emoji: emoji, event: event);
+        unawaited(controller.sendEmojiAction(emoji: emoji, event: event));
       },
       onForward: (event) {
         controller.forwardEventsAction(event: event);
