@@ -251,6 +251,33 @@ the conversation, scrolling included, instead of a strong blue block that
 went away after three seconds. A selected message shows its selection colour
 instead.
 
+## D14. In-app calls use the MatrixRTC format of Twake Space Chat, not the voip of the Dart SDK (proposed by Johann, 2026-11-05)
+
+A call in a room is a MatrixRTC session with a LiveKit focus, written exactly
+as Twake Space Chat (matrix-js-sdk 43) writes it, so that both apps meet in
+the same call:
+
+- one `org.matrix.msc3401.call.member` state event per device, state key
+  `_<user>_<device>_m.call` (no leading `_` on the MSC3757/MSC3779 room
+  versions), `membershipID` `<user>:<device>`, `focus_active` LiveKit
+  `oldest_membership`, `foci_preferred` the token service of the well-known;
+- the token comes from `POST <token service>/sfu/get` (MSC4195) with an
+  OpenID token; the token service is `livekit_service_url` of the
+  `org.matrix.msc4143.rtc_foci` LiveKit focus, else its `livekit_base_url`;
+- the membership lasts 4 hours (`expires`) and grows by 4 hours before it
+  lapses; a delayed leave (MSC4140) of 8 seconds, restarted every 5, ends it
+  on the server when the app vanishes;
+- at join, a membership this device left from an earlier run is ended first;
+- a call is encrypted when its room is;
+- a call in a direct chat ends when the other person leaves it.
+
+The calls of `package:matrix` (`GroupCallSession`, `LiveKitBackend`) are not
+used: they write `com.famedly.call.member`, which Twake Space Chat and Element
+Call do not read (still so in matrix 15.0.0).
+
+A call in an encrypted room needs the exchange of media keys, which comes
+later: until then the app does not join calls of encrypted rooms.
+
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
 
 The row shows up to three reactions, the most used first; among equal

@@ -73,7 +73,15 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     }
   }
 
-  String? get videoCallBaseUrl {
+  String? get videoCallBaseUrl =>
+      _firstLiveKitUrl((focus) => focus.livekitBaseUrl);
+
+  /// The token service of in-app calls: its service url, else its base url.
+  String? get callTokenServiceUrl => _firstLiveKitUrl(
+    (focus) => focus.livekitServiceUrl ?? focus.livekitBaseUrl,
+  );
+
+  String? _firstLiveKitUrl(Uri? Function(RtcFocus focus) urlOf) {
     if (discoveryInformation?.additionalProperties == null) {
       return null;
     }
@@ -86,11 +94,9 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       if (focusJson is! Map) continue;
       try {
         final focus = RtcFocus.fromJson(Map<String, dynamic>.from(focusJson));
-        final baseUrl = focus.livekitBaseUrl?.toString();
-        if (!focus.isLiveKit || baseUrl == null || baseUrl.isEmpty) continue;
-        return baseUrl.endsWith('/')
-            ? baseUrl.substring(0, baseUrl.length - 1)
-            : baseUrl;
+        final url = urlOf(focus)?.toString();
+        if (!focus.isLiveKit || url == null || url.isEmpty) continue;
+        return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
       } catch (e, s) {
         Logs().wtf(
           'Failed to parse ${RtcFocus.rtcFociKey} from homeserver summary',

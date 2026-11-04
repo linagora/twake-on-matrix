@@ -12,7 +12,11 @@ class RtcFocus with EquatableMixin {
 
   final Uri? livekitBaseUrl;
 
-  RtcFocus({this.type, this.livekitBaseUrl});
+  /// The MatrixRTC token service (MSC4195); older well-knowns only give the
+  /// base url.
+  final Uri? livekitServiceUrl;
+
+  RtcFocus({this.type, this.livekitBaseUrl, this.livekitServiceUrl});
 
   bool get isLiveKit => type == liveKitType;
 
@@ -22,5 +26,5 @@ class RtcFocus with EquatableMixin {
   Map<String, dynamic> toJson() => _$RtcFocusToJson(this);
 
   @override
-  List<Object?> get props => [type, livekitBaseUrl];
+  List<Object?> get props => [type, livekitBaseUrl, livekitServiceUrl];
 }

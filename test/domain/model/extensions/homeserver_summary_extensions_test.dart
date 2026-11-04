@@ -62,5 +62,45 @@ void main() {
 
       expect(summary.isInvitationEnabled, isFalse);
     });
+    group('callTokenServiceUrl', () {
+      Map<String, dynamic> foci(List<Map<String, Object?>> foci) => {
+        'org.matrix.msc4143.rtc_foci': foci,
+      };
+
+      test('prefers the service url of the LiveKit focus', () {
+        final summary = summaryWith(
+          foci([
+            {
+              'type': 'livekit',
+              'livekit_service_url': 'https://rtc.test/',
+              'livekit_base_url': 'https://meet.test',
+            },
+          ]),
+        );
+
+        expect(summary.callTokenServiceUrl, 'https://rtc.test');
+        expect(summary.videoCallBaseUrl, 'https://meet.test');
+      });
+
+      test('falls back on the base url', () {
+        final summary = summaryWith(
+          foci([
+            {'type': 'livekit', 'livekit_base_url': 'https://rtc.test'},
+          ]),
+        );
+
+        expect(summary.callTokenServiceUrl, 'https://rtc.test');
+      });
+
+      test('ignores a focus of another type', () {
+        final summary = summaryWith(
+          foci([
+            {'type': 'other', 'livekit_service_url': 'https://rtc.test'},
+          ]),
+        );
+
+        expect(summary.callTokenServiceUrl, isNull);
+      });
+    });
   });
 }
