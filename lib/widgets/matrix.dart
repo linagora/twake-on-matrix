@@ -1259,7 +1259,7 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
-  bool _homeserverCheckFailed = false;
+  final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
 
   Future<void> _getHomeserverInformation(Client newClient) async {
     Logs().d(
@@ -1287,13 +1287,16 @@ class MatrixState extends ConsumerState<Matrix>
       fallback: previousSummary?.discoveryInformation,
     );
 
-    if (checkedSummary == null && discovery == null) return;
-
     // The active client may have changed while awaiting: a late result must
     // not overwrite the newer account's summary.
     if (clientOrNull != newClient) return;
 
-    _homeserverCheckFailed = checkFailed;
+    // Recorded before the early return below: an unreachable account without
+    // cached discovery must still be refreshed on reconnect.
+    _homeserverCheckLog.record(newClient, failed: checkFailed);
+
+    if (checkedSummary == null && discovery == null) return;
+
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
       versions:
@@ -1535,7 +1538,7 @@ class MatrixState extends ConsumerState<Matrix>
     if (widget.clients.isEmpty) return;
     if (!client.needsHomeserverInformationRefresh(
       hasSummary: loginHomeserverSummary != null,
-      lastCheckFailed: _homeserverCheckFailed,
+      lastCheckFailed: _homeserverCheckLog.hasFailed(client),
     )) {
       return;
     }
