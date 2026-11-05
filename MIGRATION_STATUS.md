@@ -49,4 +49,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | new_group | Use cases + native providers + controller; avatar upload still on GetIt (shared) | #3541 |
 | capabilities | Use case + native providers, GetIt removed | #3539 |
 | preview_url | Use case + native providers, GetIt registrations removed; `MediaAPI` still reads the home `DioClient` from GetIt (shared with upload and download) | #3537 |
+| draft_chat | Create direct chat and blocked state on use cases + native providers; `UploadManager` bridged, unblock mixin and the style classes (`ResponsiveUtils`) still on GetIt | #3392 |
 | Everything else | Legacy | |
