@@ -57,6 +57,10 @@ D17, D42, D170, D237, D286, D348, D354, D483, D542):
   `lib/providers/room_list/`: entries, filter, folders, children of a space.
 - The folded spaces are a preference of this device, with no business rule:
   their controller reads its datasource directly, without a use case.
+- Exception to §2.4.5 of `GUIDELINES.md`: `FoldersController` shows a save at
+  once, before the server answers, and goes back to what the server holds if
+  it fails. A dragged folder must stay where it was dropped, and account data
+  has no local echo before the sync. Saves run one at a time, in order.
 
 ## Spec
 
