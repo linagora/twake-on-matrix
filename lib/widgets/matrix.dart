@@ -1543,7 +1543,7 @@ class MatrixState extends ConsumerState<Matrix>
     await LocalizationService.applyLocale(locale);
   }
 
-  bool _homeserverCheckFailed = false;
+  final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
 
   Future<void> _getHomeserverInformation(
     Client newClient, [
@@ -1568,7 +1568,7 @@ class MatrixState extends ConsumerState<Matrix>
       return;
     }
 
-    _homeserverCheckFailed = checkFailed;
+    _homeserverCheckLog.record(newClient, failed: checkFailed);
     loginHomeserverSummary = summary;
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
@@ -1831,7 +1831,7 @@ class MatrixState extends ConsumerState<Matrix>
     if (clientOrNull == null) return;
     if (!client.needsHomeserverInformationRefresh(
       hasSummary: loginHomeserverSummary != null,
-      lastCheckFailed: _homeserverCheckFailed,
+      lastCheckFailed: _homeserverCheckLog.hasFailed(client),
     )) {
       return;
     }

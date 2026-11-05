@@ -245,4 +245,40 @@ void main() {
       );
     });
   });
+
+  group('HomeserverCheckLog', () {
+    late Client healthy;
+    late Client unreachable;
+    late HomeserverCheckLog log;
+
+    setUp(() {
+      healthy = Client('healthy', database: _ClearableDatabase());
+      unreachable = Client('unreachable', database: _ClearableDatabase());
+      log = HomeserverCheckLog();
+    });
+
+    tearDown(() async {
+      await healthy.dispose(closeDatabase: false);
+      await unreachable.dispose(closeDatabase: false);
+    });
+
+    test('a healthy account does not hide the failure of another one', () {
+      log.record(unreachable, failed: true);
+      log.record(healthy, failed: false);
+
+      expect(log.hasFailed(unreachable), isTrue);
+      expect(log.hasFailed(healthy), isFalse);
+    });
+
+    test('a later successful check clears the failure', () {
+      log.record(unreachable, failed: true);
+      log.record(unreachable, failed: false);
+
+      expect(log.hasFailed(unreachable), isFalse);
+    });
+
+    test('an account that was never checked has not failed', () {
+      expect(log.hasFailed(healthy), isFalse);
+    });
+  });
 }

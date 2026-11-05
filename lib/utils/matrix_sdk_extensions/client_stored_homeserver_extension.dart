@@ -55,3 +55,21 @@ extension ClientStoredHomeserverExtension on Client {
     required bool lastCheckFailed,
   }) => homeserver == null || !hasSummary || lastCheckFailed;
 }
+
+/// Remembers, per account, whether the last homeserver check failed.
+///
+/// One flag for all accounts would let a healthy account hide the failure of
+/// another one after an account switch.
+class HomeserverCheckLog {
+  final Set<String> _failedClients = {};
+
+  void record(Client client, {required bool failed}) {
+    if (failed) {
+      _failedClients.add(client.clientName);
+    } else {
+      _failedClients.remove(client.clientName);
+    }
+  }
+
+  bool hasFailed(Client client) => _failedClients.contains(client.clientName);
+}
