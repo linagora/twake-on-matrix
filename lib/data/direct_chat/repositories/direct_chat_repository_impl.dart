@@ -48,6 +48,10 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
       Logs().e('DirectChatRepositoryImpl::createDirectChat() failed', e, s);
       if (roomId != null) await _cleanUp(client, roomId);
       throw CreateDirectChatFailedException(e);
+    } catch (_) {
+      // An Error is not wrapped (G4) but the created room must not leak.
+      if (roomId != null) await _cleanUp(client, roomId);
+      rethrow;
     }
   }
 
@@ -69,8 +73,9 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     return false;
   }
 
-  /// A forbidden profile stops the creation; any other profile failure is
-  /// logged and the creation goes on, as the contact may have no profile yet.
+  /// A forbidden profile stops the creation. Any other Matrix error is logged
+  /// and the creation goes on, as the contact may have no profile yet. A
+  /// failure that is not a Matrix error (offline, timeout) is a typed failure.
   /// Profile lookup: https://spec.matrix.org/v1.11/client-server-api/#get_matrixclientv3profileuserid
   /// (403 `M_FORBIDDEN` when the server refuses to share the profile).
   Future<void> _checkProfile(Client client, String contactMxId) async {
@@ -81,6 +86,9 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
         throw const CreateDirectChatForbiddenException();
       }
       Logs().w('DirectChatRepositoryImpl: profile lookup failed', e);
+    } on Exception catch (e, s) {
+      Logs().e('DirectChatRepositoryImpl: profile lookup failed', e, s);
+      throw CreateDirectChatFailedException(e);
     }
   }
 
