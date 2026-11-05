@@ -204,7 +204,7 @@ Future<void> _tryPushHelper(
           ),
         ),
       );
-      if (decrypted != null) {
+      if (decrypted != null && !decrypted.type.startsWith('m.call')) {
         await _showNotification(
           flutterLocalNotificationsPlugin,
           decrypted,
