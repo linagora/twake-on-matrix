@@ -14,28 +14,12 @@ class SearchEngine {
     ];
   }
 
-  /// Builds the normalize/compare closures for a given `needle` and
-  /// `options`, so callers can reuse the same normalization pipeline across
-  /// multiple values without recomputing it per value.
-  ({String Function(String) apply, bool Function(String) matches}) _matcher(
-    String needle,
-    SearchOptions options,
-  ) {
-    final pipeline = _buildPipeline(options);
-    String apply(String input) =>
-        pipeline.fold<String>(input, (v, step) => step.normalize(v));
-    final normNeedle = apply(needle);
-    bool matches(String value) {
-      switch (options.mode) {
-        case SearchMode.exact:
-          return value == normNeedle;
-        case SearchMode.substring:
-          return value.contains(normNeedle);
-      }
-    }
-
-    return (apply: apply, matches: matches);
-  }
+  /// Builds a [SearchMatcher] for `needle` and `options`. The needle is
+  /// normalized once; reuse the matcher for every value compared against it.
+  SearchMatcher buildMatcher(
+    String needle, {
+    SearchOptions options = const SearchOptions(),
+  }) => SearchMatcher._(needle, options, _buildPipeline(options));
 
   List<T> matchAnyField<T>(
     String needle,
@@ -43,12 +27,11 @@ class SearchEngine {
     required List<Iterable<String> Function(T)> fieldExtractors,
     SearchOptions options = const SearchOptions(),
   }) {
-    final matcher = _matcher(needle, options);
+    final matcher = buildMatcher(needle, options: options);
 
     return haystack.where((item) {
       return fieldExtractors.any(
-        (extract) =>
-            extract(item).any((value) => matcher.matches(matcher.apply(value))),
+        (extract) => extract(item).any(matcher.matches),
       );
     }).toList();
   }
@@ -80,7 +63,7 @@ class SearchEngine {
     List<Iterable<String> Function(T)>? fieldExtractors,
     SearchOptions options = const SearchOptions(),
   }) {
-    final matcher = _matcher(needle, options);
+    final matcher = buildMatcher(needle, options: options);
     final extractors =
         fieldExtractors ??
         [
@@ -88,10 +71,7 @@ class SearchEngine {
         ];
 
     return haystack.any(
-      (item) => extractors.any(
-        (extract) =>
-            extract(item).any((value) => matcher.matches(matcher.apply(value))),
-      ),
+      (item) => extractors.any((extract) => extract(item).any(matcher.matches)),
     );
   }
 
@@ -99,14 +79,28 @@ class SearchEngine {
     String needle,
     String haystack, {
     SearchOptions options = const SearchOptions(),
-  }) {
-    return matchAnyField(
-      needle,
-      [haystack],
-      fieldExtractors: [
-        (String s) => [s],
-      ],
-      options: options,
-    ).isNotEmpty;
+  }) => buildMatcher(needle, options: options).matches(haystack);
+}
+
+class SearchMatcher {
+  final SearchOptions _options;
+  final List<NormalizationStep> _pipeline;
+  final String _normalizedNeedle;
+
+  SearchMatcher._(String needle, this._options, this._pipeline)
+    : _normalizedNeedle = _normalize(_pipeline, needle);
+
+  static String _normalize(List<NormalizationStep> pipeline, String input) =>
+      pipeline.fold<String>(input, (v, step) => step.normalize(v));
+
+  /// Normalizes `value` with the same pipeline as the needle, then compares.
+  bool matches(String value) {
+    final normalized = _normalize(_pipeline, value);
+    switch (_options.mode) {
+      case SearchMode.exact:
+        return normalized == _normalizedNeedle;
+      case SearchMode.substring:
+        return normalized.contains(_normalizedNeedle);
+    }
   }
 }
