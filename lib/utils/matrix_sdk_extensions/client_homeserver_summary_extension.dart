@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 
 extension ClientHomeserverSummaryExtension on Client {
@@ -28,7 +29,7 @@ extension ClientHomeserverSummaryExtension on Client {
     if (homeserver != null) {
       try {
         final (_, checkedVersions, checkedLoginFlows, _) =
-            await checkHomeserver(homeserver, checkWellKnown: false);
+            await checkStoredHomeserver();
         versions = checkedVersions;
         loginFlows = checkedLoginFlows;
       } catch (e, s) {

@@ -1623,7 +1623,11 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    // A client that holds a session keeps its own homeserver: the default one
+    // would receive its token and answer M_UNKNOWN_TOKEN.
+    if (!client.isLogged()) {
+      client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    }
     await _getHomeserverInformation(client);
   }
 
