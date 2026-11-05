@@ -203,45 +203,56 @@ void main() {
       expect(unlogged.homeserver, held);
     });
 
-    test('reconnect refreshes when the summary is missing', () {
+    void expectRefresh(
+      Client client, {
+      required bool hasSummary,
+      required bool lastCheckFailed,
+      required bool refreshes,
+    }) {
       expect(
-        logged.needsHomeserverInformationRefresh(
-          hasSummary: false,
-          lastCheckFailed: false,
+        client.needsHomeserverInformationRefresh(
+          hasSummary: hasSummary,
+          lastCheckFailed: lastCheckFailed,
         ),
-        isTrue,
+        refreshes,
+      );
+    }
+
+    test('reconnect refreshes when the summary is missing', () {
+      expectRefresh(
+        logged,
+        hasSummary: false,
+        lastCheckFailed: false,
+        refreshes: true,
       );
     });
 
     test('reconnect refreshes when the last check failed', () {
-      expect(
-        logged.needsHomeserverInformationRefresh(
-          hasSummary: true,
-          lastCheckFailed: true,
-        ),
-        isTrue,
+      expectRefresh(
+        logged,
+        hasSummary: true,
+        lastCheckFailed: true,
+        refreshes: true,
       );
     });
 
     test('reconnect refreshes a client that has no homeserver', () {
       unlogged.homeserver = null;
 
-      expect(
-        unlogged.needsHomeserverInformationRefresh(
-          hasSummary: true,
-          lastCheckFailed: false,
-        ),
-        isTrue,
+      expectRefresh(
+        unlogged,
+        hasSummary: true,
+        lastCheckFailed: false,
+        refreshes: true,
       );
     });
 
     test('reconnect does nothing when everything is known and healthy', () {
-      expect(
-        logged.needsHomeserverInformationRefresh(
-          hasSummary: true,
-          lastCheckFailed: false,
-        ),
-        isFalse,
+      expectRefresh(
+        logged,
+        hasSummary: true,
+        lastCheckFailed: false,
+        refreshes: false,
       );
     });
   });
