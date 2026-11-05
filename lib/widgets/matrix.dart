@@ -69,6 +69,7 @@ import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -1542,6 +1543,8 @@ class MatrixState extends ConsumerState<Matrix>
     await LocalizationService.applyLocale(locale);
   }
 
+  bool _homeserverCheckFailed = false;
+
   Future<void> _getHomeserverInformation(
     Client newClient, [
     SwitchToken? token,
@@ -1549,11 +1552,13 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
+    var checkFailed = false;
     final summary = await newClient.fetchHomeserverSummary(
       // A login that makes this account active checked its server just before.
       previous:
           _loginSessions.homeserverSummaryOf(newClient) ??
           loginHomeserverSummary,
+      onCheckFailed: () => checkFailed = true,
     );
 
     // The active client may have changed while awaiting: a late result must
@@ -1563,6 +1568,7 @@ class MatrixState extends ConsumerState<Matrix>
       return;
     }
 
+    _homeserverCheckFailed = checkFailed;
     loginHomeserverSummary = summary;
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
@@ -1623,11 +1629,9 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    // A client that holds a session keeps its own homeserver: the default one
-    // would receive its token and answer M_UNKNOWN_TOKEN.
-    if (!client.isLogged()) {
-      client.homeserver ??= Uri.parse(AppConfig.homeserver);
-    }
+    client.applyDefaultHomeserverWithoutSession(
+      Uri.parse(AppConfig.homeserver),
+    );
     await _getHomeserverInformation(client);
   }
 
@@ -1825,7 +1829,12 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   Future<void> onConnect() async {
     if (clientOrNull == null) return;
-    if (client.homeserver != null) return;
+    if (!client.needsHomeserverInformationRefresh(
+      hasSummary: loginHomeserverSummary != null,
+      lastCheckFailed: _homeserverCheckFailed,
+    )) {
+      return;
+    }
     await _refreshHomeserverInformation(client);
   }
 

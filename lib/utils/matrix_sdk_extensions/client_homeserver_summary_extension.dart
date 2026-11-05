@@ -6,8 +6,10 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extensi
 extension ClientHomeserverSummaryExtension on Client {
   /// Returns null when nothing can be read for this homeserver. [previous] is
   /// reused only when its well-known points to this client's homeserver.
+  /// [onCheckFailed] runs when the homeserver itself cannot be checked.
   Future<HomeserverSummary?> fetchHomeserverSummary({
     HomeserverSummary? previous,
+    void Function()? onCheckFailed,
   }) async {
     final homeserver = this.homeserver?.stripTrailingSlash();
     final previousHomeserver = previous
@@ -33,6 +35,7 @@ extension ClientHomeserverSummaryExtension on Client {
         versions = checkedVersions;
         loginFlows = checkedLoginFlows;
       } catch (e, s) {
+        onCheckFailed?.call();
         Logs().w(
           'ClientHomeserverSummaryExtension::fetchHomeserverSummary: homeserver '
           'unreachable, using cached discovery information',

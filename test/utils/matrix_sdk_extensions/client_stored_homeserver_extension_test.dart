@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -25,6 +26,9 @@ class _ModalClient extends http.BaseClient {
   final void Function(Uri) _onRequest;
   final http.Client _healthy = FakeMatrixApi();
 
+  /// While set, an unreachable request waits for it before failing.
+  Completer<void>? holdUnreachable;
+
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     _onRequest(request.url);
@@ -32,6 +36,7 @@ class _ModalClient extends http.BaseClient {
       case _Mode.healthy:
         return _healthy.send(request);
       case _Mode.unreachable:
+        await holdUnreachable?.future;
         throw const SocketException('connection refused');
       case _Mode.rejectsToken:
         return http.StreamedResponse(
@@ -53,8 +58,10 @@ void main() {
     late _Mode mode;
     late List<Uri> requested;
 
+    late _ModalClient server;
+
     http.Client serverThat() =>
-        _ModalClient(() => mode, (uri) => requested.add(uri));
+        server = _ModalClient(() => mode, (uri) => requested.add(uri));
 
     setUp(() async {
       mode = _Mode.healthy;
@@ -80,6 +87,24 @@ void main() {
       expect(client.homeserver, stored);
       expect(client.isLogged(), isTrue);
       expect(requested.every((uri) => uri.host == stored!.host), isTrue);
+    });
+
+    test('does not give the homeserver back to a client cleared while the '
+        'check is in flight', () async {
+      mode = _Mode.unreachable;
+      server.holdUnreachable = Completer<void>();
+
+      final check = expectLater(
+        client.checkStoredHomeserver(),
+        throwsA(anything),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await client.clear();
+      server.holdUnreachable!.complete();
+      await check;
+
+      expect(client.isLogged(), isFalse);
+      expect(client.homeserver, isNull);
     });
 
     test('an unreachable account leaves the other account untouched', () async {
@@ -138,5 +163,86 @@ void main() {
         expect(client.homeserver, isNotNull);
       },
     );
+  });
+
+  group('ClientStoredHomeserverExtension::homeserver refresh decisions', () {
+    final defaultServer = Uri.parse('https://default.example');
+    late Client logged;
+    late Client unlogged;
+
+    setUp(() async {
+      logged = await getClient(database: _ClearableDatabase());
+      unlogged = Client('unlogged', database: _ClearableDatabase());
+    });
+
+    tearDown(() async {
+      await logged.dispose(closeDatabase: false);
+      await unlogged.dispose(closeDatabase: false);
+    });
+
+    test('a client with a session never receives the default homeserver', () {
+      logged.homeserver = null;
+
+      logged.applyDefaultHomeserverWithoutSession(defaultServer);
+
+      expect(logged.homeserver, isNull);
+    });
+
+    test('a client without a session receives the default homeserver', () {
+      unlogged.applyDefaultHomeserverWithoutSession(defaultServer);
+
+      expect(unlogged.homeserver, defaultServer);
+    });
+
+    test('a client without a session keeps the homeserver it holds', () {
+      final held = Uri.parse('https://held.example');
+      unlogged.homeserver = held;
+
+      unlogged.applyDefaultHomeserverWithoutSession(defaultServer);
+
+      expect(unlogged.homeserver, held);
+    });
+
+    test('reconnect refreshes when the summary is missing', () {
+      expect(
+        logged.needsHomeserverInformationRefresh(
+          hasSummary: false,
+          lastCheckFailed: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('reconnect refreshes when the last check failed', () {
+      expect(
+        logged.needsHomeserverInformationRefresh(
+          hasSummary: true,
+          lastCheckFailed: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('reconnect refreshes a client that has no homeserver', () {
+      unlogged.homeserver = null;
+
+      expect(
+        unlogged.needsHomeserverInformationRefresh(
+          hasSummary: true,
+          lastCheckFailed: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('reconnect does nothing when everything is known and healthy', () {
+      expect(
+        logged.needsHomeserverInformationRefresh(
+          hasSummary: true,
+          lastCheckFailed: false,
+        ),
+        isFalse,
+      );
+    });
   });
 }
