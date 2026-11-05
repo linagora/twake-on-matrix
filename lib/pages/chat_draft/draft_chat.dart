@@ -402,7 +402,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     } catch (e, s) {
       // Not a typed failure (an Error or a missing client): the screen must not
       // stay blocked, and the cause is reported instead of hidden.
-      Logs().e('_createRoom: unexpected ${e.runtimeType}', e, s);
+      Logs().e('_createRoom: unexpected failure', e, s);
       failure = CreateDirectChatFailedException(e);
     }
     if (!mounted || requestId != _createRoomRequestId) return;
