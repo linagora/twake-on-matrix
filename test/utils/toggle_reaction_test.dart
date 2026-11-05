@@ -26,14 +26,14 @@ void main() {
     expect(calls, ['redact']);
   });
 
-  test('redacts then sends when another emoji is selected', () async {
+  test('sends then redacts when another emoji is selected', () async {
     await run(emoji: '😂', key: '👍');
-    expect(calls, ['redact', 'send']);
+    expect(calls, ['send', 'redact']);
   });
 
-  test('redacts then sends when existing reaction has no key', () async {
+  test('sends then redacts when existing reaction has no key', () async {
     await run(emoji: '😂');
-    expect(calls, ['redact', 'send']);
+    expect(calls, ['send', 'redact']);
   });
 
   test(
@@ -60,23 +60,38 @@ void main() {
     },
   );
 
-  test('waits for the redaction before sending the replacement', () async {
-    final redaction = Completer<void>();
-    final replacement = toggleReaction(
+  test('waits for the replacement before redacting the old reaction', () async {
+    final replacement = Completer<void>();
+    final change = toggleReaction(
       emoji: '\uD83D\uDE02',
       myReactionKey: '\uD83D\uDC4D',
-      redactMyReaction: () {
-        calls.add('redact');
-        return redaction.future;
+      redactMyReaction: () async => calls.add('redact'),
+      sendReaction: () {
+        calls.add('send');
+        return replacement.future;
       },
-      sendReaction: () async => calls.add('send'),
     );
     await Future<void>.delayed(Duration.zero);
-    expect(calls, ['redact']);
+    expect(calls, ['send']);
 
-    redaction.complete();
-    await replacement;
+    replacement.complete();
+    await change;
 
-    expect(calls, ['redact', 'send']);
+    expect(calls, ['send', 'redact']);
+  });
+
+  test('keeps the old reaction when sending the replacement fails', () async {
+    final change = toggleReaction(
+      emoji: '\uD83D\uDE02',
+      myReactionKey: '\uD83D\uDC4D',
+      redactMyReaction: () async => calls.add('redact'),
+      sendReaction: () async {
+        calls.add('send');
+        throw Exception('send failed');
+      },
+    );
+
+    await expectLater(change, throwsException);
+    expect(calls, ['send']);
   });
 }

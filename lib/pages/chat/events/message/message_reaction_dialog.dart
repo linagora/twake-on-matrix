@@ -102,7 +102,7 @@ class MessageReactionDialog extends StatelessWidget {
                       onClickEmojiReactionAction: (emoji) async {
                         final isSelected = emoji == (relatesTo?['key'] ?? '');
                         if (myReaction == null) {
-                          onSendEmojiReaction?.call(emoji, event);
+                          await onSendEmojiReaction?.call(emoji, event);
                           return;
                         }
 
@@ -112,8 +112,8 @@ class MessageReactionDialog extends StatelessWidget {
                         }
 
                         if (!isSelected) {
+                          await onSendEmojiReaction?.call(emoji, event);
                           await myReaction.redactEvent();
-                          onSendEmojiReaction?.call(emoji, event);
                           return;
                         }
                       },

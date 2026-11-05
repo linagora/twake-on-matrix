@@ -30,7 +30,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 typedef OnMenuAction =
     Function(BuildContext, ChatHorizontalActionMenu, Event, TapDownDetails);
 
-typedef OnSendEmojiReactionAction = void Function(String emoji, Event event);
+typedef OnSendEmojiReactionAction =
+    Future<void> Function(String emoji, Event event);
 
 typedef OnRemoveEmojiReactionAction = void Function(String emoji, Event event);
 

@@ -570,7 +570,7 @@ class _MessageContentWithTimestampBuilderState
     final isSelected = emoji == (relatesTo?['key'] ?? '');
     if (myReaction == null) {
       Navigator.of(context).pop();
-      widget.onSendEmojiReaction?.call(emoji, event);
+      await widget.onSendEmojiReaction?.call(emoji, event);
       return;
     }
 
@@ -582,8 +582,8 @@ class _MessageContentWithTimestampBuilderState
 
     if (!isSelected) {
       Navigator.of(context).pop();
+      await widget.onSendEmojiReaction?.call(emoji, event);
       await myReaction.redactEvent();
-      widget.onSendEmojiReaction?.call(emoji, event);
       return;
     }
   }

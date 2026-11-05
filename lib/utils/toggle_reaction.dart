@@ -11,7 +11,7 @@ bool _isSameReaction(String emoji, String? reactionKey) =>
 ///
 /// - No existing reaction ([redactMyReaction] is null): send [emoji].
 /// - Same emoji already reacted (ignoring variation selectors): remove it.
-/// - Another emoji reacted: remove it, then send [emoji].
+/// - Another emoji reacted: send [emoji], then remove the old one.
 Future<void> toggleReaction({
   required String emoji,
   required String? myReactionKey,
@@ -22,7 +22,11 @@ Future<void> toggleReaction({
     await sendReaction();
     return;
   }
-  await redactMyReaction();
-  if (_isSameReaction(emoji, myReactionKey)) return;
+  if (_isSameReaction(emoji, myReactionKey)) {
+    await redactMyReaction();
+    return;
+  }
+  // A redaction synced before the new local echo would empty the row (#2364).
   await sendReaction();
+  await redactMyReaction();
 }
