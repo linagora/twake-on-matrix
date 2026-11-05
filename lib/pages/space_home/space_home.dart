@@ -294,7 +294,7 @@ class _SpaceChannels extends ConsumerWidget {
       );
     }
     return value == null
-        ? const CircularProgressIndicator()
-        : const SizedBox.shrink();
+        ? CircularProgressIndicator(semanticsLabel: l10n.spaceChannelsLoading)
+        : Text(l10n.spaceChannelsEmpty);
   }
 }

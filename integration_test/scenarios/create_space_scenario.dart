@@ -1,9 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
 import 'package:twake_chat/pages/chat/chat_view.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 import '../base/base_test_scenario.dart';
 import '../robots/add_member_robot.dart';
@@ -33,6 +35,35 @@ class CreateSpaceScenario extends BaseTestScenario {
     final spaceName = 'Space $now';
     final groupName = 'Group $now';
 
+    try {
+      await _createAndCheck(spaceName, groupName);
+    } finally {
+      // Spaces show in All: leave nothing behind on the shared account, whatever
+      // failed.
+      await _leaveWhatItMade(spaceName, groupName);
+    }
+  }
+
+  Future<void> _leaveWhatItMade(String spaceName, String groupName) async {
+    final client = Matrix.of(
+      $.tester.element(find.byType(Scaffold).first),
+    ).client;
+    final space = client.rooms.firstWhereOrNull(
+      (room) => room.isSpace && room.name == spaceName,
+    );
+    final made = {
+      ...client.rooms.where((room) => room.name == groupName),
+      ...?space?.spaceChildren
+          .map((child) => client.getRoomById(child.roomId ?? ''))
+          .nonNulls,
+      ?space,
+    };
+    for (final room in made) {
+      await room.leave();
+    }
+  }
+
+  Future<void> _createAndCheck(String spaceName, String groupName) async {
     await robots.chatListRobot().clickOnPenIcon();
     await $('New space').tap();
     await _fillTheFlow(spaceName);
@@ -71,14 +102,5 @@ class CreateSpaceScenario extends BaseTestScenario {
         .takeWhile((row) => row.depth > rows[spaceAt].depth)
         .map((row) => row.room.name);
     expect(children, containsAll(['General', groupName]));
-
-    // Spaces show in All: leave nothing behind on the shared account.
-    final created = rows
-        .skip(spaceAt)
-        .take(children.length + 1)
-        .map((row) => row.room);
-    for (final room in created.toList().reversed) {
-      await room.leave();
-    }
   }
 }

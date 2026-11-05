@@ -31,8 +31,22 @@ void _leaveForm(BuildContext context) {
   }
 }
 
+TwakeAppBar _formAppBar(BuildContext context, String title) => TwakeAppBar(
+  title: title,
+  context: context,
+  withDivider: true,
+  enableLeftTitle: true,
+  leading: TwakeIconButton(
+    paddingAll: SettingsFoldersStyle.backPadding,
+    icon: Icons.arrow_back_ios,
+    tooltip: L10n.of(context)!.back,
+    onTap: () => _leaveForm(context),
+  ),
+);
+
 /// Waits for the folders of the account: a reload lands here before they are
-/// read, and the form takes its first values once.
+/// read, and the form takes its first values once. They may never come: the bar
+/// stays a way out.
 class _WaitForFolders extends ConsumerWidget {
   const _WaitForFolders({required this.builder});
 
@@ -45,7 +59,10 @@ class _WaitForFolders extends ConsumerWidget {
     );
     return isLoaded
         ? builder(context)
-        : const Scaffold(body: Center(child: CircularProgressIndicator()));
+        : Scaffold(
+            appBar: _formAppBar(context, L10n.of(context)!.chatFolders),
+            body: const Center(child: CircularProgressIndicator()),
+          );
   }
 }
 
@@ -283,18 +300,7 @@ class _FormScaffoldState extends State<_FormScaffold> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TwakeAppBar(
-        title: widget.title,
-        context: context,
-        withDivider: true,
-        enableLeftTitle: true,
-        leading: TwakeIconButton(
-          paddingAll: SettingsFoldersStyle.backPadding,
-          icon: Icons.arrow_back_ios,
-          tooltip: L10n.of(context)!.back,
-          onTap: () => _leaveForm(context),
-        ),
-      ),
+      appBar: _formAppBar(context, widget.title),
       body: CustomScrollView(
         slivers: [
           SliverPadding(

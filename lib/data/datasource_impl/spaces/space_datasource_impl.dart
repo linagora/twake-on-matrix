@@ -15,6 +15,7 @@ class SpaceDatasourceImpl implements SpaceDatasource {
   const SpaceDatasourceImpl(this._activeClient);
 
   /// One page: the home shows the first channels, as the React client.
+  /// Spec: [`/hierarchy`](https://spec.matrix.org/v1.16/client-server-api/#get_matrixclientv1roomsroomidhierarchy).
   static const int _hierarchyLimit = 100;
 
   /// The rooms of a Twake Space space, whose members are managed over there.

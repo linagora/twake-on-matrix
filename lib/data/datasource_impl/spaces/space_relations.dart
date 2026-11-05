@@ -2,6 +2,10 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/exception/spaces/space_exception.dart';
 
 /// What a room and its space say of each other, whatever the room is.
+///
+/// Spec: [`m.space.child`](https://spec.matrix.org/v1.16/client-server-api/#mspacechild),
+/// [`m.space.parent`](https://spec.matrix.org/v1.16/client-server-api/#mspaceparent),
+/// [`restricted` joins](https://spec.matrix.org/v1.16/client-server-api/#restricted-rooms).
 extension SpaceRelations on Client {
   /// A parent not synced yet is checked by the server alone.
   ///

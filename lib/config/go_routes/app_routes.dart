@@ -651,17 +651,20 @@ class FolderEditRoute extends GoRouteData with $FolderEditRoute {
 }
 
 class BuiltinFolderEditRoute extends GoRouteData with $BuiltinFolderEditRoute {
-  const BuiltinFolderEditRoute({required this.kind});
+  const BuiltinFolderEditRoute({this.kind});
 
-  final BuiltinFolder kind;
+  /// Null for a link that names no kind this app knows.
+  final BuiltinFolder? kind;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
-      _loggedOutRedirect(context, state);
+      kind == null
+      ? const FoldersRoute().location
+      : _loggedOutRedirect(context, state);
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, BuiltinFolderEditScreen(kind: kind));
+      _defaultPage(context, BuiltinFolderEditScreen(kind: kind!));
 }
 
 // --- Draft chat ---

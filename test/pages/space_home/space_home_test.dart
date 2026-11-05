@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +19,7 @@ import 'space_home_test.mocks.dart';
 void main() {
   _spaceHomeTests();
   _spaceHomeChannelsTests();
+  _spaceHomeEmptyTests();
 }
 
 const _spaceId = '!s';
@@ -111,6 +114,42 @@ void _spaceHomeTests() {
       await tester.tap(find.byKey(const ValueKey('space_open_info')));
 
       expect(_isInfoShown, isTrue);
+    });
+  });
+}
+
+void _spaceHomeEmptyTests() {
+  group('SpaceHome', () {
+    testWidgets('whenTheSpaceHoldsNothing_saysSo', (tester) async {
+      await _pump(tester, _summary());
+
+      expect(find.text('Nothing here yet.'), findsOneWidget);
+    });
+
+    testWidgets('whileChannelsLoad_announcesIt', (tester) async {
+      final handle = tester.ensureSemantics();
+      _repository = MockSpaceRepository();
+      when(_repository.getSpace(_spaceId)).thenReturn(_summary());
+      when(
+        _repository.watchRoomChanges(),
+      ).thenAnswer((_) => const Stream.empty());
+      when(_repository.getRoomListEntries()).thenReturn(const []);
+      when(
+        _repository.getSpaceChildren(_spaceId),
+      ).thenAnswer((_) => Completer<List<SpaceChannel>>().future);
+      _container = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [spaceRepositoryProvider.overrideWithValue(_repository)],
+      );
+      await pumpLocalized(
+        tester,
+        _container,
+        SpaceHome(roomId: _spaceId, onShowInfo: () {}),
+      );
+      await tester.pump();
+
+      expect(find.bySemanticsLabel('Loading channels'), findsOneWidget);
+      handle.dispose();
     });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -106,6 +108,29 @@ void main() {
 
       verify(repository.joinRoom('c', via: ['good.org'])).called(1);
       expect(find.text('room c'), findsOneWidget);
+    });
+
+    testWidgets('whenTappedTwiceWhileJoining_joinsAndOpensOnce', (
+      tester,
+    ) async {
+      final pending = Completer<void>();
+      when(
+        repository.joinRoom(any, via: anyNamed('via')),
+      ).thenAnswer((_) => pending.future);
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+
+      await pumpAndTap(tester, const SpaceChannel(roomId: 'c', name: 'Dev'));
+      await tester.tap(find.text('open'));
+      await tester.pump();
+      pending.complete();
+      await tester.pumpAndSettle();
+
+      verify(repository.joinRoom('c', via: anyNamed('via'))).called(1);
+      GoRouter.of(tester.element(find.text('room c'))).pop();
+      await tester.pumpAndSettle();
+      expect(find.text('open'), findsOneWidget);
     });
 
     testWidgets('whenJoinFails_staysAndTellsIt', (tester) async {

@@ -30,6 +30,7 @@ void main() {
   _folderEditScreenSaveTests();
   _folderEditScreenLiveTests();
   _builtinFolderEditScreenTests();
+  _waitForFoldersTests();
 }
 
 late MockFoldersRepository _repository;
@@ -271,6 +272,18 @@ void _folderEditScreenLiveTests() {
             .value,
         isTrue,
       );
+    });
+  });
+}
+
+void _waitForFoldersTests() {
+  group('FolderEditScreen', () {
+    testWidgets('whileFoldersNeverLoad_offersAWayOut', (tester) async {
+      await _pump(tester, const FolderEditScreen());
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byTooltip('Back'), findsOneWidget);
     });
   });
 }

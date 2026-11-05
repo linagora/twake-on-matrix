@@ -58,6 +58,16 @@ D17, D42, D170, D237, D286, D348, D354, D483, D542):
 - The folded spaces are a preference of this device, with no business rule:
   their controller reads its datasource directly, without a use case.
 
+## Spec
+
+- [`m.space.child`](https://spec.matrix.org/v1.16/client-server-api/#mspacechild)
+- [`m.space.parent`](https://spec.matrix.org/v1.16/client-server-api/#mspaceparent)
+- [`/hierarchy`](https://spec.matrix.org/v1.16/client-server-api/#get_matrixclientv1roomsroomidhierarchy)
+- [`restricted` joins](https://spec.matrix.org/v1.16/client-server-api/#restricted-rooms)
+
+A public space follows D8 of `DECISION.md`, like a public group: no `m.federate`
+when the server announces its ACL, `m.federate: false` otherwise.
+
 ## Consequences
 
 - Chat list state added here lives in Riverpod; the rest of `chat_list` stays

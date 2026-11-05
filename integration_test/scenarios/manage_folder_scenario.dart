@@ -39,17 +39,23 @@ class ManageFolderScenario extends BaseTestScenario {
     await $.waitUntilVisible($(name));
     await _goBack();
 
-    await robots.homeRobot().gotoChatListScreen();
-    await $(name).scrollTo(
-      view: find.descendant(
-        of: find.byType(RoomListFilterBar),
-        matching: find.byType(Scrollable),
-      ),
-    );
-    await $(name).tap();
-    await $.waitUntilVisible($('Nothing here.'));
+    try {
+      await robots.homeRobot().gotoChatListScreen();
+      await $(name).scrollTo(
+        view: find.descendant(
+          of: find.byType(RoomListFilterBar),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      await $(name).tap();
+      await $.waitUntilVisible($('Nothing here.'));
+    } finally {
+      // Leave nothing behind on the shared account, whatever failed.
+      await _deleteFolder(name);
+    }
+  }
 
-    // Leave nothing behind on the shared account.
+  Future<void> _deleteFolder(String name) async {
     await _openFolders();
     await $(
       find.descendant(

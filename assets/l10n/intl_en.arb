@@ -2903,6 +2903,16 @@
     "type": "text",
     "placeholders": {}
   },
+  "spaceChannelsLoading": "Loading channels",
+  "@spaceChannelsLoading": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceChannelsEmpty": "Nothing here yet.",
+  "@spaceChannelsEmpty": {
+    "type": "text",
+    "placeholders": {}
+  },
   "roomKindSpace": "Space",
   "@roomKindSpace": {
     "type": "text",
