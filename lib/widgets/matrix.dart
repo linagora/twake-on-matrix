@@ -45,6 +45,7 @@ import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -1268,7 +1269,7 @@ class MatrixState extends ConsumerState<Matrix>
     HomeserverSummary? checkedSummary;
     try {
       checkedSummary = await newClient
-          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
+          .checkStoredHomeserver()
           .toHomeserverSummary();
     } catch (e) {
       Logs().w(
@@ -1350,7 +1351,11 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    // A client that holds a session keeps its own homeserver: the default one
+    // would receive its token and answer M_UNKNOWN_TOKEN.
+    if (!client.isLogged()) {
+      client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    }
     await _getHomeserverInformation(client);
   }
 
