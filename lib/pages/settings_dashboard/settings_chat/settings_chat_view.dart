@@ -1,6 +1,5 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar_style.dart';
@@ -12,15 +11,12 @@ import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
-import 'settings_chat.dart';
-
 class SettingsChatView extends StatelessWidget {
-  final SettingsChatController controller;
-  final responsive = getIt.get<ResponsiveUtils>();
-  SettingsChatView(this.controller, {super.key});
+  const SettingsChatView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveUtils();
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(
@@ -44,6 +40,8 @@ class SettingsChatView extends StatelessWidget {
         iconColor: Theme.of(context).textTheme.bodyLarge!.color,
         child: MaxWidthBody(
           withScrolling: true,
+          // TODO: [transitional] #3576 The switches still mirror their value
+          // into the static AppConfig, which the chat reads.
           child: Column(
             children: [
               SettingsSwitchListTile.adaptive(

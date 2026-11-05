@@ -30,7 +30,7 @@ import 'package:twake_chat/pages/public_rooms/public_rooms_page.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_3pid/settings_3pid.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_app_language/settings_app_language.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_blocked_users/settings_blocked_user.dart';
-import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_chat/settings_chat_view.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_contacts_visibility/settings_contacts_visibility.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_emotes/settings_emotes.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_data_and_storage/settings_data_and_storage.dart';
@@ -732,7 +732,7 @@ class ChatSettingsRoute extends GoRouteData with $ChatSettingsRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const SettingsChat());
+      _defaultPage(context, const SettingsChatView());
 }
 
 class EmotesRoute extends GoRouteData with $EmotesRoute {
