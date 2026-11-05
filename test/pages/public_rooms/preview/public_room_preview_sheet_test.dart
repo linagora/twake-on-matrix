@@ -16,86 +16,90 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../../domain/public_rooms/fake_public_rooms_repository.dart';
 
-void main() {
-  const alias = '#general:hs';
-  late FakePublicRoomsRepository repository;
+const _alias = '#general:hs';
 
+late FakePublicRoomsRepository _repository;
+
+void main() {
   setUpAll(() {
     if (!GetIt.instance.isRegistered<ResponsiveUtils>()) {
       GetIt.instance.registerSingleton(ResponsiveUtils());
     }
   });
 
-  setUp(() => repository = FakePublicRoomsRepository());
+  setUp(() => _repository = FakePublicRoomsRepository());
 
-  /// The sheet opened from a home route, in a router that knows the room.
-  Future<GoRouter> pumpSheet(WidgetTester tester) async {
-    final router = GoRouter(
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, _) => Scaffold(
-            body: TextButton(
-              onPressed: () => unawaited(
-                showModalBottomSheet<void>(
-                  context: context,
-                  builder: (_) => const PublicRoomPreviewSheet(
-                    address: RoomAddress(alias),
-                    eventId: r'$event',
-                  ),
+  _shownStateTests();
+  _unavailableTests();
+  _navigationTests();
+}
+
+/// The sheet opened from a home route, in a router that knows the room.
+Future<void> _pumpSheet(WidgetTester tester) async {
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, _) => Scaffold(
+          body: TextButton(
+            onPressed: () => unawaited(
+              showModalBottomSheet<void>(
+                context: context,
+                builder: (_) => const PublicRoomPreviewSheet(
+                  address: RoomAddress(_alias),
+                  eventId: r'$event',
                 ),
               ),
-              child: const Text('open'),
             ),
+            child: const Text('open'),
           ),
-        ),
-        GoRoute(
-          path: '/rooms/:roomid',
-          builder: (_, state) => Text(
-            'room ${state.pathParameters['roomid']} '
-            '${state.uri.queryParameters['event']}',
-          ),
-        ),
-      ],
-    );
-    addTearDown(router.dispose);
-    await tester.pumpWidget(
-      ProviderScope(
-        retry: (_, _) => null,
-        overrides: [
-          publicRoomsRepositoryProvider.overrideWithValue(repository),
-        ],
-        child: MaterialApp.router(
-          locale: const Locale('en'),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          routerConfig: router,
         ),
       ),
-    );
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-    return router;
-  }
-
-  PublicRoom general({
-    PublicRoomAccess access = PublicRoomAccess.open,
-    String? topic = 'Everything',
-  }) => PublicRoom(
-    roomId: '!general:hs',
-    name: 'General',
-    topic: topic,
-    memberCount: 3,
-    access: access,
-    kind: PublicRoomKind.group,
+      GoRoute(
+        path: '/rooms/:roomid',
+        builder: (_, state) => Text(
+          'room ${state.pathParameters['roomid']} '
+          '${state.uri.queryParameters['event']}',
+        ),
+      ),
+    ],
   );
+  addTearDown(router.dispose);
+  await tester.pumpWidget(
+    ProviderScope(
+      retry: (_, _) => null,
+      overrides: [publicRoomsRepositoryProvider.overrideWithValue(_repository)],
+      child: MaterialApp.router(
+        locale: const Locale('en'),
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        routerConfig: router,
+      ),
+    ),
+  );
+  await tester.tap(find.text('open'));
+  await tester.pumpAndSettle();
+}
 
+PublicRoom _general({
+  PublicRoomAccess access = PublicRoomAccess.open,
+  String? topic = 'Everything',
+}) => PublicRoom(
+  roomId: '!general:hs',
+  name: 'General',
+  topic: topic,
+  memberCount: 3,
+  access: access,
+  kind: PublicRoomKind.group,
+);
+
+void _shownStateTests() {
   testWidgets('sheet_whenTheRoomIsOpen_showsNameTopicAndJoin', (tester) async {
     // Arrange
-    repository.preview = PublicRoomPreview.found(general());
+    _repository.preview = PublicRoomPreview.found(_general());
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Assert
     expect(find.text('General'), findsOneWidget);
@@ -105,39 +109,41 @@ void main() {
 
   testWidgets('sheet_whenOnApproval_offersToAsk', (tester) async {
     // Arrange
-    repository.preview = PublicRoomPreview.found(
-      general(access: PublicRoomAccess.approval, topic: null),
+    _repository.preview = PublicRoomPreview.found(
+      _general(access: PublicRoomAccess.approval, topic: null),
     );
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
     await tester.tap(find.text('Ask to join · 3 members'));
     await tester.pumpAndSettle();
 
     // Assert
-    expect(repository.knockedIds, [alias]);
+    expect(_repository.knockedIds, [_alias]);
     expect(find.text('Ask to join · 3 members'), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
   });
 
   testWidgets('sheet_whenBanned_saysSoWithoutAButton', (tester) async {
     // Arrange
-    repository.preview = const PublicRoomPreview.banned();
+    _repository.preview = const PublicRoomPreview.banned();
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Assert
     expect(find.text('You have been banned from this chat'), findsOneWidget);
     expect(find.byType(FilledButton), findsNothing);
   });
+}
 
+void _unavailableTests() {
   testWidgets('sheet_whenUnavailable_offersToTryToJoin', (tester) async {
     // Arrange
-    repository.preview = const PublicRoomPreview.unavailable();
+    _repository.preview = const PublicRoomPreview.unavailable();
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Assert
     expect(find.text('This group is unavailable.'), findsOneWidget);
@@ -146,19 +152,21 @@ void main() {
 
   testWidgets('sheet_whenTheLookupFails_saysUnavailable', (tester) async {
     // Arrange
-    repository.previewError = const PublicRoomsNoClientException();
+    _repository.previewError = const PublicRoomsNoClientException();
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Assert
     expect(find.text('This group is unavailable.'), findsOneWidget);
   });
+}
 
+void _navigationTests() {
   testWidgets('sheet_whenJoined_opensTheRoomAtTheEvent', (tester) async {
     // Arrange
-    repository.preview = PublicRoomPreview.found(general());
-    await pumpSheet(tester);
+    _repository.preview = PublicRoomPreview.found(_general());
+    await _pumpSheet(tester);
 
     // Act
     await tester.tap(find.text('Join · 3 members'));
@@ -170,10 +178,10 @@ void main() {
 
   testWidgets('sheet_whenAlreadyJoined_opensTheRoomAtTheEvent', (tester) async {
     // Arrange
-    repository.preview = const PublicRoomPreview.joined('!general:hs');
+    _repository.preview = const PublicRoomPreview.joined('!general:hs');
 
     // Act
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Assert
     expect(find.text(r'room !general:hs $event'), findsOneWidget);
@@ -181,10 +189,10 @@ void main() {
 
   testWidgets('sheet_whenTheJoinFails_staysOpen', (tester) async {
     // Arrange
-    repository
-      ..preview = PublicRoomPreview.found(general())
+    _repository
+      ..preview = PublicRoomPreview.found(_general())
       ..joinError = PublicRoomJoinFailedException(cause: Exception('no'));
-    await pumpSheet(tester);
+    await _pumpSheet(tester);
 
     // Act
     await tester.tap(find.text('Join · 3 members'));
