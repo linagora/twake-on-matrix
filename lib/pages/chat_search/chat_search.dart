@@ -5,6 +5,8 @@ import 'package:twake_chat/pages/chat_search/chat_search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
 import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/search/keyword_matcher_cache.dart';
+import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -45,6 +47,9 @@ class ChatSearchController extends State<ChatSearch> {
   final inputFocus = FocusNode();
 
   SameTypeEventsBuilderController? sameTypeEventsBuilderController;
+  final _keywordMatcherCache = KeywordMatcherCache(
+    options: const SearchOptions(diacriticSensitive: false),
+  );
 
   late ServerSearchController serverSearchController;
 
@@ -82,7 +87,10 @@ class ChatSearchController extends State<ChatSearch> {
         getTimeline: getTimeline,
         searchFunc: (event) =>
             event.isSearchable &&
-            event.isContains(serverSearchController.debouncerValue),
+            _keywordMatcherCache.matches(
+              serverSearchController.debouncerValue,
+              event.plaintextBody,
+            ),
         limit: _pageLimit,
       );
     }
