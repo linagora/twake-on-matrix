@@ -23,11 +23,34 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     final client = _requireClient;
     await _checkProfile(client, contactMxId);
 
+    try {
+      return await _joinExistingOrCreate(client, contactMxId, enableEncryption);
+    } on Exception catch (e, s) {
+      Logs().e('DirectChatRepositoryImpl::createDirectChat() failed', e, s);
+      throw CreateDirectChatFailedException(e);
+    }
+  }
+
+  Future<String> _joinExistingOrCreate(
+    Client client,
+    String contactMxId,
+    bool enableEncryption,
+  ) async {
+    final existingRoomId = await _joinExistingDirectChat(client, contactMxId);
+    if (existingRoomId != null) return existingRoomId;
+    return _createNewDirectChat(client, contactMxId, enableEncryption);
+  }
+
+  /// Leaves the created room on any failure, so it does not leak. The error
+  /// is rethrown as is: an Exception is wrapped by the caller, an Error (G4)
+  /// is not.
+  Future<String> _createNewDirectChat(
+    Client client,
+    String contactMxId,
+    bool enableEncryption,
+  ) async {
     String? roomId;
     try {
-      final existingRoomId = await _joinExistingDirectChat(client, contactMxId);
-      if (existingRoomId != null) return existingRoomId;
-
       // The invite is part of the createRoom payload so the server sees an
       // is_direct room with two parties from the start; a separate inviteUser
       // call can make some homeservers treat the room as a group.
@@ -37,21 +60,20 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
         preset: CreateRoomPreset.trustedPrivateChat,
         initialState: enableEncryption ? [_encryptionState()] : null,
       );
-      await client.waitForRoomInSync(roomId, join: true);
-      if (client.getRoomById(roomId) == null) {
-        throw Exception('Room not synced after waitForRoomInSync');
-      }
+      await _awaitRoomInSync(client, roomId);
       // Both sides must recognise the room as a DM.
       await Room(id: roomId, client: client).addToDirectChat(contactMxId);
       return roomId;
-    } on Exception catch (e, s) {
-      Logs().e('DirectChatRepositoryImpl::createDirectChat() failed', e, s);
-      if (roomId != null) await _cleanUp(client, roomId);
-      throw CreateDirectChatFailedException(e);
     } catch (_) {
-      // An Error is not wrapped (G4) but the created room must not leak.
       if (roomId != null) await _cleanUp(client, roomId);
       rethrow;
+    }
+  }
+
+  Future<void> _awaitRoomInSync(Client client, String roomId) async {
+    await client.waitForRoomInSync(roomId, join: true);
+    if (client.getRoomById(roomId) == null) {
+      throw Exception('Room not synced after waitForRoomInSync');
     }
   }
 
