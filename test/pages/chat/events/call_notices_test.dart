@@ -63,6 +63,12 @@ void main() {
         ).isCallThreadRoot,
         isFalse,
       );
+      expect(
+        callThreadRoot(
+          extra: {'msgtype': MessageTypes.File, 'body': 'notes.pdf'},
+        ).isCallThreadRoot,
+        isFalse,
+      );
     });
 
     test('reads the time of its event, not the body sent', () {

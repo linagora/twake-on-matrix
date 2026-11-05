@@ -650,6 +650,7 @@ extension LocalizedBody on Event {
 extension FutureEventExtension on Event {
   bool get isCallThreadRoot =>
       type == EventTypes.Message &&
+      messageType == MessageTypes.Text &&
       !redacted &&
       content.containsKey(CallEventTypes.callThreadKey);
 
