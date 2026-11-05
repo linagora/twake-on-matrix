@@ -3236,5 +3236,15 @@
         "type": "String"
       }
     }
+  },
+  "publicGroupUnavailable": "This group is unavailable.",
+  "@publicGroupUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tryToJoin": "Try to join",
+  "@tryToJoin": {
+    "type": "text",
+    "placeholders": {}
   }
 }
