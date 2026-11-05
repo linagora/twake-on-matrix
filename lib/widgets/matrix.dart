@@ -1267,6 +1267,7 @@ class MatrixState extends ConsumerState<Matrix>
     );
     if (newClient.homeserver == null) return;
     final previousSummary = loginHomeserverSummary;
+    final refreshTicket = _homeserverCheckLog.begin(newClient);
 
     HomeserverSummary? checkedSummary;
     var checkFailed = false;
@@ -1284,12 +1285,18 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     final discovery = await newClient.getWellKnownOrFallback(
-      fallback: previousSummary?.discoveryInformation,
+      fallback: newClient.discoveryFallbackFor(
+        previousSummary?.discoveryInformation,
+      ),
     );
 
     // The active client may have changed while awaiting: a late result must
-    // not overwrite the newer account's summary.
-    if (clientOrNull != newClient) return;
+    // not overwrite the newer account's summary. A newer refresh of the same
+    // client wins over this one for the same reason.
+    if (clientOrNull != newClient ||
+        !_homeserverCheckLog.isLatest(newClient, refreshTicket)) {
+      return;
+    }
 
     // Recorded before the early return below: an unreachable account without
     // cached discovery must still be refreshed on reconnect.
@@ -1359,9 +1366,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.applyDefaultHomeserverWithoutSession(
-      Uri.parse(AppConfig.homeserver),
-    );
+    client.applyDefaultHomeserverWithoutSession(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
