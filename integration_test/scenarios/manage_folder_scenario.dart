@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_edit_screen.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/folders_screen.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
 
 import '../base/base_test_scenario.dart';
@@ -20,6 +22,14 @@ class ManageFolderScenario extends BaseTestScenario {
     await $.waitUntilVisible($(const ValueKey('folder_new')));
   }
 
+  /// A new folder comes last: on a short screen it starts below the fold.
+  Future<void> _scrollToFolder(String name) => $(name).scrollTo(
+    view: find.descendant(
+      of: find.byType(FoldersScreen),
+      matching: find.byType(ReorderableListView),
+    ),
+  );
+
   Future<void> _goBack() async {
     await $(find.byTooltip('Back').last).tap();
     await $.pumpAndSettle();
@@ -34,9 +44,16 @@ class ManageFolderScenario extends BaseTestScenario {
     await $(const ValueKey('folder_new')).tap();
     await $(const ValueKey('folder_name')).enterText(name);
     await $(const ValueKey('folder_type_bot')).tap();
-    await $(const ValueKey('folder_save')).scrollTo();
+    // Web shows the room list beside the form: scroll the form, not the first
+    // scrollable found.
+    await $(const ValueKey('folder_save')).scrollTo(
+      view: find.descendant(
+        of: find.byType(FolderEditScreen),
+        matching: find.byType(CustomScrollView),
+      ),
+    );
     await $(const ValueKey('folder_save')).tap();
-    await $.waitUntilVisible($(name));
+    await _scrollToFolder(name);
     await _goBack();
 
     try {
@@ -57,6 +74,7 @@ class ManageFolderScenario extends BaseTestScenario {
 
   Future<void> _deleteFolder(String name) async {
     await _openFolders();
+    await _scrollToFolder(name);
     await $(
       find.descendant(
         of: find.ancestor(
