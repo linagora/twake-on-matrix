@@ -74,7 +74,6 @@ class AvatarWithKindBadge extends StatelessWidget {
     AvatarKindBadge.broadcast => l10n.roomKindBroadcast,
     AvatarKindBadge.space => l10n.roomKindSpace,
   };
-
 }
 
 class _BadgeIcon extends StatelessWidget {

@@ -8,7 +8,7 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/domain/spaces/usecases/save_folders_usecase.provider.dart';
 import 'package:twake_chat/domain/spaces/usecases/watch_folders_usecase.provider.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 
@@ -40,7 +40,7 @@ abstract class FoldersState with _$FoldersState {
 class FoldersController extends _$FoldersController {
   @override
   FoldersState build() {
-    ref.watch(activeMatrixClientProvider.select((active) => active.userId));
+    ref.watch(activeUserIdProvider);
     // A notifier outlives its rebuilds: a save running now is another account's.
     _generation++;
     _inFlight = 0;

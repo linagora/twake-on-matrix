@@ -8,4 +8,4 @@ part 'folders_datasource.provider.g.dart';
 // TODO: [transitional] Reads the active client until matrixClientProvider exists.
 @riverpod
 FoldersDatasource foldersDatasource(Ref ref) =>
-    FoldersDatasourceImpl(ref.watch(activeMatrixClientProvider).client);
+    FoldersDatasourceImpl(ref.watch(activeMatrixClientProvider));

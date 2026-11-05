@@ -10,7 +10,6 @@ import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';

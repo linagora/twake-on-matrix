@@ -1,7 +1,6 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 
 part 'room_list_filter_controller.g.dart';
 
@@ -12,7 +11,7 @@ class RoomListFilterController extends _$RoomListFilterController {
   @override
   RoomListFilter build() {
     // The folders of an account mean nothing to the next one.
-    ref.watch(activeMatrixClientProvider.select((active) => active.userId));
+    ref.watch(activeUserIdProvider);
     return const RoomListFilter.all();
   }
 

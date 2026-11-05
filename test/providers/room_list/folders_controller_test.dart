@@ -12,7 +12,7 @@ import 'package:twake_chat/domain/repository/folders/folders_repository.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
@@ -315,7 +315,7 @@ void _foldersControllerOverlapTests() {
 
       final save = _controller().reorder(0, 2);
       await pumpEventQueue();
-      _container.read(activeMatrixClientProvider.notifier).setClient(client);
+      _container.read(legacyActiveClientProvider.notifier).setClient(client);
       await pumpEventQueue();
       pending.completeError(const FolderSaveFailedException());
       await expectLater(save, throwsA(isA<FolderSaveFailedException>()));
@@ -348,7 +348,7 @@ void _foldersControllerAccountTests() {
 
       final first = _controller().reorder(0, 2);
       await pumpEventQueue();
-      _container.read(activeMatrixClientProvider.notifier).setClient(client);
+      _container.read(legacyActiveClientProvider.notifier).setClient(client);
       await pumpEventQueue();
       await _emit(const [_spaces, _unread, ..._others]);
       unawaited(_controller().reorder(0, 1));

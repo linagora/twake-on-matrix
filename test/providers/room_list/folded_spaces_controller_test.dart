@@ -5,7 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 
 import 'folded_spaces_controller_test.mocks.dart';
 
@@ -18,7 +18,7 @@ void main() {
     final client = MockClient();
     when(client.userID).thenReturn(user);
     final container = ProviderContainer.test(retry: (_, _) => null);
-    container.read(activeMatrixClientProvider.notifier).setClient(client);
+    container.read(legacyActiveClientProvider.notifier).setClient(client);
     container.listen(foldedSpacesControllerProvider, (_, _) {});
     await pumpEventQueue();
     return container;
@@ -60,7 +60,7 @@ void main() {
       final client = MockClient();
       when(client.userID).thenReturn(user);
       final container = ProviderContainer.test(retry: (_, _) => null);
-      container.read(activeMatrixClientProvider.notifier).setClient(client);
+      container.read(legacyActiveClientProvider.notifier).setClient(client);
       container.listen(foldedSpacesControllerProvider, (_, _) {});
 
       await container

@@ -13,7 +13,7 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_providers.dart';
@@ -63,7 +63,7 @@ void _roomListFilterControllerTests() {
       final second = MockClient();
       when(second.userID).thenReturn('@b:own.org');
       final container = _newContainer();
-      final active = container.read(activeMatrixClientProvider.notifier);
+      final active = container.read(legacyActiveClientProvider.notifier);
       active.setClient(first);
       container
           .read(roomListFilterControllerProvider.notifier)
