@@ -28,7 +28,30 @@ extension ClientStoredHomeserverExtension on Client {
     try {
       return await checkHomeserver(stored, checkWellKnown: false);
     } finally {
-      homeserver ??= stored;
+      // clear() nulls the homeserver on purpose when the session ends while
+      // the check is in flight; only a client that is still logged in gets
+      // its stored homeserver back.
+      if (isLogged()) {
+        homeserver ??= stored;
+      }
     }
   }
+
+  /// Gives a client without a session the [defaultHomeserver].
+  ///
+  /// A client that holds a session keeps its own homeserver: the default one
+  /// would receive its token and answer `M_UNKNOWN_TOKEN`.
+  void applyDefaultHomeserverWithoutSession(Uri defaultHomeserver) {
+    if (!isLogged()) {
+      homeserver ??= defaultHomeserver;
+    }
+  }
+
+  /// Whether the homeserver information should be fetched again when the
+  /// network returns: the client has no homeserver yet, no summary was
+  /// stored, or the last check failed.
+  bool needsHomeserverInformationRefresh({
+    required bool hasSummary,
+    required bool lastCheckFailed,
+  }) => homeserver == null || !hasSummary || lastCheckFailed;
 }

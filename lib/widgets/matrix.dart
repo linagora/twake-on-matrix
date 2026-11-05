@@ -1259,6 +1259,8 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
+  bool _homeserverCheckFailed = false;
+
   Future<void> _getHomeserverInformation(Client newClient) async {
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
@@ -1267,11 +1269,13 @@ class MatrixState extends ConsumerState<Matrix>
     final previousSummary = loginHomeserverSummary;
 
     HomeserverSummary? checkedSummary;
+    var checkFailed = false;
     try {
       checkedSummary = await newClient
           .checkStoredHomeserver()
           .toHomeserverSummary();
     } catch (e) {
+      checkFailed = true;
       Logs().w(
         'Matrix::_getHomeserverInformation: homeserver unreachable, using '
         'cached discovery information',
@@ -1289,6 +1293,7 @@ class MatrixState extends ConsumerState<Matrix>
     // not overwrite the newer account's summary.
     if (clientOrNull != newClient) return;
 
+    _homeserverCheckFailed = checkFailed;
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
       versions:
@@ -1351,11 +1356,9 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    // A client that holds a session keeps its own homeserver: the default one
-    // would receive its token and answer M_UNKNOWN_TOKEN.
-    if (!client.isLogged()) {
-      client.homeserver ??= Uri.parse(AppConfig.homeserver);
-    }
+    client.applyDefaultHomeserverWithoutSession(
+      Uri.parse(AppConfig.homeserver),
+    );
     await _getHomeserverInformation(client);
   }
 
@@ -1530,7 +1533,12 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   Future<void> onConnect() async {
     if (widget.clients.isEmpty) return;
-    if (client.homeserver != null) return;
+    if (!client.needsHomeserverInformationRefresh(
+      hasSummary: loginHomeserverSummary != null,
+      lastCheckFailed: _homeserverCheckFailed,
+    )) {
+      return;
+    }
     await _refreshHomeserverInformation(client);
   }
 
