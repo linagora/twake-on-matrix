@@ -40,8 +40,8 @@ class SettingsChatView extends StatelessWidget {
         iconColor: Theme.of(context).textTheme.bodyLarge!.color,
         child: MaxWidthBody(
           withScrolling: true,
-          // TODO: [transitional] The switches still mirror their value into the
-          // static AppConfig, which the chat reads.
+          // TODO: [transitional] #3576 The switches still mirror their value
+          // into the static AppConfig, which the chat reads.
           child: Column(
             children: [
               SettingsSwitchListTile.adaptive(
