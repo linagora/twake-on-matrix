@@ -11,19 +11,34 @@ import '../../../fake_client.dart' show MockDatabase;
 import 'room_list_entry_mapper_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<Room>()])
-StrippedStateEvent _relation(
-  String type,
-  String key, {
-  bool isCanonical = false,
-}) => StrippedStateEvent(
+StrippedStateEvent _relation(String type, String key) => StrippedStateEvent(
   type: type,
   senderId: '@a:b',
   stateKey: key,
   content: {
     'via': ['b'],
-    if (isCanonical) 'canonical': true,
   },
 );
+
+/// Marks the last parent [room] names as its `canonical: true` one.
+MockRoom _withLastParentCanonical(MockRoom room) {
+  final parents = room.spaceParents;
+  when(room.spaceParents).thenReturn([
+    ...parents.take(parents.length - 1),
+    SpaceParent.fromState(
+      StrippedStateEvent(
+        type: EventTypes.SpaceParent,
+        senderId: '@a:b',
+        stateKey: parents.last.roomId,
+        content: {
+          'via': ['b'],
+          'canonical': true,
+        },
+      ),
+    ),
+  ]);
+  return room;
+}
 
 const String _parentSender = '@sender:b.org';
 
@@ -32,7 +47,6 @@ MockRoom _room(
   bool isSpace = false,
   List<String> children = const [],
   List<String> parents = const [],
-  bool isLastParentCanonical = false,
 }) {
   final room = MockRoom();
   when(room.id).thenReturn(id);
@@ -45,13 +59,7 @@ MockRoom _room(
   ]);
   when(room.spaceParents).thenReturn([
     for (final parent in parents)
-      SpaceParent.fromState(
-        _relation(
-          EventTypes.SpaceParent,
-          parent,
-          isCanonical: isLastParentCanonical && parent == parents.last,
-        ),
-      ),
+      SpaceParent.fromState(_relation(EventTypes.SpaceParent, parent)),
   ]);
   for (final parent in parents) {
     when(room.getState(EventTypes.SpaceParent, parent)).thenReturn(
@@ -182,7 +190,7 @@ void _roomListEntriesOfTests() {
       final entries = entriesOf([
         _room('!a', isSpace: true, children: ['!c']),
         _room('!z', isSpace: true, children: ['!c']),
-        _room('!c', parents: ['!a', '!z'], isLastParentCanonical: true),
+        _withLastParentCanonical(_room('!c', parents: ['!a', '!z'])),
       ]);
 
       expect(entries.last.parentSpaceIds, ['!z', '!a']);
@@ -191,7 +199,7 @@ void _roomListEntriesOfTests() {
     test('whenTheCanonicalSpaceIsNotJoined_ignoresIt', () {
       final entries = entriesOf([
         _room('!a', isSpace: true, children: ['!c']),
-        _room('!c', parents: ['!a', '!gone'], isLastParentCanonical: true),
+        _withLastParentCanonical(_room('!c', parents: ['!a', '!gone'])),
       ]);
 
       expect(entries.last.parentSpaceIds, ['!a']);
