@@ -95,7 +95,9 @@ void main() {
     () async {
       // Arrange
       final room = _FakeRoom('Unable to getUserMedia: denied');
-      final datasource = LiveKitCallMediaDatasourceImpl(createRoom: () => room);
+      final datasource = LiveKitCallMediaDatasourceImpl(
+        createRoom: (_) => room,
+      );
 
       // Act & Assert
       await expectLater(
@@ -109,7 +111,7 @@ void main() {
   test('connect_whenTheMicrophoneFailsWithAnError_rethrowsIt', () async {
     // Arrange
     final room = _FakeRoom(StateError('bug'));
-    final datasource = LiveKitCallMediaDatasourceImpl(createRoom: () => room);
+    final datasource = LiveKitCallMediaDatasourceImpl(createRoom: (_) => room);
 
     // Act & Assert
     await expectLater(

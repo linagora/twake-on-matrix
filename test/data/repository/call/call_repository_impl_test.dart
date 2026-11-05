@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/data/repository/call/call_repository_impl.dart';
+import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
@@ -47,6 +50,14 @@ class _FakeRtc implements MatrixRtcDatasource {
   @override
   Future<void> leaveMembership(CallRoom room) async =>
       calls.add('leave ${room.id}');
+
+  final keys = StreamController<CallMediaKey>();
+
+  @override
+  Stream<CallMediaKey> watchMediaKeys(CallRoom room) {
+    calls.add('keys ${room.id}');
+    return keys.stream;
+  }
 }
 
 class _FakeToken implements CallTokenDatasource {
@@ -67,8 +78,15 @@ class _FakeMedia implements CallMediaDatasource {
   var participants = const <CallParticipant>[];
 
   @override
-  Future<void> connect(CallServer server, CallMediaState media) async => calls
-      .add('connect ${server.url} ${media.isMicrophoneOn} ${media.isCameraOn}');
+  Future<void> connect(CallServer server, CallMediaState media) async =>
+      calls.add(
+        'connect ${server.url} ${media.isMicrophoneOn} ${media.isCameraOn} '
+        '${media.isEncrypted}',
+      );
+
+  @override
+  Future<void> setMediaKey(CallMediaKey key) async =>
+      calls.add('key ${key.participantId} ${key.index}');
 
   @override
   Future<void> disconnect() async => calls.add('disconnect');
@@ -130,14 +148,14 @@ void main() {
     // Act
     await repository.connectMedia(
       _server,
-      const CallMediaState(isMicrophoneOn: true),
+      const CallMediaState(isMicrophoneOn: true, isEncrypted: true),
     );
     await repository.setMicrophone(isOn: false);
     await repository.disconnectMedia();
 
     // Assert
     expect(media.calls, [
-      'connect wss://lk.test true false',
+      'connect wss://lk.test true false true',
       'microphone false',
       'disconnect',
     ]);
@@ -163,5 +181,21 @@ void main() {
     // Assert
     expect(participants.single.displayName, '@bob:hs in !r');
     expect(participants.single.avatarUrl, Uri.parse('mxc://a'));
+  });
+
+  test('the media keys of the call go to the media until stopped', () async {
+    repository.startMediaKeys(_room);
+    rtc.keys.add(
+      const CallMediaKey(participantId: '@b:hs:B', index: 1, key: [1]),
+    );
+    await pumpEventQueue();
+    await repository.stopMediaKeys();
+    rtc.keys.add(
+      const CallMediaKey(participantId: '@b:hs:B', index: 2, key: [2]),
+    );
+    await pumpEventQueue();
+
+    expect(rtc.calls, ['keys !r']);
+    expect(media.calls, ['key @b:hs:B 1']);
   });
 }

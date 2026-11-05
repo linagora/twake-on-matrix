@@ -276,14 +276,13 @@ The calls of `package:matrix` (`GroupCallSession`, `LiveKitBackend`) are not
 used: they write `com.famedly.call.member`, which Twake Space Chat and Element
 Call do not read (still so in matrix 15.0.0).
 
-A call in an encrypted room needs the exchange of media keys, which comes
-later. Until then the app does not join calls of encrypted rooms, and an
-encrypted room shows no call button at all, not even the Meet link it sent
-before (decided by Johann, 2026-11-10). This trade-off is deliberate: on a
-server whose well-known has a token service, the Meet link disappears from
-encrypted rooms until the exchange of media keys ships. A call ends if
-encryption is turned on in its room during the call, as its media would stay
-in the clear.
+In an encrypted call each device encrypts its media with its own random key
+and sends it to the other devices of the call over Olm
+(`io.element.call.encryption_keys`). When a device leaves, the key changes;
+a device that joins gets the current key while it is under 10 seconds old,
+else everyone gets a new one. LiveKit only sees ciphertext.
+A call that started in the clear ends if encryption is turned on in its room
+during the call, as its media would stay in the clear.
 
 ## D15. The call button of a chat: in-app call or Meet link (proposed, 2026-11-05)
 

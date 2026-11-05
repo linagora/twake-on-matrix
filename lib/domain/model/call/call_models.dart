@@ -41,6 +41,7 @@ abstract class CallMediaState with _$CallMediaState {
   const factory CallMediaState({
     required bool isMicrophoneOn,
     @Default(false) bool isCameraOn,
+    @Default(false) bool isEncrypted,
   }) = _CallMediaState;
 }
 
