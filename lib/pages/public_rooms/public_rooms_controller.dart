@@ -43,32 +43,9 @@ class PublicRoomsController extends _$PublicRoomsController {
     }
     state = AsyncData(current.copyWith(pendingRoomId: room.roomId));
     try {
-      if (room.access == PublicRoomAccess.approval) {
-        await ref.read(knockPublicRoomUseCaseProvider).execute(room.roomId);
-        if (!ref.mounted) return const PublicRoomRequested();
-        _update(
-          (state) => state.copyWith(
-            requestedRoomIds: {...state.requestedRoomIds, room.roomId},
-          ),
-        );
-        return const PublicRoomRequested();
-      }
-      final joined = await ref
-          .read(joinPublicRoomUseCaseProvider)
-          .execute(room.roomId);
-      if (ref.mounted) {
-        _update(
-          (state) => state.copyWith(
-            rooms: [
-              for (final other in state.rooms)
-                if (other.roomId != room.roomId) other,
-            ],
-          ),
-        );
-      }
-      return joined.isInSync
-          ? PublicRoomJoined(joined.roomId)
-          : const PublicRoomJoinedNotInSync();
+      return room.access == PublicRoomAccess.approval
+          ? await _knock(room)
+          : await _join(room);
     } on PublicRoomsException {
       return const PublicRoomOpenFailed();
     } finally {
@@ -76,6 +53,36 @@ class PublicRoomsController extends _$PublicRoomsController {
         _update((state) => state.copyWith(pendingRoomId: null));
       }
     }
+  }
+
+  Future<PublicRoomOpenResult> _knock(PublicRoom room) async {
+    await ref.read(knockPublicRoomUseCaseProvider).execute(room.roomId);
+    if (!ref.mounted) return const PublicRoomRequested();
+    _update(
+      (state) => state.copyWith(
+        requestedRoomIds: {...state.requestedRoomIds, room.roomId},
+      ),
+    );
+    return const PublicRoomRequested();
+  }
+
+  Future<PublicRoomOpenResult> _join(PublicRoom room) async {
+    final joined = await ref
+        .read(joinPublicRoomUseCaseProvider)
+        .execute(room.roomId);
+    final result = joined.isInSync
+        ? PublicRoomJoined(joined.roomId)
+        : const PublicRoomJoinedNotInSync();
+    if (!ref.mounted) return result;
+    _update(
+      (state) => state.copyWith(
+        rooms: [
+          for (final other in state.rooms)
+            if (other.roomId != room.roomId) other,
+        ],
+      ),
+    );
+    return result;
   }
 
   Future<void> _loadMore(
