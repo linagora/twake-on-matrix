@@ -386,6 +386,26 @@ void main() {
     );
 
     test(
+      'the candidate that follows a rollback has the home server of the failed try',
+      () async {
+        boot(accounts: [a]);
+        final client = await sessions.loginClient();
+        final id = client.clientName;
+        final picked = Uri.parse('https://matrix.example.com');
+        client.homeserver = picked;
+        host.failing.add('switchAfter:$id');
+
+        await host.logIn(id);
+        // The SDK can clear it on a client that was signed out.
+        client.homeserver = null;
+        final next = await sessions.loginClient();
+
+        expect(next.clientName, isNot(id));
+        expect(next.homeserver, picked);
+      },
+    );
+
+    test(
       'a storage that cannot be deleted leaves the account listed, says so, and a retry finishes it',
       () async {
         boot(accounts: [a]);

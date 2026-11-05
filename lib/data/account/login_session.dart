@@ -125,6 +125,12 @@ class LoginSession {
   /// The home server of the login, read when the server accepted it: a set-up
   /// that is retried later uses it, not the one a new login screen picked.
   HomeserverSummary? _summary;
+
+  /// The home server of the client when the server accepted the login. The SDK
+  /// can clear it on the client afterwards (a failed try signs it out), so a
+  /// new login screen after a rollback reads it from here.
+  Uri? get homeserver => _homeserver;
+  Uri? _homeserver;
   Object? _cleanupError;
   final Set<_Cleanup> _failedCleanups = {};
   final Set<_SetUp> _failedSetUps = {};
@@ -213,6 +219,7 @@ class LoginSession {
     if (!_acceptsLogin) return; // a repeated event, or a session ending
     _loggedOutSeen = false;
     _summary = _host.loginHomeserverSummary;
+    _homeserver = client.homeserver;
     _move(LoginSessionState.registering, {
       LoginSessionState.created,
       LoginSessionState.loggingIn,

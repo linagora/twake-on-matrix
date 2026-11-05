@@ -112,11 +112,15 @@ class LoginSessions {
   }
 
   Future<Client> _newCandidate(LoginHost host, Future<void> retry) async {
+    // After a rollback the failed session still holds the home server the
+    // user picked: the new candidate takes it, as it has none yet.
+    final retried = _pending?.homeserver;
     final session = _pending = LoginSession.candidate(host);
     // Registered as soon as the client exists, not after the retry: an event
     // of that client must find this session, not make a placeholder.
     final registered = session.ready.then<void>(
       (client) {
+        client.homeserver ??= retried;
         _byId[client.clientName] = session;
       },
       onError: (_) {
