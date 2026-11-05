@@ -82,14 +82,15 @@ void main() {
         expect(summary.videoCallBaseUrl, 'https://meet.test');
       });
 
-      test('falls back on the base url', () {
+      test('has no token service with a base url alone', () {
         final summary = summaryWith(
           foci([
-            {'type': 'livekit', 'livekit_base_url': 'https://rtc.test'},
+            {'type': 'livekit', 'livekit_base_url': 'https://meet.test'},
           ]),
         );
 
-        expect(summary.callTokenServiceUrl, 'https://rtc.test');
+        expect(summary.callTokenServiceUrl, isNull);
+        expect(summary.videoCallBaseUrl, 'https://meet.test');
       });
 
       test('ignores a focus of another type', () {

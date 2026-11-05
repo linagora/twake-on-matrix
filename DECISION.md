@@ -263,7 +263,7 @@ the same call:
   `oldest_membership`, `foci_preferred` the token service of the well-known;
 - the token comes from `POST <token service>/sfu/get` (MSC4195) with an
   OpenID token; the token service is `livekit_service_url` of the
-  `org.matrix.msc4143.rtc_foci` LiveKit focus, else its `livekit_base_url`;
+  `org.matrix.msc4143.rtc_foci` LiveKit focus (D15);
 - the membership lasts 4 hours (`expires`) and grows by 4 hours before it
   lapses; a delayed leave (MSC4140) of 8 seconds, restarted every 5, ends it
   on the server when the app vanishes;
@@ -277,6 +277,28 @@ Call do not read (still so in matrix 15.0.0).
 
 A call in an encrypted room needs the exchange of media keys, which comes
 later: until then the app does not join calls of encrypted rooms.
+
+## D15. The call button of a chat: in-app call or Meet link (proposed, 2026-11-05)
+
+The call button in the header of a chat starts an in-app call (D14) when the
+`org.matrix.msc4143.rtc_foci` LiveKit focus of the well-known has a
+`livekit_service_url`. Without one, it keeps sending the Meet link of
+`livekit_base_url`, as before. A base url alone is not taken as a token
+service: on `meet.twake.app` (the production well-known on 2026-11-05) it is
+Meet, and `POST /sfu/get` answers 405.
+
+The first call screen is audio only, as the calls of Twake Space Chat start
+with the camera off:
+
+- the button opens the screen before the call; « Start a call » joins it;
+- in the call: one tile per device, with its avatar, its name, « Microphone
+  off » and a ring while it speaks; a microphone button and « Leave the call »;
+- leaving the screen leaves the call: no call keeps running without a screen
+  that shows it.
+
+Not yet: the camera and the videos, the speaker and device choice, a call
+that goes on in a small window, the number of people already in a call on
+the button.
 
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
 

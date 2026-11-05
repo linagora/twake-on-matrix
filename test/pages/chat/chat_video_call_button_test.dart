@@ -13,6 +13,7 @@ import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.d
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/video_call/video_call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -47,25 +48,29 @@ void main() {
 
   const testRoomId = '!room:example.com';
 
-  HomeserverSummary summaryOf({required bool withVideoCall}) =>
-      HomeserverSummary(
-        discoveryInformation: DiscoveryInformation(
-          mHomeserver: HomeserverInformation(
-            baseUrl: Uri.parse('https://matrix.example.com'),
-          ),
-          additionalProperties: {
-            if (withVideoCall)
-              RtcFocus.rtcFociKey: [
-                {
-                  'type': RtcFocus.liveKitType,
-                  'livekit_base_url': 'https://meet.example.com/',
-                },
-              ],
-          },
-        ),
-        versions: GetVersionsResponse(versions: ['v1.11']),
-        loginFlows: [],
-      );
+  HomeserverSummary summaryOf({
+    required bool withVideoCall,
+    bool withTokenService = false,
+  }) => HomeserverSummary(
+    discoveryInformation: DiscoveryInformation(
+      mHomeserver: HomeserverInformation(
+        baseUrl: Uri.parse('https://matrix.example.com'),
+      ),
+      additionalProperties: {
+        if (withVideoCall)
+          RtcFocus.rtcFociKey: [
+            {
+              'type': RtcFocus.liveKitType,
+              'livekit_base_url': 'https://meet.example.com/',
+              if (withTokenService)
+                'livekit_service_url': 'https://rtc.example.com',
+            },
+          ],
+      },
+    ),
+    versions: GetVersionsResponse(versions: ['v1.11']),
+    loginFlows: [],
+  );
 
   PostExpectation<Future<void>> whenExecute() => when(
     mockUseCase.execute(
@@ -78,6 +83,7 @@ void main() {
   Future<void> pumpButton(
     WidgetTester tester, {
     bool withVideoCall = true,
+    bool withTokenService = false,
   }) async {
     final container = ProviderContainer.test(
       retry: (_, _) => null,
@@ -89,7 +95,12 @@ void main() {
     );
     container
         .read(loginHomeserverSummaryProvider.notifier)
-        .set(summaryOf(withVideoCall: withVideoCall));
+        .set(
+          summaryOf(
+            withVideoCall: withVideoCall,
+            withTokenService: withTokenService,
+          ),
+        );
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -126,9 +137,27 @@ void main() {
       expect(find.byType(TwakeIconButton), findsNothing);
     });
 
-    testWidgets('onTap_always_startsTheCallOnTheVideoCallBaseUrl', (
-      tester,
-    ) async {
+    testWidgets('onTap_withATokenService_opensTheInAppCall', (tester) async {
+      // Arrange
+      when(mockRoom.getLocalizedDisplayname()).thenReturn('Team');
+      await pumpButton(tester, withTokenService: true);
+
+      // Act
+      await tester.tap(find.byTooltip('Start a call'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.byType(CallScreen), findsOneWidget);
+      verifyNever(
+        mockUseCase.execute(
+          roomId: anyNamed('roomId'),
+          baseUrl: anyNamed('baseUrl'),
+          startedTitle: anyNamed('startedTitle'),
+        ),
+      );
+    });
+
+    testWidgets('onTap_withoutATokenService_sendsTheMeetLink', (tester) async {
       // Arrange
       await pumpButton(tester);
 

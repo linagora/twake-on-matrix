@@ -65,7 +65,7 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Play audio and voice messages on bluetooth devices</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Open the camera and take a picture to share them with your contacts on Twake Chat.</string>
+	<string>Take pictures and videos to share with your contacts, and show your camera in calls on Twake Chat.</string>
 	<key>NSCarrierUsageDescription</key>
 	<string>Used by Twake Chat to determine the default country code for phone number normalization.</string>
 	<key>NSContactsUsageDescription</key>
@@ -79,7 +79,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-    <string>Record voice message and share them with your contacts on Twake Chat.</string>
+    <string>Record voice messages, and talk in calls on Twake Chat.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

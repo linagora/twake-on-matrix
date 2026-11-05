@@ -9,7 +9,7 @@ import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 
 /// MatrixRTC (MSC4143) session memberships with a LiveKit focus: one
-/// `org.matrix.msc3401.call.member` state event per device (DECISION.md D10).
+/// `org.matrix.msc3401.call.member` state event per device (DECISION.md D14).
 class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   MatrixRtcDatasourceImpl(this._maybeClient);
 

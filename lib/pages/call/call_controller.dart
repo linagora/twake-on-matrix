@@ -62,7 +62,7 @@ class CallController extends _$CallController {
     if (current is! CallConnected) return;
     final hadOthers = current.participants.any((p) => !p.isLocal);
     state = current.copyWith(participants: participants);
-    // DECISION.md D10: a direct call ends when the other person leaves.
+    // DECISION.md D14: a direct call ends when the other person leaves.
     if (current.isDirect && hadOthers && participants.every((p) => p.isLocal)) {
       unawaited(leave());
     }

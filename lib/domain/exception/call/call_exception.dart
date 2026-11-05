@@ -37,7 +37,7 @@ class CallServiceUnavailableException extends CallException {
     : super('No MatrixRTC token service in the well-known');
 }
 
-/// Until media keys are exchanged (DECISION.md D10).
+/// Until media keys are exchanged (DECISION.md D14).
 class CallEncryptionUnsupportedException extends CallException {
   const CallEncryptionUnsupportedException()
     : super('Calls in encrypted rooms are not supported yet');

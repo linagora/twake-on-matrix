@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:twake_chat/domain/exception/video_call/video_call_exception.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
+import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -46,15 +47,23 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
 
   @override
   Widget build(BuildContext context) {
-    final videoCallBaseUrl = ref.watch(
-      loginHomeserverSummaryProvider.select(
-        (summary) => summary?.videoCallBaseUrl,
-      ),
-    );
-    if (widget.controller.room == null ||
-        videoCallBaseUrl == null ||
-        !widget.controller.canStartVideoCall(videoCallBaseUrl)) {
+    final room = widget.controller.room;
+    final summary = ref.watch(loginHomeserverSummaryProvider);
+    final tokenServiceUrl = summary?.callTokenServiceUrl;
+    final baseUrl = tokenServiceUrl ?? summary?.videoCallBaseUrl;
+    if (room == null ||
+        baseUrl == null ||
+        !widget.controller.canStartVideoCall(baseUrl)) {
       return const SizedBox.shrink();
+    }
+    final l10n = L10n.of(context)!;
+    if (tokenServiceUrl != null) {
+      return TwakeIconButton(
+        icon: Icons.videocam_outlined,
+        tooltip: l10n.startCall,
+        onTap: () => unawaited(CallScreen.open(context, room)),
+        preferBelow: false,
+      );
     }
     if (_isStarting) {
       return const Padding(
@@ -67,8 +76,8 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     }
     return TwakeIconButton(
       icon: Icons.videocam_outlined,
-      tooltip: L10n.of(context)!.startVideoCall,
-      onTap: () => unawaited(_start(videoCallBaseUrl)),
+      tooltip: l10n.startVideoCall,
+      onTap: () => unawaited(_start(baseUrl)),
       preferBelow: false,
     );
   }

@@ -16,7 +16,7 @@ class JoinCallUseCase {
   }) async {
     if (serviceUrl == null) throw const CallServiceUnavailableException();
     final room = _repository.getRoomInfo(roomId);
-    // DECISION.md D10: a call is encrypted when its room is.
+    // DECISION.md D14: a call is encrypted when its room is.
     if (room.isEncrypted) throw const CallEncryptionUnsupportedException();
     await _repository.endStaleOwnMembership(roomId);
     final server = await _repository.fetchServer(

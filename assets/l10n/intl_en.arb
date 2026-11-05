@@ -3281,5 +3281,79 @@
   "@driveShortcutsNotSent": {
     "type": "text",
     "placeholders": {}
+  },
+  "@startCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callTitle": "Call",
+  "@callTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callConnecting": "Connecting…",
+  "@callConnecting": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callMicrophone": "Microphone",
+  "@callMicrophone": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callMicrophoneOff": "Microphone off",
+  "@callMicrophoneOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLeave": "Leave the call",
+  "@callLeave": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callRetry": "Try again",
+  "@callRetry": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorNoService": "This server offers no calls.",
+  "@callErrorNoService": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorEncrypted": "Calls in encrypted chats are not available yet.",
+  "@callErrorEncrypted": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorNoPermission": "You may not join a call in this conversation.",
+  "@callErrorNoPermission": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorRoomNotFound": "This conversation is not loaded yet.",
+  "@callErrorRoomNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorTokenFailed": "The call server refused the call. Try again in a moment.",
+  "@callErrorTokenFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorMembershipFailed": "The call could not be joined. Try again in a moment.",
+  "@callErrorMembershipFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorConnectionFailed": "The call server could not be reached.",
+  "@callErrorConnectionFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorMediaFailed": "The microphone could not be opened. Check the permissions of the app.",
+  "@callErrorMediaFailed": {
+    "type": "text",
+    "placeholders": {}
   }
 }

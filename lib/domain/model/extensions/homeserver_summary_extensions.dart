@@ -76,10 +76,10 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
   String? get videoCallBaseUrl =>
       _firstLiveKitUrl((focus) => focus.livekitBaseUrl);
 
-  /// The token service of in-app calls: its service url, else its base url.
-  String? get callTokenServiceUrl => _firstLiveKitUrl(
-    (focus) => focus.livekitServiceUrl ?? focus.livekitBaseUrl,
-  );
+  /// The token service of in-app calls. A base url alone is a Meet server
+  /// (DECISION.md D15).
+  String? get callTokenServiceUrl =>
+      _firstLiveKitUrl((focus) => focus.livekitServiceUrl);
 
   String? _firstLiveKitUrl(Uri? Function(RtcFocus focus) urlOf) {
     if (discoveryInformation?.additionalProperties == null) {
