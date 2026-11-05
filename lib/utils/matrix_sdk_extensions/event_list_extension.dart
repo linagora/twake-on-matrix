@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -44,18 +45,8 @@ extension EventListExtension on List<Event> {
     return map;
   }
 
-  /// Syncs two event lists (top and bottom) with new events.
-  /// Handles removal of deleted events, updating of changed events,
-  /// and addition of new events at the start and end.
-  ///
-  /// Parameters:
-  /// - [oldEvents]: The previous list of events
-  /// - [newEvents]: The current list of events
-  /// - [currentTop]: Current events in the top list
-  /// - [currentBottom]: Current events in the bottom list
-  /// - [wasRequestingFuture]: Whether future events were being requested
-  ///
-  /// Returns [EventListSyncResult] with updated top/bottom lists and scroll flag.
+  /// Splits [newEvents] around the centered event, so events landing between
+  /// two shown ones are not dropped.
   static EventListSyncResult syncEventLists({
     required List<Event> oldEvents,
     required List<Event> newEvents,
@@ -63,213 +54,64 @@ extension EventListExtension on List<Event> {
     required List<Event> currentBottom,
     required bool wasRequestingFuture,
   }) {
-    // Check if new items are completely different (use Set for O(1) lookup)
-    final newEventsSet = newEvents.toSet();
-    final hasCommonItems = oldEvents.any(newEventsSet.contains);
-
-    if (!hasCommonItems) {
-      // Completely different list - clear top and set bottom to new items.
-      // Log: if the newest newEvent differs from the newest oldEvent, the visible
-      // "last message" may have changed unexpectedly (potential missing-message case).
-      if (oldEvents.isNotEmpty && newEvents.isNotEmpty) {
-        final oldNewest = oldEvents.first.eventId;
-        final newNewest = newEvents.first.eventId;
-        if (oldNewest != newNewest) {
-          Logs().d(
-            '${SentryTrackedEvents.missingLastMessage.message}: '
-            'syncEventLists() no common items — full reset '
-            '(oldCount=${oldEvents.length}, newCount=${newEvents.length}, '
-            'oldNewest=$oldNewest, newNewest=$newNewest)',
-          );
-        }
-      }
-      return EventListSyncResult(
-        top: const [],
-        bottom: List.from(newEvents),
-        shouldScrollToBottom: false,
-        hasNewEvents:
-            newEvents.isNotEmpty &&
-            (oldEvents.isEmpty ||
-                newEvents.first.eventId != oldEvents.first.eventId),
-      );
-    }
-
-    // Build a map for O(1) event lookups by eventId and transactionId
     final newEventsMap = buildEventMap(newEvents);
+    bool isKept(Event event) => event.findEventInMap(newEventsMap) != null;
 
-    // Remove deleted events and update changed events
-    final updatedTop = _removeDeletedAndUpdate(currentTop, newEventsMap);
-    final updatedBottom = _removeDeletedAndUpdate(currentBottom, newEventsMap);
+    final bottomAnchor = currentBottom.firstWhereOrNull(isKept);
+    final anchor = (bottomAnchor ?? currentTop.firstWhereOrNull(isKept))
+        ?.findEventInMap(newEventsMap);
+    final anchorIndex = anchor == null
+        ? -1
+        : newEvents.indexWhere((event) => identical(event, anchor));
 
-    // Build a set of existing events for O(1) duplicate checking
-    final existingEventsMap = buildEventMap([...updatedTop, ...updatedBottom]);
+    if (anchorIndex == -1) return _reset(oldEvents, newEvents);
 
-    // Find anchor points for detecting new events
-    final firstOldEventInLists = _findFirstMatchingEvent(
-      oldEvents,
-      existingEventsMap,
-    );
-    final lastOldEventInLists = _findLastMatchingEvent(
-      oldEvents,
-      existingEventsMap,
-    );
-
-    // Find and add new items at the start
-    final startDiff = _findStartDiff(newEvents, firstOldEventInLists);
-    final shouldScrollToBottom = _applyStartDiff(
-      newEvents: newEvents,
-      startDiff: startDiff,
-      existingEventsMap: existingEventsMap,
-      updatedTop: updatedTop,
-      wasRequestingFuture: wasRequestingFuture,
-    );
-
-    // Find and add new items at the end
-    final endDiff = _findEndDiff(newEvents, lastOldEventInLists);
-    _applyEndDiff(
-      newEvents: newEvents,
-      endDiff: endDiff,
-      existingEventsMap: existingEventsMap,
-      updatedBottom: updatedBottom,
-    );
+    final splitIndex = bottomAnchor != null ? anchorIndex : anchorIndex + 1;
+    final shownEventsMap = buildEventMap([...currentTop, ...currentBottom]);
+    bool isAdded(Event event) => event.findEventInMap(shownEventsMap) == null;
+    final top = newEvents.sublist(0, splitIndex).reversed.toList();
+    final newestShown = currentTop.lastOrNull ?? currentBottom.first;
 
     return EventListSyncResult(
-      top: updatedTop,
-      bottom: updatedBottom,
-      shouldScrollToBottom: shouldScrollToBottom,
-      hasNewEvents: startDiff > 0 || endDiff > 0,
+      top: top,
+      bottom: newEvents.sublist(splitIndex),
+      shouldScrollToBottom:
+          !wasRequestingFuture &&
+          top.any(
+            (event) =>
+                isAdded(event) &&
+                event.originServerTs.isAfter(newestShown.originServerTs) &&
+                event.isVisibleInGui &&
+                event.isOwnMessage,
+          ),
+      hasNewEvents: newEvents.any(isAdded),
     );
   }
 
-  /// Applies new events found at the start of [newEvents] to [updatedTop].
-  /// Returns whether the view should scroll to bottom.
-  static bool _applyStartDiff({
-    required List<Event> newEvents,
-    required int startDiff,
-    required Map<String, Event> existingEventsMap,
-    required List<Event> updatedTop,
-    required bool wasRequestingFuture,
-  }) {
-    if (startDiff == 0) return false;
-
-    final newStartItems = newEvents.sublist(0, startDiff);
-    final itemsToAdd = <Event>[];
-
-    for (final newItem in newStartItems) {
-      if (newItem.findEventInMap(existingEventsMap) == null) {
-        itemsToAdd.add(newItem);
-        existingEventsMap[newItem.eventId] = newItem;
-        final transactionId = newItem.unsigned?['transaction_id'] as String?;
-        if (transactionId != null) {
-          existingEventsMap[transactionId] = newItem;
-        }
-      }
-    }
-
-    if (itemsToAdd.length < newStartItems.length) {
-      final droppedCount = newStartItems.length - itemsToAdd.length;
-      Logs().d(
-        '${SentryTrackedEvents.missingLastMessage.message}: '
-        'syncEventLists() $droppedCount new-start event(s) dropped as '
-        'duplicates (startDiff=$startDiff, added=${itemsToAdd.length})',
-      );
-    }
-
-    updatedTop.addAll(itemsToAdd.reversed);
-
-    return !wasRequestingFuture &&
-        itemsToAdd.any((event) => event.isVisibleInGui && event.isOwnMessage);
-  }
-
-  /// Applies new events found at the end of [newEvents] to [updatedBottom].
-  static void _applyEndDiff({
-    required List<Event> newEvents,
-    required int endDiff,
-    required Map<String, Event> existingEventsMap,
-    required List<Event> updatedBottom,
-  }) {
-    if (endDiff == 0) return;
-
-    final newEndItems = newEvents.sublist(newEvents.length - endDiff);
-    final itemsToAdd = [
-      for (final newItem in newEndItems)
-        if (newItem.findEventInMap(existingEventsMap) == null) newItem,
-    ];
-
-    updatedBottom.addAll(itemsToAdd);
-  }
-
-  /// Removes deleted events and updates changed events in a list.
-  static List<Event> _removeDeletedAndUpdate(
-    List<Event> events,
-    Map<String, Event> newEventsMap,
-  ) {
-    final result = <Event>[];
-
-    for (final event in events) {
-      final matchingEvent = event.findEventInMap(newEventsMap);
-      if (matchingEvent != null) {
-        // Keep the event, but use the updated version if different
-        result.add(matchingEvent);
-      }
-      // If matchingEvent is null, the event was deleted, so we don't add it
-    }
-
-    return result;
-  }
-
-  /// Finds the first old event that still exists in the existing events map.
-  static Event? _findFirstMatchingEvent(
+  static EventListSyncResult _reset(
     List<Event> oldEvents,
-    Map<String, Event> existingEventsMap,
-  ) {
-    for (final oldEvent in oldEvents) {
-      if (oldEvent.findEventInMap(existingEventsMap) != null) {
-        return oldEvent;
-      }
-    }
-    return null;
-  }
-
-  /// Finds the last old event that still exists in the existing events map.
-  static Event? _findLastMatchingEvent(
-    List<Event> oldEvents,
-    Map<String, Event> existingEventsMap,
-  ) {
-    for (int i = oldEvents.length - 1; i >= 0; i--) {
-      if (oldEvents[i].findEventInMap(existingEventsMap) != null) {
-        return oldEvents[i];
-      }
-    }
-    return null;
-  }
-
-  /// Finds how many new events are at the start of the list.
-  static int _findStartDiff(
     List<Event> newEvents,
-    Event? firstOldEventInLists,
   ) {
-    if (firstOldEventInLists == null) return 0;
-
-    int startDiff = 0;
-    while (startDiff < newEvents.length &&
-        !newEvents[startDiff].isSameEvent(firstOldEventInLists)) {
-      startDiff++;
+    if (oldEvents.isNotEmpty && newEvents.isNotEmpty) {
+      final oldNewest = oldEvents.first.eventId;
+      final newNewest = newEvents.first.eventId;
+      if (oldNewest != newNewest) {
+        Logs().d(
+          '${SentryTrackedEvents.missingLastMessage.message}: '
+          'syncEventLists() no common items — full reset '
+          '(oldCount=${oldEvents.length}, newCount=${newEvents.length}, '
+          'oldNewest=$oldNewest, newNewest=$newNewest)',
+        );
+      }
     }
-    return startDiff;
-  }
-
-  /// Finds how many new events are at the end of the list.
-  static int _findEndDiff(List<Event> newEvents, Event? lastOldEventInLists) {
-    if (lastOldEventInLists == null) return 0;
-
-    int endDiff = 0;
-    while (endDiff < newEvents.length &&
-        !newEvents[newEvents.length - 1 - endDiff].isSameEvent(
-          lastOldEventInLists,
-        )) {
-      endDiff++;
-    }
-    return endDiff;
+    return EventListSyncResult(
+      top: const [],
+      bottom: List.from(newEvents),
+      shouldScrollToBottom: false,
+      hasNewEvents:
+          newEvents.isNotEmpty &&
+          (oldEvents.isEmpty ||
+              newEvents.first.eventId != oldEvents.first.eventId),
+    );
   }
 }
