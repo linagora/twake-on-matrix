@@ -1721,6 +1721,8 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "Lisasime vestluse kogukonda",
+  "addToSpace": "Lisa kogukonda",
   "scanQrCode": "Skaneeri QR-koodi",
   "homeserver": "Koduserver",
   "serverRequiresEmail": "See koduserver eeldab registreerimisel kasutatava e-postiaadressi kinnitamist.",
@@ -1747,7 +1749,9 @@
   "time": "Kellaaeg",
   "messageType": "Sõnumi tüüp",
   "sender": "Saatja",
+  "addToSpaceDescription": "Vali kogukond, kuhu soovid seda vestlust lisada.",
   "loginWithOneClick": "Logi sisse ühe klõpsuga",
+  "removeFromSpace": "Eemalda kogukonnast",
   "start": "Alusta",
   "commandHint_discardsession": "Loobu sessioonist",
   "@commandHint_discardsession": {
@@ -1899,9 +1903,12 @@
   "noKeyForThisMessage": "See võib juhtuda, kui sõnum oli saadetud enne, kui siin seadmes oma kontoga sisse logisid.\n\nSamuti võib juhtuda siis, kui saatja on lugemises selles seadmes blokeerinud või on tekkinud tõrkeid veebiühenduses.\n\nAga mõnes teises seadmes saad seda sõnumit lugeda? Siis sa võid sõnumi sealt üle tõsta. Ava Seadistused -> Seadmed ning kontrolli, et kõik sinu seadmed on omavahel verifitseeritud. Kui avad selle vestluse või jututoa ning mõlemad sessioonid on avatud, siis vajalikud krüptovõtmed saadetakse automaatset.\n\nKas sa soovid vältida krüptovõtmete kadumist väljalogimisel ja seadmete vahetusel? Siis palun kontrolli, et seadistuses on krüptovõtmete varundus sisse lülitatud.",
   "newGroup": "Uus jututuba",
   "newSpace": "Uus kogukond",
+  "enterSpace": "Sisene kogukonda",
+  "enterRoom": "Ava jututuba",
   "appearOnTopDetails": "Sellega lubad rakendust avada kõige pealmisena (pole vajalik, kui Fluffychat on juba seadistatud toimima helistamiskontoga)",
   "screenSharingTitle": "ekraani jagamine",
   "foregroundServiceRunning": "See teavitus toimib siis, kui esiplaaniteenus töötab.",
+  "allSpaces": "Kõik kogukonnad",
   "screenSharingDetail": "Sa jagad oma ekraani FuffyChat'i vahendusel",
   "numChats": "{number} vestlust",
   "@numChats": {

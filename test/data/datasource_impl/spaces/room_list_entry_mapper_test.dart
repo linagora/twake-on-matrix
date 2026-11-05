@@ -11,12 +11,17 @@ import '../../../fake_client.dart' show MockDatabase;
 import 'room_list_entry_mapper_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<Room>()])
-StrippedStateEvent _relation(String type, String key) => StrippedStateEvent(
+StrippedStateEvent _relation(
+  String type,
+  String key, {
+  bool isCanonical = false,
+}) => StrippedStateEvent(
   type: type,
   senderId: '@a:b',
   stateKey: key,
   content: {
     'via': ['b'],
+    if (isCanonical) 'canonical': true,
   },
 );
 
@@ -27,6 +32,7 @@ MockRoom _room(
   bool isSpace = false,
   List<String> children = const [],
   List<String> parents = const [],
+  String? canonicalParent,
 }) {
   final room = MockRoom();
   when(room.id).thenReturn(id);
@@ -39,7 +45,13 @@ MockRoom _room(
   ]);
   when(room.spaceParents).thenReturn([
     for (final parent in parents)
-      SpaceParent.fromState(_relation(EventTypes.SpaceParent, parent)),
+      SpaceParent.fromState(
+        _relation(
+          EventTypes.SpaceParent,
+          parent,
+          isCanonical: parent == canonicalParent,
+        ),
+      ),
   ]);
   for (final parent in parents) {
     when(room.getState(EventTypes.SpaceParent, parent)).thenReturn(
@@ -164,6 +176,25 @@ void _roomListEntriesOfTests() {
       ]);
 
       expect(entries.last.parentSpaceIds, ['!listing', '!named']);
+    });
+
+    test('whenAJoinedSpaceIsCanonical_putsItFirst', () {
+      final entries = entriesOf([
+        _room('!a', isSpace: true, children: ['!c']),
+        _room('!z', isSpace: true, children: ['!c']),
+        _room('!c', parents: ['!a', '!z'], canonicalParent: '!z'),
+      ]);
+
+      expect(entries.last.parentSpaceIds, ['!z', '!a']);
+    });
+
+    test('whenTheCanonicalSpaceIsNotJoined_ignoresIt', () {
+      final entries = entriesOf([
+        _room('!a', isSpace: true, children: ['!c']),
+        _room('!c', parents: ['!a', '!gone'], canonicalParent: '!gone'),
+      ]);
+
+      expect(entries.last.parentSpaceIds, ['!a']);
     });
 
     test('whenInSeveralSpaces_theFirstDoesNotFollowTheRoomOrder', () {

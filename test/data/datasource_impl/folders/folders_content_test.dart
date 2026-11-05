@@ -58,6 +58,17 @@ void main() {
       ]);
     });
 
+    test('whenBuiltinKindIsUnknown_doesNotReadItAsAFolder', () {
+      expect(
+        readFolders({
+          'folders': [
+            {'builtin': 'future', 'name': 'Future'},
+          ],
+        }),
+        isEmpty,
+      );
+    });
+
     test('whenNotAList_readsNothing', () {
       expect(readFolders(null), isEmpty);
       expect(readFolders({'folders': 'nope'}), isEmpty);
@@ -65,6 +76,29 @@ void main() {
   });
 
   group('writeFolders', () {
+    test('whenAnotherClientAddedThings_keepsThem', () {
+      final current = {
+        'version': 2,
+        'folders': [
+          {'name': 'Work', 'emoji': 'x', 'pinned': true},
+          {'name': 'Gone', 'pinned': true},
+          {'builtin': 'future', 'name': 'Future'},
+        ],
+      };
+
+      final written = writeFolders(const [
+        Folder.user('Work'),
+      ], current: current);
+
+      expect(written, {
+        'version': 2,
+        'folders': [
+          {'name': 'Work', 'pinned': true},
+          {'builtin': 'future', 'name': 'Future'},
+        ],
+      });
+    });
+
     test('always_writesBackWhatItReadsWithoutEmptyParts', () {
       final content = {
         'folders': [

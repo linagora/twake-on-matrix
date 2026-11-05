@@ -43,6 +43,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Adicionar ao espaço",
   "admin": "Admin",
   "@admin": {
     "type": "text",
@@ -275,6 +276,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "A conversa foi adicionada a este espaço",
   "chats": "Conversas",
   "@chats": {
     "type": "text",
@@ -1454,6 +1456,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "allSpaces": "Todos espaços",
   "user": "Utilizador",
   "youAcceptedTheInvitation": "👍 Aceitou o convite",
   "userAndOthersAreTyping": "{username} e mais {count} pessoas estão digitando",
@@ -1519,6 +1522,7 @@
   "youRejectedTheInvitation": "Rejeitou o convite",
   "widgetUrlError": "Isto não é uma URL válida.",
   "documents": "Documentos",
+  "enterSpace": "Entrar no espaço",
   "unavailable": "Indisponível",
   "@unavailable": {
     "type": "text",
@@ -1673,6 +1677,7 @@
     "placeholders": {}
   },
   "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
+  "enterRoom": "Entrar na conversa",
   "download": "Descarregar",
   "@download": {
     "type": "text",
@@ -1739,6 +1744,7 @@
       "senderName": {}
     }
   },
+  "addToSpaceDescription": "Selecione um espaço para adicionar esta conversa.",
   "googlyEyesContent": "{senderName} enviou olhos grilidos",
   "@googlyEyesContent": {
     "type": "text",
@@ -1793,6 +1799,7 @@
   },
   "users": "Utilizadores",
   "newGroup": "Novo grupo",
+  "removeFromSpace": "Remover do espaço",
   "sourceCode": "Código fonte",
   "@sourceCode": {
     "type": "text",

@@ -67,6 +67,9 @@ class _RoomListSliver extends ConsumerWidget {
           foldedSpaceIds: content.foldedSpaceIds,
           joinableBySpace: content.joinableBySpace,
         );
+        final indexByKey = {
+          for (final (index, row) in rows.indexed) row.key: index,
+        };
         if (rows.isEmpty) {
           return SliverFillRemaining(
             hasScrollBody: false,
@@ -97,12 +100,8 @@ class _RoomListSliver extends ConsumerWidget {
               ),
             },
             childCount: rows.length,
-            findChildIndexCallback: (key) {
-              final index = rows.indexWhere(
-                (row) => row.key == (key as ValueKey).value,
-              );
-              return index < 0 ? null : index;
-            },
+            findChildIndexCallback: (key) =>
+                indexByKey[(key as ValueKey).value],
           ),
         );
       },

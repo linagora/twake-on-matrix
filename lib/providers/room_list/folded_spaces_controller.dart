@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/datasource_impl/spaces/folded_spaces_datasource.provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
@@ -25,6 +26,11 @@ class FoldedSpacesController extends _$FoldedSpacesController {
         ? folded.difference({spaceId})
         : {...folded, spaceId};
     state = AsyncData(next);
-    await ref.read(foldedSpacesDatasourceProvider).write(userId, next);
+    try {
+      await ref.read(foldedSpacesDatasourceProvider).write(userId, next);
+    } on Exception catch (exception, stackTrace) {
+      // A fold is only a look: it holds until the next start.
+      Logs().w('FoldedSpacesController::toggle', exception, stackTrace);
+    }
   }
 }

@@ -82,8 +82,6 @@ class ChatListController extends State<ChatList>
   final responsive = getIt.get<ResponsiveUtils>();
   bool _webPushPermissionSoftAskShown = false;
 
-  final ValueNotifier<bool> expandRoomsForAllNotifier = ValueNotifier(true);
-
   final ValueNotifier<bool> sortingRoomsNotifier = ValueNotifier(true);
 
   final ValueNotifier<SelectMode> selectModeNotifier = ValueNotifier(
@@ -825,7 +823,6 @@ class ChatListController extends State<ChatList>
   void dispose() {
     scrollController.removeListener(_onScroll);
     _roomUpdateSubscription?.cancel();
-    expandRoomsForAllNotifier.dispose();
     selectModeNotifier.dispose();
     conversationSelectionNotifier.dispose();
     searchChatController.dispose();

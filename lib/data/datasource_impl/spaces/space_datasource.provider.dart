@@ -5,7 +5,6 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'space_datasource.provider.g.dart';
 
-// TODO: [transitional] Reads the active client until matrixClientProvider exists.
 @riverpod
 SpaceDatasource spaceDatasource(Ref ref) =>
     SpaceDatasourceImpl(ref.watch(activeMatrixClientProvider));

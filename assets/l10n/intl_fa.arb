@@ -32,6 +32,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "بہ اسپیس افزایید",
   "appLock": "قفل برنامہ",
   "@appLock": {
     "type": "text",
@@ -410,6 +411,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "گپ بہ این اسپیس اضافه شده‌است",
   "chat": "گپ",
   "@chat": {
     "type": "text",
@@ -518,6 +520,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "allSpaces": "همہ اسپیس‌ها",
   "commandHint_ban": "کاربر مشخص شده را از این اتاق ممنوعیت کنید",
   "@commandHint_ban": {
     "type": "text",

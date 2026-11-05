@@ -59,7 +59,10 @@ class FoldersDatasourceImpl implements FoldersDatasource {
       await client.setAccountData(
         client.userID!,
         foldersAccountDataType,
-        writeFolders(folders),
+        writeFolders(
+          folders,
+          current: client.accountData[foldersAccountDataType]?.content,
+        ),
       );
     } on Exception catch (exception, stackTrace) {
       Logs().e('FoldersDatasourceImpl::saveFolders', exception, stackTrace);

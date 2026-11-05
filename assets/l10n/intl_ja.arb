@@ -1565,6 +1565,7 @@
   },
   "pleaseEnterValidEmail": "正しいメールアドレスを入力してください。",
   "passwordsDoNotMatch": "パスワードが一致しません!",
+  "addToSpace": "スペースに追加",
   "bubbleSize": "ふきだしの大きさ",
   "@bubbleSize": {
     "type": "text",
@@ -1596,6 +1597,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "このスペースにチャットが追加されました",
   "commandHint_ban": "このユーザーを禁止する",
   "@commandHint_ban": {
     "type": "text",
@@ -1732,7 +1734,9 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpaceDescription": "このチャットを追加するスペースを選択してください。",
   "messageInfo": "メッセージの情報",
+  "removeFromSpace": "スペースから削除",
   "thisUserHasNotPostedAnythingYet": "このユーザーはまだストーリーに何も投稿していません",
   "replyHasBeenSent": "返信が送信されました",
   "storyFrom": "{date}からのストーリー:\n{body}",
@@ -1882,6 +1886,9 @@
       "number": {}
     }
   },
+  "allSpaces": "すべてのスペース",
+  "enterRoom": "部屋に入る",
+  "enterSpace": "スペースに入る",
   "newSpace": "新しいスペース",
   "reopenChat": "チャットを再開する"
 }

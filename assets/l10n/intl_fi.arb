@@ -53,6 +53,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Lisää tilaan",
   "admin": "Ylläpitäjä",
   "@admin": {
     "type": "text",
@@ -300,6 +301,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "Keskustelu on lisätty tähän tilaan",
   "chats": "Keskustelut",
   "@chats": {
     "type": "text",
@@ -1532,6 +1534,8 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeFromSpace": "Poista tilasta",
+  "addToSpaceDescription": "Valitse tila, johon tämä keskustelu lisätään.",
   "start": "Aloita",
   "serverRequiresEmail": "Tämän palvelimen täytyy tarkistaa sähköposti-osoitteesi rekisteröitymistä varten.",
   "sentCallInformations": "{senderName} lähetti puhelutiedot",
@@ -1891,6 +1895,9 @@
   "foregroundServiceRunning": "Tämä ilmoitus näkyy etualapalvelun ollessa käynnissä.",
   "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt FluffyChatin puhelin-tunnukseksi)",
   "newSpace": "Uusi tila",
+  "enterSpace": "Siirry tilaan",
+  "enterRoom": "Siirry huoneeseen",
+  "allSpaces": "Kaikki tilat",
   "screenSharingTitle": "ruudunjako",
   "newGroup": "Uusi ryhmä",
   "screenSharingDetail": "Jaat ruutuasi FluffyChatissä",

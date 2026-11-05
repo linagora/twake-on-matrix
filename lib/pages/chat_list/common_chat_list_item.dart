@@ -34,6 +34,7 @@ class CommonChatListItem extends StatelessWidget {
           onTap: !controller.isSelectMode
               ? null
               : space != null
+              // Not null: a row without onTap opens its room.
               ? () {}
               : () => controller.toggleSelection(room.id),
           // Same as the swipe: nothing the menu offers fits a space.

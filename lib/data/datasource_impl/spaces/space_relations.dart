@@ -36,9 +36,10 @@ extension SpaceRelations on Client {
       ),
   ];
 
-  /// The room is of no use outside its space: it goes if the server refuses it.
-  /// With no answer the listing may have reached the server, and the room stays:
-  /// a space would otherwise list a room nobody can let its members in.
+  /// The room is of no use in a space that refuses it: it goes. Any other
+  /// failure leaves the room, which names its space, and the flow goes on: the
+  /// listing may have reached the server, and a space would then list a room
+  /// nobody can let its members in.
   ///
   /// Throws a [SpaceForbiddenException] when the space refuses it.
   Future<void> listRoomInSpace(
@@ -52,12 +53,13 @@ extension SpaceRelations on Client {
         'via': viaForRoom(roomId),
         if (isSuggested) 'suggested': true,
       });
-    } on MatrixException catch (exception) {
-      await _removeRoom(roomId);
-      if (exception.error == MatrixError.M_FORBIDDEN) {
+    } on Exception catch (exception, stackTrace) {
+      if (exception is MatrixException &&
+          exception.error == MatrixError.M_FORBIDDEN) {
+        await _removeRoom(roomId);
         throw const SpaceForbiddenException();
       }
-      rethrow;
+      Logs().w('SpaceRelations::listRoomInSpace', exception, stackTrace);
     }
   }
 

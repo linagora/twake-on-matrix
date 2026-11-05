@@ -51,6 +51,30 @@ void main() {
       ).called(1);
     });
 
+    test('whenAnotherClientWroteMore_keepsIt', () async {
+      when(client.accountData).thenReturn({
+        foldersAccountDataType: BasicEvent(
+          type: foldersAccountDataType,
+          content: {
+            'folders': [
+              {'builtin': 'future'},
+            ],
+          },
+        ),
+      });
+
+      await datasource.saveFolders(const [Folder.user('Work')]);
+
+      verify(
+        client.setAccountData('@me:own.org', foldersAccountDataType, {
+          'folders': [
+            {'name': 'Work'},
+            {'builtin': 'future'},
+          ],
+        }),
+      ).called(1);
+    });
+
     test('whenATagFails_doesNotSaveTheFolders', () async {
       final room = MockRoom();
       when(client.getRoomById('!c')).thenReturn(room);

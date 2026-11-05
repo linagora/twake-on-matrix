@@ -522,6 +522,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Cuir go spás",
   "addEmail": "Cuir ríomhphost leis",
   "@addEmail": {
     "type": "text",
@@ -706,6 +707,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "Cuireadh comhrá leis an spás seo",
   "chatBackupDescription": "Tá do chúltaca comhrá daingnithe le heochair slándála. Déan cinnte nach gcaillfidh tú é.",
   "@chatBackupDescription": {
     "type": "text",
@@ -1794,6 +1796,7 @@
   "failedToSendFiles": "Theip ar chomhaid a sheoladh",
   "continueProcess": "Lean ar aghaidh",
   "useYourCompanyServer": "Bain úsáid as do fhreastalaí cuideachta",
+  "allSpaces": "Gach spás",
   "markAsRead": "Marcáil mar léite",
   "expand": "Leathnaigh",
   "widgetJitsi": "Jitsi Buail le chéile",
@@ -2015,6 +2018,7 @@
   "messageInfo": "Eolas faoin teachtaireacht",
   "messageType": "Cineál Teachtaireachta",
   "time": "Am",
+  "addToSpaceDescription": "Roghnaigh spás chun an comhrá seo a chur leis.",
   "whoCanSeeMyStories": "Cé atá in ann mo chuid scéalta a fheiceáil?",
   "whatIsGoingOn": "Céard atá ag dul ar aghaidh?",
   "openChat": "Oscail Comhrá",
@@ -2023,6 +2027,7 @@
   "indexedDbErrorLong": "Ar an drochuair, níl stóráil na dteachtaireachtaí cumasaithe i mód príobháideach de réir réamhshocraithe.\nTabhair cuairt, le do thoil,\n - faoi:config\n - socraigh dom.indexedDB.privateBrowsing.enabled go fíor\nSeachas sin, ní féidir FluffyChat a reáchtáil.",
   "widgetNameError": "Tabhair ainm taispeána, le do thoil.",
   "errorAddingWidget": "Earráid agus an ghiuirléid á cur leis.",
+  "enterSpace": "Iontráil spás",
   "numChats": "Comhráite {number}",
   "@numChats": {
     "type": "number",
@@ -2146,11 +2151,13 @@
     "type": "text",
     "placeholders": {}
   },
+  "removeFromSpace": "Bain ón spás",
   "start": "Tosaigh",
   "publish": "Foilsigh",
   "replyHasBeenSent": "Seoladh freagra",
   "stories": "Scéalta",
   "custom": "Saincheaptha",
+  "enterRoom": "Iontráil seomra",
   "doNotShowAgain": "Ná taispeáin arís",
   "onlineStatus": "ar líne",
   "startNewChatMessage": "Is deas comhrá a bheith agat le do chairde agus comhoibriú le d'fhoirne.\nTosaímis comhrá, cruthaímis comhrá grúpa, nó glac páirt i gceann atá ann cheana féin.",

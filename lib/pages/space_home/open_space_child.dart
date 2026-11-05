@@ -27,9 +27,10 @@ Future<void> openSpaceChild(
   final keepsThePage = ResponsiveUtils().isSingleColumnLayout(context);
   if (!child.isJoined) {
     try {
-      await ref
+      final hasJoined = await ref
           .read(spaceJoinControllerProvider.notifier)
           .join(parentSpaceId, child);
+      if (!hasJoined) return;
     } on SpaceJoinFailedException {
       if (context.mounted) TwakeSnackBar.show(context, failed);
       return;

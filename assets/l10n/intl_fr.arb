@@ -35,6 +35,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Ajouter à l'espace",
   "admin": "Administrateur",
   "@admin": {
     "type": "text",
@@ -316,6 +317,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "La discussion a été ajoutée à cet espace",
   "chats": "Discussions",
   "@chats": {
     "type": "text",
@@ -1732,6 +1734,8 @@
   "time": "Heure",
   "sender": "Expéditeur/trice",
   "messageInfo": "Informations sur le message",
+  "removeFromSpace": "Supprimer de l’espace",
+  "addToSpaceDescription": "Sélectionnez un espace pour y ajouter cette discussion.",
   "loginWithOneClick": "Se connecter en un clic",
   "start": "Commencer",
   "commandHint_create": "Créer un salon de discussion vide\nUtilisez --no-encryption pour désactiver le chiffrement",
@@ -1880,6 +1884,8 @@
   "updateAvailable": "Mise à jour de Twake Chat disponible",
   "updateNow": "Lancer la mise à jour en arrière-plan",
   "noKeyForThisMessage": "Cela peut se produire si le message a été envoyé avant que vous ne vous soyez connecté à votre compte sur cet appareil.\n\nIl est également possible que l'expéditeur ait bloqué votre appareil ou qu'un problème de connexion Internet se soit produit.\n\nÊtes-vous capable de lire le message dans une autre session ? Vous pouvez alors transférer le message à partir de celle-ci ! Allez dans Réglages > Appareils et assurez-vous que vos appareils ont été vérifiés mutuellement. Lorsque vous ouvrirez le salon la fois suivante et que les deux sessions seront au premier plan, les clés seront transmises automatiquement.\n\nVous ne voulez pas perdre les clés en vous déconnectant ou en changeant d'appareil ? Assurez-vous que vous avez activé la sauvegarde des discussions dans les Réglages.",
+  "enterRoom": "Entrer dans le salon",
+  "allSpaces": "Tous les espaces",
   "commandHint_markasdm": "Marquer comme salon de messagerie directe",
   "commandHint_markasgroup": "Marquer comme salon",
   "whyIsThisMessageEncrypted": "Pourquoi ce message est-il illisible ?",
@@ -1889,6 +1895,7 @@
   "appearOnTopDetails": "Permet à l'application d'apparaître en haut de l'écran (non nécessaire si vous avez déjà configuré Fluffychat comme compte d'appel)",
   "newGroup": "Nouveau groupe",
   "newSpace": "Nouvel espace",
+  "enterSpace": "Entrer dans l’espace",
   "numChats": "{number} discussions",
   "@numChats": {
     "type": "number",
@@ -2724,95 +2731,5 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
-  },
-  "roomListBroadcasts": "Diffusion",
-  "roomListDirects": "Direct",
-  "roomListSpaces": "Espaces",
-  "roomListFavourites": "Favoris",
-  "roomListEmptyView": "Rien ici.",
-  "roomListFilters": "Afficher",
-  "hideRoomsOf": "Masquer les salons de {name}",
-  "@hideRoomsOf": {
-    "type": "text",
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "showRoomsOf": "Afficher les salons de {name}",
-  "@showRoomsOf": {
-    "type": "text",
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "addSubspaceTo": "Ajouter un sous-espace à {name}",
-  "@addSubspaceTo": {
-    "type": "text",
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "joinWithMembers": "{count, plural, =0{Rejoindre · 0 membre} =1{Rejoindre · 1 membre} other{Rejoindre · {count} membres}}",
-  "@joinWithMembers": {
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "folderEdit": "Modifier le dossier",
-  "folderDelete": "Supprimer le dossier",
-  "folderDeleteTitle": "Supprimer ce dossier ?",
-  "folderDeleteText": "Les discussions qu’il contient restent en place.",
-  "folderDeleted": "Dossier supprimé",
-  "folderSaveFailed": "Le dossier n’a pas pu être enregistré. Réessayez.",
-  "spacePublic": "Espace public",
-  "spacePrivate": "Espace privé",
-  "spaceInvitePeople": "Inviter des personnes",
-  "spaceChannels": "Canaux de l’espace",
-  "spaceMemberCount": "{count, plural, =0{0 membre} =1{1 membre} other{{count} membres}}",
-  "@spaceMemberCount": {
-    "type": "text",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "spaceShowInfo": "Afficher les infos",
-  "createInTheSpace": "Dans l’espace",
-  "createNameRequired": "Donnez-lui un nom.",
-  "createFailed": "La création a échoué.",
-  "createForbidden": "Vous n’avez pas le droit de faire cela ici.",
-  "roomListUnread": "Non lus",
-  "spaceNewGroup": "Nouveau groupe",
-  "spaceInfoTitle": "Infos de l’espace",
-  "spaceLeave": "Quitter l’espace",
-  "spaceLeaveSubtitle": "L’espace et ses salons continueront d’exister après votre départ",
-  "spaceMentioned": "Vous avez été mentionné·e",
-  "foldersTitle": "Dossiers",
-  "foldersIntro": "Créez des dossiers pour différents groupes de discussions et passez de l’un à l’autre rapidement.",
-  "foldersRecommended": "Recommandés",
-  "folderNew": "Nouveau dossier",
-  "folderName": "Nom du dossier",
-  "folderTaken": "Un dossier porte déjà ce nom",
-  "folderEmoji": "Choisir un emoji",
-  "folderColor": "Couleur du dossier",
-  "folderNoColor": "Aucune couleur",
-  "folderIncluded": "Discussions incluses",
-  "folderIncludedHelp": "Les discussions de ces types y entrent d’elles-mêmes, les nouvelles aussi.",
-  "folderTypeDirect": "Messages directs",
-  "folderTypeGroup": "Groupes",
-  "folderTypeBroadcast": "Canaux",
-  "folderTypeBot": "Bots",
-  "folderRuleUnread": "Les discussions avec des messages non lus",
-  "folderRuleBroadcasts": "Les diffusions et les canaux où seuls les modérateurs publient",
-  "folderRuleDirects": "Les discussions avec une personne",
-  "folderRuleSpaces": "Les espaces et leurs discussions",
-  "folderRuleFavourites": "Les discussions marquées comme favorites",
-  "spaceJoinFailed": "Impossible de rejoindre.",
-  "spaceChannelsFailed": "Impossible de lire les canaux.",
-  "spaceChannelsRetry": "Réessayer",
-  "enterSpaceName": "Entrez le nom de l’espace"
+  }
 }

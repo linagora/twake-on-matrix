@@ -9,7 +9,8 @@ class FoldedSpacesDatasourceImpl implements FoldedSpacesDatasource {
   @override
   Future<Set<String>> read(String userId) async {
     final prefs = await SharedPreferences.getInstance();
-    return {...?prefs.getStringList(_key(userId))};
+    final stored = prefs.get(_key(userId));
+    return stored is List ? stored.whereType<String>().toSet() : const {};
   }
 
   @override

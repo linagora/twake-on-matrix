@@ -29,6 +29,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Dodajte v prostor",
   "alias": "vzdevek",
   "@alias": {
     "type": "text",
@@ -248,6 +249,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "Klepet je bil dodan v ta prostor",
   "chats": "Klepeti",
   "@chats": {
     "type": "text",

@@ -29,7 +29,7 @@ class NewGroupDatasourceImpl implements NewGroupDatasource {
         );
       }
       return roomId;
-    } catch (exception, stackTrace) {
+    } on Exception catch (exception, stackTrace) {
       Logs().e('NewGroupDatasourceImpl::createGroup', exception, stackTrace);
       rethrow;
     }

@@ -5,7 +5,6 @@ import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 
 part 'folders_datasource.provider.g.dart';
 
-// TODO: [transitional] Reads the active client until matrixClientProvider exists.
 @riverpod
 FoldersDatasource foldersDatasource(Ref ref) =>
     FoldersDatasourceImpl(ref.watch(activeMatrixClientProvider));

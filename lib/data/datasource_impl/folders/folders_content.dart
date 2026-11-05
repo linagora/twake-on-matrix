@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
 
 /// The account data every Twake client shares its folders in.
@@ -6,13 +8,19 @@ const String foldersAccountDataType = 'app.twake.chat.folders';
 /// The folders of the account data, whatever a client wrote there.
 List<Folder> readFolders(Map<String, Object?>? content) {
   final list = content?['folders'];
-  if (list is! List) return const [];
+  if (list is! List) {
+    if (list != null) Logs().w('readFolders: malformed folders');
+    return const [];
+  }
   // A built-in is known by its kind, a folder by its name: « spaces » is
   // both a kind and a name a folder may have.
   final kinds = <BuiltinFolder>{};
   final names = <String>{};
   final folders = <Folder>[];
-  for (final item in list.whereType<Map>()) {
+  final items = list.whereType<Map>().toList();
+  if (items.length != list.length) Logs().w('readFolders: malformed folder');
+  for (final item in items) {
+    if (_isUnknownBuiltin(item)) continue;
     final name = item['name'];
     final emoji = item['emoji'];
     final safeEmoji = emoji is String && emoji.isNotEmpty ? emoji : null;
@@ -52,10 +60,55 @@ List<Folder> readFolders(Map<String, Object?>? content) {
   return folders;
 }
 
-/// The content written back, without the empty parts.
-Map<String, Object?> writeFolders(List<Folder> folders) => {
-  'folders': folders.map(_writeFolder).toList(),
+/// A built-in of a newer client: this one has no rule for it.
+bool _isUnknownBuiltin(Map item) {
+  final kind = item['builtin'];
+  return kind != null && !BuiltinFolder.values.asNameMap().containsKey(kind);
+}
+
+const Set<String> _folderKeys = {
+  'builtin',
+  'name',
+  'emoji',
+  'color',
+  'hidden',
+  'include',
+  'exclude',
 };
+
+/// The content written back, without the empty parts. What another client
+/// keeps in [current] and this one does not know stays; the built-ins this one
+/// has no rule for move to the end.
+Map<String, Object?> writeFolders(
+  List<Folder> folders, {
+  Map<String, Object?>? current,
+}) {
+  final stored = current?['folders'];
+  final items = stored is List
+      ? stored.whereType<Map>().toList()
+      : const <Map>[];
+  return {
+    ...?current,
+    'folders': [
+      for (final folder in folders.map(_writeFolder))
+        {..._unknownFieldsOf(items, folder), ...folder},
+      ...items.where(_isUnknownBuiltin),
+    ],
+  };
+}
+
+Map<Object?, Object?> _unknownFieldsOf(
+  List<Map> items,
+  Map<String, Object?> folder,
+) {
+  final builtin = folder['builtin'];
+  final item = items.firstWhereOrNull(
+    (item) => builtin != null
+        ? item['builtin'] == builtin
+        : item['builtin'] == null && item['name'] == folder['name'],
+  );
+  return {...?item}..removeWhere((key, _) => _folderKeys.contains(key));
+}
 
 Map<String, Object?> _writeFolder(Folder folder) => switch (folder) {
   BuiltinFolderEntry(:final kind, hidden: true) => {

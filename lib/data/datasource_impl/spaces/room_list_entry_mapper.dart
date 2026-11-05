@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
@@ -7,9 +8,9 @@ const String folderTagPrefix = 'u.';
 
 final RegExp _botId = RegExp(r'^@(bot_|hermes_)');
 
-/// A room's spaces: every joined space listing it, then the joined spaces it
-/// names with the right to, so a new room shows under its space before the
-/// space lists it.
+/// A room's spaces: the one it calls canonical when the room counts there, then
+/// every joined space listing it, then the joined spaces it names with the right
+/// to, so a new room shows under its space before the space lists it.
 List<RoomListEntry> roomListEntriesOf(
   List<Room> rooms, {
   required Map<String, List<String>> directChats,
@@ -27,15 +28,25 @@ List<RoomListEntry> roomListEntriesOf(
         room,
         directId: _directIdOf(room, directByRoom),
         childIds: childIdsOf[room.id] ?? const [],
-        parentSpaceIds: {
+        parentSpaceIds: _canonicalFirst(room, {
           ...?listedBy[room.id],
           ..._parentsNamedBy(room, joinedSpaces),
-        }.toList(),
+        }),
       ),
   ];
 }
 
 bool _isJoined(Room room) => room.membership == Membership.join;
+
+List<String> _canonicalFirst(Room room, Set<String> parentIds) {
+  final canonical = room.spaceParents
+      .firstWhereOrNull((parent) => parent.canonical == true)
+      ?.roomId;
+  return [
+    if (parentIds.contains(canonical)) ?canonical,
+    ...parentIds.where((id) => id != canonical),
+  ];
+}
 
 List<String> _childIdsOf(Room space) => space.spaceChildren
     .map((child) => child.roomId)

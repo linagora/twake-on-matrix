@@ -682,6 +682,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Adjunter al spacie",
   "askVerificationRequest": "Esque acceptar ti demanda de verification de {username}?",
   "@askVerificationRequest": {
     "type": "text",
@@ -909,6 +910,9 @@
   },
   "newGroup": "Crear un gruppe",
   "newSpace": "Crear un spacie",
+  "enterSpace": "Intrar li spacie",
+  "enterRoom": "Intrar li chambre",
+  "allSpaces": "Omni spacies",
   "numChats": "{number} conversationes",
   "@numChats": {
     "type": "number",

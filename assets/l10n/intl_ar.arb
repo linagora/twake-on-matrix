@@ -1412,6 +1412,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "أُضيفت المحادثة الى هذا الفضاء",
   "chatBackup": "انسخ احتياطيًا المحادثة",
   "@chatBackup": {
     "type": "text",
@@ -1469,6 +1470,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "أضفه لفضاء",
   "addEmail": "أضف بريدًا إلكترونيًا",
   "@addEmail": {
     "type": "text",
@@ -1693,6 +1695,7 @@
       "min": {}
     }
   },
+  "removeFromSpace": "أزل من الفضاء",
   "unverified": "غير مؤكد",
   "messageInfo": "معلومات الرسالة",
   "messageType": "نوع الرسالة",
@@ -1804,6 +1807,7 @@
   "publish": "انشر",
   "whoCanSeeMyStories": "من يمكنه رؤية قصصي؟",
   "unsubscribeStories": "إلغاء الإشتراك بالقصص",
+  "addToSpaceDescription": "إختر فضاء لإضافة هذه المحادثة إليه.",
   "addToStory": "إضافة للقصة",
   "openChat": "فتح المحادثة",
   "confirmEventUnpin": "هل أنت متأكد من إلغاء تثبيت الحدث بشكل دائم؟"

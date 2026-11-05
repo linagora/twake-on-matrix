@@ -931,6 +931,7 @@
     "placeholders": {}
   },
   "messageInfo": "Žinutės informacija",
+  "removeFromSpace": "Pašalinti iš erdvės",
   "security": "Apsauga",
   "@security": {
     "type": "text",
@@ -1021,12 +1022,14 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpaceDescription": "Pasirinkite erdvę, kad prie jos pridėtumėte šį pokalbį.",
   "start": "Pradžia",
   "account": "Paskyra",
   "@account": {
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Pridėti į erdvę",
   "appLock": "Programos užraktas",
   "@appLock": {
     "type": "text",
@@ -1047,6 +1050,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "Pokalbis buvo pridėtas prie šios erdvės",
   "compareNumbersMatch": "Palyginkite skaičius",
   "@compareNumbersMatch": {
     "type": "text",
@@ -1870,6 +1874,9 @@
   "commandHint_markasgroup": "Pažymėti kaip grupę",
   "storeInAppleKeyChain": "Saugoti Apple raktų grandinėje",
   "newSpace": "Nauja erdvė",
+  "enterSpace": "Įeiti į erdvę",
+  "enterRoom": "Įeiti į kambarį",
+  "allSpaces": "Visos erdvės",
   "user": "Vartotojas",
   "custom": "Pasirinktinis",
   "dehydrate": "Eksportuoti sesiją ir išvalyti įrenginį",

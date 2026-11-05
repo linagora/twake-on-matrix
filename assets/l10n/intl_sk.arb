@@ -1193,6 +1193,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Pridať do priestoru",
   "cantOpenUri": "Nemožno otvoriť identifikátor prostriedku {uri}",
   "@cantOpenUri": {
     "type": "text",

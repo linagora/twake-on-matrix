@@ -54,11 +54,16 @@ List<SpaceSummary> addableSpaces(Ref ref) {
 /// Joins what a space holds.
 @riverpod
 class SpaceJoinController extends _$SpaceJoinController {
+  final Set<String> _joining = {};
+
   @override
   void build() {}
 
+  /// False when the same join is already running: a second tap does nothing.
+  ///
   /// Throws a `SpaceJoinFailedException`.
-  Future<void> join(String parentSpaceId, SpaceChannel child) async {
+  Future<bool> join(String parentSpaceId, SpaceChannel child) async {
+    if (!_joining.add(child.roomId)) return false;
     // Nobody listens to this provider: it must outlive the join.
     final link = ref.keepAlive();
     try {
@@ -66,7 +71,9 @@ class SpaceJoinController extends _$SpaceJoinController {
           .read(joinSpaceChildUseCaseProvider)
           .execute(child.roomId, via: child.via);
       ref.invalidate(spaceChildrenProvider(parentSpaceId));
+      return true;
     } finally {
+      _joining.remove(child.roomId);
       link.close();
     }
   }
@@ -92,13 +99,21 @@ RoomListContent roomListContent(Ref ref, String? activeRoomId) {
     activeRoomId: activeRoomId,
     folders: ref.watch(roomListFoldersProvider),
   );
+  // Membership as of now: the hierarchy is read again only when a space lists
+  // something else, not when the user leaves or joins what it holds.
+  final joinedIds = {
+    for (final entry in entries)
+      if (entry.isJoined) entry.id,
+  };
   // Watched in every view: a chip and back must not read every space again.
   final joinableBySpace = {
     for (final entry in entries)
       if (entry.isSpace && entry.isJoined)
-        entry.id: joinableSubspaces(
-          ref.watch(spaceChildrenProvider(entry.id)).value ?? const [],
-        ),
+        entry.id: joinableSubspaces([
+          for (final child
+              in ref.watch(spaceChildrenProvider(entry.id)).value ?? const [])
+            child.copyWith(isJoined: joinedIds.contains(child.roomId)),
+        ]),
   };
   return RoomListContent(
     visible: visible,

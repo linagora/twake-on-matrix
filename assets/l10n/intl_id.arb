@@ -614,6 +614,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Tambahkan ke ruang",
   "addEmail": "Tambahkan email",
   "@addEmail": {
     "type": "text",
@@ -1633,6 +1634,7 @@
     "type": "text",
     "description": "Usage hint for the command /ban"
   },
+  "chatHasBeenAddedToThisSpace": "Obrolan telah ditambahkan ke ruang ini",
   "changeTheme": "Ubah gaya Anda",
   "@changeTheme": {
     "type": "text",
@@ -1746,8 +1748,10 @@
   "time": "Waktu",
   "messageType": "Jenis pesan",
   "sender": "Pengirim",
+  "addToSpaceDescription": "Pilih ruang untuk menambahkan obrolan ini ke dalamnya.",
   "start": "Mulai",
   "loginWithOneClick": "Masuk dengan satu klik",
+  "removeFromSpace": "Hapus dari ruang",
   "commandHint_clearcache": "Hapus cache",
   "@commandHint_clearcache": {
     "type": "text",
@@ -1901,6 +1905,9 @@
   "whyIsThisMessageEncrypted": "Mengapa pesan ini tidak dapat dibaca?",
   "newGroup": "Obrolan baru",
   "newSpace": "Ruang baru",
+  "enterSpace": "Masuk ke ruang",
+  "enterRoom": "Masuk ke room",
+  "allSpaces": "Semua ruang",
   "screenSharingDetail": "Anda sedang membagikan layar Anda di FuffyChat",
   "numChats": "{number} obrolan",
   "@numChats": {

@@ -1737,6 +1737,7 @@
   "storyPrivacyWarning": "Por favor, note que pessoas podem ver e contactar umas às outras no seu painel. Ele ficará visível por apenas 24 horas, mas não há garantias de que será apagado por todos dispositivos e servidores.",
   "iUnderstand": "Eu compreendo",
   "replyHasBeenSent": "Resposta enviada",
+  "removeFromSpace": "Remover do espaço",
   "loginWithOneClick": "Entrar com um clique",
   "storyFrom": "Painel de {date}:\n{body}",
   "@storyFrom": {
@@ -1761,7 +1762,9 @@
       "min": {}
     }
   },
+  "addToSpace": "Adicionar ao espaço",
   "homeserver": "Servidor matriz",
+  "chatHasBeenAddedToThisSpace": "A conversa foi adicionada a este espaço",
   "commandHint_clearcache": "Limpar dados temporários",
   "@commandHint_clearcache": {
     "type": "text",
@@ -1788,6 +1791,7 @@
   "bundleName": "Nome da coleção",
   "time": "Hora",
   "messageType": "Tipo da mensagem",
+  "addToSpaceDescription": "Selecione um espaço para adicionar esta conversa.",
   "addToStory": "Adicionar ao painel",
   "whoCanSeeMyStories": "Quem pode ver meu painel?",
   "unsubscribeStories": "Desinscrever de painéis",
@@ -1916,6 +1920,9 @@
   "appearOnTopDetails": "Permitir que o app apareça no topo (desnecessário caso FluffyChat já esteja configurado como conta para chamadas)",
   "newGroup": "Novo grupo",
   "newSpace": "Novo espaço",
+  "enterSpace": "Entrar no espaço",
+  "enterRoom": "Entrar na conversa",
+  "allSpaces": "Todos espaços",
   "hideUnimportantStateEvents": "Ocultar eventos desimportantes",
   "doNotShowAgain": "Não mostrar novamente",
   "updateAvailable": "Atualização do FluffyChat disponível",

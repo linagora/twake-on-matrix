@@ -152,6 +152,24 @@ void _spaceChildrenTests() {
 
 void _spaceJoinControllerTests() {
   group('SpaceJoinController', () {
+    test('join_whileTheSameJoinRuns_startsNoSecondOne', () async {
+      final container = _newContainer();
+      final pending = Completer<void>();
+      when(
+        _repository.joinRoom(any, via: anyNamed('via')),
+      ).thenAnswer((_) => pending.future);
+      final controller = container.read(spaceJoinControllerProvider.notifier);
+      const child = SpaceChannel(roomId: '!a', name: 'A');
+
+      final first = controller.join('!s', child);
+      final second = await controller.join('!s', child);
+      pending.complete();
+
+      expect(second, isFalse);
+      expect(await first, isTrue);
+      verify(_repository.joinRoom('!a', via: const [])).called(1);
+    });
+
     test('join_always_joinsThroughItsViaAndReadsTheSpaceAgain', () async {
       final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
@@ -198,6 +216,53 @@ void _roomListContentTests() {
 
       expect(content.visible, const [_space]);
       expect(content.joinableBySpace['!s']!.single.roomId, '!sub');
+    });
+
+    test('whenASubSpaceIsLeftAfterTheRead_offersItAgain', () async {
+      when(_repository.getSpaceChildren('!s')).thenAnswer(
+        (_) async => const [
+          SpaceChannel(
+            roomId: '!sub',
+            name: 'Sub',
+            isSpace: true,
+            isJoinable: true,
+            isJoined: true,
+          ),
+        ],
+      );
+      final container = _newContainer();
+      container.listen(roomListContentProvider(null), (_, _) {});
+      await pumpEventQueue();
+
+      final content = container.read(roomListContentProvider(null));
+
+      expect(content.joinableBySpace['!s']!.single.roomId, '!sub');
+    });
+
+    test('whenASubSpaceIsJoinedAfterTheRead_stopsOfferingIt', () async {
+      when(_repository.getRoomListEntries()).thenReturn(const [
+        _space,
+        RoomListEntry(id: '!sub', kind: RoomKind.space),
+      ]);
+      when(_repository.getSpaceChildren(any)).thenAnswer((invocation) async {
+        return invocation.positionalArguments.first == '!s'
+            ? const [
+                SpaceChannel(
+                  roomId: '!sub',
+                  name: 'Sub',
+                  isSpace: true,
+                  isJoinable: true,
+                ),
+              ]
+            : const [];
+      });
+      final container = _newContainer();
+      container.listen(roomListContentProvider(null), (_, _) {});
+      await pumpEventQueue();
+
+      final content = container.read(roomListContentProvider(null));
+
+      expect(content.joinableBySpace['!s'], isEmpty);
     });
 
     test('whenSpaceIsOnlyInvited_readsNoHierarchy', () async {

@@ -1601,6 +1601,7 @@
     "type": "text",
     "description": "Usage hint for the command /myroomnick"
   },
+  "addToSpace": "加入空間",
   "cantOpenUri": "無法打開URI {uri}",
   "@cantOpenUri": {
     "type": "text",
@@ -1644,5 +1645,6 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "聊天室已添加到此空間",
   "clearArchive": "清除存檔"
 }

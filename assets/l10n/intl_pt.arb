@@ -154,6 +154,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Adicionar ao espaço",
   "commandHint_googly": "Enviar olhos grilidos",
   "commandHint_markasdm": "Marcar como conversa direta",
   "commandHint_ban": "Banir o utilizador dado desta sala",
@@ -244,9 +245,14 @@
     }
   },
   "sender": "Remetente",
+  "removeFromSpace": "Remover do espaço",
+  "addToSpaceDescription": "Selecione um espaço para adicionar esta conversa.",
   "matrixWidgets": "Ferramentas Matrix",
   "widgetCustom": "Personalizado",
   "widgetUrlError": "Isto não é uma URL válida.",
+  "enterSpace": "Entrar no espaço",
+  "enterRoom": "Entrar na conversa",
+  "allSpaces": "Todos espaços",
   "copy": "Copiar",
   "@copy": {
     "type": "text",
@@ -827,6 +833,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "A conversa foi adicionada a este espaço",
   "clearArchive": "Limpar arquivo",
   "commandHint_create": "Criar uma conversa de grupo vazia\nUsa --no-encryption para desativar a encriptação",
   "@commandHint_create": {

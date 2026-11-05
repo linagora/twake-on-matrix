@@ -230,29 +230,30 @@ void main() {
         client.setRoomStateWithKey(any, any, any, any),
       ).thenThrow(TimeoutException('no answer'));
 
-      await expectLater(
-        datasource.createSpace(
-          const NewSpace(name: 'Sub', parentSpaceId: '!space:other.org'),
-        ),
-        throwsA(isA<SpaceCreationFailedException>()),
+      final roomId = await datasource.createSpace(
+        const NewSpace(name: 'Sub', parentSpaceId: '!space:other.org'),
       );
+
+      expect(roomId, newRoomId);
       verifyNever(client.leaveRoom(newRoomId));
       verifyNever(client.forgetRoom(newRoomId));
     });
 
-    test('whenTheServerAnswersAnotherError_removesTheRoom', () async {
+    test('whenTheServerAnswersAnotherError_keepsTheRoom', () async {
       when(client.setRoomStateWithKey(any, any, any, any)).thenThrow(
-        MatrixException.fromJson({'errcode': 'M_UNKNOWN', 'error': 'down'}),
+        MatrixException.fromJson({
+          'errcode': 'M_LIMIT_EXCEEDED',
+          'error': 'slow down',
+        }),
       );
 
-      await expectLater(
-        datasource.createSpace(
-          const NewSpace(name: 'Sub', parentSpaceId: '!space:other.org'),
-        ),
-        throwsA(isA<SpaceCreationFailedException>()),
+      final roomId = await datasource.createSpace(
+        const NewSpace(name: 'Sub', parentSpaceId: '!space:other.org'),
       );
-      verify(client.leaveRoom(newRoomId)).called(1);
-      verify(client.forgetRoom(newRoomId)).called(1);
+
+      expect(roomId, newRoomId);
+      verifyNever(client.leaveRoom(newRoomId));
+      verifyNever(client.forgetRoom(newRoomId));
     });
 
     test('whenAnythingElseFails_throwsTyped', () async {

@@ -1721,6 +1721,8 @@
     "type": "text",
     "placeholders": {}
   },
+  "chatHasBeenAddedToThisSpace": "O chat foi engadido a este espazo",
+  "addToSpace": "Engadir ao espazo",
   "scanQrCode": "Escanear código QR",
   "homeserver": "Servidor de inicio",
   "serverRequiresEmail": "O servidor precisa validar o teu enderezo de email para rexistrarte.",
@@ -1742,8 +1744,10 @@
   "messageInfo": "Info da mensaxe",
   "time": "Hora",
   "sender": "Remitente",
+  "addToSpaceDescription": "Elixe un espazo ao que engadir este chat.",
   "loginWithOneClick": "Conéctate cun click",
   "messageType": "Tipo de mensaxe",
+  "removeFromSpace": "Retirar do espazo",
   "start": "Comezar",
   "commandHint_discardsession": "Descartar sesión",
   "@commandHint_discardsession": {
@@ -1902,6 +1906,9 @@
   "foregroundServiceRunning": "Esta notificación aparece cando se está a executar o servizo en segundo plano.",
   "screenSharingTitle": "compartición da pantalla",
   "appearOnTopDetails": "Permítelle á app aparecer por enrriba (non é preciso se xa configuraches FluffyChat como unha conta para chamadas)",
+  "enterSpace": "Entrar no espazo",
+  "enterRoom": "Entrar na sala",
+  "allSpaces": "Tódolos espazos",
   "screenSharingDetail": "Estás compartindo a túa pantalla en FluffyChat",
   "numChats": "{number} chats",
   "@numChats": {

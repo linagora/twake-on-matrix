@@ -1519,6 +1519,7 @@
     "placeholders": {}
   },
   "yourChatBackupHasBeenSetUp": "Twoja kopia zapasowa chatu została ustawiona.",
+  "chatHasBeenAddedToThisSpace": "Chat został dodany do tej przestrzeni",
   "contentHasBeenReported": "Zawartość została zgłoszona administratorom serwera",
   "@contentHasBeenReported": {
     "type": "text",
@@ -1594,6 +1595,7 @@
     "type": "text",
     "placeholders": {}
   },
+  "addToSpace": "Dodaj do przestrzeni",
   "changeYourAvatar": "Zmień avatar",
   "@changeYourAvatar": {
     "type": "text",

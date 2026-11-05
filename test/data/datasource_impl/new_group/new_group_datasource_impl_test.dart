@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
@@ -152,6 +154,15 @@ void main() {
       );
       verify(mockClient.leaveRoom(roomId)).called(1);
       verify(mockClient.forgetRoom(roomId)).called(1);
+    });
+
+    test('createGroup_whenListingGetsNoAnswer_returnsTheRoom', () async {
+      when(
+        mockClient.setRoomStateWithKey(any, any, any, any),
+      ).thenThrow(TimeoutException('no answer'));
+
+      expect(await datasource.createGroup(request), roomId);
+      verifyNever(mockClient.leaveRoom(roomId));
     });
 
     test('createGroup_whenUserMayNotAdd_createsNothing', () async {
