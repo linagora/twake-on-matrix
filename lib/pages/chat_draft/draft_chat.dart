@@ -399,9 +399,19 @@ class DraftChatController extends ConsumerState<DraftChat>
           .execute(contactMxId: intendedMxId);
     } on CreateDirectChatException catch (e) {
       failure = e;
+    } catch (e, s) {
+      // Not a typed failure (an Error or a missing client): the screen must not
+      // stay blocked, and the cause is reported instead of hidden.
+      Logs().e('_createRoom: unexpected ${e.runtimeType}', e, s);
+      failure = CreateDirectChatFailedException(e);
     }
     if (!mounted || requestId != _createRoomRequestId) return;
 
+    if (!identical(ref.read(activeMatrixClientProvider), client)) {
+      // The account changed during the request: its room is not ours to open.
+      isSendingNotifier.value = false;
+      return;
+    }
     if (failure is CreateDirectChatRoomMismatchException) {
       isSendingNotifier.value = false;
       TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
