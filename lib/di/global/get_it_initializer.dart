@@ -97,7 +97,6 @@ import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interacto
 import 'package:twake_chat/domain/usecase/room/ban_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/block_user_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/chat_get_pinned_events_interactor.dart';
-import 'package:twake_chat/domain/usecase/room/chat_room_search_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/create_support_chat_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/delete_event_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.dart';
@@ -368,9 +367,6 @@ class GetItInitializer {
     );
     getIt.registerSingleton<SearchRecentChatInteractor>(
       SearchRecentChatInteractor(),
-    );
-    getIt.registerSingleton<ChatRoomSearchInteractor>(
-      ChatRoomSearchInteractor(),
     );
     getIt.registerSingleton<TimelineSearchEventInteractor>(
       TimelineSearchEventInteractor(),
