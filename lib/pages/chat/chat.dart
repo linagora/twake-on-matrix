@@ -1018,6 +1018,7 @@ class ChatController extends ConsumerState<Chat>
     }
     final text = selectedEvents.copyableTextEvents
         .map((event) => event.getSelectedEventString(context, timeline!))
+        .where((text) => text.isNotEmpty)
         .join('\n');
     if (text.isEmpty) return;
     await TwakeClipboard.instance.copyText(text);
