@@ -15,6 +15,52 @@ void main() {
 
     // Assert
     expect(repository.requestedLimit, 1000);
+    expect(repository.requestedSearchTerm, isNull);
+  });
+
+  test('execute_withASearchTerm_asksTheServerForTheFirstMatches', () async {
+    // Arrange
+    final repository = FakePublicRoomsRepository(
+      directory: [publicRoom('!group'), publicRoom('!joined')],
+      joined: {'!joined'},
+    );
+
+    // Act
+    final rooms = await FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute(searchTerm: 'gr').first;
+
+    // Assert
+    expect(repository.requestedLimit, 20);
+    expect(repository.requestedSearchTerm, 'gr');
+    expect(rooms.map((room) => room.roomId), ['!group']);
+  });
+
+  test('execute_withASearchTerm_trimsIt', () async {
+    // Arrange
+    final repository = FakePublicRoomsRepository();
+
+    // Act
+    await FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute(searchTerm: ' gr ').toList();
+
+    // Assert
+    expect(repository.requestedSearchTerm, 'gr');
+  });
+
+  test('execute_withUnderTwoLetters_asksNothing', () async {
+    // Arrange
+    final repository = FakePublicRoomsRepository();
+
+    // Act
+    final pages = await FetchJoinablePublicRoomsUseCase(
+      repository,
+    ).execute(searchTerm: ' g ').toList();
+
+    // Assert
+    expect(pages, isEmpty);
+    expect(repository.requestedLimit, isNull);
   });
 
   test('execute_always_keepsOnlyGroupsAndFeedsNotJoined', () async {

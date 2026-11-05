@@ -57,13 +57,18 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   final knockedVia = <List<String>>[];
 
   int? requestedLimit;
+  String? requestedSearchTerm;
   final knockedQueries = <List<String>>[];
   final joinedIds = <String>[];
   final knockedIds = <String>[];
 
   @override
-  Stream<List<PublicRoom>> fetchDirectory({required int limit}) {
+  Stream<List<PublicRoom>> fetchDirectory({
+    required int limit,
+    String? searchTerm,
+  }) {
     requestedLimit = limit;
+    requestedSearchTerm = searchTerm;
     if (fetchError case final error?) return Stream.error(error);
     if (directoryController case final controller?) return controller.stream;
     return Stream.fromIterable(pages);

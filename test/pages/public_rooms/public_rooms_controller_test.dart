@@ -21,9 +21,9 @@ void main() {
   Future<PublicRoomsController> loadedController(
     ProviderContainer container,
   ) async {
-    container.listen(publicRoomsControllerProvider, (_, _) {});
-    await container.read(publicRoomsControllerProvider.future);
-    return container.read(publicRoomsControllerProvider.notifier);
+    container.listen(publicRoomsControllerProvider(), (_, _) {});
+    await container.read(publicRoomsControllerProvider().future);
+    return container.read(publicRoomsControllerProvider().notifier);
   }
 
   Future<(ProviderContainer, PublicRoomsState)> loadFirstPage(
@@ -31,9 +31,9 @@ void main() {
   ) async {
     repository.directoryController = pages;
     final container = makeContainer();
-    container.listen(publicRoomsControllerProvider, (_, _) {});
+    container.listen(publicRoomsControllerProvider(), (_, _) {});
     pages.add([publicRoom('!first')]);
-    final first = await container.read(publicRoomsControllerProvider.future);
+    final first = await container.read(publicRoomsControllerProvider().future);
     return (container, first);
   }
 
@@ -45,7 +45,7 @@ void main() {
     sendLaterPages(pages);
     await pages.close();
     await pumpEventQueue();
-    return container.read(publicRoomsControllerProvider).requireValue;
+    return container.read(publicRoomsControllerProvider()).requireValue;
   }
 
   setUp(() {
@@ -64,11 +64,40 @@ void main() {
     final container = makeContainer();
 
     // Act
-    final state = await container.read(publicRoomsControllerProvider.future);
+    final state = await container.read(publicRoomsControllerProvider().future);
 
     // Assert
     expect(state.rooms.map((room) => room.roomId), ['!open', '!knock']);
     expect(state.pendingRoomId, isNull);
+  });
+
+  test('build_withASearchTerm_asksTheDirectoryForIt', () async {
+    // Arrange
+    final container = makeContainer();
+
+    // Act
+    final state = await container.read(
+      publicRoomsControllerProvider(searchTerm: 'op').future,
+    );
+
+    // Assert
+    expect(repository.requestedSearchTerm, 'op');
+    expect(state.rooms.map((room) => room.roomId), ['!open', '!knock']);
+  });
+
+  test('build_withoutAListener_isDisposed', () async {
+    // Arrange
+    final container = makeContainer();
+    final provider = publicRoomsControllerProvider(searchTerm: 'op');
+    final subscription = container.listen(provider, (_, _) {});
+    await container.read(provider.future);
+
+    // Act
+    subscription.close();
+    await pumpEventQueue();
+
+    // Assert
+    expect(container.exists(provider), isFalse);
   });
 
   test('build_whenTheDirectoryFails_isAnError', () async {
@@ -79,7 +108,7 @@ void main() {
     final container = makeContainer();
 
     // Act
-    final result = container.read(publicRoomsControllerProvider.future);
+    final result = container.read(publicRoomsControllerProvider().future);
 
     // Assert
     await expectLater(result, throwsA(isA<PublicRoomsFetchFailedException>()));
@@ -98,6 +127,19 @@ void main() {
     expect((result as PublicRoomJoined).roomId, '!open');
     expect(repository.joinedIds, ['!open']);
     expect(repository.knockedIds, isEmpty);
+  });
+
+  test('open_whenJoined_takesTheRoomOutOfTheList', () async {
+    // Arrange
+    final container = makeContainer();
+    final controller = await loadedController(container);
+
+    // Act
+    await controller.open(publicRoom('!open'));
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!knock']);
   });
 
   test('open_whenOnApproval_sendsAKnockInstead', () async {
@@ -131,7 +173,7 @@ void main() {
     // Assert
     expect(second, isA<PublicRoomOpenIgnored>());
     expect(
-      container.read(publicRoomsControllerProvider).value?.pendingRoomId,
+      container.read(publicRoomsControllerProvider()).value?.pendingRoomId,
       '!open',
     );
   });
@@ -149,7 +191,7 @@ void main() {
     // Assert
     expect(first.rooms.map((room) => room.roomId), ['!first']);
     expect(first.isLoadingMore, isTrue);
-    final state = container.read(publicRoomsControllerProvider).requireValue;
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
     expect(state.rooms.map((room) => room.roomId), ['!first', '!second']);
     expect(state.isLoadingMore, isFalse);
   });
@@ -182,7 +224,7 @@ void main() {
     ]);
     expect(
       container
-          .read(publicRoomsControllerProvider)
+          .read(publicRoomsControllerProvider())
           .requireValue
           .requestedRoomIds,
       {'!knock'},
@@ -199,7 +241,7 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    final state = container.read(publicRoomsControllerProvider).requireValue;
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
     expect(state.requestedRoomIds, isEmpty);
     expect(state.rooms.map((room) => room.roomId), ['!open', '!knock']);
   });
@@ -215,7 +257,7 @@ void main() {
     );
 
     // Assert
-    final state = container.read(publicRoomsControllerProvider).requireValue;
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
     expect(state.requestedRoomIds, {'!knock'});
     expect(state.pendingRoomId, isNull);
   });
@@ -263,7 +305,10 @@ void main() {
     // Assert
     expect(errors.single, isA<StateError>());
     expect(
-      container.read(publicRoomsControllerProvider).requireValue.isLoadingMore,
+      container
+          .read(publicRoomsControllerProvider())
+          .requireValue
+          .isLoadingMore,
       isFalse,
     );
   });
@@ -348,7 +393,7 @@ void main() {
     final container = makeContainer();
 
     // Act
-    final state = await container.read(publicRoomsControllerProvider.future);
+    final state = await container.read(publicRoomsControllerProvider().future);
 
     // Assert
     expect(state.rooms.map((room) => room.roomId), ['!a', '!b']);
@@ -393,7 +438,7 @@ void main() {
     expect(errors.single, isA<TypeError>());
     expect(
       container
-          .read(publicRoomsControllerProvider)
+          .read(publicRoomsControllerProvider())
           .requireValue
           .requestedRoomIds,
       isEmpty,
@@ -428,7 +473,7 @@ void main() {
         // Assert
         await expectLater(result, outcome);
         expect(
-          container.read(publicRoomsControllerProvider).value?.pendingRoomId,
+          container.read(publicRoomsControllerProvider()).value?.pendingRoomId,
           isNull,
         );
       },
@@ -490,7 +535,7 @@ void main() {
       expect(errors.single, isA<TypeError>());
       expect(
         container
-            .read(publicRoomsControllerProvider)
+            .read(publicRoomsControllerProvider())
             .requireValue
             .requestedRoomIds,
         {'!pending'},
