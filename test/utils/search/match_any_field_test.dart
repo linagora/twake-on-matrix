@@ -152,30 +152,33 @@ void _testVariableLengthFields() {
       expect(result, [items[0]]);
     });
 
-    test('should match an item via any element of a multi-element collection field', () {
-      final items = [
-        {
-          'name': 'Alice',
-          'tags': ['billing', 'urgent', 'follow-up'],
-        },
-        {
-          'name': 'Bob',
-          'tags': ['low-priority'],
-        },
-      ];
-      final extractors = [
-        (Map<String, Object> m) => [m['name'] as String],
-        (Map<String, Object> m) => m['tags'] as List<String>,
-      ];
+    test(
+      'should match an item via any element of a multi-element collection field',
+      () {
+        final items = [
+          {
+            'name': 'Alice',
+            'tags': ['billing', 'urgent', 'follow-up'],
+          },
+          {
+            'name': 'Bob',
+            'tags': ['low-priority'],
+          },
+        ];
+        final extractors = [
+          (Map<String, Object> m) => [m['name'] as String],
+          (Map<String, Object> m) => m['tags'] as List<String>,
+        ];
 
-      final result = _engine.matchAnyField(
-        'urgent',
-        items,
-        fieldExtractors: extractors,
-      );
+        final result = _engine.matchAnyField(
+          'urgent',
+          items,
+          fieldExtractors: extractors,
+        );
 
-      expect(result, [items[0]]);
-    });
+        expect(result, [items[0]]);
+      },
+    );
   });
 }
 
