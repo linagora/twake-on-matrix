@@ -107,6 +107,26 @@ void main() {
       expect(client.homeserver, isNull);
     });
 
+    test('does not give the old homeserver back to a session that replaced '
+        'the one that started the check', () async {
+      mode = _Mode.unreachable;
+      server.holdUnreachable = Completer<void>();
+
+      final check = expectLater(
+        client.checkStoredHomeserver(),
+        throwsA(anything),
+      );
+      await Future<void>.delayed(Duration.zero);
+      // The user logs out and in again on the same client instance while the
+      // check of the old homeserver is still in flight.
+      client.accessToken = 'token-of-the-new-session';
+      server.holdUnreachable!.complete();
+      await check;
+
+      expect(client.isLogged(), isTrue);
+      expect(client.homeserver, isNull);
+    });
+
     test('an unreachable account leaves the other account untouched', () async {
       final otherServer = Uri.parse('https://other.example');
       final other = await getClient(database: _ClearableDatabase());
@@ -166,7 +186,7 @@ void main() {
   });
 
   group('ClientStoredHomeserverExtension::homeserver refresh decisions', () {
-    final defaultServer = Uri.parse('https://default.example');
+    const defaultServer = 'https://default.example';
     late Client logged;
     late Client unlogged;
 
@@ -188,10 +208,39 @@ void main() {
       expect(logged.homeserver, isNull);
     });
 
+    test('a malformed default is not parsed for a client with a session', () {
+      expect(
+        () => logged.applyDefaultHomeserverWithoutSession('http://[malformed'),
+        returnsNormally,
+      );
+      expect(logged.homeserver, isNotNull);
+    });
+
+    test('a client with a session never takes the discovery of another '
+        'account', () {
+      final foreign = DiscoveryInformation(
+        mHomeserver: HomeserverInformation(
+          baseUrl: Uri.parse('https://foreign.example'),
+        ),
+      );
+
+      expect(logged.discoveryFallbackFor(foreign), isNull);
+    });
+
+    test('a client without a session keeps the discovery it is given', () {
+      final given = DiscoveryInformation(
+        mHomeserver: HomeserverInformation(
+          baseUrl: Uri.parse('https://given.example'),
+        ),
+      );
+
+      expect(unlogged.discoveryFallbackFor(given), same(given));
+    });
+
     test('a client without a session receives the default homeserver', () {
       unlogged.applyDefaultHomeserverWithoutSession(defaultServer);
 
-      expect(unlogged.homeserver, defaultServer);
+      expect(unlogged.homeserver, Uri.parse(defaultServer));
     });
 
     test('a client without a session keeps the homeserver it holds', () {
@@ -286,6 +335,21 @@ void main() {
       log.record(unreachable, failed: false);
 
       expect(log.hasFailed(unreachable), isFalse);
+    });
+
+    test('only the latest refresh of an account may report', () {
+      final first = log.begin(unreachable);
+      final second = log.begin(unreachable);
+
+      expect(log.isLatest(unreachable, first), isFalse);
+      expect(log.isLatest(unreachable, second), isTrue);
+    });
+
+    test('a refresh of another account does not supersede this one', () {
+      final ticket = log.begin(healthy);
+      log.begin(unreachable);
+
+      expect(log.isLatest(healthy, ticket), isTrue);
     });
 
     test('an account that was never checked has not failed', () {

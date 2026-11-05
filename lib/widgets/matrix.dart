@@ -1552,6 +1552,7 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
+    final refreshTicket = _homeserverCheckLog.begin(newClient);
     var checkFailed = false;
     final summary = await newClient.fetchHomeserverSummary(
       // A login that makes this account active checked its server just before.
@@ -1562,9 +1563,11 @@ class MatrixState extends ConsumerState<Matrix>
     );
 
     // The active client may have changed while awaiting: a late result must
-    // not overwrite the newer account's summary.
+    // not overwrite the newer account's summary. A newer refresh of the same
+    // client wins over this one for the same reason.
     if (!_isCurrent(token) ||
-        (_switchCoordinator.target ?? clientOrNull) != newClient) {
+        (_switchCoordinator.target ?? clientOrNull) != newClient ||
+        !_homeserverCheckLog.isLatest(newClient, refreshTicket)) {
       return;
     }
 
@@ -1629,9 +1632,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.applyDefaultHomeserverWithoutSession(
-      Uri.parse(AppConfig.homeserver),
-    );
+    client.applyDefaultHomeserverWithoutSession(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
