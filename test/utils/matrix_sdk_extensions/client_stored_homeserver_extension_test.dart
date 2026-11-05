@@ -82,6 +82,21 @@ void main() {
       expect(requested.every((uri) => uri.host == stored!.host), isTrue);
     });
 
+    test('an unreachable account leaves the other account untouched', () async {
+      final otherServer = Uri.parse('https://other.example');
+      final other = await getClient(database: _ClearableDatabase());
+      other.homeserver = otherServer;
+      final stored = client.homeserver;
+      mode = _Mode.unreachable;
+
+      await expectLater(client.checkStoredHomeserver(), throwsA(anything));
+
+      expect(client.homeserver, stored);
+      expect(other.homeserver, otherServer);
+      expect(other.isLogged(), isTrue);
+      await other.dispose(closeDatabase: false);
+    });
+
     test(
       'the SDK check alone drops the homeserver (why the guard exists)',
       () async {
