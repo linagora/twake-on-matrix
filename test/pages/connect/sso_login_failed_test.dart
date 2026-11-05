@@ -60,6 +60,9 @@ class _FakeMatrixState extends Fake implements MatrixState {
   List<Client?> get currentClients => clients;
 
   @override
+  String? loginType;
+
+  @override
   final StreamController<ClientLoginStateEvent> onClientLoginStateChanged =
       StreamController<ClientLoginStateEvent>.broadcast();
 
@@ -357,6 +360,59 @@ void main() {
     expect(result, SsoLoginState.tokenEmpty);
     final l10n = L10n.of(tester.element(find.byType(Scaffold)))!;
     expect(find.text(l10n.oopsSomethingWentWrong), findsOneWidget);
+  });
+
+  testWidgets('leaving the screen while the login client is pending does not '
+      'start the login', (tester) async {
+    final pending = Completer<Client>();
+    var clientRequests = 0;
+    // The web auth takes the client first; the login then waits for the
+    // sessions (their cleanup retries) while the user leaves the screen.
+    final sessions = FakeLoginSessions(
+      loginClient: () =>
+          ++clientRequests == 1 ? Future.value(client) : pending.future,
+    );
+    Widget app(Widget home) => ProviderScope(
+      overrides: [loginSessionsProvider.overrideWithValue(sessions)],
+      child: MaterialApp(
+        navigatorKey: TwakeApp.routerKey,
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        builder: (context, child) =>
+            Provider<MatrixState>.value(value: matrix, child: child),
+        home: home,
+      ),
+    );
+    await tester.pumpWidget(app(const Scaffold(body: SizedBox())));
+    client.homeserver = Uri.parse('https://matrix.example.com');
+    const channel = MethodChannel('flutter_web_auth_2');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          channel,
+          (call) async => 'twake://done?loginToken=abc',
+        );
+    addTearDown(
+      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null),
+    );
+
+    final result = host.ssoLoginActionMobile(
+      context: tester.element(find.byType(Scaffold)),
+      id: 'oidc',
+    );
+    await tester.pump();
+    expect(clientRequests, 2);
+
+    // The screen goes away, the app (and its navigator) stays.
+    await tester.pumpWidget(app(const SizedBox()));
+    pending.complete(client);
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Without the check the login dialog opens over whatever is on screen and
+    // the call waits for it, so the effects are read before the result.
+    expect(client.logins, 0);
+    expect(find.byType(InitClientDialog), findsNothing);
+    expect(await result, SsoLoginState.error);
   });
 
   group('the web auth of the SSO fails', () {

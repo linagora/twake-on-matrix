@@ -179,6 +179,8 @@ mixin ConnectPageMixin {
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final sessions = _sessionsOf(context);
       final client = await sessions.loginClient();
+      // `loginClient` waits for the cleanup retries: the user may have left.
+      if (!context.mounted) return SsoLoginState.error;
       return await loginWithToken(sessions, client, token);
     } catch (e) {
       // Only a cancel of the web auth stays silent, and it is not an error.
