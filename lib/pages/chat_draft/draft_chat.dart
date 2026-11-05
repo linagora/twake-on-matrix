@@ -389,6 +389,8 @@ class DraftChatController extends ConsumerState<DraftChat>
     // Only the latest request reports back, as the cancelled stream did.
     final requestId = ++_createRoomRequestId;
     final intendedMxId = presentationContact.matrixId!;
+    // One client for the whole request: the use case captures it on read.
+    final client = ref.read(activeMatrixClientProvider);
     String? roomId;
     CreateDirectChatException? failure;
     try {
@@ -411,8 +413,12 @@ class DraftChatController extends ConsumerState<DraftChat>
       isSendingNotifier.value = false;
       return;
     }
-    final room = ref.read(activeMatrixClientProvider)?.getRoomById(roomId!);
-    if (room == null) return;
+    final room = client?.getRoomById(roomId!);
+    if (room == null) {
+      onRoomCreatedFailed?.call();
+      isSendingNotifier.value = false;
+      return;
+    }
     onRoomCreatedSuccess?.call(room);
     RoomRoute(
       roomid: room.id,
