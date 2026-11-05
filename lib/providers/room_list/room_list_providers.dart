@@ -70,7 +70,7 @@ class SpaceJoinController extends _$SpaceJoinController {
       await ref
           .read(joinSpaceChildUseCaseProvider)
           .execute(child.roomId, via: child.via);
-      ref.invalidate(spaceChildrenProvider(parentSpaceId));
+      if (ref.mounted) ref.invalidate(spaceChildrenProvider(parentSpaceId));
       return true;
     } finally {
       _joining.remove(child.roomId);

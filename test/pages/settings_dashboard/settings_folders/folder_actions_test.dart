@@ -19,7 +19,7 @@ void main() {
     Future<BuildContext> pump(WidgetTester tester) async {
       await pumpLocalized(
         tester,
-        ProviderContainer.test(),
+        ProviderContainer.test(retry: (_, _) => null),
         const Scaffold(body: Text('screen')),
       );
       return tester.element(find.text('screen'));

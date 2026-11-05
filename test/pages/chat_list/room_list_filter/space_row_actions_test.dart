@@ -13,7 +13,7 @@ void main() {
       var toggled = 0;
       await pumpLocalized(
         tester,
-        ProviderContainer.test(),
+        ProviderContainer.test(retry: (_, _) => null),
         Scaffold(
           body: SpaceRowActions(
             name: 'Team',
@@ -36,7 +36,7 @@ void main() {
       var added = 0;
       await pumpLocalized(
         tester,
-        ProviderContainer.test(),
+        ProviderContainer.test(retry: (_, _) => null),
         Scaffold(
           body: SpaceRowActions(
             name: 'Team',
