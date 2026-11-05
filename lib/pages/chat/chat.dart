@@ -59,6 +59,7 @@ import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
+import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/basic_event_extension.dart';
 import 'package:twake_chat/utils/extension/event_status_custom_extension.dart';
@@ -68,6 +69,7 @@ import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -1003,10 +1005,18 @@ class ChatController extends ConsumerState<Chat>
     showEmojiPickerComposerNotifier.value = true;
   }
 
-  void copySingleEventAction() async {
+  void copySelectedEventsAction() async {
     if (selectedEvents.length == 1) {
       await selectedEvents.first.copy(context, timeline!);
+      return;
     }
+    final text = selectedEvents.copyableTextEvents
+        .map((event) => event.getSelectedEventString(context, timeline!))
+        .join('\n');
+    if (text.isEmpty) return;
+    await TwakeClipboard.instance.copyText(text);
+    if (!mounted) return;
+    TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
   void copyEventsAction(Event event) async {
