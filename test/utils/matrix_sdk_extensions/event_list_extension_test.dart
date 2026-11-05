@@ -235,4 +235,84 @@ void main() {
       expect(result.bottom[1].eventId, '\$event3');
     });
   });
+
+  group('EventListExtension.copyableTextEvents', () {
+    Event message({
+      required String eventId,
+      required int timestamp,
+      String type = EventTypes.Message,
+      String msgtype = MessageTypes.Text,
+    }) {
+      return Event(
+        senderId: '@user:example.com',
+        type: type,
+        room: room,
+        eventId: eventId,
+        content: {'msgtype': msgtype, 'body': eventId},
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
+    }
+
+    List<String> idsOf(List<Event> events) =>
+        events.map((event) => event.eventId).toList();
+
+    test('sorts text events chronologically, whatever the selection order', () {
+      final events = [
+        message(eventId: 'third', timestamp: 3),
+        message(eventId: 'first', timestamp: 1),
+        message(eventId: 'second', timestamp: 2),
+      ];
+
+      expect(idsOf(events.copyableTextEvents), ['first', 'second', 'third']);
+    });
+
+    test('keeps notices and emotes', () {
+      final events = [
+        message(eventId: 'notice', timestamp: 1, msgtype: MessageTypes.Notice),
+        message(eventId: 'emote', timestamp: 2, msgtype: MessageTypes.Emote),
+      ];
+
+      expect(idsOf(events.copyableTextEvents), ['notice', 'emote']);
+    });
+
+    test('skips media, stickers and encrypted events', () {
+      final events = [
+        message(eventId: 'text', timestamp: 1),
+        message(eventId: 'image', timestamp: 2, msgtype: MessageTypes.Image),
+        message(eventId: 'file', timestamp: 3, msgtype: MessageTypes.File),
+        message(eventId: 'video', timestamp: 4, msgtype: MessageTypes.Video),
+        message(eventId: 'audio', timestamp: 5, msgtype: MessageTypes.Audio),
+        message(eventId: 'sticker', timestamp: 6, type: EventTypes.Sticker),
+        message(eventId: 'encrypted', timestamp: 7, type: EventTypes.Encrypted),
+      ];
+
+      expect(idsOf(events.copyableTextEvents), ['text']);
+    });
+
+    test('skips redacted messages', () {
+      final redacted = message(eventId: 'redacted', timestamp: 2)
+        ..setRedactionEvent(
+          Event(
+            senderId: '@user:example.com',
+            type: EventTypes.Redaction,
+            room: room,
+            eventId: 'redaction',
+            redacts: 'redacted',
+            content: {},
+            originServerTs: DateTime.fromMillisecondsSinceEpoch(3),
+          ),
+        );
+      final events = [message(eventId: 'text', timestamp: 1), redacted];
+
+      expect(idsOf(events.copyableTextEvents), ['text']);
+    });
+
+    test('returns an empty list when nothing is copyable', () {
+      final events = [
+        message(eventId: 'image', timestamp: 1, msgtype: MessageTypes.Image),
+      ];
+
+      expect(events.copyableTextEvents, isEmpty);
+    });
+  });
 }

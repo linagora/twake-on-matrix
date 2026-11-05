@@ -28,6 +28,17 @@ class EventListSyncResult extends Equatable {
 /// Extension for managing and syncing lists of Matrix events.
 /// Provides efficient operations for detecting changes, additions, and removals.
 extension EventListExtension on List<Event> {
+  List<Event> get copyableTextEvents => where(
+    (event) =>
+        event.type == EventTypes.Message &&
+        !event.redacted &&
+        {
+          MessageTypes.Text,
+          MessageTypes.Notice,
+          MessageTypes.Emote,
+        }.contains(event.messageType),
+  ).sortedBy((event) => event.originServerTs);
+
   /// Builds a map of events for O(1) lookup by eventId and transactionId.
   /// Returns a map where keys are eventId/transactionId and values are the events.
   static Map<String, Event> buildEventMap(List<Event> events) {
