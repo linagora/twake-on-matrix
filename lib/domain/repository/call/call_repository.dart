@@ -16,6 +16,11 @@ abstract class CallRepository {
 
   Future<void> connectMedia(CallServer server, CallMediaState media);
 
+  /// Shares the media keys of an encrypted call until [stopMediaKeys].
+  void startMediaKeys(CallRoom room);
+
+  Future<void> stopMediaKeys();
+
   Future<void> disconnectMedia();
 
   Future<void> setMicrophone({required bool isOn});

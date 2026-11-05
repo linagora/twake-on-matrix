@@ -3316,11 +3316,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "callErrorEncrypted": "Calls in encrypted chats are not available yet.",
-  "@callErrorEncrypted": {
-    "type": "text",
-    "placeholders": {}
-  },
   "callErrorNoPermission": "You may not join a call in this conversation.",
   "@callErrorNoPermission": {
     "type": "text",
@@ -3353,6 +3348,11 @@
   },
   "callErrorMicrophoneChange": "The microphone could not be changed. Try again.",
   "@callErrorMicrophoneChange": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorEncryptionTurnedOn": "Encryption was turned on in this chat. Join again to encrypt the call.",
+  "@callErrorEncryptionTurnedOn": {
     "type": "text",
     "placeholders": {}
   }

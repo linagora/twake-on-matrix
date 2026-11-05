@@ -187,7 +187,10 @@ void main() {
 
     // Assert
     expect(state(), const CallState.idle());
-    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
+    expect(
+      repository.calls,
+      containsAllInOrder(['disconnect', 'stopKeys', 'leave !dm']),
+    );
   });
 
   test('onParticipants_whenLeftAloneInAGroupCall_staysConnected', () async {
@@ -244,7 +247,7 @@ void main() {
 
     // Assert
     expect(state(), const CallState.idle());
-    expect(repository.calls, isNot(contains('connect mic=true camera=false')));
+    expect(repository.calls, isNot(contains(startsWith('connect'))));
   });
 
   test('leave_whileTheMembershipIsSent_leavesOnceJoined', () async {
@@ -373,7 +376,25 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    expectEndedAs<CallEncryptionUnsupportedException>();
+    expectEndedAs<CallEncryptionTurnedOnException>();
+  });
+
+  test('onRoomEncrypted_inAnEncryptedRoom_staysConnected', () async {
+    // Arrange
+    repository.roomInfo = const CallRoomInfo(
+      isEncrypted: true,
+      isDirect: false,
+      canJoin: true,
+    );
+    await controller().join('!room', isVideo: false);
+
+    // Act
+    repository.encryptions.add(null);
+    await pumpEventQueue();
+
+    // Assert
+    expect(state(), isA<CallConnected>());
+    expect(repository.calls, isNot(contains('disconnect')));
   });
 
   group('accountSwitch', () {

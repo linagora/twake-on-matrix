@@ -146,7 +146,6 @@ class _CallScreenState extends ConsumerState<CallScreen> {
 
   static String _describe(L10n l10n, CallException error) => switch (error) {
     CallServiceUnavailableException() => l10n.callErrorNoService,
-    CallEncryptionUnsupportedException() => l10n.callErrorEncrypted,
     CallNoPermissionException() => l10n.callErrorNoPermission,
     CallRoomNotFoundException() ||
     CallNoClientException() => l10n.callErrorRoomNotFound,
@@ -154,6 +153,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     CallMembershipFailedException() => l10n.callErrorMembershipFailed,
     CallConnectionFailedException() => l10n.callErrorConnectionFailed,
     CallMediaFailedException() => l10n.callErrorMediaFailed,
+    CallEncryptionTurnedOnException() => l10n.callErrorEncryptionTurnedOn,
   };
 }
 
