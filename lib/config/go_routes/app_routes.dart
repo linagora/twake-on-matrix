@@ -145,20 +145,25 @@ class RootRoute extends GoRouteData with $RootRoute {
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute({this.$extra});
 
-  final bool? $extra;
+  /// The extra is shared with the child routes, whose redirect also builds
+  /// this route from it: the login route carries a [LoginClientOwner], this
+  /// one a `loggedOut` flag. A narrower type would throw on the child's.
+  final Object? $extra;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
       _loggedInRedirect(context, state);
 
   @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(
-        context,
-        PlatformInfos.isMobile
-            ? const TwakeWelcome()
-            : AutoHomeserverPicker(loggedOut: $extra),
-      );
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    final extra = $extra;
+    return _defaultPage(
+      context,
+      PlatformInfos.isMobile
+          ? const TwakeWelcome()
+          : AutoHomeserverPicker(loggedOut: extra is bool ? extra : null),
+    );
+  }
 }
 
 mixin _LoginRoute on GoRouteData {
