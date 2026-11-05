@@ -19,9 +19,11 @@ class PublicRoomsController extends _$PublicRoomsController {
   Future<void> _lookups = Future<void>.value();
 
   @override
-  Future<PublicRoomsState> build() async {
+  Future<PublicRoomsState> build({String? searchTerm}) async {
     final pages = StreamIterator(
-      ref.watch(fetchJoinablePublicRoomsUseCaseProvider).execute(),
+      ref
+          .watch(fetchJoinablePublicRoomsUseCaseProvider)
+          .execute(searchTerm: searchTerm),
     );
     ref.onDispose(() => unawaited(pages.cancel()));
     final hasFirstPage = await pages.moveNext();
@@ -54,6 +56,16 @@ class PublicRoomsController extends _$PublicRoomsController {
       final joined = await ref
           .read(joinPublicRoomUseCaseProvider)
           .execute(room.roomId);
+      if (ref.mounted) {
+        _update(
+          (state) => state.copyWith(
+            rooms: [
+              for (final other in state.rooms)
+                if (other.roomId != room.roomId) other,
+            ],
+          ),
+        );
+      }
       return joined.isInSync
           ? PublicRoomJoined(joined.roomId)
           : const PublicRoomJoinedNotInSync();

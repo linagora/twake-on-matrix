@@ -19,6 +19,7 @@ import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:mockito/annotations.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/search/public_groups_search_term.dart';
 import 'package:mockito/mockito.dart';
 import 'server_search_view_test.mocks.dart';
 
@@ -137,6 +138,9 @@ void main() {
             mockSearchController.searchContactAndRecentChatController,
           ).thenReturn(mockSearchContactAndRecentChatController);
           when(mockTextEditingController.text).thenReturn('test');
+          when(
+            mockSearchController.publicGroupsSearchTerm,
+          ).thenReturn(PublicGroupsSearchTerm(TextEditingController()));
           when(mockServerSearchController.searchResultsNotifier).thenReturn(
             ValueNotifier<PresentationServerSideUIState>(
               PresentationServerSideEmptySearch(),

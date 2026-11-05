@@ -5,16 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/empty_state/linagora_empty_state.dart';
-import 'package:linagora_design_flutter/list_item/linagora_avatar_list_item.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/public_rooms/public_room_open_message.dart';
+import 'package:twake_chat/pages/public_rooms/public_room_row.dart';
 import 'package:twake_chat/pages/public_rooms/public_rooms_controller.dart';
 import 'package:twake_chat/pages/public_rooms/public_rooms_state.dart';
 import 'package:twake_chat/pages/search/search_text_field.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 
 class PublicRoomsPage extends ConsumerStatefulWidget {
@@ -39,26 +39,21 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
   Future<void> _open(PublicRoom room) async {
     final l10n = L10n.of(context)!;
     final result = await ref
-        .read(publicRoomsControllerProvider.notifier)
+        .read(publicRoomsControllerProvider().notifier)
         .open(room);
     if (!mounted) return;
+    if (result.message(l10n, room) case final message?) {
+      TwakeSnackBar.show(context, message);
+    }
     switch (result) {
       case PublicRoomJoined(:final roomId):
         context.pop();
         RoomRoute(roomid: roomId).go(context);
       case PublicRoomJoinedNotInSync():
-        TwakeSnackBar.show(context, l10n.youJoinedTheChat);
         context.pop();
-      case PublicRoomRequested():
-        TwakeSnackBar.show(context, l10n.joinRequestSentAdminMustApprove);
-      case PublicRoomOpenFailed():
-        TwakeSnackBar.show(
-          context,
-          room.access == PublicRoomAccess.approval
-              ? l10n.publicGroupRequestFailed
-              : l10n.publicGroupJoinFailed,
-        );
-      case PublicRoomOpenIgnored():
+      case PublicRoomRequested() ||
+          PublicRoomOpenFailed() ||
+          PublicRoomOpenIgnored():
         break;
     }
   }
@@ -66,7 +61,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final state = ref.watch(publicRoomsControllerProvider);
+    final state = ref.watch(publicRoomsControllerProvider());
     return Scaffold(
       appBar: _buildAppBar(
         isBusy:
@@ -86,7 +81,7 @@ class _PublicRoomsPageState extends ConsumerState<PublicRoomsPage> {
         ),
         AsyncError() => GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => ref.invalidate(publicRoomsControllerProvider),
+          onTap: () => ref.invalidate(publicRoomsControllerProvider()),
           child: _PublicRoomsEmptyState(
             title: l10n.publicGroupsLoadFailed,
             description: l10n.tapToRetry,
@@ -168,51 +163,13 @@ class _PublicRoomList extends StatelessWidget {
       itemBuilder: (context, index) {
         final room = rooms[index];
         final isRequested = requestedRoomIds.contains(room.roomId);
-        return _PublicRoomRow(
+        return PublicRoomRow(
           key: ValueKey(room.roomId),
           room: room,
           isRequested: isRequested,
           onTap: isRequested ? null : () => onOpen(room),
         );
       },
-    );
-  }
-}
-
-class _PublicRoomRow extends StatelessWidget {
-  const _PublicRoomRow({
-    super.key,
-    required this.room,
-    required this.isRequested,
-    required this.onTap,
-  });
-
-  final PublicRoom room;
-  final bool isRequested;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = L10n.of(context)!;
-    final access = isRequested
-        ? l10n.publicGroupRequestSentMembers(room.memberCount)
-        : room.access == PublicRoomAccess.approval
-        ? l10n.askToJoinPublicGroupMembers(room.memberCount)
-        : l10n.joinPublicGroupMembers(room.memberCount);
-    final topic = room.topic;
-    return LinagoraAvatarListItem(
-      avatar: AvatarWithKindBadge(
-        mxContent: room.avatarUri,
-        name: room.name,
-        badge: switch (room) {
-          PublicRoom(kind: PublicRoomKind.feed) => AvatarKindBadge.broadcast,
-          PublicRoom(access: PublicRoomAccess.open) => AvatarKindBadge.public,
-          _ => AvatarKindBadge.people,
-        },
-      ),
-      title: room.name,
-      subtitle: topic == null || topic.isEmpty ? access : '$access · $topic',
-      onTap: onTap,
     );
   }
 }
