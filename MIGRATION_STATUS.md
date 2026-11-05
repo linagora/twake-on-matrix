@@ -51,4 +51,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | preview_url | Use case + native providers, GetIt registrations removed; `MediaAPI` still reads the home `DioClient` from GetIt (shared with upload and download) | #3537 |
 | settings_chat | Consumer widgets, GetIt removed | #3551 |
 | spaces, folders | New code on use cases and controllers, no GetIt in its `lib` code; the chat list around it stays legacy | #3558 |
+| draft_chat | Create direct chat and blocked state on use cases + native providers; `UploadManager` bridged, unblock mixin and the style classes (`ResponsiveUtils`) still on GetIt | #3392 |
 | Everything else | Legacy | |
