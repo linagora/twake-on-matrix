@@ -18,6 +18,11 @@ extension ClientHomeserverSummaryExtension on Client {
         ? previous
         : null;
 
+    // Before checkHomeserver, which sets the homeserver to null when it fails.
+    final discovery = await getWellKnownOrFallback(
+      fallback: ownPrevious?.discoveryInformation,
+    );
+
     GetVersionsResponse? versions;
     List<LoginFlow>? loginFlows;
     if (homeserver != null) {
@@ -35,10 +40,6 @@ extension ClientHomeserverSummaryExtension on Client {
         );
       }
     }
-
-    final discovery = await getWellKnownOrFallback(
-      fallback: ownPrevious?.discoveryInformation,
-    );
 
     if (versions == null && discovery == null) return null;
 

@@ -122,5 +122,18 @@ void main() {
       expect(summary.versions.versions, ['v1.11']);
       expect(database.cache['well_known'], isNotNull);
     });
+
+    test('fetches the well-known when only the versions check fails', () async {
+      final api = FakeMatrixApi.currentApi!.api['GET']!;
+      api.remove(versionsPath);
+      api[wellKnownPath] = (_) => {
+        'm.homeserver': {'base_url': 'https://fakeserver.notexisting'},
+        'app.twake.chat': {'enable_invitations': true},
+      };
+
+      final summary = await client.fetchHomeserverSummary();
+
+      expect(summary!.isInvitationEnabled, isTrue);
+    });
   });
 }
