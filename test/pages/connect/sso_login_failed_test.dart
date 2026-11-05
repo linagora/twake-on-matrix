@@ -366,24 +366,35 @@ void main() {
       'start the login', (tester) async {
     final pending = Completer<Client>();
     var clientRequests = 0;
-    // The web auth takes the client first; the login then waits for the
-    // sessions (their cleanup retries) while the user leaves the screen.
-    final sessions = FakeLoginSessions(
-      loginClient: () =>
-          ++clientRequests == 1 ? Future.value(client) : pending.future,
-    );
-    Widget app(Widget home) => ProviderScope(
-      overrides: [loginSessionsProvider.overrideWithValue(sessions)],
-      child: MaterialApp(
-        navigatorKey: TwakeApp.routerKey,
-        localizationsDelegates: L10n.localizationsDelegates,
-        supportedLocales: L10n.supportedLocales,
-        builder: (context, child) =>
-            Provider<MatrixState>.value(value: matrix, child: child),
-        home: home,
+    // The screen the app shows: it is swapped for an empty one below, while
+    // the app (and its navigator) stays.
+    final screen = ValueNotifier<Widget>(const Scaffold(body: SizedBox()));
+    addTearDown(screen.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          loginSessionsProvider.overrideWithValue(
+            // The web auth takes the client first; the login then waits for
+            // the sessions (their cleanup retries) while the user leaves.
+            FakeLoginSessions(
+              loginClient: () =>
+                  ++clientRequests == 1 ? Future.value(client) : pending.future,
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          navigatorKey: TwakeApp.routerKey,
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          builder: (context, child) =>
+              Provider<MatrixState>.value(value: matrix, child: child),
+          home: ValueListenableBuilder<Widget>(
+            valueListenable: screen,
+            builder: (context, widget, _) => widget,
+          ),
+        ),
       ),
     );
-    await tester.pumpWidget(app(const Scaffold(body: SizedBox())));
     client.homeserver = Uri.parse('https://matrix.example.com');
     const channel = MethodChannel('flutter_web_auth_2');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -403,8 +414,8 @@ void main() {
     await tester.pump();
     expect(clientRequests, 2);
 
-    // The screen goes away, the app (and its navigator) stays.
-    await tester.pumpWidget(app(const SizedBox()));
+    screen.value = const SizedBox();
+    await tester.pump();
     pending.complete(client);
     await tester.pump(const Duration(milliseconds: 100));
 
