@@ -6,6 +6,6 @@ class KnockPublicRoomUseCase {
   final PublicRoomsRepository _repository;
 
   /// Throws a `PublicRoomKnockFailedException`.
-  Future<void> execute(String roomIdOrAlias) =>
-      _repository.knock(roomIdOrAlias);
+  Future<void> execute(String roomIdOrAlias, {List<String> via = const []}) =>
+      _repository.knock(roomIdOrAlias, via: via);
 }

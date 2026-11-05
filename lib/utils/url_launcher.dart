@@ -1,12 +1,10 @@
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
-import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/url_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -17,8 +15,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
+import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
-import 'package:twake_chat/widgets/public_room_bottom_sheet.dart';
 import 'platform_infos.dart';
 
 class UrlLauncher with GoToDraftChatMixin {
@@ -169,82 +168,32 @@ class UrlLauncher with GoToDraftChatMixin {
       // we got a room! Let's open that one
       final roomIdOrAlias = identityParts.primaryIdentifier;
       final event = identityParts.secondaryIdentifier;
-      var room =
+      final room =
           matrix.client.getRoomByAlias(roomIdOrAlias) ??
           matrix.client.getRoomById(roomIdOrAlias);
-      var roomId = room?.id;
-      // we make the servers a set and later on convert to a list, so that we can easily
-      // deduplicate servers added via alias lookup and query parameter
-      final servers = <String>{};
-      if (room == null && roomIdOrAlias.sigil == '#') {
-        // we were unable to find the room locally...so resolve it
-        final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
-        );
-        if (response.error != null) {
-          return; // nothing to do, the alias doesn't exist
-        }
-        roomId = response.result!.roomId;
-        servers.addAll(response.result!.servers!);
-        room = matrix.client.getRoomById(roomId!);
-      }
-      servers.addAll(identityParts.via);
       final canOpenDirectly =
           room != null &&
           (room.membership == Membership.join ||
               room.membership == Membership.invite);
-      if (canOpenDirectly) {
-        if (room.isSpace) {
-          // TODO: Implement navigate to space
-          const RoomsRoute().go(context);
-          return;
-        }
-        // we have the room, so....just open it
-        if (event != null) {
-          RoomRoute(roomid: room.id, event: event).go(context);
-        } else {
-          RoomRoute(roomid: room.id).go(context);
-        }
-        return;
-      } else if (room == null) {
+      if (!canOpenDirectly) {
         await showAdaptiveBottomSheet(
           context: context,
-          builder: (c) => PublicRoomBottomSheet(
-            roomAlias: identityParts.primaryIdentifier,
-            outerContext: context,
+          builder: (_) => PublicRoomPreviewSheet(
+            address: RoomAddress(
+              roomIdOrAlias,
+              via: identityParts.via.toList(),
+            ),
+            eventId: event,
           ),
         );
+        return;
       }
-      if (roomIdOrAlias.sigil == '!' ||
-          room?.membership == Membership.leave ||
-          room?.membership == Membership.ban) {
-        if (await showOkCancelAlertDialog(
-              useRootNavigator: false,
-              context: context,
-              title: 'Join room $roomIdOrAlias',
-            ) ==
-            OkCancelResult.ok) {
-          roomId = roomIdOrAlias;
-          final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-            future: () => matrix.client.joinRoom(
-              roomIdOrAlias,
-              via: servers.isNotEmpty ? servers.toList() : null,
-            ),
-          );
-          if (response.error != null) return;
-          // wait for two seconds so that it probably came down /sync
-          await TwakeDialog.showFutureLoadingDialogFullScreen(
-            future: () => Future.delayed(const Duration(seconds: 2)),
-          );
-          final joinedRoomId = response.result;
-          if (joinedRoomId == null) return;
-          if (event != null) {
-            RoomRoute(roomid: joinedRoomId, event: event).go(context);
-          } else {
-            RoomRoute(roomid: joinedRoomId).go(context);
-          }
-        }
+      if (room.isSpace) {
+        // TODO: Implement navigate to space
+        const RoomsRoute().go(context);
+        return;
       }
+      RoomRoute(roomid: room.id, event: event).go(context);
     } else if (identityParts.primaryIdentifier.sigil == '@') {
       if (room?.isDirectChat == true) {
         await showAdaptiveBottomSheet(

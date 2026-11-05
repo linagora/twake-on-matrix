@@ -158,3 +158,26 @@ toggle.
 A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
+
+## D10. A room address opens a preview of the room (proposed by Johann, 2026-11-05)
+
+A link to a room address (`https://matrix.to/#/#name:server`) or ID that the
+user has neither joined nor been invited to opens a preview, as Twake Space
+Chat does (D491 there):
+
+- The room's name, topic and avatar, with « Join · n members », or « Ask to
+  join · n members » when it needs an approval. Once asked, the button gives
+  way to « Request sent ».
+- A user banned from the room is told so, with no button.
+- A room nobody can preview (unknown, or invite only) says the group is
+  unavailable and offers « Try to join ».
+- A failed join or request is said in the preview, under the button.
+- A room the user is already in under another address opens directly.
+
+The preview reads the room summary (MSC3266) first, which also says whether
+the user is banned or has already asked; when the server answers nothing, it
+looks the address up in the public directory of the address's server, as Twake
+Space Chat does. The `via` servers of the link route the summary, the join and
+the request. A joined room still opens directly, at the linked message.
+
+Hand-typed addresses becoming links is left to a later change.
