@@ -41,6 +41,15 @@ void main() {
 }
 
 const _space = RoomListEntry(id: '!s', kind: RoomKind.space, childIds: ['!a']);
+
+/// Joined when `/hierarchy` was read: the room list decides what it is now.
+const _subSpace = SpaceChannel(
+  roomId: '!sub',
+  name: 'Sub',
+  isSpace: true,
+  isJoinable: true,
+  isJoined: true,
+);
 late MockSpaceRepository _repository;
 late StreamController<int> _changes;
 
@@ -219,17 +228,9 @@ void _roomListContentTests() {
     });
 
     test('whenASubSpaceIsLeftAfterTheRead_offersItAgain', () async {
-      when(_repository.getSpaceChildren('!s')).thenAnswer(
-        (_) async => const [
-          SpaceChannel(
-            roomId: '!sub',
-            name: 'Sub',
-            isSpace: true,
-            isJoinable: true,
-            isJoined: true,
-          ),
-        ],
-      );
+      when(
+        _repository.getSpaceChildren('!s'),
+      ).thenAnswer((_) async => const [_subSpace]);
       final container = _newContainer();
       container.listen(roomListContentProvider(null), (_, _) {});
       await pumpEventQueue();
@@ -246,14 +247,7 @@ void _roomListContentTests() {
       ]);
       when(_repository.getSpaceChildren(any)).thenAnswer((invocation) async {
         return invocation.positionalArguments.first == '!s'
-            ? const [
-                SpaceChannel(
-                  roomId: '!sub',
-                  name: 'Sub',
-                  isSpace: true,
-                  isJoinable: true,
-                ),
-              ]
+            ? const [_subSpace]
             : const [];
       });
       final container = _newContainer();

@@ -89,6 +89,29 @@ abstract class RoomListContent with _$RoomListContent {
   }) = _RoomListContent;
 }
 
+/// Joinable sub-spaces of each joined space, watched in every view: a chip
+/// and back must not read every space again.
+Map<String, List<SpaceChannel>> _joinableBySpace(
+  Ref ref,
+  List<RoomListEntry> entries,
+) {
+  // Membership as of now: the hierarchy is read again only when a space lists
+  // something else, not when the user leaves or joins what it holds.
+  final joinedIds = {
+    for (final entry in entries)
+      if (entry.isJoined) entry.id,
+  };
+  return {
+    for (final entry in entries)
+      if (entry.isSpace && entry.isJoined)
+        entry.id: joinableSubspaces([
+          for (final child
+              in ref.watch(spaceChildrenProvider(entry.id)).value ?? const [])
+            child.copyWith(isJoined: joinedIds.contains(child.roomId)),
+        ]),
+  };
+}
+
 @riverpod
 RoomListContent roomListContent(Ref ref, String? activeRoomId) {
   final view = ref.watch(shownRoomListFilterProvider);
@@ -99,22 +122,7 @@ RoomListContent roomListContent(Ref ref, String? activeRoomId) {
     activeRoomId: activeRoomId,
     folders: ref.watch(roomListFoldersProvider),
   );
-  // Membership as of now: the hierarchy is read again only when a space lists
-  // something else, not when the user leaves or joins what it holds.
-  final joinedIds = {
-    for (final entry in entries)
-      if (entry.isJoined) entry.id,
-  };
-  // Watched in every view: a chip and back must not read every space again.
-  final joinableBySpace = {
-    for (final entry in entries)
-      if (entry.isSpace && entry.isJoined)
-        entry.id: joinableSubspaces([
-          for (final child
-              in ref.watch(spaceChildrenProvider(entry.id)).value ?? const [])
-            child.copyWith(isJoined: joinedIds.contains(child.roomId)),
-        ]),
-  };
+  final joinableBySpace = _joinableBySpace(ref, entries);
   return RoomListContent(
     visible: visible,
     foldedSpaceIds: ref.watch(foldedSpacesControllerProvider).value ?? const {},

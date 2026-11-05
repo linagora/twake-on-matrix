@@ -32,7 +32,7 @@ MockRoom _room(
   bool isSpace = false,
   List<String> children = const [],
   List<String> parents = const [],
-  String? canonicalParent,
+  bool isLastParentCanonical = false,
 }) {
   final room = MockRoom();
   when(room.id).thenReturn(id);
@@ -49,7 +49,7 @@ MockRoom _room(
         _relation(
           EventTypes.SpaceParent,
           parent,
-          isCanonical: parent == canonicalParent,
+          isCanonical: isLastParentCanonical && parent == parents.last,
         ),
       ),
   ]);
@@ -182,7 +182,7 @@ void _roomListEntriesOfTests() {
       final entries = entriesOf([
         _room('!a', isSpace: true, children: ['!c']),
         _room('!z', isSpace: true, children: ['!c']),
-        _room('!c', parents: ['!a', '!z'], canonicalParent: '!z'),
+        _room('!c', parents: ['!a', '!z'], isLastParentCanonical: true),
       ]);
 
       expect(entries.last.parentSpaceIds, ['!z', '!a']);
@@ -191,7 +191,7 @@ void _roomListEntriesOfTests() {
     test('whenTheCanonicalSpaceIsNotJoined_ignoresIt', () {
       final entries = entriesOf([
         _room('!a', isSpace: true, children: ['!c']),
-        _room('!c', parents: ['!a', '!gone'], canonicalParent: '!gone'),
+        _room('!c', parents: ['!a', '!gone'], isLastParentCanonical: true),
       ]);
 
       expect(entries.last.parentSpaceIds, ['!a']);
