@@ -192,6 +192,7 @@ class TwakeDialog {
   /// stored).
   static Future<Object?> showStreamDialogFullScreen({
     required Future Function() future,
+    Client? account,
   }) async {
     final twakeContext = TwakeApp.routerKey.currentContext;
     if (twakeContext == null) {
@@ -201,8 +202,8 @@ class TwakeDialog {
     }
     return await showDialog<Object?>(
       context: twakeContext!,
-      builder: (context) => InitClientDialog(future: future),
-      barrierDismissible: true,
+      builder: (context) => InitClientDialog(future: future, account: account),
+      barrierDismissible: false,
       barrierColor: Colors.transparent,
       useRootNavigator: false,
     );

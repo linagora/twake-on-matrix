@@ -16,7 +16,20 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 class InitClientDialog extends StatefulWidget {
   final Future Function() future;
 
-  const InitClientDialog({super.key, required this.future});
+  /// The account this dialog is logging in. A login event of another account
+  /// belongs to that account's own screen.
+  final Client? account;
+
+  /// Goes to a location after a login; the app router unless a test says
+  /// otherwise.
+  final void Function(String location, {Object? extra})? navigate;
+
+  const InitClientDialog({
+    super.key,
+    required this.future,
+    this.account,
+    @visibleForTesting this.navigate,
+  });
 
   @override
   State<InitClientDialog> createState() => _InitClientDialogState();
@@ -48,6 +61,8 @@ class _InitClientDialogState extends State<InitClientDialog>
   final Completer _loginCompleter = Completer();
 
   void _listenClientLoginStateChanged(ClientLoginStateEvent event) {
+    final account = widget.account;
+    if (account != null && event.client != account) return;
     Logs().i(
       'StreamDialogBuilder::_listenClientLoginStateChanged - ${event.multipleAccountLoginType}',
     );
@@ -64,14 +79,31 @@ class _InitClientDialogState extends State<InitClientDialog>
       if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       return;
     }
+
+    if (event.multipleAccountLoginType.isFailure) {
+      _handleLoginFailed(event);
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
+      return;
+    }
+  }
+
+  /// The login worked on the server but the account could not be stored and
+  /// the login was undone. The event is the dialog result, so whoever opened
+  /// the dialog can tell the user and let them try again.
+  void _handleLoginFailed(ClientLoginStateEvent event) {
+    if (!mounted) return;
+
+    Navigator.of(context, rootNavigator: false).pop(event);
   }
 
   void _handleFunctionOnDone() async {
     Logs().i('StreamDialogBuilder::_handleFunctionOnDone');
+    var timedOut = false;
     try {
       await _loginCompleter.future.timeout(
         const Duration(seconds: 30),
         onTimeout: () {
+          timedOut = true;
           Logs().w(
             'StreamDialogBuilder::_handleFunctionOnDone - Timeout waiting for login state',
           );
@@ -82,16 +114,42 @@ class _InitClientDialogState extends State<InitClientDialog>
     }
 
     if (!mounted) return;
+    if (!timedOut) return;
+    // Reached once the server accepted the login: when the client holds a
+    // token the set-up is slow, not failed, so the user goes on to the rooms
+    // as the login event would have sent them.
+    final account = widget.account;
+    if (account != null && account.isLogged()) {
+      _handleSlowLogin(account);
+      return;
+    }
+    // Back and the barrier cannot close the dialog, so a login that never
+    // reports would keep it up for good: it ends as a failure.
+    Navigator.of(
+      context,
+      rootNavigator: false,
+    ).pop(TimeoutException('The login did not report its result'));
+  }
+
+  void _handleSlowLogin(Client account) {
+    final hasOtherAccount = Matrix.of(context).currentClients
+        .whereType<Client>()
+        .any((client) => !identical(client, account) && client.isLogged());
+    if (hasOtherAccount) {
+      _handleAddAnotherAccount(account);
+    } else {
+      _handleFirstLoggedIn(account);
+    }
   }
 
   void _handleFunctionOnError(Object? error) {
     Logs().e('StreamDialogBuilder::_handleFunctionOnError - $error');
     if (mounted) {
-      if (!_loginCompleter.isCompleted) {
-        _loginCompleter.completeError(error ?? 'Unknown error');
-      }
+      // Nothing waits for the login state once the login threw: the error
+      // goes back with the dialog.
+      if (!_loginCompleter.isCompleted) _loginCompleter.complete();
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context, error);
     }
   }
 
@@ -100,7 +158,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     Navigator.of(context, rootNavigator: false).pop();
 
-    TwakeApp.router.go(
+    (widget.navigate ?? TwakeApp.router.go)(
       '/rooms',
       extra: LoggedInBodyArgs(newActiveClient: client),
     );
@@ -111,7 +169,7 @@ class _InitClientDialogState extends State<InitClientDialog>
 
     Navigator.of(context, rootNavigator: false).pop();
 
-    TwakeApp.router.go(
+    (widget.navigate ?? TwakeApp.router.go)(
       '/rooms',
       extra: LoggedInOtherAccountBodyArgs(newActiveClient: client),
     );
@@ -140,25 +198,31 @@ class _InitClientDialogState extends State<InitClientDialog>
 
   @override
   Widget build(BuildContext context) {
-    return SlotLayout(
-      config: <Breakpoint, SlotLayoutConfig>{
-        const WidthPlatformBreakpoint(
-          end: ResponsiveUtils.maxMobileWidth,
-        ): SlotLayout.from(
-          key: DialogKeys.initClientBreakpointMobile.key,
-          builder: (_) => TomBootstrapDialogMobileView(
-            description: L10n.of(context)!.backingUpYourMessage,
+    // Back and the barrier must not close this while the login is running:
+    // the dialog is the only listener of this attempt, and closing it makes
+    // the login look successful or drops a later failure.
+    return PopScope(
+      canPop: false,
+      child: SlotLayout(
+        config: <Breakpoint, SlotLayoutConfig>{
+          const WidthPlatformBreakpoint(
+            end: ResponsiveUtils.maxMobileWidth,
+          ): SlotLayout.from(
+            key: DialogKeys.initClientBreakpointMobile.key,
+            builder: (_) => TomBootstrapDialogMobileView(
+              description: L10n.of(context)!.backingUpYourMessage,
+            ),
           ),
-        ),
-        const WidthPlatformBreakpoint(
-          begin: ResponsiveUtils.minTabletWidth,
-        ): SlotLayout.from(
-          key: DialogKeys.initClientBreakpointWebAndDesktop.key,
-          builder: (_) => TomBootstrapDialogWebView(
-            description: L10n.of(context)!.backingUpYourMessage,
+          const WidthPlatformBreakpoint(
+            begin: ResponsiveUtils.minTabletWidth,
+          ): SlotLayout.from(
+            key: DialogKeys.initClientBreakpointWebAndDesktop.key,
+            builder: (_) => TomBootstrapDialogWebView(
+              description: L10n.of(context)!.backingUpYourMessage,
+            ),
           ),
-        ),
-      },
+        },
+      ),
     );
   }
 }

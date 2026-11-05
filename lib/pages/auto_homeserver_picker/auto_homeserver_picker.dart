@@ -1,7 +1,9 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_view.dart';
+import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -73,7 +75,7 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
       if (!ssoSupported) {
         // No SSO: go straight to password login page
-        const HomeLoginRoute().push(context);
+        const HomeLoginRoute($extra: LoginClientOwner.caller).push(context);
       } else if (ssoSupported && matrix.loginRegistrationSupported == false) {
         Map<String, dynamic>? rawLoginTypes;
         await client
@@ -89,10 +91,18 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
           rawLoginTypes: rawLoginTypes,
         );
         if (supportsSso(context) && identitiesProvider?.length == 1) {
-          ssoLoginAction(context: context, id: identitiesProvider!.single.id!);
+          final result = await ssoLoginAction(
+            context: context,
+            id: identitiesProvider!.single.id!,
+          );
+          // A failed login shows the retry button instead of the spinner.
+          if (result != SsoLoginState.success && mounted) {
+            autoHomeserverPickerUIState.value =
+                AutoHomeServerPickerFailureState();
+          }
         }
       } else {
-        const ConnectRoute().push(context);
+        const ConnectRoute($extra: LoginClientOwner.caller).push(context);
       }
     } catch (e) {
       autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState();
