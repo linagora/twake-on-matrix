@@ -10,9 +10,9 @@ import '../base/base_test_scenario.dart';
 
 /// Cross-platform scenario: create a public group limited to the homeserver.
 ///
-/// Turns the public groups flag on, creates a group with "Make chat public",
-/// then asserts on the homeserver that the room is public, unfederated,
-/// unencrypted and listed in the room directory.
+/// Turns the public groups flag on without `server_acl`, creates a group with
+/// "Make chat public", then asserts on the homeserver that the room is public,
+/// unfederated, unencrypted and listed in the room directory.
 ///
 /// The flag is injected because the test homeserver serves no HTTPS
 /// well-known.
@@ -41,10 +41,7 @@ class CreatePublicGroupChatScenario extends BaseTestScenario {
               additionalProperties: {
                 ...?summary?.discoveryInformation?.additionalProperties,
                 'app.twake.chat': {
-                  'public_groups': {
-                    'enabled': true,
-                    'default_server_limited': true,
-                  },
+                  'public_groups': {'enabled': true},
                 },
               },
             ),

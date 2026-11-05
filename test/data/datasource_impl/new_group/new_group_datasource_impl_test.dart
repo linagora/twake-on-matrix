@@ -115,7 +115,7 @@ void main() {
     );
 
     test(
-      'createGroup_whenPublicAndServerLimited_createsAnUnencryptedUnfederatedPublicRoom',
+      'createGroup_whenPublicWithoutServerAcl_createsAnUnencryptedUnfederatedPublicRoom',
       () async {
         // Act
         await datasource.createGroup(
@@ -123,7 +123,6 @@ void main() {
             groupName: 'Paris Business',
             enableEncryption: true,
             isPublic: true,
-            isServerLimited: true,
           ),
         );
 
@@ -138,13 +137,14 @@ void main() {
     );
 
     test(
-      'createGroup_whenPublicWithoutServerLimit_createsAFederatedPublicRoom',
+      'createGroup_whenPublicWithServerAcl_createsAPublicRoomWithoutMFederate',
       () async {
         // Act
         await datasource.createGroup(
           const CreateNewGroupChatRequest(
             groupName: 'Open Lab',
             isPublic: true,
+            isServerAclEnabled: true,
           ),
         );
 
@@ -158,13 +158,12 @@ void main() {
       },
     );
 
-    test('createGroup_whenPrivate_ignoresTheServerLimit', () async {
+    test('createGroup_whenPrivate_createsAPrivateRoom', () async {
       // Act
       await datasource.createGroup(
         const CreateNewGroupChatRequest(
           groupName: 'Team',
           enableEncryption: true,
-          isServerLimited: true,
         ),
       );
 

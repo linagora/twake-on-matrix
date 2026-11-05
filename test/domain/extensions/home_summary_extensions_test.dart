@@ -333,50 +333,52 @@ void main() {
       expect(isEnabled, isFalse);
     });
 
+    test('isPublicGroupsServerAclEnabled_whenWellKnownSetsIt_returnsTrue', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': true, 'server_acl': true},
+        },
+      });
+
+      // Act
+      final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
+
+      // Assert
+      expect(isServerAclEnabled, isTrue);
+    });
+
     test(
-      'isPublicGroupsServerLimitedByDefault_whenWellKnownOpensGroups_returnsFalse',
+      'isPublicGroupsServerAclEnabled_whenWellKnownSetsFalse_returnsFalse',
       () {
         // Arrange
         final summary = summaryWith({
           'app.twake.chat': {
-            'public_groups': {'default_server_limited': false},
+            'public_groups': {'enabled': true, 'server_acl': false},
           },
         });
 
         // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
+        final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
 
         // Assert
-        expect(isLimited, isFalse);
+        expect(isServerAclEnabled, isFalse);
       },
     );
 
-    test(
-      'isPublicGroupsServerLimitedByDefault_whenKeyIsMissing_returnsTrue',
-      () {
-        // Arrange
-        final summary = summaryWith({'app.twake.chat': <String, dynamic>{}});
+    test('isPublicGroupsServerAclEnabled_whenKeyIsMissing_returnsFalse', () {
+      // Arrange
+      final summary = summaryWith({
+        'app.twake.chat': {
+          'public_groups': {'enabled': true},
+        },
+      });
 
-        // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
+      // Act
+      final isServerAclEnabled = summary.isPublicGroupsServerAclEnabled;
 
-        // Assert
-        expect(isLimited, isTrue);
-      },
-    );
-
-    test(
-      'isPublicGroupsServerLimitedByDefault_whenSummaryIsNull_returnsTrue',
-      () {
-        // Arrange
-        const HomeserverSummary? summary = null;
-
-        // Act
-        final isLimited = summary.isPublicGroupsServerLimitedByDefault;
-
-        // Assert
-        expect(isLimited, isTrue);
-      },
-    );
+      // Assert
+      expect(isServerAclEnabled, isFalse);
+    });
   });
 }

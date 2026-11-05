@@ -127,8 +127,34 @@ When the server enables public groups, the group creation screen always shows
 "Enable end-to-end encryption" then "Make chat public", both off. While one is
 on, the other is greyed out and its subtitle says why, so a group can never be
 created both public and encrypted. Turning it off makes the other available
-again. "Limit to users of <server>" still appears under "Make chat public"
-when the group is public.
+again. There is no "Limit to users of <server>" toggle under "Make chat
+public" (see D8).
 
 When the server does not enable public groups, only the encryption toggle is
 shown, as before.
+
+## D8. A public group stays on its server through a server ACL when the server says so (proposed by Johann, 2026-11-03)
+
+A homeserver that keeps public rooms on itself sets an
+[`m.room.server_acl`](https://spec.matrix.org/v1.16/client-server-api/#mroomserver_acl)
+that allows only itself on a room whose join rule becomes public, and opens it
+again when the room stops being public. If a room admin changes that ACL from
+another client, the server module puts it back. The module acts only on rooms
+created on its own server, and only when a local member has the power level to
+send the ACL; otherwise it logs an error and the room stays public and open to
+other servers. Such a server announces it in its well-known with
+`app.twake.chat.public_groups.server_acl: true`.
+
+When it does, the client creates a public group without `m.federate`. When the
+key is false or missing, the client sets `m.federate: false` in the
+`creation_content` of
+[`createRoom`](https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3createroom),
+as before. That value of
+[`m.room.create`](https://spec.matrix.org/v1.16/client-server-api/#mroomcreate)
+is fixed forever, so the room can never be opened to other servers later. In
+both cases the group creation screen offers no "Limit to users of <server>"
+toggle.
+
+A server whose well-known set `default_server_limited: false` used to create
+public groups that federate by default. It now gets `m.federate: false` too,
+unless it announces `server_acl: true`.

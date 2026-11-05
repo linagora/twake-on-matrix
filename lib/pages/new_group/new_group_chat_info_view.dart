@@ -10,7 +10,6 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/widget/expansion_participants_list.dart';
 import 'package:twake_chat/presentation/model/pick_avatar_state.dart';
-import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/app_bars/twake_app_bar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -337,7 +336,6 @@ class _GroupPrivacySettings extends ConsumerWidget {
         (summary) => summary.isPublicGroupsEnabled,
       ),
     );
-    final serverName = ref.watch(activeUserIdProvider)?.domain;
     final l10n = L10n.of(context)!;
     return ValueListenableBuilder<GroupPrivacyState>(
       valueListenable: screen.groupPrivacyNotifier,
@@ -349,7 +347,7 @@ class _GroupPrivacySettings extends ConsumerWidget {
             onChanged: (isEncrypted) =>
                 screen.setEncrypted(isEncrypted: isEncrypted),
           ),
-          if (isPublicGroupsEnabled) ...[
+          if (isPublicGroupsEnabled)
             LinagoraSettingItem.selectable(
               title: l10n.makeChatPublic,
               subtitle: privacy.canBePublic
@@ -360,16 +358,6 @@ class _GroupPrivacySettings extends ConsumerWidget {
               enabled: privacy.canBePublic,
               onChanged: (isPublic) => screen.setPublic(isPublic: isPublic),
             ),
-            if (privacy.isPublic)
-              LinagoraSettingItem.selectable(
-                title: l10n.groupPrivacyLimitToServer(serverName ?? ''),
-                subtitle: l10n.groupPrivacyLimitToServerDescription,
-                subtitleMaxLines: null,
-                value: privacy.isServerLimited,
-                onChanged: (isServerLimited) =>
-                    screen.setServerLimited(isServerLimited: isServerLimited),
-              ),
-          ],
         ],
       ),
     );

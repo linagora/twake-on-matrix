@@ -65,14 +65,13 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
 
   CreateNewGroupChatRequest _toRequest(NewGroupForm form) {
     final userId = ref.read(activeUserIdProvider);
+    final summary = ref.read(loginHomeserverSummaryProvider);
     return CreateNewGroupChatRequest(
       groupName: form.groupName,
       invite: form.invitees.nonNulls.where((id) => id != userId).toList(),
       enableEncryption: form.privacy.isEncrypted,
-      isPublic:
-          form.privacy.isPublic &&
-          ref.read(loginHomeserverSummaryProvider).isPublicGroupsEnabled,
-      isServerLimited: form.privacy.isServerLimited,
+      isPublic: form.privacy.isPublic && summary.isPublicGroupsEnabled,
+      isServerAclEnabled: summary.isPublicGroupsServerAclEnabled,
       urlAvatar: form.urlAvatar,
     );
   }

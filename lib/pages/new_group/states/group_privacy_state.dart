@@ -9,7 +9,6 @@ abstract class GroupPrivacyState with _$GroupPrivacyState {
   @Assert('!(isPublic && isEncrypted)', 'A public group cannot be encrypted')
   const factory GroupPrivacyState({
     @Default(false) bool isPublic,
-    @Default(false) bool isServerLimited,
     @Default(false) bool isEncrypted,
   }) = _GroupPrivacyState;
 
@@ -17,16 +16,10 @@ abstract class GroupPrivacyState with _$GroupPrivacyState {
 
   bool get canBeEncrypted => !isPublic;
 
-  /// Unchanged while encrypted; turning public on resets [isServerLimited].
-  GroupPrivacyState withPublic({
-    required bool isPublic,
-    required bool isServerLimitedByDefault,
-  }) {
+  /// Unchanged while encrypted.
+  GroupPrivacyState withPublic({required bool isPublic}) {
     if (isPublic && !canBePublic) return this;
-    return copyWith(
-      isPublic: isPublic,
-      isServerLimited: isPublic && isServerLimitedByDefault,
-    );
+    return copyWith(isPublic: isPublic);
   }
 
   /// Unchanged while public.
