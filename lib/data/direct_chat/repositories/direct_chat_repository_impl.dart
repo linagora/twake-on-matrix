@@ -71,6 +71,8 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
 
   /// A forbidden profile stops the creation; any other profile failure is
   /// logged and the creation goes on, as the contact may have no profile yet.
+  /// Profile lookup: https://spec.matrix.org/v1.11/client-server-api/#get_matrixclientv3profileuserid
+  /// (403 `M_FORBIDDEN` when the server refuses to share the profile).
   Future<void> _checkProfile(Client client, String contactMxId) async {
     try {
       await client.getUserProfile(contactMxId);
