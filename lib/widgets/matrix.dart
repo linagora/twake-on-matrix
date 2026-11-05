@@ -45,6 +45,7 @@ import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -1258,19 +1259,24 @@ class MatrixState extends ConsumerState<Matrix>
     }
   }
 
+  final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
+
   Future<void> _getHomeserverInformation(Client newClient) async {
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     if (newClient.homeserver == null) return;
     final previousSummary = loginHomeserverSummary;
+    final refreshTicket = _homeserverCheckLog.begin(newClient);
 
     HomeserverSummary? checkedSummary;
+    var checkFailed = false;
     try {
       checkedSummary = await newClient
-          .checkHomeserver(newClient.homeserver!, checkWellKnown: false)
+          .checkStoredHomeserver()
           .toHomeserverSummary();
     } catch (e) {
+      checkFailed = true;
       Logs().w(
         'Matrix::_getHomeserverInformation: homeserver unreachable, using '
         'cached discovery information',
@@ -1279,14 +1285,24 @@ class MatrixState extends ConsumerState<Matrix>
     }
 
     final discovery = await newClient.getWellKnownOrFallback(
-      fallback: previousSummary?.discoveryInformation,
+      fallback: newClient.discoveryFallbackFor(
+        previousSummary?.discoveryInformation,
+      ),
     );
 
-    if (checkedSummary == null && discovery == null) return;
-
     // The active client may have changed while awaiting: a late result must
-    // not overwrite the newer account's summary.
-    if (clientOrNull != newClient) return;
+    // not overwrite the newer account's summary. A newer refresh of the same
+    // client wins over this one for the same reason.
+    if (clientOrNull != newClient ||
+        !_homeserverCheckLog.isLatest(newClient, refreshTicket)) {
+      return;
+    }
+
+    // Recorded before the early return below: an unreachable account without
+    // cached discovery must still be refreshed on reconnect.
+    _homeserverCheckLog.record(newClient, failed: checkFailed);
+
+    if (checkedSummary == null && discovery == null) return;
 
     loginHomeserverSummary = HomeserverSummary(
       discoveryInformation: discovery,
@@ -1350,7 +1366,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    client.applyDefaultHomeserverWithoutSession(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
@@ -1525,7 +1541,12 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   Future<void> onConnect() async {
     if (widget.clients.isEmpty) return;
-    if (client.homeserver != null) return;
+    if (!client.needsHomeserverInformationRefresh(
+      hasSummary: loginHomeserverSummary != null,
+      lastCheckFailed: _homeserverCheckLog.hasFailed(client),
+    )) {
+      return;
+    }
     await _refreshHomeserverInformation(client);
   }
 
