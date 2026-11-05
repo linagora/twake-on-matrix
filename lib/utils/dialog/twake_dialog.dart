@@ -187,7 +187,10 @@ class TwakeDialog {
     );
   }
 
-  static Future<void> showStreamDialogFullScreen({
+  /// Shows the dialog that runs [future]; its result is what the dialog is
+  /// popped with (the failed login event when the account could not be
+  /// stored).
+  static Future<Object?> showStreamDialogFullScreen({
     required Future Function() future,
   }) async {
     final twakeContext = TwakeApp.routerKey.currentContext;
@@ -196,7 +199,7 @@ class TwakeDialog {
         'TwakeLoadingDialog()::showStreamDialogFullScreen - Twake context is null',
       );
     }
-    return await showDialog(
+    return await showDialog<Object?>(
       context: twakeContext!,
       builder: (context) => InitClientDialog(future: future),
       barrierDismissible: true,
