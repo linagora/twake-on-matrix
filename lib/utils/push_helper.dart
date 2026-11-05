@@ -204,7 +204,9 @@ Future<void> _tryPushHelper(
           ),
         ),
       );
-      if (decrypted != null && !decrypted.type.startsWith('m.call')) {
+      if (decrypted != null &&
+          !decrypted.type.startsWith('m.call') &&
+          !decrypted.type.startsWith('org.matrix.call.')) {
         await _showNotification(
           flutterLocalNotificationsPlugin,
           decrypted,
