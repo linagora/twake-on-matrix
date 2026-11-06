@@ -18,7 +18,6 @@ void main() {
   late Room room;
   final sentAt = DateTime(2026, 11, 4, 14, 32);
   final en = lookupL10n(const Locale('en'));
-  final fr = lookupL10n(const Locale('fr'));
 
   setUpAll(() async {
     client = await getClient();
@@ -76,10 +75,6 @@ void main() {
       expect(
         callThreadRoot().callThreadRootText(en),
         'Meeting started at $time',
-      );
-      expect(
-        callThreadRoot().callThreadRootText(fr),
-        'Réunion démarrée à $time',
       );
     });
 

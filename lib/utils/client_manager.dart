@@ -159,12 +159,6 @@ abstract class ClientManager {
         // this was added only get it on their next join_rules change.
         EventTypes.RoomJoinRules,
       },
-      // The SDK default adds call events: a call would mark the room unread.
-      roomPreviewLastEvents: <String>{
-        EventTypes.Message,
-        EventTypes.Encrypted,
-        EventTypes.Sticker,
-      },
       // Matrix 12+ no longer caches loadArchive() results for getRoomById().
       // Persist left rooms via sync; keep SDK default member lazy-loading.
       syncFilter: Filter(

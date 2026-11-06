@@ -6,4 +6,13 @@ abstract final class CallEventTypes {
   /// Marks the message that opens the thread of a call, as Twake Space Chat
   /// sends it when a call starts.
   static const String callThreadKey = 'app.twake.chat.call_thread';
+
+  static const _prefixes = ['m.call.', 'org.matrix.call.', 'com.famedly.call.'];
+
+  /// Call signalling and MatrixRTC events, legacy ones included.
+  static bool isCallEvent(String type) =>
+      type == callMember ||
+      type == rtcNotification ||
+      type == callNotify ||
+      _prefixes.any(type.startsWith);
 }

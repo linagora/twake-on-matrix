@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/setting_keys.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/extensions/push/push_notification_extension.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -147,15 +148,8 @@ Future<void> _tryPushHelper(
     client.backgroundSync = false;
   }
 
-  if (event.type.startsWith('m.call')) {
-    Logs().v('Push message is a m.call. Do not display.');
-    return;
-  }
-
-  if ((event.type.startsWith('m.call') &&
-          event.type != EventTypes.CallInvite) ||
-      event.type == 'org.matrix.call.sdp_stream_metadata_changed') {
-    Logs().v('Push message was for a call, but not call invite.');
+  if (CallEventTypes.isCallEvent(event.type)) {
+    Logs().v('Push message is a call event. Do not display.');
     return;
   }
 
@@ -204,9 +198,7 @@ Future<void> _tryPushHelper(
           ),
         ),
       );
-      if (decrypted != null &&
-          !decrypted.type.startsWith('m.call') &&
-          !decrypted.type.startsWith('org.matrix.call.')) {
+      if (decrypted != null && !CallEventTypes.isCallEvent(decrypted.type)) {
         await _showNotification(
           flutterLocalNotificationsPlugin,
           decrypted,
