@@ -6,7 +6,7 @@ void main() {
   test('call signalling and MatrixRTC events are call events', () {
     for (final type in [
       CallEventTypes.callMember,
-      CallEventTypes.rtcNotification,
+      RtcNotificationContent.eventType,
       CallEventTypes.callNotify,
       EventTypes.CallInvite,
       EventTypes.CallAnswer,

@@ -98,7 +98,7 @@ void main() {
           EventTypes.CallNegotiate,
           EventTypes.GroupCallMember,
           CallEventTypes.callMember,
-          CallEventTypes.rtcNotification,
+          RtcNotificationContent.eventType,
           CallEventTypes.callNotify,
         ]) {
           expect(
@@ -301,7 +301,7 @@ void main() {
         AppConfig.hideUnknownEvents = false;
         for (final type in [
           CallEventTypes.callMember,
-          CallEventTypes.rtcNotification,
+          RtcNotificationContent.eventType,
           CallEventTypes.callNotify,
           EventTypes.CallHangup,
         ]) {
