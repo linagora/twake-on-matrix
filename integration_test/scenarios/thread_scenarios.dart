@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_search/chat_search_view.dart';
 import 'package:twake_chat/widgets/matrix.dart' as twake;
 
@@ -204,6 +205,9 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     await threads.expectMessageInThread(myReply);
     await threads.closeThread();
     await chat.clickOnBackIcon();
+    // The room was opened from search: leave search to reach the chat list.
+    await robots.searchRobot().backToPreviousScreen();
+    await $(ChatList).waitUntilVisible();
 
     await sendEventAsReceiver(
       roomId: fixture.roomId,
