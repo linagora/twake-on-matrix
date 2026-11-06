@@ -72,6 +72,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extensi
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconciliation_extension.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -161,6 +162,11 @@ class ChatController extends ConsumerState<Chat>
         AutoMarkAsReadMixin {
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
+
+  late final Stream<ConnectivityResult> connectivityResultStream =
+      networkConnectionService.connectivity.onConnectivityChanged.map(
+        (results) => results.primary,
+      );
 
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
