@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:twake_chat/utils/login_failed_snackbar.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
@@ -173,9 +172,7 @@ class _OnAuthRedirectState extends ConsumerState<OnAuthRedirect>
       final client = await sessions.loginClient();
       _loginClient = client;
       final summary = context.mounted
-          ? await client
-                .checkHomeserver(Uri.parse(homeserver))
-                .toHomeserverSummary()
+          ? await sessions.checkHomeserver(client, Uri.parse(homeserver))
           : null;
       if (summary == null || !context.mounted) {
         // The user left while the client was made or the homeserver was
@@ -183,8 +180,6 @@ class _OnAuthRedirectState extends ConsumerState<OnAuthRedirect>
         unawaited(sessions.discardPending());
         return;
       }
-      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
-
       await sessions.trackLogin(
         client,
         () => client.login(

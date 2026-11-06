@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
@@ -209,7 +208,7 @@ class LoginController extends ConsumerState<Login> {
     try {
       var newDomain = Uri.https(userId.domain!, '');
 
-      // Use cached discovery from loginHomeserverSummary instead of
+      // Use the discovery the login screens checked instead of
       // re-fetching well-known (which fails on domains like twake.app
       // that don't serve .well-known/matrix/client).
       // Only apply when the MXID domain matches the current homeserver
@@ -217,9 +216,7 @@ class LoginController extends ConsumerState<Login> {
       // from a different server are not silently redirected.
       final mxidDomain = userId.domain!;
       final currentHost = oldHomeserver?.host ?? '';
-      final cachedDiscovery = ref
-          .read(loginHomeserverSummaryProvider)
-          ?.discoveryInformation;
+      final cachedDiscovery = _sessions.homeserverSummary?.discoveryInformation;
       final cachedBaseUrl =
           cachedDiscovery?.mHomeserver.baseUrl.toString() ?? '';
       if (currentHost.endsWith(mxidDomain) && cachedBaseUrl.isNotEmpty) {

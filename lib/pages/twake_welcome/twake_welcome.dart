@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
@@ -99,11 +98,11 @@ class TwakeWelcomeController extends ConsumerState<TwakeWelcome>
       }
       final sessions = _sessions;
       final client = await sessions.loginClient();
-      final summary = await client
-          .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
-          .toHomeserverSummary();
+      await sessions.checkHomeserver(
+        client,
+        Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+      );
       if (!mounted) return;
-      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
       final uri = await FlutterWebAuth2.authenticate(
         url: url,
         callbackUrlScheme: AppConfig.appOpenUrlScheme,

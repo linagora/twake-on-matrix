@@ -7,6 +7,8 @@
 /// used by the mobile integration tests (PRs #2980, #3015).
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -61,9 +63,9 @@ void main() {
       final matrix = Matrix.of(context);
       final client = await matrix.getLoginClient();
 
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(serverUrl))
-          .toHomeserverSummary();
+      await ProviderScope.containerOf(context, listen: false)
+          .read(loginSessionsProvider)
+          .checkHomeserver(client, Uri.parse(serverUrl));
 
       await client.login(
         LoginType.mLoginPassword,
