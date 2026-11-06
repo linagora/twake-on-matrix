@@ -15,8 +15,21 @@ void main() {
   group('SendTextMessageInteractor', () {
     // Twelve characters, three parts of five.
     const String longText = 'abcdefghijkl';
+    const String editEventId = r'$edited';
     late SendTextMessageInteractor interactor;
     late MockRoom room;
+
+    Event mediaEvent(Map<String, Object?> content) => Event(
+      content: content,
+      type: EventTypes.Message,
+      eventId: editEventId,
+      senderId: '@alice:example.org',
+      originServerTs: DateTime(2026),
+      room: room,
+    );
+
+    Event textEvent() =>
+        mediaEvent({'msgtype': MessageTypes.Text, 'body': 'before'});
 
     PostExpectation<Future<String?>> whenSendTextEvent() => when(
       room.sendTextEvent(
@@ -27,14 +40,17 @@ void main() {
       ),
     );
 
-    void verifyNoOtherSend() => verifyNever(
-      room.sendTextEvent(
-        any,
-        inReplyTo: anyNamed('inReplyTo'),
-        editEventId: anyNamed('editEventId'),
-        parseCommands: anyNamed('parseCommands'),
-      ),
-    );
+    void verifyNoOtherSend() {
+      verifyNever(
+        room.sendTextEvent(
+          any,
+          inReplyTo: anyNamed('inReplyTo'),
+          editEventId: anyNamed('editEventId'),
+          parseCommands: anyNamed('parseCommands'),
+        ),
+      );
+      verifyNever(room.sendEvent(any, editEventId: anyNamed('editEventId')));
+    }
 
     setUp(() {
       interactor = SendTextMessageInteractor(
@@ -47,6 +63,9 @@ void main() {
       when(room.client).thenReturn(client);
       when(client.commands).thenReturn({'me': (_, _) => null});
       whenSendTextEvent().thenAnswer((_) async => r'$event');
+      when(
+        room.sendEvent(any, editEventId: anyNamed('editEventId')),
+      ).thenAnswer((_) async => r'$event');
     });
 
     test(
@@ -202,14 +221,11 @@ void main() {
     );
 
     test('should send the whole text as one edit when editing', () async {
-      // Arrange
-      const String editEventId = r'$edited';
-
       // Act
       await interactor.execute(
         room: room,
         text: longText,
-        editEventId: editEventId,
+        editEvent: textEvent(),
       );
 
       // Assert
@@ -222,6 +238,110 @@ void main() {
       ).called(1);
       verifyNoOtherSend();
     });
+
+    test('should keep the file and its name when editing a caption', () async {
+      // Arrange
+      final Event image = mediaEvent({
+        'msgtype': MessageTypes.Image,
+        'body': 'Old caption',
+        'format': 'org.matrix.custom.html',
+        'formatted_body': '<b>Old caption</b>',
+        'filename': 'photo.jpg',
+        'url': 'mxc://example.org/photo',
+        'info': {'mimetype': 'image/jpeg', 'w': 400, 'h': 300},
+        'm.mentions': {},
+      });
+
+      // Act
+      await interactor.execute(
+        room: room,
+        text: 'New caption',
+        editEvent: image,
+      );
+
+      // Assert
+      verify(
+        room.sendEvent({
+          'msgtype': MessageTypes.Image,
+          'body': 'New caption',
+          'filename': 'photo.jpg',
+          'url': 'mxc://example.org/photo',
+          'info': {'mimetype': 'image/jpeg', 'w': 400, 'h': 300},
+        }, editEventId: editEventId),
+      ).called(1);
+      verifyNoOtherSend();
+    });
+
+    test(
+      'should keep the encrypted file and drop the reply relation when editing '
+      'a caption',
+      () async {
+        // Arrange
+        final Map<String, Object?> file = {
+          'url': 'mxc://example.org/doc',
+          'v': 'v2',
+        };
+        final Event document = mediaEvent({
+          'msgtype': MessageTypes.File,
+          'body': 'Old caption',
+          'filename': 'report.pdf',
+          'file': file,
+          'm.relates_to': {
+            'm.in_reply_to': {'event_id': r'$parent'},
+          },
+        });
+
+        // Act
+        await interactor.execute(
+          room: room,
+          text: '**New**',
+          editEvent: document,
+        );
+
+        // Assert
+        verify(
+          room.sendEvent({
+            'msgtype': MessageTypes.File,
+            'body': '**New**',
+            'format': 'org.matrix.custom.html',
+            'formatted_body': '<strong>New</strong>',
+            'filename': 'report.pdf',
+            'file': file,
+          }, editEventId: editEventId),
+        ).called(1);
+        verifyNoOtherSend();
+      },
+    );
+
+    test(
+      'should keep the body as the file name when the file had no filename',
+      () async {
+        // Arrange
+        final Event video = mediaEvent({
+          'msgtype': MessageTypes.Video,
+          'body': 'clip.mp4',
+          'url': 'mxc://example.org/clip',
+        });
+
+        // Act
+        await interactor.execute(
+          room: room,
+          text: 'A caption',
+          editEvent: video,
+        );
+
+        // Assert
+        verify(
+          room.sendEvent({
+            'msgtype': MessageTypes.Video,
+            'body': 'A caption',
+            'filename': 'clip.mp4',
+            'url': 'mxc://example.org/clip',
+          }, editEventId: editEventId),
+        ).called(1);
+        verifyNoOtherSend();
+      },
+    );
 
     test(
       'should let the SDK run a known command without splitting it',
@@ -281,13 +401,12 @@ void main() {
       () async {
         // Arrange
         const String text = '/foo bar';
-        const String editEventId = r'$edited';
 
         // Act
         await interactor.execute(
           room: room,
           text: text,
-          editEventId: editEventId,
+          editEvent: textEvent(),
         );
 
         // Assert
