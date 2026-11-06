@@ -2,8 +2,12 @@ import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 
 abstract class PublicRoomsRepository {
   /// The directory of the user's homeserver, one page at a time, up to
-  /// [limit] rooms. When a page after the first one fails, the stream ends.
-  Stream<List<PublicRoom>> fetchDirectory({required int limit});
+  /// [limit] rooms, filtered by the server on [searchTerm] when given. When a
+  /// page after the first one fails, the stream ends.
+  Stream<List<PublicRoom>> fetchDirectory({
+    required int limit,
+    String? searchTerm,
+  });
 
   /// The rooms the user has joined or is invited to.
   Set<String> getKnownRoomIds();

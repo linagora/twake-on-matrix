@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/feed_config.dart';
@@ -31,7 +32,10 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       _maybeClient ?? (throw const PublicRoomsNoClientException());
 
   @override
-  Stream<List<PublicRoom>> fetchDirectory({required int limit}) async* {
+  Stream<List<PublicRoom>> fetchDirectory({
+    required int limit,
+    String? searchTerm,
+  }) async* {
     final client = _client;
     var count = 0;
     var emptyPages = 0;
@@ -41,11 +45,22 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       final Map<String, Object?> page;
       try {
         // No `server`: the directory of the user's homeserver only.
-        page = await client.request(
-          RequestType.GET,
-          '/client/v3/publicRooms',
-          query: {'limit': '$pageSize', 'since': ?since},
-        );
+        page = searchTerm == null
+            ? await client.request(
+                RequestType.GET,
+                '/client/v3/publicRooms',
+                query: {'limit': '$pageSize', 'since': ?since},
+              )
+            // Only the POST form takes a filter: https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3publicrooms
+            : await client.request(
+                RequestType.POST,
+                '/client/v3/publicRooms',
+                data: {
+                  'limit': min(pageSize, limit),
+                  'since': ?since,
+                  'filter': {'generic_search_term': searchTerm},
+                },
+              );
         if (page['chunk'] is! List) {
           throw const FormatException('publicRooms: no chunk list');
         }
@@ -73,6 +88,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           .toList();
       count += rooms.length;
       yield rooms;
+      // A search is one request, as twake-space-chat does.
+      if (searchTerm != null) return;
       if (rooms.isEmpty && ++emptyPages == _maxEmptyPages) {
         Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: empty pages');
         return;

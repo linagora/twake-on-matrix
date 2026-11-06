@@ -337,6 +337,92 @@ void main() {
       expect(rooms.first.name, 'Group');
       expect(rooms[1].name, '!f');
     });
+
+    test(
+      'fetchDirectory_withASearchTerm_postsTheServerFilterUpToTheLimit',
+      () async {
+        // Arrange
+        when(
+          mockClient.request(
+            RequestType.POST,
+            '/client/v3/publicRooms',
+            data: anyNamed('data'),
+          ),
+        ).thenAnswer((_) async => page(0, 20, next: 'p2').toJson());
+
+        // Act
+        final pages = await datasource
+            .fetchDirectory(limit: 20, searchTerm: 'équipe')
+            .toList();
+
+        // Assert
+        expect(pages.map((page) => page.length), [20]);
+        verify(
+          mockClient.request(
+            RequestType.POST,
+            '/client/v3/publicRooms',
+            data: {
+              'limit': 20,
+              'filter': {'generic_search_term': 'équipe'},
+            },
+          ),
+        ).called(1);
+        verifyNever(
+          mockClient.request(RequestType.GET, any, query: anyNamed('query')),
+        );
+      },
+    );
+
+    test('fetchDirectory_withASearchTerm_neverAsksForTheNextPage', () async {
+      // Arrange
+      when(
+        mockClient.request(
+          RequestType.POST,
+          '/client/v3/publicRooms',
+          data: anyNamed('data'),
+        ),
+      ).thenAnswer((_) async => page(0, 5, next: 'p2').toJson());
+
+      // Act
+      final pages = await datasource
+          .fetchDirectory(limit: 20, searchTerm: 'eq')
+          .toList();
+
+      // Assert
+      expect(pages.map((page) => page.length), [5]);
+      verify(
+        mockClient.request(
+          RequestType.POST,
+          '/client/v3/publicRooms',
+          data: anyNamed('data'),
+        ),
+      ).called(1);
+    });
+
+    test(
+      'fetchDirectory_withASearchTermWhenTheServerFails_throwsTheTypedException',
+      () async {
+        // Arrange
+        when(
+          mockClient.request(
+            RequestType.POST,
+            '/client/v3/publicRooms',
+            data: anyNamed('data'),
+          ),
+        ).thenThrow(Exception('down'));
+
+        // Act
+        final result = datasource
+            .fetchDirectory(limit: 20, searchTerm: 'eq')
+            .toList();
+
+        // Assert
+        await expectLater(
+          result,
+          throwsA(isA<PublicRoomsFetchFailedException>()),
+        );
+      },
+    );
   });
 
   test('knownRoomIds_always_listsJoinedAndInvitedRooms', () {
