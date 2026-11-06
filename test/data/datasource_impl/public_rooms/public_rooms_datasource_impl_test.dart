@@ -374,6 +374,32 @@ void main() {
       },
     );
 
+    test('fetchDirectory_withASearchTerm_neverAsksForTheNextPage', () async {
+      // Arrange
+      when(
+        mockClient.request(
+          RequestType.POST,
+          '/client/v3/publicRooms',
+          data: anyNamed('data'),
+        ),
+      ).thenAnswer((_) async => page(0, 5, next: 'p2').toJson());
+
+      // Act
+      final pages = await datasource
+          .fetchDirectory(limit: 20, searchTerm: 'eq')
+          .toList();
+
+      // Assert
+      expect(pages.map((page) => page.length), [5]);
+      verify(
+        mockClient.request(
+          RequestType.POST,
+          '/client/v3/publicRooms',
+          data: anyNamed('data'),
+        ),
+      ).called(1);
+    });
+
     test(
       'fetchDirectory_withASearchTermWhenTheServerFails_throwsTheTypedException',
       () async {
