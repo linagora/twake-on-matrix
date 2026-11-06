@@ -1,4 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/data/account/login_sessions.dart';
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_state.dart';
@@ -36,6 +39,11 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   MatrixState get matrix => Matrix.of(context);
 
+  LoginSessions get _sessions => ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(loginSessionsProvider);
+
   bool get _isSaasPlatform =>
       AppConfig.platform != null &&
       AppConfig.platform!.isNotEmpty &&
@@ -43,18 +51,15 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   void _autoConnectHomeserver() async {
     try {
+      final sessions = _sessions;
       final client = await matrix.getLoginClient();
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(AppConfig.homeserver))
-          .timeout(
-            autoHomeserverPickerTimeout,
-            onTimeout: () {
-              throw CheckHomeserverTimeoutException();
-            },
-          )
-          .toHomeserverSummary();
+      final summary = await sessions.checkHomeserver(
+        client,
+        Uri.parse(AppConfig.homeserver),
+        timeout: autoHomeserverPickerTimeout,
+      );
 
-      final ssoSupported = matrix.loginHomeserverSummary.supportSSOLogin;
+      final ssoSupported = summary.supportSSOLogin;
 
       try {
         await client
@@ -123,16 +128,13 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
 
   void _autoConnectSaas() async {
     try {
+      final sessions = _sessions;
       final client = await matrix.getLoginClient();
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(AppConfig.twakeWorkplaceHomeserver))
-          .timeout(
-            autoHomeserverPickerTimeout,
-            onTimeout: () {
-              throw CheckHomeserverTimeoutException();
-            },
-          )
-          .toHomeserverSummary();
+      await sessions.checkHomeserver(
+        client,
+        Uri.parse(AppConfig.twakeWorkplaceHomeserver),
+        timeout: autoHomeserverPickerTimeout,
+      );
       Map<String, dynamic>? rawLoginTypes;
       await client
           .request(RequestType.GET, '/client/r0/login')
@@ -199,10 +201,9 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       final loginToken = getQueryParameter('loginToken');
       if (loginToken != null || loginToken?.isNotEmpty == true) {
         matrix.loginType = LoginType.mLoginToken;
+        final sessions = _sessions;
         final client = await matrix.getLoginClient();
-        matrix.loginHomeserverSummary = await client
-            .checkHomeserver(Uri.parse(AppConfig.homeserver))
-            .toHomeserverSummary();
+        await sessions.checkHomeserver(client, Uri.parse(AppConfig.homeserver));
         final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
           future: () async => client.login(
             LoginType.mLoginToken,

@@ -9,6 +9,38 @@ import 'package:twake_chat/data/account/login_sessions.dart';
 import 'fakes.dart';
 import 'fake_login_host.dart';
 
+/// A client whose home server check ends when the test completes it.
+class _CheckingClient extends FakeAccountClient {
+  _CheckingClient([super.clientName = 'checking']);
+
+  final checks = <Completer<DiscoveryInformation?>>[];
+
+  @override
+  Future<
+    (
+      DiscoveryInformation?,
+      GetVersionsResponse,
+      List<LoginFlow>,
+      GetAuthMetadataResponse?,
+    )
+  >
+  checkHomeserver(
+    Uri homeserverUrl, {
+    bool checkWellKnown = true,
+    bool? fetchAuthMetadata,
+    Set<String>? overrideSupportedVersions,
+  }) async {
+    final check = Completer<DiscoveryInformation?>();
+    checks.add(check);
+    return (
+      await check.future,
+      GetVersionsResponse(versions: const []),
+      const <LoginFlow>[],
+      null,
+    );
+  }
+}
+
 /// A host whose listeners fail when they are cancelled.
 class _FailingCancelHost extends FakeLoginHost {
   @override
@@ -531,6 +563,79 @@ void main() {
         sessions.trackLogin(client, () async => throw StateError('x')),
         throwsStateError,
       );
+    });
+  });
+
+  group('homeserverSummary', () {
+    final discovery = DiscoveryInformation(
+      mHomeserver: HomeserverInformation(
+        baseUrl: Uri.parse('https://other.example.com'),
+      ),
+    );
+    final homeserver = Uri.parse('https://other.example.com');
+
+    test('keeps the server the login screens checked', () async {
+      final client = _CheckingClient();
+
+      final check = sessions.checkHomeserver(client, homeserver);
+      client.checks.single.complete(discovery);
+      final summary = await check;
+
+      expect(summary.discoveryInformation, same(discovery));
+      expect(sessions.homeserverSummary, same(summary));
+    });
+
+    test('is forgotten when the user leaves', () async {
+      final client = _CheckingClient();
+      final check = sessions.checkHomeserver(client, homeserver);
+      client.checks.single.complete(discovery);
+      await check;
+
+      await sessions.discardPending();
+
+      expect(sessions.homeserverSummary, isNull);
+    });
+
+    test('is not kept from a check that ends after the user left', () async {
+      final client = _CheckingClient();
+      final check = sessions.checkHomeserver(client, homeserver);
+
+      await sessions.discardPending();
+      client.checks.single.complete(discovery);
+      await check;
+
+      expect(sessions.homeserverSummary, isNull);
+    });
+
+    test('is not kept from a check that a newer one overtook', () async {
+      final client = _CheckingClient();
+      final older = sessions.checkHomeserver(client, homeserver);
+      final newer = sessions.checkHomeserver(client, homeserver);
+      final newerDiscovery = DiscoveryInformation(
+        mHomeserver: HomeserverInformation(
+          baseUrl: Uri.parse('https://newer.example.com'),
+        ),
+      );
+
+      client.checks[1].complete(newerDiscovery);
+      await newer;
+      client.checks[0].complete(discovery);
+      await older;
+
+      expect(
+        sessions.homeserverSummary?.discoveryInformation,
+        same(newerDiscovery),
+      );
+    });
+
+    test('is given only for the client it was checked on', () async {
+      final client = _CheckingClient();
+      final check = sessions.checkHomeserver(client, homeserver);
+      client.checks.single.complete(discovery);
+      final summary = await check;
+
+      expect(sessions.homeserverSummaryOf(client), same(summary));
+      expect(sessions.homeserverSummaryOf(_CheckingClient('other')), isNull);
     });
   });
 }
