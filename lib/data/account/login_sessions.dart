@@ -23,6 +23,7 @@ class LoginSessions {
   final Map<String, LoginSession> _byId = {};
   LoginSession? _pending;
   HomeserverSummary? _homeserverSummary;
+  String? _homeserverSummaryClient;
   int _summaryGeneration = 0;
 
   /// Sessions replaced by a new login that still have a listener or a set-up
@@ -199,15 +200,19 @@ class LoginSessions {
   /// makes another one active.
   HomeserverSummary? get homeserverSummary => _homeserverSummary;
 
+  /// [homeserverSummary] when it was checked on [client].
+  HomeserverSummary? homeserverSummaryOf(Client client) =>
+      _homeserverSummaryClient == client.clientName ? _homeserverSummary : null;
+
   /// Checks [homeserver] on the login [client] and keeps what it found for
-  /// the login that follows. A check that ends after the user left, or after
-  /// [timeout], is not kept.
+  /// the login that follows. A check that ends after the user left, after a
+  /// newer check started, or after [timeout], is not kept.
   Future<HomeserverSummary> checkHomeserver(
     Client client,
     Uri homeserver, {
     Duration? timeout,
   }) async {
-    final generation = _summaryGeneration;
+    final generation = ++_summaryGeneration;
     try {
       final check = client.checkHomeserver(homeserver);
       final (discovery, versions, loginFlows, _) = timeout == null
@@ -221,7 +226,10 @@ class LoginSessions {
         versions: versions,
         loginFlows: loginFlows,
       );
-      if (generation == _summaryGeneration) _homeserverSummary = summary;
+      if (generation == _summaryGeneration) {
+        _homeserverSummary = summary;
+        _homeserverSummaryClient = client.clientName;
+      }
       return summary;
     } catch (e, s) {
       Logs().wtf('LoginSessions::checkHomeserver: $homeserver', e, s);
@@ -231,6 +239,7 @@ class LoginSessions {
 
   void _forgetHomeserverSummary() {
     _homeserverSummary = null;
+    _homeserverSummaryClient = null;
     _summaryGeneration++;
   }
 
