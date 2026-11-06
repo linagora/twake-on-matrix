@@ -14,6 +14,9 @@ class FakeAccountClient extends Fake implements Client {
   final bool logged;
 
   @override
+  Uri? homeserver;
+
+  @override
   bool isLogged() => logged;
 }
 

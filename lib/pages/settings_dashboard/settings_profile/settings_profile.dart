@@ -538,7 +538,9 @@ class SettingsProfileController extends State<SettingsProfile>
   Future<List<ClientProfilePresentation?>> _getClientProfiles() async {
     try {
       final profiles = await Future.wait(
-        (await ClientManager.getClients()).map((client) async {
+        ClientManager.loggedIn(await ClientManager.getClients()).map((
+          client,
+        ) async {
           final profileBundle = await client.fetchOwnProfile();
           Logs().d(
             'SettingsProfileController::getProfileBundles() - ClientName - ${client.clientName}',

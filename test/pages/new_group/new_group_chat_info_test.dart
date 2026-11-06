@@ -76,7 +76,10 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: ProviderScope(child: NewGroupChatInfoView(mockController)),
+          home: ProviderScope(
+            overrides: activeAccountOverrides(null),
+            child: NewGroupChatInfoView(mockController),
+          ),
         ),
       );
 

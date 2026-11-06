@@ -15,6 +15,7 @@ import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_bars/searchable_app_bar.dart';
 
+import '../../providers/fake_active_account.dart';
 import 'forward_screen_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<ForwardRepository>()])
@@ -42,6 +43,7 @@ void main() {
       ProviderScope(
         overrides: [
           forwardRepositoryProvider.overrideWithValue(mockRepository),
+          ...activeAccountOverrides(null),
         ],
         child: MaterialApp(
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),

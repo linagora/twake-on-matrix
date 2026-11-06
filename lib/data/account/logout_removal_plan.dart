@@ -14,11 +14,13 @@ class LogoutRemovalPlan {
     required bool Function() isActive,
     required Future<void> Function() cancelSubscriptions,
     required Future<void> Function() activateReplacement,
+    Future<void> Function()? rebindPush,
     Future<void> Function()? announce,
   }) : _accounts = accounts,
        _isActive = isActive,
        _cancelSubscriptions = cancelSubscriptions,
        _activateReplacement = activateReplacement,
+       _rebindPush = rebindPush,
        _announce = announce;
 
   final String id;
@@ -26,6 +28,12 @@ class LogoutRemovalPlan {
   final bool Function() _isActive;
   final Future<void> Function() _cancelSubscriptions;
   final Future<void> Function() _activateReplacement;
+
+  /// Null when push is not part of the removal. Moves push away from this
+  /// account if it still serves it. It does not
+  /// depend on the account having been the active one: push serves one account
+  /// and may be on one that is not active.
+  final Future<void> Function()? _rebindPush;
 
   /// Null when the user already knows (a removal retried after a restart).
   final Future<void> Function()? _announce;
@@ -71,11 +79,17 @@ class LogoutRemovalPlan {
   /// The announcement counts as done only when it worked, so a failure is
   /// retried.
   Future<void> _settle() async {
-    final announce = _announce;
-    if (announce != null && !_announced) {
-      await announce();
-      _announced = true;
+    try {
+      final announce = _announce;
+      if (announce != null && !_announced) {
+        await announce();
+        _announced = true;
+      }
+      if (_wasActive ?? false) await _activateReplacement();
+    } finally {
+      // Push must not stay on the account that left because a step before
+      // failed; the next try moves it again, which does nothing once moved.
+      await _rebindPush?.call();
     }
-    if (_wasActive ?? false) await _activateReplacement();
   }
 }

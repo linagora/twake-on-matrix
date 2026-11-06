@@ -9,8 +9,6 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
-import 'package:twake_chat/domain/model/homeserver_summary.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/init_client_dialog.dart';
@@ -72,15 +70,6 @@ class _FakeMatrixState extends Fake implements MatrixState {
 }
 
 class _Host with ConnectPageMixin {}
-
-class _FixedSummary extends LoginHomeserverSummary {
-  _FixedSummary(this._summary);
-
-  final HomeserverSummary _summary;
-
-  @override
-  HomeserverSummary? build() => _summary;
-}
 
 void main() {
   late _FakeLoginClient client;
@@ -275,52 +264,6 @@ void main() {
 
       expect(went, hasLength(1));
     });
-  });
-
-  testWidgets('the SSO of a new candidate uses the homeserver the user '
-      'picked', (tester) async {
-    tester.view.physicalSize = const Size(800, 1600);
-    tester.view.devicePixelRatio = 2;
-    addTearDown(tester.view.reset);
-    final picked = Uri.parse('https://matrix.example.com');
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          loginSessionsProvider.overrideWithValue(
-            FakeLoginSessions(loginClient: () async => client),
-          ),
-          loginHomeserverSummaryProvider.overrideWith(
-            () => _FixedSummary(
-              HomeserverSummary(
-                discoveryInformation: DiscoveryInformation(
-                  mHomeserver: HomeserverInformation(baseUrl: picked),
-                ),
-                versions: GetVersionsResponse(versions: ['r1.6.0']),
-                loginFlows: [],
-              ),
-            ),
-          ),
-        ],
-        child: const MaterialApp(home: Scaffold(body: SizedBox())),
-      ),
-    );
-    expect(client.homeserver, isNull);
-
-    const channel = MethodChannel('flutter_web_auth_2');
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async => 'twake://done');
-    addTearDown(
-      () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(channel, null),
-    );
-
-    final callback = await host.authenticateWithWebAuth(
-      context: tester.element(find.byType(Scaffold)),
-      id: 'oidc',
-    );
-
-    expect(callback, 'twake://done');
-    expect(client.homeserver, picked);
   });
 
   testWidgets('a callback with no login token tells the user', (tester) async {

@@ -109,13 +109,6 @@ mixin ConnectPageMixin {
     // the screen may be gone by then.
     final container = ProviderScope.containerOf(context, listen: false);
     final client = await container.read(loginSessionsProvider).loginClient();
-    // After a rollback the sessions hand out a new candidate, which has no
-    // homeserver yet: it is the one the user picked.
-    client.homeserver ??= container
-        .read(loginHomeserverSummaryProvider)
-        ?.discoveryInformation
-        ?.mHomeserver
-        .baseUrl;
     final homeserver = client.homeserver?.toString() ?? '';
     if (homeserver.isEmpty) {
       throw StateError('Homeserver is not configured for SSO');

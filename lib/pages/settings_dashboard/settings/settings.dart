@@ -112,16 +112,9 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     return;
   }
 
-  Future<void> _removePushers() {
-    // TODO: [transitional] TW-3302 the teardown is set once the accounts
-    // drive the session; until then remove the pusher as before.
-    if (ref.read(pushRemovalsControllerProvider) == null) {
-      return matrix.backgroundPush?.removeCurrentPusher() ?? Future.value();
-    }
-    return ref
-        .read(pushRemovalsControllerProvider.notifier)
-        .removeBeforeLogout(matrix.client);
-  }
+  Future<void> _removePushers() => ref
+      .read(pushRemovalsControllerProvider.notifier)
+      .removeBeforeLogout(matrix.client);
 
   Future<void> _logoutActionsOnMobile() async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(

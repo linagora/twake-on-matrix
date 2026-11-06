@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/account/entities/accounts_state.dart';
 import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 
 part 'active_matrix_client_provider.g.dart';
 
@@ -14,10 +13,6 @@ part 'active_matrix_client_provider.g.dart';
 /// it is null when nobody is logged in (`NoAccount`, `LastLoggedOut`).
 @Riverpod(keepAlive: true)
 Client? activeMatrixClient(Ref ref) {
-  // TODO: [transitional] TW-3302 - removed in 5/5 with the legacy push.
-  if (!ref.watch(accountsDriveActiveClientProvider)) {
-    return ref.watch(legacyActiveClientProvider).client;
-  }
   final id = switch (ref.watch(accountsProvider)) {
     Active(:final activeId) => activeId,
     Switching(:final from) => from,

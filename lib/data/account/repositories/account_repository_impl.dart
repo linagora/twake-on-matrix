@@ -83,8 +83,6 @@ class AccountRepositoryImpl implements AccountRepository {
   /// With several accounts, a client that is not logged in is a leftover of a
   /// logout whose cleanup did not finish: it is owed a removal, which the app
   /// runs like any pending one (retried, listed as unavailable meanwhile).
-  /// Until the transitional deletion in `ClientManager.getClients` is gone
-  /// (TW-3302 5/5) such a client is deleted at load and none is found here.
   Set<String> _loggedOutBesideOthers(Iterable<Client> clients) =>
       clients.length > 1
       ? {

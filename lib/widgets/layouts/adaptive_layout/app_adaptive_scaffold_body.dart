@@ -168,6 +168,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         await matrix.retrievePersistedActiveClient();
+        if (!mounted) return;
         getCurrentProfile();
         _handleProfileDataChange();
       }
