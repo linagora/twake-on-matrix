@@ -53,7 +53,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final FocusNode? focusNode;
   final double maxWidth;
   final List<ContextMenuAction> listActions;
-  final OnSendEmojiReactionAction? onSendEmojiReaction;
+  final OnToggleEmojiReactionAction? onToggleEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onLongPressMessage;
   final void Function(Event)? onReply;
@@ -94,7 +94,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.menuChildren,
     this.focusNode,
     required this.listActions,
-    this.onSendEmojiReaction,
+    this.onToggleEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
     this.onEdit,
@@ -299,7 +299,7 @@ class _MessageContentWithTimestampBuilderState
               messageContextMenu: _messageContextMenu,
               themeContextMenu: _themeContextMenu,
               iconContextMenu: _iconContextMenu,
-              onSendEmojiReaction: widget.onSendEmojiReaction,
+              onToggleEmojiReaction: widget.onToggleEmojiReaction,
             ),
           ),
         )
@@ -430,12 +430,7 @@ class _MessageContentWithTimestampBuilderState
             );
           },
           onEmojiSelected: (emojiId, emoji) =>
-              _handleEmojiSelectionFromEmojiPicker(
-                emoji: emoji,
-                myReaction: myReaction,
-                event: event,
-                relatesTo: relatesTo,
-              ),
+              _handleEmojiSelectionFromEmojiPicker(emoji: emoji, event: event),
         ),
       ),
     );
@@ -563,29 +558,10 @@ class _MessageContentWithTimestampBuilderState
 
   Future<void> _handleEmojiSelectionFromEmojiPicker({
     required String emoji,
-    required Event? myReaction,
     required Event event,
-    required dynamic relatesTo,
   }) async {
-    final isSelected = emoji == (relatesTo?['key'] ?? '');
-    if (myReaction == null) {
-      Navigator.of(context).pop();
-      await widget.onSendEmojiReaction?.call(emoji, event);
-      return;
-    }
-
-    if (isSelected) {
-      Navigator.of(context).pop();
-      await myReaction.redactEvent();
-      return;
-    }
-
-    if (!isSelected) {
-      Navigator.of(context).pop();
-      await widget.onSendEmojiReaction?.call(emoji, event);
-      await myReaction.redactEvent();
-      return;
-    }
+    Navigator.of(context).pop();
+    await widget.onToggleEmojiReaction?.call(emoji, event);
   }
 
   Widget _menuActionsRowBuilder(
