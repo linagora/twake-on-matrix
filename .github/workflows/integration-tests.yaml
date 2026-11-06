@@ -246,6 +246,7 @@ jobs:
             targets: >-
               integration_test/tests/contact/contact_test.dart
               integration_test/tests/login/login_with_password_test.dart
+              integration_test/tests/login/multiple_accounts_test.dart
               integration_test/tests/setting/language_test.dart
               integration_test/tests/setting/settings_contacts_visibility_test.dart
               integration_test/tests/setting/settings_recovery_key_test.dart
