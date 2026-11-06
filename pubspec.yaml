@@ -340,9 +340,6 @@ dependency_overrides:
     git:
       url: https://github.com/linagora/overflow_view.git
       ref: master
-  # livekit_client needs 6; flutter_avif (last release 2025) asks for ^3.
-  # Remove with the flutter_avif_platform_interface override (yekeskin/flutter_avif#103).
-  protobuf: 6.1.0
   # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
   url_launcher_ios: 6.3.1
   # Fixes a compile error when comforming missing header to Launcher in iOS 18.

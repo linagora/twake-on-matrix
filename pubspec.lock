@@ -2670,7 +2670,7 @@ packages:
     source: hosted
     version: "2.1.1"
   protobuf:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: protobuf
       sha256: "13b6717366aa7ec3792dd62c19c7d33a785708224365f2db23c5ca01f1c1a0f2"
