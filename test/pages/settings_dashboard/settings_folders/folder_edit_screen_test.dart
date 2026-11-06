@@ -17,6 +17,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../../utils/pump_localized.dart';
 import 'folder_edit_screen_test.mocks.dart';
+import '../../../providers/fake_active_account.dart';
 
 @GenerateNiceMocks([MockSpec<FoldersRepository>()])
 void main() {
@@ -56,6 +57,7 @@ Future<void> _pump(
   _container = ProviderContainer.test(
     retry: (_, _) => null,
     overrides: [
+      ...activeAccountOverrides(null),
       foldersRepositoryProvider.overrideWithValue(_repository),
       roomListEntriesProvider.overrideWith(
         (ref) =>

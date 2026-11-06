@@ -12,12 +12,12 @@ import 'package:twake_chat/domain/repository/folders/folders_repository.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_entries_provider.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 
 import 'folders_controller_test.mocks.dart';
+import '../fake_active_account.dart';
 
 @GenerateNiceMocks([MockSpec<FoldersRepository>(), MockSpec<Client>()])
 void main() {
@@ -29,6 +29,7 @@ void main() {
     _container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
+        ...activeAccountOverridesFollowing(),
         foldersRepositoryProvider.overrideWithValue(_repository),
         roomListEntriesProvider.overrideWithValue(const [
           RoomListEntry(id: '!tagged', folders: ['Work']),
@@ -163,6 +164,7 @@ void _foldersControllerTagOnlyTests() {
       final tagOnly = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
+          ...activeAccountOverridesFollowing(),
           foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWithValue(const [
             RoomListEntry(id: '!z', folders: ['Zed']),
@@ -195,6 +197,7 @@ void _foldersControllerTagOnlyTests() {
       final live = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
+          ...activeAccountOverridesFollowing(),
           foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWith((ref) => ref.watch(entries)),
         ],
@@ -223,6 +226,7 @@ void _foldersControllerSavesTests() {
       final tagged = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
+          ...activeAccountOverridesFollowing(),
           foldersRepositoryProvider.overrideWithValue(_repository),
           roomListEntriesProvider.overrideWithValue(const [
             RoomListEntry(id: '!a', folders: ['Home']),
@@ -315,7 +319,7 @@ void _foldersControllerOverlapTests() {
 
       final save = _controller().reorder(0, 2);
       await pumpEventQueue();
-      _container.read(legacyActiveClientProvider.notifier).setClient(client);
+      _container.read(fakeActiveAccountProvider.notifier).set(client);
       await pumpEventQueue();
       pending.completeError(const FolderSaveFailedException());
       await expectLater(save, throwsA(isA<FolderSaveFailedException>()));
@@ -348,7 +352,7 @@ void _foldersControllerAccountTests() {
 
       final first = _controller().reorder(0, 2);
       await pumpEventQueue();
-      _container.read(legacyActiveClientProvider.notifier).setClient(client);
+      _container.read(fakeActiveAccountProvider.notifier).set(client);
       await pumpEventQueue();
       await _emit(const [_spaces, _unread, ..._others]);
       unawaited(_controller().reorder(0, 1));
@@ -520,6 +524,7 @@ void _saveUserFolderRenameTests() {
         final halfway = ProviderContainer.test(
           retry: (_, _) => null,
           overrides: [
+            ...activeAccountOverridesFollowing(),
             foldersRepositoryProvider.overrideWithValue(_repository),
             roomListEntriesProvider.overrideWithValue(const [
               RoomListEntry(id: '!a', folders: ['Work', 'Job']),

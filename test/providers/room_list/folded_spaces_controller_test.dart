@@ -7,9 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/datasource/spaces/folded_spaces_datasource.dart';
 import 'package:twake_chat/data/datasource_impl/spaces/folded_spaces_datasource.provider.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 
 import 'folded_spaces_controller_test.mocks.dart';
+import '../fake_active_account.dart';
 
 @GenerateNiceMocks([MockSpec<Client>()])
 void main() {
@@ -19,8 +19,11 @@ void main() {
   Future<ProviderContainer> load() async {
     final client = MockClient();
     when(client.userID).thenReturn(user);
-    final container = ProviderContainer.test(retry: (_, _) => null);
-    container.read(legacyActiveClientProvider.notifier).setClient(client);
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: activeAccountOverridesFollowing(),
+    );
+    container.read(fakeActiveAccountProvider.notifier).set(client);
     container.listen(foldedSpacesControllerProvider, (_, _) {});
     await pumpEventQueue();
     return container;
@@ -61,8 +64,11 @@ void main() {
       });
       final client = MockClient();
       when(client.userID).thenReturn(user);
-      final container = ProviderContainer.test(retry: (_, _) => null);
-      container.read(legacyActiveClientProvider.notifier).setClient(client);
+      final container = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: activeAccountOverridesFollowing(),
+      );
+      container.read(fakeActiveAccountProvider.notifier).set(client);
       container.listen(foldedSpacesControllerProvider, (_, _) {});
 
       await container
@@ -91,6 +97,7 @@ void main() {
       final container = ProviderContainer.test(
         retry: (_, _) => null,
         overrides: [
+          ...activeAccountOverridesFollowing(),
           foldedSpacesDatasourceProvider.overrideWithValue(
             const _FailingWrite(),
           ),
@@ -98,7 +105,7 @@ void main() {
       );
       final client = MockClient();
       when(client.userID).thenReturn(user);
-      container.read(legacyActiveClientProvider.notifier).setClient(client);
+      container.read(fakeActiveAccountProvider.notifier).set(client);
       container.listen(foldedSpacesControllerProvider, (_, _) {});
       await pumpEventQueue();
 
@@ -110,7 +117,10 @@ void main() {
     });
 
     test('whenNoAccount_foldsNothing', () async {
-      final container = ProviderContainer.test(retry: (_, _) => null);
+      final container = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: activeAccountOverridesFollowing(),
+      );
       container.listen(foldedSpacesControllerProvider, (_, _) {});
       await pumpEventQueue();
 

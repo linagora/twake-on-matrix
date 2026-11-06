@@ -13,12 +13,12 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/room_list_filter.dart';
 import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/providers/room_list/folded_spaces_controller.dart';
-import 'package:twake_chat/providers/legacy_active_client_provider.dart';
 import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_providers.dart';
 
 import 'room_list_providers_test.mocks.dart';
+import '../fake_active_account.dart';
 
 @GenerateNiceMocks([MockSpec<SpaceRepository>(), MockSpec<Client>()])
 void main() {
@@ -57,6 +57,7 @@ ProviderContainer _newContainer({List overrides = const []}) =>
     ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
+        ...activeAccountOverridesFollowing(),
         spaceRepositoryProvider.overrideWithValue(_repository),
         savedFoldersProvider.overrideWith((ref) => const Stream.empty()),
         foldedSpacesControllerProvider.overrideWith(_NoFold.new),
@@ -72,13 +73,13 @@ void _roomListFilterControllerTests() {
       final second = MockClient();
       when(second.userID).thenReturn('@b:own.org');
       final container = _newContainer();
-      final active = container.read(legacyActiveClientProvider.notifier);
-      active.setClient(first);
+      final active = container.read(fakeActiveAccountProvider.notifier);
+      active.set(first);
       container
           .read(roomListFilterControllerProvider.notifier)
           .select(const RoomListFilter.folder('Work'));
 
-      active.setClient(second);
+      active.set(second);
 
       expect(
         container.read(roomListFilterControllerProvider),

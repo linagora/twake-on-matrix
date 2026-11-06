@@ -9,6 +9,7 @@ import 'package:twake_chat/providers/room_list/folders_controller.dart';
 import 'package:twake_chat/providers/room_list/room_list_filter_controller.dart';
 
 import '../../../utils/pump_localized.dart';
+import '../../../providers/fake_active_account.dart';
 
 void main() {
   _roomListFilterBarTests();
@@ -25,7 +26,10 @@ Future<void> _pump(
 }) async {
   _container = ProviderContainer.test(
     retry: (_, _) => null,
-    overrides: [roomListFoldersProvider.overrideWithValue(folders)],
+    overrides: [
+      ...activeAccountOverrides(null),
+      roomListFoldersProvider.overrideWithValue(folders),
+    ],
   );
   await pumpLocalized(
     tester,
