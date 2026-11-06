@@ -309,6 +309,8 @@ class ChatController extends ConsumerState<Chat>
 
   final ValueNotifier<String?> focusHover = ValueNotifier(null);
 
+  final ValueNotifier<String?> highlightedEventIdNotifier = ValueNotifier(null);
+
   final ValueNotifier<bool> openingPopupMenu = ValueNotifier(false);
 
   final ValueNotifier<bool> showScrollDownButtonNotifier = ValueNotifier(false);
@@ -2194,6 +2196,10 @@ class ChatController extends ConsumerState<Chat>
     }
   }
 
+  void clearHighlightedEvent() {
+    highlightedEventIdNotifier.value = null;
+  }
+
   void onHideKeyboardAndEmoji() {
     hideKeyboardChatScreen();
     if (!PlatformInfos.isWeb) {
@@ -3248,6 +3254,7 @@ class ChatController extends ConsumerState<Chat>
     showScrollDownButtonNotifier.dispose();
     editEventNotifier.dispose();
     focusHover.dispose();
+    highlightedEventIdNotifier.dispose();
     disposeAudioPlayer();
     super.dispose();
   }
