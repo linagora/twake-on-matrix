@@ -158,3 +158,16 @@ toggle.
 A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
+
+## D11. Copying several selected messages follows Twake Space Chat (proposed by Johann, 2026-11-06)
+
+Copy, with several messages selected, puts them on the clipboard in timeline
+order, as Twake Space Chat does (its D183): each message under a line
+`Author, day time`, an empty line between two messages. The day and the time
+are those of the conversation: "Today", "Yesterday" or the date of the day
+separator, then `HH:mm`. A file, an image or a video with a caption is copied
+with its caption, without one with its file name. Other messages (stickers,
+locations, polls, encrypted, deleted) are left out.
+
+With one message selected, Copy is unchanged: its text alone, or the image
+itself on the web.
