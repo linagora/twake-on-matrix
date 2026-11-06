@@ -15,7 +15,7 @@ void main() {
 
     // Assert
     expect(repository.requestedLimit, 1000);
-    expect(repository.requestedSearchTerm, isNull);
+    expect(repository.requestedSearchTerms, [null]);
   });
 
   test('execute_withASearchTerm_asksTheServerForTheFirstMatches', () async {
@@ -32,7 +32,7 @@ void main() {
 
     // Assert
     expect(repository.requestedLimit, 20);
-    expect(repository.requestedSearchTerm, 'gr');
+    expect(repository.requestedSearchTerms, ['gr']);
     expect(rooms.map((room) => room.roomId), ['!group']);
   });
 
@@ -46,7 +46,7 @@ void main() {
     ).execute(searchTerm: ' gr ').toList();
 
     // Assert
-    expect(repository.requestedSearchTerm, 'gr');
+    expect(repository.requestedSearchTerms, ['gr']);
   });
 
   test('execute_withUnderTwoLetters_asksNothing', () async {

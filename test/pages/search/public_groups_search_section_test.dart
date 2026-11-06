@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,7 +130,7 @@ void main() {
     await type(tester, ' é ');
 
     // Assert
-    expect(repository.requestedSearchTerm, isNull);
+    expect(repository.requestedSearchTerms, isEmpty);
     expect(find.text('header'), findsNothing);
   });
 
@@ -140,7 +142,7 @@ void main() {
     await type(tester, ' éq ');
 
     // Assert
-    expect(repository.requestedSearchTerm, 'éq');
+    expect(repository.requestedSearchTerms, ['éq']);
     expect(find.text('header'), findsOneWidget);
     expect(find.text('Équipe'), findsOneWidget);
     expect(find.text('Ask to join · 3 members'), findsOneWidget);
@@ -157,7 +159,7 @@ void main() {
     await type(tester, 'équ');
 
     // Assert
-    expect(repository.requestedSearchTerm, 'équ');
+    expect(repository.requestedSearchTerms, ['équ']);
     expect(repository.requestedLimit, 20);
   });
 
@@ -169,7 +171,7 @@ void main() {
     await type(tester, 'éq');
 
     // Assert
-    expect(repository.requestedSearchTerm, isNull);
+    expect(repository.requestedSearchTerms, isEmpty);
     expect(find.text('header'), findsNothing);
     expect(find.text('No Results'), findsOneWidget);
   });
@@ -187,6 +189,23 @@ void main() {
     expect(find.text('No Results'), findsOneWidget);
   });
 
+  testWidgets('build_whileTheDirectoryLoads_hidesNoResults', (tester) async {
+    // Arrange
+    final pages = StreamController<List<PublicRoom>>();
+    addTearDown(pages.close);
+    repository.directoryController = pages;
+    await pumpSection(tester);
+
+    // Act
+    textController.text = 'éq';
+    await tester.pump(PublicGroupsSearchTerm.debounceDuration);
+    await tester.pump();
+
+    // Assert
+    expect(find.text('header'), findsNothing);
+    expect(find.text('No Results'), findsNothing);
+  });
+
   testWidgets('build_whenTheDirectoryFails_showsNoSection', (tester) async {
     // Arrange
     repository.fetchError = PublicRoomsFetchFailedException(
@@ -199,6 +218,7 @@ void main() {
 
     // Assert
     expect(find.text('header'), findsNothing);
+    expect(find.text('No Results'), findsOneWidget);
   });
 
   testWidgets('build_whenTheTextGoesBackUnderTwoLetters_hidesTheSection', (
