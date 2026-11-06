@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -32,26 +33,53 @@ class EventListSyncResult extends Equatable {
 /// Extension for managing and syncing lists of Matrix events.
 /// Provides efficient operations for detecting changes, additions, and removals.
 extension EventListExtension on List<Event> {
-  List<Event> get copyableTextEvents => where(
+  static const _textMessageTypes = {
+    MessageTypes.Text,
+    MessageTypes.Notice,
+    MessageTypes.Emote,
+  };
+
+  static const _fileMessageTypes = {
+    MessageTypes.Image,
+    MessageTypes.Video,
+    MessageTypes.Audio,
+    MessageTypes.File,
+  };
+
+  List<Event> get copyableEvents => where(
     (event) =>
         event.type == EventTypes.Message &&
         !event.redacted &&
-        {
-          MessageTypes.Text,
-          MessageTypes.Notice,
-          MessageTypes.Emote,
-        }.contains(event.messageType),
+        (_textMessageTypes.contains(event.messageType) ||
+            _fileMessageTypes.contains(event.messageType)),
   ).sortedBy((event) => event.originServerTs);
 
   Future<void> copyTexts(BuildContext context, Timeline timeline) async {
-    final text = copyableTextEvents
-        .map((event) => event.getSelectedEventString(context, timeline))
-        .where((text) => text.isNotEmpty)
-        .join('\n');
+    final text = copyableEvents
+        .map((event) => _copiedMessage(event, context, timeline))
+        .nonNulls
+        .join('\n\n');
     if (text.isEmpty) return;
     await TwakeClipboard.instance.copyText(text);
     if (!context.mounted) return;
     TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
+  }
+
+  static String? _copiedMessage(
+    Event event,
+    BuildContext context,
+    Timeline timeline,
+  ) {
+    final text =
+        _fileMessageTypes.contains(event.messageType) &&
+            !event.isCaptionModeOrReply()
+        ? event.filename
+        : event.getSelectedEventString(context, timeline);
+    if (text.isEmpty) return null;
+    final sender = event.senderFromMemoryOrFallback.calcDisplayname();
+    final sentAt = event.originServerTs;
+    return '$sender, ${sentAt.relativeTime(context)} '
+        '${sentAt.localizedTimeOfDay(context)}\n$text';
   }
 
   /// Builds a map of events for O(1) lookup by eventId and transactionId.

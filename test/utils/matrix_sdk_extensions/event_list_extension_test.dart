@@ -243,7 +243,7 @@ void main() {
     });
   });
 
-  group('EventListExtension.copyableTextEvents', () {
+  group('EventListExtension.copyableEvents', () {
     Event message({
       required String eventId,
       required int timestamp,
@@ -270,7 +270,7 @@ void main() {
         message(eventId: 'second', timestamp: 2),
       ];
 
-      expect(idsOf(events.copyableTextEvents), ['first', 'second', 'third']);
+      expect(idsOf(events.copyableEvents), ['first', 'second', 'third']);
     });
 
     test('keeps notices and emotes', () {
@@ -279,22 +279,40 @@ void main() {
         message(eventId: 'emote', timestamp: 2, msgtype: MessageTypes.Emote),
       ];
 
-      expect(idsOf(events.copyableTextEvents), ['notice', 'emote']);
+      expect(idsOf(events.copyableEvents), ['notice', 'emote']);
     });
 
-    test('skips media, stickers and encrypted events', () {
-      final events = [
-        message(eventId: 'text', timestamp: 1),
-        message(eventId: 'image', timestamp: 2, msgtype: MessageTypes.Image),
-        message(eventId: 'file', timestamp: 3, msgtype: MessageTypes.File),
-        message(eventId: 'video', timestamp: 4, msgtype: MessageTypes.Video),
-        message(eventId: 'audio', timestamp: 5, msgtype: MessageTypes.Audio),
-        message(eventId: 'sticker', timestamp: 6, type: EventTypes.Sticker),
-        message(eventId: 'encrypted', timestamp: 7, type: EventTypes.Encrypted),
-      ];
+    test(
+      'keeps text and file messages, skips stickers and encrypted events',
+      () {
+        final events = [
+          message(eventId: 'text', timestamp: 1),
+          message(eventId: 'image', timestamp: 2, msgtype: MessageTypes.Image),
+          message(eventId: 'file', timestamp: 3, msgtype: MessageTypes.File),
+          message(eventId: 'video', timestamp: 4, msgtype: MessageTypes.Video),
+          message(eventId: 'audio', timestamp: 5, msgtype: MessageTypes.Audio),
+          message(
+            eventId: 'location',
+            timestamp: 6,
+            msgtype: MessageTypes.Location,
+          ),
+          message(eventId: 'sticker', timestamp: 7, type: EventTypes.Sticker),
+          message(
+            eventId: 'encrypted',
+            timestamp: 8,
+            type: EventTypes.Encrypted,
+          ),
+        ];
 
-      expect(idsOf(events.copyableTextEvents), ['text']);
-    });
+        expect(idsOf(events.copyableEvents), [
+          'text',
+          'image',
+          'file',
+          'video',
+          'audio',
+        ]);
+      },
+    );
 
     test('skips redacted messages', () {
       final redacted = message(eventId: 'redacted', timestamp: 2)
@@ -311,25 +329,41 @@ void main() {
         );
       final events = [message(eventId: 'text', timestamp: 1), redacted];
 
-      expect(idsOf(events.copyableTextEvents), ['text']);
+      expect(idsOf(events.copyableEvents), ['text']);
     });
 
     test('returns an empty list when nothing is copyable', () {
       final events = [
-        message(eventId: 'image', timestamp: 1, msgtype: MessageTypes.Image),
+        message(eventId: 'sticker', timestamp: 1, type: EventTypes.Sticker),
       ];
 
-      expect(events.copyableTextEvents, isEmpty);
+      expect(events.copyableEvents, isEmpty);
     });
   });
 
   group('EventListExtension.copyTexts', () {
     late List<String> copiedTexts;
+    final today = DateTime.now();
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    DateTime at(DateTime day, int hour, int minute) =>
+        DateTime(day.year, day.month, day.day, hour, minute);
 
     setUpAll(() {
       if (!GetIt.instance.isRegistered<ResponsiveUtils>()) {
         GetIt.instance.registerSingleton(ResponsiveUtils());
       }
+      room.setState(
+        Event(
+          senderId: '@alice:example.com',
+          type: EventTypes.RoomMember,
+          room: room,
+          eventId: '\$alice-member',
+          stateKey: '@alice:example.com',
+          content: {'membership': 'join', 'displayname': 'Alice'},
+          originServerTs: DateTime.fromMillisecondsSinceEpoch(0),
+        ),
+      );
     });
 
     setUp(() {
@@ -348,37 +382,33 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
-    Event textMessage(
-      String body, {
-      required int timestamp,
-      String msgtype = MessageTypes.Text,
+    Event messageFromAlice(
+      Map<String, Object?> content, {
+      required DateTime sentAt,
     }) {
       return Event(
-        senderId: '@user:example.com',
+        senderId: '@alice:example.com',
         type: EventTypes.Message,
         room: room,
-        eventId: '\$$timestamp',
-        content: {'msgtype': msgtype, 'body': body},
-        originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+        eventId: '\$${sentAt.millisecondsSinceEpoch}',
+        content: content,
+        originServerTs: sentAt,
       );
     }
 
-    Event replyWithoutText({required int timestamp}) {
-      return Event(
-        senderId: '@user:example.com',
-        type: EventTypes.Message,
-        room: room,
-        eventId: '\$$timestamp',
-        content: {
+    Event textMessage(String body, {required DateTime sentAt}) =>
+        messageFromAlice({
           'msgtype': MessageTypes.Text,
-          'body': '> <@other:example.com> quoted',
-          'm.relates_to': {
-            'm.in_reply_to': {'event_id': '\$quoted'},
-          },
-        },
-        originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
-      );
-    }
+          'body': body,
+        }, sentAt: sentAt);
+
+    Event replyWithoutText({required DateTime sentAt}) => messageFromAlice({
+      'msgtype': MessageTypes.Text,
+      'body': '> <@other:example.com> quoted',
+      'm.relates_to': {
+        'm.in_reply_to': {'event_id': '\$quoted'},
+      },
+    }, sentAt: sentAt);
 
     Future<void> copy(WidgetTester tester, List<Event> events) async {
       final timeline = Timeline(
@@ -408,33 +438,69 @@ void main() {
       lookupL10n(const Locale('en')).textCopiedToClipboard,
     );
 
-    testWidgets('copies the texts in timeline order and confirms it', (
-      tester,
-    ) async {
+    testWidgets(
+      'copies each message under its author and time, in timeline order',
+      (tester) async {
+        await copy(tester, [
+          textMessage('second', sentAt: at(today, 9, 5)),
+          textMessage('first\non two lines', sentAt: at(yesterday, 18, 30)),
+        ]);
+
+        expect(copiedTexts, [
+          'Alice, Yesterday 18:30\nfirst\non two lines\n\n'
+              'Alice, Today 09:05\nsecond',
+        ]);
+        expect(copiedSnackBar, findsOneWidget);
+      },
+    );
+
+    testWidgets('copies a captioned file with its caption', (tester) async {
       await copy(tester, [
-        textMessage('second', timestamp: 2),
-        textMessage('first', timestamp: 1),
+        textMessage('look', sentAt: at(today, 9, 0)),
+        messageFromAlice({
+          'msgtype': MessageTypes.Image,
+          'body': 'the caption',
+          'filename': 'photo.png',
+        }, sentAt: at(today, 9, 1)),
       ]);
 
-      expect(copiedTexts, ['first\nsecond']);
-      expect(copiedSnackBar, findsOneWidget);
+      expect(copiedTexts, [
+        'Alice, Today 09:00\nlook\n\nAlice, Today 09:01\nthe caption',
+      ]);
+    });
+
+    testWidgets('copies a file without caption with its name', (tester) async {
+      await copy(tester, [
+        messageFromAlice({
+          'msgtype': MessageTypes.File,
+          'body': 'report.pdf',
+        }, sentAt: at(today, 9, 0)),
+        messageFromAlice({
+          'msgtype': MessageTypes.Image,
+          'body': '',
+          'filename': 'photo.png',
+        }, sentAt: at(today, 9, 1)),
+      ]);
+
+      expect(copiedTexts, [
+        'Alice, Today 09:00\nreport.pdf\n\nAlice, Today 09:01\nphoto.png',
+      ]);
     });
 
     testWidgets('leaves empty texts out', (tester) async {
       await copy(tester, [
-        textMessage('first', timestamp: 1),
-        replyWithoutText(timestamp: 2),
-        textMessage('third', timestamp: 3),
+        textMessage('first', sentAt: at(today, 9, 0)),
+        replyWithoutText(sentAt: at(today, 9, 1)),
+        textMessage('third', sentAt: at(today, 9, 2)),
       ]);
 
-      expect(copiedTexts, ['first\nthird']);
+      expect(copiedTexts, [
+        'Alice, Today 09:00\nfirst\n\nAlice, Today 09:02\nthird',
+      ]);
     });
 
     testWidgets('does nothing when no text can be copied', (tester) async {
-      await copy(tester, [
-        textMessage('photo.png', timestamp: 1, msgtype: MessageTypes.Image),
-        replyWithoutText(timestamp: 2),
-      ]);
+      await copy(tester, [replyWithoutText(sentAt: at(today, 9, 0))]);
 
       expect(copiedTexts, isEmpty);
       expect(copiedSnackBar, findsNothing);
