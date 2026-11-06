@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 
 enum MessageContextMenuAction {
   reply,
+  startThread,
   forward,
   copy,
   report,
@@ -21,6 +22,9 @@ enum MessageContextMenuAction {
     switch (this) {
       case MessageContextMenuAction.reply:
         Navigator.of(context).pop('reply');
+        break;
+      case MessageContextMenuAction.startThread:
+        Navigator.of(context).pop('startThread');
         break;
       case MessageContextMenuAction.forward:
         Navigator.of(context).pop('forward');
@@ -56,6 +60,8 @@ enum MessageContextMenuAction {
     switch (this) {
       case MessageContextMenuAction.reply:
         return L10n.of(context)!.reply;
+      case MessageContextMenuAction.startThread:
+        return L10n.of(context)!.startThread;
       case MessageContextMenuAction.forward:
         return L10n.of(context)!.forward;
       case MessageContextMenuAction.copy:
@@ -88,6 +94,8 @@ enum MessageContextMenuAction {
     switch (this) {
       case MessageContextMenuAction.reply:
         return null;
+      case MessageContextMenuAction.startThread:
+        return Icons.forum_outlined;
       case MessageContextMenuAction.forward:
         return Icons.shortcut;
       case MessageContextMenuAction.copy:
@@ -115,6 +123,7 @@ enum MessageContextMenuAction {
         return event.isPinned ? Assets.images.icUnpin.path : null;
       case MessageContextMenuAction.reply:
         return Assets.images.icReply.path;
+      case MessageContextMenuAction.startThread:
       case MessageContextMenuAction.forward:
       case MessageContextMenuAction.edit:
       case MessageContextMenuAction.copy:

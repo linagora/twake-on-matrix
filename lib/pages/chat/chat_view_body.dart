@@ -77,7 +77,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    if (!controller.isThread &&
+                        controller.room!.pinnedEventIds.isNotEmpty)
                       const SizedBox(
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
@@ -223,8 +224,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                             .timeline
                             ?.requestKeys(onlineKeyBackupOnly: false),
                       ),
-                    PinnedEventsView(controller),
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    if (!controller.isThread) PinnedEventsView(controller),
+                    if (!controller.isThread &&
+                        controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
                         thickness: ChatViewBodyStyle.dividerSize,

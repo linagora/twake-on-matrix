@@ -65,3 +65,24 @@ String? unreadThreadBannerTarget({
   }
   return target?.rootEventId;
 }
+
+/// Per-thread counters of every joined room of a raw `/sync` response, for
+/// the rooms whose update carries counters (their map replaces the old one).
+/// The SDK does not parse `unread_thread_notifications`.
+Map<String, Map<String, ThreadCounts>> parseSyncUnreadThreadNotifications(
+  Map<String, Object?> sync,
+) {
+  final result = <String, Map<String, ThreadCounts>>{};
+  final rooms = ((sync['rooms'] as Map?)?['join']) as Map?;
+  if (rooms == null) return result;
+  for (final entry in rooms.entries) {
+    final room = entry.value;
+    if (entry.key is! String || room is! Map) continue;
+    final threads =
+        room['unread_thread_notifications'] ??
+        room['org.matrix.msc3773.unread_thread_notifications'];
+    if (threads == null && room['unread_notifications'] == null) continue;
+    result[entry.key as String] = parseUnreadThreadNotifications(threads);
+  }
+  return result;
+}

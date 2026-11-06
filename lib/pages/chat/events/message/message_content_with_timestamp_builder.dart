@@ -57,6 +57,12 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onLongPressMessage;
   final void Function(Event)? onReply;
+
+  /// Null when "Start a thread" is not offered on this message.
+  final void Function(Event)? onStartThread;
+
+  /// On the thread screen there is no quote reply.
+  final bool inThread;
   final void Function(Event)? onEdit;
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
@@ -97,6 +103,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onSendEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
+    this.onStartThread,
+    this.inThread = false,
     this.onEdit,
     this.onDelete,
     this.onForward,
@@ -124,7 +132,10 @@ class _MessageContentWithTimestampBuilderState
   bool someHorizontalActionHidden = false;
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
-    if (event.room.canSendDefaultMessages) ...[MessageContextMenuAction.reply],
+    if (event.room.canSendDefaultMessages && !widget.inThread) ...[
+      MessageContextMenuAction.reply,
+    ],
+    if (widget.onStartThread != null) MessageContextMenuAction.startThread,
     MessageContextMenuAction.forward,
     MessageContextMenuAction.copy,
     if (event.room.canReportContent) MessageContextMenuAction.report,
@@ -350,6 +361,9 @@ class _MessageContentWithTimestampBuilderState
       switch (result) {
         case 'reply':
           widget.onReply?.call(widget.event);
+          break;
+        case 'startThread':
+          widget.onStartThread?.call(widget.event);
           break;
         case 'forward':
           widget.onForward?.call(widget.event);

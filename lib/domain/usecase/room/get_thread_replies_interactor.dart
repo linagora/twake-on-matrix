@@ -31,12 +31,20 @@ final class GetThreadRepliesInteractor {
       limit: pageSize,
       dir: Direction.b,
     );
-    return ThreadRepliesPage(
-      replies: [
-        for (final event in response.chunk.reversed)
-          Event.fromMatrixEvent(event, room),
-      ],
-      nextBatch: response.nextBatch,
-    );
+    final replies = [
+      for (final event in response.chunk.reversed)
+        Event.fromMatrixEvent(event, room),
+    ];
+    // /relations returns the events as stored: decrypt them.
+    if (room.encrypted && room.client.encryptionEnabled) {
+      for (var i = 0; i < replies.length; i++) {
+        if (replies[i].type == EventTypes.Encrypted) {
+          replies[i] = await room.client.encryption!.decryptRoomEvent(
+            replies[i],
+          );
+        }
+      }
+    }
+    return ThreadRepliesPage(replies: replies, nextBatch: response.nextBatch);
   }
 }

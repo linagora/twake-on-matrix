@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/domain/model/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -28,7 +32,17 @@ class ChatEventListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!event.isVisibleInGui) return const SizedBox();
+    if (!controller.isEventVisible(event)) return const SizedBox();
+
+    final threadSummary = controller.threadSummaryOf(event);
+    final canStartThread =
+        event.type == EventTypes.Message &&
+        event.status.isSynced &&
+        ThreadRules.canStartThread(
+          event,
+          hasThread: threadSummary != null,
+          inThreadScreen: controller.isThread,
+        );
 
     return Message(
       key: GlobalObjectKey(event.eventId),
@@ -36,6 +50,11 @@ class ChatEventListItem extends StatelessWidget {
       autoScrollController: controller.scrollController,
       scrollIndex: index,
       matrixState: controller.matrix!,
+      inThread: controller.isThread,
+      threadCard: threadSummary == null
+          ? null
+          : _threadCard(context, threadSummary),
+      onStartThread: canStartThread ? (event) => _openThread(context) : null,
       onSwipe: (direction) => controller.replyAction(replyTo: event),
       onAvatarTap: (Event event) => controller.onContactTap(
         contactPresentationSearch: event.senderFromMemoryOrFallback
@@ -103,4 +122,30 @@ class ChatEventListItem extends StatelessWidget {
       onRetryTextMessage: controller.retryTextMessage,
     );
   }
+
+  void _openThread(BuildContext context) => ThreadRoute(
+    roomid: event.room.id,
+    rootid: event.eventId,
+  ).push<void>(context);
+
+  Widget _threadCard(BuildContext context, ThreadSummary summary) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+    child: Align(
+      alignment: event.isOwnMessage
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.7),
+        child: ThreadSummaryCard(
+          replyCount: summary.replyCount,
+          lastReplyAuthor: summary.lastReply.senderFromMemoryOrFallback
+              .calcDisplayname(),
+          lastReplyText: summary.lastReplyText,
+          lastReplyTime: summary.lastReply.originServerTs,
+          unreadCount: controller.threadUnreadCount(event.eventId),
+          onTap: () => _openThread(context),
+        ),
+      ),
+    ),
+  );
 }

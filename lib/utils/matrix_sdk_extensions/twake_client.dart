@@ -4,14 +4,19 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 /// Top-level function for native isolate-based sync response parsing.
 /// Returns a fully constructed [SyncUpdate] since Dart isolates can
-/// transfer complex objects without serialization overhead.
-SyncUpdate _parseSyncResponseNative(Uint8List responseBody) {
+/// transfer complex objects without serialization overhead, with the
+/// per-thread counters the SDK does not parse.
+(SyncUpdate, Map<String, Map<String, ThreadCounts>>) _parseSyncResponseNative(
+  Uint8List responseBody,
+) {
   final responseString = utf8.decode(responseBody);
-  final json = jsonDecode(responseString);
-  return SyncUpdate.fromJson(json as Map<String, Object?>);
+  final json = jsonDecode(responseString) as Map<String, Object?>;
+  return (SyncUpdate.fromJson(json), parseSyncUnreadThreadNotifications(json));
 }
 
 /// Top-level function for web JSON decoding via `compute()`.
@@ -46,7 +51,10 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// compare the generated `Api.sync()` signature and body with this
 /// implementation.
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
-class TwakeClient extends Client {
+class TwakeClient extends Client implements ThreadUnreadStoreOwner {
+  @override
+  final ThreadUnreadStore threadUnread = ThreadUnreadStore();
+
   TwakeClient(
     super.clientName, {
     required super.database,
@@ -73,7 +81,9 @@ class TwakeClient extends Client {
     super.onSoftLogout,
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
-  });
+  }) {
+    threadUnread.attach(this);
+  }
 
   /// Logs this account's notification device out and removes its recovery
   /// key first: the SDK forgets the user in `clear`, also when the server
@@ -126,11 +136,17 @@ class TwakeClient extends Client {
         // On web: run utf8.decode + jsonDecode via compute() (near-native
         // speed on WASM), then call SyncUpdate.fromJson on the main thread.
         final json = await compute(_jsonDecodeSyncResponseWeb, responseBody);
+        threadUnread.apply(parseSyncUnreadThreadNotifications(json));
         return SyncUpdate.fromJson(json);
       }
 
       // On native: offload the entire pipeline to a background isolate.
-      return await compute(_parseSyncResponseNative, responseBody);
+      final (update, threadCounts) = await compute(
+        _parseSyncResponseNative,
+        responseBody,
+      );
+      threadUnread.apply(threadCounts);
+      return update;
     } catch (e) {
       // Re-throw parsing errors with context so _innerSync's catch chain
       // can distinguish them from network/connection errors.

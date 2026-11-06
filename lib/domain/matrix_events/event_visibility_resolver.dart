@@ -16,8 +16,11 @@ abstract final class EventVisibilityResolver {
   /// 2. Type         — delegates to [EventTypeRules].
   /// 3. Config       — [AppConfig] toggles.
   /// 4. Content      — payload / room-state heuristics.
-  static bool isVisibleInTimeline(Event event) {
-    return _passesRelationshipLayer(event) &&
+  ///
+  /// [inThread] is true on the thread screen, where thread replies are the
+  /// content and must not be hidden.
+  static bool isVisibleInTimeline(Event event, {bool inThread = false}) {
+    return _passesRelationshipLayer(event, inThread: inThread) &&
         _passesTypeLayer(event) &&
         _passesConfigLayer(event) &&
         _passesContentLayer(event);
@@ -70,9 +73,9 @@ abstract final class EventVisibilityResolver {
     RelationshipTypes.reaction,
   };
 
-  static bool _passesRelationshipLayer(Event event) {
+  static bool _passesRelationshipLayer(Event event, {bool inThread = false}) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
-    if (event.threadRootId != null) return false;
+    if (!inThread && event.threadRootId != null) return false;
     if (event.type.startsWith('m.key.verification.')) return false;
     return true;
   }
