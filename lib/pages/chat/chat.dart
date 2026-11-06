@@ -591,6 +591,9 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
+  // Captured where the listener is added: dispose must not look it up via context.
+  ThreadUnreadStore? _listenedThreadUnreadStore;
+
   ThreadUnreadStore? get _threadUnreadStore {
     final c = client;
     return c is ThreadUnreadStoreOwner
@@ -3273,7 +3276,7 @@ class ChatController extends ConsumerState<Chat>
         return const ErrorRoute().go(context);
       }
       _handleReceivedShareFiles();
-      _threadUnreadStore?.addListener(updateView);
+      _listenedThreadUnreadStore = _threadUnreadStore?..addListener(updateView);
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();
@@ -3448,7 +3451,7 @@ class ChatController extends ConsumerState<Chat>
     _scrollGeneration++;
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
-    _threadUnreadStore?.removeListener(updateView);
+    _listenedThreadUnreadStore?.removeListener(updateView);
     timeline?.cancelSubscriptions();
     timeline = null;
 
