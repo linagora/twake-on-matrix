@@ -1,8 +1,12 @@
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:matrix/matrix.dart';
 
 /// Result of syncing event lists between old and new states.
@@ -38,6 +42,17 @@ extension EventListExtension on List<Event> {
           MessageTypes.Emote,
         }.contains(event.messageType),
   ).sortedBy((event) => event.originServerTs);
+
+  Future<void> copyTexts(BuildContext context, Timeline timeline) async {
+    final text = copyableTextEvents
+        .map((event) => event.getSelectedEventString(context, timeline))
+        .where((text) => text.isNotEmpty)
+        .join('\n');
+    if (text.isEmpty) return;
+    await TwakeClipboard.instance.copyText(text);
+    if (!context.mounted) return;
+    TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
+  }
 
   /// Builds a map of events for O(1) lookup by eventId and transactionId.
   /// Returns a map where keys are eventId/transactionId and values are the events.

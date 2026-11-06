@@ -1,6 +1,13 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get_it/get_it.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/models/timeline_chunk.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../fake_client.dart';
 
@@ -313,6 +320,124 @@ void main() {
       ];
 
       expect(events.copyableTextEvents, isEmpty);
+    });
+  });
+
+  group('EventListExtension.copyTexts', () {
+    late List<String> copiedTexts;
+
+    setUpAll(() {
+      if (!GetIt.instance.isRegistered<ResponsiveUtils>()) {
+        GetIt.instance.registerSingleton(ResponsiveUtils());
+      }
+    });
+
+    setUp(() {
+      copiedTexts = [];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (call) async {
+            if (call.method == 'Clipboard.setData') {
+              copiedTexts.add((call.arguments as Map)['text'] as String);
+            }
+            return null;
+          });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
+    Event textMessage(
+      String body, {
+      required int timestamp,
+      String msgtype = MessageTypes.Text,
+    }) {
+      return Event(
+        senderId: '@user:example.com',
+        type: EventTypes.Message,
+        room: room,
+        eventId: '\$$timestamp',
+        content: {'msgtype': msgtype, 'body': body},
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
+    }
+
+    Event replyWithoutText({required int timestamp}) {
+      return Event(
+        senderId: '@user:example.com',
+        type: EventTypes.Message,
+        room: room,
+        eventId: '\$$timestamp',
+        content: {
+          'msgtype': MessageTypes.Text,
+          'body': '> <@other:example.com> quoted',
+          'm.relates_to': {
+            'm.in_reply_to': {'event_id': '\$quoted'},
+          },
+        },
+        originServerTs: DateTime.fromMillisecondsSinceEpoch(timestamp),
+      );
+    }
+
+    Future<void> copy(WidgetTester tester, List<Event> events) async {
+      final timeline = Timeline(
+        room: room,
+        chunk: TimelineChunk(events: []),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => events.copyTexts(context, timeline),
+                child: const Text('copy'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('copy'));
+      await tester.pump();
+    }
+
+    final copiedSnackBar = find.text(
+      lookupL10n(const Locale('en')).textCopiedToClipboard,
+    );
+
+    testWidgets('copies the texts in timeline order and confirms it', (
+      tester,
+    ) async {
+      await copy(tester, [
+        textMessage('second', timestamp: 2),
+        textMessage('first', timestamp: 1),
+      ]);
+
+      expect(copiedTexts, ['first\nsecond']);
+      expect(copiedSnackBar, findsOneWidget);
+    });
+
+    testWidgets('leaves empty texts out', (tester) async {
+      await copy(tester, [
+        textMessage('first', timestamp: 1),
+        replyWithoutText(timestamp: 2),
+        textMessage('third', timestamp: 3),
+      ]);
+
+      expect(copiedTexts, ['first\nthird']);
+    });
+
+    testWidgets('does nothing when no text can be copied', (tester) async {
+      await copy(tester, [
+        textMessage('photo.png', timestamp: 1, msgtype: MessageTypes.Image),
+        replyWithoutText(timestamp: 2),
+      ]);
+
+      expect(copiedTexts, isEmpty);
+      expect(copiedSnackBar, findsNothing);
     });
   });
 }

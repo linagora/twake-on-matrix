@@ -59,7 +59,6 @@ import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
-import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/basic_event_extension.dart';
 import 'package:twake_chat/utils/extension/event_status_custom_extension.dart';
@@ -1016,14 +1015,7 @@ class ChatController extends ConsumerState<Chat>
       await selectedEvents.first.copy(context, timeline!);
       return;
     }
-    final text = selectedEvents.copyableTextEvents
-        .map((event) => event.getSelectedEventString(context, timeline!))
-        .where((text) => text.isNotEmpty)
-        .join('\n');
-    if (text.isEmpty) return;
-    await TwakeClipboard.instance.copyText(text);
-    if (!mounted) return;
-    TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
+    await selectedEvents.copyTexts(context, timeline!);
   }
 
   void copyEventsAction(Event event) async {
