@@ -88,6 +88,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           .toList();
       count += rooms.length;
       yield rooms;
+      // A search is one request, as twake-space-chat does.
+      if (searchTerm != null) return;
       if (rooms.isEmpty && ++emptyPages == _maxEmptyPages) {
         Logs().w('PublicRoomsDatasourceImpl::fetchDirectory: empty pages');
         return;

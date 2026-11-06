@@ -46,6 +46,12 @@ void main() {
         MockSearchContactsAndChatsController();
   });
 
+  setUp(() {
+    when(
+      mockSearchController.publicGroupsSearchTerm,
+    ).thenReturn(PublicGroupsSearchTerm(TextEditingController()));
+  });
+
   Future<void> makeTestable(WidgetTester tester) async {
     await tester.pumpWidget(
       ThemeBuilder(
@@ -101,6 +107,7 @@ void main() {
             mockSearchController.searchContactAndRecentChatController,
           ).thenReturn(mockSearchContactAndRecentChatController);
           when(mockTextEditingController.text).thenReturn('@test:domain.com');
+          when(mockSearchController.isSearchMatrixUserId).thenReturn(true);
           when(mockServerSearchController.searchResultsNotifier).thenReturn(
             ValueNotifier<PresentationServerSideUIState>(
               PresentationServerSideEmptySearch(),
@@ -138,9 +145,7 @@ void main() {
             mockSearchController.searchContactAndRecentChatController,
           ).thenReturn(mockSearchContactAndRecentChatController);
           when(mockTextEditingController.text).thenReturn('test');
-          when(
-            mockSearchController.publicGroupsSearchTerm,
-          ).thenReturn(PublicGroupsSearchTerm(TextEditingController()));
+          when(mockSearchController.isSearchMatrixUserId).thenReturn(false);
           when(mockServerSearchController.searchResultsNotifier).thenReturn(
             ValueNotifier<PresentationServerSideUIState>(
               PresentationServerSideEmptySearch(),
