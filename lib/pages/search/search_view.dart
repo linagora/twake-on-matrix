@@ -70,6 +70,14 @@ class SearchView extends StatelessWidget {
           ),
           _RecentChatAndContactsHeader(searchController: searchController),
           _recentChatsWidget(),
+          PublicGroupsSearchSection(
+            searchTerm: searchController.publicGroupsSearchTerm,
+            header: _SearchHeader(
+              header: l10n.publicGroupsYouCanJoin,
+              searchController: searchController,
+              needShowMore: false,
+            ),
+          ),
           ValueListenableBuilder(
             valueListenable:
                 searchController.serverSearchController.searchResultsNotifier,
@@ -103,14 +111,6 @@ class SearchView extends StatelessWidget {
                     : const SizedBox(),
               );
             },
-          ),
-          PublicGroupsSearchSection(
-            searchTerm: searchController.publicGroupsSearchTerm,
-            header: _SearchHeader(
-              header: l10n.publicGroupsYouCanJoin,
-              searchController: searchController,
-              needShowMore: false,
-            ),
           ),
         ],
       ),
