@@ -32,6 +32,10 @@ class ThreadRobot extends CoreRobot {
 
   PatrolFinder get threadHeader => $(ThreadAppBarTitle);
 
+  /// The header is a Column whose centre lies right of the short "Thread"
+  /// line, so the header itself is never hit-testable: wait on the title.
+  PatrolFinder get _threadTitle => threadHeader.$(find.text('Thread'));
+
   PatrolFinder get _startThreadItem =>
       $(PullDownMenuItem).containing(find.text('Start a thread'));
 
@@ -53,7 +57,7 @@ class ThreadRobot extends CoreRobot {
     await $.waitUntilVisible(found, timeout: _timeout);
     await found.tap();
     await $.pumpAndTrySettle();
-    await $.waitUntilVisible(threadHeader, timeout: _timeout);
+    await $.waitUntilVisible(_threadTitle, timeout: _timeout);
   }
 
   Future<void> startThreadFrom(String message) async {
@@ -61,7 +65,7 @@ class ThreadRobot extends CoreRobot {
     await $.waitUntilVisible(_startThreadItem);
     await _startThreadItem.tap();
     await $.pumpAndTrySettle();
-    await $.waitUntilVisible(threadHeader, timeout: _timeout);
+    await $.waitUntilVisible(_threadTitle, timeout: _timeout);
   }
 
   Future<void> expectNoStartThreadItemOn(String message) async {
@@ -75,8 +79,8 @@ class ThreadRobot extends CoreRobot {
   }
 
   Future<void> expectThreadScreenOn(String rootText) async {
-    await $.waitUntilVisible(threadHeader, timeout: _timeout);
-    expect(threadHeader.$(find.text('Thread')), findsOneWidget);
+    await $.waitUntilVisible(_threadTitle, timeout: _timeout);
+    expect(_threadTitle, findsOneWidget);
     expect(
       threadHeader.$(find.textContaining(rootText)),
       findsOneWidget,
@@ -141,6 +145,6 @@ class ThreadRobot extends CoreRobot {
     await $.waitUntilVisible(banner, timeout: _timeout);
     await $(find.text('Open')).tap();
     await $.pumpAndTrySettle();
-    await $.waitUntilVisible(threadHeader, timeout: _timeout);
+    await $.waitUntilVisible(_threadTitle, timeout: _timeout);
   }
 }
