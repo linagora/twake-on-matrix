@@ -74,7 +74,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/decrypted-$fileName';
+    return '$fileStoreDirectory/$eventId/decrypted/$fileName';
   }
 
   String convertFileExtension(String filename, String newExtension) {
