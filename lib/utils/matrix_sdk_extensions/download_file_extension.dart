@@ -238,6 +238,7 @@ extension DownloadFileExtension on Event {
     }
 
     final decryptedFile = File(decryptedPath);
+    await decryptedFile.create(recursive: true);
     await decryptedFile.writeAsBytes(decryptedBytes);
 
     return FileInfo(filename, filePath: decryptedPath);
