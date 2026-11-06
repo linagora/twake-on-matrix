@@ -166,9 +166,12 @@ directory of the user's homeserver for the text, as twake-space-chat does:
 one request, filtered by the server (`generic_search_term`), at most 20
 rooms. Shown only when the well-known enables public groups.
 
-- The rooms come last, under « Groups you can join », after the messages.
-  The same rooms as D5: groups and feeds the user has neither joined nor been
-  invited to, with the same rows and badges.
+- The rooms come under « Groups you can join », after the chats and contacts
+  and before the messages (decided by Johann, 2026-11-06). Here the messages
+  page in endlessly as the list scrolls, unlike twake-space-chat where they
+  stop at 20 and the public rooms come last. The same rooms as D5: groups and
+  feeds the user has neither joined nor been invited to, with the same rows
+  and badges.
 - The request leaves 300 ms after the typing stops, like the other searches.
   Nothing shows while it runs, when it fails or when it finds nothing.
 - A tap behaves as on the page of D5: joins and opens the room, or sends the
