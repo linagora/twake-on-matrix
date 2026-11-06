@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Single entry-point for all event visibility decisions.
@@ -30,6 +31,7 @@ abstract final class EventVisibilityResolver {
   static bool isEligibleForChatListPreviewSync(Event event) {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
+    if (event.threadRootId != null) return false;
     return true;
   }
 
@@ -41,6 +43,7 @@ abstract final class EventVisibilityResolver {
   ) async {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
+    if (event.threadRootId != null) return false;
     if (event.relationshipType != RelationshipTypes.edit) return true;
 
     // Walk the edit chain; discard if any ancestor is redacted.
@@ -50,7 +53,7 @@ abstract final class EventVisibilityResolver {
       if (!visited.add(id)) break;
       final target = await room.getEventById(id);
       if (target == null) break;
-      if (target.redacted) return false;
+      if (target.redacted || target.threadRootId != null) return false;
       id = target.relationshipType == RelationshipTypes.edit
           ? target.relationshipEventId
           : null;
@@ -69,6 +72,7 @@ abstract final class EventVisibilityResolver {
 
   static bool _passesRelationshipLayer(Event event) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
+    if (event.threadRootId != null) return false;
     if (event.type.startsWith('m.key.verification.')) return false;
     return true;
   }
