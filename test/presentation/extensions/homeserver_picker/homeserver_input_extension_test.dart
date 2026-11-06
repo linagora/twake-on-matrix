@@ -1,14 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/pages/homeserver_picker/homeserver_input.dart';
+import 'package:twake_chat/presentation/extensions/homeserver_picker/homeserver_input_extension.dart';
 
 void main() {
-  group('parseHomeserverInput', () {
+  group('toHomeserverUri', () {
     final cases = {
       'matrix.example.com': Uri.parse('https://matrix.example.com'),
+      'matrix.example.com/': Uri.parse('https://matrix.example.com/'),
       'matrix.example.com:8443': Uri.parse('https://matrix.example.com:8443'),
       '192.168.88.253:8443': Uri.parse('https://192.168.88.253:8443'),
+      '[::1]:8448': Uri.parse('https://[::1]:8448'),
       'localhost:8083': Uri.parse('https://localhost:8083'),
       'matrix.example.com:8443/': Uri.parse('https://matrix.example.com:8443/'),
+      'matrix.org/path': Uri.parse('https://matrix.org/path'),
       'https://matrix.example.com:8443': Uri.parse(
         'https://matrix.example.com:8443',
       ),
@@ -17,7 +20,7 @@ void main() {
 
     for (final MapEntry(key: input, value: expected) in cases.entries) {
       test('parses "$input"', () {
-        final uri = parseHomeserverInput(input);
+        final uri = input.toHomeserverUri();
 
         expect(uri, expected);
         expect(uri.host, isNotEmpty);
@@ -25,7 +28,8 @@ void main() {
     }
 
     test('keeps the port', () {
-      expect(parseHomeserverInput('matrix.example.com:8443').port, 8443);
+      expect('matrix.example.com:8443'.toHomeserverUri().port, 8443);
+      expect('[::1]:8448'.toHomeserverUri().port, 8448);
     });
   });
 }

@@ -11,7 +11,7 @@ import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
-import 'package:twake_chat/pages/homeserver_picker/homeserver_input.dart';
+import 'package:twake_chat/presentation/extensions/homeserver_picker/homeserver_input_extension.dart';
 import 'package:twake_chat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -158,7 +158,7 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
           .trim()
           .toLowerCase()
           .replaceAll(' ', '-');
-      final homeserver = parseHomeserverInput(homeserverController.text);
+      final homeserver = homeserverController.text.toHomeserverUri();
       final matrix = Matrix.of(context);
       final allHomeserverLoggedIn = ClientManager.loggedIn(
         await ClientManager.getClients(),
