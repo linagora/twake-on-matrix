@@ -54,6 +54,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   final previewQueries = <String>[];
   final previewVia = <List<String>>[];
   final joinedVia = <List<String>>[];
+  final knockedVia = <List<String>>[];
 
   int? requestedLimit;
   final knockedQueries = <List<String>>[];
@@ -110,6 +111,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
     await knockGate?.future;
     if (knockError case final error?) throw error;
     knockedIds.add(roomIdOrAlias);
+    knockedVia.add(via);
   }
 
   @override

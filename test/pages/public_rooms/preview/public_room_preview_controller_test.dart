@@ -68,6 +68,24 @@ void main() {
     await expectLater(result, throwsA(isA<PublicRoomsNoClientException>()));
   });
 
+  test('open_afterAFailedLookup_triesToJoin', () async {
+    // Arrange
+    repository.previewError = const PublicRoomsNoClientException();
+    final container = ProviderContainer.test(
+      retry: (_, _) => null,
+      overrides: [publicRoomsRepositoryProvider.overrideWithValue(repository)],
+    );
+    container.listen(provider, (_, _) {});
+    await expectLater(container.read(provider.future), throwsA(anything));
+
+    // Act
+    final result = await container.read(provider.notifier).open();
+
+    // Assert
+    expect(result, isA<PublicRoomJoined>());
+    expect(repository.joinedIds, [alias]);
+  });
+
   test('open_whenTheRoomIsOpen_joinsByTheAddress', () async {
     // Arrange
     final (container, controller) = await loaded(
@@ -127,6 +145,9 @@ void main() {
     // Assert
     expect(result, isA<PublicRoomRequested>());
     expect(repository.knockedIds, [alias]);
+    expect(repository.knockedVia, [
+      ['hs2'],
+    ]);
     expect(repository.joinedIds, isEmpty);
     final preview = container.read(provider).requireValue.preview;
     expect((preview as PublicRoomPreviewFound).isRequested, isTrue);
