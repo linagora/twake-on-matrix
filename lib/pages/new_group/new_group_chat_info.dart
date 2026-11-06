@@ -13,6 +13,8 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_view.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
+import 'package:twake_chat/providers/room_list/room_list_providers.dart';
 import 'package:twake_chat/presentation/extensions/invite_user_exception_extension.dart';
 import 'package:twake_chat/presentation/mixins/common_media_picker_mixin.dart';
 import 'package:twake_chat/presentation/mixins/pick_avatar_mixin.dart';
@@ -21,7 +23,6 @@ import 'package:twake_chat/presentation/model/contact/presentation_contact.dart'
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
-import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
@@ -33,6 +34,7 @@ import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.da
 import 'package:twake_chat/utils/dialog/warning_dialog.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
@@ -41,12 +43,16 @@ import 'package:wechat_camera_picker/wechat_camera_picker.dart';
 class NewGroupChatInfo extends ConsumerStatefulWidget {
   final Set<PresentationContact> contactsList;
 
-  final bool isFeed;
+  final NewGroupKind kind;
+
+  /// The space the flow was opened from, chosen beforehand.
+  final String? parentSpaceId;
 
   const NewGroupChatInfo({
     super.key,
     required this.contactsList,
-    this.isFeed = false,
+    this.kind = NewGroupKind.group,
+    this.parentSpaceId,
   });
 
   @override
@@ -69,11 +75,17 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
   final avatarAssetEntityNotifier = ValueNotifier<AssetEntity?>(null);
   final avatarFilePickerNotifier = ValueNotifier<MatrixFile?>(null);
   final groupNameFocusNode = FocusNode();
-  final responsiveUtils = ResponsiveUtils();
-
   Set<PresentationContact> get contactsList => widget.contactsList;
 
-  bool get isFeed => widget.isFeed;
+  NewGroupKind get kind => widget.kind;
+
+  bool get isFeed => kind.isFeed;
+
+  bool get isSpace => kind.isSpace;
+
+  late final parentSpaceNotifier = ValueNotifier<String?>(widget.parentSpaceId);
+
+  final topicTextEditingController = TextEditingController();
 
   void setEncrypted({required bool isEncrypted}) {
     groupPrivacyNotifier.value = groupPrivacyNotifier.value.withEncryption(
@@ -122,6 +134,20 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     }
   }
 
+  /// A link can name a space the user may not add to: it is not kept.
+  String? get _validParentSpaceId {
+    final parentId = parentSpaceNotifier.value;
+    return ref.read(addableSpacesProvider).any((space) => space.id == parentId)
+        ? parentId
+        : null;
+  }
+
+  /// Checked on the resolved parent: a link or « None » can leave a plain
+  /// group without anybody.
+  bool get canSubmit =>
+      contactsList.isNotEmpty ||
+      !kind.isMemberRequired(parentSpaceId: _validParentSpaceId);
+
   void createNewGroup({String? urlAvatar}) {
     unawaited(
       ref
@@ -131,7 +157,9 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
               groupName: groupNameTextEditingController.text,
               invitees: contactsList.map((contact) => contact.matrixId),
               privacy: groupPrivacyNotifier.value,
-              isFeed: isFeed,
+              kind: kind,
+              topic: topicTextEditingController.text,
+              parentSpaceId: _validParentSpaceId,
               urlAvatar: urlAvatar,
             ),
           ),
@@ -172,9 +200,14 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
       case NewGroupChatInfoFailed(:final reason):
         await showConfirmAlertDialog(
           context: context,
-          message: reason == NewGroupFailureReason.feedNotSupported
-              ? l10n.feedNotSupportedByHomeserver
-              : l10n.inviteUserErrorMessage,
+          message: switch (reason) {
+            NewGroupFailureReason.spaceRefused => l10n.createForbidden,
+            NewGroupFailureReason.feedNotSupported =>
+              l10n.feedNotSupportedByHomeserver,
+            NewGroupFailureReason.other when widget.kind.isSpace =>
+              l10n.createFailed,
+            NewGroupFailureReason.other => l10n.inviteUserErrorMessage,
+          },
           isArrangeActionButtonsVertical: true,
           okLabel: l10n.gotIt,
         );
@@ -201,7 +234,8 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
   }
 
   void _completeGroupCreation({required String roomId, String? groupName}) {
-    if (!responsiveUtils.isSingleColumnLayout(context)) {
+    // Where the flow went through the inner navigator, whatever the width.
+    if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
       context.popInnerAll();
     }
     RoomRoute(
@@ -286,6 +320,8 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     avatarAssetEntityNotifier.dispose();
     avatarUploadStateNotifier.dispose();
     groupNameTextEditingController.dispose();
+    topicTextEditingController.dispose();
+    parentSpaceNotifier.dispose();
     groupNameFocusNode.dispose();
     avatarFilePickerNotifier.dispose();
   }

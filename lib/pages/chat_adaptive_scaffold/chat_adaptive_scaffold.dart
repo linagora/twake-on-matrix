@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/space_home/space_home.dart';
+import 'package:twake_chat/pages/space_home/space_or_chat.dart';
 import 'package:twake_chat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold_builder.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_navigator.dart';
 import 'package:twake_chat/pages/chat_search/chat_search.dart';
@@ -45,12 +47,20 @@ class ChatAdaptiveScaffoldController extends State<ChatAdaptiveScaffold> {
   Widget build(BuildContext context) {
     return KeyboardDismissOnTap(
       child: ChatAdaptiveScaffoldBuilder(
-        bodyBuilder: (controller) => Chat(
+        bodyBuilder: (controller) => SpaceOrChat(
           roomId: widget.roomId,
-          shareFiles: widget.shareFiles,
-          roomName: widget.roomName,
-          onChangeRightColumnType: controller.setRightColumnType,
-          jumpToEventStream: jumpToEventStreamController.stream,
+          spaceBuilder: (_) => SpaceHome(
+            roomId: widget.roomId,
+            onShowInfo: () =>
+                controller.setRightColumnType(RightColumnType.groupChatDetails),
+          ),
+          chatBuilder: (_) => Chat(
+            roomId: widget.roomId,
+            shareFiles: widget.shareFiles,
+            roomName: widget.roomName,
+            onChangeRightColumnType: controller.setRightColumnType,
+            jumpToEventStream: jumpToEventStreamController.stream,
+          ),
         ),
         rightBuilder:
             (

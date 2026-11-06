@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_room_list_extension.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/widgets/unread_rooms_badge.dart';
@@ -103,13 +103,9 @@ void main() {
 
     final room = await restoreRoom();
 
-    for (final filter in ActiveFilter.values) {
-      expect(
-        filter.getRoomFilterByActiveFilter()(room),
-        isFalse,
-        reason: '$filter',
-      );
-    }
+    expect(room.membership, Membership.leave);
+    expect(client.listedRooms, isEmpty);
+    expect(client.acceptedRooms, isEmpty);
     expect(client.joinedOrInvitedRooms, isEmpty);
   });
 

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_room_list_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -29,12 +29,12 @@ extension ClientExtension on Client {
       )
       .toList();
 
-  List<Room> filteredRoomsForAll(ActiveFilter activeFilter) {
-    return rooms
-        .where(activeFilter.getRoomFilterByActiveFilter())
-        .sorted(chatListItemComparator)
-        .toList();
-  }
+  /// The rooms a message can go to, most recent first: spaces hold no
+  /// conversation and an invitation is not accepted yet.
+  List<Room> get acceptedRooms => listedRooms
+      .where((room) => !room.isSpace && !room.isInvitation)
+      .sorted(chatListItemComparator)
+      .toList();
 
   String mxid(BuildContext context) => userID ?? L10n.of(context)!.user;
 

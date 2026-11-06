@@ -6,7 +6,6 @@ abstract class SettingKeys {
       'chat.twake.hideUnimportantStateEvents';
   static const String showDirectChatsInSpaces =
       'chat.twake.showDirectChatsInSpaces';
-  static const String separateChatTypes = 'chat.twake.separateChatTypes';
   static const String sentry = 'sentry';
   static const String theme = 'theme';
   static const String amoledEnabled = 'amoled_enabled';
@@ -43,7 +42,6 @@ const Map<String, String> legacySettingKeys = {
   SettingKeys.hideUnimportantStateEvents:
       'chat.fluffy.hideUnimportantStateEvents',
   SettingKeys.showDirectChatsInSpaces: 'chat.fluffy.showDirectChatsInSpaces',
-  SettingKeys.separateChatTypes: 'chat.fluffy.separateChatTypes',
   SettingKeys.showNoGoogle: 'chat.fluffy.show_no_google',
   SettingKeys.bubbleSizeFactor: 'chat.fluffy.bubble_size_factor',
   SettingKeys.fontSizeFactor: 'chat.fluffy.font_size_factor',

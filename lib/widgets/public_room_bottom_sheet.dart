@@ -50,8 +50,7 @@ class PublicRoomBottomSheet extends StatelessWidget {
       }
     }
     if (!context.mounted) return;
-    final room = client.getRoomById(roomId);
-    if (room != null && !room.isSpace) {
+    if (client.getRoomById(roomId) != null) {
       RoomRoute(roomid: roomId).go(context);
     }
     if (!context.mounted) return;

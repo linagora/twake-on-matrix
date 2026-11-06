@@ -14,8 +14,8 @@ class ChatDetailsAppBar extends StatefulWidget {
     required this.room,
     required this.onToggleNotification,
     required this.muteNotifier,
-    required this.onSearch,
-    required this.onMessage,
+    this.onSearch,
+    this.onMessage,
     required this.tabList,
     required this.tabController,
     required this.innerBoxIsScrolled,
@@ -24,8 +24,10 @@ class ChatDetailsAppBar extends StatefulWidget {
   final Room room;
   final VoidCallback onToggleNotification;
   final ValueNotifier<PushRuleState> muteNotifier;
-  final VoidCallback onSearch;
-  final VoidCallback onMessage;
+
+  /// `null` where there is nothing to search: a space.
+  final VoidCallback? onSearch;
+  final VoidCallback? onMessage;
   final bool innerBoxIsScrolled;
   final List<ChatDetailsPage> tabList;
   final TabController? tabController;

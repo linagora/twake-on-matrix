@@ -9,7 +9,7 @@ class SettingForNewGroupRobot extends CoreRobot {
   SettingForNewGroupRobot(super.$);
 
   PatrolFinder getNameTextField() {
-    return $(TextField).last;
+    return $(const ValueKey('new_group_name'));
   }
 
   PatrolFinder getConfirmIcon() {
