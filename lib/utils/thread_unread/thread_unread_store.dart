@@ -98,6 +98,25 @@ extension ThreadUnreadRoomExtension on Room {
   }
 }
 
+/// One decision for every consumer of the room counters: the server stops
+/// counting thread notifications in the room's own counters.
+extension RoomUnreadWithThreads on Room {
+  bool get isUnreadWithThreads => isUnread || unreadBadgeCount > 0;
+
+  bool get isUnreadOrInvitedWithThreads =>
+      isUnreadOrInvited || unreadBadgeCount > 0;
+
+  /// Mentions of the room and of any of its threads.
+  int get highlightCountWithThreads {
+    final store = client is ThreadUnreadStoreOwner
+        ? (client as ThreadUnreadStoreOwner).threadUnread
+        : null;
+    return highlightCount +
+        (store?.threadsOf(id).fold<int>(0, (n, t) => n + t.highlightCount) ??
+            0);
+  }
+}
+
 extension MarkRoomAndThreadsRead on Room {
   /// "Mark as read": the main timeline and every thread with unread messages.
   Future<void> markRoomAndAllThreadsRead() async {

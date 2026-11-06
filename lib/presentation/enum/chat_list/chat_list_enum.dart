@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
@@ -101,7 +102,7 @@ enum ChatListSelectionActions {
   String getTitleContextMenuSelection(BuildContext context, Room room) {
     switch (this) {
       case ChatListSelectionActions.read:
-        if (room.isUnreadOrInvited) {
+        if (room.isUnreadOrInvitedWithThreads) {
           return L10n.of(context)!.markThisChatAsRead;
         } else {
           return L10n.of(context)!.markThisChatAsUnRead;

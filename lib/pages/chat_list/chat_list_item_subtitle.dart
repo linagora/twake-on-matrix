@@ -33,7 +33,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     final String typingText = room.getLocalizedTypingText(l10n);
     final bool isGroup = !room.isDirectChat;
     final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      room.isUnreadOrInvited || room.unreadBadgeCount > 0,
+      room.isUnreadOrInvitedWithThreads,
       room.hasNewMessages,
       room.unreadBadgeCount > 0,
     );
@@ -96,7 +96,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                     curve: TwakeThemes.animationCurve,
                     padding: const .only(bottom: 4),
                     height: ChatListItemStyle.mentionIconWidth,
-                    width: isMentioned && room.isUnreadOrInvited
+                    width: isMentioned && room.isUnreadOrInvitedWithThreads
                         ? ChatListItemStyle.mentionIconWidth
                         : 0,
                     decoration: BoxDecoration(
@@ -104,7 +104,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
                       borderRadius: .circular(AppConfig.borderRadius),
                     ),
                     child: Center(
-                      child: isMentioned && room.isUnreadOrInvited
+                      child: isMentioned && room.isUnreadOrInvitedWithThreads
                           ? Text(
                               '@',
                               style: TextStyle(
@@ -126,7 +126,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           padding: const .symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
-            room.isUnreadOrInvited || room.unreadBadgeCount > 0,
+            room.isUnreadOrInvitedWithThreads,
             room.hasNewMessages,
             room.unreadBadgeCount,
           ),
@@ -187,7 +187,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
               lastEvent,
               context,
               isGroup,
-              room.isUnreadOrInvited,
+              room.isUnreadOrInvitedWithThreads,
             ),
     );
   }

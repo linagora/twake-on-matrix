@@ -147,7 +147,8 @@ class ChatListController extends State<ChatList>
 
   bool _containUnreadMessage(ConversationSelectionPresentation conversation) {
     final room = Matrix.of(context).client.getRoomById(conversation.roomId);
-    return room != null && (room.isUnreadOrInvited || room.hasNewMessages);
+    return room != null &&
+        (room.isUnreadOrInvitedWithThreads || room.hasNewMessages);
   }
 
   bool get anySelectedRoomNotFavorite =>
@@ -273,7 +274,7 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> _markAsRead(Room room) async {
-    if (room.isUnread || room.hasNewMessages) {
+    if (room.isUnreadWithThreads || room.hasNewMessages) {
       await room.markRoomAndAllThreadsRead();
     }
   }
@@ -634,7 +635,7 @@ class ChatListController extends State<ChatList>
   Future<void> toggleRead(Room room) async {
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        if (room.isUnread) {
+        if (room.isUnreadWithThreads) {
           await room.markUnread(false);
           await room.markRoomAndAllThreadsRead();
         } else {
@@ -826,18 +827,20 @@ class ChatListController extends State<ChatList>
     return [
       if (!room.isInvitation)
         ChatCustomSlidableAction(
-          label: room.isUnread
+          label: room.isUnreadWithThreads
               ? L10n.of(context)!.read
               : L10n.of(context)!.unread,
           icon: Icon(
-            room.isUnread
+            room.isUnreadWithThreads
                 ? Icons.mark_chat_read_outlined
                 : Icons.mark_chat_unread_outlined,
             size: ChatListViewStyle.slidableIconSize,
           ),
           onPressed: (_) => toggleRead(room),
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          backgroundColor: ChatListViewStyle.readSlidableColor(room.isUnread)!,
+          backgroundColor: ChatListViewStyle.readSlidableColor(
+            room.isUnreadWithThreads,
+          )!,
         ),
       ChatCustomSlidableAction(
         label: room.isMuted ? L10n.of(context)!.unmute : L10n.of(context)!.mute,
