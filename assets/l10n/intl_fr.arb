@@ -2731,19 +2731,5 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
-  },
-  "callFromUnsupportedApp": "Appel d’une application que Twake Chat ne prend pas en charge",
-  "@callFromUnsupportedApp": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "callStartedAt": "Réunion démarrée à {time}",
-  "@callStartedAt": {
-    "type": "text",
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
   }
 }

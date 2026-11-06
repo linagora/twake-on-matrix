@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 /// Top-level function for native isolate-based sync response parsing.
 /// Returns a fully constructed [SyncUpdate] since Dart isolates can
@@ -73,7 +74,11 @@ class TwakeClient extends Client {
     super.onSoftLogout,
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
-  });
+  }) {
+    // The SDK adds call events after the given set: a call would mark the
+    // room unread.
+    roomPreviewLastEvents.removeWhere(CallEventTypes.isCallEvent);
+  }
 
   /// Logs this account's notification device out and removes its recovery
   /// key first: the SDK forgets the user in `clear`, also when the server

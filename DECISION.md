@@ -159,7 +159,7 @@ A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
 
-## D9. Call events in the timeline and the chat list follow Twake Space Chat (proposed by Johann, 2026-11-04)
+## D10. Call events in the timeline and the chat list follow Twake Space Chat (proposed by Johann, 2026-11-04)
 
 Twake Chat reads call events as Twake Space Chat does, so that both clients
 of the same room tell the same story:
