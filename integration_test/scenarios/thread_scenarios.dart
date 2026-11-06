@@ -212,7 +212,9 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     );
     await $.pump(const Duration(seconds: 5));
 
-    await openMobileGroupFixture(this);
+    // Reopen from the chat list, as a user would: a second search open can
+    // hang on the iOS contacts dialog that Patrol cannot answer.
+    await robots.chatListRobot().openChatByTitle(fixture.title);
     await threads.openFromUnreadBanner();
     await threads.expectThreadScreenOn(root);
     await threads.expectMessageInThread(laterReply);
