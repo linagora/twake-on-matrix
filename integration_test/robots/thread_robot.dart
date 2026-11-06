@@ -48,11 +48,6 @@ class ThreadRobot extends CoreRobot {
     );
   }
 
-  Future<void> expectNoCard() async {
-    await $.pump(const Duration(seconds: 2));
-    expect($(ThreadSummaryCard), findsNothing);
-  }
-
   Future<void> openFromCard({required String lastReplyText}) async {
     final found = card(lastReplyText: lastReplyText);
     await $.waitUntilVisible(found, timeout: _timeout);
@@ -120,11 +115,23 @@ class ThreadRobot extends CoreRobot {
     await waitUntilAbsent($, threadHeader, timeout: _timeout);
   }
 
+  /// The reply text may show on the card of its root, nowhere else.
   Future<void> expectNotInMainTimeline(String text) async {
     await $.pump(const Duration(seconds: 2));
+    final everywhere = find
+        .textContaining(text, findRichText: true)
+        .evaluate()
+        .toSet();
+    final onCards = find
+        .descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.textContaining(text, findRichText: true),
+        )
+        .evaluate()
+        .toSet();
     expect(
-      _message(text),
-      findsNothing,
+      everywhere.difference(onCards),
+      isEmpty,
       reason: 'A thread reply must not show in the main timeline',
     );
   }
