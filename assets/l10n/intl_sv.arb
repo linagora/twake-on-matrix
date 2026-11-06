@@ -1888,9 +1888,7 @@
   "indexedDbErrorLong": "Meddelandelagring är tyvärr inte aktiverat i privat läge som standard.\nGå till\n - about:config\n - sätt dom.indexedDB.privateBrowsing.enabled till true\nAnnars går det inte att använda FluffyChat.",
   "storeInSecureStorageDescription": "Lagra återställningsnyckeln på säker plats på denna enhet.",
   "storeInAppleKeyChain": "Lagra i Apples nyckelkedja (KeyChain)",
-  "foregroundServiceRunning": "Denna notifikation visas när förgrundstjänsten körs.",
   "custom": "Anpassad",
-  "screenSharingTitle": "skärmdelning",
   "noKeyForThisMessage": "Detta kan hända om meddelandet skickas innan du har loggat in på ditt konto på denna enhet.\n\nDet kan också vara så att avsändaren har blockerat din enhet eller att något gick fel med Internetanslutningen.\n\nKan du läsa meddelandet i en annan session? Isåfall kan du överföra meddelandet från den sessionen! Gå till Inställningar > Enhet och säkerställ att dina enheter har verifierat varandra. När du öppnar rummet nästa gång och båda sessionerna är i förgrunden, så kommer nycklarna att överföras automatiskt.\n\nOm du vill behålla nycklarna när du loggar ut eller byter enhet, kontrollera att du har aktiverat säkerhetskopiering av chattar i inställningarna.",
   "fileIsTooBigForServer": "Servern informerar om att filen är för stor för att skickas.",
   "deviceKeys": "Enhetsnycklar:",
@@ -1906,7 +1904,6 @@
       "senderName": {}
     }
   },
-  "screenSharingDetail": "Du delar din skärm i FluffyChat",
   "youRejectedTheInvitation": "Du avvisade inbjudan",
   "youBannedUser": "Du förbjöd {user}",
   "@youBannedUser": {
@@ -1935,7 +1932,6 @@
   "stories": "Berättelser",
   "saveKeyManuallyDescription": "Spara nyckeln manuellt genom att aktivera dela-funktionen eller urklippshanteraren på enheten.",
   "storeInAndroidKeystore": "Lagra i Androids nyckellagring (KeyStore)",
-  "appearOnTopDetails": "Tillåt att appen visas ovanpå (behövs inte om du redan har FluffyChat konfigurerat som ett samtalskonto)",
   "whyIsThisMessageEncrypted": "Varför kan inte detta meddelande läsas?",
   "newGroup": "Ny grupp",
   "enterRoom": "Gå till rummet",

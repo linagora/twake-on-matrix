@@ -798,8 +798,6 @@
   "users": "Người dùng",
   "storeInSecureStorageDescription": "Lưu trữ khóa khôi phục trong bộ lưu trữ an toàn của thiết bị này.",
   "saveKeyManuallyDescription": "Lưu khóa này thủ công bằng cách kích hoạt hộp thoại chia sẻ hệ thống hoặc bảng nhớ tạm.",
-  "foregroundServiceRunning": "Thông báo này xuất hiện khi dịch vụ nền trước đang chạy.",
-  "appearOnTopDetails": "Cho phép ứng dụng xuất hiện trên cùng (không cần thiết nếu bạn đã thiết lập Fluffychat làm tài khoản gọi điện)",
   "pleaseClickOnLink": "Vui lòng nhấp vào liên kết trong email và tiếp tục.",
   "@pleaseClickOnLink": {
     "type": "text",
@@ -1385,8 +1383,6 @@
   "storeSecurlyOnThisDevice": "Lưu trữ an toàn trên thiết bị này",
   "user": "Người dùng",
   "custom": "Cá nhân hóa",
-  "screenSharingTitle": "Chia sẻ màn hình",
-  "screenSharingDetail": "Bạn đang chia sẻ màn hình trong FuffyChat",
   "reason": "Lý do",
   "@reason": {
     "type": "text",

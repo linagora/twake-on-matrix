@@ -1906,10 +1906,6 @@
   "enterSpace": "进入空间",
   "enterRoom": "进入聊天室",
   "allSpaces": "所有空间",
-  "appearOnTopDetails": "允许应用显示在顶部（如果你已经将 Fluffychat 设置为呼叫账户，则不需要授予此权限）",
-  "foregroundServiceRunning": "此通知在前台服务运行时出现。",
-  "screenSharingTitle": "屏幕共享",
-  "screenSharingDetail": "你正在 FluffyChat 共享屏幕",
   "numChats": "{number} 个聊天",
   "@numChats": {
     "type": "number",

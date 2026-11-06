@@ -1805,7 +1805,6 @@
   "searchContacts": "Cuardaigh teagmhálacha",
   "byContinuingYourAgreeingToOur": "Trí leanúint ar aghaidh, tá tú ag aontú lenár",
   "explainPermissionToAccessPhotos": "Ní dhéanann Twake Chat sonraí a shioncronú idir do ghléas agus ár bhfreastalaithe. Ní stórálaimid ach na meáin a sheol tú chuig an seomra comhrá. Déantar gach comhad meán a sheoltar chuig comhrá a chriptiú agus a stóráil go slán. Téigh go Socruithe > Ceadanna agus gníomhachtaigh an cead Stóráil: Grianghraif. Is féidir leat rochtain ar do leabharlann meán a dhiúltú am ar bith freisin.",
-  "appearOnTopDetails": "Ceadaíonn sé don aip a bheith ar bharr (ní gá má tá socrú Fluffychat agat cheana féin mar chuntas glao)",
   "configureDataEncryption": "Cumraigh criptiú sonraí",
   "updateNow": "Tosaigh nuashonrú sa chúlra",
   "sendMessage": "Seol teachtaireacht",
@@ -2114,7 +2113,6 @@
     }
   },
   "youAcceptedTheInvitation": "👍 Ghlac tú leis an gcuireadh",
-  "screenSharingTitle": "comhroinnt scáileáin",
   "reopenChat": "Comhrá a athoscailt",
   "welcomeToTwake": "Fáilte go Twake, {user}",
   "@welcomeToTwake": {
@@ -2212,8 +2210,6 @@
   },
   "noEmailWarning": "Iontráil seoladh ríomhphoist bailí. Seachas sin ní bheidh tú in ann do phasfhocal a athshocrú. Mura bhfuil tú ag iarraidh, tapáil arís ar an gcnaipe chun leanúint ar aghaidh.",
   "storeInAppleKeyChain": "Stóráil i Apple KeyChain",
-  "foregroundServiceRunning": "Tá an fógra seo le feiceáil nuair atá an tseirbhís tulra ag rith.",
-  "screenSharingDetail": "Tá do scáileán á roinnt agat i FuffyChat",
   "onlineHourAgo": "ar líne {hour}h ó shin",
   "@onlineHourAgo": {
     "placeholders": {
