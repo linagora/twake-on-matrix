@@ -174,9 +174,10 @@ of the same room tell the same story:
 - A legacy `m.call.invite` (the one-to-one call of Element) shows one line,
   « Call from an app Twake Chat does not support », with no answer button.
   It is not the chat-list preview, does not make the room unread on this
-  device, and its push shows no notification.
+  device, and on Android its push shows no notification.
 
-Known limit: the unread badge counts what the server counts. Synapse's
+Known limits: the unread badge counts what the server counts. Synapse's
 default rule for `m.call.invite` still adds 1 to the badge until the room is
-read. The ring push rules will be settled with the in-app and the system
-ring.
+read. On iOS the notification extension still shows its generic notification
+for that push. The ring push rules, and the iOS extension, will be settled
+with the in-app and the system ring.

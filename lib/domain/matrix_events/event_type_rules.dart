@@ -126,7 +126,7 @@ abstract final class EventTypeRules {
     CallEventTypes.callMember: EventTypeRule(
       group: EventVisibilityGroup.neverInTimeline,
     ),
-    CallEventTypes.rtcNotification: EventTypeRule(
+    RtcNotificationContent.eventType: EventTypeRule(
       group: EventVisibilityGroup.neverInTimeline,
     ),
     CallEventTypes.callNotify: EventTypeRule(

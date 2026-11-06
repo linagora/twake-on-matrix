@@ -1,6 +1,7 @@
+import 'package:matrix/matrix.dart';
+
 abstract final class CallEventTypes {
   static const String callMember = 'org.matrix.msc3401.call.member';
-  static const String rtcNotification = 'org.matrix.msc4075.rtc.notification';
   static const String callNotify = 'org.matrix.msc4075.call.notify';
 
   /// Marks the message that opens the thread of a call, as Twake Space Chat
@@ -12,7 +13,7 @@ abstract final class CallEventTypes {
   /// Call signalling and MatrixRTC events, legacy ones included.
   static bool isCallEvent(String type) =>
       type == callMember ||
-      type == rtcNotification ||
+      type == RtcNotificationContent.eventType ||
       type == callNotify ||
       _prefixes.any(type.startsWith);
 }
