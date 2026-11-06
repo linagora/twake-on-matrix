@@ -616,7 +616,16 @@ void main() {
     test('getPreview_whenBannedFromTheLocalRoom_asksNothing', () async {
       // Arrange
       final room = MockRoom();
-      when(room.membership).thenReturn(Membership.ban);
+      when(room.membership).thenReturn(Membership.leave);
+      when(room.getState(EventTypes.RoomMember, '@me:hs')).thenReturn(
+        StrippedStateEvent(
+          type: EventTypes.RoomMember,
+          content: {'membership': 'ban'},
+          senderId: '@admin:hs',
+          stateKey: '@me:hs',
+        ),
+      );
+      when(mockClient.userID).thenReturn('@me:hs');
       when(mockClient.getRoomByAlias(alias)).thenReturn(room);
 
       // Act

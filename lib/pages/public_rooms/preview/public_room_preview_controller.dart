@@ -23,8 +23,11 @@ class PublicRoomPreviewController extends _$PublicRoomPreviewController {
 
   /// Joins the room, or asks to join it when it needs an approval.
   Future<PublicRoomOpenResult> open() async {
-    final current = state.value;
-    if (current == null || !current.canOpen) {
+    // A failed lookup shows « Try to join », as an unavailable preview.
+    final current =
+        state.value ??
+        const PublicRoomPreviewState(preview: PublicRoomPreview.unavailable());
+    if (!current.canOpen) {
       return const PublicRoomOpenIgnored();
     }
     state = AsyncData(current.copyWith(isPending: true, hasFailed: false));
