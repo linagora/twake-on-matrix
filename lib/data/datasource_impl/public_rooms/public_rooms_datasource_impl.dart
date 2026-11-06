@@ -199,6 +199,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         : PublicRoomPreview.found(_toPublicRoom(listed));
   }
 
+  // https://spec.matrix.org/latest/client-server-api/#get_matrixclientv1room_summaryroomidoralias
   Future<GetRoomSummaryResponse$3?> _fetchSummary(
     Client client,
     String roomIdOrAlias,
