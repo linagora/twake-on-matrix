@@ -437,10 +437,15 @@ extension ChatScrollToEventMixin on ChatController {
       'highlighting displayIndex='
       '${getDisplayEventIndex(highlightIndex)}',
     );
-    // Do not await: highlight() animates for ~3s and would keep
-    // `_isProgrammaticScrolling` true, blocking same-room URL jumps
-    // (search result spam → "casino" / missed targets).
-    unawaited(scrollController.highlight(getDisplayEventIndex(highlightIndex)));
+    highlightedEventIdNotifier.value = session.request.eventId;
+    // Do not await: it would keep `_isProgrammaticScrolling` true, blocking
+    // same-room URL jumps (search result spam → "casino" / missed targets).
+    unawaited(
+      scrollController.highlight(
+        getDisplayEventIndex(highlightIndex),
+        highlightDuration: Duration.zero,
+      ),
+    );
   }
 
   Future<bool> _revealMountedTarget(ChatJumpSeekSession session) async {
