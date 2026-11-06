@@ -516,7 +516,7 @@ class _EmojiButton extends StatelessWidget {
       builder: (sheetContext) => SizedBox(
         height: SettingsFoldersStyle.emojiPickerHeight,
         child: emoji_mart.EmojiPicker(
-          // TODO: [transitional] No provider holds the emoji data yet.
+          // TODO: [transitional] #3560 reads the emoji data from a provider.
           emojiData: Matrix.of(context).emojiData,
           configuration: emoji_mart.EmojiPickerConfiguration(
             emojiStyle: textTheme.headlineLarge!,
