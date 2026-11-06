@@ -52,7 +52,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
                 '/client/v3/publicRooms',
                 query: {'limit': '$pageSize', 'since': ?since},
               )
-            // Only the POST form takes a filter.
+            // Only the POST form takes a filter: https://spec.matrix.org/v1.16/client-server-api/#post_matrixclientv3publicrooms
             : await client.request(
                 RequestType.POST,
                 '/client/v3/publicRooms',
