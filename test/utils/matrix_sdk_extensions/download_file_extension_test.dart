@@ -39,54 +39,70 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
+  Future<FileInfo?> downloadAndDecrypt(Uint8List plain, String fileName) async {
+    final encrypted = await MatrixFile(bytes: plain, name: fileName).encrypt();
+    final encryptedPath = await StorageDirectoryManager.instance
+        .getFilePathInAppDownloads(eventId: eventId, fileName: fileName);
+    await File(encryptedPath).create(recursive: true);
+    await File(encryptedPath).writeAsBytes(encrypted.data);
+    final event = Event(
+      content: {
+        'msgtype': MessageTypes.File,
+        'body': fileName,
+        'info': {'size': plain.length},
+        'file': {
+          'url': 'mxc://example.org/encrypted',
+          'v': 'v2',
+          'iv': encrypted.iv,
+          'hashes': {'sha256': encrypted.sha256},
+          'key': {
+            'kty': 'oct',
+            'alg': 'A256CTR',
+            'ext': true,
+            'key_ops': ['encrypt', 'decrypt'],
+            'k': encrypted.k,
+          },
+        },
+      },
+      type: EventTypes.Message,
+      eventId: eventId,
+      senderId: '@bob:example.org',
+      originServerTs: DateTime.now(),
+      room: room,
+    );
+    final decryptedPath = await StorageDirectoryManager.instance
+        .getDecryptedFilePath(eventId: eventId, fileName: fileName);
+    return event.decryptFile(
+      FileInfo(fileName, filePath: encryptedPath),
+      decryptedPath,
+      filename: fileName,
+    );
+  }
+
   group('decryptFile', () {
+    test(
+      'decryptFile_whenFileIsNamedDecrypted_writesPlainFileUnderOriginalName',
+      () async {
+        // Arrange
+        final plain = Uint8List.fromList(utf8.encode('plain bytes'));
+
+        // Act
+        final result = await downloadAndDecrypt(plain, 'decrypted');
+
+        // Assert
+        expect(result?.filePath?.split('/').last, 'decrypted');
+        expect(await File(result!.filePath!).readAsBytes(), plain);
+      },
+    );
+
     test(
       'decryptFile_whenAttachmentIsEncrypted_writesPlainFileUnderOriginalName',
       () async {
         // Arrange
         final plain = Uint8List.fromList(utf8.encode('%PDF-1.4 secret plan'));
-        final encrypted = await MatrixFile(
-          bytes: plain,
-          name: fileName,
-        ).encrypt();
-        final encryptedPath = await StorageDirectoryManager.instance
-            .getFilePathInAppDownloads(eventId: eventId, fileName: fileName);
-        await File(encryptedPath).create(recursive: true);
-        await File(encryptedPath).writeAsBytes(encrypted.data);
-        final event = Event(
-          content: {
-            'msgtype': MessageTypes.File,
-            'body': fileName,
-            'info': {'mimetype': 'application/pdf', 'size': plain.length},
-            'file': {
-              'url': 'mxc://example.org/encrypted',
-              'v': 'v2',
-              'iv': encrypted.iv,
-              'hashes': {'sha256': encrypted.sha256},
-              'key': {
-                'kty': 'oct',
-                'alg': 'A256CTR',
-                'ext': true,
-                'key_ops': ['encrypt', 'decrypt'],
-                'k': encrypted.k,
-              },
-            },
-          },
-          type: EventTypes.Message,
-          eventId: eventId,
-          senderId: '@bob:example.org',
-          originServerTs: DateTime.now(),
-          room: room,
-        );
-        final decryptedPath = await StorageDirectoryManager.instance
-            .getDecryptedFilePath(eventId: eventId, fileName: fileName);
 
         // Act
-        final result = await event.decryptFile(
-          FileInfo(fileName, filePath: encryptedPath),
-          decryptedPath,
-          filename: fileName,
-        );
+        final result = await downloadAndDecrypt(plain, fileName);
 
         // Assert
         expect(result?.filePath?.split('/').last, fileName);
