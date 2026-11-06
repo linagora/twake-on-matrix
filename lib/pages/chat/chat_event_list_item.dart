@@ -45,7 +45,11 @@ class ChatEventListItem extends StatelessWidget {
         );
 
     return Message(
-      key: GlobalObjectKey(event.eventId),
+      // The room's Chat stays mounted under the thread screen and shares the
+      // root row: a second GlobalObjectKey for it would throw.
+      key: controller.isThread && event.eventId == controller.threadRootId
+          ? ValueKey(event.eventId)
+          : GlobalObjectKey(event.eventId),
       event,
       autoScrollController: controller.scrollController,
       scrollIndex: index,
