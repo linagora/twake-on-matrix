@@ -5,7 +5,6 @@ import 'package:twake_chat/pages/chat/chat_invitation_body.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/pages/chat/chat_view_body.dart';
 import 'package:twake_chat/pages/chat/chat_view_style.dart';
-import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
@@ -133,11 +132,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                           room: controller.room,
                           isArchived: controller.isArchived,
                           sendController: controller.sendController,
-                          connectivityResultStream: controller
-                              .networkConnectionService
-                              .connectivity
-                              .onConnectivityChanged
-                              .map((results) => results.primary),
+                          connectivityResultStream:
+                              controller.connectivityResultStream,
                           actions: _appBarActions(context),
                           onPushDetails: controller.onPushDetails,
                           roomName: controller.roomName,
