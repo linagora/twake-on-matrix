@@ -1549,7 +1549,9 @@ class MatrixState extends ConsumerState<Matrix>
     );
     final summary = await newClient.fetchHomeserverSummary(
       // A login that makes this account active checked its server just before.
-      previous: _loginSessions.homeserverSummary ?? loginHomeserverSummary,
+      previous:
+          _loginSessions.homeserverSummaryOf(newClient) ??
+          loginHomeserverSummary,
     );
 
     // The active client may have changed while awaiting: a late result must
