@@ -554,10 +554,6 @@ void main() {
       }
     }
 
-    void stubDirectoryLookup(List<PublicRoomsChunk> chunks) => when(
-      mockClient.queryPublicRooms(server: 'hs', filter: anyNamed('filter')),
-    ).thenAnswer((_) async => QueryPublicRoomsResponse(chunk: chunks));
-
     final notFound = MatrixException.fromJson({'errcode': 'M_NOT_FOUND'});
 
     test('getPreview_whenTheSummaryAnswers_mapsTheRoom', () async {
@@ -579,12 +575,6 @@ void main() {
             access: PublicRoomAccess.approval,
             kind: PublicRoomKind.group,
           ),
-        ),
-      );
-      verifyNever(
-        mockClient.queryPublicRooms(
-          server: anyNamed('server'),
-          filter: anyNamed('filter'),
         ),
       );
     });
@@ -648,47 +638,9 @@ void main() {
       expect(preview, const PublicRoomPreview.unavailable());
     });
 
-    test(
-      'getPreview_whenTheSummaryFails_findsTheAliasInTheDirectory',
-      () async {
-        // Arrange
-        stubSummary(notFound);
-        stubDirectoryLookup([
-          PublicRoomsChunk(
-            roomId: '!other:hs',
-            canonicalAlias: '#general-2:hs',
-            numJoinedMembers: 1,
-            guestCanJoin: false,
-            worldReadable: false,
-          ),
-          PublicRoomsChunk(
-            roomId: '!general:hs',
-            name: 'General',
-            canonicalAlias: alias,
-            numJoinedMembers: 7,
-            guestCanJoin: false,
-            worldReadable: false,
-          ),
-        ]);
-
-        // Act
-        final preview = await datasource.getPreview(alias, via: const []);
-
-        // Assert
-        expect(preview, isA<PublicRoomPreviewFound>());
-        final room = (preview as PublicRoomPreviewFound).room;
-        expect(room.roomId, '!general:hs');
-        expect(room.memberCount, 7);
-        expect(room.access, PublicRoomAccess.open);
-      },
-    );
-
-    test('getPreview_whenNeitherKnowsTheRoom_saysUnavailable', () async {
+    test('getPreview_whenTheSummarySaysNotFound_saysUnavailable', () async {
       // Arrange
       stubSummary(notFound);
-      when(
-        mockClient.queryPublicRooms(server: 'hs', filter: anyNamed('filter')),
-      ).thenThrow(notFound);
 
       // Act
       final preview = await datasource.getPreview(alias, via: const []);
@@ -697,21 +649,28 @@ void main() {
       expect(preview, const PublicRoomPreview.unavailable());
     });
 
-    test('getPreview_forARoomId_skipsTheDirectory', () async {
+    test('getPreview_whenTheServerIsUnreachable_saysUnavailable', () async {
       // Arrange
-      when(mockClient.getRoomSummary('!a:hs', via: ['hs'])).thenThrow(notFound);
+      stubSummary(Exception('offline'));
 
       // Act
-      final preview = await datasource.getPreview('!a:hs', via: const ['hs']);
+      final preview = await datasource.getPreview(alias, via: const []);
 
       // Assert
       expect(preview, const PublicRoomPreview.unavailable());
-      verifyNever(
-        mockClient.queryPublicRooms(
-          server: anyNamed('server'),
-          filter: anyNamed('filter'),
-        ),
-      );
+    });
+
+    test('getPreview_withServers_asksTheSummaryThroughThem', () async {
+      // Arrange
+      when(
+        mockClient.getRoomSummary('!a:hs', via: ['hs2']),
+      ).thenThrow(notFound);
+
+      // Act
+      await datasource.getPreview('!a:hs', via: const ['hs2']);
+
+      // Assert
+      verify(mockClient.getRoomSummary('!a:hs', via: ['hs2'])).called(1);
     });
   });
 }

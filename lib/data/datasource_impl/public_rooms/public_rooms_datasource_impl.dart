@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/data/datasource/public_rooms/public_rooms_datasource.dart';
@@ -180,23 +179,18 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
       return const PublicRoomPreview.banned();
     }
     final summary = await _fetchSummary(client, roomIdOrAlias, via);
-    if (summary != null) {
-      return switch (summary.membership) {
-        Membership.join ||
-        Membership.invite => PublicRoomPreview.joined(summary.roomId),
-        Membership.ban => const PublicRoomPreview.banned(),
-        _ when _closedRules.contains(summary.joinRule) =>
-          const PublicRoomPreview.unavailable(),
-        final membership => PublicRoomPreview.found(
-          _toPublicRoom(summary),
-          isRequested: membership == Membership.knock,
-        ),
-      };
-    }
-    final listed = await _findInDirectory(client, roomIdOrAlias);
-    return listed == null
-        ? const PublicRoomPreview.unavailable()
-        : PublicRoomPreview.found(_toPublicRoom(listed));
+    if (summary == null) return const PublicRoomPreview.unavailable();
+    return switch (summary.membership) {
+      Membership.join ||
+      Membership.invite => PublicRoomPreview.joined(summary.roomId),
+      Membership.ban => const PublicRoomPreview.banned(),
+      _ when _closedRules.contains(summary.joinRule) =>
+        const PublicRoomPreview.unavailable(),
+      final membership => PublicRoomPreview.found(
+        _toPublicRoom(summary),
+        isRequested: membership == Membership.knock,
+      ),
+    };
   }
 
   // https://spec.matrix.org/latest/client-server-api/#get_matrixclientv1room_summaryroomidoralias
@@ -210,26 +204,6 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         roomIdOrAlias,
         via: via.isEmpty ? null : via,
       );
-    } on Exception catch (exception, stackTrace) {
-      Logs().w('PublicRoomsDatasourceImpl::getPreview', exception, stackTrace);
-      return null;
-    }
-  }
-
-  // A room ID names no server to ask.
-  Future<PublicRoomsChunk?> _findInDirectory(
-    Client client,
-    String alias,
-  ) async {
-    if (alias.sigil != '#') return null;
-    try {
-      final page = await client.queryPublicRooms(
-        server: alias.domain,
-        filter: PublicRoomQueryFilter(genericSearchTerm: alias.localpart),
-      );
-      return page.chunk
-          .where((chunk) => !_closedRules.contains(chunk.joinRule))
-          .firstWhereOrNull((chunk) => chunk.canonicalAlias == alias);
     } on Exception catch (exception, stackTrace) {
       Logs().w('PublicRoomsDatasourceImpl::getPreview', exception, stackTrace);
       return null;
