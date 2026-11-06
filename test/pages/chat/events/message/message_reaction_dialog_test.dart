@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -19,7 +17,6 @@ import 'message_reaction_dialog_test.mocks.dart';
 void main() {
   const myUserId = '@me:localhost';
   late List<String> calls;
-  late Completer<void> sending;
   late MockEvent event;
   late MockEvent myReaction;
   late MockTimeline timeline;
@@ -74,39 +71,31 @@ void main() {
           themeContextMenu: (_) => const PullDownMenuItemTheme(),
           iconContextMenu: (_, _) => null,
           dialogSafeAreaKey: GlobalKey(),
-          onSendEmojiReaction: (emoji, _) {
-            calls.add('send $emoji');
-            return sending.future;
+          onToggleEmojiReaction: (emoji, _) async {
+            calls.add('toggle $emoji');
           },
         ),
       ),
     ),
   );
 
-  testWidgets(
-    'sends the new reaction before redacting the old one when changing it',
-    (tester) async {
-      sending = Completer<void>();
-      await pumpDialog(tester);
+  testWidgets('hands another reaction to the toggle callback', (tester) async {
+    await pumpDialog(tester);
 
-      await tester.tap(find.text('😂'));
-      await tester.pump();
+    await tester.tap(find.text('😂'));
+    await tester.pump();
 
-      expect(calls, ['send 😂']);
+    expect(calls, ['toggle 😂']);
+  });
 
-      sending.complete();
-      await tester.pump();
-
-      expect(calls, ['send 😂', 'redact']);
-    },
-  );
-
-  testWidgets('only redacts when tapping the current reaction', (tester) async {
+  testWidgets('hands the current reaction to the toggle callback', (
+    tester,
+  ) async {
     await pumpDialog(tester);
 
     await tester.tap(find.text('👍'));
     await tester.pump();
 
-    expect(calls, ['redact']);
+    expect(calls, ['toggle 👍']);
   });
 }

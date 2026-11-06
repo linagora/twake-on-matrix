@@ -72,8 +72,8 @@ class ChatEventListItem extends StatelessWidget {
         return ContextMenuAction(name: action.action.name);
       }).toList(),
       onPickEmojiReaction: () {},
-      onSelectEmojiReaction: (emoji, event) =>
-          controller.sendEmojiAction(emoji: emoji, event: event),
+      onToggleEmojiReaction: (emoji, event) =>
+          controller.toggleReactionAction(emoji: emoji, event: event),
       onForward: (event) {
         controller.forwardEventsAction(event: event);
       },

@@ -28,7 +28,7 @@ class MessageReactionDialog extends StatelessWidget {
   final PullDownMenuItemTheme Function(MessageContextMenuAction)
   themeContextMenu;
   final Widget? Function(Event, MessageContextMenuAction) iconContextMenu;
-  final OnSendEmojiReactionAction? onSendEmojiReaction;
+  final OnToggleEmojiReactionAction? onToggleEmojiReaction;
   final Key dialogSafeAreaKey;
   final bool showReactions;
 
@@ -43,7 +43,7 @@ class MessageReactionDialog extends StatelessWidget {
     required this.themeContextMenu,
     required this.iconContextMenu,
     required this.dialogSafeAreaKey,
-    this.onSendEmojiReaction,
+    this.onToggleEmojiReaction,
     this.showReactions = true,
   });
 
@@ -99,24 +99,8 @@ class MessageReactionDialog extends StatelessWidget {
                         displayEmojiPicker.value = true;
                       },
                       myEmojiReacted: relatesTo?['key'] ?? '',
-                      onClickEmojiReactionAction: (emoji) async {
-                        final isSelected = emoji == (relatesTo?['key'] ?? '');
-                        if (myReaction == null) {
-                          await onSendEmojiReaction?.call(emoji, event);
-                          return;
-                        }
-
-                        if (isSelected) {
-                          await myReaction.redactEvent();
-                          return;
-                        }
-
-                        if (!isSelected) {
-                          await onSendEmojiReaction?.call(emoji, event);
-                          await myReaction.redactEvent();
-                          return;
-                        }
-                      },
+                      onClickEmojiReactionAction: (emoji) =>
+                          onToggleEmojiReaction?.call(emoji, event),
                       contextMenuWidget: display
                           ? const SizedBox()
                           : Padding(
