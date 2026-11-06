@@ -175,12 +175,14 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     final localRoom =
         client.getRoomByAlias(roomIdOrAlias) ??
         client.getRoomById(roomIdOrAlias);
-    // The SDK keeps a room the user was banned from as left.
-    final ownMember = localRoom?.getState(
-      EventTypes.RoomMember,
-      client.userID ?? '',
+    // The SDK keeps a room the user was banned from as left; after a restart
+    // the member event is only in the database.
+    final ownMember = await localRoom?.requestUser(
+      client.userID!,
+      requestState: false,
+      requestProfile: false,
     );
-    if (ownMember?.content['membership'] == Membership.ban.name) {
+    if (ownMember?.membership == Membership.ban) {
       return const PublicRoomPreview.banned();
     }
     final summary = await _fetchSummary(client, roomIdOrAlias, via);

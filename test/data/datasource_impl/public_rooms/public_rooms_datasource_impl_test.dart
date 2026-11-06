@@ -602,6 +602,36 @@ void main() {
       expect(preview, const PublicRoomPreview.joined('!general:hs'));
     });
 
+    test('getPreview_whenInvited_saysJoined', () async {
+      // Arrange
+      stubSummary(summary(membership: Membership.invite));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.joined('!general:hs'));
+    });
+
+    test('getPreview_whenTheLocalRoomWasLeft_asksTheSummary', () async {
+      // Arrange
+      final room = MockRoom();
+      when(
+        room.requestUser('@me:hs', requestState: false, requestProfile: false),
+      ).thenAnswer(
+        (_) async => User('@me:hs', membership: 'leave', room: room),
+      );
+      when(mockClient.userID).thenReturn('@me:hs');
+      when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+      stubSummary(summary());
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, isA<PublicRoomPreviewFound>());
+    });
+
     test('getPreview_whenTheSummarySaysBanned_saysBanned', () async {
       // Arrange
       stubSummary(summary(membership: Membership.ban));
@@ -617,14 +647,9 @@ void main() {
       // Arrange
       final room = MockRoom();
       when(room.membership).thenReturn(Membership.leave);
-      when(room.getState(EventTypes.RoomMember, '@me:hs')).thenReturn(
-        StrippedStateEvent(
-          type: EventTypes.RoomMember,
-          content: {'membership': 'ban'},
-          senderId: '@admin:hs',
-          stateKey: '@me:hs',
-        ),
-      );
+      when(
+        room.requestUser('@me:hs', requestState: false, requestProfile: false),
+      ).thenAnswer((_) async => User('@me:hs', membership: 'ban', room: room));
       when(mockClient.userID).thenReturn('@me:hs');
       when(mockClient.getRoomByAlias(alias)).thenReturn(room);
 
