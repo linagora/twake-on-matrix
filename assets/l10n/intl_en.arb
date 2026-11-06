@@ -2940,7 +2940,7 @@
     "type": "text",
     "placeholders": {}
   },
-  "threadMessagesCount": "{n} messages",
+  "threadMessagesCount": "{n, plural, =1{1 message} other{{n} messages}}",
   "@threadMessagesCount": {
     "type": "text",
     "placeholders": {
