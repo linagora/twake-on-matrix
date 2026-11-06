@@ -12,6 +12,9 @@ void main() {
       'localhost:8083': Uri.parse('https://localhost:8083'),
       'matrix.example.com:8443/': Uri.parse('https://matrix.example.com:8443/'),
       'matrix.org/path': Uri.parse('https://matrix.org/path'),
+      'matrix.example.com:8443/proxy/https://bridge': Uri.parse(
+        'https://matrix.example.com:8443/proxy/https://bridge',
+      ),
       'https://matrix.example.com:8443': Uri.parse(
         'https://matrix.example.com:8443',
       ),
