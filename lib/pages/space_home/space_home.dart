@@ -253,7 +253,7 @@ class _SpaceChannels extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
-    final children = ref.watch(spaceChildrenProvider(spaceId));
+    final children = ref.watch(currentSpaceChildrenProvider(spaceId));
     final value = children.value;
     if (value != null && value.isNotEmpty) {
       return Column(

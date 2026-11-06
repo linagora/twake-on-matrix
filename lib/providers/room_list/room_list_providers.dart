@@ -43,6 +43,28 @@ Future<List<SpaceChannel>> spaceChildren(Ref ref, String spaceId) {
   return ref.watch(getSpaceChildrenUseCaseProvider).execute(spaceId);
 }
 
+/// What [spaceId] holds, with the membership of now: `/hierarchy` is read
+/// again only when the space lists something else, not when the user leaves
+/// or joins what it holds.
+@riverpod
+AsyncValue<List<SpaceChannel>> currentSpaceChildren(Ref ref, String spaceId) {
+  final joinedIds = ref.watch(_joinedRoomIdsProvider);
+  return ref
+      .watch(spaceChildrenProvider(spaceId))
+      .whenData(
+        (children) => [
+          for (final child in children)
+            child.copyWith(isJoined: joinedIds.contains(child.roomId)),
+        ],
+      );
+}
+
+@riverpod
+Set<String> _joinedRoomIds(Ref ref) => {
+  for (final entry in ref.watch(roomListEntriesProvider))
+    if (entry.isJoined) entry.id,
+};
+
 /// The spaces a new room may go in. Read again once the rooms are loaded: an
 /// account other than the first may land on a form before that.
 @riverpod
@@ -94,23 +116,13 @@ abstract class RoomListContent with _$RoomListContent {
 Map<String, List<SpaceChannel>> _joinableBySpace(
   Ref ref,
   List<RoomListEntry> entries,
-) {
-  // Membership as of now: the hierarchy is read again only when a space lists
-  // something else, not when the user leaves or joins what it holds.
-  final joinedIds = {
-    for (final entry in entries)
-      if (entry.isJoined) entry.id,
-  };
-  return {
-    for (final entry in entries)
-      if (entry.isSpace && entry.isJoined)
-        entry.id: joinableSubspaces([
-          for (final child
-              in ref.watch(spaceChildrenProvider(entry.id)).value ?? const [])
-            child.copyWith(isJoined: joinedIds.contains(child.roomId)),
-        ]),
-  };
-}
+) => {
+  for (final entry in entries)
+    if (entry.isSpace && entry.isJoined)
+      entry.id: joinableSubspaces(
+        ref.watch(currentSpaceChildrenProvider(entry.id)).value ?? const [],
+      ),
+};
 
 @riverpod
 RoomListContent roomListContent(Ref ref, String? activeRoomId) {

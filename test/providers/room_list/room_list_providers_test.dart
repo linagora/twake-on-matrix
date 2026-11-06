@@ -117,6 +117,21 @@ void _shownRoomListFilterTests() {
 
 void _spaceChildrenTests() {
   group('spaceChildren', () {
+    test('whenAChannelIsLeftAfterTheRead_saysItIsNotJoined', () async {
+      when(_repository.getSpaceChildren('!s')).thenAnswer(
+        (_) async => const [
+          SpaceChannel(roomId: '!a', name: 'A', isJoined: true),
+        ],
+      );
+      final container = _newContainer();
+      container.listen(currentSpaceChildrenProvider('!s'), (_, _) {});
+      await pumpEventQueue();
+
+      final children = container.read(currentSpaceChildrenProvider('!s'));
+
+      expect(children.value!.single.isJoined, isFalse);
+    });
+
     test('whenOtherRoomsChange_doesNotReadAgain', () async {
       final container = _newContainer();
       container.listen(spaceChildrenProvider('!s'), (_, _) {});
