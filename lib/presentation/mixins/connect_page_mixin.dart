@@ -1,7 +1,6 @@
 import 'package:twake_chat/utils/login_failed_snackbar.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
@@ -38,10 +37,9 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String flowType,
   }) =>
-      ProviderScope.containerOf(context, listen: false)
-          .read(loginHomeserverSummaryProvider)
-          ?.loginFlows
-          .any((flow) => flow.type == flowType) ??
+      _sessionsOf(
+        context,
+      ).homeserverSummary?.loginFlows.any((flow) => flow.type == flowType) ??
       false;
 
   bool supportsSso(BuildContext context) =>

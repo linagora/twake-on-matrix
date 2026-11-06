@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/homeserver_picker/homeserver_picker_view.dart';
@@ -340,9 +342,10 @@ class LoginRobot extends CoreRobot implements AbstractLoginRobot {
     final context = $.tester.element($(TwakeWelcome).finder.first);
     final matrix = Matrix.of(context);
     final client = await matrix.getLoginClient();
-    matrix.loginHomeserverSummary = await client
-        .checkHomeserver(Uri.parse(serverUrl))
-        .toHomeserverSummary();
+    await ProviderScope.containerOf(
+      context,
+      listen: false,
+    ).read(loginSessionsProvider).checkHomeserver(client, Uri.parse(serverUrl));
 
     await loginWithRateLimitRetry(
       () => client.login(

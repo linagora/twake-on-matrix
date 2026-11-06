@@ -5,6 +5,8 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
 import 'package:twake_chat/data/account/login_host.dart';
 import 'package:twake_chat/data/account/login_session.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/utils/exception/homeserver_exception.dart';
 
 /// The client a login screen uses, and what becomes of it. It finds the
 /// placeholder or the pending candidate, or makes a candidate, and hands the
@@ -20,6 +22,8 @@ class LoginSessions {
   LoginHost? _attached;
   final Map<String, LoginSession> _byId = {};
   LoginSession? _pending;
+  HomeserverSummary? _homeserverSummary;
+  int _summaryGeneration = 0;
 
   /// Sessions replaced by a new login that still have a listener or a set-up
   /// to retry. Dropping them would leak the listener and lose the set-up.
@@ -54,6 +58,7 @@ class LoginSessions {
     _byId.clear();
     _replaced.clear();
     _pending = null;
+    _forgetHomeserverSummary();
     for (final session in dropped) {
       unawaited(session.cancelListeners());
     }
@@ -188,10 +193,52 @@ class LoginSessions {
     (_, session) => session.state == LoginSessionState.disposed,
   );
 
+  /// The home server the login screens checked last, for the login that
+  /// follows; kept until the login screens are left. It is never the active
+  /// account's, which stays in `loginHomeserverSummaryProvider` until a login
+  /// makes another one active.
+  HomeserverSummary? get homeserverSummary => _homeserverSummary;
+
+  /// Checks [homeserver] on the login [client] and keeps what it found for
+  /// the login that follows. A check that ends after the user left, or after
+  /// [timeout], is not kept.
+  Future<HomeserverSummary> checkHomeserver(
+    Client client,
+    Uri homeserver, {
+    Duration? timeout,
+  }) async {
+    final generation = _summaryGeneration;
+    try {
+      final check = client.checkHomeserver(homeserver);
+      final (discovery, versions, loginFlows, _) = timeout == null
+          ? await check
+          : await check.timeout(
+              timeout,
+              onTimeout: () => throw CheckHomeserverTimeoutException(),
+            );
+      final summary = HomeserverSummary(
+        discoveryInformation: discovery,
+        versions: versions,
+        loginFlows: loginFlows,
+      );
+      if (generation == _summaryGeneration) _homeserverSummary = summary;
+      return summary;
+    } catch (e, s) {
+      Logs().wtf('LoginSessions::checkHomeserver: $homeserver', e, s);
+      rethrow;
+    }
+  }
+
+  void _forgetHomeserverSummary() {
+    _homeserverSummary = null;
+    _summaryGeneration++;
+  }
+
   /// The user left the add-account flow: the pending candidate is thrown away
-  /// unless it became an account. Waits for what is going on, and shares a
-  /// call made at the same time.
+  /// unless it became an account, with the home server checked for it. Waits
+  /// for what is going on, and shares a call made at the same time.
   Future<void> discardPending() async {
+    _forgetHomeserverSummary();
     final pending = _pending;
     if (pending == null) return;
     await pending.dispose();
