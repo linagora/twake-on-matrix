@@ -2731,10 +2731,5 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
-  },
-  "publicGroupsYouCanJoin": "Groupes à rejoindre",
-  "@publicGroupsYouCanJoin": {
-    "type": "text",
-    "placeholders": {}
   }
 }
