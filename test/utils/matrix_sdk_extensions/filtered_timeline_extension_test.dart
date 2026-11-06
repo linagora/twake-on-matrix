@@ -100,6 +100,9 @@ void main() {
           CallEventTypes.callMember,
           RtcNotificationContent.eventType,
           CallEventTypes.callNotify,
+          'm.call.sdp_stream_metadata_changed',
+          'org.matrix.call.sdp_stream_metadata_changed',
+          'com.famedly.call.member',
         ]) {
           expect(
             EventTypeRules.getGroup(type),

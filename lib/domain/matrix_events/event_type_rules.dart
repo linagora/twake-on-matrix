@@ -13,7 +13,8 @@ enum EventVisibilityGroup {
   neverInTimeline,
 
   /// Hidden when [AppConfig.hideUnknownEvents] is true.
-  /// Also the fallback for types absent from [EventTypeRules._byType].
+  /// Also the fallback for types absent from [EventTypeRules._byType],
+  /// call events aside.
   unknown,
 }
 
@@ -122,46 +123,19 @@ abstract final class EventTypeRules {
       group: EventVisibilityGroup.neverInTimeline,
     ),
 
-    // MatrixRTC calls only show live; the legacy invite is a single line.
-    CallEventTypes.callMember: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    RtcNotificationContent.eventType: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    CallEventTypes.callNotify: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.GroupCallMember: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
+    // The legacy invite is a single line; other call events never show.
     EventTypes.CallInvite: EventTypeRule(
       group: EventVisibilityGroup.alwaysVisible,
-    ),
-    EventTypes.CallAnswer: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.CallReject: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.CallSelectAnswer: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.CallNegotiate: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.CallHangup: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
-    ),
-    EventTypes.CallCandidates: EventTypeRule(
-      group: EventVisibilityGroup.neverInTimeline,
     ),
   };
 
   /// Returns the visibility group for [type], or [EventVisibilityGroup.unknown]
   /// for unregistered types.
   static EventVisibilityGroup getGroup(String type) =>
-      _byType[type]?.group ?? EventVisibilityGroup.unknown;
+      _byType[type]?.group ??
+      (CallEventTypes.isCallEvent(type)
+          ? EventVisibilityGroup.neverInTimeline
+          : EventVisibilityGroup.unknown);
 
   /// Message-like types (same-sender grouping, notifications, server filter).
   static final Set<String> messageContentTypes = {
