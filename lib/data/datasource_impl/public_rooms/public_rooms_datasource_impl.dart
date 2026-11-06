@@ -200,7 +200,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     };
   }
 
-  // https://spec.matrix.org/latest/client-server-api/#get_matrixclientv1room_summaryroomidoralias
+  // https://spec.matrix.org/v1.16/client-server-api/#get_matrixclientv1room_summaryroomidoralias
   Future<GetRoomSummaryResponse$3?> _fetchSummary(
     Client client,
     String roomIdOrAlias,
