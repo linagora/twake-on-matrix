@@ -287,6 +287,7 @@ msix_config:
 dependency_overrides:
   # livekit_client needs 12; super_native_extensions 0.9.1 caps it below 12
   # but only calls DeviceInfoPlugin().deviceInfo.
+  # Remove once super_native_extensions ships a stable release allowing 12 (0.10.0-dev.2 does).
   device_info_plus: 12.3.0
   # flutter_emoji_mart still pins the design system at v0.2.4; force v0.2.5
   # for the new LinagoraTextField input behaviors (autofocus/onSubmitted).
@@ -340,6 +341,7 @@ dependency_overrides:
       url: https://github.com/linagora/overflow_view.git
       ref: master
   # livekit_client needs 6; flutter_avif (last release 2025) asks for ^3.
+  # Remove with the flutter_avif_platform_interface override (yekeskin/flutter_avif#103).
   protobuf: 6.1.0
   # Fixes a compile error when comforming UIApplication to Launcher in iOS 18.
   url_launcher_ios: 6.3.1
