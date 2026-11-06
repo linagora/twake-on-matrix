@@ -243,9 +243,7 @@ extension LocalizedBody on Event {
         );
       } catch (e) {
         TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
-        Logs().e(
-          'copySingleEventAction(): failed to copy file ${matrixFile.name}',
-        );
+        Logs().e('copy(): failed to copy file ${matrixFile.name}');
       }
     } else {
       copyTextEvent(context, timeline);
