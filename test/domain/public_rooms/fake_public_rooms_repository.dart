@@ -50,7 +50,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   bool isJoinInSync = true;
 
   int? requestedLimit;
-  String? requestedSearchTerm;
+  final requestedSearchTerms = <String?>[];
   final knockedQueries = <List<String>>[];
   final joinedIds = <String>[];
   final knockedIds = <String>[];
@@ -61,7 +61,7 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
     String? searchTerm,
   }) {
     requestedLimit = limit;
-    requestedSearchTerm = searchTerm;
+    requestedSearchTerms.add(searchTerm);
     if (fetchError case final error?) return Stream.error(error);
     if (directoryController case final controller?) return controller.stream;
     return Stream.fromIterable(pages);

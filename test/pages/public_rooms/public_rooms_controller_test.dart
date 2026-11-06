@@ -81,7 +81,7 @@ void main() {
     );
 
     // Assert
-    expect(repository.requestedSearchTerm, 'op');
+    expect(repository.requestedSearchTerms, ['op']);
     expect(state.rooms.map((room) => room.roomId), ['!open', '!knock']);
   });
 

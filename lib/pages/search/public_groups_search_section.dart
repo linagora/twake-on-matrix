@@ -37,7 +37,8 @@ class PublicGroupsSearchSection extends StatelessWidget {
   );
 }
 
-/// Shows [child] unless public groups are found for [searchTerm].
+/// Shows [child] unless public groups are found, or still asked, for
+/// [searchTerm].
 class HiddenWhenPublicGroupsFound extends StatelessWidget {
   const HiddenWhenPublicGroupsFound({
     super.key,
@@ -56,23 +57,29 @@ class HiddenWhenPublicGroupsFound extends StatelessWidget {
         ? child!
         : Consumer(
             builder: (context, ref, child) =>
-                _watchPublicGroups(ref, term)?.rooms.isNotEmpty ?? false
-                ? const SizedBox.shrink()
-                : child!,
+                switch (_watchPublicGroups(ref, term)) {
+                  AsyncLoading() => const SizedBox.shrink(),
+                  AsyncData(:final value) when value.rooms.isNotEmpty =>
+                    const SizedBox.shrink(),
+                  _ => child!,
+                },
             child: child,
           ),
     child: child,
   );
 }
 
-PublicRoomsState? _watchPublicGroups(WidgetRef ref, String searchTerm) {
+AsyncValue<PublicRoomsState>? _watchPublicGroups(
+  WidgetRef ref,
+  String searchTerm,
+) {
   final isEnabled = ref.watch(
     loginHomeserverSummaryProvider.select(
       (summary) => summary.isPublicGroupsEnabled,
     ),
   );
   if (!isEnabled) return null;
-  return ref.watch(publicRoomsControllerProvider(searchTerm: searchTerm)).value;
+  return ref.watch(publicRoomsControllerProvider(searchTerm: searchTerm));
 }
 
 class _PublicGroupsSliver extends ConsumerWidget {
@@ -102,7 +109,7 @@ class _PublicGroupsSliver extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = _watchPublicGroups(ref, searchTerm);
+    final state = _watchPublicGroups(ref, searchTerm)?.value;
     if (state == null || state.rooms.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
