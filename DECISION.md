@@ -163,7 +163,7 @@ unless it announces `server_acl: true`.
 
 A link to a room address (`https://matrix.to/#/#name:server`) or ID that the
 user has neither joined nor been invited to opens a preview, as Twake Space
-Chat does (D491 there):
+Chat does (D491 and D581 there):
 
 - The room's name, topic and avatar, with « Join · n members », or « Ask to
   join · n members » when it needs an approval. Once asked, the button gives
@@ -174,10 +174,11 @@ Chat does (D491 there):
 - A failed join or request is said in the preview, under the button.
 - A room the user is already in under another address opens directly.
 
-The preview reads the room summary (MSC3266) first, which also says whether
-the user is banned or has already asked; when the server answers nothing, it
-looks the address up in the public directory of the address's server, as Twake
-Space Chat does. The `via` servers of the link route the summary, the join and
+The preview reads the room summary (MSC3266) only, with no search of a public
+directory, as Twake Space Chat does since its D581: it also says whether the
+user is banned or has already asked, and it describes a room that no directory
+lists. Any failure of the summary shows the group as unavailable, with « Try to
+join », as there. The `via` servers of the link route the summary, the join and
 the request. A joined room still opens directly, at the linked message.
 
 Hand-typed addresses becoming links is left to a later change.
