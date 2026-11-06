@@ -17,6 +17,7 @@ class MessageContainer extends StatelessWidget {
   final Widget row;
   final bool selected;
   final bool selectMode;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
   final OnHover? onHover;
   final OnSwipe? onSwipe;
   final OnSelect? onSelect;
@@ -30,6 +31,7 @@ class MessageContainer extends StatelessWidget {
     required this.row,
     required this.selected,
     required this.selectMode,
+    this.highlightedEventIdNotifier,
     this.onHover,
     this.onSwipe,
     this.onSelect,
@@ -80,6 +82,10 @@ class MessageContainer extends StatelessWidget {
       ),
     );
 
+    final highlightTint = LinagoraSysColors.material().warning.withValues(
+      alpha: 0.12,
+    );
+
     // Outer SizedBox(∞) gives the Stack a bounded width.
     // Inner SizedBox(∞) wrapping container forces it to fill that width,
     // overriding Container's tendency to shrink-wrap to its child.
@@ -88,12 +94,14 @@ class MessageContainer extends StatelessWidget {
       width: double.infinity,
       child: Stack(
         children: [
-          if (selected)
-            Positioned.fill(
-              child: ColoredBox(
-                color: LinagoraSysColors.material().secondaryContainer,
-              ),
+          Positioned.fill(
+            child: _MessageBackground(
+              eventId: event.eventId,
+              selected: selected,
+              highlightTint: highlightTint,
+              highlightedEventIdNotifier: highlightedEventIdNotifier,
             ),
+          ),
           SizedBox(width: double.infinity, child: container),
         ],
       ),
@@ -106,10 +114,39 @@ class MessageContainer extends StatelessWidget {
         key: ValueKey(event.eventId),
         index: scrollIdx,
         controller: controller,
-        highlightColor: Theme.of(context).highlightColor,
+        highlightColor: highlightTint,
         child: highlighted,
       );
     }
     return highlighted;
+  }
+}
+
+class _MessageBackground extends StatelessWidget {
+  final String eventId;
+  final bool selected;
+  final Color highlightTint;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
+
+  const _MessageBackground({
+    required this.eventId,
+    required this.selected,
+    required this.highlightTint,
+    this.highlightedEventIdNotifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (selected) {
+      return ColoredBox(color: LinagoraSysColors.material().secondaryContainer);
+    }
+    final highlightedEventIdNotifier = this.highlightedEventIdNotifier;
+    if (highlightedEventIdNotifier == null) return const SizedBox.shrink();
+    return ValueListenableBuilder<String?>(
+      valueListenable: highlightedEventIdNotifier,
+      builder: (context, highlightedEventId, _) => highlightedEventId == eventId
+          ? ColoredBox(color: highlightTint)
+          : const SizedBox.shrink(),
+    );
   }
 }

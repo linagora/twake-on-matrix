@@ -158,3 +158,14 @@ toggle.
 A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
+
+## D13. A message reached by a jump is tinted until the next touch, as in Twake Space Chat (proposed by Johann, 2026-11-06)
+
+A tap on the quote of a reply, a pinned message, a search result or a link
+scrolls the chat to its message and highlights it (#3281). The highlight
+follows Twake Space Chat (its D138 and D263): the whole row of the message,
+with a soft tint of the design system warning colour at 12 %, after a short
+stronger flash when the message is reached. It stays until the next touch in
+the conversation, scrolling included, instead of a strong blue block that
+went away after three seconds. A selected message shows its selection colour
+instead.
