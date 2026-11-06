@@ -17,11 +17,16 @@ import 'package:twake_chat/domain/app_state/room/upload_content_state.dart';
 import 'package:twake_chat/domain/exception/room/invite_user_exception.dart';
 import 'package:twake_chat/domain/model/room/create_new_group_chat_request.dart';
 import 'package:twake_chat/domain/repository/new_group/new_group_repository.dart';
+import 'package:twake_chat/domain/spaces/new_space.dart';
+import 'package:twake_chat/domain/spaces/usecases/create_space_usecase.dart';
+import 'package:twake_chat/domain/spaces/usecases/create_space_usecase.provider.dart';
+import 'package:twake_chat/domain/usecase/feed/create_new_feed_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/upload_content_for_web_interactor.dart';
 import 'package:twake_chat/domain/usecase/room/upload_content_interactor.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info_controller.dart';
+import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/pages/new_group/states/group_privacy_state.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
@@ -35,8 +40,12 @@ import '../../providers/fake_active_account.dart';
   MockSpec<NewGroupRepository>(),
   MockSpec<UploadContentInteractor>(),
   MockSpec<UploadContentInBytesInteractor>(),
+  MockSpec<CreateNewFeedInteractor>(),
+  MockSpec<CreateSpaceUseCase>(),
 ])
 void main() {
+  provideDummy<NewSpace>(const NewSpace(name: ''));
+
   const roomId = '!room:example.com';
   const bob = '@bob:example.com';
   const avatarUrl = 'mxc://example.com/avatar';
@@ -45,6 +54,8 @@ void main() {
   final uploadInBytesInteractor = MockUploadContentInBytesInteractor();
   late MockClient mockClient;
   late MockNewGroupRepository mockRepository;
+  late MockCreateNewFeedInteractor mockFeedInteractor;
+  late MockCreateSpaceUseCase mockCreateSpaceUseCase;
 
   setUpAll(() {
     GetIt.instance
@@ -62,30 +73,35 @@ void main() {
     mockClient = MockClient();
     mockRepository = MockNewGroupRepository();
     when(mockRepository.createGroup(any)).thenAnswer((_) async => roomId);
+    mockFeedInteractor = MockCreateNewFeedInteractor();
+    when(
+      mockFeedInteractor.execute(
+        feedName: anyNamed('feedName'),
+        avatarUrl: anyNamed('avatarUrl'),
+      ),
+    ).thenAnswer((_) async => roomId);
+    mockCreateSpaceUseCase = MockCreateSpaceUseCase();
+    when(mockCreateSpaceUseCase.execute(any)).thenAnswer((_) async => roomId);
   });
 
-  Future<NewGroupChatInfoScreenState> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpRouter(
+    WidgetTester tester,
+    GoRouter router, {
+    Size size = const Size(411, 914),
+  }) async {
     tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(411, 914);
+    tester.view.physicalSize = size;
     addTearDown(tester.view.reset);
-    final router = GoRouter(
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (_, _) => const NewGroupChatInfo(contactsList: {}),
-        ),
-        GoRoute(
-          path: '/rooms/:roomid',
-          builder: (_, state) => Text('room ${state.pathParameters['roomid']}'),
-        ),
-      ],
-    );
     addTearDown(router.dispose);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           ...activeAccountOverrides(mockClient),
           newGroupRepositoryProvider.overrideWithValue(mockRepository),
+          createSpaceUseCaseProvider.overrideWithValue(mockCreateSpaceUseCase),
+          createNewFeedInteractorProvider(
+            mockClient,
+          ).overrideWithValue(mockFeedInteractor),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -96,12 +112,75 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  Future<NewGroupChatInfoScreenState> pumpScreen(WidgetTester tester) async {
+    await pumpRouter(
+      tester,
+      GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => const NewGroupChatInfo(contactsList: {}),
+          ),
+          GoRoute(
+            path: '/rooms/:roomid',
+            builder: (_, state) =>
+                Text('room ${state.pathParameters['roomid']}'),
+          ),
+        ],
+      ),
+    );
     final screen = tester.state<NewGroupChatInfoScreenState>(
       find.byType(NewGroupChatInfo),
     );
     screen.groupNameTextEditingController.text = 'Team';
     return screen;
   }
+
+  const chatList = 'chat list';
+
+  // As in the app on web and desktop: the chat list column holds its own
+  // navigator (contacts, then this screen pushed on it); the room opens over
+  // it, here full screen whatever the width so that no layout overflows.
+  Future<void> pumpInFirstColumn(
+    WidgetTester tester, {
+    required Size size,
+    required NewGroupKind kind,
+  }) => pumpRouter(
+    tester,
+    size: size,
+    GoRouter(
+      routes: [
+        ShellRoute(
+          builder: (_, _, child) => Stack(
+            fit: StackFit.expand,
+            children: [
+              Navigator(
+                onGenerateRoute: (_) => null,
+                onGenerateInitialRoutes: (_, _) => [
+                  MaterialPageRoute<void>(builder: (_) => const Text(chatList)),
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        NewGroupChatInfo(contactsList: const {}, kind: kind),
+                  ),
+                ],
+              ),
+              child,
+            ],
+          ),
+          routes: [
+            GoRoute(path: '/', builder: (_, _) => const SizedBox.shrink()),
+            GoRoute(
+              path: '/rooms/:roomid',
+              builder: (_, state) =>
+                  Text('room ${state.pathParameters['roomid']}'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
 
   L10n l10nOf(WidgetTester tester) =>
       L10n.of(tester.element(find.byType(Navigator).first))!;
@@ -118,15 +197,18 @@ void main() {
 
   // The participant tiles need the whole Matrix widget, so the invitee is
   // passed to the controller instead of through the screen's contacts.
-  void createWithBob(WidgetTester tester) => unawaited(
+  void createWithBob(
+    WidgetTester tester, {
+    NewGroupKind kind = NewGroupKind.group,
+  }) => unawaited(
     ProviderScope.containerOf(tester.element(find.byType(NewGroupChatInfo)))
         .read(newGroupChatInfoControllerProvider.notifier)
         .create(
-          const NewGroupForm(
+          NewGroupForm(
             groupName: 'Team',
-            invitees: [bob],
-            privacy: GroupPrivacyState(),
-            kind: NewGroupKind.group,
+            invitees: const [bob],
+            privacy: const GroupPrivacyState(),
+            kind: kind,
           ),
         ),
   );
@@ -251,5 +333,36 @@ void main() {
       verify(mockRepository.inviteUser(roomId: roomId, userId: bob)).called(1);
       expect(find.text('room $roomId'), findsOneWidget);
     });
+  });
+
+  group('NewGroupChatInfoScreenState done, first column navigator', () {
+    const sizes = {
+      'SingleColumn': Size(411, 914),
+      'TwoColumns': Size(1280, 900),
+    };
+    String capitalized(String word) =>
+        word[0].toUpperCase() + word.substring(1);
+    for (final MapEntry(key: layout, value: size) in sizes.entries) {
+      for (final kind in NewGroupKind.values) {
+        testWidgets(
+          'createNewGroup_when${capitalized(kind.name)}CreatedIn${layout}_'
+          'closesTheInnerScreensAndOpensTheRoom',
+          (tester) async {
+            // Arrange
+            await pumpInFirstColumn(tester, size: size, kind: kind);
+            expect(find.byType(NewGroupChatInfo), findsOneWidget);
+
+            // Act
+            createWithBob(tester, kind: kind);
+            await tester.pumpAndSettle();
+
+            // Assert
+            expect(find.byType(NewGroupChatInfo), findsNothing);
+            expect(find.text(chatList), findsOneWidget);
+            expect(find.text('room $roomId'), findsOneWidget);
+          },
+        );
+      }
+    }
   });
 }
