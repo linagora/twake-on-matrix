@@ -2924,5 +2924,48 @@
   "@publicGroupsLoadFailed": {
     "type": "text",
     "placeholders": {}
+  },
+  "thread": "Thread",
+  "@thread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startThread": "Start a thread",
+  "@startThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyInThread": "Reply in thread",
+  "@replyInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMessagesCount": "{n} messages",
+  "@threadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "threadUnreadMessagesCount": "{n} unread messages",
+  "@threadUnreadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newRepliesInThread": "New replies in a thread",
+  "@newRepliesInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openThread": "Open",
+  "@openThread": {
+    "type": "text",
+    "placeholders": {}
   }
 }

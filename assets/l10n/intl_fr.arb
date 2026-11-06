@@ -2731,5 +2731,48 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
+  },
+  "thread": "Fil",
+  "@thread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startThread": "Démarrer un fil",
+  "@startThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyInThread": "Répondre dans le fil",
+  "@replyInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMessagesCount": "{n} messages",
+  "@threadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "threadUnreadMessagesCount": "{n} messages non lus",
+  "@threadUnreadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newRepliesInThread": "Nouvelles réponses dans un fil",
+  "@newRepliesInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openThread": "Ouvrir",
+  "@openThread": {
+    "type": "text",
+    "placeholders": {}
   }
 }
