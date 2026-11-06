@@ -23,6 +23,8 @@ class UploadFileInfo extends UploadInfo {
   final DateTime createdAt;
   final UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
+  String? threadRootEventId;
+  String? threadLastEventId;
   bool isFailed;
   FileInfo? fileInfo;
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -38,6 +40,8 @@ class UploadFileInfo extends UploadInfo {
     required this.cancelToken,
     this.captionInfo,
     this.inReplyToEventId,
+    this.threadRootEventId,
+    this.threadLastEventId,
     this.isFailed = false,
     this.fileInfo,
     this.matrixFile,

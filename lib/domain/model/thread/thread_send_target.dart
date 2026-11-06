@@ -8,4 +8,12 @@ class ThreadSendTarget {
 
   final String rootEventId;
   final String lastEventId;
+
+  /// The `m.relates_to` the SDK writes for a threaded message.
+  Map<String, Object?> get relatesTo => {
+    'rel_type': 'm.thread',
+    'event_id': rootEventId,
+    'is_falling_back': true,
+    'm.in_reply_to': {'event_id': lastEventId},
+  };
 }

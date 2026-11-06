@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide Task;
 import 'package:dio/dio.dart';
@@ -137,6 +138,12 @@ class UploadManager {
       }
 
       final caption = uploadInfo.captionInfo?.caption;
+      final thread = uploadInfo.threadRootEventId == null
+          ? null
+          : ThreadSendTarget(
+              rootEventId: uploadInfo.threadRootEventId!,
+              lastEventId: uploadInfo.threadLastEventId!,
+            );
       final inReplyTo = uploadInfo.inReplyToEventId == null
           ? null
           : await room.getEventById(uploadInfo.inReplyToEventId!);
@@ -151,6 +158,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         } else {
           fakeImageEvent = await room.sendFakeFileEvent(
@@ -159,6 +167,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         }
       } catch (e) {
@@ -185,6 +194,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         } else {
           await _addFileTaskToWorkerQueueWeb(
@@ -199,6 +209,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         }
       } catch (e) {
@@ -238,6 +249,7 @@ class UploadManager {
     required Room room,
     String? captionInfo,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) {
     final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
@@ -253,6 +265,8 @@ class UploadManager {
             )
           : null,
       inReplyToEventId: inReplyTo?.eventId,
+      threadRootEventId: thread?.rootEventId,
+      threadLastEventId: thread?.lastEventId,
     );
   }
 
@@ -265,11 +279,13 @@ class UploadManager {
     required List<FileAssetEntity> entities,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
       captionInfo: caption,
       inReplyTo: inReplyTo,
+      thread: thread,
     );
 
     for (final txid in txids.entries) {
@@ -288,6 +304,7 @@ class UploadManager {
         room: room,
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -299,6 +316,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
 
@@ -335,6 +353,7 @@ class UploadManager {
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
     }
@@ -346,6 +365,7 @@ class UploadManager {
     Map<MatrixFile, MatrixImageFile?>? thumbnails,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     // Store txids and fake events for all files
     final uploadTasks = <String, SyncUpdate>{};
@@ -363,6 +383,7 @@ class UploadManager {
         room: room,
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -371,6 +392,7 @@ class UploadManager {
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -426,6 +448,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -436,6 +459,7 @@ class UploadManager {
     required List<FileInfo> fileInfos,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     for (final fileInfo in fileInfos.asMap().entries) {
       final fileIndex = fileInfo.key;
@@ -452,6 +476,7 @@ class UploadManager {
         room: room,
         captionInfo: isLastFile ? caption : null,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
@@ -463,6 +488,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -498,6 +524,7 @@ class UploadManager {
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
         inReplyTo: isLastFile ? inReplyTo : null,
+        thread: thread,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -514,6 +541,7 @@ class UploadManager {
     int? shrinkImageMaxDimension,
     String? captionInfo,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     Map<String, dynamic>? uploadInfo,
   }) {
     final info = _eventIdMapUploadFileInfo[txid];
@@ -538,6 +566,7 @@ class UploadManager {
               sentDate: sentDate,
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
+              thread: thread,
               uploadInfo: uploadInfo,
             );
             if (eventId == null) {
@@ -571,6 +600,7 @@ class UploadManager {
     required StreamController<Either<Failure, Success>> streamController,
     required CancelToken cancelToken,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     MatrixImageFile? thumbnail,
     DateTime? sentDate,
     String? captionInfo,
@@ -597,6 +627,7 @@ class UploadManager {
               sentDate: sentDate,
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
+              thread: thread,
             );
             if (eventId == null) {
               throw Exception('File upload failed');

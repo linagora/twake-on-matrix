@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/pages/chat/send_file_dialog/send_file_dialog.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -15,6 +16,7 @@ mixin SendFilesWithCaptionWebMixin {
     void Function(SendMediaDialogResult)? onSendFileCallback,
     String? pendingText,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     if (matrixFilesList.length <= AppConfig.maxFilesSendPerDialog &&
         matrixFilesList.isNotEmpty) {
@@ -27,6 +29,7 @@ mixin SendFilesWithCaptionWebMixin {
             files: matrixFilesList,
             pendingText: pendingText,
             inReplyTo: inReplyTo,
+            thread: thread,
           );
         },
       );

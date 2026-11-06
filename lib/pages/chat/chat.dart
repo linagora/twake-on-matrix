@@ -829,6 +829,7 @@ class ChatController extends ConsumerState<Chat>
       pendingText: pendingText,
       matrixFilesList: matrixFiles,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       onSendFileCallback: (result) async {
         await handleSendMediaCallback(
           result: result.status,
@@ -1075,7 +1076,12 @@ class ChatController extends ConsumerState<Chat>
       'url': sticker.url.toString(),
     };
     // send the sticker
-    await room!.sendEvent(eventContent, type: EventTypes.Sticker);
+    await room!.sendEvent(
+      eventContent,
+      type: EventTypes.Sticker,
+      threadRootEventId: threadRootId,
+      threadLastEventId: threadRootId == null ? null : threadLastEventId,
+    );
   }
 
   Future<void> sendVoiceMessageWeb() async {
@@ -1118,6 +1124,7 @@ class ChatController extends ConsumerState<Chat>
       txid: txid,
       messageType: MessageTypes.Audio,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       extraContent: extraContent,
     );
 
@@ -1133,6 +1140,7 @@ class ChatController extends ConsumerState<Chat>
           txid: txid,
           fakeImageEvent: fakeImageEvent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           extraContent: extraContent,
         )
         .catchError((e) {
@@ -1173,6 +1181,7 @@ class ChatController extends ConsumerState<Chat>
       txid: txid,
       messageType: MessageTypes.Audio,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       extraContent: extraContent,
     );
 
@@ -1189,6 +1198,7 @@ class ChatController extends ConsumerState<Chat>
           msgType: MessageTypes.Audio,
           fakeImageEvent: fakeImageEvent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           extraContent: extraContent,
         )
         .whenComplete(() {
@@ -1909,6 +1919,7 @@ class ChatController extends ConsumerState<Chat>
         context,
         pendingText: pendingText,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
         room: room,
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
@@ -1955,6 +1966,7 @@ class ChatController extends ConsumerState<Chat>
       room: room,
       caption: sendController.text.isNotEmpty ? sendController.text : null,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       onSendCallback: _onMediaSent,
     );
   }
@@ -1974,6 +1986,7 @@ class ChatController extends ConsumerState<Chat>
           room: room,
           onSendFileCallback: _onMediaSent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           popContext: false,
         );
         break;
@@ -1993,6 +2006,7 @@ class ChatController extends ConsumerState<Chat>
         room: room,
         caption: sendController.text.isNotEmpty ? sendController.text : null,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
       );
       await _onMediaSent();
     }, popContext: false);
@@ -2017,6 +2031,7 @@ class ChatController extends ConsumerState<Chat>
         context: context,
         onSendFileCallback: scrollDown,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
       ),
       onSendTap: () async {
         await sendMedia(
@@ -2024,6 +2039,7 @@ class ChatController extends ConsumerState<Chat>
           room: room,
           caption: _captionsController.text,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
         );
         scrollDown();
         _captionsController.clear();
@@ -2035,6 +2051,7 @@ class ChatController extends ConsumerState<Chat>
           imagePickerController,
           room: room,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
         );
         scrollDown();
 

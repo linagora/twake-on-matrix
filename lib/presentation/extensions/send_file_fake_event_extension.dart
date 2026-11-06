@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
@@ -8,6 +9,7 @@ extension SendFileFakeEventExtension on Room {
     String messageType = MessageTypes.Image,
     required String txid,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     String? editEventId,
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
@@ -42,6 +44,7 @@ extension SendFileFakeEventExtension on Room {
                     'info': <String, dynamic>{...fileInfo.metadata},
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     if (extraContent != null) ...extraContent,
+                    if (thread != null) 'm.relates_to': thread.relatesTo,
                   },
                   type: EventTypes.Message,
                   eventId: txid,
@@ -132,6 +135,7 @@ extension SendFileFakeEventExtension on Room {
     MatrixFile file, {
     required String txid,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     String? editEventId,
     int? shrinkImageMaxDimension,
     Map<String, dynamic>? extraContent,
@@ -166,6 +170,7 @@ extension SendFileFakeEventExtension on Room {
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     'filename': file.name,
                     'info': file.info,
+                    if (thread != null) 'm.relates_to': thread.relatesTo,
                   },
                   type: EventTypes.Message,
                   eventId: txid,
