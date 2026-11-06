@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_placeholder.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_image_preview_style.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -198,7 +199,7 @@ mixin ChatListItemMixin {
 
   bool hasNewMessage(Room room) {
     // If there's a notification count, definitely has new messages
-    if (room.notificationCount > 0) {
+    if (room.unreadBadgeCount > 0) {
       return true;
     }
 

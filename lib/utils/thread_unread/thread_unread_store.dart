@@ -1,6 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 /// Unread counters of the threads, kept in memory: the SDK keeps only the
 /// counters of the room. Filled from the raw sync response, so a restart
@@ -91,6 +95,38 @@ extension ThreadUnreadRoomExtension on Room {
             mainNotificationCount: notificationCount,
             threads: store.threadsOf(id),
           );
+  }
+}
+
+extension MarkRoomAndThreadsRead on Room {
+  /// "Mark as read": the main timeline and every thread with unread messages.
+  Future<void> markRoomAndAllThreadsRead() async {
+    final preview = await lastEventAvailableInPreview();
+    final store = client is ThreadUnreadStoreOwner
+        ? (client as ThreadUnreadStoreOwner).threadUnread
+        : null;
+    final lastEventIdByThreadRootId = <String, String>{};
+    for (final thread in store?.threadsOf(id) ?? const <ThreadUnread>[]) {
+      if (thread.notificationCount == 0) continue;
+      final page = await const GetThreadRepliesInteractor().execute(
+        room: this,
+        rootEventId: thread.rootEventId,
+      );
+      final last = page.replies.lastOrNull;
+      if (last != null) {
+        lastEventIdByThreadRootId[thread.rootEventId] = last.eventId;
+      }
+    }
+    if (preview is RoomPreviewFound) {
+      await markRoomAndThreadsRead(
+        mainEventId: preview.event.eventId,
+        lastEventIdByThreadRootId: lastEventIdByThreadRootId,
+      );
+      return;
+    }
+    for (final entry in lastEventIdByThreadRootId.entries) {
+      await setThreadReadMarker(threadRootId: entry.key, eventId: entry.value);
+    }
   }
 }
 

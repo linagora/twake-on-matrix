@@ -1,3 +1,7 @@
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/pages/chat/thread/unread_thread_banner.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -216,6 +220,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                         );
                       },
                     ),
+                    if (!controller.isThread) _unreadThreadBanner(context),
                     if (controller.room != null &&
                         controller.room?.encrypted == true)
                       ChatDeviceVerificationBanner(
@@ -352,6 +357,27 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _unreadThreadBanner(BuildContext context) {
+    final client = controller.client;
+    if (client is! ThreadUnreadStoreOwner) return const SizedBox.shrink();
+    final store = (client as ThreadUnreadStoreOwner).threadUnread;
+    final room = controller.room!;
+    return ListenableBuilder(
+      listenable: store,
+      builder: (context, _) {
+        final rootId = unreadThreadBannerTarget(
+          mainNotificationCount: room.notificationCount,
+          threads: store.threadsOf(room.id),
+        );
+        if (rootId == null) return const SizedBox.shrink();
+        return UnreadThreadBanner(
+          onOpen: () =>
+              ThreadRoute(roomid: room.id, rootid: rootId).push<void>(context),
+        );
+      },
     );
   }
 

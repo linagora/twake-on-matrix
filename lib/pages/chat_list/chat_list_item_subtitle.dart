@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:twake_chat/config/app_config.dart';
@@ -32,9 +33,9 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     final String typingText = room.getLocalizedTypingText(l10n);
     final bool isGroup = !room.isDirectChat;
     final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
-      room.isUnreadOrInvited,
+      room.isUnreadOrInvited || room.unreadBadgeCount > 0,
       room.hasNewMessages,
-      room.notificationCount > 0,
+      room.unreadBadgeCount > 0,
     );
     final (Event? lastEvent, List<User> seenByUsers) = switch (previewResult) {
       RoomPreviewFound(:final event, :final seenByUsers) => (
@@ -125,18 +126,18 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           padding: const .symmetric(horizontal: 7),
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
-            room.isUnreadOrInvited,
+            room.isUnreadOrInvited || room.unreadBadgeCount > 0,
             room.hasNewMessages,
-            room.notificationCount,
+            room.unreadBadgeCount,
           ),
           decoration: BoxDecoration(
             color: notificationColor(context: context, room: room),
             borderRadius: .circular(AppConfig.borderRadius),
           ),
           child: Center(
-            child: room.notificationCount > 0
+            child: room.unreadBadgeCount > 0
                 ? Text(
-                    room.notificationCount.toString(),
+                    room.unreadBadgeCount.toString(),
                     style: textScheme.labelMedium?.copyWith(
                       letterSpacing: -0.5,
                       color: colorScheme.onPrimary,

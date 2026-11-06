@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
@@ -273,10 +274,7 @@ class ChatListController extends State<ChatList>
 
   Future<void> _markAsRead(Room room) async {
     if (room.isUnread || room.hasNewMessages) {
-      await room.setReadMarker(
-        room.lastEvent!.eventId,
-        mRead: room.lastEvent!.eventId,
-      );
+      await room.markRoomAndAllThreadsRead();
     }
   }
 
@@ -638,10 +636,7 @@ class ChatListController extends State<ChatList>
       future: () async {
         if (room.isUnread) {
           await room.markUnread(false);
-          await room.setReadMarker(
-            room.lastEvent!.eventId,
-            mRead: room.lastEvent!.eventId,
-          );
+          await room.markRoomAndAllThreadsRead();
         } else {
           await room.markUnread(true);
         }
