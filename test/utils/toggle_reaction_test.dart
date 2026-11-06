@@ -66,24 +66,24 @@ void main() {
   test(
     'only redacts when the selected emoji differs by a variation selector',
     () async {
-      await run(emoji: '❤', mine: [reaction('❤️')]);
-      expect(calls, ['redact ❤️']);
+      await run(emoji: '\u2764', mine: [reaction('\u2764\uFE0F')]);
+      expect(calls, ['redact \u2764\uFE0F']);
 
       calls.clear();
-      await run(emoji: '❤️', mine: [reaction('❤')]);
-      expect(calls, ['redact ❤']);
+      await run(emoji: '\u2764\uFE0F', mine: [reaction('\u2764')]);
+      expect(calls, ['redact \u2764']);
     },
   );
 
   test(
     'only redacts when the selected emoji differs by a text variation selector',
     () async {
-      await run(emoji: '❤', mine: [reaction('❤︎')]);
-      expect(calls, ['redact ❤︎']);
+      await run(emoji: '\u2764', mine: [reaction('\u2764\uFE0E')]);
+      expect(calls, ['redact \u2764\uFE0E']);
 
       calls.clear();
-      await run(emoji: '❤︎', mine: [reaction('❤')]);
-      expect(calls, ['redact ❤']);
+      await run(emoji: '\u2764\uFE0E', mine: [reaction('\u2764')]);
+      expect(calls, ['redact \u2764']);
     },
   );
 
@@ -140,4 +140,12 @@ void main() {
     await run(emoji: '🎉', mine: [reaction('👍'), reaction('😂')]);
     expect(calls, ['send 🎉', 'redact 👍', 'redact 😂']);
   });
+
+  test(
+    'removes the tapped reaction when it is not the first of mine',
+    () async {
+      await run(emoji: '😂', mine: [reaction('👍'), reaction('😂')]);
+      expect(calls, ['redact 👍', 'redact 😂']);
+    },
+  );
 }
