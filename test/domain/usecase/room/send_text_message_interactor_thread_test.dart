@@ -190,6 +190,51 @@ void main() {
     verifyNoOtherSend();
   });
 
+  /// An edit (`m.replace`) is not a thread reply: the SDK copies the content,
+  /// thread relation included, into `m.new_content` (room.dart:1308-1325).
+  /// Editing the root from its thread would make it a reply of itself.
+  group('editing from the thread screen', () {
+    test('editing the root sends no thread relation', () async {
+      // Longer than maxLength: an edit is not split either.
+      await interactor.execute(
+        room: room,
+        text: 'fixed root',
+        editEventId: rootId,
+        threadRootEventId: rootId,
+        threadLastEventId: lastId,
+      );
+
+      // Omitted named arguments must be null: no thread ids.
+      verify(
+        room.sendTextEvent(
+          'fixed root',
+          editEventId: rootId,
+          parseCommands: false,
+        ),
+      ).called(1);
+      verifyNoOtherSend();
+    });
+
+    test('editing a reply sends no thread relation', () async {
+      await interactor.execute(
+        room: room,
+        text: 'fixed reply',
+        editEventId: r'$reply',
+        threadRootEventId: rootId,
+        threadLastEventId: lastId,
+      );
+
+      verify(
+        room.sendTextEvent(
+          'fixed reply',
+          editEventId: r'$reply',
+          parseCommands: false,
+        ),
+      ).called(1);
+      verifyNoOtherSend();
+    });
+  });
+
   test('a text sent outside a thread carries no thread relation', () async {
     await interactor.execute(room: room, text: 'hello');
 
