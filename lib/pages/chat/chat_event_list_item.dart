@@ -61,7 +61,10 @@ class ChatEventListItem extends StatelessWidget {
       onStartThread: canStartThread
           ? (event) => _openThread(context, start: true)
           : null,
-      onSwipe: (direction) => controller.replyAction(replyTo: event),
+      // No reply to quote in a thread: replyAction does nothing there.
+      onSwipe: controller.isThread
+          ? null
+          : (direction) => controller.replyAction(replyTo: event),
       onAvatarTap: (Event event) => controller.onContactTap(
         contactPresentationSearch: event.senderFromMemoryOrFallback
             .toContactPresentationSearch(),
