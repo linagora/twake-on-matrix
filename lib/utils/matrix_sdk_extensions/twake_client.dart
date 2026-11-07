@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
@@ -53,7 +55,7 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
 class TwakeClient extends Client implements ThreadUnreadStoreOwner {
   @override
-  final ThreadUnreadStore threadUnread = ThreadUnreadStore();
+  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
 
   TwakeClient(
     super.clientName, {
@@ -82,7 +84,14 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
   }) {
-    threadUnread.attach(this);
+    unawaited(threadUnread.restore());
+    // The user's own thread events, from any device, make a thread followed.
+    onTimelineEvent.stream.listen((event) {
+      final rootId = event.threadRootId;
+      if (rootId != null && event.senderId == userID) {
+        threadUnread.markFollowed(event.room.id, rootId);
+      }
+    });
   }
 
   /// Logs this account's notification device out and removes its recovery

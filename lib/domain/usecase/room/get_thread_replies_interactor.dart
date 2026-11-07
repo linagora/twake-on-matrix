@@ -22,13 +22,14 @@ final class GetThreadRepliesInteractor {
     required Room room,
     required String rootEventId,
     String? from,
+    int limit = pageSize,
   }) async {
     final response = await room.client.getRelatingEventsWithRelType(
       room.id,
       rootEventId,
       RelationshipTypes.thread,
       from: from,
-      limit: pageSize,
+      limit: limit,
       dir: Direction.b,
     );
     final replies = [
