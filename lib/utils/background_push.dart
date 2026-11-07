@@ -754,6 +754,7 @@ class BackgroundPush {
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
       onSelectNotification: (data) =>
           onSelectNotification(data, eventId: notification.eventId),
     );
@@ -896,6 +897,7 @@ class BackgroundPush {
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
     );
   }
 

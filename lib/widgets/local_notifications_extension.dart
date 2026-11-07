@@ -52,6 +52,14 @@ extension LocalNotificationsExtension on MatrixState {
       return;
     }
     final event = Event.fromJson(eventUpdate.content, room);
+    final openThread = activeThread;
+    if (openThread != null &&
+        openThread.roomId == roomId &&
+        openThread.threadRootId == event.threadRootId &&
+        PlatformInfos.isLinux &&
+        DesktopLifecycle.instance.isActive.value) {
+      return;
+    }
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
     final body = await event.calcLocalizedBody(
       MatrixLocals(L10n.of(context)!),

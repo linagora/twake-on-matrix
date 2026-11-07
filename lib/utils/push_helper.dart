@@ -14,6 +14,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> pushHelper(
@@ -21,6 +22,7 @@ Future<void> pushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
+  ({String roomId, String threadRootId})? activeThread,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   try {
@@ -30,6 +32,7 @@ Future<void> pushHelper(
       client: client,
       l10n: l10n,
       activeRoomId: activeRoomId,
+      activeThread: activeThread,
       onSelectNotification: onSelectNotification,
     );
   } catch (e, s) {
@@ -73,6 +76,7 @@ Future<void> _tryPushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
+  ({String roomId, String threadRootId})? activeThread,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   final isBackgroundMessage = client == null;
@@ -133,6 +137,17 @@ Future<void> _tryPushHelper(
     return;
   }
   Logs().v('Push helper got notification event of type ${event.type}.');
+
+  // On a thread screen only the replies of that thread are read live; the
+  // thread is known from the event (m.relates_to stays in clear).
+  if (!isBackgroundMessage &&
+      activeThread != null &&
+      activeThread.roomId == notification.roomId &&
+      activeThread.threadRootId == event.threadRootId &&
+      client.syncPresence == null) {
+    Logs().v('Thread is in foreground. Stop push helper here.');
+    return;
+  }
 
   if (event.type.startsWith('m.call')) {
     // make sure bg sync is on (needed to update hold, unhold events)

@@ -480,6 +480,9 @@ class MatrixState extends ConsumerState<Matrix>
 
   String? get activeRoomId => TwakeApp.router.activeRoomId;
 
+  ({String roomId, String threadRootId})? get activeThread =>
+      TwakeApp.router.activeThread;
+
   final linuxNotifications = PlatformInfos.isLinux
       ? NotificationsClient()
       : null;
