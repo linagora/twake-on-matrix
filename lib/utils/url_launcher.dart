@@ -1,3 +1,5 @@
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -142,6 +144,26 @@ class UrlLauncher with GoToDraftChatMixin {
     }
   }
 
+  /// A link to a thread reply opens the thread screen on it, the room beneath.
+  Future<void> _openEvent(
+    BuildContext context,
+    Room room,
+    String eventId,
+  ) async {
+    Event? target;
+    try {
+      target = await room.getEventById(eventId);
+    } catch (e) {
+      Logs().w('UrlLauncher: unable to load the linked event', e);
+    }
+    if (!context.mounted) return;
+    context.goToRoomWithEvent(
+      room.id,
+      eventId,
+      threadRootId: target?.threadRootId,
+    );
+  }
+
   void openMatrixToUrl({
     String? customUrl,
     bool isInvitationLink = false,
@@ -201,7 +223,7 @@ class UrlLauncher with GoToDraftChatMixin {
         }
         // we have the room, so....just open it
         if (event != null) {
-          RoomRoute(roomid: room.id, event: event).go(context);
+          await _openEvent(context, room, event);
         } else {
           RoomRoute(roomid: room.id).go(context);
         }
@@ -238,7 +260,10 @@ class UrlLauncher with GoToDraftChatMixin {
           );
           final joinedRoomId = response.result;
           if (joinedRoomId == null) return;
-          if (event != null) {
+          final joinedRoom = matrix.client.getRoomById(joinedRoomId);
+          if (event != null && joinedRoom != null) {
+            await _openEvent(context, joinedRoom, event);
+          } else if (event != null) {
             RoomRoute(roomid: joinedRoomId, event: event).go(context);
           } else {
             RoomRoute(roomid: joinedRoomId).go(context);

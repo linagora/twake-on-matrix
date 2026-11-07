@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -52,6 +53,7 @@ extension SendFileExtension on Room {
     required SyncUpdate fakeImageEvent,
     required String txid,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     String? editEventId,
     int? shrinkImageMaxDimension,
     ImageFileInfo? thumbnail,
@@ -178,6 +180,7 @@ extension SendFileExtension on Room {
         txid: txid,
         messageType: msgType,
         inReplyTo: inReplyTo,
+        thread: thread,
         editEventId: editEventId,
         shrinkImageMaxDimension: shrinkImageMaxDimension,
         extraContent: extraContent,
@@ -273,6 +276,7 @@ extension SendFileExtension on Room {
           txid: txid,
           messageType: msgType,
           inReplyTo: inReplyTo,
+          thread: thread,
           editEventId: editEventId,
           shrinkImageMaxDimension: shrinkImageMaxDimension,
           extraContent: extraContent,
@@ -570,6 +574,8 @@ extension SendFileExtension on Room {
       content,
       txid: txid,
       inReplyTo: inReplyTo,
+      threadRootEventId: thread?.rootEventId,
+      threadLastEventId: thread?.lastEventId,
       editEventId: editEventId,
     );
     if (eventId != null) {
@@ -665,6 +671,7 @@ extension SendFileExtension on Room {
     required List<FileAssetEntity> entities,
     String? captionInfo,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     final txIdMapToImageFile = <TransactionId, FakeSendingFileInfo>{};
     for (final entity in entities) {
@@ -678,6 +685,7 @@ extension SendFileExtension on Room {
           messageType: entity.messageType,
           captionInfo: captionInfo,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
         txIdMapToImageFile[txid] = FakeSendingFileInfo(
           fileInfo: fileInfo,

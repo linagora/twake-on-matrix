@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
@@ -43,8 +44,13 @@ class UnreadRoomsBadge extends StatelessWidget {
   static int countNotifications(Client client, bool Function(Room) filter) {
     return client.joinedOrInvitedRooms
         .where(filter)
-        .where((r) => (r.isUnread || r.membership == Membership.invite))
-        .map((element) => element.isUnread ? element.notificationCount : 1)
+        .where(
+          (r) => (r.isUnreadWithThreads || r.membership == Membership.invite),
+        )
+        .map(
+          (element) =>
+              element.isUnreadWithThreads ? element.unreadBadgeCount : 1,
+        )
         .sum;
   }
 }

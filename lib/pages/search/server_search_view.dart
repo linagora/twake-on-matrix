@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/search/server_search_view_style.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -53,8 +54,11 @@ class ServerSearchMessagesList extends StatelessWidget {
                 final originServerTs = result.result?.originServerTs;
 
                 return TwakeInkWell(
-                  onTap: () =>
-                      context.goToRoomWithEvent(event.room.id, event.eventId),
+                  onTap: () => context.goToRoomWithEvent(
+                    event.room.id,
+                    event.eventId,
+                    threadRootId: event.threadRootId,
+                  ),
                   child: TwakeListItem(
                     child: Padding(
                       padding: ServerSearchViewStyle.paddingInsideListItem,

@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:async';
 import 'dart:io';
 
@@ -445,11 +446,11 @@ class StoryPageController extends State<StoryPage> {
     final room = currentEvent.room;
     room.client.updateIosBadge();
     if (index == events.length - 1) {
-      timeline!.setReadMarker();
+      timeline!.setMainTimelineReadMarker();
       return;
     }
     if (!currentSeenByUsers.any((u) => u.id == u.room.client.userID)) {
-      timeline!.setReadMarker(eventId: currentEvent.eventId);
+      timeline!.setMainTimelineReadMarker(eventId: currentEvent.eventId);
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -182,8 +183,23 @@ extension ContextExtensionss on BuildContext {
     Navigator.of(this).popUntil((route) => route.isFirst);
   }
 
-  void goToRoomWithEvent(String roomId, String eventId) {
-    go('/rooms/$roomId?event=$eventId');
+  /// Opens [eventId] in its room. A thread reply opens its thread screen,
+  /// scrolled to it, with the room beneath.
+  void goToRoomWithEvent(
+    String roomId,
+    String eventId, {
+    String? threadRootId,
+  }) {
+    if (threadRootId == null) {
+      go('/rooms/$roomId?event=$eventId');
+      return;
+    }
+    RoomRoute(roomid: roomId).go(this);
+    ThreadRoute(
+      roomid: roomId,
+      rootid: threadRootId,
+      event: eventId,
+    ).push<void>(this);
   }
 
   int getCacheSize(double size) {

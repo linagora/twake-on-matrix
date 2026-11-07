@@ -6,9 +6,11 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/add_story/add_story.dart';
 import 'package:twake_chat/pages/archive/archive.dart';
 import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_messages.dart';
 import 'package:twake_chat/pages/chat_adaptive_scaffold/chat_adaptive_scaffold.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:twake_chat/pages/chat_blank/chat_blank.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_adaptive_scaffold.dart';
 import 'package:twake_chat/pages/chat_encryption_settings/chat_encryption_settings.dart';
@@ -367,6 +369,7 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
             TypedGoRoute<EncryptionRoute>(path: 'encryption'),
             TypedGoRoute<InviteRoute>(path: 'invite'),
             TypedGoRoute<PinnedMessagesRoute>(path: 'pinnedmessages'),
+            TypedGoRoute<ThreadRoute>(path: 'threads/:rootid'),
           ],
         ),
       ],
@@ -936,6 +939,43 @@ class RoomRoute extends GoRouteData with $RoomRoute {
 }
 
 // --- Room sub-routes ---
+
+/// Full-screen thread above its room; [event] targets a reply to scroll to,
+/// [start] opens it for a first reply (keyboard up).
+class ThreadRoute extends GoRouteData with $ThreadRoute {
+  const ThreadRoute({
+    required this.roomid,
+    required this.rootid,
+    this.event,
+    this.start = false,
+  });
+
+  final String roomid;
+  final String rootid;
+  final String? event;
+  final bool start;
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    final child = KeyboardDismissOnTap(
+      child: Chat(
+        key: Key('Thread_${roomid}_$rootid'),
+        roomId: roomid,
+        threadRootId: rootid,
+        startThread: start,
+      ),
+    );
+    final name = '/rooms/thread_${roomid}_$rootid';
+    if (_responsive.isMobile(context)) {
+      return TwakeCupertinoPage(key: state.pageKey, name: name, child: child);
+    }
+    return NoTransitionPage(key: state.pageKey, name: name, child: child);
+  }
+}
 
 class EncryptionRoute extends GoRouteData with $EncryptionRoute {
   const EncryptionRoute({required this.roomid});

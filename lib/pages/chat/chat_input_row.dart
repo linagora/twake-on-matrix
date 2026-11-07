@@ -470,7 +470,9 @@ class ChatInputRow extends StatelessWidget {
       showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
         contentPadding: ChatInputRowStyle.contentPadding(context),
-        hintText: L10n.of(context)!.message,
+        hintText: controller.isThread
+            ? L10n.of(context)!.replyInThread
+            : L10n.of(context)!.message,
         isDense: true,
         hintMaxLines: 1,
         hintStyle: InputBarStyle.getTypeAheadTextStyle(context).copyWith(

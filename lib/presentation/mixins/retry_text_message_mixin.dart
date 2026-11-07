@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 
 mixin RetryTextMessageMixin {
@@ -23,7 +24,16 @@ mixin RetryTextMessageMixin {
     Event? replyEvent;
     String? editEventId;
 
-    if (event.inReplyToEventId() != null) {
+    final threadRootId = event.threadRootId;
+    final threadLastEventId = event.content
+        .tryGetMap<String, Object?>('m.relates_to')
+        ?.tryGetMap<String, Object?>('m.in_reply_to')
+        ?.tryGet<String>('event_id');
+
+    if (threadRootId != null) {
+      // A thread reply keeps its relation; its in_reply_to is only the
+      // fallback to the last event of the thread, not a quote.
+    } else if (event.inReplyToEventId() != null) {
       replyEvent = await room.getEventById(event.inReplyToEventId()!);
     } else if (event.relationshipType == RelationshipTypes.edit &&
         event.relationshipEventId != null) {
@@ -36,6 +46,8 @@ mixin RetryTextMessageMixin {
         txid: event.transactionId,
         inReplyTo: replyEvent,
         editEventId: editEventId,
+        threadRootEventId: threadRootId,
+        threadLastEventId: threadLastEventId,
       );
       if (eventId == null) {
         throw StateError('Sent event return null id');

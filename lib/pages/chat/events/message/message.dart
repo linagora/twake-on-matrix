@@ -76,6 +76,11 @@ class Message extends StatefulWidget {
   final OnSendEmojiReactionAction? onSelectEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
+  final void Function(Event)? onStartThread;
+  final bool inThread;
+
+  /// Card of the thread under this message, when it is a thread root.
+  final Widget? threadCard;
   final void Function(Event)? onEdit;
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
@@ -122,6 +127,9 @@ class Message extends StatefulWidget {
     this.onSelectEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
+    this.onStartThread,
+    this.inThread = false,
+    this.threadCard,
     this.onEdit,
     this.onDelete,
     this.onForward,
@@ -292,6 +300,8 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           onSendEmojiReaction: widget.onSelectEmojiReaction,
           onPickEmojiReaction: widget.onPickEmojiReaction,
           onReply: widget.onReply,
+          onStartThread: widget.onStartThread,
+          inThread: widget.inThread,
           onEdit: widget.onEdit,
           onDelete: widget.onDelete,
           onForward: widget.onForward,
@@ -362,6 +372,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           autoScrollController: widget.autoScrollController,
           scrollIndex: widget.scrollIndex,
         ),
+        if (widget.threadCard != null) widget.threadCard!,
       ],
     );
 

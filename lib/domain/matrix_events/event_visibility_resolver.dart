@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Single entry-point for all event visibility decisions.
@@ -11,12 +12,16 @@ abstract final class EventVisibilityResolver {
   /// Whether [event] should be rendered as a row in the chat timeline.
   ///
   /// Rules are evaluated in layers, short-circuiting on the first `false`:
-  /// 1. Relationship — edits/reactions/verification are always hidden.
+  /// 1. Relationship — edits/reactions/verification are always hidden, and
+  ///    thread replies outside the thread screen.
   /// 2. Type         — delegates to [EventTypeRules].
   /// 3. Config       — [AppConfig] toggles.
   /// 4. Content      — payload / room-state heuristics.
-  static bool isVisibleInTimeline(Event event) {
-    return _passesRelationshipLayer(event) &&
+  ///
+  /// [inThread] is true on the thread screen, where thread replies are the
+  /// content and must not be hidden.
+  static bool isVisibleInTimeline(Event event, {bool inThread = false}) {
+    return _passesRelationshipLayer(event, inThread: inThread) &&
         _passesTypeLayer(event) &&
         _passesConfigLayer(event) &&
         _passesContentLayer(event);
@@ -30,6 +35,7 @@ abstract final class EventVisibilityResolver {
   static bool isEligibleForChatListPreviewSync(Event event) {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
+    if (event.threadRootId != null) return false;
     return true;
   }
 
@@ -41,6 +47,7 @@ abstract final class EventVisibilityResolver {
   ) async {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
+    if (event.threadRootId != null) return false;
     if (event.relationshipType != RelationshipTypes.edit) return true;
 
     // Walk the edit chain; discard if any ancestor is redacted.
@@ -50,7 +57,7 @@ abstract final class EventVisibilityResolver {
       if (!visited.add(id)) break;
       final target = await room.getEventById(id);
       if (target == null) break;
-      if (target.redacted) return false;
+      if (target.redacted || target.threadRootId != null) return false;
       id = target.relationshipType == RelationshipTypes.edit
           ? target.relationshipEventId
           : null;
@@ -67,8 +74,9 @@ abstract final class EventVisibilityResolver {
     RelationshipTypes.reaction,
   };
 
-  static bool _passesRelationshipLayer(Event event) {
+  static bool _passesRelationshipLayer(Event event, {bool inThread = false}) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
+    if (!inThread && event.threadRootId != null) return false;
     if (event.type.startsWith('m.key.verification.')) return false;
     return true;
   }

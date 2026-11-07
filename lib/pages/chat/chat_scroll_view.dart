@@ -3,7 +3,6 @@ import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_event_list_item.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -129,7 +128,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     };
     _visibleEvents = [
       for (final event in _currentEvents)
-        if (event.isVisibleInGui) event,
+        if (controller.isEventVisible(event)) event,
     ];
     _visiblePosition = {
       for (var i = 0; i < _visibleEvents.length; i++)
@@ -162,10 +161,10 @@ class _ChatScrollViewState extends State<ChatScrollView> {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
               if (index == _bottom.length) {
-                if (controller.timeline!.isRequestingHistory) {
+                if (controller.isRequestingHistory) {
                   return const Center(child: CupertinoActivityIndicator());
                 }
-                if (controller.timeline!.canRequestHistory) {
+                if (controller.canRequestHistory) {
                   return Center(
                     child: IconButton(
                       onPressed: controller.requestHistory,

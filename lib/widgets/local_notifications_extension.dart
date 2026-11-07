@@ -1,3 +1,6 @@
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:io';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/presentation/extensions/event_update_extension.dart';
@@ -44,8 +47,8 @@ extension LocalNotificationsExtension on MatrixState {
       Logs().w('Can not display notification for unknown room $roomId');
       return;
     }
-    if (room.notificationCount == 0 ||
-        (room.isMuted && room.highlightCount == 0)) {
+    if (room.unreadBadgeCount == 0 ||
+        (room.isMuted && room.highlightCountWithThreads == 0)) {
       return;
     }
     final event = Event.fromJson(eventUpdate.content, room);
@@ -143,7 +146,15 @@ extension LocalNotificationsExtension on MatrixState {
         );
         switch (action) {
           case DesktopNotificationActions.seen:
-            room.setReadMarker(event.eventId, mRead: event.eventId);
+            final threadRootId = event.threadRootId;
+            if (threadRootId == null) {
+              room.setMainTimelineReadMarker(event.eventId);
+            } else {
+              room.setThreadReadMarker(
+                threadRootId: threadRootId,
+                eventId: event.eventId,
+              );
+            }
             break;
           case DesktopNotificationActions.openChat:
             RoomRoute(roomid: room.id).go(context);

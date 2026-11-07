@@ -25,6 +25,8 @@ final class SendTextMessageInteractor {
     required String text,
     Event? inReplyTo,
     String? editEventId,
+    String? threadRootEventId,
+    String? threadLastEventId,
   }) => sendQueue.enqueue(
     room.id,
     () => _send(
@@ -32,6 +34,8 @@ final class SendTextMessageInteractor {
       text: text,
       inReplyTo: inReplyTo,
       editEventId: editEventId,
+      threadRootEventId: threadRootEventId,
+      threadLastEventId: threadLastEventId,
     ),
   );
 
@@ -40,7 +44,11 @@ final class SendTextMessageInteractor {
     required String text,
     Event? inReplyTo,
     String? editEventId,
+    String? threadRootEventId,
+    String? threadLastEventId,
   }) async {
+    // A quote in a thread would be prepended to the body by the SDK.
+    if (threadRootEventId != null) inReplyTo = null;
     final bool isCommand = _isKnownCommand(room, text);
     if (editEventId != null || isCommand) {
       await room.sendTextEvent(
@@ -48,6 +56,8 @@ final class SendTextMessageInteractor {
         inReplyTo: inReplyTo,
         editEventId: editEventId,
         parseCommands: isCommand,
+        threadRootEventId: threadRootEventId,
+        threadLastEventId: threadLastEventId,
       );
       return;
     }
@@ -55,12 +65,18 @@ final class SendTextMessageInteractor {
     final List<String> parts = splitter.split(text);
     for (final (int index, String part) in parts.indexed) {
       try {
-        await room.sendTextEvent(
+        final String? sentId = await room.sendTextEvent(
           part,
           inReplyTo: index == 0 ? inReplyTo : null,
           // A part starting with "/" is not a command.
           parseCommands: false,
+          threadRootEventId: threadRootEventId,
+          threadLastEventId: threadLastEventId,
         );
+        // The next part follows this one in the thread.
+        if (sentId != null && threadRootEventId != null) {
+          threadLastEventId = sentId;
+        }
       } on Exception catch (error, stackTrace) {
         // The part is already in error in the timeline, keep going.
         Logs().e(

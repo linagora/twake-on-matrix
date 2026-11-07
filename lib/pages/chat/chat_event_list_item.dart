@@ -1,9 +1,15 @@
 import 'dart:async';
 
+import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/domain/model/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -28,15 +34,39 @@ class ChatEventListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!event.isVisibleInGui) return const SizedBox();
+    if (!controller.isEventVisible(event)) return const SizedBox();
+
+    final threadSummary = controller.threadSummaryOf(event);
+    final canStartThread =
+        event.type == EventTypes.Message &&
+        event.status.isSynced &&
+        ThreadRules.canStartThread(
+          event,
+          hasThread: threadSummary != null,
+          inThreadScreen: controller.isThread,
+        );
 
     return Message(
-      key: GlobalObjectKey(event.eventId),
+      // The room's Chat stays mounted under the thread screen and shares the
+      // root row: a second GlobalObjectKey for it would throw.
+      key: controller.isThread && event.eventId == controller.threadRootId
+          ? ValueKey(event.eventId)
+          : GlobalObjectKey(event.eventId),
       event,
       autoScrollController: controller.scrollController,
       scrollIndex: index,
       matrixState: controller.matrix!,
-      onSwipe: (direction) => controller.replyAction(replyTo: event),
+      inThread: controller.isThread,
+      threadCard: threadSummary == null
+          ? null
+          : _threadCard(context, threadSummary),
+      onStartThread: canStartThread
+          ? (event) => _openThread(context, start: true)
+          : null,
+      // No reply to quote in a thread: replyAction does nothing there.
+      onSwipe: controller.isThread
+          ? null
+          : (direction) => controller.replyAction(replyTo: event),
       onAvatarTap: (Event event) => controller.onContactTap(
         contactPresentationSearch: event.senderFromMemoryOrFallback
             .toContactPresentationSearch(),
@@ -103,4 +133,47 @@ class ChatEventListItem extends StatelessWidget {
       onRetryTextMessage: controller.retryTextMessage,
     );
   }
+
+  void _openThread(BuildContext context, {bool start = false}) => ThreadRoute(
+    roomid: event.room.id,
+    rootid: event.eventId,
+    start: start,
+  ).push<void>(context);
+
+  /// The edited body of a text reply, else the localized label of the
+  /// reply (a file, a voice message, an undecryptable event).
+  String? _lastReplyText(BuildContext context, ThreadSummary summary) {
+    final reply = summary.lastReply;
+    if (reply == null) return null;
+    if (reply.type == EventTypes.Message &&
+        reply.messageType == MessageTypes.Text) {
+      return summary.lastReplyText;
+    }
+    return reply.calcLocalizedBodyFallback(
+      MatrixLocals(L10n.of(context)!),
+      withSenderNamePrefix: false,
+      hideReply: true,
+    );
+  }
+
+  Widget _threadCard(BuildContext context, ThreadSummary summary) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+    child: Align(
+      alignment: event.isOwnMessage
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.7),
+        child: ThreadSummaryCard(
+          replyCount: summary.replyCount,
+          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
+              .calcDisplayname(),
+          lastReplyText: _lastReplyText(context, summary),
+          lastReplyTime: summary.lastReply?.originServerTs,
+          unreadCount: controller.threadUnreadCount(event.eventId),
+          onTap: () => _openThread(context),
+        ),
+      ),
+    ),
+  );
 }

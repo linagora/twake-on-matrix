@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
@@ -477,11 +478,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   bool webHasFocus = true;
 
-  String? get activeRoomId {
-    final path = TwakeApp.router.routeInformationProvider.value.uri.path;
-    if (!path.startsWith('/rooms/')) return null;
-    return path.split('/')[2];
-  }
+  String? get activeRoomId => TwakeApp.router.activeRoomId;
 
   final linuxNotifications = PlatformInfos.isLinux
       ? NotificationsClient()

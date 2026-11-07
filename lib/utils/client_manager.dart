@@ -28,6 +28,11 @@ abstract class ClientManager {
   static const String _includeLeaveFilterMigratedPrefix =
       'im.twake.store.sync_filter_include_leave_v1';
 
+  /// Same invalidation once more so existing installs ask the server for
+  /// per-thread counters (`unread_thread_notifications`).
+  static const String _threadCountersFilterMigratedPrefix =
+      'im.twake.store.sync_filter_thread_counters_v1';
+
   static Future<List<Client>> getClients({bool initialize = true}) async {
     final clientNames = <String>{};
     var migratedFromLegacyKey = false;
@@ -134,12 +139,27 @@ abstract class ClientManager {
       ? const NativeImplementationsDummy()
       : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
+  /// `unread_thread_notifications` makes the server count unread messages per
+  /// thread instead of mixing them into the room counters.
+  static final Filter syncFilter = Filter(
+    room: RoomFilter(
+      includeLeave: true,
+      state: StateFilter(lazyLoadMembers: true),
+      timeline: StateFilter(unreadThreadNotifications: true),
+    ),
+  );
+
   static Future<Client> createClient(String clientName) async {
     final database = await MatrixSdkDatabase.init(
       clientName,
       database: await openSqfliteDb(name: clientName),
     );
-    await _invalidatePersistedSyncFilterForIncludeLeave(database, clientName);
+    await _invalidatePersistedSyncFilterOnce(database, clientName);
+    await _invalidatePersistedSyncFilterOnce(
+      database,
+      clientName,
+      migratedPrefix: _threadCountersFilterMigratedPrefix,
+    );
     return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid
@@ -161,12 +181,7 @@ abstract class ClientManager {
       },
       // Matrix 12+ no longer caches loadArchive() results for getRoomById().
       // Persist left rooms via sync; keep SDK default member lazy-loading.
-      syncFilter: Filter(
-        room: RoomFilter(
-          includeLeave: true,
-          state: StateFilter(lazyLoadMembers: true),
-        ),
-      ),
+      syncFilter: syncFilter,
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       database: database,
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
@@ -182,12 +197,13 @@ abstract class ClientManager {
     );
   }
 
-  static Future<void> _invalidatePersistedSyncFilterForIncludeLeave(
+  static Future<void> _invalidatePersistedSyncFilterOnce(
     DatabaseApi database,
-    String clientName,
-  ) async {
+    String clientName, {
+    String migratedPrefix = _includeLeaveFilterMigratedPrefix,
+  }) async {
     final store = Store();
-    final migratedKey = '$_includeLeaveFilterMigratedPrefix.$clientName';
+    final migratedKey = '$migratedPrefix.$clientName';
     if (await store.getItem(migratedKey) == '1') return;
 
     try {
@@ -215,7 +231,7 @@ abstract class ClientManager {
       await store.setItem(migratedKey, '1');
     } catch (e, s) {
       Logs().w(
-        'Unable to invalidate sync filter for includeLeave migration',
+        'Unable to invalidate the persisted sync filter ($migratedKey)',
         e,
         s,
       );
