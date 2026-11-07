@@ -57,6 +57,10 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
   @override
   late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
 
+  /// Thread counters parsed with a sync, held until the SDK has handled it.
+  final _pendingThreadCounts =
+      Expando<Map<String, Map<String, ThreadCounts>>>();
+
   TwakeClient(
     super.clientName, {
     required super.database,
@@ -85,6 +89,13 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     super.convertLinebreaksInFormatting,
   }) {
     unawaited(threadUnread.restore());
+    // The SDK emits onSync once it has handled the sync: the thread counters
+    // then land with the room counters and receipts, and a failed sync never
+    // applies them.
+    onSync.stream.listen((update) {
+      final counts = _pendingThreadCounts[update];
+      if (counts != null) threadUnread.apply(counts);
+    });
     // The user's own thread events, from any device, make a thread followed.
     onTimelineEvent.stream.listen((event) {
       final rootId = event.threadRootId;
@@ -145,8 +156,9 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
         // On web: run utf8.decode + jsonDecode via compute() (near-native
         // speed on WASM), then call SyncUpdate.fromJson on the main thread.
         final json = await compute(_jsonDecodeSyncResponseWeb, responseBody);
-        threadUnread.apply(parseSyncUnreadThreadNotifications(json));
-        return SyncUpdate.fromJson(json);
+        final update = SyncUpdate.fromJson(json);
+        _pendingThreadCounts[update] = parseSyncUnreadThreadNotifications(json);
+        return update;
       }
 
       // On native: offload the entire pipeline to a background isolate.
@@ -154,7 +166,7 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
         _parseSyncResponseNative,
         responseBody,
       );
-      threadUnread.apply(threadCounts);
+      _pendingThreadCounts[update] = threadCounts;
       return update;
     } catch (e) {
       // Re-throw parsing errors with context so _innerSync's catch chain
