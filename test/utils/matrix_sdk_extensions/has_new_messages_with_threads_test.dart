@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
+import '../../fake_client.dart';
 
 /// Roast #1: the app sends threaded receipts only (`thread_id: main` or the
 /// root id), so the unthreaded `receiptState.global` of an account that used
@@ -20,6 +21,8 @@ void main() {
   setUp(() {
     client = MockClient();
     when(client.userID).thenReturn(me);
+    // Event.receipts of the SDK looks the user up in the database.
+    when(client.database).thenReturn(MockDatabase());
     when(
       client.roomPreviewLastEvents,
     ).thenReturn({EventTypes.Message, EventTypes.Encrypted});
@@ -118,6 +121,18 @@ void main() {
             'is_falling_back': true,
           },
         ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isFalse);
+    });
+    test('an unthreaded receipt on the last event still reads the room', () {
+      // A client of the account that still sends unthreaded receipts.
+      final room = roomWith(
+        receipts: LatestReceiptState(
+          global: own(receipt(r'$last', 6)),
+          mainThread: own(receipt(r'$before', 1)),
+        ),
+        lastEvent: (room) => message(room),
       );
 
       expect(room.hasNewMessagesWithThreads, isFalse);
