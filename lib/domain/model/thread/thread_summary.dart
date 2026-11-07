@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 
@@ -10,29 +11,16 @@ class ThreadSummary {
     required this.replyCount,
     required this.lastReply,
     required this.lastReplyText,
-    required bool participated,
-    required String rootSenderId,
-    required Set<String> replySenderIds,
-  }) : _participated = participated,
-       _rootSenderId = rootSenderId,
-       _replySenderIds = replySenderIds;
+  });
 
   final String rootEventId;
   final int replyCount;
-  final Event lastReply;
+
+  /// Null when every reply known is deleted: the card shows the count only.
+  final Event? lastReply;
 
   /// Text of [lastReply] with its latest edit applied.
-  final String lastReplyText;
-
-  final bool _participated;
-  final String _rootSenderId;
-  final Set<String> _replySenderIds;
-
-  /// P1: the user wrote the root, or replied in the thread.
-  bool isFollowedBy(String userId) =>
-      _participated ||
-      _rootSenderId == userId ||
-      _replySenderIds.contains(userId);
+  final String? lastReplyText;
 
   static ThreadSummary? fromRoot(
     Event root, {
@@ -46,6 +34,11 @@ class ThreadSummary {
         ? null
         : Event.fromJson(latestJson, root.room);
 
+    // A redacted event loses its `m.relates_to`: match it by id.
+    final deletedIds = {
+      for (final e in liveEvents)
+        if (e.redacted) e.eventId,
+    };
     final replies = liveEvents
         .where((e) => e.threadRootId == root.eventId && !e.redacted)
         .toList();
@@ -55,39 +48,46 @@ class ThreadSummary {
           (serverLatest == null ||
               e.originServerTs.isAfter(serverLatest.originServerTs)),
     );
-    final candidates = [?serverLatest, ...fresh]
-      ..sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
-    if (candidates.isEmpty) return null;
+    // The live copy of the server latest reply (decrypted) replaces it.
+    final liveLatest = replies.firstWhereOrNull(
+      (e) => e.eventId == serverLatest?.eventId,
+    );
+    final keptServerLatest =
+        serverLatest == null || deletedIds.contains(serverLatest.eventId)
+        ? null
+        : liveLatest ?? serverLatest;
+    final candidates = [
+      ?keptServerLatest,
+      ...replies.where((e) => e.eventId != serverLatest?.eventId),
+    ]..sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
 
     final count = (aggregate?.tryGet<int>('count') ?? 0) + fresh.length;
     if (count == 0) return null;
 
-    final last = candidates.last;
-    final edits = liveEvents.where(
-      (e) =>
-          e.relationshipType == RelationshipTypes.edit &&
-          e.relationshipEventId == last.eventId,
-    );
+    final last = candidates.lastOrNull;
+    final edits = last == null
+        ? const <Event>[]
+        : liveEvents.where(
+            (e) =>
+                e.relationshipType == RelationshipTypes.edit &&
+                e.relationshipEventId == last.eventId,
+          );
     final latestEdit = edits.isEmpty
         ? null
         : edits.reduce(
             (a, b) => b.originServerTs.isAfter(a.originServerTs) ? b : a,
           );
-    final text =
-        latestEdit?.content
-            .tryGetMap<String, Object?>('m.new_content')
-            ?.tryGet<String>('body') ??
-        last.body;
 
     return ThreadSummary._(
       rootEventId: root.eventId,
       replyCount: count,
       lastReply: last,
-      lastReplyText: text,
-      participated:
-          aggregate?.tryGet<bool>('current_user_participated') == true,
-      rootSenderId: root.senderId,
-      replySenderIds: {for (final e in replies) e.senderId},
+      lastReplyText: last == null
+          ? null
+          : latestEdit?.content
+                    .tryGetMap<String, Object?>('m.new_content')
+                    ?.tryGet<String>('body') ??
+                last.body,
     );
   }
 }

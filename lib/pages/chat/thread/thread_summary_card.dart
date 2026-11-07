@@ -9,17 +9,19 @@ class ThreadSummaryCard extends StatelessWidget {
   const ThreadSummaryCard({
     super.key,
     required this.replyCount,
-    required this.lastReplyAuthor,
-    required this.lastReplyText,
-    required this.lastReplyTime,
+    this.lastReplyAuthor,
+    this.lastReplyText,
+    this.lastReplyTime,
     required this.onTap,
     this.unreadCount = 0,
   });
 
   final int replyCount;
-  final String lastReplyAuthor;
-  final String lastReplyText;
-  final DateTime lastReplyTime;
+
+  /// Null when no reply is left to show: the card shows the count only.
+  final String? lastReplyAuthor;
+  final String? lastReplyText;
+  final DateTime? lastReplyTime;
   final int unreadCount;
   final VoidCallback onTap;
 
@@ -30,9 +32,10 @@ class ThreadSummaryCard extends StatelessWidget {
     final textStyle = LinagoraTextStyle.material();
     final count = l10n.threadMessagesCount(replyCount);
     final unread = unreadCount > 0;
-    final last =
-        '$lastReplyAuthor: $lastReplyText · '
-        '${lastReplyTime.localizedTimeShort(context)}';
+    final last = lastReplyTime == null
+        ? null
+        : '$lastReplyAuthor: $lastReplyText · '
+              '${lastReplyTime!.localizedTimeShort(context)}';
 
     return Semantics(
       container: true,
@@ -41,7 +44,7 @@ class ThreadSummaryCard extends StatelessWidget {
       label: [
         count,
         if (unread) l10n.threadUnreadMessagesCount(unreadCount),
-        last,
+        ?last,
       ].join(', '),
       onTap: onTap,
       child: Material(
@@ -83,12 +86,15 @@ class ThreadSummaryCard extends StatelessWidget {
                     Icon(Icons.chevron_right, size: 18, color: colors.primary),
                   ],
                 ),
-                Text(
-                  last,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle.bodySmall.copyWith(color: colors.secondary),
-                ),
+                if (last != null)
+                  Text(
+                    last,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle.bodySmall.copyWith(
+                      color: colors.secondary,
+                    ),
+                  ),
               ],
             ),
           ),
