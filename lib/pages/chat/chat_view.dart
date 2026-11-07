@@ -207,8 +207,10 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                             if (audioRecordState != AudioRecordState.initial) {
                               return const SizedBox.shrink();
                             }
-                            final unreadCount =
-                                controller.room?.notificationCount ?? 0;
+                            // The room's count is the main timeline's, not the thread's.
+                            final unreadCount = controller.isThread
+                                ? 0
+                                : controller.room?.notificationCount ?? 0;
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 56.0),
                               child: Stack(
