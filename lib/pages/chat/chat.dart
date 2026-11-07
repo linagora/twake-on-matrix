@@ -566,6 +566,12 @@ class ChatController extends ConsumerState<Chat>
 
   bool _isLoadingThreadReplies = false;
 
+  /// The page being fetched: a second caller awaits it instead of returning.
+  Future<void>? _threadPageLoad;
+
+  /// Completes once the thread screen has its first page (or failed to).
+  final Completer<void> _threadReady = Completer<void>();
+
   String? _lastThreadReadEventId;
 
   /// Events of the list: the room timeline, or the root and the replies of
@@ -686,9 +692,12 @@ class ChatController extends ConsumerState<Chat>
     if (_olderThreadReplies.isEmpty && mounted) _requestInputFocus();
   }
 
-  Future<void> _loadMoreThreadReplies() async {
+  Future<void> _loadMoreThreadReplies() => _threadPageLoad ??=
+      _fetchThreadReplies().whenComplete(() => _threadPageLoad = null);
+
+  Future<void> _fetchThreadReplies() async {
     final room = this.room;
-    if (room == null || _isLoadingThreadReplies) return;
+    if (room == null) return;
     _isLoadingThreadReplies = true;
     if (mounted) setState(() {});
     try {
@@ -870,6 +879,7 @@ class ChatController extends ConsumerState<Chat>
       await loadTimelineFuture;
       if (isThread) {
         await _loadThread();
+        if (!_threadReady.isCompleted) _threadReady.complete();
         _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -911,6 +921,7 @@ class ChatController extends ConsumerState<Chat>
       });
     } catch (e, s) {
       Logs().wtf('Failed to load timeline', e, s);
+      if (!_threadReady.isCompleted) _threadReady.complete();
       rethrow;
     }
   }
@@ -3410,14 +3421,16 @@ class ChatController extends ConsumerState<Chat>
   /// to it and highlights it.
   Future<void> _jumpToThreadReply(String eventId) async {
     _lastHighlightedEventId = eventId;
-    for (var i = 0; i < 300 && mounted; i++) {
-      if (openingChatViewStateNotifier.value is ViewEventListSuccess) break;
-      await SchedulerBinding.instance.endOfFrame;
-    }
-    while (mounted &&
-        !eventsToDisplay.any((e) => e.eventId == eventId) &&
-        canRequestHistory) {
-      await requestHistory();
+    await _threadReady.future;
+    try {
+      while (mounted &&
+          !eventsToDisplay.any((e) => e.eventId == eventId) &&
+          canRequestHistory) {
+        await _loadMoreThreadReplies();
+      }
+    } catch (e, s) {
+      // A failed page must not be retried forever: stop, the reply stays unknown.
+      Logs().w('Unable to reach the reply in the thread', e, s);
     }
     await SchedulerBinding.instance.endOfFrame;
     await SchedulerBinding.instance.endOfFrame;
