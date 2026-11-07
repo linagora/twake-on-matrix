@@ -4,6 +4,7 @@ import 'package:mockito/mockito.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
+import '../room_status_extension_test.mocks.dart' show MockTimeline;
 
 /// THR-M-06: the mobile sends threaded receipts only, like the web, so its
 /// receipts on the room no longer clear the unread threads read on the web.
@@ -161,6 +162,108 @@ void main() {
         ),
       ).called(1);
       verifyNoUnthreadedReceipt();
+    });
+  });
+
+  /// The room screen reads the main timeline on every view update while it
+  /// sits at the bottom. A receipt the server already has must not be sent
+  /// again: one POST per update is useless traffic on a failing network.
+  group('reading the main timeline again', () {
+    late Room realRoom;
+    late MockTimeline timeline;
+
+    Event mainMessage(String eventId) => Event(
+      type: EventTypes.Message,
+      content: {'msgtype': 'm.text', 'body': 'hello'},
+      eventId: eventId,
+      senderId: '@bob:example.com',
+      originServerTs: DateTime.utc(2026, 11, 6, 10),
+      room: realRoom,
+    );
+
+    LatestReceiptStateForTimeline ownMain(String eventId) {
+      final data = LatestReceiptStateData(
+        eventId,
+        DateTime.utc(2026, 11, 6, 10, 1).millisecondsSinceEpoch,
+      );
+      return LatestReceiptStateForTimeline(
+        ownPrivate: null,
+        ownPublic: data,
+        latestOwnReceipt: data,
+        otherUsers: {},
+      );
+    }
+
+    void verifyNothingSent() {
+      verifyNever(
+        client.postReceipt(any, any, any, threadId: anyNamed('threadId')),
+      );
+      verifyNever(
+        client.setReadMarker(
+          any,
+          mFullyRead: anyNamed('mFullyRead'),
+          mRead: anyNamed('mRead'),
+          mReadPrivate: anyNamed('mReadPrivate'),
+        ),
+      );
+    }
+
+    setUp(() {
+      // An account whose old unthreaded receipt is far behind.
+      final staleGlobal = LatestReceiptStateData(
+        r'$old',
+        DateTime.utc(2026, 10, 30).millisecondsSinceEpoch,
+      );
+      realRoom = Room(
+        id: roomId,
+        client: client,
+        receiptState: LatestReceiptState(
+          global: LatestReceiptStateForTimeline(
+            ownPrivate: null,
+            ownPublic: staleGlobal,
+            latestOwnReceipt: staleGlobal,
+            otherUsers: {},
+          ),
+          mainThread: ownMain(r'$last'),
+        ),
+      );
+      timeline = MockTimeline();
+      when(timeline.room).thenReturn(realRoom);
+      when(
+        timeline.events,
+      ).thenReturn([mainMessage(r'$last'), mainMessage(r'$before')]);
+    });
+
+    test('sends nothing when the main receipt is already on the newest main '
+        'event', () async {
+      await timeline.setMainTimelineReadMarker();
+
+      verifyNothingSent();
+    });
+
+    test('sends nothing when asked for the event the main receipt is already '
+        'on', () async {
+      await timeline.setMainTimelineReadMarker(eventId: r'$last');
+
+      verifyNothingSent();
+    });
+
+    test('a newer main event is read', () async {
+      when(
+        timeline.events,
+      ).thenReturn([mainMessage(r'$newer'), mainMessage(r'$last')]);
+
+      await timeline.setMainTimelineReadMarker();
+
+      verify(
+        client.postReceipt(
+          roomId,
+          ReceiptType.mRead,
+          r'$newer',
+          threadId: 'main',
+        ),
+      ).called(1);
+      verify(client.setReadMarker(roomId, mFullyRead: r'$newer')).called(1);
     });
   });
 }
