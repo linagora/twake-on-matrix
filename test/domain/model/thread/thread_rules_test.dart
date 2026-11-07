@@ -98,7 +98,9 @@ void main() {
     });
   });
 
-  /// Roast #3+8: Synapse refuses a `main` receipt on an event related, even
+  /// THR-M-06, spec §4 « Reçus » (`thread_id = main`).
+  ///
+  /// Synapse refuses a `main` receipt on an event related, even
   /// through a reaction or an edit, to a thread event. The one "last event of
   /// the main timeline" every main receipt targets.
   group('newest event of the main timeline', () {

@@ -6,7 +6,9 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_ext
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../fake_client.dart';
 
-/// Roast #1: the app sends threaded receipts only (`thread_id: main` or the
+/// THR-M-06, spec §4 « Reçus ».
+///
+/// The app sends threaded receipts only (`thread_id: main` or the
 /// root id), so the unthreaded `receiptState.global` of an account that used
 /// an older client stays on an old event. The SDK `Room.hasNewMessages` reads
 /// that stale global receipt and reports new messages forever.

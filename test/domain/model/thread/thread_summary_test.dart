@@ -334,7 +334,9 @@ void main() {
     });
   });
 
-  /// Roast #2: in an E2EE room `unsigned.m.relations.m.thread.latest_event`
+  /// THR-M-02 (last reply on the card), spec §1 « Chiffrement ».
+  ///
+  /// In an E2EE room `unsigned.m.relations.m.thread.latest_event`
   /// is the raw `m.room.encrypted` event; only the live copy is decrypted.
   group('encrypted room', () {
     Map<String, Object?> encryptedJson({

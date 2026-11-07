@@ -26,7 +26,9 @@ class _StoredEventsDatabase extends MockDatabase {
   }
 }
 
-/// Roast #3+8 and #15: "Mark as read" on a room sends its main receipt on the
+/// THR-M-06 « Marquer comme lu ».
+///
+/// "Mark as read" on a room sends its main receipt on the
 /// newest main timeline event, found among the stored events of the room,
 /// even when the most recent ones are all thread replies.
 void main() {

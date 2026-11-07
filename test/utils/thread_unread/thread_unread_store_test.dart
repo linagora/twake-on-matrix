@@ -7,7 +7,9 @@ import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 
-/// Roast #4, #5, #9: the unread counters of the threads. They notify only on
+/// THR-M-06 and spec §5 « Compteurs par fil ».
+///
+/// The unread counters of the threads. They notify only on
 /// a real change, survive a restart (spec §5, web reload too) per account,
 /// and the follow state has one source.
 void main() {
