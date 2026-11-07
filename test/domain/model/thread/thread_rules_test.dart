@@ -85,6 +85,68 @@ void main() {
       expect(ThreadRules.canStartThread(reply, hasThread: false), isTrue);
     });
 
+    // A thread starts on a message the server has: its replies point to the
+    // root's event id, which a message still being sent (or that failed)
+    // does not have yet.
+    test('is not offered on a message still being sent', () {
+      final pending = Event(
+        type: EventTypes.Message,
+        content: {'msgtype': 'm.text', 'body': 'hello'},
+        eventId: 'transaction-1',
+        senderId: '@alice:example.com',
+        originServerTs: DateTime.utc(2026, 11, 6),
+        status: EventStatus.sending,
+        room: room,
+      );
+
+      expect(ThreadRules.canStartThread(pending, hasThread: false), isFalse);
+    });
+
+    test('is not offered on a message that failed to send', () {
+      final failed = Event(
+        type: EventTypes.Message,
+        content: {'msgtype': 'm.text', 'body': 'hello'},
+        eventId: 'transaction-2',
+        senderId: '@alice:example.com',
+        originServerTs: DateTime.utc(2026, 11, 6),
+        status: EventStatus.error,
+        room: room,
+      );
+
+      expect(ThreadRules.canStartThread(failed, hasThread: false), isFalse);
+    });
+
+    // THR-M-03 offers it in "the menu of a message": a membership change, a
+    // reaction or a deletion is not a message.
+    for (final (type, content) in [
+      (EventTypes.RoomMember, <String, Object?>{'membership': 'join'}),
+      (
+        EventTypes.Reaction,
+        <String, Object?>{
+          'm.relates_to': {
+            'rel_type': RelationshipTypes.reaction,
+            'event_id': r'$message',
+            'key': '👍',
+          },
+        },
+      ),
+      (EventTypes.Redaction, <String, Object?>{}),
+    ]) {
+      test('is not offered on a $type event', () {
+        final event = Event(
+          type: type,
+          content: content,
+          eventId: r'$not_a_message',
+          senderId: '@alice:example.com',
+          stateKey: type == EventTypes.RoomMember ? '@alice:example.com' : null,
+          originServerTs: DateTime.utc(2026, 11, 6),
+          room: room,
+        );
+
+        expect(ThreadRules.canStartThread(event, hasThread: false), isFalse);
+      });
+    }
+
     test('is not offered inside the thread screen', () {
       // THR-M-04: no "Start a thread" in a thread, even on its root.
       expect(
