@@ -780,7 +780,10 @@ class ChatController extends ConsumerState<Chat>
     // Under a thread screen this timeline stays mounted but is not seen.
     if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
     if (isThread) return _markThreadRead();
-    if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
+    if (room?.notificationCount == 0 &&
+        room?.hasNewMessagesWithThreads != true) {
+      return;
+    }
     if (_markingLatestRead) return;
     _markingLatestRead = true;
     timeline?.setMainTimelineReadMarker(eventId: null).whenComplete(() {
@@ -899,7 +902,7 @@ class ChatController extends ConsumerState<Chat>
       final fullyRead = room?.fullyRead;
       if (fullyRead != null &&
           fullyRead.isNotEmpty &&
-          room?.hasNewMessages == true) {
+          room?.hasNewMessagesWithThreads == true) {
         // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
         final lastEventId = room?.lastEvent?.eventId;
         final lastEventInTimeline =
@@ -1041,7 +1044,6 @@ class ChatController extends ConsumerState<Chat>
     );
     _storeInputTimeoutTimer?.cancel();
     await _draftStorage.remove(roomId!, threadRootId: threadRootId);
-    if (isThread) _threadUnreadStore?.markFollowed(roomId!, threadRootId!);
 
     final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&

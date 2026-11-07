@@ -1,6 +1,6 @@
-import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 
 /// Read receipts carrying a `thread_id`: `main` for the room timeline, the
 /// root id for a thread. The SDK's `Room.setReadMarker` sends unthreaded
@@ -31,6 +31,24 @@ extension ThreadedReadReceiptExtension on Room {
     }
   }
 
+  /// SDK `hasNewMessages` reads `receiptState.global` only, which the app
+  /// never moves (it sends threaded receipts). The own read position is the
+  /// newest own receipt: unthreaded, main, or the thread of the last event.
+  bool get hasNewMessagesWithThreads {
+    final last = lastEvent;
+    if (last == null || !client.roomPreviewLastEvents.contains(last.type)) {
+      return false;
+    }
+    if (last.senderId == client.userID) return false;
+    final rootId = last.threadRootId;
+    final readAt = [
+      receiptState.global.latestOwnReceipt?.ts,
+      receiptState.mainThread?.latestOwnReceipt?.ts,
+      if (rootId != null) receiptState.byThread[rootId]?.latestOwnReceipt?.ts,
+    ].nonNulls.fold<int>(0, (a, b) => a > b ? a : b);
+    return readAt < last.originServerTs.millisecondsSinceEpoch;
+  }
+
   Future<void> _postReceipt(String eventId, String threadId) =>
       client.postReceipt(
         id,
@@ -46,11 +64,7 @@ extension ThreadedTimelineReadMarkerExtension on Timeline {
   /// Reads the main timeline up to [eventId], or its last synced event that
   /// is not a thread reply (a main receipt on a thread event is refused).
   Future<void> setMainTimelineReadMarker({String? eventId}) async {
-    eventId ??= events
-        .firstWhereOrNull(
-          (event) => event.status.isSynced && event.threadRootId == null,
-        )
-        ?.eventId;
+    eventId ??= ThreadRules.newestMainTimelineEvent(events)?.eventId;
     if (eventId == null) return;
     return room.setMainTimelineReadMarker(eventId);
   }

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 mixin ChatListItemMixin {
   Widget textContentWidget(
@@ -207,7 +208,7 @@ mixin ChatListItemMixin {
     // For mentions-only rooms, check hasNewMessages
     // This is important because they won't increment notificationCount for regular messages
     if (room.pushRuleState == PushRuleState.mentionsOnly &&
-        room.hasNewMessages) {
+        room.hasNewMessagesWithThreads) {
       return true;
     }
 

@@ -16,6 +16,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
   final Room room;
@@ -34,7 +35,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     final bool isGroup = !room.isDirectChat;
     final double unreadBadgeSize = ChatListItemStyle.unreadBadgeSize(
       room.isUnreadOrInvitedWithThreads,
-      room.hasNewMessages,
+      room.hasNewMessagesWithThreads,
       room.unreadBadgeCount > 0,
     );
     final (Event? lastEvent, List<User> seenByUsers) = switch (previewResult) {
@@ -127,7 +128,7 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
           height: unreadBadgeSize,
           width: ChatListItemStyle.notificationBadgeSize(
             room.isUnreadOrInvitedWithThreads,
-            room.hasNewMessages,
+            room.hasNewMessagesWithThreads,
             room.unreadBadgeCount,
           ),
           decoration: BoxDecoration(

@@ -49,6 +49,7 @@ import 'package:matrix/matrix.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../../widgets/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 class ChatList extends StatefulWidget {
   final ValueNotifier<String?> activeRoomIdNotifier;
@@ -148,7 +149,7 @@ class ChatListController extends State<ChatList>
   bool _containUnreadMessage(ConversationSelectionPresentation conversation) {
     final room = Matrix.of(context).client.getRoomById(conversation.roomId);
     return room != null &&
-        (room.isUnreadOrInvitedWithThreads || room.hasNewMessages);
+        (room.isUnreadOrInvitedWithThreads || room.hasNewMessagesWithThreads);
   }
 
   bool get anySelectedRoomNotFavorite =>
@@ -274,7 +275,7 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> _markAsRead(Room room) async {
-    if (room.isUnreadWithThreads || room.hasNewMessages) {
+    if (room.isUnreadWithThreads || room.hasNewMessagesWithThreads) {
       await room.markRoomAndAllThreadsRead();
     }
   }
