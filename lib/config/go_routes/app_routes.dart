@@ -940,13 +940,20 @@ class RoomRoute extends GoRouteData with $RoomRoute {
 
 // --- Room sub-routes ---
 
-/// Full-screen thread above its room; [event] targets a reply to scroll to.
+/// Full-screen thread above its room; [event] targets a reply to scroll to,
+/// [start] opens it for a first reply (keyboard up).
 class ThreadRoute extends GoRouteData with $ThreadRoute {
-  const ThreadRoute({required this.roomid, required this.rootid, this.event});
+  const ThreadRoute({
+    required this.roomid,
+    required this.rootid,
+    this.event,
+    this.start = false,
+  });
 
   final String roomid;
   final String rootid;
   final String? event;
+  final bool start;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
@@ -959,6 +966,7 @@ class ThreadRoute extends GoRouteData with $ThreadRoute {
         key: Key('Thread_${roomid}_$rootid'),
         roomId: roomid,
         threadRootId: rootid,
+        startThread: start,
       ),
     );
     final name = '/rooms/thread_${roomid}_$rootid';

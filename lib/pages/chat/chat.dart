@@ -134,6 +134,9 @@ class Chat extends ConsumerStatefulWidget {
   /// Set on the thread screen: the chat then shows this thread only.
   final String? threadRootId;
 
+  /// Thread opened to write its first reply.
+  final bool startThread;
+
   const Chat({
     super.key,
     required this.roomId,
@@ -142,6 +145,7 @@ class Chat extends ConsumerStatefulWidget {
     this.onChangeRightColumnType,
     this.jumpToEventStream,
     this.threadRootId,
+    this.startThread = false,
   });
 
   @override
@@ -688,8 +692,7 @@ class ChatController extends ConsumerState<Chat>
       Logs().w('Unable to load the root of the thread', e, s);
     }
     await requestHistory();
-    // "Start a thread": a root alone opens with the keyboard.
-    if (_olderThreadReplies.isEmpty && mounted) _requestInputFocus();
+    if (widget.startThread && mounted) _requestInputFocus();
   }
 
   Future<void> _loadMoreThreadReplies() => _threadPageLoad ??=

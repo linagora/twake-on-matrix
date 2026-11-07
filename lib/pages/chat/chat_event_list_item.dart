@@ -58,7 +58,9 @@ class ChatEventListItem extends StatelessWidget {
       threadCard: threadSummary == null
           ? null
           : _threadCard(context, threadSummary),
-      onStartThread: canStartThread ? (event) => _openThread(context) : null,
+      onStartThread: canStartThread
+          ? (event) => _openThread(context, start: true)
+          : null,
       onSwipe: (direction) => controller.replyAction(replyTo: event),
       onAvatarTap: (Event event) => controller.onContactTap(
         contactPresentationSearch: event.senderFromMemoryOrFallback
@@ -127,9 +129,10 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  void _openThread(BuildContext context) => ThreadRoute(
+  void _openThread(BuildContext context, {bool start = false}) => ThreadRoute(
     roomid: event.room.id,
     rootid: event.eventId,
+    start: start,
   ).push<void>(context);
 
   Widget _threadCard(BuildContext context, ThreadSummary summary) => Padding(
