@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../fake_client.dart';
@@ -12,16 +14,23 @@ import '../../fake_client.dart';
 /// root id), so the unthreaded `receiptState.global` of an account that used
 /// an older client stays on an old event. The SDK `Room.hasNewMessages` reads
 /// that stale global receipt and reports new messages forever.
+///
+/// THR-M-06 badge rule: a reply of a thread the user does not follow counts
+/// only on its card, unless it mentions the user.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   const roomId = '!room:example.com';
   const me = '@me:example.com';
   const bob = '@bob:example.com';
   const rootId = r'$root';
 
-  late MockClient client;
+  late _ThreadClient client;
 
   setUp(() {
-    client = MockClient();
+    SharedPreferences.setMockInitialValues({});
+    client = _ThreadClient();
+    when(client.clientName).thenReturn('account-a');
     when(client.userID).thenReturn(me);
     // Event.receipts of the SDK looks the user up in the database.
     when(client.database).thenReturn(MockDatabase());
@@ -51,6 +60,27 @@ void main() {
       DateTime.utc(2026, 10, 30).millisecondsSinceEpoch,
     ),
   );
+
+  /// Server counters of the thread [root], and whether the user follows it.
+  void threadCounters(
+    String root, {
+    required bool followed,
+    int notifications = 1,
+    int highlights = 0,
+  }) {
+    client.threadUnread.apply({
+      roomId: {
+        root: (notificationCount: notifications, highlightCount: highlights),
+      },
+    });
+    if (followed) client.threadUnread.markFollowed(roomId, root);
+  }
+
+  Map<String, Object?> threadRelation(String root) => {
+    'rel_type': RelationshipTypes.thread,
+    'event_id': root,
+    'is_falling_back': true,
+  };
 
   Room roomWith({
     required LatestReceiptState receipts,
@@ -108,6 +138,7 @@ void main() {
     });
 
     test('a thread reply read in its thread reads the room', () {
+      threadCounters(rootId, followed: true, notifications: 0);
       final room = roomWith(
         receipts: LatestReceiptState(
           global: staleGlobal(),
@@ -163,7 +194,9 @@ void main() {
       expect(room.hasNewMessagesWithThreads, isTrue);
     });
 
-    test('a receipt in another thread does not read a reply of this one', () {
+    test('a receipt in another thread does not read a reply of a followed '
+        'thread', () {
+      threadCounters(rootId, followed: true);
       final room = roomWith(
         receipts: LatestReceiptState(
           global: staleGlobal(),
@@ -182,6 +215,64 @@ void main() {
       );
 
       expect(room.hasNewMessagesWithThreads, isTrue);
+    });
+  });
+
+  group('a reply in a thread the user does not follow', () {
+    Room roomWithUnreadReply() => roomWith(
+      // Read up to before the reply, everywhere.
+      receipts: LatestReceiptState(
+        global: staleGlobal(),
+        mainThread: own(receipt(r'$before', 1)),
+        byThread: {rootId: own(receipt(r'$older_reply', 2))},
+      ),
+      lastEvent: (room) =>
+          message(room, eventId: r'$reply', relatesTo: threadRelation(rootId)),
+    );
+
+    test('is not a new message of the room', () {
+      threadCounters(rootId, followed: false);
+
+      expect(roomWithUnreadReply().hasNewMessagesWithThreads, isFalse);
+    });
+
+    test('is not a new message of the room in an E2EE room, while it cannot '
+        'be decrypted', () {
+      // `m.relates_to` stays in clear on `m.room.encrypted`.
+      threadCounters(rootId, followed: false);
+      final room = roomWith(
+        receipts: LatestReceiptState(
+          global: staleGlobal(),
+          mainThread: own(receipt(r'$before', 1)),
+        ),
+        lastEvent: (room) => Event(
+          type: EventTypes.Encrypted,
+          content: {
+            'algorithm': 'm.megolm.v1.aes-sha2',
+            'ciphertext': 'AwgA',
+            'session_id': 'unknown',
+            'm.relates_to': threadRelation(rootId),
+          },
+          eventId: r'$reply',
+          senderId: bob,
+          originServerTs: at(5),
+          room: room,
+        ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isFalse);
+    });
+
+    test('that mentions the user is a new message of the room', () {
+      threadCounters(rootId, followed: false, highlights: 1);
+
+      expect(roomWithUnreadReply().hasNewMessagesWithThreads, isTrue);
+    });
+
+    test('is a new message once the user follows the thread', () {
+      threadCounters(rootId, followed: true);
+
+      expect(roomWithUnreadReply().hasNewMessagesWithThreads, isTrue);
     });
   });
 
@@ -215,4 +306,10 @@ void main() {
       expect(room.hasNewMessagesWithThreads, isFalse);
     });
   });
+}
+
+/// A client that keeps the thread counters, like [TwakeClient].
+class _ThreadClient extends MockClient implements ThreadUnreadStoreOwner {
+  @override
+  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
 }
