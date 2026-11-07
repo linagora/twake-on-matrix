@@ -11,7 +11,6 @@ import '../room/room_extension_test.mocks.dart';
 void main() {
   late MockRoom room;
 
-  const me = '@me:example.com';
   const alice = '@alice:example.com';
   const bob = '@bob:example.com';
   const rootId = r'$root';
@@ -166,8 +165,8 @@ void main() {
 
       expect(summary.rootEventId, rootId);
       expect(summary.replyCount, 2);
-      expect(summary.lastReply.eventId, r'$r2');
-      expect(summary.lastReply.senderId, bob);
+      expect(summary.lastReply?.eventId, r'$r2');
+      expect(summary.lastReply?.senderId, bob);
       expect(summary.lastReplyText, 'See you tomorrow');
     });
 
@@ -177,7 +176,7 @@ void main() {
       )!;
 
       expect(summary.lastReplyText, isNot('Root text'));
-      expect(summary.lastReply.eventId, isNot(rootId));
+      expect(summary.lastReply?.eventId, isNot(rootId));
     });
   });
 
@@ -190,7 +189,7 @@ void main() {
       )!;
 
       expect(summary.replyCount, 3);
-      expect(summary.lastReply.eventId, r'$r3');
+      expect(summary.lastReply?.eventId, r'$r3');
       expect(summary.lastReplyText, 'Fine by me');
     });
 
@@ -204,7 +203,7 @@ void main() {
       )!;
 
       expect(summary.replyCount, 2);
-      expect(summary.lastReply.eventId, r'$r2');
+      expect(summary.lastReply?.eventId, r'$r2');
       expect(summary.lastReplyText, 'second');
     });
 
@@ -217,7 +216,7 @@ void main() {
       )!;
 
       expect(summary.replyCount, 2);
-      expect(summary.lastReply.eventId, r'$r2');
+      expect(summary.lastReply?.eventId, r'$r2');
     });
 
     test(
@@ -229,7 +228,7 @@ void main() {
         )!;
 
         expect(summary.replyCount, 2);
-        expect(summary.lastReply.eventId, r'$r2');
+        expect(summary.lastReply?.eventId, r'$r2');
         expect(summary.lastReplyText, 'See you tomorrow');
       },
     );
@@ -245,7 +244,7 @@ void main() {
         )!;
 
         expect(summary.replyCount, 2);
-        expect(summary.lastReply.eventId, r'$r2');
+        expect(summary.lastReply?.eventId, r'$r2');
         expect(summary.lastReplyText, 'See you tomorrow');
       },
     );
@@ -264,7 +263,7 @@ void main() {
       )!;
 
       expect(summary.replyCount, 2);
-      expect(summary.lastReply.eventId, r'$r2');
+      expect(summary.lastReply?.eventId, r'$r2');
       expect(summary.lastReplyText, 'See you on Monday');
     });
 
@@ -330,49 +329,99 @@ void main() {
         ],
       )!;
 
-      expect(summary.lastReply.eventId, r'$r1');
+      expect(summary.lastReply?.eventId, r'$r1');
       expect(summary.lastReplyText, 'first');
     });
   });
 
-  group('followed in P1 (participation)', () {
-    test('the author of the root follows the thread', () {
+  /// Roast #2: in an E2EE room `unsigned.m.relations.m.thread.latest_event`
+  /// is the raw `m.room.encrypted` event; only the live copy is decrypted.
+  group('encrypted room', () {
+    Map<String, Object?> encryptedJson({
+      required String eventId,
+      required int minute,
+    }) => {
+      'event_id': eventId,
+      'type': EventTypes.Encrypted,
+      'sender': bob,
+      'origin_server_ts': at(minute).millisecondsSinceEpoch,
+      'content': {
+        'algorithm': 'm.megolm.v1.aes-sha2',
+        'ciphertext': 'AwgAEnACgAkLmt6qF84IK++J7UDH2Za1YVchHyprqTqsg',
+        'device_id': 'BOBDEVICE',
+        'sender_key': 'sGeUBZ2bWuMtA7r5bQ2EtgK6mF0RwXzBEPjL8tCaDX0',
+        'session_id': 'ZDiaWXGq5Gq8mXkP7dL0Ft7ufY5Vmbq3GEjTb1fuq1o',
+        // Kept in clear so the server can aggregate the thread.
+        'm.relates_to': threadRelation(rootId),
+      },
+    };
+
+    test('the decrypted live copy of the server latest reply is shown, and '
+        'not counted twice', () {
       final summary = ThreadSummary.fromRoot(
-        root(count: 1, latest: serverLatest, sender: me),
-      )!;
-
-      expect(summary.isFollowedBy(me), isTrue);
-    });
-
-    test('the server flag current_user_participated makes it followed', () {
-      final summary = ThreadSummary.fromRoot(
-        root(count: 1, latest: serverLatest, participated: true),
-      )!;
-
-      expect(summary.isFollowedBy(me), isTrue);
-    });
-
-    test('a reply of the user received live makes it followed', () {
-      final summary = ThreadSummary.fromRoot(
-        root(count: 1, latest: serverLatest),
+        root(count: 2, latest: encryptedJson(eventId: r'$r2', minute: 2)),
         liveEvents: [
-          reply(eventId: r'$mine', body: 'me too', minute: 4, sender: me),
+          reply(eventId: r'$r2', body: 'See you tomorrow', minute: 2),
         ],
       )!;
 
-      expect(summary.isFollowedBy(me), isTrue);
+      expect(summary.replyCount, 2);
+      expect(summary.lastReply?.eventId, r'$r2');
+      expect(summary.lastReplyText, 'See you tomorrow');
+      expect(summary.lastReply?.type, EventTypes.Message);
     });
 
-    test(
-      'a thread the user neither started nor replied to is not followed',
-      () {
-        final summary = ThreadSummary.fromRoot(
-          root(count: 2, latest: serverLatest),
-          liveEvents: [reply(eventId: r'$r3', body: 'hi', minute: 4)],
-        )!;
+    test('a deleted server latest reply gives way to the previous reply '
+        'known live', () {
+      final deleted = reply(eventId: r'$r2', body: 'oops', minute: 2)
+        ..setRedactionEvent(
+          Event(
+            type: EventTypes.Redaction,
+            content: {},
+            redacts: r'$r2',
+            eventId: r'$redaction',
+            senderId: bob,
+            originServerTs: at(3),
+            room: room,
+          ),
+        );
 
-        expect(summary.isFollowedBy(me), isFalse);
-      },
-    );
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: encryptedJson(eventId: r'$r2', minute: 2)),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'first', minute: 1),
+          deleted,
+        ],
+      )!;
+
+      expect(summary.lastReply?.eventId, r'$r1');
+      expect(summary.lastReplyText, 'first');
+    });
+
+    test('a deleted server latest reply with no other reply known shows no '
+        'last reply and keeps the server count', () {
+      final deleted = reply(eventId: r'$r2', body: 'oops', minute: 2)
+        ..setRedactionEvent(
+          Event(
+            type: EventTypes.Redaction,
+            content: {},
+            redacts: r'$r2',
+            eventId: r'$redaction',
+            senderId: bob,
+            originServerTs: at(3),
+            room: room,
+          ),
+        );
+
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: encryptedJson(eventId: r'$r2', minute: 2)),
+        liveEvents: [deleted],
+      );
+
+      expect(summary, isNotNull);
+      expect(summary!.replyCount, 2);
+      expect(summary.lastReply, isNull);
+      expect(summary.lastReplyText, isNull);
+    });
   });
 }

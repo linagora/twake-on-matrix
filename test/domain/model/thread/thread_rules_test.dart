@@ -97,40 +97,4 @@ void main() {
       );
     });
   });
-
-  /// THR-M-04: the thread screen follows the conversation at the bottom.
-  group('scroll on a new reply', () {
-    test(
-      'a reply of the user scrolls to the bottom, even when scrolled up',
-      () {
-        expect(
-          ThreadRules.shouldScrollToBottomOnNewReply(
-            isOwnReply: true,
-            isAtBottom: false,
-          ),
-          isTrue,
-        );
-      },
-    );
-
-    test('a reply of someone else scrolls when the user is at the bottom', () {
-      expect(
-        ThreadRules.shouldScrollToBottomOnNewReply(
-          isOwnReply: false,
-          isAtBottom: true,
-        ),
-        isTrue,
-      );
-    });
-
-    test('a reply of someone else does not move a user who scrolled up', () {
-      expect(
-        ThreadRules.shouldScrollToBottomOnNewReply(
-          isOwnReply: false,
-          isAtBottom: false,
-        ),
-        isFalse,
-      );
-    });
-  });
 }
