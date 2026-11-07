@@ -12,7 +12,8 @@ abstract final class EventVisibilityResolver {
   /// Whether [event] should be rendered as a row in the chat timeline.
   ///
   /// Rules are evaluated in layers, short-circuiting on the first `false`:
-  /// 1. Relationship — edits/reactions/verification are always hidden.
+  /// 1. Relationship — edits/reactions/verification are always hidden, and
+  ///    thread replies outside the thread screen.
   /// 2. Type         — delegates to [EventTypeRules].
   /// 3. Config       — [AppConfig] toggles.
   /// 4. Content      — payload / room-state heuristics.
