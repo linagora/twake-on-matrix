@@ -154,8 +154,8 @@ abstract class ClientManager {
       clientName,
       database: await openSqfliteDb(name: clientName),
     );
-    await _invalidatePersistedSyncFilterForIncludeLeave(database, clientName);
-    await _invalidatePersistedSyncFilterForIncludeLeave(
+    await _invalidatePersistedSyncFilterOnce(database, clientName);
+    await _invalidatePersistedSyncFilterOnce(
       database,
       clientName,
       migratedPrefix: _threadCountersFilterMigratedPrefix,
@@ -197,7 +197,7 @@ abstract class ClientManager {
     );
   }
 
-  static Future<void> _invalidatePersistedSyncFilterForIncludeLeave(
+  static Future<void> _invalidatePersistedSyncFilterOnce(
     DatabaseApi database,
     String clientName, {
     String migratedPrefix = _includeLeaveFilterMigratedPrefix,
@@ -231,7 +231,7 @@ abstract class ClientManager {
       await store.setItem(migratedKey, '1');
     } catch (e, s) {
       Logs().w(
-        'Unable to invalidate sync filter for includeLeave migration',
+        'Unable to invalidate the persisted sync filter ($migratedKey)',
         e,
         s,
       );
