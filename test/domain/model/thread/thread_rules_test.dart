@@ -97,4 +97,155 @@ void main() {
       );
     });
   });
+
+  /// Roast #3+8: Synapse refuses a `main` receipt on an event related, even
+  /// through a reaction or an edit, to a thread event. The one "last event of
+  /// the main timeline" every main receipt targets.
+  group('newest event of the main timeline', () {
+    Event event({
+      required String eventId,
+      String type = EventTypes.Message,
+      Map<String, Object?> content = const {'msgtype': 'm.text', 'body': 'hi'},
+      EventStatus status = EventStatus.synced,
+      String? redacts,
+    }) => Event(
+      type: type,
+      content: content,
+      eventId: eventId,
+      senderId: '@alice:example.com',
+      originServerTs: DateTime.utc(2026, 11, 6),
+      status: status,
+      redacts: redacts,
+      room: room,
+    );
+
+    Event threadReply() => event(
+      eventId: r'$reply',
+      content: {
+        'msgtype': 'm.text',
+        'body': 'in the thread',
+        'm.relates_to': {
+          'rel_type': RelationshipTypes.thread,
+          'event_id': rootId,
+          'is_falling_back': true,
+        },
+      },
+    );
+    Event mainMessage() => event(eventId: r'$main');
+
+    test('a reaction to a thread reply is skipped', () {
+      final reaction = event(
+        eventId: r'$reaction',
+        type: EventTypes.Reaction,
+        content: {
+          'm.relates_to': {
+            'rel_type': RelationshipTypes.reaction,
+            'event_id': r'$reply',
+            'key': '👍',
+          },
+        },
+      );
+
+      expect(
+        ThreadRules.newestMainTimelineEvent([
+          reaction,
+          threadReply(),
+          mainMessage(),
+        ])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('an edit is skipped', () {
+      final edit = event(
+        eventId: r'$edit',
+        content: {
+          'msgtype': 'm.text',
+          'body': '* fixed',
+          'm.new_content': {'msgtype': 'm.text', 'body': 'fixed'},
+          'm.relates_to': {
+            'rel_type': RelationshipTypes.edit,
+            'event_id': r'$reply',
+          },
+        },
+      );
+
+      expect(
+        ThreadRules.newestMainTimelineEvent([edit, mainMessage()])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('a redaction event is skipped', () {
+      final redaction = event(
+        eventId: r'$redaction',
+        type: EventTypes.Redaction,
+        content: const {},
+        redacts: r'$reply',
+      );
+
+      expect(
+        ThreadRules.newestMainTimelineEvent([
+          redaction,
+          mainMessage(),
+        ])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('a message still being sent is skipped', () {
+      final pending = event(
+        eventId: 'transaction-1',
+        status: EventStatus.sending,
+      );
+
+      expect(
+        ThreadRules.newestMainTimelineEvent([pending, mainMessage()])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('a message that failed to send is skipped', () {
+      final failed = event(eventId: 'transaction-2', status: EventStatus.error);
+
+      expect(
+        ThreadRules.newestMainTimelineEvent([failed, mainMessage()])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('a thread reply is skipped', () {
+      expect(
+        ThreadRules.newestMainTimelineEvent([
+          threadReply(),
+          mainMessage(),
+        ])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('the newest plain message is returned', () {
+      expect(
+        ThreadRules.newestMainTimelineEvent([
+          mainMessage(),
+          event(eventId: r'$older'),
+        ])?.eventId,
+        r'$main',
+      );
+    });
+
+    test('nothing eligible gives no event', () {
+      expect(
+        ThreadRules.newestMainTimelineEvent([
+          threadReply(),
+          event(eventId: 'transaction-1', status: EventStatus.sending),
+        ]),
+        isNull,
+      );
+    });
+
+    test('an empty timeline gives no event', () {
+      expect(ThreadRules.newestMainTimelineEvent(const []), isNull);
+    });
+  });
 }
