@@ -357,6 +357,9 @@ class ChatController extends ConsumerState<Chat>
 
   final RoomDraftStorage _draftStorage = const RoomDraftStorage();
 
+  Future<void> _clearDraft() =>
+      _draftStorage.remove(roomId!, threadRootId: threadRootId);
+
   FocusNode inputFocus = FocusNode();
 
   FocusNode keyboardFocus = FocusNode();
@@ -556,6 +559,7 @@ class ChatController extends ConsumerState<Chat>
     RoomRoute(roomid: roomId).go(context);
   }
 
+  @override
   String? get threadRootId => widget.threadRootId;
 
   bool get isThread => threadRootId != null;
@@ -1043,7 +1047,7 @@ class ChatController extends ConsumerState<Chat>
       sendTextMessageInteractorProvider,
     );
     _storeInputTimeoutTimer?.cancel();
-    await _draftStorage.remove(roomId!, threadRootId: threadRootId);
+    await _clearDraft();
 
     final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&
@@ -1962,7 +1966,7 @@ class ChatController extends ConsumerState<Chat>
     }
     if (result == SendMediaWithCaptionStatus.done ||
         result == SendMediaWithCaptionStatus.emptyRoom) {
-      await _draftStorage.remove(roomId!);
+      await _clearDraft();
       replyEventNotifier.value = null;
     }
 
@@ -1975,7 +1979,7 @@ class ChatController extends ConsumerState<Chat>
   Future<void> _onMediaSent() async {
     scrollDown();
     sendController.clear();
-    await _draftStorage.remove(roomId!);
+    await _clearDraft();
     replyEventNotifier.value = null;
   }
 
@@ -2076,7 +2080,7 @@ class ChatController extends ConsumerState<Chat>
         );
         scrollDown();
 
-        await _draftStorage.remove(roomId!);
+        await _clearDraft();
         replyEventNotifier.value = null;
       },
       captionController: _captionsController,

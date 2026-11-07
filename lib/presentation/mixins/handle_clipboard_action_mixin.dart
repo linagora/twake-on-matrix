@@ -13,6 +13,8 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
 
   Room? get room;
 
+  String? get threadRootId;
+
   TextEditingController get sendController;
 
   final RoomDraftStorage _draftStorage = const RoomDraftStorage();
@@ -48,7 +50,7 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
       pendingText: pendingText,
       onSendFileCallback: () async {
         sendController.clear();
-        await _draftStorage.remove(room!.id);
+        await _draftStorage.remove(room!.id, threadRootId: threadRootId);
         onSendFileCallback();
       },
     );
