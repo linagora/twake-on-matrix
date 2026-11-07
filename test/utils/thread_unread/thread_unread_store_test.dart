@@ -1,13 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 
-/// Roast #4: the unread counters of the threads notify only on a real
-/// change, and a thread's activity moves only when it gets new messages.
+/// Roast #4, #5, #9: the unread counters of the threads. They notify only on
+/// a real change, survive a restart (spec §5, web reload too) per account,
+/// and the follow state has one source.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -20,6 +22,7 @@ void main() {
   late List<bool> participatedOnLookup;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     room = MockRoom();
     when(room.id).thenReturn(roomId);
     participatedOnLookup = [false];
@@ -122,6 +125,74 @@ void main() {
       await pumpEventQueue();
 
       expect(threadOf(store)?.lastActivity, activity);
+    });
+  });
+
+  group('the counters survive a restart', () {
+    test(
+      'counters and follow state are found again by the same account',
+      () async {
+        final before = ThreadUnreadStore(client: clientNamed('account-a'));
+        before.apply(counts(3, highlights: 1));
+        before.markFollowed(roomId, rootId);
+        await pumpEventQueue();
+
+        final after = ThreadUnreadStore(client: clientNamed('account-a'));
+        await after.restore();
+
+        final thread = threadOf(after);
+        expect(thread, isNotNull);
+        expect(thread!.notificationCount, 3);
+        expect(thread.highlightCount, 1);
+        expect(thread.followed, isTrue);
+      },
+    );
+
+    test('another account sees none of them', () async {
+      final accountA = ThreadUnreadStore(client: clientNamed('account-a'));
+      accountA.apply(counts(3, highlights: 1));
+      accountA.markFollowed(roomId, rootId);
+      await pumpEventQueue();
+
+      final accountB = ThreadUnreadStore(client: clientNamed('account-b'));
+      await accountB.restore();
+
+      expect(accountB.threadsOf(roomId), isEmpty);
+    });
+  });
+
+  group('one source for the follow state', () {
+    test('a thread the user wrote in stays followed after a restart, even '
+        'when the root still says not participated', () async {
+      final before = ThreadUnreadStore(client: clientNamed('account-a'));
+      before.markFollowed(roomId, rootId);
+      before.apply(counts(1));
+      await pumpEventQueue();
+
+      // The cached root is older than the user's reply.
+      participatedOnLookup = [false];
+      final after = ThreadUnreadStore(client: clientNamed('account-a'));
+      await after.restore();
+      after.apply(counts(2));
+      await pumpEventQueue();
+
+      expect(threadOf(after)?.followed, isTrue);
+    });
+
+    test('a thread found not followed is checked again when new replies '
+        'arrive', () async {
+      // The user replied from another device between the two syncs.
+      participatedOnLookup = [false, true];
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+      expect(threadOf(store)?.followed, isFalse);
+
+      store.apply(counts(2));
+      await pumpEventQueue();
+
+      expect(threadOf(store)?.followed, isTrue);
     });
   });
 }
