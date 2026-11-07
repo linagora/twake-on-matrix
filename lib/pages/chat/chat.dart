@@ -774,6 +774,8 @@ class ChatController extends ConsumerState<Chat>
 
   void _markLatestReadIfAtBottom() {
     if (!_isAtLiveBottom) return;
+    // Under a thread screen this timeline stays mounted but is not seen.
+    if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
     if (isThread) return _markThreadRead();
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
