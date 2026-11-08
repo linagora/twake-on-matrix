@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
 import 'package:twake_chat/utils/clipboard.dart';
@@ -14,6 +15,9 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
   Room? get room;
 
   String? get threadRootId;
+
+  /// Where a pasted image goes: the thread on screen, or null for the room.
+  ThreadSendTarget? get threadSendTarget;
 
   TextEditingController get sendController;
 
@@ -48,6 +52,7 @@ mixin HandleClipboardActionMixin on PasteImageMixin {
       room!,
       clipboardReader: clipboardReader,
       pendingText: pendingText,
+      thread: threadSendTarget,
       onSendFileCallback: () async {
         sendController.clear();
         await _draftStorage.remove(room!.id, threadRootId: threadRootId);

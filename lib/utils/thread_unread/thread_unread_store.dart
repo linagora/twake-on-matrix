@@ -308,6 +308,7 @@ extension MarkRoomAndThreadsRead on Room {
         room: this,
         rootEventId: thread.rootEventId,
         limit: 1,
+        decrypt: false,
       );
       final last = page.replies.lastOrNull;
       if (last != null) {

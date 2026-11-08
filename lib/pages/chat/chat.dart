@@ -3,7 +3,7 @@ import 'package:twake_chat/domain/model/thread/thread_events.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/domain/model/thread/thread_summary.dart';
-import 'package:twake_chat/domain/usecase/room/get_thread_events_page_interactor.dart';
+import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
@@ -657,6 +657,7 @@ class ChatController extends ConsumerState<Chat>
       eventsToDisplay.firstWhereOrNull((e) => e.status.isSynced)?.eventId ??
       threadRootId!;
 
+  @override
   ThreadSendTarget? get threadSendTarget => isThread
       ? ThreadSendTarget(
           rootEventId: threadRootId!,
@@ -686,11 +687,22 @@ class ChatController extends ConsumerState<Chat>
   void _createThreadEvents(Room room) {
     final threadEvents = ThreadEvents(
       rootEventId: threadRootId!,
-      fetchPage: (from) => const GetThreadEventsPageInteractor().execute(
-        room: room,
-        rootEventId: threadRootId!,
-        from: from,
-      ),
+      fetchPage: (from) async {
+        final page = await const GetThreadRepliesInteractor().execute(
+          room: room,
+          rootEventId: threadRootId!,
+          from: from,
+          withRelations: true,
+        );
+        // A reply seen here and deleted later loses its relation: the room
+        // timeline must still know it was in a thread.
+        for (final event in page.replies) {
+          if (event.threadRootId == threadRootId) {
+            client.threadUnread?.rememberThreadReply(room.id, event.eventId);
+          }
+        }
+        return (events: page.replies, nextBatch: page.nextBatch);
+      },
       // Edits and reactions of old replies show on them through the timeline.
       onRelation: (event) => timeline?.addAggregatedEvent(event),
       onChanged: updateView,
@@ -3285,7 +3297,9 @@ class ChatController extends ConsumerState<Chat>
   void initState() {
     super.initState();
     _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
-    _initializePinnedEvents();
+    // The room Chat under a thread already does the work of the room
+    // (pinned events, participants, presence, ignored users).
+    if (!isThread) _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
     keyboardVisibilitySubscription = keyboardVisibilityController.onChange
@@ -3305,9 +3319,11 @@ class ChatController extends ConsumerState<Chat>
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
-      initCachedPresence();
-      await _requestParticipants();
-      listenIgnoredUser();
+      if (!isThread) {
+        initCachedPresence();
+        await _requestParticipants();
+        listenIgnoredUser();
+      }
       initAudioPlayer();
     });
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
@@ -3499,9 +3515,14 @@ class ChatController extends ConsumerState<Chat>
     //
     // TODO: replace with per-room selective eviction via ImageProvider.evict()
     // once MXC image providers are tracked at the room level.
-    PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
-    MxcImageCacheManager.instance.evictRoom(widget.roomId);
+    //
+    // A thread Chat sits on top of the room Chat, which is still on screen:
+    // it must not empty the cache of the room underneath.
+    if (!isThread) {
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      MxcImageCacheManager.instance.evictRoom(widget.roomId);
+    }
 
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();
