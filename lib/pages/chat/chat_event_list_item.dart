@@ -37,14 +37,11 @@ class ChatEventListItem extends StatelessWidget {
     if (!controller.isEventVisible(event)) return const SizedBox();
 
     final threadSummary = controller.threadSummaryOf(event);
-    final canStartThread =
-        event.type == EventTypes.Message &&
-        event.status.isSynced &&
-        ThreadRules.canStartThread(
-          event,
-          hasThread: threadSummary != null,
-          inThreadScreen: controller.isThread,
-        );
+    final canStartThread = ThreadRules.canStartThread(
+      event,
+      hasThread: threadSummary != null,
+      inThreadScreen: controller.isThread,
+    );
 
     return Message(
       // The room's Chat stays mounted under the thread screen and shares the

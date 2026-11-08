@@ -11,7 +11,8 @@ abstract final class ThreadRules {
       !hasThread &&
       !inThreadScreen &&
       event.room.canSendDefaultMessages &&
-      event.type != EventTypes.Encrypted &&
+      event.type == EventTypes.Message &&
+      event.status.isSynced &&
       event.threadRootId == null;
 
   /// The event every main-timeline receipt targets: Synapse refuses a `main`
