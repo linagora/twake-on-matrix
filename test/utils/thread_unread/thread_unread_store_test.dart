@@ -1,11 +1,28 @@
+// ignore_for_file: depend_on_referenced_packages
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
+
+/// The device storage, counting the saves of the thread counters.
+class _CountingPrefsStore extends InMemorySharedPreferencesStore {
+  _CountingPrefsStore() : super.empty();
+
+  int writes = 0;
+
+  @override
+  Future<bool> setValue(String valueType, String key, Object value) {
+    if (key.contains('thread_unread_')) writes++;
+    return super.setValue(valueType, key, value);
+  }
+}
 
 /// THR-M-06 and spec §5 « Compteurs par fil ».
 ///
@@ -600,6 +617,78 @@ void main() {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
       expect(store.badgeOf('!unknown:example.com'), 0);
+    });
+  });
+
+  /// Roast n°4 major: every remembered reply id and every counter change
+  /// rewrote the whole saved state. A catch-up sync brings hundreds of
+  /// thread replies, about a millisecond apart (one database write each in
+  /// the SDK): the saves are coalesced, and the last state is still saved.
+  group('saves of a burst', () {
+    late _CountingPrefsStore prefs;
+
+    setUp(() {
+      prefs = _CountingPrefsStore();
+      SharedPreferencesStorePlatform.instance = prefs;
+    });
+
+    test('300 thread replies remembered in a row are saved at most twice, '
+        'the last one included', () {
+      fakeAsync((async) {
+        final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+        for (var i = 0; i < 300; i++) {
+          store.rememberThreadReply(roomId, '\$reply$i');
+          async.elapse(const Duration(milliseconds: 1));
+        }
+        async.elapse(const Duration(seconds: 10));
+
+        expect(prefs.writes, lessThanOrEqualTo(2));
+        final after = ThreadUnreadStore(client: clientNamed('account-a'));
+        after.restore();
+        async.flushMicrotasks();
+        expect(after.knownThreadReplyIds(roomId), contains(r'$reply0'));
+        expect(after.knownThreadReplyIds(roomId), contains(r'$reply299'));
+      });
+    });
+
+    test('100 counter changes in a row are saved at most twice, the last '
+        'one included', () {
+      fakeAsync((async) {
+        final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+        for (var n = 1; n <= 100; n++) {
+          store.apply(counts(n));
+          async.elapse(const Duration(milliseconds: 1));
+        }
+        async.elapse(const Duration(seconds: 10));
+
+        expect(prefs.writes, lessThanOrEqualTo(2));
+        final after = ThreadUnreadStore(client: clientNamed('account-a'));
+        after.restore();
+        async.flushMicrotasks();
+        expect(threadOf(after)?.notificationCount, 100);
+      });
+    });
+
+    test('a logout during a burst wins over the save still to come', () {
+      fakeAsync((async) {
+        final store = ThreadUnreadStore(client: clientNamed('account-a'));
+        for (var i = 0; i < 50; i++) {
+          store.rememberThreadReply(roomId, '\$reply$i');
+          store.apply(counts(i + 1));
+          async.elapse(const Duration(milliseconds: 1));
+        }
+
+        store.clear();
+        async.elapse(const Duration(seconds: 10));
+
+        final next = ThreadUnreadStore(client: clientNamed('account-a'));
+        next.restore();
+        async.flushMicrotasks();
+        expect(next.knownThreadReplyIds(roomId), isEmpty);
+        expect(next.threadsOf(roomId), isEmpty);
+      });
     });
   });
 }
