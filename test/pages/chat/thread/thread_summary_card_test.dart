@@ -16,6 +16,37 @@ void main() {
   DateTime fiveMinutesAgo() =>
       DateTime.now().subtract(const Duration(minutes: 5, seconds: 10));
 
+  final primary = LinagoraSysColors.material().primary;
+
+  /// Surfaces no default theme has: a colour of the card that equals one of
+  /// them comes from the theme, not from a constant.
+  const paper = Color(0xFF123456);
+  const raised = Color(0xFF654321);
+  final theme = ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: primary,
+      primary: primary,
+      surfaceContainerLowest: paper,
+      surfaceContainerHighest: raised,
+    ),
+  );
+
+  Widget card({
+    int replyCount = 3,
+    int unreadCount = 0,
+    VoidCallback? onTap,
+    DateTime? lastReplyTime,
+    bool onOwnBubble = false,
+  }) => ThreadSummaryCard(
+    replyCount: replyCount,
+    lastReplyAuthor: 'Alice',
+    lastReplyText: 'See you tomorrow',
+    lastReplyTime: lastReplyTime ?? fiveMinutesAgo(),
+    unreadCount: unreadCount,
+    onOwnBubble: onOwnBubble,
+    onTap: onTap ?? () {},
+  );
+
   Future<void> pumpCard(
     WidgetTester tester, {
     int replyCount = 3,
@@ -23,8 +54,11 @@ void main() {
     VoidCallback? onTap,
     Locale locale = const Locale('en'),
     DateTime? lastReplyTime,
+    bool onOwnBubble = false,
+    double? maxWidth,
   }) => tester.pumpWidget(
     MaterialApp(
+      theme: theme,
       locale: locale,
       localizationsDelegates: const [
         L10n.delegate,
@@ -34,19 +68,23 @@ void main() {
       ],
       supportedLocales: LocalizationService.supportedLocales,
       home: Scaffold(
-        body: ThreadSummaryCard(
-          replyCount: replyCount,
-          lastReplyAuthor: 'Alice',
-          lastReplyText: 'See you tomorrow',
-          lastReplyTime: lastReplyTime ?? fiveMinutesAgo(),
-          unreadCount: unreadCount,
-          onTap: onTap ?? () {},
+        body: Align(
+          alignment: AlignmentDirectional.topStart,
+          child: ConstrainedBox(
+            // Loose: the card picks its width inside it.
+            constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
+            child: card(
+              replyCount: replyCount,
+              unreadCount: unreadCount,
+              onTap: onTap,
+              lastReplyTime: lastReplyTime,
+              onOwnBubble: onOwnBubble,
+            ),
+          ),
         ),
       ),
     ),
   );
-
-  final primary = LinagoraSysColors.material().primary;
 
   /// The frame of the card: the box that draws its border.
   BoxDecoration frame(WidgetTester tester) => tester
@@ -143,6 +181,56 @@ void main() {
       final style = line(tester, '3 messages').text.style!;
       expect(style.color, primary);
       expect(style.fontWeight, FontWeight.w600);
+    });
+  });
+
+  /// Roast n°4 against the web ThreadCard (twake-space-chat
+  /// src/ds/ThreadCard/ThreadCard.tsx): `display: block; width: 100%`, the
+  /// count in `variant="caption"` w600 primary followed by the text « › »,
+  /// `backgroundColor: palette.background.paper`. Here the paper is
+  /// `ColorScheme.surfaceContainerLowest` (white in the light Twake theme,
+  /// the darkest surface in the dark one), read from the theme.
+  group('as the web card', () {
+    testWidgets('stretches to the width it is given, not to its text', (
+      tester,
+    ) async {
+      // Wider than the text of the card (12 px glyphs in tests: ~480 px).
+      await pumpCard(tester, maxWidth: 700);
+
+      expect(tester.getSize(find.byType(ThreadSummaryCard)).width, 700);
+    });
+
+    testWidgets('the number of messages is in the caption size, followed by '
+        'the text « › », not an icon', (tester) async {
+      await pumpCard(tester);
+
+      final count = line(tester, '3 messages');
+      expect(count.text.toPlainText(), '3 messages ›');
+      expect(LinagoraTextStyle.material().bodySmall.fontSize, 12);
+      expect(count.text.style!.fontSize, 12);
+      expect(count.text.style!.fontWeight, FontWeight.w600);
+      expect(count.text.style!.color, primary);
+      expect(
+        find.descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.byType(Icon),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('on the bubble of an own message, the card is the paper of '
+        'the theme', (tester) async {
+      await pumpCard(tester, onOwnBubble: true);
+
+      expect(frame(tester).color, paper);
+    });
+
+    testWidgets('on a received bubble, the card is the raised surface of the '
+        'theme', (tester) async {
+      await pumpCard(tester);
+
+      expect(frame(tester).color, raised);
     });
   });
 

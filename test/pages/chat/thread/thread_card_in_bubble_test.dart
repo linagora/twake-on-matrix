@@ -48,14 +48,18 @@ void main() {
     await getIt.reset();
   });
 
-  Future<void> pumpRootWithCard(WidgetTester tester) async {
+  Future<void> pumpRootWithCard(
+    WidgetTester tester, {
+    String rootBody = 'the root',
+    bool withLastReply = true,
+  }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 900);
     addTearDown(tester.view.reset);
 
     final room = Room(id: '!room:example.org', client: client);
     final root = Event(
-      content: {'msgtype': 'm.text', 'body': 'the root'},
+      content: {'msgtype': 'm.text', 'body': rootBody},
       type: EventTypes.Message,
       eventId: r'$root:example.org',
       senderId: '@alice:example.org',
@@ -98,11 +102,13 @@ void main() {
                 selectMode: false,
                 threadCard: ThreadSummaryCard(
                   replyCount: 3,
-                  lastReplyAuthor: 'Bob',
-                  lastReplyText: 'See you tomorrow',
-                  lastReplyTime: DateTime.now().subtract(
-                    const Duration(minutes: 5, seconds: 10),
-                  ),
+                  lastReplyAuthor: withLastReply ? 'Bob' : null,
+                  lastReplyText: withLastReply ? 'See you tomorrow' : null,
+                  lastReplyTime: withLastReply
+                      ? DateTime.now().subtract(
+                          const Duration(minutes: 5, seconds: 10),
+                        )
+                      : null,
                   onTap: () {},
                 ),
               ),
@@ -164,5 +170,25 @@ void main() {
         .color;
     expect(cardColor, isNotNull);
     expect(cardColor, isNot(bubbleColor));
+  });
+
+  /// Roast n°4: the web card is `width: 100%` of its bubble; here it was
+  /// as narrow as its own text under a wider root.
+  testWidgets('the card is as wide as the bubble, under a root longer than '
+      'the card', (tester) async {
+    await pumpRootWithCard(
+      tester,
+      rootBody:
+          'the root of this thread, long enough to fill the bubble and wrap '
+          'onto a second line',
+      // The count alone: narrower than the root.
+      withLastReply: false,
+    );
+
+    final text = tester.getRect(
+      find.textContaining('the root of this thread', findRichText: true).first,
+    );
+    final cardRect = tester.getRect(find.byType(ThreadSummaryCard));
+    expect(cardRect.width, greaterThanOrEqualTo(text.width));
   });
 }
