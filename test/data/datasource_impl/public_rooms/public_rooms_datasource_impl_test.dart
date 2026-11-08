@@ -670,6 +670,27 @@ void main() {
     );
 
     test(
+      'getPreview_whenTheSummaryFailsWhileRoomsLoad_waitsForTheStoredBan',
+      () async {
+        // Arrange
+        final room = bannedLocalRoom();
+        final roomsLoading = Completer<void>();
+        when(mockClient.roomsLoading).thenAnswer((_) => roomsLoading.future);
+        when(mockClient.getRoomByAlias(alias)).thenReturn(null);
+        stubSummary(notFound);
+
+        // Act
+        final preview = datasource.getPreview(alias, via: const []);
+        await pumpEventQueue();
+        when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+        roomsLoading.complete();
+
+        // Assert
+        expect(await preview, const PublicRoomPreview.banned());
+      },
+    );
+
+    test(
       'getPreview_whenTheSummaryAnswersOverAStoredBan_followsTheSummary',
       () async {
         // Arrange

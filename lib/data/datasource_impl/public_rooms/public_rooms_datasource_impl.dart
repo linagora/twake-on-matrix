@@ -192,6 +192,7 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
   }
 
   Future<bool> _isBannedLocally(Client client, String roomIdOrAlias) async {
+    await client.roomsLoading;
     final localRoom =
         client.getRoomByAlias(roomIdOrAlias) ??
         client.getRoomById(roomIdOrAlias);
