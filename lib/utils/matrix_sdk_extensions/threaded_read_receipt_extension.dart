@@ -1,6 +1,7 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 /// Read receipts carrying a `thread_id`: `main` for the room timeline, the
 /// root id for a thread. The SDK's `Room.setReadMarker` sends unthreaded
@@ -41,6 +42,15 @@ extension ThreadedReadReceiptExtension on Room {
     }
     if (last.senderId == client.userID) return false;
     final rootId = last.threadRootId;
+    if (rootId != null) {
+      final thread = client.threadUnread
+          ?.threadsOf(id)
+          .where((t) => t.rootEventId == rootId)
+          .firstOrNull;
+      if (thread?.followed != true && (thread?.highlightCount ?? 0) == 0) {
+        return false;
+      }
+    }
     final readAt = [
       receiptState.global.latestOwnReceipt?.ts,
       receiptState.mainThread?.latestOwnReceipt?.ts,
@@ -66,6 +76,10 @@ extension ThreadedTimelineReadMarkerExtension on Timeline {
   Future<void> setMainTimelineReadMarker({String? eventId}) async {
     eventId ??= ThreadRules.newestMainTimelineEvent(events)?.eventId;
     if (eventId == null) return;
+    // Already read there: no receipt, no request.
+    if (eventId == room.receiptState.mainThread?.latestOwnReceipt?.eventId) {
+      return;
+    }
     return room.setMainTimelineReadMarker(eventId);
   }
 }
