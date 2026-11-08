@@ -1,7 +1,9 @@
 import 'package:twake_chat/pages/chat/chat_audio_player_widget.dart';
 import 'package:twake_chat/pages/chat_list/browse_public_groups_button.dart';
+import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_header_style.dart';
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/connection_status_header.dart';
@@ -44,6 +46,11 @@ class ChatListHeader extends StatelessWidget {
           child: PlatformInfos.isWeb
               ? _normalModeWidgetWeb(context)
               : _normalModeWidgetsMobile(context),
+        ),
+        ValueListenableBuilder<SelectMode>(
+          valueListenable: controller.selectModeNotifier,
+          builder: (context, selectMode, _) =>
+              RoomListFilterBar(enabled: !selectMode.isSelectMode),
         ),
         if (ChatListHeaderStyle.responsive.isMobile(context)) ...[
           // Only show audio player on actual mobile platforms (not just mobile-sized layouts)

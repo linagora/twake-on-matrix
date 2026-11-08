@@ -48,7 +48,9 @@ class ChatDetailsView extends StatelessWidget {
           ),
           backgroundColor: LinagoraSysColors.material().onPrimary,
           appBar: TwakeAppBar(
-            title: L10n.of(context)!.groupInfo,
+            title: controller.room?.isSpace == true
+                ? L10n.of(context)!.spaceInfoTitle
+                : L10n.of(context)!.groupInfo,
             leading: TwakeIconButton(
               paddingAll: 8,
               splashColor: Colors.transparent,
@@ -106,8 +108,8 @@ class ChatDetailsView extends StatelessWidget {
                   muteNotifier: controller.muteNotifier,
                   onToggleNotification: controller.onToggleNotification,
                   innerBoxIsScrolled: innerBoxIsScrolled,
-                  onSearch: controller.onTapSearch,
-                  onMessage: controller.onTapMessage,
+                  onSearch: room.isSpace ? null : controller.onTapSearch,
+                  onMessage: room.isSpace ? null : controller.onTapMessage,
                 ),
               ];
             },

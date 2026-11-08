@@ -34,6 +34,8 @@ abstract class ContactsSelectionController<T extends ConsumerStatefulWidget>
 
   bool get isFullScreen => true;
 
+  bool get isSelectionRequired => true;
+
   ProviderSubscription<bool>? _invitationEnabledSubscription;
 
   @override

@@ -19,6 +19,8 @@ class SlidableChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // An action pane cannot be empty.
+    if (slidables.isEmpty) return chatListItem;
     return Slidable(
       // Slidables must have the same groupTag for SlidableAutoCloseBehavior to work properly
       groupTag: 'slidable_list',

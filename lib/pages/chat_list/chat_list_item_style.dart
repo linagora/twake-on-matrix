@@ -13,6 +13,12 @@ class ChatListItemStyle {
 
   static const double chatItemHeight = 72;
 
+  static const double spaceItemHeight = 56;
+
+  static const double depthIndent = 24;
+
+  static const double childAvatarSize = 32;
+
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
