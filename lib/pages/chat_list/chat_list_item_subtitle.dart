@@ -28,8 +28,14 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     this.previewResult,
   });
 
+  /// Rebuilds on a change of the thread counters only, not the whole list.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([?room.client.threadUnread]),
+    builder: (context, _) => _buildContent(context),
+  );
+
+  Widget _buildContent(BuildContext context) {
     final L10n l10n = L10n.of(context)!;
     final String typingText = room.getLocalizedTypingText(l10n);
     final bool isGroup = !room.isDirectChat;
