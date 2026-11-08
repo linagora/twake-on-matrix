@@ -643,8 +643,7 @@ void main() {
       expect(preview, const PublicRoomPreview.banned());
     });
 
-    test('getPreview_whenBannedFromTheLocalRoom_asksNothing', () async {
-      // Arrange
+    MockRoom bannedLocalRoom() {
       final room = MockRoom();
       when(room.membership).thenReturn(Membership.leave);
       when(
@@ -652,14 +651,38 @@ void main() {
       ).thenAnswer((_) async => User('@me:hs', membership: 'ban', room: room));
       when(mockClient.userID).thenReturn('@me:hs');
       when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+      return room;
+    }
 
-      // Act
-      final preview = await datasource.getPreview(alias, via: const []);
+    test(
+      'getPreview_whenTheSummaryFailsAndTheLocalRoomHasABan_saysBanned',
+      () async {
+        // Arrange
+        bannedLocalRoom();
+        stubSummary(notFound);
 
-      // Assert
-      expect(preview, const PublicRoomPreview.banned());
-      verifyNever(mockClient.getRoomSummary(any, via: anyNamed('via')));
-    });
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
+
+        // Assert
+        expect(preview, const PublicRoomPreview.banned());
+      },
+    );
+
+    test(
+      'getPreview_whenTheSummaryAnswersOverAStoredBan_followsTheSummary',
+      () async {
+        // Arrange
+        bannedLocalRoom();
+        stubSummary(summary(membership: Membership.leave));
+
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
+
+        // Assert
+        expect(preview, isA<PublicRoomPreviewFound>());
+      },
+    );
 
     test('getPreview_whenTheRoomIsInviteOnly_saysUnavailable', () async {
       // Arrange

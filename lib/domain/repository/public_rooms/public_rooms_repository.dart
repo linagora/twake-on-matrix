@@ -22,7 +22,7 @@ abstract class PublicRoomsRepository {
 
   Future<void> knock(String roomIdOrAlias, {List<String> via = const []});
 
-  /// From the room summary, else from the directory of the room's server.
+  /// From the room summary; a ban stored locally answers when it fails.
   Future<PublicRoomPreview> getPreview(
     String roomIdOrAlias, {
     required List<String> via,

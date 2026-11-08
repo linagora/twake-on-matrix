@@ -172,21 +172,12 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
     required List<String> via,
   }) async {
     final client = _client;
-    final localRoom =
-        client.getRoomByAlias(roomIdOrAlias) ??
-        client.getRoomById(roomIdOrAlias);
-    // The SDK keeps a room the user was banned from as left; after a restart
-    // the member event is only in the database.
-    final ownMember = await localRoom?.requestUser(
-      client.userID!,
-      requestState: false,
-      requestProfile: false,
-    );
-    if (ownMember?.membership == Membership.ban) {
-      return const PublicRoomPreview.banned();
-    }
     final summary = await _fetchSummary(client, roomIdOrAlias, via);
-    if (summary == null) return const PublicRoomPreview.unavailable();
+    if (summary == null) {
+      return await _isBannedLocally(client, roomIdOrAlias)
+          ? const PublicRoomPreview.banned()
+          : const PublicRoomPreview.unavailable();
+    }
     return switch (summary.membership) {
       Membership.join ||
       Membership.invite => PublicRoomPreview.joined(summary.roomId),
@@ -198,6 +189,20 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         isRequested: membership == Membership.knock,
       ),
     };
+  }
+
+  Future<bool> _isBannedLocally(Client client, String roomIdOrAlias) async {
+    final localRoom =
+        client.getRoomByAlias(roomIdOrAlias) ??
+        client.getRoomById(roomIdOrAlias);
+    // The SDK keeps a room the user was banned from as left; after a restart
+    // the member event is only in the database.
+    final ownMember = await localRoom?.requestUser(
+      client.userID!,
+      requestState: false,
+      requestProfile: false,
+    );
+    return ownMember?.membership == Membership.ban;
   }
 
   // https://spec.matrix.org/v1.16/client-server-api/#get_matrixclientv1room_summaryroomidoralias
