@@ -15,9 +15,13 @@ class PublicGroupsSearchTerm extends ValueNotifier<String?> {
 
   Timer? _debounce;
 
+  String? _lastText;
+
   void _onTextChanged() {
-    _debounce?.cancel();
     final text = _textController.text.trim();
+    if (text == _lastText) return;
+    _lastText = text;
+    _debounce?.cancel();
     if (text.length < FetchJoinablePublicRoomsUseCase.minSearchLength) {
       value = null;
       return;

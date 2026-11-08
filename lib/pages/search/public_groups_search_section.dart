@@ -109,7 +109,10 @@ class _PublicGroupsSliver extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = _watchPublicGroups(ref, searchTerm)?.value;
+    final state = switch (_watchPublicGroups(ref, searchTerm)) {
+      AsyncData(isLoading: false, :final value) => value,
+      _ => null,
+    };
     if (state == null || state.rooms.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }

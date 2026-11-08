@@ -158,6 +158,25 @@ void main() {
     expect(repository.joinedIds, isEmpty);
   });
 
+  test('open_whileTheListReloads_ignoresTheTap', () async {
+    // Arrange
+    final container = makeContainer();
+    final controller = await loadedController(container);
+    await pumpEventQueue();
+    final pages = StreamController<List<PublicRoom>>();
+    addTearDown(pages.close);
+    repository.directoryController = pages;
+    container.invalidate(publicRoomsControllerProvider());
+    await pumpEventQueue();
+
+    // Act
+    final result = await controller.open(publicRoom('!open'));
+
+    // Assert
+    expect(result, isA<PublicRoomOpenIgnored>());
+    expect(repository.joinedIds, isEmpty);
+  });
+
   test('open_whileAnotherRoomIsPending_ignoresTheTap', () async {
     // Arrange
     final gate = Completer<void>();

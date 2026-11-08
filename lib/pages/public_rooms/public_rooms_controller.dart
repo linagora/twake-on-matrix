@@ -37,7 +37,10 @@ class PublicRoomsController extends _$PublicRoomsController {
   }
 
   Future<PublicRoomOpenResult> open(PublicRoom room) async {
-    final current = state.value;
+    final current = switch (state) {
+      AsyncData(isLoading: false, :final value) => value,
+      _ => null,
+    };
     if (current == null || !current.canOpen(room.roomId)) {
       return const PublicRoomOpenIgnored();
     }

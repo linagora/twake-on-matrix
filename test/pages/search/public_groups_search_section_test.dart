@@ -11,6 +11,7 @@ import 'package:twake_chat/domain/exception/public_rooms/public_rooms_exception.
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/public_rooms/public_rooms_controller.dart';
 import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/public_groups_search_term.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -204,6 +205,27 @@ void main() {
     // Assert
     expect(find.text('header'), findsNothing);
     expect(find.text('No Results'), findsNothing);
+  });
+
+  testWidgets('build_whileTheDirectoryReloads_hidesThePreviousRooms', (
+    tester,
+  ) async {
+    // Arrange
+    await pumpSection(tester);
+    await type(tester, 'éq');
+    final pages = StreamController<List<PublicRoom>>();
+    addTearDown(pages.close);
+    repository.directoryController = pages;
+
+    // Act
+    ProviderScope.containerOf(
+      tester.element(find.text('header')),
+    ).invalidate(publicRoomsControllerProvider(searchTerm: 'éq'));
+    await tester.pump();
+
+    // Assert
+    expect(find.text('header'), findsNothing);
+    expect(find.text('Équipe'), findsNothing);
   });
 
   testWidgets('build_whenTheDirectoryFails_showsNoSection', (tester) async {

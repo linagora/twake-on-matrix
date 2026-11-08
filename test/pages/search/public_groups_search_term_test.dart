@@ -47,6 +47,21 @@ void main() {
     });
   });
 
+  test('value_whenOnlyTheCaretMoves_keepsTheDelay', () {
+    fakeAsync((async) {
+      // Arrange
+      textController.text = 'éq';
+
+      // Act
+      async.elapse(const Duration(milliseconds: 200));
+      textController.selection = const TextSelection.collapsed(offset: 1);
+      async.elapse(const Duration(milliseconds: 100));
+
+      // Assert
+      expect(searchTerm.value, 'éq');
+    });
+  });
+
   test('value_underTwoLetters_isNullAtOnce', () {
     fakeAsync((async) {
       // Arrange
