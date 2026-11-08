@@ -263,4 +263,60 @@ void main() {
       );
     });
   });
+
+  /// Roast n°4 (THR-M-07, P1: following = wrote the root or replied). On a
+  /// new device the store knows no thread yet: a root the user wrote makes
+  /// the thread followed for this decision. The caller passes the sender of
+  /// the root (`rootSenderId`), which it reads from the root event.
+  group('a thread whose root the user wrote', () {
+    test('notifies a reply although the store does not know the thread '
+        'yet', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          rootSenderId: me,
+        ),
+        isTrue,
+      );
+    });
+
+    test('a root of another user, in a thread not followed, does not '
+        'notify', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          rootSenderId: '@alice:example.com',
+        ),
+        isFalse,
+      );
+    });
+
+    test('a reply already read does not notify', () {
+      receipts(byThread: {rootId: replySentAt});
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          rootSenderId: me,
+        ),
+        isFalse,
+      );
+    });
+
+    test('in a muted room, a reply without mention does not notify', () {
+      when(room.pushRuleState).thenReturn(PushRuleState.mentionsOnly);
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          rootSenderId: me,
+        ),
+        isFalse,
+      );
+    });
+  });
 }
