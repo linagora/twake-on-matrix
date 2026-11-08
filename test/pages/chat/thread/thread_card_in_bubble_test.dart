@@ -172,7 +172,7 @@ void main() {
     expect(cardColor, isNot(bubbleColor));
   });
 
-  /// Roast n°4: the web card is `width: 100%` of its bubble; here it was
+  /// THR-M-02: the web card is `width: 100%` of its bubble; here it was
   /// as narrow as its own text under a wider root.
   testWidgets('the card is as wide as the bubble, under a root longer than '
       'the card', (tester) async {
@@ -190,5 +190,24 @@ void main() {
     );
     final cardRect = tester.getRect(find.byType(ThreadSummaryCard));
     expect(cardRect.width, greaterThanOrEqualTo(text.width));
+  });
+
+  /// THR-M-02: the web bubble is `inline-block`, its card `width: 100%` of
+  /// it: a card never makes the bubble wider than its root needs.
+  testWidgets('under a short root the bubble stays narrower than under a '
+      'long one', (tester) async {
+    await pumpRootWithCard(tester, rootBody: 'hi', withLastReply: false);
+    final short = tester.getRect(find.byType(MessageBubble)).width;
+
+    await pumpRootWithCard(
+      tester,
+      rootBody:
+          'the root of this thread, long enough to fill the bubble and wrap '
+          'onto a second line',
+      withLastReply: false,
+    );
+    final long = tester.getRect(find.byType(MessageBubble)).width;
+
+    expect(short, lessThan(long));
   });
 }
