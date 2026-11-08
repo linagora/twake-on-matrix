@@ -42,6 +42,10 @@ final class ThreadEvents {
   bool _canLoadMore = true;
   Future<void>? _loading;
   List<Event> _events = const [];
+  Object? _lastError;
+
+  /// Why the last page failed; null once a page succeeded.
+  Object? get lastError => _lastError;
 
   bool get isLoading => _loading != null;
 
@@ -76,6 +80,10 @@ final class ThreadEvents {
       }
       _nextBatch = page.nextBatch;
       _canLoadMore = page.nextBatch != null;
+      _lastError = null;
+    } catch (e) {
+      _lastError = e;
+      rethrow;
     } finally {
       _loading = null;
       _rebuild();
