@@ -216,6 +216,18 @@ void main() {
       expect(threadOf(after)?.followed, isTrue);
     });
 
+    test('a thread the user wrote in is followed before any counter of '
+        'it arrives', () {
+      // THR-M-09: the notification of a reply is decided before the thread
+      // counters of its sync land.
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      store.markFollowed(roomId, rootId);
+
+      expect(store.isFollowed(roomId, rootId), isTrue);
+      expect(store.isFollowed(roomId, r'$other_root'), isFalse);
+    });
+
     test('a thread found not followed is checked again when new replies '
         'arrive', () async {
       // The user replied from another device between the two syncs.
