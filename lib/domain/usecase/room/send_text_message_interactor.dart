@@ -56,8 +56,10 @@ final class SendTextMessageInteractor {
         inReplyTo: inReplyTo,
         editEventId: editEventId,
         parseCommands: isCommand,
-        threadRootEventId: threadRootEventId,
-        threadLastEventId: threadLastEventId,
+        // An edit copies the thread relation into `m.new_content`: it is not
+        // a reply.
+        threadRootEventId: editEventId == null ? threadRootEventId : null,
+        threadLastEventId: editEventId == null ? threadLastEventId : null,
       );
       return;
     }
