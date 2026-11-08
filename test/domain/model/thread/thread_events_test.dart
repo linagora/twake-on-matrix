@@ -466,6 +466,61 @@ void main() {
 
   /// The list is read on every frame: it is built again only when it
   /// changes.
+  /// THR-M-05: a reply the user sends shows once. The SDK keys the local
+  /// echo by its transaction id and replaces it, at the same timeline index,
+  /// by the server echo carrying the real event id (timeline.dart:~663,
+  /// room.dart:~1429).
+  group('replies the user sends', () {
+    const txid = 'm1762430000000';
+
+    Event echo({
+      required String eventId,
+      required EventStatus status,
+      int minute = 40,
+    }) => Event(
+      type: EventTypes.Message,
+      content: {
+        'msgtype': 'm.text',
+        'body': 'my reply',
+        'm.relates_to': threadRelation(),
+      },
+      eventId: eventId,
+      senderId: '@me:example.com',
+      originServerTs: at(minute),
+      status: status,
+      unsigned: {'transaction_id': txid},
+      room: room,
+    );
+
+    test('the local echo replaced by the server echo is listed once, '
+        'sent', () async {
+      final thread = await opened(const []);
+      thread.updateLive([
+        echo(eventId: txid, status: EventStatus.sending),
+      ], root: root());
+
+      thread.updateLive([
+        echo(eventId: r'$real', status: EventStatus.synced),
+      ], root: root());
+
+      expect(idsOf(thread), [r'$real', rootId]);
+      expect(only(thread, r'$real').status.isSynced, isTrue);
+    });
+
+    test('a failed reply the user cancels leaves the thread', () async {
+      final thread = await opened(const []);
+      thread.updateLive([
+        echo(eventId: txid, status: EventStatus.error),
+      ], root: root());
+      expect(idsOf(thread), [txid, rootId]);
+
+      // Cancelling removes the event from the room timeline.
+      thread.updateLive(const [], root: root());
+
+      expect(idsOf(thread), [rootId]);
+    });
+  });
+
   group('the same list until something changes', () {
     test('two reads give the same list', () async {
       final thread = await opened([reply(r'$r1', 1)]);
