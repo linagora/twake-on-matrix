@@ -177,8 +177,9 @@ void main() {
 
   /// THR-M-09: a catch-up sync, or a reply read on another
   /// device, brings replies the user has read already. Their own receipt in
-  /// the thread (or a newer main or unthreaded one) says so; the follow
-  /// state and a mention do not bring the notification back.
+  /// the thread, or a newer unthreaded one, says so (MSC3771: a `main`
+  /// receipt does not cover threads); the follow state and a mention do not
+  /// bring the notification back.
   group('a reply the user has read already', () {
     const later = Duration(minutes: 1);
 
@@ -216,19 +217,18 @@ void main() {
       );
     });
 
-    test('does not notify when the own main receipt is newer than the one of '
-        'the thread', () {
+    test('MSC3771: a newer own main receipt does not read a thread reply, '
+        'which still notifies', () {
+      // A `main` receipt covers the main timeline only; a thread reply is
+      // read by the receipt of its thread or by an unthreaded one.
       receipts(
         main: replySentAt.add(later),
         byThread: {rootId: replySentAt.subtract(later)},
       );
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(
-          reply(mentionsMe: true),
-          followed: true,
-        ),
-        isFalse,
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        isTrue,
       );
     });
 
