@@ -3,7 +3,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 
-/// Card under a thread root: number of messages, then author, text and age of
+/// Card inside the bubble of a thread root: number of messages, then author, text and age of
 /// the last reply. It does not repeat the root text, which is right above.
 class ThreadSummaryCard extends StatelessWidget {
   const ThreadSummaryCard({
@@ -14,6 +14,7 @@ class ThreadSummaryCard extends StatelessWidget {
     this.lastReplyTime,
     required this.onTap,
     this.unreadCount = 0,
+    this.color = Colors.white,
   });
 
   final int replyCount;
@@ -23,6 +24,9 @@ class ThreadSummaryCard extends StatelessWidget {
   final String? lastReplyText;
   final DateTime? lastReplyTime;
   final int unreadCount;
+
+  /// White on the blue bubble of the user; a grey on a white bubble.
+  final Color color;
   final VoidCallback onTap;
 
   @override
@@ -32,10 +36,23 @@ class ThreadSummaryCard extends StatelessWidget {
     final textStyle = LinagoraTextStyle.material();
     final count = l10n.threadMessagesCount(replyCount);
     final unread = unreadCount > 0;
+    final secondary = textStyle.bodySmall.copyWith(color: colors.secondary);
     final last = lastReplyTime == null
         ? null
-        : '$lastReplyAuthor: $lastReplyText · '
-              '${lastReplyTime!.localizedTimeShort(context)}';
+        : TextSpan(
+            style: secondary,
+            children: [
+              TextSpan(
+                text: lastReplyAuthor,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              TextSpan(
+                text:
+                    ': $lastReplyText · '
+                    '${lastReplyTime!.ageFrom(context)}',
+              ),
+            ],
+          );
 
     return Semantics(
       container: true,
@@ -44,20 +61,22 @@ class ThreadSummaryCard extends StatelessWidget {
       label: [
         count,
         if (unread) l10n.threadUnreadMessagesCount(unreadCount),
-        ?last,
+        ?last?.toPlainText(),
       ].join(', '),
       onTap: onTap,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: unread ? colors.primary : colors.outline,
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+              border: _LeftBarBorder(
+                bar: unread ? colors.primary : colors.outline,
+                outline: colors.outline,
               ),
             ),
             child: Column(
@@ -81,25 +100,56 @@ class ThreadSummaryCard extends StatelessWidget {
                       count,
                       style: textStyle.labelLarge.copyWith(
                         color: colors.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     Icon(Icons.chevron_right, size: 18, color: colors.primary),
                   ],
                 ),
                 if (last != null)
-                  Text(
-                    last,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: textStyle.bodySmall.copyWith(
-                      color: colors.secondary,
-                    ),
-                  ),
+                  Text.rich(last, maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+/// A 1 px outline with a 3 px bar on the left. A [Border] with a wider side
+/// cannot be painted with a radius, so this one draws both itself.
+class _LeftBarBorder extends Border {
+  _LeftBarBorder({required Color bar, required Color outline})
+    : super(
+        top: BorderSide(color: outline),
+        right: BorderSide(color: outline),
+        bottom: BorderSide(color: outline),
+        left: BorderSide(color: bar, width: 3),
+      );
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    TextDirection? textDirection,
+    BoxShape shape = BoxShape.rectangle,
+    BorderRadius? borderRadius,
+  }) {
+    final rrect = (borderRadius ?? BorderRadius.zero).toRRect(rect);
+    canvas.drawRRect(
+      rrect.deflate(0.5),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..color = top.color,
+    );
+    canvas
+      ..save()
+      ..clipRRect(rrect)
+      ..drawRect(
+        Rect.fromLTWH(rect.left, rect.top, left.width, rect.height),
+        Paint()..color = left.color,
+      )
+      ..restore();
   }
 }

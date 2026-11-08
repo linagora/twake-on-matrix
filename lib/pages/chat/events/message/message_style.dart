@@ -254,6 +254,9 @@ class MessageStyle {
     );
   }
 
+  static EdgeInsets get paddingThreadCard =>
+      const EdgeInsets.only(top: LinagoraSpacing.base * 0.5);
+
   static EdgeInsets get paddingMessageTime =>
       const EdgeInsets.only(bottom: LinagoraSpacing.base * 0.5);
 

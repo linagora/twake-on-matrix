@@ -2967,5 +2967,41 @@
   "@openThread": {
     "type": "text",
     "placeholders": {}
+  },
+  "ageSecondsAgo": "{n, plural, =1{1 second ago} other{{n} seconds ago}}",
+  "@ageSecondsAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageMinutesAgo": "{n, plural, =1{1 minute ago} other{{n} minutes ago}}",
+  "@ageMinutesAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageHoursAgo": "{n, plural, =1{1 hour ago} other{{n} hours ago}}",
+  "@ageHoursAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageDaysAgo": "{n, plural, =1{1 day ago} other{{n} days ago}}",
+  "@ageDaysAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

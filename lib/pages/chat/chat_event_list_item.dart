@@ -153,28 +153,21 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  Widget _threadCard(BuildContext context, ThreadSummary summary) => Padding(
-    padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-    child: Align(
-      alignment: event.isOwnMessage
-          ? Alignment.centerRight
-          : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.7),
-        child: ListenableBuilder(
-          listenable:
-              controller.threadUnreadStore ?? Listenable.merge(const []),
-          builder: (context, _) => ThreadSummaryCard(
-            replyCount: summary.replyCount,
-            lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
-                .calcDisplayname(),
-            lastReplyText: _lastReplyText(context, summary),
-            lastReplyTime: summary.lastReply?.originServerTs,
-            unreadCount: controller.threadUnreadCount(event.eventId),
-            onTap: () => _openThread(context),
-          ),
+  Widget _threadCard(BuildContext context, ThreadSummary summary) =>
+      ListenableBuilder(
+        listenable: controller.threadUnreadStore ?? Listenable.merge(const []),
+        builder: (context, _) => ThreadSummaryCard(
+          replyCount: summary.replyCount,
+          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
+              .calcDisplayname(),
+          lastReplyText: _lastReplyText(context, summary),
+          lastReplyTime: summary.lastReply?.originServerTs,
+          unreadCount: controller.threadUnreadCount(event.eventId),
+          // A received bubble is white already: the card is grey there.
+          color: event.isOwnMessage
+              ? Colors.white
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          onTap: () => _openThread(context),
         ),
-      ),
-    ),
-  );
+      );
 }

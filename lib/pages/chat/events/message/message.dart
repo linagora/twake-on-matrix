@@ -314,6 +314,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           onTapMoreButton: widget.onTapMoreButton,
           recentEmojiFuture: widget.recentEmojiFuture,
           onRetryTextMessage: widget.onRetryTextMessage,
+          threadCard: widget.threadCard,
         ),
       ),
     ];
@@ -372,7 +373,6 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           autoScrollController: widget.autoScrollController,
           scrollIndex: widget.scrollIndex,
         ),
-        if (widget.threadCard != null) widget.threadCard!,
       ],
     );
 

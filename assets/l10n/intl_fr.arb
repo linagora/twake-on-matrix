@@ -2774,5 +2774,41 @@
   "@openThread": {
     "type": "text",
     "placeholders": {}
+  },
+  "ageSecondsAgo": "{n, plural, =1{il y a 1 seconde} other{il y a {n} secondes}}",
+  "@ageSecondsAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageMinutesAgo": "{n, plural, =1{il y a 1 minute} other{il y a {n} minutes}}",
+  "@ageMinutesAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageHoursAgo": "{n, plural, =1{il y a 1 heure} other{il y a {n} heures}}",
+  "@ageHoursAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageDaysAgo": "{n, plural, =1{il y a 1 jour} other{il y a {n} jours}}",
+  "@ageDaysAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
   }
 }

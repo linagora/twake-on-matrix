@@ -36,6 +36,7 @@ final class ThreadEvents {
 
   final Map<String, Event> _pageReplies = {};
   final Map<String, Event> _live = {};
+  final Set<String> _liveReplyIds = {};
   final Set<String> _handedRelations = {};
   Event? _root;
   String? _nextBatch;
@@ -94,10 +95,13 @@ final class ThreadEvents {
   /// Takes the room timeline (any order) and the root event when known.
   void updateLive(Iterable<Event> timeline, {Event? root}) {
     _root = root;
+    // The live part is the current timeline: a local echo replaced by its
+    // server echo, or a cancelled reply, must not stay.
+    _live.clear();
     for (final event in timeline) {
       // A redacted event lost its relation: it stays a reply once seen.
-      if (event.threadRootId == rootEventId ||
-          _live.containsKey(event.eventId) ||
+      if (event.threadRootId == rootEventId) _liveReplyIds.add(event.eventId);
+      if (_liveReplyIds.contains(event.eventId) ||
           _pageReplies.containsKey(event.eventId)) {
         _live[event.eventId] = event;
       }

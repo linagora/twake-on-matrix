@@ -76,6 +76,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
 
+  /// The summary of the thread of this message, inside its bubble.
+  final Widget? threadCard;
+
   static const Key dialogSafeAreaKey = Key(
     'message_context_menu_dialog_safe_area',
   );
@@ -117,6 +120,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
+    this.threadCard,
   });
 
   @override
@@ -494,6 +498,38 @@ class _MessageContentWithTimestampBuilderState
         maxWidthScreen: widget.maxWidth,
       ),
     );
+    final card = widget.threadCard;
+    final messageContent = MessageContentBuilder(
+      event: widget.event,
+      timeline: widget.timeline,
+      onSelect: widget.onSelect,
+      nextEvent: widget.nextEvent,
+      scrollToEventId: widget.scrollToEventId,
+      selectMode: widget.selectMode,
+      onRetryTextMessage: widget.onRetryTextMessage,
+    );
+    // With a card, the time goes under it, not over the text.
+    final time =
+        widget.event.isReplyEventWithAudio() || (card != null && !timelineText)
+        ? null
+        : OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isWeb,
+            child: Padding(
+              padding: MessageStyle.paddingMessageTime,
+              child: Text.rich(
+                WidgetSpan(
+                  child: MessageTime(
+                    timelineOverlayMessage: widget.event.timelineOverlayMessage,
+                    room: widget.event.room,
+                    event: widget.event,
+                    showSeenIcon: widget.event.isOwnMessage,
+                    timeline: widget.timeline,
+                    onRetryTextMessage: widget.onRetryTextMessage,
+                  ),
+                ),
+              ),
+            ),
+          );
     final bubbleContent = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -502,41 +538,17 @@ class _MessageContentWithTimestampBuilderState
             isEnabled: PlatformInfos.isWeb,
             child: DisplayNameWidget(event: widget.event),
           ),
-        OptionalStack(
-          isEnabled: timelineText,
-          alignment: AlignmentDirectional.bottomEnd,
-          children: [
-            MessageContentBuilder(
-              event: widget.event,
-              timeline: widget.timeline,
-              onSelect: widget.onSelect,
-              nextEvent: widget.nextEvent,
-              scrollToEventId: widget.scrollToEventId,
-              selectMode: widget.selectMode,
-              onRetryTextMessage: widget.onRetryTextMessage,
-            ),
-            if (!widget.event.isReplyEventWithAudio())
-              OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
-                child: Padding(
-                  padding: MessageStyle.paddingMessageTime,
-                  child: Text.rich(
-                    WidgetSpan(
-                      child: MessageTime(
-                        timelineOverlayMessage:
-                            widget.event.timelineOverlayMessage,
-                        room: widget.event.room,
-                        event: widget.event,
-                        showSeenIcon: widget.event.isOwnMessage,
-                        timeline: widget.timeline,
-                        onRetryTextMessage: widget.onRetryTextMessage,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        if (card != null) ...[
+          messageContent,
+          Padding(padding: MessageStyle.paddingThreadCard, child: card),
+          if (time != null)
+            Align(alignment: AlignmentDirectional.centerEnd, child: time),
+        ] else
+          OptionalStack(
+            isEnabled: timelineText,
+            alignment: AlignmentDirectional.bottomEnd,
+            children: [messageContent, ?time],
+          ),
       ],
     );
 
