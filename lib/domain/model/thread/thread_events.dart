@@ -52,8 +52,14 @@ final class ThreadEvents {
 
   /// Fetches the next page; a call during a fetch shares it. Throws when the
   /// page fails: the next call fetches the same page again.
-  Future<void> loadMore() =>
-      _loading ?? (_canLoadMore ? _load() : Future.value());
+  Future<void> loadMore() {
+    final loading = _loading;
+    if (loading != null) return loading;
+    if (!_canLoadMore) return Future.value();
+    final load = _load();
+    onChanged?.call();
+    return load;
+  }
 
   Future<void> _load() => _loading = _fetch();
 

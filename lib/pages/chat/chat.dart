@@ -1,8 +1,9 @@
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:twake_chat/domain/model/thread/thread_events.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/domain/model/thread/thread_summary.dart';
-import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
+import 'package:twake_chat/domain/usecase/room/get_thread_events_page_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
@@ -566,18 +567,14 @@ class ChatController extends ConsumerState<Chat>
 
   Event? _threadRootEvent;
 
-  final List<Event> _olderThreadReplies = [];
+  /// The events of the thread screen, created once the room timeline is up.
+  ThreadEvents? _threadEvents;
 
-  String? _threadNextBatch;
+  StreamSubscription<Event>? _threadRedactionSub;
 
-  bool _threadCanLoadMore = false;
+  StreamSubscription<String>? _threadSessionKeySub;
 
-  bool _isLoadingThreadReplies = false;
-
-  /// The page being fetched: a second caller awaits it instead of returning.
-  Future<void>? _threadPageLoad;
-
-  /// Completes once the thread screen has its first page (or failed to).
+  /// Completes once [_threadEvents] exists (or the timeline failed to load).
   final Completer<void> _threadReady = Completer<void>();
 
   String? _lastThreadReadEventId;
@@ -585,23 +582,9 @@ class ChatController extends ConsumerState<Chat>
   /// Events of the list: the room timeline, or the root and the replies of
   /// the thread (loaded by pages, completed by the live timeline), newest
   /// first.
-  List<Event> get eventsToDisplay {
-    final events = timeline?.events ?? const <Event>[];
-    if (!isThread) return events;
-    final byId = <String, Event>{
-      for (final reply in _olderThreadReplies) reply.eventId: reply,
-      for (final event in events)
-        if (event.threadRootId == threadRootId) event.eventId: event,
-    };
-    final root =
-        events.firstWhereOrNull((e) => e.eventId == threadRootId) ??
-        _threadRootEvent;
-    return [
-      ...byId.values.toList()
-        ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs)),
-      ?root,
-    ];
-  }
+  List<Event> get eventsToDisplay => isThread
+      ? _threadEvents?.events ?? const <Event>[]
+      : timeline?.events ?? const <Event>[];
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
@@ -668,11 +651,12 @@ class ChatController extends ConsumerState<Chat>
       : event.isVisibleInGui;
 
   bool get isRequestingHistory => isThread
-      ? _isLoadingThreadReplies
+      ? _threadEvents?.isLoading == true
       : timeline?.isRequestingHistory == true;
 
-  bool get canRequestHistory =>
-      isThread ? _threadCanLoadMore : timeline?.canRequestHistory == true;
+  bool get canRequestHistory => isThread
+      ? _threadEvents?.canLoadMore == true
+      : timeline?.canRequestHistory == true;
 
   /// Last synced event of the thread (its root while it has no reply): the
   /// event the next reply follows.
@@ -695,31 +679,53 @@ class ChatController extends ConsumerState<Chat>
     } catch (e, s) {
       Logs().w('Unable to load the root of the thread', e, s);
     }
-    await requestHistory();
+    _createThreadEvents(room);
+    await _threadEvents!.ready;
     if (widget.startThread && mounted) _requestInputFocus();
   }
 
-  Future<void> _loadMoreThreadReplies() => _threadPageLoad ??=
-      _fetchThreadReplies().whenComplete(() => _threadPageLoad = null);
-
-  Future<void> _fetchThreadReplies() async {
-    final room = this.room;
-    if (room == null) return;
-    _isLoadingThreadReplies = true;
-    if (mounted) setState(() {});
-    try {
-      final page = await const GetThreadRepliesInteractor().execute(
+  void _createThreadEvents(Room room) {
+    final threadEvents = ThreadEvents(
+      rootEventId: threadRootId!,
+      fetchPage: (from) => const GetThreadEventsPageInteractor().execute(
         room: room,
         rootEventId: threadRootId!,
-        from: _threadNextBatch,
-      );
-      _olderThreadReplies.addAll(page.replies);
-      _threadNextBatch = page.nextBatch;
-      _threadCanLoadMore = page.canLoadMore;
-    } finally {
-      _isLoadingThreadReplies = false;
-      if (mounted) setState(() {});
+        from: from,
+      ),
+      // Edits and reactions of old replies show on them through the timeline.
+      onRelation: (event) => timeline?.addAggregatedEvent(event),
+      onChanged: updateView,
+    );
+    _threadEvents = threadEvents;
+    _syncThreadEvents();
+    // A reply known only from a page is deleted live, or decrypted late.
+    _threadRedactionSub = room.client.onTimelineEvent.stream
+        .where((e) => e.roomId == room.id && e.type == EventTypes.Redaction)
+        .listen(threadEvents.applyRedaction);
+    _threadSessionKeySub = room.onSessionKeyReceived.stream.listen(
+      (sessionId) => unawaited(_decryptThreadPageReplies(sessionId)),
+    );
+  }
+
+  void _syncThreadEvents() => _threadEvents?.updateLive(
+    timeline?.events ?? const <Event>[],
+    root:
+        timeline?.events.firstWhereOrNull((e) => e.eventId == threadRootId) ??
+        _threadRootEvent,
+  );
+
+  Future<void> _decryptThreadPageReplies(String sessionId) async {
+    final threadEvents = _threadEvents;
+    final encryption = room?.client.encryption;
+    if (threadEvents == null || encryption == null) return;
+    for (final event in threadEvents.undecryptedPageReplies.toList()) {
+      if (event.content['session_id'] != sessionId) continue;
+      final decrypted = await encryption.decryptRoomEvent(event);
+      if (decrypted.type == EventTypes.Encrypted) continue;
+      threadEvents.replaceEvent(decrypted);
+      timeline?.addAggregatedEvent(decrypted);
     }
+    updateView();
   }
 
   /// A thread is read only while its screen shows its last reply.
@@ -742,7 +748,7 @@ class ChatController extends ConsumerState<Chat>
   Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
     if (isThread) {
       try {
-        return await _loadMoreThreadReplies();
+        return await _threadEvents?.loadMore();
       } catch (err) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -940,6 +946,7 @@ class ChatController extends ConsumerState<Chat>
 
   void updateView() {
     if (!mounted) return;
+    _syncThreadEvents();
     setState(() {});
 
     _markLatestReadIfAtBottom();
@@ -3434,10 +3441,11 @@ class ChatController extends ConsumerState<Chat>
     _lastHighlightedEventId = eventId;
     await _threadReady.future;
     try {
+      await _threadEvents?.ready;
       while (mounted &&
           !eventsToDisplay.any((e) => e.eventId == eventId) &&
           canRequestHistory) {
-        await _loadMoreThreadReplies();
+        await _threadEvents!.loadMore();
       }
     } catch (e, s) {
       // A failed page must not be retried forever: stop, the reply stays unknown.
@@ -3476,6 +3484,8 @@ class ChatController extends ConsumerState<Chat>
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
     _listenedThreadUnreadStore?.removeListener(updateView);
+    unawaited(_threadRedactionSub?.cancel());
+    unawaited(_threadSessionKeySub?.cancel());
     timeline?.cancelSubscriptions();
     timeline = null;
 
