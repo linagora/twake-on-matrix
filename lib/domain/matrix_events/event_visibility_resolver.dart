@@ -20,8 +20,20 @@ abstract final class EventVisibilityResolver {
   ///
   /// [inThread] is true on the thread screen, where thread replies are the
   /// content and must not be hidden.
-  static bool isVisibleInTimeline(Event event, {bool inThread = false}) {
-    return _passesRelationshipLayer(event, inThread: inThread) &&
+  ///
+  /// [knownThreadReplyIds]: ids of events seen as thread replies; one of them
+  /// stays out of the main timeline even once deleted (a deleted event loses
+  /// its relation).
+  static bool isVisibleInTimeline(
+    Event event, {
+    bool inThread = false,
+    Set<String> knownThreadReplyIds = const {},
+  }) {
+    return _passesRelationshipLayer(
+          event,
+          inThread: inThread,
+          knownThreadReplyIds: knownThreadReplyIds,
+        ) &&
         _passesTypeLayer(event) &&
         _passesConfigLayer(event) &&
         _passesContentLayer(event);
@@ -74,9 +86,17 @@ abstract final class EventVisibilityResolver {
     RelationshipTypes.reaction,
   };
 
-  static bool _passesRelationshipLayer(Event event, {bool inThread = false}) {
+  static bool _passesRelationshipLayer(
+    Event event, {
+    bool inThread = false,
+    Set<String> knownThreadReplyIds = const {},
+  }) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
-    if (!inThread && event.threadRootId != null) return false;
+    if (!inThread &&
+        (event.threadRootId != null ||
+            knownThreadReplyIds.contains(event.eventId))) {
+      return false;
+    }
     if (event.type.startsWith('m.key.verification.')) return false;
     return true;
   }

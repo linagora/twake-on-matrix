@@ -99,10 +99,13 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
         threadUnread.apply(counts ?? const {}, leftRoomIds: left);
       }
     });
-    // The user's own thread events, from any device, make a thread followed.
+    // Thread replies are remembered (they lose their relation once deleted);
+    // the user's own, from any device, make a thread followed.
     onTimelineEvent.stream.listen((event) {
       final rootId = event.threadRootId;
-      if (rootId != null && event.senderId == userID) {
+      if (rootId == null) return;
+      threadUnread.rememberThreadReply(event.room.id, event.eventId);
+      if (event.senderId == userID) {
         threadUnread.markFollowed(event.room.id, rootId);
       }
     });

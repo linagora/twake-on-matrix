@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -22,6 +23,14 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Map<String, DateTime> _activity = {};
   final Map<String, int> _badges = {};
 
+  /// Ids of the thread replies seen live, per room: once deleted, a reply
+  /// loses its `m.relates_to` and only this tells it was in a thread.
+  final Map<String, Set<String>> _threadReplyIds = {};
+  final Queue<(String, String)> _threadReplyOrder = Queue();
+
+  // ponytail: a count cap for the account, not a per-room one.
+  static const int _maxThreadReplyIds = 4000;
+
   /// Bumped by [clear]: a lookup started before it must not bring a follow back.
   int _epoch = 0;
 
@@ -41,6 +50,8 @@ class ThreadUnreadStore extends ChangeNotifier {
       _followed.removeWhere((key) => key.startsWith(prefix));
       _activity.removeWhere((key, _) => key.startsWith(prefix));
       _badges.remove(roomId);
+      _threadReplyIds.remove(roomId);
+      _threadReplyOrder.removeWhere((e) => e.$1 == roomId);
       changed |= hadCounts || hadFollow != _followed.length;
     }
     for (final entry in roomCounts.entries) {
@@ -71,6 +82,30 @@ class ThreadUnreadStore extends ChangeNotifier {
     _persist();
   }
 
+  bool isFollowed(String roomId, String rootId) =>
+      _followed.contains('$roomId|$rootId');
+
+  /// A thread reply of the live timeline (any sender); the oldest ids go
+  /// when the account holds more than [_maxThreadReplyIds].
+  void rememberThreadReply(String roomId, String eventId) {
+    if (!_addThreadReplyId(roomId, eventId)) return;
+    while (_threadReplyOrder.length > _maxThreadReplyIds) {
+      final oldest = _threadReplyOrder.removeFirst();
+      _threadReplyIds[oldest.$1]?.remove(oldest.$2);
+    }
+    _persist();
+  }
+
+  Set<String> knownThreadReplyIds(String roomId) =>
+      _threadReplyIds[roomId] ?? const {};
+
+  bool _addThreadReplyId(String roomId, String eventId) {
+    final ids = _threadReplyIds.putIfAbsent(roomId, () => {});
+    if (!ids.add(eventId)) return false;
+    _threadReplyOrder.add((roomId, eventId));
+    return true;
+  }
+
   /// Loads what [_persist] saved; a sync that came first wins.
   Future<void> restore() async {
     try {
@@ -91,6 +126,11 @@ class ThreadUnreadStore extends ChangeNotifier {
         );
       }
       _followed.addAll((json['followed'] as List? ?? const []).cast<String>());
+      for (final room in (json['replies'] as Map? ?? const {}).entries) {
+        for (final id in (room.value as List).cast<String>()) {
+          _addThreadReplyId(room.key as String, id);
+        }
+      }
       _counts.keys.toList().forEach(_refreshBadge);
       notifyListeners();
     } catch (e, s) {
@@ -106,6 +146,8 @@ class ThreadUnreadStore extends ChangeNotifier {
     _followed.clear();
     _activity.clear();
     _badges.clear();
+    _threadReplyIds.clear();
+    _threadReplyOrder.clear();
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -132,6 +174,10 @@ class ThreadUnreadStore extends ChangeNotifier {
               },
           },
           'followed': _followed.toList(),
+          'replies': {
+            for (final room in _threadReplyIds.entries)
+              if (room.value.isNotEmpty) room.key: room.value.toList(),
+          },
         }),
       );
     } catch (e, s) {
@@ -165,28 +211,39 @@ class ThreadUnreadStore extends ChangeNotifier {
   ];
 
   /// Participation as the server tells it: the user wrote the root or
-  /// replied (P1; the explicit follow choice comes with P2). A "no" is not
-  /// kept: the next increase of the counter asks again.
+  /// replied (P1; the explicit follow choice comes with P2). The root stored
+  /// in the database keeps the aggregate of the day it was stored, so unless
+  /// it already says "participated" the server is asked. A "no" is not kept:
+  /// the next increase of the counter asks again, as does a failed call.
   Future<void> _resolveFollowed(String roomId, String rootId) async {
     final key = '$roomId|$rootId';
     if (_followed.contains(key) || !_resolving.add(key)) return;
     final epoch = _epoch;
     try {
-      final root = await _client.getRoomById(roomId)?.getEventById(rootId);
-      if (root == null || epoch != _epoch) return;
-      final participated =
-          (((root.unsigned?['m.relations'] as Map?)?['m.thread']
-              as Map?)?['current_user_participated']) ==
-          true;
-      if (participated || root.senderId == _client.userID) {
-        markFollowed(roomId, rootId);
+      final stored = await _client.getRoomById(roomId)?.getEventById(rootId);
+      if (epoch != _epoch) return;
+      var follow =
+          stored != null &&
+          (stored.senderId == _client.userID ||
+              _participated(stored.unsigned) == true);
+      if (!follow) {
+        final fresh = await _client.getOneRoomEvent(roomId, rootId);
+        follow =
+            fresh.senderId == _client.userID ||
+            _participated(fresh.unsigned) == true;
       }
+      if (follow && epoch == _epoch) markFollowed(roomId, rootId);
     } catch (e, s) {
       Logs().w('Unable to tell if the thread is followed', e, s);
     } finally {
       _resolving.remove(key);
     }
   }
+
+  bool? _participated(Map<String, Object?>? unsigned) =>
+      ((unsigned?['m.relations'] as Map?)?['m.thread']
+              as Map?)?['current_user_participated']
+          as bool?;
 }
 
 /// The one way to reach the thread counters of an account; null for a client
