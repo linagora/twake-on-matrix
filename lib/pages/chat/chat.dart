@@ -3297,8 +3297,7 @@ class ChatController extends ConsumerState<Chat>
   void initState() {
     super.initState();
     _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
-    // The room Chat under a thread already does the work of the room
-    // (pinned events, participants, presence, ignored users).
+    // The pinned events header is not shown on the thread screen.
     if (!isThread) _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
@@ -3319,11 +3318,12 @@ class ChatController extends ConsumerState<Chat>
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
-      if (!isThread) {
-        initCachedPresence();
-        await _requestParticipants();
-        listenIgnoredUser();
-      }
+      // The thread screen shows no presence (its app bar is the thread one),
+      // but its composer needs the participants (mentions, possibly opened by
+      // deep link with no room Chat) and the blocked state of a DM.
+      if (!isThread) initCachedPresence();
+      await _requestParticipants();
+      listenIgnoredUser();
       initAudioPlayer();
     });
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
@@ -3468,8 +3468,13 @@ class ChatController extends ConsumerState<Chat>
     await SchedulerBinding.instance.endOfFrame;
     await SchedulerBinding.instance.endOfFrame;
     if (!mounted) return;
-    final index = eventsToDisplay.indexWhere((e) => e.eventId == eventId);
     _pendingUrlJumpEventId = null;
+    await scrollToThreadEvent(eventId);
+  }
+
+  /// Scrolls the thread screen to an event already loaded in it.
+  Future<void> scrollToThreadEvent(String eventId) async {
+    final index = eventsToDisplay.indexWhere((e) => e.eventId == eventId);
     if (index < 0 || !scrollController.hasClients) return;
     await scrollController.scrollToIndex(
       index + 1,

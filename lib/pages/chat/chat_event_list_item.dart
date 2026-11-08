@@ -44,9 +44,9 @@ class ChatEventListItem extends StatelessWidget {
     );
 
     return Message(
-      // The room's Chat stays mounted under the thread screen and shares the
-      // root row: a second GlobalObjectKey for it would throw.
-      key: controller.isThread && event.eventId == controller.threadRootId
+      // The room's Chat stays mounted under the thread screen and can show
+      // the same event: a second GlobalObjectKey for it would throw.
+      key: controller.isThread
           ? ValueKey(event.eventId)
           : GlobalObjectKey(event.eventId),
       event,
@@ -73,8 +73,10 @@ class ChatEventListItem extends StatelessWidget {
       onSelect: controller.onSelectMessage,
       selectMode: controller.selectMode,
       maxWidth: constraints.maxWidth,
-      scrollToEventId: (String eventId) =>
-          controller.scrollToEventId(eventId, highlight: true),
+      // The thread list has no GlobalObjectKey rows: scroll by index there.
+      scrollToEventId: (String eventId) => controller.isThread
+          ? controller.scrollToThreadEvent(eventId)
+          : controller.scrollToEventId(eventId, highlight: true),
       selected: controller.selectedEvents.any(
         (e) => e.eventId == event.eventId,
       ),
