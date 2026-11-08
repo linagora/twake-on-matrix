@@ -1,5 +1,7 @@
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -79,12 +81,39 @@ void main() {
         },
       );
 
-      test('calls, policy rules are unknown', () {
+      test('legacy call invite is alwaysVisible', () {
+        expect(
+          EventTypeRules.getGroup(EventTypes.CallInvite),
+          EventVisibilityGroup.alwaysVisible,
+        );
+      });
+
+      test('call signalling and MatrixRTC events are neverInTimeline', () {
         for (final type in [
-          EventTypes.CallInvite,
           EventTypes.CallAnswer,
           EventTypes.CallHangup,
           EventTypes.CallCandidates,
+          EventTypes.CallReject,
+          EventTypes.CallSelectAnswer,
+          EventTypes.CallNegotiate,
+          EventTypes.GroupCallMember,
+          CallEventTypes.callMember,
+          RtcNotificationContent.eventType,
+          CallEventTypes.callNotify,
+          'm.call.sdp_stream_metadata_changed',
+          'org.matrix.call.sdp_stream_metadata_changed',
+          'com.famedly.call.member',
+        ]) {
+          expect(
+            EventTypeRules.getGroup(type),
+            EventVisibilityGroup.neverInTimeline,
+            reason: type,
+          );
+        }
+      });
+
+      test('policy rules are unknown', () {
+        for (final type in [
           'm.policy.rule.room',
           'm.policy.rule.server',
           'm.policy.rule.user',
@@ -257,11 +286,38 @@ void main() {
       });
     });
 
-    group('hidden by unknown group (hideUnknownEvents = true)', () {
-      test('m.call.invite', () {
-        expect(makeEvent(type: EventTypes.CallInvite).isVisibleInGui, isFalse);
+    group('legacy and MatrixRTC calls', () {
+      test('m.call.invite shows as a line', () {
+        expect(makeEvent(type: EventTypes.CallInvite).isVisibleInGui, isTrue);
       });
 
+      test('m.call.invite is not a chat-list preview', () {
+        expect(
+          EventVisibilityResolver.isEligibleForChatListPreviewSync(
+            makeEvent(type: EventTypes.CallInvite),
+          ),
+          isFalse,
+        );
+      });
+
+      test('call member, ring and hangup stay hidden with unknown shown', () {
+        AppConfig.hideUnknownEvents = false;
+        for (final type in [
+          CallEventTypes.callMember,
+          RtcNotificationContent.eventType,
+          CallEventTypes.callNotify,
+          EventTypes.CallHangup,
+        ]) {
+          expect(
+            makeEvent(type: type, content: {}, stateKey: '').isVisibleInGui,
+            isFalse,
+            reason: type,
+          );
+        }
+      });
+    });
+
+    group('hidden by unknown group (hideUnknownEvents = true)', () {
       test('com.example.custom (unregistered)', () {
         expect(
           makeEvent(type: 'com.example.custom', content: {}).isVisibleInGui,
@@ -442,11 +498,6 @@ void main() {
         ).isVisibleInGui,
         isTrue,
       );
-    });
-
-    test('m.call.invite visible when hideUnknownEvents = false', () {
-      AppConfig.hideUnknownEvents = false;
-      expect(makeEvent(type: EventTypes.CallInvite).isVisibleInGui, isTrue);
     });
 
     test('unknown type visible when hideUnknownEvents = false', () {
