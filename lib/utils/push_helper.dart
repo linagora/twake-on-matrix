@@ -15,6 +15,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> pushHelper(
@@ -90,14 +92,6 @@ Future<void> _tryPushHelper(
     notification.toJson(),
   );
 
-  if (!isBackgroundMessage &&
-      activeRoomId == notification.roomId &&
-      activeRoomId != null &&
-      client.syncPresence == null) {
-    Logs().v('Room is in foreground. Stop push helper here.');
-    return;
-  }
-
   // Initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   await flutterLocalNotificationsPlugin.initialize(
@@ -138,15 +132,27 @@ Future<void> _tryPushHelper(
   }
   Logs().v('Push helper got notification event of type ${event.type}.');
 
-  // On a thread screen only the replies of that thread are read live; the
-  // thread is known from the event (m.relates_to stays in clear).
-  if (!isBackgroundMessage &&
-      activeThread != null &&
-      activeThread.roomId == notification.roomId &&
-      activeThread.threadRootId == event.threadRootId &&
-      client.syncPresence == null) {
-    Logs().v('Thread is in foreground. Stop push helper here.');
-    return;
+  // Foreground: the room on screen is read live, except its thread replies
+  // (they sit in another screen); a thread reply follows the thread rule,
+  // which also skips the thread on screen. The thread is known from the
+  // event (m.relates_to stays in clear).
+  if (!isBackgroundMessage && client.syncPresence == null) {
+    final threadRootId = event.threadRootId;
+    if (threadRootId == null) {
+      if (activeRoomId != null && activeRoomId == notification.roomId) {
+        Logs().v('Room is in foreground. Stop push helper here.');
+        return;
+      }
+    } else if (!ThreadRules.shouldNotifyThreadEvent(
+      event,
+      followed:
+          client.threadUnread?.isFollowed(notification.roomId!, threadRootId) ??
+          false,
+      activeThread: activeThread,
+    )) {
+      Logs().v('Thread reply is read live or not followed. Stop push helper.');
+      return;
+    }
   }
 
   if (event.type.startsWith('m.call')) {

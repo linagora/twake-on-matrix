@@ -1,5 +1,6 @@
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:io';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
@@ -37,27 +38,33 @@ extension LocalNotificationsExtension on MatrixState {
     if (kIsWeb && (isWebPushActiveSync() || await isWebPushDisabledByUser())) {
       return;
     }
-    if (activeRoomId == roomId) {
-      if (PlatformInfos.isLinux && DesktopLifecycle.instance.isActive.value) {
-        return;
-      }
-    }
     final room = client.getRoomById(roomId);
     if (room == null) {
       Logs().w('Can not display notification for unknown room $roomId');
       return;
     }
-    if (room.unreadBadgeCount == 0 ||
-        (room.isMuted && room.highlightCountWithThreads == 0)) {
-      return;
-    }
     final event = Event.fromJson(eventUpdate.content, room);
-    final openThread = activeThread;
-    if (openThread != null &&
-        openThread.roomId == roomId &&
-        openThread.threadRootId == event.threadRootId &&
+    final threadRootId = event.threadRootId;
+    // The room on screen is read live, but not its thread replies.
+    if (threadRootId == null &&
+        activeRoomId == roomId &&
         PlatformInfos.isLinux &&
         DesktopLifecycle.instance.isActive.value) {
+      return;
+    }
+    if (threadRootId != null) {
+      // Room counters leave thread messages out and the thread counters land
+      // after this event: decide from the reply and the follow state.
+      if (!ThreadRules.shouldNotifyThreadEvent(
+        event,
+        followed:
+            client.threadUnread?.isFollowed(roomId, threadRootId) ?? false,
+        activeThread: activeThread,
+      )) {
+        return;
+      }
+    } else if (room.unreadBadgeCount == 0 ||
+        (room.isMuted && room.highlightCountWithThreads == 0)) {
       return;
     }
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));
