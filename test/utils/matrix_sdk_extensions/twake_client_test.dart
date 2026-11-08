@@ -55,7 +55,7 @@ void main() {
     );
   });
 
-  /// Roast n°4: the local echo of an own reply carries the transaction id
+  /// THR-M-01 and THR-M-07: the local echo of an own reply carries the transaction id
   /// as event id, and the SDK emits it on onTimelineEvent like a synced
   /// event. Only the synced echo, with its real id, is a thread reply.
   group('own thread reply sent from this device', () {
@@ -141,7 +141,7 @@ void main() {
     });
   });
 
-  /// Roast n°4 (THR-M-01): a gap in the sync is filled by requestHistory;
+  /// THR-M-01: a gap in the sync is filled by requestHistory;
   /// those replies come on onHistoryEvent and lose their relation once
   /// deleted, as live ones do.
   test('a thread reply loaded with the history is remembered as one', () async {

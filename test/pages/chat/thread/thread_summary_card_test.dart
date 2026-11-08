@@ -184,7 +184,7 @@ void main() {
     });
   });
 
-  /// Roast n°4 against the web ThreadCard (twake-space-chat
+  /// THR-M-02, against the web ThreadCard (twake-space-chat
   /// src/ds/ThreadCard/ThreadCard.tsx): `display: block; width: 100%`, the
   /// count in `variant="caption"` w600 primary followed by the text « › »,
   /// `backgroundColor: palette.background.paper`. Here the paper is

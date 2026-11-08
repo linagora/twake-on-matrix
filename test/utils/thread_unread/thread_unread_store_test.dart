@@ -247,7 +247,7 @@ void main() {
 
     test('a thread found not followed stays so on new replies, until the '
         'user writes in it', () async {
-      // Roast n°4: the user's own reply, from any device, comes through the
+      // THR-M-07: the user's own reply, from any device, comes through the
       // sync (TwakeClient → markFollowed); the counters need not ask again.
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
@@ -311,7 +311,7 @@ void main() {
 
     test('a "not participated" from the server is kept: 50 new replies ask '
         'the server once', () async {
-      // Roast n°4: one lookup per thread, not one per counter increase.
+      // THR-M-07: one lookup per thread, not one per counter increase.
       serverParticipatedOnLookup = [false];
       final client = clientNamed('account-a');
       final store = ThreadUnreadStore(client: client);
@@ -620,7 +620,7 @@ void main() {
     });
   });
 
-  /// Roast n°4 major: every remembered reply id and every counter change
+  /// Spec §5: every remembered reply id and every counter change
   /// rewrote the whole saved state. A catch-up sync brings hundreds of
   /// thread replies, about a millisecond apart (one database write each in
   /// the SDK): the saves are coalesced, and the last state is still saved.

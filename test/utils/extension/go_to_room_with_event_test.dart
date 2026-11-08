@@ -27,7 +27,7 @@ class _RecordingRouter extends GoRouter {
   }
 }
 
-/// THR-M-11 and roast n°4: a thread reply opened from the search or a link
+/// THR-M-11: a thread reply opened from the search or a link
 /// opens its thread screen, scrolled to the reply, over its room. One
 /// navigation to the nested route `/rooms/:roomId/threads/:rootId?event=`
 /// builds both pages; a `go` to the room then a `push` of the thread was

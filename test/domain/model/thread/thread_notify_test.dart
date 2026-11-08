@@ -175,7 +175,7 @@ void main() {
     });
   });
 
-  /// Roast n°4 B1 (THR-M-09): a catch-up sync, or a reply read on another
+  /// THR-M-09: a catch-up sync, or a reply read on another
   /// device, brings replies the user has read already. Their own receipt in
   /// the thread (or a newer main or unthreaded one) says so; the follow
   /// state and a mention do not bring the notification back.
@@ -264,7 +264,7 @@ void main() {
     });
   });
 
-  /// Roast n°4 (THR-M-07, P1: following = wrote the root or replied). On a
+  /// THR-M-07 (P1: following = wrote the root or replied). On a
   /// new device the store knows no thread yet: a root the user wrote makes
   /// the thread followed for this decision. The caller passes the sender of
   /// the root (`rootSenderId`), which it reads from the root event.
