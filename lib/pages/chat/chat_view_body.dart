@@ -1,7 +1,6 @@
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/pages/chat/thread/unread_thread_banner.dart';
-import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:desktop_drop/desktop_drop.dart';
@@ -361,9 +360,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
   }
 
   Widget _unreadThreadBanner(BuildContext context) {
-    final client = controller.client;
-    if (client is! ThreadUnreadStoreOwner) return const SizedBox.shrink();
-    final store = (client as ThreadUnreadStoreOwner).threadUnread;
+    final store = controller.threadUnreadStore;
+    if (store == null) return const SizedBox.shrink();
     final room = controller.room!;
     return ListenableBuilder(
       listenable: store,

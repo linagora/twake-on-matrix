@@ -161,14 +161,18 @@ class ChatEventListItem extends StatelessWidget {
           : Alignment.centerLeft,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: constraints.maxWidth * 0.7),
-        child: ThreadSummaryCard(
-          replyCount: summary.replyCount,
-          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
-              .calcDisplayname(),
-          lastReplyText: _lastReplyText(context, summary),
-          lastReplyTime: summary.lastReply?.originServerTs,
-          unreadCount: controller.threadUnreadCount(event.eventId),
-          onTap: () => _openThread(context),
+        child: ListenableBuilder(
+          listenable:
+              controller.threadUnreadStore ?? Listenable.merge(const []),
+          builder: (context, _) => ThreadSummaryCard(
+            replyCount: summary.replyCount,
+            lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
+                .calcDisplayname(),
+            lastReplyText: _lastReplyText(context, summary),
+            lastReplyTime: summary.lastReply?.originServerTs,
+            unreadCount: controller.threadUnreadCount(event.eventId),
+            onTap: () => _openThread(context),
+          ),
         ),
       ),
     ),

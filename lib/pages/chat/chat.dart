@@ -588,18 +588,11 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
-  // Captured where the listener is added: dispose must not look it up via context.
-  ThreadUnreadStore? _listenedThreadUnreadStore;
-
-  ThreadUnreadStore? get _threadUnreadStore {
-    final c = client;
-    return c is ThreadUnreadStoreOwner
-        ? (c as ThreadUnreadStoreOwner).threadUnread
-        : null;
-  }
+  /// The thread counters of the account; widgets listen to it themselves.
+  ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
 
   int threadUnreadCount(String rootId) =>
-      _threadUnreadStore?.unreadCount(roomId!, rootId) ?? 0;
+      threadUnreadStore?.unreadCount(roomId!, rootId) ?? 0;
 
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
@@ -681,6 +674,12 @@ class ChatController extends ConsumerState<Chat>
     }
     _createThreadEvents(room);
     await _threadEvents!.ready;
+    final error = _threadEvents!.lastError;
+    if (error != null && mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toLocalizedString(context))));
+    }
     if (widget.startThread && mounted) _requestInputFocus();
   }
 
@@ -3305,7 +3304,6 @@ class ChatController extends ConsumerState<Chat>
         return const ErrorRoute().go(context);
       }
       _handleReceivedShareFiles();
-      _listenedThreadUnreadStore = _threadUnreadStore?..addListener(updateView);
       _listenRoomUpdateEvent();
       initCachedPresence();
       await _requestParticipants();
@@ -3483,7 +3481,6 @@ class ChatController extends ConsumerState<Chat>
     _scrollGeneration++;
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
-    _listenedThreadUnreadStore?.removeListener(updateView);
     unawaited(_threadRedactionSub?.cancel());
     unawaited(_threadSessionKeySub?.cancel());
     timeline?.cancelSubscriptions();
