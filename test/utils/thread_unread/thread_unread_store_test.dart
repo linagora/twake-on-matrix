@@ -22,12 +22,19 @@ void main() {
 
   late MockRoom room;
   late List<bool> participatedOnLookup;
+  late bool cachedRootHasAggregate;
+
+  /// What `GET /rooms/{roomId}/event/{rootId}` says, one answer per call
+  /// (the last one repeats); an [Exception] makes the call fail.
+  late List<Object> serverParticipatedOnLookup;
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     room = MockRoom();
     when(room.id).thenReturn(roomId);
     participatedOnLookup = [false];
+    cachedRootHasAggregate = true;
+    serverParticipatedOnLookup = [false];
     var lookups = 0;
     when(room.getEventById(rootId)).thenAnswer((_) async {
       final participated =
@@ -43,11 +50,16 @@ void main() {
         senderId: alice,
         originServerTs: DateTime.utc(2026, 11, 6),
         room: room,
-        unsigned: {
-          'm.relations': {
-            'm.thread': {'count': 3, 'current_user_participated': participated},
-          },
-        },
+        unsigned: cachedRootHasAggregate
+            ? {
+                'm.relations': {
+                  'm.thread': {
+                    'count': 3,
+                    'current_user_participated': participated,
+                  },
+                },
+              }
+            : null,
       );
     });
   });
@@ -57,6 +69,29 @@ void main() {
     when(client.clientName).thenReturn(name);
     when(client.userID).thenReturn(me);
     when(client.getRoomById(roomId)).thenReturn(room);
+    var serverLookups = 0;
+    when(client.getOneRoomEvent(roomId, rootId)).thenAnswer((_) async {
+      final answer =
+          serverParticipatedOnLookup[serverLookups.clamp(
+            0,
+            serverParticipatedOnLookup.length - 1,
+          )];
+      serverLookups++;
+      if (answer is Exception) throw answer;
+      return MatrixEvent(
+        type: EventTypes.Message,
+        content: {'msgtype': 'm.text', 'body': 'root'},
+        eventId: rootId,
+        senderId: alice,
+        originServerTs: DateTime.utc(2026, 11, 6),
+        roomId: roomId,
+        unsigned: {
+          'm.relations': {
+            'm.thread': {'count': 4, 'current_user_participated': answer},
+          },
+        },
+      );
+    });
     return client;
   }
 
@@ -186,6 +221,86 @@ void main() {
       // The user replied from another device between the two syncs.
       participatedOnLookup = [false, true];
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+      expect(threadOf(store)?.followed, isFalse);
+
+      store.apply(counts(2));
+      await pumpEventQueue();
+
+      expect(threadOf(store)?.followed, isTrue);
+    });
+  });
+
+  /// THR-M-07 (P1: following = wrote the root or replied). The root read
+  /// from the database keeps the thread aggregate of the day it was stored:
+  /// a reply the user sent since, from another device, is not in it.
+  group('follow state read from the server', () {
+    test('a thread the stored root says not participated is followed when '
+        'the server says the user replied', () async {
+      participatedOnLookup = [false];
+      serverParticipatedOnLookup = [true];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a stored root without the thread aggregate is checked on the '
+        'server', () async {
+      cachedRootHasAggregate = false;
+      serverParticipatedOnLookup = [true];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a stored root that says participated needs no server '
+        'call', () async {
+      participatedOnLookup = [true];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      verifyNever(client.getOneRoomEvent(any, any));
+      expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a "not participated" from the server is not asked again until '
+        'the counter changes', () async {
+      serverParticipatedOnLookup = [false];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(2));
+      await pumpEventQueue();
+      store.apply(counts(2));
+      await pumpEventQueue();
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(threadOf(store)?.followed, isFalse);
+
+      store.apply(counts(3));
+      await pumpEventQueue();
+
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+    });
+
+    test('a server that does not answer leaves the thread not followed, and '
+        'the next reply asks again', () async {
+      serverParticipatedOnLookup = [Exception('offline'), true];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
 
       store.apply(counts(1));
       await pumpEventQueue();
