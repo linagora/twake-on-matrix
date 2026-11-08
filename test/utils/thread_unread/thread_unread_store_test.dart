@@ -228,10 +228,10 @@ void main() {
       expect(store.isFollowed(roomId, r'$other_root'), isFalse);
     });
 
-    test('a thread found not followed is checked again when new replies '
-        'arrive', () async {
-      // The user replied from another device between the two syncs.
-      participatedOnLookup = [false, true];
+    test('a thread found not followed stays so on new replies, until the '
+        'user writes in it', () async {
+      // Roast n°4: the user's own reply, from any device, comes through the
+      // sync (TwakeClient → markFollowed); the counters need not ask again.
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
       store.apply(counts(1));
@@ -240,6 +240,9 @@ void main() {
 
       store.apply(counts(2));
       await pumpEventQueue();
+      expect(threadOf(store)?.followed, isFalse);
+
+      store.markFollowed(roomId, rootId);
 
       expect(threadOf(store)?.followed, isTrue);
     });
@@ -289,23 +292,40 @@ void main() {
       expect(threadOf(store)?.followed, isTrue);
     });
 
-    test('a "not participated" from the server is not asked again until '
-        'the counter changes', () async {
+    test('a "not participated" from the server is kept: 50 new replies ask '
+        'the server once', () async {
+      // Roast n°4: one lookup per thread, not one per counter increase.
       serverParticipatedOnLookup = [false];
       final client = clientNamed('account-a');
       final store = ThreadUnreadStore(client: client);
 
-      store.apply(counts(2));
-      await pumpEventQueue();
-      store.apply(counts(2));
-      await pumpEventQueue();
-      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      for (var n = 1; n <= 50; n++) {
+        store.apply(counts(n));
+        await pumpEventQueue();
+      }
+
+      verify(
+        client.getOneRoomEvent(roomId, rootId),
+      ).called(lessThanOrEqualTo(1));
+      verify(room.getEventById(rootId)).called(lessThanOrEqualTo(1));
       expect(threadOf(store)?.followed, isFalse);
+    });
 
-      store.apply(counts(3));
+    test('a thread kept not followed is followed once the user writes in it, '
+        'and asks nothing more', () async {
+      serverParticipatedOnLookup = [false];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+      store.apply(counts(1));
+      await pumpEventQueue();
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+
+      store.markFollowed(roomId, rootId);
+      store.apply(counts(2));
       await pumpEventQueue();
 
-      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      verifyNever(client.getOneRoomEvent(roomId, rootId));
+      expect(threadOf(store)?.followed, isTrue);
     });
 
     test('a server that does not answer leaves the thread not followed, and '
@@ -322,6 +342,39 @@ void main() {
       await pumpEventQueue();
 
       expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a failed lookup is tried again once per later increase, and a '
+        '"not participated" then is kept', () async {
+      serverParticipatedOnLookup = [
+        Exception('offline'),
+        Exception('offline'),
+        false,
+      ];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+      // The same counters again: no increase, no new call.
+      store.apply(counts(1));
+      await pumpEventQueue();
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+
+      store.apply(counts(2));
+      await pumpEventQueue();
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+
+      store.apply(counts(3));
+      await pumpEventQueue();
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+
+      for (var n = 4; n <= 10; n++) {
+        store.apply(counts(n));
+        await pumpEventQueue();
+      }
+      verifyNever(client.getOneRoomEvent(roomId, rootId));
+      expect(threadOf(store)?.followed, isFalse);
     });
   });
 
