@@ -5,6 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../fake_client.dart';
 
+/// A logged-in account: its own events are the ones of [userID].
+class _OwnClient extends TwakeClient {
+  _OwnClient() : super('testclient', database: MockDatabase());
+
+  @override
+  String? get userID => '@me:example.org';
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
@@ -45,5 +53,91 @@ void main() {
       client.threadUnread.knownThreadReplyIds('!room:example.org'),
       contains(r'$reply'),
     );
+  });
+
+  /// Roast n°4: the local echo of an own reply carries the transaction id
+  /// as event id, and the SDK emits it on onTimelineEvent like a synced
+  /// event. Only the synced echo, with its real id, is a thread reply.
+  group('own thread reply sent from this device', () {
+    const roomId = '!room:example.org';
+    const rootId = r'$root';
+    const txid = 'txn-1';
+
+    Event ownReply(
+      Room room, {
+      required String eventId,
+      required EventStatus status,
+    }) => Event(
+      type: EventTypes.Message,
+      content: {
+        'msgtype': 'm.text',
+        'body': 'my reply',
+        'm.relates_to': {
+          'rel_type': RelationshipTypes.thread,
+          'event_id': rootId,
+          'is_falling_back': true,
+        },
+      },
+      eventId: eventId,
+      senderId: '@me:example.org',
+      originServerTs: DateTime.now(),
+      status: status,
+      unsigned: {
+        messageSendingStatusKey: status.intValue,
+        'transaction_id': txid,
+      },
+      room: room,
+    );
+
+    test('its local echo, still sending, is neither remembered nor makes '
+        'the thread followed', () async {
+      final client = _OwnClient();
+      final room = Room(id: roomId, client: client);
+
+      client.onTimelineEvent.add(
+        ownReply(room, eventId: txid, status: EventStatus.sending),
+      );
+      await pumpEventQueue();
+
+      expect(
+        client.threadUnread.knownThreadReplyIds(roomId),
+        isNot(contains(txid)),
+      );
+      expect(client.threadUnread.isFollowed(roomId, rootId), isFalse);
+    });
+
+    test('its local echo, failed to send, is neither remembered nor makes '
+        'the thread followed', () async {
+      final client = _OwnClient();
+      final room = Room(id: roomId, client: client);
+
+      client.onTimelineEvent.add(
+        ownReply(room, eventId: txid, status: EventStatus.error),
+      );
+      await pumpEventQueue();
+
+      expect(
+        client.threadUnread.knownThreadReplyIds(roomId),
+        isNot(contains(txid)),
+      );
+      expect(client.threadUnread.isFollowed(roomId, rootId), isFalse);
+    });
+
+    test('its synced echo is remembered by its real id and makes the thread '
+        'followed', () async {
+      final client = _OwnClient();
+      final room = Room(id: roomId, client: client);
+
+      client.onTimelineEvent.add(
+        ownReply(room, eventId: txid, status: EventStatus.sending),
+      );
+      client.onTimelineEvent.add(
+        ownReply(room, eventId: r'$my_reply', status: EventStatus.synced),
+      );
+      await pumpEventQueue();
+
+      expect(client.threadUnread.knownThreadReplyIds(roomId), {r'$my_reply'});
+      expect(client.threadUnread.isFollowed(roomId, rootId), isTrue);
+    });
   });
 }
