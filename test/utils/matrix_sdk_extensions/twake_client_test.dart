@@ -140,4 +140,37 @@ void main() {
       expect(client.threadUnread.isFollowed(roomId, rootId), isTrue);
     });
   });
+
+  /// Roast n°4 (THR-M-01): a gap in the sync is filled by requestHistory;
+  /// those replies come on onHistoryEvent and lose their relation once
+  /// deleted, as live ones do.
+  test('a thread reply loaded with the history is remembered as one', () async {
+    final client = TwakeClient('testclient', database: MockDatabase());
+    final room = Room(id: '!room:example.org', client: client);
+
+    client.onHistoryEvent.add(
+      Event(
+        type: EventTypes.Message,
+        content: {
+          'msgtype': 'm.text',
+          'body': 'older, in the thread',
+          'm.relates_to': {
+            'rel_type': RelationshipTypes.thread,
+            'event_id': r'$root',
+            'is_falling_back': true,
+          },
+        },
+        eventId: r'$old_reply',
+        senderId: '@bob:example.org',
+        originServerTs: DateTime.utc(2026, 11, 1),
+        room: room,
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(
+      client.threadUnread.knownThreadReplyIds('!room:example.org'),
+      contains(r'$old_reply'),
+    );
+  });
 }
