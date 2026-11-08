@@ -28,7 +28,56 @@ void main() {
     when(room.notificationCount).thenReturn(0);
     when(room.highlightCount).thenReturn(0);
     when(room.pushRuleState).thenReturn(PushRuleState.notify);
+    // Nothing read yet, unless a test says otherwise.
+    when(room.receiptState).thenReturn(LatestReceiptState.empty());
   });
+
+  /// When [reply] was sent.
+  final replySentAt = DateTime.utc(2026, 11, 8, 10);
+
+  /// The user's own receipt, sent at [at].
+  LatestReceiptStateForTimeline ownReceiptAt(DateTime at) =>
+      LatestReceiptStateForTimeline(
+        ownPrivate: null,
+        ownPublic: LatestReceiptStateData(r'$read', at.millisecondsSinceEpoch),
+        latestOwnReceipt: LatestReceiptStateData(
+          r'$read',
+          at.millisecondsSinceEpoch,
+        ),
+        otherUsers: {},
+      );
+
+  void receipts({
+    DateTime? global,
+    DateTime? main,
+    Map<String, DateTime> byThread = const {},
+    Map<String, DateTime> othersInThread = const {},
+  }) {
+    when(room.receiptState).thenReturn(
+      LatestReceiptState(
+        global: global == null
+            ? LatestReceiptStateForTimeline.empty()
+            : ownReceiptAt(global),
+        mainThread: main == null ? null : ownReceiptAt(main),
+        byThread: {
+          for (final entry in byThread.entries)
+            entry.key: ownReceiptAt(entry.value),
+          for (final entry in othersInThread.entries)
+            entry.key: LatestReceiptStateForTimeline(
+              ownPrivate: null,
+              ownPublic: null,
+              latestOwnReceipt: null,
+              otherUsers: {
+                '@alice:example.com': LatestReceiptStateData(
+                  r'$read',
+                  entry.value.millisecondsSinceEpoch,
+                ),
+              },
+            ),
+        },
+      ),
+    );
+  }
 
   Event reply({bool mentionsMe = false}) => Event(
     type: EventTypes.Message,
@@ -50,7 +99,7 @@ void main() {
     },
     eventId: r'$reply',
     senderId: '@bob:example.com',
-    originServerTs: DateTime.utc(2026, 11, 8, 10),
+    originServerTs: replySentAt,
     room: room,
   );
 
@@ -121,6 +170,95 @@ void main() {
           reply(mentionsMe: true),
           followed: false,
         ),
+        isTrue,
+      );
+    });
+  });
+
+  /// Roast n°4 B1 (THR-M-09): a catch-up sync, or a reply read on another
+  /// device, brings replies the user has read already. Their own receipt in
+  /// the thread (or a newer main or unthreaded one) says so; the follow
+  /// state and a mention do not bring the notification back.
+  group('a reply the user has read already', () {
+    const later = Duration(minutes: 1);
+
+    test('does not notify when the own receipt of the thread is on it', () {
+      receipts(byThread: {rootId: replySentAt});
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(mentionsMe: true),
+          followed: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('does not notify when the own receipt of the thread is newer', () {
+      receipts(byThread: {rootId: replySentAt.add(later)});
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        isFalse,
+      );
+    });
+
+    test('does not notify when an unthreaded own receipt is newer than the '
+        'one of the thread', () {
+      receipts(
+        global: replySentAt.add(later),
+        byThread: {rootId: replySentAt.subtract(later)},
+      );
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        isFalse,
+      );
+    });
+
+    test('does not notify when the own main receipt is newer than the one of '
+        'the thread', () {
+      receipts(
+        main: replySentAt.add(later),
+        byThread: {rootId: replySentAt.subtract(later)},
+      );
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(mentionsMe: true),
+          followed: true,
+        ),
+        isFalse,
+      );
+    });
+
+    test('a newer reply than every own receipt still notifies', () {
+      receipts(
+        global: replySentAt.subtract(later),
+        main: replySentAt.subtract(later),
+        byThread: {rootId: replySentAt.subtract(later)},
+      );
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        isTrue,
+      );
+    });
+
+    test('the own receipt of another thread does not read this one', () {
+      receipts(byThread: {r'$other_root': replySentAt.add(later)});
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        isTrue,
+      );
+    });
+
+    test('the receipt of another user does not read it for the user', () {
+      receipts(othersInThread: {rootId: replySentAt.add(later)});
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
         isTrue,
       );
     });
