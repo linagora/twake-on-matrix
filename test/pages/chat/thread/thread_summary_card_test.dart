@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 
-/// THR-M-02: the card under a thread root.
+/// THR-M-02: the card of a thread, inside the bubble of its root. Design
+/// (Clément, 08/11): as the web ThreadCard (twake-space-chat
+/// src/ds/ThreadCard/ThreadCard.tsx) — a paper card, radius 8, a 3 px left
+/// border (primary when unread, neutral when read), « N messages › » in
+/// primary w600, then one line « **Author**: text · relative age ».
 void main() {
+  /// Five minutes and a bit: far from a minute boundary while the test runs.
+  DateTime fiveMinutesAgo() =>
+      DateTime.now().subtract(const Duration(minutes: 5, seconds: 10));
+
   Future<void> pumpCard(
     WidgetTester tester, {
     int replyCount = 3,
     int unreadCount = 0,
     VoidCallback? onTap,
+    Locale locale = const Locale('en'),
+    DateTime? lastReplyTime,
   }) => tester.pumpWidget(
     MaterialApp(
-      locale: const Locale('en'),
+      locale: locale,
       localizationsDelegates: const [
         L10n.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -27,13 +38,171 @@ void main() {
           replyCount: replyCount,
           lastReplyAuthor: 'Alice',
           lastReplyText: 'See you tomorrow',
-          lastReplyTime: DateTime.now().subtract(const Duration(minutes: 5)),
+          lastReplyTime: lastReplyTime ?? fiveMinutesAgo(),
           unreadCount: unreadCount,
           onTap: onTap ?? () {},
         ),
       ),
     ),
   );
+
+  final primary = LinagoraSysColors.material().primary;
+
+  /// The frame of the card: the box that draws its border.
+  BoxDecoration frame(WidgetTester tester) => tester
+      .widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.byType(DecoratedBox),
+        ),
+      )
+      .map((box) => box.decoration)
+      .whereType<BoxDecoration>()
+      .singleWhere((decoration) => decoration.border != null);
+
+  /// The unread dot: a small primary circle.
+  Finder unreadDot() => find.descendant(
+    of: find.byType(ThreadSummaryCard),
+    matching: find.byWidgetPredicate((widget) {
+      final decoration = widget is DecoratedBox ? widget.decoration : null;
+      return decoration is BoxDecoration &&
+          decoration.shape == BoxShape.circle &&
+          decoration.color == primary;
+    }),
+  );
+
+  /// The painted text of a line of the card, found by its start.
+  RichText line(WidgetTester tester, String start) => tester
+      .widgetList<RichText>(
+        find.descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.byType(RichText),
+        ),
+      )
+      .singleWhere((text) => text.text.toPlainText().startsWith(start));
+
+  /// The spans of [text] that carry their own text, with the style they are
+  /// painted with (their parents' merged in).
+  List<(String, TextStyle)> spansOf(InlineSpan text) {
+    final spans = <(String, TextStyle)>[];
+    void visit(InlineSpan span, TextStyle inherited) {
+      final style = inherited.merge(span.style);
+      if (span is TextSpan) {
+        if (span.text != null && span.text!.isNotEmpty) {
+          spans.add((span.text!, style));
+        }
+        for (final child in span.children ?? const <InlineSpan>[]) {
+          visit(child, style);
+        }
+      }
+    }
+
+    visit(text, const TextStyle());
+    return spans;
+  }
+
+  group('look of the card', () {
+    testWidgets('a paper card with radius 8, distinct from the bubble', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      final decoration = frame(tester);
+      expect(decoration.borderRadius, BorderRadius.circular(8));
+      expect(decoration.color, isNotNull);
+      expect(decoration.color!.a, 1.0, reason: 'an opaque paper surface');
+    });
+
+    testWidgets('an unread thread has a dot and a 3 px left border in the '
+        'primary colour', (tester) async {
+      await pumpCard(tester, unreadCount: 2);
+
+      final border = frame(tester).border! as Border;
+      expect(border.left.width, 3);
+      expect(border.left.color, primary);
+      expect(unreadDot(), findsOneWidget);
+      expect(tester.getSize(unreadDot()), const Size(8, 8));
+    });
+
+    testWidgets('a read thread has no dot and a neutral left border', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      final border = frame(tester).border! as Border;
+      expect(border.left.width, 3);
+      expect(border.left.color, isNot(primary));
+      expect(unreadDot(), findsNothing);
+    });
+
+    testWidgets('the number of messages is in primary, semi-bold', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      final style = line(tester, '3 messages').text.style!;
+      expect(style.color, primary);
+      expect(style.fontWeight, FontWeight.w600);
+    });
+  });
+
+  group('the last reply', () {
+    testWidgets('is one line, cut with an ellipsis', (tester) async {
+      await pumpCard(tester);
+
+      final text = line(tester, 'Alice: See you tomorrow · ');
+      expect(text.maxLines, 1);
+      expect(text.overflow, TextOverflow.ellipsis);
+    });
+
+    testWidgets('shows its author in semi-bold, the text in regular', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      final spans = spansOf(line(tester, 'Alice: See you tomorrow · ').text);
+      final author = spans.where((span) => span.$1 == 'Alice');
+      expect(author, hasLength(1), reason: 'the author is a span of its own');
+      expect(author.single.$2.fontWeight, FontWeight.w600);
+      final rest = spans.where((span) => span.$1.contains('See you tomorrow'));
+      expect(rest.single.$2.fontWeight, isNot(FontWeight.w600));
+    });
+
+    testWidgets('shows how long ago it was sent, not the time of day', (
+      tester,
+    ) async {
+      await pumpCard(tester);
+
+      final plain = line(
+        tester,
+        'Alice: See you tomorrow · ',
+      ).text.toPlainText();
+      expect(plain, 'Alice: See you tomorrow · 5 minutes ago');
+      expect(plain, isNot(matches(RegExp(r'\d{1,2}:\d{2}'))));
+    });
+
+    testWidgets('says the age in the language of the app', (tester) async {
+      await pumpCard(tester, locale: const Locale('fr'));
+
+      expect(
+        line(tester, 'Alice: See you tomorrow · ').text.toPlainText(),
+        'Alice: See you tomorrow · il y a 5 minutes',
+      );
+    });
+
+    testWidgets('accessibility reads the age too', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpCard(tester);
+
+      expect(
+        find.bySemanticsLabel(
+          RegExp('3 messages.*Alice: See you tomorrow · 5 minutes ago'),
+        ),
+        findsOneWidget,
+      );
+      semantics.dispose();
+    });
+  });
 
   testWidgets('shows the number of messages of the thread', (tester) async {
     await pumpCard(tester, replyCount: 3);
