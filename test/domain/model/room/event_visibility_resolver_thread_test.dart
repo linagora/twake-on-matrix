@@ -128,6 +128,65 @@ void main() {
     );
   });
 
+  /// THR-M-01. Once deleted, a reply loses `m.relates_to` (event.dart:255-289)
+  /// and nothing in the event says it was in a thread any more: the room
+  /// Chat and the thread Chat would then both show it, with the same
+  /// GlobalObjectKey. The thread counters store remembers the ids of the
+  /// replies it saw ([ThreadUnreadStore.knownThreadReplyIds]).
+  group('a deleted thread reply', () {
+    Event deleted(Event event) =>
+        Event.fromJson(event.toJson(), room)..setRedactionEvent(
+          Event(
+            type: EventTypes.Redaction,
+            content: const {},
+            eventId: r'$redaction',
+            senderId: '@alice:example.com',
+            originServerTs: DateTime.utc(2026, 11, 6, 11),
+            redacts: event.eventId,
+            room: room,
+          ),
+        );
+
+    test('stays out of the main timeline when its id is known as a thread '
+        'reply', () {
+      final reply = deleted(threadReply());
+
+      expect(
+        EventVisibilityResolver.isVisibleInTimeline(
+          reply,
+          knownThreadReplyIds: {r'$reply'},
+        ),
+        isFalse,
+      );
+    });
+
+    test('still shows, deleted, on the thread screen', () {
+      final reply = deleted(threadReply());
+
+      expect(
+        EventVisibilityResolver.isVisibleInTimeline(
+          reply,
+          inThread: true,
+          knownThreadReplyIds: {r'$reply'},
+        ),
+        isTrue,
+      );
+    });
+
+    test('a deleted message of the room itself stays in the main '
+        'timeline', () {
+      final ordinary = deleted(message(eventId: r'$ordinary'));
+
+      expect(
+        EventVisibilityResolver.isVisibleInTimeline(
+          ordinary,
+          knownThreadReplyIds: {r'$reply'},
+        ),
+        isTrue,
+      );
+    });
+  });
+
   group('chat list last message', () {
     test('a thread reply is not eligible as last message (sync check)', () {
       expect(

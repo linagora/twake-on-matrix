@@ -313,6 +313,72 @@ void main() {
     });
   });
 
+  /// THR-M-01: a reply deleted loses its thread relation; the store keeps
+  /// the ids of the thread replies so the main timeline still hides it.
+  group('ids of the thread replies', () {
+    const replyId = r'$reply';
+
+    test('a remembered reply is known for its room only', () {
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      store.rememberThreadReply(roomId, replyId);
+
+      expect(store.knownThreadReplyIds(roomId), contains(replyId));
+      expect(store.knownThreadReplyIds('!other:example.com'), isEmpty);
+    });
+
+    test('are found again after a restart by the same account', () async {
+      final before = ThreadUnreadStore(client: clientNamed('account-a'));
+      before.rememberThreadReply(roomId, replyId);
+      await pumpEventQueue();
+
+      final after = ThreadUnreadStore(client: clientNamed('account-a'));
+      await after.restore();
+
+      expect(after.knownThreadReplyIds(roomId), contains(replyId));
+    });
+
+    test('another account does not see them', () async {
+      final accountA = ThreadUnreadStore(client: clientNamed('account-a'));
+      accountA.rememberThreadReply(roomId, replyId);
+      await pumpEventQueue();
+
+      final accountB = ThreadUnreadStore(client: clientNamed('account-b'));
+      await accountB.restore();
+
+      expect(accountB.knownThreadReplyIds(roomId), isEmpty);
+    });
+
+    test('are forgotten at logout', () async {
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+      store.rememberThreadReply(roomId, replyId);
+      await pumpEventQueue();
+
+      await store.clear();
+      final next = ThreadUnreadStore(client: clientNamed('account-a'));
+      await next.restore();
+
+      expect(store.knownThreadReplyIds(roomId), isEmpty);
+      expect(next.knownThreadReplyIds(roomId), isEmpty);
+    });
+
+    test('are bounded: the oldest go first, the newest stay', () async {
+      // ponytail: 5000 probes the bound, the cap itself is not decided.
+      const remembered = 5000;
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      for (var i = 0; i < remembered; i++) {
+        store.rememberThreadReply(roomId, '\$reply$i');
+      }
+      await pumpEventQueue();
+
+      final known = store.knownThreadReplyIds(roomId);
+      expect(known.length, lessThan(remembered));
+      expect(known, contains('\$reply${remembered - 1}'));
+      expect(known, isNot(contains(r'$reply0')));
+    });
+  });
+
   /// Logout: the next account on this device may carry the same clientName.
   group('after a logout', () {
     test('the next account on the device sees no thread of the previous '
