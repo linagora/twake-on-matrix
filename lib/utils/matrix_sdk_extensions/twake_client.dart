@@ -94,7 +94,10 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     // applies them.
     onSync.stream.listen((update) {
       final counts = _pendingThreadCounts[update];
-      if (counts != null) threadUnread.apply(counts);
+      final left = update.rooms?.leave?.keys ?? const <String>[];
+      if (counts != null || left.isNotEmpty) {
+        threadUnread.apply(counts ?? const {}, leftRoomIds: left);
+      }
     });
     // The user's own thread events, from any device, make a thread followed.
     onTimelineEvent.stream.listen((event) {
@@ -119,6 +122,7 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
           (e, s) => Logs().w('Unable to log the NSE device out', e, s),
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
+    await threadUnread.clear();
     return super.clear(reason: reason);
   }
 

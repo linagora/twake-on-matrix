@@ -20,11 +20,29 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Set<String> _followed = {};
   final Set<String> _resolving = {};
   final Map<String, DateTime> _activity = {};
+  final Map<String, int> _badges = {};
+
+  /// Bumped by [clear]: a lookup started before it must not bring a follow back.
+  int _epoch = 0;
 
   String get _prefsKey => 'thread_unread_${_client.clientName}';
 
-  void apply(Map<String, Map<String, ThreadCounts>> roomCounts) {
+  /// [leftRoomIds]: rooms the sync says the user left; their counters and
+  /// follow state go, so a later join starts clean.
+  void apply(
+    Map<String, Map<String, ThreadCounts>> roomCounts, {
+    Iterable<String> leftRoomIds = const [],
+  }) {
     var changed = false;
+    for (final roomId in leftRoomIds) {
+      final hadCounts = _counts.remove(roomId) != null;
+      final prefix = '$roomId|';
+      final hadFollow = _followed.length;
+      _followed.removeWhere((key) => key.startsWith(prefix));
+      _activity.removeWhere((key, _) => key.startsWith(prefix));
+      _badges.remove(roomId);
+      changed |= hadCounts || hadFollow != _followed.length;
+    }
     for (final entry in roomCounts.entries) {
       final before = _counts[entry.key] ?? const <String, ThreadCounts>{};
       for (final thread in entry.value.entries) {
@@ -36,6 +54,7 @@ class ThreadUnreadStore extends ChangeNotifier {
       }
       if (!mapEquals(before, entry.value)) {
         _counts[entry.key] = entry.value;
+        _refreshBadge(entry.key);
         changed = true;
       }
     }
@@ -47,6 +66,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// The user wrote in this thread: it is followed from now on.
   void markFollowed(String roomId, String rootId) {
     if (!_followed.add('$roomId|$rootId')) return;
+    _refreshBadge(roomId);
     notifyListeners();
     _persist();
   }
@@ -71,9 +91,27 @@ class ThreadUnreadStore extends ChangeNotifier {
         );
       }
       _followed.addAll((json['followed'] as List? ?? const []).cast<String>());
+      _counts.keys.toList().forEach(_refreshBadge);
       notifyListeners();
     } catch (e, s) {
       Logs().w('Unable to restore the thread counters', e, s);
+    }
+  }
+
+  /// Logout: forgets everything, in memory and saved, also when a save is
+  /// still running (it runs first, then the key goes).
+  Future<void> clear() async {
+    _epoch++;
+    _counts.clear();
+    _followed.clear();
+    _activity.clear();
+    _badges.clear();
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_prefsKey);
+    } catch (e, s) {
+      Logs().w('Unable to clear the thread counters', e, s);
     }
   }
 
@@ -101,6 +139,16 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
   }
 
+  void _refreshBadge(String roomId) {
+    _badges[roomId] = roomUnreadBadge(
+      mainNotificationCount: 0,
+      threads: threadsOf(roomId),
+    );
+  }
+
+  /// Badge of the threads of the room (without its main timeline).
+  int badgeOf(String roomId) => _badges[roomId] ?? 0;
+
   int unreadCount(String roomId, String rootId) =>
       _counts[roomId]?[rootId]?.notificationCount ?? 0;
 
@@ -122,9 +170,10 @@ class ThreadUnreadStore extends ChangeNotifier {
   Future<void> _resolveFollowed(String roomId, String rootId) async {
     final key = '$roomId|$rootId';
     if (_followed.contains(key) || !_resolving.add(key)) return;
+    final epoch = _epoch;
     try {
       final root = await _client.getRoomById(roomId)?.getEventById(rootId);
-      if (root == null) return;
+      if (root == null || epoch != _epoch) return;
       final participated =
           (((root.unsigned?['m.relations'] as Map?)?['m.thread']
               as Map?)?['current_user_participated']) ==
@@ -140,18 +189,20 @@ class ThreadUnreadStore extends ChangeNotifier {
   }
 }
 
+/// The one way to reach the thread counters of an account; null for a client
+/// that keeps none.
+extension ThreadUnreadClientExtension on Client {
+  ThreadUnreadStore? get threadUnread {
+    final Object self = this;
+    return self is ThreadUnreadStoreOwner ? self.threadUnread : null;
+  }
+}
+
 extension ThreadUnreadRoomExtension on Room {
   /// Room badge: main timeline, followed threads and mentions of any thread.
   int get unreadBadgeCount {
-    final store = client is ThreadUnreadStoreOwner
-        ? (client as ThreadUnreadStoreOwner).threadUnread
-        : null;
-    return store == null
-        ? notificationCount
-        : roomUnreadBadge(
-            mainNotificationCount: notificationCount,
-            threads: store.threadsOf(id),
-          );
+    final store = client.threadUnread;
+    return notificationCount + (store?.badgeOf(id) ?? 0);
   }
 }
 
@@ -165,9 +216,7 @@ extension RoomUnreadWithThreads on Room {
 
   /// Mentions of the room and of any of its threads.
   int get highlightCountWithThreads {
-    final store = client is ThreadUnreadStoreOwner
-        ? (client as ThreadUnreadStoreOwner).threadUnread
-        : null;
+    final store = client.threadUnread;
     return highlightCount +
         (store?.threadsOf(id).fold<int>(0, (n, t) => n + t.highlightCount) ??
             0);
@@ -194,9 +243,7 @@ extension MarkRoomAndThreadsRead on Room {
   /// "Mark as read": the main timeline and every thread with unread messages.
   Future<void> markRoomAndAllThreadsRead() async {
     final mainEvent = await _newestMainTimelineEvent();
-    final store = client is ThreadUnreadStoreOwner
-        ? (client as ThreadUnreadStoreOwner).threadUnread
-        : null;
+    final store = client.threadUnread;
     final lastEventIdByThreadRootId = <String, String>{};
     for (final thread in store?.threadsOf(id) ?? const <ThreadUnread>[]) {
       if (thread.notificationCount == 0) continue;
