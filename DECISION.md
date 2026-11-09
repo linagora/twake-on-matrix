@@ -179,8 +179,9 @@ directory, as Twake Space Chat does since its D581: it also says whether the
 user is banned or has already asked, and it describes a room that no directory
 lists. A failure of the summary shows the group as unavailable, with « Try to
 join », as there, unless the app already knows the user is banned from it: the
-preview then says so, with no button. The `via` servers of the link route the summary, the join and
-the request. A joined room still opens directly, at the linked message.
+preview then says so, with no button. The `via` servers of the link route the
+summary, the join and the request. A joined room still opens directly, at the
+linked message.
 
 Hand-typed addresses becoming links is left to a later change.
 

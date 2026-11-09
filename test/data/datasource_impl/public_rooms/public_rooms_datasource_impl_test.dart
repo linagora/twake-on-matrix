@@ -613,24 +613,31 @@ void main() {
       expect(preview, const PublicRoomPreview.joined('!general:hs'));
     });
 
-    test('getPreview_whenTheLocalRoomWasLeft_asksTheSummary', () async {
-      // Arrange
-      final room = MockRoom();
-      when(
-        room.requestUser('@me:hs', requestState: false, requestProfile: false),
-      ).thenAnswer(
-        (_) async => User('@me:hs', membership: 'leave', room: room),
-      );
-      when(mockClient.userID).thenReturn('@me:hs');
-      when(mockClient.getRoomByAlias(alias)).thenReturn(room);
-      stubSummary(summary());
+    test(
+      'getPreview_whenTheSummaryFailsAndTheLocalRoomWasLeft_saysUnavailable',
+      () async {
+        // Arrange
+        final room = MockRoom();
+        when(
+          room.requestUser(
+            '@me:hs',
+            requestState: false,
+            requestProfile: false,
+          ),
+        ).thenAnswer(
+          (_) async => User('@me:hs', membership: 'leave', room: room),
+        );
+        when(mockClient.userID).thenReturn('@me:hs');
+        when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+        stubSummary(notFound);
 
-      // Act
-      final preview = await datasource.getPreview(alias, via: const []);
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
 
-      // Assert
-      expect(preview, isA<PublicRoomPreviewFound>());
-    });
+        // Assert
+        expect(preview, const PublicRoomPreview.unavailable());
+      },
+    );
 
     test('getPreview_whenTheSummarySaysBanned_saysBanned', () async {
       // Arrange
