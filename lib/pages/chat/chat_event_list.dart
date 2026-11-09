@@ -74,6 +74,8 @@ class ChatEventList extends StatelessWidget {
   ) {
     final chatScrollView = Listener(
       onPointerDown: (_) => chatController.clearHighlightedEvent(),
+      onPointerSignal: (_) => chatController.clearHighlightedEvent(),
+      onPointerPanZoomStart: (_) => chatController.clearHighlightedEvent(),
       child: ChatScrollView(
         key: PageStorageKey('ChatScrollView-${chatController.room?.id}'),
         events: events,

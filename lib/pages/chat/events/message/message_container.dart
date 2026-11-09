@@ -2,6 +2,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_selected_widget.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:twake_chat/pages/chat/events/message/swipeable_message.dart';
 import 'package:twake_chat/pages/chat/optional_gesture_detector.dart';
@@ -82,10 +83,6 @@ class MessageContainer extends StatelessWidget {
       ),
     );
 
-    final highlightTint = LinagoraSysColors.material().warning.withValues(
-      alpha: 0.12,
-    );
-
     // Outer SizedBox(∞) gives the Stack a bounded width.
     // Inner SizedBox(∞) wrapping container forces it to fill that width,
     // overriding Container's tendency to shrink-wrap to its child.
@@ -98,7 +95,6 @@ class MessageContainer extends StatelessWidget {
             child: _MessageBackground(
               eventId: event.eventId,
               selected: selected,
-              highlightTint: highlightTint,
               highlightedEventIdNotifier: highlightedEventIdNotifier,
             ),
           ),
@@ -114,7 +110,7 @@ class MessageContainer extends StatelessWidget {
         key: ValueKey(event.eventId),
         index: scrollIdx,
         controller: controller,
-        highlightColor: highlightTint,
+        highlightColor: MessageStyle.jumpHighlightTint,
         child: highlighted,
       );
     }
@@ -125,13 +121,11 @@ class MessageContainer extends StatelessWidget {
 class _MessageBackground extends StatelessWidget {
   final String eventId;
   final bool selected;
-  final Color highlightTint;
   final ValueNotifier<String?>? highlightedEventIdNotifier;
 
   const _MessageBackground({
     required this.eventId,
     required this.selected,
-    required this.highlightTint,
     this.highlightedEventIdNotifier,
   });
 
@@ -145,7 +139,7 @@ class _MessageBackground extends StatelessWidget {
     return ValueListenableBuilder<String?>(
       valueListenable: highlightedEventIdNotifier,
       builder: (context, highlightedEventId, _) => highlightedEventId == eventId
-          ? ColoredBox(color: highlightTint)
+          ? ColoredBox(color: MessageStyle.jumpHighlightTint)
           : const SizedBox.shrink(),
     );
   }

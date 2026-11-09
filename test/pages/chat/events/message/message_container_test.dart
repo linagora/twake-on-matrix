@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -5,6 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/message/message_container.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../../../fake_client.dart';
@@ -24,9 +27,7 @@ class _FakeClient extends Client {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final client = _FakeClient();
-  final highlightTint = LinagoraSysColors.material().warning.withValues(
-    alpha: 0.12,
-  );
+  final highlightTint = MessageStyle.jumpHighlightTint;
   const rowWidth = 400.0;
 
   late Event event;
@@ -100,8 +101,10 @@ void main() {
   testWidgets('keeps the tint after the flash is over', (tester) async {
     await pumpContainer(tester);
     highlightedEventId.value = event.eventId;
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 10));
+    unawaited(scrollController.highlight(0, highlightDuration: Duration.zero));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(tintFinder(highlightTint), findsOneWidget);
   });
