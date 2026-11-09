@@ -17,6 +17,17 @@ abstract final class ThreadRules {
       event.status.isSynced &&
       event.threadRootId == null;
 
+  /// The `?event=` a screen jumps to. go_router gives every route of the
+  /// stack the full URI: under a thread route (`/rooms/R/threads/T`) the room
+  /// screen must ignore the thread's reply, which is not in its timeline.
+  static String? highlightEventIdFromUri(Uri uri, {required bool isThread}) {
+    final segments = uri.pathSegments;
+    final onThreadRoute = segments.length > 3 && segments[2] == 'threads';
+    if (onThreadRoute && !isThread) return null;
+    final event = uri.queryParameters['event'];
+    return event == null || event.isEmpty ? null : event;
+  }
+
   /// The event every main-timeline receipt targets: Synapse refuses a `main`
   /// receipt on a thread event or an event related to one (edit, reaction).
   static Event? newestMainTimelineEvent(Iterable<Event> eventsNewestFirst) =>

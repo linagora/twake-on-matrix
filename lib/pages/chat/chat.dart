@@ -2,6 +2,7 @@ import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/domain/model/thread/thread_events.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_summary.dart';
 import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
@@ -3507,8 +3508,11 @@ class ChatController extends ConsumerState<Chat>
 
   /// Prefers [GoRouterState] so this State rebuilds when `?event=` changes.
   String? _eventIdFromLocation() {
-    final fromRouter = GoRouterState.of(context).uri.queryParameters['event'];
-    if (fromRouter != null && fromRouter.isNotEmpty) return fromRouter;
+    final fromRouter = ThreadRules.highlightEventIdFromUri(
+      GoRouterState.of(context).uri,
+      isThread: isThread,
+    );
+    if (fromRouter != null) return fromRouter;
 
     // Fallback for hash-URL edge cases before GoRouter has settled.
     if (!PlatformInfos.isWeb) return null;
