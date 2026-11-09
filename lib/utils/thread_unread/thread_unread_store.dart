@@ -6,10 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
-import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
+import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 /// Marks the generation of the store: [ThreadUnreadStore.clear] starts a new
@@ -26,13 +27,19 @@ class ThreadUnreadStore extends ChangeNotifier {
 
   final Map<String, Map<String, ThreadCounts>> _counts = {};
   final Set<ThreadRef> _followed = {};
-  final Set<ThreadRef> _resolving = {};
+
+  /// Lookups running, by thread: awaited by whoever needs the answer.
+  final Map<ThreadRef, Future<void>> _resolving = {};
 
   /// Threads the server answered "not participated" for: asked once, the
   /// answer stands until the user writes in the thread (markFollowed).
   final Set<ThreadRef> _notFollowed = {};
   final Map<ThreadRef, DateTime> _activity = {};
   final Map<String, int> _badges = {};
+
+  /// Timestamp of the newest main-timeline message of others seen live, per
+  /// room. Memory only: a cold start has no such message until one arrives.
+  final Map<String, int> _newestMainTs = {};
 
   /// Ids of the thread replies seen live, per room: once deleted, a reply
   /// loses its `m.relates_to` and only this tells it was in a thread.
@@ -79,6 +86,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _notFollowed.removeWhere(room.owns);
     _activity.removeWhere((thread, _) => room.owns(thread));
     _badges.remove(room.value);
+    _newestMainTs.remove(room.value);
     _threadReplyIds.remove(room.value);
     _threadReplyOrder.removeWhere(room.ownsReply);
     return hadCounts || hadFollow != _followed.length;
@@ -113,7 +121,10 @@ class ThreadUnreadStore extends ChangeNotifier {
 
   /// A thread reply of the live timeline (any sender); the oldest ids go
   /// when the account holds more than [_maxThreadReplyIds].
+  /// A reply the user sent (synced, live or from a page of the thread) makes
+  /// the thread followed.
   void rememberThreadReply(Event reply) {
+    _followIfOwnReply(reply);
     if (!_addThreadReplyId(ReplyRef(reply.room.id, reply.eventId))) return;
     while (_threadReplyOrder.length > _maxThreadReplyIds) {
       final oldest = _threadReplyOrder.removeFirst();
@@ -121,6 +132,32 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
     _persist();
   }
+
+  void _followIfOwnReply(Event reply) {
+    final rootId = reply.threadRootId;
+    if (rootId == null || reply.senderId != _client.userID) return;
+    if (reply.status.isSynced) markFollowed(ThreadRef(reply.room.id, rootId));
+  }
+
+  /// A message of the main timeline seen live (any sender but the user): the
+  /// room has new messages when the newest one is newer than the read
+  /// receipt, even if a thread reply came after it.
+  void rememberMainTimelineEvent(Event event) {
+    if (event.senderId == _client.userID) return;
+    if (!_client.roomPreviewLastEvents.contains(event.type)) return;
+    final room = event.room;
+    final known = knownThreadReplyIds(room);
+    if (ThreadRules.newestMainTimelineEvent([
+          event,
+        ], knownThreadReplyIds: known) ==
+        null) {
+      return;
+    }
+    final ts = event.originServerTs.millisecondsSinceEpoch;
+    if (ts > (_newestMainTs[room.id] ?? 0)) _newestMainTs[room.id] = ts;
+  }
+
+  int? newestMainMessageTs(Room room) => _newestMainTs[room.id];
 
   Set<String> knownThreadReplyIds(Room room) =>
       _threadReplyIds[room.id] ?? const {};
@@ -178,6 +215,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _notFollowed.clear();
     _activity.clear();
     _badges.clear();
+    _newestMainTs.clear();
     _threadReplyIds.clear();
     _threadReplyOrder.clear();
     notifyListeners();
@@ -268,8 +306,14 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// it already says "participated" the server is asked. A "no" is kept (the
   /// user's own event turns it into a follow); a failed call is asked again
   /// on the next increase of the counter.
-  Future<void> _resolveFollowed(ThreadRef thread) async {
-    if (!_claimLookup(thread)) return;
+  Future<void> _resolveFollowed(ThreadRef thread) {
+    final running = _resolving[thread];
+    if (running != null) return running;
+    if (_isSettled(thread)) return Future.value();
+    return _resolving[thread] = _runLookup(thread);
+  }
+
+  Future<void> _runLookup(ThreadRef thread) async {
     final epoch = _epoch;
     await _acquireLookupSlot();
     try {
@@ -282,9 +326,20 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
   }
 
-  /// True when no answer is known and no lookup runs for the thread.
-  bool _claimLookup(ThreadRef thread) =>
-      !_isSettled(thread) && _resolving.add(thread);
+  /// Whether the user follows the thread, once it is known: at once when it
+  /// is, else after the lookup (started when none runs). Null when the
+  /// lookup could not tell; nothing is thrown.
+  Future<bool?> followOnceKnown(ThreadRef thread) async {
+    await _resolveFollowed(thread);
+    if (_followed.contains(thread)) return true;
+    return _notFollowed.contains(thread) ? false : null;
+  }
+
+  /// A lookup runs for a thread of the room with unread replies: its badge
+  /// is 0 because the answer is unknown, not because the replies were read.
+  bool hasPendingFollowLookup(Room room) => _resolving.keys.any(
+    (thread) => thread.roomId == room.id && unreadCount(thread) > 0,
+  );
 
   bool _isSettled(ThreadRef thread) =>
       _followed.contains(thread) || _notFollowed.contains(thread);
@@ -366,6 +421,17 @@ extension ThreadUnreadRoomExtension on Room {
   }
 }
 
+extension RoomPendingNotification on Room {
+  /// Nothing of the room is waiting in a notification: safe to clear them.
+  /// A left room keeps the unread count it had when it was left (synced with
+  /// `includeLeave`), so it never blocks. A badge of 0 while a follow lookup
+  /// runs is unknown, not read.
+  bool get hasNoPendingNotification =>
+      membership == Membership.leave ||
+      (unreadBadgeCount == 0 &&
+          client.threadUnread?.hasPendingFollowLookup(this) != true);
+}
+
 /// One decision for every consumer of the room counters: the server stops
 /// counting thread notifications in the room's own counters.
 extension RoomUnreadWithThreads on Room {
@@ -394,7 +460,11 @@ extension MarkRoomAndThreadsRead on Room {
         start: start,
         limit: pageSize,
       );
-      final found = ThreadRules.newestMainTimelineEvent(page);
+      final found = ThreadRules.newestMainTimelineEvent(
+        page,
+        knownThreadReplyIds:
+            client.threadUnread?.knownThreadReplyIds(this) ?? const {},
+      );
       if (found != null || page.length < pageSize) return found;
     }
     return null;

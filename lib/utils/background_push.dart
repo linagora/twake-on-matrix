@@ -34,6 +34,7 @@ import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/client_logout.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
+import 'package:twake_chat/utils/notification_location.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
@@ -814,7 +815,8 @@ class BackgroundPush {
         Logs().v('[Push] Room $roomId not found, syncing...');
         await activeClient.waitForRoomInSync(roomId);
       }
-      _handleRedirectRoom(
+      await _handleRedirectRoom(
+        activeClient,
         roomId,
         eventId: eventId,
         switchedClient: switchedClient,
@@ -947,7 +949,7 @@ class BackgroundPush {
           });
           if (!syncErrored) {
             emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
+                .where((r) => r.hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
@@ -969,7 +971,7 @@ class BackgroundPush {
               e,
             );
             emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
+                .where((r) => r.hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
@@ -978,7 +980,7 @@ class BackgroundPush {
         _syncedRoomIds.clear();
         emptyRooms = client.rooms
             .where((r) => syncedRoomIds.contains(r.id))
-            .where(_hasNoPendingNotification)
+            .where((r) => r.hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
@@ -1060,21 +1062,20 @@ class BackgroundPush {
 
   /// A left room keeps the unread count it had when it was left (synced with
   /// `includeLeave`), so it must not block clearing its notifications.
-  bool _hasNoPendingNotification(Room room) =>
-      room.unreadBadgeCount == 0 || room.membership == Membership.leave;
-
-  void _handleRedirectRoom(
+  Future<void> _handleRedirectRoom(
+    Client client,
     String roomId, {
     String? eventId,
     Client? switchedClient,
-  }) {
+  }) async {
     final extra = switchedClient != null
         ? SwitchActiveAccountBodyArgs(newActiveClient: switchedClient)
         : null;
-    if (eventId != null) {
-      TwakeApp.router.go('/rooms/$roomId?event=$eventId', extra: extra);
-      return;
-    }
-    TwakeApp.router.go('/rooms/$roomId', extra: extra);
+    final location = await resolveNotificationLocation(
+      client,
+      roomId,
+      eventId: eventId,
+    );
+    TwakeApp.router.go(location, extra: extra);
   }
 }

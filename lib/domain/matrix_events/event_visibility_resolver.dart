@@ -48,7 +48,9 @@ abstract final class EventVisibilityResolver {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
     if (event.threadRootId != null) return false;
-    return true;
+    // An edit may target a thread reply (the SDK promotes it to lastEvent):
+    // only the async check reads its target.
+    return event.relationshipType != RelationshipTypes.edit;
   }
 
   /// Whether [event] may be used as the "last message" preview in the chat

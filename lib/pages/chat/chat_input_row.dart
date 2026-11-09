@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/pages/chat/animate_pause_button.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_mobile.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
@@ -519,11 +520,10 @@ class ActionSelectModeWidget extends StatelessWidget {
                     .getDisplayEventWithoutEditEvent(controller.timeline!)
                     .status
                     .isSent &&
-                controller
-                    .selectedEvents
-                    .first
-                    .room
-                    .canSendDefaultMessages) ...[
+                ThreadRules.canQuoteReply(
+                  controller.selectedEvents.first,
+                  inThreadScreen: controller.isThread,
+                )) ...[
               SizedBox(
                 height: ChatInputRowStyle.chatInputRowHeight,
                 child: TextButton(

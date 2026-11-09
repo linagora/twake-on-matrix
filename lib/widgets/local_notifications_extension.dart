@@ -55,13 +55,12 @@ extension LocalNotificationsExtension on MatrixState {
     if (threadRootId != null) {
       // Room counters leave thread messages out and the thread counters land
       // after this event: decide from the reply and the follow state.
-      if (!ThreadRules.shouldNotifyThreadEvent(
+      if (!await ThreadRules.shouldNotifyThreadReply(
         event,
-        followed:
-            client.threadUnread?.isFollowed(ThreadRef(roomId, threadRootId)) ??
-            false,
+        followed: client.threadUnread?.followOnceKnown(
+          ThreadRef(roomId, threadRootId),
+        ),
         pushActions: client.pushruleEvaluator.match(event),
-        rootSenderId: (await room.getEventById(threadRootId))?.senderId,
         activeThread: activeThread,
       )) {
         return;

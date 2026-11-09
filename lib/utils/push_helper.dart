@@ -146,15 +146,12 @@ Future<void> _tryPushHelper(
         Logs().v('Room is in foreground. Stop push helper here.');
         return;
       }
-    } else if (!ThreadRules.shouldNotifyThreadEvent(
+    } else if (!await ThreadRules.shouldNotifyThreadReply(
       event,
       pushActions: client.pushruleEvaluator.match(event),
-      followed:
-          client.threadUnread?.isFollowed(
-            ThreadRef(notification.roomId!, threadRootId),
-          ) ??
-          false,
-      rootSenderId: (await event.room.getEventById(threadRootId))?.senderId,
+      followed: client.threadUnread?.followOnceKnown(
+        ThreadRef(notification.roomId!, threadRootId),
+      ),
       activeThread: activeThread,
     )) {
       Logs().v('Thread reply is read live or not followed. Stop push helper.');

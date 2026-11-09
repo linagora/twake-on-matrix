@@ -190,11 +190,10 @@ extension ContextExtensionss on BuildContext {
     String eventId, {
     String? threadRootId,
   }) {
-    if (threadRootId == null) {
-      go('/rooms/$roomId?event=$eventId');
-      return;
-    }
-    ThreadRoute(roomid: roomId, rootid: threadRootId, event: eventId).go(this);
+    final route = threadRootId == null
+        ? RoomRoute(roomid: roomId, event: eventId)
+        : ThreadRoute(roomid: roomId, rootid: threadRootId, event: eventId);
+    route.go(this);
   }
 
   int getCacheSize(double size) {

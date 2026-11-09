@@ -48,7 +48,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     // (e.g. user opened draftChat). Only accept drops on the active room.
     final roomId = controller.room?.id;
     final routeSegments = GoRouterState.of(context).uri.pathSegments;
-    final acceptDrops = roomId != null && routeSegments.contains(roomId);
+    // A thread screen covers its room, which stays mounted: only the screen
+    // on top takes the drop.
+    final isOnTop = ModalRoute.of(context)?.isCurrent != false;
+    final isRoomRoute = roomId != null && routeSegments.contains(roomId);
+    final acceptDrops = isRoomRoute && isOnTop;
 
     return DropTarget(
       enable: acceptDrops,

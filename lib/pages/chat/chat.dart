@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_read_marker.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/domain/model/thread/thread_events.dart';
@@ -5,7 +6,7 @@ import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_summary.dart';
-import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
+import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
@@ -522,27 +523,16 @@ class ChatController extends ConsumerState<Chat>
       selectedEvents.any((e) => e.eventId == event.eventId);
 
   String? _findUnreadReceivedMessageLocation() {
-    if (timeline == null) return null;
-    final events = timeline!.events;
-    if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
-      final lastIndexReadEvent = events.indexWhere(
-        (event) => event.eventId == _markerReadLocation,
-      );
-      if (lastIndexReadEvent > 0) {
-        final afterFullyRead = events.getRange(0, lastIndexReadEvent);
-        final unreadEvents = afterFullyRead
-            .where((event) => event.senderId != client.userID)
-            .toList();
-        if (unreadEvents.isEmpty) return null;
-        Logs().d(
-          "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
-        );
-        return unreadEvents.last.eventId;
-      }
-    } else {
-      return null;
-    }
-    return null;
+    final events = timeline?.events;
+    if (events == null || _markerReadLocation.isEmpty) return null;
+    final separator = ThreadRules.unreadSeparatorEventId(
+      events,
+      fullyReadEventId: _markerReadLocation,
+      ownUserId: client.userID,
+      isVisible: (event) => event.isVisibleInGui,
+    );
+    Logs().d('Chat::getFirstUnreadEvent(): Last unread event $separator');
+    return separator;
   }
 
   void recreateChat() async {
@@ -586,7 +576,12 @@ class ChatController extends ConsumerState<Chat>
   /// Completes once [_threadEvents] exists (or the timeline failed to load).
   final Completer<void> _threadReady = Completer<void>();
 
-  String? _lastThreadReadEventId;
+  late final ThreadReadMarker _threadReadMarker = ThreadReadMarker(
+    (eventId) => room!.setThreadReadMarker(
+      threadRootId: threadRootId!,
+      eventId: eventId,
+    ),
+  );
 
   /// Events of the list: the room timeline, or the root and the replies of
   /// the thread (loaded by pages, completed by the live timeline), newest
@@ -768,17 +763,10 @@ class ChatController extends ConsumerState<Chat>
     final reply = eventsToDisplay.firstWhereOrNull(
       (e) => e.status.isSynced && e.threadRootId == threadRootId,
     );
-    if (reply == null || reply.eventId == _lastThreadReadEventId) return;
+    if (reply == null) return;
     unawaited(
-      room!
-          .setThreadReadMarker(
-            threadRootId: threadRootId!,
-            eventId: reply.eventId,
-          )
-          // Remembered once the server took it: a failure is tried again.
-          .then((_) {
-            _lastThreadReadEventId = reply.eventId;
-          })
+      _threadReadMarker
+          .read(reply.eventId)
           .catchError((Object e) => Logs().w('Unable to read the thread', e)),
     );
   }
@@ -2172,7 +2160,7 @@ class ChatController extends ConsumerState<Chat>
     Event event,
   ) => [
     if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
-    if (event.room.canSendDefaultMessages && !isThread)
+    if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
       ChatHorizontalActionMenu.reply,
     ChatHorizontalActionMenu.more,
   ];
@@ -3025,7 +3013,8 @@ class ChatController extends ConsumerState<Chat>
     showFullEmojiPickerOnWebNotifier.value = false;
     final listPopupMenuActions = [
       ChatContextMenuActions.select,
-      ChatContextMenuActions.reply,
+      if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
+        ChatContextMenuActions.reply,
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
@@ -3355,7 +3344,8 @@ class ChatController extends ConsumerState<Chat>
       if (!isThread) initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
-      initAudioPlayer();
+      // A thread opened over the room must not stop its voice message.
+      if (!isThread) initAudioPlayer();
     });
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }

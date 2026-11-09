@@ -1,4 +1,3 @@
-import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -104,21 +103,22 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
         );
       }
     });
-    // Thread replies are remembered (they lose their relation once deleted);
-    // the user's own, from any device, make a thread followed. A gap filled
-    // by requestHistory comes on onHistoryEvent. A local echo (sending, error)
-    // is neither: only the synced event counts.
-    void onThreadEvent(Event event) {
-      final rootId = event.threadRootId;
-      if (rootId == null || !event.status.isSynced) return;
-      threadUnread.rememberThreadReply(event);
-      if (event.senderId == userID) {
-        threadUnread.markFollowed(ThreadRef(event.room.id, rootId));
+    // Thread replies are remembered (they lose their relation once deleted),
+    // the user's own make the thread followed (in the store); the messages of
+    // the main timeline tell the room has new ones under a thread reply. A
+    // gap filled by requestHistory comes on onHistoryEvent. A local echo
+    // (sending, error) is neither: only the synced event counts.
+    void onSeenEvent(Event event) {
+      if (!event.status.isSynced) return;
+      if (event.threadRootId == null) {
+        threadUnread.rememberMainTimelineEvent(event);
+      } else {
+        threadUnread.rememberThreadReply(event);
       }
     }
 
-    onTimelineEvent.stream.listen(onThreadEvent);
-    onHistoryEvent.stream.listen(onThreadEvent);
+    onTimelineEvent.stream.listen(onSeenEvent);
+    onHistoryEvent.stream.listen(onSeenEvent);
 
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
