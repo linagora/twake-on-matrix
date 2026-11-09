@@ -14,6 +14,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -112,6 +113,8 @@ void main() {
                           const Duration(minutes: 5, seconds: 10),
                         )
                       : null,
+                  // As chat_event_list_item wires it.
+                  onOwnBubble: root.isOwnMessage,
                   onTap: () {},
                 ),
               ),
@@ -152,6 +155,8 @@ void main() {
     expect(time.top, greaterThanOrEqualTo(cardRect.bottom));
   });
 
+  /// CodeRabbit review 5829198697 (nitpick): the card was built as on a
+  /// received bubble. The root is sent by the user of the client.
   testWidgets('the card stands out on the bubble of an own message', (
     tester,
   ) async {
