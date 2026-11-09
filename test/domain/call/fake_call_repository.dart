@@ -34,6 +34,9 @@ class FakeCallRepository implements CallRepository {
   CallException? leaveError;
   CallException? mediaError;
   Object? staleError;
+  Completer<void>? connectGate;
+  Completer<void>? leaveGate;
+  Completer<void>? joinGate;
 
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
@@ -64,12 +67,14 @@ class FakeCallRepository implements CallRepository {
     required bool isVideo,
   }) async {
     calls.add('join $roomId video=$isVideo');
+    await joinGate?.future;
     if (joinError case final error?) throw error;
   }
 
   @override
   Future<void> leaveMembership(String roomId) async {
     calls.add('leave $roomId');
+    await leaveGate?.future;
     if (leaveError case final error?) throw error;
   }
 
@@ -80,6 +85,7 @@ class FakeCallRepository implements CallRepository {
     required bool isCameraOn,
   }) async {
     calls.add('connect mic=$isMicrophoneOn camera=$isCameraOn');
+    await connectGate?.future;
     if (connectError case final error?) throw error;
   }
 

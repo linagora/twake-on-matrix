@@ -7,12 +7,16 @@ class JoinCallUseCase {
 
   final CallRepository _repository;
 
+  static bool _never() => false;
+
   /// The membership is sent once the media is up, so that the others never
-  /// see a device that could not connect.
-  Future<CallRoomInfo> execute({
+  /// see a device that could not connect. Null when [isCancelled] turns true
+  /// before the membership is sent.
+  Future<CallRoomInfo?> execute({
     required String roomId,
     required String? serviceUrl,
     required bool isVideo,
+    bool Function() isCancelled = _never,
   }) async {
     if (serviceUrl == null) throw const CallServiceUnavailableException();
     final room = _repository.getRoomInfo(roomId);
@@ -23,11 +27,16 @@ class JoinCallUseCase {
       roomId: roomId,
       serviceUrl: serviceUrl,
     );
+    if (isCancelled()) return null;
     await _repository.connectMedia(
       server,
       isMicrophoneOn: true,
       isCameraOn: isVideo,
     );
+    if (isCancelled()) {
+      await _repository.disconnectMedia();
+      return null;
+    }
     try {
       await _repository.joinMembership(
         roomId: roomId,

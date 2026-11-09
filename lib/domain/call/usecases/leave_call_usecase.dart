@@ -6,10 +6,11 @@ class LeaveCallUseCase {
   final CallRepository _repository;
 
   Future<void> execute(String roomId) async {
+    // The microphone stops first, however slow the homeserver is.
     try {
-      await _repository.leaveMembership(roomId);
-    } finally {
       await _repository.disconnectMedia();
+    } finally {
+      await _repository.leaveMembership(roomId);
     }
   }
 }

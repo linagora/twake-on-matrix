@@ -30,7 +30,15 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     final room = lk.Room(
       roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
     );
-    final listener = room.createListener()..listen((_) => _emit());
+    final listener = room.createListener()
+      ..listen((_) => _emit())
+      // Our own disconnect disposes the listener first: this one is LiveKit
+      // giving up.
+      ..on<lk.RoomDisconnectedEvent>(
+        (event) => _participants.addError(
+          CallConnectionFailedException(cause: event.reason),
+        ),
+      );
     try {
       await room.connect(server.url, server.token);
     } catch (error) {
@@ -58,16 +66,21 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     final listener = _listener;
     _room = null;
     _listener = null;
-    try {
+    await _logFailure(() async {
       await listener?.dispose();
-      if (room != null) {
-        await room.disconnect();
-        await room.dispose();
-      }
+      await room?.disconnect();
+    });
+    // A disconnect that times out still has to release the microphone.
+    await _logFailure(() async => room?.dispose());
+    _emit();
+  }
+
+  Future<void> _logFailure(Future<void> Function() run) async {
+    try {
+      await run();
     } catch (error, stackTrace) {
       Logs().w('LiveKitCallMedia: disconnect failed', error, stackTrace);
     }
-    _emit();
   }
 
   @override

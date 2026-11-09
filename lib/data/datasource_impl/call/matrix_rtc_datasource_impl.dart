@@ -18,6 +18,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   static const _delayedLeave = Duration(seconds: 8);
   static const _delayedLeaveRestart = Duration(seconds: 5);
   static const _expiryHeadroom = Duration(minutes: 1);
+  static const _extendRetry = Duration(seconds: 30);
   static const _tokenTimeout = Duration(seconds: 20);
   static final _unprefixedRoomVersion = RegExp(
     r'^org\.matrix\.msc(3757|3779)\b',
@@ -30,6 +31,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   var _session = 0;
   Timer? _restartTimer;
   Timer? _expiryTimer;
+  Timer? _extendRetryTimer;
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -230,19 +232,37 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _expiryTimer = Timer.periodic(_membershipExpiry - _expiryHeadroom, (_) {
       expiries++;
       unawaited(
-        _client
-            .setRoomStateWithKey(
-              roomId,
-              memberEventType,
-              stateKey,
-              contentFor(expiries: expiries, createdTs: createdTs),
-            )
-            .catchError((Object error, StackTrace stackTrace) {
-              Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
-              return '';
-            }),
+        _extend(
+          roomId,
+          stateKey,
+          contentFor(expiries: expiries, createdTs: createdTs),
+        ),
       );
     });
+  }
+
+  Future<void> _extend(
+    String roomId,
+    String stateKey,
+    Map<String, Object?> content,
+  ) async {
+    final session = _session;
+    try {
+      await _client.setRoomStateWithKey(
+        roomId,
+        memberEventType,
+        stateKey,
+        content,
+      );
+    } catch (error, stackTrace) {
+      Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
+      if (session != _session) return;
+      _extendRetryTimer?.cancel();
+      _extendRetryTimer = Timer(
+        _extendRetry,
+        () => unawaited(_extend(roomId, stateKey, content)),
+      );
+    }
   }
 
   /// The homeserver ends the membership itself if this device vanishes
@@ -315,6 +335,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _resendMembership = null;
     _expiryTimer?.cancel();
     _expiryTimer = null;
+    _extendRetryTimer?.cancel();
+    _extendRetryTimer = null;
     _restartTimer?.cancel();
     _restartTimer = null;
     final delayId = _delayId;
@@ -324,7 +346,6 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   @override
   Future<void> leaveMembership(String roomId) async {
-    final room = _room(roomId);
     final delayId = _stopTimers();
     if (delayId != null) {
       try {
@@ -334,6 +355,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         Logs().w('MatrixRtcDatasource: delayed leave', error, stackTrace);
       }
     }
+    final room = _room(roomId);
     try {
       await _client.setRoomStateWithKey(
         roomId,

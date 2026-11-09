@@ -5,15 +5,15 @@ import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import '../fake_call_repository.dart';
 
 void main() {
-  test('leaves the membership, then disconnects the media', () async {
+  test('execute_always_disconnectsTheMediaBeforeTheMembershipLeaves', () async {
     final repository = FakeCallRepository();
 
     await LeaveCallUseCase(repository).execute('!room');
 
-    expect(repository.calls, ['leave !room', 'disconnect']);
+    expect(repository.calls, ['disconnect', 'leave !room']);
   });
 
-  test('disconnects the media even when the leave fails', () async {
+  test('execute_whenTheLeaveFails_hasDisconnectedTheMedia', () async {
     final repository = FakeCallRepository(
       leaveError: const CallMembershipFailedException(),
     );
@@ -22,6 +22,6 @@ void main() {
       LeaveCallUseCase(repository).execute('!room'),
       throwsA(isA<CallMembershipFailedException>()),
     );
-    expect(repository.calls, ['leave !room', 'disconnect']);
+    expect(repository.calls, ['disconnect', 'leave !room']);
   });
 }

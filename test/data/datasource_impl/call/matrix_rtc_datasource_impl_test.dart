@@ -25,8 +25,12 @@ class _FakeRoom extends Fake implements Room {
 /// already sent, as after a pause of the app.
 class _FakeClient extends Fake implements Client {
   final writes = <String>[];
+  final delayedActions = <String>[];
   final _room = _FakeRoom();
   var _isLapsed = true;
+  var _delays = 0;
+  var isRoomGone = false;
+  var failingMemberships = 0;
 
   @override
   String? get userID => '@bob:hs.test';
@@ -41,17 +45,19 @@ class _FakeClient extends Fake implements Client {
   String? get bearerToken => 'token';
 
   @override
-  Room? getRoomById(String id) => _room;
+  Room? getRoomById(String id) => isRoomGone ? null : _room;
 
   @override
   late final http.Client httpClient = MockClient((request) async {
     if (request.url.path.contains('delayed_events')) {
+      final action = jsonDecode(request.body)['action'];
+      delayedActions.add('$action ${request.url.pathSegments.last}');
       if (!_isLapsed) return http.Response('{}', 200);
       _isLapsed = false;
       return http.Response('{"errcode":"M_NOT_FOUND","error":"gone"}', 404);
     }
     writes.add('delayed leave');
-    return http.Response('{"delay_id":"delay"}', 200);
+    return http.Response('{"delay_id":"delay-${++_delays}"}', 200);
   });
 
   @override
@@ -65,6 +71,11 @@ class _FakeClient extends Fake implements Client {
     String stateKey,
     Map<String, Object?> body,
   ) async {
+    if (body.isNotEmpty && failingMemberships > 0) {
+      failingMemberships--;
+      writes.add('membership failed');
+      throw Exception('offline');
+    }
     writes.add(body.isEmpty ? 'left' : 'membership');
     return r'$event';
   }
@@ -90,6 +101,55 @@ void main() {
         'delayed leave',
         'membership',
       ]);
+      async.elapse(const Duration(seconds: 5));
+      expect(client.delayedActions.last, 'restart delay-2');
+      datasource.dispose();
+    });
+  });
+
+  test('extend_whenTheExtensionFails_triesAgainSoon', () {
+    fakeAsync((async) {
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(
+        roomId: '!room:hs.test',
+        serviceUrl: 'https://rtc.test',
+        isVideo: false,
+      );
+      async.flushMicrotasks();
+      async.elapse(const Duration(seconds: 6));
+      client
+        ..writes.clear()
+        ..failingMemberships = 1;
+
+      async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
+      async.elapse(const Duration(seconds: 30));
+
+      expect(client.writes, ['membership failed', 'membership']);
+      datasource.dispose();
+    });
+  });
+
+  test('leaveMembership_whenTheRoomIsGone_stopsRenewingTheMembership', () {
+    fakeAsync((async) {
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(
+        roomId: '!room:hs.test',
+        serviceUrl: 'https://rtc.test',
+        isVideo: false,
+      );
+      async.flushMicrotasks();
+      async.elapse(const Duration(seconds: 6));
+      client.isRoomGone = true;
+
+      datasource.leaveMembership('!room:hs.test').ignore();
+      async.flushMicrotasks();
+      final actions = client.delayedActions.length;
+      async.elapse(const Duration(seconds: 20));
+
+      expect(client.delayedActions.last, 'send delay-2');
+      expect(client.delayedActions.length, actions);
       datasource.dispose();
     });
   });

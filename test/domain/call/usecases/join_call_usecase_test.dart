@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
@@ -10,10 +12,15 @@ void main() {
 
   setUp(() => repository = FakeCallRepository());
 
-  Future<CallRoomInfo> join({String? serviceUrl = 'https://rtc.test'}) =>
-      JoinCallUseCase(
-        repository,
-      ).execute(roomId: '!room', serviceUrl: serviceUrl, isVideo: true);
+  Future<CallRoomInfo?> join({
+    String? serviceUrl = 'https://rtc.test',
+    bool Function()? isCancelled,
+  }) => JoinCallUseCase(repository).execute(
+    roomId: '!room',
+    serviceUrl: serviceUrl,
+    isVideo: true,
+    isCancelled: isCancelled ?? () => false,
+  );
 
   test(
     'ends the stale membership, then gets the token, connects and joins',
@@ -71,5 +78,29 @@ void main() {
 
     await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
     expect(repository.calls.last, 'disconnect');
+  });
+
+  test('execute_whenCancelledBeforeTheMedia_connectsNothing', () async {
+    final room = await join(isCancelled: () => true);
+
+    expect(room, isNull);
+    expect(repository.calls, [
+      'endStale !room',
+      'fetchServer !room https://rtc.test',
+    ]);
+  });
+
+  test('execute_whenCancelledWhileTheMediaConnects_disconnectsIt', () async {
+    var isCancelled = false;
+    repository.connectGate = Completer<void>();
+
+    final joining = join(isCancelled: () => isCancelled);
+    await pumpEventQueue();
+    isCancelled = true;
+    repository.connectGate!.complete();
+
+    expect(await joining, isNull);
+    expect(repository.calls.last, 'disconnect');
+    expect(repository.calls, isNot(contains('join !room video=true')));
   });
 }

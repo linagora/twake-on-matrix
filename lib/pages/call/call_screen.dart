@@ -34,13 +34,10 @@ class CallScreen extends ConsumerStatefulWidget {
 }
 
 class _CallScreenState extends ConsumerState<CallScreen> {
+  late final CallController _calls;
   var _isClosing = false;
 
-  void _join() => unawaited(
-    ref
-        .read(callControllerProvider.notifier)
-        .join(widget.roomId, isVideo: false),
-  );
+  void _join() => unawaited(_calls.join(widget.roomId, isVideo: false));
 
   bool _isThisRoom(CallState state) => switch (state) {
     CallIdle() => false,
@@ -49,11 +46,34 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     CallFailed(:final roomId) => roomId == widget.roomId,
   };
 
+  bool _wasInThisCall(CallState? state) => switch (state) {
+    CallConnecting(:final roomId) ||
+    CallConnected(:final roomId) => roomId == widget.roomId,
+    _ => false,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _calls = ref.read(callControllerProvider.notifier);
+  }
+
+  @override
+  void dispose() {
+    // DECISION.md D15: a route removed without a pop still ends its call.
+    if (!_isClosing) {
+      final calls = _calls;
+      final roomId = widget.roomId;
+      scheduleMicrotask(() => unawaited(calls.leaveRoom(roomId)));
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(callControllerProvider, (previous, next) {
-      final wasInCall = previous is CallConnected || previous is CallConnecting;
-      if (wasInCall && next is CallIdle && !_isClosing) {
+      if (_wasInThisCall(previous) && next is CallIdle && !_isClosing) {
+        _isClosing = true;
         Navigator.of(context).pop();
       }
     });
@@ -66,9 +86,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) return;
         _isClosing = true;
-        if (_isThisRoom(ref.read(callControllerProvider))) {
-          unawaited(ref.read(callControllerProvider.notifier).leave());
-        }
+        unawaited(_calls.leaveRoom(widget.roomId));
       },
       child: Scaffold(
         backgroundColor: LinagoraRefColors.material().neutral[10],

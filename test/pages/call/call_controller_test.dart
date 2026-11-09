@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart' hide CallState;
@@ -142,7 +144,7 @@ void main() {
       await pumpEventQueue();
 
       expect(state(), const CallState.idle());
-      expect(repository.calls, containsAllInOrder(['leave !dm', 'disconnect']));
+      expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
     },
   );
 
@@ -169,7 +171,7 @@ void main() {
     await controller().leave();
 
     expect(state(), const CallState.idle());
-    expect(repository.calls.last, 'disconnect');
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 
   test('a refused microphone answers false', () async {
@@ -186,10 +188,23 @@ void main() {
     expect(repository.calls.last, 'camera true');
   });
 
-  test('hanging up while it connects leaves once joined', () async {
+  test('leave_beforeTheMediaConnects_connectsNoMedia', () async {
     final joining = controller().join('!room', isVideo: false);
 
     await controller().leave();
+    await joining;
+
+    expect(state(), const CallState.idle());
+    expect(repository.calls, isNot(contains('connect mic=true camera=false')));
+  });
+
+  test('leave_whileTheMembershipIsSent_leavesOnceJoined', () async {
+    repository.joinGate = Completer<void>();
+    final joining = controller().join('!room', isVideo: false);
+    await pumpEventQueue();
+
+    await controller().leave();
+    repository.joinGate!.complete();
     await joining;
 
     expect(state(), const CallState.idle());
@@ -197,5 +212,76 @@ void main() {
       repository.calls,
       containsAllInOrder(['join !room video=false', 'leave !room']),
     );
+  });
+
+  test(
+    'onParticipants_whenTheOtherLeavesADirectCallWithMyTwoDevices_leaves',
+    () async {
+      repository.roomInfo = const CallRoomInfo(
+        isEncrypted: false,
+        isDirect: true,
+      );
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+        participant('@me:hs.test:TABLET'),
+        participant('@bob:hs.test:BOB'),
+      ]);
+      await pumpEventQueue();
+
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+        participant('@me:hs.test:TABLET'),
+      ]);
+      await pumpEventQueue();
+
+      expect(state(), const CallState.idle());
+    },
+  );
+
+  test('leave_whileTheMediaConnects_sendsNoMembership', () async {
+    repository.connectGate = Completer<void>();
+    final joining = controller().join('!room', isVideo: false);
+    await pumpEventQueue();
+
+    await controller().leave();
+    repository.connectGate!.complete();
+    await joining;
+
+    expect(state(), const CallState.idle());
+    expect(repository.calls.last, 'disconnect');
+    expect(repository.calls, isNot(contains('join !room video=false')));
+  });
+
+  test('join_whileThePreviousCallLeaves_waitsForItsCleanup', () async {
+    await controller().join('!room', isVideo: false);
+    repository.leaveGate = Completer<void>();
+    final leaving = controller().leave();
+
+    final joining = controller().join('!other', isVideo: false);
+    await pumpEventQueue();
+    expect(repository.calls, isNot(contains('endStale !other')));
+
+    repository.leaveGate!.complete();
+    await leaving;
+    await joining;
+    expect(
+      repository.calls,
+      containsAllInOrder([
+        'leave !room',
+        'endStale !other',
+        'join !other video=false',
+      ]),
+    );
+  });
+
+  test('onParticipants_whenTheMediaIsLost_failsAndEndsTheCall', () async {
+    await controller().join('!room', isVideo: false);
+
+    repository.participants.addError(const CallConnectionFailedException());
+    await pumpEventQueue();
+
+    expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 }

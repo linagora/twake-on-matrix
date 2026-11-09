@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.dart';
@@ -21,6 +23,7 @@ class CallController extends _$CallController {
   StreamSubscription<List<CallParticipant>>? _participants;
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
+  Future<void>? _cleanup;
   var _isLeaveRequested = false;
 
   @override
@@ -41,30 +44,37 @@ class CallController extends _$CallController {
         .read(loginHomeserverSummaryProvider)
         ?.callTokenServiceUrl;
     try {
+      // The previous call must not disconnect the media of this one.
+      await _cleanup;
+      if (!ref.mounted) return;
       final room = await joinCall.execute(
         roomId: roomId,
         serviceUrl: serviceUrl,
         isVideo: isVideo,
+        isCancelled: () => _isLeaveRequested,
       );
       if (!ref.mounted) return;
+      if (room == null) {
+        state = const CallState.idle();
+        return;
+      }
       state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
       _participants = ref
           .read(watchCallParticipantsUseCaseProvider)
           .execute(roomId)
-          .listen(_onParticipants);
+          .listen(_onParticipants, onError: _onMediaLost);
       if (_isLeaveRequested) await leave();
     } catch (error) {
       if (!ref.mounted) return;
       state = _isLeaveRequested
           ? const CallState.idle()
-          : CallState.failed(
-              roomId: roomId,
-              error: error is CallException
-                  ? error
-                  : CallConnectionFailedException(cause: error),
-            );
+          : CallState.failed(roomId: roomId, error: _typed(error));
     }
   }
+
+  static CallException _typed(Object error) => error is CallException
+      ? error
+      : CallConnectionFailedException(cause: error);
 
   void _onParticipants(List<CallParticipant> participants) {
     final current = state;
@@ -72,13 +82,26 @@ class CallController extends _$CallController {
     state = current.copyWith(participants: participants);
     // DECISION.md D14: a direct call ends when the other person leaves.
     if (!current.isDirect) return;
-    if (_hasOthers(current.participants) && !_hasOthers(participants)) {
+    if (_hasOtherUser(current.participants) && !_hasOtherUser(participants)) {
       unawaited(leave());
     }
   }
 
-  static bool _hasOthers(List<CallParticipant> participants) =>
-      participants.any((p) => !p.isLocal);
+  static bool _hasOtherUser(List<CallParticipant> participants) {
+    final me = participants.firstWhereOrNull((p) => p.isLocal)?.userId;
+    return participants.any((p) => p.userId != me);
+  }
+
+  void _onMediaLost(Object error) {
+    final current = state;
+    if (current is! CallConnected) return;
+    unawaited(
+      _end(
+        current,
+        then: CallState.failed(roomId: current.roomId, error: _typed(error)),
+      ),
+    );
+  }
 
   /// Hanging up is immediate for the user; the membership ends behind it.
   Future<void> leave() async {
@@ -88,18 +111,33 @@ class CallController extends _$CallController {
       return;
     }
     if (current is! CallConnected) return;
+    await _end(current, then: const CallState.idle());
+  }
+
+  /// Leaves only if the call of this device is in [roomId].
+  Future<void> leaveRoom(String roomId) async {
+    final roomInCall = switch (state) {
+      CallConnecting(:final roomId) || CallConnected(:final roomId) => roomId,
+      _ => null,
+    };
+    if (roomInCall == roomId) await leave();
+  }
+
+  Future<void> _end(CallConnected current, {required CallState then}) {
     final LeaveCallUseCase leaveCall =
         _leaveCall ?? ref.read(leaveCallUseCaseProvider);
     _leaveCall = null;
     final participants = _participants;
     _participants = null;
-    state = const CallState.idle();
-    await participants?.cancel();
-    try {
-      await leaveCall.execute(current.roomId);
-    } catch (_) {
-      // The delayed leave of the homeserver ends the membership.
-    }
+    state = then;
+    return _cleanup = () async {
+      await participants?.cancel();
+      try {
+        await leaveCall.execute(current.roomId);
+      } catch (_) {
+        // The delayed leave of the homeserver ends the membership.
+      }
+    }();
   }
 
   /// False when the device refused the change.

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -76,8 +79,10 @@ void main() {
 
   // The fake repository lives outside the fake zone of the test.
   Future<void> settle(WidgetTester tester) async {
-    await tester.pumpAndSettle();
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    for (var i = 0; i < 2; i++) {
+      await tester.pumpAndSettle();
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    }
   }
 
   testWidgets('build_beforeTheCall_offersToStartIt', (tester) async {
@@ -153,5 +158,36 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('call-retry')), findsOneWidget);
+  });
+
+  testWidgets('dispose_whenTheRouteIsRemovedWithoutAPop_leavesTheCall', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await join(tester);
+
+    unawaited(
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .pushAndRemoveUntil(
+            MaterialPageRoute<void>(builder: (_) => const Text('shared')),
+            (_) => false,
+          ),
+    );
+    await settle(tester);
+
+    expect(repository.calls, contains('leave $_roomId'));
+  });
+
+  testWidgets('build_whenTheCallOfAnotherRoomEnds_staysOpen', (tester) async {
+    await pumpScreen(tester);
+    final calls = container.read(callControllerProvider.notifier);
+
+    await tester.runAsync(() => calls.join('!other:hs.test', isVideo: false));
+    await tester.pump();
+    await tester.runAsync(calls.leave);
+    await settle(tester);
+
+    expect(find.byType(CallScreen), findsOneWidget);
   });
 }
