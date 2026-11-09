@@ -213,15 +213,21 @@ void _pendingFollowTests() {
 
   test('the lookup fails: no notification, nothing thrown', () async {
     final decision = _decide(followed: lookup.future);
+    await pumpEventQueue();
     lookup.completeError(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
 
     await expectLater(decision, completion(isFalse));
   });
 
   test('a mention decides without waiting for the lookup', () async {
-    await expectLater(
-      _decide(followed: lookup.future, pushActions: _mentionNotifies()),
-      completion(isTrue),
-    );
+    var decided = false;
+    final decision = _decide(
+      followed: lookup.future,
+      pushActions: _mentionNotifies(),
+    ).whenComplete(() => decided = true);
+    await pumpEventQueue();
+
+    expect(decided, isTrue);
+    expect(await decision, isTrue);
   });
 }

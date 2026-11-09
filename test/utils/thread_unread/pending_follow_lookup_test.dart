@@ -131,6 +131,8 @@ void _pendingLookupTests() {
 
   test('the lookup fails: no longer pending', () async {
     _sync(1);
+    // The store has reached the server request: the error has a listener.
+    await pumpEventQueue();
     _lookup.completeError(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
     await pumpEventQueue();
 
@@ -260,6 +262,7 @@ void _followOnceKnownTests() {
   test('the lookup fails: unknown, nothing thrown', () async {
     _sync(1);
     final follow = _followOnceKnown();
+    await pumpEventQueue();
     _lookup.completeError(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
 
     await expectLater(follow, completion(isNull));
