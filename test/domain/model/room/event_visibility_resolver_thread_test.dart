@@ -195,6 +195,23 @@ void main() {
       );
     });
 
+    /// CodeRabbit 4515300455: the SDK promotes an edit to `lastEvent` when
+    /// it targets the current one, a thread reply included. The edit has no
+    /// thread relation of its own; only the full check reads its target.
+    test('an edit is not taken as last message without reading what it '
+        'edits (sync check)', () {
+      final edit = message(
+        eventId: r'$edit',
+        body: '* fixed',
+        relatesTo: {'rel_type': RelationshipTypes.edit, 'event_id': r'$reply'},
+      );
+
+      expect(
+        EventVisibilityResolver.isEligibleForChatListPreviewSync(edit),
+        isFalse,
+      );
+    });
+
     test('a thread reply is not eligible as last message', () async {
       expect(
         await EventVisibilityResolver.isEligibleForChatListPreview(

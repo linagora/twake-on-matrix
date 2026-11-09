@@ -45,6 +45,10 @@ void main() {
   /// timeline only. A thread reply is read by the receipt of its thread or
   /// by an unthreaded one, never by a `main` one, however recent.
   group('the last event is a reply of a followed thread', _followedReplyTests);
+  group(
+    'a reply of a followed thread without a server counter',
+    _followedWithoutCounterTests,
+  );
   group('rules kept from the SDK', _sdkRulesTests);
 }
 
@@ -260,6 +264,19 @@ void _notFollowedTests() {
     _threadCounters(_rootId, followed: true);
 
     expect(roomWithUnreadReply().hasNewMessagesWithThreads, isTrue);
+  });
+}
+
+/// CodeRabbit 4515561997: Synapse sends counters only for threads with a
+/// non-zero count; in a "mentions only" room a plain reply makes none.
+void _followedWithoutCounterTests() {
+  test('is a new message of the room', () {
+    _client.threadUnread.markFollowed(const ThreadRef(_roomId, _rootId));
+
+    expect(
+      _roomWithLastReply(_staleAnd(_readBefore)).hasNewMessagesWithThreads,
+      isTrue,
+    );
   });
 }
 
