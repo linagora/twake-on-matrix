@@ -121,7 +121,7 @@ void main() {
       ], myUserId);
 
       expect(reactions, hasLength(1));
-      expect(reactions.single.key, '👍');
+      expect(reactions.single.key, thumbsUpVs16);
       expect(reactions.single.count, 3);
       expect(reactions.single.reactors, hasLength(3));
       expect(reactions.single.reacted, isTrue);
@@ -193,7 +193,21 @@ void main() {
       final fromHistory = groupReactions(events.reversed, myUserId);
 
       expect(live.map((r) => r.key), [thumbsUpVs16, '❤️']);
-      expect(fromHistory.map((r) => r.key), ['👍', '❤️']);
+      expect(fromHistory.map((r) => r.key), [thumbsUpVs16, '❤️']);
+    });
+
+    test('shows the same variant of a group whatever the arrival', () {
+      final events = [
+        reactionEvent(thumbsUpVs15, senderId: bob),
+        reactionEvent('👍', senderId: carol),
+        reactionEvent(thumbsUpVs16),
+      ];
+
+      expect(groupReactions(events, myUserId).single.key, thumbsUpVs16);
+      expect(
+        groupReactions(events.reversed, myUserId).single.key,
+        thumbsUpVs16,
+      );
     });
 
     test('breaks a full tie the same way whatever the arrival', () {

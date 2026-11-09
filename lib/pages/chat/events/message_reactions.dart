@@ -49,6 +49,20 @@ final _variationSelectors = RegExp('[\uFE0E\uFE0F]');
 
 String _groupKey(String key) => key.replaceAll(_variationSelectors, '');
 
+// Emoji presentation first, text presentation last, so the shown variant
+// does not depend on the arrival order.
+int _keyRank(String key) => key.contains('\uFE0F')
+    ? 0
+    : key.contains('\uFE0E')
+    ? 2
+    : 1;
+
+String _shownKey(String current, String candidate) {
+  final byRank = _keyRank(candidate).compareTo(_keyRank(current));
+  if (byRank != 0) return byRank < 0 ? candidate : current;
+  return candidate.compareTo(current) < 0 ? candidate : current;
+}
+
 String? _reactionKey(Event event) => event.content
     .tryGetMap<String, dynamic>('m.relates_to')
     ?.tryGet<String>('key');
@@ -57,10 +71,13 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
   final reactionMap = <String, ReactionEntry>{};
   final sendersByGroup = <String, Set<String>>{};
   final firstSentAt = <String, DateTime>{};
+  final shownKeys = <String, String>{};
   for (final e in events) {
     final key = _reactionKey(e);
     if (key == null) continue;
     final groupKey = _groupKey(key);
+    final shown = shownKeys[groupKey];
+    shownKeys[groupKey] = shown == null ? key : _shownKey(shown, key);
     final sentAt = firstSentAt[groupKey];
     if (sentAt == null || e.originServerTs.isBefore(sentAt)) {
       firstSentAt[groupKey] = e.originServerTs;
@@ -85,7 +102,10 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
       if (bySentAt != 0) return bySentAt;
       return a.compareTo(b);
     });
-  return [for (final groupKey in groupKeys) reactionMap[groupKey]!];
+  return [
+    for (final groupKey in groupKeys)
+      reactionMap[groupKey]!.copyWith(key: shownKeys[groupKey]!),
+  ];
 }
 
 class ReactionsList extends StatelessWidget {
