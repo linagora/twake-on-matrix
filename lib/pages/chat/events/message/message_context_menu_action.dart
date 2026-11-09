@@ -15,7 +15,8 @@ enum MessageContextMenuAction {
   select,
   pin,
   saveToDownload,
-  saveToGallery;
+  saveToGallery,
+  trySendAgain;
 
   void onTap(BuildContext context) {
     switch (this) {
@@ -49,6 +50,9 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.delete:
         Navigator.of(context).pop('delete');
         break;
+      case MessageContextMenuAction.trySendAgain:
+        Navigator.of(context).pop('trySendAgain');
+        break;
     }
   }
 
@@ -74,6 +78,8 @@ enum MessageContextMenuAction {
         return L10n.of(context)!.edit;
       case MessageContextMenuAction.delete:
         return L10n.of(context)!.delete;
+      case MessageContextMenuAction.trySendAgain:
+        return L10n.of(context)!.tryToSendAgain;
     }
   }
 
@@ -106,6 +112,8 @@ enum MessageContextMenuAction {
         return Icons.edit_outlined;
       case MessageContextMenuAction.delete:
         return Icons.delete_outlined;
+      case MessageContextMenuAction.trySendAgain:
+        return Icons.refresh;
     }
   }
 
@@ -123,6 +131,7 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.saveToDownload:
       case MessageContextMenuAction.saveToGallery:
       case MessageContextMenuAction.delete:
+      case MessageContextMenuAction.trySendAgain:
         return null;
     }
   }
