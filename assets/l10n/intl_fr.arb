@@ -2756,7 +2756,7 @@
       }
     }
   },
-  "threadUnreadMessagesCount": "{n} messages non lus",
+  "threadUnreadMessagesCount": "{n, plural, =1{1 message non lu} other{{n} messages non lus}}",
   "@threadUnreadMessagesCount": {
     "type": "text",
     "placeholders": {

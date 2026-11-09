@@ -95,20 +95,26 @@ class ThreadSummary {
     ]..sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
   }
 
+  /// Text of [last] as the card shows it: its latest valid edit applied,
+  /// without the quote fallback a reply to another message carries.
   static String _textWithEdit(Event last, Iterable<Event> liveEvents) {
+    // Matrix spec: only the sender can edit, and the edit is a message (an
+    // undecrypted edit has no new content to show).
     final edits = liveEvents.where(
       (e) =>
           e.relationshipType == RelationshipTypes.edit &&
-          e.relationshipEventId == last.eventId,
+          e.relationshipEventId == last.eventId &&
+          e.senderId == last.senderId &&
+          e.type == EventTypes.Message,
     );
     final latestEdit = edits.isEmpty
         ? null
         : edits.reduce(
             (a, b) => b.originServerTs.isAfter(a.originServerTs) ? b : a,
           );
-    return latestEdit?.content
-            .tryGetMap<String, Object?>('m.new_content')
-            ?.tryGet<String>('body') ??
-        last.body;
+    return (latestEdit ?? last).calcUnlocalizedBody(
+      hideReply: true,
+      hideEdit: true,
+    );
   }
 }
