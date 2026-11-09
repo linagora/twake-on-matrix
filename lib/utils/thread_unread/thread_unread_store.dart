@@ -470,10 +470,10 @@ extension MarkRoomAndThreadsRead on Room {
     return null;
   }
 
-  Future<Map<String, String>> _lastReplyOfUnreadThreads(
+  Future<Map<ThreadRef, Event>> _lastReplyOfUnreadThreads(
     List<ThreadUnread> threads,
   ) async {
-    final lastByRoot = <String, String>{};
+    final lastByThread = <ThreadRef, Event>{};
     for (final thread in threads.where((t) => t.notificationCount > 0)) {
       final page = await const GetThreadRepliesInteractor().execute(
         room: this,
@@ -484,27 +484,27 @@ extension MarkRoomAndThreadsRead on Room {
         ),
       );
       final last = page.replies.lastOrNull;
-      if (last != null) lastByRoot[thread.rootEventId] = last.eventId;
+      if (last != null) lastByThread[ThreadRef(id, thread.rootEventId)] = last;
     }
-    return lastByRoot;
+    return lastByThread;
   }
 
   /// "Mark as read": the main timeline and every thread with unread messages.
   Future<void> markRoomAndAllThreadsRead() async {
     final mainEvent = await _newestMainTimelineEvent();
     final store = client.threadUnread;
-    final lastEventIdByThreadRootId = await _lastReplyOfUnreadThreads(
+    final lastReplyByThread = await _lastReplyOfUnreadThreads(
       store?.threadsOf(this) ?? const <ThreadUnread>[],
     );
     if (mainEvent != null) {
       await markRoomAndThreadsRead(
-        mainEventId: mainEvent.eventId,
-        lastEventIdByThreadRootId: lastEventIdByThreadRootId,
+        mainEvent: mainEvent,
+        lastReplyByThread: lastReplyByThread,
       );
       return;
     }
-    for (final entry in lastEventIdByThreadRootId.entries) {
-      await setThreadReadMarker(threadRootId: entry.key, eventId: entry.value);
+    for (final entry in lastReplyByThread.entries) {
+      await setThreadReadMarker(entry.value, entry.key);
     }
   }
 }

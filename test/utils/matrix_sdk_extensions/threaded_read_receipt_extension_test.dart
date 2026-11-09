@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
@@ -14,6 +15,9 @@ void main() {
 
   late MockRoom room;
   late MockClient client;
+
+  Event message(String eventId) => _message(eventId, room);
+  ThreadRef thread(String rootEventId) => ThreadRef(roomId, rootEventId);
 
   setUp(() {
     room = MockRoom();
@@ -45,7 +49,7 @@ void main() {
 
   group('main timeline', () {
     test('reading the room sends a receipt on the main thread', () async {
-      await room.setMainTimelineReadMarker(r'$last');
+      await room.setMainTimelineReadMarker(message(r'$last'));
 
       verify(
         client.postReceipt(
@@ -59,7 +63,7 @@ void main() {
     });
 
     test('m.fully_read keeps following the main timeline', () async {
-      await room.setMainTimelineReadMarker(r'$last');
+      await room.setMainTimelineReadMarker(message(r'$last'));
 
       verify(client.setReadMarker(roomId, mFullyRead: r'$last')).called(1);
     });
@@ -67,7 +71,7 @@ void main() {
     test('with private receipts the main thread receipt is private', () async {
       when(client.receiptsPublicByDefault).thenReturn(false);
 
-      await room.setMainTimelineReadMarker(r'$last');
+      await room.setMainTimelineReadMarker(message(r'$last'));
 
       verify(
         client.postReceipt(
@@ -93,10 +97,7 @@ void main() {
     test(
       'reading a thread sends a receipt with the root as thread id',
       () async {
-        await room.setThreadReadMarker(
-          threadRootId: rootId,
-          eventId: r'$reply',
-        );
+        await room.setThreadReadMarker(message(r'$reply'), thread(rootId));
 
         verify(
           client.postReceipt(
@@ -111,7 +112,7 @@ void main() {
     );
 
     test('reading a thread does not move m.fully_read of the room', () async {
-      await room.setThreadReadMarker(threadRootId: rootId, eventId: r'$reply');
+      await room.setThreadReadMarker(message(r'$reply'), thread(rootId));
 
       verifyNever(
         client.setReadMarker(
@@ -124,7 +125,7 @@ void main() {
     });
 
     test('reading a thread sends nothing on the main thread', () async {
-      await room.setThreadReadMarker(threadRootId: rootId, eventId: r'$reply');
+      await room.setThreadReadMarker(message(r'$reply'), thread(rootId));
 
       verifyNever(client.postReceipt(any, any, any, threadId: 'main'));
     });
@@ -133,8 +134,11 @@ void main() {
   group('Mark as read on a room', () {
     test('reads the main timeline and every unread thread', () async {
       await room.markRoomAndThreadsRead(
-        mainEventId: r'$last',
-        lastEventIdByThreadRootId: {r'$rootA': r'$a9', r'$rootB': r'$b3'},
+        mainEvent: message(r'$last'),
+        lastReplyByThread: {
+          thread(r'$rootA'): message(r'$a9'),
+          thread(r'$rootB'): message(r'$b3'),
+        },
       );
 
       verify(
@@ -172,14 +176,7 @@ void main() {
     late Room realRoom;
     late MockTimeline timeline;
 
-    Event mainMessage(String eventId) => Event(
-      type: EventTypes.Message,
-      content: {'msgtype': 'm.text', 'body': 'hello'},
-      eventId: eventId,
-      senderId: '@bob:example.com',
-      originServerTs: DateTime.utc(2026, 11, 6, 10),
-      room: realRoom,
-    );
+    Event mainMessage(String eventId) => _message(eventId, realRoom);
 
     LatestReceiptStateForTimeline ownMain(String eventId) {
       final data = LatestReceiptStateData(
@@ -243,7 +240,7 @@ void main() {
 
     test('sends nothing when asked for the event the main receipt is already '
         'on', () async {
-      await timeline.setMainTimelineReadMarker(eventId: r'$last');
+      await timeline.setMainTimelineReadMarker(event: mainMessage(r'$last'));
 
       verifyNothingSent();
     });
@@ -267,3 +264,12 @@ void main() {
     });
   });
 }
+
+Event _message(String eventId, Room room) => Event(
+  type: EventTypes.Message,
+  content: {'msgtype': 'm.text', 'body': 'hello'},
+  eventId: eventId,
+  senderId: '@bob:example.com',
+  originServerTs: DateTime.utc(2026, 11, 6, 10),
+  room: room,
+);

@@ -12,26 +12,24 @@ import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 extension ThreadedReadReceiptExtension on Room {
   static const String mainThreadId = 'main';
 
-  /// Reads the main timeline up to [eventId]; `m.fully_read` follows it.
-  Future<void> setMainTimelineReadMarker(String eventId) async {
-    await _postReceipt(eventId, mainThreadId);
-    await client.setReadMarker(id, mFullyRead: eventId);
+  /// Reads the main timeline up to [event]; `m.fully_read` follows it.
+  Future<void> setMainTimelineReadMarker(Event event) async {
+    await _postReceipt(event);
+    await client.setReadMarker(id, mFullyRead: event.eventId);
   }
 
-  /// Reads the thread [threadRootId] up to [eventId]; `m.fully_read` stays.
-  Future<void> setThreadReadMarker({
-    required String threadRootId,
-    required String eventId,
-  }) => _postReceipt(eventId, threadRootId);
+  /// Reads the [thread] up to [event]; `m.fully_read` stays.
+  Future<void> setThreadReadMarker(Event event, ThreadRef thread) =>
+      _postReceipt(event, thread: thread);
 
   /// "Mark as read" on a room: its main timeline and every given thread.
   Future<void> markRoomAndThreadsRead({
-    required String mainEventId,
-    required Map<String, String> lastEventIdByThreadRootId,
+    required Event mainEvent,
+    required Map<ThreadRef, Event> lastReplyByThread,
   }) async {
-    await setMainTimelineReadMarker(mainEventId);
-    for (final entry in lastEventIdByThreadRootId.entries) {
-      await setThreadReadMarker(threadRootId: entry.key, eventId: entry.value);
+    await setMainTimelineReadMarker(mainEvent);
+    for (final entry in lastReplyByThread.entries) {
+      await setThreadReadMarker(entry.value, entry.key);
     }
   }
 
@@ -49,21 +47,24 @@ extension ThreadedReadReceiptExtension on Room {
     if (last.senderId == client.userID) return false;
     final rootId = last.threadRootId;
     if (rootId == null) return _isNewerThanRead(last);
-    return _hasUnreadWatchedReply(last, rootId) || _hasUnreadMainMessage;
+    return _hasUnreadWatchedReply(last, ThreadRef(id, rootId)) ||
+        _hasUnreadMainMessage;
   }
 
   /// The user reads the thread in a screen of its own: only a followed or
   /// mentioning thread counts as new messages of the room.
-  bool _hasUnreadWatchedReply(Event reply, String rootId) =>
-      _isThreadWatched(rootId) && _isNewerThanRead(reply, threadRootId: rootId);
+  bool _hasUnreadWatchedReply(Event reply, ThreadRef thread) =>
+      _isThreadWatched(thread) && _isNewerThanRead(reply, thread: thread);
 
-  bool _isThreadWatched(String rootId) {
+  bool _isThreadWatched(ThreadRef thread) {
     final store = client.threadUnread;
     if (store == null) return false;
-    if (store.isFollowed(ThreadRef(id, rootId))) return true;
+    if (store.isFollowed(thread)) return true;
     return store
         .threadsOf(this)
-        .any((t) => t.rootEventId == rootId && t.highlightCount > 0);
+        .any(
+          (t) => t.rootEventId == thread.rootEventId && t.highlightCount > 0,
+        );
   }
 
   bool get _hasUnreadMainMessage {
@@ -71,45 +72,46 @@ extension ThreadedReadReceiptExtension on Room {
     return newest != null && newest > _ownReadTs();
   }
 
-  bool _isNewerThanRead(Event event, {String? threadRootId}) =>
-      _ownReadTs(threadRootId: threadRootId) <
-      event.originServerTs.millisecondsSinceEpoch;
+  bool _isNewerThanRead(Event event, {ThreadRef? thread}) =>
+      _ownReadTs(thread: thread) < event.originServerTs.millisecondsSinceEpoch;
 
   /// Newest own receipt that covers the main timeline, or the thread.
-  int _ownReadTs({String? threadRootId}) => [
+  int _ownReadTs({ThreadRef? thread}) => [
     receiptState.global.latestOwnReceipt?.ts,
     // MSC3771: a `main` receipt covers the main timeline only.
-    if (threadRootId == null)
+    if (thread == null)
       receiptState.mainThread?.latestOwnReceipt?.ts
     else
-      receiptState.byThread[threadRootId]?.latestOwnReceipt?.ts,
+      receiptState.byThread[thread.rootEventId]?.latestOwnReceipt?.ts,
   ].nonNulls.fold<int>(0, math.max);
 
-  Future<void> _postReceipt(String eventId, String threadId) =>
+  /// A receipt on the [thread], or on the main timeline when null.
+  Future<void> _postReceipt(Event event, {ThreadRef? thread}) =>
       client.postReceipt(
         id,
         client.receiptsPublicByDefault
             ? ReceiptType.mRead
             : ReceiptType.mReadPrivate,
-        eventId,
-        threadId: threadId,
+        event.eventId,
+        threadId: thread?.rootEventId ?? mainThreadId,
       );
 }
 
 extension ThreadedTimelineReadMarkerExtension on Timeline {
-  /// Reads the main timeline up to [eventId], or its last synced event that
+  /// Reads the main timeline up to [event], or its last synced event that
   /// is not a thread reply (a main receipt on a thread event is refused).
-  Future<void> setMainTimelineReadMarker({String? eventId}) async {
-    eventId ??= ThreadRules.newestMainTimelineEvent(
+  Future<void> setMainTimelineReadMarker({Event? event}) async {
+    event ??= ThreadRules.newestMainTimelineEvent(
       events,
       knownThreadReplyIds:
           room.client.threadUnread?.knownThreadReplyIds(room) ?? const {},
-    )?.eventId;
-    if (eventId == null) return;
+    );
+    if (event == null) return;
     // Already read there: no receipt, no request.
-    if (eventId == room.receiptState.mainThread?.latestOwnReceipt?.eventId) {
+    if (event.eventId ==
+        room.receiptState.mainThread?.latestOwnReceipt?.eventId) {
       return;
     }
-    return room.setMainTimelineReadMarker(eventId);
+    return room.setMainTimelineReadMarker(event);
   }
 }

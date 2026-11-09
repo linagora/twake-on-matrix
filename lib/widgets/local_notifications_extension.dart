@@ -164,12 +164,9 @@ extension LocalNotificationsExtension on MatrixState {
           case DesktopNotificationActions.seen:
             final threadRootId = event.threadRootId;
             if (threadRootId == null) {
-              room.setMainTimelineReadMarker(event.eventId);
+              room.setMainTimelineReadMarker(event);
             } else {
-              room.setThreadReadMarker(
-                threadRootId: threadRootId,
-                eventId: event.eventId,
-              );
+              room.setThreadReadMarker(event, ThreadRef(room.id, threadRootId));
             }
             break;
           case DesktopNotificationActions.openChat:
