@@ -6,7 +6,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/avatar/avatar_style.dart';
 
-enum AvatarKindBadge { people, public, broadcast }
+enum AvatarKindBadge { people, public, broadcast, space }
 
 /// Figma "Avatar icon md (56)": the badge sits in a notch cut out of the avatar.
 class AvatarWithKindBadge extends StatelessWidget {
@@ -57,15 +57,10 @@ class AvatarWithKindBadge extends StatelessWidget {
           Positioned(
             left: _badgeOffset * scale,
             top: _badgeOffset * scale,
-            child: SvgPicture.asset(
-              _assetPath,
-              semanticsLabel: _label(L10n.of(context)!),
-              width: _badgeSize * scale,
-              height: _badgeSize * scale,
-              colorFilter: ColorFilter.mode(
-                LinagoraRefColors.material().tertiary[30]!,
-                BlendMode.srcIn,
-              ),
+            child: _BadgeIcon(
+              badge: badge,
+              label: _label(L10n.of(context)!),
+              size: _badgeSize * scale,
             ),
           ),
         ],
@@ -77,13 +72,46 @@ class AvatarWithKindBadge extends StatelessWidget {
     AvatarKindBadge.people => l10n.roomKindPeople,
     AvatarKindBadge.public => l10n.roomKindPublic,
     AvatarKindBadge.broadcast => l10n.roomKindBroadcast,
+    AvatarKindBadge.space => l10n.roomKindSpace,
   };
+}
 
-  String get _assetPath => switch (badge) {
-    AvatarKindBadge.people => Assets.images.icAvatarBadgePeople.path,
-    AvatarKindBadge.public => Assets.images.icAvatarBadgePublic.path,
-    AvatarKindBadge.broadcast => Assets.images.icAvatarBadgeBroadcast.path,
-  };
+class _BadgeIcon extends StatelessWidget {
+  const _BadgeIcon({
+    required this.badge,
+    required this.label,
+    required this.size,
+  });
+
+  final AvatarKindBadge badge;
+  final String label;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = LinagoraRefColors.material().tertiary[30]!;
+    final assetPath = switch (badge) {
+      AvatarKindBadge.people => Assets.images.icAvatarBadgePeople.path,
+      AvatarKindBadge.public => Assets.images.icAvatarBadgePublic.path,
+      AvatarKindBadge.broadcast => Assets.images.icAvatarBadgeBroadcast.path,
+      AvatarKindBadge.space => null,
+    };
+    if (assetPath == null) {
+      return Icon(
+        Icons.view_in_ar,
+        semanticLabel: label,
+        size: size,
+        color: color,
+      );
+    }
+    return SvgPicture.asset(
+      assetPath,
+      semanticsLabel: label,
+      width: size,
+      height: size,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
 }
 
 class _NotchClipper extends CustomClipper<Path> {

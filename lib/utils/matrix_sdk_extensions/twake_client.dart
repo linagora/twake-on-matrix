@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 /// Top-level function for native isolate-based sync response parsing.
 /// Returns a fully constructed [SyncUpdate] since Dart isolates can
@@ -114,6 +115,10 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
 
     onTimelineEvent.stream.listen(onThreadEvent);
     onHistoryEvent.stream.listen(onThreadEvent);
+
+    // The SDK adds call events after the given set: a call would mark the
+    // room unread.
+    roomPreviewLastEvents.removeWhere(CallEventTypes.isCallEvent);
   }
 
   /// Logs this account's notification device out and removes its recovery

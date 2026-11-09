@@ -57,7 +57,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "addToSpace": "Add to space",
   "admin": "Admin",
   "@admin": {
     "type": "text",
@@ -470,7 +469,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "chatHasBeenAddedToThisSpace": "Chat has been added to this space",
   "chats": "Chats",
   "@chats": {
     "type": "text",
@@ -1979,8 +1977,6 @@
   "time": "Time",
   "messageType": "Message Type",
   "sender": "Sender",
-  "removeFromSpace": "Remove from space",
-  "addToSpaceDescription": "Select a space to add this chat to it.",
   "start": "Start",
   "addToStory": "Add to story",
   "publish": "Publish",
@@ -2091,9 +2087,6 @@
   "noKeyForThisMessage": "This can happen if the message was sent before you have signed in to your account at this device.\n\nIt is also possible that the sender has blocked your device or something went wrong with the internet connection.\n\nAre you able to read the message on another session? Then you can transfer the message from it! Go to Settings > Devices and make sure that your devices have verified each other. When you open the room the next time and both sessions are in the foreground, the keys will be transmitted automatically.\n\nDo you not want to loose the keys when logging out or switching devices? Make sure that you have enabled the chat backup in the settings.",
   "newGroup": "New chat",
   "newSpace": "New space",
-  "enterSpace": "Enter space",
-  "enterRoom": "Enter room",
-  "allSpaces": "All spaces",
   "numChats": "{number} chats",
   "@numChats": {
     "type": "number",
@@ -2910,6 +2903,21 @@
     "type": "text",
     "placeholders": {}
   },
+  "spaceChannelsLoading": "Loading channels",
+  "@spaceChannelsLoading": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceChannelsEmpty": "Nothing here yet.",
+  "@spaceChannelsEmpty": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomKindSpace": "Space",
+  "@roomKindSpace": {
+    "type": "text",
+    "placeholders": {}
+  },
   "roomKindPeople": "Group",
   "@roomKindPeople": {
     "type": "text",
@@ -2922,6 +2930,320 @@
   },
   "publicGroupsLoadFailed": "Public groups could not be loaded.",
   "@publicGroupsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListBroadcasts": "Broadcast",
+  "@roomListBroadcasts": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListDirects": "Direct",
+  "@roomListDirects": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListSpaces": "Spaces",
+  "@roomListSpaces": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListFavourites": "Favourites",
+  "@roomListFavourites": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListEmptyView": "Nothing here.",
+  "@roomListEmptyView": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListFilters": "Show",
+  "@roomListFilters": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "hideRoomsOf": "Hide the rooms of {name}",
+  "@hideRoomsOf": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "showRoomsOf": "Show the rooms of {name}",
+  "@showRoomsOf": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "addSubspaceTo": "Add subspace to {name}",
+  "@addSubspaceTo": {
+    "type": "text",
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "joinWithMembers": "{count, plural, =1{Join · 1 member} other{Join · {count} members}}",
+  "@joinWithMembers": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "folderEdit": "Edit folder",
+  "@folderEdit": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderDelete": "Delete folder",
+  "@folderDelete": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderDeleteTitle": "Delete this folder?",
+  "@folderDeleteTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderDeleteText": "The chats in it stay where they are.",
+  "@folderDeleteText": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderDeleted": "Folder deleted",
+  "@folderDeleted": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderSaveFailed": "The folder could not be saved. Try again.",
+  "@folderSaveFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spacePublic": "Public space",
+  "@spacePublic": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spacePrivate": "Private space",
+  "@spacePrivate": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceInvitePeople": "Invite people",
+  "@spaceInvitePeople": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceChannels": "Channels of the space",
+  "@spaceChannels": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceMemberCount": "{count, plural, =1{1 member} other{{count} members}}",
+  "@spaceMemberCount": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "spaceShowInfo": "Show room info",
+  "@spaceShowInfo": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "createInTheSpace": "In the space",
+  "@createInTheSpace": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "createNameRequired": "Give it a name.",
+  "@createNameRequired": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "createFailed": "Creation failed.",
+  "createForbidden": "You are not allowed to do this here.",
+  "@createForbidden": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "roomListUnread": "Unread",
+  "@roomListUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceNewGroup": "New group chat",
+  "@spaceNewGroup": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceInfoTitle": "Space info",
+  "@spaceInfoTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceLeave": "Leave space",
+  "@spaceLeave": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceLeaveSubtitle": "The space and its chats will still remain after you left",
+  "@spaceLeaveSubtitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceMentioned": "You were mentioned",
+  "@spaceMentioned": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "foldersTitle": "Folders",
+  "@foldersTitle": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "foldersIntro": "Make folders for different groups of chats and switch between them quickly.",
+  "@foldersIntro": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "foldersRecommended": "Recommended",
+  "@foldersRecommended": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderNew": "New folder",
+  "@folderNew": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderName": "Folder name",
+  "@folderName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderTaken": "A folder has this name already",
+  "@folderTaken": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderEmoji": "Choose an emoji",
+  "@folderEmoji": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderColor": "Folder colour",
+  "@folderColor": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderNoColor": "No colour",
+  "@folderNoColor": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderIncluded": "Included chats",
+  "@folderIncluded": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderIncludedHelp": "Chats of these kinds go in by themselves, new ones too.",
+  "@folderIncludedHelp": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderTypeDirect": "Direct messages",
+  "@folderTypeDirect": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderTypeGroup": "Groups",
+  "@folderTypeGroup": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderTypeBroadcast": "Channels",
+  "@folderTypeBroadcast": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderTypeBot": "Bots",
+  "@folderTypeBot": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderRuleUnread": "Chats with unread messages",
+  "@folderRuleUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderRuleBroadcasts": "Broadcasts and channels where only moderators post",
+  "@folderRuleBroadcasts": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderRuleDirects": "Chats with one person",
+  "@folderRuleDirects": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderRuleSpaces": "Spaces and the chats inside them",
+  "@folderRuleSpaces": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "folderRuleFavourites": "Chats marked as favourite",
+  "@folderRuleFavourites": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceJoinFailed": "Could not join.",
+  "@spaceJoinFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "spaceChannelsFailed": "Could not read the channels.",
+  "spaceChannelsRetry": "Try again",
+  "@spaceChannelsFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "@spaceChannelsRetry": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "enterSpaceName": "Enter a space name",
+  "@enterSpaceName": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callFromUnsupportedApp": "Call from an app Twake Chat does not support",
+  "@callFromUnsupportedApp": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callStartedAt": "Meeting started at {time}",
+  "@callStartedAt": {
+    "type": "text",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "publicGroupUnavailable": "This group is unavailable.",
+  "@publicGroupUnavailable": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "tryToJoin": "Try to join",
+  "@tryToJoin": {
     "type": "text",
     "placeholders": {}
   },

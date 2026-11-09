@@ -1,3 +1,4 @@
+import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_style.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,8 @@ class ChatListViewStyle {
 
   static Size preferredSizeAppBar({bool? hasAudioEvent}) =>
       hasAudioEvent == true
-      ? const Size.fromHeight(160)
-      : const Size.fromHeight(120);
+      ? const Size.fromHeight(160 + RoomListFilterStyle.height)
+      : const Size.fromHeight(120 + RoomListFilterStyle.height);
 
   // Slidable Ratio of one slidable item
   static const double slidableSizeRatio = 0.23;

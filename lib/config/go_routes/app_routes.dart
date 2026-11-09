@@ -24,7 +24,11 @@ import 'package:twake_chat/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:twake_chat/pages/invitation_selection/invitation_selection.dart';
 import 'package:twake_chat/pages/login/login.dart';
 import 'package:twake_chat/pages/login/on_auth_redirect.dart';
+import 'package:twake_chat/domain/spaces/folders.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/folder_edit_screen.dart';
+import 'package:twake_chat/pages/settings_dashboard/settings_folders/folders_screen.dart';
 import 'package:twake_chat/pages/new_group/new_group.dart';
+import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
 import 'package:twake_chat/pages/new_group/new_group_chat_info.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat.dart';
 import 'package:twake_chat/pages/personal_qr/personal_qr.dart';
@@ -315,6 +319,14 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
                 ),
               ],
             ),
+            TypedGoRoute<NewPrivateChatNewSpaceRoute>(
+              path: 'newspace',
+              routes: [
+                TypedGoRoute<NewPrivateChatNewSpaceInfoRoute>(
+                  path: 'newspaceinfo',
+                ),
+              ],
+            ),
             TypedGoRoute<NewPrivateChatNewFeedRoute>(
               path: 'newfeed',
               routes: [
@@ -326,6 +338,13 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
           ],
         ),
         TypedGoRoute<NewGroupRoute>(path: 'newgroup'),
+        TypedGoRoute<FoldersRoute>(
+          path: 'folders',
+          routes: [
+            TypedGoRoute<FolderEditRoute>(path: 'edit'),
+            TypedGoRoute<BuiltinFolderEditRoute>(path: 'builtin'),
+          ],
+        ),
         TypedGoRoute<DraftChatRoute>(path: 'draftChat'),
         TypedGoRoute<ForwardRoute>(path: 'forward'),
         TypedGoRoute<ShareRoute>(path: 'share'),
@@ -513,22 +532,63 @@ class NewPrivateChatRoute extends GoRouteData with $NewPrivateChatRoute {
 
 class NewPrivateChatNewGroupRoute extends GoRouteData
     with $NewPrivateChatNewGroupRoute {
-  const NewPrivateChatNewGroupRoute();
+  const NewPrivateChatNewGroupRoute({this.parent});
+
+  /// The space the flow was opened from.
+  final String? parent;
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const NewGroup());
+      _defaultPage(context, NewGroup(parentSpaceId: parent));
 }
 
-class NewPrivateChatNewGroupInfoRoute extends GoRouteData
-    with $NewPrivateChatNewGroupInfoRoute {
-  const NewPrivateChatNewGroupInfoRoute({this.$extra});
+class NewPrivateChatNewSpaceRoute extends GoRouteData
+    with $NewPrivateChatNewSpaceRoute {
+  const NewPrivateChatNewSpaceRoute({this.parent});
 
+  /// The space the new one goes in.
+  final String? parent;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(
+        context,
+        NewGroup(kind: NewGroupKind.space, parentSpaceId: parent),
+      );
+}
+
+class NewPrivateChatNewSpaceInfoRoute extends GoRouteData
+    with $NewPrivateChatNewSpaceInfoRoute {
+  const NewPrivateChatNewSpaceInfoRoute({this.parent, this.$extra});
+
+  final String? parent;
   final Set<PresentationContact>? $extra;
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, NewGroupChatInfo(contactsList: $extra ?? {}));
+      _defaultPage(
+        context,
+        NewGroupChatInfo(
+          contactsList: $extra ?? {},
+          kind: NewGroupKind.space,
+          parentSpaceId: parent,
+        ),
+      );
+}
+
+class NewPrivateChatNewGroupInfoRoute extends GoRouteData
+    with $NewPrivateChatNewGroupInfoRoute {
+  const NewPrivateChatNewGroupInfoRoute({this.parent, this.$extra});
+
+  final String? parent;
+  final Set<PresentationContact>? $extra;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(
+        context,
+        NewGroupChatInfo(contactsList: $extra ?? {}, parentSpaceId: parent),
+      );
 }
 
 class NewPrivateChatNewFeedRoute extends GoRouteData
@@ -537,7 +597,7 @@ class NewPrivateChatNewFeedRoute extends GoRouteData
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, const NewGroup(isFeed: true));
+      _defaultPage(context, const NewGroup(kind: NewGroupKind.feed));
 }
 
 class NewPrivateChatNewFeedInfoRoute extends GoRouteData
@@ -550,7 +610,7 @@ class NewPrivateChatNewFeedInfoRoute extends GoRouteData
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _defaultPage(
         context,
-        NewGroupChatInfo(contactsList: $extra ?? {}, isFeed: true),
+        NewGroupChatInfo(contactsList: $extra ?? {}, kind: NewGroupKind.feed),
       );
 }
 
@@ -564,6 +624,50 @@ class NewGroupRoute extends GoRouteData with $NewGroupRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) =>
       _defaultPage(context, const NewGroup());
+}
+
+class FoldersRoute extends GoRouteData with $FoldersRoute {
+  const FoldersRoute();
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, const FoldersScreen());
+}
+
+class FolderEditRoute extends GoRouteData with $FolderEditRoute {
+  const FolderEditRoute({this.name});
+
+  /// The folder edited, a new one when `null`.
+  final String? name;
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, FolderEditScreen(name: name));
+}
+
+class BuiltinFolderEditRoute extends GoRouteData with $BuiltinFolderEditRoute {
+  const BuiltinFolderEditRoute({this.kind});
+
+  /// Null for a link that names no kind this app knows.
+  final BuiltinFolder? kind;
+
+  @override
+  FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
+      kind == null
+      ? const FoldersRoute().location
+      : _loggedOutRedirect(context, state);
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      _defaultPage(context, BuiltinFolderEditScreen(kind: kind!));
 }
 
 // --- Draft chat ---

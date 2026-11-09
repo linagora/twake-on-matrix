@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
@@ -194,12 +195,21 @@ void main() {
   /// thread relation included, into `m.new_content` (room.dart:1308-1325).
   /// Editing the root from its thread would make it a reply of itself.
   group('editing from the thread screen', () {
+    Event textEvent(String eventId) => Event(
+      content: {'msgtype': MessageTypes.Text, 'body': 'before'},
+      type: EventTypes.Message,
+      eventId: eventId,
+      senderId: '@alice:example.org',
+      originServerTs: DateTime(2026),
+      room: room,
+    );
+
     test('editing the root sends no thread relation', () async {
       // Longer than maxLength: an edit is not split either.
       await interactor.execute(
         room: room,
         text: 'fixed root',
-        editEventId: rootId,
+        editEvent: textEvent(rootId),
         threadRootEventId: rootId,
         threadLastEventId: lastId,
       );
@@ -219,7 +229,7 @@ void main() {
       await interactor.execute(
         room: room,
         text: 'fixed reply',
-        editEventId: r'$reply',
+        editEvent: textEvent(r'$reply'),
         threadRootEventId: rootId,
         threadLastEventId: lastId,
       );

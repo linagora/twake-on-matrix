@@ -4,8 +4,7 @@ import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_body_view_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_skeletonizer_widget.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_builder.dart';
-import 'package:twake_chat/pages/chat_list/space_view.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_room_list_extension.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/stream_extension.dart';
 import 'package:flutter/material.dart';
@@ -43,24 +42,14 @@ class ChatListBodyView extends StatelessWidget {
             },
         child: SlidableAutoCloseBehavior(
           child: StreamBuilder(
-            key: ValueKey(
-              controller.activeClient.userID.toString() +
-                  controller.activeFilter.toString() +
-                  controller.activeSpaceId.toString(),
-            ),
+            key: ValueKey(controller.activeClient.userID.toString()),
             stream: controller.activeClient.onSync.stream
                 .where((s) => s.hasRoomUpdate)
                 .rateLimit(const Duration(seconds: 1)),
             builder: (context, _) {
-              if (controller.activeFilter == ActiveFilter.spaces) {
-                return SpaceView(
-                  controller,
-                  scrollController: controller.scrollController,
-                  key: Key(controller.activeSpaceId ?? 'Spaces'),
-                );
-              }
               if (controller.activeClient.prevBatch != null) {
-                if (controller.chatListBodyIsEmpty) {
+                final rooms = controller.activeClient.listedRooms;
+                if (rooms.isEmpty) {
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -137,22 +126,7 @@ class ChatListBodyView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (!controller.filteredRoomsForPinIsEmpty)
-                      ValueListenableBuilder(
-                        valueListenable: controller.expandRoomsForPinNotifier,
-                        builder: (context, isExpanded, child) {
-                          return child!;
-                        },
-                        child: ChatListViewBuilder(
-                          controller: controller,
-                          rooms: controller.filteredRoomsForPin,
-                        ),
-                      ),
-                    if (!controller.filteredRoomsForAllIsEmpty)
-                      ChatListViewBuilder(
-                        controller: controller,
-                        rooms: controller.filteredRoomsForAll,
-                      ),
+                    ChatListViewBuilder(controller: controller, rooms: rooms),
                   ],
                 );
               }

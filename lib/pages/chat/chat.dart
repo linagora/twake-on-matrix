@@ -77,10 +77,12 @@ import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconciliation_extension.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
@@ -178,6 +180,11 @@ class ChatController extends ConsumerState<Chat>
         AutoMarkAsReadMixin {
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
+
+  late final Stream<ConnectivityResult> connectivityResultStream =
+      networkConnectionService.connectivity.onConnectivityChanged.map(
+        (results) => results.primary,
+      );
 
   /// Flag to prevent auto-loading history/future during programmatic scrolling
   bool _isProgrammaticScrolling = false;
@@ -1109,7 +1116,7 @@ class ChatController extends ConsumerState<Chat>
         room: room!,
         text: sendController.text.trim(),
         inReplyTo: replyEventNotifier.value,
-        editEventId: editEventNotifier.value?.eventId,
+        editEvent: editEventNotifier.value,
         threadRootEventId: threadRootId,
         threadLastEventId: threadRootId == null ? null : threadLastEventId,
       ),
@@ -1286,10 +1293,12 @@ class ChatController extends ConsumerState<Chat>
     showEmojiPickerComposerNotifier.value = true;
   }
 
-  void copySingleEventAction() async {
+  void copySelectedEventsAction() async {
     if (selectedEvents.length == 1) {
       await selectedEvents.first.copy(context, timeline!);
+      return;
     }
+    await selectedEvents.copyTexts(context, timeline!);
   }
 
   void copyEventsAction(Event event) async {

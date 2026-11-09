@@ -158,3 +158,66 @@ toggle.
 A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
+
+## D10. A room address opens a preview of the room (proposed by Johann, 2026-11-05)
+
+A link to a room address (`https://matrix.to/#/#name:server`) or ID that the
+user has neither joined nor been invited to opens a preview, as Twake Space
+Chat does (D491 and D581 there):
+
+- The room's name, topic and avatar, with « Join · n members », or « Ask to
+  join · n members » when it needs an approval. Once asked, the button gives
+  way to « Request sent ».
+- A user banned from the room is told so, with no button.
+- A room nobody can preview (unknown, or invite only) says the group is
+  unavailable and offers « Try to join ».
+- A failed join or request is said in the preview, under the button.
+- A room the user is already in under another address opens directly.
+
+The preview reads the room summary (MSC3266) only, with no search of a public
+directory, as Twake Space Chat does since its D581: it also says whether the
+user is banned or has already asked, and it describes a room that no directory
+lists. A failure of the summary shows the group as unavailable, with « Try to
+join », as there, unless the app already knows the user is banned from it: the
+preview then says so, with no button. The `via` servers of the link route the
+summary, the join and the request. A joined room still opens directly, at the
+linked message; one this device has not synced yet opens once it arrives, or
+shows « Try to join » after 30 seconds.
+
+Hand-typed addresses becoming links is left to a later change.
+
+## D11. Copying several selected messages follows Twake Space Chat (proposed by Johann, 2026-11-06)
+
+Copy, with several messages selected, puts them on the clipboard in timeline
+order, as Twake Space Chat does (its D183): each message under a line
+`Author, day time`, an empty line between two messages. The day and the time
+are those of the conversation: "Today", "Yesterday" or the date of the day
+separator, then `HH:mm`. A file, an image or a video with a caption is copied
+with its caption, without one with its file name. Other messages (stickers,
+locations, polls, encrypted, deleted) are left out.
+
+With one message selected, Copy is unchanged: its text alone, or the image
+itself on the web.
+
+## D12. Call events in the timeline and the chat list follow Twake Space Chat (proposed by Johann, 2026-11-04)
+
+Twake Chat reads call events as Twake Space Chat does, so that both clients
+of the same room tell the same story:
+
+- A MatrixRTC call shows only while it goes on. Its membership, its ring and
+  the old call signalling (hangup, answer, candidates) never show in the
+  timeline or the chat list, whatever the setting for unknown events.
+- The message that opens the chat of a call (marked
+  `app.twake.chat.call_thread`) reads « Meeting started at 14:32 », at the
+  time of its event on the reader's clock, in the bubble and in the chat
+  list. The body sent carries the caller's time, for the other clients.
+- A legacy `m.call.invite` (the one-to-one call of Element) shows one line,
+  « Call from an app Twake Chat does not support », with no answer button.
+  It is not the chat-list preview, does not make the room unread on this
+  device, and on Android its push shows no notification.
+
+Known limits: the unread badge counts what the server counts. Synapse's
+default rule for `m.call.invite` still adds 1 to the badge until the room is
+read. On iOS the notification extension still shows its generic notification
+for that push. The ring push rules, and the iOS extension, will be settled
+with the in-app and the system ring.

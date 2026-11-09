@@ -1,4 +1,5 @@
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 /// How a given event type behaves in the chat timeline.
 enum EventVisibilityGroup {
@@ -12,7 +13,8 @@ enum EventVisibilityGroup {
   neverInTimeline,
 
   /// Hidden when [AppConfig.hideUnknownEvents] is true.
-  /// Also the fallback for types absent from [EventTypeRules._byType].
+  /// Also the fallback for types absent from [EventTypeRules._byType],
+  /// call events aside.
   unknown,
 }
 
@@ -121,21 +123,19 @@ abstract final class EventTypeRules {
       group: EventVisibilityGroup.neverInTimeline,
     ),
 
-    // -- Unknown (hidden by hideUnknownEvents) --------------------------------
-    // SDK-defined call types are listed explicitly; any other unregistered type
-    // falls through to unknown via getGroup's default.
-    EventTypes.CallInvite: EventTypeRule(group: EventVisibilityGroup.unknown),
-    EventTypes.CallAnswer: EventTypeRule(group: EventVisibilityGroup.unknown),
-    EventTypes.CallHangup: EventTypeRule(group: EventVisibilityGroup.unknown),
-    EventTypes.CallCandidates: EventTypeRule(
-      group: EventVisibilityGroup.unknown,
+    // The legacy invite is a single line; other call events never show.
+    EventTypes.CallInvite: EventTypeRule(
+      group: EventVisibilityGroup.alwaysVisible,
     ),
   };
 
   /// Returns the visibility group for [type], or [EventVisibilityGroup.unknown]
   /// for unregistered types.
   static EventVisibilityGroup getGroup(String type) =>
-      _byType[type]?.group ?? EventVisibilityGroup.unknown;
+      _byType[type]?.group ??
+      (CallEventTypes.isCallEvent(type)
+          ? EventVisibilityGroup.neverInTimeline
+          : EventVisibilityGroup.unknown);
 
   /// Message-like types (same-sender grouping, notifications, server filter).
   static final Set<String> messageContentTypes = {

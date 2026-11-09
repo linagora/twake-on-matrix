@@ -4,11 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 mixin GoToGroupChatMixin {
-  void goToNewGroupChat(BuildContext context) {
+  void goToNewGroupChat(BuildContext context, {String? parentSpaceId}) {
     if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
-      context.pushInner('innernavigator/newgroup');
+      context.pushInner('innernavigator/newgroup', arguments: parentSpaceId);
     } else {
-      const NewPrivateChatNewGroupRoute().push(context);
+      NewPrivateChatNewGroupRoute(parent: parentSpaceId).push(context);
+    }
+  }
+
+  void goToNewSpace(BuildContext context, {String? parentSpaceId}) {
+    if (!FirstColumnInnerRoutes.instance.goRouteAvailableInFirstColumn()) {
+      context.pushInner('innernavigator/newspace', arguments: parentSpaceId);
+    } else {
+      NewPrivateChatNewSpaceRoute(parent: parentSpaceId).push(context);
     }
   }
 

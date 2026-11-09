@@ -5,6 +5,8 @@ import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/pages/chat/events/message_time_style.dart';
 import 'package:twake_chat/pages/chat/seen_by_row.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_item.dart';
+import 'package:twake_chat/presentation/model/chat_list/room_list_row.dart';
+import 'package:twake_chat/presentation/model/chat_list/space_row_data.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar_with_kind_badge.dart';
@@ -95,6 +97,52 @@ void main() {
     await tester.pump();
 
     verifyNever(room.loadHeroUsers());
+  });
+
+  SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
+    fold: SpaceFold.none,
+    unreadCount: 0,
+    mentionCount: mentionCount,
+    onToggleFold: () {},
+  );
+
+  testWidgets('says an invited space is an invitation', (tester) async {
+    final room = buildRoom(name: 'Team');
+    when(room.membership).thenReturn(Membership.invite);
+
+    await tester.pumpWidget(wrap(ChatListItem(room, space: spaceData())));
+    await tester.pump();
+
+    expect(find.text('Invited'), findsOneWidget);
+  });
+
+  testWidgets('says nothing of invitation on a joined space', (tester) async {
+    final room = buildRoom(name: 'Team');
+
+    await tester.pumpWidget(wrap(ChatListItem(room, space: spaceData())));
+    await tester.pump();
+
+    expect(find.text('Invited'), findsNothing);
+  });
+
+  testWidgets('names the mention badge of a space for a screen reader', (
+    tester,
+  ) async {
+    final room = buildRoom(name: 'Team');
+
+    await tester.pumpWidget(
+      wrap(ChatListItem(room, space: spaceData(mentionCount: 1))),
+    );
+    await tester.pump();
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == 'You were mentioned',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows the seen status computed with the preview', (

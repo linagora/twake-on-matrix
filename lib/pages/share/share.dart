@@ -1,6 +1,5 @@
 import 'package:twake_chat/event/twake_event_types.dart';
 import 'package:twake_chat/pages/share/share_view.dart';
-import 'package:twake_chat/presentation/enum/chat_list/chat_list_enum.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/search_recent_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
@@ -120,10 +119,7 @@ class ShareController extends State<Share>
     }
   }
 
-  final ActiveFilter _activeFilterAllChats = ActiveFilter.acceptedChats;
-
-  List<Room> get filteredRoomsForAll =>
-      Matrix.of(context).client.filteredRoomsForAll(_activeFilterAllChats);
+  List<Room> get filteredRoomsForAll => Matrix.of(context).client.acceptedRooms;
 
   @override
   Widget build(BuildContext context) {

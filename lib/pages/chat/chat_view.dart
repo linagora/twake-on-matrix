@@ -32,7 +32,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
             icon: Icons.copy_outlined,
             tooltip: L10n.of(context)!.copy,
             onTap: () => controller.actionWithClearSelections(
-              controller.copySingleEventAction,
+              controller.copySelectedEventsAction,
             ),
           ),
           // #777 Hide Delete Message functionality
@@ -135,10 +135,8 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                                 room: controller.room,
                                 isArchived: controller.isArchived,
                                 sendController: controller.sendController,
-                                connectivityResultStream: controller
-                                    .networkConnectionService
-                                    .connectivity
-                                    .onConnectivityChanged,
+                                connectivityResultStream:
+                                    controller.connectivityResultStream,
                                 actions: _appBarActions(context),
                                 onPushDetails: controller.onPushDetails,
                                 roomName: controller.roomName,

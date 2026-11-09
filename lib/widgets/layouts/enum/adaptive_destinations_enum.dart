@@ -1,5 +1,5 @@
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/widgets/avatar/bottom_navigation_avatar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 import 'package:twake_chat/widgets/unread_rooms_badge.dart';
@@ -36,10 +36,10 @@ enum AdaptiveDestinationEnum {
           key: NavigationKeys.roomsDestination.key,
           icon: UnreadRoomsBadge(
             color: LinagoraSysColors.material().onBackground,
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
+            filter: (room) => room.isNotSpaceAndStoryRoom(),
           ),
           selectedIcon: UnreadRoomsBadge(
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
+            filter: (room) => room.isNotSpaceAndStoryRoom(),
             isSelected: true,
           ),
           label: L10n.of(context)!.chats,
@@ -81,10 +81,10 @@ enum AdaptiveDestinationEnum {
         return BottomNavigationBarItem(
           icon: UnreadRoomsBadge(
             color: LinagoraSysColors.material().tertiary,
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
+            filter: (room) => room.isNotSpaceAndStoryRoom(),
           ),
           activeIcon: UnreadRoomsBadge(
-            filter: (room) => !room.isSpace && !room.isStoryRoom,
+            filter: (room) => room.isNotSpaceAndStoryRoom(),
             isSelected: true,
           ),
           label: L10n.of(context)!.chats,

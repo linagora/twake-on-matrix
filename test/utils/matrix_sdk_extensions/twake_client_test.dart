@@ -173,4 +173,21 @@ void main() {
       contains(r'$old_reply'),
     );
   });
+
+  test('keeps call events out of the room preview', () {
+    final client = TwakeClient('testclient', database: MockDatabase());
+
+    expect(
+      client.roomPreviewLastEvents,
+      containsAll([EventTypes.Message, EventTypes.Encrypted]),
+    );
+    expect(
+      client.roomPreviewLastEvents,
+      isNot(contains(EventTypes.CallInvite)),
+    );
+    expect(
+      client.roomPreviewLastEvents,
+      isNot(contains(EventTypes.GroupCallMember)),
+    );
+  });
 }

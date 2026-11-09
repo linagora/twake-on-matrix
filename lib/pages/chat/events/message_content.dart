@@ -301,6 +301,12 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
+            if (event.isCallThreadRoot) {
+              return Text(
+                event.callThreadRootText(L10n.of(context)!),
+                style: event.getMessageTextStyle(context),
+              );
+            }
             final videoCallUrl = VideoCallHelper.extractUrl(
               event,
               videoCallBaseUrl,
