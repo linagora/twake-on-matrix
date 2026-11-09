@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
@@ -29,6 +31,7 @@ void main() {
   group('the root is not loaded when something else decided', _noLookupTests);
   group('the root decides when nothing else did', _lookupTests);
   group('a root that cannot be loaded', _failingRootTests);
+  group('the follow lookup of the thread still runs', _pendingFollowTests);
 }
 
 const _roomId = '!room:example.com';
@@ -87,7 +90,7 @@ void _rootSentBy(String sender) => when(_room.getEventById(_rootId)).thenAnswer(
 
 Future<bool> _decide({
   Event? reply,
-  bool followed = false,
+  FutureOr<bool> followed = false,
   EvaluatedPushRuleAction? pushActions,
   ({String roomId, String threadRootId})? activeThread,
 }) => ThreadRules.shouldNotifyThreadReply(
@@ -170,6 +173,55 @@ void _failingRootTests() {
     await expectLater(
       _decide(pushActions: _mentionNotifies(), activeThread: _thisThread),
       completion(isFalse),
+    );
+  });
+}
+
+/// Review 4515562072, maintainer decision of 09/11: in the foreground, a
+/// reply that arrives while the follow lookup of its thread runs (neither
+/// the follow state nor a mention decided) waits for the lookup. The root
+/// cannot be loaded here, so only the lookup can decide.
+void _pendingFollowTests() {
+  late Completer<bool> lookup;
+  setUp(() => lookup = Completer<bool>());
+
+  test('the decision waits for the lookup', () async {
+    var decided = false;
+    final decision = _decide(
+      followed: lookup.future,
+    ).whenComplete(() => decided = true);
+    await pumpEventQueue();
+
+    expect(decided, isFalse);
+    lookup.complete(true);
+    expect(await decision, isTrue);
+  });
+
+  test('the user participated: the reply notifies', () async {
+    final decision = _decide(followed: lookup.future);
+    lookup.complete(true);
+
+    expect(await decision, isTrue);
+  });
+
+  test('the user did not participate: no notification', () async {
+    final decision = _decide(followed: lookup.future);
+    lookup.complete(false);
+
+    expect(await decision, isFalse);
+  });
+
+  test('the lookup fails: no notification, nothing thrown', () async {
+    final decision = _decide(followed: lookup.future);
+    lookup.completeError(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
+
+    await expectLater(decision, completion(isFalse));
+  });
+
+  test('a mention decides without waiting for the lookup', () async {
+    await expectLater(
+      _decide(followed: lookup.future, pushActions: _mentionNotifies()),
+      completion(isTrue),
     );
   });
 }

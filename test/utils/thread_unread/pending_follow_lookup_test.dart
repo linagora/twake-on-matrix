@@ -41,6 +41,15 @@ void main() {
 
   group('a follow lookup pending for a room', _pendingLookupTests);
   group('the notifications of a room may be cleared', _clearRuleTests);
+
+  /// Review 4515562072, maintainer decision of 09/11: a thread reply that
+  /// arrives in the foreground while the follow lookup of its thread runs
+  /// waits for the answer: participated notifies, not participated does
+  /// not, a failed lookup does not (and throws nothing).
+  group(
+    'the follow state once the pending lookup answers',
+    _followOnceKnownTests,
+  );
 }
 
 const _roomId = '!room:example.com';
@@ -87,6 +96,12 @@ Future<void> _answer({required bool participated}) async {
 }
 
 bool get _pending => _store.hasPendingFollowLookup(_room);
+
+const _thread = ThreadRef(_roomId, _rootId);
+
+/// The follow state of [_thread], as the notification decision awaits it:
+/// true followed, false not followed, null unknown (lookup failed).
+Future<bool?> _followOnceKnown() => _store.followOnceKnown(_thread);
 
 void _pendingLookupTests() {
   test('nothing pending before any sync', () {
@@ -194,6 +209,60 @@ void _clearRuleTests() {
     );
 
     expect(left.hasNoPendingNotification, isTrue);
+  });
+}
+
+void _followOnceKnownTests() {
+  test(
+    'a followed thread answers at once, without asking the server',
+    () async {
+      _store.markFollowed(_thread);
+
+      expect(await _followOnceKnown(), isTrue);
+      verifyNever(_client.getOneRoomEvent(any, any));
+    },
+  );
+
+  test('a thread known as not followed answers at once', () async {
+    _sync(1);
+    await _answer(participated: false);
+
+    expect(await _followOnceKnown(), isFalse);
+  });
+
+  test('while the lookup runs, the answer waits for the server', () async {
+    _sync(1);
+    var answered = false;
+    final follow = _followOnceKnown().whenComplete(() => answered = true);
+    await pumpEventQueue();
+
+    expect(answered, isFalse);
+    await _answer(participated: true);
+    expect(await follow, isTrue);
+  });
+
+  test('the server says the user participated: followed', () async {
+    _sync(1);
+    final follow = _followOnceKnown();
+    await _answer(participated: true);
+
+    expect(await follow, isTrue);
+  });
+
+  test('the server says not participated: not followed', () async {
+    _sync(1);
+    final follow = _followOnceKnown();
+    await _answer(participated: false);
+
+    expect(await follow, isFalse);
+  });
+
+  test('the lookup fails: unknown, nothing thrown', () async {
+    _sync(1);
+    final follow = _followOnceKnown();
+    _lookup.completeError(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
+
+    await expectLater(follow, completion(isNull));
   });
 }
 
