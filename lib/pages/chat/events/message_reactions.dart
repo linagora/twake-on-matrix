@@ -56,11 +56,16 @@ String? _reactionKey(Event event) => event.content
 List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
   final reactionMap = <String, ReactionEntry>{};
   final sendersByGroup = <String, Set<String>>{};
+  final firstSentAt = <String, DateTime>{};
   for (final e in events) {
     final key = _reactionKey(e);
     if (key == null) continue;
     final groupKey = _groupKey(key);
     if (!(sendersByGroup[groupKey] ??= {}).add(e.senderId)) continue;
+    final sentAt = firstSentAt[groupKey];
+    if (sentAt == null || e.originServerTs.isBefore(sentAt)) {
+      firstSentAt[groupKey] = e.originServerTs;
+    }
     final entry =
         reactionMap[groupKey] ??
         ReactionEntry(key: key, count: 0, reacted: false, reactors: []);
@@ -70,9 +75,15 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
       reacted: entry.reacted || e.senderId == userId,
     );
   }
-  final reactionList = reactionMap.values.toList();
-  reactionList.sort((a, b) => b.count - a.count > 0 ? 1 : -1);
-  return reactionList;
+  // The arrival order differs between history and live sync, so it cannot
+  // break ties.
+  final groupKeys = reactionMap.keys.toList()
+    ..sort((a, b) {
+      final byCount = reactionMap[b]!.count.compareTo(reactionMap[a]!.count);
+      if (byCount != 0) return byCount;
+      return firstSentAt[a]!.compareTo(firstSentAt[b]!);
+    });
+  return [for (final groupKey in groupKeys) reactionMap[groupKey]!];
 }
 
 class ReactionsList extends StatelessWidget {

@@ -62,11 +62,16 @@ void main() {
     reactors: reactors ?? [for (var i = 0; i < count; i++) user('$key $i')],
   );
 
-  MockEvent reactionEvent(String key, {String senderId = myUserId}) {
+  MockEvent reactionEvent(
+    String key, {
+    String senderId = myUserId,
+    DateTime? sentAt,
+  }) {
     final event = MockEvent();
     final sender = user(senderId);
     when(event.room).thenReturn(room);
     when(event.senderId).thenReturn(senderId);
+    when(event.originServerTs).thenReturn(sentAt ?? DateTime(2026));
     when(event.senderFromMemoryOrFallback).thenReturn(sender);
     when(event.content).thenReturn({
       'm.relates_to': {
@@ -149,6 +154,38 @@ void main() {
       ], myUserId);
 
       expect(reactions.map((r) => (r.key, r.count)), [('❤️', 2), ('👍', 1)]);
+    });
+
+    test('orders equal counts by first reaction, whatever the arrival', () {
+      final events = [
+        for (final (i, key) in ['👍', '❤️', '😂', '🎉', '🔥'].indexed)
+          reactionEvent(
+            key,
+            senderId: '@user$i:example.com',
+            sentAt: DateTime(2026, 1, 1, 0, i),
+          ),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      const expected = ['👍', '❤️', '😂', '🎉', '🔥'];
+      expect(live.map((r) => r.key), expected);
+      expect(fromHistory.map((r) => r.key), expected);
+    });
+
+    test('puts a higher count first, before older reactions', () {
+      final reactions = groupReactions([
+        reactionEvent('👍', sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent('🔥', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 2)),
+        reactionEvent(
+          '🔥',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 3),
+        ),
+      ], myUserId);
+
+      expect(reactions.map((r) => r.key), ['🔥', '👍']);
     });
   });
 
