@@ -53,7 +53,8 @@ extension ThreadedReadReceiptExtension on Room {
     }
     final readAt = [
       receiptState.global.latestOwnReceipt?.ts,
-      receiptState.mainThread?.latestOwnReceipt?.ts,
+      // MSC3771: a `main` receipt covers the main timeline only.
+      if (rootId == null) receiptState.mainThread?.latestOwnReceipt?.ts,
       if (rootId != null) receiptState.byThread[rootId]?.latestOwnReceipt?.ts,
     ].nonNulls.fold<int>(0, (a, b) => a > b ? a : b);
     return readAt < last.originServerTs.millisecondsSinceEpoch;
