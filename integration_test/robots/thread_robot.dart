@@ -114,8 +114,13 @@ class ThreadRobot extends CoreRobot {
   }
 
   /// Leaves the thread with the back arrow of its header.
+  ///
+  /// Not [goBack]: back in the room, the iOS text cursor of the room composer
+  /// (focus given back) blinks for ever, so its strict `pumpAndSettle` never
+  /// settles. The header check below is the real wait.
   Future<void> closeThread() async {
-    await goBack();
+    await $(AppBar).$(find.byIcon(Icons.arrow_back_ios)).first.tap();
+    await $.pumpAndTrySettle();
     await waitUntilAbsent($, threadHeader, timeout: _timeout);
   }
 
