@@ -271,7 +271,11 @@ class ThreadUnreadStore extends ChangeNotifier {
     await _acquireLookupSlot();
     try {
       if (epoch != _epoch) return;
-      final stored = await _client.getRoomById(roomId)?.getEventById(rootId);
+      // Local store first (no network), then at most one server request.
+      final room = _client.getRoomById(roomId);
+      final stored = room == null
+          ? null
+          : await _client.database.getEventById(rootId, room);
       if (epoch != _epoch) return;
       var follow =
           stored != null &&
