@@ -439,6 +439,10 @@ void main() {
     oldPages.add([publicRoom('!old', access: PublicRoomAccess.approval)]);
     await container.read(publicRoomsControllerProvider.future);
     await pumpEventQueue();
+    expect(repository.knockedQueries, [
+      ['!old'],
+    ]);
+    expect(repository.lookupsInFlight, 1);
     final newPages = StreamController<List<PublicRoom>>();
     addTearDown(newPages.close);
     repository.directoryController = newPages;
