@@ -134,9 +134,9 @@ void _resolveTests() {
   });
 
   test('an event the server cannot give opens the room on it', () async {
-    when(
-      _room.getEventById(_replyId),
-    ).thenThrow(MatrixException.fromJson({'errcode': 'M_UNKNOWN'}));
+    when(_room.getEventById(_replyId)).thenAnswer(
+      (_) async => throw MatrixException.fromJson({'errcode': 'M_UNKNOWN'}),
+    );
 
     expect(await _tapped(), _roomLocation(_replyId));
   });
