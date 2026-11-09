@@ -36,6 +36,11 @@ class ThreadUnreadStore extends ChangeNotifier {
   // ponytail: a count cap for the account, not a per-room one.
   static const int _maxThreadReplyIds = 4000;
 
+  /// Follow lookups run at most this many at a time (one server request each).
+  static const int _maxLookupsInFlight = 3;
+  int _lookupsInFlight = 0;
+  final Queue<Completer<void>> _lookupWaiters = Queue();
+
   /// Bumped by [clear]: a lookup started before it must not bring a follow back.
   int _epoch = 0;
 
@@ -263,7 +268,9 @@ class ThreadUnreadStore extends ChangeNotifier {
       return;
     }
     final epoch = _epoch;
+    await _acquireLookupSlot();
     try {
+      if (epoch != _epoch) return;
       final stored = await _client.getRoomById(roomId)?.getEventById(rootId);
       if (epoch != _epoch) return;
       var follow =
@@ -285,7 +292,27 @@ class ThreadUnreadStore extends ChangeNotifier {
     } catch (e, s) {
       Logs().w('Unable to tell if the thread is followed', e, s);
     } finally {
+      _releaseLookupSlot();
       _resolving.remove(key);
+    }
+  }
+
+  Future<void> _acquireLookupSlot() {
+    if (_lookupsInFlight < _maxLookupsInFlight) {
+      _lookupsInFlight++;
+      return Future.value();
+    }
+    final waiter = Completer<void>();
+    _lookupWaiters.add(waiter);
+    return waiter.future;
+  }
+
+  /// Hands the slot to the next waiter, or frees it.
+  void _releaseLookupSlot() {
+    if (_lookupWaiters.isEmpty) {
+      _lookupsInFlight--;
+    } else {
+      _lookupWaiters.removeFirst().complete();
     }
   }
 
