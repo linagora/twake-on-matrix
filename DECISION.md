@@ -250,3 +250,10 @@ stronger flash when the message is reached. It stays until the next touch in
 the conversation, scrolling included, instead of a strong blue block that
 went away after three seconds. A selected message shows its selection colour
 instead.
+
+## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
+
+The row shows up to three reactions, the most used first; equal counts keep
+the order of their first reaction, oldest first. The others are summed up in
+`+N`, which opens the full list. A new reaction never pushes out one already
+shown at the same count.
