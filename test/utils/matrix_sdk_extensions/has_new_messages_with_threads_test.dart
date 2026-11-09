@@ -50,6 +50,14 @@ void main() {
     _followedWithoutCounterTests,
   );
   group('rules kept from the SDK', _sdkRulesTests);
+
+  /// CodeRabbit 4515300576, maintainer decision of 09/11. In a "mentions
+  /// only" room (no room counter for a plain message) the room has new
+  /// messages when its newest main-timeline message (not a thread reply,
+  /// not the user's) is newer than the main or unthreaded receipt, or when
+  /// a followed or mentioning thread is unread. A thread reply as last
+  /// event of the room must not hide an unread main message.
+  group('an unread main message under a thread reply', _mainUnderReplyTests);
 }
 
 const _roomId = '!room:example.com';
@@ -152,6 +160,21 @@ Event _message(
 /// A reply of the thread of [_rootId], sent at minute 5.
 Event _reply(Room room) =>
     _message(room, eventId: r'$reply', relatesTo: _threadRelation(_rootId));
+
+/// A main-timeline message of bob sent at [minute], seen live by the
+/// account. The chosen seam is the store, like
+/// [ThreadUnreadStore.rememberThreadReply].
+void _mainMessageAt(Room room, int minute) =>
+    _client.threadUnread.rememberMainTimelineEvent(
+      Event(
+        type: EventTypes.Message,
+        content: {'msgtype': 'm.text', 'body': 'main'},
+        eventId: r'$main',
+        senderId: _bob,
+        originServerTs: _at(minute),
+        room: room,
+      ),
+    );
 
 /// A room whose last event is [_reply].
 Room _roomWithLastReply(LatestReceiptState receipts) =>
@@ -350,4 +373,43 @@ void _sdkRulesTests() {
 class _ThreadClient extends MockClient implements ThreadUnreadStoreOwner {
   @override
   late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
+}
+
+void _mainUnderReplyTests() {
+  /// Unread main message at minute 3, then a reply at minute 5 of a thread
+  /// the user does not follow and that does not mention them.
+  Room roomWithMainUnder(LatestReceiptState receipts) {
+    _threadCounters(_rootId, followed: false);
+    final room = _roomWithLastReply(receipts);
+    _mainMessageAt(room, 3);
+    return room;
+  }
+
+  test('keeps the room unread', () {
+    final room = roomWithMainUnder(_staleAnd(_readBefore));
+
+    expect(room.hasNewMessagesWithThreads, isTrue);
+  });
+
+  test('read by a main receipt: the room is read', () {
+    final room = roomWithMainUnder(_staleAnd(_receipt(r'$main', 4)));
+
+    expect(room.hasNewMessagesWithThreads, isFalse);
+  });
+
+  test('read by an unthreaded receipt: the room is read', () {
+    final room = roomWithMainUnder(_unthreadedOn(_receipt(r'$main', 4)));
+
+    expect(room.hasNewMessagesWithThreads, isFalse);
+  });
+
+  test('a receipt of the thread does not read the main message', () {
+    // MSC3771: a thread receipt covers its thread only.
+    _client.threadUnread.markFollowed(const ThreadRef(_roomId, _rootId));
+    final room = roomWithMainUnder(
+      _staleAnd(_readBefore, threads: {_rootId: _receipt(r'$reply', 6)}),
+    );
+
+    expect(room.hasNewMessagesWithThreads, isTrue);
+  });
 }
