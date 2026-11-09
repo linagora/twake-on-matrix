@@ -1273,7 +1273,9 @@ class MatrixState extends ConsumerState<Matrix>
     Client client, [
     HomeserverSummary? summary,
   ]) async {
-    final loginSummary = summary ?? loginHomeserverSummary;
+    // Without the summary of its login, the active account's would be saved
+    // for this one.
+    final loginSummary = summary;
     final tomServer = loginSummary?.tomServer;
     Logs().d('MatrixState::setUpToMServicesInLogin: $tomServer');
     if (tomServer != null) {
@@ -1283,7 +1285,7 @@ class MatrixState extends ConsumerState<Matrix>
     final homeServer =
         loginSummary?.discoveryInformation?.mHomeserver.baseUrl ??
         client.homeserver;
-    _setupAuthUrl(summary: loginSummary);
+    if (loginSummary != null) _setupAuthUrl(summary: loginSummary);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -1326,7 +1328,7 @@ class MatrixState extends ConsumerState<Matrix>
     Client client, [
     HomeserverSummary? summary,
   ]) async {
-    final loginSummary = summary ?? loginHomeserverSummary;
+    final loginSummary = summary;
     final federationSever = loginSummary?.federationServer;
     final identityServer = loginSummary?.discoveryInformation?.mIdentityServer;
     Logs().d('MatrixState::setUpFederationServicesInLogin: $federationSever');
@@ -1548,7 +1550,10 @@ class MatrixState extends ConsumerState<Matrix>
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
     final summary = await newClient.fetchHomeserverSummary(
-      previous: loginHomeserverSummary,
+      // A login that makes this account active checked its server just before.
+      previous:
+          _loginSessions.homeserverSummaryOf(newClient) ??
+          loginHomeserverSummary,
     );
 
     // The active client may have changed while awaiting: a late result must
@@ -1988,31 +1993,6 @@ class FixedThreepidCreds extends ThreepidCreds {
   }
 }
 
-extension HomeserverSummaryConversion
-    on
-        Future<
-          (
-            DiscoveryInformation?,
-            GetVersionsResponse,
-            List<LoginFlow>,
-            GetAuthMetadataResponse?,
-          )
-        > {
-  Future<HomeserverSummary> toHomeserverSummary() async {
-    try {
-      final result = await this;
-      return HomeserverSummary(
-        discoveryInformation: result.$1,
-        versions: result.$2,
-        loginFlows: result.$3,
-      );
-    } catch (e, s) {
-      Logs().wtf('HomeserverSummaryConversion::toHomeserverSummary', e, s);
-      rethrow;
-    }
-  }
-}
-
 /// The push state `MatrixState` owns, given to `PushRemovalsController`.
 class _MatrixPushTeardown implements PushTeardown {
   _MatrixPushTeardown(this._state);
@@ -2182,7 +2162,7 @@ class _MatrixLoginHost implements LoginHost {
 
   @override
   HomeserverSummary? get loginHomeserverSummary =>
-      _state.loginHomeserverSummary;
+      _container.read(loginSessionsProvider).homeserverSummary;
 
   @override
   Future<void> setUpToM(Client client, HomeserverSummary? summary) =>

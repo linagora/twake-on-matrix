@@ -1,3 +1,4 @@
+import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
@@ -118,11 +119,11 @@ class MultipleAccountsRobot extends HomeRobot {
       );
       await $.pump();
     } else {
-      final matrix = Matrix.of($.tester.element($(TwakeWelcome).finder.first));
-      final client = await matrix.getLoginClient();
-      matrix.loginHomeserverSummary = await client
-          .checkHomeserver(Uri.parse(serverUrl))
-          .toHomeserverSummary();
+      final context = $.tester.element($(TwakeWelcome).finder.first);
+      final client = await Matrix.of(context).getLoginClient();
+      await ProviderScope.containerOf(context, listen: false)
+          .read(loginSessionsProvider)
+          .checkHomeserver(client, Uri.parse(serverUrl));
       await loginWithRateLimitRetry(
         () => client.login(
           LoginType.mLoginPassword,
