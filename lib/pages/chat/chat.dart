@@ -844,7 +844,7 @@ class ChatController extends ConsumerState<Chat>
         room: room!,
         text: sendController.text.trim(),
         inReplyTo: replyEventNotifier.value,
-        editEventId: editEventNotifier.value?.eventId,
+        editEvent: editEventNotifier.value,
       ),
     );
     sendController.value = TextEditingValue(
