@@ -27,17 +27,19 @@ Map<String, ThreadCounts> parseUnreadThreadNotifications(Object? json) {
   final counts = <String, ThreadCounts>{};
   if (json is! Map) return counts;
   for (final entry in json.entries) {
-    final value = entry.value;
-    if (entry.key is! String || value is! Map) continue;
-    final notifications = value['notification_count'] ?? 0;
-    final highlights = value['highlight_count'] ?? 0;
-    if (notifications is! int || highlights is! int) continue;
-    counts[entry.key as String] = (
-      notificationCount: notifications,
-      highlightCount: highlights,
-    );
+    final key = entry.key;
+    final parsed = _parseThreadCounts(entry.value);
+    if (key is String && parsed != null) counts[key] = parsed;
   }
   return counts;
+}
+
+ThreadCounts? _parseThreadCounts(Object? value) {
+  if (value is! Map) return null;
+  final notifications = value['notification_count'] ?? 0;
+  final highlights = value['highlight_count'] ?? 0;
+  if (notifications is! int || highlights is! int) return null;
+  return (notificationCount: notifications, highlightCount: highlights);
 }
 
 int roomUnreadBadge({
@@ -56,14 +58,16 @@ String? unreadThreadBannerTarget({
   if (mainNotificationCount > 0) return null;
   ThreadUnread? target;
   for (final thread in threads.where((t) => t.badgeCount > 0)) {
-    final activity = thread.lastActivity;
-    final best = target?.lastActivity;
-    if (target == null ||
-        (activity != null && (best == null || activity.isAfter(best)))) {
-      target = thread;
-    }
+    if (target == null || _isMoreRecent(thread, target)) target = thread;
   }
   return target?.rootEventId;
+}
+
+bool _isMoreRecent(ThreadUnread thread, ThreadUnread than) {
+  final activity = thread.lastActivity;
+  final best = than.lastActivity;
+  if (activity == null) return false;
+  return best == null || activity.isAfter(best);
 }
 
 /// Per-thread counters of every joined room of a raw `/sync` response, for
@@ -81,8 +85,12 @@ Map<String, Map<String, ThreadCounts>> parseSyncUnreadThreadNotifications(
     final threads =
         room['unread_thread_notifications'] ??
         room['org.matrix.msc3773.unread_thread_notifications'];
-    if (threads == null && room['unread_notifications'] == null) continue;
-    result[entry.key as String] = parseUnreadThreadNotifications(threads);
+    if (_carriesCounters(room, threads)) {
+      result[entry.key as String] = parseUnreadThreadNotifications(threads);
+    }
   }
   return result;
 }
+
+bool _carriesCounters(Map room, Object? threads) =>
+    threads != null || room['unread_notifications'] != null;

@@ -20,24 +20,22 @@ class UnreadRoomsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = Matrix.of(context).client;
     return StreamBuilder(
-      stream: Matrix.of(
-        context,
-      ).client.onSync.stream.where((syncUpdate) => syncUpdate.hasRoomUpdate),
+      stream: client.onSync.stream.where(
+        (syncUpdate) => syncUpdate.hasRoomUpdate,
+      ),
       builder: (context, _) => ListenableBuilder(
-        listenable: Listenable.merge([?Matrix.of(context).client.threadUnread]),
+        listenable: Listenable.merge([?client.threadUnread]),
         builder: (context, _) => TwakeNavigationIcon(
           icon: Icons.chat_bubble,
-          notificationCount: getNotificationsCount(context),
+          notificationCount: countNotifications(client, filter),
           isSelected: isSelected,
           color: color,
         ),
       ),
     );
   }
-
-  int getNotificationsCount(BuildContext context) =>
-      countNotifications(Matrix.of(context).client, filter);
 
   @visibleForTesting
   static int countNotifications(Client client, bool Function(Room) filter) {

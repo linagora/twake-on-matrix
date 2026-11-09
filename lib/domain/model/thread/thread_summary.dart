@@ -29,10 +29,7 @@ class ThreadSummary {
     final aggregate = root.unsigned
         ?.tryGetMap<String, Object?>('m.relations')
         ?.tryGetMap<String, Object?>('m.thread');
-    final latestJson = aggregate?.tryGetMap<String, Object?>('latest_event');
-    final serverLatest = latestJson == null
-        ? null
-        : Event.fromJson(latestJson, root.room);
+    final serverLatest = _serverLatest(aggregate, root);
 
     // A redacted event loses its `m.relates_to`: match it by id.
     final deletedIds = {
@@ -42,12 +39,41 @@ class ThreadSummary {
     final replies = liveEvents
         .where((e) => e.threadRootId == root.eventId && !e.redacted)
         .toList();
-    final fresh = replies.where(
-      (e) =>
-          e.eventId != serverLatest?.eventId &&
-          (serverLatest == null ||
-              e.originServerTs.isAfter(serverLatest.originServerTs)),
+    final fresh = replies.where((e) => _isFresh(e, serverLatest));
+
+    final count = (aggregate?.tryGet<int>('count') ?? 0) + fresh.length;
+    if (count == 0) return null;
+
+    final last = _sortedCandidates(
+      replies,
+      serverLatest,
+      deletedIds,
+    ).lastOrNull;
+    return ThreadSummary._(
+      rootEventId: root.eventId,
+      replyCount: count,
+      lastReply: last,
+      lastReplyText: last == null ? null : _textWithEdit(last, liveEvents),
     );
+  }
+
+  static Event? _serverLatest(Map<String, Object?>? aggregate, Event root) {
+    final latestJson = aggregate?.tryGetMap<String, Object?>('latest_event');
+    return latestJson == null ? null : Event.fromJson(latestJson, root.room);
+  }
+
+  /// A live reply the server aggregate does not know yet.
+  static bool _isFresh(Event e, Event? serverLatest) =>
+      e.eventId != serverLatest?.eventId &&
+      (serverLatest == null ||
+          e.originServerTs.isAfter(serverLatest.originServerTs));
+
+  /// Oldest first.
+  static List<Event> _sortedCandidates(
+    List<Event> replies,
+    Event? serverLatest,
+    Set<String> deletedIds,
+  ) {
     // The live copy of the server latest reply (decrypted) replaces it.
     final liveLatest = replies.firstWhereOrNull(
       (e) => e.eventId == serverLatest?.eventId,
@@ -56,38 +82,26 @@ class ThreadSummary {
         serverLatest == null || deletedIds.contains(serverLatest.eventId)
         ? null
         : liveLatest ?? serverLatest;
-    final candidates = [
+    return [
       ?keptServerLatest,
       ...replies.where((e) => e.eventId != serverLatest?.eventId),
     ]..sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
+  }
 
-    final count = (aggregate?.tryGet<int>('count') ?? 0) + fresh.length;
-    if (count == 0) return null;
-
-    final last = candidates.lastOrNull;
-    final edits = last == null
-        ? const <Event>[]
-        : liveEvents.where(
-            (e) =>
-                e.relationshipType == RelationshipTypes.edit &&
-                e.relationshipEventId == last.eventId,
-          );
+  static String _textWithEdit(Event last, Iterable<Event> liveEvents) {
+    final edits = liveEvents.where(
+      (e) =>
+          e.relationshipType == RelationshipTypes.edit &&
+          e.relationshipEventId == last.eventId,
+    );
     final latestEdit = edits.isEmpty
         ? null
         : edits.reduce(
             (a, b) => b.originServerTs.isAfter(a.originServerTs) ? b : a,
           );
-
-    return ThreadSummary._(
-      rootEventId: root.eventId,
-      replyCount: count,
-      lastReply: last,
-      lastReplyText: last == null
-          ? null
-          : latestEdit?.content
-                    .tryGetMap<String, Object?>('m.new_content')
-                    ?.tryGet<String>('body') ??
-                last.body,
-    );
+    return latestEdit?.content
+            .tryGetMap<String, Object?>('m.new_content')
+            ?.tryGet<String>('body') ??
+        last.body;
   }
 }

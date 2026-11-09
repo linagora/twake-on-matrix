@@ -136,25 +136,27 @@ final class ThreadEvents {
   void _rebuild() {
     final byId = {..._pageReplies};
     _live.forEach((id, live) {
-      // A live copy that cannot be read does not hide a decrypted page copy.
-      if (live.type != EventTypes.Encrypted ||
-          byId[id]?.type == EventTypes.Encrypted ||
-          !byId.containsKey(id)) {
-        byId[id] = live;
-      }
+      if (_liveReplacesPage(live, byId[id])) byId[id] = live;
     });
     final next = [
       ...byId.values.toList()
         ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs)),
       ?_root,
     ];
-    if (next.length == _events.length) {
-      var same = true;
-      for (var i = 0; i < next.length && same; i++) {
-        same = identical(next[i], _events[i]);
-      }
-      if (same) return;
+    if (!_sameEvents(next)) _events = next;
+  }
+
+  /// A live copy that cannot be read does not hide a decrypted page copy.
+  bool _liveReplacesPage(Event live, Event? page) =>
+      live.type != EventTypes.Encrypted ||
+      page == null ||
+      page.type == EventTypes.Encrypted;
+
+  bool _sameEvents(List<Event> next) {
+    if (next.length != _events.length) return false;
+    for (var i = 0; i < next.length; i++) {
+      if (!identical(next[i], _events[i])) return false;
     }
-    _events = next;
+    return true;
   }
 }

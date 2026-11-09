@@ -58,7 +58,7 @@ final class GetThreadRepliesInteractor {
         Event.fromMatrixEvent(event, room),
     ];
     // /relations returns the events as stored: decrypt them.
-    if (decrypt && room.encrypted && room.client.encryptionEnabled) {
+    if (decrypt && _canDecrypt(room)) {
       for (var i = 0; i < replies.length; i++) {
         if (replies[i].type == EventTypes.Encrypted) {
           replies[i] = await room.client.encryption!.decryptRoomEvent(
@@ -69,4 +69,7 @@ final class GetThreadRepliesInteractor {
     }
     return ThreadRepliesPage(replies: replies, nextBatch: response.nextBatch);
   }
+
+  bool _canDecrypt(Room room) =>
+      room.encrypted && room.client.encryptionEnabled;
 }
