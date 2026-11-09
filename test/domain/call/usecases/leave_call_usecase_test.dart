@@ -24,4 +24,15 @@ void main() {
     );
     expect(repository.calls, ['disconnect', 'leave !room']);
   });
+
+  test('execute_whenTheMediaFailsToDisconnect_stillLeaves', () async {
+    final repository = FakeCallRepository()
+      ..disconnectError = const CallConnectionFailedException();
+
+    await expectLater(
+      LeaveCallUseCase(repository).execute('!room'),
+      throwsA(isA<CallConnectionFailedException>()),
+    );
+    expect(repository.calls, ['disconnect', 'leave !room']);
+  });
 }

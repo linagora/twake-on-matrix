@@ -21,6 +21,8 @@ part 'call_controller.g.dart';
 /// The one call this device is in, whichever screen shows it.
 @Riverpod(keepAlive: true)
 class CallController extends _$CallController {
+  static const _cleanupWait = Duration(seconds: 10);
+
   StreamSubscription<List<CallParticipant>>? _participants;
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
@@ -45,8 +47,9 @@ class CallController extends _$CallController {
         .read(loginHomeserverSummaryProvider)
         ?.callTokenServiceUrl;
     try {
-      // The previous call must not disconnect the media of this one.
-      await _cleanup;
+      // The previous call must not disconnect the media of this one; a
+      // homeserver that never answers its leave must not hold this call.
+      await _cleanup?.timeout(_cleanupWait, onTimeout: () {});
       if (!ref.mounted) return;
       final room = await joinCall.execute(
         roomId: roomId,

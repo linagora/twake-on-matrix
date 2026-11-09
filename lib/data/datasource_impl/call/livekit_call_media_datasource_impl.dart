@@ -18,6 +18,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   lk.Room? _room;
   lk.EventsListener<lk.RoomEvent>? _listener;
+  CallConnectionFailedException? _lost;
   final _participants = StreamController<List<CallParticipant>>.broadcast();
 
   @override
@@ -27,6 +28,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     required bool isCameraOn,
   }) async {
     await disconnect();
+    _lost = null;
     final room = lk.Room(
       roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
     );
@@ -34,11 +36,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       ..listen((_) => _emit())
       // Our own disconnect disposes the listener first: this one is LiveKit
       // giving up.
-      ..on<lk.RoomDisconnectedEvent>(
-        (event) => _participants.addError(
-          CallConnectionFailedException(cause: event.reason),
-        ),
-      );
+      ..on<lk.RoomDisconnectedEvent>((event) {
+        final lost = _lost = CallConnectionFailedException(cause: event.reason);
+        _participants.addError(lost);
+      });
     try {
       await room.connect(server.url, server.token);
     } catch (error) {
@@ -66,6 +67,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     final listener = _listener;
     _room = null;
     _listener = null;
+    _lost = null;
     await _logFailure(() async {
       await listener?.dispose();
       await room?.disconnect();
@@ -113,6 +115,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   @override
   Stream<List<CallParticipant>> watchParticipants() async* {
+    // Lost before anyone listened: the call still ends.
+    if (_lost case final lost?) throw lost;
     yield _snapshot();
     yield* _participants.stream;
   }

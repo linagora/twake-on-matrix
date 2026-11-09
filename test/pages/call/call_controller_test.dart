@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart' hide CallState;
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
@@ -283,5 +284,23 @@ void main() {
 
     expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
     expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+  });
+
+  test('join_whenThePreviousLeaveNeverEnds_joinsAfterAWhile', () {
+    fakeAsync((async) {
+      controller().join('!room', isVideo: false);
+      async.flushMicrotasks();
+      repository.leaveGate = Completer<void>();
+      controller().leave();
+      async.flushMicrotasks();
+
+      controller().join('!other', isVideo: false);
+      async.elapse(const Duration(seconds: 5));
+      expect(repository.calls, isNot(contains('endStale !other')));
+      async.elapse(const Duration(seconds: 6));
+
+      expect(repository.calls, contains('join !other video=false'));
+      expect(state(), isA<CallConnected>());
+    });
   });
 }

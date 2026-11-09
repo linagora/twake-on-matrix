@@ -32,6 +32,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Timer? _restartTimer;
   Timer? _expiryTimer;
   Timer? _extendRetryTimer;
+  Map<String, Object?>? _extension;
+  Future<void>? _extending;
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -231,22 +233,23 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _expiryTimer?.cancel();
     _expiryTimer = Timer.periodic(_membershipExpiry - _expiryHeadroom, (_) {
       expiries++;
-      unawaited(
-        _extend(
-          roomId,
-          stateKey,
-          contentFor(expiries: expiries, createdTs: createdTs),
-        ),
-      );
+      _extension = contentFor(expiries: expiries, createdTs: createdTs);
+      _queueExtension(roomId, stateKey);
     });
   }
 
-  Future<void> _extend(
-    String roomId,
-    String stateKey,
-    Map<String, Object?> content,
-  ) async {
+  /// One write at a time, always the newest content: an older one never
+  /// lands last.
+  void _queueExtension(String roomId, String stateKey) {
     final session = _session;
+    _extending = (_extending ?? Future<void>.value()).then(
+      (_) => _extend(roomId, stateKey, session),
+    );
+  }
+
+  Future<void> _extend(String roomId, String stateKey, int session) async {
+    final content = _extension;
+    if (content == null || session != _session) return;
     try {
       await _client.setRoomStateWithKey(
         roomId,
@@ -260,7 +263,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       _extendRetryTimer?.cancel();
       _extendRetryTimer = Timer(
         _extendRetry,
-        () => unawaited(_extend(roomId, stateKey, content)),
+        () => _queueExtension(roomId, stateKey),
       );
     }
   }
@@ -337,6 +340,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _expiryTimer = null;
     _extendRetryTimer?.cancel();
     _extendRetryTimer = null;
+    _extension = null;
     _restartTimer?.cancel();
     _restartTimer = null;
     final delayId = _delayId;
@@ -347,6 +351,10 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> leaveMembership(String roomId) async {
     final delayId = _stopTimers();
+    // An extension still in flight would otherwise land after the leave.
+    final extending = _extending;
+    _extending = null;
+    await extending;
     if (delayId != null) {
       try {
         await _client.manageDelayedEvent(delayId, DelayedEventAction.send);

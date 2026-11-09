@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -31,6 +32,7 @@ class _FakeClient extends Fake implements Client {
   var _delays = 0;
   var isRoomGone = false;
   var failingMemberships = 0;
+  Completer<void>? holdMemberships;
 
   @override
   String? get userID => '@bob:hs.test';
@@ -71,6 +73,7 @@ class _FakeClient extends Fake implements Client {
     String stateKey,
     Map<String, Object?> body,
   ) async {
+    if (body.isNotEmpty) await holdMemberships?.future;
     if (body.isNotEmpty && failingMemberships > 0) {
       failingMemberships--;
       writes.add('membership failed');
@@ -146,10 +149,62 @@ void main() {
       datasource.leaveMembership('!room:hs.test').ignore();
       async.flushMicrotasks();
       final actions = client.delayedActions.length;
-      async.elapse(const Duration(seconds: 20));
+      final writes = client.writes.length;
+      async.elapse(const Duration(hours: 5));
 
       expect(client.delayedActions.last, 'send delay-2');
       expect(client.delayedActions.length, actions);
+      expect(client.writes.length, writes);
+      datasource.dispose();
+    });
+  });
+
+  test('leaveMembership_whileAnExtensionIsSent_leavesAfterIt', () {
+    fakeAsync((async) {
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(
+        roomId: '!room:hs.test',
+        serviceUrl: 'https://rtc.test',
+        isVideo: false,
+      );
+      async.flushMicrotasks();
+      async.elapse(const Duration(seconds: 6));
+      final hold = client.holdMemberships = Completer<void>();
+      async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
+
+      datasource.leaveMembership('!room:hs.test').ignore();
+      async.flushMicrotasks();
+      expect(client.delayedActions, isNot(contains('send delay-2')));
+      hold.complete();
+      async.flushMicrotasks();
+
+      expect(client.writes.last, 'membership');
+      expect(client.delayedActions.last, 'send delay-2');
+      datasource.dispose();
+    });
+  });
+
+  test('leaveMembership_whileAnExtensionRetryWaits_writesNoMembership', () {
+    fakeAsync((async) {
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(
+        roomId: '!room:hs.test',
+        serviceUrl: 'https://rtc.test',
+        isVideo: false,
+      );
+      async.flushMicrotasks();
+      async.elapse(const Duration(seconds: 6));
+      client.failingMemberships = 1;
+      async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
+      expect(client.writes.last, 'membership failed');
+
+      datasource.leaveMembership('!room:hs.test').ignore();
+      async.flushMicrotasks();
+      async.elapse(const Duration(minutes: 1));
+
+      expect(client.writes.last, 'membership failed');
       datasource.dispose();
     });
   });

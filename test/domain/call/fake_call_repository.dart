@@ -34,6 +34,7 @@ class FakeCallRepository implements CallRepository {
   CallException? leaveError;
   CallException? mediaError;
   Object? staleError;
+  CallException? disconnectError;
   Completer<void>? connectGate;
   Completer<void>? leaveGate;
   Completer<void>? joinGate;
@@ -90,7 +91,10 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  Future<void> disconnectMedia() async => calls.add('disconnect');
+  Future<void> disconnectMedia() async {
+    calls.add('disconnect');
+    if (disconnectError case final error?) throw error;
+  }
 
   @override
   Future<void> setMicrophone({required bool isOn}) async {
