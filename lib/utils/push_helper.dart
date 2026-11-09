@@ -148,6 +148,7 @@ Future<void> _tryPushHelper(
       followed:
           client.threadUnread?.isFollowed(notification.roomId!, threadRootId) ??
           false,
+      rootSenderId: (await event.room.getEventById(threadRootId))?.senderId,
       activeThread: activeThread,
     )) {
       Logs().v('Thread reply is read live or not followed. Stop push helper.');

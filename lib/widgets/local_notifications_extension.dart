@@ -59,6 +59,7 @@ extension LocalNotificationsExtension on MatrixState {
         event,
         followed:
             client.threadUnread?.isFollowed(roomId, threadRootId) ?? false,
+        rootSenderId: (await room.getEventById(threadRootId))?.senderId,
         activeThread: activeThread,
       )) {
         return;
