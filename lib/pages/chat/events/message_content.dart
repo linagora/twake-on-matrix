@@ -29,6 +29,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_message/audio_player_widget.dart';
+import 'package:twake_chat/utils/media_album/media_album_bubble.dart';
+import 'package:twake_chat/utils/media_album/media_album_scope.dart';
 import 'cute_events.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
@@ -61,6 +63,46 @@ class MessageContent extends StatelessWidget
     this.textWidth,
   });
 
+  Widget _buildAlbum(BuildContext context, List<Event> members) {
+    final album = OptionalSelectionContainerDisabled(
+      isEnabled: PlatformInfos.isWeb,
+      child: MediaAlbumBubble(
+        members: members,
+        isPreviewEnabled: onTapPreview != null,
+        onTapSelectMode: () => onTapSelectMode?.call(),
+      ),
+    );
+    final captionEvent = members.last;
+    if (!captionEvent.isBodyDiffersFromFilename() ||
+        captionEvent.text.isEmpty) {
+      return album;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        album,
+        const SizedBox(height: 8),
+        SizedBox(
+          width: MessageStyle.messageBubbleWidthMediaCaption(
+            event: captionEvent,
+            context: context,
+            textWidth: textWidth,
+          ),
+          child: TwakeLinkPreview(
+            key: ValueKey('TwakeLinkPreview%${captionEvent.eventId}%'),
+            event: captionEvent,
+            localizedBody: captionEvent.body,
+            ownMessage: ownMessage,
+            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+            linkStyle: MessageContentStyle.linkStyleMessageContent(context),
+            richTextStyle: captionEvent.getMessageTextStyle(context),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
@@ -71,6 +113,10 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
+            final albumMembers = MediaAlbumScope.membersFor(context, event);
+            if (albumMembers != null) {
+              return _buildAlbum(context, albumMembers);
+            }
             if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
