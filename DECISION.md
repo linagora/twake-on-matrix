@@ -181,7 +181,8 @@ lists. A failure of the summary shows the group as unavailable, with « Try to
 join », as there, unless the app already knows the user is banned from it: the
 preview then says so, with no button. The `via` servers of the link route the
 summary, the join and the request. A joined room still opens directly, at the
-linked message.
+linked message; one this device has not synced yet opens once it arrives, or
+shows « Try to join » after 30 seconds.
 
 Hand-typed addresses becoming links is left to a later change.
 

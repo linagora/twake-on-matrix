@@ -591,8 +591,16 @@ void main() {
       expect((preview as PublicRoomPreviewFound).isRequested, isTrue);
     });
 
+    MockRoom syncedRoom(Membership membership) {
+      final room = MockRoom();
+      when(room.membership).thenReturn(membership);
+      when(mockClient.getRoomById('!general:hs')).thenReturn(room);
+      return room;
+    }
+
     test('getPreview_whenAlreadyJoinedUnderAnotherAlias_saysJoined', () async {
       // Arrange
+      syncedRoom(Membership.join);
       stubSummary(summary(membership: Membership.join));
 
       // Act
@@ -604,6 +612,7 @@ void main() {
 
     test('getPreview_whenInvited_saysJoined', () async {
       // Arrange
+      syncedRoom(Membership.invite);
       stubSummary(summary(membership: Membership.invite));
 
       // Act
@@ -611,6 +620,54 @@ void main() {
 
       // Assert
       expect(preview, const PublicRoomPreview.joined('!general:hs'));
+      verifyNever(
+        mockClient.waitForRoomInSync(
+          any,
+          join: anyNamed('join'),
+          invite: anyNamed('invite'),
+        ),
+      );
+    });
+
+    test('getPreview_whenJoinedButNotInSyncYet_waitsForTheRoom', () async {
+      // Arrange
+      when(
+        mockClient.waitForRoomInSync('!general:hs', join: true, invite: false),
+      ).thenAnswer((_) async => SyncUpdate(nextBatch: 'n'));
+      stubSummary(summary(membership: Membership.join));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.joined('!general:hs'));
+      verify(
+        mockClient.waitForRoomInSync('!general:hs', join: true, invite: false),
+      ).called(1);
+    });
+
+    test('getPreview_whenTheJoinedRoomNeverReachesTheSync_saysUnavailable', () {
+      fakeAsync((async) {
+        // Arrange
+        when(
+          mockClient.waitForRoomInSync(
+            '!general:hs',
+            join: false,
+            invite: true,
+          ),
+        ).thenAnswer((_) => Completer<SyncUpdate>().future);
+        stubSummary(summary(membership: Membership.invite));
+        PublicRoomPreview? preview;
+
+        // Act
+        datasource
+            .getPreview(alias, via: const [])
+            .then((result) => preview = result);
+        async.elapse(const Duration(seconds: 31));
+
+        // Assert
+        expect(preview, const PublicRoomPreview.unavailable());
+      });
     });
 
     test(

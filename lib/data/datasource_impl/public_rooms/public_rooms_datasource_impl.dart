@@ -179,8 +179,8 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
           : const PublicRoomPreview.unavailable();
     }
     return switch (summary.membership) {
-      Membership.join ||
-      Membership.invite => PublicRoomPreview.joined(summary.roomId),
+      final Membership membership && (Membership.join || Membership.invite) =>
+        await _joinedPreview(client, summary.roomId, membership),
       Membership.ban => const PublicRoomPreview.banned(),
       _ when _closedRules.contains(summary.joinRule) =>
         const PublicRoomPreview.unavailable(),
@@ -189,6 +189,30 @@ class PublicRoomsDatasourceImpl implements PublicRoomsDatasource {
         isRequested: membership == Membership.knock,
       ),
     };
+  }
+
+  Future<PublicRoomPreview> _joinedPreview(
+    Client client,
+    String roomId,
+    Membership membership,
+  ) async {
+    if (client.getRoomById(roomId)?.membership == membership) {
+      return PublicRoomPreview.joined(roomId);
+    }
+    try {
+      await client
+          .waitForRoomInSync(
+            roomId,
+            join: membership == Membership.join,
+            invite: membership == Membership.invite,
+          )
+          .timeout(_joinSyncTimeout);
+    } on Exception catch (exception, stackTrace) {
+      // « Try to join » joins again and opens the room once it is in sync.
+      Logs().w('PublicRoomsDatasourceImpl::getPreview', exception, stackTrace);
+      return const PublicRoomPreview.unavailable();
+    }
+    return PublicRoomPreview.joined(roomId);
   }
 
   Future<bool> _isBannedLocally(Client client, String roomIdOrAlias) async {
