@@ -79,10 +79,14 @@ void main() {
     );
   }
 
-  Event reply({bool mentionsMe = false}) => Event(
+  Event reply({
+    bool mentionsMe = false,
+    String msgtype = MessageTypes.Text,
+    String sender = '@bob:example.com',
+  }) => Event(
     type: EventTypes.Message,
     content: {
-      'msgtype': 'm.text',
+      'msgtype': msgtype,
       'body': mentionsMe ? 'Me: look' : 'look',
       if (mentionsMe) ...{
         'format': 'org.matrix.custom.html',
@@ -98,15 +102,40 @@ void main() {
       },
     },
     eventId: r'$reply',
-    senderId: '@bob:example.com',
+    senderId: sender,
     originServerTs: replySentAt,
     room: room,
   );
 
+  /// THR-M-09, maintainer decision (09/11) « push rules + filter »: the push
+  /// rules of the account decide first (`client.pushruleEvaluator.match`),
+  /// then the thread filter applies. The caller passes what they said.
+  ///
+  /// The default rules (`.m.rule.message`): notify.
+  EvaluatedPushRuleAction notifies() =>
+      EvaluatedPushRuleAction.fromActions(['notify']);
+
+  /// A mention (`.m.rule.is_user_mention`, an override): notify and
+  /// highlight, also in a room set to mentions only.
+  EvaluatedPushRuleAction mentionNotifies() =>
+      EvaluatedPushRuleAction.fromActions([
+        'notify',
+        {'set_tweak': 'highlight'},
+      ]);
+
+  /// No notification: a room set to mentions only (room rule), a muted room
+  /// (override), a notice of a bot (`.m.rule.suppress_notices`).
+  EvaluatedPushRuleAction silent() =>
+      EvaluatedPushRuleAction.fromActions(['dont_notify']);
+
   test('a reply in a followed thread notifies while the room counters are '
       'still 0', () {
     expect(
-      ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+      ThreadRules.shouldNotifyThreadEvent(
+        reply(),
+        followed: true,
+        pushActions: notifies(),
+      ),
       isTrue,
     );
   });
@@ -116,6 +145,7 @@ void main() {
     expect(
       ThreadRules.shouldNotifyThreadEvent(
         reply(mentionsMe: true),
+        pushActions: mentionNotifies(),
         followed: false,
       ),
       isTrue,
@@ -125,7 +155,11 @@ void main() {
   test('a reply in a thread the user does not follow, without mention, does '
       'not notify', () {
     expect(
-      ThreadRules.shouldNotifyThreadEvent(reply(), followed: false),
+      ThreadRules.shouldNotifyThreadEvent(
+        reply(),
+        followed: false,
+        pushActions: notifies(),
+      ),
       isFalse,
     );
   });
@@ -134,6 +168,7 @@ void main() {
     expect(
       ThreadRules.shouldNotifyThreadEvent(
         reply(mentionsMe: true),
+        pushActions: mentionNotifies(),
         followed: true,
         activeThread: (roomId: roomId, threadRootId: rootId),
       ),
@@ -146,6 +181,7 @@ void main() {
       ThreadRules.shouldNotifyThreadEvent(
         reply(),
         followed: true,
+        pushActions: notifies(),
         activeThread: (roomId: roomId, threadRootId: r'$other_root'),
       ),
       isTrue,
@@ -159,7 +195,12 @@ void main() {
 
     test('a reply in a followed thread does not notify', () {
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          // The room rule of « mentions only ».
+          pushActions: silent(),
+        ),
         isFalse,
       );
     });
@@ -168,6 +209,7 @@ void main() {
       expect(
         ThreadRules.shouldNotifyThreadEvent(
           reply(mentionsMe: true),
+          pushActions: mentionNotifies(),
           followed: false,
         ),
         isTrue,
@@ -189,6 +231,7 @@ void main() {
       expect(
         ThreadRules.shouldNotifyThreadEvent(
           reply(mentionsMe: true),
+          pushActions: mentionNotifies(),
           followed: true,
         ),
         isFalse,
@@ -199,7 +242,11 @@ void main() {
       receipts(byThread: {rootId: replySentAt.add(later)});
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isFalse,
       );
     });
@@ -212,7 +259,11 @@ void main() {
       );
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isFalse,
       );
     });
@@ -227,7 +278,11 @@ void main() {
       );
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isTrue,
       );
     });
@@ -240,7 +295,11 @@ void main() {
       );
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isTrue,
       );
     });
@@ -249,7 +308,11 @@ void main() {
       receipts(byThread: {r'$other_root': replySentAt.add(later)});
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isTrue,
       );
     });
@@ -258,7 +321,11 @@ void main() {
       receipts(othersInThread: {rootId: replySentAt.add(later)});
 
       expect(
-        ThreadRules.shouldNotifyThreadEvent(reply(), followed: true),
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
         isTrue,
       );
     });
@@ -276,6 +343,7 @@ void main() {
           reply(),
           followed: false,
           rootSenderId: me,
+          pushActions: notifies(),
         ),
         isTrue,
       );
@@ -288,6 +356,7 @@ void main() {
           reply(),
           followed: false,
           rootSenderId: '@alice:example.com',
+          pushActions: notifies(),
         ),
         isFalse,
       );
@@ -301,6 +370,7 @@ void main() {
           reply(),
           followed: false,
           rootSenderId: me,
+          pushActions: notifies(),
         ),
         isFalse,
       );
@@ -314,8 +384,90 @@ void main() {
           reply(),
           followed: false,
           rootSenderId: me,
+          // The room rule of « mentions only ».
+          pushActions: silent(),
         ),
         isFalse,
+      );
+    });
+  });
+
+  /// THR-M-09, maintainer decision (09/11) « push rules + filter »: what the
+  /// push rules say for the reply comes first; the thread filter (followed,
+  /// or a mention) only narrows it.
+  group('the push rules decide first', () {
+    test('a muted room: a reply that mentions the user does not notify', () {
+      // « Mute »: an override rule without notify, above the mention rules.
+      when(room.pushRuleState).thenReturn(PushRuleState.dontNotify);
+
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(mentionsMe: true),
+          followed: true,
+          pushActions: silent(),
+        ),
+        isFalse,
+      );
+    });
+
+    test('a notice of a bot the push rules do not notify, in a followed '
+        'thread, does not notify', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(msgtype: MessageTypes.Notice, sender: '@bot:example.com'),
+          followed: true,
+          pushActions: silent(),
+        ),
+        isFalse,
+      );
+    });
+
+    test('a root the user wrote does not bring back a reply the push rules '
+        'do not notify', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(msgtype: MessageTypes.Notice, sender: '@bot:example.com'),
+          followed: false,
+          rootSenderId: me,
+          pushActions: silent(),
+        ),
+        isFalse,
+      );
+    });
+
+    test('the default rules, a followed thread: the reply notifies', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: true,
+          pushActions: notifies(),
+        ),
+        isTrue,
+      );
+    });
+
+    test('the default rules, a thread not followed, no mention: the reply '
+        'does not notify', () {
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          pushActions: notifies(),
+        ),
+        isFalse,
+      );
+    });
+
+    test('a reply the push rules highlight (a keyword, the display name) '
+        'notifies in a thread not followed', () {
+      // No `m.mentions`: the highlight of the push rules is the mention.
+      expect(
+        ThreadRules.shouldNotifyThreadEvent(
+          reply(),
+          followed: false,
+          pushActions: mentionNotifies(),
+        ),
+        isTrue,
       );
     });
   });
