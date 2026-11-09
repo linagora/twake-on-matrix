@@ -59,13 +59,13 @@ extension LocalNotificationsExtension on MatrixState {
         event,
         followed:
             client.threadUnread?.isFollowed(roomId, threadRootId) ?? false,
+        pushActions: client.pushruleEvaluator.match(event),
         rootSenderId: (await room.getEventById(threadRootId))?.senderId,
         activeThread: activeThread,
       )) {
         return;
       }
-    } else if (room.unreadBadgeCount == 0 ||
-        (room.isMuted && room.highlightCountWithThreads == 0)) {
+    } else if (!ThreadRules.shouldNotifyMainTimelineEvent(room)) {
       return;
     }
     final title = room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)!));

@@ -40,12 +40,21 @@ abstract final class ThreadRules {
             e.relationshipType != RelationshipTypes.reaction,
       );
 
-  /// Whether a thread reply raises a local notification. Decided from the
-  /// reply and the follow state: the room counters leave thread messages out
-  /// and the thread counters land after the event. A muted room: mention only.
+  /// Whether a main-timeline message raises a local notification: the room
+  /// counters, which the push rules fill (the ones without threads). A muted
+  /// room: mention only.
+  static bool shouldNotifyMainTimelineEvent(Room room) =>
+      room.notificationCount > 0 &&
+      (!room.isMuted || room.highlightCount > 0);
+
+  /// Whether a thread reply raises a local notification. The push rules
+  /// ([pushActions], `client.pushruleEvaluator.match(event)`) decide first,
+  /// then the thread filter: followed, or highlighted. The room counters
+  /// leave thread messages out and the thread counters land after the event.
   static bool shouldNotifyThreadEvent(
     Event event, {
     required bool followed,
+    required EvaluatedPushRuleAction pushActions,
     String? rootSenderId,
     ({String roomId, String threadRootId})? activeThread,
   }) {
@@ -57,8 +66,8 @@ abstract final class ThreadRules {
         activeThread.threadRootId == event.threadRootId) {
       return false;
     }
-    if (event.room.isMuted) return event.isMention;
-    return followed || rootSenderId == me || event.isMention;
+    if (!pushActions.notify) return false;
+    return followed || rootSenderId == me || pushActions.highlight;
   }
 
   /// MSC3771: only the receipt of the thread or an unthreaded one reads a

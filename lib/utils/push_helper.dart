@@ -135,7 +135,8 @@ Future<void> _tryPushHelper(
   // Foreground: the room on screen is read live, except its thread replies
   // (they sit in another screen); a thread reply follows the thread rule,
   // which also skips the thread on screen. The thread is known from the
-  // event (m.relates_to stays in clear).
+  // event (m.relates_to stays in clear). Outside the foreground the server
+  // push decides until P2 (thread push rule): this rule does not apply there.
   if (!isBackgroundMessage && client.syncPresence == null) {
     final threadRootId = event.threadRootId;
     if (threadRootId == null) {
@@ -145,6 +146,7 @@ Future<void> _tryPushHelper(
       }
     } else if (!ThreadRules.shouldNotifyThreadEvent(
       event,
+      pushActions: client.pushruleEvaluator.match(event),
       followed:
           client.threadUnread?.isFollowed(notification.roomId!, threadRootId) ??
           false,
