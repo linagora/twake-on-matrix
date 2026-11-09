@@ -77,8 +77,14 @@ class StorageDirectoryManager {
     return '$fileStoreDirectory/decrypted/$eventId/${_safeName(fileName)}';
   }
 
-  String _safeName(String fileName) =>
-      fileName.replaceAll(RegExp(r'[/\\]'), '_');
+  String _safeName(String fileName) {
+    final segments = fileName
+        .split(RegExp(r'[/\\]'))
+        .where(
+          (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+        );
+    return segments.isEmpty ? 'file' : segments.join('_');
+  }
 
   String convertFileExtension(String filename, String newExtension) {
     final lastDotIndex = filename.lastIndexOf('.');

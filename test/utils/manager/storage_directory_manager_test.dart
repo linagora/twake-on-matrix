@@ -53,19 +53,28 @@ void main() {
     );
 
     test(
-      'getDecryptedFilePath_whenNameHasPathSeparators_staysInTheEventFolder',
+      'getDecryptedFilePath_whenNameHasPathSeparators_keepsOnlyTheLastNames',
       () async {
         // Act
         final decryptedPath = await StorageDirectoryManager.instance
             .getDecryptedFilePath(eventId: eventId, fileName: r'../..\../x');
 
         // Assert
+        expect(decryptedPath, p.join(tempDir.path, 'decrypted', eventId, 'x'));
+      },
+    );
+
+    test(
+      'getDecryptedFilePath_whenNameHasOnlyDotSegments_fallsBackToFile',
+      () async {
+        // Act
+        final decryptedPath = await StorageDirectoryManager.instance
+            .getDecryptedFilePath(eventId: eventId, fileName: '..');
+
+        // Assert
         expect(
-          p.isWithin(
-            p.join(tempDir.path, 'decrypted', eventId),
-            p.normalize(decryptedPath),
-          ),
-          isTrue,
+          decryptedPath,
+          p.join(tempDir.path, 'decrypted', eventId, 'file'),
         );
       },
     );
@@ -73,17 +82,17 @@ void main() {
 
   group('getFilePathInAppDownloads', () {
     test(
-      'getFilePathInAppDownloads_whenNameHasPathSeparators_staysInTheEventFolder',
+      'getFilePathInAppDownloads_whenNameHasPathSeparators_joinsTheNames',
       () async {
         // Act
         final downloadPath = await StorageDirectoryManager.instance
-            .getFilePathInAppDownloads(eventId: eventId, fileName: '../../x');
+            .getFilePathInAppDownloads(
+              eventId: eventId,
+              fileName: '../a/b.txt',
+            );
 
         // Assert
-        expect(
-          p.isWithin(p.join(tempDir.path, eventId), p.normalize(downloadPath)),
-          isTrue,
-        );
+        expect(downloadPath, p.join(tempDir.path, eventId, 'a_b.txt'));
       },
     );
   });
