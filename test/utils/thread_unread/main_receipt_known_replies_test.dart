@@ -6,8 +6,8 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_ext
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
-import '../../fake_client.dart';
 import '../room_status_extension_test.mocks.dart' show MockTimeline;
+import 'thread_fakes.dart';
 
 /// Review 4515562061 (b), the two places that pick the main read target:
 /// the room screen reading its timeline, and « Mark as read » in the room
@@ -42,7 +42,7 @@ void main() {
       'reply', () async {
     when(
       _client.database,
-    ).thenReturn(_StoredEvents([_deletedReply(), _mainMessage()]));
+    ).thenReturn(StoredEvents([_deletedReply(), _mainMessage()]));
 
     await _room.markRoomAndAllThreadsRead();
 
@@ -78,23 +78,11 @@ Event _liveReply() => Event(
 );
 
 /// The same reply once deleted: no content, no relation.
-Event _deletedReply() => Event(
-  type: EventTypes.Message,
-  content: const {},
+Event _deletedReply() => deletedEvent(
   eventId: _replyId,
-  senderId: _bob,
-  originServerTs: _replySentAt,
-  unsigned: {
-    'redacted_because': {
-      'type': EventTypes.Redaction,
-      'event_id': r'$redaction',
-      'sender': _bob,
-      'origin_server_ts': DateTime.utc(2026, 11, 9, 12).millisecondsSinceEpoch,
-      'content': const {},
-      'redacts': _replyId,
-    },
-  },
+  sender: _bob,
   room: _room,
+  sentAt: _replySentAt,
 );
 
 Event _mainMessage() => Event(
@@ -119,22 +107,4 @@ void _verifyMainReadOnMainMessage() {
 class _ThreadClient extends MockClient implements ThreadUnreadStoreOwner {
   @override
   late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
-}
-
-/// Stored events of a room, newest first, paged like the SDK database.
-class _StoredEvents extends MockDatabase {
-  _StoredEvents(this.events);
-
-  final List<Event> events;
-
-  @override
-  Future<List<Event>> getEventList(
-    Room room, {
-    int start = 0,
-    bool onlySending = false,
-    int? limit,
-  }) async {
-    final stored = events.skip(start);
-    return (limit == null ? stored : stored.take(limit)).toList();
-  }
 }

@@ -3,6 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 
+import '../../../utils/thread_unread/thread_fakes.dart';
 import '../room/room_extension_test.mocks.dart';
 
 /// Review 4515562061 (b): a deleted thread reply loses its `m.relates_to`,
@@ -26,23 +27,11 @@ const _deletedReplyId = r'$deleted_reply';
 late MockRoom _room;
 
 /// An event deleted by Alice: no content left, no relation.
-Event _deleted(String eventId) => Event(
-  type: EventTypes.Message,
-  content: const {},
+Event _deleted(String eventId) => deletedEvent(
   eventId: eventId,
-  senderId: _alice,
-  originServerTs: DateTime.utc(2026, 11, 9, 11),
-  unsigned: {
-    'redacted_because': {
-      'type': EventTypes.Redaction,
-      'event_id': r'$redaction',
-      'sender': _alice,
-      'origin_server_ts': DateTime.utc(2026, 11, 9, 12).millisecondsSinceEpoch,
-      'content': const {},
-      'redacts': eventId,
-    },
-  },
+  sender: _alice,
   room: _room,
+  sentAt: DateTime.utc(2026, 11, 9, 11),
 );
 
 Event _mainMessage() => Event(

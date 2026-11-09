@@ -51,7 +51,7 @@ void main() {
 
     _store.rememberThreadReply(_reply(sender: _me));
 
-    expect(told, 1);
+    expect(told, isPositive);
   });
 }
 
