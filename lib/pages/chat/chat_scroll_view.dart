@@ -40,7 +40,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   void initState() {
     super.initState();
     _currentEvents = List<Event>.from(widget.events)
-      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
+      ..sort(compareEventsNewestFirst);
     _indexEvents();
     _bottom.addAll(_currentEvents);
   }
@@ -58,7 +58,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     if (widget.events == oldWidget.events) return;
 
     final newEvents = List<Event>.from(widget.events)
-      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
+      ..sort(compareEventsNewestFirst);
 
     // Use the extension to sync event lists
     final result = EventListExtension.syncEventLists(
