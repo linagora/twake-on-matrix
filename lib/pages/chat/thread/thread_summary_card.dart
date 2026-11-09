@@ -14,7 +14,7 @@ class ThreadSummaryCard extends StatelessWidget {
     this.lastReplyTime,
     required this.onTap,
     this.unreadCount = 0,
-    this.color = Colors.white,
+    this.onOwnBubble = false,
   });
 
   final int replyCount;
@@ -25,8 +25,9 @@ class ThreadSummaryCard extends StatelessWidget {
   final DateTime? lastReplyTime;
   final int unreadCount;
 
-  /// White on the blue bubble of the user; a grey on a white bubble.
-  final Color color;
+  /// The card sits on a bubble of the user (the paper of the theme) rather
+  /// than on a received one (a raised surface).
+  final bool onOwnBubble;
   final VoidCallback onTap;
 
   @override
@@ -35,6 +36,7 @@ class ThreadSummaryCard extends StatelessWidget {
     final colors = LinagoraSysColors.material();
     final textStyle = LinagoraTextStyle.material();
     final count = l10n.threadMessagesCount(replyCount);
+    final scheme = Theme.of(context).colorScheme;
     final unread = unreadCount > 0;
     final secondary = textStyle.bodySmall.copyWith(color: colors.secondary);
     final last = lastReplyTime == null
@@ -70,9 +72,13 @@ class ThreadSummaryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Container(
+            // Takes the width it is given; shrinks if it is unbounded.
+            alignment: AlignmentDirectional.centerStart,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: color,
+              color: onOwnBubble
+                  ? scheme.surfaceContainerLowest
+                  : scheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
               border: _LeftBarBorder(
                 bar: unread ? colors.primary : colors.outline,
@@ -96,14 +102,16 @@ class ThreadSummaryCard extends StatelessWidget {
                           shape: BoxShape.circle,
                         ),
                       ),
-                    Text(
-                      count,
-                      style: textStyle.labelLarge.copyWith(
-                        color: colors.primary,
-                        fontWeight: FontWeight.w600,
+                    // Its minimum width is its whole text: it never wraps.
+                    IntrinsicWidth(
+                      child: Text(
+                        '$count ›',
+                        style: textStyle.bodySmall.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    Icon(Icons.chevron_right, size: 18, color: colors.primary),
                   ],
                 ),
                 if (last != null)
@@ -137,18 +145,27 @@ class _LeftBarBorder extends Border {
     BorderRadius? borderRadius,
   }) {
     final rrect = (borderRadius ?? BorderRadius.zero).toRRect(rect);
-    canvas.drawRRect(
-      rrect.deflate(0.5),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..color = top.color,
-    );
+    // The bar lives inside the rounded shape; the outline starts after it.
     canvas
       ..save()
       ..clipRRect(rrect)
       ..drawRect(
         Rect.fromLTWH(rect.left, rect.top, left.width, rect.height),
         Paint()..color = left.color,
+      )
+      ..clipRect(
+        Rect.fromLTRB(
+          rect.left + left.width,
+          rect.top,
+          rect.right,
+          rect.bottom,
+        ),
+      )
+      ..drawRRect(
+        rrect.deflate(0.5),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..color = top.color,
       )
       ..restore();
   }

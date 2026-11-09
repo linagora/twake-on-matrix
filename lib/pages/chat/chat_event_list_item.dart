@@ -165,10 +165,7 @@ class ChatEventListItem extends StatelessWidget {
           lastReplyText: _lastReplyText(context, summary),
           lastReplyTime: summary.lastReply?.originServerTs,
           unreadCount: controller.threadUnreadCount(event.eventId),
-          // A received bubble is white already: the card is grey there.
-          color: event.isOwnMessage
-              ? Colors.white
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          onOwnBubble: event.isOwnMessage,
           onTap: () => _openThread(context),
         ),
       );

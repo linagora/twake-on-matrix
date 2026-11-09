@@ -7,6 +7,7 @@ import 'package:twake_chat/pages/chat/events/message/message_content_builder.dar
 import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:twake_chat/pages/chat/events/message/message_reaction_dialog.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/pages/chat/events/message/width_matched_footer.dart';
 import 'package:twake_chat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions.dart';
 import 'package:twake_chat/pages/chat/events/message_time.dart';
@@ -530,27 +531,40 @@ class _MessageContentWithTimestampBuilderState
               ),
             ),
           );
-    final bubbleContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showDisplayName)
-          OptionalSelectionContainerDisabled(
+    final displayName = showDisplayName
+        ? OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
             child: DisplayNameWidget(event: widget.event),
-          ),
-        if (card != null) ...[
-          messageContent,
-          Padding(padding: MessageStyle.paddingThreadCard, child: card),
-          if (time != null)
-            Align(alignment: AlignmentDirectional.centerEnd, child: time),
-        ] else
-          OptionalStack(
-            isEnabled: timelineText,
-            alignment: AlignmentDirectional.bottomEnd,
-            children: [messageContent, ?time],
-          ),
-      ],
-    );
+          )
+        : null;
+    // The card takes the width of the bubble, which the root alone decides
+    // (the bubble shrinks to its content).
+    final bubbleContent = card != null
+        ? WidthMatchedFooter(
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [?displayName, messageContent],
+            ),
+            footer: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(padding: MessageStyle.paddingThreadCard, child: card),
+                if (time != null)
+                  Align(alignment: AlignmentDirectional.centerEnd, child: time),
+              ],
+            ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ?displayName,
+              OptionalStack(
+                isEnabled: timelineText,
+                alignment: AlignmentDirectional.bottomEnd,
+                children: [messageContent, ?time],
+              ),
+            ],
+          );
 
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(
