@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
@@ -20,6 +21,10 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Map<String, Map<String, ThreadCounts>> _counts = {};
   final Set<String> _followed = {};
   final Set<String> _resolving = {};
+
+  /// Threads the server answered "not participated" for: asked once, the
+  /// answer stands until the user writes in the thread (markFollowed).
+  final Set<String> _notFollowed = {};
   final Map<String, DateTime> _activity = {};
   final Map<String, int> _badges = {};
 
@@ -48,6 +53,7 @@ class ThreadUnreadStore extends ChangeNotifier {
       final prefix = '$roomId|';
       final hadFollow = _followed.length;
       _followed.removeWhere((key) => key.startsWith(prefix));
+      _notFollowed.removeWhere((key) => key.startsWith(prefix));
       _activity.removeWhere((key, _) => key.startsWith(prefix));
       _badges.remove(roomId);
       _threadReplyIds.remove(roomId);
@@ -71,7 +77,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
     if (!changed) return;
     notifyListeners();
-    _persist();
+    _persist(immediately: leftRoomIds.isNotEmpty);
   }
 
   /// The user wrote in this thread: it is followed from now on.
@@ -142,8 +148,12 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// still running (it runs first, then the key goes).
   Future<void> clear() async {
     _epoch++;
+    _persistTimer?.cancel();
+    _persistTimer = null;
+    _dirty = false;
     _counts.clear();
     _followed.clear();
+    _notFollowed.clear();
     _activity.clear();
     _badges.clear();
     _threadReplyIds.clear();
@@ -157,7 +167,36 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
   }
 
-  Future<void> _persist() async {
+  Timer? _persistTimer;
+  bool _dirty = false;
+
+  // ponytail: fixed window; a save per change is what a catch-up sync broke.
+  static const Duration _persistWindow = Duration(seconds: 1);
+
+  /// Saves in a zero-delay task (a burst of calls in a row is one save),
+  /// then at most once per [_persistWindow]. Leaving a room is rare and must
+  /// not wait: [immediately] saves now.
+  void _persist({bool immediately = false}) {
+    if (immediately) {
+      _persistTimer?.cancel();
+      _persistTimer = null;
+      _dirty = false;
+      _save();
+      return;
+    }
+    _dirty = true;
+    if (_persistTimer != null) return;
+    _persistTimer = Timer(Duration.zero, () {
+      _dirty = false;
+      _persistTimer = Timer(_persistWindow, () {
+        _persistTimer = null;
+        if (_dirty) _persist();
+      });
+      _save();
+    });
+  }
+
+  Future<void> _save() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -213,11 +252,16 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// Participation as the server tells it: the user wrote the root or
   /// replied (P1; the explicit follow choice comes with P2). The root stored
   /// in the database keeps the aggregate of the day it was stored, so unless
-  /// it already says "participated" the server is asked. A "no" is not kept:
-  /// the next increase of the counter asks again, as does a failed call.
+  /// it already says "participated" the server is asked. A "no" is kept (the
+  /// user's own event turns it into a follow); a failed call is asked again
+  /// on the next increase of the counter.
   Future<void> _resolveFollowed(String roomId, String rootId) async {
     final key = '$roomId|$rootId';
-    if (_followed.contains(key) || !_resolving.add(key)) return;
+    if (_followed.contains(key) ||
+        _notFollowed.contains(key) ||
+        !_resolving.add(key)) {
+      return;
+    }
     final epoch = _epoch;
     try {
       final stored = await _client.getRoomById(roomId)?.getEventById(rootId);
@@ -232,7 +276,12 @@ class ThreadUnreadStore extends ChangeNotifier {
             fresh.senderId == _client.userID ||
             _participated(fresh.unsigned) == true;
       }
-      if (follow && epoch == _epoch) markFollowed(roomId, rootId);
+      if (epoch != _epoch) return;
+      if (follow) {
+        markFollowed(roomId, rootId);
+      } else {
+        _notFollowed.add(key);
+      }
     } catch (e, s) {
       Logs().w('Unable to tell if the thread is followed', e, s);
     } finally {
