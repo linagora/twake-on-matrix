@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 
 void main() {
@@ -38,7 +39,7 @@ void main() {
     });
 
     test(
-      'getDecryptedFilePath_always_differsFromTheEncryptedDownloadPath',
+      'getDecryptedFilePath_always_isOutsideTheEncryptedDownloadFolder',
       () async {
         // Act
         final decryptedPath = await StorageDirectoryManager.instance
@@ -47,7 +48,42 @@ void main() {
             .getFilePathInAppDownloads(eventId: eventId, fileName: fileName);
 
         // Assert
-        expect(decryptedPath, isNot(encryptedPath));
+        expect(p.isWithin(p.dirname(encryptedPath), decryptedPath), isFalse);
+      },
+    );
+
+    test(
+      'getDecryptedFilePath_whenNameHasPathSeparators_staysInTheEventFolder',
+      () async {
+        // Act
+        final decryptedPath = await StorageDirectoryManager.instance
+            .getDecryptedFilePath(eventId: eventId, fileName: r'../..\../x');
+
+        // Assert
+        expect(
+          p.isWithin(
+            p.join(tempDir.path, 'decrypted', eventId),
+            p.normalize(decryptedPath),
+          ),
+          isTrue,
+        );
+      },
+    );
+  });
+
+  group('getFilePathInAppDownloads', () {
+    test(
+      'getFilePathInAppDownloads_whenNameHasPathSeparators_staysInTheEventFolder',
+      () async {
+        // Act
+        final downloadPath = await StorageDirectoryManager.instance
+            .getFilePathInAppDownloads(eventId: eventId, fileName: '../../x');
+
+        // Assert
+        expect(
+          p.isWithin(p.join(tempDir.path, eventId), p.normalize(downloadPath)),
+          isTrue,
+        );
       },
     );
   });
