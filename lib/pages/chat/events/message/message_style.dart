@@ -11,6 +11,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:linagora_design_flutter/spacings/linagora_spacing.dart';
 import 'package:matrix/matrix.dart';
 
@@ -64,6 +65,9 @@ class MessageStyle {
 
   static Color? forwardColorBackground(context) =>
       Theme.of(context).colorScheme.surfaceTint.withOpacity(0.08);
+
+  static final jumpHighlightTint = LinagoraSysColors.material().warning
+      .withValues(alpha: 0.12);
 
   static const double messageBubbleDesktopMaxWidth = 520.0;
   static const double messageBubbleMobileRatioMaxWidth = 0.88;

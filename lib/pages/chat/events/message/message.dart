@@ -59,6 +59,7 @@ class Message extends StatefulWidget {
   final OnSwipe? onSwipe;
   final OnHover? onHover;
   final ValueNotifier<String?> isHoverNotifier;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
   final bool selected;
   final Timeline timeline;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
@@ -107,6 +108,7 @@ class Message extends StatefulWidget {
     this.selectMode = true,
     required this.timeline,
     required this.isHoverNotifier,
+    this.highlightedEventIdNotifier,
     required this.listHorizontalActionMenu,
     required this.maxWidth,
     this.menuChildren,
@@ -356,6 +358,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           row: row,
           selected: widget.selected,
           selectMode: widget.selectMode,
+          highlightedEventIdNotifier: widget.highlightedEventIdNotifier,
           onHover: widget.onHover,
           onSwipe: widget.onSwipe,
           onSelect: widget.onSelect,

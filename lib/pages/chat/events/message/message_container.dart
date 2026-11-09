@@ -2,6 +2,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:twake_chat/pages/chat/chat_view_body_style.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_selected_widget.dart';
+import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:twake_chat/pages/chat/events/message/swipeable_message.dart';
 import 'package:twake_chat/pages/chat/optional_gesture_detector.dart';
@@ -17,6 +18,7 @@ class MessageContainer extends StatelessWidget {
   final Widget row;
   final bool selected;
   final bool selectMode;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
   final OnHover? onHover;
   final OnSwipe? onSwipe;
   final OnSelect? onSelect;
@@ -30,6 +32,7 @@ class MessageContainer extends StatelessWidget {
     required this.row,
     required this.selected,
     required this.selectMode,
+    this.highlightedEventIdNotifier,
     this.onHover,
     this.onSwipe,
     this.onSelect,
@@ -88,12 +91,13 @@ class MessageContainer extends StatelessWidget {
       width: double.infinity,
       child: Stack(
         children: [
-          if (selected)
-            Positioned.fill(
-              child: ColoredBox(
-                color: LinagoraSysColors.material().secondaryContainer,
-              ),
+          Positioned.fill(
+            child: _MessageBackground(
+              eventId: event.eventId,
+              selected: selected,
+              highlightedEventIdNotifier: highlightedEventIdNotifier,
             ),
+          ),
           SizedBox(width: double.infinity, child: container),
         ],
       ),
@@ -106,10 +110,37 @@ class MessageContainer extends StatelessWidget {
         key: ValueKey(event.eventId),
         index: scrollIdx,
         controller: controller,
-        highlightColor: Theme.of(context).highlightColor,
+        highlightColor: MessageStyle.jumpHighlightTint,
         child: highlighted,
       );
     }
     return highlighted;
+  }
+}
+
+class _MessageBackground extends StatelessWidget {
+  final String eventId;
+  final bool selected;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
+
+  const _MessageBackground({
+    required this.eventId,
+    required this.selected,
+    this.highlightedEventIdNotifier,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (selected) {
+      return ColoredBox(color: LinagoraSysColors.material().secondaryContainer);
+    }
+    final highlightedEventIdNotifier = this.highlightedEventIdNotifier;
+    if (highlightedEventIdNotifier == null) return const SizedBox.shrink();
+    return ValueListenableBuilder<String?>(
+      valueListenable: highlightedEventIdNotifier,
+      builder: (context, highlightedEventId, _) => highlightedEventId == eventId
+          ? ColoredBox(color: MessageStyle.jumpHighlightTint)
+          : const SizedBox.shrink(),
+    );
   }
 }
