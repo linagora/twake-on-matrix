@@ -334,6 +334,102 @@ void main() {
     });
   });
 
+  /// CodeRabbit 4515287978: only an edit made by the sender of the reply,
+  /// as an `m.room.message`, replaces its text (Matrix spec, `m.replace`;
+  /// the SDK `Event.getDisplayEvent` keeps the same ones).
+  group('edits that do not change the card', () {
+    Event bySender(Event event, String sender) =>
+        Event.fromJson({...event.toJson(), 'sender': sender}, room);
+
+    test('an edit of the last reply by another member does not change the '
+        'text shown', () {
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: serverLatest),
+        liveEvents: [
+          bySender(
+            edit(
+              eventId: r'$e1',
+              target: r'$r2',
+              newBody: 'Text written by Alice',
+              minute: 7,
+            ),
+            alice,
+          ),
+        ],
+      )!;
+
+      expect(summary.lastReplyText, 'See you tomorrow');
+    });
+
+    test('a newer edit that cannot be read does not hide the edit of the '
+        'sender', () {
+      // Its `m.relates_to` stays in clear, its new content does not.
+      final undecrypted = Event(
+        type: EventTypes.Encrypted,
+        content: {
+          'algorithm': 'm.megolm.v1.aes-sha2',
+          'ciphertext': 'AwgA',
+          'session_id': 'unknown',
+          'm.relates_to': {
+            'rel_type': RelationshipTypes.edit,
+            'event_id': r'$r2',
+          },
+        },
+        eventId: r'$e2',
+        senderId: bob,
+        originServerTs: at(8),
+        room: room,
+      );
+
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: serverLatest),
+        liveEvents: [
+          edit(
+            eventId: r'$e1',
+            target: r'$r2',
+            newBody: 'See you on Monday',
+            minute: 7,
+          ),
+          undecrypted,
+        ],
+      )!;
+
+      expect(summary.lastReplyText, 'See you on Monday');
+    });
+  });
+
+  /// CodeRabbit 4515288006: a reply that quotes a message of the thread
+  /// carries the quote fallback in its body (SDK `Room.sendEvent`); the card
+  /// shows the reply itself, as the SDK `calcLocalizedBodyFallback(
+  /// hideReply: true, hideEdit: true)` does.
+  group('a last reply that quotes another message', () {
+    const quoting =
+        '> <@alice:example.com> Root text\n'
+        '\n'
+        'Actual reply';
+
+    test('the card shows the reply without the quote', () {
+      final summary = ThreadSummary.fromRoot(
+        root(),
+        liveEvents: [reply(eventId: r'$r1', body: quoting, minute: 1)],
+      )!;
+
+      expect(summary.lastReplyText, 'Actual reply');
+    });
+
+    test('the card shows the reply without the quote when it comes from '
+        'the server aggregation', () {
+      final summary = ThreadSummary.fromRoot(
+        root(
+          count: 1,
+          latest: replyJson(eventId: r'$r1', body: quoting, minute: 1),
+        ),
+      )!;
+
+      expect(summary.lastReplyText, 'Actual reply');
+    });
+  });
+
   /// THR-M-02 (last reply on the card), spec §1 « Chiffrement ».
   ///
   /// In an E2EE room `unsigned.m.relations.m.thread.latest_event`
