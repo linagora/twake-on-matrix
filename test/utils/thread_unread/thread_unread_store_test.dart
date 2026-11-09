@@ -40,9 +40,18 @@ void main() {
   const me = '@me:example.com';
   const alice = '@alice:example.com';
 
-  late MockRoom room;
+  /// THR-M-09, maintainer-side decision (09/11): the follow lookup reads the
+  /// device database first, without network, then asks the server at most
+  /// once, only when the root is missing there or does not say participated.
+  /// The rooms are real rooms of the SDK: `Room.getEventById` asks the
+  /// server itself when the database misses, so only the counts of database
+  /// reads and of server requests tell the two apart.
+  late _StoredRoots database;
   late List<bool> participatedOnLookup;
   late bool cachedRootHasAggregate;
+
+  /// Whether the device database holds the root at all.
+  late bool rootStored;
 
   /// What `GET /rooms/{roomId}/event/{rootId}` says, one answer per call
   /// (the last one repeats); an [Exception] makes the call fail.
@@ -50,13 +59,13 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    room = MockRoom();
-    when(room.id).thenReturn(roomId);
     participatedOnLookup = [false];
     cachedRootHasAggregate = true;
+    rootStored = true;
     serverParticipatedOnLookup = [false];
     var lookups = 0;
-    when(room.getEventById(rootId)).thenAnswer((_) async {
+    database = _StoredRoots((eventId, room) {
+      if (eventId != rootId || !rootStored) return null;
       final participated =
           participatedOnLookup[lookups.clamp(
             0,
@@ -88,6 +97,8 @@ void main() {
     final client = MockClient();
     when(client.clientName).thenReturn(name);
     when(client.userID).thenReturn(me);
+    when(client.database).thenReturn(database);
+    final room = Room(id: roomId, client: client);
     when(client.getRoomById(roomId)).thenReturn(room);
     var serverLookups = 0;
     when(client.getOneRoomEvent(roomId, rootId)).thenAnswer((_) async {
@@ -282,6 +293,7 @@ void main() {
       store.apply(counts(1));
       await pumpEventQueue();
 
+      expect(database.reads[rootId], 1);
       verify(client.getOneRoomEvent(roomId, rootId)).called(1);
       expect(threadOf(store)?.followed, isTrue);
     });
@@ -308,8 +320,55 @@ void main() {
       store.apply(counts(1));
       await pumpEventQueue();
 
+      expect(database.reads[rootId], 1);
       verifyNever(client.getOneRoomEvent(any, any));
       expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a root missing from the device database costs one server '
+        'request, the server saying not participated', () async {
+      rootStored = false;
+      serverParticipatedOnLookup = [false];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      expect(database.reads[rootId], 1);
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(threadOf(store)?.followed, isFalse);
+    });
+
+    test('a root missing from the device database costs one server '
+        'request, the server saying participated', () async {
+      rootStored = false;
+      serverParticipatedOnLookup = [true];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      expect(database.reads[rootId], 1);
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(threadOf(store)?.followed, isTrue);
+    });
+
+    test('a root missing from the device database, 50 new replies: one '
+        'server request in all', () async {
+      rootStored = false;
+      serverParticipatedOnLookup = [false];
+      final client = clientNamed('account-a');
+      final store = ThreadUnreadStore(client: client);
+
+      for (var n = 1; n <= 50; n++) {
+        store.apply(counts(n));
+        await pumpEventQueue();
+      }
+
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(threadOf(store)?.followed, isFalse);
     });
 
     test('a "not participated" from the server is kept: 50 new replies ask '
@@ -324,10 +383,8 @@ void main() {
         await pumpEventQueue();
       }
 
-      verify(
-        client.getOneRoomEvent(roomId, rootId),
-      ).called(lessThanOrEqualTo(1));
-      verify(room.getEventById(rootId)).called(lessThanOrEqualTo(1));
+      verify(client.getOneRoomEvent(roomId, rootId)).called(1);
+      expect(database.reads[rootId], 1);
       expect(threadOf(store)?.followed, isFalse);
     });
 
@@ -399,13 +456,10 @@ void main() {
   });
 
   /// THR-M-09, perf (roast 5): after a long absence, one catch-up sync can
-  /// raise the counters of many threads the user does not follow. Each
-  /// lookup of the follow state costs one server request, not two for the
-  /// same root, and only a few run at a time.
-  group('lookups of the follow state, on the server', () {
-    /// A real room of the SDK, whose database holds none of the roots: the
-    /// root must come from the server.
-    late Room realRoom;
+  /// raise the counters of many threads the user does not follow. Each is
+  /// looked up once, and only a few run at a time.
+  group('many lookups of the follow state at once', () {
+    /// The database holds none of these roots: each comes from the server.
     late MockClient client;
     late Map<String, int> serverCalls;
     late List<Completer<void>> pending;
@@ -447,23 +501,7 @@ void main() {
       pending = [];
       inFlight = 0;
       maxInFlight = 0;
-      client = MockClient();
-      when(client.clientName).thenReturn('account-a');
-      when(client.userID).thenReturn(me);
-      when(client.database).thenReturn(_NoStoredEvents());
-      realRoom = Room(id: roomId, client: client);
-      when(client.getRoomById(roomId)).thenReturn(realRoom);
-    });
-
-    test('a root missing from the database costs one server request', () async {
-      serve(rootId);
-      final store = ThreadUnreadStore(client: client);
-
-      store.apply(counts(1));
-      await pumpEventQueue();
-
-      expect(serverCalls[rootId], 1);
-      expect(threadOf(store)?.followed, isFalse);
+      client = clientNamed('account-a');
     });
 
     test('many threads raised at once: never more than 3 lookups in flight, '
@@ -491,8 +529,8 @@ void main() {
         expect(maxInFlight, lessThanOrEqualTo(3));
       }
 
-      expect(serverCalls.keys.toSet(), roots.toSet());
-      expect(serverCalls.values.every((n) => n == 1), isTrue);
+      // Every thread looked up, each with one server request.
+      expect(serverCalls, {for (final root in roots) root: 1});
       expect(store.threadsOf(roomId).where((t) => t.followed), isEmpty);
     });
   });
@@ -795,9 +833,17 @@ void main() {
   });
 }
 
-/// A database that stores no event: `Room.getEventById` falls back to the
-/// server, as for a root never synced on this device.
-class _NoStoredEvents extends fake.MockDatabase {
+/// The device database: answers the roots it holds ([answer] returns null
+/// for the others) and counts the reads per event id.
+class _StoredRoots extends fake.MockDatabase {
+  _StoredRoots(this.answer);
+
+  final Event? Function(String eventId, Room room) answer;
+  final Map<String, int> reads = {};
+
   @override
-  Future<Event?> getEventById(String eventId, Room room) async => null;
+  Future<Event?> getEventById(String eventId, Room room) async {
+    reads.update(eventId, (n) => n + 1, ifAbsent: () => 1);
+    return answer(eventId, room);
+  }
 }
