@@ -31,7 +31,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/$fileName';
+    return '$fileStoreDirectory/$eventId/${_safeName(fileName)}';
   }
 
   Future<String?> getTwakeDownloadsFolderInDevice() async {
@@ -74,7 +74,16 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/decrypted-$fileName';
+    return '$fileStoreDirectory/decrypted/$eventId/${_safeName(fileName)}';
+  }
+
+  String _safeName(String fileName) {
+    final segments = fileName
+        .split(RegExp(r'[/\\]'))
+        .where(
+          (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+        );
+    return segments.isEmpty ? 'file' : segments.join('_');
   }
 
   String convertFileExtension(String filename, String newExtension) {
