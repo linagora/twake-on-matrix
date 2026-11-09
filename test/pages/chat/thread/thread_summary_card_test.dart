@@ -21,6 +21,24 @@ void main() {
   group('the last reply', _lastReplyTests);
   _countAndTapTests();
   _accessibilityTests();
+  group('the unread count says one or several messages', _unreadPluralTests);
+}
+
+/// CodeRabbit 4515287889: « 1 unread messages » was a raw `{n}`; the
+/// string is an ICU plural, as `threadMessagesCount` next to it.
+void _unreadPluralTests() {
+  final en = lookupL10n(const Locale('en'));
+  final fr = lookupL10n(const Locale('fr'));
+
+  test('in English', () {
+    expect(en.threadUnreadMessagesCount(1), '1 unread message');
+    expect(en.threadUnreadMessagesCount(2), '2 unread messages');
+  });
+
+  test('in French', () {
+    expect(fr.threadUnreadMessagesCount(1), '1 message non lu');
+    expect(fr.threadUnreadMessagesCount(2), '2 messages non lus');
+  });
 }
 
 /// Five minutes and a bit: far from a minute boundary while the test runs.
