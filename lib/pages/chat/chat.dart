@@ -673,44 +673,59 @@ class ChatController extends ConsumerState<Chat>
     } catch (e, s) {
       Logs().w('Unable to load the root of the thread', e, s);
     }
+    // Closed while the root loaded: no subscription must outlive the screen.
+    if (!mounted) return;
     _createThreadEvents(room);
-    await _threadEvents!.ready;
-    final error = _threadEvents!.lastError;
-    if (error != null && mounted) {
+    final threadEvents = _threadEvents!;
+    await threadEvents.ready;
+    if (!mounted) return;
+    final error = threadEvents.lastError;
+    if (error != null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error.toLocalizedString(context))));
     }
-    if (widget.startThread && mounted) _requestInputFocus();
+    if (widget.startThread) _requestInputFocus();
   }
 
   void _createThreadEvents(Room room) {
+    // Captured now: the closures below outlive the widget context.
+    final rootId = threadRootId!;
+    final roomClient = room.client;
     final threadEvents = ThreadEvents(
-      rootEventId: threadRootId!,
+      rootEventId: rootId,
       fetchPage: (from) async {
         final page = await const GetThreadRepliesInteractor().execute(
           room: room,
-          rootEventId: threadRootId!,
+          rootEventId: rootId,
           from: from,
           withRelations: true,
         );
+        if (!mounted) return (events: page.replies, nextBatch: page.nextBatch);
         // A reply seen here and deleted later loses its relation: the room
         // timeline must still know it was in a thread.
         for (final event in page.replies) {
-          if (event.threadRootId == threadRootId) {
-            client.threadUnread?.rememberThreadReply(room.id, event.eventId);
+          if (event.threadRootId == rootId) {
+            roomClient.threadUnread?.rememberThreadReply(
+              room.id,
+              event.eventId,
+            );
           }
         }
         return (events: page.replies, nextBatch: page.nextBatch);
       },
       // Edits and reactions of old replies show on them through the timeline.
-      onRelation: (event) => timeline?.addAggregatedEvent(event),
-      onChanged: updateView,
+      onRelation: (event) {
+        if (mounted) timeline?.addAggregatedEvent(event);
+      },
+      onChanged: () {
+        if (mounted) updateView();
+      },
     );
     _threadEvents = threadEvents;
     _syncThreadEvents();
     // A reply known only from a page is deleted live, or decrypted late.
-    _threadRedactionSub = room.client.onTimelineEvent.stream
+    _threadRedactionSub = roomClient.onTimelineEvent.stream
         .where((e) => e.roomId == room.id && e.type == EventTypes.Redaction)
         .listen(threadEvents.applyRedaction);
     _threadSessionKeySub = room.onSessionKeyReceived.stream.listen(
@@ -732,6 +747,7 @@ class ChatController extends ConsumerState<Chat>
     for (final event in threadEvents.undecryptedPageReplies.toList()) {
       if (event.content['session_id'] != sessionId) continue;
       final decrypted = await encryption.decryptRoomEvent(event);
+      if (!mounted) return;
       if (decrypted.type == EventTypes.Encrypted) continue;
       threadEvents.replaceEvent(decrypted);
       timeline?.addAggregatedEvent(decrypted);
@@ -907,8 +923,10 @@ class ChatController extends ConsumerState<Chat>
     try {
       await loadTimelineFuture;
       if (isThread) {
+        if (!mounted) return;
         await _loadThread();
         if (!_threadReady.isCompleted) _threadReady.complete();
+        if (!mounted) return;
         _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -2743,7 +2761,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void _requestInputFocus() {
-    if (!inputFocus.hasPrimaryFocus) {
+    if (mounted && !inputFocus.hasPrimaryFocus) {
       inputFocus.requestFocus();
     }
   }
@@ -3454,12 +3472,13 @@ class ChatController extends ConsumerState<Chat>
   Future<void> _jumpToThreadReply(String eventId) async {
     _lastHighlightedEventId = eventId;
     await _threadReady.future;
+    if (!mounted) return;
     try {
       await _threadEvents?.ready;
       while (mounted &&
           !eventsToDisplay.any((e) => e.eventId == eventId) &&
           canRequestHistory) {
-        await _threadEvents!.loadMore();
+        await _threadEvents?.loadMore();
       }
     } catch (e, s) {
       // A failed page must not be retried forever: stop, the reply stays unknown.
@@ -3504,6 +3523,10 @@ class ChatController extends ConsumerState<Chat>
     disposeAutoMarkAsReadMixin();
     unawaited(_threadRedactionSub?.cancel());
     unawaited(_threadSessionKeySub?.cancel());
+    _threadRedactionSub = null;
+    _threadSessionKeySub = null;
+    _threadEvents = null;
+    if (!_threadReady.isCompleted) _threadReady.complete();
     timeline?.cancelSubscriptions();
     timeline = null;
 
