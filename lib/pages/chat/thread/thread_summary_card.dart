@@ -96,7 +96,7 @@ class ThreadSummaryCard extends StatelessWidget {
                       Container(
                         width: 8,
                         height: 8,
-                        margin: const EdgeInsets.only(right: 6),
+                        margin: const EdgeInsetsDirectional.only(end: 6),
                         decoration: BoxDecoration(
                           color: colors.primary,
                           shape: BoxShape.circle,
@@ -125,7 +125,8 @@ class ThreadSummaryCard extends StatelessWidget {
   }
 }
 
-/// A 1 px outline with a 3 px bar on the left. A [Border] with a wider side
+/// A 1 px outline with a 3 px bar on the start side (`left` holds the bar,
+/// whichever the direction). A [Border] with a wider side
 /// cannot be painted with a radius, so this one draws both itself.
 class _LeftBarBorder extends Border {
   _LeftBarBorder({required Color bar, required Color outline})
@@ -137,6 +138,14 @@ class _LeftBarBorder extends Border {
       );
 
   @override
+  EdgeInsetsGeometry get dimensions => EdgeInsetsDirectional.fromSTEB(
+    left.width,
+    top.width,
+    right.width,
+    bottom.width,
+  );
+
+  @override
   void paint(
     Canvas canvas,
     Rect rect, {
@@ -145,19 +154,21 @@ class _LeftBarBorder extends Border {
     BorderRadius? borderRadius,
   }) {
     final rrect = (borderRadius ?? BorderRadius.zero).toRRect(rect);
+    final rtl = textDirection == TextDirection.rtl;
+    final barLeft = rtl ? rect.right - left.width : rect.left;
     // The bar lives inside the rounded shape; the outline starts after it.
     canvas
       ..save()
       ..clipRRect(rrect)
       ..drawRect(
-        Rect.fromLTWH(rect.left, rect.top, left.width, rect.height),
+        Rect.fromLTWH(barLeft, rect.top, left.width, rect.height),
         Paint()..color = left.color,
       )
       ..clipRect(
         Rect.fromLTRB(
-          rect.left + left.width,
+          rtl ? rect.left : rect.left + left.width,
           rect.top,
-          rect.right,
+          rtl ? barLeft : rect.right,
           rect.bottom,
         ),
       )
