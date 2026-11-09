@@ -100,15 +100,20 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
       }
     });
     // Thread replies are remembered (they lose their relation once deleted);
-    // the user's own, from any device, make a thread followed.
-    onTimelineEvent.stream.listen((event) {
+    // the user's own, from any device, make a thread followed. A gap filled
+    // by requestHistory comes on onHistoryEvent. A local echo (sending, error)
+    // is neither: only the synced event counts.
+    void onThreadEvent(Event event) {
       final rootId = event.threadRootId;
-      if (rootId == null) return;
+      if (rootId == null || !event.status.isSynced) return;
       threadUnread.rememberThreadReply(event.room.id, event.eventId);
       if (event.senderId == userID) {
         threadUnread.markFollowed(event.room.id, rootId);
       }
-    });
+    }
+
+    onTimelineEvent.stream.listen(onThreadEvent);
+    onHistoryEvent.stream.listen(onThreadEvent);
   }
 
   /// Logs this account's notification device out and removes its recovery
