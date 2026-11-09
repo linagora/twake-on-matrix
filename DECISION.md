@@ -291,7 +291,7 @@ Meet, and `POST /sfu/get` answers 405.
 The first call screen is audio only, as the calls of Twake Space Chat start
 with the camera off:
 
-- the button opens the screen before the call; « Start a call » joins it;
+- the button opens the screen before the call; « Start Call » joins it;
 - in the call: one tile per device, with its avatar, its name, « Microphone
   off » and a ring while it speaks; a microphone button and « Leave the call »;
 - leaving the screen leaves the call: no call keeps running without a screen
