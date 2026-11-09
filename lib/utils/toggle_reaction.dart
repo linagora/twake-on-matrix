@@ -14,28 +14,30 @@ String? _keyOf(Event reaction) =>
 
 /// Toggles the current user's reaction on an event.
 ///
-/// - No existing reaction: send [emoji].
-/// - Same emoji already reacted (ignoring variation selectors): remove all of
-///   [myReactions].
-/// - Another emoji reacted: send [emoji], then, only if it was sent, remove
-///   all of [myReactions] so a leftover from a failed change goes too.
+/// - One of [myReactions] still sending: ignore the tap, its echo has no
+///   event id to redact yet.
+/// - No sent reaction: send [emoji].
+/// - Same emoji already reacted (ignoring variation selectors): remove it,
+///   and keep my other reactions.
+/// - Another emoji: send [emoji], then, only if it was sent, remove all my
+///   sent reactions so a leftover from a failed change goes too.
 Future<void> toggleReaction({
   required String emoji,
   required List<Event> myReactions,
   required Future<bool> Function() sendReaction,
 }) async {
-  if (myReactions.isEmpty) {
+  if (myReactions.any((e) => e.status.isSending)) return;
+  final sent = myReactions.where((e) => e.status.isSent).toList();
+  if (sent.isEmpty) {
     await sendReaction();
     return;
   }
-  Future<void> redactMyReactions() =>
-      Future.wait(myReactions.map((e) => e.redactEvent()));
-
-  if (myReactions.any((e) => _isSameReaction(emoji, _keyOf(e)))) {
-    await redactMyReactions();
+  final same = sent.where((e) => _isSameReaction(emoji, _keyOf(e)));
+  if (same.isNotEmpty) {
+    await Future.wait(same.map((e) => e.redactEvent()));
     return;
   }
   // A redaction synced before the new local echo would empty the row (#2364).
   if (!await sendReaction()) return;
-  await redactMyReactions();
+  await Future.wait(sent.map((e) => e.redactEvent()));
 }

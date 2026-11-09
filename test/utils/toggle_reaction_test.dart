@@ -12,8 +12,9 @@ import 'toggle_reaction_test.mocks.dart';
 void main() {
   late List<String> calls;
 
-  MockEvent reaction(String? key) {
+  MockEvent reaction(String? key, {EventStatus status = EventStatus.synced}) {
     final event = MockEvent();
+    when(event.status).thenReturn(status);
     when(event.content).thenReturn({
       'm.relates_to': {
         'rel_type': RelationshipTypes.reaction,
@@ -127,6 +128,7 @@ void main() {
 
   test('reports a failed redaction after the replacement is sent', () async {
     final old = MockEvent();
+    when(old.status).thenReturn(EventStatus.synced);
     when(old.content).thenReturn({
       'm.relates_to': {'key': '👍'},
     });
@@ -141,11 +143,27 @@ void main() {
     expect(calls, ['send 🎉', 'redact 👍', 'redact 😂']);
   });
 
-  test(
-    'removes the tapped reaction when it is not the first of mine',
-    () async {
-      await run(emoji: '😂', mine: [reaction('👍'), reaction('😂')]);
-      expect(calls, ['redact 👍', 'redact 😂']);
-    },
-  );
+  test('never redacts a reaction whose send failed', () async {
+    await run(
+      emoji: '🎉',
+      mine: [
+        reaction('👍'),
+        reaction('😂', status: EventStatus.error),
+      ],
+    );
+    expect(calls, ['send 🎉', 'redact 👍']);
+  });
+
+  test('sends when my only reaction is one whose send failed', () async {
+    await run(
+      emoji: '🎉',
+      mine: [reaction('😂', status: EventStatus.error)],
+    );
+    expect(calls, ['send 🎉']);
+  });
+
+  test('only removes the matching reaction when tapping one I hold', () async {
+    await run(emoji: '😂', mine: [reaction('👍'), reaction('😂')]);
+    expect(calls, ['redact 😂']);
+  });
 }
