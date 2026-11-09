@@ -6,7 +6,7 @@ extension FilteredTimelineExtension on Event {
   bool get isVisibleInGui => EventVisibilityResolver.isVisibleInTimeline(
     this,
     knownThreadReplyIds:
-        room.client.threadUnread?.knownThreadReplyIds(room.id) ?? const {},
+        room.client.threadUnread?.knownThreadReplyIds(room) ?? const {},
   );
 
   /// True when the room creator is joining for the first time.

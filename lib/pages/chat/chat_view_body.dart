@@ -368,7 +368,7 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
       builder: (context, _) {
         final rootId = unreadThreadBannerTarget(
           mainNotificationCount: room.notificationCount,
-          threads: store.threadsOf(room.id),
+          threads: store.threadsOf(room),
         );
         if (rootId == null) return const SizedBox.shrink();
         return UnreadThreadBanner(

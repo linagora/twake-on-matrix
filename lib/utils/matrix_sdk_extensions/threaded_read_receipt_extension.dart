@@ -44,7 +44,7 @@ extension ThreadedReadReceiptExtension on Room {
     final rootId = last.threadRootId;
     if (rootId != null) {
       final thread = client.threadUnread
-          ?.threadsOf(id)
+          ?.threadsOf(this)
           .where((t) => t.rootEventId == rootId)
           .firstOrNull;
       if (thread?.followed != true && (thread?.highlightCount ?? 0) == 0) {

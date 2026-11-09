@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
@@ -187,13 +188,18 @@ void main() {
           );
         });
       }
-      client.threadUnread.apply({
-        roomId: {
-          rootA: (notificationCount: 3, highlightCount: 0),
-          rootB: (notificationCount: 1, highlightCount: 1),
-          rootRead: (notificationCount: 0, highlightCount: 0),
-        },
-      });
+      client.threadUnread.apply(
+        const SyncThreadUpdate(
+          counts: {
+            roomId: {
+              rootA: (notificationCount: 3, highlightCount: 0),
+              rootB: (notificationCount: 1, highlightCount: 1),
+              rootRead: (notificationCount: 0, highlightCount: 0),
+            },
+          },
+          leftRoomIds: [],
+        ),
+      );
     });
 
     test('each unread thread gets a receipt on its newest reply, and the main '

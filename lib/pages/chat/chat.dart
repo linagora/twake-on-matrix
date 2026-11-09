@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/domain/model/thread/thread_events.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
@@ -600,7 +601,7 @@ class ChatController extends ConsumerState<Chat>
   ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
 
   int threadUnreadCount(String rootId) =>
-      threadUnreadStore?.unreadCount(roomId!, rootId) ?? 0;
+      threadUnreadStore?.unreadCount(ThreadRef(roomId!, rootId)) ?? 0;
 
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
@@ -716,10 +717,7 @@ class ChatController extends ConsumerState<Chat>
         // timeline must still know it was in a thread.
         for (final event in page.replies) {
           if (event.threadRootId == rootId) {
-            roomClient.threadUnread?.rememberThreadReply(
-              room.id,
-              event.eventId,
-            );
+            roomClient.threadUnread?.rememberThreadReply(event);
           }
         }
         return (events: page.replies, nextBatch: page.nextBatch);

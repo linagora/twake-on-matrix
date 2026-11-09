@@ -8,7 +8,9 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
@@ -37,6 +39,7 @@ void main() {
 
   const roomId = '!room:example.com';
   const rootId = r'$root';
+  const thread = ThreadRef(roomId, rootId);
   const me = '@me:example.com';
   const alice = '@alice:example.com';
 
@@ -57,8 +60,11 @@ void main() {
   /// (the last one repeats); an [Exception] makes the call fail.
   late List<Object> serverParticipatedOnLookup;
 
+  late Room room;
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    room = _roomOf(roomId);
     participatedOnLookup = [false];
     cachedRootHasAggregate = true;
     rootStored = true;
@@ -126,17 +132,38 @@ void main() {
     return client;
   }
 
-  Map<String, Map<String, ThreadCounts>> counts(
-    int notifications, {
-    int highlights = 0,
-  }) => {
+  /// What one sync carries: [rooms] counters, [left] the rooms left.
+  SyncThreadUpdate sync(
+    Map<String, Map<String, ThreadCounts>> rooms, {
+    Iterable<String> left = const [],
+  }) => SyncThreadUpdate(counts: rooms, leftRoomIds: left);
+
+  SyncThreadUpdate counts(int notifications, {int highlights = 0}) => sync({
     roomId: {
       rootId: (notificationCount: notifications, highlightCount: highlights),
     },
-  };
+  });
+
+  /// A thread reply of [room], as the live timeline brings it.
+  Event replyIn(Room room, String eventId) => Event(
+    type: EventTypes.Message,
+    content: {
+      'msgtype': 'm.text',
+      'body': 'in the thread',
+      'm.relates_to': {
+        'rel_type': RelationshipTypes.thread,
+        'event_id': rootId,
+        'is_falling_back': true,
+      },
+    },
+    eventId: eventId,
+    senderId: alice,
+    originServerTs: DateTime.utc(2026, 11, 8),
+    room: room,
+  );
 
   ThreadUnread? threadOf(ThreadUnreadStore store) =>
-      store.threadsOf(roomId).where((t) => t.rootEventId == rootId).firstOrNull;
+      store.threadsOf(room).where((t) => t.rootEventId == rootId).firstOrNull;
 
   group('listeners are told only about real changes', () {
     test('the same counters received twice notify once', () async {
@@ -160,7 +187,7 @@ void main() {
 
       // What parseSyncUnreadThreadNotifications returns for a room whose
       // update carries `unread_notifications` only.
-      store.apply({roomId: {}});
+      store.apply(sync({roomId: {}}));
       await pumpEventQueue();
 
       expect(notifications, 0);
@@ -202,30 +229,50 @@ void main() {
       () async {
         final before = ThreadUnreadStore(client: clientNamed('account-a'));
         before.apply(counts(3, highlights: 1));
-        before.markFollowed(roomId, rootId);
+        before.markFollowed(thread);
         await pumpEventQueue();
 
         final after = ThreadUnreadStore(client: clientNamed('account-a'));
         await after.restore();
 
-        final thread = threadOf(after);
-        expect(thread, isNotNull);
-        expect(thread!.notificationCount, 3);
-        expect(thread.highlightCount, 1);
-        expect(thread.followed, isTrue);
+        final restored = threadOf(after);
+        expect(restored, isNotNull);
+        expect(restored!.notificationCount, 3);
+        expect(restored.highlightCount, 1);
+        expect(restored.followed, isTrue);
       },
     );
 
     test('another account sees none of them', () async {
       final accountA = ThreadUnreadStore(client: clientNamed('account-a'));
       accountA.apply(counts(3, highlights: 1));
-      accountA.markFollowed(roomId, rootId);
+      accountA.markFollowed(thread);
       await pumpEventQueue();
 
       final accountB = ThreadUnreadStore(client: clientNamed('account-b'));
       await accountB.restore();
 
-      expect(accountB.threadsOf(roomId), isEmpty);
+      expect(accountB.threadsOf(room), isEmpty);
+    });
+
+    test('what the app saved before the typed store is found again', () async {
+      // Written by hand in the format of the earlier releases.
+      SharedPreferences.setMockInitialValues({
+        'thread_unread_account-a':
+            '{"counts":{"$roomId":{"$rootId":[3,1]}},'
+            '"followed":["$roomId|$rootId"],'
+            '"replies":{"$roomId":["\$reply1"]}}',
+      });
+      final store = ThreadUnreadStore(client: clientNamed('account-a'));
+
+      await store.restore();
+
+      final restored = threadOf(store);
+      expect(restored?.notificationCount, 3);
+      expect(restored?.highlightCount, 1);
+      expect(restored?.followed, isTrue);
+      expect(store.badgeOf(room), 3);
+      expect(store.knownThreadReplyIds(room), {r'$reply1'});
     });
   });
 
@@ -233,7 +280,7 @@ void main() {
     test('a thread the user wrote in stays followed after a restart, even '
         'when the root still says not participated', () async {
       final before = ThreadUnreadStore(client: clientNamed('account-a'));
-      before.markFollowed(roomId, rootId);
+      before.markFollowed(thread);
       before.apply(counts(1));
       await pumpEventQueue();
 
@@ -253,10 +300,13 @@ void main() {
       // counters of its sync land.
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
-      store.markFollowed(roomId, rootId);
+      store.markFollowed(thread);
 
-      expect(store.isFollowed(roomId, rootId), isTrue);
-      expect(store.isFollowed(roomId, r'$other_root'), isFalse);
+      expect(store.isFollowed(thread), isTrue);
+      expect(
+        store.isFollowed(const ThreadRef(roomId, r'$other_root')),
+        isFalse,
+      );
     });
 
     test('a thread found not followed stays so on new replies, until the '
@@ -273,7 +323,7 @@ void main() {
       await pumpEventQueue();
       expect(threadOf(store)?.followed, isFalse);
 
-      store.markFollowed(roomId, rootId);
+      store.markFollowed(thread);
 
       expect(threadOf(store)?.followed, isTrue);
     });
@@ -397,7 +447,7 @@ void main() {
       await pumpEventQueue();
       verify(client.getOneRoomEvent(roomId, rootId)).called(1);
 
-      store.markFollowed(roomId, rootId);
+      store.markFollowed(thread);
       store.apply(counts(2));
       await pumpEventQueue();
 
@@ -512,12 +562,14 @@ void main() {
       }
       final store = ThreadUnreadStore(client: client);
 
-      store.apply({
-        roomId: {
-          for (final root in roots)
-            root: (notificationCount: 5, highlightCount: 0),
-        },
-      });
+      store.apply(
+        sync({
+          roomId: {
+            for (final root in roots)
+              root: (notificationCount: 5, highlightCount: 0),
+          },
+        }),
+      );
       await pumpEventQueue();
       expect(inFlight, greaterThan(0), reason: 'the lookups started');
       expect(maxInFlight, lessThanOrEqualTo(3));
@@ -531,7 +583,7 @@ void main() {
 
       // Every thread looked up, each with one server request.
       expect(serverCalls, {for (final root in roots) root: 1});
-      expect(store.threadsOf(roomId).where((t) => t.followed), isEmpty);
+      expect(store.threadsOf(room).where((t) => t.followed), isEmpty);
     });
   });
 
@@ -543,45 +595,45 @@ void main() {
     test('a remembered reply is known for its room only', () {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
-      store.rememberThreadReply(roomId, replyId);
+      store.rememberThreadReply(replyIn(room, replyId));
 
-      expect(store.knownThreadReplyIds(roomId), contains(replyId));
-      expect(store.knownThreadReplyIds('!other:example.com'), isEmpty);
+      expect(store.knownThreadReplyIds(room), contains(replyId));
+      expect(store.knownThreadReplyIds(_roomOf('!other:example.com')), isEmpty);
     });
 
     test('are found again after a restart by the same account', () async {
       final before = ThreadUnreadStore(client: clientNamed('account-a'));
-      before.rememberThreadReply(roomId, replyId);
+      before.rememberThreadReply(replyIn(room, replyId));
       await pumpEventQueue();
 
       final after = ThreadUnreadStore(client: clientNamed('account-a'));
       await after.restore();
 
-      expect(after.knownThreadReplyIds(roomId), contains(replyId));
+      expect(after.knownThreadReplyIds(room), contains(replyId));
     });
 
     test('another account does not see them', () async {
       final accountA = ThreadUnreadStore(client: clientNamed('account-a'));
-      accountA.rememberThreadReply(roomId, replyId);
+      accountA.rememberThreadReply(replyIn(room, replyId));
       await pumpEventQueue();
 
       final accountB = ThreadUnreadStore(client: clientNamed('account-b'));
       await accountB.restore();
 
-      expect(accountB.knownThreadReplyIds(roomId), isEmpty);
+      expect(accountB.knownThreadReplyIds(room), isEmpty);
     });
 
     test('are forgotten at logout', () async {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
-      store.rememberThreadReply(roomId, replyId);
+      store.rememberThreadReply(replyIn(room, replyId));
       await pumpEventQueue();
 
       await store.clear();
       final next = ThreadUnreadStore(client: clientNamed('account-a'));
       await next.restore();
 
-      expect(store.knownThreadReplyIds(roomId), isEmpty);
-      expect(next.knownThreadReplyIds(roomId), isEmpty);
+      expect(store.knownThreadReplyIds(room), isEmpty);
+      expect(next.knownThreadReplyIds(room), isEmpty);
     });
 
     test('are bounded: the oldest go first, the newest stay', () async {
@@ -590,11 +642,11 @@ void main() {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
       for (var i = 0; i < remembered; i++) {
-        store.rememberThreadReply(roomId, '\$reply$i');
+        store.rememberThreadReply(replyIn(room, '\$reply$i'));
       }
       await pumpEventQueue();
 
-      final known = store.knownThreadReplyIds(roomId);
+      final known = store.knownThreadReplyIds(room);
       expect(known.length, lessThan(remembered));
       expect(known, contains('\$reply${remembered - 1}'));
       expect(known, isNot(contains(r'$reply0')));
@@ -607,22 +659,22 @@ void main() {
         'user', () async {
       final previous = ThreadUnreadStore(client: clientNamed('account-a'));
       previous.apply(counts(3, highlights: 1));
-      previous.markFollowed(roomId, rootId);
+      previous.markFollowed(thread);
       await pumpEventQueue();
 
       await previous.clear();
 
-      expect(previous.threadsOf(roomId), isEmpty);
-      expect(previous.badgeOf(roomId), 0);
+      expect(previous.threadsOf(room), isEmpty);
+      expect(previous.badgeOf(room), 0);
       final next = ThreadUnreadStore(client: clientNamed('account-a'));
       await next.restore();
-      expect(next.threadsOf(roomId), isEmpty);
+      expect(next.threadsOf(room), isEmpty);
     });
 
     test('a thread followed by the previous user is not followed by the '
         'next one', () async {
       final previous = ThreadUnreadStore(client: clientNamed('account-a'));
-      previous.markFollowed(roomId, rootId);
+      previous.markFollowed(thread);
       await pumpEventQueue();
       await previous.clear();
 
@@ -632,14 +684,14 @@ void main() {
       await pumpEventQueue();
 
       expect(threadOf(next)?.followed, isFalse);
-      expect(next.badgeOf(roomId), 0);
+      expect(next.badgeOf(room), 0);
     });
 
     test('a save still running when the user logs out does not bring the '
         'threads back', () async {
       final previous = ThreadUnreadStore(client: clientNamed('account-a'));
       previous.apply(counts(3));
-      previous.markFollowed(roomId, rootId);
+      previous.markFollowed(thread);
       // No pause: both saves are still in flight.
       await previous.clear();
       await pumpEventQueue();
@@ -647,7 +699,7 @@ void main() {
       final next = ThreadUnreadStore(client: clientNamed('account-a'));
       await next.restore();
 
-      expect(next.threadsOf(roomId), isEmpty);
+      expect(next.threadsOf(room), isEmpty);
     });
   });
 
@@ -656,13 +708,15 @@ void main() {
 
     ThreadUnreadStore storeWithTwoRooms() {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
-      store.apply({
-        roomId: {rootId: (notificationCount: 3, highlightCount: 1)},
-        otherRoomId: {
-          r'$other_root': (notificationCount: 2, highlightCount: 2),
-        },
-      });
-      store.markFollowed(roomId, rootId);
+      store.apply(
+        sync({
+          roomId: {rootId: (notificationCount: 3, highlightCount: 1)},
+          otherRoomId: {
+            r'$other_root': (notificationCount: 2, highlightCount: 2),
+          },
+        }),
+      );
+      store.markFollowed(thread);
       return store;
     }
 
@@ -670,32 +724,32 @@ void main() {
       final store = storeWithTwoRooms();
       await pumpEventQueue();
 
-      store.apply(const {}, leftRoomIds: const [roomId]);
+      store.apply(sync(const {}, left: const [roomId]));
       await pumpEventQueue();
 
-      expect(store.threadsOf(roomId), isEmpty);
-      expect(store.badgeOf(roomId), 0);
-      expect(store.threadsOf(otherRoomId), hasLength(1));
-      expect(store.badgeOf(otherRoomId), 2);
+      expect(store.threadsOf(room), isEmpty);
+      expect(store.badgeOf(room), 0);
+      expect(store.threadsOf(_roomOf(otherRoomId)), hasLength(1));
+      expect(store.badgeOf(_roomOf(otherRoomId)), 2);
     });
 
     test('does not come back after a restart', () async {
       final store = storeWithTwoRooms();
       await pumpEventQueue();
-      store.apply(const {}, leftRoomIds: const [roomId]);
+      store.apply(sync(const {}, left: const [roomId]));
       await pumpEventQueue();
 
       final restarted = ThreadUnreadStore(client: clientNamed('account-a'));
       await restarted.restore();
 
-      expect(restarted.threadsOf(roomId), isEmpty);
-      expect(restarted.threadsOf(otherRoomId), hasLength(1));
+      expect(restarted.threadsOf(room), isEmpty);
+      expect(restarted.threadsOf(_roomOf(otherRoomId)), hasLength(1));
     });
 
     test('rejoined later, its threads are no longer followed', () async {
       final store = storeWithTwoRooms();
       await pumpEventQueue();
-      store.apply(const {}, leftRoomIds: const [roomId]);
+      store.apply(sync(const {}, left: const [roomId]));
       await pumpEventQueue();
 
       store.apply(counts(1));
@@ -712,13 +766,15 @@ void main() {
 
     ThreadUnreadStore storeWithTwoThreads() {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
-      store.apply({
-        roomId: {
-          rootId: (notificationCount: 3, highlightCount: 1),
-          quietRootId: (notificationCount: 5, highlightCount: 2),
-        },
-      });
-      store.markFollowed(roomId, rootId);
+      store.apply(
+        sync({
+          roomId: {
+            rootId: (notificationCount: 3, highlightCount: 1),
+            quietRootId: (notificationCount: 5, highlightCount: 2),
+          },
+        }),
+      );
+      store.markFollowed(thread);
       return store;
     }
 
@@ -727,36 +783,38 @@ void main() {
       final store = storeWithTwoThreads();
       await pumpEventQueue();
 
-      expect(store.badgeOf(roomId), 3 + 2);
+      expect(store.badgeOf(room), 3 + 2);
     });
 
     test('follows the user when they start following a thread', () async {
       final store = storeWithTwoThreads();
       await pumpEventQueue();
 
-      store.markFollowed(roomId, quietRootId);
+      store.markFollowed(const ThreadRef(roomId, quietRootId));
 
-      expect(store.badgeOf(roomId), 3 + 5);
+      expect(store.badgeOf(room), 3 + 5);
     });
 
     test('follows the new counters of a sync', () async {
       final store = storeWithTwoThreads();
       await pumpEventQueue();
 
-      store.apply({
-        roomId: {
-          rootId: (notificationCount: 1, highlightCount: 0),
-          quietRootId: (notificationCount: 6, highlightCount: 4),
-        },
-      });
+      store.apply(
+        sync({
+          roomId: {
+            rootId: (notificationCount: 1, highlightCount: 0),
+            quietRootId: (notificationCount: 6, highlightCount: 4),
+          },
+        }),
+      );
 
-      expect(store.badgeOf(roomId), 1 + 4);
+      expect(store.badgeOf(room), 1 + 4);
     });
 
     test('is zero for a room without thread counters', () {
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
-      expect(store.badgeOf('!unknown:example.com'), 0);
+      expect(store.badgeOf(_roomOf('!unknown:example.com')), 0);
     });
   });
 
@@ -778,7 +836,7 @@ void main() {
         final store = ThreadUnreadStore(client: clientNamed('account-a'));
 
         for (var i = 0; i < 300; i++) {
-          store.rememberThreadReply(roomId, '\$reply$i');
+          store.rememberThreadReply(replyIn(room, '\$reply$i'));
           async.elapse(const Duration(milliseconds: 1));
         }
         async.elapse(const Duration(seconds: 10));
@@ -787,8 +845,8 @@ void main() {
         final after = ThreadUnreadStore(client: clientNamed('account-a'));
         after.restore();
         async.flushMicrotasks();
-        expect(after.knownThreadReplyIds(roomId), contains(r'$reply0'));
-        expect(after.knownThreadReplyIds(roomId), contains(r'$reply299'));
+        expect(after.knownThreadReplyIds(room), contains(r'$reply0'));
+        expect(after.knownThreadReplyIds(room), contains(r'$reply299'));
       });
     });
 
@@ -815,7 +873,7 @@ void main() {
       fakeAsync((async) {
         final store = ThreadUnreadStore(client: clientNamed('account-a'));
         for (var i = 0; i < 50; i++) {
-          store.rememberThreadReply(roomId, '\$reply$i');
+          store.rememberThreadReply(replyIn(room, '\$reply$i'));
           store.apply(counts(i + 1));
           async.elapse(const Duration(milliseconds: 1));
         }
@@ -826,12 +884,34 @@ void main() {
         final next = ThreadUnreadStore(client: clientNamed('account-a'));
         next.restore();
         async.flushMicrotasks();
-        expect(next.knownThreadReplyIds(roomId), isEmpty);
-        expect(next.threadsOf(roomId), isEmpty);
+        expect(next.knownThreadReplyIds(room), isEmpty);
+        expect(next.threadsOf(room), isEmpty);
+      });
+    });
+
+    test('a room left during a burst is saved at once, without waiting for '
+        'the next save', () {
+      fakeAsync((async) {
+        final store = ThreadUnreadStore(client: clientNamed('account-a'));
+        store.apply(counts(3));
+        async.elapse(const Duration(milliseconds: 1));
+        expect(prefs.writes, 1);
+
+        store.apply(sync(const {}, left: const [roomId]));
+        async.flushMicrotasks();
+
+        expect(prefs.writes, 2);
+        final next = ThreadUnreadStore(client: clientNamed('account-a'));
+        next.restore();
+        async.flushMicrotasks();
+        expect(next.threadsOf(room), isEmpty);
       });
     });
   });
 }
+
+/// The store reads only the id of a room.
+Room _roomOf(String id) => Room(id: id, client: MockClient());
 
 /// The device database: answers the roots it holds ([answer] returns null
 /// for the others) and counts the reads per event id.

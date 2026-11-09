@@ -1,5 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -49,10 +50,7 @@ void main() {
     );
     await pumpEventQueue();
 
-    expect(
-      client.threadUnread.knownThreadReplyIds('!room:example.org'),
-      contains(r'$reply'),
-    );
+    expect(client.threadUnread.knownThreadReplyIds(room), contains(r'$reply'));
   });
 
   /// THR-M-01 and THR-M-07: the local echo of an own reply carries the transaction id
@@ -100,10 +98,13 @@ void main() {
       await pumpEventQueue();
 
       expect(
-        client.threadUnread.knownThreadReplyIds(roomId),
+        client.threadUnread.knownThreadReplyIds(room),
         isNot(contains(txid)),
       );
-      expect(client.threadUnread.isFollowed(roomId, rootId), isFalse);
+      expect(
+        client.threadUnread.isFollowed(const ThreadRef(roomId, rootId)),
+        isFalse,
+      );
     });
 
     test('its local echo, failed to send, is neither remembered nor makes '
@@ -117,10 +118,13 @@ void main() {
       await pumpEventQueue();
 
       expect(
-        client.threadUnread.knownThreadReplyIds(roomId),
+        client.threadUnread.knownThreadReplyIds(room),
         isNot(contains(txid)),
       );
-      expect(client.threadUnread.isFollowed(roomId, rootId), isFalse);
+      expect(
+        client.threadUnread.isFollowed(const ThreadRef(roomId, rootId)),
+        isFalse,
+      );
     });
 
     test('its synced echo is remembered by its real id and makes the thread '
@@ -136,8 +140,11 @@ void main() {
       );
       await pumpEventQueue();
 
-      expect(client.threadUnread.knownThreadReplyIds(roomId), {r'$my_reply'});
-      expect(client.threadUnread.isFollowed(roomId, rootId), isTrue);
+      expect(client.threadUnread.knownThreadReplyIds(room), {r'$my_reply'});
+      expect(
+        client.threadUnread.isFollowed(const ThreadRef(roomId, rootId)),
+        isTrue,
+      );
     });
   });
 
@@ -169,7 +176,7 @@ void main() {
     await pumpEventQueue();
 
     expect(
-      client.threadUnread.knownThreadReplyIds('!room:example.org'),
+      client.threadUnread.knownThreadReplyIds(room),
       contains(r'$old_reply'),
     );
   });

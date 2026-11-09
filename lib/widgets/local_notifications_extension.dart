@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
@@ -57,7 +58,8 @@ extension LocalNotificationsExtension on MatrixState {
       if (!ThreadRules.shouldNotifyThreadEvent(
         event,
         followed:
-            client.threadUnread?.isFollowed(roomId, threadRootId) ?? false,
+            client.threadUnread?.isFollowed(ThreadRef(roomId, threadRootId)) ??
+            false,
         pushActions: client.pushruleEvaluator.match(event),
         rootSenderId: (await room.getEventById(threadRootId))?.senderId,
         activeThread: activeThread,

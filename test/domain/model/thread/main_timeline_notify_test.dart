@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../usecase/room/send_text_message_interactor_test.mocks.dart';
@@ -39,12 +41,17 @@ void main() {
   /// mentioning the user.
   void unreadThread({int replies = 2, int mentions = 0}) {
     client.threadUnread
-      ..markFollowed(roomId, rootId)
-      ..apply({
-        roomId: {
-          rootId: (notificationCount: replies, highlightCount: mentions),
-        },
-      });
+      ..markFollowed(const ThreadRef(roomId, rootId))
+      ..apply(
+        SyncThreadUpdate(
+          counts: {
+            roomId: {
+              rootId: (notificationCount: replies, highlightCount: mentions),
+            },
+          },
+          leftRoomIds: const [],
+        ),
+      );
   }
 
   test('a room set to mentions only, a mention unread in a thread: a plain '

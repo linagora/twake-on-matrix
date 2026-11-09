@@ -8,8 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
+
+/// Marks the generation of the store: [ThreadUnreadStore.clear] starts a new
+/// one, so a lookup started before it must not bring a follow back.
+class _LookupEpoch {}
 
 /// Unread counters of the threads: the SDK keeps only the counters of the
 /// room. Filled from the raw sync response, and saved per account so a cold
@@ -20,19 +25,19 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Client _client;
 
   final Map<String, Map<String, ThreadCounts>> _counts = {};
-  final Set<String> _followed = {};
-  final Set<String> _resolving = {};
+  final Set<ThreadRef> _followed = {};
+  final Set<ThreadRef> _resolving = {};
 
   /// Threads the server answered "not participated" for: asked once, the
   /// answer stands until the user writes in the thread (markFollowed).
-  final Set<String> _notFollowed = {};
-  final Map<String, DateTime> _activity = {};
+  final Set<ThreadRef> _notFollowed = {};
+  final Map<ThreadRef, DateTime> _activity = {};
   final Map<String, int> _badges = {};
 
   /// Ids of the thread replies seen live, per room: once deleted, a reply
   /// loses its `m.relates_to` and only this tells it was in a thread.
   final Map<String, Set<String>> _threadReplyIds = {};
-  final Queue<(String, String)> _threadReplyOrder = Queue();
+  final Queue<ReplyRef> _threadReplyOrder = Queue();
 
   // ponytail: a count cap for the account, not a per-room one.
   static const int _maxThreadReplyIds = 4000;
@@ -42,92 +47,88 @@ class ThreadUnreadStore extends ChangeNotifier {
   int _lookupsInFlight = 0;
   final Queue<Completer<void>> _lookupWaiters = Queue();
 
-  /// Bumped by [clear]: a lookup started before it must not bring a follow back.
-  int _epoch = 0;
+  /// Replaced by [clear]: a lookup started before it is stale.
+  _LookupEpoch _epoch = _LookupEpoch();
 
   String get _prefsKey => 'thread_unread_${_client.clientName}';
 
-  /// [leftRoomIds]: rooms the sync says the user left; their counters and
-  /// follow state go, so a later join starts clean.
-  void apply(
-    Map<String, Map<String, ThreadCounts>> roomCounts, {
-    Iterable<String> leftRoomIds = const [],
-  }) {
+  /// Rooms the sync says the user left lose their counters and follow state,
+  /// so a later join starts clean.
+  void apply(SyncThreadUpdate update) {
     var changed = false;
-    for (final roomId in leftRoomIds) {
-      changed |= _forgetRoom(roomId);
+    for (final room in update.leftRooms) {
+      changed |= _forgetRoom(room);
     }
-    for (final entry in roomCounts.entries) {
-      changed |= _applyRoomCounts(entry.key, entry.value);
+    for (final room in update.rooms) {
+      changed |= _applyRoomCounts(room);
     }
     if (!changed) return;
     notifyListeners();
-    _persist(immediately: leftRoomIds.isNotEmpty);
+    if (update.hasLeft) {
+      _persistNow();
+    } else {
+      _persist();
+    }
   }
 
   /// True when the room held counters or follows.
-  bool _forgetRoom(String roomId) {
-    final hadCounts = _counts.remove(roomId) != null;
-    final prefix = '$roomId|';
+  bool _forgetRoom(RoomId room) {
+    final hadCounts = _counts.remove(room.value) != null;
     final hadFollow = _followed.length;
-    _followed.removeWhere((key) => key.startsWith(prefix));
-    _notFollowed.removeWhere((key) => key.startsWith(prefix));
-    _activity.removeWhere((key, _) => key.startsWith(prefix));
-    _badges.remove(roomId);
-    _threadReplyIds.remove(roomId);
-    _threadReplyOrder.removeWhere((e) => e.$1 == roomId);
+    _followed.removeWhere(room.owns);
+    _notFollowed.removeWhere(room.owns);
+    _activity.removeWhere((thread, _) => room.owns(thread));
+    _badges.remove(room.value);
+    _threadReplyIds.remove(room.value);
+    _threadReplyOrder.removeWhere(room.ownsReply);
     return hadCounts || hadFollow != _followed.length;
   }
 
   /// True when the counters of the room changed.
-  bool _applyRoomCounts(String roomId, Map<String, ThreadCounts> counts) {
-    final before = _counts[roomId] ?? const <String, ThreadCounts>{};
-    for (final thread in counts.entries) {
+  bool _applyRoomCounts(RoomCounts room) {
+    final before = _counts[room.id.value] ?? const <String, ThreadCounts>{};
+    for (final thread in room.threads.entries) {
       final previous = before[thread.key]?.notificationCount ?? 0;
       if (thread.value.notificationCount > previous) {
-        final ref = ThreadRef(roomId, thread.key);
-        _activity[ref.key] = DateTime.now();
+        final ref = ThreadRef(room.id.value, thread.key);
+        _activity[ref] = DateTime.now();
         _resolveFollowed(ref);
       }
     }
-    if (mapEquals(before, counts)) return false;
-    _counts[roomId] = counts;
-    _refreshBadge(roomId);
+    if (mapEquals(before, room.threads)) return false;
+    _counts[room.id.value] = room.threads;
+    _refreshBadge(room.id);
     return true;
   }
 
   /// The user wrote in this thread: it is followed from now on.
-  void markFollowed(String roomId, String rootId) =>
-      _markFollowed(ThreadRef(roomId, rootId));
-
-  void _markFollowed(ThreadRef thread) {
-    if (!_followed.add(thread.key)) return;
-    _refreshBadge(thread.roomId);
+  void markFollowed(ThreadRef thread) {
+    if (!_followed.add(thread)) return;
+    _refreshBadge(RoomId(thread.roomId));
     notifyListeners();
     _persist();
   }
 
-  bool isFollowed(String roomId, String rootId) =>
-      _followed.contains(ThreadRef(roomId, rootId).key);
+  bool isFollowed(ThreadRef thread) => _followed.contains(thread);
 
   /// A thread reply of the live timeline (any sender); the oldest ids go
   /// when the account holds more than [_maxThreadReplyIds].
-  void rememberThreadReply(String roomId, String eventId) {
-    if (!_addThreadReplyId(roomId, eventId)) return;
+  void rememberThreadReply(Event reply) {
+    if (!_addThreadReplyId(ReplyRef(reply.room.id, reply.eventId))) return;
     while (_threadReplyOrder.length > _maxThreadReplyIds) {
       final oldest = _threadReplyOrder.removeFirst();
-      _threadReplyIds[oldest.$1]?.remove(oldest.$2);
+      _threadReplyIds[oldest.roomId]?.remove(oldest.eventId);
     }
     _persist();
   }
 
-  Set<String> knownThreadReplyIds(String roomId) =>
-      _threadReplyIds[roomId] ?? const {};
+  Set<String> knownThreadReplyIds(Room room) =>
+      _threadReplyIds[room.id] ?? const {};
 
-  bool _addThreadReplyId(String roomId, String eventId) {
-    final ids = _threadReplyIds.putIfAbsent(roomId, () => {});
-    if (!ids.add(eventId)) return false;
-    _threadReplyOrder.add((roomId, eventId));
+  bool _addThreadReplyId(ReplyRef reply) {
+    final ids = _threadReplyIds.putIfAbsent(reply.roomId, () => {});
+    if (!ids.add(reply.eventId)) return false;
+    _threadReplyOrder.add(reply);
     return true;
   }
 
@@ -137,38 +138,30 @@ class ThreadUnreadStore extends ChangeNotifier {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_prefsKey);
       if (raw == null) return;
-      _restoreFrom(jsonDecode(raw) as Map<String, Object?>);
+      _restoreFrom(
+        ThreadUnreadSnapshot.fromJson(jsonDecode(raw) as Map<String, Object?>),
+      );
       notifyListeners();
     } catch (e, s) {
       Logs().w('Unable to restore the thread counters', e, s);
     }
   }
 
-  void _restoreFrom(Map<String, Object?> json) {
-    _restoreCounts(json['counts'] as Map? ?? const {});
-    _followed.addAll((json['followed'] as List? ?? const []).cast<String>());
-    _restoreReplyIds(json['replies'] as Map? ?? const {});
-    _counts.keys.toList().forEach(_refreshBadge);
-  }
-
-  void _restoreCounts(Map saved) {
-    for (final room in saved.entries) {
-      _counts.putIfAbsent(room.key as String, () => _decodeThreads(room.value));
+  void _restoreFrom(ThreadUnreadSnapshot saved) {
+    for (final room in saved.counts.entries) {
+      _counts.putIfAbsent(room.key, () => room.value);
+    }
+    _followed.addAll(saved.followed);
+    _restoreReplyIds(saved);
+    for (final roomId in _counts.keys.toList()) {
+      _refreshBadge(RoomId(roomId));
     }
   }
 
-  Map<String, ThreadCounts> _decodeThreads(Object? saved) => {
-    for (final thread in (saved as Map).entries)
-      thread.key as String: (
-        notificationCount: (thread.value as List)[0] as int,
-        highlightCount: (thread.value as List)[1] as int,
-      ),
-  };
-
-  void _restoreReplyIds(Map saved) {
-    for (final room in saved.entries) {
-      for (final id in (room.value as List).cast<String>()) {
-        _addThreadReplyId(room.key as String, id);
+  void _restoreReplyIds(ThreadUnreadSnapshot saved) {
+    for (final room in saved.replies.entries) {
+      for (final id in room.value) {
+        _addThreadReplyId(ReplyRef(room.key, id));
       }
     }
   }
@@ -176,7 +169,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// Logout: forgets everything, in memory and saved, also when a save is
   /// still running (it runs first, then the key goes).
   Future<void> clear() async {
-    _epoch++;
+    _epoch = _LookupEpoch();
     _persistTimer?.cancel();
     _persistTimer = null;
     _dirty = false;
@@ -203,16 +196,8 @@ class ThreadUnreadStore extends ChangeNotifier {
   static const Duration _persistWindow = Duration(seconds: 1);
 
   /// Saves in a zero-delay task (a burst of calls in a row is one save),
-  /// then at most once per [_persistWindow]. Leaving a room is rare and must
-  /// not wait: [immediately] saves now.
-  void _persist({bool immediately = false}) {
-    if (immediately) {
-      _persistTimer?.cancel();
-      _persistTimer = null;
-      _dirty = false;
-      _save();
-      return;
-    }
+  /// then at most once per [_persistWindow].
+  void _persist() {
     _dirty = true;
     if (_persistTimer != null) return;
     _persistTimer = Timer(Duration.zero, () {
@@ -225,57 +210,57 @@ class ThreadUnreadStore extends ChangeNotifier {
     });
   }
 
+  /// Leaving a room is rare and must not wait: saves now.
+  void _persistNow() {
+    _persistTimer?.cancel();
+    _persistTimer = null;
+    _dirty = false;
+    _save();
+  }
+
   Future<void> _save() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_prefsKey, jsonEncode(_toJson()));
+      await prefs.setString(_prefsKey, jsonEncode(_snapshot.toJson()));
     } catch (e, s) {
       Logs().w('Unable to save the thread counters', e, s);
     }
   }
 
-  Map<String, Object?> _toJson() => {
-    'counts': {
-      for (final room in _counts.entries)
-        room.key: {
-          for (final thread in room.value.entries)
-            thread.key: [
-              thread.value.notificationCount,
-              thread.value.highlightCount,
-            ],
-        },
-    },
-    'followed': _followed.toList(),
-    'replies': {
-      for (final room in _threadReplyIds.entries)
-        if (room.value.isNotEmpty) room.key: room.value.toList(),
-    },
-  };
+  ThreadUnreadSnapshot get _snapshot => ThreadUnreadSnapshot(
+    counts: _counts,
+    followed: _followed,
+    replies: _threadReplyIds,
+  );
 
-  void _refreshBadge(String roomId) {
-    _badges[roomId] = roomUnreadBadge(
+  void _refreshBadge(RoomId room) {
+    _badges[room.value] = roomUnreadBadge(
       mainNotificationCount: 0,
-      threads: threadsOf(roomId),
+      threads: _threadsIn(room),
     );
   }
 
   /// Badge of the threads of the room (without its main timeline).
-  int badgeOf(String roomId) => _badges[roomId] ?? 0;
+  int badgeOf(Room room) => _badges[room.id] ?? 0;
 
-  int unreadCount(String roomId, String rootId) =>
-      _counts[roomId]?[rootId]?.notificationCount ?? 0;
+  int unreadCount(ThreadRef thread) =>
+      _counts[thread.roomId]?[thread.rootEventId]?.notificationCount ?? 0;
 
-  List<ThreadUnread> threadsOf(String roomId) => [
+  List<ThreadUnread> threadsOf(Room room) => _threadsIn(RoomId(room.id));
+
+  List<ThreadUnread> _threadsIn(RoomId room) => [
     for (final entry
-        in (_counts[roomId] ?? const <String, ThreadCounts>{}).entries)
-      ThreadUnread(
-        rootEventId: entry.key,
-        notificationCount: entry.value.notificationCount,
-        highlightCount: entry.value.highlightCount,
-        followed: _followed.contains(ThreadRef(roomId, entry.key).key),
-        lastActivity: _activity[ThreadRef(roomId, entry.key).key],
-      ),
+        in (_counts[room.value] ?? const <String, ThreadCounts>{}).entries)
+      _unreadOf(ThreadRef(room.value, entry.key), entry.value),
   ];
+
+  ThreadUnread _unreadOf(ThreadRef thread, ThreadCounts counts) => ThreadUnread(
+    rootEventId: thread.rootEventId,
+    notificationCount: counts.notificationCount,
+    highlightCount: counts.highlightCount,
+    followed: _followed.contains(thread),
+    lastActivity: _activity[thread],
+  );
 
   /// Participation as the server tells it: the user wrote the root or
   /// replied (P1; the explicit follow choice comes with P2). The root stored
@@ -293,33 +278,35 @@ class ThreadUnreadStore extends ChangeNotifier {
       Logs().w('Unable to tell if the thread is followed', e, s);
     } finally {
       _releaseLookupSlot();
-      _resolving.remove(thread.key);
+      _resolving.remove(thread);
     }
   }
 
   /// True when no answer is known and no lookup runs for the thread.
   bool _claimLookup(ThreadRef thread) =>
-      !_isSettled(thread) && _resolving.add(thread.key);
+      !_isSettled(thread) && _resolving.add(thread);
 
   bool _isSettled(ThreadRef thread) =>
-      _followed.contains(thread.key) || _notFollowed.contains(thread.key);
+      _followed.contains(thread) || _notFollowed.contains(thread);
 
-  Future<void> _lookupAndRecord(ThreadRef thread, int epoch) async {
-    if (epoch != _epoch) return;
+  bool _isStale(_LookupEpoch epoch) => !identical(epoch, _epoch);
+
+  Future<void> _lookupAndRecord(ThreadRef thread, _LookupEpoch epoch) async {
+    if (_isStale(epoch)) return;
     final follow = await _lookupFollow(thread, epoch);
-    if (follow == null || epoch != _epoch) return;
+    if (follow == null || _isStale(epoch)) return;
     if (follow) {
-      _markFollowed(thread);
+      markFollowed(thread);
     } else {
-      _notFollowed.add(thread.key);
+      _notFollowed.add(thread);
     }
   }
 
   /// Local store first (no network), then at most one server request; null
   /// when the account was cleared meanwhile.
-  Future<bool?> _lookupFollow(ThreadRef thread, int epoch) async {
+  Future<bool?> _lookupFollow(ThreadRef thread, _LookupEpoch epoch) async {
     final stored = await _storedRoot(thread);
-    if (epoch != _epoch) return null;
+    if (_isStale(epoch)) return null;
     if (stored != null && _isParticipant(stored)) return true;
     final fresh = await _client.getOneRoomEvent(
       thread.roomId,
@@ -335,7 +322,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   }
 
   bool _isParticipant(MatrixEvent event) =>
-      event.senderId == _client.userID || _participated(event.unsigned) == true;
+      event.senderId == _client.userID || _participated(event) == true;
 
   Future<void> _acquireLookupSlot() {
     if (_lookupsInFlight < _maxLookupsInFlight) {
@@ -356,8 +343,8 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
   }
 
-  bool? _participated(Map<String, Object?>? unsigned) =>
-      ((unsigned?['m.relations'] as Map?)?['m.thread']
+  bool? _participated(MatrixEvent event) =>
+      ((event.unsigned?['m.relations'] as Map?)?['m.thread']
               as Map?)?['current_user_participated']
           as bool?;
 }
@@ -375,7 +362,7 @@ extension ThreadUnreadRoomExtension on Room {
   /// Room badge: main timeline, followed threads and mentions of any thread.
   int get unreadBadgeCount {
     final store = client.threadUnread;
-    return notificationCount + (store?.badgeOf(id) ?? 0);
+    return notificationCount + (store?.badgeOf(this) ?? 0);
   }
 }
 
@@ -391,7 +378,7 @@ extension RoomUnreadWithThreads on Room {
   int get highlightCountWithThreads {
     final store = client.threadUnread;
     return highlightCount +
-        (store?.threadsOf(id).fold<int>(0, (n, t) => n + t.highlightCount) ??
+        (store?.threadsOf(this).fold<int>(0, (n, t) => n + t.highlightCount) ??
             0);
   }
 }
@@ -437,7 +424,7 @@ extension MarkRoomAndThreadsRead on Room {
     final mainEvent = await _newestMainTimelineEvent();
     final store = client.threadUnread;
     final lastEventIdByThreadRootId = await _lastReplyOfUnreadThreads(
-      store?.threadsOf(id) ?? const <ThreadUnread>[],
+      store?.threadsOf(this) ?? const <ThreadUnread>[],
     );
     if (mainEvent != null) {
       await markRoomAndThreadsRead(

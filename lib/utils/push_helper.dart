@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -149,7 +150,9 @@ Future<void> _tryPushHelper(
       event,
       pushActions: client.pushruleEvaluator.match(event),
       followed:
-          client.threadUnread?.isFollowed(notification.roomId!, threadRootId) ??
+          client.threadUnread?.isFollowed(
+            ThreadRef(notification.roomId!, threadRootId),
+          ) ??
           false,
       rootSenderId: (await event.room.getEventById(threadRootId))?.senderId,
       activeThread: activeThread,

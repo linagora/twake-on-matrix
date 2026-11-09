@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
@@ -100,12 +102,17 @@ void _threadCounters(
   int notifications = 1,
   int highlights = 0,
 }) {
-  _client.threadUnread.apply({
-    _roomId: {
-      root: (notificationCount: notifications, highlightCount: highlights),
-    },
-  });
-  if (followed) _client.threadUnread.markFollowed(_roomId, root);
+  _client.threadUnread.apply(
+    SyncThreadUpdate(
+      counts: {
+        _roomId: {
+          root: (notificationCount: notifications, highlightCount: highlights),
+        },
+      },
+      leftRoomIds: const [],
+    ),
+  );
+  if (followed) _client.threadUnread.markFollowed(ThreadRef(_roomId, root));
 }
 
 Map<String, Object?> _threadRelation(String root) => {

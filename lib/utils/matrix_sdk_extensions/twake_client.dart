@@ -1,3 +1,5 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -97,7 +99,9 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
       final counts = _pendingThreadCounts[update];
       final left = update.rooms?.leave?.keys ?? const <String>[];
       if (counts != null || left.isNotEmpty) {
-        threadUnread.apply(counts ?? const {}, leftRoomIds: left);
+        threadUnread.apply(
+          SyncThreadUpdate(counts: counts ?? const {}, leftRoomIds: left),
+        );
       }
     });
     // Thread replies are remembered (they lose their relation once deleted);
@@ -107,9 +111,9 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     void onThreadEvent(Event event) {
       final rootId = event.threadRootId;
       if (rootId == null || !event.status.isSynced) return;
-      threadUnread.rememberThreadReply(event.room.id, event.eventId);
+      threadUnread.rememberThreadReply(event);
       if (event.senderId == userID) {
-        threadUnread.markFollowed(event.room.id, rootId);
+        threadUnread.markFollowed(ThreadRef(event.room.id, rootId));
       }
     }
 
