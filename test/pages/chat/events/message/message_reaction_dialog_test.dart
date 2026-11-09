@@ -71,7 +71,8 @@ void main() {
           themeContextMenu: (_) => const PullDownMenuItemTheme(),
           iconContextMenu: (_, _) => null,
           dialogSafeAreaKey: GlobalKey(),
-          onToggleEmojiReaction: (emoji, _) async {
+          onToggleEmojiReaction: (emoji, targetEvent) async {
+            expect(targetEvent, same(event));
             calls.add('toggle $emoji');
           },
         ),

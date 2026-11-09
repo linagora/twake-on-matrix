@@ -9,8 +9,9 @@ bool _isSameReaction(String emoji, String? reactionKey) =>
     emoji.replaceAll(_variationSelectors, '') ==
         reactionKey.replaceAll(_variationSelectors, '');
 
-String? _keyOf(Event reaction) =>
-    (reaction.content['m.relates_to'] as Map?)?['key'] as String?;
+String? _keyOf(Event reaction) => reaction.content
+    .tryGetMap<String, Object?>('m.relates_to')
+    ?.tryGet<String>('key');
 
 /// Toggles the current user's reaction on an event.
 ///

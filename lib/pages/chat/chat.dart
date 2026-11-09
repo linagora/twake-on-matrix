@@ -1478,7 +1478,8 @@ class ChatController extends ConsumerState<Chat>
   }) async {
     if (!mounted) return false;
     final sendingRoom = room!;
-    await handleStoreRecentReactions(emoji, emojiId: emojiId);
+    // Not awaited, so a second pick already sees this reaction's local echo.
+    unawaited(handleStoreRecentReactions(emoji, emojiId: emojiId));
     return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 

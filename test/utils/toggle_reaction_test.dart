@@ -143,6 +143,32 @@ void main() {
     expect(calls, ['send 🎉', 'redact 👍', 'redact 😂']);
   });
 
+  test('ignores the tap while one of my reactions is still sending', () async {
+    await run(
+      emoji: '🎉',
+      mine: [
+        reaction('👍'),
+        reaction('😂', status: EventStatus.sending),
+      ],
+    );
+    expect(calls, isEmpty);
+  });
+
+  test('changes the reaction when my other one has a malformed key', () async {
+    final malformed = MockEvent();
+    when(malformed.status).thenReturn(EventStatus.synced);
+    when(malformed.content).thenReturn({
+      'm.relates_to': {'key': 42},
+    });
+    when(malformed.redactEvent()).thenAnswer((_) async {
+      calls.add('redact malformed');
+      return r'$redaction';
+    });
+
+    await run(emoji: '🎉', mine: [malformed, reaction('👍')]);
+    expect(calls, ['send 🎉', 'redact malformed', 'redact 👍']);
+  });
+
   test('never redacts a reaction whose send failed', () async {
     await run(
       emoji: '🎉',
