@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
+import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 
 abstract class PublicRoomsRepository {
   /// The directory of the user's homeserver, one page at a time, up to
@@ -14,7 +15,16 @@ abstract class PublicRoomsRepository {
 
   /// Waits up to 30 seconds for the joined room to reach the sync;
   /// `isInSync` is false when it has not.
-  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias);
+  Future<({String roomId, bool isInSync})> join(
+    String roomIdOrAlias, {
+    List<String> via = const [],
+  });
 
-  Future<void> knock(String roomIdOrAlias);
+  Future<void> knock(String roomIdOrAlias, {List<String> via = const []});
+
+  /// From the room summary; a ban stored locally answers when it fails.
+  Future<PublicRoomPreview> getPreview(
+    String roomIdOrAlias, {
+    required List<String> via,
+  });
 }

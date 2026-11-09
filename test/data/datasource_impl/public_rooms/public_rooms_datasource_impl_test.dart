@@ -9,6 +9,7 @@ import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/data/datasource_impl/public_rooms/public_rooms_datasource_impl.dart';
 import 'package:twake_chat/domain/exception/public_rooms/public_rooms_exception.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
+import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 
 import 'public_rooms_datasource_impl_test.mocks.dart';
 
@@ -495,6 +496,14 @@ void main() {
       verify(mockClient.knockRoom('!a:hs')).called(1);
     });
 
+    test('knock_withServers_routesTheRequestThroughThem', () async {
+      // Act
+      await datasource.knock('!a:hs', via: const ['hs2']);
+
+      // Assert
+      verify(mockClient.knockRoom('!a:hs', via: ['hs2'])).called(1);
+    });
+
     test('knock_whenTheHomeserverRefuses_throwsKnockFailed', () async {
       // Arrange
       when(
@@ -517,5 +526,293 @@ void main() {
 
     // Assert
     await expectLater(result, throwsA(isA<PublicRoomsNoClientException>()));
+  });
+
+  group('getPreview', () {
+    const alias = '#general:hs';
+
+    GetRoomSummaryResponse$3 summary({
+      String? joinRule = 'public',
+      Membership? membership,
+    }) => GetRoomSummaryResponse$3(
+      roomId: '!general:hs',
+      name: 'General',
+      topic: 'Chat',
+      joinRule: joinRule,
+      guestCanJoin: false,
+      numJoinedMembers: 4,
+      worldReadable: false,
+      membership: membership,
+    );
+
+    void stubSummary(Object answer) {
+      final stub = when(mockClient.getRoomSummary(alias, via: anyNamed('via')));
+      if (answer is Exception) {
+        stub.thenThrow(answer);
+      } else {
+        stub.thenAnswer((_) async => answer as GetRoomSummaryResponse$3);
+      }
+    }
+
+    final notFound = MatrixException.fromJson({'errcode': 'M_NOT_FOUND'});
+
+    test('getPreview_whenTheSummaryAnswers_mapsTheRoom', () async {
+      // Arrange
+      stubSummary(summary(joinRule: 'knock'));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(
+        preview,
+        const PublicRoomPreview.found(
+          PublicRoom(
+            roomId: '!general:hs',
+            name: 'General',
+            topic: 'Chat',
+            memberCount: 4,
+            access: PublicRoomAccess.approval,
+            kind: PublicRoomKind.group,
+          ),
+        ),
+      );
+    });
+
+    test('getPreview_whenAJoinRequestIsPending_saysItIsRequested', () async {
+      // Arrange
+      stubSummary(summary(joinRule: 'knock', membership: Membership.knock));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, isA<PublicRoomPreviewFound>());
+      expect((preview as PublicRoomPreviewFound).isRequested, isTrue);
+    });
+
+    MockRoom syncedRoom(Membership membership) {
+      final room = MockRoom();
+      when(room.membership).thenReturn(membership);
+      when(mockClient.getRoomById('!general:hs')).thenReturn(room);
+      return room;
+    }
+
+    test('getPreview_whenAlreadyJoinedUnderAnotherAlias_saysJoined', () async {
+      // Arrange
+      syncedRoom(Membership.join);
+      stubSummary(summary(membership: Membership.join));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.joined('!general:hs'));
+    });
+
+    test('getPreview_whenInvited_saysJoined', () async {
+      // Arrange
+      syncedRoom(Membership.invite);
+      stubSummary(summary(membership: Membership.invite));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.joined('!general:hs'));
+      verifyNever(
+        mockClient.waitForRoomInSync(
+          any,
+          join: anyNamed('join'),
+          invite: anyNamed('invite'),
+        ),
+      );
+    });
+
+    test('getPreview_whenJoinedButNotInSyncYet_waitsForTheRoom', () async {
+      // Arrange
+      when(
+        mockClient.waitForRoomInSync('!general:hs', join: true, invite: false),
+      ).thenAnswer((_) async => SyncUpdate(nextBatch: 'n'));
+      stubSummary(summary(membership: Membership.join));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.joined('!general:hs'));
+      verify(
+        mockClient.waitForRoomInSync('!general:hs', join: true, invite: false),
+      ).called(1);
+    });
+
+    test('getPreview_whenTheJoinedRoomNeverReachesTheSync_saysUnavailable', () {
+      fakeAsync((async) {
+        // Arrange
+        when(
+          mockClient.waitForRoomInSync(
+            '!general:hs',
+            join: false,
+            invite: true,
+          ),
+        ).thenAnswer((_) => Completer<SyncUpdate>().future);
+        stubSummary(summary(membership: Membership.invite));
+        PublicRoomPreview? preview;
+
+        // Act
+        datasource
+            .getPreview(alias, via: const [])
+            .then((result) => preview = result);
+        async.elapse(const Duration(seconds: 31));
+
+        // Assert
+        expect(preview, const PublicRoomPreview.unavailable());
+      });
+    });
+
+    test(
+      'getPreview_whenTheSummaryFailsAndTheLocalRoomWasLeft_saysUnavailable',
+      () async {
+        // Arrange
+        final room = MockRoom();
+        when(
+          room.requestUser(
+            '@me:hs',
+            requestState: false,
+            requestProfile: false,
+          ),
+        ).thenAnswer(
+          (_) async => User('@me:hs', membership: 'leave', room: room),
+        );
+        when(mockClient.userID).thenReturn('@me:hs');
+        when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+        stubSummary(notFound);
+
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
+
+        // Assert
+        expect(preview, const PublicRoomPreview.unavailable());
+      },
+    );
+
+    test('getPreview_whenTheSummarySaysBanned_saysBanned', () async {
+      // Arrange
+      stubSummary(summary(membership: Membership.ban));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.banned());
+    });
+
+    MockRoom bannedLocalRoom() {
+      final room = MockRoom();
+      when(room.membership).thenReturn(Membership.leave);
+      when(
+        room.requestUser('@me:hs', requestState: false, requestProfile: false),
+      ).thenAnswer((_) async => User('@me:hs', membership: 'ban', room: room));
+      when(mockClient.userID).thenReturn('@me:hs');
+      when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+      return room;
+    }
+
+    test(
+      'getPreview_whenTheSummaryFailsAndTheLocalRoomHasABan_saysBanned',
+      () async {
+        // Arrange
+        bannedLocalRoom();
+        stubSummary(notFound);
+
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
+
+        // Assert
+        expect(preview, const PublicRoomPreview.banned());
+      },
+    );
+
+    test(
+      'getPreview_whenTheSummaryFailsWhileRoomsLoad_waitsForTheStoredBan',
+      () async {
+        // Arrange
+        final room = bannedLocalRoom();
+        final roomsLoading = Completer<void>();
+        when(mockClient.roomsLoading).thenAnswer((_) => roomsLoading.future);
+        when(mockClient.getRoomByAlias(alias)).thenReturn(null);
+        stubSummary(notFound);
+
+        // Act
+        final preview = datasource.getPreview(alias, via: const []);
+        await pumpEventQueue();
+        when(mockClient.getRoomByAlias(alias)).thenReturn(room);
+        roomsLoading.complete();
+
+        // Assert
+        expect(await preview, const PublicRoomPreview.banned());
+      },
+    );
+
+    test(
+      'getPreview_whenTheSummaryAnswersOverAStoredBan_followsTheSummary',
+      () async {
+        // Arrange
+        bannedLocalRoom();
+        stubSummary(summary(membership: Membership.leave));
+
+        // Act
+        final preview = await datasource.getPreview(alias, via: const []);
+
+        // Assert
+        expect(preview, isA<PublicRoomPreviewFound>());
+      },
+    );
+
+    test('getPreview_whenTheRoomIsInviteOnly_saysUnavailable', () async {
+      // Arrange
+      stubSummary(summary(joinRule: 'invite'));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.unavailable());
+    });
+
+    test('getPreview_whenTheSummarySaysNotFound_saysUnavailable', () async {
+      // Arrange
+      stubSummary(notFound);
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.unavailable());
+    });
+
+    test('getPreview_whenTheServerIsUnreachable_saysUnavailable', () async {
+      // Arrange
+      stubSummary(Exception('offline'));
+
+      // Act
+      final preview = await datasource.getPreview(alias, via: const []);
+
+      // Assert
+      expect(preview, const PublicRoomPreview.unavailable());
+    });
+
+    test('getPreview_withServers_asksTheSummaryThroughThem', () async {
+      // Arrange
+      when(
+        mockClient.getRoomSummary('!a:hs', via: ['hs2']),
+      ).thenThrow(notFound);
+
+      // Act
+      await datasource.getPreview('!a:hs', via: const ['hs2']);
+
+      // Assert
+      verify(mockClient.getRoomSummary('!a:hs', via: ['hs2'])).called(1);
+    });
   });
 }

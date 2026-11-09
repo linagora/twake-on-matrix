@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:twake_chat/domain/exception/public_rooms/public_rooms_exception.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
+import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 import 'package:twake_chat/domain/repository/public_rooms/public_rooms_repository.dart';
 
 PublicRoom publicRoom(
@@ -48,6 +49,12 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   int lookupsInFlight = 0;
   int maxLookupsInFlight = 0;
   bool isJoinInSync = true;
+  PublicRoomPreview preview = const PublicRoomPreview.unavailable();
+  PublicRoomsException? previewError;
+  final previewQueries = <String>[];
+  final previewVia = <List<String>>[];
+  final joinedVia = <List<String>>[];
+  final knockedVia = <List<String>>[];
 
   int? requestedLimit;
   final knockedQueries = <List<String>>[];
@@ -81,11 +88,15 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   }
 
   @override
-  Future<({String roomId, bool isInSync})> join(String roomIdOrAlias) async {
+  Future<({String roomId, bool isInSync})> join(
+    String roomIdOrAlias, {
+    List<String> via = const [],
+  }) async {
     await joinGate?.future;
     if (joinError case final error?) throw error;
     if (joinUntypedError case final error?) throw error;
     joinedIds.add(roomIdOrAlias);
+    joinedVia.add(via);
     final roomId = roomIdOrAlias.startsWith('#')
         ? '!${roomIdOrAlias.substring(1)}'
         : roomIdOrAlias;
@@ -93,9 +104,24 @@ class FakePublicRoomsRepository implements PublicRoomsRepository {
   }
 
   @override
-  Future<void> knock(String roomIdOrAlias) async {
+  Future<void> knock(
+    String roomIdOrAlias, {
+    List<String> via = const [],
+  }) async {
     await knockGate?.future;
     if (knockError case final error?) throw error;
     knockedIds.add(roomIdOrAlias);
+    knockedVia.add(via);
+  }
+
+  @override
+  Future<PublicRoomPreview> getPreview(
+    String roomIdOrAlias, {
+    required List<String> via,
+  }) async {
+    previewQueries.add(roomIdOrAlias);
+    previewVia.add(via);
+    if (previewError case final error?) throw error;
+    return preview;
   }
 }

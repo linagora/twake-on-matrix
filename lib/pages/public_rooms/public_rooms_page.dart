@@ -10,6 +10,7 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/public_rooms/public_room_kind_badge.dart';
 import 'package:twake_chat/pages/public_rooms/public_rooms_controller.dart';
 import 'package:twake_chat/pages/public_rooms/public_rooms_state.dart';
 import 'package:twake_chat/pages/search/search_text_field.dart';
@@ -204,11 +205,7 @@ class _PublicRoomRow extends StatelessWidget {
       avatar: AvatarWithKindBadge(
         mxContent: room.avatarUri,
         name: room.name,
-        badge: switch (room) {
-          PublicRoom(kind: PublicRoomKind.feed) => AvatarKindBadge.broadcast,
-          PublicRoom(access: PublicRoomAccess.open) => AvatarKindBadge.public,
-          _ => AvatarKindBadge.people,
-        },
+        badge: room.kindBadge,
       ),
       title: room.name,
       subtitle: topic == null || topic.isEmpty ? access : '$access · $topic',

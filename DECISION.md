@@ -159,6 +159,33 @@ A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
 
+## D10. A room address opens a preview of the room (proposed by Johann, 2026-11-05)
+
+A link to a room address (`https://matrix.to/#/#name:server`) or ID that the
+user has neither joined nor been invited to opens a preview, as Twake Space
+Chat does (D491 and D581 there):
+
+- The room's name, topic and avatar, with « Join · n members », or « Ask to
+  join · n members » when it needs an approval. Once asked, the button gives
+  way to « Request sent ».
+- A user banned from the room is told so, with no button.
+- A room nobody can preview (unknown, or invite only) says the group is
+  unavailable and offers « Try to join ».
+- A failed join or request is said in the preview, under the button.
+- A room the user is already in under another address opens directly.
+
+The preview reads the room summary (MSC3266) only, with no search of a public
+directory, as Twake Space Chat does since its D581: it also says whether the
+user is banned or has already asked, and it describes a room that no directory
+lists. A failure of the summary shows the group as unavailable, with « Try to
+join », as there, unless the app already knows the user is banned from it: the
+preview then says so, with no button. The `via` servers of the link route the
+summary, the join and the request. A joined room still opens directly, at the
+linked message; one this device has not synced yet opens once it arrives, or
+shows « Try to join » after 30 seconds.
+
+Hand-typed addresses becoming links is left to a later change.
+
 ## D11. Copying several selected messages follows Twake Space Chat (proposed by Johann, 2026-11-06)
 
 Copy, with several messages selected, puts them on the clipboard in timeline
