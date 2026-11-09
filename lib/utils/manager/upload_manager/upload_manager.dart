@@ -15,12 +15,15 @@ import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_resu
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_file_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
+import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_worker_queue.dart';
 import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
 import 'package:rxdart/rxdart.dart';
 
 class UploadManager {
+  final MediaBatchStamp _batchStamp = const MediaBatchStamp();
+
   UploadManager._();
 
   static final UploadManager _instance = UploadManager._();
@@ -151,6 +154,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            extraContent: _batchStamp.contentFor(uploadInfo.batchId),
           );
         } else {
           fakeImageEvent = await room.sendFakeFileEvent(
@@ -159,6 +163,7 @@ class UploadManager {
             captionInfo: caption,
             uploadInfo: uploadInfo.toJson(),
             inReplyTo: inReplyTo,
+            extraContent: _batchStamp.contentFor(uploadInfo.batchId),
           );
         }
       } catch (e) {
@@ -238,6 +243,7 @@ class UploadManager {
     required Room room,
     String? captionInfo,
     Event? inReplyTo,
+    String? batchId,
   }) {
     final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
@@ -253,8 +259,12 @@ class UploadManager {
             )
           : null,
       inReplyToEventId: inReplyTo?.eventId,
+      batchId: batchId,
     );
   }
+
+  Map<String, Object>? _batchContentOf(String txid) =>
+      _batchStamp.contentFor(_eventIdMapUploadFileInfo[txid]?.batchId);
 
   Stream<Either<Failure, Success>>? getUploadStateStream(String txid) {
     return _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController.stream;
@@ -272,6 +282,8 @@ class UploadManager {
       inReplyTo: inReplyTo,
     );
 
+    final batchId = _batchStamp.newBatchIdFor(txids.length);
+
     for (final txid in txids.entries) {
       final txidKey = txid.key;
       final fakeSendingFileInfo = txids[txidKey];
@@ -281,13 +293,15 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadMediaMobile(): txid: $txidKey');
 
+      final isFirstFile = txidKey == txids.keys.first;
       final isLastFile = txidKey == txids.keys.last;
 
       _initUploadFileInfo(
         txid: txidKey,
         room: room,
         captionInfo: isLastFile ? caption : null,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        batchId: batchId,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -298,7 +312,8 @@ class UploadManager {
         messageType: fakeSendingFileInfo.messageType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        extraContent: _batchContentOf(txidKey),
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
 
@@ -334,7 +349,7 @@ class UploadManager {
         sentDate: sentDate,
         shrinkImageMaxDimension: _shrinkImageMaxDimension,
         captionInfo: _eventIdMapUploadFileInfo[txidKey]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
         uploadInfo: _eventIdMapUploadFileInfo[txidKey]?.toJson(),
       );
     }
@@ -350,19 +365,23 @@ class UploadManager {
     // Store txids and fake events for all files
     final uploadTasks = <String, SyncUpdate>{};
 
+    final batchId = _batchStamp.newBatchIdFor(files.length);
+
     // First pass: Create all placeholders and fake events
     for (final matrixFile in files.asMap().entries) {
       final txid = room.client.generateUniqueTransactionId();
       final fileIndex = matrixFile.key;
       final fileInfo = matrixFile.value;
 
+      final isFirstFile = fileIndex == 0;
       final isLastFile = fileIndex == files.length - 1;
 
       _initUploadFileInfo(
         txid: txid,
         room: room,
         captionInfo: isLastFile ? caption : null,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        batchId: batchId,
       );
 
       room.sendingFilePlaceholders[txid] = fileInfo;
@@ -370,7 +389,8 @@ class UploadManager {
         fileInfo,
         txid: txid,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        extraContent: _batchContentOf(txid),
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -391,7 +411,7 @@ class UploadManager {
       final txid = uploadTasks.keys.elementAt(fileIndex);
       final fakeFileEvent = uploadTasks[txid]!;
 
-      final isLastFile = fileIndex == files.length - 1;
+      final isFirstFile = fileIndex == 0;
 
       final streamController =
           _eventIdMapUploadFileInfo[txid]?.uploadStateStreamController;
@@ -425,7 +445,7 @@ class UploadManager {
         thumbnail: thumbnails?[fileInfo],
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -437,6 +457,8 @@ class UploadManager {
     String? caption,
     Event? inReplyTo,
   }) async {
+    final batchId = _batchStamp.newBatchIdFor(fileInfos.length);
+
     for (final fileInfo in fileInfos.asMap().entries) {
       final fileIndex = fileInfo.key;
       final fileValue = fileInfo.value;
@@ -445,13 +467,15 @@ class UploadManager {
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
 
+      final isFirstFile = fileIndex == 0;
       final isLastFile = fileIndex == fileInfos.length - 1;
 
       _initUploadFileInfo(
         txid: txid,
         room: room,
         captionInfo: isLastFile ? caption : null,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        batchId: batchId,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
@@ -462,7 +486,8 @@ class UploadManager {
         messageType: fileValue.msgType,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
+        extraContent: _batchContentOf(txid),
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
 
@@ -497,7 +522,7 @@ class UploadManager {
         cancelToken: cancelToken,
         sentDate: sentDate,
         captionInfo: _eventIdMapUploadFileInfo[txid]?.captionInfo?.caption,
-        inReplyTo: isLastFile ? inReplyTo : null,
+        inReplyTo: isFirstFile ? inReplyTo : null,
         uploadInfo: _eventIdMapUploadFileInfo[txid]?.toJson(),
       );
     }
@@ -539,6 +564,7 @@ class UploadManager {
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
               uploadInfo: uploadInfo,
+              extraContent: _batchStamp.contentFor(info?.batchId),
             );
             if (eventId == null) {
               throw Exception('Failed to send file event');
@@ -597,6 +623,7 @@ class UploadManager {
               sentDate: sentDate,
               captionInfo: captionInfo,
               inReplyTo: inReplyTo,
+              extraContent: _batchStamp.contentFor(info?.batchId),
             );
             if (eventId == null) {
               throw Exception('File upload failed');

@@ -166,6 +166,7 @@ extension SendFileFakeEventExtension on Room {
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     'filename': file.name,
                     'info': file.info,
+                    if (extraContent != null) ...extraContent,
                   },
                   type: EventTypes.Message,
                   eventId: txid,

@@ -10,6 +10,7 @@ import 'package:equatable/equatable.dart';
 import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
@@ -1186,13 +1187,15 @@ class ChatController extends ConsumerState<Chat>
     final events = selectedEvents.isEmpty && event != null
         ? [event]
         : selectedEvents;
-    final messages = events
-        .map(
-          (msg) => msg
-              .getDisplayEventWithoutEditEvent(timeline!)
-              .formatContentForwards(),
-        )
-        .toList();
+    final messages = const MediaBatchStamp().restampForwarded(
+      events
+          .map(
+            (msg) => msg
+                .getDisplayEventWithoutEditEvent(timeline!)
+                .formatContentForwards(),
+          )
+          .toList(),
+    );
     _clearSelectEvent();
     ForwardRoute($extra: ForwardArgument(messages: messages)).push(context);
   }
