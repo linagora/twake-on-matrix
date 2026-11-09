@@ -57,7 +57,7 @@ post_install do |installer|
       # `flutter build ios` started from the app. A build started from Xcode.app compiles
       # every permission except notifications out, so checks report `denied`. For Xcode.app run
       #   launchctl setenv PERMISSION_HANDLER_INFO_PLIST "$PWD/ios/Runner/Info.plist"
-      # once from the repo root, then clear DerivedData.
+      # once from the repo root, then clear DerivedData and restart Xcode.
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
         '$(inherited)',
         ## dart: PermissionGroup.microphone
