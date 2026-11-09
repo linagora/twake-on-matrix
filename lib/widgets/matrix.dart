@@ -1273,7 +1273,9 @@ class MatrixState extends ConsumerState<Matrix>
     Client client, [
     HomeserverSummary? summary,
   ]) async {
-    final loginSummary = summary ?? loginHomeserverSummary;
+    // Without the summary of its login, the active account's would be saved
+    // for this one.
+    final loginSummary = summary;
     final tomServer = loginSummary?.tomServer;
     Logs().d('MatrixState::setUpToMServicesInLogin: $tomServer');
     if (tomServer != null) {
@@ -1283,7 +1285,7 @@ class MatrixState extends ConsumerState<Matrix>
     final homeServer =
         loginSummary?.discoveryInformation?.mHomeserver.baseUrl ??
         client.homeserver;
-    _setupAuthUrl(summary: loginSummary);
+    if (loginSummary != null) _setupAuthUrl(summary: loginSummary);
     if (identityServer != null) {
       _setUpIdentityServer(identityServer);
     }
@@ -1326,7 +1328,7 @@ class MatrixState extends ConsumerState<Matrix>
     Client client, [
     HomeserverSummary? summary,
   ]) async {
-    final loginSummary = summary ?? loginHomeserverSummary;
+    final loginSummary = summary;
     final federationSever = loginSummary?.federationServer;
     final identityServer = loginSummary?.discoveryInformation?.mIdentityServer;
     Logs().d('MatrixState::setUpFederationServicesInLogin: $federationSever');

@@ -1563,6 +1563,60 @@ void main() {
       expect(federation.saved, ['@a:s']);
     });
 
+    testWidgets('a login without its own summary saves no federation of the '
+        'active account', (tester) async {
+      final client = _BootClient('a', userID: '@a:s');
+      final federation = _RecordingFederation();
+      final harness = _Harness(
+        tester,
+        [client],
+        tomFromGetIt: false,
+        overrides: [
+          tomConfigurationsRepositoryProvider.overrideWithValue(_UnusedTom()),
+          federationConfigurationsRepositoryProvider.overrideWithValue(
+            federation,
+          ),
+        ],
+      );
+
+      await harness.run(() async {
+        await harness.mount();
+        harness.matrix.loginHomeserverSummary = _summaryWithFederation();
+        await harness.matrix.loginHost.setUpFederation(client, null);
+      });
+
+      expect(federation.saved, isEmpty);
+    });
+
+    testWidgets('a login without its own summary does not take the auth '
+        'server of the active account', (tester) async {
+      final client = _BootClient('a', userID: '@a:s');
+      final harness = _Harness(tester, [client]);
+
+      await harness.run(() async {
+        await harness.mount();
+        harness.matrix.loginHomeserverSummary = HomeserverSummary(
+          discoveryInformation: DiscoveryInformation(
+            mHomeserver: HomeserverInformation(
+              baseUrl: Uri.parse('https://hs.example.com'),
+            ),
+            additionalProperties: {
+              'm.authentication': {'issuer': 'https://auth.active'},
+            },
+          ),
+          versions: GetVersionsResponse(versions: ['r1.6.0']),
+          loginFlows: [],
+        );
+        try {
+          await harness.matrix.setUpToMServicesInLogin(client);
+        } catch (_) {
+          // The rest of the set-up needs the app wiring that is missing here.
+        }
+      });
+
+      expect(harness.matrix.authUrl, isNot('https://auth.active'));
+    });
+
     testWidgets('retrying the pending removals retries the logout removals '
         'and the candidate discards', (tester) async {
       final logout = _CountingRemovals();
