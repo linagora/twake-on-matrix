@@ -43,10 +43,11 @@ void main() {
     VoidCallback? onTap,
     DateTime? lastReplyTime,
     bool onOwnBubble = false,
+    String lastReplyText = 'See you tomorrow',
   }) => ThreadSummaryCard(
     replyCount: replyCount,
     lastReplyAuthor: 'Alice',
-    lastReplyText: 'See you tomorrow',
+    lastReplyText: lastReplyText,
     lastReplyTime: lastReplyTime ?? fiveMinutesAgo(),
     unreadCount: unreadCount,
     onOwnBubble: onOwnBubble,
@@ -63,6 +64,7 @@ void main() {
     bool onOwnBubble = false,
     double? maxWidth,
     TextDirection direction = TextDirection.ltr,
+    String lastReplyText = 'See you tomorrow',
   }) => tester.pumpWidget(
     MaterialApp(
       theme: theme,
@@ -92,6 +94,7 @@ void main() {
                   onTap: onTap,
                   lastReplyTime: lastReplyTime,
                   onOwnBubble: onOwnBubble,
+                  lastReplyText: lastReplyText,
                 ),
               ),
             ),
@@ -133,6 +136,32 @@ void main() {
         ),
       )
       .singleWhere((text) => text.text.toPlainText().startsWith(start));
+
+  /// Every painted paragraph of the card, as laid out on screen.
+  List<RenderParagraph> paragraphs(WidgetTester tester) => tester
+      .widgetList<RichText>(
+        find.descendant(
+          of: find.byType(ThreadSummaryCard),
+          matching: find.byType(RichText),
+        ),
+      )
+      .map((text) => tester.renderObject<RenderParagraph>(find.byWidget(text)))
+      .toList();
+
+  /// The paragraph of the card that shows [text], whatever else it shows.
+  RenderParagraph paragraphShowing(WidgetTester tester, String text) =>
+      paragraphs(tester).firstWhere(
+        (p) => p.text.toPlainText().contains(text),
+        orElse: () => fail('no paragraph of the card shows « $text »'),
+      );
+
+  /// [paragraph] does not show all of [full]: cut by the ellipsis of the
+  /// layout, or shortened by hand with « … ».
+  bool isCut(RenderParagraph paragraph, String full) {
+    final plain = paragraph.text.toPlainText();
+    return paragraph.didExceedMaxLines ||
+        (plain.contains('…') && !plain.contains(full));
+  }
 
   /// The spans of [text] that carry their own text, with the style they are
   /// painted with (their parents' merged in).
@@ -325,20 +354,12 @@ void main() {
   });
 
   group('the last reply', () {
-    testWidgets('is one line, cut with an ellipsis', (tester) async {
-      await pumpCard(tester);
-
-      final text = line(tester, 'Alice: See you tomorrow · ');
-      expect(text.maxLines, 1);
-      expect(text.overflow, TextOverflow.ellipsis);
-    });
-
     testWidgets('shows its author in semi-bold, the text in regular', (
       tester,
     ) async {
       await pumpCard(tester);
 
-      final spans = spansOf(line(tester, 'Alice: See you tomorrow · ').text);
+      final spans = spansOf(line(tester, 'Alice').text);
       final author = spans.where((span) => span.$1 == 'Alice');
       expect(author, hasLength(1), reason: 'the author is a span of its own');
       expect(author.single.$2.fontWeight, FontWeight.w600);
@@ -351,21 +372,123 @@ void main() {
     ) async {
       await pumpCard(tester);
 
-      final plain = line(
-        tester,
-        'Alice: See you tomorrow · ',
-      ).text.toPlainText();
-      expect(plain, 'Alice: See you tomorrow · 5 minutes ago');
-      expect(plain, isNot(matches(RegExp(r'\d{1,2}:\d{2}'))));
+      expect(
+        find.textContaining('Alice: See you tomorrow', findRichText: true),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('5 minutes ago', findRichText: true),
+        findsOneWidget,
+      );
+      for (final paragraph in paragraphs(tester)) {
+        expect(
+          paragraph.text.toPlainText(),
+          isNot(matches(RegExp(r'\d{1,2}:\d{2}'))),
+        );
+      }
     });
 
     testWidgets('says the age in the language of the app', (tester) async {
       await pumpCard(tester, locale: const Locale('fr'));
 
       expect(
-        line(tester, 'Alice: See you tomorrow · ').text.toPlainText(),
-        'Alice: See you tomorrow · il y a 5 minutes',
+        find.textContaining('il y a 5 minutes', findRichText: true),
+        findsOneWidget,
       );
+    });
+
+    /// THR-M-02, decision of the maintainer (09/11): the relative age of the
+    /// last reply stays whole; only the text of the reply is cut with an
+    /// ellipsis once the line reaches the width the card is given.
+    group('longer than the card', () {
+      const long =
+          'Let us meet on Thursday at the usual place near the station';
+
+      // 12 px glyphs in tests: the line is ~900 px, the card 300.
+      Future<void> pumpLong(WidgetTester tester) =>
+          pumpCard(tester, maxWidth: 300, lastReplyText: long);
+
+      testWidgets('keeps its age whole, inside the card', (tester) async {
+        await pumpLong(tester);
+
+        expect(tester.takeException(), isNull);
+        final age = paragraphShowing(tester, '5 minutes ago');
+        expect(
+          age.didExceedMaxLines,
+          isFalse,
+          reason: 'the age is cut with the reply',
+        );
+        expect(
+          age.size.width,
+          moreOrLessEquals(
+            age.getMaxIntrinsicWidth(double.infinity),
+            epsilon: 0.5,
+          ),
+          reason: 'the age is on one line, not wrapped',
+        );
+        final cardRect = tester.getRect(find.byType(ThreadSummaryCard));
+        final ageRect = age.localToGlobal(Offset.zero) & age.size;
+        expect(ageRect.left, greaterThanOrEqualTo(cardRect.left));
+        expect(ageRect.right, lessThanOrEqualTo(cardRect.right));
+      });
+
+      testWidgets('keeps the dot before the age', (tester) async {
+        await pumpLong(tester);
+
+        final withDot = paragraphs(
+          tester,
+        ).where((p) => p.text.toPlainText().contains('·'));
+        expect(withDot, isNotEmpty);
+        for (final paragraph in withDot) {
+          expect(
+            paragraph.didExceedMaxLines,
+            isFalse,
+            reason: 'the dot is cut with the reply',
+          );
+        }
+      });
+
+      testWidgets('cuts the text of the reply with an ellipsis, on one line', (
+        tester,
+      ) async {
+        await pumpLong(tester);
+
+        final reply = paragraphShowing(tester, 'Alice');
+        expect(isCut(reply, long), isTrue);
+        final count = paragraphShowing(tester, '3 messages');
+        expect(reply.size.height, lessThan(2 * count.size.height));
+      });
+
+      testWidgets('shows the age after the text, on the same line', (
+        tester,
+      ) async {
+        await pumpLong(tester);
+
+        final reply = paragraphShowing(tester, 'Alice');
+        final age = paragraphShowing(tester, '5 minutes ago');
+        final replyRect = reply.localToGlobal(Offset.zero) & reply.size;
+        final ageRect = age.localToGlobal(Offset.zero) & age.size;
+        expect(
+          ageRect.center.dy,
+          moreOrLessEquals(replyRect.center.dy, epsilon: 2),
+        );
+        if (!identical(reply, age)) {
+          expect(ageRect.left, greaterThanOrEqualTo(replyRect.right - 0.5));
+        }
+      });
+    });
+
+    testWidgets('that fits the card is not cut at all', (tester) async {
+      await pumpCard(tester, maxWidth: 700);
+
+      expect(tester.takeException(), isNull);
+      for (final paragraph in paragraphs(tester)) {
+        expect(
+          isCut(paragraph, 'Alice: See you tomorrow'),
+          isFalse,
+          reason: '« ${paragraph.text.toPlainText()} » is cut',
+        );
+      }
     });
 
     testWidgets('accessibility reads the age too', (tester) async {

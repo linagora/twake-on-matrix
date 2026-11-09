@@ -243,6 +243,47 @@ void main() {
     double bubbleWidth(WidgetTester tester) =>
         tester.getRect(find.byType(MessageBubble)).width;
 
+    /// Every painted paragraph of the card.
+    List<RenderParagraph> cardParagraphs(WidgetTester tester) => tester
+        .widgetList<RichText>(
+          find.descendant(
+            of: find.byType(ThreadSummaryCard),
+            matching: find.byType(RichText),
+          ),
+        )
+        .map(
+          (text) => tester.renderObject<RenderParagraph>(find.byWidget(text)),
+        )
+        .toList();
+
+    /// The paragraph of the card that shows [text], whatever else it shows.
+    RenderParagraph paragraphShowing(WidgetTester tester, String text) =>
+        cardParagraphs(tester).firstWhere(
+          (p) => p.text.toPlainText().contains(text),
+          orElse: () => fail('no paragraph of the card shows « $text »'),
+        );
+
+    Rect rectOf(RenderParagraph paragraph) =>
+        paragraph.localToGlobal(Offset.zero) & paragraph.size;
+
+    /// Laid out whole: not cut, not wrapped, inside the bubble.
+    void expectWhole(WidgetTester tester, RenderParagraph paragraph) {
+      final plain = paragraph.text.toPlainText();
+      expect(paragraph.didExceedMaxLines, isFalse, reason: '« $plain » is cut');
+      expect(
+        paragraph.size.width,
+        moreOrLessEquals(
+          paragraph.getMaxIntrinsicWidth(double.infinity),
+          epsilon: 0.5,
+        ),
+        reason: '« $plain » is not on one line',
+      );
+      final bubble = tester.getRect(find.byType(MessageBubble));
+      final rect = rectOf(paragraph);
+      expect(rect.left, greaterThanOrEqualTo(bubble.left));
+      expect(rect.right, lessThanOrEqualTo(bubble.right));
+    }
+
     testWidgets('a short last reply is shown whole: the card widens the '
         'bubble to it', (tester) async {
       await pumpRootWithCard(
@@ -268,6 +309,69 @@ void main() {
         moreOrLessEquals(line.getMaxIntrinsicWidth(double.infinity)),
       );
       expect(bubbleWidth(tester), greaterThan(countOnly));
+    });
+
+    /// THR-M-02, decision of the maintainer (09/11): the relative age stays
+    /// whole; only the text of the reply is cut once the bubble is at its
+    /// widest.
+    testWidgets('a long last reply at the widest bubble keeps its age whole; '
+        'only its text is cut', (tester) async {
+      await pumpRootWithCard(
+        tester,
+        rootBody: List.filled(60, 'word').join(' '),
+        withLastReply: false,
+        screenWidth: 800,
+      );
+      final widest = bubbleWidth(tester);
+
+      const long =
+          'Let us meet on Thursday at the usual place near the station, '
+          'and bring the slides of the review with you please';
+      await pumpRootWithCard(
+        tester,
+        rootBody: 'ok',
+        lastReplyText: long,
+        screenWidth: 800,
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(bubbleWidth(tester), lessThanOrEqualTo(widest));
+      final age = paragraphShowing(tester, '5 minutes ago');
+      expect(
+        age.didExceedMaxLines,
+        isFalse,
+        reason: 'the age is cut with the reply',
+      );
+      expectWhole(tester, age);
+      final reply = paragraphShowing(tester, 'Bob');
+      final plain = reply.text.toPlainText();
+      expect(
+        reply.didExceedMaxLines ||
+            (plain.contains('…') && !plain.contains(long)),
+        isTrue,
+        reason: 'the text of the reply is cut with an ellipsis',
+      );
+    });
+
+    testWidgets('a short last reply: nothing is cut, and the bubble holds the '
+        'whole line, age included', (tester) async {
+      await pumpRootWithCard(
+        tester,
+        rootBody: 'ok',
+        lastReplyText: 'See you',
+        screenWidth: 800,
+      );
+
+      expect(tester.takeException(), isNull);
+      for (final paragraph in cardParagraphs(tester)) {
+        expectWhole(tester, paragraph);
+      }
+      expect(
+        tester.getRect(find.byType(MessageBubble)).right,
+        greaterThanOrEqualTo(
+          rectOf(paragraphShowing(tester, '5 minutes ago')).right,
+        ),
+      );
     });
 
     testWidgets('a last reply made of one long link stops at the widest '
