@@ -61,11 +61,11 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
     final key = _reactionKey(e);
     if (key == null) continue;
     final groupKey = _groupKey(key);
-    if (!(sendersByGroup[groupKey] ??= {}).add(e.senderId)) continue;
     final sentAt = firstSentAt[groupKey];
     if (sentAt == null || e.originServerTs.isBefore(sentAt)) {
       firstSentAt[groupKey] = e.originServerTs;
     }
+    if (!(sendersByGroup[groupKey] ??= {}).add(e.senderId)) continue;
     final entry =
         reactionMap[groupKey] ??
         ReactionEntry(key: key, count: 0, reacted: false, reactors: []);
@@ -81,7 +81,9 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
     ..sort((a, b) {
       final byCount = reactionMap[b]!.count.compareTo(reactionMap[a]!.count);
       if (byCount != 0) return byCount;
-      return firstSentAt[a]!.compareTo(firstSentAt[b]!);
+      final bySentAt = firstSentAt[a]!.compareTo(firstSentAt[b]!);
+      if (bySentAt != 0) return bySentAt;
+      return a.compareTo(b);
     });
   return [for (final groupKey in groupKeys) reactionMap[groupKey]!];
 }

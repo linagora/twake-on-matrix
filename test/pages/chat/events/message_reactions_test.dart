@@ -174,6 +174,44 @@ void main() {
       expect(fromHistory.map((r) => r.key), expected);
     });
 
+    test('dates a group by its earliest event, even a duplicate sender', () {
+      final events = [
+        reactionEvent(
+          thumbsUpVs16,
+          senderId: bob,
+          sentAt: DateTime(2026, 1, 1, 0, 5),
+        ),
+        reactionEvent('👍', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent(
+          '❤️',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 3),
+        ),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      expect(live.map((r) => r.key), [thumbsUpVs16, '❤️']);
+      expect(fromHistory.map((r) => r.key), ['👍', '❤️']);
+    });
+
+    test('breaks a full tie the same way whatever the arrival', () {
+      final sentAt = DateTime(2026, 1, 1);
+      final events = [
+        reactionEvent('😂', senderId: bob, sentAt: sentAt),
+        reactionEvent('👍', senderId: carol, sentAt: sentAt),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      expect(
+        live.map((r) => r.key).toList(),
+        fromHistory.map((r) => r.key).toList(),
+      );
+    });
+
     test('puts a higher count first, before older reactions', () {
       final reactions = groupReactions([
         reactionEvent('👍', sentAt: DateTime(2026, 1, 1, 0, 1)),

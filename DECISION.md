@@ -255,5 +255,6 @@ instead.
 
 The row shows up to three reactions, the most used first; equal counts keep
 the order of their first reaction, oldest first. The others are summed up in
-`+N`, which opens the full list. A new reaction never pushes out one already
-shown at the same count.
+`+N`; in a group it opens the full list (a direct chat shows no counts and no
+list, as before). A new reaction never pushes out one already shown at the
+same count.
