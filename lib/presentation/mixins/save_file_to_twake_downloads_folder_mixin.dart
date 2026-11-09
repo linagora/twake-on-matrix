@@ -7,7 +7,6 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/downloading_file_dialog.dart';
-import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
 import 'package:twake_chat/utils/exception/storage_permission_exception.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_manager.dart';
@@ -113,13 +112,8 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
     BuildContext context,
   ) async {
     try {
-      final twakeFolder = await StorageDirectoryManager.instance
-          .getTwakeDownloadsFolderInDevice();
-      if (twakeFolder?.isNotEmpty != true) {
-        throw SaveToDownloadsException(error: 'Twake folder is empty');
-      }
       final twakeFilePath = await StorageDirectoryManager.instance
-          .getAvailableFilePath('$twakeFolder/${event.filename}');
+          .getFilePathInTwakeDownloads(event.filename);
 
       await File(twakeFilePath).create(recursive: true);
       final copiedFile = await file.copy(twakeFilePath);
