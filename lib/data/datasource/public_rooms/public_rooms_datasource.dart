@@ -2,7 +2,10 @@ import 'package:twake_chat/domain/model/public_rooms/public_room.dart';
 import 'package:twake_chat/domain/model/public_rooms/public_room_preview.dart';
 
 abstract class PublicRoomsDatasource {
-  Stream<List<PublicRoom>> fetchDirectory({required int limit});
+  Stream<List<PublicRoom>> fetchDirectory({
+    required int limit,
+    String? searchTerm,
+  });
 
   Set<String> getKnownRoomIds();
 

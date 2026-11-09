@@ -3246,5 +3246,10 @@
   "@tryToJoin": {
     "type": "text",
     "placeholders": {}
+  },
+  "publicGroupsYouCanJoin": "Groups you can join",
+  "@publicGroupsYouCanJoin": {
+    "type": "text",
+    "placeholders": {}
   }
 }

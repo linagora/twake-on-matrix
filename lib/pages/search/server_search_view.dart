@@ -1,3 +1,4 @@
+import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/search/server_search_view_style.dart';
 import 'package:twake_chat/presentation/decorators/chat_list/subtitle_text_style_decorator/subtitle_text_style_view.dart';
@@ -101,7 +102,10 @@ class ServerSearchMessagesList extends StatelessWidget {
 
           return const SizedBox();
         },
-        child: const EmptySearchWidget(),
+        child: HiddenWhenPublicGroupsFound(
+          searchTerm: searchController.publicGroupsSearchTerm,
+          child: const EmptySearchWidget(),
+        ),
       ),
     );
   }

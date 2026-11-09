@@ -159,6 +159,24 @@ A server whose well-known set `default_server_limited: false` used to create
 public groups that federate by default. It now gets `m.federate: false` too,
 unless it announces `server_acl: true`.
 
+## D9. Public groups in the search of the chat list (proposed by Johann, 2026-11-05)
+
+From two typed letters (spaces around them ignored), the search also asks the
+directory of the user's homeserver for the text, as twake-space-chat does:
+one request, filtered by the server (`generic_search_term`), at most 20
+rooms. Shown only when the well-known enables public groups.
+
+- The rooms come under « Groups you can join », after the chats and contacts
+  and before the messages (decided by Johann, 2026-11-06). Here the messages
+  page in endlessly as the list scrolls, unlike twake-space-chat where they
+  stop at 20 and the public rooms come last. The same rooms as D5: groups and
+  feeds the user has neither joined nor been invited to, with the same rows
+  and badges.
+- The request leaves 300 ms after the typing stops, like the other searches.
+  Nothing shows while it runs, when it fails or when it finds nothing.
+- A tap behaves as on the page of D5: joins and opens the room, or sends the
+  request and says so, or says the join failed.
+
 ## D10. A room address opens a preview of the room (proposed by Johann, 2026-11-05)
 
 A link to a room address (`https://matrix.to/#/#name:server`) or ID that the

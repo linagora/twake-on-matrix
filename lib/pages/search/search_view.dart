@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/app_state/search/pre_search_state.dart';
+import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/recent_contacts_banner_widget.dart';
 import 'package:twake_chat/pages/search/recent_item_widget.dart';
 import 'package:twake_chat/pages/search/search.dart';
@@ -21,6 +22,7 @@ class SearchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: PreferredSize(
@@ -68,6 +70,14 @@ class SearchView extends StatelessWidget {
           ),
           _RecentChatAndContactsHeader(searchController: searchController),
           _recentChatsWidget(),
+          PublicGroupsSearchSection(
+            searchTerm: searchController.publicGroupsSearchTerm,
+            header: _SearchHeader(
+              header: l10n.publicGroupsYouCanJoin,
+              searchController: searchController,
+              needShowMore: false,
+            ),
+          ),
           ValueListenableBuilder(
             valueListenable:
                 searchController.serverSearchController.searchResultsNotifier,
@@ -81,7 +91,7 @@ class SearchView extends StatelessWidget {
                   return child!;
                 }
                 return _SearchHeader(
-                  header: L10n.of(context)!.messages,
+                  header: l10n.messages,
                   searchController: searchController,
                   needShowMore: false,
                 );
