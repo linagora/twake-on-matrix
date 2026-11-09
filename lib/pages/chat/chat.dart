@@ -705,9 +705,11 @@ class ChatController extends ConsumerState<Chat>
       fetchPage: (from) async {
         final page = await const GetThreadRepliesInteractor().execute(
           room: room,
-          rootEventId: rootId,
-          from: from,
-          withRelations: true,
+          request: ThreadRepliesRequest(
+            rootEventId: rootId,
+            from: from,
+            withRelations: true,
+          ),
         );
         if (!mounted) return (events: page.replies, nextBatch: page.nextBatch);
         // A reply seen here and deleted later loses its relation: the room

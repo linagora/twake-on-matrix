@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
@@ -84,8 +85,9 @@ class ThreadUnreadStore extends ChangeNotifier {
     for (final thread in counts.entries) {
       final previous = before[thread.key]?.notificationCount ?? 0;
       if (thread.value.notificationCount > previous) {
-        _activity['$roomId|${thread.key}'] = DateTime.now();
-        _resolveFollowed(roomId, thread.key);
+        final ref = ThreadRef(roomId, thread.key);
+        _activity[ref.key] = DateTime.now();
+        _resolveFollowed(ref);
       }
     }
     if (mapEquals(before, counts)) return false;
@@ -95,15 +97,18 @@ class ThreadUnreadStore extends ChangeNotifier {
   }
 
   /// The user wrote in this thread: it is followed from now on.
-  void markFollowed(String roomId, String rootId) {
-    if (!_followed.add('$roomId|$rootId')) return;
-    _refreshBadge(roomId);
+  void markFollowed(String roomId, String rootId) =>
+      _markFollowed(ThreadRef(roomId, rootId));
+
+  void _markFollowed(ThreadRef thread) {
+    if (!_followed.add(thread.key)) return;
+    _refreshBadge(thread.roomId);
     notifyListeners();
     _persist();
   }
 
   bool isFollowed(String roomId, String rootId) =>
-      _followed.contains('$roomId|$rootId');
+      _followed.contains(ThreadRef(roomId, rootId).key);
 
   /// A thread reply of the live timeline (any sender); the oldest ids go
   /// when the account holds more than [_maxThreadReplyIds].
@@ -267,8 +272,8 @@ class ThreadUnreadStore extends ChangeNotifier {
         rootEventId: entry.key,
         notificationCount: entry.value.notificationCount,
         highlightCount: entry.value.highlightCount,
-        followed: _followed.contains('$roomId|${entry.key}'),
-        lastActivity: _activity['$roomId|${entry.key}'],
+        followed: _followed.contains(ThreadRef(roomId, entry.key).key),
+        lastActivity: _activity[ThreadRef(roomId, entry.key).key],
       ),
   ];
 
@@ -278,43 +283,55 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// it already says "participated" the server is asked. A "no" is kept (the
   /// user's own event turns it into a follow); a failed call is asked again
   /// on the next increase of the counter.
-  Future<void> _resolveFollowed(String roomId, String rootId) async {
-    final key = '$roomId|$rootId';
-    if (_followed.contains(key) ||
-        _notFollowed.contains(key) ||
-        !_resolving.add(key)) {
-      return;
-    }
+  Future<void> _resolveFollowed(ThreadRef thread) async {
+    if (!_claimLookup(thread)) return;
     final epoch = _epoch;
     await _acquireLookupSlot();
     try {
-      if (epoch != _epoch) return;
-      final follow = await _lookupFollow(roomId, rootId, epoch);
-      if (follow == null || epoch != _epoch) return;
-      if (follow) {
-        markFollowed(roomId, rootId);
-      } else {
-        _notFollowed.add(key);
-      }
+      await _lookupAndRecord(thread, epoch);
     } catch (e, s) {
       Logs().w('Unable to tell if the thread is followed', e, s);
     } finally {
       _releaseLookupSlot();
-      _resolving.remove(key);
+      _resolving.remove(thread.key);
+    }
+  }
+
+  /// True when no answer is known and no lookup runs for the thread.
+  bool _claimLookup(ThreadRef thread) =>
+      !_isSettled(thread) && _resolving.add(thread.key);
+
+  bool _isSettled(ThreadRef thread) =>
+      _followed.contains(thread.key) || _notFollowed.contains(thread.key);
+
+  Future<void> _lookupAndRecord(ThreadRef thread, int epoch) async {
+    if (epoch != _epoch) return;
+    final follow = await _lookupFollow(thread, epoch);
+    if (follow == null || epoch != _epoch) return;
+    if (follow) {
+      _markFollowed(thread);
+    } else {
+      _notFollowed.add(thread.key);
     }
   }
 
   /// Local store first (no network), then at most one server request; null
   /// when the account was cleared meanwhile.
-  Future<bool?> _lookupFollow(String roomId, String rootId, int epoch) async {
-    final room = _client.getRoomById(roomId);
-    final stored = room == null
-        ? null
-        : await _client.database.getEventById(rootId, room);
+  Future<bool?> _lookupFollow(ThreadRef thread, int epoch) async {
+    final stored = await _storedRoot(thread);
     if (epoch != _epoch) return null;
     if (stored != null && _isParticipant(stored)) return true;
-    final fresh = await _client.getOneRoomEvent(roomId, rootId);
+    final fresh = await _client.getOneRoomEvent(
+      thread.roomId,
+      thread.rootEventId,
+    );
     return _isParticipant(fresh);
+  }
+
+  Future<Event?> _storedRoot(ThreadRef thread) async {
+    final room = _client.getRoomById(thread.roomId);
+    if (room == null) return null;
+    return _client.database.getEventById(thread.rootEventId, room);
   }
 
   bool _isParticipant(MatrixEvent event) =>
@@ -403,9 +420,11 @@ extension MarkRoomAndThreadsRead on Room {
     for (final thread in threads.where((t) => t.notificationCount > 0)) {
       final page = await const GetThreadRepliesInteractor().execute(
         room: this,
-        rootEventId: thread.rootEventId,
-        limit: 1,
-        decrypt: false,
+        request: ThreadRepliesRequest(
+          rootEventId: thread.rootEventId,
+          limit: 1,
+          decrypt: false,
+        ),
       );
       final last = page.replies.lastOrNull;
       if (last != null) lastByRoot[thread.rootEventId] = last.eventId;

@@ -11,13 +11,30 @@ class ThreadRepliesPage {
   bool get canLoadMore => nextBatch != null;
 }
 
-/// Loads the replies of a thread by pages, going up its history.
+/// What to load of a thread.
 ///
 /// [withRelations]: the thread screen also needs the edits and reactions of
 /// the replies, so it reads `/relations/<root>?recurse=true` with no
 /// `rel_type` filter (they come in [ThreadRepliesPage.replies] too); without
 /// it, `/relations/<root>/m.thread` gives the replies only.
 /// [decrypt]: false when only ids are read (mark as read).
+class ThreadRepliesRequest {
+  const ThreadRepliesRequest({
+    required this.rootEventId,
+    this.from,
+    this.limit = GetThreadRepliesInteractor.pageSize,
+    this.withRelations = false,
+    this.decrypt = true,
+  });
+
+  final String rootEventId;
+  final String? from;
+  final int limit;
+  final bool withRelations;
+  final bool decrypt;
+}
+
+/// Loads the replies of a thread by pages, going up its history.
 final class GetThreadRepliesInteractor {
   const GetThreadRepliesInteractor();
 
@@ -25,40 +42,15 @@ final class GetThreadRepliesInteractor {
 
   Future<ThreadRepliesPage> execute({
     required Room room,
-    required String rootEventId,
-    String? from,
-    int limit = pageSize,
-    bool withRelations = false,
-    bool decrypt = true,
+    required ThreadRepliesRequest request,
   }) async {
-    final ({List<MatrixEvent> chunk, String? nextBatch}) response;
-    if (withRelations) {
-      final r = await room.client.getRelatingEvents(
-        room.id,
-        rootEventId,
-        from: from,
-        limit: limit,
-        dir: Direction.b,
-        recurse: true,
-      );
-      response = (chunk: r.chunk, nextBatch: r.nextBatch);
-    } else {
-      final r = await room.client.getRelatingEventsWithRelType(
-        room.id,
-        rootEventId,
-        RelationshipTypes.thread,
-        from: from,
-        limit: limit,
-        dir: Direction.b,
-      );
-      response = (chunk: r.chunk, nextBatch: r.nextBatch);
-    }
+    final response = await _fetch(room, request);
     final replies = [
       for (final event in response.chunk.reversed)
         Event.fromMatrixEvent(event, room),
     ];
     // /relations returns the events as stored: decrypt them.
-    if (decrypt && _canDecrypt(room)) {
+    if (request.decrypt && _canDecrypt(room)) {
       for (var i = 0; i < replies.length; i++) {
         if (replies[i].type == EventTypes.Encrypted) {
           replies[i] = await room.client.encryption!.decryptRoomEvent(
@@ -68,6 +60,32 @@ final class GetThreadRepliesInteractor {
       }
     }
     return ThreadRepliesPage(replies: replies, nextBatch: response.nextBatch);
+  }
+
+  Future<({List<MatrixEvent> chunk, String? nextBatch})> _fetch(
+    Room room,
+    ThreadRepliesRequest request,
+  ) async {
+    if (request.withRelations) {
+      final r = await room.client.getRelatingEvents(
+        room.id,
+        request.rootEventId,
+        from: request.from,
+        limit: request.limit,
+        dir: Direction.b,
+        recurse: true,
+      );
+      return (chunk: r.chunk, nextBatch: r.nextBatch);
+    }
+    final r = await room.client.getRelatingEventsWithRelType(
+      room.id,
+      request.rootEventId,
+      RelationshipTypes.thread,
+      from: request.from,
+      limit: request.limit,
+      dir: Direction.b,
+    );
+    return (chunk: r.chunk, nextBatch: r.nextBatch);
   }
 
   bool _canDecrypt(Room room) =>

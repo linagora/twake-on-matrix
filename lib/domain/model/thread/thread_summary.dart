@@ -26,19 +26,12 @@ class ThreadSummary {
     Event root, {
     Iterable<Event> liveEvents = const [],
   }) {
-    final aggregate = root.unsigned
-        ?.tryGetMap<String, Object?>('m.relations')
-        ?.tryGetMap<String, Object?>('m.thread');
+    final aggregate = _aggregateOf(root);
     final serverLatest = _serverLatest(aggregate, root);
 
     // A redacted event loses its `m.relates_to`: match it by id.
-    final deletedIds = {
-      for (final e in liveEvents)
-        if (e.redacted) e.eventId,
-    };
-    final replies = liveEvents
-        .where((e) => e.threadRootId == root.eventId && !e.redacted)
-        .toList();
+    final deletedIds = _redactedIds(liveEvents);
+    final replies = _liveReplies(root, liveEvents);
     final fresh = replies.where((e) => _isFresh(e, serverLatest));
 
     final count = (aggregate?.tryGet<int>('count') ?? 0) + fresh.length;
@@ -56,6 +49,20 @@ class ThreadSummary {
       lastReplyText: last == null ? null : _textWithEdit(last, liveEvents),
     );
   }
+
+  static Map<String, Object?>? _aggregateOf(Event root) => root.unsigned
+      ?.tryGetMap<String, Object?>('m.relations')
+      ?.tryGetMap<String, Object?>('m.thread');
+
+  static Set<String> _redactedIds(Iterable<Event> liveEvents) => {
+    for (final e in liveEvents)
+      if (e.redacted) e.eventId,
+  };
+
+  static List<Event> _liveReplies(Event root, Iterable<Event> liveEvents) =>
+      liveEvents
+          .where((e) => e.threadRootId == root.eventId && !e.redacted)
+          .toList();
 
   static Event? _serverLatest(Map<String, Object?>? aggregate, Event root) {
     final latestJson = aggregate?.tryGetMap<String, Object?>('latest_event');

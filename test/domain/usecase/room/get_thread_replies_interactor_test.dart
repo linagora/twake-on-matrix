@@ -63,7 +63,10 @@ void main() {
       ),
     );
 
-    final page = await interactor.execute(room: room, rootEventId: rootId);
+    final page = await interactor.execute(
+      room: room,
+      request: const ThreadRepliesRequest(rootEventId: rootId),
+    );
 
     expect(page.replies.map((event) => event.eventId), [
       r'$r1',
@@ -80,7 +83,10 @@ void main() {
         (_) async => GetRelatingEventsWithRelTypeResponse(chunk: []),
       );
 
-      await interactor.execute(room: room, rootEventId: rootId);
+      await interactor.execute(
+        room: room,
+        request: const ThreadRepliesRequest(rootEventId: rootId),
+      );
 
       verify(
         client.getRelatingEventsWithRelType(
@@ -103,8 +109,7 @@ void main() {
 
     final page = await interactor.execute(
       room: room,
-      rootEventId: rootId,
-      from: 'batch-1',
+      request: const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
     );
 
     expect(page.replies.single.eventId, r'$r0');
@@ -129,8 +134,7 @@ void main() {
 
     final page = await interactor.execute(
       room: room,
-      rootEventId: rootId,
-      from: 'batch-1',
+      request: const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
     );
 
     expect(page.nextBatch, isNull);
@@ -145,7 +149,10 @@ void main() {
       ),
     );
 
-    final page = await interactor.execute(room: room, rootEventId: rootId);
+    final page = await interactor.execute(
+      room: room,
+      request: const ThreadRepliesRequest(rootEventId: rootId),
+    );
 
     expect(page.canLoadMore, isTrue);
   });
@@ -156,7 +163,10 @@ void main() {
           GetRelatingEventsWithRelTypeResponse(chunk: [reply(r'$r1', 1)]),
     );
 
-    final page = await interactor.execute(room: room, rootEventId: rootId);
+    final page = await interactor.execute(
+      room: room,
+      request: const ThreadRepliesRequest(rootEventId: rootId),
+    );
 
     expect(page.replies.single.room, same(room));
     expect(page.replies.single.body, r'reply $r1');
@@ -170,7 +180,10 @@ void main() {
       );
 
       expect(
-        interactor.execute(room: room, rootEventId: rootId),
+        interactor.execute(
+          room: room,
+          request: const ThreadRepliesRequest(rootEventId: rootId),
+        ),
         throwsA(isA<MatrixException>()),
       );
     },
