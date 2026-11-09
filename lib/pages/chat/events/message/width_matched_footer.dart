@@ -21,8 +21,9 @@ class WidthMatchedFooter extends MultiChildRenderObjectWidget {
   @override
   void updateRenderObject(
     BuildContext context,
-    _RenderWidthMatchedFooter renderObject,
-  ) => renderObject.textDirection = Directionality.of(context);
+    covariant RenderObject renderObject,
+  ) => (renderObject as _RenderWidthMatchedFooter).textDirection =
+      Directionality.of(context);
 }
 
 class _RenderWidthMatchedFooter extends RenderBox
@@ -32,6 +33,7 @@ class _RenderWidthMatchedFooter extends RenderBox
   _RenderWidthMatchedFooter(this._textDirection);
 
   TextDirection _textDirection;
+  TextDirection get textDirection => _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value) return;
     _textDirection = value;
@@ -73,9 +75,8 @@ class _RenderWidthMatchedFooter extends RenderBox
       Size(width, _body.size.height + _footer.size.height),
     );
     // Narrower than the box (tight constraints): start on the reading side.
-    double dx(RenderBox child) => _textDirection == TextDirection.rtl
-        ? size.width - child.size.width
-        : 0;
+    double dx(RenderBox child) =>
+        _textDirection == TextDirection.rtl ? size.width - child.size.width : 0;
     (_body.parentData! as MultiChildLayoutParentData).offset = Offset(
       dx(_body),
       0,

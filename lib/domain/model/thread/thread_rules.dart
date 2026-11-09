@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 abstract final class ThreadRules {
   static bool canStartThread(
@@ -44,8 +43,7 @@ abstract final class ThreadRules {
   /// counters, which the push rules fill (the ones without threads). A muted
   /// room: mention only.
   static bool shouldNotifyMainTimelineEvent(Room room) =>
-      room.notificationCount > 0 &&
-      (!room.isMuted || room.highlightCount > 0);
+      room.notificationCount > 0 && (!room.isMuted || room.highlightCount > 0);
 
   /// Whether a thread reply raises a local notification. The push rules
   /// ([pushActions], `client.pushruleEvaluator.match(event)`) decide first,
