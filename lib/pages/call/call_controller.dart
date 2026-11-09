@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/call/usecases/leave_call_usecase.provider.dart
 import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/pages/call/call_state.dart';
@@ -53,23 +54,26 @@ class CallController extends _$CallController {
         isVideo: isVideo,
         isCancelled: () => _isLeaveRequested,
       );
-      if (!ref.mounted) return;
-      if (room == null) {
-        state = const CallState.idle();
-        return;
-      }
-      state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
-      _participants = ref
-          .read(watchCallParticipantsUseCaseProvider)
-          .execute(roomId)
-          .listen(_onParticipants, onError: _onMediaLost);
-      if (_isLeaveRequested) await leave();
+      if (ref.mounted) await _onJoined(roomId, room);
     } catch (error) {
       if (!ref.mounted) return;
       state = _isLeaveRequested
           ? const CallState.idle()
           : CallState.failed(roomId: roomId, error: _typed(error));
     }
+  }
+
+  Future<void> _onJoined(String roomId, CallRoomInfo? room) async {
+    if (room == null) {
+      state = const CallState.idle();
+      return;
+    }
+    state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
+    _participants = ref
+        .read(watchCallParticipantsUseCaseProvider)
+        .execute(roomId)
+        .listen(_onParticipants, onError: _onMediaLost);
+    if (_isLeaveRequested) await leave();
   }
 
   static CallException _typed(Object error) => error is CallException
