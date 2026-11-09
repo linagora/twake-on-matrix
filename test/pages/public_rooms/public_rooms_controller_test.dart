@@ -426,6 +426,38 @@ void main() {
     expect(state.isLoadingMore, isTrue);
   });
 
+  test('build_whenReloadedDuringALookup_dropsTheOldLookup', () async {
+    // Arrange
+    final gate = Completer<void>();
+    repository
+      ..knocked = {'!old', '!new'}
+      ..lookupGate = gate;
+    final oldPages = StreamController<List<PublicRoom>>();
+    repository.directoryController = oldPages;
+    final container = makeContainer();
+    container.listen(publicRoomsControllerProvider, (_, _) {});
+    oldPages.add([publicRoom('!old', access: PublicRoomAccess.approval)]);
+    await container.read(publicRoomsControllerProvider.future);
+    await pumpEventQueue();
+    final newPages = StreamController<List<PublicRoom>>();
+    addTearDown(newPages.close);
+    repository.directoryController = newPages;
+
+    // Act
+    container.invalidate(publicRoomsControllerProvider);
+    container.read(publicRoomsControllerProvider);
+    await pumpEventQueue();
+    newPages.add([publicRoom('!new', access: PublicRoomAccess.approval)]);
+    await pumpEventQueue();
+    gate.complete();
+    await pumpEventQueue();
+
+    // Assert
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!new']);
+    expect(state.requestedRoomIds, {'!new'});
+  });
+
   test('build_whenTheFirstPageRepeatsARoom_listsItOnce', () async {
     // Arrange
     repository.pages = [
