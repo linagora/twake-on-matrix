@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 Widget mobileTwakeContextMenuBuilder(
   BuildContext context,
-  EditableTextState editableTextState,
-) {
+  EditableTextState editableTextState, {
+  Future<bool> Function()? onPasteImage,
+}) {
   // On iOS, SystemContextMenu (iOS 16+) avoids the clipboard permission alert
   // but only shows "Paste" when the clipboard holds plain text. URLs copied
   // from a browser are stored as public.url — a non-plain-text type — so the
@@ -16,9 +17,13 @@ Widget mobileTwakeContextMenuBuilder(
   //
   // Fix: build the button list from editableTextState.contextMenuButtonItems
   // and, when Paste is absent, add it explicitly. The injected Paste button
-  // routes through TextEdittingControllerExtension.pasteText() so that the
+  // hands a clipboard image to [onPasteImage], else it routes text
+  // through TextEdittingControllerExtension.pasteText() so that the
   // Formats.uri fallback and correct cursor/undo behaviour are preserved.
-  final buttonItems = _buttonItemsWithPaste(editableTextState);
+  final buttonItems = _buttonItemsWithPaste(
+    editableTextState,
+    onPasteImage: onPasteImage,
+  );
 
   if (SystemContextMenu.isSupported(context)) {
     // Use the native iOS 16+ menu (no clipboard permission alert).
@@ -47,8 +52,9 @@ Widget mobileTwakeContextMenuBuilder(
 /// guaranteed to be present when the clipboard is non-empty, regardless of
 /// content type (plain text, URL, image, etc.).
 List<ContextMenuButtonItem> _buttonItemsWithPaste(
-  EditableTextState editableTextState,
-) {
+  EditableTextState editableTextState, {
+  Future<bool> Function()? onPasteImage,
+}) {
   final items = editableTextState.contextMenuButtonItems;
   final hasPaste = items.any(
     (item) => item.type == ContextMenuButtonType.paste,
@@ -61,9 +67,10 @@ List<ContextMenuButtonItem> _buttonItemsWithPaste(
   final controller = editableTextState.widget.controller;
   final pasteItem = ContextMenuButtonItem(
     type: ContextMenuButtonType.paste,
-    onPressed: () {
+    onPressed: () async {
       editableTextState.hideToolbar();
-      controller.pasteText();
+      if (await onPasteImage?.call() ?? false) return;
+      await controller.pasteText();
     },
   );
 

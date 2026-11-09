@@ -480,6 +480,7 @@ class ChatInputRow extends StatelessWidget {
         ),
       ),
       onChanged: controller.onInputBarChanged,
+      onPasteImages: controller.onPasteImages,
     );
   }
 }

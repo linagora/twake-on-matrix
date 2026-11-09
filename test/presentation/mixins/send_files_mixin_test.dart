@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
@@ -13,6 +15,8 @@ import 'package:image_picker_platform_interface/image_picker_platform_interface.
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+// ignore: depend_on_referenced_packages
+import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 
 import 'send_files_mixin_test.mocks.dart';
 
@@ -29,6 +33,15 @@ class _FakeImagePickerPlatform extends ImagePickerPlatform {
     if (error != null) throw error!;
     return media;
   }
+}
+
+class _FakePathProvider extends PathProviderPlatform {
+  _FakePathProvider(this.path);
+
+  final String path;
+
+  @override
+  Future<String?> getTemporaryPath() async => path;
 }
 
 @GenerateNiceMocks([
@@ -308,6 +321,102 @@ void main() {
         ),
       );
       expect(callbackCalled, isFalse);
+    });
+  });
+
+  group('sendPastedImagesNative', () {
+    late Directory tempDir;
+    late PathProviderPlatform originalPathProvider;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('pasted_images_test');
+      originalPathProvider = PathProviderPlatform.instance;
+      PathProviderPlatform.instance = _FakePathProvider(tempDir.path);
+    });
+
+    tearDown(() {
+      PathProviderPlatform.instance = originalPathProvider;
+      tempDir.deleteSync(recursive: true);
+    });
+
+    testWidgets(
+      'writes the pasted image to a file and sends it like a picked one',
+      (tester) async {
+        final bytes = Uint8List.fromList([1, 2, 3, 4]);
+        final replyEvent = MockEvent();
+        var callbackCalled = false;
+
+        await withContext(tester, (context) async {
+          await tester.runAsync(
+            () => mixin.sendPastedImagesNative(
+              context,
+              room: room,
+              images: [
+                MatrixImageFile(
+                  bytes: bytes,
+                  name: 'copied',
+                  mimeType: 'image/png',
+                  width: 40,
+                  height: 30,
+                ),
+              ],
+              caption: 'draft',
+              inReplyTo: replyEvent,
+              onSendCallback: () => callbackCalled = true,
+            ),
+          );
+        });
+
+        final captured =
+            verify(
+                  uploadManager.uploadFileMobile(
+                    room: room,
+                    fileInfos: captureAnyNamed('fileInfos'),
+                    caption: 'draft',
+                    inReplyTo: replyEvent,
+                  ),
+                ).captured.single
+                as List<FileInfo>;
+
+        final image = captured.single as ImageFileInfo;
+        expect(image.fileName, endsWith('.png'));
+        expect(image.mimeType, 'image/png');
+        expect(image.width, 40);
+        expect(image.height, 30);
+        expect(File(image.filePath!).readAsBytesSync(), bytes);
+        expect(callbackCalled, isTrue);
+      },
+    );
+
+    testWidgets('sends nothing when the user cancels the preview', (
+      tester,
+    ) async {
+      dialogOutcome = (_, __) => null;
+
+      await withContext(tester, (context) async {
+        await tester.runAsync(
+          () => mixin.sendPastedImagesNative(
+            context,
+            room: room,
+            images: [
+              MatrixImageFile(
+                bytes: Uint8List.fromList([1]),
+                name: 'copied',
+                mimeType: 'image/png',
+              ),
+            ],
+          ),
+        );
+      });
+
+      verifyNever(
+        uploadManager.uploadFileMobile(
+          room: anyNamed('room'),
+          fileInfos: anyNamed('fileInfos'),
+          caption: anyNamed('caption'),
+          inReplyTo: anyNamed('inReplyTo'),
+        ),
+      );
     });
   });
 }

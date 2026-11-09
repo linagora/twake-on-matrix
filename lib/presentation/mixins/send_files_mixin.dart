@@ -15,6 +15,9 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart' as native_picker;
 import 'package:linagora_design_flutter/images_picker/images_picker.dart';
 import 'package:matrix/matrix.dart';
+import 'package:mime/mime.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 /// Presents the preview + caption sheet for natively-picked media and resolves
 /// to the user's choice (`null` = cancelled). Injectable so unit tests can drive
@@ -81,7 +84,7 @@ mixin SendFilesMixin {
     // runs after the placeholder events are in the timeline, not before the
     // upload begins — keeps ordering deterministic and shrinks the window where
     // the callback's async work could race a widget dispose.
-    final uploadManager = getIt.get<UploadManager>();
+    final uploadManager = _uploadManager;
     await uploadManager.uploadFileMobile(
       room: room,
       fileInfos: result.files,
@@ -122,7 +125,7 @@ mixin SendFilesMixin {
       return;
     }
     final selectedAssets = imagePickerController.sortedSelectedAssets;
-    final uploadManger = getIt.get<UploadManager>();
+    final uploadManger = _uploadManager;
     uploadManger.uploadMediaMobile(
       room: room,
       entities: selectedAssets.map<FileAssetEntity>((entity) {
@@ -158,7 +161,7 @@ mixin SendFilesMixin {
     // Await the queueing pass before clearing composer/reply state so the
     // callback runs after the placeholder events exist, mirroring
     // [pickAndSendMediaNative] and avoiding a callback-vs-dispose race.
-    final uploadManger = getIt.get<UploadManager>();
+    final uploadManger = _uploadManager;
     await uploadManger.uploadFileMobile(
       room: room,
       fileInfos: fileInfos,
@@ -202,5 +205,49 @@ mixin SendFilesMixin {
       case PickerType.contact:
         break;
     }
+  }
+
+  UploadManager get _uploadManager => getIt.get<UploadManager>();
+
+  Future<void> sendPastedImagesNative(
+    BuildContext context, {
+    Room? room,
+    required List<MatrixFile> images,
+    String? caption,
+    Event? inReplyTo,
+    VoidCallback? onSendCallback,
+  }) async {
+    if (room == null || images.isEmpty) return;
+    final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
+    if (!context.mounted) return;
+    final result = await mediaCaptionDialogPresenter(
+      context,
+      files: fileInfos,
+      room: room,
+      pendingText: caption,
+    );
+    if (result == null || result.files.isEmpty) return;
+    await _uploadManager.uploadFileMobile(
+      room: room,
+      fileInfos: result.files,
+      caption: result.caption,
+      inReplyTo: inReplyTo,
+    );
+    onSendCallback?.call();
+  }
+
+  // The preview and the upload read media from a path; a pasted image has none.
+  Future<FileInfo> _writeToTemporaryFile(MatrixFile image) async {
+    final extension = extensionFromMime(image.mimeType);
+    final name = 'pasted_${DateTime.now().microsecondsSinceEpoch}.$extension';
+    final file = File('${(await getTemporaryDirectory()).path}/$name');
+    await file.writeAsBytes(image.bytes);
+    return ImageFileInfo(
+      name,
+      filePath: file.path,
+      customMimeType: image.mimeType,
+      width: (image.info['w'] as num?)?.toInt(),
+      height: (image.info['h'] as num?)?.toInt(),
+    );
   }
 }
