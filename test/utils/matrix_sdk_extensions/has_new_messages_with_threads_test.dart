@@ -276,6 +276,72 @@ void main() {
     });
   });
 
+  /// THR-M-09, MSC3771: an own receipt with `thread_id: main` reads the main
+  /// timeline only. A thread reply is read by the receipt of its thread or
+  /// by an unthreaded one, never by a `main` one, however recent.
+  group('the last event is a reply of a followed thread', () {
+    Room roomWithLastReply(LatestReceiptState receipts) => roomWith(
+      receipts: receipts,
+      lastEvent: (room) => message(
+        room,
+        eventId: r'$reply',
+        minute: 5,
+        relatesTo: threadRelation(rootId),
+      ),
+    );
+
+    setUp(() => threadCounters(rootId, followed: true));
+
+    test('a newer own main receipt does not read it: the room still has new '
+        'messages', () {
+      final room = roomWithLastReply(
+        LatestReceiptState(
+          global: staleGlobal(),
+          mainThread: own(receipt(r'$main_after', 7)),
+        ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isTrue);
+    });
+
+    test('a newer own main receipt and an older receipt of the thread: the '
+        'room still has new messages', () {
+      final room = roomWithLastReply(
+        LatestReceiptState(
+          global: staleGlobal(),
+          mainThread: own(receipt(r'$main_after', 7)),
+          byThread: {rootId: own(receipt(r'$older_reply', 2))},
+        ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isTrue);
+    });
+
+    test('a newer own receipt of the thread reads it', () {
+      final room = roomWithLastReply(
+        LatestReceiptState(
+          global: staleGlobal(),
+          mainThread: own(receipt(r'$main_after', 7)),
+          byThread: {rootId: own(receipt(r'$reply', 6))},
+        ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isFalse);
+    });
+
+    test('a newer unthreaded own receipt reads it', () {
+      // A client of the account that still sends unthreaded receipts.
+      final room = roomWithLastReply(
+        LatestReceiptState(
+          global: own(receipt(r'$reply', 6)),
+          mainThread: own(receipt(r'$before', 1)),
+        ),
+      );
+
+      expect(room.hasNewMessagesWithThreads, isFalse);
+    });
+  });
+
   group('rules kept from the SDK', () {
     test('the last event sent by the user is not a new message', () {
       final room = roomWith(
