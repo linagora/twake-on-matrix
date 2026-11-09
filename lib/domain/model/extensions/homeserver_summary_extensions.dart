@@ -82,21 +82,22 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
       _firstLiveKitUrl((focus) => focus.livekitServiceUrl);
 
   String? _firstLiveKitUrl(Uri? Function(RtcFocus focus) urlOf) {
-    if (discoveryInformation?.additionalProperties == null) {
-      return null;
+    for (final focus in _liveKitFoci) {
+      final url = urlOf(focus)?.toString() ?? '';
+      if (url.isEmpty) continue;
+      return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
     }
+    return null;
+  }
+
+  Iterable<RtcFocus> get _liveKitFoci sync* {
     final rtcFociJson =
         discoveryInformation?.additionalProperties[RtcFocus.rtcFociKey];
-    if (rtcFociJson is! List) {
-      return null;
-    }
-    for (final focusJson in rtcFociJson) {
-      if (focusJson is! Map) continue;
+    if (rtcFociJson is! List) return;
+    for (final focusJson in rtcFociJson.whereType<Map>()) {
       try {
         final focus = RtcFocus.fromJson(Map<String, dynamic>.from(focusJson));
-        final url = urlOf(focus)?.toString();
-        if (!focus.isLiveKit || url == null || url.isEmpty) continue;
-        return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
+        if (focus.isLiveKit) yield focus;
       } catch (e, s) {
         Logs().wtf(
           'Failed to parse ${RtcFocus.rtcFociKey} from homeserver summary',
@@ -105,7 +106,6 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
         );
       }
     }
-    return null;
   }
 }
 

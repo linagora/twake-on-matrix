@@ -69,13 +69,16 @@ class CallController extends _$CallController {
   void _onParticipants(List<CallParticipant> participants) {
     final current = state;
     if (current is! CallConnected) return;
-    final hadOthers = current.participants.any((p) => !p.isLocal);
     state = current.copyWith(participants: participants);
     // DECISION.md D14: a direct call ends when the other person leaves.
-    if (current.isDirect && hadOthers && participants.every((p) => p.isLocal)) {
+    if (!current.isDirect) return;
+    if (_hasOthers(current.participants) && !_hasOthers(participants)) {
       unawaited(leave());
     }
   }
+
+  static bool _hasOthers(List<CallParticipant> participants) =>
+      participants.any((p) => !p.isLocal);
 
   /// Hanging up is immediate for the user; the membership ends behind it.
   Future<void> leave() async {
