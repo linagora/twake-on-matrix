@@ -63,7 +63,13 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
       return TwakeIconButton(
         icon: Icons.videocam_outlined,
         tooltip: l10n.startCall,
-        onTap: () => unawaited(CallScreen.open(context, room)),
+        onTap: () => unawaited(
+          CallScreen.open(
+            context,
+            roomId: room.id,
+            title: room.getLocalizedDisplayname(),
+          ),
+        ),
         preferBelow: false,
       );
     }

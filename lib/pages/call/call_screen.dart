@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart' show Room;
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -12,19 +11,23 @@ import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_state.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 
-/// The call of [room] (DECISION.md D15): before it, in it, or why it failed.
+/// The call of a room (DECISION.md D15): before it, in it, or why it failed.
 class CallScreen extends ConsumerStatefulWidget {
-  const CallScreen({required this.room, super.key});
+  const CallScreen({required this.roomId, required this.title, super.key});
 
-  final Room room;
+  final String roomId;
+  final String title;
 
-  static Future<void> open(BuildContext context, Room room) =>
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          fullscreenDialog: true,
-          builder: (_) => CallScreen(room: room),
-        ),
-      );
+  static Future<void> open(
+    BuildContext context, {
+    required String roomId,
+    required String title,
+  }) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      fullscreenDialog: true,
+      builder: (_) => CallScreen(roomId: roomId, title: title),
+    ),
+  );
 
   @override
   ConsumerState<CallScreen> createState() => _CallScreenState();
@@ -36,14 +39,14 @@ class _CallScreenState extends ConsumerState<CallScreen> {
   void _join() => unawaited(
     ref
         .read(callControllerProvider.notifier)
-        .join(widget.room.id, isVideo: false),
+        .join(widget.roomId, isVideo: false),
   );
 
   bool _isThisRoom(CallState state) => switch (state) {
     CallIdle() => false,
     CallConnecting(:final roomId) ||
     CallConnected(:final roomId) ||
-    CallFailed(:final roomId) => roomId == widget.room.id,
+    CallFailed(:final roomId) => roomId == widget.roomId,
   };
 
   @override
@@ -75,7 +78,7 @@ class _CallScreenState extends ConsumerState<CallScreen> {
           leading: CloseButton(color: onDark),
           systemOverlayStyle: SystemUiOverlayStyle.light,
           title: Text(
-            widget.room.getLocalizedDisplayname(),
+            widget.title,
             style: textStyle.titleMedium.copyWith(color: onDark),
             overflow: TextOverflow.ellipsis,
           ),
@@ -102,7 +105,6 @@ class _CallScreenState extends ConsumerState<CallScreen> {
               ),
             ),
             CallConnected(:final participants) => _CallStage(
-              room: widget.room,
               participants: participants,
             ),
           },
@@ -158,9 +160,8 @@ class _CallMessage extends StatelessWidget {
 }
 
 class _CallStage extends ConsumerWidget {
-  const _CallStage({required this.room, required this.participants});
+  const _CallStage({required this.participants});
 
-  final Room room;
   final List<CallParticipant> participants;
 
   @override
@@ -182,7 +183,7 @@ class _CallStage extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 for (final participant in participants)
-                  _CallTile(room: room, participant: participant),
+                  _CallTile(participant: participant),
               ],
             ),
           ),
@@ -218,19 +219,18 @@ class _CallStage extends ConsumerWidget {
 }
 
 class _CallTile extends StatelessWidget {
-  const _CallTile({required this.room, required this.participant});
+  const _CallTile({required this.participant});
 
   static const _width = 160.0;
   static const _avatarSize = 64.0;
 
-  final Room room;
   final CallParticipant participant;
 
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final user = room.unsafeGetUserFromMemoryOrFallback(participant.userId);
-    final name = participant.isLocal ? l10n.you : user.calcDisplayname();
+    final displayName = participant.displayName ?? participant.userId;
+    final name = participant.isLocal ? l10n.you : displayName;
     final onDark = LinagoraSysColors.material().onPrimary;
     final textStyle = LinagoraTextStyle.material();
     return Semantics(
@@ -255,8 +255,8 @@ class _CallTile extends StatelessWidget {
         child: Column(
           children: [
             Avatar(
-              mxContent: user.avatarUrl,
-              name: user.calcDisplayname(),
+              mxContent: participant.avatarUrl,
+              name: displayName,
               size: _avatarSize,
             ),
             const SizedBox(height: 8),

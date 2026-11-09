@@ -96,5 +96,6 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  Stream<List<CallParticipant>> watchParticipants() => participants.stream;
+  Stream<List<CallParticipant>> watchParticipants(String roomId) =>
+      participants.stream;
 }

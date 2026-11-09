@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:matrix/matrix.dart' hide CallState;
 import 'package:twake_chat/data/repository/call/call_repository.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -15,34 +14,6 @@ import '../../domain/call/fake_call_repository.dart';
 import 'call_controller_test.dart' show summaryWithFoci;
 
 const _roomId = '!room:hs.test';
-
-class _FakeClient extends Fake implements Client {
-  @override
-  bool get formatLocalpart => true;
-
-  @override
-  bool get mxidLocalPartFallback => true;
-}
-
-class _FakeRoom extends Fake implements Room {
-  @override
-  final Client client = _FakeClient();
-
-  @override
-  String get id => _roomId;
-
-  @override
-  String getLocalizedDisplayname([
-    MatrixLocalizations i18n = const MatrixDefaultLocalizations(),
-  ]) => 'Team';
-
-  @override
-  User unsafeGetUserFromMemoryOrFallback(String userId) => User(
-    userId,
-    room: this,
-    displayName: userId == '@alice:hs.test' ? 'Alice' : null,
-  );
-}
 
 void main() {
   late FakeCallRepository repository;
@@ -79,7 +50,8 @@ void main() {
           supportedLocales: L10n.supportedLocales,
           home: Builder(
             builder: (context) => TextButton(
-              onPressed: () => CallScreen.open(context, _FakeRoom()),
+              onPressed: () =>
+                  CallScreen.open(context, roomId: _roomId, title: 'Team'),
               child: const Text('open'),
             ),
           ),
@@ -95,7 +67,9 @@ void main() {
     await tester.pump();
     repository.participants.add([
       participant('@bob:hs.test:BOB', isLocal: true),
-      participant('@alice:hs.test:ALICE').copyWith(isMicrophoneOn: false),
+      participant(
+        '@alice:hs.test:ALICE',
+      ).copyWith(isMicrophoneOn: false, displayName: 'Alice'),
     ]);
     await tester.pump();
   }

@@ -115,6 +115,17 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
+  ({String? displayName, Uri? avatarUrl}) memberProfile({
+    required String roomId,
+    required String userId,
+  }) {
+    final user = _maybeClient
+        ?.getRoomById(roomId)
+        ?.unsafeGetUserFromMemoryOrFallback(userId);
+    return (displayName: user?.calcDisplayname(), avatarUrl: user?.avatarUrl);
+  }
+
+  @override
   Future<CallServer> fetchServer({
     required String roomId,
     required String serviceUrl,

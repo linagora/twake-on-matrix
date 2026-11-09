@@ -8,7 +8,7 @@ void main() {
     final repository = FakeCallRepository();
     final everyone = [participant('@me:hs.test:DEV', isLocal: true)];
 
-    final next = WatchCallParticipantsUseCase(repository).execute().first;
+    final next = WatchCallParticipantsUseCase(repository).execute('!r').first;
     repository.participants.add(everyone);
 
     expect(await next, everyone);

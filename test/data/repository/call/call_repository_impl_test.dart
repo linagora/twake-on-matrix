@@ -15,6 +15,12 @@ class _FakeRtc implements MatrixRtcDatasource {
       const CallRoomInfo(isEncrypted: false, isDirect: true);
 
   @override
+  ({String? displayName, Uri? avatarUrl}) memberProfile({
+    required String roomId,
+    required String userId,
+  }) => (displayName: '$userId in $roomId', avatarUrl: Uri.parse('mxc://a'));
+
+  @override
   Future<CallServer> fetchServer({
     required String roomId,
     required String serviceUrl,
@@ -41,6 +47,7 @@ class _FakeRtc implements MatrixRtcDatasource {
 
 class _FakeMedia implements CallMediaDatasource {
   final calls = <String>[];
+  var participants = const <CallParticipant>[];
 
   @override
   Future<void> connect(
@@ -64,7 +71,8 @@ class _FakeMedia implements CallMediaDatasource {
       calls.add('camera $isOn');
 
   @override
-  Stream<List<CallParticipant>> watchParticipants() => const Stream.empty();
+  Stream<List<CallParticipant>> watchParticipants() =>
+      Stream.value(participants);
 }
 
 void main() {
@@ -118,5 +126,23 @@ void main() {
       'disconnect',
     ]);
     expect(rtc.calls, isEmpty);
+  });
+
+  test('watchParticipants_always_addsTheProfileOfEachMember', () async {
+    media.participants = const [
+      CallParticipant(
+        id: '@bob:hs:BOB',
+        userId: '@bob:hs',
+        isLocal: false,
+        isMicrophoneOn: true,
+        isCameraOn: false,
+        isSpeaking: false,
+      ),
+    ];
+
+    final participants = await repository.watchParticipants('!r').first;
+
+    expect(participants.single.displayName, '@bob:hs in !r');
+    expect(participants.single.avatarUrl, Uri.parse('mxc://a'));
   });
 }

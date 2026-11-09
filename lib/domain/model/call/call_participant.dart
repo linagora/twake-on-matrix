@@ -13,5 +13,7 @@ abstract class CallParticipant with _$CallParticipant {
     required bool isMicrophoneOn,
     required bool isCameraOn,
     required bool isSpeaking,
+    String? displayName,
+    Uri? avatarUrl,
   }) = _CallParticipant;
 }

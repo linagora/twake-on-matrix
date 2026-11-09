@@ -3,6 +3,11 @@ import 'package:twake_chat/domain/model/call/call_models.dart';
 abstract class MatrixRtcDatasource {
   CallRoomInfo getRoomInfo(String roomId);
 
+  ({String? displayName, Uri? avatarUrl}) memberProfile({
+    required String roomId,
+    required String userId,
+  });
+
   Future<CallServer> fetchServer({
     required String roomId,
     required String serviceUrl,

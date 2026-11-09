@@ -34,5 +34,5 @@ abstract class CallRepository {
   Future<void> setCamera({required bool isOn});
 
   /// Emits the participants on each change while the media is connected.
-  Stream<List<CallParticipant>> watchParticipants();
+  Stream<List<CallParticipant>> watchParticipants(String roomId);
 }

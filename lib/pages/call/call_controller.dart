@@ -46,7 +46,7 @@ class CallController extends _$CallController {
       state = CallState.connected(roomId: roomId, isDirect: room.isDirect);
       _participants = ref
           .read(watchCallParticipantsUseCaseProvider)
-          .execute()
+          .execute(roomId)
           .listen(_onParticipants);
       if (_isLeaveRequested) await leave();
     } on CallException catch (error) {

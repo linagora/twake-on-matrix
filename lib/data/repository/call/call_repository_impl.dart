@@ -63,6 +63,22 @@ class CallRepositoryImpl implements CallRepository {
   Future<void> setCamera({required bool isOn}) => _media.setCamera(isOn: isOn);
 
   @override
-  Stream<List<CallParticipant>> watchParticipants() =>
-      _media.watchParticipants();
+  Stream<List<CallParticipant>> watchParticipants(String roomId) =>
+      _media.watchParticipants().map(
+        (participants) => [
+          for (final participant in participants)
+            _withProfile(roomId, participant),
+        ],
+      );
+
+  CallParticipant _withProfile(String roomId, CallParticipant participant) {
+    final profile = _rtc.memberProfile(
+      roomId: roomId,
+      userId: participant.userId,
+    );
+    return participant.copyWith(
+      displayName: profile.displayName,
+      avatarUrl: profile.avatarUrl,
+    );
+  }
 }

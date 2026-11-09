@@ -6,5 +6,6 @@ class WatchCallParticipantsUseCase {
 
   final CallRepository _repository;
 
-  Stream<List<CallParticipant>> execute() => _repository.watchParticipants();
+  Stream<List<CallParticipant>> execute(String roomId) =>
+      _repository.watchParticipants(roomId);
 }
