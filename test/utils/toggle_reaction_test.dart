@@ -26,6 +26,9 @@ void main() {
       calls.add('redact ${key ?? 'no key'}');
       return r'$redaction';
     });
+    when(event.cancelSend()).thenAnswer((_) async {
+      calls.add('cancel ${key ?? 'no key'}');
+    });
     return event;
   }
 
@@ -169,7 +172,7 @@ void main() {
     expect(calls, ['send 🎉', 'redact malformed', 'redact 👍']);
   });
 
-  test('never redacts a reaction whose send failed', () async {
+  test('drops a reaction whose send failed instead of redacting it', () async {
     await run(
       emoji: '🎉',
       mine: [
@@ -177,13 +180,22 @@ void main() {
         reaction('😂', status: EventStatus.error),
       ],
     );
-    expect(calls, ['send 🎉', 'redact 👍']);
+    expect(calls, ['send 🎉', 'redact 👍', 'cancel 😂']);
   });
 
-  test('sends when my only reaction is one whose send failed', () async {
+  test('sends then drops my only reaction whose send failed', () async {
     await run(
       emoji: '🎉',
       mine: [reaction('😂', status: EventStatus.error)],
+    );
+    expect(calls, ['send 🎉', 'cancel 😂']);
+  });
+
+  test('keeps a failed reaction when the new one is not sent', () async {
+    await run(
+      emoji: '🎉',
+      mine: [reaction('😂', status: EventStatus.error)],
+      sent: false,
     );
     expect(calls, ['send 🎉']);
   });

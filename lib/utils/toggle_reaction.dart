@@ -22,6 +22,8 @@ String? _keyOf(Event reaction) => reaction.content
 ///   and keep my other reactions.
 /// - Another emoji: send [emoji], then, only if it was sent, remove all my
 ///   sent reactions so a leftover from a failed change goes too.
+///
+/// Once [emoji] is sent, my reactions whose send failed are dropped.
 Future<void> toggleReaction({
   required String emoji,
   required List<Event> myReactions,
@@ -29,8 +31,11 @@ Future<void> toggleReaction({
 }) async {
   if (myReactions.any((e) => e.status.isSending)) return;
   final sent = myReactions.where((e) => e.status.isSent).toList();
+  final failed = myReactions.where((e) => e.status.isError).toList();
   if (sent.isEmpty) {
-    await sendReaction();
+    if (await sendReaction()) {
+      await Future.wait(failed.map((e) => e.cancelSend()));
+    }
     return;
   }
   final same = sent.where((e) => _isSameReaction(emoji, _keyOf(e)));
@@ -40,5 +45,8 @@ Future<void> toggleReaction({
   }
   // A redaction synced before the new local echo would empty the row (#2364).
   if (!await sendReaction()) return;
-  await Future.wait(sent.map((e) => e.redactEvent()));
+  await Future.wait([
+    ...sent.map((e) => e.redactEvent()),
+    ...failed.map((e) => e.cancelSend()),
+  ]);
 }
