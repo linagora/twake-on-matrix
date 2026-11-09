@@ -159,7 +159,7 @@ void main() {
       );
     });
 
-    testWidgets('build_withATokenServiceInAnEncryptedRoom_isHidden', (
+    testWidgets('build_withATokenServiceInAnEncryptedRoom_offersTheCall', (
       tester,
     ) async {
       // Arrange
@@ -169,7 +169,7 @@ void main() {
       await pumpButton(tester, withTokenService: true);
 
       // Assert
-      expect(find.byType(TwakeIconButton), findsNothing);
+      expect(find.byTooltip('Start Call'), findsOneWidget);
     });
 
     testWidgets(
