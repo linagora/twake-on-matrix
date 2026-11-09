@@ -3516,9 +3516,12 @@ class ChatController extends ConsumerState<Chat>
 
     // Fallback for hash-URL edge cases before GoRouter has settled.
     if (!PlatformInfos.isWeb) return null;
-    return Uri.tryParse(
+    final fragment = Uri.tryParse(
       Uri.tryParse(html.window.location.href)?.fragment ?? '',
-    )?.queryParameters['event'];
+    );
+    return fragment == null
+        ? null
+        : ThreadRules.highlightEventIdFromUri(fragment, isThread: isThread);
   }
 
   @override

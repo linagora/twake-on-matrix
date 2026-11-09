@@ -537,8 +537,8 @@ class _MessageContentWithTimestampBuilderState
             child: DisplayNameWidget(event: widget.event),
           )
         : null;
-    // The card takes the width of the bubble, which the root alone decides
-    // (the bubble shrinks to its content).
+    // Fit-content: the bubble widens to the card's whole last-reply line, up
+    // to the widest bubble.
     final bubbleContent = card != null
         ? WidthMatchedFooter(
             body: Column(
