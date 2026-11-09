@@ -87,6 +87,17 @@ void main() {
     );
   });
 
+  test('join_whenAnUntypedErrorEscapes_failsAndCanJoinAgain', () async {
+    repository.staleError = StateError('database closed');
+
+    await controller().join('!room', isVideo: false);
+
+    expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
+    repository.staleError = null;
+    await controller().join('!room', isVideo: false);
+    expect(state(), isA<CallConnected>());
+  });
+
   test('without a token service the call fails as unavailable', () async {
     container.read(loginHomeserverSummaryProvider.notifier).set(null);
 
@@ -111,26 +122,29 @@ void main() {
     expect((state() as CallConnected).participants, everyone);
   });
 
-  test('a direct call ends when the other one leaves (D324)', () async {
-    repository.roomInfo = const CallRoomInfo(
-      isEncrypted: false,
-      isDirect: true,
-    );
-    await controller().join('!dm', isVideo: false);
-    repository.participants.add([
-      participant('@me:hs.test:DEV', isLocal: true),
-      participant('@bob:hs.test:BOB'),
-    ]);
-    await pumpEventQueue();
+  test(
+    'a direct call ends when the other one leaves (DECISION.md D14)',
+    () async {
+      repository.roomInfo = const CallRoomInfo(
+        isEncrypted: false,
+        isDirect: true,
+      );
+      await controller().join('!dm', isVideo: false);
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+        participant('@bob:hs.test:BOB'),
+      ]);
+      await pumpEventQueue();
 
-    repository.participants.add([
-      participant('@me:hs.test:DEV', isLocal: true),
-    ]);
-    await pumpEventQueue();
+      repository.participants.add([
+        participant('@me:hs.test:DEV', isLocal: true),
+      ]);
+      await pumpEventQueue();
 
-    expect(state(), const CallState.idle());
-    expect(repository.calls, containsAllInOrder(['leave !dm', 'disconnect']));
-  });
+      expect(state(), const CallState.idle());
+      expect(repository.calls, containsAllInOrder(['leave !dm', 'disconnect']));
+    },
+  );
 
   test('a group call goes on alone', () async {
     await controller().join('!room', isVideo: false);

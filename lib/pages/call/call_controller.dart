@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/leave_call_usecase.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
@@ -18,6 +19,8 @@ part 'call_controller.g.dart';
 @Riverpod(keepAlive: true)
 class CallController extends _$CallController {
   StreamSubscription<List<CallParticipant>>? _participants;
+  // Read at join: after an account switch it still holds the joining client.
+  LeaveCallUseCase? _leaveCall;
   var _isLeaveRequested = false;
 
   @override
@@ -33,6 +36,7 @@ class CallController extends _$CallController {
     _isLeaveRequested = false;
     state = CallState.connecting(roomId: roomId);
     final joinCall = ref.read(joinCallUseCaseProvider);
+    _leaveCall = ref.read(leaveCallUseCaseProvider);
     final serviceUrl = ref
         .read(loginHomeserverSummaryProvider)
         ?.callTokenServiceUrl;
@@ -49,11 +53,16 @@ class CallController extends _$CallController {
           .execute(roomId)
           .listen(_onParticipants);
       if (_isLeaveRequested) await leave();
-    } on CallException catch (error) {
+    } catch (error) {
       if (!ref.mounted) return;
       state = _isLeaveRequested
           ? const CallState.idle()
-          : CallState.failed(roomId: roomId, error: error);
+          : CallState.failed(
+              roomId: roomId,
+              error: error is CallException
+                  ? error
+                  : CallConnectionFailedException(cause: error),
+            );
     }
   }
 
@@ -76,14 +85,16 @@ class CallController extends _$CallController {
       return;
     }
     if (current is! CallConnected) return;
-    final leaveCall = ref.read(leaveCallUseCaseProvider);
+    final LeaveCallUseCase leaveCall =
+        _leaveCall ?? ref.read(leaveCallUseCaseProvider);
+    _leaveCall = null;
     final participants = _participants;
     _participants = null;
     state = const CallState.idle();
     await participants?.cancel();
     try {
       await leaveCall.execute(current.roomId);
-    } on CallException {
+    } catch (_) {
       // The delayed leave of the homeserver ends the membership.
     }
   }

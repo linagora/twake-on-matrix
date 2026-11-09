@@ -158,7 +158,11 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> endStaleOwnMembership(String roomId) async {
     final room = _room(roomId);
-    await room.postLoad();
+    try {
+      await room.postLoad();
+    } catch (error) {
+      throw CallMembershipFailedException(cause: error);
+    }
     final stateKey = _ownStateKey(room);
     final deviceId = room
         .getState(memberEventType, stateKey)
@@ -262,7 +266,13 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       unawaited(
         _client
             .manageDelayedEvent(delayId, DelayedEventAction.cancel)
-            .catchError((_) {}),
+            .catchError(
+              (Object error, StackTrace stackTrace) => Logs().w(
+                'MatrixRtcDatasource: delayed leave not cancelled',
+                error,
+                stackTrace,
+              ),
+            ),
       );
       return;
     }

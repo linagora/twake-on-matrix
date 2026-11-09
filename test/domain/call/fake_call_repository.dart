@@ -33,6 +33,7 @@ class FakeCallRepository implements CallRepository {
   CallException? joinError;
   CallException? leaveError;
   CallException? mediaError;
+  Object? staleError;
 
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
@@ -51,8 +52,10 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  Future<void> endStaleOwnMembership(String roomId) async =>
-      calls.add('endStale $roomId');
+  Future<void> endStaleOwnMembership(String roomId) async {
+    calls.add('endStale $roomId');
+    if (staleError case final error?) throw error;
+  }
 
   @override
   Future<void> joinMembership({

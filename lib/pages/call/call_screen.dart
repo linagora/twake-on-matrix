@@ -167,7 +167,6 @@ class _CallStage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
-    final controller = ref.read(callControllerProvider.notifier);
     final isMicrophoneOn = participants
         .where((participant) => participant.isLocal)
         .any((participant) => participant.isMicrophoneOn);
@@ -199,8 +198,11 @@ class _CallStage extends ConsumerWidget {
                 icon: isMicrophoneOn ? Icons.mic : Icons.mic_off,
                 color: isMicrophoneOn ? null : danger,
                 isSelected: isMicrophoneOn,
-                onPressed: () =>
-                    unawaited(controller.setMicrophone(isOn: !isMicrophoneOn)),
+                onPressed: () => unawaited(
+                  ref
+                      .read(callControllerProvider.notifier)
+                      .setMicrophone(isOn: !isMicrophoneOn),
+                ),
               ),
               const SizedBox(width: 24),
               _CallControl(
@@ -208,7 +210,9 @@ class _CallStage extends ConsumerWidget {
                 label: l10n.callLeave,
                 icon: Icons.call_end,
                 color: danger,
-                onPressed: () => unawaited(controller.leave()),
+                onPressed: () => unawaited(
+                  ref.read(callControllerProvider.notifier).leave(),
+                ),
               ),
             ],
           ),

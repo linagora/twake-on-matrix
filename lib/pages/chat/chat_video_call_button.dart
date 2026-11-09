@@ -48,9 +48,15 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
   @override
   Widget build(BuildContext context) {
     final room = widget.controller.room;
-    final summary = ref.watch(loginHomeserverSummaryProvider);
-    final tokenServiceUrl = summary?.callTokenServiceUrl;
-    final baseUrl = tokenServiceUrl ?? summary?.videoCallBaseUrl;
+    final (:tokenServiceUrl, :meetUrl) = ref.watch(
+      loginHomeserverSummaryProvider.select(
+        (summary) => (
+          tokenServiceUrl: summary?.callTokenServiceUrl,
+          meetUrl: summary?.videoCallBaseUrl,
+        ),
+      ),
+    );
+    final baseUrl = tokenServiceUrl ?? meetUrl;
     if (room == null ||
         baseUrl == null ||
         !widget.controller.canStartVideoCall(baseUrl)) {

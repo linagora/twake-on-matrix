@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
+import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -57,10 +58,14 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     final listener = _listener;
     _room = null;
     _listener = null;
-    await listener?.dispose();
-    if (room != null) {
-      await room.disconnect();
-      await room.dispose();
+    try {
+      await listener?.dispose();
+      if (room != null) {
+        await room.disconnect();
+        await room.dispose();
+      }
+    } catch (error, stackTrace) {
+      Logs().w('LiveKitCallMedia: disconnect failed', error, stackTrace);
     }
     _emit();
   }
