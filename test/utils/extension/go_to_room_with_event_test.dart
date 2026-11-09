@@ -37,11 +37,15 @@ void main() {
   const rootId = r'$root:example.org';
   const replyId = r'$reply:example.org';
 
+  /// The `event` the room screen read from its location, last time built.
+  String? roomEvent;
+
   Future<_RecordingRouter> pumpRouter(
     WidgetTester tester,
     void Function(BuildContext context) open,
   ) async {
     Widget page(String name) => Scaffold(body: Text(name));
+    roomEvent = null;
     final router = _RecordingRouter([
       GoRoute(
         path: '/',
@@ -54,7 +58,10 @@ void main() {
       ),
       GoRoute(
         path: '/rooms/:roomid',
-        builder: (_, _) => page('room'),
+        builder: (_, state) {
+          roomEvent = state.uri.queryParameters['event'];
+          return page('room');
+        },
         routes: [
           GoRoute(path: 'threads/:rootid', builder: (_, _) => page('thread')),
         ],
@@ -104,5 +111,19 @@ void main() {
     expect(router.navigations, hasLength(1));
     expect(router.navigations.single, startsWith('go /rooms/'));
     expect(find.text('room'), findsOneWidget);
+  });
+
+  /// CodeRabbit 4515288085: event ids of rooms v3+ are standard base64,
+  /// with `+` and `/`; a raw `+` in a query is read back as a space.
+  testWidgets('a message whose id has a "+" opens scrolled to that very '
+      'message', (tester) async {
+    const plusId = r'$abc+def/ghi=';
+
+    await pumpRouter(
+      tester,
+      (context) => context.goToRoomWithEvent(roomId, plusId),
+    );
+
+    expect(roomEvent, plusId);
   });
 }
