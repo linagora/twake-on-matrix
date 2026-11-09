@@ -39,7 +39,7 @@ class ThreadSummaryCard extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final unread = unreadCount > 0;
     final secondary = textStyle.bodySmall.copyWith(color: colors.secondary);
-    final last = lastReplyTime == null
+    final reply = lastReplyTime == null
         ? null
         : TextSpan(
             style: secondary,
@@ -48,13 +48,12 @@ class ThreadSummaryCard extends StatelessWidget {
                 text: lastReplyAuthor,
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              TextSpan(
-                text:
-                    ': $lastReplyText · '
-                    '${lastReplyTime!.ageFrom(context)}',
-              ),
+              TextSpan(text: ': $lastReplyText'),
             ],
           );
+    final age = lastReplyTime == null
+        ? null
+        : ' · ${lastReplyTime!.ageFrom(context)}';
 
     return Semantics(
       container: true,
@@ -63,7 +62,7 @@ class ThreadSummaryCard extends StatelessWidget {
       label: [
         count,
         if (unread) l10n.threadUnreadMessagesCount(unreadCount),
-        ?last?.toPlainText(),
+        ?reply == null ? null : '${reply.toPlainText()}$age',
       ].join(', '),
       onTap: onTap,
       child: Material(
@@ -114,8 +113,21 @@ class ThreadSummaryCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                if (last != null)
-                  Text.rich(last, maxLines: 1, overflow: TextOverflow.ellipsis),
+                // Only the reply is cut when the line is too long: the age stays whole.
+                if (reply != null)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text.rich(
+                          reply,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(age!, style: secondary, softWrap: false),
+                    ],
+                  ),
               ],
             ),
           ),
