@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
-import 'package:twake_chat/domain/usecase/room/get_thread_replies_interactor.dart';
+import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
 
 import 'send_text_message_interactor_test.mocks.dart';
 
