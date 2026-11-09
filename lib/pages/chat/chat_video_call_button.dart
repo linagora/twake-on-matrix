@@ -58,6 +58,8 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     }
     final l10n = L10n.of(context)!;
     if (tokenServiceUrl != null) {
+      // DECISION.md D14: no media keys yet, so no call in an encrypted room.
+      if (room.encrypted) return const SizedBox.shrink();
       return TwakeIconButton(
         icon: Icons.videocam_outlined,
         tooltip: l10n.startCall,

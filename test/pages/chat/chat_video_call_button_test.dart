@@ -143,7 +143,7 @@ void main() {
       await pumpButton(tester, withTokenService: true);
 
       // Act
-      await tester.tap(find.byTooltip('Start a call'));
+      await tester.tap(find.byTooltip('Start Call'));
       await tester.pumpAndSettle();
 
       // Assert
@@ -155,6 +155,19 @@ void main() {
           startedTitle: anyNamed('startedTitle'),
         ),
       );
+    });
+
+    testWidgets('build_withATokenServiceInAnEncryptedRoom_isHidden', (
+      tester,
+    ) async {
+      // Arrange
+      when(mockRoom.encrypted).thenReturn(true);
+
+      // Act
+      await pumpButton(tester, withTokenService: true);
+
+      // Assert
+      expect(find.byType(TwakeIconButton), findsNothing);
     });
 
     testWidgets('onTap_withoutATokenService_sendsTheMeetLink', (tester) async {
