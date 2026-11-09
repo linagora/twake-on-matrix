@@ -194,12 +194,7 @@ extension ContextExtensionss on BuildContext {
       go('/rooms/$roomId?event=$eventId');
       return;
     }
-    RoomRoute(roomid: roomId).go(this);
-    ThreadRoute(
-      roomid: roomId,
-      rootid: threadRootId,
-      event: eventId,
-    ).push<void>(this);
+    ThreadRoute(roomid: roomId, rootid: threadRootId, event: eventId).go(this);
   }
 
   int getCacheSize(double size) {
