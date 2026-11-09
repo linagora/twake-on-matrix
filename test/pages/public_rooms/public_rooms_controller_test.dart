@@ -404,6 +404,28 @@ void main() {
     expect(pages.hasListener, isFalse);
   });
 
+  test('build_whenReloadedWhileLaterPagesLoad_staysLoading', () async {
+    // Arrange
+    final oldPages = StreamController<List<PublicRoom>>();
+    final (container, _) = await loadFirstPage(oldPages);
+    final newPages = StreamController<List<PublicRoom>>();
+    repository.directoryController = newPages;
+
+    // Act
+    container.invalidate(publicRoomsControllerProvider);
+    container.read(publicRoomsControllerProvider);
+    await pumpEventQueue();
+    final whileReloading = container.read(publicRoomsControllerProvider);
+    newPages.add([publicRoom('!new')]);
+    await pumpEventQueue();
+
+    // Assert
+    expect(whileReloading.isLoading, isTrue);
+    final state = container.read(publicRoomsControllerProvider).requireValue;
+    expect(state.rooms.map((room) => room.roomId), ['!new']);
+    expect(state.isLoadingMore, isTrue);
+  });
+
   test('build_whenTheFirstPageRepeatsARoom_listsItOnce', () async {
     // Arrange
     repository.pages = [
