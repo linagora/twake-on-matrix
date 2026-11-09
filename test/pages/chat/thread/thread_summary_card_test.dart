@@ -1,4 +1,7 @@
+import 'dart:ui' show ImageByteFormat;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -31,6 +34,9 @@ void main() {
     ),
   );
 
+  /// What the card looks like on screen, pixel by pixel.
+  const cardPicture = Key('card-picture');
+
   Widget card({
     int replyCount = 3,
     int unreadCount = 0,
@@ -56,6 +62,7 @@ void main() {
     DateTime? lastReplyTime,
     bool onOwnBubble = false,
     double? maxWidth,
+    TextDirection direction = TextDirection.ltr,
   }) => tester.pumpWidget(
     MaterialApp(
       theme: theme,
@@ -68,17 +75,25 @@ void main() {
       ],
       supportedLocales: LocalizationService.supportedLocales,
       home: Scaffold(
-        body: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: ConstrainedBox(
-            // Loose: the card picks its width inside it.
-            constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
-            child: card(
-              replyCount: replyCount,
-              unreadCount: unreadCount,
-              onTap: onTap,
-              lastReplyTime: lastReplyTime,
-              onOwnBubble: onOwnBubble,
+        body: Directionality(
+          textDirection: direction,
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: ConstrainedBox(
+              // Loose: the card picks its width inside it.
+              constraints: BoxConstraints(
+                maxWidth: maxWidth ?? double.infinity,
+              ),
+              child: RepaintBoundary(
+                key: cardPicture,
+                child: card(
+                  replyCount: replyCount,
+                  unreadCount: unreadCount,
+                  onTap: onTap,
+                  lastReplyTime: lastReplyTime,
+                  onOwnBubble: onOwnBubble,
+                ),
+              ),
             ),
           ),
         ),
@@ -138,6 +153,81 @@ void main() {
     visit(text, const TextStyle());
     return spans;
   }
+
+  /// THR-M-02, RTL: in a right-to-left language the card reads from the
+  /// right, like the web card (`border-left` follows `dir`): its coloured bar
+  /// on the start side, the unread dot before the count, a gap between them.
+  group('right to left', () {
+    /// The colour painted at [dx] of the middle row of the card.
+    Future<Color> pixelAt(WidgetTester tester, double Function(Size) dx) async {
+      final boundary = tester.renderObject<RenderRepaintBoundary>(
+        find.byKey(cardPicture),
+      );
+      final size = boundary.size;
+      final bytes = await tester.runAsync(() async {
+        final image = await boundary.toImage();
+        final data = await image.toByteData(format: ImageByteFormat.rawRgba);
+        image.dispose();
+        return data!;
+      });
+      final x = dx(size).floor();
+      final y = (size.height / 2).floor();
+      final offset = (y * size.width.toInt() + x) * 4;
+      return Color.fromARGB(
+        bytes!.getUint8(offset + 3),
+        bytes.getUint8(offset),
+        bytes.getUint8(offset + 1),
+        bytes.getUint8(offset + 2),
+      );
+    }
+
+    bool isPrimary(Color color) =>
+        (color.r - primary.r).abs() < 0.02 &&
+        (color.g - primary.g).abs() < 0.02 &&
+        (color.b - primary.b).abs() < 0.02;
+
+    /// Inside a 3 px bar on the left, and on the right.
+    double nearLeft(Size size) => 1;
+    double nearRight(Size size) => size.width - 2;
+
+    testWidgets('the bar of an unread thread is on the right', (tester) async {
+      await pumpCard(tester, unreadCount: 2, direction: TextDirection.rtl);
+
+      expect(isPrimary(await pixelAt(tester, nearRight)), isTrue);
+      expect(isPrimary(await pixelAt(tester, nearLeft)), isFalse);
+    });
+
+    testWidgets('left to right, the bar is on the left', (tester) async {
+      await pumpCard(tester, unreadCount: 2);
+
+      expect(isPrimary(await pixelAt(tester, nearLeft)), isTrue);
+      expect(isPrimary(await pixelAt(tester, nearRight)), isFalse);
+    });
+
+    testWidgets('the unread dot is on the right of the count, 6 px apart', (
+      tester,
+    ) async {
+      await pumpCard(tester, unreadCount: 2, direction: TextDirection.rtl);
+
+      final dot = tester.getRect(unreadDot());
+      final count = tester.getRect(
+        find.textContaining('3 messages', findRichText: true),
+      );
+      expect(dot.left, greaterThanOrEqualTo(count.right));
+      expect(dot.left - count.right, moreOrLessEquals(6));
+    });
+
+    testWidgets('left to right, the unread dot is on the left of the count, '
+        '6 px apart', (tester) async {
+      await pumpCard(tester, unreadCount: 2);
+
+      final dot = tester.getRect(unreadDot());
+      final count = tester.getRect(
+        find.textContaining('3 messages', findRichText: true),
+      );
+      expect(count.left - dot.right, moreOrLessEquals(6));
+    });
+  });
 
   group('look of the card', () {
     testWidgets('a paper card with radius 8, distinct from the bubble', (
