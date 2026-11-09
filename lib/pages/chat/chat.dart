@@ -1471,30 +1471,47 @@ class ChatController extends ConsumerState<Chat>
   String _recentReactionId(String emoji) =>
       Matrix.of(context).emojiData.getIdByEmoji(emoji);
 
-  Future<void> sendEmojiAction({
+  Future<bool> _sendEmojiAction({
     required String emoji,
     String? emojiId,
     required Event event,
   }) async {
-    if (!mounted) return;
+    if (!mounted) return false;
     final sendingRoom = room!;
-    await handleStoreRecentReactions(emoji, emojiId: emojiId);
-    await sendingRoom.sendReaction(event.eventId, emoji);
+    // Not awaited, so a second pick already sees this reaction's local echo.
+    unawaited(handleStoreRecentReactions(emoji, emojiId: emojiId));
+    return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 
   Future<void> toggleReactionAction({
     required String emoji,
     String? emojiId,
     required Event event,
-    required Event? myReaction,
-  }) => toggleReaction(
-    emoji: emoji,
-    myReactionKey:
-        (myReaction?.content['m.relates_to'] as Map?)?['key'] as String?,
-    redactMyReaction: myReaction?.redactEvent,
-    sendReaction: () =>
-        sendEmojiAction(emoji: emoji, emojiId: emojiId, event: event),
-  );
+  }) async {
+    final timeline = this.timeline;
+    final myReactions = timeline == null
+        ? <Event>[]
+        : event
+              .aggregatedEvents(timeline, RelationshipTypes.reaction)
+              .where(
+                (e) =>
+                    e.senderId == e.room.client.userID &&
+                    e.type == EventTypes.Reaction,
+              )
+              .toList();
+    try {
+      await toggleReaction(
+        emoji: emoji,
+        myReactions: myReactions,
+        sendReaction: () =>
+            _sendEmojiAction(emoji: emoji, emojiId: emojiId, event: event),
+      );
+    } catch (e, s) {
+      Logs().e('Failed to toggle reaction $emoji', e, s);
+      if (!mounted) return;
+      TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
+    }
+  }
 
   void clearSelectedEvents() {
     showEmojiPickerNotifier.value = false;
@@ -2161,7 +2178,6 @@ class ChatController extends ConsumerState<Chat>
                                       emoji: emoji,
                                       emojiId: emojiId,
                                       event: event,
-                                      myReaction: myReaction,
                                     );
                                   },
                                 ),
@@ -2178,7 +2194,6 @@ class ChatController extends ConsumerState<Chat>
                                   await toggleReactionAction(
                                     emoji: emoji,
                                     event: event,
-                                    myReaction: myReaction,
                                   );
                                 },
                               ),
@@ -2847,7 +2862,6 @@ class ChatController extends ConsumerState<Chat>
                                           emoji: emoji,
                                           emojiId: emojiId,
                                           event: event,
-                                          myReaction: myReaction,
                                         );
                                       },
                                     ),
@@ -2865,7 +2879,6 @@ class ChatController extends ConsumerState<Chat>
                                       await toggleReactionAction(
                                         emoji: emoji,
                                         event: event,
-                                        myReaction: myReaction,
                                       );
                                     },
                                   ),
