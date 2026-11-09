@@ -1,6 +1,7 @@
 // ignore_for_file: implementation_imports
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,9 +54,10 @@ void main() {
     String rootBody = 'the root',
     bool withLastReply = true,
     String lastReplyText = 'See you tomorrow',
+    double screenWidth = 400,
   }) async {
     tester.view.devicePixelRatio = 1;
-    tester.view.physicalSize = const Size(400, 900);
+    tester.view.physicalSize = Size(screenWidth, 900);
     addTearDown(tester.view.reset);
 
     final room = Room(id: '!room:example.org', client: client);
@@ -99,7 +101,7 @@ void main() {
                 isHoverNotifier: isHoverNotifier,
                 listHorizontalActionMenu: const [],
                 listAction: const [],
-                maxWidth: 400,
+                maxWidth: screenWidth,
                 selectMode: false,
                 threadCard: ThreadSummaryCard(
                   replyCount: 3,
@@ -193,48 +195,90 @@ void main() {
     expect(cardRect.width, greaterThanOrEqualTo(text.width));
   });
 
-  /// THR-M-02: the web bubble is `inline-block`, its card `width: 100%` of
-  /// it: a card never makes the bubble wider than its root needs.
+  /// THR-M-02: the web bubble is `inline-block` (fit-content): short
+  /// content, a short root with a short last reply, makes a narrower bubble
+  /// than a root that wraps at the widest bubble.
   testWidgets('under a short root the bubble stays narrower than under a '
       'long one', (tester) async {
-    await pumpRootWithCard(tester, rootBody: 'hi', withLastReply: false);
+    await pumpRootWithCard(
+      tester,
+      rootBody: 'hi',
+      lastReplyText: 'See you',
+      screenWidth: 800,
+    );
     final short = tester.getRect(find.byType(MessageBubble)).width;
 
     await pumpRootWithCard(
       tester,
       rootBody:
           'the root of this thread, long enough to fill the bubble and wrap '
-          'onto a second line',
-      withLastReply: false,
+          'onto a second line, and then some more words to be sure it wraps',
+      lastReplyText: 'See you',
+      screenWidth: 800,
     );
     final long = tester.getRect(find.byType(MessageBubble)).width;
 
     expect(short, lessThan(long));
   });
 
-  /// THR-M-02: the line of the last reply is one line cut with an ellipsis.
-  /// It never widens the bubble: the minimum the card imposes on the bubble
-  /// is its « N messages › » line only, not the last reply.
-  group('the last reply does not widen the bubble of a short root', () {
-    /// The bubble of the root « ok » with a card of the count only.
-    Future<double> countOnlyWidth(WidgetTester tester) async {
-      await pumpRootWithCard(tester, rootBody: 'ok', withLastReply: false);
-      return tester.getRect(find.byType(MessageBubble)).width;
+  /// THR-M-02, reference design of the maintainer (09/11, web ThreadCard):
+  /// a short root « echo 5 » whose card shows the whole line « cguyon: test ·
+  /// il y a 2 secondes ». The bubble is fit-content: min(widest bubble,
+  /// max(root, natural width of the card)). The last reply is cut with an
+  /// ellipsis only once the bubble reaches its widest.
+  group('the card under a short root', () {
+    /// The painted line of the last reply.
+    RenderParagraph lastReplyLine(WidgetTester tester) {
+      final text = tester
+          .widgetList<RichText>(
+            find.descendant(
+              of: find.byType(ThreadSummaryCard),
+              matching: find.byType(RichText),
+            ),
+          )
+          .singleWhere((t) => t.text.toPlainText().startsWith('Bob'));
+      return tester.renderObject<RenderParagraph>(find.byWidget(text));
     }
 
-    /// The widest bubble: a root long enough to wrap.
-    Future<double> widestWidth(WidgetTester tester) async {
+    double bubbleWidth(WidgetTester tester) =>
+        tester.getRect(find.byType(MessageBubble)).width;
+
+    testWidgets('a short last reply is shown whole: the card widens the '
+        'bubble to it', (tester) async {
       await pumpRootWithCard(
         tester,
-        rootBody: List.filled(40, 'word').join(' '),
+        rootBody: 'ok',
         withLastReply: false,
+        screenWidth: 800,
       );
-      return tester.getRect(find.byType(MessageBubble)).width;
-    }
+      final countOnly = bubbleWidth(tester);
 
-    testWidgets('a last reply made of one long link', (tester) async {
-      final countOnly = await countOnlyWidth(tester);
-      final widest = await widestWidth(tester);
+      await pumpRootWithCard(
+        tester,
+        rootBody: 'ok',
+        lastReplyText: 'See you',
+        screenWidth: 800,
+      );
+
+      final line = lastReplyLine(tester);
+      expect(tester.takeException(), isNull);
+      expect(line.didExceedMaxLines, isFalse, reason: 'no ellipsis');
+      expect(
+        line.size.width,
+        moreOrLessEquals(line.getMaxIntrinsicWidth(double.infinity)),
+      );
+      expect(bubbleWidth(tester), greaterThan(countOnly));
+    });
+
+    testWidgets('a last reply made of one long link stops at the widest '
+        'bubble, cut with an ellipsis', (tester) async {
+      await pumpRootWithCard(
+        tester,
+        rootBody: List.filled(60, 'word').join(' '),
+        withLastReply: false,
+        screenWidth: 800,
+      );
+      final widest = bubbleWidth(tester);
 
       await pumpRootWithCard(
         tester,
@@ -243,22 +287,12 @@ void main() {
         lastReplyText:
             'https://meet.example.org/'
             'Xk9fQ2mLp7RtZs4WvBn8YcJd3HaGe6UoTi1KqPxMwNrEySb5FlVg0CjDhAzOu',
+        screenWidth: 800,
       );
-      final withLink = tester.getRect(find.byType(MessageBubble)).width;
 
       expect(tester.takeException(), isNull);
-      expect(withLink, lessThan(widest));
-      expect(withLink, moreOrLessEquals(countOnly, epsilon: 1));
-    });
-
-    testWidgets('a short last reply', (tester) async {
-      final countOnly = await countOnlyWidth(tester);
-
-      await pumpRootWithCard(tester, rootBody: 'ok', lastReplyText: 'See you');
-      final withShortReply = tester.getRect(find.byType(MessageBubble)).width;
-
-      expect(tester.takeException(), isNull);
-      expect(withShortReply, moreOrLessEquals(countOnly, epsilon: 1));
+      expect(bubbleWidth(tester), lessThanOrEqualTo(widest));
+      expect(lastReplyLine(tester).didExceedMaxLines, isTrue);
     });
   });
 }
