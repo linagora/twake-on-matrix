@@ -73,11 +73,16 @@ class ChatEventList extends StatelessWidget {
     List<Event> events,
     BoxConstraints constraints,
   ) {
-    final chatScrollView = ChatScrollView(
-      key: PageStorageKey('ChatScrollView-${chatController.room?.id}'),
-      events: events,
-      controller: chatController,
-      constraints: constraints,
+    final chatScrollView = Listener(
+      onPointerDown: (_) => chatController.clearHighlightedEvent(),
+      onPointerSignal: (_) => chatController.clearHighlightedEvent(),
+      onPointerPanZoomStart: (_) => chatController.clearHighlightedEvent(),
+      child: ChatScrollView(
+        key: PageStorageKey('ChatScrollView-${chatController.room?.id}'),
+        events: events,
+        controller: chatController,
+        constraints: constraints,
+      ),
     );
 
     if (PlatformInfos.isWeb) {

@@ -14,11 +14,15 @@ import 'package:twake_chat/pages/chat/events/message_time.dart';
 import 'package:twake_chat/pages/chat/optional_selection_container_disabled.dart';
 import 'package:twake_chat/pages/chat/optional_stack.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
+import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item.dart';
 import 'package:twake_chat/widgets/context_menu/twake_context_menu_area.dart';
@@ -54,7 +58,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final FocusNode? focusNode;
   final double maxWidth;
   final List<ContextMenuAction> listActions;
-  final OnSendEmojiReactionAction? onSendEmojiReaction;
+  final OnToggleEmojiReactionAction? onToggleEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onLongPressMessage;
   final void Function(Event)? onReply;
@@ -104,7 +108,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.menuChildren,
     this.focusNode,
     required this.listActions,
-    this.onSendEmojiReaction,
+    this.onToggleEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
     this.onStartThread,
@@ -158,7 +162,19 @@ class _MessageContentWithTimestampBuilderState
     if (event.canDelete) MessageContextMenuAction.delete,
   ];
 
+  // TODO: [transitional]
+  final UploadManager _uploadManager = getIt.get<UploadManager>();
+
+  // A failed upload has no `url` yet, so `hasAttachment` is false.
+  static const _uploadedMessageTypes = {
+    MessageTypes.Image,
+    MessageTypes.Video,
+    MessageTypes.File,
+  };
+
   List<MessageContextMenuAction> _errorMessageContextMenu(Event event) => [
+    if (_uploadedMessageTypes.contains(event.messageType))
+      MessageContextMenuAction.trySendAgain,
     if (event.isCopyable) MessageContextMenuAction.copy,
     if (event.canDelete) MessageContextMenuAction.delete,
   ];
@@ -315,7 +331,7 @@ class _MessageContentWithTimestampBuilderState
               messageContextMenu: _messageContextMenu,
               themeContextMenu: _themeContextMenu,
               iconContextMenu: _iconContextMenu,
-              onSendEmojiReaction: widget.onSendEmojiReaction,
+              onToggleEmojiReaction: widget.onToggleEmojiReaction,
             ),
           ),
         )
@@ -361,6 +377,14 @@ class _MessageContentWithTimestampBuilderState
         });
   }
 
+  Future<void> _retryUpload(BuildContext context) async {
+    final result = await _uploadManager.retryUpload(widget.event);
+    if (!context.mounted) return;
+    if (result == RetryUploadResult.fileDataUnavailable) {
+      TwakeSnackBar.show(context, L10n.of(context)!.messageCannotBeResent);
+    }
+  }
+
   void _handleResultFromHeroPage(BuildContext context, dynamic result) {
     if (result is String) {
       switch (result) {
@@ -396,6 +420,9 @@ class _MessageContentWithTimestampBuilderState
           break;
         case 'delete':
           widget.onDelete?.call(context, widget.event);
+          break;
+        case 'trySendAgain':
+          _retryUpload(context);
           break;
       }
     }
@@ -449,12 +476,7 @@ class _MessageContentWithTimestampBuilderState
             );
           },
           onEmojiSelected: (emojiId, emoji) =>
-              _handleEmojiSelectionFromEmojiPicker(
-                emoji: emoji,
-                myReaction: myReaction,
-                event: event,
-                relatesTo: relatesTo,
-              ),
+              _handleEmojiSelectionFromEmojiPicker(emoji: emoji, event: event),
         ),
       ),
     );
@@ -603,29 +625,10 @@ class _MessageContentWithTimestampBuilderState
 
   Future<void> _handleEmojiSelectionFromEmojiPicker({
     required String emoji,
-    required Event? myReaction,
     required Event event,
-    required dynamic relatesTo,
   }) async {
-    final isSelected = emoji == (relatesTo?['key'] ?? '');
-    if (myReaction == null) {
-      Navigator.of(context).pop();
-      widget.onSendEmojiReaction?.call(emoji, event);
-      return;
-    }
-
-    if (isSelected) {
-      Navigator.of(context).pop();
-      await myReaction.redactEvent();
-      return;
-    }
-
-    if (!isSelected) {
-      Navigator.of(context).pop();
-      await myReaction.redactEvent();
-      widget.onSendEmojiReaction?.call(emoji, event);
-      return;
-    }
+    Navigator.of(context).pop();
+    await widget.onToggleEmojiReaction?.call(emoji, event);
   }
 
   Widget _menuActionsRowBuilder(

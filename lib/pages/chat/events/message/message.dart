@@ -30,7 +30,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 typedef OnMenuAction =
     Function(BuildContext, ChatHorizontalActionMenu, Event, TapDownDetails);
 
-typedef OnSendEmojiReactionAction = void Function(String emoji, Event event);
+typedef OnToggleEmojiReactionAction =
+    Future<void> Function(String emoji, Event event);
 
 typedef OnRemoveEmojiReactionAction = void Function(String emoji, Event event);
 
@@ -58,6 +59,7 @@ class Message extends StatefulWidget {
   final OnSwipe? onSwipe;
   final OnHover? onHover;
   final ValueNotifier<String?> isHoverNotifier;
+  final ValueNotifier<String?>? highlightedEventIdNotifier;
   final bool selected;
   final Timeline timeline;
   final List<ContextMenuItemChatAction> listHorizontalActionMenu;
@@ -73,7 +75,7 @@ class Message extends StatefulWidget {
   final void Function()? onDisplayEmojiReaction;
   final void Function()? onHideEmojiReaction;
   final List<ContextMenuAction> listAction;
-  final OnSendEmojiReactionAction? onSelectEmojiReaction;
+  final OnToggleEmojiReactionAction? onToggleEmojiReaction;
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onReply;
   final void Function(Event)? onStartThread;
@@ -111,6 +113,7 @@ class Message extends StatefulWidget {
     this.selectMode = true,
     required this.timeline,
     required this.isHoverNotifier,
+    this.highlightedEventIdNotifier,
     required this.listHorizontalActionMenu,
     required this.maxWidth,
     this.menuChildren,
@@ -124,7 +127,7 @@ class Message extends StatefulWidget {
     this.onHideEmojiReaction,
     this.onLongPressMessage,
     required this.listAction,
-    this.onSelectEmojiReaction,
+    this.onToggleEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
     this.onStartThread,
@@ -297,7 +300,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           onDisplayEmojiReaction: widget.onDisplayEmojiReaction,
           onHideEmojiReaction: widget.onHideEmojiReaction,
           listActions: widget.listAction,
-          onSendEmojiReaction: widget.onSelectEmojiReaction,
+          onToggleEmojiReaction: widget.onToggleEmojiReaction,
           onPickEmojiReaction: widget.onPickEmojiReaction,
           onReply: widget.onReply,
           onStartThread: widget.onStartThread,
@@ -366,6 +369,7 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
           row: row,
           selected: widget.selected,
           selectMode: widget.selectMode,
+          highlightedEventIdNotifier: widget.highlightedEventIdNotifier,
           onHover: widget.onHover,
           onSwipe: widget.onSwipe,
           onSelect: widget.onSelect,

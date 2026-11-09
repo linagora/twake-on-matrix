@@ -9,8 +9,10 @@ class PublicRoomsRepositoryImpl implements PublicRoomsRepository {
   final PublicRoomsDatasource _datasource;
 
   @override
-  Stream<List<PublicRoom>> fetchDirectory({required int limit}) =>
-      _datasource.fetchDirectory(limit: limit);
+  Stream<List<PublicRoom>> fetchDirectory({
+    required int limit,
+    String? searchTerm,
+  }) => _datasource.fetchDirectory(limit: limit, searchTerm: searchTerm);
 
   @override
   Set<String> getKnownRoomIds() => _datasource.getKnownRoomIds();

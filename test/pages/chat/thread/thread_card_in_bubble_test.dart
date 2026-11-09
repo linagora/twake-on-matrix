@@ -15,11 +15,17 @@ import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../fake_client.dart';
+
+class _FakeUploadManager implements UploadManager {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 class _FakeClient extends Client {
   _FakeClient()
@@ -44,6 +50,7 @@ void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     getIt.registerSingleton(ResponsiveUtils());
+    getIt.registerSingleton<UploadManager>(_FakeUploadManager());
   });
 
   tearDown(() async {

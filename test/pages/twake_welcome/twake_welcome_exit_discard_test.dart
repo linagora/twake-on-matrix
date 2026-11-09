@@ -9,8 +9,10 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/twake_welcome/twake_welcome.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -24,6 +26,8 @@ class _FakeClient extends Fake implements Client {
   /// The error of the homeserver check; none gives a home server.
   Object? homeserverError;
 
+  DiscoveryInformation? discovery;
+
   @override
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.memberName != #checkHomeserver) {
@@ -31,7 +35,7 @@ class _FakeClient extends Fake implements Client {
     }
     if (homeserverError != null) return Future<Never>.error(homeserverError!);
     return Future.value((
-      null,
+      discovery,
       GetVersionsResponse(versions: const []),
       const <LoginFlow>[],
       null,
@@ -48,6 +52,11 @@ class _FakeMatrixState extends Fake implements MatrixState {
 void main() {
   late _FakeClient client;
   late FakeLoginSessions sessions;
+  final activeSummary = HomeserverSummary(
+    discoveryInformation: null,
+    versions: GetVersionsResponse(versions: const []),
+    loginFlows: const [],
+  );
 
   setUp(() {
     getIt.registerSingleton(ResponsiveUtils());
@@ -72,7 +81,12 @@ void main() {
 
   Future<void> pumpApp(WidgetTester tester, Widget home) => tester.pumpWidget(
     ProviderScope(
-      overrides: [loginSessionsProvider.overrideWithValue(sessions)],
+      overrides: [
+        loginSessionsProvider.overrideWithValue(sessions),
+        loginHomeserverSummaryProvider.overrideWithBuild(
+          (_, _) => activeSummary,
+        ),
+      ],
       child: MaterialApp(
         navigatorKey: TwakeApp.routerKey,
         theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
@@ -117,6 +131,30 @@ void main() {
 
     expect(find.text(failedText(tester)), findsNothing);
     expect(sessions.discards, 1);
+  });
+
+  testWidgets('a sign-in left unfinished keeps the summary of the active '
+      'account', (tester) async {
+    client.discovery = DiscoveryInformation(
+      mHomeserver: HomeserverInformation(
+        baseUrl: Uri.parse('https://other.example.com'),
+      ),
+      additionalProperties: {
+        'app.twake.chat': {
+          'enable_invitations': true,
+          'public_groups': {'enabled': true},
+        },
+      },
+    );
+    webAuthThrows('CANCELED');
+
+    await signIn(tester);
+    await pumpApp(tester, const SizedBox());
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SizedBox)),
+    );
+    expect(container.read(loginHomeserverSummaryProvider), same(activeSummary));
   });
 
   testWidgets('a sign-in that fails tells the user and drops the candidate', (

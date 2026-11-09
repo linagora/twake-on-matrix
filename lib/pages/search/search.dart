@@ -4,6 +4,7 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
+import 'package:twake_chat/pages/search/public_groups_search_term.dart';
 import 'package:twake_chat/pages/search/search_contacts_and_chats_controller.dart';
 import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
@@ -47,6 +48,10 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
       ValueNotifier<Either<Failure, Success>>(Right(SearchInitial()));
 
   final TextEditingController textEditingController = TextEditingController();
+
+  late final publicGroupsSearchTerm = PublicGroupsSearchTerm(
+    textEditingController,
+  );
 
   final scrollController = ScrollController();
 
@@ -220,6 +225,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
     searchContactAndRecentChatController?.dispose();
     serverSearchController.dispose();
     preSearchRecentContactsNotifier.dispose();
+    publicGroupsSearchTerm.dispose();
     textEditingController.dispose();
     scrollController.dispose();
     super.dispose();

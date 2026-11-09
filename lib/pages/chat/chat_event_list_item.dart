@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/domain/model/thread/thread_rules.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -85,6 +83,7 @@ class ChatEventListItem extends StatelessWidget {
       nextEvent: nextEvent,
       onHover: (isHover, event) => controller.onHover(isHover, event),
       isHoverNotifier: controller.focusHover,
+      highlightedEventIdNotifier: controller.highlightedEventIdNotifier,
       listHorizontalActionMenu: controller.listHorizontalActionMenuBuilder(
         event,
       ),
@@ -103,9 +102,8 @@ class ChatEventListItem extends StatelessWidget {
         return ContextMenuAction(name: action.action.name);
       }).toList(),
       onPickEmojiReaction: () {},
-      onSelectEmojiReaction: (emoji, event) {
-        unawaited(controller.sendEmojiAction(emoji: emoji, event: event));
-      },
+      onToggleEmojiReaction: (emoji, event) =>
+          controller.toggleReactionAction(emoji: emoji, event: event),
       onForward: (event) {
         controller.forwardEventsAction(event: event);
       },

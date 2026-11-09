@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/pages/login/login_client_owner.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:collection/collection.dart';
@@ -8,7 +7,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/presentation/extensions/homeserver_picker/homeserver_input_extension.dart';
@@ -166,10 +164,10 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
       Logs().i('All homeservers: $allHomeserverLoggedIn');
       final client = await _sessions.loginClient();
 
-      final homeserverSummary = await client.checkHomeserver(homeserver);
+      final summary = await _sessions.checkHomeserver(client, homeserver);
 
       final homeserverFromSummary =
-          homeserverSummary.$1?.mHomeserver.baseUrl.toString() ?? '';
+          summary.discoveryInformation?.mHomeserver.baseUrl.toString() ?? '';
 
       final cleanHomeserver = homeserverFromSummary.endsWith('/')
           ? homeserverFromSummary.substring(0, homeserverFromSummary.length - 1)
@@ -189,12 +187,6 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
         return;
       }
 
-      final summary = HomeserverSummary(
-        discoveryInformation: homeserverSummary.$1,
-        versions: homeserverSummary.$2,
-        loginFlows: homeserverSummary.$3,
-      );
-      ref.read(loginHomeserverSummaryProvider.notifier).set(summary);
       final ssoSupported = summary.supportSSOLogin;
 
       try {

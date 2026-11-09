@@ -3325,5 +3325,10 @@
         "type": "int"
       }
     }
+  },
+  "publicGroupsYouCanJoin": "Groups you can join",
+  "@publicGroupsYouCanJoin": {
+    "type": "text",
+    "placeholders": {}
   }
 }

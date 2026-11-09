@@ -6,16 +6,25 @@ class FetchJoinablePublicRoomsUseCase {
 
   static const directoryLimit = 1000;
 
+  static const searchLimit = 20;
+
+  static const minSearchLength = 2;
+
   static const _listedKinds = {PublicRoomKind.group, PublicRoomKind.feed};
 
   final PublicRoomsRepository _repository;
 
   /// The groups and feeds of the homeserver directory the user has neither
-  /// joined nor been invited to, one page at a time. Throws a
-  /// `PublicRoomsFetchFailedException` when the first page fails.
-  Stream<List<PublicRoom>> execute() async* {
+  /// joined nor been invited to, one page at a time. With [searchTerm], the
+  /// first [searchLimit] rooms the server matches, trimmed; nothing under
+  /// [minSearchLength] letters. Throws a `PublicRoomsFetchFailedException`
+  /// when the first page fails.
+  Stream<List<PublicRoom>> execute({String? searchTerm}) async* {
+    final term = searchTerm?.trim();
+    if (term != null && term.length < minSearchLength) return;
     await for (final page in _repository.fetchDirectory(
-      limit: directoryLimit,
+      limit: term == null ? directoryLimit : searchLimit,
+      searchTerm: term,
     )) {
       final members = _repository.getKnownRoomIds();
       yield page
