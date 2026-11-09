@@ -45,53 +45,59 @@ final _theme = ThemeData(
 /// What the card looks like on screen, pixel by pixel.
 const _cardPicture = Key('card-picture');
 
-Future<void> _pumpCard(
-  WidgetTester tester, {
-  int replyCount = 3,
-  int unreadCount = 0,
-  VoidCallback? onTap,
-  Locale locale = const Locale('en'),
-  bool onOwnBubble = false,
-  double? maxWidth,
-  TextDirection direction = TextDirection.ltr,
-  String lastReplyText = 'See you tomorrow',
-}) => tester.pumpWidget(
-  MaterialApp(
-    theme: _theme,
-    locale: locale,
-    localizationsDelegates: const [
-      L10n.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-    ],
-    supportedLocales: LocalizationService.supportedLocales,
-    home: Scaffold(
-      body: Directionality(
-        textDirection: direction,
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: ConstrainedBox(
-            // Loose: the card picks its width inside it.
-            constraints: BoxConstraints(maxWidth: maxWidth ?? double.infinity),
-            child: RepaintBoundary(
-              key: _cardPicture,
-              child: ThreadSummaryCard(
-                replyCount: replyCount,
-                lastReplyAuthor: 'Alice',
-                lastReplyText: lastReplyText,
-                lastReplyTime: _fiveMinutesAgo(),
-                unreadCount: unreadCount,
-                onOwnBubble: onOwnBubble,
-                onTap: onTap ?? () {},
+/// What a test changes in the card and around it; set by cascade, e.g.
+/// `_CardSpec()..unreadCount = 2`.
+class _CardSpec {
+  int replyCount = 3;
+  int unreadCount = 0;
+  VoidCallback onTap = () {};
+  bool onOwnBubble = false;
+  String lastReplyText = 'See you tomorrow';
+  Locale locale = const Locale('en');
+  double maxWidth = double.infinity;
+  TextDirection direction = TextDirection.ltr;
+}
+
+Future<void> _pumpCard(WidgetTester tester, [_CardSpec? spec]) {
+  final card = spec ?? _CardSpec();
+  return tester.pumpWidget(
+    MaterialApp(
+      theme: _theme,
+      locale: card.locale,
+      localizationsDelegates: const [
+        L10n.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: LocalizationService.supportedLocales,
+      home: Scaffold(
+        body: Directionality(
+          textDirection: card.direction,
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: ConstrainedBox(
+              // Loose: the card picks its width inside it.
+              constraints: BoxConstraints(maxWidth: card.maxWidth),
+              child: RepaintBoundary(
+                key: _cardPicture,
+                child: ThreadSummaryCard(
+                  replyCount: card.replyCount,
+                  lastReplyAuthor: 'Alice',
+                  lastReplyText: card.lastReplyText,
+                  lastReplyTime: _fiveMinutesAgo(),
+                  unreadCount: card.unreadCount,
+                  onOwnBubble: card.onOwnBubble,
+                  onTap: card.onTap,
+                ),
               ),
             ),
           ),
         ),
       ),
     ),
-  ),
-);
+  );
+}
 
 /// Runs [body] with the semantics tree on.
 Future<void> _withSemantics(
@@ -218,7 +224,12 @@ Future<(Rect, Rect)> _dotAndCount(
   WidgetTester tester,
   TextDirection direction,
 ) async {
-  await _pumpCard(tester, unreadCount: 2, direction: direction);
+  await _pumpCard(
+    tester,
+    _CardSpec()
+      ..unreadCount = 2
+      ..direction = direction,
+  );
   return (tester.getRect(_unreadDot()), tester.getRect(_text('3 messages')));
 }
 
@@ -227,13 +238,18 @@ Future<(Rect, Rect)> _dotAndCount(
 /// on the start side, the unread dot before the count, a gap between them.
 void _rightToLeftTests() {
   testWidgets('the bar of an unread thread is on the right', (tester) async {
-    await _pumpCard(tester, unreadCount: 2, direction: TextDirection.rtl);
+    await _pumpCard(
+      tester,
+      _CardSpec()
+        ..unreadCount = 2
+        ..direction = TextDirection.rtl,
+    );
 
     expect(await _barOnLeftAndRight(tester), (false, true));
   });
 
   testWidgets('left to right, the bar is on the left', (tester) async {
-    await _pumpCard(tester, unreadCount: 2);
+    await _pumpCard(tester, _CardSpec()..unreadCount = 2);
 
     expect(await _barOnLeftAndRight(tester), (true, false));
   });
@@ -269,7 +285,7 @@ void _lookTests() {
 
   testWidgets('an unread thread has a dot and a 3 px left border in the '
       'primary colour', (tester) async {
-    await _pumpCard(tester, unreadCount: 2);
+    await _pumpCard(tester, _CardSpec()..unreadCount = 2);
 
     final border = _frame(tester).border! as Border;
     expect(border.left.width, 3);
@@ -311,7 +327,7 @@ void _webCardTests() {
     tester,
   ) async {
     // Wider than the text of the card (12 px glyphs in tests: ~480 px).
-    await _pumpCard(tester, maxWidth: 700);
+    await _pumpCard(tester, _CardSpec()..maxWidth = 700);
 
     expect(tester.getSize(find.byType(ThreadSummaryCard)).width, 700);
   });
@@ -331,7 +347,7 @@ void _webCardTests() {
 
   testWidgets('on the bubble of an own message, the card is the paper of '
       'the theme', (tester) async {
-    await _pumpCard(tester, onOwnBubble: true);
+    await _pumpCard(tester, _CardSpec()..onOwnBubble = true);
 
     expect(_frame(tester).color, _paper);
   });
@@ -374,7 +390,7 @@ void _lastReplyTests() {
   });
 
   testWidgets('says the age in the language of the app', (tester) async {
-    await _pumpCard(tester, locale: const Locale('fr'));
+    await _pumpCard(tester, _CardSpec()..locale = const Locale('fr'));
 
     expect(_text('il y a 5 minutes'), findsOneWidget);
   });
@@ -382,7 +398,7 @@ void _lastReplyTests() {
   group('longer than the card', _longReplyTests);
 
   testWidgets('that fits the card is not cut at all', (tester) async {
-    await _pumpCard(tester, maxWidth: 700);
+    await _pumpCard(tester, _CardSpec()..maxWidth = 700);
 
     expect(tester.takeException(), isNull);
     for (final paragraph in _paragraphs(tester)) {
@@ -411,8 +427,12 @@ void _lastReplyTests() {
 const _long = 'Let us meet on Thursday at the usual place near the station';
 
 // 12 px glyphs in tests: the line is ~900 px, the card 300.
-Future<void> _pumpLong(WidgetTester tester) =>
-    _pumpCard(tester, maxWidth: 300, lastReplyText: _long);
+Future<void> _pumpLong(WidgetTester tester) => _pumpCard(
+  tester,
+  _CardSpec()
+    ..maxWidth = 300
+    ..lastReplyText = _long,
+);
 
 /// THR-M-02, decision of the maintainer (09/11): the relative age of the
 /// last reply stays whole; only the text of the reply is cut with an
@@ -485,7 +505,7 @@ void _longReplyTests() {
 
 void _countAndTapTests() {
   testWidgets('shows the number of messages of the thread', (tester) async {
-    await _pumpCard(tester, replyCount: 3);
+    await _pumpCard(tester, _CardSpec()..replyCount = 3);
 
     expect(_text('3 messages'), findsOneWidget);
   });
@@ -501,7 +521,7 @@ void _countAndTapTests() {
 
   testWidgets('tapping the card opens the thread', (tester) async {
     var opened = 0;
-    await _pumpCard(tester, onTap: () => opened++);
+    await _pumpCard(tester, _CardSpec()..onTap = () => opened++);
 
     await tester.tap(_text('3 messages'));
     await tester.pump();
@@ -513,7 +533,7 @@ void _countAndTapTests() {
 void _accessibilityTests() {
   testWidgets('announces the unread messages to accessibility', (tester) async {
     await _withSemantics(tester, () async {
-      await _pumpCard(tester, unreadCount: 2);
+      await _pumpCard(tester, _CardSpec()..unreadCount = 2);
 
       expect(
         find.bySemanticsLabel(RegExp('2 unread messages')),

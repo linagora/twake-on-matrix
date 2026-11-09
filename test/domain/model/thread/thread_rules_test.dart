@@ -33,22 +33,33 @@ const _threadRelation = {
   'is_falling_back': true,
 };
 
+const _alice = '@alice:example.com';
+
+/// An event of Alice; a membership event is her own (its state key).
 Event _event({
   required String eventId,
   String type = EventTypes.Message,
   Map<String, Object?> content = const {'msgtype': 'm.text', 'body': 'hello'},
   EventStatus status = EventStatus.synced,
-  String? stateKey,
-  String? redacts,
 }) => Event(
   type: type,
   content: content,
   eventId: eventId,
-  senderId: '@alice:example.com',
-  stateKey: stateKey,
+  senderId: _alice,
+  stateKey: type == EventTypes.RoomMember ? _alice : null,
   originServerTs: DateTime.utc(2026, 11, 6),
   status: status,
-  redacts: redacts,
+  room: _room,
+);
+
+/// Alice's redaction of [target].
+Event _redactionOf(String target) => Event(
+  type: EventTypes.Redaction,
+  content: const {},
+  eventId: r'$redaction',
+  senderId: _alice,
+  originServerTs: DateTime.utc(2026, 11, 6),
+  redacts: target,
   room: _room,
 );
 
@@ -145,7 +156,6 @@ void _startThreadTests() {
         eventId: r'$not_a_message',
         type: type,
         content: content,
-        stateKey: type == EventTypes.RoomMember ? '@alice:example.com' : null,
       );
 
       expect(_offered(event), isFalse);
@@ -217,12 +227,7 @@ void _newestMainEventTests() {
   });
 
   test('a redaction event is skipped', () {
-    final redaction = _event(
-      eventId: r'$redaction',
-      type: EventTypes.Redaction,
-      content: const {},
-      redacts: r'$reply',
-    );
+    final redaction = _redactionOf(r'$reply');
 
     expect(_newestId([redaction, _mainMessage()]), r'$main');
   });
