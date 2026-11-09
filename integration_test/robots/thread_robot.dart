@@ -11,6 +11,17 @@ import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 import '../base/core_robot.dart';
 import 'chat_group_detail_robot.dart';
 
+/// A message of a thread scenario, the root or a reply, found on screen by
+/// its text.
+class ThreadText {
+  const ThreadText(this.text);
+
+  final String text;
+
+  @override
+  String toString() => text;
+}
+
 /// Threads on mobile (spec 2026-11-06, P1): the card under a root, the
 /// "Start a thread" menu item and the full-screen thread.
 ///
@@ -20,15 +31,15 @@ class ThreadRobot extends CoreRobot {
 
   static const _timeout = Duration(seconds: 30);
 
-  PatrolFinder _message(String text) => $(
+  PatrolFinder _message(ThreadText message) => $(
     MessageContent,
-  ).containing(find.textContaining(text, findRichText: true));
+  ).containing(find.textContaining(message.text, findRichText: true));
 
   /// The card is found by the text of its last reply, so the check does not
   /// depend on where the card sits in the message row.
-  PatrolFinder card({required String lastReplyText}) => $(
+  PatrolFinder card({required ThreadText lastReply}) => $(
     ThreadSummaryCard,
-  ).containing(find.textContaining(lastReplyText, findRichText: true));
+  ).containing(find.textContaining(lastReply.text, findRichText: true));
 
   PatrolFinder get threadHeader => $(ThreadAppBarTitle);
 
@@ -40,10 +51,10 @@ class ThreadRobot extends CoreRobot {
       $(PullDownMenuItem).containing(find.text('Start a thread'));
 
   Future<void> expectCard({
-    required String lastReplyText,
+    required ThreadText lastReply,
     required int messageCount,
   }) async {
-    final found = card(lastReplyText: lastReplyText);
+    final found = card(lastReply: lastReply);
     await $.waitUntilVisible(found, timeout: _timeout);
     expect(
       found.$(find.textContaining('$messageCount message', findRichText: true)),
@@ -52,24 +63,24 @@ class ThreadRobot extends CoreRobot {
     );
   }
 
-  Future<void> openFromCard({required String lastReplyText}) async {
-    final found = card(lastReplyText: lastReplyText);
+  Future<void> openFromCard({required ThreadText lastReply}) async {
+    final found = card(lastReply: lastReply);
     await $.waitUntilVisible(found, timeout: _timeout);
     await found.tap();
     await $.pumpAndTrySettle();
     await $.waitUntilVisible(_threadTitle, timeout: _timeout);
   }
 
-  Future<void> startThreadFrom(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+  Future<void> startThreadFrom(ThreadText message) async {
+    await ChatGroupDetailRobot($).openPullDownMenu(message.text);
     await $.waitUntilVisible(_startThreadItem);
     await _startThreadItem.tap();
     await $.pumpAndTrySettle();
     await $.waitUntilVisible(_threadTitle, timeout: _timeout);
   }
 
-  Future<void> expectNoStartThreadItemOn(String message) async {
-    await ChatGroupDetailRobot($).openPullDownMenu(message);
+  Future<void> expectNoStartThreadItemOn(ThreadText message) async {
+    await ChatGroupDetailRobot($).openPullDownMenu(message.text);
     expect(
       _startThreadItem,
       findsNothing,
@@ -78,11 +89,11 @@ class ThreadRobot extends CoreRobot {
     await ChatGroupDetailRobot($).closePullDownMenu();
   }
 
-  Future<void> expectThreadScreenOn(String rootText) async {
+  Future<void> expectThreadScreenOn(ThreadText root) async {
     await $.waitUntilVisible(_threadTitle, timeout: _timeout);
     expect(_threadTitle, findsOneWidget);
     expect(
-      threadHeader.$(find.textContaining(rootText)),
+      threadHeader.$(find.textContaining(root.text)),
       findsOneWidget,
       reason: 'The header subtitle is the root text',
     );
@@ -93,8 +104,8 @@ class ThreadRobot extends CoreRobot {
     );
   }
 
-  Future<void> expectMessageInThread(String text) async {
-    await $.waitUntilVisible(_message(text), timeout: _timeout);
+  Future<void> expectMessageInThread(ThreadText message) async {
+    await $.waitUntilVisible(_message(message), timeout: _timeout);
   }
 
   /// The composer has the focus, so the keyboard is up.
@@ -104,10 +115,10 @@ class ThreadRobot extends CoreRobot {
     return $.tester.widget<EditableText>(editable.first).focusNode.hasFocus;
   }
 
-  Future<void> sendInThread(String text) async {
+  Future<void> sendInThread(ThreadText message) async {
     final field = $(InputBar).$(TextField);
     await field.tap();
-    await typeSlowlyWithPatrol($, field, text);
+    await typeSlowlyWithPatrol($, field, message.text);
     await $.waitUntilVisible($(ChatInputRowSendBtn));
     await $(ChatInputRowSendBtn).tap();
     await $.pump(const Duration(milliseconds: 300));
@@ -125,16 +136,16 @@ class ThreadRobot extends CoreRobot {
   }
 
   /// The reply text may show on the card of its root, nowhere else.
-  Future<void> expectNotInMainTimeline(String text) async {
+  Future<void> expectNotInMainTimeline(ThreadText reply) async {
     await $.pump(const Duration(seconds: 2));
     final everywhere = find
-        .textContaining(text, findRichText: true)
+        .textContaining(reply.text, findRichText: true)
         .evaluate()
         .toSet();
     final onCards = find
         .descendant(
           of: find.byType(ThreadSummaryCard),
-          matching: find.textContaining(text, findRichText: true),
+          matching: find.textContaining(reply.text, findRichText: true),
         )
         .evaluate()
         .toSet();
