@@ -52,6 +52,7 @@ void main() {
     WidgetTester tester, {
     String rootBody = 'the root',
     bool withLastReply = true,
+    String lastReplyText = 'See you tomorrow',
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 900);
@@ -103,7 +104,7 @@ void main() {
                 threadCard: ThreadSummaryCard(
                   replyCount: 3,
                   lastReplyAuthor: withLastReply ? 'Bob' : null,
-                  lastReplyText: withLastReply ? 'See you tomorrow' : null,
+                  lastReplyText: withLastReply ? lastReplyText : null,
                   lastReplyTime: withLastReply
                       ? DateTime.now().subtract(
                           const Duration(minutes: 5, seconds: 10),
@@ -209,5 +210,55 @@ void main() {
     final long = tester.getRect(find.byType(MessageBubble)).width;
 
     expect(short, lessThan(long));
+  });
+
+  /// THR-M-02: the line of the last reply is one line cut with an ellipsis.
+  /// It never widens the bubble: the minimum the card imposes on the bubble
+  /// is its « N messages › » line only, not the last reply.
+  group('the last reply does not widen the bubble of a short root', () {
+    /// The bubble of the root « ok » with a card of the count only.
+    Future<double> countOnlyWidth(WidgetTester tester) async {
+      await pumpRootWithCard(tester, rootBody: 'ok', withLastReply: false);
+      return tester.getRect(find.byType(MessageBubble)).width;
+    }
+
+    /// The widest bubble: a root long enough to wrap.
+    Future<double> widestWidth(WidgetTester tester) async {
+      await pumpRootWithCard(
+        tester,
+        rootBody: List.filled(40, 'word').join(' '),
+        withLastReply: false,
+      );
+      return tester.getRect(find.byType(MessageBubble)).width;
+    }
+
+    testWidgets('a last reply made of one long link', (tester) async {
+      final countOnly = await countOnlyWidth(tester);
+      final widest = await widestWidth(tester);
+
+      await pumpRootWithCard(
+        tester,
+        rootBody: 'ok',
+        // No slash nor dash after the host: nowhere to break the line.
+        lastReplyText:
+            'https://meet.example.org/'
+            'Xk9fQ2mLp7RtZs4WvBn8YcJd3HaGe6UoTi1KqPxMwNrEySb5FlVg0CjDhAzOu',
+      );
+      final withLink = tester.getRect(find.byType(MessageBubble)).width;
+
+      expect(tester.takeException(), isNull);
+      expect(withLink, lessThan(widest));
+      expect(withLink, moreOrLessEquals(countOnly, epsilon: 1));
+    });
+
+    testWidgets('a short last reply', (tester) async {
+      final countOnly = await countOnlyWidth(tester);
+
+      await pumpRootWithCard(tester, rootBody: 'ok', lastReplyText: 'See you');
+      final withShortReply = tester.getRect(find.byType(MessageBubble)).width;
+
+      expect(tester.takeException(), isNull);
+      expect(withShortReply, moreOrLessEquals(countOnly, epsilon: 1));
+    });
   });
 }
