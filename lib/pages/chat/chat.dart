@@ -761,13 +761,16 @@ class ChatController extends ConsumerState<Chat>
       (e) => e.status.isSynced && e.threadRootId == threadRootId,
     );
     if (reply == null || reply.eventId == _lastThreadReadEventId) return;
-    _lastThreadReadEventId = reply.eventId;
     unawaited(
       room!
           .setThreadReadMarker(
             threadRootId: threadRootId!,
             eventId: reply.eventId,
           )
+          // Remembered once the server took it: a failure is tried again.
+          .then((_) {
+            _lastThreadReadEventId = reply.eventId;
+          })
           .catchError((Object e) => Logs().w('Unable to read the thread', e)),
     );
   }
