@@ -1,5 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -10,6 +12,7 @@ import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
+import '../../fake_client.dart' as fake;
 
 /// The device storage, counting the saves of the thread counters.
 class _CountingPrefsStore extends InMemorySharedPreferencesStore {
@@ -395,6 +398,105 @@ void main() {
     });
   });
 
+  /// THR-M-09, perf (roast 5): after a long absence, one catch-up sync can
+  /// raise the counters of many threads the user does not follow. Each
+  /// lookup of the follow state costs one server request, not two for the
+  /// same root, and only a few run at a time.
+  group('lookups of the follow state, on the server', () {
+    /// A real room of the SDK, whose database holds none of the roots: the
+    /// root must come from the server.
+    late Room realRoom;
+    late MockClient client;
+    late Map<String, int> serverCalls;
+    late List<Completer<void>> pending;
+    late int inFlight;
+    late int maxInFlight;
+
+    MatrixEvent rootFromServer(String root) => MatrixEvent(
+      type: EventTypes.Message,
+      content: {'msgtype': 'm.text', 'body': 'root'},
+      eventId: root,
+      senderId: alice,
+      originServerTs: DateTime.utc(2026, 11, 6),
+      roomId: roomId,
+      unsigned: {
+        'm.relations': {
+          'm.thread': {'count': 4, 'current_user_participated': false},
+        },
+      },
+    );
+
+    /// The server answers [root] once the test lets it ([pending]).
+    void serve(String root, {bool held = false}) {
+      when(client.getOneRoomEvent(roomId, root)).thenAnswer((_) async {
+        serverCalls.update(root, (n) => n + 1, ifAbsent: () => 1);
+        inFlight++;
+        if (inFlight > maxInFlight) maxInFlight = inFlight;
+        if (held) {
+          final answer = Completer<void>();
+          pending.add(answer);
+          await answer.future;
+        }
+        inFlight--;
+        return rootFromServer(root);
+      });
+    }
+
+    setUp(() {
+      serverCalls = {};
+      pending = [];
+      inFlight = 0;
+      maxInFlight = 0;
+      client = MockClient();
+      when(client.clientName).thenReturn('account-a');
+      when(client.userID).thenReturn(me);
+      when(client.database).thenReturn(_NoStoredEvents());
+      realRoom = Room(id: roomId, client: client);
+      when(client.getRoomById(roomId)).thenReturn(realRoom);
+    });
+
+    test('a root missing from the database costs one server request', () async {
+      serve(rootId);
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply(counts(1));
+      await pumpEventQueue();
+
+      expect(serverCalls[rootId], 1);
+      expect(threadOf(store)?.followed, isFalse);
+    });
+
+    test('many threads raised at once: never more than 3 lookups in flight, '
+        'and every thread is looked up once', () async {
+      final roots = [for (var n = 0; n < 12; n++) '\$root_$n'];
+      for (final root in roots) {
+        serve(root, held: true);
+      }
+      final store = ThreadUnreadStore(client: client);
+
+      store.apply({
+        roomId: {
+          for (final root in roots)
+            root: (notificationCount: 5, highlightCount: 0),
+        },
+      });
+      await pumpEventQueue();
+      expect(inFlight, greaterThan(0), reason: 'the lookups started');
+      expect(maxInFlight, lessThanOrEqualTo(3));
+
+      // The server answers, one at a time; the next lookups follow.
+      for (var turn = 0; turn < 100 && pending.isNotEmpty; turn++) {
+        pending.removeAt(0).complete();
+        await pumpEventQueue();
+        expect(maxInFlight, lessThanOrEqualTo(3));
+      }
+
+      expect(serverCalls.keys.toSet(), roots.toSet());
+      expect(serverCalls.values.every((n) => n == 1), isTrue);
+      expect(store.threadsOf(roomId).where((t) => t.followed), isEmpty);
+    });
+  });
+
   /// THR-M-01: a reply deleted loses its thread relation; the store keeps
   /// the ids of the thread replies so the main timeline still hides it.
   group('ids of the thread replies', () {
@@ -691,4 +793,11 @@ void main() {
       });
     });
   });
+}
+
+/// A database that stores no event: `Room.getEventById` falls back to the
+/// server, as for a root never synced on this device.
+class _NoStoredEvents extends fake.MockDatabase {
+  @override
+  Future<Event?> getEventById(String eventId, Room room) async => null;
 }
