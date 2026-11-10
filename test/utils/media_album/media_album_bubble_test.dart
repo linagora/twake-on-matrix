@@ -5,26 +5,17 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/media_album/media_album_bubble.dart';
 import 'package:twake_chat/utils/media_album/media_album_scope.dart';
-import 'package:twake_chat/providers/upload_manager_provider.dart';
-import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 
 import '../../lenient_database.dart';
 
 class _FakeUploadManager implements UploadManager {
-  final retried = <String>[];
-
   @override
   Future<MatrixFile?> getMatrixFile(
     String eventId, {
     required Room room,
   }) async => null;
-
-  @override
-  Future<RetryUploadResult> retryUpload(Event event) async {
-    retried.add(event.eventId);
-    return RetryUploadResult.started;
-  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
@@ -59,6 +50,7 @@ class _Harness {
   Future<void> pumpAlbum(WidgetTester tester, List<Event> members) =>
       tester.pumpWidget(
         ProviderScope(
+          retry: (_, _) => null,
           overrides: [uploadManagerProvider.overrideWithValue(uploads)],
           child: MaterialApp(
             localizationsDelegates: L10n.localizationsDelegates,
@@ -69,7 +61,6 @@ class _Harness {
                   members: members,
                   isPreviewEnabled: true,
                   onTapSelectMode: () {},
-                  maxWidth: 400,
                 ),
               ),
             ),
@@ -97,19 +88,15 @@ class _Harness {
     await pumpAlbum(tester, events(List.filled(2, EventStatus.sending)));
 
     expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
-    expect(find.byIcon(Icons.refresh), findsNothing);
   }
 
-  Future<void> retryOnFailed(WidgetTester tester) async {
-    final e = events([EventStatus.sending, EventStatus.error]);
+  /// Two tiles and the gap fill the grid, which is as wide as a single image.
+  Future<void> gridIsAsWideAsAnImage(WidgetTester tester) async {
+    final e = events(List.filled(2, EventStatus.sending));
     await pumpAlbum(tester, e);
 
-    expect(find.byIcon(Icons.refresh), findsOneWidget);
-    expect(find.bySemanticsLabel('Failed to send files'), findsOneWidget);
-
-    await tester.tap(find.byIcon(Icons.refresh));
-    await tester.pump();
-    expect(uploads.retried, [e[1].eventId]);
+    expect(tileSize(tester, e[0]).width * 2 + 2, 256);
+    expect(tester.getSize(find.byType(MediaAlbumBubble)).width, 256);
   }
 
   Future<void> scopeGivesLeaderOnly(WidgetTester tester) async {
@@ -155,8 +142,8 @@ void main() {
     harness.spinnerWhileSending,
   );
   testWidgets(
-    'a failed image shows a retry icon, a label and retries on tap',
-    harness.retryOnFailed,
+    'the grid is as wide as a single image',
+    harness.gridIsAsWideAsAnImage,
   );
   testWidgets(
     'the scope gives the members to the leader only',

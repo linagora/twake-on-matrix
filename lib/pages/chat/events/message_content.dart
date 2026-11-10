@@ -72,7 +72,7 @@ class MessageContent extends StatelessWidget
         onTapSelectMode: () => onTapSelectMode?.call(),
       ),
     );
-    final captionEvent = members.last;
+    final captionEvent = members.last.getDisplayEventWithoutEditEvent(timeline);
     if (!captionEvent.isBodyDiffersFromFilename() ||
         captionEvent.text.isEmpty) {
       return album;
@@ -84,11 +84,7 @@ class MessageContent extends StatelessWidget
         album,
         const SizedBox(height: 8),
         SizedBox(
-          width: MessageStyle.messageBubbleWidthMediaCaption(
-            event: captionEvent,
-            context: context,
-            textWidth: textWidth,
-          ),
+          width: MediaAlbumBubble.widthFor(),
           child: TwakeLinkPreview(
             key: ValueKey('TwakeLinkPreview%${captionEvent.eventId}%'),
             event: captionEvent,

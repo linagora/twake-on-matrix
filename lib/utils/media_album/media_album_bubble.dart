@@ -2,10 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/providers/upload_manager_provider.dart';
-import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
-import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:matrix/matrix.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
@@ -19,26 +16,24 @@ class MediaAlbumBubble extends StatelessWidget {
   final List<Event> members;
   final bool isPreviewEnabled;
   final void Function() onTapSelectMode;
-  final double? maxWidth;
 
   const MediaAlbumBubble({
     super.key,
     required this.members,
     required this.isPreviewEnabled,
     required this.onTapSelectMode,
-    this.maxWidth,
   });
 
   static const double _gap = 2;
 
+  /// Width of the grid, so that a caption below it lines up with it.
+  static double widthFor() => PlatformInfos.isWeb
+      ? MessageContentStyle.imageBubbleWidthForWeb * 0.8
+      : MessageContentStyle.imageBubbleWidthForMobileAndTablet;
+
   @override
   Widget build(BuildContext context) {
-    final bubbleWidth = min(
-      maxWidth ?? double.infinity,
-      PlatformInfos.isWeb
-          ? MessageContentStyle.imageBubbleWidthForWeb * 0.8
-          : MessageContentStyle.imageBubbleWidthForMobileAndTablet,
-    );
+    final bubbleWidth = widthFor();
     final tile = (bubbleWidth - _gap) / 2;
     final rows = <List<Event>>[
       for (var i = 0; i < members.length; i += 2)
@@ -94,8 +89,9 @@ class MediaAlbumBubble extends StatelessWidget {
   }
 }
 
-/// An image that is still uploading or failed: shows the local picture with
-/// a spinner (or an error icon that retries on tap) on top.
+/// An image that is still uploading: shows the local picture with a spinner
+/// on top. A failed image leaves the album (see `GroupMediaEventsPolicy`) and
+/// gets the retry of a single image bubble.
 class _PendingTile extends ConsumerStatefulWidget {
   final Event event;
 
@@ -106,67 +102,55 @@ class _PendingTile extends ConsumerStatefulWidget {
 }
 
 class _PendingTileState extends ConsumerState<_PendingTile> {
-  late final Future<MatrixFile?> _file = widget.event.getPlaceholderMatrixFile(
-    ref.read(uploadManagerProvider),
-  );
+  late Future<MatrixFile?> _file;
 
-  Future<void> _retry() async {
-    final result = await ref
-        .read(uploadManagerProvider)
-        .retryUpload(widget.event);
-    if (!mounted || result != RetryUploadResult.fileDataUnavailable) return;
-    TwakeSnackBar.show(context, L10n.of(context)!.messageCannotBeResent);
+  @override
+  void initState() {
+    super.initState();
+    _file = widget.event.getPlaceholderMatrixFile(
+      ref.read(uploadManagerProvider),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final failed = widget.event.status.isError;
     return Semantics(
-      label: failed
-          ? L10n.of(context)!.failedToSendFiles
-          : widget.event.filename,
+      label: widget.event.filename,
       image: true,
-      button: failed,
-      child: GestureDetector(
-        onTap: failed ? _retry : null,
-        child: Stack(
-          fit: StackFit.expand,
-          alignment: Alignment.center,
-          children: [
-            BlurHash(
-              hash:
-                  widget.event.blurHash ?? MessageContentStyle.defaultBlurHash,
+      child: Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.center,
+        children: [
+          BlurHash(
+            hash: widget.event.blurHash ?? MessageContentStyle.defaultBlurHash,
+          ),
+          FutureBuilder<MatrixFile?>(
+            future: _file,
+            builder: (context, snapshot) {
+              final bytes = snapshot.data?.bytes;
+              if (bytes == null || bytes.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Image.memory(
+                bytes,
+                fit: BoxFit.cover,
+                cacheWidth: context.getCacheSize(256),
+                filterQuality: FilterQuality.none,
+              );
+            },
+          ),
+          ColoredBox(color: Colors.black.withAlpha(40)),
+          const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
             ),
-            FutureBuilder<MatrixFile?>(
-              future: _file,
-              builder: (context, snapshot) {
-                final bytes = snapshot.data?.bytes;
-                if (bytes == null || bytes.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return Image.memory(
-                  bytes,
-                  fit: BoxFit.cover,
-                  cacheWidth: context.getCacheSize(256),
-                  filterQuality: FilterQuality.none,
-                );
-              },
-            ),
-            ColoredBox(color: Colors.black.withAlpha(failed ? 90 : 40)),
-            Center(
-              child: failed
-                  ? const Icon(Icons.refresh, color: Colors.white)
-                  : const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

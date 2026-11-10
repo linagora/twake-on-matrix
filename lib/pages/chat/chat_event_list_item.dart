@@ -82,7 +82,10 @@ class ChatEventListItem extends StatelessWidget {
       timestampCallback: (event) {
         controller.handleDisplayStickyTimestamp(event.originServerTs);
       },
-      onEventVisible: controller.onEventVisible,
+      // The leader draws the whole album: report its newest image as read.
+      onEventVisible: (event) => controller.onEventVisible(
+        controller.selectMode ? event : albumMembers?.last ?? event,
+      ),
       onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
       onHideEmojiReaction: controller.onHideEmojiReaction,
       listAction: controller.listHorizontalActionMenuBuilder(event).map((
