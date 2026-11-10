@@ -98,6 +98,8 @@ List<ReactionEntry> groupReactions(Iterable<Event> events, String? userId) {
     ..sort((a, b) {
       final byCount = reactionMap[b]!.count.compareTo(reactionMap[a]!.count);
       if (byCount != 0) return byCount;
+      final mine = reactionMap[a]!.reacted;
+      if (mine != reactionMap[b]!.reacted) return mine ? -1 : 1;
       final bySentAt = firstSentAt[a]!.compareTo(firstSentAt[b]!);
       if (bySentAt != 0) return bySentAt;
       return a.compareTo(b);

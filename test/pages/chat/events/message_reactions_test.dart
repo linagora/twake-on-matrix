@@ -226,6 +226,29 @@ void main() {
       );
     });
 
+    test('puts my reaction first among equal counts', () {
+      final events = [
+        reactionEvent('👍', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent(
+          '❤️',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 2),
+        ),
+        reactionEvent('😂', sentAt: DateTime(2026, 1, 1, 0, 3)),
+      ];
+
+      expect(groupReactions(events, myUserId).map((r) => r.key), [
+        '😂',
+        '👍',
+        '❤️',
+      ]);
+      expect(groupReactions(events.reversed, myUserId).map((r) => r.key), [
+        '😂',
+        '👍',
+        '❤️',
+      ]);
+    });
+
     test('puts a higher count first, before older reactions', () {
       final reactions = groupReactions([
         reactionEvent('👍', sentAt: DateTime(2026, 1, 1, 0, 1)),
