@@ -3251,5 +3251,35 @@
   "@publicGroupsYouCanJoin": {
     "type": "text",
     "placeholders": {}
+  },
+  "addFromTwakeDrive": "Add from Drive",
+  "@addFromTwakeDrive": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveCouldNotOpen": "Couldn't open Twake Drive",
+  "@driveCouldNotOpen": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveSignInFailed": "Couldn't sign in to Twake Drive",
+  "@driveSignInFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveChatAppMissing": "Twake Chat isn't installed on your Twake Drive yet. Ask your administrator to install it.",
+  "@driveChatAppMissing": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveDownloadFailed": "Some files couldn't be added from Twake Drive",
+  "@driveDownloadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveShortcutsNotSent": "Shortcuts can't be attached, send a link instead",
+  "@driveShortcutsNotSent": {
+    "type": "text",
+    "placeholders": {}
   }
 }

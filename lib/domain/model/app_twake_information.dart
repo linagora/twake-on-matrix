@@ -17,6 +17,7 @@ abstract class AppTwakeInformation with _$AppTwakeInformation {
     @JsonKey(name: 'common_settings')
     CommonSettingsInformation? commonSettingsInformation,
     @JsonKey(name: 'enable_invitations') bool? isInvitationEnabled,
+    @JsonKey(name: 'enable_twake_drive') bool? isTwakeDriveEnabled,
     @JsonKey(name: 'public_groups')
     PublicGroupsInformation? publicGroupsInformation,
   }) = _AppTwakeInformation;

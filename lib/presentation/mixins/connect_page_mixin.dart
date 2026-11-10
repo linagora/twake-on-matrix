@@ -1,8 +1,18 @@
+import 'package:twake_chat/data/drive/datasources_impl/sso_refresh_token_store.provider.dart';
+import 'package:twake_chat/data/drive/datasources_impl/twake_sso_source.provider.dart';
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/utils/login_failed_snackbar.dart';
 import 'package:twake_chat/data/account/login_sessions.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
+import 'package:flutter_riverpod/flutter_riverpod.dart'
+    show ProviderContainer, ProviderScope;
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/config/app_constants.dart';
+import 'package:twake_chat/domain/drive/entities/drive_id_token.dart';
+import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart';
+import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/pages/connect/connect_page.dart';
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -160,29 +170,115 @@ mixin ConnectPageMixin {
     required String id,
   }) async {
     try {
-      final result = await authenticateWithWebAuth(context: context, id: id);
-      if (!context.mounted) return SsoLoginState.error;
-      final token = Uri.parse(result).queryParameters['loginToken'];
-      if (token == null || token.isEmpty) {
-        showLoginFailedSnackBar(null);
-        return SsoLoginState.tokenEmpty;
+      final container = ProviderScope.containerOf(context, listen: false);
+      // The Drive of the homeserver being signed in to, not the active
+      // account's: this login may add another account.
+      final config = _loginSummaryOf(context).twakeDriveConfig;
+      final signsInOnce = _signsInOnce(context, config);
+      final issuer = config.ssoUrl;
+      final DriveIdToken? tokens;
+      final String token;
+      if (signsInOnce) {
+        tokens = await container.read(twakeSsoSourceProvider(config)).signIn();
+        token = tokens.value;
+      } else {
+        tokens = null;
+        final result = await authenticateWithWebAuth(context: context, id: id);
+        if (!context.mounted) return SsoLoginState.error;
+        final loginToken = Uri.parse(result).queryParameters['loginToken'];
+        if (loginToken == null || loginToken.isEmpty) {
+          showLoginFailedSnackBar(null);
+          return SsoLoginState.tokenEmpty;
+        }
+        token = loginToken;
       }
+      if (!context.mounted) return SsoLoginState.error;
       Matrix.of(context).loginType = LoginType.mLoginToken;
       final sessions = _sessionsOf(context);
       final client = await sessions.loginClient();
       // `loginClient` waits for the cleanup retries: the user may have left.
       if (!context.mounted) return SsoLoginState.error;
-      return await loginWithToken(sessions, client, token);
-    } catch (e) {
+      final state = await loginWithToken(
+        sessions,
+        client,
+        token,
+        type: signsInOnce ? AppConstants.jwtLoginType : LoginType.mLoginToken,
+      );
+      final userId = client.userID;
+      if (tokens != null && state == SsoLoginState.success && userId != null) {
+        // Drive finds them when the account is active: the login runs first.
+        container.read(ssoTokenVaultProvider).put(userId, tokens);
+        await _rememberRefreshToken(
+          container,
+          userId,
+          tokens.refreshToken,
+          issuer: issuer,
+        );
+      }
+      return state;
+    } on DriveSignInCancelled {
+      Logs().i('ConnectPageMixin:: ssoLoginActionMobile(): cancelled');
+      return SsoLoginState.error;
+    } on DriveException catch (e) {
+      // The SSO source has logged the failure, with its reason.
+      showLoginFailedSnackBar(e);
+      return SsoLoginState.error;
+    } on PlatformException catch (e) {
       // Only a cancel of the web auth stays silent, and it is not an error.
-      if (e is PlatformException && e.code == 'CANCELED') {
+      if (e.code == 'CANCELED') {
         Logs().i('ConnectPageMixin:: ssoLoginActionMobile(): cancelled');
         return SsoLoginState.error;
       }
       Logs().e('ConnectPageMixin:: ssoLoginActionMobile(): error: $e');
       showLoginFailedSnackBar(e);
       return SsoLoginState.error;
+    } on Exception catch (e) {
+      // Not logged with its text: the callback of the browser is in it.
+      Logs().e('ConnectPageMixin:: ssoLoginActionMobile(): error');
+      showLoginFailedSnackBar(e);
+      return SsoLoginState.error;
     }
+  }
+
+  /// Keeps the refresh token for the next start. A store that fails does not
+  /// fail the login: the next start signs in again for Drive.
+  Future<void> _rememberRefreshToken(
+    ProviderContainer container,
+    String userId,
+    String? refreshToken, {
+    required String issuer,
+  }) async {
+    if (refreshToken == null) return;
+    try {
+      await container
+          .read(ssoRefreshTokenStoreProvider)
+          .write(userId, refreshToken, issuer: issuer);
+    } on Exception {
+      Logs().w('ConnectPageMixin:: could not keep the SSO refresh token');
+    }
+  }
+
+  /// One sign-in at the SSO opens both the Matrix session and Drive, when the
+  /// SSO is configured, the homeserver takes its id token and it offers no
+  /// choice of identity provider. Otherwise the login goes through the
+  /// homeserver SSO as before, with the provider the user chose.
+  bool _signsInOnce(BuildContext context, DriveConfig config) {
+    return config.isEnabled &&
+        supportsFlow(context: context, flowType: AppConstants.jwtLoginType) &&
+        _identityProviderCount(context) <= 1;
+  }
+
+  HomeserverSummary? _loginSummaryOf(BuildContext context) =>
+      _sessionsOf(context).homeserverSummary;
+
+  int _identityProviderCount(BuildContext context) {
+    final flows = _loginSummaryOf(context)?.loginFlows;
+    for (final flow in flows ?? const <LoginFlow>[]) {
+      if (flow.type != AuthenticationTypes.sso) continue;
+      final providers = flow.additionalProperties['identity_providers'];
+      return providers is List ? providers.length : 0;
+    }
+    return 0;
   }
 
   Future<void> tryLogoutSso(BuildContext context) async {
@@ -301,14 +397,15 @@ mixin ConnectPageMixin {
   Future<SsoLoginState> loginWithToken(
     LoginSessions sessions,
     Client client,
-    String token,
-  ) async {
+    String token, {
+    String type = LoginType.mLoginToken,
+  }) async {
     final dialogResult = await TwakeDialog.showStreamDialogFullScreen(
       account: client,
       future: () async => sessions.trackLogin(
         client,
         () => client.login(
-          LoginType.mLoginToken,
+          type,
           token: token,
           initialDeviceDisplayName: PlatformInfos.clientName,
         ),

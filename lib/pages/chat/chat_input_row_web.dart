@@ -19,6 +19,7 @@ class ChatInputRowWeb extends StatelessWidget {
     required this.inputBar,
     required this.onTapMoreBtn,
     required this.onEmojiAction,
+    this.moreButton,
     this.editEventNotifier,
     this.onCloseEditAction,
     this.timeline,
@@ -26,6 +27,10 @@ class ChatInputRowWeb extends StatelessWidget {
 
   final Widget inputBar;
   final OnTapMoreBtnAction onTapMoreBtn;
+
+  /// Replaces the "+" button, for a device whose menu has more than the file
+  /// picker (a tablet holds the attachment menu of the phone).
+  final Widget? moreButton;
   final OnTapEmojiAction onEmojiAction;
   final ValueNotifier<Event?>? editEventNotifier;
   final void Function()? onCloseEditAction;
@@ -100,15 +105,16 @@ class ChatInputRowWeb extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TwakeIconButton(
-                    tooltip: L10n.of(context)!.more,
-                    paddingAll: 0.0,
-                    margin: const EdgeInsets.all(10.0),
-                    iconColor: LinagoraSysColors.material().tertiary,
-                    icon: Icons.add_circle_outline,
-                    size: ChatInputRowStyle.chatInputRowMoreBtnSize,
-                    onTap: onTapMoreBtn,
-                  ),
+                  moreButton ??
+                      TwakeIconButton(
+                        tooltip: L10n.of(context)!.more,
+                        paddingAll: 0.0,
+                        margin: const EdgeInsets.all(10.0),
+                        iconColor: LinagoraSysColors.material().tertiary,
+                        icon: Icons.add_circle_outline,
+                        size: ChatInputRowStyle.chatInputRowMoreBtnSize,
+                        onTap: onTapMoreBtn,
+                      ),
                   Expanded(child: inputBar),
                   InkWell(
                     onTapDown: onEmojiAction,

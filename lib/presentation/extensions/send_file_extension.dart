@@ -652,11 +652,79 @@ extension SendFileExtension on Room {
       if (await file.exists() || sendingFile == null) {
         return;
       }
-      await file.create(recursive: true);
-      await file.writeAsBytes(sendingFile.bytes);
+      // Written aside and renamed, so a failed write never leaves a partial
+      // file where a complete one is expected.
+      final part = File('$filePathInAppDownloads.part');
+      try {
+        await part.create(recursive: true);
+        await part.writeAsBytes(sendingFile.bytes);
+        await part.rename(filePathInAppDownloads);
+      } on FileSystemException {
+        if (await part.exists()) await part.delete();
+        rethrow;
+      }
       Logs().d('File copied in app downloads folder', filePathInAppDownloads);
     } catch (e) {
       Logs().e('Error while copying file in app downloads folder', e);
+    }
+  }
+
+  /// Keeps the file saved for this send as the sender's copy of the sent file,
+  /// under [eventId], so its bubble opens with no download. The file is moved,
+  /// not read into memory and written again: it was made for this send and
+  /// nothing else needs it.
+  Future<void> moveFileToAppDownloadsFolder({
+    required String eventId,
+    required String fileName,
+    required String sourcePath,
+  }) async {
+    try {
+      final targetPath = isRoomEncrypted()
+          ? await StorageDirectoryManager.instance.getDecryptedFilePath(
+              eventId: eventId,
+              fileName: fileName,
+            )
+          : await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+              eventId: eventId,
+              fileName: fileName,
+            );
+      final target = File(targetPath);
+      final source = File(sourcePath);
+      if (await target.exists()) {
+        // An image was kept in memory and written already: the file saved for
+        // this send is not needed any more.
+        await source.delete();
+        return;
+      }
+      await target.parent.create(recursive: true);
+      try {
+        await source.rename(targetPath);
+      } on FileSystemException {
+        // Another volume: a rename cannot cross it. The copy is the sender's;
+        // the file saved for this send is not needed any more.
+        await source.copy(targetPath);
+        await source.delete();
+      }
+      Logs().d('File moved in app downloads folder');
+    } on FileSystemException catch (e) {
+      // The file is sent: a copy that cannot be kept only costs a download.
+      // The exception holds the path, and so the file name: only its code.
+      Logs().w(
+        'Could not keep the sent file in the app downloads folder: '
+        '${e.osError?.errorCode}',
+      );
+    } on Exception {
+      Logs().w('Could not keep the sent file in the app downloads folder');
+    }
+  }
+
+  /// Deletes a file saved for a send that is done. The send does not fail
+  /// for a file that stays.
+  Future<void> deleteSavedFile(String path) async {
+    try {
+      await File(path).delete();
+    } on FileSystemException {
+      Logs().w('Could not delete the saved file');
     }
   }
 

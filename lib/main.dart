@@ -29,6 +29,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:twake_chat/data/account/sources/account_boot_snapshot_source.dart';
 import 'package:twake_chat/providers/account_boot_snapshot_provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
+import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/utils/famedlysdk_store.dart';
 
 import 'utils/background_push.dart';
@@ -77,6 +78,10 @@ Future<void> initializeApp() async {
       bootAccountSnapshotProvider.overrideWithValue(bootSnapshot),
     ],
   );
+  // The logout cleanup of the SSO tokens listens from the moment this is read:
+  // a lazy read would leave the refresh token of an account that logs out
+  // before it ever opens Drive.
+  container.read(ssoTokenVaultProvider);
   // Preload the first account that can be used; a logged-out client kept for
   // its pending removal is not one.
   final firstClient = ClientManager.loggedIn(clients).firstOrNull;
