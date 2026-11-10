@@ -143,6 +143,44 @@ class _Harness {
     expect(found, [single]);
   }
 
+  /// The leader lays out the bubble, but the caption is on the last image.
+  Future<void> leaderTakesTheAlbumCaption(WidgetTester tester) async {
+    final e = events(List.filled(2, EventStatus.synced));
+    final captioned = [
+      e.first,
+      Event(
+        senderId: '@a:example.com',
+        type: 'm.room.message',
+        room: room,
+        eventId: e.last.eventId,
+        content: {'msgtype': 'm.image', 'body': 'Look', 'filename': 'B.png'},
+        originServerTs: DateTime.utc(2026, 11, 9),
+        status: EventStatus.synced,
+      ),
+    ];
+    expect(await _hasCaption(tester, e.first, captioned), isTrue);
+    expect(await _hasCaption(tester, e.first, e), isFalse);
+    expect(await _hasCaption(tester, e.first, null), isFalse);
+  }
+
+  Future<bool?> _hasCaption(
+    WidgetTester tester,
+    Event asked,
+    List<Event>? members,
+  ) async {
+    bool? found;
+    final probe = Builder(
+      builder: (context) {
+        found = MediaAlbumScope.hasCaptionOrReply(context, asked);
+        return const SizedBox();
+      },
+    );
+    await tester.pumpWidget(
+      members == null ? probe : MediaAlbumScope(members: members, child: probe),
+    );
+    return found;
+  }
+
   Future<void> scopeGivesLeaderOnly(WidgetTester tester) async {
     final e = events(List.filled(2, EventStatus.synced));
 
@@ -196,6 +234,10 @@ void main() {
   testWidgets(
     'every image of an album is listed for its reactions',
     harness.eventsOfGivesEveryMember,
+  );
+  testWidgets(
+    'the leader is laid out with the caption of the last image',
+    harness.leaderTakesTheAlbumCaption,
   );
   testWidgets(
     'the scope gives the members to the leader only',

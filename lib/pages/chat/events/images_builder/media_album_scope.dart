@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 /// Tells the bubble of an album's leader event which images it draws.
 class MediaAlbumScope extends InheritedWidget {
@@ -24,6 +25,16 @@ class MediaAlbumScope extends InheritedWidget {
   /// the album it leads, else [event] alone.
   static List<Event> eventsOf(BuildContext context, Event event) =>
       membersFor(context, event) ?? [event];
+
+  /// Whether the bubble of [event] has text under its media: its own caption
+  /// or reply, or, for the leader of an album, the caption of the last image.
+  static bool hasCaptionOrReply(BuildContext context, Event event) =>
+      event.isCaptionModeOrReply() ||
+      (membersFor(context, event)?.last.isCaptionModeOrReply() ?? false);
+
+  /// Whether the time sits over the media, as for an image with no caption.
+  static bool timelineOverlayFor(BuildContext context, Event event) =>
+      event.timelineOverlayMessage && !hasCaptionOrReply(context, event);
 
   @override
   bool updateShouldNotify(MediaAlbumScope oldWidget) =>

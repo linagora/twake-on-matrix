@@ -199,7 +199,7 @@ class _MessageContentWithTimestampBuilderState
           MessageTypes.Text,
           MessageTypes.BadEncrypted,
         }.contains(widget.event.messageType) ||
-        widget.event.isCaptionModeOrReply();
+        MediaAlbumScope.hasCaptionOrReply(context, widget.event);
 
     return Align(
       alignment: MessageStyle.messageAlignmentGeometry(widget.event, context),
@@ -564,7 +564,10 @@ class _MessageContentWithTimestampBuilderState
                     WidgetSpan(
                       child: MessageTime(
                         timelineOverlayMessage:
-                            widget.event.timelineOverlayMessage,
+                            MediaAlbumScope.timelineOverlayFor(
+                              context,
+                              widget.event,
+                            ),
                         room: widget.event.room,
                         event: widget.event,
                         showSeenIcon: widget.event.isOwnMessage,
