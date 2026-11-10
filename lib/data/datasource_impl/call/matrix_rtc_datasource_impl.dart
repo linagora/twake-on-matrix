@@ -381,10 +381,16 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  Stream<void> watchRoomEncrypted(String roomId) {
+  Stream<void> watchRoomEncrypted(String roomId) async* {
     final client = _maybeClient;
-    if (client == null) return const Stream.empty();
-    return client.onTimelineEvent.stream
+    if (client == null) return;
+    // Encrypted during the join, before this listened, or no longer there.
+    final room = client.getRoomById(roomId);
+    if (room == null || room.encrypted) {
+      yield null;
+      return;
+    }
+    yield* client.onTimelineEvent.stream
         .where(
           (event) =>
               event.roomId == roomId && event.type == EventTypes.Encryption,

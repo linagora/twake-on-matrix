@@ -378,6 +378,18 @@ void main() {
       expect(second.calls, isEmpty);
     });
   });
+
+  test('onRoomEncrypted_whenTheLookupFails_endsTheCall', () async {
+    await controller().join('!room', isVideo: false);
+
+    repository.encryptions.addError(StateError('no room'));
+    await pumpEventQueue();
+
+    expect(
+      (state() as CallFailed).error,
+      isA<CallEncryptionUnsupportedException>(),
+    );
+  });
 }
 
 class _FakeClient extends Fake implements Client {}

@@ -100,7 +100,10 @@ class CallController extends _$CallController {
     _encryption = ref
         .read(watchCallRoomEncryptedUseCaseProvider)
         .execute(roomId)
-        .listen((_) => _onRoomEncrypted());
+        .listen(
+          (_) => _onRoomEncrypted(),
+          onError: (Object _) => _onRoomEncrypted(),
+        );
     if (_isLeaveRequested) await leave();
   }
 

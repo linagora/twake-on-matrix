@@ -19,8 +19,10 @@ class _FakeRoom extends Fake implements Room {
   @override
   String get id => '!room:hs.test';
 
+  var isEncrypted = false;
+
   @override
-  bool get encrypted => false;
+  bool get encrypted => isEncrypted;
 
   @override
   bool get isDirectChat => false;
@@ -404,6 +406,7 @@ void main() {
     MatrixRtcDatasourceImpl(
       client,
     ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+    await pumpEventQueue();
 
     client.onTimelineEvent.add(
       Event(
@@ -416,6 +419,30 @@ void main() {
         room: client._room,
       ),
     );
+    await pumpEventQueue();
+
+    expect(encrypted, hasLength(1));
+  });
+
+  test('watchRoomEncrypted_whenEncryptedBeforeItListens_emitsAtOnce', () async {
+    final client = _FakeClient().._room.isEncrypted = true;
+    final encrypted = <void>[];
+
+    MatrixRtcDatasourceImpl(
+      client,
+    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+    await pumpEventQueue();
+
+    expect(encrypted, hasLength(1));
+  });
+
+  test('watchRoomEncrypted_whenTheRoomIsGone_emitsAtOnce', () async {
+    final client = _FakeClient()..isRoomGone = true;
+    final encrypted = <void>[];
+
+    MatrixRtcDatasourceImpl(
+      client,
+    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
     await pumpEventQueue();
 
     expect(encrypted, hasLength(1));
