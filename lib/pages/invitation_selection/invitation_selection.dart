@@ -102,6 +102,11 @@ class InvitationSelectionController
           },
           onError: (Object error, StackTrace stackTrace) {
             Logs().e('InvitationSelection::performInvite', error, stackTrace);
+            if (!navigator.mounted) return;
+            TwakeSnackBar.show(
+              navigator.context,
+              L10n.of(navigator.context)!.oopsSomethingWentWrong,
+            );
           },
         );
   }

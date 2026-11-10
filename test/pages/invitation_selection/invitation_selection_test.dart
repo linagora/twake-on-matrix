@@ -159,5 +159,14 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('whenItThrows_showsAnErrorSnackBar', (tester) async {
+      await openInvitationAndSubmit(tester);
+
+      interactor.result.addError(Exception('unban failed'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Oops, something went wrong…'), findsOneWidget);
+    });
   });
 }
