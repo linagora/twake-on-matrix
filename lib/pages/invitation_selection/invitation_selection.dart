@@ -65,51 +65,37 @@ class InvitationSelectionController
     final selectedContacts = selectedContactsMapNotifier.contactsList
         .map((contact) => contact.matrixId!)
         .toList();
+    final room = _room;
+    final navigator = Navigator.of(context);
+    // A federated invite can take minutes: leave now, report on the page below.
+    navigator.pop();
 
-    final subscription = getIt
+    getIt
         .get<UnbanAndInviteUsersInteractor>()
-        .execute(room: _room, userIds: selectedContacts)
+        .execute(room: room, userIds: selectedContacts)
         .listen((event) {
+          if (!navigator.mounted) return;
+          final hostContext = navigator.context;
           final state = event.fold((failure) => failure, (success) => success);
-
-          if (state is InviteUserLoading) {
-            TwakeDialog.showLoadingDialog(context);
-            return;
-          }
 
           if (state is InviteUserSuccess) {
             TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.contactHasBeenInvitedToTheGroup,
+              hostContext,
+              L10n.of(hostContext)!.contactHasBeenInvitedToTheGroup,
             );
-            inviteSuccessAction();
             return;
           }
 
           if (state is InviteUserSomeFailed) {
-            final exception = state.inviteUserPartialFailureException;
-
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await showConfirmAlertDialog(
-                context: context,
-                message: exception.getLocalizedErrorMessage(context),
-                isArrangeActionButtonsVertical: true,
-                okLabel: L10n.of(context)!.gotIt,
-              );
-            });
-            inviteSuccessAction();
-            return;
+            showConfirmAlertDialog(
+              context: hostContext,
+              message: state.inviteUserPartialFailureException
+                  .getLocalizedErrorMessage(hostContext),
+              isArrangeActionButtonsVertical: true,
+              okLabel: L10n.of(hostContext)!.gotIt,
+            );
           }
         });
-
-    subscription.onDone(() {
-      TwakeDialog.hideLoadingDialog(context);
-      subscription.cancel();
-    });
-  }
-
-  void inviteSuccessAction() {
-    Navigator.of(context).pop();
   }
 
   @override
