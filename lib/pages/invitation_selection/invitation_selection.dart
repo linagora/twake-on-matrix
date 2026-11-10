@@ -73,29 +73,37 @@ class InvitationSelectionController
     getIt
         .get<UnbanAndInviteUsersInteractor>()
         .execute(room: room, userIds: selectedContacts)
-        .listen((event) {
-          if (!navigator.mounted) return;
-          final hostContext = navigator.context;
-          final state = event.fold((failure) => failure, (success) => success);
-
-          if (state is InviteUserSuccess) {
-            TwakeSnackBar.show(
-              hostContext,
-              L10n.of(hostContext)!.contactHasBeenInvitedToTheGroup,
+        .listen(
+          (event) {
+            if (!navigator.mounted) return;
+            final hostContext = navigator.context;
+            final state = event.fold(
+              (failure) => failure,
+              (success) => success,
             );
-            return;
-          }
 
-          if (state is InviteUserSomeFailed) {
-            showConfirmAlertDialog(
-              context: hostContext,
-              message: state.inviteUserPartialFailureException
-                  .getLocalizedErrorMessage(hostContext),
-              isArrangeActionButtonsVertical: true,
-              okLabel: L10n.of(hostContext)!.gotIt,
-            );
-          }
-        });
+            if (state is InviteUserSuccess) {
+              TwakeSnackBar.show(
+                hostContext,
+                L10n.of(hostContext)!.contactHasBeenInvitedToTheGroup,
+              );
+              return;
+            }
+
+            if (state is InviteUserSomeFailed) {
+              showConfirmAlertDialog(
+                context: hostContext,
+                message: state.inviteUserPartialFailureException
+                    .getLocalizedErrorMessage(hostContext),
+                isArrangeActionButtonsVertical: true,
+                okLabel: L10n.of(hostContext)!.gotIt,
+              );
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            Logs().e('InvitationSelection::performInvite', error, stackTrace);
+          },
+        );
   }
 
   @override
