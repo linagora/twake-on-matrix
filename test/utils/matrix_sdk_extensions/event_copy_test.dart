@@ -36,8 +36,28 @@ void main() {
   setUpAll(_setUpRoom);
   setUp(() => _clipboard = _RecordingClipboard());
 
-  testWidgets('copies the image itself, not its description', _copiesImage);
-  testWidgets('copies the video itself, not its description', _copiesVideo);
+  testWidgets(
+    'copies the image itself, not its description',
+    _copiesMedia(
+      MessageTypes.Image,
+      MatrixImageFile(
+        bytes: Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 1, 2, 3]),
+        name: 'orange.png',
+        mimeType: 'image/png',
+      ),
+    ),
+  );
+  testWidgets(
+    'copies the video itself, not its description',
+    _copiesMedia(
+      MessageTypes.Video,
+      MatrixVideoFile(
+        bytes: Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]),
+        name: 'clip.mp4',
+        mimeType: 'video/mp4',
+      ),
+    ),
+  );
   testWidgets(
     'falls back to the text for a format the clipboard cannot hold',
     _fallsBackToTextForUnknownFormat,
@@ -101,44 +121,21 @@ Future<void> _copy(WidgetTester tester, Event event) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _copiesImage(WidgetTester tester) async {
-  final bytes = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 1, 2, 3]);
-  final event = _mediaEvent(
-    eventId: r'$image:example.org',
-    msgtype: MessageTypes.Image,
-    file: MatrixImageFile(
-      bytes: bytes,
-      name: 'orange.png',
-      mimeType: 'image/png',
-    ),
-  );
+WidgetTesterCallback _copiesMedia(String msgtype, MatrixFile file) =>
+    (tester) async {
+      final event = _mediaEvent(
+        eventId: '\$${file.name}:example.org',
+        msgtype: msgtype,
+        file: file,
+      );
 
-  await _copy(tester, event);
+      await _copy(tester, event);
 
-  expect(_clipboard.mediaBytes, bytes);
-  expect(_clipboard.mediaMimeType, 'image/png');
-  expect(_clipboard.text, isNull);
-  expect(find.text('Copied to clipboard'), findsOneWidget);
-}
-
-Future<void> _copiesVideo(WidgetTester tester) async {
-  final bytes = Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
-  final event = _mediaEvent(
-    eventId: r'$video:example.org',
-    msgtype: MessageTypes.Video,
-    file: MatrixVideoFile(
-      bytes: bytes,
-      name: 'clip.mp4',
-      mimeType: 'video/mp4',
-    ),
-  );
-
-  await _copy(tester, event);
-
-  expect(_clipboard.mediaBytes, bytes);
-  expect(_clipboard.mediaMimeType, 'video/mp4');
-  expect(_clipboard.text, isNull);
-}
+      expect(_clipboard.mediaBytes, file.bytes);
+      expect(_clipboard.mediaMimeType, file.mimeType);
+      expect(_clipboard.text, isNull);
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    };
 
 Future<void> _fallsBackToTextForUnknownFormat(WidgetTester tester) async {
   final event = _mediaEvent(
