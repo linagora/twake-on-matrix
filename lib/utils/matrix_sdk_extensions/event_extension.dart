@@ -13,7 +13,6 @@ import 'package:twake_chat/utils/extension/mime_type_extension.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:twake_chat/utils/size_string.dart';
@@ -233,29 +232,46 @@ extension LocalizedBody on Event {
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
-  Future<void> copy(BuildContext context, Timeline timeline) async {
-    if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
+  Future<void> copy(
+    BuildContext context,
+    Timeline timeline, {
+    TwakeClipboard? clipboard,
+  }) async {
+    clipboard ??= TwakeClipboard.instance;
+    if (!isVideoOrImage) {
+      return copyTextEvent(context, timeline, clipboard: clipboard);
+    }
+    final l10n = L10n.of(context)!;
+    try {
       final matrixFile =
-          getMatrixFile() ??
-          await downloadAndDecryptAttachment(getThumbnail: true);
-      try {
-        await TwakeClipboard.instance.copyImageAsBytes(
-          matrixFile.bytes,
-          mimeType: mimeType,
-        );
-      } catch (e) {
-        TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
-        Logs().e('copy(): failed to copy file ${matrixFile.name}');
+          getMatrixFile() ?? await downloadAndDecryptAttachment();
+      if (!context.mounted) return;
+      if (!TwakeClipboard.canCopyMedia(matrixFile.mimeType)) {
+        await copyTextEvent(context, timeline, clipboard: clipboard);
+        return;
       }
-    } else {
-      copyTextEvent(context, timeline);
+      await clipboard.copyMediaAsBytes(
+        matrixFile.bytes,
+        mimeType: matrixFile.mimeType,
+      );
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, l10n.copiedToClipboard);
+    } catch (e) {
+      Logs().e('copy(): failed to copy the media of $eventId', e);
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, l10n.copyImageFailed);
     }
   }
 
-  Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
-    await TwakeClipboard.instance.copyText(
+  Future<void> copyTextEvent(
+    BuildContext context,
+    Timeline timeline, {
+    TwakeClipboard? clipboard,
+  }) async {
+    await (clipboard ?? TwakeClipboard.instance).copyText(
       getSelectedEventString(context, timeline),
     );
+    if (!context.mounted) return;
     TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
