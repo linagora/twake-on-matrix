@@ -403,15 +403,12 @@ void main() {
     expect(encrypted, hasLength(1));
   });
 
-  test('watchRoomEncrypted_whenTheRoomIsGone_emitsAtOnce', () async {
+  test('watchRoomEncrypted_whenTheRoomIsGone_failsAsRoomNotFound', () async {
     final client = _FakeClient()..isRoomGone = true;
-    final encrypted = <void>[];
 
-    MatrixRtcDatasourceImpl(
-      client,
-    ).watchRoomEncrypted(_room).listen(encrypted.add);
-    await pumpEventQueue();
-
-    expect(encrypted, hasLength(1));
+    await expectLater(
+      MatrixRtcDatasourceImpl(client).watchRoomEncrypted(_room),
+      emitsError(isA<CallRoomNotFoundException>()),
+    );
   });
 }

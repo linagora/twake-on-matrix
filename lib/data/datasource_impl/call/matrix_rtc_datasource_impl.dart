@@ -361,9 +361,10 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
     final client = _maybeClient;
     if (client == null) return;
-    // Encrypted during the join, before this listened, or no longer there.
     final room = client.getRoomById(call.id);
-    if (room == null || room.encrypted) {
+    if (room == null) throw const CallRoomNotFoundException();
+    // Encrypted during the join, before this listened.
+    if (room.encrypted) {
       yield null;
       return;
     }

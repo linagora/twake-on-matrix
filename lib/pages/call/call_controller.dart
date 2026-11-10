@@ -112,8 +112,8 @@ class CallController extends _$CallController {
         .read(watchCallRoomEncryptedUseCaseProvider)
         .execute(roomId)
         .listen(
-          (_) => _onRoomEncrypted(),
-          onError: (Object _) => _onRoomEncrypted(),
+          (_) => _endWith(const CallEncryptionUnsupportedException()),
+          onError: (Object error) => _endWith(_typed(error)),
         );
     if (_isLeaveRequested) await leave();
   }
@@ -138,16 +138,13 @@ class CallController extends _$CallController {
     return participants.any((p) => p.userId != me);
   }
 
-  void _onRoomEncrypted() {
+  void _endWith(CallException error) {
     final current = state;
     if (current is! CallConnected) return;
     unawaited(
       _end(
         current,
-        then: CallState.failed(
-          roomId: current.roomId,
-          error: const CallEncryptionUnsupportedException(),
-        ),
+        then: CallState.failed(roomId: current.roomId, error: error),
       ),
     );
   }

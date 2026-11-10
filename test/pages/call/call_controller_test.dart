@@ -379,16 +379,14 @@ void main() {
     });
   });
 
-  test('onRoomEncrypted_whenTheLookupFails_endsTheCall', () async {
+  test('onRoomEncrypted_whenTheRoomIsGone_endsTheCallAsRoomNotFound', () async {
     await controller().join('!room', isVideo: false);
 
-    repository.encryptions.addError(StateError('no room'));
+    repository.encryptions.addError(const CallRoomNotFoundException());
     await pumpEventQueue();
 
-    expect(
-      (state() as CallFailed).error,
-      isA<CallEncryptionUnsupportedException>(),
-    );
+    expect((state() as CallFailed).error, isA<CallRoomNotFoundException>());
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 }
 
