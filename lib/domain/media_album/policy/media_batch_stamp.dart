@@ -1,7 +1,7 @@
 import 'dart:math';
 
 /// The key that ties the files of one send together, shared with the Twake web
-/// client (`docs/adr/0038-media-album-batch-key.md`). The value is a UUID
+/// client (`docs/adr/0039-media-album-batch-key.md`). The value is a UUID
 /// string, the same on every file of one confirmed send. Display grouping
 /// reads it; sending and forwarding write it.
 ///

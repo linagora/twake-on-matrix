@@ -1,4 +1,4 @@
-# 38. Media album batch key
+# 39. Media album batch key
 
 Date: 2026-11-06
 
@@ -21,8 +21,13 @@ MSC4274 (`m.gallery`) is still open and unsupported by clients that do not know 
 - Each file stays its own `m.image`/`m.video` event. Nothing changes for clients
   that ignore the key.
 - Grouping is display only and follows the web rule: adjacent events, same
-  sender, same batch, up to 10, sent and decrypted. A reply may sit only on the
-  first file; a caption only on the last.
+  sender, same batch, at most a minute apart and on the same day, up to 10,
+  decrypted, and a new album starts at the first unread event. A reply may sit
+  only on the first file; a caption only on the last.
+- Differences with web: images without the key never group on mobile (web
+  also groups them when they are a minute apart, which can merge two sends);
+  images still being sent stay in the album on mobile, so it does not break
+  apart while uploading (web groups only sent images).
 - Forwarding drops the key; a forward of 2+ images stamps one fresh id.
 - Spec basis (Matrix client-server API v1.19): a client may put its own keys in
   event content under a reverse-domain namespace
@@ -35,7 +40,8 @@ MSC4274 (`m.gallery`) is still open and unsupported by clients that do not know 
 
 ## Consequences
 
-- Albums look the same on web and mobile. Per-event actions (select, delete,
+- Albums look the same on web and mobile, except for the two differences
+  above. Per-event actions (select, delete,
   forward, copy, scroll-to) are unchanged.
 - The key is a Twake convention outside the Matrix spec. It is not secret; in
   E2EE rooms it is inside the encrypted payload.
