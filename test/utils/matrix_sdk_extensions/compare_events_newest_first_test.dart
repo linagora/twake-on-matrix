@@ -92,32 +92,38 @@ void main() {
     );
   });
 
-  test('a failed echo stays among the echoes, in creation order', () {
-    Event echo(String name, int createdMs, EventStatus status, int second) =>
-        Event(
-          senderId: '@user:example.com',
-          type: 'm.room.message',
-          room: room,
-          eventId: 'Twake-$name-$createdMs',
-          content: {'body': name},
-          originServerTs: DateTime.utc(2026, 11, 9, 14, 24, second),
-          status: status,
-        );
-    final sent = event('S', 30, EventStatus.synced);
-    final failed = echo('1', 1794209038793, EventStatus.error, 50);
-    final pending = echo('2', 1794209038840, EventStatus.sending, 5);
-
-    expect(
-      [
-        for (final e in ([
-          pending,
-          sent,
-          failed,
-        ]..sort(compareEventsNewestFirst)).reversed)
-          e.eventId,
-      ],
-      ['S', failed.eventId, pending.eventId],
+  test('a failed message keeps its place in time, below newer messages', () {
+    // Failed yesterday, kept by the SDK store; a message was sent today.
+    final failed = Event(
+      senderId: '@user:example.com',
+      type: 'm.room.message',
+      room: room,
+      eventId: 'Twake-1-1794109038793',
+      content: {'body': 'failed'},
+      originServerTs: DateTime.utc(2026, 11, 8, 9),
+      status: EventStatus.error,
     );
+    final today = event('S', 30, EventStatus.synced);
+
+    expect(order([today, failed]), [failed.eventId, 'S']);
+  });
+
+  test('echoes created in the same millisecond keep their counter order', () {
+    Event echo(int counter, int second) => Event(
+      senderId: '@user:example.com',
+      type: 'm.room.message',
+      room: room,
+      eventId: 'Twake Chat-$counter-1794209038793',
+      content: {'body': '$counter'},
+      originServerTs: DateTime.utc(2026, 11, 9, 14, 24, second),
+      status: EventStatus.sending,
+    );
+    // The SDK restamps each echo "now": 9 started last, 10 first.
+    expect(order([echo(10, 1), echo(9, 3), echo(11, 2)]), [
+      'Twake Chat-9-1794209038793',
+      'Twake Chat-10-1794209038793',
+      'Twake Chat-11-1794209038793',
+    ]);
   });
 
   test('an echo whose id has no creation time is ordered by its time', () {

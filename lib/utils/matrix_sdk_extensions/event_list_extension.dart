@@ -42,9 +42,11 @@ const _minTransactionMillis = 1000000000000;
 /// a new echo stamped "now" when the file starts to send, so the images of one
 /// send would swap places as they go one after the other. Local echoes
 /// therefore sort after every sent event, and among themselves by the creation
-/// time inside their transaction id, which never changes. An echo whose id has
-/// no such time counts as older than the others and is ordered by its own time
-/// among its kind, so the order stays consistent for any mix.
+/// time inside their transaction id, which never changes, then by its counter
+/// when two were created in the same millisecond. An echo whose id has no such
+/// time counts as older than the others and is ordered by its own time among
+/// its kind, so the order stays consistent for any mix. A failed event is not
+/// an echo: it keeps its place in time, as before.
 int compareEventsNewestFirst(Event a, Event b) {
   final aEcho = _isLocalEcho(a);
   if (aEcho != _isLocalEcho(b)) return aEcho ? -1 : 1;
@@ -53,6 +55,9 @@ int compareEventsNewestFirst(Event a, Event b) {
     final bCreated = _transactionCreatedAt(b.eventId);
     if (aCreated != null && bCreated != null) {
       if (aCreated != bCreated) return bCreated.compareTo(aCreated);
+      final aCounter = _transactionCounter(a.eventId) ?? -1;
+      final bCounter = _transactionCounter(b.eventId) ?? -1;
+      if (aCounter != bCounter) return bCounter.compareTo(aCounter);
     } else if (aCreated != null || bCreated != null) {
       return aCreated != null ? -1 : 1;
     }
@@ -60,8 +65,14 @@ int compareEventsNewestFirst(Event a, Event b) {
   return b.originServerTs.compareTo(a.originServerTs);
 }
 
-bool _isLocalEcho(Event event) =>
-    event.status.isSending || event.status.isError;
+bool _isLocalEcho(Event event) => event.status.isSending;
+
+/// The counter of a transaction id (`<client>-<counter>-<millis>`), or null.
+int? _transactionCounter(String eventId) {
+  final end = eventId.lastIndexOf('-');
+  final start = end > 0 ? eventId.lastIndexOf('-', end - 1) : -1;
+  return start < 0 ? null : int.tryParse(eventId.substring(start + 1, end));
+}
 
 /// Milliseconds at the end of a transaction id, or null for any other id.
 int? _transactionCreatedAt(String eventId) {
