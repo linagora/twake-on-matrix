@@ -412,16 +412,16 @@ void main() {
     repository.directoryController = newPages;
 
     // Act
-    container.invalidate(publicRoomsControllerProvider);
-    container.read(publicRoomsControllerProvider);
+    container.invalidate(publicRoomsControllerProvider());
+    container.read(publicRoomsControllerProvider());
     await pumpEventQueue();
-    final whileReloading = container.read(publicRoomsControllerProvider);
+    final whileReloading = container.read(publicRoomsControllerProvider());
     newPages.add([publicRoom('!new')]);
     await pumpEventQueue();
 
     // Assert
     expect(whileReloading.isLoading, isTrue);
-    final state = container.read(publicRoomsControllerProvider).requireValue;
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
     expect(state.rooms.map((room) => room.roomId), ['!new']);
     expect(state.isLoadingMore, isTrue);
   });
@@ -435,9 +435,9 @@ void main() {
     final oldPages = StreamController<List<PublicRoom>>();
     repository.directoryController = oldPages;
     final container = makeContainer();
-    container.listen(publicRoomsControllerProvider, (_, _) {});
+    container.listen(publicRoomsControllerProvider(), (_, _) {});
     oldPages.add([publicRoom('!old', access: PublicRoomAccess.approval)]);
-    await container.read(publicRoomsControllerProvider.future);
+    await container.read(publicRoomsControllerProvider().future);
     await pumpEventQueue();
     expect(repository.knockedQueries, [
       ['!old'],
@@ -448,8 +448,8 @@ void main() {
     repository.directoryController = newPages;
 
     // Act
-    container.invalidate(publicRoomsControllerProvider);
-    container.read(publicRoomsControllerProvider);
+    container.invalidate(publicRoomsControllerProvider());
+    container.read(publicRoomsControllerProvider());
     await pumpEventQueue();
     newPages.add([publicRoom('!new', access: PublicRoomAccess.approval)]);
     await pumpEventQueue();
@@ -457,10 +457,43 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    final state = container.read(publicRoomsControllerProvider).requireValue;
+    final state = container.read(publicRoomsControllerProvider()).requireValue;
     expect(state.rooms.map((room) => room.roomId), ['!new']);
     expect(state.requestedRoomIds, {'!new'});
   });
+
+  for (final (description, room) in [
+    ('Join', publicRoom('!open')),
+    ('Request', publicRoom('!knock', access: PublicRoomAccess.approval)),
+  ]) {
+    test('open_whenReloadedDuringThe${description}_staysLoading', () async {
+      // Arrange
+      final gate = Completer<void>();
+      repository
+        ..joinGate = gate
+        ..knockGate = gate;
+      final oldPages = StreamController<List<PublicRoom>>();
+      final (container, _) = await loadFirstPage(oldPages);
+      final controller = container.read(
+        publicRoomsControllerProvider().notifier,
+      );
+      final result = controller.open(room);
+      final newPages = StreamController<List<PublicRoom>>();
+      addTearDown(newPages.close);
+      repository.directoryController = newPages;
+
+      // Act
+      container.invalidate(publicRoomsControllerProvider());
+      container.read(publicRoomsControllerProvider());
+      await pumpEventQueue();
+      gate.complete();
+      await result;
+      await pumpEventQueue();
+
+      // Assert
+      expect(container.read(publicRoomsControllerProvider()).isLoading, isTrue);
+    });
+  }
 
   test('build_whenTheFirstPageRepeatsARoom_listsItOnce', () async {
     // Arrange

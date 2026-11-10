@@ -46,10 +46,11 @@ class PublicRoomsController extends _$PublicRoomsController {
       return const PublicRoomOpenIgnored();
     }
     state = AsyncData(current.copyWith(pendingRoomId: room.roomId));
+    final ref = this.ref;
     try {
       return room.access == PublicRoomAccess.approval
-          ? await _knock(room)
-          : await _join(room);
+          ? await _knock(ref, room)
+          : await _join(ref, room);
     } on PublicRoomsException {
       return const PublicRoomOpenFailed();
     } finally {
@@ -59,7 +60,7 @@ class PublicRoomsController extends _$PublicRoomsController {
     }
   }
 
-  Future<PublicRoomOpenResult> _knock(PublicRoom room) async {
+  Future<PublicRoomOpenResult> _knock(Ref ref, PublicRoom room) async {
     await ref.read(knockPublicRoomUseCaseProvider).execute(room.roomId);
     if (!ref.mounted) return const PublicRoomRequested();
     _update(
@@ -70,7 +71,7 @@ class PublicRoomsController extends _$PublicRoomsController {
     return const PublicRoomRequested();
   }
 
-  Future<PublicRoomOpenResult> _join(PublicRoom room) async {
+  Future<PublicRoomOpenResult> _join(Ref ref, PublicRoom room) async {
     final joined = await ref
         .read(joinPublicRoomUseCaseProvider)
         .execute(room.roomId);
