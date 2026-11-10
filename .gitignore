@@ -119,3 +119,6 @@ web/vendor/dotlottie/
 /test/**/*.lock
 /unit_test_*.hive
 /unit_test_*.lock
+
+# Claude Code local settings (may contain raw commands with secrets)
+.claude/settings.local.json
