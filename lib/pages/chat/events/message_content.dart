@@ -29,8 +29,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_message/audio_player_widget.dart';
-import 'package:twake_chat/utils/media_album/media_album_bubble.dart';
-import 'package:twake_chat/utils/media_album/media_album_scope.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_bubble.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'cute_events.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';

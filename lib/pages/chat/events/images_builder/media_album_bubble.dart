@@ -6,6 +6,7 @@ import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.
 import 'package:matrix/matrix.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -53,6 +54,7 @@ class MediaAlbumBubble extends StatelessWidget {
                   for (var c = 0; c < rows[r].length; c++) ...[
                     if (c > 0) const SizedBox(width: _gap),
                     _tile(
+                      context,
                       rows[r][c],
                       width: rows[r].length == 1 ? bubbleWidth : tile,
                       height: tile,
@@ -67,24 +69,33 @@ class MediaAlbumBubble extends StatelessWidget {
     );
   }
 
-  Widget _tile(Event event, {required double width, required double height}) {
-    return SizedBox(
+  Widget _tile(
+    BuildContext context,
+    Event event, {
+    required double width,
+    required double height,
+  }) {
+    return Listener(
       key: ValueKey('album-tile-${event.transactionId ?? event.eventId}'),
-      width: width,
-      height: height,
-      child: !event.status.isSent
-          ? _PendingTile(event: event)
-          : ImageBubble(
-              event,
-              maxSize: false,
-              rounded: false,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-              animated: true,
-              onTapPreview: isPreviewEnabled ? () {} : null,
-              onTapSelectMode: onTapSelectMode,
-            ),
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => MediaAlbumPressScope.report(context, event),
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: !event.status.isSent
+            ? _PendingTile(event: event)
+            : ImageBubble(
+                event,
+                maxSize: false,
+                rounded: false,
+                width: width,
+                height: height,
+                fit: BoxFit.cover,
+                animated: true,
+                onTapPreview: isPreviewEnabled ? () {} : null,
+                onTapSelectMode: onTapSelectMode,
+              ),
+      ),
     );
   }
 }

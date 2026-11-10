@@ -20,6 +20,11 @@ class MediaAlbumScope extends InheritedWidget {
     return scope.members;
   }
 
+  /// The events whose reactions the bubble of [event] shows: every image of
+  /// the album it leads, else [event] alone.
+  static List<Event> eventsOf(BuildContext context, Event event) =>
+      membersFor(context, event) ?? [event];
+
   @override
   bool updateShouldNotify(MediaAlbumScope oldWidget) =>
       oldWidget.members.length != members.length ||
@@ -31,4 +36,23 @@ class MediaAlbumScope extends InheritedWidget {
     }
     return true;
   }
+}
+
+/// Lets an album tile tell the message around it which image the finger is
+/// on, so that a long-press opens the menu of that image.
+class MediaAlbumPressScope extends InheritedWidget {
+  final void Function(Event event) onPressed;
+
+  const MediaAlbumPressScope({
+    super.key,
+    required this.onPressed,
+    required super.child,
+  });
+
+  static void report(BuildContext context, Event event) => context
+      .getInheritedWidgetOfExactType<MediaAlbumPressScope>()
+      ?.onPressed(event);
+
+  @override
+  bool updateShouldNotify(MediaAlbumPressScope oldWidget) => false;
 }

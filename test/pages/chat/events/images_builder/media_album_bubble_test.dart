@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:twake_chat/utils/media_album/media_album_bubble.dart';
-import 'package:twake_chat/utils/media_album/media_album_scope.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_bubble.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 
-import '../../lenient_database.dart';
+import '../../../../lenient_database.dart';
 
 class _FakeUploadManager implements UploadManager {
   @override
@@ -25,11 +25,15 @@ class _FakeUploadManager implements UploadManager {
 class _Harness {
   late Room room;
   late _FakeUploadManager uploads;
+  final pressed = <String>[];
 
   Future<void> init() async =>
       room = await getLenientRoom('!bubble:example.com');
 
-  void reset() => uploads = _FakeUploadManager();
+  void reset() {
+    uploads = _FakeUploadManager();
+    pressed.clear();
+  }
 
   Event image(String name, EventStatus status, int createdMs) => Event(
     senderId: '@a:example.com',
@@ -57,10 +61,13 @@ class _Harness {
             supportedLocales: L10n.supportedLocales,
             home: Scaffold(
               body: Center(
-                child: MediaAlbumBubble(
-                  members: members,
-                  isPreviewEnabled: true,
-                  onTapSelectMode: () {},
+                child: MediaAlbumPressScope(
+                  onPressed: (event) => pressed.add(event.eventId),
+                  child: MediaAlbumBubble(
+                    members: members,
+                    isPreviewEnabled: true,
+                    onTapSelectMode: () {},
+                  ),
                 ),
               ),
             ),
@@ -97,6 +104,43 @@ class _Harness {
 
     expect(tileSize(tester, e[0]).width * 2 + 2, 256);
     expect(tester.getSize(find.byType(MediaAlbumBubble)).width, 256);
+  }
+
+  /// A long-press menu opens for the image under the finger.
+  Future<void> pressReportsTheTile(WidgetTester tester) async {
+    final e = events(List.filled(3, EventStatus.sending));
+    await pumpAlbum(tester, e);
+
+    await tester.press(find.byKey(ValueKey('album-tile-${e[2].eventId}')));
+    expect(pressed, [e[2].eventId]);
+  }
+
+  /// Reactions are drawn for every image, not only the leader.
+  Future<void> eventsOfGivesEveryMember(WidgetTester tester) async {
+    final e = events(List.filled(2, EventStatus.synced));
+    List<Event>? found;
+    await tester.pumpWidget(
+      MediaAlbumScope(
+        members: e,
+        child: Builder(
+          builder: (context) {
+            found = MediaAlbumScope.eventsOf(context, e.first);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(found, e);
+    final single = image('Z', EventStatus.synced, 1);
+    await tester.pumpWidget(
+      Builder(
+        builder: (context) {
+          found = MediaAlbumScope.eventsOf(context, single);
+          return const SizedBox();
+        },
+      ),
+    );
+    expect(found, [single]);
   }
 
   Future<void> scopeGivesLeaderOnly(WidgetTester tester) async {
@@ -144,6 +188,14 @@ void main() {
   testWidgets(
     'the grid is as wide as a single image',
     harness.gridIsAsWideAsAnImage,
+  );
+  testWidgets(
+    'pressing a tile reports that image',
+    harness.pressReportsTheTile,
+  );
+  testWidgets(
+    'every image of an album is listed for its reactions',
+    harness.eventsOfGivesEveryMember,
   );
   testWidgets(
     'the scope gives the members to the leader only',

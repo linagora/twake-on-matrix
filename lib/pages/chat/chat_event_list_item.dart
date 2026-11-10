@@ -1,5 +1,5 @@
 import 'package:twake_chat/pages/chat/chat.dart';
-import 'package:twake_chat/utils/media_album/media_album_scope.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
