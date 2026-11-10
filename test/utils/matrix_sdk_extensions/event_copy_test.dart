@@ -28,132 +28,144 @@ class _RecordingClipboard extends Fake implements TwakeClipboard {
   Future<void> copyText(String text) async => this.text = text;
 }
 
+late Room _room;
+late Timeline _timeline;
+late _RecordingClipboard _clipboard;
+
 void main() {
-  late Room room;
-  late Timeline timeline;
-  late _RecordingClipboard clipboard;
+  setUpAll(_setUpRoom);
+  setUp(() => _clipboard = _RecordingClipboard());
 
-  setUpAll(() async {
-    if (!getIt.isRegistered<ResponsiveUtils>()) {
-      getIt.registerSingleton(ResponsiveUtils());
-    }
-    final client = await getClient();
-    room = Room(id: '!room:example.org', client: client);
-    timeline = Timeline(
-      room: room,
-      chunk: TimelineChunk(events: []),
-    );
-  });
-
-  setUp(() => clipboard = _RecordingClipboard());
-
-  Event buildEvent(Map<String, dynamic> content, String eventId) => Event(
-    content: content,
-    type: EventTypes.Message,
-    eventId: eventId,
-    senderId: '@bob:example.org',
-    originServerTs: DateTime(2026, 11, 10),
-    room: room,
+  testWidgets('copies the image itself, not its description', _copiesImage);
+  testWidgets('copies the video itself, not its description', _copiesVideo);
+  testWidgets(
+    'falls back to the text for a format the clipboard cannot hold',
+    _fallsBackToTextForUnknownFormat,
   );
+  testWidgets('copies the body of a text message', _copiesText);
+}
 
-  Future<void> copy(WidgetTester tester, Event event) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: L10n.localizationsDelegates,
-        supportedLocales: L10n.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => TextButton(
-              onPressed: () =>
-                  event.copy(context, timeline, clipboard: clipboard),
-              child: const Text('copy'),
-            ),
+Future<void> _setUpRoom() async {
+  if (!getIt.isRegistered<ResponsiveUtils>()) {
+    getIt.registerSingleton(ResponsiveUtils());
+  }
+  final client = await getClient();
+  _room = Room(id: '!room:example.org', client: client);
+  _timeline = Timeline(
+    room: _room,
+    chunk: TimelineChunk(events: []),
+  );
+}
+
+Event _buildEvent(Map<String, dynamic> content, String eventId) => Event(
+  content: content,
+  type: EventTypes.Message,
+  eventId: eventId,
+  senderId: '@bob:example.org',
+  originServerTs: DateTime(2026, 11, 10),
+  room: _room,
+);
+
+Event _mediaEvent({
+  required String eventId,
+  required String msgtype,
+  required MatrixFile file,
+}) {
+  _room.sendingFilePlaceholders[eventId] = file;
+  return _buildEvent({
+    'msgtype': msgtype,
+    'body': file.name,
+    'url': 'mxc://example.org/${file.name}',
+    'info': {'mimetype': file.mimeType},
+  }, eventId);
+}
+
+Future<void> _copy(WidgetTester tester, Event event) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      locale: const Locale('en'),
+      localizationsDelegates: L10n.localizationsDelegates,
+      supportedLocales: L10n.supportedLocales,
+      home: Scaffold(
+        body: Builder(
+          builder: (context) => TextButton(
+            onPressed: () =>
+                event.copy(context, _timeline, clipboard: _clipboard),
+            child: const Text('copy'),
           ),
         ),
       ),
-    );
-    await tester.tap(find.text('copy'));
-    await tester.pumpAndSettle();
-  }
+    ),
+  );
+  await tester.tap(find.text('copy'));
+  await tester.pumpAndSettle();
+}
 
-  testWidgets('copies the image itself, not its description', (tester) async {
-    const eventId = r'$image:example.org';
-    final bytes = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 1, 2, 3]);
-    room.sendingFilePlaceholders[eventId] = MatrixImageFile(
+Future<void> _copiesImage(WidgetTester tester) async {
+  final bytes = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 1, 2, 3]);
+  final event = _mediaEvent(
+    eventId: r'$image:example.org',
+    msgtype: MessageTypes.Image,
+    file: MatrixImageFile(
       bytes: bytes,
       name: 'orange.png',
       mimeType: 'image/png',
-    );
-    final event = buildEvent({
-      'msgtype': MessageTypes.Image,
-      'body': 'orange.png',
-      'url': 'mxc://example.org/orange',
-      'info': {'mimetype': 'image/png'},
-    }, eventId);
+    ),
+  );
 
-    await copy(tester, event);
+  await _copy(tester, event);
 
-    expect(clipboard.mediaBytes, bytes);
-    expect(clipboard.mediaMimeType, 'image/png');
-    expect(clipboard.text, isNull);
-    expect(find.text('Copied to clipboard'), findsOneWidget);
-  });
+  expect(_clipboard.mediaBytes, bytes);
+  expect(_clipboard.mediaMimeType, 'image/png');
+  expect(_clipboard.text, isNull);
+  expect(find.text('Copied to clipboard'), findsOneWidget);
+}
 
-  testWidgets('copies the video itself, not its description', (tester) async {
-    const eventId = r'$video:example.org';
-    final bytes = Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
-    room.sendingFilePlaceholders[eventId] = MatrixVideoFile(
+Future<void> _copiesVideo(WidgetTester tester) async {
+  final bytes = Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
+  final event = _mediaEvent(
+    eventId: r'$video:example.org',
+    msgtype: MessageTypes.Video,
+    file: MatrixVideoFile(
       bytes: bytes,
       name: 'clip.mp4',
       mimeType: 'video/mp4',
-    );
-    final event = buildEvent({
-      'msgtype': MessageTypes.Video,
-      'body': 'clip.mp4',
-      'url': 'mxc://example.org/clip',
-      'info': {'mimetype': 'video/mp4'},
-    }, eventId);
+    ),
+  );
 
-    await copy(tester, event);
+  await _copy(tester, event);
 
-    expect(clipboard.mediaBytes, bytes);
-    expect(clipboard.mediaMimeType, 'video/mp4');
-    expect(clipboard.text, isNull);
-  });
+  expect(_clipboard.mediaBytes, bytes);
+  expect(_clipboard.mediaMimeType, 'video/mp4');
+  expect(_clipboard.text, isNull);
+}
 
-  testWidgets('falls back to the text for a format the clipboard cannot hold', (
-    tester,
-  ) async {
-    const eventId = r'$webm:example.org';
-    room.sendingFilePlaceholders[eventId] = MatrixVideoFile(
+Future<void> _fallsBackToTextForUnknownFormat(WidgetTester tester) async {
+  final event = _mediaEvent(
+    eventId: r'$webm:example.org',
+    msgtype: MessageTypes.Video,
+    file: MatrixVideoFile(
       bytes: Uint8List.fromList([1, 2, 3]),
       name: 'clip.webm',
       mimeType: 'video/webm',
-    );
-    final event = buildEvent({
-      'msgtype': MessageTypes.Video,
-      'body': 'clip.webm',
-      'url': 'mxc://example.org/webm',
-      'info': {'mimetype': 'video/webm'},
-    }, eventId);
+    ),
+  );
 
-    await copy(tester, event);
+  await _copy(tester, event);
 
-    expect(clipboard.mediaBytes, isNull);
-    expect(clipboard.text, isNotNull);
-  });
+  expect(_clipboard.mediaBytes, isNull);
+  expect(_clipboard.text, isNotNull);
+}
 
-  testWidgets('copies the body of a text message', (tester) async {
-    final event = buildEvent({
-      'msgtype': MessageTypes.Text,
-      'body': 'Hello there',
-    }, r'$text:example.org');
+Future<void> _copiesText(WidgetTester tester) async {
+  final event = _buildEvent({
+    'msgtype': MessageTypes.Text,
+    'body': 'Hello there',
+  }, r'$text:example.org');
 
-    await copy(tester, event);
+  await _copy(tester, event);
 
-    expect(clipboard.text, 'Hello there');
-    expect(clipboard.mediaBytes, isNull);
-    expect(find.text('Text copied to clipboard'), findsOneWidget);
-  });
+  expect(_clipboard.text, 'Hello there');
+  expect(_clipboard.mediaBytes, isNull);
+  expect(find.text('Text copied to clipboard'), findsOneWidget);
 }
