@@ -18,35 +18,61 @@ class JoinCallUseCase {
     required bool isVideo,
     bool Function() isCancelled = _never,
   }) async {
+    final join = _joinOf(roomId, serviceUrl: serviceUrl, isVideo: isVideo);
+    final room = _checkRoom(join.room);
+    await _repository.endStaleOwnMembership(join.room);
+    final server = await _repository.fetchServer(join);
+    if (isCancelled()) return null;
+    if (!await _connect(server, join, isCancelled)) return null;
+    await _sendMembership(join);
+    return room;
+  }
+
+  static CallJoin _joinOf(
+    String roomId, {
+    required String? serviceUrl,
+    required bool isVideo,
+  }) {
     if (serviceUrl == null) throw const CallServiceUnavailableException();
-    final join = CallJoin(
+    return CallJoin(
       room: CallRoom(roomId),
       serviceUrl: serviceUrl,
       isVideo: isVideo,
     );
-    final room = _repository.getRoomInfo(join.room);
+  }
+
+  CallRoomInfo _checkRoom(CallRoom room) {
+    final info = _repository.getRoomInfo(room);
     // DECISION.md D14: a call is encrypted when its room is.
-    if (room.isEncrypted) throw const CallEncryptionUnsupportedException();
+    if (info.isEncrypted) throw const CallEncryptionUnsupportedException();
     // Before the token and the microphone: a member may not hold the state
     // event of the call in a group (power level).
-    if (!room.canJoin) throw const CallNoPermissionException();
-    await _repository.endStaleOwnMembership(join.room);
-    final server = await _repository.fetchServer(join);
-    if (isCancelled()) return null;
+    if (!info.canJoin) throw const CallNoPermissionException();
+    return info;
+  }
+
+  /// False when cancelled while the media connected: it is disconnected
+  /// again.
+  Future<bool> _connect(
+    CallServer server,
+    CallJoin join,
+    bool Function() isCancelled,
+  ) async {
     await _repository.connectMedia(
       server,
-      CallMediaState(isMicrophoneOn: true, isCameraOn: isVideo),
+      CallMediaState(isMicrophoneOn: true, isCameraOn: join.isVideo),
     );
-    if (isCancelled()) {
-      await _repository.disconnectMedia();
-      return null;
-    }
+    if (!isCancelled()) return true;
+    await _repository.disconnectMedia();
+    return false;
+  }
+
+  Future<void> _sendMembership(CallJoin join) async {
     try {
       await _repository.joinMembership(join);
     } on CallException {
       await _repository.disconnectMedia();
       rethrow;
     }
-    return room;
   }
 }
