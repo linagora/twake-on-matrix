@@ -10,6 +10,8 @@ import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/mime_type_uitls.dart';
 import 'package:twake_chat/utils/string_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart' as native_picker;
@@ -218,28 +220,34 @@ mixin SendFilesMixin {
     VoidCallback? onSendCallback,
   }) async {
     if (room == null || images.isEmpty) return;
-    final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
-    if (!context.mounted) return;
-    final result = await mediaCaptionDialogPresenter(
-      context,
-      files: fileInfos,
-      room: room,
-      pendingText: caption,
-    );
-    if (result == null || result.files.isEmpty) return;
-    await _uploadManager.uploadFileMobile(
-      room: room,
-      fileInfos: result.files,
-      caption: result.caption,
-      inReplyTo: inReplyTo,
-    );
-    onSendCallback?.call();
+    try {
+      final fileInfos = await Future.wait(images.map(_writeToTemporaryFile));
+      if (!context.mounted) return;
+      final result = await mediaCaptionDialogPresenter(
+        context,
+        files: fileInfos,
+        room: room,
+        pendingText: caption,
+      );
+      if (result == null || result.files.isEmpty) return;
+      await _uploadManager.uploadFileMobile(
+        room: room,
+        fileInfos: result.files,
+        caption: result.caption,
+        inReplyTo: inReplyTo,
+      );
+      onSendCallback?.call();
+    } catch (e, s) {
+      Logs().e('SendFilesMixin::sendPastedImagesNative(): $e', e, s);
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
+    }
   }
 
   // The preview and the upload read media from a path; a pasted image has none.
   Future<FileInfo> _writeToTemporaryFile(MatrixFile image) async {
-    final extension = extensionFromMime(image.mimeType);
-    final name = 'pasted_${DateTime.now().microsecondsSinceEpoch}.$extension';
+    final name =
+        'pasted_${DateTime.now().microsecondsSinceEpoch}.${_extensionOf(image.mimeType)}';
     final file = File('${(await getTemporaryDirectory()).path}/$name');
     await file.writeAsBytes(image.bytes);
     return ImageFileInfo(
@@ -249,5 +257,12 @@ mixin SendFilesMixin {
       width: (image.info['w'] as num?)?.toInt(),
       height: (image.info['h'] as num?)?.toInt(),
     );
+  }
+
+  // `mime` answers `jpe` for JPEG, and the MIME type itself when it has no extension.
+  String _extensionOf(String mimeType) {
+    if (mimeType == 'image/jpeg' || mimeType == 'image/jpg') return 'jpg';
+    final extension = extensionFromMime(mimeType);
+    return extension.contains('/') ? mimeType.split('/').last : extension;
   }
 }

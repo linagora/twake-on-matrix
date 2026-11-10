@@ -6,7 +6,9 @@ import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
 import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
 import 'package:twake_chat/pages/chat/send_media_native_dialog/send_media_native_dialog.dart';
 import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -73,6 +75,7 @@ void main() {
     originalPicker = ImagePickerPlatform.instance;
     ImagePickerPlatform.instance = fakePicker;
     getIt.registerSingleton<UploadManager>(uploadManager);
+    getIt.registerSingleton(ResponsiveUtils());
     room = Room(client: MockClient(), id: '!room:server.abc');
   });
 
@@ -92,11 +95,15 @@ void main() {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
-        home: Builder(
-          builder: (context) {
-            capturedContext = context;
-            return const SizedBox.shrink();
-          },
+        localizationsDelegates: L10n.localizationsDelegates,
+        supportedLocales: L10n.supportedLocales,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
         ),
       ),
     );
@@ -387,6 +394,81 @@ void main() {
         expect(callbackCalled, isTrue);
       },
     );
+
+    for (final mimeType in ['image/jpeg', 'image/jpg']) {
+      testWidgets('names a $mimeType image .jpg', (tester) async {
+        await withContext(tester, (context) async {
+          await tester.runAsync(
+            () => mixin.sendPastedImagesNative(
+              context,
+              room: room,
+              images: [
+                MatrixImageFile(
+                  bytes: Uint8List.fromList([1]),
+                  name: 'pasted',
+                  mimeType: mimeType,
+                ),
+              ],
+            ),
+          );
+        });
+
+        final captured =
+            verify(
+                  uploadManager.uploadFileMobile(
+                    room: room,
+                    fileInfos: captureAnyNamed('fileInfos'),
+                    caption: anyNamed('caption'),
+                    inReplyTo: anyNamed('inReplyTo'),
+                  ),
+                ).captured.single
+                as List<FileInfo>;
+        expect(captured.single.fileName, endsWith('.jpg'));
+      });
+    }
+
+    testWidgets('tells the user when the pasted image cannot be sent', (
+      tester,
+    ) async {
+      PathProviderPlatform.instance = _FakePathProvider(
+        '${tempDir.path}/missing',
+      );
+      var callbackCalled = false;
+
+      await withContext(tester, (context) async {
+        await tester.runAsync(
+          () => mixin.sendPastedImagesNative(
+            context,
+            room: room,
+            images: [
+              MatrixImageFile(
+                bytes: Uint8List.fromList([1]),
+                name: 'pasted',
+                mimeType: 'image/png',
+              ),
+            ],
+            onSendCallback: () => callbackCalled = true,
+          ),
+        );
+      });
+      await tester.pump();
+
+      expect(
+        find.text(
+          L10n.of(tester.element(find.byType(Scaffold)))!.pasteImageFailed,
+        ),
+        findsOneWidget,
+      );
+      verifyNever(
+        uploadManager.uploadFileMobile(
+          room: anyNamed('room'),
+          fileInfos: anyNamed('fileInfos'),
+          caption: anyNamed('caption'),
+          inReplyTo: anyNamed('inReplyTo'),
+        ),
+      );
+      expect(callbackCalled, isFalse);
+    });
 
     testWidgets('sends nothing when the user cancels the preview', (
       tester,

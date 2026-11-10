@@ -1,10 +1,12 @@
 import 'package:twake_chat/presentation/extensions/text_editting_controller_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 Widget mobileTwakeContextMenuBuilder(
   BuildContext context,
   EditableTextState editableTextState, {
-  Future<bool> Function()? onPasteImage,
+  Future<bool> Function(ClipboardReader reader)? onPasteImage,
+  Future<ClipboardReader?> Function() readClipboard = _readSystemClipboard,
 }) {
   // On iOS, SystemContextMenu (iOS 16+) avoids the clipboard permission alert
   // but only shows "Paste" when the clipboard holds plain text. URLs copied
@@ -23,6 +25,7 @@ Widget mobileTwakeContextMenuBuilder(
   final buttonItems = _buttonItemsWithPaste(
     editableTextState,
     onPasteImage: onPasteImage,
+    readClipboard: readClipboard,
   );
 
   if (SystemContextMenu.isSupported(context)) {
@@ -53,7 +56,8 @@ Widget mobileTwakeContextMenuBuilder(
 /// content type (plain text, URL, image, etc.).
 List<ContextMenuButtonItem> _buttonItemsWithPaste(
   EditableTextState editableTextState, {
-  Future<bool> Function()? onPasteImage,
+  Future<bool> Function(ClipboardReader reader)? onPasteImage,
+  required Future<ClipboardReader?> Function() readClipboard,
 }) {
   final items = editableTextState.contextMenuButtonItems;
   final hasPaste = items.any(
@@ -69,8 +73,12 @@ List<ContextMenuButtonItem> _buttonItemsWithPaste(
     type: ContextMenuButtonType.paste,
     onPressed: () async {
       editableTextState.hideToolbar();
-      if (await onPasteImage?.call() ?? false) return;
-      await controller.pasteText();
+      if (onPasteImage == null) return controller.pasteText();
+      // Each clipboard read can show the iOS "Allow Paste" prompt: read once.
+      final reader = await readClipboard();
+      if (reader == null) return;
+      if (await onPasteImage(reader)) return;
+      await controller.pasteText(clipboardReader: reader);
     },
   );
 
@@ -81,3 +89,6 @@ List<ContextMenuButtonItem> _buttonItemsWithPaste(
   final insertAt = cutIndex == -1 ? 0 : cutIndex + 1;
   return [...items.sublist(0, insertAt), pasteItem, ...items.sublist(insertAt)];
 }
+
+Future<ClipboardReader?> _readSystemClipboard() async =>
+    SystemClipboard.instance?.read();

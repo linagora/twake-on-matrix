@@ -25,6 +25,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
 
 class InputBar extends StatefulWidget {
   final Room? room;
@@ -405,13 +406,17 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     }
   }
 
-  Future<bool> _pasteClipboardImages() async {
+  Future<bool> _pasteClipboardImages(ClipboardReader reader) async {
     final onPasteImages = widget.onPasteImages;
     if (onPasteImages == null ||
-        !await TwakeClipboard.instance.isReadableImageFormat()) {
+        !await TwakeClipboard.instance.isReadableImageFormat(
+          clipboardReader: reader,
+        )) {
       return false;
     }
-    final images = await TwakeClipboard.instance.pasteImagesUsingBytes();
+    final images = await TwakeClipboard.instance.pasteImagesUsingBytes(
+      reader: reader,
+    );
     final pasted = images?.nonNulls.toList() ?? [];
     if (pasted.isEmpty) return false;
     onPasteImages(pasted);
@@ -484,7 +489,9 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
                         mobileTwakeContextMenuBuilder(
                           context,
                           editableTextState,
-                          onPasteImage: _pasteClipboardImages,
+                          onPasteImage: widget.onPasteImages == null
+                              ? null
+                              : _pasteClipboardImages,
                         ),
               contentInsertionConfiguration: widget.onPasteImages == null
                   ? null
