@@ -21,13 +21,17 @@ class AlbumTimelineIndex {
     this._hiddenIds,
   );
 
-  /// [visibleNewestFirst] is the visible events, newest first.
-  factory AlbumTimelineIndex(List<Event> visibleNewestFirst) {
+  /// [visibleNewestFirst] is the visible events, newest first; [breakBefore]
+  /// is the first unread event, which starts a new album.
+  factory AlbumTimelineIndex(
+    List<Event> visibleNewestFirst, {
+    String? breakBefore,
+  }) {
     final oldestFirst = visibleNewestFirst.reversed.toList();
     final byId = {for (final e in oldestFirst) e.eventId: e};
     final albums = const GroupMediaEventsPolicy().execute([
       for (final e in oldestFirst) e.toMediaSnapshotIfBatched(),
-    ]);
+    ], breakBefore: breakBefore);
     return AlbumTimelineIndex._(
       visibleNewestFirst,
       _positions(visibleNewestFirst),

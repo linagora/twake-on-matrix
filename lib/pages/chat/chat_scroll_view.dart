@@ -36,6 +36,7 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   late Map<String, int> _eventIndexMap;
   List<Event> _visibleEvents = const [];
   AlbumTimelineIndex _albums = AlbumTimelineIndex(const []);
+  String? _albumBreak;
 
   @override
   void initState() {
@@ -56,7 +57,13 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     final wasRequestingFutureBeforeUpdate = _wasRequestingFuture;
     _wasRequestingFuture = currentIsRequestingFuture;
 
-    if (widget.events == oldWidget.events) return;
+    if (widget.events == oldWidget.events) {
+      // The first unread can be found after the events: regroup at it.
+      if (_albumBreak != controller.unreadReceivedMessageLocation) {
+        _indexEvents();
+      }
+      return;
+    }
 
     final newEvents = List<Event>.from(widget.events)
       ..sort(compareEventsNewestFirst);
@@ -132,7 +139,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       for (final event in _currentEvents)
         if (event.isVisibleInGui) event,
     ];
-    _albums = AlbumTimelineIndex(_visibleEvents);
+    _albumBreak = controller.unreadReceivedMessageLocation;
+    _albums = AlbumTimelineIndex(_visibleEvents, breakBefore: _albumBreak);
   }
 
   @override

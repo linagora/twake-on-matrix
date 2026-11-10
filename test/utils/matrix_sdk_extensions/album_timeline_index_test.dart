@@ -54,6 +54,13 @@ void main() {
     expect(index.isHiddenMember('C'), isFalse);
   });
 
+  test('the first unread image starts a new album', () {
+    final split = AlbumTimelineIndex([newer, a, b, c, older], breakBefore: 'B');
+    expect(split.albumLedBy('C'), isNull);
+    expect(split.albumLedBy('B')!.map((e) => e.eventId), ['B', 'A']);
+    expect(split.isHiddenMember('B'), isFalse);
+  });
+
   test('the leader sees the events around the whole album', () {
     expect(index.newerNeighbour(c)?.eventId, 'newer');
     expect(index.olderNeighbour(c)?.eventId, 'older');

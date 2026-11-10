@@ -97,4 +97,32 @@ void main() {
       isEmpty,
     );
   });
+
+  test('images more than a minute apart do not join, as on web', () {
+    expect(ids([img('1'), img('2', ts: t0.add(const Duration(seconds: 60)))]), [
+      ['1', '2'],
+    ]);
+    expect(
+      ids([img('1'), img('2', ts: t0.add(const Duration(seconds: 61)))]),
+      isEmpty,
+    );
+  });
+
+  test('the first unread image starts a new run, as on web', () {
+    expect(
+      [
+        for (final a in policy.execute([
+          img('1'),
+          img('2'),
+          img('3'),
+          img('4'),
+        ], breakBefore: '3'))
+          a.eventIds,
+      ],
+      [
+        ['1', '2'],
+        ['3', '4'],
+      ],
+    );
+  });
 }
