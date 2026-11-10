@@ -44,52 +44,41 @@ class FakeCallRepository implements CallRepository {
   final encryptions = StreamController<void>.broadcast();
 
   @override
-  Stream<void> watchRoomEncrypted(String roomId) => encryptions.stream;
+  Stream<void> watchRoomEncrypted(CallRoom room) => encryptions.stream;
 
   @override
-  CallRoomInfo getRoomInfo(String roomId) => roomInfo;
+  CallRoomInfo getRoomInfo(CallRoom room) => roomInfo;
 
   @override
-  Future<CallServer> fetchServer({
-    required String roomId,
-    required String serviceUrl,
-  }) async {
-    calls.add('fetchServer $roomId $serviceUrl');
+  Future<CallServer> fetchServer(CallJoin join) async {
+    calls.add('fetchServer ${join.room.id} ${join.serviceUrl}');
     if (fetchError case final error?) throw error;
     return testServer;
   }
 
   @override
-  Future<void> endStaleOwnMembership(String roomId) async {
-    calls.add('endStale $roomId');
+  Future<void> endStaleOwnMembership(CallRoom room) async {
+    calls.add('endStale ${room.id}');
     if (staleError case final error?) throw error;
   }
 
   @override
-  Future<void> joinMembership({
-    required String roomId,
-    required String serviceUrl,
-    required bool isVideo,
-  }) async {
-    calls.add('join $roomId video=$isVideo');
+  Future<void> joinMembership(CallJoin join) async {
+    calls.add('join ${join.room.id} video=${join.isVideo}');
     await joinGate?.future;
     if (joinError case final error?) throw error;
   }
 
   @override
-  Future<void> leaveMembership(String roomId) async {
-    calls.add('leave $roomId');
+  Future<void> leaveMembership(CallRoom room) async {
+    calls.add('leave ${room.id}');
     await leaveGate?.future;
     if (leaveError case final error?) throw error;
   }
 
   @override
-  Future<void> connectMedia(
-    CallServer server, {
-    required bool isMicrophoneOn,
-    required bool isCameraOn,
-  }) async {
-    calls.add('connect mic=$isMicrophoneOn camera=$isCameraOn');
+  Future<void> connectMedia(CallServer server, CallMediaState media) async {
+    calls.add('connect mic=${media.isMicrophoneOn} camera=${media.isCameraOn}');
     await connectGate?.future;
     if (connectError case final error?) throw error;
   }
@@ -107,6 +96,6 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  Stream<List<CallParticipant>> watchParticipants(String roomId) =>
+  Stream<List<CallParticipant>> watchParticipants(CallRoom room) =>
       participants.stream;
 }

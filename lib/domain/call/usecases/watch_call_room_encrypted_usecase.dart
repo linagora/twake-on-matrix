@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
 
 class WatchCallRoomEncryptedUseCase {
@@ -6,5 +7,6 @@ class WatchCallRoomEncryptedUseCase {
   final CallRepository _repository;
 
   /// Emits when encryption is turned on in [roomId] (DECISION.md D14).
-  Stream<void> execute(String roomId) => _repository.watchRoomEncrypted(roomId);
+  Stream<void> execute(String roomId) =>
+      _repository.watchRoomEncrypted(CallRoom(roomId));
 }

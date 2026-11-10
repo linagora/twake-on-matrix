@@ -15,42 +15,24 @@ class CallRepositoryImpl implements CallRepository {
   final CallMediaDatasource _media;
 
   @override
-  CallRoomInfo getRoomInfo(String roomId) => _rtc.getRoomInfo(roomId);
+  CallRoomInfo getRoomInfo(CallRoom room) => _rtc.getRoomInfo(room);
 
   @override
-  Future<CallServer> fetchServer({
-    required String roomId,
-    required String serviceUrl,
-  }) => _rtc.fetchServer(roomId: roomId, serviceUrl: serviceUrl);
+  Future<CallServer> fetchServer(CallJoin join) => _rtc.fetchServer(join);
 
   @override
-  Future<void> endStaleOwnMembership(String roomId) =>
-      _rtc.endStaleOwnMembership(roomId);
+  Future<void> endStaleOwnMembership(CallRoom room) =>
+      _rtc.endStaleOwnMembership(room);
 
   @override
-  Future<void> joinMembership({
-    required String roomId,
-    required String serviceUrl,
-    required bool isVideo,
-  }) => _rtc.joinMembership(
-    roomId: roomId,
-    serviceUrl: serviceUrl,
-    isVideo: isVideo,
-  );
+  Future<void> joinMembership(CallJoin join) => _rtc.joinMembership(join);
 
   @override
-  Future<void> leaveMembership(String roomId) => _rtc.leaveMembership(roomId);
+  Future<void> leaveMembership(CallRoom room) => _rtc.leaveMembership(room);
 
   @override
-  Future<void> connectMedia(
-    CallServer server, {
-    required bool isMicrophoneOn,
-    required bool isCameraOn,
-  }) => _media.connect(
-    server,
-    isMicrophoneOn: isMicrophoneOn,
-    isCameraOn: isCameraOn,
-  );
+  Future<void> connectMedia(CallServer server, CallMediaState media) =>
+      _media.connect(server, media);
 
   @override
   Future<void> disconnectMedia() => _media.disconnect();
@@ -60,19 +42,16 @@ class CallRepositoryImpl implements CallRepository {
       _media.setMicrophone(isOn: isOn);
 
   @override
-  Stream<List<CallParticipant>> watchParticipants(String roomId) =>
+  Stream<List<CallParticipant>> watchParticipants(CallRoom room) =>
       _media.watchParticipants().map(
         (participants) => [
           for (final participant in participants)
-            _withProfile(roomId, participant),
+            _withProfile(room, participant),
         ],
       );
 
-  CallParticipant _withProfile(String roomId, CallParticipant participant) {
-    final profile = _rtc.memberProfile(
-      roomId: roomId,
-      userId: participant.userId,
-    );
+  CallParticipant _withProfile(CallRoom room, CallParticipant participant) {
+    final profile = _rtc.memberProfile(room, participant);
     return participant.copyWith(
       displayName: profile.displayName,
       avatarUrl: profile.avatarUrl,
@@ -80,6 +59,6 @@ class CallRepositoryImpl implements CallRepository {
   }
 
   @override
-  Stream<void> watchRoomEncrypted(String roomId) =>
-      _rtc.watchRoomEncrypted(roomId);
+  Stream<void> watchRoomEncrypted(CallRoom room) =>
+      _rtc.watchRoomEncrypted(room);
 }

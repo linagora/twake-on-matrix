@@ -1,30 +1,24 @@
 import 'package:twake_chat/domain/model/call/call_models.dart';
+import 'package:twake_chat/domain/model/call/call_participant.dart';
 
 abstract class MatrixRtcDatasource {
-  CallRoomInfo getRoomInfo(String roomId);
+  CallRoomInfo getRoomInfo(CallRoom room);
 
-  ({String? displayName, Uri? avatarUrl}) memberProfile({
-    required String roomId,
-    required String userId,
-  });
+  ({String? displayName, Uri? avatarUrl}) memberProfile(
+    CallRoom room,
+    CallParticipant participant,
+  );
 
-  Future<CallServer> fetchServer({
-    required String roomId,
-    required String serviceUrl,
-  });
+  Future<CallServer> fetchServer(CallJoin join);
 
-  Future<void> endStaleOwnMembership(String roomId);
+  Future<void> endStaleOwnMembership(CallRoom room);
 
   /// The membership stays alive (delayed leave, expiry) until
   /// [leaveMembership].
-  Future<void> joinMembership({
-    required String roomId,
-    required String serviceUrl,
-    required bool isVideo,
-  });
+  Future<void> joinMembership(CallJoin join);
 
-  Future<void> leaveMembership(String roomId);
+  Future<void> leaveMembership(CallRoom room);
 
-  /// Emits when encryption is turned on in [roomId].
-  Stream<void> watchRoomEncrypted(String roomId);
+  /// Emits when encryption is turned on in [room].
+  Stream<void> watchRoomEncrypted(CallRoom room);
 }

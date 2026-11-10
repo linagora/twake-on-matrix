@@ -19,33 +19,30 @@ class JoinCallUseCase {
     bool Function() isCancelled = _never,
   }) async {
     if (serviceUrl == null) throw const CallServiceUnavailableException();
-    final room = _repository.getRoomInfo(roomId);
+    final join = CallJoin(
+      room: CallRoom(roomId),
+      serviceUrl: serviceUrl,
+      isVideo: isVideo,
+    );
+    final room = _repository.getRoomInfo(join.room);
     // DECISION.md D14: a call is encrypted when its room is.
     if (room.isEncrypted) throw const CallEncryptionUnsupportedException();
     // Before the token and the microphone: a member may not hold the state
     // event of the call in a group (power level).
     if (!room.canJoin) throw const CallNoPermissionException();
-    await _repository.endStaleOwnMembership(roomId);
-    final server = await _repository.fetchServer(
-      roomId: roomId,
-      serviceUrl: serviceUrl,
-    );
+    await _repository.endStaleOwnMembership(join.room);
+    final server = await _repository.fetchServer(join);
     if (isCancelled()) return null;
     await _repository.connectMedia(
       server,
-      isMicrophoneOn: true,
-      isCameraOn: isVideo,
+      CallMediaState(isMicrophoneOn: true, isCameraOn: isVideo),
     );
     if (isCancelled()) {
       await _repository.disconnectMedia();
       return null;
     }
     try {
-      await _repository.joinMembership(
-        roomId: roomId,
-        serviceUrl: serviceUrl,
-        isVideo: isVideo,
-      );
+      await _repository.joinMembership(join);
     } on CallException {
       await _repository.disconnectMedia();
       rethrow;

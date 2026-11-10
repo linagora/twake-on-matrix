@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
 
 class LeaveCallUseCase {
@@ -10,7 +11,7 @@ class LeaveCallUseCase {
     try {
       await _repository.disconnectMedia();
     } finally {
-      await _repository.leaveMembership(roomId);
+      await _repository.leaveMembership(CallRoom(roomId));
     }
   }
 }

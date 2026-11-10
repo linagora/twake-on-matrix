@@ -6,46 +6,45 @@ import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
 const _server = CallServer(url: 'wss://lk.test', token: 'jwt');
+const _room = CallRoom('!r');
+const _join = CallJoin(room: _room, serviceUrl: 'https://rtc', isVideo: true);
 
 class _FakeRtc implements MatrixRtcDatasource {
   final calls = <String>[];
 
   @override
-  Stream<void> watchRoomEncrypted(String roomId) => const Stream.empty();
+  Stream<void> watchRoomEncrypted(CallRoom room) => const Stream.empty();
 
   @override
-  CallRoomInfo getRoomInfo(String roomId) =>
+  CallRoomInfo getRoomInfo(CallRoom room) =>
       const CallRoomInfo(isEncrypted: false, isDirect: true);
 
   @override
-  ({String? displayName, Uri? avatarUrl}) memberProfile({
-    required String roomId,
-    required String userId,
-  }) => (displayName: '$userId in $roomId', avatarUrl: Uri.parse('mxc://a'));
+  ({String? displayName, Uri? avatarUrl}) memberProfile(
+    CallRoom room,
+    CallParticipant participant,
+  ) => (
+    displayName: '${participant.userId} in ${room.id}',
+    avatarUrl: Uri.parse('mxc://a'),
+  );
 
   @override
-  Future<CallServer> fetchServer({
-    required String roomId,
-    required String serviceUrl,
-  }) async {
-    calls.add('fetch $roomId $serviceUrl');
+  Future<CallServer> fetchServer(CallJoin join) async {
+    calls.add('fetch ${join.room.id} ${join.serviceUrl}');
     return _server;
   }
 
   @override
-  Future<void> endStaleOwnMembership(String roomId) async =>
-      calls.add('endStale $roomId');
+  Future<void> endStaleOwnMembership(CallRoom room) async =>
+      calls.add('endStale ${room.id}');
 
   @override
-  Future<void> joinMembership({
-    required String roomId,
-    required String serviceUrl,
-    required bool isVideo,
-  }) async => calls.add('join $roomId $serviceUrl $isVideo');
+  Future<void> joinMembership(CallJoin join) async =>
+      calls.add('join ${join.room.id} ${join.serviceUrl} ${join.isVideo}');
 
   @override
-  Future<void> leaveMembership(String roomId) async =>
-      calls.add('leave $roomId');
+  Future<void> leaveMembership(CallRoom room) async =>
+      calls.add('leave ${room.id}');
 }
 
 class _FakeMedia implements CallMediaDatasource {
@@ -53,11 +52,8 @@ class _FakeMedia implements CallMediaDatasource {
   var participants = const <CallParticipant>[];
 
   @override
-  Future<void> connect(
-    CallServer server, {
-    required bool isMicrophoneOn,
-    required bool isCameraOn,
-  }) async => calls.add('connect ${server.url} $isMicrophoneOn $isCameraOn');
+  Future<void> connect(CallServer server, CallMediaState media) async => calls
+      .add('connect ${server.url} ${media.isMicrophoneOn} ${media.isCameraOn}');
 
   @override
   Future<void> disconnect() async => calls.add('disconnect');
@@ -86,18 +82,11 @@ void main() {
   });
 
   test('the membership goes to the MatrixRTC datasource', () async {
-    expect(repository.getRoomInfo('!r').isDirect, isTrue);
-    expect(
-      await repository.fetchServer(roomId: '!r', serviceUrl: 'https://rtc'),
-      _server,
-    );
-    await repository.endStaleOwnMembership('!r');
-    await repository.joinMembership(
-      roomId: '!r',
-      serviceUrl: 'https://rtc',
-      isVideo: true,
-    );
-    await repository.leaveMembership('!r');
+    expect(repository.getRoomInfo(_room).isDirect, isTrue);
+    expect(await repository.fetchServer(_join), _server);
+    await repository.endStaleOwnMembership(_room);
+    await repository.joinMembership(_join);
+    await repository.leaveMembership(_room);
 
     expect(rtc.calls, [
       'fetch !r https://rtc',
@@ -111,8 +100,7 @@ void main() {
   test('the media goes to the media datasource', () async {
     await repository.connectMedia(
       _server,
-      isMicrophoneOn: true,
-      isCameraOn: false,
+      const CallMediaState(isMicrophoneOn: true),
     );
     await repository.setMicrophone(isOn: false);
     await repository.disconnectMedia();
@@ -137,7 +125,7 @@ void main() {
       ),
     ];
 
-    final participants = await repository.watchParticipants('!r').first;
+    final participants = await repository.watchParticipants(_room).first;
 
     expect(participants.single.displayName, '@bob:hs in !r');
     expect(participants.single.avatarUrl, Uri.parse('mxc://a'));

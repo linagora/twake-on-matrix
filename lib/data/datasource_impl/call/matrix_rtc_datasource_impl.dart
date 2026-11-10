@@ -2,17 +2,29 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:matrix/matrix.dart';
+import 'package:http/http.dart' as http;
+import 'package:matrix/matrix.dart' hide CallParticipant;
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/model/call/sfu_token_response.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
+import 'package:twake_chat/domain/model/call/call_participant.dart';
+
+/// How many times the membership lasts its expiry, from when it was sent.
+typedef MembershipExpiry = ({int count, int? createdTs});
+
+/// The own membership event of a call: its room and its state key.
+typedef _Slot = ({String roomId, String stateKey});
+
+typedef _Attempt = ({_Slot slot, int session});
 
 /// MatrixRTC (MSC4143) session memberships with a LiveKit focus: one
 /// `org.matrix.msc3401.call.member` state event per device (DECISION.md D14).
 class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   MatrixRtcDatasourceImpl(this._maybeClient);
+
+  static const MembershipExpiry firstExpiry = (count: 1, createdTs: null);
 
   static const memberEventType = CallEventTypes.callMember;
   static const _membershipExpiry = Duration(hours: 4);
@@ -38,13 +50,13 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
-  String get _userId => _client.userID ?? (throw const CallNoClientException());
+  CallDevice get _device => CallDevice(
+    userId: _client.userID ?? (throw const CallNoClientException()),
+    deviceId: _client.deviceID ?? (throw const CallNoClientException()),
+  );
 
-  String get _deviceId =>
-      _client.deviceID ?? (throw const CallNoClientException());
-
-  Room _room(String roomId) {
-    final room = _client.getRoomById(roomId);
+  Room _room(CallRoom call) {
+    final room = _client.getRoomById(call.id);
     if (room == null || room.membership != Membership.join) {
       throw const CallRoomNotFoundException();
     }
@@ -52,67 +64,59 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @visibleForTesting
-  static String stateKeyFor({
-    required String userId,
-    required String deviceId,
-    required String? roomVersion,
-  }) {
-    final stateKey = '${userId}_${deviceId}_m.call';
+  static String stateKeyFor(CallDevice device, {required String? roomVersion}) {
+    final stateKey = '${device.userId}_${device.deviceId}_m.call';
     final isUnprefixed =
         roomVersion != null && _unprefixedRoomVersion.hasMatch(roomVersion);
     return isUnprefixed ? stateKey : '_$stateKey';
   }
 
   @visibleForTesting
-  static Map<String, Object?> membershipContent({
-    required String userId,
-    required String deviceId,
-    required String serviceUrl,
-    required bool isVideo,
-    int expiries = 1,
-    int? createdTs,
-  }) => {
+  static Map<String, Object?> membershipContent(
+    CallDevice device,
+    CallJoin join, [
+    MembershipExpiry expiry = firstExpiry,
+  ]) => {
     'application': 'm.call',
     'call_id': '',
     'scope': 'm.room',
-    'device_id': deviceId,
-    'membershipID': '$userId:$deviceId',
-    'expires': _membershipExpiry.inMilliseconds * expiries,
-    'm.call.intent': isVideo ? 'video' : 'audio',
+    'device_id': device.deviceId,
+    'membershipID': '${device.userId}:${device.deviceId}',
+    'expires': _membershipExpiry.inMilliseconds * expiry.count,
+    'm.call.intent': join.isVideo ? 'video' : 'audio',
     'focus_active': {'type': 'livekit', 'focus_selection': 'oldest_membership'},
     'foci_preferred': [
-      {'type': 'livekit', 'livekit_service_url': serviceUrl},
+      {'type': 'livekit', 'livekit_service_url': join.serviceUrl},
     ],
-    'created_ts': ?createdTs,
+    'created_ts': ?expiry.createdTs,
   };
 
   @visibleForTesting
-  static CallServer parseServer(int statusCode, String body) {
-    if (statusCode ~/ 100 != 2) {
-      throw CallTokenFailedException(cause: 'HTTP $statusCode');
+  static CallServer parseServer(http.Response response) {
+    if (response.statusCode ~/ 100 != 2) {
+      throw CallTokenFailedException(cause: 'HTTP ${response.statusCode}');
     }
-    final json = jsonDecode(body);
+    final json = jsonDecode(response.body);
     if (json is! Map<String, dynamic>) {
       throw const CallTokenFailedException(cause: 'Unexpected body');
     }
-    final response = SfuTokenResponse.fromJson(json);
-    final url = response.url;
-    final jwt = response.jwt;
+    final token = SfuTokenResponse.fromJson(json);
+    final url = token.url;
+    final jwt = token.jwt;
     if (url == null || jwt == null) {
       throw const CallTokenFailedException(cause: 'No url or jwt');
     }
     return CallServer(url: url, token: jwt);
   }
 
-  String _ownStateKey(Room room) => stateKeyFor(
-    userId: _userId,
-    deviceId: _deviceId,
-    roomVersion: room.roomVersion,
+  _Slot _ownSlot(Room room) => (
+    roomId: room.id,
+    stateKey: stateKeyFor(_device, roomVersion: room.roomVersion),
   );
 
   @override
-  CallRoomInfo getRoomInfo(String roomId) {
-    final room = _room(roomId);
+  CallRoomInfo getRoomInfo(CallRoom call) {
+    final room = _room(call);
     return CallRoomInfo(
       isEncrypted: room.encrypted,
       isDirect: room.isDirectChat,
@@ -121,39 +125,35 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  ({String? displayName, Uri? avatarUrl}) memberProfile({
-    required String roomId,
-    required String userId,
-  }) {
+  ({String? displayName, Uri? avatarUrl}) memberProfile(
+    CallRoom call,
+    CallParticipant participant,
+  ) {
     final user = _maybeClient
-        ?.getRoomById(roomId)
-        ?.unsafeGetUserFromMemoryOrFallback(userId);
+        ?.getRoomById(call.id)
+        ?.unsafeGetUserFromMemoryOrFallback(participant.userId);
     return (displayName: user?.calcDisplayname(), avatarUrl: user?.avatarUrl);
   }
 
   @override
-  Future<CallServer> fetchServer({
-    required String roomId,
-    required String serviceUrl,
-  }) async {
+  Future<CallServer> fetchServer(CallJoin join) async {
     final client = _client;
-    _room(roomId);
-    final userId = _userId;
-    final deviceId = _deviceId;
+    _room(join.room);
+    final device = _device;
     try {
-      final openIdToken = await client.requestOpenIdToken(userId, {});
+      final openIdToken = await client.requestOpenIdToken(device.userId, {});
       final response = await client.httpClient
           .post(
-            Uri.parse('$serviceUrl/sfu/get'),
+            Uri.parse('${join.serviceUrl}/sfu/get'),
             headers: {'content-type': 'application/json'},
             body: jsonEncode({
-              'room': roomId,
+              'room': join.room.id,
               'openid_token': openIdToken.toJson(),
-              'device_id': deviceId,
+              'device_id': device.deviceId,
             }),
           )
           .timeout(_tokenTimeout);
-      return parseServer(response.statusCode, response.body);
+      return parseServer(response);
     } on CallException {
       rethrow;
     } on Exception catch (error) {
@@ -162,124 +162,107 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  Future<void> endStaleOwnMembership(String roomId) async {
-    final room = _room(roomId);
+  Future<void> endStaleOwnMembership(CallRoom call) async {
+    final room = _room(call);
     try {
       await room.postLoad();
     } on Exception catch (error) {
       throw CallMembershipFailedException(cause: error);
     }
-    final stateKey = _ownStateKey(room);
+    final slot = _ownSlot(room);
     final deviceId = room
-        .getState(memberEventType, stateKey)
+        .getState(memberEventType, slot.stateKey)
         ?.content
         .tryGet<String>('device_id');
     if (deviceId == null) return;
     try {
-      await _client.setRoomStateWithKey(roomId, memberEventType, stateKey, {});
+      await _write(slot, {});
     } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: stale membership kept', error, stackTrace);
     }
   }
 
   @override
-  Future<void> joinMembership({
-    required String roomId,
-    required String serviceUrl,
-    required bool isVideo,
-  }) async {
-    final room = _room(roomId);
+  Future<void> joinMembership(CallJoin join) async {
+    final room = _room(join.room);
     if (!room.canChangeStateEvent(memberEventType)) {
       throw const CallNoPermissionException();
     }
-    final stateKey = _ownStateKey(room);
-    Map<String, Object?> contentFor({int expiries = 1, int? createdTs}) =>
-        membershipContent(
-          userId: _userId,
-          deviceId: _deviceId,
-          serviceUrl: serviceUrl,
-          isVideo: isVideo,
-          expiries: expiries,
-          createdTs: createdTs,
-        );
-    await _scheduleDelayedLeave(roomId, stateKey);
+    final slot = _ownSlot(room);
+    final device = _device;
+    await _scheduleDelayedLeave(slot);
     try {
-      await _client.setRoomStateWithKey(
-        roomId,
-        memberEventType,
-        stateKey,
-        contentFor(),
-      );
+      await _write(slot, membershipContent(device, join));
     } on Exception catch (error) {
       _stopTimers();
       throw CallMembershipFailedException(cause: error);
     }
-    _resendMembership = () => _client.setRoomStateWithKey(
-      roomId,
-      memberEventType,
-      stateKey,
-      contentFor(),
+    _resendMembership = () => _write(slot, membershipContent(device, join));
+    _extendBeforeExpiry(
+      slot,
+      (expiry) => membershipContent(device, join, expiry),
     );
-    _extendBeforeExpiry(roomId, stateKey, contentFor);
   }
+
+  Future<String> _write(_Slot slot, Map<String, Object?> content) =>
+      _client.setRoomStateWithKey(
+        slot.roomId,
+        memberEventType,
+        slot.stateKey,
+        content,
+      );
 
   /// `expires` grows by its own length before it lapses, from the same
   /// `created_ts`.
   void _extendBeforeExpiry(
-    String roomId,
-    String stateKey,
-    Map<String, Object?> Function({int expiries, int? createdTs}) contentFor,
+    _Slot slot,
+    Map<String, Object?> Function(MembershipExpiry expiry) contentFor,
   ) {
     final createdTs = DateTime.now().millisecondsSinceEpoch;
-    var expiries = 1;
+    var count = 1;
     _expiryTimer?.cancel();
     _expiryTimer = Timer.periodic(_membershipExpiry - _expiryHeadroom, (_) {
-      expiries++;
-      _extension = contentFor(expiries: expiries, createdTs: createdTs);
-      _queueExtension(roomId, stateKey);
+      count++;
+      _extension = contentFor((count: count, createdTs: createdTs));
+      _queueExtension(slot);
     });
   }
 
   /// One write at a time, always the newest content: an older one never
   /// lands last.
-  void _queueExtension(String roomId, String stateKey) {
-    final session = _session;
+  void _queueExtension(_Slot slot) {
+    final attempt = (slot: slot, session: _session);
     _extending = (_extending ?? Future<void>.value()).then(
-      (_) => _extend(roomId, stateKey, session),
+      (_) => _extend(attempt),
     );
   }
 
-  Future<void> _extend(String roomId, String stateKey, int session) async {
+  Future<void> _extend(_Attempt attempt) async {
     final content = _extension;
-    if (content == null || session != _session) return;
+    if (content == null || attempt.session != _session) return;
     try {
-      await _client.setRoomStateWithKey(
-        roomId,
-        memberEventType,
-        stateKey,
-        content,
-      );
+      await _write(attempt.slot, content);
     } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
-      if (session != _session) return;
+      if (attempt.session != _session) return;
       _extendRetryTimer?.cancel();
       _extendRetryTimer = Timer(
         _extendRetry,
-        () => _queueExtension(roomId, stateKey),
+        () => _queueExtension(attempt.slot),
       );
     }
   }
 
   /// The homeserver ends the membership itself if this device vanishes
   /// (MSC4140); without delayed events the membership expires instead.
-  Future<void> _scheduleDelayedLeave(String roomId, String stateKey) async {
+  Future<void> _scheduleDelayedLeave(_Slot slot) async {
     final session = _session;
     final String delayId;
     try {
       delayId = await _client.setRoomStateWithKeyWithDelay(
-        roomId,
+        slot.roomId,
         memberEventType,
-        stateKey,
+        slot.stateKey,
         _delayedLeave.inMilliseconds,
         {},
       );
@@ -306,13 +289,12 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _restartTimer = Timer.periodic(_delayedLeaveRestart, (_) {
       if (_restarting != null) return;
       _restarting = _restartDelayedLeave(
-        roomId,
-        stateKey,
+        slot,
       ).whenComplete(() => _restarting = null);
     });
   }
 
-  Future<void> _restartDelayedLeave(String roomId, String stateKey) async {
+  Future<void> _restartDelayedLeave(_Slot slot) async {
     final delayId = _delayId;
     if (delayId == null) return;
     final session = _session;
@@ -322,7 +304,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       // Left meanwhile: the leave consumed the delayed event.
       if (error.error != MatrixError.M_NOT_FOUND || _delayId != delayId) return;
       // Paused too long: the homeserver ended the membership.
-      await _scheduleDelayedLeave(roomId, stateKey);
+      await _scheduleDelayedLeave(slot);
       if (session != _session) return;
       await _resendMembership?.call().catchError((
         Object error,
@@ -351,7 +333,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  Future<void> leaveMembership(String roomId) async {
+  Future<void> leaveMembership(CallRoom call) async {
     final delayId = _stopTimers();
     // A write still in flight would otherwise land after the leave.
     final extending = _extending;
@@ -367,25 +349,20 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         Logs().w('MatrixRtcDatasource: delayed leave', error, stackTrace);
       }
     }
-    final room = _room(roomId);
+    final room = _room(call);
     try {
-      await _client.setRoomStateWithKey(
-        roomId,
-        memberEventType,
-        _ownStateKey(room),
-        {},
-      );
+      await _write(_ownSlot(room), {});
     } on Exception catch (error) {
       throw CallMembershipFailedException(cause: error);
     }
   }
 
   @override
-  Stream<void> watchRoomEncrypted(String roomId) async* {
+  Stream<void> watchRoomEncrypted(CallRoom call) async* {
     final client = _maybeClient;
     if (client == null) return;
     // Encrypted during the join, before this listened, or no longer there.
-    final room = client.getRoomById(roomId);
+    final room = client.getRoomById(call.id);
     if (room == null || room.encrypted) {
       yield null;
       return;
@@ -393,7 +370,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     yield* client.onTimelineEvent.stream
         .where(
           (event) =>
-              event.roomId == roomId && event.type == EventTypes.Encryption,
+              event.roomId == call.id && event.type == EventTypes.Encryption,
         )
         .map((_) {});
   }

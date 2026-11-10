@@ -18,3 +18,35 @@ abstract class CallRoomInfo with _$CallRoomInfo {
     @Default(true) bool canJoin,
   }) = _CallRoomInfo;
 }
+
+/// The room of a call, by its Matrix id.
+@freezed
+abstract class CallRoom with _$CallRoom {
+  const factory CallRoom(String id) = _CallRoom;
+}
+
+/// What joining the call of a room needs.
+@freezed
+abstract class CallJoin with _$CallJoin {
+  const factory CallJoin({
+    required CallRoom room,
+    required String serviceUrl,
+    @Default(false) bool isVideo,
+  }) = _CallJoin;
+}
+
+/// The own media of a call.
+@freezed
+abstract class CallMediaState with _$CallMediaState {
+  const factory CallMediaState({
+    required bool isMicrophoneOn,
+    @Default(false) bool isCameraOn,
+  }) = _CallMediaState;
+}
+
+/// A device in a call: its user and its device id.
+@freezed
+abstract class CallDevice with _$CallDevice {
+  const factory CallDevice({required String userId, required String deviceId}) =
+      _CallDevice;
+}

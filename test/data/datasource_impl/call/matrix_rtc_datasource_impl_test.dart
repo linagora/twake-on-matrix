@@ -13,6 +13,10 @@ import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_datasource_impl.
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 
+const _room = CallRoom('!room:hs.test');
+const _join = CallJoin(room: _room, serviceUrl: 'https://rtc.test');
+const _alice = CallDevice(userId: '@alice:localhost', deviceId: 'DEV');
+
 class _FakeRoom extends Fake implements Room {
   var canJoin = true;
 
@@ -128,11 +132,7 @@ void main() {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
 
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       async.elapse(const Duration(seconds: 6));
 
@@ -152,11 +152,7 @@ void main() {
     fakeAsync((async) {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       async.elapse(const Duration(seconds: 6));
       client
@@ -175,16 +171,12 @@ void main() {
     fakeAsync((async) {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       async.elapse(const Duration(seconds: 6));
       client.isRoomGone = true;
 
-      datasource.leaveMembership('!room:hs.test').ignore();
+      datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       final actions = client.delayedActions.length;
       final writes = client.writes.length;
@@ -201,17 +193,13 @@ void main() {
     fakeAsync((async) {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       async.elapse(const Duration(seconds: 6));
       final hold = client.holdMemberships = Completer<void>();
       async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
 
-      datasource.leaveMembership('!room:hs.test').ignore();
+      datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       expect(client.delayedActions, isNot(contains('send delay-2')));
       hold.complete();
@@ -227,18 +215,14 @@ void main() {
     fakeAsync((async) {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       async.elapse(const Duration(seconds: 6));
       client.failingMemberships = 1;
       async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
       expect(client.writes.last, 'membership failed');
 
-      datasource.leaveMembership('!room:hs.test').ignore();
+      datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       async.elapse(const Duration(minutes: 1));
 
@@ -250,11 +234,7 @@ void main() {
   group('stateKeyFor', () {
     test('prefixes the key with an underscore in a usual room', () {
       expect(
-        MatrixRtcDatasourceImpl.stateKeyFor(
-          userId: '@alice:localhost',
-          deviceId: 'DEV',
-          roomVersion: '10',
-        ),
+        MatrixRtcDatasourceImpl.stateKeyFor(_alice, roomVersion: '10'),
         '_@alice:localhost_DEV_m.call',
       );
     });
@@ -265,11 +245,7 @@ void main() {
         'org.matrix.msc3779.10',
       ]) {
         expect(
-          MatrixRtcDatasourceImpl.stateKeyFor(
-            userId: '@alice:localhost',
-            deviceId: 'DEV',
-            roomVersion: version,
-          ),
+          MatrixRtcDatasourceImpl.stateKeyFor(_alice, roomVersion: version),
           '@alice:localhost_DEV_m.call',
         );
       }
@@ -279,10 +255,12 @@ void main() {
   test('the membership is an MSC4143 session membership', () {
     expect(
       MatrixRtcDatasourceImpl.membershipContent(
-        userId: '@alice:localhost',
-        deviceId: 'DEV',
-        serviceUrl: 'http://127.0.0.1:3003',
-        isVideo: true,
+        _alice,
+        const CallJoin(
+          room: _room,
+          serviceUrl: 'http://127.0.0.1:3003',
+          isVideo: true,
+        ),
       ),
       {
         'application': 'm.call',
@@ -305,12 +283,9 @@ void main() {
 
   test('an extended membership keeps its created_ts and grows expires', () {
     final content = MatrixRtcDatasourceImpl.membershipContent(
-      userId: '@alice:localhost',
-      deviceId: 'DEV',
-      serviceUrl: 'http://127.0.0.1:3003',
-      isVideo: false,
-      expiries: 2,
-      createdTs: 1700000000000,
+      _alice,
+      const CallJoin(room: _room, serviceUrl: 'http://127.0.0.1:3003'),
+      (count: 2, createdTs: 1700000000000),
     );
 
     expect(content['expires'], 28800000);
@@ -321,8 +296,7 @@ void main() {
     test('reads the LiveKit url and token', () {
       expect(
         MatrixRtcDatasourceImpl.parseServer(
-          200,
-          '{"url":"ws://127.0.0.1:7880","jwt":"token"}',
+          http.Response('{"url":"ws://127.0.0.1:7880","jwt":"token"}', 200),
         ),
         const CallServer(url: 'ws://127.0.0.1:7880', token: 'token'),
       );
@@ -330,14 +304,16 @@ void main() {
 
     test('an error status is a token failure', () {
       expect(
-        () => MatrixRtcDatasourceImpl.parseServer(403, '{}'),
+        () => MatrixRtcDatasourceImpl.parseServer(http.Response('{}', 403)),
         throwsA(isA<CallTokenFailedException>()),
       );
     });
 
     test('a body without url or jwt is a token failure', () {
       expect(
-        () => MatrixRtcDatasourceImpl.parseServer(200, '{"url":"ws://x"}'),
+        () => MatrixRtcDatasourceImpl.parseServer(
+          http.Response('{"url":"ws://x"}', 200),
+        ),
         throwsA(isA<CallTokenFailedException>()),
       );
     });
@@ -347,16 +323,12 @@ void main() {
     fakeAsync((async) {
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-      datasource.joinMembership(
-        roomId: '!room:hs.test',
-        serviceUrl: 'https://rtc.test',
-        isVideo: false,
-      );
+      datasource.joinMembership(_join);
       async.flushMicrotasks();
       final hold = client.holdMemberships = Completer<void>();
       async.elapse(const Duration(seconds: 6));
 
-      datasource.leaveMembership('!room:hs.test').ignore();
+      datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       expect(client.timeline, isNot(contains('send delay-2')));
       hold.complete();
@@ -374,18 +346,13 @@ void main() {
   test('getRoomInfo_withoutTheRightToTheCallEvent_cannotJoin', () {
     final client = _FakeClient().._room.canJoin = false;
 
-    expect(
-      MatrixRtcDatasourceImpl(client).getRoomInfo('!room:hs.test').canJoin,
-      isFalse,
-    );
+    expect(MatrixRtcDatasourceImpl(client).getRoomInfo(_room).canJoin, isFalse);
   });
 
   test('fetchServer_always_sendsTheOpenIdTokenOfThisDevice', () async {
     final client = _FakeClient();
 
-    final server = await MatrixRtcDatasourceImpl(
-      client,
-    ).fetchServer(roomId: '!room:hs.test', serviceUrl: 'https://rtc.test');
+    final server = await MatrixRtcDatasourceImpl(client).fetchServer(_join);
 
     expect(server, const CallServer(url: 'wss://lk.test', token: 'jwt'));
     expect(client.tokenRequests.single, {
@@ -405,7 +372,7 @@ void main() {
     final encrypted = <void>[];
     MatrixRtcDatasourceImpl(
       client,
-    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+    ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
     client.onTimelineEvent.add(
@@ -430,7 +397,7 @@ void main() {
 
     MatrixRtcDatasourceImpl(
       client,
-    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+    ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
     expect(encrypted, hasLength(1));
@@ -442,7 +409,7 @@ void main() {
 
     MatrixRtcDatasourceImpl(
       client,
-    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+    ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
     expect(encrypted, hasLength(1));

@@ -29,11 +29,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   }
 
   @override
-  Future<void> connect(
-    CallServer server, {
-    required bool isMicrophoneOn,
-    required bool isCameraOn,
-  }) async {
+  Future<void> connect(CallServer server, CallMediaState media) async {
     await disconnect();
     _lost = null;
     final room = lk.Room(
@@ -54,10 +50,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     _room = room;
     _listener = listener;
     try {
-      if (isMicrophoneOn) {
+      if (media.isMicrophoneOn) {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
-      if (isCameraOn) await room.localParticipant?.setCameraEnabled(true);
+      if (media.isCameraOn) await room.localParticipant?.setCameraEnabled(true);
     } on Exception catch (error) {
       await disconnect();
       throw CallMediaFailedException(cause: error);

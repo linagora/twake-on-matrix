@@ -45,35 +45,46 @@ class CallController extends _$CallController {
 
   Future<void> join(String roomId, {required bool isVideo}) async {
     if (state is CallConnecting || state is CallConnected) return;
-    _isLeaveRequested = false;
-    state = CallState.connecting(roomId: roomId);
-    final joinCall = ref.read(joinCallUseCaseProvider);
-    _leaveCall = ref.read(leaveCallUseCaseProvider);
-    final serviceUrl = ref
-        .read(loginHomeserverSummaryProvider)
-        ?.callTokenServiceUrl;
+    _start(roomId);
     try {
-      // The previous call must not disconnect the media of this one; a
-      // homeserver that never answers its leave must not hold this call.
-      await _cleanup?.timeout(_cleanupWait, onTimeout: () {});
-      if (!ref.mounted) return;
-      final room = await joinCall.execute(
-        roomId: roomId,
-        serviceUrl: serviceUrl,
-        isVideo: isVideo,
-        isCancelled: () => _isLeaveRequested,
-      );
+      final room = await _join(roomId, isVideo: isVideo);
       if (ref.mounted) await _onJoined(roomId, room);
     } catch (error, stackTrace) {
-      _log('join failed', error, stackTrace);
-      if (ref.mounted) {
-        state = _isLeaveRequested
-            ? const CallState.idle()
-            : CallState.failed(roomId: roomId, error: _typed(error));
-      }
+      _onJoinFailed(roomId, error, stackTrace);
       // A bug, not a failure of the call: it must reach the crash reports.
       if (error is Error) rethrow;
     }
+  }
+
+  void _start(String roomId) {
+    _isLeaveRequested = false;
+    state = CallState.connecting(roomId: roomId);
+    _leaveCall = ref.read(leaveCallUseCaseProvider);
+  }
+
+  Future<CallRoomInfo?> _join(String roomId, {required bool isVideo}) async {
+    final joinCall = ref.read(joinCallUseCaseProvider);
+    final serviceUrl = ref
+        .read(loginHomeserverSummaryProvider)
+        ?.callTokenServiceUrl;
+    // The previous call must not disconnect the media of this one; a
+    // homeserver that never answers its leave must not hold this call.
+    await _cleanup?.timeout(_cleanupWait, onTimeout: () {});
+    if (!ref.mounted) return null;
+    return joinCall.execute(
+      roomId: roomId,
+      serviceUrl: serviceUrl,
+      isVideo: isVideo,
+      isCancelled: () => _isLeaveRequested,
+    );
+  }
+
+  void _onJoinFailed(String roomId, Object error, StackTrace stackTrace) {
+    _log('join failed', error, stackTrace);
+    if (!ref.mounted) return;
+    state = _isLeaveRequested
+        ? const CallState.idle()
+        : CallState.failed(roomId: roomId, error: _typed(error));
   }
 
   static void _log(String message, Object error, StackTrace? stackTrace) =>
