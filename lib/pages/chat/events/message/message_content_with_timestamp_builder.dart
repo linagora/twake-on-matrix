@@ -2,6 +2,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_builder.dart';
@@ -137,7 +138,7 @@ class _MessageContentWithTimestampBuilderState
   Widget _trackAlbumPress(Widget child) => Listener(
     onPointerUp: (_) => _pressedAlbumMember = null,
     onPointerCancel: (_) => _pressedAlbumMember = null,
-    child: MediaAlbumPressScope(
+    child: MediaAlbumPressScope<Event>(
       onPressed: (event) => _pressedAlbumMember = event,
       child: child,
     ),
@@ -199,7 +200,7 @@ class _MessageContentWithTimestampBuilderState
           MessageTypes.Text,
           MessageTypes.BadEncrypted,
         }.contains(widget.event.messageType) ||
-        MediaAlbumScope.hasCaptionOrReply(context, widget.event);
+        context.albumHasCaptionOrReply(widget.event);
 
     return Align(
       alignment: MessageStyle.messageAlignmentGeometry(widget.event, context),
@@ -307,9 +308,13 @@ class _MessageContentWithTimestampBuilderState
   /// The dialog is outside the album scope of the list: give the preview the
   /// same members, so it shows the whole album.
   Widget _withAlbumScope(BuildContext context, Widget preview) {
-    final members = MediaAlbumScope.membersFor(context, widget.event);
+    final members = context.albumMembersFor(widget.event);
     if (members == null) return preview;
-    return MediaAlbumScope(members: members, child: preview);
+    return MediaAlbumScope<Event>(
+      members: members,
+      idOf: mediaAlbumEventId,
+      child: preview,
+    );
   }
 
   /// Opens the hero emoji reaction dialog for available messages.
@@ -563,11 +568,9 @@ class _MessageContentWithTimestampBuilderState
                   child: Text.rich(
                     WidgetSpan(
                       child: MessageTime(
-                        timelineOverlayMessage:
-                            MediaAlbumScope.timelineOverlayFor(
-                              context,
-                              widget.event,
-                            ),
+                        timelineOverlayMessage: context.albumTimelineOverlayFor(
+                          widget.event,
+                        ),
                         room: widget.event.room,
                         event: widget.event,
                         showSeenIcon: widget.event.isOwnMessage,
@@ -614,7 +617,7 @@ class _MessageContentWithTimestampBuilderState
   /// The events of this bubble that have reactions: every image of an album,
   /// so that a reaction on any of them is drawn.
   List<Event> _eventsWithReactions(BuildContext context) => [
-    for (final event in MediaAlbumScope.eventsOf(context, widget.event))
+    for (final event in context.albumEventsOf(widget.event))
       if (event.hasReactionEvent(timeline: widget.timeline)) event,
   ];
 

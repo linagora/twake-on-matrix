@@ -1,5 +1,5 @@
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_time.dart';
@@ -43,10 +43,7 @@ class MessageContentBuilder extends ConsumerWidget
     return LayoutBuilder(
       builder: (context, constraints) {
         final textColor = Theme.of(context).colorScheme.onSurface;
-        final timelineOverlay = MediaAlbumScope.timelineOverlayFor(
-          context,
-          event,
-        );
+        final timelineOverlay = context.albumTimelineOverlayFor(event);
         final displayEvent = event.getDisplayEventWithoutEditEvent(timeline);
         final noPadding = {
           MessageTypes.File,
@@ -81,7 +78,7 @@ class MessageContentBuilder extends ConsumerWidget
             stepWidth:
                 isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
-                    MediaAlbumScope.hasCaptionOrReply(context, event) ||
+                    context.albumHasCaptionOrReply(event) ||
                     VideoCallHelper.extractUrl(event, videoCallBaseUrl) != null
                 ? null
                 : stepWidth,

@@ -1,49 +1,44 @@
 import 'package:flutter/widgets.dart';
-import 'package:matrix/matrix.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
-/// Tells the bubble of an album's leader event which images it draws.
-class MediaAlbumScope extends InheritedWidget {
+/// Tells the bubble of an album's leader which images it draws.
+///
+/// Generic over the member type so that this widget does not depend on the
+/// Matrix SDK; `MediaAlbumContextExtension` gives the typed helpers for
+/// timeline events.
+class MediaAlbumScope<T> extends InheritedWidget {
   /// Album members, oldest first. The first one is the leader.
-  final List<Event> members;
+  final List<T> members;
+
+  /// The id of a member, used to find the leader and to compare albums.
+  final String Function(T member) idOf;
 
   const MediaAlbumScope({
     super.key,
     required this.members,
+    required this.idOf,
     required super.child,
   });
 
-  static List<Event>? membersFor(BuildContext context, Event event) {
-    final scope = context.dependOnInheritedWidgetOfExactType<MediaAlbumScope>();
-    if (scope == null || scope.members.first.eventId != event.eventId) {
+  /// The members of the album led by [leaderId], else null.
+  static List<T>? membersFor<T>(BuildContext context, String? leaderId) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<MediaAlbumScope<T>>();
+    if (scope == null ||
+        scope.members.isEmpty ||
+        scope.idOf(scope.members.first) != leaderId) {
       return null;
     }
     return scope.members;
   }
 
-  /// The events whose reactions the bubble of [event] shows: every image of
-  /// the album it leads, else [event] alone.
-  static List<Event> eventsOf(BuildContext context, Event event) =>
-      membersFor(context, event) ?? [event];
-
-  /// Whether the bubble of [event] has text under its media: its own caption
-  /// or reply, or, for the leader of an album, the caption of the last image.
-  static bool hasCaptionOrReply(BuildContext context, Event event) =>
-      event.isCaptionModeOrReply() ||
-      (membersFor(context, event)?.last.isCaptionModeOrReply() ?? false);
-
-  /// Whether the time sits over the media, as for an image with no caption.
-  static bool timelineOverlayFor(BuildContext context, Event event) =>
-      event.timelineOverlayMessage && !hasCaptionOrReply(context, event);
-
   @override
-  bool updateShouldNotify(MediaAlbumScope oldWidget) =>
+  bool updateShouldNotify(MediaAlbumScope<T> oldWidget) =>
       oldWidget.members.length != members.length ||
       !_sameIds(oldWidget.members, members);
 
-  bool _sameIds(List<Event> a, List<Event> b) {
+  bool _sameIds(List<T> a, List<T> b) {
     for (var i = 0; i < a.length; i++) {
-      if (a[i].eventId != b[i].eventId) return false;
+      if (idOf(a[i]) != idOf(b[i])) return false;
     }
     return true;
   }
@@ -51,8 +46,8 @@ class MediaAlbumScope extends InheritedWidget {
 
 /// Lets an album tile tell the message around it which image the finger is
 /// on, so that a long-press opens the menu of that image.
-class MediaAlbumPressScope extends InheritedWidget {
-  final void Function(Event event) onPressed;
+class MediaAlbumPressScope<T> extends InheritedWidget {
+  final void Function(T member) onPressed;
 
   const MediaAlbumPressScope({
     super.key,
@@ -60,10 +55,10 @@ class MediaAlbumPressScope extends InheritedWidget {
     required super.child,
   });
 
-  static void report(BuildContext context, Event event) => context
-      .getInheritedWidgetOfExactType<MediaAlbumPressScope>()
-      ?.onPressed(event);
+  static void report<T>(BuildContext context, T member) => context
+      .getInheritedWidgetOfExactType<MediaAlbumPressScope<T>>()
+      ?.onPressed(member);
 
   @override
-  bool updateShouldNotify(MediaAlbumPressScope oldWidget) => false;
+  bool updateShouldNotify(MediaAlbumPressScope<T> oldWidget) => false;
 }

@@ -1,28 +1,33 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
-import 'package:matrix/matrix.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart';
-import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
-import 'package:twake_chat/utils/extension/build_context_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 
+/// Builds the content of one tile of the album, sized [width] x [height].
+typedef MediaAlbumTileBuilder<T> =
+    Widget Function(
+      BuildContext context,
+      T member, {
+      required double width,
+      required double height,
+    });
+
 /// Grid of the images of one send: rows of two, an odd last row is full width.
-class MediaAlbumBubble extends StatelessWidget {
-  final List<Event> members;
-  final bool isPreviewEnabled;
-  final void Function() onTapSelectMode;
+///
+/// Generic over the member type so that it does not depend on the Matrix
+/// SDK: the caller gives the key and the content of each tile.
+class MediaAlbumBubble<T> extends StatelessWidget {
+  final List<T> members;
+  final Object Function(T member) keyOf;
+  final MediaAlbumTileBuilder<T> tileBuilder;
 
   const MediaAlbumBubble({
     super.key,
     required this.members,
-    required this.isPreviewEnabled,
-    required this.onTapSelectMode,
+    required this.keyOf,
+    required this.tileBuilder,
   });
 
   static const double _gap = 2;
@@ -36,7 +41,7 @@ class MediaAlbumBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final bubbleWidth = widthFor();
     final tile = (bubbleWidth - _gap) / 2;
-    final rows = <List<Event>>[
+    final rows = <List<T>>[
       for (var i = 0; i < members.length; i += 2)
         members.sublist(i, min(i + 2, members.length)),
     ];
@@ -71,97 +76,18 @@ class MediaAlbumBubble extends StatelessWidget {
 
   Widget _tile(
     BuildContext context,
-    Event event, {
+    T member, {
     required double width,
     required double height,
   }) {
     return Listener(
-      key: ValueKey('album-tile-${event.transactionId ?? event.eventId}'),
+      key: ValueKey('album-tile-${keyOf(member)}'),
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (_) => MediaAlbumPressScope.report(context, event),
+      onPointerDown: (_) => MediaAlbumPressScope.report<T>(context, member),
       child: SizedBox(
         width: width,
         height: height,
-        child: !event.status.isSent
-            ? _PendingTile(event: event)
-            : ImageBubble(
-                event,
-                maxSize: false,
-                rounded: false,
-                width: width,
-                height: height,
-                fit: BoxFit.cover,
-                animated: true,
-                onTapPreview: isPreviewEnabled ? () {} : null,
-                onTapSelectMode: onTapSelectMode,
-              ),
-      ),
-    );
-  }
-}
-
-/// An image that is still uploading: shows the local picture with a spinner
-/// on top. A failed image leaves the album (see `GroupMediaEventsPolicy`) and
-/// gets the retry of a single image bubble.
-class _PendingTile extends ConsumerStatefulWidget {
-  final Event event;
-
-  const _PendingTile({required this.event});
-
-  @override
-  ConsumerState<_PendingTile> createState() => _PendingTileState();
-}
-
-class _PendingTileState extends ConsumerState<_PendingTile> {
-  late Future<MatrixFile?> _file;
-
-  @override
-  void initState() {
-    super.initState();
-    _file = widget.event.getPlaceholderMatrixFile(
-      ref.read(uploadManagerProvider),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: widget.event.filename,
-      image: true,
-      child: Stack(
-        fit: StackFit.expand,
-        alignment: Alignment.center,
-        children: [
-          BlurHash(
-            hash: widget.event.blurHash ?? MessageContentStyle.defaultBlurHash,
-          ),
-          FutureBuilder<MatrixFile?>(
-            future: _file,
-            builder: (context, snapshot) {
-              final bytes = snapshot.data?.bytes;
-              if (bytes == null || bytes.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return Image.memory(
-                bytes,
-                fit: BoxFit.cover,
-                cacheWidth: context.getCacheSize(256),
-                filterQuality: FilterQuality.none,
-              );
-            },
-          ),
-          ColoredBox(color: Colors.black.withAlpha(40)),
-          const Center(
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
+        child: tileBuilder(context, member, width: width, height: height),
       ),
     );
   }

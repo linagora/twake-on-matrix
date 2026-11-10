@@ -4,7 +4,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
 import 'package:twake_chat/pages/chat/context_item_chat_action.dart';
 import 'package:twake_chat/pages/chat/events/message/message_container.dart';
-import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_with_timestamp_builder.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/state_message.dart';
@@ -249,10 +249,9 @@ class _MessageState extends State<Message> with MessageAvatarMixin {
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
 
-    final hasReactionEvent = MediaAlbumScope.eventsOf(
-      context,
-      widget.event,
-    ).any((event) => event.hasReactionEvent(timeline: widget.timeline));
+    final hasReactionEvent = context
+        .albumEventsOf(widget.event)
+        .any((event) => event.hasReactionEvent(timeline: widget.timeline));
     final rowChildren = <Widget>[
       if (!widget.event.shouldAlignOwnMessageInDifferentSide)
         Padding(

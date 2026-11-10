@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_bubble.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 
 import '../../../../lenient_database.dart';
 
@@ -61,12 +63,15 @@ class _Harness {
             supportedLocales: L10n.supportedLocales,
             home: Scaffold(
               body: Center(
-                child: MediaAlbumPressScope(
+                child: MediaAlbumPressScope<Event>(
                   onPressed: (event) => pressed.add(event.eventId),
-                  child: MediaAlbumBubble(
+                  child: MediaAlbumBubble<Event>(
                     members: members,
-                    isPreviewEnabled: true,
-                    onTapSelectMode: () {},
+                    keyOf: (e) => e.transactionId ?? e.eventId,
+                    tileBuilder: (_, e, {required width, required height}) =>
+                        e.status.isSent
+                        ? const SizedBox.expand()
+                        : PendingImageTile(event: e),
                   ),
                 ),
               ),
@@ -103,7 +108,7 @@ class _Harness {
     await pumpAlbum(tester, e);
 
     expect(tileSize(tester, e[0]).width * 2 + 2, 256);
-    expect(tester.getSize(find.byType(MediaAlbumBubble)).width, 256);
+    expect(tester.getSize(find.byType(MediaAlbumBubble<Event>)).width, 256);
   }
 
   /// A long-press menu opens for the image under the finger.
@@ -120,11 +125,12 @@ class _Harness {
     final e = events(List.filled(2, EventStatus.synced));
     List<Event>? found;
     await tester.pumpWidget(
-      MediaAlbumScope(
+      MediaAlbumScope<Event>(
         members: e,
+        idOf: mediaAlbumEventId,
         child: Builder(
           builder: (context) {
-            found = MediaAlbumScope.eventsOf(context, e.first);
+            found = context.albumEventsOf(e.first);
             return const SizedBox();
           },
         ),
@@ -135,7 +141,7 @@ class _Harness {
     await tester.pumpWidget(
       Builder(
         builder: (context) {
-          found = MediaAlbumScope.eventsOf(context, single);
+          found = context.albumEventsOf(single);
           return const SizedBox();
         },
       ),
@@ -171,12 +177,18 @@ class _Harness {
     bool? found;
     final probe = Builder(
       builder: (context) {
-        found = MediaAlbumScope.hasCaptionOrReply(context, asked);
+        found = context.albumHasCaptionOrReply(asked);
         return const SizedBox();
       },
     );
     await tester.pumpWidget(
-      members == null ? probe : MediaAlbumScope(members: members, child: probe),
+      members == null
+          ? probe
+          : MediaAlbumScope<Event>(
+              members: members,
+              idOf: mediaAlbumEventId,
+              child: probe,
+            ),
     );
     return found;
   }
@@ -195,11 +207,12 @@ class _Harness {
   ) async {
     List<Event>? found;
     await tester.pumpWidget(
-      MediaAlbumScope(
+      MediaAlbumScope<Event>(
         members: members,
+        idOf: mediaAlbumEventId,
         child: Builder(
           builder: (context) {
-            found = MediaAlbumScope.membersFor(context, asked);
+            found = context.albumMembersFor(asked);
             return const SizedBox();
           },
         ),

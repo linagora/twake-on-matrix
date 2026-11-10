@@ -1,5 +1,6 @@
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -42,7 +43,11 @@ class ChatEventListItem extends StatelessWidget {
     final message = _buildMessage(context);
     final members = albumMembers;
     if (members == null || controller.selectMode) return message;
-    return MediaAlbumScope(members: members, child: message);
+    return MediaAlbumScope<Event>(
+      members: members,
+      idOf: mediaAlbumEventId,
+      child: message,
+    );
   }
 
   Widget _buildMessage(BuildContext context) {
