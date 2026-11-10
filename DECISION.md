@@ -276,9 +276,13 @@ used: they write `com.famedly.call.member`, which Twake Space Chat and Element
 Call do not read (still so in matrix 15.0.0).
 
 A call in an encrypted room needs the exchange of media keys, which comes
-later: until then the app does not join calls of encrypted rooms, and the
-call button is hidden in them. A call ends if encryption is turned on in its
-room during the call, as its media would stay in the clear.
+later. Until then the app does not join calls of encrypted rooms, and an
+encrypted room shows no call button at all, not even the Meet link it sent
+before (decided by Johann, 2026-11-10). This trade-off is deliberate: on a
+server whose well-known has a token service, the Meet link disappears from
+encrypted rooms until the exchange of media keys ships. A call ends if
+encryption is turned on in its room during the call, as its media would stay
+in the clear.
 
 ## D15. The call button of a chat: in-app call or Meet link (proposed, 2026-11-05)
 
@@ -301,6 +305,14 @@ with the camera off:
 Not yet: the camera and the videos, the speaker and device choice, a call
 that goes on in a small window, the number of people already in a call on
 the button.
+
+Joining a call writes the state event `org.matrix.msc3401.call.member`
+(decided by Johann, 2026-11-10):
+
+- a group created by Twake Chat gives it to every member (level 0), as Twake
+  Space Chat does;
+- in an older room, a member who may not write it sees no in-app call button;
+- the join still checks this right before anything goes out.
 
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
 

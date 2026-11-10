@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:twake_chat/domain/exception/video_call/video_call_exception.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 import 'package:twake_chat/pages/call/call_screen.dart';
@@ -64,8 +65,12 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     }
     final l10n = L10n.of(context)!;
     if (tokenServiceUrl != null) {
-      // DECISION.md D14: no media keys yet, so no call in an encrypted room.
-      if (room.encrypted) return const SizedBox.shrink();
+      // DECISION.md D14: no media keys yet, so no call in an encrypted room;
+      // D15: nor for a member who may not write the call membership.
+      if (room.encrypted ||
+          !room.canChangeStateEvent(CallEventTypes.callMember)) {
+        return const SizedBox.shrink();
+      }
       return TwakeIconButton(
         icon: Icons.videocam_outlined,
         tooltip: l10n.startCall,

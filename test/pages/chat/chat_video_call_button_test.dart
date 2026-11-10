@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
@@ -124,6 +125,7 @@ void main() {
     mockRoom = MockRoom();
     when(mockRoom.client).thenReturn(mockClient);
     when(mockRoom.id).thenReturn(testRoomId);
+    when(mockRoom.canChangeStateEvent(any)).thenReturn(true);
   });
 
   tearDown(() => GetIt.instance.reset());
@@ -162,6 +164,21 @@ void main() {
     ) async {
       // Arrange
       when(mockRoom.encrypted).thenReturn(true);
+
+      // Act
+      await pumpButton(tester, withTokenService: true);
+
+      // Assert
+      expect(find.byType(TwakeIconButton), findsNothing);
+    });
+
+    testWidgets('build_withATokenServiceForAMemberWithoutTheRight_isHidden', (
+      tester,
+    ) async {
+      // Arrange
+      when(
+        mockRoom.canChangeStateEvent(CallEventTypes.callMember),
+      ).thenReturn(false);
 
       // Act
       await pumpButton(tester, withTokenService: true);
