@@ -23,6 +23,7 @@ class UploadFileInfo extends UploadInfo {
   final DateTime createdAt;
   final UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
+  final String? batchId;
   bool isFailed;
   FileInfo? fileInfo;
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -38,6 +39,7 @@ class UploadFileInfo extends UploadInfo {
     required this.cancelToken,
     this.captionInfo,
     this.inReplyToEventId,
+    this.batchId,
     this.isFailed = false,
     this.fileInfo,
     this.matrixFile,

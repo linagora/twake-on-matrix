@@ -29,6 +29,9 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:matrix/matrix.dart' hide Visibility;
 
 import 'audio_message/audio_player_widget.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_bubble.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'cute_events.dart';
 import 'map_bubble.dart';
 import 'message_download_content.dart';
@@ -61,6 +64,62 @@ class MessageContent extends StatelessWidget
     this.textWidth,
   });
 
+  Widget _buildAlbumTile(
+    BuildContext context,
+    Event member, {
+    required double width,
+    required double height,
+  }) {
+    if (!member.status.isSent) return PendingImageTile(event: member);
+    return ImageBubble(
+      member,
+      maxSize: false,
+      rounded: false,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      animated: true,
+      onTapPreview: onTapPreview != null ? () {} : null,
+      onTapSelectMode: () => onTapSelectMode?.call(),
+    );
+  }
+
+  Widget _buildAlbum(BuildContext context, List<Event> members) {
+    final album = OptionalSelectionContainerDisabled(
+      isEnabled: PlatformInfos.isWeb,
+      child: MediaAlbumBubble<Event>(
+        members: members,
+        keyOf: (member) => member.transactionId ?? member.eventId,
+        tileBuilder: _buildAlbumTile,
+      ),
+    );
+    final captionEvent = members.last.getDisplayEventWithoutEditEvent(timeline);
+    if (!captionEvent.isBodyDiffersFromFilename() ||
+        captionEvent.text.isEmpty) {
+      return album;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        album,
+        const SizedBox(height: 8),
+        SizedBox(
+          width: MediaAlbumBubble.widthFor(),
+          child: TwakeLinkPreview(
+            key: ValueKey('TwakeLinkPreview%${captionEvent.eventId}%'),
+            event: captionEvent,
+            localizedBody: captionEvent.body,
+            ownMessage: ownMessage,
+            fontSize: AppConfig.messageFontSize * AppConfig.fontSizeFactor,
+            linkStyle: MessageContentStyle.linkStyleMessageContent(context),
+            richTextStyle: captionEvent.getMessageTextStyle(context),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
@@ -71,6 +130,10 @@ class MessageContent extends StatelessWidget
       case EventTypes.Sticker:
         switch (event.messageType) {
           case MessageTypes.Image:
+            final albumMembers = context.albumMembersFor(event);
+            if (albumMembers != null) {
+              return _buildAlbum(context, albumMembers);
+            }
             if (event.isCaptionModeOrReply()) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

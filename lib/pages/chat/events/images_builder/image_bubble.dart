@@ -8,6 +8,8 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 
@@ -135,6 +137,73 @@ class ImageBubble extends StatelessWidget {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// An album image that is still uploading: shows the local picture with a spinner
+/// on top. A failed image leaves the album (see `GroupMediaEventsPolicy`) and
+/// gets the retry of a single image bubble.
+class PendingImageTile extends ConsumerStatefulWidget {
+  final Event event;
+
+  const PendingImageTile({super.key, required this.event});
+
+  @override
+  ConsumerState<PendingImageTile> createState() => PendingImageTileState();
+}
+
+class PendingImageTileState extends ConsumerState<PendingImageTile> {
+  late Future<MatrixFile?> _file;
+
+  @override
+  void initState() {
+    super.initState();
+    _file = widget.event.getPlaceholderMatrixFile(
+      ref.read(uploadManagerProvider),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: widget.event.filename,
+      image: true,
+      child: Stack(
+        fit: StackFit.expand,
+        alignment: Alignment.center,
+        children: [
+          BlurHash(
+            hash: widget.event.blurHash ?? MessageContentStyle.defaultBlurHash,
+          ),
+          FutureBuilder<MatrixFile?>(
+            future: _file,
+            builder: (context, snapshot) {
+              final bytes = snapshot.data?.bytes;
+              if (bytes == null || bytes.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Image.memory(
+                bytes,
+                fit: BoxFit.cover,
+                cacheWidth: context.getCacheSize(256),
+                filterQuality: FilterQuality.none,
+              );
+            },
+          ),
+          ColoredBox(color: Colors.black.withAlpha(40)),
+          const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/album_timeline_index.dart';
 import 'package:twake_chat/pages/chat/chat_event_list_item.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -34,13 +35,14 @@ class _ChatScrollViewState extends State<ChatScrollView> {
   List<Event> _currentEvents = [];
   late Map<String, int> _eventIndexMap;
   List<Event> _visibleEvents = const [];
-  Map<String, int> _visiblePosition = const {};
+  AlbumTimelineIndex _albums = AlbumTimelineIndex(const []);
+  String? _albumBreak;
 
   @override
   void initState() {
     super.initState();
     _currentEvents = List<Event>.from(widget.events)
-      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
+      ..sort(compareEventsNewestFirst);
     _indexEvents();
     _bottom.addAll(_currentEvents);
   }
@@ -55,10 +57,16 @@ class _ChatScrollViewState extends State<ChatScrollView> {
     final wasRequestingFutureBeforeUpdate = _wasRequestingFuture;
     _wasRequestingFuture = currentIsRequestingFuture;
 
-    if (widget.events == oldWidget.events) return;
+    if (widget.events == oldWidget.events) {
+      // The first unread can be found after the events: regroup at it.
+      if (_albumBreak != controller.unreadReceivedMessageLocation) {
+        _indexEvents();
+      }
+      return;
+    }
 
     final newEvents = List<Event>.from(widget.events)
-      ..sort((a, b) => b.originServerTs.compareTo(a.originServerTs));
+      ..sort(compareEventsNewestFirst);
 
     // Use the extension to sync event lists
     final result = EventListExtension.syncEventLists(
@@ -131,10 +139,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
       for (final event in _currentEvents)
         if (event.isVisibleInGui) event,
     ];
-    _visiblePosition = {
-      for (var i = 0; i < _visibleEvents.length; i++)
-        _visibleEvents[i].eventId: i,
-    };
+    _albumBreak = controller.unreadReceivedMessageLocation;
+    _albums = AlbumTimelineIndex(_visibleEvents, breakBefore: _albumBreak);
   }
 
   @override
@@ -184,14 +190,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 return const SizedBox.shrink();
               }
 
-              final visiblePos = _visiblePosition[currentEvent.eventId];
-              final previousEvent = visiblePos != null && visiblePos > 0
-                  ? _visibleEvents[visiblePos - 1]
-                  : null;
-              final nextEvent =
-                  visiblePos != null && visiblePos < _visibleEvents.length - 1
-                  ? _visibleEvents[visiblePos + 1]
-                  : null;
+              final previousEvent = _albums.newerNeighbour(currentEvent);
+              final nextEvent = _albums.olderNeighbour(currentEvent);
               return ChatEventListItem(
                 event: currentEvent,
                 index: currentEventIndex + 1,
@@ -199,6 +199,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 constraints: widget.constraints,
                 previousEvent: previousEvent,
                 nextEvent: nextEvent,
+                albumMembers: _albums.albumLedBy(currentEvent.eventId),
+                hiddenAlbumMember: _albums.isHiddenMember(currentEvent.eventId),
               );
             }, childCount: _bottom.length + 1),
           ),
@@ -231,14 +233,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 return const SizedBox.shrink();
               }
 
-              final visiblePos = _visiblePosition[currentEvent.eventId];
-              final previousEvent = visiblePos != null && visiblePos > 0
-                  ? _visibleEvents[visiblePos - 1]
-                  : null;
-              final nextEvent =
-                  visiblePos != null && visiblePos < _visibleEvents.length - 1
-                  ? _visibleEvents[visiblePos + 1]
-                  : null;
+              final previousEvent = _albums.newerNeighbour(currentEvent);
+              final nextEvent = _albums.olderNeighbour(currentEvent);
               return ChatEventListItem(
                 event: currentEvent,
                 index: currentEventIndex + 1,
@@ -246,6 +242,8 @@ class _ChatScrollViewState extends State<ChatScrollView> {
                 constraints: widget.constraints,
                 previousEvent: previousEvent,
                 nextEvent: nextEvent,
+                albumMembers: _albums.albumLedBy(currentEvent.eventId),
+                hiddenAlbumMember: _albums.isHiddenMember(currentEvent.eventId),
               );
             }, childCount: _top.length + 1),
           ),
