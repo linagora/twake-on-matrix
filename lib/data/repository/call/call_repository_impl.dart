@@ -60,9 +60,6 @@ class CallRepositoryImpl implements CallRepository {
       _media.setMicrophone(isOn: isOn);
 
   @override
-  Future<void> setCamera({required bool isOn}) => _media.setCamera(isOn: isOn);
-
-  @override
   Stream<List<CallParticipant>> watchParticipants(String roomId) =>
       _media.watchParticipants().map(
         (participants) => [
@@ -81,4 +78,8 @@ class CallRepositoryImpl implements CallRepository {
       avatarUrl: profile.avatarUrl,
     );
   }
+
+  @override
+  Stream<void> watchRoomEncrypted(String roomId) =>
+      _rtc.watchRoomEncrypted(roomId);
 }

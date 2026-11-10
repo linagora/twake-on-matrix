@@ -41,6 +41,10 @@ class FakeCallRepository implements CallRepository {
 
   final calls = <String>[];
   final participants = StreamController<List<CallParticipant>>.broadcast();
+  final encryptions = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> watchRoomEncrypted(String roomId) => encryptions.stream;
 
   @override
   CallRoomInfo getRoomInfo(String roomId) => roomInfo;
@@ -99,12 +103,6 @@ class FakeCallRepository implements CallRepository {
   @override
   Future<void> setMicrophone({required bool isOn}) async {
     calls.add('microphone $isOn');
-    if (mediaError case final error?) throw error;
-  }
-
-  @override
-  Future<void> setCamera({required bool isOn}) async {
-    calls.add('camera $isOn');
     if (mediaError case final error?) throw error;
   }
 

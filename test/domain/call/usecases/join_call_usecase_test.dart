@@ -103,4 +103,15 @@ void main() {
     expect(repository.calls.last, 'disconnect');
     expect(repository.calls, isNot(contains('join !room video=true')));
   });
+
+  test('execute_withoutTheRightToJoin_touchesNothing', () async {
+    repository.roomInfo = const CallRoomInfo(
+      isEncrypted: false,
+      isDirect: false,
+      canJoin: false,
+    );
+
+    await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
+    expect(repository.calls, isEmpty);
+  });
 }

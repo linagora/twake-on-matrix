@@ -6,6 +6,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/model/call/sfu_token_response.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 
 /// MatrixRTC (MSC4143) session memberships with a LiveKit focus: one
@@ -13,7 +14,7 @@ import 'package:twake_chat/domain/model/call/call_models.dart';
 class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   MatrixRtcDatasourceImpl(this._maybeClient);
 
-  static const memberEventType = 'org.matrix.msc3401.call.member';
+  static const memberEventType = CallEventTypes.callMember;
   static const _membershipExpiry = Duration(hours: 4);
   static const _delayedLeave = Duration(seconds: 8);
   static const _delayedLeaveRestart = Duration(seconds: 5);
@@ -27,7 +28,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   final Client? _maybeClient;
   String? _delayId;
   Future<void> Function()? _resendMembership;
-  var _isRestarting = false;
+  Future<void>? _restarting;
   var _session = 0;
   Timer? _restartTimer;
   Timer? _expiryTimer;
@@ -115,6 +116,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     return CallRoomInfo(
       isEncrypted: room.encrypted,
       isDirect: room.isDirectChat,
+      canJoin: room.canChangeStateEvent(memberEventType),
     );
   }
 
@@ -154,7 +156,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       return parseServer(response.statusCode, response.body);
     } on CallException {
       rethrow;
-    } catch (error) {
+    } on Exception catch (error) {
       throw CallTokenFailedException(cause: error);
     }
   }
@@ -164,7 +166,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     final room = _room(roomId);
     try {
       await room.postLoad();
-    } catch (error) {
+    } on Exception catch (error) {
       throw CallMembershipFailedException(cause: error);
     }
     final stateKey = _ownStateKey(room);
@@ -175,7 +177,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     if (deviceId == null) return;
     try {
       await _client.setRoomStateWithKey(roomId, memberEventType, stateKey, {});
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: stale membership kept', error, stackTrace);
     }
   }
@@ -208,7 +210,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         stateKey,
         contentFor(),
       );
-    } catch (error) {
+    } on Exception catch (error) {
       _stopTimers();
       throw CallMembershipFailedException(cause: error);
     }
@@ -257,7 +259,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         stateKey,
         content,
       );
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
       if (session != _session) return;
       _extendRetryTimer?.cancel();
@@ -281,7 +283,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         _delayedLeave.inMilliseconds,
         {},
       );
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: no delayed leave', error, stackTrace);
       return;
     }
@@ -301,16 +303,18 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
     _delayId = delayId;
     _restartTimer?.cancel();
-    _restartTimer = Timer.periodic(
-      _delayedLeaveRestart,
-      (_) => unawaited(_restartDelayedLeave(roomId, stateKey)),
-    );
+    _restartTimer = Timer.periodic(_delayedLeaveRestart, (_) {
+      if (_restarting != null) return;
+      _restarting = _restartDelayedLeave(
+        roomId,
+        stateKey,
+      ).whenComplete(() => _restarting = null);
+    });
   }
 
   Future<void> _restartDelayedLeave(String roomId, String stateKey) async {
     final delayId = _delayId;
-    if (delayId == null || _isRestarting) return;
-    _isRestarting = true;
+    if (delayId == null) return;
     final session = _session;
     try {
       await _client.manageDelayedEvent(delayId, DelayedEventAction.restart);
@@ -326,10 +330,8 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       ) {
         Logs().w('MatrixRtcDatasource: not sent again', error, stackTrace);
       });
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: restart failed', error, stackTrace);
-    } finally {
-      _isRestarting = false;
     }
   }
 
@@ -351,15 +353,17 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   @override
   Future<void> leaveMembership(String roomId) async {
     final delayId = _stopTimers();
-    // An extension still in flight would otherwise land after the leave.
+    // A write still in flight would otherwise land after the leave.
     final extending = _extending;
+    final restarting = _restarting;
     _extending = null;
     await extending;
+    await restarting;
     if (delayId != null) {
       try {
         await _client.manageDelayedEvent(delayId, DelayedEventAction.send);
         return;
-      } catch (error, stackTrace) {
+      } on Exception catch (error, stackTrace) {
         Logs().w('MatrixRtcDatasource: delayed leave', error, stackTrace);
       }
     }
@@ -371,9 +375,21 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         _ownStateKey(room),
         {},
       );
-    } catch (error) {
+    } on Exception catch (error) {
       throw CallMembershipFailedException(cause: error);
     }
+  }
+
+  @override
+  Stream<void> watchRoomEncrypted(String roomId) {
+    final client = _maybeClient;
+    if (client == null) return const Stream.empty();
+    return client.onTimelineEvent.stream
+        .where(
+          (event) =>
+              event.roomId == roomId && event.type == EventTypes.Encryption,
+        )
+        .map((_) {});
   }
 
   void dispose() => _stopTimers();

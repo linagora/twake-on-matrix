@@ -24,4 +24,7 @@ abstract class MatrixRtcDatasource {
   });
 
   Future<void> leaveMembership(String roomId);
+
+  /// Emits when encryption is turned on in [roomId].
+  Stream<void> watchRoomEncrypted(String roomId);
 }

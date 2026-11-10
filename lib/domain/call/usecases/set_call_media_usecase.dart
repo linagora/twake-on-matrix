@@ -5,10 +5,6 @@ class SetCallMediaUseCase {
 
   final CallRepository _repository;
 
-  Future<void> execute({bool? isMicrophoneOn, bool? isCameraOn}) async {
-    if (isMicrophoneOn != null) {
-      await _repository.setMicrophone(isOn: isMicrophoneOn);
-    }
-    if (isCameraOn != null) await _repository.setCamera(isOn: isCameraOn);
-  }
+  Future<void> execute({required bool isMicrophoneOn}) =>
+      _repository.setMicrophone(isOn: isMicrophoneOn);
 }

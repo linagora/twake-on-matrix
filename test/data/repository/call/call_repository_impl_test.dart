@@ -11,6 +11,9 @@ class _FakeRtc implements MatrixRtcDatasource {
   final calls = <String>[];
 
   @override
+  Stream<void> watchRoomEncrypted(String roomId) => const Stream.empty();
+
+  @override
   CallRoomInfo getRoomInfo(String roomId) =>
       const CallRoomInfo(isEncrypted: false, isDirect: true);
 
@@ -67,10 +70,6 @@ class _FakeMedia implements CallMediaDatasource {
       calls.add('microphone $isOn');
 
   @override
-  Future<void> setCamera({required bool isOn}) async =>
-      calls.add('camera $isOn');
-
-  @override
   Stream<List<CallParticipant>> watchParticipants() =>
       Stream.value(participants);
 }
@@ -116,13 +115,11 @@ void main() {
       isCameraOn: false,
     );
     await repository.setMicrophone(isOn: false);
-    await repository.setCamera(isOn: true);
     await repository.disconnectMedia();
 
     expect(media.calls, [
       'connect wss://lk.test true false',
       'microphone false',
-      'camera true',
       'disconnect',
     ]);
     expect(rtc.calls, isEmpty);

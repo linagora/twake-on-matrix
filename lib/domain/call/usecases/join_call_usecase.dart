@@ -22,6 +22,9 @@ class JoinCallUseCase {
     final room = _repository.getRoomInfo(roomId);
     // DECISION.md D14: a call is encrypted when its room is.
     if (room.isEncrypted) throw const CallEncryptionUnsupportedException();
+    // Before the token and the microphone: a member may not hold the state
+    // event of the call in a group (power level).
+    if (!room.canJoin) throw const CallNoPermissionException();
     await _repository.endStaleOwnMembership(roomId);
     final server = await _repository.fetchServer(
       roomId: roomId,

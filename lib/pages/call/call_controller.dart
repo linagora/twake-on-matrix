@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.dart';
 import 'package:twake_chat/domain/call/usecases/leave_call_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
+import 'package:twake_chat/domain/call/usecases/watch_call_room_encrypted_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
@@ -15,6 +15,8 @@ import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions
 import 'package:twake_chat/pages/call/call_state.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/utils/logging/log_orchestrator.dart';
+import 'package:twake_chat/utils/logging/log_types.dart';
 
 part 'call_controller.g.dart';
 
@@ -24,6 +26,7 @@ class CallController extends _$CallController {
   static const _cleanupWait = Duration(seconds: 10);
 
   StreamSubscription<List<CallParticipant>>? _participants;
+  StreamSubscription<void>? _encryption;
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
   Future<void>? _cleanup;
@@ -31,7 +34,10 @@ class CallController extends _$CallController {
 
   @override
   CallState build() {
-    ref.onDispose(() => unawaited(_participants?.cancel()));
+    ref.onDispose(() {
+      unawaited(_participants?.cancel());
+      unawaited(_encryption?.cancel());
+    });
     // A call belongs to the account that joined it.
     ref.listen(activeMatrixClientProvider, (_, _) => unawaited(leave()));
     return const CallState.idle();
@@ -58,13 +64,27 @@ class CallController extends _$CallController {
         isCancelled: () => _isLeaveRequested,
       );
       if (ref.mounted) await _onJoined(roomId, room);
-    } catch (error) {
-      if (!ref.mounted) return;
-      state = _isLeaveRequested
-          ? const CallState.idle()
-          : CallState.failed(roomId: roomId, error: _typed(error));
+    } catch (error, stackTrace) {
+      _log('join failed', error, stackTrace);
+      if (ref.mounted) {
+        state = _isLeaveRequested
+            ? const CallState.idle()
+            : CallState.failed(roomId: roomId, error: _typed(error));
+      }
+      // A bug, not a failure of the call: it must reach the crash reports.
+      if (error is Error) rethrow;
     }
   }
+
+  static void _log(String message, Object error, StackTrace? stackTrace) =>
+      LogOrchestrator().log(
+        LogEntry(
+          message: 'CallController: $message',
+          level: LogLevel.warn,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
 
   Future<void> _onJoined(String roomId, CallRoomInfo? room) async {
     if (room == null) {
@@ -76,6 +96,11 @@ class CallController extends _$CallController {
         .read(watchCallParticipantsUseCaseProvider)
         .execute(roomId)
         .listen(_onParticipants, onError: _onMediaLost);
+    // DECISION.md D14: the media of this call is in the clear.
+    _encryption = ref
+        .read(watchCallRoomEncryptedUseCaseProvider)
+        .execute(roomId)
+        .listen((_) => _onRoomEncrypted());
     if (_isLeaveRequested) await leave();
   }
 
@@ -99,7 +124,22 @@ class CallController extends _$CallController {
     return participants.any((p) => p.userId != me);
   }
 
-  void _onMediaLost(Object error) {
+  void _onRoomEncrypted() {
+    final current = state;
+    if (current is! CallConnected) return;
+    unawaited(
+      _end(
+        current,
+        then: CallState.failed(
+          roomId: current.roomId,
+          error: const CallEncryptionUnsupportedException(),
+        ),
+      ),
+    );
+  }
+
+  void _onMediaLost(Object error, StackTrace stackTrace) {
+    _log('media lost', error, stackTrace);
     final current = state;
     if (current is! CallConnected) return;
     unawaited(
@@ -136,30 +176,25 @@ class CallController extends _$CallController {
     _leaveCall = null;
     final participants = _participants;
     _participants = null;
+    unawaited(_encryption?.cancel());
+    _encryption = null;
     state = then;
     return _cleanup = () async {
       await participants?.cancel();
       try {
         await leaveCall.execute(current.roomId);
-      } catch (_) {
+      } on Exception catch (error, stackTrace) {
         // The delayed leave of the homeserver ends the membership.
+        _log('leave failed', error, stackTrace);
       }
     }();
   }
 
   /// False when the device refused the change.
-  Future<bool> setMicrophone({required bool isOn}) => _setMedia(
-    () => ref.read(setCallMediaUseCaseProvider).execute(isMicrophoneOn: isOn),
-  );
-
-  Future<bool> setCamera({required bool isOn}) => _setMedia(
-    () => ref.read(setCallMediaUseCaseProvider).execute(isCameraOn: isOn),
-  );
-
-  Future<bool> _setMedia(Future<void> Function() change) async {
+  Future<bool> setMicrophone({required bool isOn}) async {
     if (state is! CallConnected) return false;
     try {
-      await change();
+      await ref.read(setCallMediaUseCaseProvider).execute(isMicrophoneOn: isOn);
       return true;
     } on CallException {
       return false;

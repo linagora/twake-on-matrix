@@ -12,8 +12,6 @@ abstract class CallMediaDatasource {
 
   Future<void> setMicrophone({required bool isOn});
 
-  Future<void> setCamera({required bool isOn});
-
   Stream<List<CallParticipant>> watchParticipants();
 
   Future<void> dispose();

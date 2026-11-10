@@ -21,6 +21,13 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   CallConnectionFailedException? _lost;
   final _participants = StreamController<List<CallParticipant>>.broadcast();
 
+  /// LiveKit gave up on the room; a listener that comes later still hears it.
+  @visibleForTesting
+  void onLost(Object? reason) {
+    final lost = _lost = CallConnectionFailedException(cause: reason);
+    _participants.addError(lost);
+  }
+
   @override
   Future<void> connect(
     CallServer server, {
@@ -36,13 +43,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       ..listen((_) => _emit())
       // Our own disconnect disposes the listener first: this one is LiveKit
       // giving up.
-      ..on<lk.RoomDisconnectedEvent>((event) {
-        final lost = _lost = CallConnectionFailedException(cause: event.reason);
-        _participants.addError(lost);
-      });
+      ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     try {
       await room.connect(server.url, server.token);
-    } catch (error) {
+    } on Exception catch (error) {
       await listener.dispose();
       await room.dispose();
       throw CallConnectionFailedException(cause: error);
@@ -54,7 +58,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
       if (isCameraOn) await room.localParticipant?.setCameraEnabled(true);
-    } catch (error) {
+    } on Exception catch (error) {
       await disconnect();
       throw CallMediaFailedException(cause: error);
     }
@@ -80,7 +84,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> _logFailure(Future<void> Function() run) async {
     try {
       await run();
-    } catch (error, stackTrace) {
+    } on Exception catch (error, stackTrace) {
       Logs().w('LiveKitCallMedia: disconnect failed', error, stackTrace);
     }
   }
@@ -95,10 +99,6 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> setMicrophone({required bool isOn}) =>
       _change((local) => local.setMicrophoneEnabled(isOn));
 
-  @override
-  Future<void> setCamera({required bool isOn}) =>
-      _change((local) => local.setCameraEnabled(isOn));
-
   Future<void> _change(
     Future<Object?> Function(lk.LocalParticipant local) run,
   ) async {
@@ -106,7 +106,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     if (local == null) return;
     try {
       await run(local);
-    } catch (error) {
+    } on Exception catch (error) {
       throw CallMediaFailedException(cause: error);
     } finally {
       _emit();

@@ -3286,11 +3286,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "callTitle": "Call",
-  "@callTitle": {
-    "type": "text",
-    "placeholders": {}
-  },
   "callConnecting": "Connecting…",
   "@callConnecting": {
     "type": "text",

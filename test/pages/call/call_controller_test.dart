@@ -90,10 +90,13 @@ void main() {
     );
   });
 
-  test('join_whenAnUntypedErrorEscapes_failsAndCanJoinAgain', () async {
+  test('join_whenAProgrammerErrorEscapes_failsAndSurfacesIt', () async {
     repository.staleError = StateError('database closed');
 
-    await controller().join('!room', isVideo: false);
+    await expectLater(
+      controller().join('!room', isVideo: false),
+      throwsA(isA<StateError>()),
+    );
 
     expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
     repository.staleError = null;
@@ -180,13 +183,6 @@ void main() {
     repository.mediaError = const CallMediaFailedException();
 
     expect(await controller().setMicrophone(isOn: true), isFalse);
-  });
-
-  test('the camera follows the call', () async {
-    await controller().join('!room', isVideo: false);
-
-    expect(await controller().setCamera(isOn: true), isTrue);
-    expect(repository.calls.last, 'camera true');
   });
 
   test('leave_beforeTheMediaConnects_connectsNoMedia', () async {
@@ -303,4 +299,100 @@ void main() {
       expect(state(), isA<CallConnected>());
     });
   });
+
+  test('onRoomEncrypted_duringTheCall_endsIt', () async {
+    await controller().join('!room', isVideo: false);
+
+    repository.encryptions.add(null);
+    await pumpEventQueue();
+
+    expect(
+      (state() as CallFailed).error,
+      isA<CallEncryptionUnsupportedException>(),
+    );
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+  });
+
+  group('an account switch', () {
+    late FakeCallRepository first;
+    late FakeCallRepository second;
+    late ProviderContainer switching;
+    final firstClient = _FakeClient();
+    final secondClient = _FakeClient();
+
+    setUp(() {
+      first = FakeCallRepository();
+      second = FakeCallRepository();
+      switching = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [
+          _clientProvider.overrideWith(() => _ClientNotifier(firstClient)),
+          activeMatrixClientProvider.overrideWith(
+            (ref) => ref.watch(_clientProvider),
+          ),
+          callRepositoryProvider.overrideWith(
+            (ref) => ref.watch(activeMatrixClientProvider) == firstClient
+                ? first
+                : second,
+          ),
+        ],
+      );
+      switching
+          .read(loginHomeserverSummaryProvider.notifier)
+          .set(
+            summaryWithFoci([
+              {'type': 'livekit', 'livekit_service_url': 'https://rtc.test'},
+            ]),
+          );
+      switching.listen(callControllerProvider, (_, _) {});
+    });
+
+    test('accountSwitch_whileConnected_leavesWithTheFirstClient', () async {
+      await switching
+          .read(callControllerProvider.notifier)
+          .join('!room', isVideo: false);
+
+      switching.read(_clientProvider.notifier).set(secondClient);
+      await pumpEventQueue();
+
+      expect(switching.read(callControllerProvider), const CallState.idle());
+      expect(first.calls, containsAllInOrder(['disconnect', 'leave !room']));
+      expect(second.calls, isEmpty);
+    });
+
+    test('accountSwitch_whileConnecting_sendsNoMembership', () async {
+      first.connectGate = Completer<void>();
+      final joining = switching
+          .read(callControllerProvider.notifier)
+          .join('!room', isVideo: false);
+      await pumpEventQueue();
+
+      switching.read(_clientProvider.notifier).set(secondClient);
+      await pumpEventQueue();
+      first.connectGate!.complete();
+      await joining;
+
+      expect(switching.read(callControllerProvider), const CallState.idle());
+      expect(first.calls.last, 'disconnect');
+      expect(first.calls, isNot(contains('join !room video=false')));
+      expect(second.calls, isEmpty);
+    });
+  });
+}
+
+class _FakeClient extends Fake implements Client {}
+
+final _clientProvider = NotifierProvider<_ClientNotifier, Client?>(
+  () => _ClientNotifier(null),
+);
+
+class _ClientNotifier extends Notifier<Client?> {
+  _ClientNotifier(this._initial);
+
+  final Client? _initial;
+
+  @override
+  Client? build() => _initial;
+
+  void set(Client? client) => state = client;
 }

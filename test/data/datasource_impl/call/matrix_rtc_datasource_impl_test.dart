@@ -7,11 +7,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports, the SDK does not export the type of its streams.
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:twake_chat/data/datasource_impl/call/matrix_rtc_datasource_impl.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 
 class _FakeRoom extends Fake implements Room {
+  var canJoin = true;
+
+  @override
+  String get id => '!room:hs.test';
+
+  @override
+  bool get encrypted => false;
+
+  @override
+  bool get isDirectChat => false;
+
   @override
   Membership get membership => Membership.join;
 
@@ -19,7 +32,7 @@ class _FakeRoom extends Fake implements Room {
   String? get roomVersion => '10';
 
   @override
-  bool canChangeStateEvent(String action) => true;
+  bool canChangeStateEvent(String action) => canJoin;
 }
 
 /// Records the membership writes; the first restart finds the delayed leave
@@ -33,6 +46,23 @@ class _FakeClient extends Fake implements Client {
   var isRoomGone = false;
   var failingMemberships = 0;
   Completer<void>? holdMemberships;
+  final timeline = <String>[];
+  final tokenRequests = <Map<String, Object?>>[];
+
+  @override
+  final CachedStreamController<Event> onTimelineEvent =
+      CachedStreamController();
+
+  @override
+  Future<OpenIdCredentials> requestOpenIdToken(
+    String userId,
+    Map<String, Object?> body,
+  ) async => OpenIdCredentials(
+    accessToken: 'openid',
+    expiresIn: 3600,
+    matrixServerName: 'hs.test',
+    tokenType: 'Bearer',
+  );
 
   @override
   String? get userID => '@bob:hs.test';
@@ -51,9 +81,14 @@ class _FakeClient extends Fake implements Client {
 
   @override
   late final http.Client httpClient = MockClient((request) async {
+    if (request.url.path.endsWith('/sfu/get')) {
+      tokenRequests.add(jsonDecode(request.body) as Map<String, Object?>);
+      return http.Response('{"url":"wss://lk.test","jwt":"jwt"}', 200);
+    }
     if (request.url.path.contains('delayed_events')) {
       final action = jsonDecode(request.body)['action'];
       delayedActions.add('$action ${request.url.pathSegments.last}');
+      timeline.add('$action ${request.url.pathSegments.last}');
       if (!_isLapsed) return http.Response('{}', 200);
       _isLapsed = false;
       return http.Response('{"errcode":"M_NOT_FOUND","error":"gone"}', 404);
@@ -80,6 +115,7 @@ class _FakeClient extends Fake implements Client {
       throw Exception('offline');
     }
     writes.add(body.isEmpty ? 'left' : 'membership');
+    timeline.add(body.isEmpty ? 'left' : 'membership');
     return r'$event';
   }
 }
@@ -303,5 +339,85 @@ void main() {
         throwsA(isA<CallTokenFailedException>()),
       );
     });
+  });
+
+  test('leaveMembership_whileAMembershipIsSentAgain_leavesAfterIt', () {
+    fakeAsync((async) {
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(
+        roomId: '!room:hs.test',
+        serviceUrl: 'https://rtc.test',
+        isVideo: false,
+      );
+      async.flushMicrotasks();
+      final hold = client.holdMemberships = Completer<void>();
+      async.elapse(const Duration(seconds: 6));
+
+      datasource.leaveMembership('!room:hs.test').ignore();
+      async.flushMicrotasks();
+      expect(client.timeline, isNot(contains('send delay-2')));
+      hold.complete();
+      async.flushMicrotasks();
+
+      expect(
+        client.timeline,
+        containsAllInOrder(['restart delay-1', 'membership', 'send delay-2']),
+      );
+      expect(client.timeline.last, 'send delay-2');
+      datasource.dispose();
+    });
+  });
+
+  test('getRoomInfo_withoutTheRightToTheCallEvent_cannotJoin', () {
+    final client = _FakeClient().._room.canJoin = false;
+
+    expect(
+      MatrixRtcDatasourceImpl(client).getRoomInfo('!room:hs.test').canJoin,
+      isFalse,
+    );
+  });
+
+  test('fetchServer_always_sendsTheOpenIdTokenOfThisDevice', () async {
+    final client = _FakeClient();
+
+    final server = await MatrixRtcDatasourceImpl(
+      client,
+    ).fetchServer(roomId: '!room:hs.test', serviceUrl: 'https://rtc.test');
+
+    expect(server, const CallServer(url: 'wss://lk.test', token: 'jwt'));
+    expect(client.tokenRequests.single, {
+      'room': '!room:hs.test',
+      'openid_token': {
+        'access_token': 'openid',
+        'expires_in': 3600,
+        'matrix_server_name': 'hs.test',
+        'token_type': 'Bearer',
+      },
+      'device_id': 'BOB',
+    });
+  });
+
+  test('watchRoomEncrypted_whenEncryptionIsTurnedOn_emits', () async {
+    final client = _FakeClient();
+    final encrypted = <void>[];
+    MatrixRtcDatasourceImpl(
+      client,
+    ).watchRoomEncrypted('!room:hs.test').listen(encrypted.add);
+
+    client.onTimelineEvent.add(
+      Event(
+        content: {'algorithm': 'm.megolm.v1.aes-sha2'},
+        type: EventTypes.Encryption,
+        eventId: r'$encryption',
+        senderId: '@alice:hs.test',
+        originServerTs: DateTime.now(),
+        stateKey: '',
+        room: client._room,
+      ),
+    );
+    await pumpEventQueue();
+
+    expect(encrypted, hasLength(1));
   });
 }

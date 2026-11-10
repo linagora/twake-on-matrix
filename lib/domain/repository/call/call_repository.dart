@@ -31,7 +31,8 @@ abstract class CallRepository {
 
   Future<void> setMicrophone({required bool isOn});
 
-  Future<void> setCamera({required bool isOn});
+  /// Emits when encryption is turned on in [roomId].
+  Stream<void> watchRoomEncrypted(String roomId);
 
   /// Emits the participants on each change while the media is connected.
   Stream<List<CallParticipant>> watchParticipants(String roomId);

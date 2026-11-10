@@ -277,7 +277,8 @@ Call do not read (still so in matrix 15.0.0).
 
 A call in an encrypted room needs the exchange of media keys, which comes
 later: until then the app does not join calls of encrypted rooms, and the
-call button is hidden in them.
+call button is hidden in them. A call ends if encryption is turned on in its
+room during the call, as its media would stay in the clear.
 
 ## D15. The call button of a chat: in-app call or Meet link (proposed, 2026-11-05)
 
