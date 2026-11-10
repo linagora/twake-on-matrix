@@ -503,6 +503,7 @@ class _GroupNameField extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.isValidGroupNameNotifier,
       builder: (context, value, _) {
+        final l10n = L10n.of(context)!;
         return TextField(
           enabled: controller.room?.canChangeRoomName ?? false,
           style: ChatDetailEditViewStyle.textFieldStyle(context),
@@ -518,9 +519,10 @@ class _GroupNameField extends StatelessWidget {
                 color: Theme.of(context).colorScheme.shadow,
               ),
             ),
-            labelText: L10n.of(context)!.groupName,
+            labelText: l10n.groupName,
             labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
-            hintText: L10n.of(context)!.enterGroupName,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: l10n.enterGroupName,
             hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
             contentPadding: ChatDetailEditViewStyle.contentPadding,
             errorText: controller.getErrorMessage(
@@ -561,11 +563,13 @@ class _DescriptionField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context)!;
+    final canChangeTopic = controller.room?.canChangeTopic ?? false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TextField(
-          enabled: controller.room?.canChangeTopic ?? false,
+          enabled: canChangeTopic,
           style: ChatDetailEditViewStyle.textFieldStyle(context),
           controller: controller.descriptionTextEditingController,
           contextMenuBuilder: mobileTwakeContextMenuBuilder,
@@ -579,9 +583,10 @@ class _DescriptionField extends StatelessWidget {
                 color: Theme.of(context).colorScheme.shadow,
               ),
             ),
-            labelText: L10n.of(context)!.description,
+            labelText: l10n.description,
             labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
-            hintText: L10n.of(context)!.description,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            hintText: canChangeTopic ? l10n.addDescription : null,
             hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
             contentPadding: ChatDetailEditViewStyle.contentPadding,
             suffixIcon: ValueListenableBuilder<bool>(
@@ -613,7 +618,7 @@ class _DescriptionField extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(left: 16),
           child: Text(
-            L10n.of(context)!.descriptionHelper,
+            l10n.descriptionHelper,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
