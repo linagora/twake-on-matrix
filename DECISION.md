@@ -259,3 +259,11 @@ their first reaction, oldest first. Reactions beyond three are summed up in
 `+N`; in a group it opens the full list (a direct chat shows no counts and no
 list, as before). A later reaction from someone else does not push out one
 already shown at the same count; the user's own one does, so their tap shows.
+
+## D17. Copying an image or video copies the file itself (proposed by Johann, 2026-11-10)
+
+Copy on an image or a video message puts the file itself on the clipboard,
+on mobile, ready to paste in another app or in the composer (#962). An
+encrypted file is downloaded and decrypted first. A format the clipboard
+cannot hold (WebM, BMP…) copies the text, as before. This replaces, for one
+selected message, the "image itself on the web" of D11.
