@@ -186,6 +186,67 @@ void main() {
   FileInfo textFileInfo() =>
       FileInfo('notes.txt', bytes: Uint8List.fromList([1, 2, 3]));
 
+  Future<void> uploadWeb(ThreadSendTarget? thread) => manager.uploadFilesWeb(
+    room: room,
+    files: [textFile()],
+    caption: 'look',
+    inReplyTo: replyTarget,
+    thread: thread,
+  );
+
+  Future<void> uploadMobile(ThreadSendTarget? thread) =>
+      manager.uploadFileMobile(
+        room: room,
+        fileInfos: [textFileInfo()],
+        caption: 'look',
+        inReplyTo: replyTarget,
+        thread: thread,
+      );
+
+  Future<void> uploadGallery(ThreadSendTarget? thread) =>
+      manager.uploadMediaMobile(
+        room: room,
+        entities: [_PickedFile()],
+        caption: 'look',
+        inReplyTo: replyTarget,
+        thread: thread,
+      );
+
+  /// Sends a thread file whose first upload fails, then retries it.
+  Future<void> failThenRetry(ThreadSendTarget? thread) async {
+    mediaApi.failNextUpload = true;
+    await uploadWeb(thread);
+    final txid = queue.added.single.id!;
+    await runQueuedSends();
+    expect(sentMessages(), isEmpty, reason: 'the first upload failed');
+
+    placeholders.clear();
+    final result = await manager.retryUpload(
+      Event(
+        senderId: room.client.userID!,
+        type: EventTypes.Message,
+        room: room,
+        eventId: txid,
+        content: {'msgtype': MessageTypes.File, 'body': 'look'},
+        originServerTs: DateTime.now(),
+      ),
+    );
+    expect(result, RetryUploadResult.started);
+    await pumpEventQueue();
+  }
+
+  /// Every way the app sends a file, as the user reaches it.
+  final entryPoints =
+      <({String name, Future<void> Function(ThreadSendTarget? thread) upload})>[
+        (name: 'web', upload: uploadWeb),
+        (name: 'mobile', upload: uploadMobile),
+        (name: 'gallery', upload: uploadGallery),
+      ];
+  final threadEntryPoints = [
+    ...entryPoints,
+    (name: 'retry', upload: failThenRetry),
+  ];
+
   void expectThreadMessageWithoutQuote(Map<String, Object?> content) {
     expect(content['body'], 'look', reason: 'no quote fallback in the body');
     expect(
@@ -202,63 +263,20 @@ void main() {
   }
 
   group('a file sent to a thread never quotes the message it replies to', () {
-    test('web: the message sent to the server has the thread relation and '
-        'no quote', () async {
-      await manager.uploadFilesWeb(
-        room: room,
-        files: [textFile()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-        thread: _thread,
-      );
-      await runQueuedSends();
+    for (final entry in threadEntryPoints) {
+      test('${entry.name}: the message sent to the server has the thread '
+          'relation and no quote', () async {
+        await entry.upload(_thread);
+        await runQueuedSends();
 
-      final sent = sentMessages();
-      expect(sent, isNotEmpty, reason: 'the file message reached the server');
-      expectThreadMessageWithoutQuote(sent.single);
-    });
+        final sent = sentMessages();
+        expect(sent, isNotEmpty, reason: 'the file message reached the server');
+        expectThreadMessageWithoutQuote(sent.single);
+      });
 
-    test('mobile: the message sent to the server has the thread relation '
-        'and no quote', () async {
-      await manager.uploadFileMobile(
-        room: room,
-        fileInfos: [textFileInfo()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-        thread: _thread,
-      );
-      await runQueuedSends();
-
-      final sent = sentMessages();
-      expect(sent, isNotEmpty, reason: 'the file message reached the server');
-      expectThreadMessageWithoutQuote(sent.single);
-    });
-
-    test('gallery: the message sent to the server has the thread relation '
-        'and no quote', () async {
-      await manager.uploadMediaMobile(
-        room: room,
-        entities: [_PickedFile()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-        thread: _thread,
-      );
-      await runQueuedSends();
-
-      final sent = sentMessages();
-      expect(sent, isNotEmpty, reason: 'the file message reached the server');
-      expectThreadMessageWithoutQuote(sent.single);
-    });
-
-    test(
-      'gallery: the placeholder shown while uploading has no reply',
-      () async {
-        await manager.uploadMediaMobile(
-          room: room,
-          entities: [_PickedFile()],
-          inReplyTo: replyTarget,
-          thread: _thread,
-        );
+      test('${entry.name}: the placeholder shown while uploading has no '
+          'reply', () async {
+        await entry.upload(_thread);
         await pumpEventQueue();
 
         expect(placeholders, isNotEmpty);
@@ -266,138 +284,24 @@ void main() {
           expect(placeholder.unsigned, isNot(contains('in_reply_to')));
           expect(placeholder.content['m.relates_to'], _thread.relatesTo);
         }
-      },
-    );
-
-    test('web: the placeholder shown while uploading has no reply', () async {
-      await manager.uploadFilesWeb(
-        room: room,
-        files: [textFile()],
-        inReplyTo: replyTarget,
-        thread: _thread,
-      );
-
-      await pumpEventQueue();
-      expect(placeholders, isNotEmpty);
-      expect(placeholders.first.unsigned, isNot(contains('in_reply_to')));
-      expect(placeholders.first.content['m.relates_to'], _thread.relatesTo);
-    });
-
-    test(
-      'mobile: the placeholder shown while uploading has no reply',
-      () async {
-        await manager.uploadFileMobile(
-          room: room,
-          fileInfos: [textFileInfo()],
-          inReplyTo: replyTarget,
-          thread: _thread,
-        );
-
-        await pumpEventQueue();
-        expect(placeholders, isNotEmpty);
-        expect(placeholders.first.unsigned, isNot(contains('in_reply_to')));
-        expect(placeholders.first.content['m.relates_to'], _thread.relatesTo);
-      },
-    );
-
-    /// Sends a thread file whose first upload fails, then retries it.
-    Future<void> failThenRetry() async {
-      mediaApi.failNextUpload = true;
-      await manager.uploadFilesWeb(
-        room: room,
-        files: [textFile()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-        thread: _thread,
-      );
-      final txid = queue.added.single.id!;
-      await runQueuedSends();
-      expect(sentMessages(), isEmpty, reason: 'the first upload failed');
-
-      placeholders.clear();
-      final result = await manager.retryUpload(
-        Event(
-          senderId: room.client.userID!,
-          type: EventTypes.Message,
-          room: room,
-          eventId: txid,
-          content: {'msgtype': MessageTypes.File, 'body': 'look'},
-          originServerTs: DateTime.now(),
-        ),
-      );
-      expect(result, RetryUploadResult.started);
-      await pumpEventQueue();
+      });
     }
-
-    test('retry: the resent message has no quote', () async {
-      await failThenRetry();
-      await runQueuedSends();
-
-      final sent = sentMessages();
-      expect(
-        sent,
-        isNotEmpty,
-        reason: 'the retried message reached the server',
-      );
-      expectThreadMessageWithoutQuote(sent.single);
-    });
-
-    test('retry: the placeholder shown again has no reply', () async {
-      await failThenRetry();
-
-      expect(placeholders, isNotEmpty);
-      expect(placeholders.first.unsigned, isNot(contains('in_reply_to')));
-    });
   });
 
   group('a file sent outside a thread keeps its reply', () {
-    void expectQuotedReply(Map<String, Object?> content) {
-      expect(content['m.relates_to'], {
-        'm.in_reply_to': {'event_id': r'$target'},
+    for (final entry in entryPoints) {
+      test(entry.name, () async {
+        await entry.upload(null);
+        await pumpEventQueue();
+        expect(placeholders.first.unsigned?['in_reply_to'], r'$target');
+        await runQueuedSends();
+
+        final content = sentMessages().single;
+        expect(content['m.relates_to'], {
+          'm.in_reply_to': {'event_id': r'$target'},
+        });
+        expect(content['body'], startsWith('> <@bob:example.com> hi'));
       });
-      expect(content['body'], startsWith('> <@bob:example.com> hi'));
     }
-
-    test('web', () async {
-      await manager.uploadFilesWeb(
-        room: room,
-        files: [textFile()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-      );
-      await pumpEventQueue();
-      expect(placeholders.first.unsigned?['in_reply_to'], r'$target');
-      await runQueuedSends();
-
-      expectQuotedReply(sentMessages().single);
-    });
-
-    test('gallery', () async {
-      await manager.uploadMediaMobile(
-        room: room,
-        entities: [_PickedFile()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-      );
-      await pumpEventQueue();
-      expect(placeholders.first.unsigned?['in_reply_to'], r'$target');
-      await runQueuedSends();
-
-      expectQuotedReply(sentMessages().single);
-    });
-
-    test('mobile', () async {
-      await manager.uploadFileMobile(
-        room: room,
-        fileInfos: [textFileInfo()],
-        caption: 'look',
-        inReplyTo: replyTarget,
-      );
-      await pumpEventQueue();
-      expect(placeholders.first.unsigned?['in_reply_to'], r'$target');
-      await runQueuedSends();
-
-      expectQuotedReply(sentMessages().single);
-    });
   });
 }
