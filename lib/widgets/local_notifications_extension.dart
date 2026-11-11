@@ -60,6 +60,7 @@ extension LocalNotificationsExtension on MatrixState {
         followed: client.threadUnread?.followOnceKnown(
           ThreadRef(roomId, threadRootId),
         ),
+        choice: client.threadUnread?.prefOf(ThreadRef(roomId, threadRootId)),
         pushActions: client.pushruleEvaluator.match(event),
         activeThread: activeThread,
       )) {

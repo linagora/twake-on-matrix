@@ -2,11 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
+import '../../data/datasource_impl/thread/thread_account.dart';
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../fake_client.dart';
 
@@ -58,6 +60,10 @@ void main() {
   /// a followed or mentioning thread is unread. A thread reply as last
   /// event of the room must not hide an unread main message.
   group('an unread main message under a thread reply', _mainUnderReplyTests);
+
+  /// THR-M-07: a muted thread stays followed but counts nothing, mentions
+  /// included; an unfollowed one still counts its mentions (THR-M-06).
+  group('the explicit choice of the user', _choiceTests);
 }
 
 const _roomId = '!room:example.com';
@@ -411,5 +417,50 @@ void _mainUnderReplyTests() {
     );
 
     expect(room.hasNewMessagesWithThreads, isTrue);
+  });
+}
+
+/// The user chose [pref] for the thread of [_rootId] (account data of
+/// `app.twake.chat.thread_prefs`, as the web writes it).
+void _choose(WirePref pref) {
+  final choices = {
+    threadPrefsAccountDataType: BasicEvent(
+      type: threadPrefsAccountDataType,
+      content: {
+        'threads': [prefEntry(const ThreadRef(_roomId, _rootId), pref)],
+      },
+    ),
+  };
+  when(_client.accountData).thenReturn(choices);
+}
+
+void _choiceTests() {
+  // The reply is the last event of the room, newer than every receipt.
+  Room roomWithUnreadReply() => _roomWithLastReply(
+    _staleAnd(_readBefore, threads: {_rootId: _receipt(r'$older_reply', 2)}),
+  );
+
+  test('a muted thread the user wrote in is not a new message of the '
+      'room', () {
+    _choose(WirePref.mute);
+    _threadCounters(_rootId, followed: true);
+
+    expect(roomWithUnreadReply().hasNewMessagesWithThreads, isFalse);
+  });
+
+  test('a muted thread that mentions the user is not a new message of the '
+      'room', () {
+    _choose(WirePref.mute);
+    _threadCounters(_rootId, followed: true, highlights: 1);
+
+    expect(roomWithUnreadReply().hasNewMessagesWithThreads, isFalse);
+  });
+
+  test('an unfollowed thread that mentions the user is a new message of the '
+      'room', () {
+    _choose(WirePref.unfollow);
+    _threadCounters(_rootId, followed: true, highlights: 1);
+
+    expect(roomWithUnreadReply().hasNewMessagesWithThreads, isTrue);
   });
 }

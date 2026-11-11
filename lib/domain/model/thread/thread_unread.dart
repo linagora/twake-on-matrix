@@ -7,6 +7,7 @@ class ThreadUnread {
     required this.notificationCount,
     required this.highlightCount,
     required this.followed,
+    this.muted = false,
     this.lastActivity,
   });
 
@@ -14,11 +15,18 @@ class ThreadUnread {
   final int notificationCount;
   final int highlightCount;
   final bool followed;
+  final bool muted;
   final DateTime? lastActivity;
 
   /// highlight_count is part of notification_count: a followed thread counts
   /// all of it, another one only its mentions.
-  int get badgeCount => followed ? notificationCount : highlightCount;
+  /// A muted thread counts nothing, mentions included.
+  int get badgeCount {
+    if (muted) return 0;
+    return followed ? notificationCount : highlightCount;
+  }
+
+  int get mentionCount => muted ? 0 : highlightCount;
 }
 
 /// Reads `unread_thread_notifications` of a joined room of the sync response.

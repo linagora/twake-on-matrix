@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 abstract final class ThreadRules {
@@ -107,11 +108,14 @@ abstract final class ThreadRules {
   /// screen, push rules) and a mention come first, without waiting. Then
   /// [followed] (may still be looked up), then the sender of the root, which
   /// a lookup that told nothing leaves as the last word. A root that cannot
-  /// be loaded counts as unknown; nothing is thrown.
+  /// be loaded counts as unknown; nothing is thrown. An explicit [choice]
+  /// of the user decides before all that: muted, never; followed, as if
+  /// followed; unfollowed, a mention only.
   static Future<bool> shouldNotifyThreadReply(
     Event event, {
     required FutureOr<bool?> followed,
     required EvaluatedPushRuleAction pushActions,
+    ThreadPref? choice,
     ({String roomId, String threadRootId})? activeThread,
   }) async {
     bool decide(bool isFollowed, String? rootSenderId) =>
@@ -122,7 +126,8 @@ abstract final class ThreadRules {
           rootSenderId: rootSenderId,
           activeThread: activeThread,
         );
-    if (!decide(true, null)) return false;
+    if (choice == ThreadPref.mute || !decide(true, null)) return false;
+    if (choice != null) return decide(choice == ThreadPref.follow, null);
     if (decide(false, null)) return true;
     if (await _followOrNull(followed) == true) return true;
     return decide(false, await _rootSenderOrNull(event));
