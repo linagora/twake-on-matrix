@@ -62,11 +62,16 @@ void main() {
     reactors: reactors ?? [for (var i = 0; i < count; i++) user('$key $i')],
   );
 
-  MockEvent reactionEvent(String key, {String senderId = myUserId}) {
+  MockEvent reactionEvent(
+    String key, {
+    String senderId = myUserId,
+    DateTime? sentAt,
+  }) {
     final event = MockEvent();
     final sender = user(senderId);
     when(event.room).thenReturn(room);
     when(event.senderId).thenReturn(senderId);
+    when(event.originServerTs).thenReturn(sentAt ?? DateTime(2026));
     when(event.senderFromMemoryOrFallback).thenReturn(sender);
     when(event.content).thenReturn({
       'm.relates_to': {
@@ -116,7 +121,7 @@ void main() {
       ], myUserId);
 
       expect(reactions, hasLength(1));
-      expect(reactions.single.key, '👍');
+      expect(reactions.single.key, thumbsUpVs16);
       expect(reactions.single.count, 3);
       expect(reactions.single.reactors, hasLength(3));
       expect(reactions.single.reacted, isTrue);
@@ -149,6 +154,113 @@ void main() {
       ], myUserId);
 
       expect(reactions.map((r) => (r.key, r.count)), [('❤️', 2), ('👍', 1)]);
+    });
+
+    test('orders equal counts by first reaction, whatever the arrival', () {
+      final events = [
+        for (final (i, key) in ['👍', '❤️', '😂', '🎉', '🔥'].indexed)
+          reactionEvent(
+            key,
+            senderId: '@user$i:example.com',
+            sentAt: DateTime(2026, 1, 1, 0, i),
+          ),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      const expected = ['👍', '❤️', '😂', '🎉', '🔥'];
+      expect(live.map((r) => r.key), expected);
+      expect(fromHistory.map((r) => r.key), expected);
+    });
+
+    test('dates a group by its earliest event, even a duplicate sender', () {
+      final events = [
+        reactionEvent(
+          thumbsUpVs16,
+          senderId: bob,
+          sentAt: DateTime(2026, 1, 1, 0, 5),
+        ),
+        reactionEvent('👍', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent(
+          '❤️',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 3),
+        ),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      expect(live.map((r) => r.key), [thumbsUpVs16, '❤️']);
+      expect(fromHistory.map((r) => r.key), [thumbsUpVs16, '❤️']);
+    });
+
+    test('shows the same variant of a group whatever the arrival', () {
+      final events = [
+        reactionEvent(thumbsUpVs15, senderId: bob),
+        reactionEvent('👍', senderId: carol),
+        reactionEvent(thumbsUpVs16),
+      ];
+
+      expect(groupReactions(events, myUserId).single.key, thumbsUpVs16);
+      expect(
+        groupReactions(events.reversed, myUserId).single.key,
+        thumbsUpVs16,
+      );
+    });
+
+    test('breaks a full tie the same way whatever the arrival', () {
+      final sentAt = DateTime(2026, 1, 1);
+      final events = [
+        reactionEvent('😂', senderId: bob, sentAt: sentAt),
+        reactionEvent('👍', senderId: carol, sentAt: sentAt),
+      ];
+
+      final live = groupReactions(events, myUserId);
+      final fromHistory = groupReactions(events.reversed, myUserId);
+
+      expect(
+        live.map((r) => r.key).toList(),
+        fromHistory.map((r) => r.key).toList(),
+      );
+    });
+
+    test('puts my reaction first among equal counts', () {
+      final events = [
+        reactionEvent('👍', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent(
+          '❤️',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 2),
+        ),
+        reactionEvent('😂', sentAt: DateTime(2026, 1, 1, 0, 3)),
+      ];
+
+      expect(groupReactions(events, myUserId).map((r) => r.key), [
+        '😂',
+        '👍',
+        '❤️',
+      ]);
+      expect(groupReactions(events.reversed, myUserId).map((r) => r.key), [
+        '😂',
+        '👍',
+        '❤️',
+      ]);
+    });
+
+    test('puts a higher count first, before older reactions', () {
+      final reactions = groupReactions([
+        reactionEvent('👍', sentAt: DateTime(2026, 1, 1, 0, 1)),
+        reactionEvent('🔥', senderId: bob, sentAt: DateTime(2026, 1, 1, 0, 2)),
+        reactionEvent(
+          '🔥',
+          senderId: carol,
+          sentAt: DateTime(2026, 1, 1, 0, 3),
+        ),
+      ], myUserId);
+
+      expect(reactions.map((r) => r.key), ['🔥', '👍']);
     });
   });
 
