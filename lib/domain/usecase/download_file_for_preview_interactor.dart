@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/app_state/preview_file/download_file_for_previ
 import 'package:twake_chat/domain/app_state/preview_file/download_file_for_preview_loading.dart';
 import 'package:twake_chat/domain/app_state/preview_file/download_file_for_preview_success.dart';
 import 'package:twake_chat/domain/model/download_file/download_file_for_preview_response.dart';
+import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
@@ -25,7 +26,7 @@ class DownloadFileForPreviewInteractor {
         downloadCallback: downloadCallback,
         getThumbnail: getThumbnail,
       );
-      final tempFile = File('$tempDirPath/${event.filename}');
+      final tempFile = File('$tempDirPath/${event.filename.safeFileName}');
       tempFile.createSync(recursive: true);
       if (matrixFile.bytes.isEmpty) {
         yield const Left(

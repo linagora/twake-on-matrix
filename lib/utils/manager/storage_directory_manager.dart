@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/model/extensions/string_extension.dart';
 import 'package:twake_chat/utils/exception/save_to_downloads_exception.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,7 +32,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/$eventId/${_safeName(fileName)}';
+    return '$fileStoreDirectory/$eventId/${fileName.safeFileName}';
   }
 
   Future<String?> getTwakeDownloadsFolderInDevice() async {
@@ -47,6 +48,14 @@ class StorageDirectoryManager {
       Logs().e('StorageDirectoryUtils:: getDownloadFolderDevice: $e');
     }
     return null;
+  }
+
+  Future<String> getFilePathInTwakeDownloads(String fileName) async {
+    final twakeFolder = await getTwakeDownloadsFolderInDevice();
+    if (twakeFolder?.isNotEmpty != true) {
+      throw SaveToDownloadsException(error: 'Twake folder is empty');
+    }
+    return getAvailableFilePath('$twakeFolder/${fileName.safeFileName}');
   }
 
   Future<String> getAvailableFilePath(String filePath) async {
@@ -74,16 +83,7 @@ class StorageDirectoryManager {
   }) async {
     final fileStoreDirectory = await StorageDirectoryManager.instance
         .getFileStoreDirectory();
-    return '$fileStoreDirectory/decrypted/$eventId/${_safeName(fileName)}';
-  }
-
-  String _safeName(String fileName) {
-    final segments = fileName
-        .split(RegExp(r'[/\\]'))
-        .where(
-          (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
-        );
-    return segments.isEmpty ? 'file' : segments.join('_');
+    return '$fileStoreDirectory/decrypted/$eventId/${fileName.safeFileName}';
   }
 
   String convertFileExtension(String filename, String newExtension) {

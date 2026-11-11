@@ -11,6 +11,7 @@ void main() {
   const eventId = r'$encrypted:example.org';
   const fileName = 'Secret Plan.pdf';
   const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+  const externalPathChannel = MethodChannel('external_path');
   late Directory tempDir;
 
   setUp(() {
@@ -20,11 +21,18 @@ void main() {
           pathProviderChannel,
           (_) async => tempDir.path,
         );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          externalPathChannel,
+          (_) async => p.join(tempDir.path, 'Download'),
+        );
   });
 
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathProviderChannel, null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(externalPathChannel, null);
     tempDir.deleteSync(recursive: true);
   });
 
@@ -93,6 +101,22 @@ void main() {
 
         // Assert
         expect(downloadPath, p.join(tempDir.path, eventId, 'a_b.txt'));
+      },
+    );
+  });
+
+  group('getFilePathInTwakeDownloads', () {
+    test(
+      'getFilePathInTwakeDownloads_whenNameHasPathSeparators_keepsOnlyTheLastName',
+      () async {
+        // Act
+        final twakeFolder = await StorageDirectoryManager.instance
+            .getTwakeDownloadsFolderInDevice();
+        final filePath = await StorageDirectoryManager.instance
+            .getFilePathInTwakeDownloads('../../x');
+
+        // Assert
+        expect(filePath, p.join(twakeFolder!, 'x'));
       },
     );
   });
