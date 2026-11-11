@@ -1,3 +1,10 @@
+import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_events.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
+import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -33,6 +40,7 @@ import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
+import 'package:twake_chat/providers/thread_providers.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -129,6 +137,12 @@ class Chat extends ConsumerStatefulWidget {
   final void Function(RightColumnType)? onChangeRightColumnType;
   final Stream<String>? jumpToEventStream;
 
+  /// Set on the thread screen: the chat then shows this thread only.
+  final String? threadRootId;
+
+  /// Thread opened to write its first reply.
+  final bool startThread;
+
   const Chat({
     super.key,
     required this.roomId,
@@ -136,6 +150,8 @@ class Chat extends ConsumerStatefulWidget {
     this.roomName,
     this.onChangeRightColumnType,
     this.jumpToEventStream,
+    this.threadRootId,
+    this.startThread = false,
   });
 
   @override
@@ -276,6 +292,7 @@ class ChatController extends ConsumerState<Chat>
 
   bool get hasNoMessageEvents {
     if (timeline == null) return true;
+    if (isThread) return false;
 
     final visibleEvents = timeline!.events.where(
       (event) => event.isVisibleInGui,
@@ -298,6 +315,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   bool get isEmptySupportChat {
+    if (isThread) return false;
     final supportChatRoomId = Matrix.of(context).supportChatRoomId;
     if (supportChatRoomId == null) return false;
 
@@ -351,6 +369,9 @@ class ChatController extends ConsumerState<Chat>
   final TextEditingController _captionsController = TextEditingController();
 
   final RoomDraftStorage _draftStorage = const RoomDraftStorage();
+
+  Future<void> _clearDraft() =>
+      _draftStorage.remove(roomId!, threadRootId: threadRootId);
 
   FocusNode inputFocus = FocusNode();
 
@@ -504,27 +525,16 @@ class ChatController extends ConsumerState<Chat>
       selectedEvents.any((e) => e.eventId == event.eventId);
 
   String? _findUnreadReceivedMessageLocation() {
-    if (timeline == null) return null;
-    final events = timeline!.events;
-    if (_markerReadLocation != '' && _markerReadLocation.isNotEmpty) {
-      final lastIndexReadEvent = events.indexWhere(
-        (event) => event.eventId == _markerReadLocation,
-      );
-      if (lastIndexReadEvent > 0) {
-        final afterFullyRead = events.getRange(0, lastIndexReadEvent);
-        final unreadEvents = afterFullyRead
-            .where((event) => event.senderId != client.userID)
-            .toList();
-        if (unreadEvents.isEmpty) return null;
-        Logs().d(
-          "Chat::getFirstUnreadEvent(): Last unread event ${unreadEvents.last}",
-        );
-        return unreadEvents.last.eventId;
-      }
-    } else {
-      return null;
-    }
-    return null;
+    final events = timeline?.events;
+    if (events == null || _markerReadLocation.isEmpty) return null;
+    final separator = ThreadRules.unreadSeparatorEventId(
+      events,
+      fullyReadEventId: _markerReadLocation,
+      ownUserId: client.userID,
+      isVisible: (event) => event.isVisibleInGui,
+    );
+    Logs().d('Chat::getFirstUnreadEvent(): Last unread event $separator');
+    return separator;
   }
 
   void recreateChat() async {
@@ -551,7 +561,199 @@ class ChatController extends ConsumerState<Chat>
     RoomRoute(roomid: roomId).go(context);
   }
 
+  @override
+  String? get threadRootId => widget.threadRootId;
+
+  bool get isThread => threadRootId != null;
+
+  Event? _threadRootEvent;
+
+  /// The events of the thread screen, created once the room timeline is up.
+  ThreadEvents? _threadEvents;
+
+  StreamSubscription<Event>? _threadRedactionSub;
+
+  StreamSubscription<String>? _threadSessionKeySub;
+
+  /// Completes once [_threadEvents] exists (or the timeline failed to load).
+  final Completer<void> _threadReady = Completer<void>();
+
+  /// Events of the list: the room timeline, or the root and the replies of
+  /// the thread (loaded by pages, completed by the live timeline), newest
+  /// first.
+  List<Event> get eventsToDisplay => isThread
+      ? _threadEvents?.events ?? const <Event>[]
+      : timeline?.events ?? const <Event>[];
+
+  Map<String, List<Event>> _threadEventsByRoot = const {};
+
+  /// Groups the thread replies (and their edits) of the live timeline by root,
+  /// so each card does not scan the whole timeline.
+  void refreshThreadGrouping() {
+    if (isThread) return;
+    final replies = <String, List<Event>>{};
+    final rootOfReply = <String, String>{};
+    final events = timeline?.events ?? const <Event>[];
+    for (final event in events) {
+      final root = event.threadRootId;
+      if (root == null) continue;
+      (replies[root] ??= []).add(event);
+      rootOfReply[event.eventId] = root;
+    }
+    for (final event in events) {
+      final root = rootOfReply[event.relationshipEventId];
+      if (event.relationshipType == RelationshipTypes.edit && root != null) {
+        replies[root]!.add(event);
+      }
+    }
+    _threadEventsByRoot = replies;
+  }
+
+  ThreadSummary? threadSummaryOf(Event root) => isThread
+      ? null
+      : ThreadSummary.fromRoot(
+          root,
+          liveEvents: _threadEventsByRoot[root.eventId] ?? const [],
+        );
+
+  /// Text of the root, shown under the title of the thread screen.
+  String get threadRootText {
+    final tl = timeline;
+    final root = eventsToDisplay.firstWhereOrNull(
+      (e) => e.eventId == threadRootId,
+    );
+    if (tl == null || root == null) return '';
+    return root
+        .getDisplayEvent(tl)
+        .calcLocalizedBodyFallback(
+          MatrixLocals(L10n.of(context)!),
+          withSenderNamePrefix: false,
+          hideReply: true,
+        );
+  }
+
+  bool isEventVisible(Event event) => isThread
+      ? EventVisibilityResolver.isVisibleInTimeline(event, inThread: true)
+      : event.isVisibleInGui;
+
+  bool get isRequestingHistory => isThread
+      ? _threadEvents?.isLoading == true
+      : timeline?.isRequestingHistory == true;
+
+  bool get canRequestHistory => isThread
+      ? _threadEvents?.canLoadMore == true
+      : timeline?.canRequestHistory == true;
+
+  /// Last synced event of the thread (its root while it has no reply): the
+  /// event the next reply follows.
+  String get threadLastEventId =>
+      eventsToDisplay.firstWhereOrNull((e) => e.status.isSynced)?.eventId ??
+      threadRootId!;
+
+  @override
+  ThreadSendTarget? get threadSendTarget => isThread
+      ? ThreadSendTarget(
+          rootEventId: threadRootId!,
+          lastEventId: threadLastEventId,
+        )
+      : null;
+
+  Future<void> _loadThread() async {
+    final room = this.room;
+    if (room == null) return;
+    try {
+      _threadRootEvent = await room.getEventById(threadRootId!);
+    } catch (e, s) {
+      Logs().w('Unable to load the root of the thread', e, s);
+    }
+    // Closed while the root loaded: no subscription must outlive the screen.
+    if (!mounted) return;
+    _createThreadEvents(room);
+    final threadEvents = _threadEvents!;
+    await threadEvents.ready;
+    if (!mounted) return;
+    final error = threadEvents.lastError;
+    if (error != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toLocalizedString(context))));
+    }
+    if (widget.startThread) _requestInputFocus();
+  }
+
+  void _createThreadEvents(Room room) {
+    // Captured now: the closures below outlive the widget context.
+    final rootId = threadRootId!;
+    final roomClient = room.client;
+    final getReplies = ref.read(getThreadRepliesUseCaseProvider(roomClient));
+    final roomId = room.id;
+    final threadEvents = ThreadEvents(
+      rootEventId: rootId,
+      fetchPage: (from) async {
+        final page = await getReplies.execute(
+          roomId: roomId,
+          request: ThreadRepliesRequest(
+            rootEventId: rootId,
+            from: from,
+            withRelations: true,
+          ),
+        );
+        return (events: page.replies, nextBatch: page.nextBatch);
+      },
+      // Edits and reactions of old replies show on them through the timeline.
+      onRelation: (event) {
+        if (mounted) timeline?.addAggregatedEvent(event);
+      },
+      onChanged: () {
+        if (mounted) updateView();
+      },
+    );
+    _threadEvents = threadEvents;
+    _syncThreadEvents();
+    // A reply known only from a page is deleted live, or decrypted late.
+    _threadRedactionSub = roomClient.onTimelineEvent.stream
+        .where((e) => e.roomId == room.id && e.type == EventTypes.Redaction)
+        .listen(threadEvents.applyRedaction);
+    _threadSessionKeySub = room.onSessionKeyReceived.stream.listen(
+      (sessionId) => unawaited(_decryptThreadPageReplies(sessionId)),
+    );
+  }
+
+  void _syncThreadEvents() => _threadEvents?.updateLive(
+    timeline?.events ?? const <Event>[],
+    root:
+        timeline?.events.firstWhereOrNull((e) => e.eventId == threadRootId) ??
+        _threadRootEvent,
+  );
+
+  Future<void> _decryptThreadPageReplies(String sessionId) async {
+    final threadEvents = _threadEvents;
+    final encryption = room?.client.encryption;
+    if (threadEvents == null || encryption == null) return;
+    for (final event in threadEvents.undecryptedPageReplies.toList()) {
+      if (event.content['session_id'] != sessionId) continue;
+      final decrypted = await encryption.decryptRoomEvent(event);
+      if (!mounted) return;
+      if (decrypted.type == EventTypes.Encrypted) continue;
+      threadEvents.replaceEvent(decrypted);
+      timeline?.addAggregatedEvent(decrypted);
+    }
+    updateView();
+  }
+
   Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
+    if (isThread) {
+      try {
+        return await _threadEvents?.loadMore();
+      } catch (err) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text((err).toLocalizedString(context))),
+          );
+        }
+        return;
+      }
+    }
     if (!timeline!.canRequestHistory) return;
     Logs().v('Chat::requestHistory(): Requesting history...');
     try {
@@ -581,6 +783,9 @@ class ChatController extends ConsumerState<Chat>
 
   void _markLatestReadIfAtBottom() {
     if (!_isAtLiveBottom) return;
+    // Under a thread screen this timeline stays mounted but is not seen.
+    if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
+    if (isThread) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
     _markingLatestRead = true;
@@ -620,15 +825,15 @@ class ChatController extends ConsumerState<Chat>
             scrollController.position.minScrollExtent ||
         scrollController.position.pixels - _isPortionAvailableToScroll ==
             scrollController.position.minScrollExtent) {
-      if (timeline?.isRequestingHistory == true) return;
-      if (timeline?.canRequestHistory == true) {
+      if (isRequestingHistory) return;
+      if (canRequestHistory) {
         requestHistory();
       }
     }
   }
 
   void _loadDraft() async {
-    final draft = await _draftStorage.read(roomId!);
+    final draft = await _draftStorage.read(roomId!, threadRootId: threadRootId);
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
       inputText.value = draft;
@@ -647,6 +852,7 @@ class ChatController extends ConsumerState<Chat>
       pendingText: pendingText,
       matrixFilesList: matrixFiles,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       onSendFileCallback: (result) async {
         await handleSendMediaCallback(
           result: result.status,
@@ -682,6 +888,18 @@ class ChatController extends ConsumerState<Chat>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
+      if (isThread) {
+        if (!mounted) return;
+        await _loadThread();
+        if (!_threadReady.isCompleted) _threadReady.complete();
+        if (!mounted) return;
+        _updateOpeningChatViewStateNotifier(ViewEventListSuccess());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _markLatestReadIfAtBottom();
+        });
+        return;
+      }
       // URL `?event=` jumps are scheduled from didChangeDependencies /
       // didUpdateWidget via `_scheduleJumpToUrlEventIfNeeded` — do not
       // start a second jump here (overlapping cacheExtent / scroll).
@@ -716,12 +934,14 @@ class ChatController extends ConsumerState<Chat>
       });
     } catch (e, s) {
       Logs().wtf('Failed to load timeline', e, s);
+      if (!_threadReady.isCompleted) _threadReady.complete();
       rethrow;
     }
   }
 
   void updateView() {
     if (!mounted) return;
+    _syncThreadEvents();
     setState(() {});
 
     _markLatestReadIfAtBottom();
@@ -743,6 +963,8 @@ class ChatController extends ConsumerState<Chat>
   @override
   Future<void> setReadMarker({String? eventId}) async {
     if (!mounted || room == null || eventId == null) return;
+    // A thread screen sends no main-timeline receipt.
+    if (isThread) return;
 
     // Store the latest request
     Event? event;
@@ -827,7 +1049,7 @@ class ChatController extends ConsumerState<Chat>
       sendTextMessageInteractorProvider,
     );
     _storeInputTimeoutTimer?.cancel();
-    await _draftStorage.remove(roomId!);
+    await _clearDraft();
 
     final commandMatch = RegExp(r'^/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&
@@ -850,6 +1072,8 @@ class ChatController extends ConsumerState<Chat>
         text: sendController.text.trim(),
         inReplyTo: replyEventNotifier.value,
         editEvent: editEventNotifier.value,
+        threadRootEventId: threadRootId,
+        threadLastEventId: threadRootId == null ? null : threadLastEventId,
       ),
     );
     sendController.value = TextEditingValue(
@@ -879,7 +1103,12 @@ class ChatController extends ConsumerState<Chat>
       'url': sticker.url.toString(),
     };
     // send the sticker
-    await room!.sendEvent(eventContent, type: EventTypes.Sticker);
+    await room!.sendEvent(
+      eventContent,
+      type: EventTypes.Sticker,
+      threadRootEventId: threadRootId,
+      threadLastEventId: threadRootId == null ? null : threadLastEventId,
+    );
   }
 
   Future<void> sendVoiceMessageWeb() async {
@@ -922,6 +1151,7 @@ class ChatController extends ConsumerState<Chat>
       txid: txid,
       messageType: MessageTypes.Audio,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       extraContent: extraContent,
     );
 
@@ -937,6 +1167,7 @@ class ChatController extends ConsumerState<Chat>
           txid: txid,
           fakeImageEvent: fakeImageEvent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           extraContent: extraContent,
         )
         .catchError((e) {
@@ -977,6 +1208,7 @@ class ChatController extends ConsumerState<Chat>
       txid: txid,
       messageType: MessageTypes.Audio,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       extraContent: extraContent,
     );
 
@@ -993,6 +1225,7 @@ class ChatController extends ConsumerState<Chat>
           msgType: MessageTypes.Audio,
           fakeImageEvent: fakeImageEvent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           extraContent: extraContent,
         )
         .whenComplete(() {
@@ -1246,6 +1479,8 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void replyAction({Event? replyTo}) {
+    // The thread screen has no quote reply.
+    if (isThread) return;
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1327,7 +1562,7 @@ class ChatController extends ConsumerState<Chat>
     }
     timeline = loaded;
     timeline?.requestKeys(onlineKeyBackupOnly: false);
-    if (room!.markedUnread) room?.markUnread(false);
+    if (!isThread && room!.markedUnread) room?.markUnread(false);
 
     // Debug: log if room's lastEvent is absent from the freshly loaded timeline
     final lastEvent = room?.lastEvent;
@@ -1676,7 +1911,7 @@ class ChatController extends ConsumerState<Chat>
     }
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
-      await _draftStorage.save(roomId!, text);
+      await _draftStorage.save(roomId!, text, threadRootId: threadRootId);
     });
     typingCoolDown?.cancel();
     typingCoolDown = Timer(const Duration(seconds: 2), () {
@@ -1732,6 +1967,7 @@ class ChatController extends ConsumerState<Chat>
         context,
         pendingText: pendingText,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
         room: room,
         matrixFilesList: matrixFiles,
         onSendFileCallback: (result) async {
@@ -1753,7 +1989,7 @@ class ChatController extends ConsumerState<Chat>
     }
     if (result == SendMediaWithCaptionStatus.done ||
         result == SendMediaWithCaptionStatus.emptyRoom) {
-      await _draftStorage.remove(roomId!);
+      await _clearDraft();
       replyEventNotifier.value = null;
     }
 
@@ -1766,7 +2002,7 @@ class ChatController extends ConsumerState<Chat>
   Future<void> _onMediaSent() async {
     scrollDown();
     sendController.clear();
-    await _draftStorage.remove(roomId!);
+    await _clearDraft();
     replyEventNotifier.value = null;
   }
 
@@ -1778,6 +2014,7 @@ class ChatController extends ConsumerState<Chat>
       room: room,
       caption: sendController.text.isNotEmpty ? sendController.text : null,
       inReplyTo: replyEventNotifier.value,
+      thread: threadSendTarget,
       onSendCallback: _onMediaSent,
     );
   }
@@ -1797,6 +2034,7 @@ class ChatController extends ConsumerState<Chat>
           room: room,
           onSendFileCallback: _onMediaSent,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
           popContext: false,
         );
         break;
@@ -1816,6 +2054,7 @@ class ChatController extends ConsumerState<Chat>
         room: room,
         caption: sendController.text.isNotEmpty ? sendController.text : null,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
       );
       await _onMediaSent();
     }, popContext: false);
@@ -1868,6 +2107,7 @@ class ChatController extends ConsumerState<Chat>
         context: context,
         onSendFileCallback: scrollDown,
         inReplyTo: replyEventNotifier.value,
+        thread: threadSendTarget,
       ),
       onSendTap: () async {
         await sendMedia(
@@ -1875,6 +2115,7 @@ class ChatController extends ConsumerState<Chat>
           room: room,
           caption: _captionsController.text,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
         );
         scrollDown();
         _captionsController.clear();
@@ -1886,10 +2127,11 @@ class ChatController extends ConsumerState<Chat>
           imagePickerController,
           room: room,
           inReplyTo: replyEventNotifier.value,
+          thread: threadSendTarget,
         );
         scrollDown();
 
-        await _draftStorage.remove(roomId!);
+        await _clearDraft();
         replyEventNotifier.value = null;
       },
       captionController: _captionsController,
@@ -1932,7 +2174,8 @@ class ChatController extends ConsumerState<Chat>
     Event event,
   ) => [
     if (event.room.canSendReactions) ChatHorizontalActionMenu.reaction,
-    if (event.room.canSendDefaultMessages) ChatHorizontalActionMenu.reply,
+    if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
+      ChatHorizontalActionMenu.reply,
     ChatHorizontalActionMenu.more,
   ];
 
@@ -2535,7 +2778,7 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void _requestInputFocus() {
-    if (!inputFocus.hasPrimaryFocus) {
+    if (mounted && !inputFocus.hasPrimaryFocus) {
       inputFocus.requestFocus();
     }
   }
@@ -2786,7 +3029,8 @@ class ChatController extends ConsumerState<Chat>
     showFullEmojiPickerOnWebNotifier.value = false;
     final listPopupMenuActions = [
       ChatContextMenuActions.select,
-      ChatContextMenuActions.reply,
+      if (ThreadRules.canQuoteReply(event, inThreadScreen: isThread))
+        ChatContextMenuActions.reply,
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
@@ -3022,10 +3266,13 @@ class ChatController extends ConsumerState<Chat>
   /// On mobile, [MatrixState.audioPlayer] keeps playing after leaving the chat
   /// (background playback). Do not stop/dispose it here. The web recorder and
   /// recording UI notifiers are Chat-scoped and must always be torn down.
+  ///
+  /// A thread screen shares the room's player: closing it must not stop the
+  /// playback of the room screen below.
   void disposeAudioPlayer() {
     disposeAudioMixin();
 
-    if (PlatformInfos.isMobile) {
+    if (PlatformInfos.isMobile || isThread) {
       return;
     }
 
@@ -3087,7 +3334,8 @@ class ChatController extends ConsumerState<Chat>
   void initState() {
     super.initState();
     _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
-    _initializePinnedEvents();
+    // The pinned events header is not shown on the thread screen.
+    if (!isThread) _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
     keyboardVisibilitySubscription = keyboardVisibilityController.onChange
@@ -3107,10 +3355,14 @@ class ChatController extends ConsumerState<Chat>
       }
       _handleReceivedShareFiles();
       _listenRoomUpdateEvent();
-      initCachedPresence();
+      // The thread screen shows no presence (its app bar is the thread one),
+      // but its composer needs the participants (mentions, possibly opened by
+      // deep link with no room Chat) and the blocked state of a DM.
+      if (!isThread) initCachedPresence();
       await _requestParticipants();
       listenIgnoredUser();
-      initAudioPlayer();
+      // A thread opened over the room must not stop its voice message.
+      if (!isThread) initAudioPlayer();
     });
     showEmojiPickerComposerNotifier.addListener(_emojiPickerListener);
   }
@@ -3147,6 +3399,11 @@ class ChatController extends ConsumerState<Chat>
     );
 
     _pendingUrlJumpEventId = highlightEventId;
+
+    if (isThread) {
+      unawaited(_jumpToThreadReply(highlightEventId));
+      return;
+    }
 
     // Timeline already up: jump immediately (no post-frame abort race).
     if (timeline != null && timeline!.events.isNotEmpty) {
@@ -3230,16 +3487,61 @@ class ChatController extends ConsumerState<Chat>
     );
   }
 
+  /// Thread screen opened on a reply: loads pages until it is there, scrolls
+  /// to it and highlights it.
+  Future<void> _jumpToThreadReply(String eventId) async {
+    _lastHighlightedEventId = eventId;
+    await _threadReady.future;
+    if (!mounted) return;
+    try {
+      await _threadEvents?.ready;
+      while (mounted &&
+          !eventsToDisplay.any((e) => e.eventId == eventId) &&
+          canRequestHistory) {
+        await _threadEvents?.loadMore();
+      }
+    } catch (e, s) {
+      // A failed page must not be retried forever: stop, the reply stays unknown.
+      Logs().w('Unable to reach the reply in the thread', e, s);
+    }
+    await SchedulerBinding.instance.endOfFrame;
+    await SchedulerBinding.instance.endOfFrame;
+    if (!mounted) return;
+    _pendingUrlJumpEventId = null;
+    await scrollToThreadEvent(eventId);
+  }
+
+  /// Scrolls the thread screen to an event already loaded in it.
+  Future<void> scrollToThreadEvent(String eventId) async {
+    final index = eventsToDisplay.indexWhere((e) => e.eventId == eventId);
+    if (index < 0 || !scrollController.hasClients) return;
+    await scrollController.scrollToIndex(
+      index + 1,
+      preferPosition: AutoScrollPosition.middle,
+    );
+    // Same soft tint as main's jump (#3588), cleared on the next touch.
+    highlightedEventIdNotifier.value = eventId;
+    unawaited(
+      scrollController.highlight(index + 1, highlightDuration: Duration.zero),
+    );
+  }
+
   /// Prefers [GoRouterState] so this State rebuilds when `?event=` changes.
   String? _eventIdFromLocation() {
-    final fromRouter = GoRouterState.of(context).uri.queryParameters['event'];
-    if (fromRouter != null && fromRouter.isNotEmpty) return fromRouter;
+    final fromRouter = ThreadRules.highlightEventIdFromUri(
+      GoRouterState.of(context).uri,
+      isThread: isThread,
+    );
+    if (fromRouter != null) return fromRouter;
 
     // Fallback for hash-URL edge cases before GoRouter has settled.
     if (!PlatformInfos.isWeb) return null;
-    return Uri.tryParse(
+    final fragment = Uri.tryParse(
       Uri.tryParse(html.window.location.href)?.fragment ?? '',
-    )?.queryParameters['event'];
+    );
+    return fragment == null
+        ? null
+        : ThreadRules.highlightEventIdFromUri(fragment, isThread: isThread);
   }
 
   @override
@@ -3249,6 +3551,12 @@ class ChatController extends ConsumerState<Chat>
     _scrollGeneration++;
     unregisterPasteShortcutListeners();
     disposeAutoMarkAsReadMixin();
+    unawaited(_threadRedactionSub?.cancel());
+    unawaited(_threadSessionKeySub?.cancel());
+    _threadRedactionSub = null;
+    _threadSessionKeySub = null;
+    _threadEvents = null;
+    if (!_threadReady.isCompleted) _threadReady.complete();
     timeline?.cancelSubscriptions();
     timeline = null;
 
@@ -3265,9 +3573,14 @@ class ChatController extends ConsumerState<Chat>
     //
     // TODO: replace with per-room selective eviction via ImageProvider.evict()
     // once MXC image providers are tracked at the room level.
-    PaintingBinding.instance.imageCache.clear();
-    PaintingBinding.instance.imageCache.clearLiveImages();
-    MxcImageCacheManager.instance.evictRoom(widget.roomId);
+    //
+    // A thread Chat sits on top of the room Chat, which is still on screen:
+    // it must not empty the cache of the room underneath.
+    if (!isThread) {
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+      MxcImageCacheManager.instance.evictRoom(widget.roomId);
+    }
 
     inputFocus.dispose();
     searchEmojiFocusNode.dispose();

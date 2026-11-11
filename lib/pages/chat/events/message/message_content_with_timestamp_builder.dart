@@ -9,6 +9,7 @@ import 'package:twake_chat/pages/chat/events/message/message_content_builder.dar
 import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:twake_chat/pages/chat/events/message/message_reaction_dialog.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
+import 'package:twake_chat/pages/chat/events/message/width_matched_footer.dart';
 import 'package:twake_chat/pages/chat/events/message/multi_platform_message_container.dart';
 import 'package:twake_chat/pages/chat/events/message_reactions.dart';
 import 'package:twake_chat/pages/chat/events/message_time.dart';
@@ -63,6 +64,12 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final OnPickEmojiReactionAction? onPickEmojiReaction;
   final void Function(Event)? onLongPressMessage;
   final void Function(Event)? onReply;
+
+  /// Null when "Start a thread" is not offered on this message.
+  final void Function(Event)? onStartThread;
+
+  /// On the thread screen there is no quote reply.
+  final bool inThread;
   final void Function(Event)? onEdit;
   final void Function(BuildContext, Event)? onDelete;
   final void Function(Event)? onForward;
@@ -75,6 +82,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
   final Future<void> Function(Event)? onRetryTextMessage;
+
+  /// The summary of the thread of this message, inside its bubble.
+  final Widget? threadCard;
 
   static const Key dialogSafeAreaKey = Key(
     'message_context_menu_dialog_safe_area',
@@ -103,6 +113,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onToggleEmojiReaction,
     this.onPickEmojiReaction,
     this.onReply,
+    this.onStartThread,
+    this.inThread = false,
     this.onEdit,
     this.onDelete,
     this.onForward,
@@ -115,6 +127,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
+    this.threadCard,
   });
 
   @override
@@ -145,7 +158,10 @@ class _MessageContentWithTimestampBuilderState
   );
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
-    if (event.room.canSendDefaultMessages) ...[MessageContextMenuAction.reply],
+    if (event.room.canSendDefaultMessages && !widget.inThread) ...[
+      MessageContextMenuAction.reply,
+    ],
+    if (widget.onStartThread != null) MessageContextMenuAction.startThread,
     MessageContextMenuAction.forward,
     MessageContextMenuAction.copy,
     if (event.room.canReportContent) MessageContextMenuAction.report,
@@ -413,6 +429,9 @@ class _MessageContentWithTimestampBuilderState
         case 'reply':
           widget.onReply?.call(event);
           break;
+        case 'startThread':
+          widget.onStartThread?.call(widget.event);
+          break;
         case 'forward':
           widget.onForward?.call(event);
           break;
@@ -539,52 +558,74 @@ class _MessageContentWithTimestampBuilderState
         maxWidthScreen: widget.maxWidth,
       ),
     );
-    final bubbleContent = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showDisplayName)
-          OptionalSelectionContainerDisabled(
+    final card = widget.threadCard;
+    final messageContent = MessageContentBuilder(
+      event: widget.event,
+      timeline: widget.timeline,
+      onSelect: widget.onSelect,
+      nextEvent: widget.nextEvent,
+      scrollToEventId: widget.scrollToEventId,
+      selectMode: widget.selectMode,
+      onRetryTextMessage: widget.onRetryTextMessage,
+    );
+    // With a card, the time goes under it, not over the text.
+    final time =
+        widget.event.isReplyEventWithAudio() || (card != null && !timelineText)
+        ? null
+        : OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
-            child: DisplayNameWidget(event: widget.event),
-          ),
-        OptionalStack(
-          isEnabled: timelineText,
-          alignment: AlignmentDirectional.bottomEnd,
-          children: [
-            MessageContentBuilder(
-              event: widget.event,
-              timeline: widget.timeline,
-              onSelect: widget.onSelect,
-              nextEvent: widget.nextEvent,
-              scrollToEventId: widget.scrollToEventId,
-              selectMode: widget.selectMode,
-              onRetryTextMessage: widget.onRetryTextMessage,
-            ),
-            if (!widget.event.isReplyEventWithAudio())
-              OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
-                child: Padding(
-                  padding: MessageStyle.paddingMessageTime,
-                  child: Text.rich(
-                    WidgetSpan(
-                      child: MessageTime(
-                        timelineOverlayMessage: context.albumTimelineOverlayFor(
-                          widget.event,
-                        ),
-                        room: widget.event.room,
-                        event: widget.event,
-                        showSeenIcon: widget.event.isOwnMessage,
-                        timeline: widget.timeline,
-                        onRetryTextMessage: widget.onRetryTextMessage,
-                      ),
+            child: Padding(
+              padding: MessageStyle.paddingMessageTime,
+              child: Text.rich(
+                WidgetSpan(
+                  child: MessageTime(
+                    timelineOverlayMessage: context.albumTimelineOverlayFor(
+                      widget.event,
                     ),
+                    room: widget.event.room,
+                    event: widget.event,
+                    showSeenIcon: widget.event.isOwnMessage,
+                    timeline: widget.timeline,
+                    onRetryTextMessage: widget.onRetryTextMessage,
                   ),
                 ),
               ),
-          ],
-        ),
-      ],
-    );
+            ),
+          );
+    final displayName = showDisplayName
+        ? OptionalSelectionContainerDisabled(
+            isEnabled: PlatformInfos.isWeb,
+            child: DisplayNameWidget(event: widget.event),
+          )
+        : null;
+    // Fit-content: the bubble widens to the card's whole last-reply line, up
+    // to the widest bubble.
+    final bubbleContent = card != null
+        ? WidthMatchedFooter(
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [?displayName, messageContent],
+            ),
+            footer: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(padding: MessageStyle.paddingThreadCard, child: card),
+                if (time != null)
+                  Align(alignment: AlignmentDirectional.centerEnd, child: time),
+              ],
+            ),
+          )
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ?displayName,
+              OptionalStack(
+                isEnabled: timelineText,
+                alignment: AlignmentDirectional.bottomEnd,
+                children: [messageContent, ?time],
+              ),
+            ],
+          );
 
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(

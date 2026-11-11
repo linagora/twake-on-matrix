@@ -135,6 +135,18 @@ extension DateTimeExtension on DateTime {
     return currentTime.year == year;
   }
 
+  /// "5 minutes ago"; the short date after a week.
+  String ageFrom(BuildContext context, {DateTime? now}) {
+    now ??= DateTime.now();
+    final l10n = L10n.of(context)!;
+    final age = now.difference(this);
+    if (age.inDays > 7) return localizedTimeShort(context, currentTime: now);
+    if (age.inDays > 0) return l10n.ageDaysAgo(age.inDays);
+    if (age.inHours > 0) return l10n.ageHoursAgo(age.inHours);
+    if (age.inMinutes > 0) return l10n.ageMinutesAgo(age.inMinutes);
+    return l10n.ageSecondsAgo(age.inSeconds < 0 ? 0 : age.inSeconds);
+  }
+
   String relativeTime(BuildContext context, {DateTime? currentTime}) {
     if (isToday(currentTime: currentTime)) {
       return L10n.of(context)!.today;
