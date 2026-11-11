@@ -18,24 +18,27 @@ class InviteUserInteractor {
 
     final failedUsers = <String, InviteUserException>{};
 
-    for (final userId in userIds) {
-      try {
-        await _inviteUserWithRetry(
-          matrixClient: matrixClient,
-          roomId: roomId,
-          userId: userId,
-        );
-      } catch (exception) {
-        failedUsers[userId] = _mapExceptionToInviteUserException(
-          userId: userId,
-          exception: exception,
-        );
-        Logs().e(
-          'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
-          exception,
-        );
-      }
-    }
+    // A slow federated invite must not hold the others back.
+    await Future.wait(
+      userIds.map((userId) async {
+        try {
+          await _inviteUserWithRetry(
+            matrixClient: matrixClient,
+            roomId: roomId,
+            userId: userId,
+          );
+        } catch (exception) {
+          failedUsers[userId] = _mapExceptionToInviteUserException(
+            userId: userId,
+            exception: exception,
+          );
+          Logs().e(
+            'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
+            exception,
+          );
+        }
+      }),
+    );
 
     if (failedUsers.isNotEmpty) {
       yield Left(
