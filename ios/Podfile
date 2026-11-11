@@ -51,6 +51,13 @@ post_install do |installer|
       xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
       File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
 
+      # These macros only reach pods built by CocoaPods. permission_handler_apple is a
+      # Swift package now: its Package.swift derives PERMISSION_* from Runner/Info.plist,
+      # found from the working directory. That works for fastlane, xcodebuild and
+      # `flutter build ios` started from the app. A build started from Xcode.app compiles
+      # every permission except notifications out, so checks report `denied`. For Xcode.app run
+      #   launchctl setenv PERMISSION_HANDLER_INFO_PLIST "$PWD/ios/Runner/Info.plist"
+      # once from the repo root, then clear DerivedData and restart Xcode.
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
         '$(inherited)',
         ## dart: PermissionGroup.microphone

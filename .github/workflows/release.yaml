@@ -116,6 +116,9 @@ jobs:
           APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           SENTRY_RELEASE: ${{ steps.sentry_version.outputs.release }}
+          # With the plugins as Swift packages, `xcodebuild -showBuildSettings` takes more
+          # than fastlane's default 3 + 6 + 12 + 24 s retries on the runner.
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
         run: ../scripts/release-ios-testflight.sh
         working-directory: ${{ matrix.os }}
 

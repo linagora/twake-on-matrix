@@ -32,7 +32,8 @@ class PublicRoomsController extends _$PublicRoomsController {
     final firstPage = pages.current
         .where((room) => loadedIds.add(room.roomId))
         .toList();
-    unawaited(_loadMore(firstPage, pages));
+    // This build's Ref unmounts on reload, unlike the notifier's `ref`.
+    unawaited(_loadMore(ref, firstPage, pages));
     return PublicRoomsState(rooms: firstPage, isLoadingMore: true);
   }
 
@@ -45,10 +46,11 @@ class PublicRoomsController extends _$PublicRoomsController {
       return const PublicRoomOpenIgnored();
     }
     state = AsyncData(current.copyWith(pendingRoomId: room.roomId));
+    final ref = this.ref;
     try {
       return room.access == PublicRoomAccess.approval
-          ? await _knock(room)
-          : await _join(room);
+          ? await _knock(ref, room)
+          : await _join(ref, room);
     } on PublicRoomsException {
       return const PublicRoomOpenFailed();
     } finally {
@@ -58,7 +60,7 @@ class PublicRoomsController extends _$PublicRoomsController {
     }
   }
 
-  Future<PublicRoomOpenResult> _knock(PublicRoom room) async {
+  Future<PublicRoomOpenResult> _knock(Ref ref, PublicRoom room) async {
     await ref.read(knockPublicRoomUseCaseProvider).execute(room.roomId);
     if (!ref.mounted) return const PublicRoomRequested();
     _update(
@@ -69,7 +71,7 @@ class PublicRoomsController extends _$PublicRoomsController {
     return const PublicRoomRequested();
   }
 
-  Future<PublicRoomOpenResult> _join(PublicRoom room) async {
+  Future<PublicRoomOpenResult> _join(Ref ref, PublicRoom room) async {
     final joined = await ref
         .read(joinPublicRoomUseCaseProvider)
         .execute(room.roomId);
@@ -89,12 +91,13 @@ class PublicRoomsController extends _$PublicRoomsController {
   }
 
   Future<void> _loadMore(
+    Ref ref,
     List<PublicRoom> firstPage,
     StreamIterator<List<PublicRoom>> pages,
   ) async {
     await future;
     if (!ref.mounted) return;
-    _queueLookup(firstPage);
+    _queueLookup(ref, firstPage);
     try {
       while (await pages.moveNext()) {
         if (!ref.mounted) return;
@@ -106,7 +109,7 @@ class PublicRoomsController extends _$PublicRoomsController {
             .where((room) => loadedIds.add(room.roomId))
             .toList();
         _update((state) => state.copyWith(rooms: [...state.rooms, ...added]));
-        _queueLookup(added);
+        _queueLookup(ref, added);
       }
     } on PublicRoomsException {
       // Logged by the datasource: keep the rooms already shown.
@@ -117,14 +120,14 @@ class PublicRoomsController extends _$PublicRoomsController {
     }
   }
 
-  void _queueLookup(List<PublicRoom> page) {
+  void _queueLookup(Ref ref, List<PublicRoom> page) {
     // An untyped error still surfaces, but the next pages are looked up.
     _lookups = _lookups
-        .then((_) => _markRequested(page))
+        .then((_) => _markRequested(ref, page))
         .onError<Object>(Zone.current.handleUncaughtError);
   }
 
-  Future<void> _markRequested(List<PublicRoom> page) async {
+  Future<void> _markRequested(Ref ref, List<PublicRoom> page) async {
     final roomIds = [
       for (final room in page)
         if (room.access == PublicRoomAccess.approval) room.roomId,

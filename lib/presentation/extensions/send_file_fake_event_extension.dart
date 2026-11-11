@@ -170,6 +170,7 @@ extension SendFileFakeEventExtension on Room {
                     if (contentCaptionFormat != null) ...contentCaptionFormat,
                     'filename': file.name,
                     'info': file.info,
+                    if (extraContent != null) ...extraContent,
                     if (thread != null) 'm.relates_to': thread.relatesTo,
                   },
                   type: EventTypes.Message,

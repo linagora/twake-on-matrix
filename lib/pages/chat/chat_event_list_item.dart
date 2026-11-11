@@ -4,6 +4,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
@@ -21,6 +23,8 @@ class ChatEventListItem extends StatelessWidget {
     required this.constraints,
     this.previousEvent,
     this.nextEvent,
+    this.albumMembers,
+    this.hiddenAlbumMember = false,
   });
 
   final ChatController controller;
@@ -30,10 +34,29 @@ class ChatEventListItem extends StatelessWidget {
   final Event? previousEvent;
   final Event? nextEvent;
 
+  /// Set on the leader of an album (oldest first); the other members pass
+  /// [hiddenAlbumMember]. Both are ignored in select mode so that every
+  /// image can be selected on its own.
+  final List<Event>? albumMembers;
+  final bool hiddenAlbumMember;
+
   @override
   Widget build(BuildContext context) {
     if (!controller.isEventVisible(event)) return const SizedBox();
+    if (hiddenAlbumMember && !controller.selectMode) {
+      return SizedBox(key: GlobalObjectKey(event.eventId));
+    }
+    final message = _buildMessage(context);
+    final members = albumMembers;
+    if (members == null || controller.selectMode) return message;
+    return MediaAlbumScope<Event>(
+      members: members,
+      idOf: mediaAlbumEventId,
+      child: message,
+    );
+  }
 
+  Widget _buildMessage(BuildContext context) {
     final threadSummary = controller.threadSummaryOf(event);
     final canStartThread = ThreadRules.canStartThread(
       event,
@@ -93,7 +116,10 @@ class ChatEventListItem extends StatelessWidget {
       timestampCallback: (event) {
         controller.handleDisplayStickyTimestamp(event.originServerTs);
       },
-      onEventVisible: controller.onEventVisible,
+      // The leader draws the whole album: report its newest image as read.
+      onEventVisible: (event) => controller.onEventVisible(
+        controller.selectMode ? event : albumMembers?.last ?? event,
+      ),
       onDisplayEmojiReaction: controller.onDisplayEmojiReaction,
       onHideEmojiReaction: controller.onHideEmojiReaction,
       listAction: controller.listHorizontalActionMenuBuilder(event).map((

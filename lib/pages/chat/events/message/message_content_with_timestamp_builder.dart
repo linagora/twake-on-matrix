@@ -1,6 +1,8 @@
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
+import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_builder.dart';
@@ -140,6 +142,21 @@ class _MessageContentWithTimestampBuilderState
   final ResponsiveUtils _responsiveUtils = getIt.get<ResponsiveUtils>();
   bool someHorizontalActionHidden = false;
 
+  /// The album image under the finger, so that a long-press on an album opens
+  /// the menu of that image and not of the leader.
+  Event? _pressedAlbumMember;
+
+  Event _pressedOr(Event event) => _pressedAlbumMember ?? event;
+
+  Widget _trackAlbumPress(Widget child) => Listener(
+    onPointerUp: (_) => _pressedAlbumMember = null,
+    onPointerCancel: (_) => _pressedAlbumMember = null,
+    child: MediaAlbumPressScope<Event>(
+      onPressed: (event) => _pressedAlbumMember = event,
+      child: child,
+    ),
+  );
+
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
     if (event.room.canSendDefaultMessages && !widget.inThread) ...[
       MessageContextMenuAction.reply,
@@ -199,7 +216,7 @@ class _MessageContentWithTimestampBuilderState
           MessageTypes.Text,
           MessageTypes.BadEncrypted,
         }.contains(widget.event.messageType) ||
-        widget.event.isCaptionModeOrReply();
+        context.albumHasCaptionOrReply(widget.event);
 
     return Align(
       alignment: MessageStyle.messageAlignmentGeometry(widget.event, context),
@@ -241,28 +258,30 @@ class _MessageContentWithTimestampBuilderState
               widget.event,
               widget.selected,
             ),
-            child: MultiPlatformSelectionMode(
-              event: widget.event,
-              isClickable: _responsiveUtils.isMobile(context),
-              onLongPress: widget.event.redacted
-                  ? null
-                  : widget.event.status.isError
-                  ? (event) => _handleErrorMessageLongPress(
-                      context,
-                      event,
-                      timelineText: timelineText,
-                    )
-                  : !widget.event.status.isError &&
-                        !widget.event.status.isSending
-                  ? (event) => _handleAvailableMessageLongPress(
-                      context,
-                      event,
-                      timelineText: timelineText,
-                    )
-                  : null,
-              child: _messageBuilder(
-                context: context,
-                timelineText: timelineText,
+            child: _trackAlbumPress(
+              MultiPlatformSelectionMode(
+                event: widget.event,
+                isClickable: _responsiveUtils.isMobile(context),
+                onLongPress: widget.event.redacted
+                    ? null
+                    : widget.event.status.isError
+                    ? (event) => _handleErrorMessageLongPress(
+                        context,
+                        _pressedOr(event),
+                        timelineText: timelineText,
+                      )
+                    : !widget.event.status.isError &&
+                          !widget.event.status.isSending
+                    ? (event) => _handleAvailableMessageLongPress(
+                        context,
+                        _pressedOr(event),
+                        timelineText: timelineText,
+                      )
+                    : null,
+                child: _messageBuilder(
+                  context: context,
+                  timelineText: timelineText,
+                ),
               ),
             ),
           ),
@@ -287,15 +306,30 @@ class _MessageContentWithTimestampBuilderState
         child: SingleChildScrollView(
           primary: true,
           physics: const ClampingScrollPhysics(),
-          child: _messageBuilder(
-            key: ValueKey(
-              '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+          child: _withAlbumScope(
+            context,
+            _messageBuilder(
+              key: ValueKey(
+                '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+              ),
+              context: context,
+              timelineText: timelineText,
             ),
-            context: context,
-            timelineText: timelineText,
           ),
         ),
       ),
+    );
+  }
+
+  /// The dialog is outside the album scope of the list: give the preview the
+  /// same members, so it shows the whole album.
+  Widget _withAlbumScope(BuildContext context, Widget preview) {
+    final members = context.albumMembersFor(widget.event);
+    if (members == null) return preview;
+    return MediaAlbumScope<Event>(
+      members: members,
+      idOf: mediaAlbumEventId,
+      child: preview,
     );
   }
 
@@ -336,7 +370,7 @@ class _MessageContentWithTimestampBuilderState
           ),
         )
         .then((result) {
-          _handleResultFromHeroPage(context, result);
+          _handleResultFromHeroPage(context, result, event);
           widget.onHideEmojiReaction?.call();
         });
   }
@@ -372,57 +406,61 @@ class _MessageContentWithTimestampBuilderState
           ),
         )
         .then((result) {
-          _handleResultFromHeroPage(context, result);
+          _handleResultFromHeroPage(context, result, event);
           widget.onHideEmojiReaction?.call();
         });
   }
 
-  Future<void> _retryUpload(BuildContext context) async {
-    final result = await _uploadManager.retryUpload(widget.event);
+  Future<void> _retryUpload(BuildContext context, Event event) async {
+    final result = await _uploadManager.retryUpload(event);
     if (!context.mounted) return;
     if (result == RetryUploadResult.fileDataUnavailable) {
       TwakeSnackBar.show(context, L10n.of(context)!.messageCannotBeResent);
     }
   }
 
-  void _handleResultFromHeroPage(BuildContext context, dynamic result) {
+  void _handleResultFromHeroPage(
+    BuildContext context,
+    dynamic result,
+    Event event,
+  ) {
     if (result is String) {
       switch (result) {
         case 'reply':
-          widget.onReply?.call(widget.event);
+          widget.onReply?.call(event);
           break;
         case 'startThread':
           widget.onStartThread?.call(widget.event);
           break;
         case 'forward':
-          widget.onForward?.call(widget.event);
+          widget.onForward?.call(event);
           break;
         case 'copy':
-          widget.onCopy?.call(widget.event);
+          widget.onCopy?.call(event);
           break;
         case 'report':
-          widget.onReport?.call(widget.event);
+          widget.onReport?.call(event);
           break;
         case 'select':
-          widget.onSelect?.call(widget.event);
+          widget.onSelect?.call(event);
           break;
         case 'pin':
-          widget.onPin?.call(widget.event);
+          widget.onPin?.call(event);
           break;
         case 'saveToDownload':
-          widget.saveToDownload?.call(widget.event);
+          widget.saveToDownload?.call(event);
           break;
         case 'saveToGallery':
-          widget.saveToGallery?.call(widget.event);
+          widget.saveToGallery?.call(event);
           break;
         case 'edit':
-          widget.onEdit?.call(widget.event);
+          widget.onEdit?.call(event);
           break;
         case 'delete':
-          widget.onDelete?.call(context, widget.event);
+          widget.onDelete?.call(context, event);
           break;
         case 'trySendAgain':
-          _retryUpload(context);
+          _retryUpload(context, event);
           break;
       }
     }
@@ -487,9 +525,8 @@ class _MessageContentWithTimestampBuilderState
     required BuildContext context,
     required bool timelineText,
   }) {
-    final hasReactionEvent = widget.event.hasReactionEvent(
-      timeline: widget.timeline,
-    );
+    final reactionEvents = _eventsWithReactions(context);
+    final hasReactionEvent = reactionEvents.isNotEmpty;
 
     final isDisplayOnlyEmoji = widget.event.isDisplayOnlyEmoji(widget.timeline);
     // The tail is shown on the last bubble of a same-sender group. A group
@@ -542,7 +579,9 @@ class _MessageContentWithTimestampBuilderState
               child: Text.rich(
                 WidgetSpan(
                   child: MessageTime(
-                    timelineOverlayMessage: widget.event.timelineOverlayMessage,
+                    timelineOverlayMessage: context.albumTimelineOverlayFor(
+                      widget.event,
+                    ),
                     room: widget.event.room,
                     event: widget.event,
                     showSeenIcon: widget.event.isOwnMessage,
@@ -591,7 +630,7 @@ class _MessageContentWithTimestampBuilderState
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
-            child: MessageReactions(widget.event, widget.timeline),
+            child: _reactionsOf(reactionEvents),
           )
         : null;
 
@@ -613,6 +652,29 @@ class _MessageContentWithTimestampBuilderState
       isAlignedToEnd: alignOwnMessageRight,
       reactions: reactions,
       child: bubbleContent,
+    );
+  }
+
+  /// The events of this bubble that have reactions: every image of an album,
+  /// so that a reaction on any of them is drawn.
+  List<Event> _eventsWithReactions(BuildContext context) => [
+    for (final event in context.albumEventsOf(widget.event))
+      if (event.hasReactionEvent(timeline: widget.timeline)) event,
+  ];
+
+  /// One row: each image keeps its own chips, so a tap reacts to that image.
+  Widget _reactionsOf(List<Event> events) {
+    if (events.length == 1) {
+      return MessageReactions(events.single, widget.timeline);
+    }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final event in events) MessageReactions(event, widget.timeline),
+        ],
+      ),
     );
   }
 

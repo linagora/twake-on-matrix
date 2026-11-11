@@ -75,5 +75,24 @@ void main() {
       expect(stickerReply.content['m.relates_to'], isNotNull);
       expect(stickerReply.content['msgtype'], isNull);
     });
+
+    test(
+      'drops the batch key so a forwarded copy never joins the original',
+      () {
+        final image = BasicEvent(
+          type: EventTypes.Message,
+          content: {
+            'msgtype': MessageTypes.Image,
+            'body': 'photo.jpg',
+            'app.twake.chat.batch': 'batch-1',
+          },
+        );
+
+        expect(image.formatContentForwards(), {
+          'msgtype': MessageTypes.Image,
+          'body': 'photo.jpg',
+        });
+      },
+    );
   });
 }

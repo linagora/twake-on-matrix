@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_builder_mixin.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_time.dart';
@@ -42,6 +43,7 @@ class MessageContentBuilder extends ConsumerWidget
     return LayoutBuilder(
       builder: (context, constraints) {
         final textColor = Theme.of(context).colorScheme.onSurface;
+        final timelineOverlay = context.albumTimelineOverlayFor(event);
         final displayEvent = event.getDisplayEventWithoutEditEvent(timeline);
         final noPadding = {
           MessageTypes.File,
@@ -71,12 +73,12 @@ class MessageContentBuilder extends ConsumerWidget
 
         return OptionalPadding(
           padding: const EdgeInsets.only(bottom: 8),
-          isEnabled: !noPadding && !event.timelineOverlayMessage,
+          isEnabled: !noPadding && !timelineOverlay,
           child: IntrinsicWidth(
             stepWidth:
                 isContainsTagName(event) ||
                     isContainsSpecialHTMLTag(event) ||
-                    event.isCaptionModeOrReply() ||
+                    context.albumHasCaptionOrReply(event) ||
                     VideoCallHelper.extractUrl(event, videoCallBaseUrl) != null
                 ? null
                 : stepWidth,
@@ -92,7 +94,7 @@ class MessageContentBuilder extends ConsumerWidget
                     ownMessage: event.isOwnMessage,
                   ),
                 OptionalStack(
-                  isEnabled: event.timelineOverlayMessage,
+                  isEnabled: timelineOverlay,
                   children: [
                     MessageContent(
                       displayEvent,
@@ -102,7 +104,7 @@ class MessageContentBuilder extends ConsumerWidget
                       endOfBubbleWidget: Padding(
                         padding: MessageStyle.paddingTimestamp,
                         child: MessageTime(
-                          timelineOverlayMessage: event.timelineOverlayMessage,
+                          timelineOverlayMessage: timelineOverlay,
                           event: event,
                           showSeenIcon: event.isOwnMessage,
                           timeline: timeline,
@@ -124,8 +126,7 @@ class MessageContentBuilder extends ConsumerWidget
                         child: Text.rich(
                           WidgetSpan(
                             child: MessageTime(
-                              timelineOverlayMessage:
-                                  event.timelineOverlayMessage,
+                              timelineOverlayMessage: timelineOverlay,
                               event: event,
                               showSeenIcon: event.isOwnMessage,
                               timeline: timeline,
@@ -153,8 +154,7 @@ class MessageContentBuilder extends ConsumerWidget
                       child: Text.rich(
                         WidgetSpan(
                           child: MessageTime(
-                            timelineOverlayMessage:
-                                event.timelineOverlayMessage,
+                            timelineOverlayMessage: timelineOverlay,
                             event: event,
                             showSeenIcon: event.isOwnMessage,
                             timeline: timeline,

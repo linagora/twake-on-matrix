@@ -21,6 +21,7 @@ import 'package:equatable/equatable.dart';
 import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
@@ -87,6 +88,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconciliation_extension.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
+import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
@@ -122,6 +124,7 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart'
 import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
 import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
@@ -1458,13 +1461,15 @@ class ChatController extends ConsumerState<Chat>
     final events = selectedEvents.isEmpty && event != null
         ? [event]
         : selectedEvents;
-    final messages = events
-        .map(
-          (msg) => msg
-              .getDisplayEventWithoutEditEvent(timeline!)
-              .formatContentForwards(),
-        )
-        .toList();
+    final messages = const MediaBatchStamp().restampForwarded(
+      events
+          .map(
+            (msg) => msg
+                .getDisplayEventWithoutEditEvent(timeline!)
+                .formatContentForwards(),
+          )
+          .toList(),
+    );
     _clearSelectEvent();
     ForwardRoute($extra: ForwardArgument(messages: messages)).push(context);
   }
@@ -2092,6 +2097,34 @@ class ChatController extends ConsumerState<Chat>
       );
       await _onMediaSent();
     }, popContext: false);
+  }
+
+  void onPasteImages(List<MatrixFile> images) {
+    sendPastedImagesNative(
+      context,
+      room: room,
+      images: images,
+      caption: sendController.text.isNotEmpty ? sendController.text : null,
+      inReplyTo: replyEventNotifier.value,
+      onSendCallback: _onMediaSent,
+    );
+  }
+
+  @override
+  Future<void> pasteClipboardImage(ClipboardReader? clipboardReader) async {
+    if (!PlatformInfos.isMobile) {
+      return super.pasteClipboardImage(clipboardReader);
+    }
+    final images = await TwakeClipboard.instance.pasteImagesUsingBytes(
+      reader: clipboardReader,
+    );
+    final pasted = images?.nonNulls.toList() ?? [];
+    if (!mounted) return;
+    if (pasted.isEmpty) {
+      TwakeSnackBar.show(context, L10n.of(context)!.pasteImageFailed);
+      return;
+    }
+    onPasteImages(pasted);
   }
 
   void _showMediaPicker(BuildContext context) {

@@ -23,6 +23,7 @@ class UploadFileInfo extends UploadInfo {
   final DateTime createdAt;
   final UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
+  final String? batchId;
   String? threadRootEventId;
   String? threadLastEventId;
   bool isFailed;
@@ -40,6 +41,7 @@ class UploadFileInfo extends UploadInfo {
     required this.cancelToken,
     this.captionInfo,
     this.inReplyToEventId,
+    this.batchId,
     this.threadRootEventId,
     this.threadLastEventId,
     this.isFailed = false,

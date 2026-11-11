@@ -1,19 +1,19 @@
 import 'dart:typed_data';
 
 import 'package:twake_chat/config/app_config.dart';
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/sending_image_info_widget.dart';
 import 'package:twake_chat/presentation/model/file/display_image_info.dart';
-import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/utils/extension/image_size_extension.dart';
 
-class MessageImageBuilder extends StatefulWidget {
+class MessageImageBuilder extends ConsumerStatefulWidget {
   final Event event;
 
   final void Function()? onTapPreview;
@@ -31,17 +31,18 @@ class MessageImageBuilder extends StatefulWidget {
   });
 
   @override
-  State<MessageImageBuilder> createState() => _MessageImageBuilderState();
+  ConsumerState<MessageImageBuilder> createState() =>
+      _MessageImageBuilderState();
 }
 
-class _MessageImageBuilderState extends State<MessageImageBuilder> {
+class _MessageImageBuilderState extends ConsumerState<MessageImageBuilder> {
   Future<MatrixFile?>? _matrixFileFuture;
 
   @override
   void initState() {
     super.initState();
     _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
-      getIt.get<UploadManager>(),
+      ref.read(uploadManagerProvider),
     );
   }
 
@@ -50,7 +51,7 @@ class _MessageImageBuilderState extends State<MessageImageBuilder> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.event != widget.event) {
       _matrixFileFuture = widget.event.getPlaceholderMatrixFile(
-        getIt.get<UploadManager>(),
+        ref.read(uploadManagerProvider),
       );
     }
   }

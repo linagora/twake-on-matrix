@@ -12,6 +12,7 @@ import 'package:twake_chat/pages/chat/input_bar/input_bar_shortcut.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar_style.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
+import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -24,6 +25,7 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
 
 class InputBar extends StatefulWidget {
   final Room? room;
@@ -44,6 +46,7 @@ class InputBar extends StatefulWidget {
   final ValueNotifier<bool>? showEmojiPickerNotifier;
   final SuggestionsController<Map<String, String?>>? suggestionsController;
   final bool isDraftChat;
+  final ValueChanged<List<MatrixFile>>? onPasteImages;
 
   const InputBar({
     this.room,
@@ -64,6 +67,7 @@ class InputBar extends StatefulWidget {
     this.suggestionsController,
     this.showEmojiPickerNotifier,
     this.isDraftChat = false,
+    this.onPasteImages,
     super.key,
   });
 
@@ -402,6 +406,35 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     }
   }
 
+  Future<bool> _pasteClipboardImages(ClipboardReader reader) async {
+    final onPasteImages = widget.onPasteImages;
+    if (onPasteImages == null ||
+        !await TwakeClipboard.instance.isReadableImageFormat(
+          clipboardReader: reader,
+        )) {
+      return false;
+    }
+    final images = await TwakeClipboard.instance.pasteImagesUsingBytes(
+      reader: reader,
+    );
+    final pasted = images?.nonNulls.toList() ?? [];
+    if (pasted.isEmpty) return false;
+    onPasteImages(pasted);
+    return true;
+  }
+
+  void _onContentInserted(service.KeyboardInsertedContent content) {
+    final bytes = content.data;
+    if (bytes == null) return;
+    widget.onPasteImages?.call([
+      MatrixFile.fromMimeType(
+        bytes: bytes,
+        name: 'pasted',
+        mimeType: content.mimeType,
+      ),
+    ]);
+  }
+
   void _handleSuggestionsCallbackMobile() {
     if (widget.showEmojiPickerNotifier?.value == false) {
       widget.typeAheadFocusNode?.requestFocus();
@@ -452,7 +485,19 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               },
               contextMenuBuilder: PlatformInfos.isWeb
                   ? null
-                  : mobileTwakeContextMenuBuilder,
+                  : (context, editableTextState) =>
+                        mobileTwakeContextMenuBuilder(
+                          context,
+                          editableTextState,
+                          onPasteImage: widget.onPasteImages == null
+                              ? null
+                              : _pasteClipboardImages,
+                        ),
+              contentInsertionConfiguration: widget.onPasteImages == null
+                  ? null
+                  : ContentInsertionConfiguration(
+                      onContentInserted: _onContentInserted,
+                    ),
               onTap: () async {
                 await Future.delayed(InputBar.debounceDurationTap);
                 FocusScope.of(context).requestFocus(focusNode);

@@ -30,6 +30,56 @@ class EventListSyncResult extends Equatable {
   List<Object?> get props => [top, bottom, shouldScrollToBottom, hasNewEvents];
 }
 
+/// A transaction id ends with the millisecond it was created at; any value
+/// below this is not a time (the SDK format is `<client>-<counter>-<millis>`).
+const _minTransactionMillis = 1000000000000;
+
+/// Orders events newest first for the chat list.
+///
+/// A local echo (an event still being sent, or one that failed) has the
+/// transaction id as event id. Its time is not usable for ordering: the
+/// placeholder carries the time of its creation, and the SDK replaces it with
+/// a new echo stamped "now" when the file starts to send, so the images of one
+/// send would swap places as they go one after the other. Local echoes
+/// therefore sort after every sent event, and among themselves by the creation
+/// time inside their transaction id, which never changes, then by its counter
+/// when two were created in the same millisecond. An echo whose id has no such
+/// time counts as older than the others and is ordered by its own time among
+/// its kind, so the order stays consistent for any mix. A failed event is not
+/// an echo: it keeps its place in time, as before.
+int compareEventsNewestFirst(Event a, Event b) {
+  final aEcho = _isLocalEcho(a);
+  if (aEcho != _isLocalEcho(b)) return aEcho ? -1 : 1;
+  if (aEcho) {
+    final aCreated = _transactionCreatedAt(a.eventId);
+    final bCreated = _transactionCreatedAt(b.eventId);
+    if (aCreated != null && bCreated != null) {
+      if (aCreated != bCreated) return bCreated.compareTo(aCreated);
+      final aCounter = _transactionCounter(a.eventId) ?? -1;
+      final bCounter = _transactionCounter(b.eventId) ?? -1;
+      if (aCounter != bCounter) return bCounter.compareTo(aCounter);
+    } else if (aCreated != null || bCreated != null) {
+      return aCreated != null ? -1 : 1;
+    }
+  }
+  return b.originServerTs.compareTo(a.originServerTs);
+}
+
+bool _isLocalEcho(Event event) => event.status.isSending;
+
+/// The counter of a transaction id (`<client>-<counter>-<millis>`), or null.
+int? _transactionCounter(String eventId) {
+  final end = eventId.lastIndexOf('-');
+  final start = end > 0 ? eventId.lastIndexOf('-', end - 1) : -1;
+  return start < 0 ? null : int.tryParse(eventId.substring(start + 1, end));
+}
+
+/// Milliseconds at the end of a transaction id, or null for any other id.
+int? _transactionCreatedAt(String eventId) {
+  final millis = int.tryParse(eventId.substring(eventId.lastIndexOf('-') + 1));
+  return millis != null && millis > _minTransactionMillis ? millis : null;
+}
+
 /// Extension for managing and syncing lists of Matrix events.
 /// Provides efficient operations for detecting changes, additions, and removals.
 extension EventListExtension on List<Event> {

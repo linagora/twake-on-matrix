@@ -5,6 +5,13 @@ extension StringExtension on String {
         : this;
   }
 
+  String get safeFileName {
+    final segments = split(RegExp(r'[/\\]')).where(
+      (segment) => segment.isNotEmpty && segment != '.' && segment != '..',
+    );
+    return segments.isEmpty ? 'file' : segments.join('_');
+  }
+
   String get displayMentioned {
     return '@[$this]';
   }
