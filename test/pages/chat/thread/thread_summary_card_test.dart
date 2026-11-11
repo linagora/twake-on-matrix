@@ -25,19 +25,14 @@ void main() {
 }
 
 /// CodeRabbit 4515287889: « 1 unread messages » was a raw `{n}`; the
-/// string is an ICU plural, as `threadMessagesCount` next to it.
+/// string is an ICU plural, as `threadMessagesCount` next to it. The French
+/// strings are Weblate's (661311f66): no French text is asserted here.
 void _unreadPluralTests() {
   final en = lookupL10n(const Locale('en'));
-  final fr = lookupL10n(const Locale('fr'));
 
   test('in English', () {
     expect(en.threadUnreadMessagesCount(1), '1 unread message');
     expect(en.threadUnreadMessagesCount(2), '2 unread messages');
-  });
-
-  test('in French', () {
-    expect(fr.threadUnreadMessagesCount(1), '1 message non lu');
-    expect(fr.threadUnreadMessagesCount(2), '2 messages non lus');
   });
 }
 
@@ -407,10 +402,13 @@ void _lastReplyTests() {
     }
   });
 
+  /// The text of the age is Weblate's (661311f66): the card takes it from
+  /// the strings of the app locale, whatever they say.
   testWidgets('says the age in the language of the app', (tester) async {
-    await _pumpCard(tester, _CardSpec()..locale = const Locale('fr'));
+    const french = Locale('fr');
+    await _pumpCard(tester, _CardSpec()..locale = french);
 
-    expect(_text('il y a 5 minutes'), findsOneWidget);
+    expect(_text(lookupL10n(french).ageMinutesAgo(5)), findsOneWidget);
   });
 
   group('longer than the card', _longReplyTests);
