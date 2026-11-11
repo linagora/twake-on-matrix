@@ -111,4 +111,68 @@ void main() {
       );
     });
   });
+
+  group('fixDoubleEncodedAutolinks', () {
+    // Inputs are the exact output of package:markdown 7.3.1 for bare URLs
+    // (GitHub-flavored autolinks), which re-encode an existing `%XX`.
+    test('restores the single encoding of a message link', () {
+      const input =
+          '<a href="https://matrix.to/#/!r%253Aex.org/%2524e">'
+          'https://matrix.to/#/!r%3Aex.org/%24e</a>';
+
+      expect(
+        fixDoubleEncodedAutolinks(input),
+        '<a href="https://matrix.to/#/!r%3Aex.org/%24e">'
+        'https://matrix.to/#/!r%3Aex.org/%24e</a>',
+      );
+    });
+
+    test('keeps the HTML escaping of & in the query', () {
+      const input =
+          '<p>see <a href="https://a.org/x?y=1&amp;z=%253A">'
+          'https://a.org/x?y=1&amp;z=%3A</a> end</p>';
+
+      expect(
+        fixDoubleEncodedAutolinks(input),
+        '<p>see <a href="https://a.org/x?y=1&amp;z=%3A">'
+        'https://a.org/x?y=1&amp;z=%3A</a> end</p>',
+      );
+    });
+
+    test('restores a www. link, which markdown prefixes with http://', () {
+      const input = '<a href="http://www.a.org/%253A">www.a.org/%3A</a>';
+
+      expect(
+        fixDoubleEncodedAutolinks(input),
+        '<a href="http://www.a.org/%3A">www.a.org/%3A</a>',
+      );
+    });
+
+    test('still encodes a raw % that starts no escape', () {
+      const input = '<a href="https://a.org/50%25off">https://a.org/50%off</a>';
+
+      expect(fixDoubleEncodedAutolinks(input), input);
+    });
+
+    test('leaves a link whose text differs from its href', () {
+      const input = '<a href="https://example.org/a%253Ab">label</a>';
+
+      expect(fixDoubleEncodedAutolinks(input), input);
+    });
+
+    test('leaves a correctly encoded link from another client', () {
+      const input =
+          '<a href="https://matrix.to/#/!r%3Aex.org/%24e">'
+          'https://matrix.to/#/!r%3Aex.org/%24e</a>';
+
+      expect(fixDoubleEncodedAutolinks(input), input);
+    });
+
+    test('leaves an anchor whose text is past the bounded length', () {
+      final text = 'https://example.org/${'a' * 1000}%3A';
+      final input = '<a href="${Uri.encodeFull(text)}">$text</a>';
+
+      expect(fixDoubleEncodedAutolinks(input), input);
+    });
+  });
 }

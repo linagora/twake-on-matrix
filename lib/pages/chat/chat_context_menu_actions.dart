@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 enum ChatContextMenuActions {
   select,
   copyMessage,
+  copyLink,
   edit,
   pinChat,
   report,
@@ -31,6 +32,8 @@ enum ChatContextMenuActions {
         return L10n.of(context)!.reply;
       case ChatContextMenuActions.copyMessage:
         return L10n.of(context)!.copyMessageText;
+      case ChatContextMenuActions.copyLink:
+        return L10n.of(context)!.copyLink;
       case ChatContextMenuActions.pinChat:
         return unpin ? L10n.of(context)!.unpin : L10n.of(context)!.pinChat;
       case ChatContextMenuActions.report:
@@ -54,6 +57,8 @@ enum ChatContextMenuActions {
         return isSelected ? Icons.circle_outlined : Icons.check_circle_outline;
       case ChatContextMenuActions.copyMessage:
         return Icons.content_copy;
+      case ChatContextMenuActions.copyLink:
+        return Icons.link;
       case ChatContextMenuActions.pinChat:
         return !unpin ? Icons.push_pin_outlined : null;
       case ChatContextMenuActions.report:

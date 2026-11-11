@@ -49,8 +49,10 @@ class ReplyContent extends StatelessWidget {
         !displayEvent.redacted &&
         displayEvent.content['format'] == 'org.matrix.custom.html' &&
         displayEvent.content['formatted_body'] is String) {
-      String html = fixDoubleEncodedCodeBlocks(
-        displayEvent.content['formatted_body'] as String? ?? '',
+      String html = fixDoubleEncodedAutolinks(
+        fixDoubleEncodedCodeBlocks(
+          displayEvent.content['formatted_body'] as String? ?? '',
+        ),
       );
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';

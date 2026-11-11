@@ -18,7 +18,9 @@ class FormattedTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var html = fixDoubleEncodedCodeBlocks(event.formattedText);
+    var html = fixDoubleEncodedAutolinks(
+      fixDoubleEncodedCodeBlocks(event.formattedText),
+    );
 
     if (event.messageType == MessageTypes.Emote) {
       html = '* $html';

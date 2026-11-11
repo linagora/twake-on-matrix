@@ -124,6 +124,16 @@ extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
     ssoClientId: AppConstants.twakeSsoClientId,
   );
 
+  /// The `https` origin of the Twake Chat web app (`app.twake.chat`
+  /// `web_url`), or null when it is missing or not an `https` URL.
+  String? get webAppOrigin {
+    final webUrl = this?.appTwakeInformation?.webUrl;
+    if (webUrl == null) return null;
+    final uri = Uri.tryParse(webUrl);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+    return uri.origin;
+  }
+
   bool get isPublicGroupsEnabled =>
       this?.appTwakeInformation?.publicGroupsInformation?.isEnabled ?? false;
 
