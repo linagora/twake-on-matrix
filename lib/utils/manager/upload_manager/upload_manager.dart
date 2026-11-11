@@ -147,7 +147,7 @@ class UploadManager {
               rootEventId: uploadInfo.threadRootEventId!,
               lastEventId: uploadInfo.threadLastEventId!,
             );
-      final inReplyTo = uploadInfo.inReplyToEventId == null
+      final inReplyTo = thread != null || uploadInfo.inReplyToEventId == null
           ? null
           : await room.getEventById(uploadInfo.inReplyToEventId!);
       uploadInfo.isFailed = false;
@@ -291,6 +291,7 @@ class UploadManager {
     Event? inReplyTo,
     ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     final txids = await room.sendPlaceholdersForImagePickerFiles(
       entities: entities,
       captionInfo: caption,
@@ -382,6 +383,7 @@ class UploadManager {
     Event? inReplyTo,
     ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     // Store txids and fake events for all files
     final uploadTasks = <String, SyncUpdate>{};
 
@@ -481,6 +483,7 @@ class UploadManager {
     Event? inReplyTo,
     ThreadSendTarget? thread,
   }) async {
+    inReplyTo = thread.withoutQuote(inReplyTo);
     final batchId = _batchStamp.newBatchIdFor(fileInfos.length);
 
     for (final fileInfo in fileInfos.asMap().entries) {
