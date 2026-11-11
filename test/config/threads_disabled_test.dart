@@ -1,23 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
-import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
-import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
-import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../utils/thread_unread/thread_fakes.dart';
 
-/// `AppConfig.threadsEnabled` off: the app behaves like main, where threads
-/// do not exist. A thread reply is an ordinary message of the room, a root
-/// has no card, the message menu has no « Start a thread », and the badges
-/// count what the server counts for the room. With the flag on, the thread
-/// specs hold.
+/// Scope (orchestrator, 11/11): the flag gates the thread UI only; counters, badges, receipts and the sync filter are not gated.
+///
+/// `AppConfig.threadsEnabled` off (until the counters/receipts PR sets it
+/// on): a thread reply is an ordinary message of the room, a root has no
+/// card, the message menu has no « Start a thread ». With the flag on, the
+/// thread specs hold.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -35,8 +32,6 @@ void main() {
 
   group('a thread reply in the room', _timelineTests);
   group('a thread root', _rootTests);
-  group('the badges', _badgeTests);
-  group('the sync filter', _syncFilterTests);
 }
 
 const _roomId = '!room:example.com';
@@ -140,79 +135,5 @@ void _rootTests() {
       ),
       isFalse,
     );
-  });
-}
-
-void _badgeTests() {
-  late RecordingThreadClient client;
-
-  /// A room whose main timeline has [notifications] unread, one of them a
-  /// mention, and whose thread has 3 unread messages, 2 mentions.
-  Room roomWithUnreadThread({int notifications = 0}) {
-    final room = Room(
-      id: _roomId,
-      client: client,
-      notificationCount: notifications,
-      highlightCount: notifications == 0 ? 0 : 1,
-    );
-    client.threadUnread.apply(
-      const SyncThreadUpdate(
-        counts: {
-          _roomId: {_rootId: (notificationCount: 3, highlightCount: 2)},
-        },
-        leftRoomIds: [],
-      ),
-    );
-    return room;
-  }
-
-  setUp(() {
-    SharedPreferences.setMockInitialValues({});
-    client = RecordingThreadClient();
-    when(client.clientName).thenReturn('account-a');
-    when(client.userID).thenReturn('@me:example.com');
-  });
-
-  test('with the flag on, the thread counts in the badge (fixture '
-      'check)', () {
-    AppConfig.threadsEnabled = true;
-
-    final room = roomWithUnreadThread(notifications: 2);
-
-    expect(room.unreadBadgeCount, greaterThan(2));
-  });
-
-  test('the badge of a room is its own count, threads not added', () {
-    final room = roomWithUnreadThread(notifications: 2);
-
-    expect(room.unreadBadgeCount, 2);
-    expect(room.highlightCountWithThreads, 1);
-  });
-
-  test('unread threads alone do not make the room unread', () {
-    final room = roomWithUnreadThread();
-
-    expect(room.isUnreadWithThreads, isFalse);
-    expect(room.isUnreadOrInvitedWithThreads, isFalse);
-  });
-}
-
-/// On main the server counts thread messages in the room counters: the
-/// sync filter must stop asking for per-thread counters, at the time it is
-/// read (the flag is a static the app may set at start).
-void _syncFilterTests() {
-  test('the sync filter follows the flag: no per-thread counters when '
-      'off', () {
-    String? timelineFilter() =>
-        (((ClientManager.syncFilter.toJson()['room']
-                    as Map<String, Object?>)['timeline']
-                as Map<String, Object?>?)?['unread_thread_notifications'])
-            ?.toString();
-
-    AppConfig.threadsEnabled = true;
-    expect(timelineFilter(), 'true');
-
-    AppConfig.threadsEnabled = false;
-    expect(timelineFilter(), isNot('true'));
   });
 }
