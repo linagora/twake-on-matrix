@@ -6,6 +6,7 @@ import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
 import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/thread/thread_resolved_mark.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 
 import '../base/core_robot.dart';
@@ -157,7 +158,7 @@ class ThreadRobot extends CoreRobot {
   }
 
   /// The check « Resolved » (THR-M-08), found by its accessible label.
-  Finder get _resolvedMark => find.bySemanticsLabel(RegExp('Resolved'));
+  Finder get _resolvedMark => find.byType(ResolvedMark);
 
   PatrolFinder get _threadMenuButton => $(AppBar).$(find.byTooltip('More'));
 
