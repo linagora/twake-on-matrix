@@ -15,20 +15,23 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
 import 'platform_infos.dart';
 
-/// Whether a link to [eventId] in [targetRoomId], tapped inside the chat
+/// Whether a message link to [targetRoomId], tapped inside the chat
 /// [openRoomId], scrolls that open chat instead of navigating: navigating to
 /// the URL it already shows would not notify it again.
 bool jumpsInOpenChat({
   required String? openRoomId,
   required String targetRoomId,
-  required String? eventId,
-}) => eventId != null && openRoomId == targetRoomId;
+}) => openRoomId == targetRoomId;
 
 class UrlLauncher with GoToDraftChatMixin {
   static const _blockedSchemes = {AppConfig.appOpenUrlScheme, 'file'};
@@ -55,6 +58,21 @@ class UrlLauncher with GoToDraftChatMixin {
       // we can't open this thing
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
+    }
+    final container = ProviderScope.containerOf(context, listen: false);
+    final webAppMatrixTo = container
+        .read(messageLinkPolicyProvider)
+        .matrixToForWebLink(
+          url!,
+          webAppOrigin: container
+              .read(loginHomeserverSummaryProvider)
+              .webAppOrigin,
+        );
+    if (webAppMatrixTo != null) {
+      return openMatrixToUrl(
+        customUrl: webAppMatrixTo,
+        isInvitationLink: isInvitationLink,
+      );
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
       final inviteUri = Uri.parse(AppConfig.inviteLinkPrefix);
@@ -203,7 +221,6 @@ class UrlLauncher with GoToDraftChatMixin {
           jumpsInOpenChat(
             openRoomId: openChat?.roomId,
             targetRoomId: room.id,
-            eventId: event,
           )) {
         await openChat!.scrollToEventIdAndHighlight(event);
         return;

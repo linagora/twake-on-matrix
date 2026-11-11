@@ -4,6 +4,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -44,22 +45,26 @@ void main() {
   });
 
   Future<void> launch(WidgetTester tester, String url) async {
+    // The app runs under a ProviderScope; UrlLauncher reads the web app
+    // origin from it.
     await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: LocalizationService.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (ctx) {
-              context = ctx;
-              return const SizedBox.shrink();
-            },
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            L10n.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: LocalizationService.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ),

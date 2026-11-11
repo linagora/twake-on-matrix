@@ -457,7 +457,10 @@ extension RoomExtension on Room {
         getMention: getMention,
       );
 
-      html = fixDoubleEncodedAutolinks(fixDoubleEncodedCodeBlocks(html));
+      html = fixDoubleEncodedAutolinks(
+        fixDoubleEncodedCodeBlocks(html),
+        source: message,
+      );
 
       final formatText = event['body']
           .toString()

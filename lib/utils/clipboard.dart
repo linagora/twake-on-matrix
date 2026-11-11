@@ -48,7 +48,7 @@ class TwakeClipboard {
     try {
       await copyText(text);
       return true;
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().e('Clipboard::tryCopyText(): clipboard write failed', e, s);
       return false;
     }

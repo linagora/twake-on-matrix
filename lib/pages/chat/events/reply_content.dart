@@ -53,6 +53,7 @@ class ReplyContent extends StatelessWidget {
         fixDoubleEncodedCodeBlocks(
           displayEvent.content['formatted_body'] as String? ?? '',
         ),
+        source: displayEvent.body,
       );
       if (displayEvent.messageType == MessageTypes.Emote) {
         html = '* $html';
