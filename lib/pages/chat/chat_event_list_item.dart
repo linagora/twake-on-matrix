@@ -180,13 +180,17 @@ class ChatEventListItem extends StatelessWidget {
   }
 
   Widget _threadCard(BuildContext context, ThreadSummary summary) =>
-      ThreadSummaryCard(
-        replyCount: summary.replyCount,
-        lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
-            .calcDisplayname(),
-        lastReplyText: _lastReplyText(context, summary),
-        lastReplyTime: summary.lastReply?.originServerTs,
-        onOwnBubble: event.isOwnMessage,
-        onTap: () => _openThread(context),
+      ListenableBuilder(
+        listenable: controller.threadUnreadStore ?? Listenable.merge(const []),
+        builder: (context, _) => ThreadSummaryCard(
+          replyCount: summary.replyCount,
+          lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
+              .calcDisplayname(),
+          lastReplyText: _lastReplyText(context, summary),
+          lastReplyTime: summary.lastReply?.originServerTs,
+          unreadCount: controller.threadUnreadCount(event.eventId),
+          onOwnBubble: event.isOwnMessage,
+          onTap: () => _openThread(context),
+        ),
       );
 }

@@ -1,3 +1,5 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_read_marker.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
@@ -5,6 +7,8 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -578,6 +582,11 @@ class ChatController extends ConsumerState<Chat>
   /// Completes once [_threadEvents] exists (or the timeline failed to load).
   final Completer<void> _threadReady = Completer<void>();
 
+  late final ThreadReadMarker _threadReadMarker = ThreadReadMarker(
+    (reply) =>
+        room!.setThreadReadMarker(reply, ThreadRef(room!.id, threadRootId!)),
+  );
+
   /// Events of the list: the room timeline, or the root and the replies of
   /// the thread (loaded by pages, completed by the live timeline), newest
   /// first.
@@ -586,6 +595,12 @@ class ChatController extends ConsumerState<Chat>
       : timeline?.events ?? const <Event>[];
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
+
+  /// The thread counters of the account; widgets listen to it themselves.
+  ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
+
+  int threadUnreadCount(String rootId) =>
+      threadUnreadStore?.unreadCount(ThreadRef(roomId!, rootId)) ?? 0;
 
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
@@ -698,6 +713,14 @@ class ChatController extends ConsumerState<Chat>
             withRelations: true,
           ),
         );
+        if (!mounted) return (events: page.replies, nextBatch: page.nextBatch);
+        // A reply seen here and deleted later loses its relation: the room
+        // timeline must still know it was in a thread.
+        for (final event in page.replies) {
+          if (event.threadRootId == rootId) {
+            roomClient.threadUnread?.rememberThreadReply(event);
+          }
+        }
         return (events: page.replies, nextBatch: page.nextBatch);
       },
       // Edits and reactions of old replies show on them through the timeline.
@@ -739,6 +762,19 @@ class ChatController extends ConsumerState<Chat>
       timeline?.addAggregatedEvent(decrypted);
     }
     updateView();
+  }
+
+  /// A thread is read only while its screen shows its last reply.
+  void _markThreadRead() {
+    final reply = eventsToDisplay.firstWhereOrNull(
+      (e) => e.status.isSynced && e.threadRootId == threadRootId,
+    );
+    if (reply == null) return;
+    unawaited(
+      _threadReadMarker
+          .read(reply)
+          .catchError((Object e) => Logs().w('Unable to read the thread', e)),
+    );
   }
 
   Future<void> requestHistory({int? historyCount, StateFilter? filter}) async {
@@ -785,11 +821,14 @@ class ChatController extends ConsumerState<Chat>
     if (!_isAtLiveBottom) return;
     // Under a thread screen this timeline stays mounted but is not seen.
     if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
-    if (isThread) return;
-    if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
+    if (isThread) return _markThreadRead();
+    if (room?.notificationCount == 0 &&
+        room?.hasNewMessagesWithThreads != true) {
+      return;
+    }
     if (_markingLatestRead) return;
     _markingLatestRead = true;
-    timeline?.setReadMarker(eventId: null).whenComplete(() {
+    timeline?.setMainTimelineReadMarker().whenComplete(() {
       _markingLatestRead = false;
     });
   }
@@ -907,7 +946,7 @@ class ChatController extends ConsumerState<Chat>
       final fullyRead = room?.fullyRead;
       if (fullyRead != null &&
           fullyRead.isNotEmpty &&
-          room?.hasNewMessages == true) {
+          room?.hasNewMessagesWithThreads == true) {
         // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
         final lastEventId = room?.lastEvent?.eventId;
         final lastEventInTimeline =
@@ -958,12 +997,12 @@ class ChatController extends ConsumerState<Chat>
   }
 
   Future<void>? _setReadMarkerFuture;
-  String? _pendingReadMarkerEventId;
+  Event? _pendingReadMarkerEvent;
 
   @override
   Future<void> setReadMarker({String? eventId}) async {
     if (!mounted || room == null || eventId == null) return;
-    // A thread screen sends no main-timeline receipt.
+    // A thread is read by `_markThreadRead` when its last reply is shown.
     if (isThread) return;
 
     // Store the latest request
@@ -979,7 +1018,7 @@ class ChatController extends ConsumerState<Chat>
         event.status == EventStatus.error) {
       return;
     }
-    _pendingReadMarkerEventId = eventId;
+    _pendingReadMarkerEvent = event;
 
     // If already processing, just coalesce; the worker will pick it up.
     if (_setReadMarkerFuture != null) return;
@@ -998,30 +1037,30 @@ class ChatController extends ConsumerState<Chat>
       final timeline = this.timeline;
       if (timeline == null || timeline.events.isEmpty) return;
 
-      var currentEventId = _pendingReadMarkerEventId;
-      _pendingReadMarkerEventId = null;
+      var currentEvent = _pendingReadMarkerEvent;
+      _pendingReadMarkerEvent = null;
 
       if (_isAtLiveBottom) {
-        currentEventId = null;
+        currentEvent = null;
       }
 
-      Logs().d('Set read marker...', currentEventId);
+      Logs().d('Set read marker...', currentEvent?.eventId);
 
       try {
-        await timeline.setReadMarker(eventId: currentEventId);
+        await timeline.setMainTimelineReadMarker(event: currentEvent);
       } catch (e, s) {
         Logs().e('Failed to set read marker', e, s);
         return;
       }
 
       if (!mounted) return;
-      if (currentEventId == null ||
-          currentEventId == timeline.room.lastEvent?.eventId) {
+      if (currentEvent == null ||
+          currentEvent.eventId == timeline.room.lastEvent?.eventId) {
         Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
       }
 
       // If no new request arrived while we awaited, we're done.
-      if (_pendingReadMarkerEventId == null) return;
+      if (_pendingReadMarkerEvent == null) return;
     }
   }
 
