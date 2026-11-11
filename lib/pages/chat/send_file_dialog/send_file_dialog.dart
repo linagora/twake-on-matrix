@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
@@ -29,6 +30,7 @@ class SendFileDialog extends StatefulWidget {
   final List<MatrixFile> files;
   final String? pendingText;
   final Event? inReplyTo;
+  final ThreadSendTarget? thread;
 
   const SendFileDialog({
     this.room,
@@ -36,6 +38,7 @@ class SendFileDialog extends StatefulWidget {
     super.key,
     this.pendingText,
     this.inReplyTo,
+    this.thread,
   });
 
   @override
@@ -153,6 +156,7 @@ class SendFileDialogController extends State<SendFileDialog> {
           files: [filesNotifier.value.first],
           caption: textEditingController.text,
           inReplyTo: widget.inReplyTo,
+          thread: widget.thread,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(
@@ -184,6 +188,7 @@ class SendFileDialogController extends State<SendFileDialog> {
           caption: textEditingController.text,
           thumbnails: thumbnails,
           inReplyTo: widget.inReplyTo,
+          thread: widget.thread,
         )
         .then((_) => PaintingBinding.instance.imageCache.clear());
     Navigator.of(
