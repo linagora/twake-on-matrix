@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_type_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:matrix/matrix.dart';
 
 /// Single entry-point for all event visibility decisions.
@@ -11,12 +12,28 @@ abstract final class EventVisibilityResolver {
   /// Whether [event] should be rendered as a row in the chat timeline.
   ///
   /// Rules are evaluated in layers, short-circuiting on the first `false`:
-  /// 1. Relationship — edits/reactions/verification are always hidden.
+  /// 1. Relationship — edits/reactions/verification are always hidden, and
+  ///    thread replies outside the thread screen.
   /// 2. Type         — delegates to [EventTypeRules].
   /// 3. Config       — [AppConfig] toggles.
   /// 4. Content      — payload / room-state heuristics.
-  static bool isVisibleInTimeline(Event event) {
-    return _passesRelationshipLayer(event) &&
+  ///
+  /// [inThread] is true on the thread screen, where thread replies are the
+  /// content and must not be hidden.
+  ///
+  /// [knownThreadReplyIds]: ids of events seen as thread replies; one of them
+  /// stays out of the main timeline even once deleted (a deleted event loses
+  /// its relation).
+  static bool isVisibleInTimeline(
+    Event event, {
+    bool inThread = false,
+    Set<String> knownThreadReplyIds = const {},
+  }) {
+    return _passesRelationshipLayer(
+          event,
+          inThread: inThread,
+          knownThreadReplyIds: knownThreadReplyIds,
+        ) &&
         _passesTypeLayer(event) &&
         _passesConfigLayer(event) &&
         _passesContentLayer(event);
@@ -30,7 +47,10 @@ abstract final class EventVisibilityResolver {
   static bool isEligibleForChatListPreviewSync(Event event) {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
-    return true;
+    if (_isThreadReply(event)) return false;
+    // An edit may target a thread reply (the SDK promotes it to lastEvent):
+    // only the async check reads its target.
+    return event.relationshipType != RelationshipTypes.edit;
   }
 
   /// Whether [event] may be used as the "last message" preview in the chat
@@ -41,6 +61,7 @@ abstract final class EventVisibilityResolver {
   ) async {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
+    if (_isThreadReply(event)) return false;
     if (event.relationshipType != RelationshipTypes.edit) return true;
 
     // Walk the edit chain; discard if any ancestor is redacted.
@@ -50,7 +71,7 @@ abstract final class EventVisibilityResolver {
       if (!visited.add(id)) break;
       final target = await room.getEventById(id);
       if (target == null) break;
-      if (target.redacted) return false;
+      if (target.redacted || _isThreadReply(target)) return false;
       id = target.relationshipType == RelationshipTypes.edit
           ? target.relationshipEventId
           : null;
@@ -62,13 +83,29 @@ abstract final class EventVisibilityResolver {
   // Layer 1 — Relationship
   // ---------------------------------------------------------------------------
 
+  /// With the threads flag off a reply is an ordinary message of the room.
+  static bool _isThreadReply(Event event) =>
+      AppConfig.threadsEnabled && event.threadRootId != null;
+
+  static bool _isKnownThreadReply(Event event, Set<String> knownIds) =>
+      AppConfig.threadsEnabled && knownIds.contains(event.eventId);
+
   static const _hiddenRelationships = {
     RelationshipTypes.edit,
     RelationshipTypes.reaction,
   };
 
-  static bool _passesRelationshipLayer(Event event) {
+  static bool _passesRelationshipLayer(
+    Event event, {
+    bool inThread = false,
+    Set<String> knownThreadReplyIds = const {},
+  }) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
+    if (!inThread &&
+        (_isThreadReply(event) ||
+            _isKnownThreadReply(event, knownThreadReplyIds))) {
+      return false;
+    }
     if (event.type.startsWith('m.key.verification.')) return false;
     return true;
   }

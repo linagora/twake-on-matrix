@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/pages/chat/animate_pause_button.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_mobile.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
@@ -470,7 +471,9 @@ class ChatInputRow extends StatelessWidget {
       showEmojiPickerNotifier: controller.showEmojiPickerNotifier,
       decoration: InputDecoration(
         contentPadding: ChatInputRowStyle.contentPadding(context),
-        hintText: L10n.of(context)!.message,
+        hintText: controller.isThread
+            ? L10n.of(context)!.replyInThread
+            : L10n.of(context)!.message,
         isDense: true,
         hintMaxLines: 1,
         hintStyle: InputBarStyle.getTypeAheadTextStyle(context).copyWith(
@@ -518,11 +521,10 @@ class ActionSelectModeWidget extends StatelessWidget {
                     .getDisplayEventWithoutEditEvent(controller.timeline!)
                     .status
                     .isSent &&
-                controller
-                    .selectedEvents
-                    .first
-                    .room
-                    .canSendDefaultMessages) ...[
+                ThreadRules.canQuoteReply(
+                  controller.selectedEvents.first,
+                  inThreadScreen: controller.isThread,
+                )) ...[
               SizedBox(
                 height: ChatInputRowStyle.chatInputRowHeight,
                 child: TextButton(

@@ -45,7 +45,11 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
     // (e.g. user opened draftChat). Only accept drops on the active room.
     final roomId = controller.room?.id;
     final routeSegments = GoRouterState.of(context).uri.pathSegments;
-    final acceptDrops = roomId != null && routeSegments.contains(roomId);
+    // A thread screen covers its room, which stays mounted: only the screen
+    // on top takes the drop.
+    final isOnTop = ModalRoute.of(context)?.isCurrent != false;
+    final isRoomRoute = roomId != null && routeSegments.contains(roomId);
+    final acceptDrops = isRoomRoute && isOnTop;
 
     return DropTarget(
       enable: acceptDrops,
@@ -77,7 +81,8 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    if (!controller.isThread &&
+                        controller.room!.pinnedEventIds.isNotEmpty)
                       const SizedBox(
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
@@ -223,8 +228,9 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                             .timeline
                             ?.requestKeys(onlineKeyBackupOnly: false),
                       ),
-                    PinnedEventsView(controller),
-                    if (controller.room!.pinnedEventIds.isNotEmpty)
+                    if (!controller.isThread) PinnedEventsView(controller),
+                    if (!controller.isThread &&
+                        controller.room!.pinnedEventIds.isNotEmpty)
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
                         thickness: ChatViewBodyStyle.dividerSize,

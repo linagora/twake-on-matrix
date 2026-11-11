@@ -3247,6 +3247,85 @@
     "type": "text",
     "placeholders": {}
   },
+  "thread": "Thread",
+  "@thread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "startThread": "Start a thread",
+  "@startThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "replyInThread": "Reply in thread",
+  "@replyInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMessagesCount": "{n, plural, =1{1 message} other{{n} messages}}",
+  "@threadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "threadUnreadMessagesCount": "{n, plural, =1{1 unread message} other{{n} unread messages}}",
+  "@threadUnreadMessagesCount": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "newRepliesInThread": "New replies in a thread",
+  "@newRepliesInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "openThread": "Open",
+  "@openThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "ageSecondsAgo": "{n, plural, =1{1 second ago} other{{n} seconds ago}}",
+  "@ageSecondsAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageMinutesAgo": "{n, plural, =1{1 minute ago} other{{n} minutes ago}}",
+  "@ageMinutesAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageHoursAgo": "{n, plural, =1{1 hour ago} other{{n} hours ago}}",
+  "@ageHoursAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ageDaysAgo": "{n, plural, =1{1 day ago} other{{n} days ago}}",
+  "@ageDaysAgo": {
+    "type": "text",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "publicGroupsYouCanJoin": "Groups you can join",
   "@publicGroupsYouCanJoin": {
     "type": "text",
