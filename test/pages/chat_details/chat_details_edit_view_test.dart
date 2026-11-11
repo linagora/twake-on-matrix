@@ -203,4 +203,31 @@ void main() {
     expect(find.text('Description'), findsOneWidget);
     expect(find.text('Add description'), findsNothing);
   });
+
+  testWidgets('build_emptyGroupName_showsDimmedHint', (tester) async {
+    // Arrange
+    when(
+      controller.groupNameTextEditingController,
+    ).thenReturn(TextEditingController());
+
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    expect(find.text('Enter chat name'), findsOneWidget);
+  });
+
+  testWidgets('build_cannotChangeRoomName_hidesGroupNameHint', (tester) async {
+    // Arrange
+    when(room.ownPowerLevel).thenReturn(PowerLevel(0));
+    when(
+      controller.groupNameTextEditingController,
+    ).thenReturn(TextEditingController());
+
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    expect(find.text('Enter chat name'), findsNothing);
+  });
 }

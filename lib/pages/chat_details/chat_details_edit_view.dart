@@ -504,8 +504,9 @@ class _GroupNameField extends StatelessWidget {
       valueListenable: controller.isValidGroupNameNotifier,
       builder: (context, value, _) {
         final l10n = L10n.of(context)!;
+        final canChangeRoomName = controller.room?.canChangeRoomName ?? false;
         return TextField(
-          enabled: controller.room?.canChangeRoomName ?? false,
+          enabled: canChangeRoomName,
           style: ChatDetailEditViewStyle.textFieldStyle(context),
           controller: controller.groupNameTextEditingController,
           contextMenuBuilder: mobileTwakeContextMenuBuilder,
@@ -522,7 +523,7 @@ class _GroupNameField extends StatelessWidget {
             labelText: l10n.groupName,
             labelStyle: ChatDetailEditViewStyle.textFieldLabelStyle(context),
             floatingLabelBehavior: FloatingLabelBehavior.always,
-            hintText: l10n.enterGroupName,
+            hintText: canChangeRoomName ? l10n.enterGroupName : null,
             hintStyle: ChatDetailEditViewStyle.textFieldHintStyle(context),
             contentPadding: ChatDetailEditViewStyle.contentPadding,
             errorText: controller.getErrorMessage(
