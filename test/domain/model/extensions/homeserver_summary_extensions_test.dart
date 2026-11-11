@@ -124,5 +124,37 @@ void main() {
         expect(summary.callTokenServiceUrl, isNull);
       });
     });
+
+    group('webAppOrigin', () {
+      String? originOf(Object? webUrl) => summaryWith({
+        'app.twake.chat': {'web_url': webUrl},
+      }).webAppOrigin;
+
+      test('is the origin of the configured web URL', () {
+        expect(
+          originOf('https://chat.example.org'),
+          'https://chat.example.org',
+        );
+      });
+
+      test('drops a trailing slash, path and query', () {
+        expect(
+          originOf('https://chat.example.org:8443/app/?x=1'),
+          'https://chat.example.org:8443',
+        );
+      });
+
+      test('is null when the URL is missing, not https or not a URL', () {
+        expect(originOf(null), isNull);
+        expect(originOf(''), isNull);
+        expect(originOf('http://chat.example.org'), isNull);
+        expect(originOf('chat.example.org'), isNull);
+      });
+
+      test('is null without app.twake.chat or without a summary', () {
+        expect(summaryWith({}).webAppOrigin, isNull);
+        expect((null as HomeserverSummary?).webAppOrigin, isNull);
+      });
+    });
   });
 }

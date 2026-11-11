@@ -44,6 +44,16 @@ class ChatJumpSeekSession {
 
 enum _SeekPageOutcome { found, stop, continueSeek }
 
+/// The key of the row that shows [eventId]: rows are built with
+/// `GlobalObjectKey(event.eventId)`, and [GlobalObjectKey] compares with
+/// `identical`, so an equal id from elsewhere (a link, a URL query) is swapped
+/// for the timeline's own string. Unknown ids are kept as they are.
+GlobalObjectKey messageRowKey(String eventId, Iterable<Event> events) =>
+    GlobalObjectKey(
+      events.firstWhereOrNull((event) => event.eventId == eventId)?.eventId ??
+          eventId,
+    );
+
 /// Scrolls the chat timeline to a target event and optionally highlights it.
 ///
 /// Center-anchored `_top`/`_bottom` lists break naive `scrollToIndex` /
@@ -59,6 +69,9 @@ enum _SeekPageOutcome { found, stop, continueSeek }
 ///    becomes finite (or we hit a scroll edge), then center.
 /// 5. Highlight only after the row is actually in the viewport.
 extension ChatScrollToEventMixin on ChatController {
+  GlobalObjectKey _rowKey(String eventId) =>
+      messageRowKey(eventId, timeline?.events ?? const []);
+
   static const double _jumpMountCacheExtent = 20000;
   static const int _jumpWindowMaxEvents = 60;
   static const int _maxMountFrames = 90;
@@ -109,7 +122,7 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   bool _isTargetRowBuilt(ChatJumpRequest request) {
-    return GlobalObjectKey(request.eventId).currentContext != null;
+    return _rowKey(request.eventId).currentContext != null;
   }
 
   bool get _isChatEventListReady {
@@ -126,7 +139,7 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   double? _dyForEventId(String eventId) {
-    final itemContext = GlobalObjectKey(eventId).currentContext;
+    final itemContext = _rowKey(eventId).currentContext;
     if (itemContext == null || !scrollController.hasClients) return null;
 
     final itemBox = itemContext.findRenderObject() as RenderBox?;
@@ -145,7 +158,7 @@ extension ChatScrollToEventMixin on ChatController {
     final dy = _targetDyInScrollViewport(request);
     if (dy == null || !scrollController.hasClients) return false;
 
-    final itemContext = GlobalObjectKey(request.eventId).currentContext!;
+    final itemContext = _rowKey(request.eventId).currentContext!;
     final itemBox = itemContext.findRenderObject() as RenderBox?;
     final scrollBox =
         scrollController.position.context.notificationContext
@@ -361,7 +374,7 @@ extension ChatScrollToEventMixin on ChatController {
 
   /// Center a row that already has a finite viewport position.
   Future<void> _centerFiniteTarget(ChatJumpRequest request) async {
-    final itemContext = GlobalObjectKey(request.eventId).currentContext;
+    final itemContext = _rowKey(request.eventId).currentContext;
     if (itemContext == null || !scrollController.hasClients) return;
 
     final itemBox = itemContext.findRenderObject() as RenderBox?;
@@ -409,7 +422,7 @@ extension ChatScrollToEventMixin on ChatController {
       );
     }
     if (!_isJumpCurrent(session.request)) return;
-    final keyContext = GlobalObjectKey(session.request.eventId).currentContext;
+    final keyContext = _rowKey(session.request.eventId).currentContext;
     if (keyContext == null || !keyContext.mounted) return;
     await Scrollable.ensureVisible(
       keyContext,
@@ -589,7 +602,7 @@ extension ChatScrollToEventMixin on ChatController {
 
     // Row not in tag map yet: one short ensureVisible attempt if the key
     // already mounted; otherwise leave the live timeline alone.
-    final keyContext = GlobalObjectKey(request.eventId).currentContext;
+    final keyContext = _rowKey(request.eventId).currentContext;
     if (keyContext != null && keyContext.mounted) {
       if (!_isJumpCurrent(request)) return;
       await Scrollable.ensureVisible(
