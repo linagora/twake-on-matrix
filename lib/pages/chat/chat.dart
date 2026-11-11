@@ -90,6 +90,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconci
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/album_timeline_index.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';

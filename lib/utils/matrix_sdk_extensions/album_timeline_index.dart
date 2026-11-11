@@ -62,6 +62,18 @@ class AlbumTimelineIndex {
   /// True for an album image that the leader draws.
   bool isHiddenMember(String eventId) => _hiddenIds.contains(eventId);
 
+  /// The leader that draws the hidden image [eventId], else null (the event
+  /// is drawn on its own row).
+  String? albumLeaderOf(String eventId) {
+    if (!isHiddenMember(eventId)) return null;
+    for (final entry in _albumByLeader.entries) {
+      if (entry.value.any((event) => event.eventId == eventId)) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
   /// The newer neighbour. For a leader it is the event newer than the newest
   /// image of its album, not another image of it.
   Event? newerNeighbour(Event event) {

@@ -35,6 +35,13 @@ void main() {
     expect(hrefOf('see $messageLink please'), messageLink);
   });
 
+  test('a markdown link whose text is its own target decoded keeps it', () {
+    expect(
+      hrefOf('[https://example.org/a%3Ab](https://example.org/a%253Ab)'),
+      'https://example.org/a%253Ab',
+    );
+  });
+
   test('a markdown link written with %25 keeps it, as CommonMark says', () {
     expect(
       hrefOf('[label](https://example.org/a%253Ab)'),

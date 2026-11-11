@@ -53,4 +53,62 @@ void main() {
       expect(parts?.secondaryIdentifier, eventId);
     });
   });
+
+  group('MessageLinkPolicy.matrixToForWebLink', () {
+    const origin = 'https://chat.example.org';
+
+    test('turns a web app message link into its matrix.to link', () {
+      final webLink = policy.build(
+        webAppOrigin: origin,
+        roomId: roomId,
+        eventId: eventId,
+      );
+
+      expect(
+        policy.matrixToForWebLink(webLink, webAppOrigin: origin),
+        policy.build(webAppOrigin: null, roomId: roomId, eventId: eventId),
+      );
+    });
+
+    test('turns a web app room link into a matrix.to room link', () {
+      expect(
+        policy.matrixToForWebLink(
+          '$origin/rooms/!abc%3Aexample.org',
+          webAppOrigin: origin,
+        ),
+        'https://matrix.to/#/!abc%3Aexample.org',
+      );
+    });
+
+    test('ignores links of another origin or another path', () {
+      expect(
+        policy.matrixToForWebLink(
+          'https://other.example.org/rooms/!abc%3Aexample.org',
+          webAppOrigin: origin,
+        ),
+        isNull,
+      );
+      expect(
+        policy.matrixToForWebLink(
+          '$origin/rooms/!abc%3Aexample.org/details',
+          webAppOrigin: origin,
+        ),
+        isNull,
+      );
+      expect(
+        policy.matrixToForWebLink('$origin/settings', webAppOrigin: origin),
+        isNull,
+      );
+    });
+
+    test('ignores every link while the web app origin is unknown', () {
+      expect(
+        policy.matrixToForWebLink(
+          '$origin/rooms/!abc%3Aexample.org',
+          webAppOrigin: null,
+        ),
+        isNull,
+      );
+    });
+  });
 }

@@ -21,10 +21,17 @@ final _percentEscape = RegExp('%[0-9A-Fa-f]{2}');
 /// that encoding of their text (with `http://` added for `www.` links) are
 /// rewritten, keeping existing `%XX` escapes as CommonMark does for other
 /// links; every other anchor is left as it is.
-String fixDoubleEncodedAutolinks(String html) {
+///
+/// [source] is the markdown the HTML came from (the event `body`). An anchor
+/// whose href is written there as an explicit destination (`](href`) was
+/// not an autolink and is kept, even when it matches the pattern above.
+String fixDoubleEncodedAutolinks(String html, {required String source}) {
   final unescape = HtmlUnescape();
   return html.replaceAllMapped(_anchorPattern, (match) {
     final href = unescape.convert(match.group(1)!);
+    if (source.contains(']($href') || source.contains('](<$href')) {
+      return match.group(0)!;
+    }
     final text = match.group(2)!;
     final url = unescape.convert(text);
     final destination = href == Uri.encodeFull(url)

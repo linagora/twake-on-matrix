@@ -713,11 +713,27 @@ extension ChatScrollToEventMixin on ChatController {
     }
   }
 
+  /// A hidden album image is drawn by its leader's row: jump to that row so
+  /// the album is centered and tinted. Images outside the loaded timeline
+  /// keep their own id.
+  String _albumRowEventId(String eventId) {
+    final visible = [
+      for (final event in _sortedTimelineEvents)
+        if (event.isVisibleInGui) event,
+    ];
+    return AlbumTimelineIndex(
+          visible,
+          breakBefore: unreadReceivedMessageLocation,
+        ).albumLeaderOf(eventId) ??
+        eventId;
+  }
+
   Future<void> scrollToEventId(
     String eventId, {
     bool highlight = true,
     bool allowContextualReload = true,
   }) async {
+    eventId = _albumRowEventId(eventId);
     // Probe without bumping generation — live scroll must not supersede
     // an in-flight search jump.
     final probe = ChatJumpRequest(

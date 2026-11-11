@@ -113,6 +113,9 @@ void main() {
   });
 
   group('fixDoubleEncodedAutolinks', () {
+    // A message made of bare URLs: no explicit `](destination)` in its body.
+    const bareUrlSource = 'see the link';
+
     // Inputs are the exact output of package:markdown 7.3.1 for bare URLs
     // (GitHub-flavored autolinks), which re-encode an existing `%XX`.
     test('restores the single encoding of a message link', () {
@@ -121,7 +124,7 @@ void main() {
           'https://matrix.to/#/!r%3Aex.org/%24e</a>';
 
       expect(
-        fixDoubleEncodedAutolinks(input),
+        fixDoubleEncodedAutolinks(input, source: bareUrlSource),
         '<a href="https://matrix.to/#/!r%3Aex.org/%24e">'
         'https://matrix.to/#/!r%3Aex.org/%24e</a>',
       );
@@ -133,7 +136,7 @@ void main() {
           'https://a.org/x?y=1&amp;z=%3A</a> end</p>';
 
       expect(
-        fixDoubleEncodedAutolinks(input),
+        fixDoubleEncodedAutolinks(input, source: bareUrlSource),
         '<p>see <a href="https://a.org/x?y=1&amp;z=%3A">'
         'https://a.org/x?y=1&amp;z=%3A</a> end</p>',
       );
@@ -143,7 +146,7 @@ void main() {
       const input = '<a href="http://www.a.org/%253A">www.a.org/%3A</a>';
 
       expect(
-        fixDoubleEncodedAutolinks(input),
+        fixDoubleEncodedAutolinks(input, source: bareUrlSource),
         '<a href="http://www.a.org/%3A">www.a.org/%3A</a>',
       );
     });
@@ -151,13 +154,13 @@ void main() {
     test('still encodes a raw % that starts no escape', () {
       const input = '<a href="https://a.org/50%25off">https://a.org/50%off</a>';
 
-      expect(fixDoubleEncodedAutolinks(input), input);
+      expect(fixDoubleEncodedAutolinks(input, source: bareUrlSource), input);
     });
 
     test('leaves a link whose text differs from its href', () {
       const input = '<a href="https://example.org/a%253Ab">label</a>';
 
-      expect(fixDoubleEncodedAutolinks(input), input);
+      expect(fixDoubleEncodedAutolinks(input, source: bareUrlSource), input);
     });
 
     test('leaves a correctly encoded link from another client', () {
@@ -165,14 +168,23 @@ void main() {
           '<a href="https://matrix.to/#/!r%3Aex.org/%24e">'
           'https://matrix.to/#/!r%3Aex.org/%24e</a>';
 
-      expect(fixDoubleEncodedAutolinks(input), input);
+      expect(fixDoubleEncodedAutolinks(input, source: bareUrlSource), input);
     });
 
     test('leaves an anchor whose text is past the bounded length', () {
       final text = 'https://example.org/${'a' * 1000}%3A';
       final input = '<a href="${Uri.encodeFull(text)}">$text</a>';
 
-      expect(fixDoubleEncodedAutolinks(input), input);
+      expect(fixDoubleEncodedAutolinks(input, source: bareUrlSource), input);
+    });
+    test('keeps an explicit markdown link whose text matches the pattern', () {
+      // `[https://example.org/a%3Ab](https://example.org/a%253Ab)` targets a
+      // literal %3A on purpose; package:markdown keeps its destination.
+      const source = '[https://example.org/a%3Ab](https://example.org/a%253Ab)';
+      const input =
+          '<a href="https://example.org/a%253Ab">https://example.org/a%3Ab</a>';
+
+      expect(fixDoubleEncodedAutolinks(input, source: source), input);
     });
   });
 }

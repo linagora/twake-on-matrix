@@ -20,6 +20,7 @@ class FormattedTextWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     var html = fixDoubleEncodedAutolinks(
       fixDoubleEncodedCodeBlocks(event.formattedText),
+      source: event.body,
     );
 
     if (event.messageType == MessageTypes.Emote) {
