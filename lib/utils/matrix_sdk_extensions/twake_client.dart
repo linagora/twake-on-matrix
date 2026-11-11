@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
@@ -56,6 +56,7 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// implementation.
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
 class TwakeClient extends Client implements ThreadUnreadStoreOwner {
+  // TODO: [transitional] #3599
   @override
   late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
 

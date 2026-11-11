@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 /// What the card under a thread root shows: built from the server
 /// aggregation of the root, then kept up to date with the replies, edits

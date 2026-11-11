@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 
 /// THR-M-04 and THR-M-11: a link or a search result opens a thread reply at
 /// `/rooms/R/threads/T?event=E`. go_router gives every route of the stack the

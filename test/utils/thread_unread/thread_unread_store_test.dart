@@ -637,7 +637,7 @@ void main() {
     });
 
     test('are bounded: the oldest go first, the newest stay', () async {
-      // ponytail: 5000 probes the bound, the cap itself is not decided.
+      // 5000 probes the bound, the cap itself is not decided.
       const remembered = 5000;
       final store = ThreadUnreadStore(client: clientNamed('account-a'));
 

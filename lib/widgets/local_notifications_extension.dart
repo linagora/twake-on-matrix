@@ -1,7 +1,7 @@
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:io';
 import 'package:twake_chat/presentation/extensions/event_update_extension.dart';

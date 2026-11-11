@@ -1,4 +1,4 @@
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/search/server_search_view_style.dart';

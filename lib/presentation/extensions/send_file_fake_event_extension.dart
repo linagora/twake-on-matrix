@@ -1,4 +1,4 @@
-import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';

@@ -1,12 +1,12 @@
-import 'package:twake_chat/domain/model/thread/thread_read_marker.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_read_marker.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
-import 'package:twake_chat/domain/model/thread/thread_events.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
-import 'package:twake_chat/domain/model/thread/thread_send_target.dart';
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
-import 'package:twake_chat/domain/model/thread/thread_summary.dart';
-import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_events.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
+import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
@@ -43,6 +43,7 @@ import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
+import 'package:twake_chat/providers/thread_providers.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -696,11 +697,13 @@ class ChatController extends ConsumerState<Chat>
     // Captured now: the closures below outlive the widget context.
     final rootId = threadRootId!;
     final roomClient = room.client;
+    final getReplies = ref.read(getThreadRepliesUseCaseProvider(roomClient));
+    final roomId = room.id;
     final threadEvents = ThreadEvents(
       rootEventId: rootId,
       fetchPage: (from) async {
-        final page = await const GetThreadRepliesInteractor().execute(
-          room: room,
+        final page = await getReplies.execute(
+          roomId: roomId,
           request: ThreadRepliesRequest(
             rootEventId: rootId,
             from: from,
@@ -3269,10 +3272,13 @@ class ChatController extends ConsumerState<Chat>
   /// On mobile, [MatrixState.audioPlayer] keeps playing after leaving the chat
   /// (background playback). Do not stop/dispose it here. The web recorder and
   /// recording UI notifiers are Chat-scoped and must always be torn down.
+  ///
+  /// A thread screen shares the room's player: closing it must not stop the
+  /// playback of the room screen below.
   void disposeAudioPlayer() {
     disposeAudioMixin();
 
-    if (PlatformInfos.isMobile) {
+    if (PlatformInfos.isMobile || isThread) {
       return;
     }
 

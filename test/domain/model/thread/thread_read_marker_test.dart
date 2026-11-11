@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/domain/model/thread/thread_read_marker.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_read_marker.dart';
 
 import '../../usecase/room/send_text_message_interactor_test.mocks.dart';
 

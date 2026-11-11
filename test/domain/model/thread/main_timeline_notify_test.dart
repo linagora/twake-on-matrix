@@ -3,7 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 

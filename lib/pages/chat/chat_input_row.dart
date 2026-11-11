@@ -1,4 +1,4 @@
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/pages/chat/animate_pause_button.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_mobile.dart';
 import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';

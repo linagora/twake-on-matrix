@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 /// A page of `/relations/<root>?recurse=true&dir=b`: newest first.
 typedef ThreadPage = ({List<Event> events, String? nextBatch});

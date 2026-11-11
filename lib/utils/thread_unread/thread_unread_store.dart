@@ -6,11 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
-import 'package:twake_chat/domain/model/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
-import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
+import 'package:twake_chat/data/thread/repositories/thread_repository_impl.dart';
+import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
+import 'package:twake_chat/domain/thread/usecases/get_thread_replies_use_case.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 /// Marks the generation of the store: [ThreadUnreadStore.clear] starts a new
@@ -20,6 +22,7 @@ class _LookupEpoch {}
 /// Unread counters of the threads: the SDK keeps only the counters of the
 /// room. Filled from the raw sync response, and saved per account so a cold
 /// start (or a web reload) shows them before the next sync carries them.
+// TODO: [transitional] #3599
 class ThreadUnreadStore extends ChangeNotifier {
   ThreadUnreadStore({required Client client}) : _client = client;
 
@@ -46,7 +49,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Map<String, Set<String>> _threadReplyIds = {};
   final Queue<ReplyRef> _threadReplyOrder = Queue();
 
-  // ponytail: a count cap for the account, not a per-room one.
+  // A count cap for the account, not a per-room one.
   static const int _maxThreadReplyIds = 4000;
 
   /// Follow lookups run at most this many at a time (one server request each).
@@ -230,7 +233,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   Timer? _persistTimer;
   bool _dirty = false;
 
-  // ponytail: fixed window; a save per change is what a catch-up sync broke.
+  // Fixed window: a save per change is what a catch-up sync broke.
   static const Duration _persistWindow = Duration(seconds: 1);
 
   /// Saves in a zero-delay task (a burst of calls in a row is one save),
@@ -451,7 +454,7 @@ extension RoomUnreadWithThreads on Room {
 
 extension MarkRoomAndThreadsRead on Room {
   /// Stored events, newest first, paged: the newest ones can all be replies
-  /// of a busy thread. ponytail: gives up after [_mainEventSearchLimit].
+  /// of a busy thread. It gives up after [_mainEventSearchLimit].
   Future<Event?> _newestMainTimelineEvent() async {
     const pageSize = 50;
     for (var start = 0; start < _mainEventSearchLimit; start += pageSize) {
@@ -474,9 +477,10 @@ extension MarkRoomAndThreadsRead on Room {
     List<ThreadUnread> threads,
   ) async {
     final lastByThread = <ThreadRef, Event>{};
+    final getReplies = GetThreadRepliesUseCase(ThreadRepositoryImpl(client));
     for (final thread in threads.where((t) => t.notificationCount > 0)) {
-      final page = await const GetThreadRepliesInteractor().execute(
-        room: this,
+      final page = await getReplies.execute(
+        roomId: id,
         request: ThreadRepliesRequest(
           rootEventId: thread.rootEventId,
           limit: 1,

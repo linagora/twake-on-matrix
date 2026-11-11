@@ -1,6 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:twake_chat/domain/model/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 /// Where a tapped notification leads: a thread reply opens its thread screen
 /// on that reply (room beneath), anything else opens the room, on the event

@@ -2,9 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
-import 'package:twake_chat/domain/thread/usecases/get_thread_replies_interactor.dart';
+import 'package:twake_chat/data/thread/repositories/thread_repository_impl.dart';
+import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
 
-import '../../usecase/room/send_text_message_interactor_test.mocks.dart';
+import '../../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 
 /// Decrypts every event into the text message [decryptedBody].
 class _FakeEncryption extends Fake implements Encryption {
@@ -50,7 +51,7 @@ void main() {
 
   late MockRoom room;
   late MockClient client;
-  late GetThreadRepliesInteractor interactor;
+  late ThreadRepositoryImpl interactor;
 
   MatrixEvent reply(String eventId, int minute) => MatrixEvent(
     type: EventTypes.Message,
@@ -88,7 +89,8 @@ void main() {
     client = MockClient();
     when(room.id).thenReturn(roomId);
     when(room.client).thenReturn(client);
-    interactor = const GetThreadRepliesInteractor();
+    when(client.getRoomById(roomId)).thenReturn(room);
+    interactor = ThreadRepositoryImpl(client);
   });
 
   test('the first page gives the most recent replies, oldest first', () async {
@@ -100,9 +102,9 @@ void main() {
       ),
     );
 
-    final page = await interactor.execute(
-      room: room,
-      request: const ThreadRepliesRequest(rootEventId: rootId),
+    final page = await interactor.getReplies(
+      roomId,
+      const ThreadRepliesRequest(rootEventId: rootId),
     );
 
     expect(page.replies.map((event) => event.eventId), [
@@ -120,9 +122,9 @@ void main() {
         (_) async => GetRelatingEventsWithRelTypeResponse(chunk: []),
       );
 
-      await interactor.execute(
-        room: room,
-        request: const ThreadRepliesRequest(rootEventId: rootId),
+      await interactor.getReplies(
+        roomId,
+        const ThreadRepliesRequest(rootEventId: rootId),
       );
 
       verify(
@@ -144,9 +146,9 @@ void main() {
           GetRelatingEventsWithRelTypeResponse(chunk: [reply(r'$r0', 0)]),
     );
 
-    final page = await interactor.execute(
-      room: room,
-      request: const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
+    final page = await interactor.getReplies(
+      roomId,
+      const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
     );
 
     expect(page.replies.single.eventId, r'$r0');
@@ -169,9 +171,9 @@ void main() {
           GetRelatingEventsWithRelTypeResponse(chunk: [reply(r'$r0', 0)]),
     );
 
-    final page = await interactor.execute(
-      room: room,
-      request: const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
+    final page = await interactor.getReplies(
+      roomId,
+      const ThreadRepliesRequest(rootEventId: rootId, from: 'batch-1'),
     );
 
     expect(page.nextBatch, isNull);
@@ -186,9 +188,9 @@ void main() {
       ),
     );
 
-    final page = await interactor.execute(
-      room: room,
-      request: const ThreadRepliesRequest(rootEventId: rootId),
+    final page = await interactor.getReplies(
+      roomId,
+      const ThreadRepliesRequest(rootEventId: rootId),
     );
 
     expect(page.canLoadMore, isTrue);
@@ -200,9 +202,9 @@ void main() {
           GetRelatingEventsWithRelTypeResponse(chunk: [reply(r'$r1', 1)]),
     );
 
-    final page = await interactor.execute(
-      room: room,
-      request: const ThreadRepliesRequest(rootEventId: rootId),
+    final page = await interactor.getReplies(
+      roomId,
+      const ThreadRepliesRequest(rootEventId: rootId),
     );
 
     expect(page.replies.single.room, same(room));
@@ -217,9 +219,9 @@ void main() {
       );
 
       expect(
-        interactor.execute(
-          room: room,
-          request: const ThreadRepliesRequest(rootEventId: rootId),
+        interactor.getReplies(
+          roomId,
+          const ThreadRepliesRequest(rootEventId: rootId),
         ),
         throwsA(isA<MatrixException>()),
       );
@@ -254,9 +256,9 @@ void main() {
       );
     });
 
-    Future<ThreadRepliesPage> loadFrom(String from) => interactor.execute(
-      room: room,
-      request: ThreadRepliesRequest(
+    Future<ThreadRepliesPage> loadFrom(String from) => interactor.getReplies(
+      roomId,
+      ThreadRepliesRequest(
         rootEventId: rootId,
         from: from,
         withRelations: true,
