@@ -180,6 +180,19 @@ void _newestIsMainTests() {
   });
 }
 
+/// `GET /relations/<root>/m.thread` of any thread (a mock call matcher).
+Future<GetRelatingEventsWithRelTypeResponse> _threadRelationsRequest() =>
+    _client.getRelatingEventsWithRelType(
+      any,
+      any,
+      any,
+      from: anyNamed('from'),
+      to: anyNamed('to'),
+      limit: anyNamed('limit'),
+      dir: anyNamed('dir'),
+      recurse: anyNamed('recurse'),
+    );
+
 void _unreadThreadsTests() {
   const rootA = r'$rootA';
   const rootB = r'$rootB';
@@ -188,18 +201,7 @@ void _unreadThreadsTests() {
     final main = _mainMessage(r'$main', 50);
     _store([main, _mainMessage(rootA, 30)], lastEvent: main);
     // The server has replies: a per-thread lookup would find one.
-    when(
-      _client.getRelatingEventsWithRelType(
-        _roomId,
-        any,
-        any,
-        from: anyNamed('from'),
-        to: anyNamed('to'),
-        limit: anyNamed('limit'),
-        dir: anyNamed('dir'),
-        recurse: anyNamed('recurse'),
-      ),
-    ).thenAnswer(
+    when(_threadRelationsRequest()).thenAnswer(
       (_) async => GetRelatingEventsWithRelTypeResponse(
         chunk: [_threadReply(9, 45, root: rootA)],
       ),
@@ -220,18 +222,7 @@ void _unreadThreadsTests() {
   test('no thread is fetched: no /relations request', () async {
     await _room.markRoomAndAllThreadsRead();
 
-    verifyNever(
-      _client.getRelatingEventsWithRelType(
-        any,
-        any,
-        any,
-        from: anyNamed('from'),
-        to: anyNamed('to'),
-        limit: anyNamed('limit'),
-        dir: anyNamed('dir'),
-        recurse: anyNamed('recurse'),
-      ),
-    );
+    verifyNever(_threadRelationsRequest());
     verifyNever(
       _client.getRelatingEvents(
         any,

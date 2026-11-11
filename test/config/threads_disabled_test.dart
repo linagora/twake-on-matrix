@@ -36,6 +36,7 @@ void main() {
   group('a thread reply in the room', _timelineTests);
   group('a thread root', _rootTests);
   group('the badges', _badgeTests);
+  group('the sync filter', _syncFilterTests);
 }
 
 const _roomId = '!room:example.com';
@@ -194,10 +195,12 @@ void _badgeTests() {
     expect(room.isUnreadWithThreads, isFalse);
     expect(room.isUnreadOrInvitedWithThreads, isFalse);
   });
+}
 
-  /// On main the server counts thread messages in the room counters: the
-  /// sync filter must stop asking for per-thread counters, at the time it
-  /// is read (the flag is a static the app may set at start).
+/// On main the server counts thread messages in the room counters: the
+/// sync filter must stop asking for per-thread counters, at the time it is
+/// read (the flag is a static the app may set at start).
+void _syncFilterTests() {
   test('the sync filter follows the flag: no per-thread counters when '
       'off', () {
     String? timelineFilter() =>
