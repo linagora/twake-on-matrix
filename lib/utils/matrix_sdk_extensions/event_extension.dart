@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
@@ -7,6 +9,7 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/event_info_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
@@ -241,19 +244,15 @@ extension LocalizedBody on Event {
     if (!isVideoOrImage) {
       return copyTextEvent(context, timeline, clipboard: clipboard);
     }
+    final localFile = getMatrixFile();
+    final mimeType = localFile?.mimeType ?? attachmentMimetype;
+    if (!TwakeClipboard.canCopyMedia(mimeType)) {
+      return copyTextEvent(context, timeline, clipboard: clipboard);
+    }
     final l10n = L10n.of(context)!;
     try {
-      final matrixFile =
-          getMatrixFile() ?? await downloadAndDecryptAttachment();
-      if (!context.mounted) return;
-      if (!TwakeClipboard.canCopyMedia(matrixFile.mimeType)) {
-        await copyTextEvent(context, timeline, clipboard: clipboard);
-        return;
-      }
-      await clipboard.copyMediaAsBytes(
-        matrixFile.bytes,
-        mimeType: matrixFile.mimeType,
-      );
+      final bytes = localFile?.bytes ?? await _readAttachmentFile();
+      await clipboard.copyMediaAsBytes(bytes, mimeType: mimeType);
       if (!context.mounted) return;
       TwakeSnackBar.show(context, l10n.copiedToClipboard);
     } catch (e) {
@@ -261,6 +260,12 @@ extension LocalizedBody on Event {
       if (!context.mounted) return;
       TwakeSnackBar.show(context, l10n.copyImageFailed);
     }
+  }
+
+  Future<Uint8List> _readAttachmentFile() async {
+    final path = (await getFileInfo())?.filePath;
+    if (path == null) throw StateError('No file for $eventId');
+    return File(path).readAsBytes();
   }
 
   Future<void> copyTextEvent(
