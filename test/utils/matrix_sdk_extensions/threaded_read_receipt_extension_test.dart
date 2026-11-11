@@ -9,6 +9,8 @@ import '../room_status_extension_test.mocks.dart' show MockTimeline;
 
 /// THR-M-06: the mobile sends threaded receipts only, like the web, so its
 /// receipts on the room no longer clear the unread threads read on the web.
+/// « Mark as read » in the room list is the exception (maintainer decision
+/// 11/11): see test/utils/thread_unread/mark_room_and_all_threads_read_test.dart.
 void main() {
   const roomId = '!room:example.com';
   const rootId = r'$root';
@@ -128,44 +130,6 @@ void main() {
       await room.setThreadReadMarker(message(r'$reply'), thread(rootId));
 
       verifyNever(client.postReceipt(any, any, any, threadId: 'main'));
-    });
-  });
-
-  group('Mark as read on a room', () {
-    test('reads the main timeline and every unread thread', () async {
-      await room.markRoomAndThreadsRead(
-        mainEvent: message(r'$last'),
-        lastReplyByThread: {
-          thread(r'$rootA'): message(r'$a9'),
-          thread(r'$rootB'): message(r'$b3'),
-        },
-      );
-
-      verify(
-        client.postReceipt(
-          roomId,
-          ReceiptType.mRead,
-          r'$last',
-          threadId: 'main',
-        ),
-      ).called(1);
-      verify(
-        client.postReceipt(
-          roomId,
-          ReceiptType.mRead,
-          r'$a9',
-          threadId: r'$rootA',
-        ),
-      ).called(1);
-      verify(
-        client.postReceipt(
-          roomId,
-          ReceiptType.mRead,
-          r'$b3',
-          threadId: r'$rootB',
-        ),
-      ).called(1);
-      verifyNoUnthreadedReceipt();
     });
   });
 

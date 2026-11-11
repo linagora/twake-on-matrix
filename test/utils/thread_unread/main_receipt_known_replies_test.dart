@@ -5,20 +5,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
-import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../room_status_extension_test.mocks.dart' show MockTimeline;
 import 'thread_fakes.dart';
 
 /// Review 4515562061 (b), the two places that pick the main read target:
 /// the room screen reading its timeline, and « Mark as read » in the room
 /// list. A reply the app saw in a thread and that was deleted since (it lost
-/// its `m.relates_to`) never gets the `main` receipt nor `m.fully_read`.
+/// its `m.relates_to`) never gets the `main` receipt of the room screen nor
+/// `m.fully_read`.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
-    _client = _ThreadClient();
+    _client = RecordingThreadClient();
     when(_client.clientName).thenReturn('account-a');
     when(_client.userID).thenReturn('@me:example.com');
     when(_client.receiptsPublicByDefault).thenReturn(true);
@@ -38,15 +38,22 @@ void main() {
     _verifyMainReadOnMainMessage();
   });
 
-  test('« Mark as read » reads the main message, not the deleted '
-      'reply', () async {
-    when(
-      _client.database,
-    ).thenReturn(StoredEvents([_deletedReply(), _mainMessage()]));
+  /// Maintainer decision (11/11), nqhhdev 4521574499: the one unthreaded
+  /// receipt of « Mark as read » lands on the newest event, the deleted
+  /// reply here (MSC3771: unthreaded covers every thread). `m.fully_read`
+  /// stays on the main message.
+  test('« Mark as read » keeps m.fully_read on the main message, not on the '
+      'deleted reply', () async {
+    final main = _mainMessage();
+    when(_client.database).thenReturn(StoredEvents([_deletedReply(), main]));
+    _room.lastEvent = main;
 
     await _room.markRoomAndAllThreadsRead();
 
-    _verifyMainReadOnMainMessage();
+    expect(_client.fullyRead, [r'$main']);
+    expect(_client.receipts, [
+      (eventId: _replyId, threadId: null, public: true),
+    ]);
   });
 }
 
@@ -55,7 +62,7 @@ const _rootId = r'$root';
 const _replyId = r'$reply';
 const _bob = '@bob:example.com';
 
-late _ThreadClient _client;
+late RecordingThreadClient _client;
 late Room _room;
 
 final _replySentAt = DateTime.utc(2026, 11, 9, 11);
@@ -102,9 +109,4 @@ void _verifyMainReadOnMainMessage() {
     _client.postReceipt(any, any, _replyId, threadId: anyNamed('threadId')),
   );
   verifyNever(_client.setReadMarker(any, mFullyRead: _replyId));
-}
-
-class _ThreadClient extends MockClient implements ThreadUnreadStoreOwner {
-  @override
-  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
 }
