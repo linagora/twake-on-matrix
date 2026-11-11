@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 
 import '../room/room_extension_test.mocks.dart';
@@ -82,7 +83,17 @@ Event _undecryptable() => _event(
 bool _offered(Event event) =>
     ThreadRules.canStartThread(event, hasThread: false);
 
+/// With `AppConfig.threadsEnabled` on; off, see threads_disabled_test.dart.
 void _startThreadTests() {
+  late bool flagBefore;
+
+  setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
   test('is offered on a message without thread in a room the user can '
       'write in', () {
     expect(_offered(_message()), isTrue);

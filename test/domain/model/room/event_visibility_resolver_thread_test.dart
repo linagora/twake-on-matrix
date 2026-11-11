@@ -1,21 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
 
 import 'room_extension_test.mocks.dart';
 
 /// THR-M-01: thread replies stay out of the main timeline and out of the
 /// chat-list "last message"; the root and classic replies stay.
+/// With `AppConfig.threadsEnabled` on; off, see threads_disabled_test.dart.
 void main() {
   late MockRoom room;
+  late bool flagBefore;
 
   const rootId = r'$root';
 
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
     room = MockRoom();
     when(room.id).thenReturn('!room:example.com');
   });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
 
   Event message({
     required String eventId,

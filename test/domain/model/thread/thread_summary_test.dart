@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 
 import '../room/room_extension_test.mocks.dart';
@@ -8,17 +9,23 @@ import '../room/room_extension_test.mocks.dart';
 /// THR-M-02: the card under a root shows the number of replies and the last
 /// reply, built from the server aggregation (`unsigned.m.relations.m.thread`)
 /// and kept up to date with the replies received live.
+/// With `AppConfig.threadsEnabled` on; off, see threads_disabled_test.dart.
 void main() {
   late MockRoom room;
+  late bool flagBefore;
 
   const alice = '@alice:example.com';
   const bob = '@bob:example.com';
   const rootId = r'$root';
 
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
     room = MockRoom();
     when(room.id).thenReturn('!room:example.com');
   });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
 
   DateTime at(int minute) => DateTime.utc(2026, 11, 6, 10, minute);
 
