@@ -3393,9 +3393,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "856d12d526f252ee9465e39500b4a15a0bf24e97"
-      resolved-ref: "856d12d526f252ee9465e39500b4a15a0bf24e97"
-      url: "https://github.com/nqhhdev/twake_drive_picker.git"
+      ref: "5d70891eba606c16743924857c2cf1dc27649d72"
+      resolved-ref: "5d70891eba606c16743924857c2cf1dc27649d72"
+      url: "https://github.com/linagora/twake_drive_picker.git"
     source: git
     version: "0.2.0"
   typed_data:
