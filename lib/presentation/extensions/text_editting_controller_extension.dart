@@ -6,7 +6,7 @@ extension TextEdittingControllerExtension on TextEditingController {
   Future<void> pasteText({ClipboardReader? clipboardReader}) async {
     final start = selection.start;
     final end = selection.end;
-    TwakeClipboard.instance.initReader();
+    if (clipboardReader == null) TwakeClipboard.instance.initReader();
     final pastedText = await TwakeClipboard.instance.pasteText(
       clipboardReader: clipboardReader,
     );
