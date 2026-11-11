@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -15,6 +16,9 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> pushHelper(
@@ -22,6 +26,7 @@ Future<void> pushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
+  ({String roomId, String threadRootId})? activeThread,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   try {
@@ -31,6 +36,7 @@ Future<void> pushHelper(
       client: client,
       l10n: l10n,
       activeRoomId: activeRoomId,
+      activeThread: activeThread,
       onSelectNotification: onSelectNotification,
     );
   } catch (e, s) {
@@ -74,6 +80,7 @@ Future<void> _tryPushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
+  ({String roomId, String threadRootId})? activeThread,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   final isBackgroundMessage = client == null;
@@ -86,14 +93,6 @@ Future<void> _tryPushHelper(
     'Push helper has been started (background=$isBackgroundMessage).',
     notification.toJson(),
   );
-
-  if (!isBackgroundMessage &&
-      activeRoomId == notification.roomId &&
-      activeRoomId != null &&
-      client.syncPresence == null) {
-    Logs().v('Room is in foreground. Stop push helper here.');
-    return;
-  }
 
   // Initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -134,6 +133,31 @@ Future<void> _tryPushHelper(
     return;
   }
   Logs().v('Push helper got notification event of type ${event.type}.');
+
+  // Foreground: the room on screen is read live, except its thread replies
+  // (they sit in another screen); a thread reply follows the thread rule,
+  // which also skips the thread on screen. The thread is known from the
+  // event (m.relates_to stays in clear). Outside the foreground the server
+  // push decides until P2 (thread push rule): this rule does not apply there.
+  if (!isBackgroundMessage && client.syncPresence == null) {
+    final threadRootId = event.threadRootId;
+    if (threadRootId == null) {
+      if (activeRoomId != null && activeRoomId == notification.roomId) {
+        Logs().v('Room is in foreground. Stop push helper here.');
+        return;
+      }
+    } else if (!await ThreadRules.shouldNotifyThreadReply(
+      event,
+      pushActions: client.pushruleEvaluator.match(event),
+      followed: client.threadUnread?.followOnceKnown(
+        ThreadRef(notification.roomId!, threadRootId),
+      ),
+      activeThread: activeThread,
+    )) {
+      Logs().v('Thread reply is read live or not followed. Stop push helper.');
+      return;
+    }
+  }
 
   if (event.type.startsWith('m.call')) {
     // make sure bg sync is on (needed to update hold, unhold events)

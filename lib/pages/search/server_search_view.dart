@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/pages/search/public_groups_search_section.dart';
 import 'package:twake_chat/pages/search/search.dart';
 import 'package:twake_chat/pages/search/server_search_view_style.dart';
@@ -54,8 +55,11 @@ class ServerSearchMessagesList extends StatelessWidget {
                 final originServerTs = result.result?.originServerTs;
 
                 return TwakeInkWell(
-                  onTap: () =>
-                      context.goToRoomWithEvent(event.room.id, event.eventId),
+                  onTap: () => context.goToRoomWithEvent(
+                    event.room.id,
+                    event.eventId,
+                    threadRootId: event.threadRootId,
+                  ),
                   child: TwakeListItem(
                     child: Padding(
                       padding: ServerSearchViewStyle.paddingInsideListItem,
