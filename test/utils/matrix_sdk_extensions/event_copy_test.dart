@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +10,7 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
@@ -31,10 +34,14 @@ class _RecordingClipboard extends Fake implements TwakeClipboard {
 late Room _room;
 late Timeline _timeline;
 late _RecordingClipboard _clipboard;
+late Directory _tempDir;
+
+const _pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
 
 void main() {
   setUpAll(_setUpRoom);
-  setUp(() => _clipboard = _RecordingClipboard());
+  setUp(_setUpClipboardAndStorage);
+  tearDown(_tearDownStorage);
 
   testWidgets(
     'copies the image itself, not its description',
@@ -61,6 +68,34 @@ void main() {
     _fallsBackToTextForUnknownFormat,
   );
   testWidgets('copies the body of a text message', _copiesText);
+  testWidgets(
+    'copies a received file already on the device',
+    _copiesReceivedFileFromDisk,
+  );
+  testWidgets(
+    'shows an error when a received file cannot be downloaded',
+    _showsErrorWhenDownloadFails,
+  );
+  testWidgets(
+    'copies the text of a received WebM without downloading it',
+    _copiesTextOfReceivedWebmWithoutDownload,
+  );
+}
+
+void _setUpClipboardAndStorage() {
+  _clipboard = _RecordingClipboard();
+  _tempDir = Directory.systemTemp.createTempSync('event_copy_test');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+        _pathProviderChannel,
+        (_) async => _tempDir.path,
+      );
+}
+
+void _tearDownStorage() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(_pathProviderChannel, null);
+  _tempDir.deleteSync(recursive: true);
 }
 
 Future<void> _setUpRoom() async {
@@ -99,22 +134,17 @@ Event _mediaEvent(MatrixFile file) {
 
 Future<void> _copy(WidgetTester tester, Event event) async {
   await tester.pumpWidget(
-    MaterialApp(
-      locale: const Locale('en'),
+    const MaterialApp(
+      locale: Locale('en'),
       localizationsDelegates: L10n.localizationsDelegates,
       supportedLocales: L10n.supportedLocales,
-      home: Scaffold(
-        body: Builder(
-          builder: (context) => TextButton(
-            onPressed: () =>
-                event.copy(context, _timeline, clipboard: _clipboard),
-            child: const Text('copy'),
-          ),
-        ),
-      ),
+      home: Scaffold(body: SizedBox()),
     ),
   );
-  await tester.tap(find.text('copy'));
+  final context = tester.element(find.byType(SizedBox));
+  await tester.runAsync(
+    () => event.copy(context, _timeline, clipboard: _clipboard),
+  );
   await tester.pumpAndSettle();
 }
 
@@ -155,4 +185,53 @@ Future<void> _copiesText(WidgetTester tester) async {
   expect(_clipboard.text, 'Hello there');
   expect(_clipboard.mediaBytes, isNull);
   expect(find.text('Text copied to clipboard'), findsOneWidget);
+}
+
+Event _receivedEvent(String name, String mimeType, int size) => _buildEvent({
+  'msgtype': MessageTypes.Video,
+  'body': name,
+  'url': 'mxc://example.org/$name',
+  'info': {'mimetype': mimeType, 'size': size},
+});
+
+Future<void> _copiesReceivedFileFromDisk(WidgetTester tester) async {
+  final bytes = Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
+  final event = _receivedEvent('received.mp4', 'video/mp4', bytes.length);
+  await tester.runAsync(() async {
+    final path = await StorageDirectoryManager.instance
+        .getFilePathInAppDownloads(
+          eventId: event.eventId,
+          fileName: 'received.mp4',
+        );
+    await File(path).create(recursive: true);
+    await File(path).writeAsBytes(bytes);
+  });
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, bytes);
+  expect(_clipboard.mediaMimeType, 'video/mp4');
+  expect(find.text('Copied to clipboard'), findsOneWidget);
+}
+
+Future<void> _showsErrorWhenDownloadFails(WidgetTester tester) async {
+  final event = _receivedEvent('missing.png', 'image/png', 3);
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, isNull);
+  expect(_clipboard.text, isNull);
+  expect(find.text('Copy image failed'), findsOneWidget);
+}
+
+Future<void> _copiesTextOfReceivedWebmWithoutDownload(
+  WidgetTester tester,
+) async {
+  final event = _receivedEvent('received.webm', 'video/webm', 3);
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, isNull);
+  expect(_clipboard.text, isNotNull);
+  expect(find.text('Copy image failed'), findsNothing);
 }
