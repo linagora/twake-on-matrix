@@ -22,17 +22,6 @@ extension ThreadedReadReceiptExtension on Room {
   Future<void> setThreadReadMarker(Event event, ThreadRef thread) =>
       _postReceipt(event, thread: thread);
 
-  /// "Mark as read" on a room: its main timeline and every given thread.
-  Future<void> markRoomAndThreadsRead({
-    required Event mainEvent,
-    required Map<ThreadRef, Event> lastReplyByThread,
-  }) async {
-    await setMainTimelineReadMarker(mainEvent);
-    for (final entry in lastReplyByThread.entries) {
-      await setThreadReadMarker(entry.value, entry.key);
-    }
-  }
-
   /// SDK `hasNewMessages` reads `receiptState.global` only, which the app
   /// never moves (it sends threaded receipts). The own read position is the
   /// newest own receipt: unthreaded, main, or the thread of the last event.

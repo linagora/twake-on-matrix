@@ -14,8 +14,9 @@ class ThreadRepositoryImpl implements ThreadRepository<Event> {
     String roomId,
     ThreadRepliesRequest request,
   ) async {
-    final room =
-        _client.getRoomById(roomId) ?? Room(id: roomId, client: _client);
+    final room = _client.getRoomById(roomId);
+    // A room the client does not know (left, not synced yet): nothing to show.
+    if (room == null) return const ThreadRepliesPage(replies: []);
     final response = await _fetch(roomId, request);
     final replies = [
       for (final event in response.chunk.reversed)

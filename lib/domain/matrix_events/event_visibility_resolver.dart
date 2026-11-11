@@ -47,7 +47,7 @@ abstract final class EventVisibilityResolver {
   static bool isEligibleForChatListPreviewSync(Event event) {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
-    if (event.threadRootId != null) return false;
+    if (_isThreadReply(event)) return false;
     // An edit may target a thread reply (the SDK promotes it to lastEvent):
     // only the async check reads its target.
     return event.relationshipType != RelationshipTypes.edit;
@@ -61,7 +61,7 @@ abstract final class EventVisibilityResolver {
   ) async {
     if (!EventTypeRules.showInChatListTypes.contains(event.type)) return false;
     if (event.redacted) return false;
-    if (event.threadRootId != null) return false;
+    if (_isThreadReply(event)) return false;
     if (event.relationshipType != RelationshipTypes.edit) return true;
 
     // Walk the edit chain; discard if any ancestor is redacted.
@@ -71,7 +71,7 @@ abstract final class EventVisibilityResolver {
       if (!visited.add(id)) break;
       final target = await room.getEventById(id);
       if (target == null) break;
-      if (target.redacted || target.threadRootId != null) return false;
+      if (target.redacted || _isThreadReply(target)) return false;
       id = target.relationshipType == RelationshipTypes.edit
           ? target.relationshipEventId
           : null;
@@ -82,6 +82,13 @@ abstract final class EventVisibilityResolver {
   // ---------------------------------------------------------------------------
   // Layer 1 — Relationship
   // ---------------------------------------------------------------------------
+
+  /// With the threads flag off a reply is an ordinary message of the room.
+  static bool _isThreadReply(Event event) =>
+      AppConfig.threadsEnabled && event.threadRootId != null;
+
+  static bool _isKnownThreadReply(Event event, Set<String> knownIds) =>
+      AppConfig.threadsEnabled && knownIds.contains(event.eventId);
 
   static const _hiddenRelationships = {
     RelationshipTypes.edit,
@@ -95,8 +102,8 @@ abstract final class EventVisibilityResolver {
   }) {
     if (_hiddenRelationships.contains(event.relationshipType)) return false;
     if (!inThread &&
-        (event.threadRootId != null ||
-            knownThreadReplyIds.contains(event.eventId))) {
+        (_isThreadReply(event) ||
+            _isKnownThreadReply(event, knownThreadReplyIds))) {
       return false;
     }
     if (event.type.startsWith('m.key.verification.')) return false;

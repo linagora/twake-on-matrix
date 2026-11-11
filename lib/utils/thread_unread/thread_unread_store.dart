@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,10 +11,6 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_ex
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
-import 'package:twake_chat/data/thread/repositories/thread_repository_impl.dart';
-import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
-import 'package:twake_chat/domain/thread/usecases/get_thread_replies_use_case.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 /// Marks the generation of the store: [ThreadUnreadStore.clear] starts a new
 /// one, so a lookup started before it must not bring a follow back.
@@ -473,43 +470,27 @@ extension MarkRoomAndThreadsRead on Room {
     return null;
   }
 
-  Future<Map<ThreadRef, Event>> _lastReplyOfUnreadThreads(
-    List<ThreadUnread> threads,
-  ) async {
-    final lastByThread = <ThreadRef, Event>{};
-    final getReplies = GetThreadRepliesUseCase(ThreadRepositoryImpl(client));
-    for (final thread in threads.where((t) => t.notificationCount > 0)) {
-      final page = await getReplies.execute(
-        roomId: id,
-        request: ThreadRepliesRequest(
-          rootEventId: thread.rootEventId,
-          limit: 1,
-          decrypt: false,
-        ),
-      );
-      final last = page.replies.lastOrNull;
-      if (last != null) lastByThread[ThreadRef(id, thread.rootEventId)] = last;
-    }
-    return lastByThread;
+  /// The newest event the server has: a thread reply counts, a local echo
+  /// still sending does not.
+  Future<Event?> _newestSyncedEvent() async {
+    final page = await client.database.getEventList(this, start: 0, limit: 50);
+    return page.firstWhereOrNull((e) => e.status.isSynced);
   }
 
-  /// "Mark as read": the main timeline and every thread with unread messages.
+  /// "Mark as read": ONE unthreaded receipt on the newest event of the room
+  /// (MSC3771: it covers the main timeline and every thread up to it);
+  /// `m.fully_read` stays on the newest main timeline event.
   Future<void> markRoomAndAllThreadsRead() async {
-    final mainEvent = await _newestMainTimelineEvent();
-    final store = client.threadUnread;
-    final lastReplyByThread = await _lastReplyOfUnreadThreads(
-      store?.threadsOf(this) ?? const <ThreadUnread>[],
+    final newest = await _newestSyncedEvent();
+    if (newest == null) return;
+    final main = await _newestMainTimelineEvent();
+    final public = client.receiptsPublicByDefault;
+    await client.setReadMarker(
+      id,
+      mFullyRead: main?.eventId,
+      mRead: public ? newest.eventId : null,
+      mReadPrivate: public ? null : newest.eventId,
     );
-    if (mainEvent != null) {
-      await markRoomAndThreadsRead(
-        mainEvent: mainEvent,
-        lastReplyByThread: lastReplyByThread,
-      );
-      return;
-    }
-    for (final entry in lastReplyByThread.entries) {
-      await setThreadReadMarker(entry.value, entry.key);
-    }
   }
 }
 

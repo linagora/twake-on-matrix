@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 /// What the card under a thread root shows: built from the server
@@ -26,6 +27,7 @@ class ThreadSummary {
     Event root, {
     Iterable<Event> liveEvents = const [],
   }) {
+    if (!AppConfig.threadsEnabled) return null;
     final aggregate = _aggregateOf(root);
     final serverLatest = _serverLatest(aggregate, root);
 
