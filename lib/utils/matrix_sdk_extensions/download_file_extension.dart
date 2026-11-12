@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
-import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -18,6 +17,18 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileExtension on Event {
+  static final _downloadsInFlight = <String, Future<void>>{};
+
+  static void _trackDownload(String key, Future<void> download) {
+    final done = download.then<void>((_) {}, onError: (_) {});
+    _downloadsInFlight[key] = done;
+    done.whenComplete(() {
+      if (identical(_downloadsInFlight[key], done)) {
+        _downloadsInFlight.remove(key);
+      }
+    });
+  }
+
   bool canContainAttachment() {
     return [EventTypes.Message, EventTypes.Sticker].contains(type);
   }
@@ -52,6 +63,9 @@ extension DownloadFileExtension on Event {
   }) async {
     final attachment = File(savePath);
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
+    final downloadKey = downloadLink.toString();
+    final inFlight = _downloadsInFlight[downloadKey];
+    if (throwOnError && inFlight != null) await inFlight;
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
     );
@@ -74,7 +88,7 @@ extension DownloadFileExtension on Event {
     if (needsDownload) {
       try {
         final mediaAPI = getIt<MediaAPI>();
-        final downloadResponse = await mediaAPI.downloadFileInfo(
+        final download = mediaAPI.downloadFileInfo(
           uriPath: downloadLink,
           savePath: savePath,
           onReceiveProgress: (receive, total) {
@@ -85,6 +99,10 @@ extension DownloadFileExtension on Event {
           },
           cancelToken: cancelToken,
         );
+        if (!_downloadsInFlight.containsKey(downloadKey)) {
+          _trackDownload(downloadKey, download);
+        }
+        final downloadResponse = await download;
         final status = downloadResponse.statusCode ?? 0;
         if (status < 200 || status >= 300 || !await File(savePath).exists()) {
           throw Exception(
@@ -96,21 +114,6 @@ extension DownloadFileExtension on Event {
           Logs().i("downloadOrRetrieveAttachment: user cancel the download");
         } else if (e is DioDuplicateDownloadException) {
           Logs().i("downloadOrRetrieveAttachment: duplicate request");
-          if (throwOnError) {
-            await getIt<DownloadFileInterceptor>().whenDone(
-              e.requestOptions.path,
-            );
-            return downloadOrRetrieveAttachment(
-              mxcUrl,
-              savePath,
-              downloadStreamController: downloadStreamController,
-              progressCallback: progressCallback,
-              getThumbnail: getThumbnail,
-              cancelToken: cancelToken,
-              filename: filename,
-              throwOnError: true,
-            );
-          }
         } else {
           Logs().e("downloadOrRetrieveAttachment: $e");
           downloadStreamController?.add(

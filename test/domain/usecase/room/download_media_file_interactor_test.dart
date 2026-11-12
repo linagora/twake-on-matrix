@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
@@ -7,17 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/model/media/download_file_response.dart';
 import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
-import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/download/download_file_state.dart';
 import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 
 import '../../../fake_client.dart';
 
-const _inFlightPath = '_matrix/media/v3/download/example.com/gone';
+const _firstHalf = [1, 2, 3];
+const _secondHalf = [4, 5, 6];
 
 class _FakeMediaAPI implements MediaAPI {
   _FakeMediaAPI(this.outcomes);
@@ -33,9 +35,12 @@ class _FakeMediaAPI implements MediaAPI {
     ProgressCallback? onReceiveProgress,
   }) async {
     final outcome = outcomes[calls++];
-    if (outcome != null) throw outcome;
-    await File(savePath).create(recursive: true);
-    await File(savePath).writeAsBytes([1, 2, 3]);
+    if (outcome is! Completer && outcome != null) throw outcome;
+    final file = File(savePath);
+    await file.create(recursive: true);
+    await file.writeAsBytes(_firstHalf);
+    if (outcome is Completer) await outcome.future;
+    await file.writeAsBytes(_secondHalf, mode: FileMode.append);
     return DownloadFileResponse(
       statusCode: 200,
       requestOptions: RequestOptions(),
@@ -54,7 +59,6 @@ void main() {
   const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
   late Room room;
   late Directory tempDir;
-  late DownloadFileInterceptor interceptor;
   late _FakeMediaAPI mediaAPI;
 
   setUpAll(() async {
@@ -69,12 +73,9 @@ void main() {
           pathProviderChannel,
           (_) async => tempDir.path,
         );
-    interceptor = DownloadFileInterceptor();
-    getIt.registerSingleton<DownloadFileInterceptor>(interceptor);
   });
 
   tearDown(() {
-    getIt.unregister<DownloadFileInterceptor>();
     if (getIt.isRegistered<MediaAPI>()) getIt.unregister<MediaAPI>();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathProviderChannel, null);
@@ -116,18 +117,16 @@ void main() {
   }
 
   final duplicate = DioDuplicateDownloadException(
-    requestOptions: RequestOptions(path: _inFlightPath),
+    requestOptions: RequestOptions(),
   );
 
-  void startInFlightDownload() => interceptor.onRequest(
-    RequestOptions(path: _inFlightPath),
-    RequestInterceptorHandler(),
-  );
-
-  void finishInFlightDownload() => interceptor.onResponse(
-    Response(requestOptions: RequestOptions(path: _inFlightPath)),
-    ResponseInterceptorHandler(),
-  );
+  Future<Completer<void>> startSlowDownload(String msgtype, String body) async {
+    final secondHalf = Completer<void>();
+    downloads([secondHalf]);
+    unawaited(mediaEvent(msgtype, body).getFileInfo());
+    await pumpEventQueue();
+    return secondHalf;
+  }
 
   group('DownloadMediaFileInteractor', () {
     Future<List<Either>> run({bool encrypted = false}) =>
@@ -148,19 +147,33 @@ void main() {
       expect(await run(), [Left(DownloadMediaFileFailure(exception: error))]);
     });
 
-    test('waits for the in-flight download, then returns the file', () async {
-      downloads([duplicate, null]);
-      startInFlightDownload();
+    test('reads the file only once the in-flight download is saved', () async {
+      final secondHalf = await startSlowDownload(
+        MessageTypes.Image,
+        'photo.png',
+      );
 
-      final result = run();
+      var done = false;
+      final result = run().whenComplete(() => done = true);
       await pumpEventQueue();
-      expect(mediaAPI.calls, 1);
+      expect(done, isFalse);
 
-      finishInFlightDownload();
+      secondHalf.complete();
       final states = await result;
 
-      expect(mediaAPI.calls, 2);
-      expect(states.single.isRight(), isTrue);
+      expect(mediaAPI.calls, 1);
+      final fileInfo =
+          (states.single as Right).value as DownloadMediaFileSuccess;
+      expect(await File(fileInfo.fileInfo.filePath!).readAsBytes(), [
+        ..._firstHalf,
+        ..._secondHalf,
+      ]);
+    });
+
+    test('reports nothing for a duplicate request', () async {
+      downloads([duplicate]);
+
+      expect(await run(), isEmpty);
     });
 
     test('reports nothing for a cancelled request', () async {
@@ -194,10 +207,21 @@ void main() {
       await expectLater(run(), throwsException);
     });
 
-    test('plays the file once the in-flight download ends', () async {
-      downloads([duplicate, null]);
+    test('plays the file once the in-flight download is saved', () async {
+      final secondHalf = await startSlowDownload(
+        MessageTypes.Video,
+        'clip.mp4',
+      );
 
-      expect(await run(), endsWith('clip.mp4'));
+      var done = false;
+      final url = run().whenComplete(() => done = true);
+      await pumpEventQueue();
+      expect(done, isFalse);
+      secondHalf.complete();
+
+      final path = Uri.parse((await url)!).toFilePath();
+      expect(await File(path).readAsBytes(), [..._firstHalf, ..._secondHalf]);
+      expect(mediaAPI.calls, 1);
     });
   });
 }
