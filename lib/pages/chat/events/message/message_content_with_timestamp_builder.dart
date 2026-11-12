@@ -280,7 +280,7 @@ class _MessageContentWithTimestampBuilderState
 
   /// Wraps the message preview for a hero dialog with selection/scroll support.
   Widget _buildHeroPreviewMessage({
-    required BuildContext context,
+    required List<Event>? albumMembers,
     required String keyPrefix,
     required bool timelineText,
   }) {
@@ -291,13 +291,15 @@ class _MessageContentWithTimestampBuilderState
           primary: true,
           physics: const ClampingScrollPhysics(),
           child: _withAlbumScope(
-            context,
-            _messageBuilder(
-              key: ValueKey(
-                '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+            albumMembers,
+            Builder(
+              builder: (context) => _messageBuilder(
+                key: ValueKey(
+                  '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+                ),
+                context: context,
+                timelineText: timelineText,
               ),
-              context: context,
-              timelineText: timelineText,
             ),
           ),
         ),
@@ -305,10 +307,9 @@ class _MessageContentWithTimestampBuilderState
     );
   }
 
-  /// The dialog is outside the album scope of the list: give the preview the
-  /// same members, so it shows the whole album.
-  Widget _withAlbumScope(BuildContext context, Widget preview) {
-    final members = context.albumMembersFor(widget.event);
+  /// The dialog route sits above the album scope of the list, so the preview
+  /// gets the [members] read from the bubble before the route opened.
+  Widget _withAlbumScope(List<Event>? members, Widget preview) {
     if (members == null) return preview;
     return MediaAlbumScope<Event>(
       members: members,
@@ -331,6 +332,7 @@ class _MessageContentWithTimestampBuilderState
     // for chat screen
     widget.onDisplayEmojiReaction?.call();
     _displayEmojiPicker.value = false;
+    final albumMembers = context.albumMembersFor(widget.event);
     await Navigator.of(context)
         .push(
           HeroDialogRoute(
@@ -341,7 +343,7 @@ class _MessageContentWithTimestampBuilderState
               dialogSafeAreaKey:
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
               messageWidget: _buildHeroPreviewMessage(
-                context: context,
+                albumMembers: albumMembers,
                 keyPrefix: 'PreviewReactionWidgetKey',
                 timelineText: timelineText,
               ),
@@ -367,6 +369,7 @@ class _MessageContentWithTimestampBuilderState
   }) async {
     widget.onDisplayEmojiReaction?.call();
     _displayEmojiPicker.value = false;
+    final albumMembers = context.albumMembersFor(widget.event);
     await Navigator.of(context)
         .push(
           HeroDialogRoute(
@@ -378,7 +381,7 @@ class _MessageContentWithTimestampBuilderState
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
               showReactions: false,
               messageWidget: _buildHeroPreviewMessage(
-                context: context,
+                albumMembers: albumMembers,
                 keyPrefix: 'PreviewErrorWidgetKey',
                 timelineText: timelineText,
               ),
