@@ -267,3 +267,15 @@ on mobile, ready to paste in another app or in the composer (#962). An
 encrypted file is downloaded and decrypted first. A format the clipboard
 cannot hold (WebM, BMP…) copies the text, as before. This replaces, for one
 selected message, the "image itself on the web" of D11.
+
+## D18. Add members closes at once and invites in the background (proposed by Johann, 2026-11-10)
+
+Inviting a user from another server waits for that server, which can take
+minutes (#3262). The Add members screen now closes as soon as the selection is
+sent, and the invite goes on in the background. The result comes later on the
+page underneath: the usual « Contact has been invited to the chat » snackbar,
+or the « couldn't be added » dialog when it fails.
+
+There is no « Inviting… » feedback while an invite is pending, for now. There
+is no client-side timeout either: the server keeps going after the client
+gives up, so a timeout could report a failure for an invite that still lands.

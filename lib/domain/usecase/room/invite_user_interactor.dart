@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
@@ -7,6 +9,11 @@ import 'package:matrix/matrix.dart';
 
 class InviteUserInteractor {
   static const int _maxRetries = 3;
+  static const int _maxConcurrentInvites = 5;
+
+  InviteUserInteractor({Random? random}) : _random = random ?? Random();
+
+  final Random _random;
 
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
@@ -18,24 +25,36 @@ class InviteUserInteractor {
 
     final failedUsers = <String, InviteUserException>{};
 
-    for (final userId in userIds) {
-      try {
-        await _inviteUserWithRetry(
-          matrixClient: matrixClient,
-          roomId: roomId,
-          userId: userId,
-        );
-      } catch (exception) {
-        failedUsers[userId] = _mapExceptionToInviteUserException(
-          userId: userId,
-          exception: exception,
-        );
-        Logs().e(
-          'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
-          exception,
-        );
+    // A slow federated invite must not hold the others back, but a burst trips the rate limit.
+    final pending = userIds.iterator;
+    Future<void> inviteNext() async {
+      while (pending.moveNext()) {
+        final userId = pending.current;
+        try {
+          await _inviteUserWithRetry(
+            matrixClient: matrixClient,
+            roomId: roomId,
+            userId: userId,
+          );
+        } catch (exception) {
+          failedUsers[userId] = _mapExceptionToInviteUserException(
+            userId: userId,
+            exception: exception,
+          );
+          Logs().e(
+            'InviteUserInteractor::execute: Failed to invite user $userId after all retries',
+            exception,
+          );
+        }
       }
     }
+
+    await Future.wait(
+      List.generate(
+        min(_maxConcurrentInvites, userIds.length),
+        (_) => inviteNext(),
+      ),
+    );
 
     if (failedUsers.isNotEmpty) {
       yield Left(
@@ -116,7 +135,9 @@ class InviteUserInteractor {
           Logs().d(
             'InviteUserInteractor::_inviteUserWithRetry: Rate limited. Waiting ${retryAfterMs}ms before retry',
           );
-          await Future.delayed(Duration(milliseconds: retryAfterMs));
+          // Invites rejected together would otherwise all retry at the same instant.
+          final jitterMs = (retryAfterMs * 0.25 * _random.nextDouble()).round();
+          await Future.delayed(Duration(milliseconds: retryAfterMs + jitterMs));
         }
       }
     }
