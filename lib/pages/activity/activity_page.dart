@@ -31,13 +31,40 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     }
   }
 
+  Future<void> _markAllRead(List<String> roomIds) =>
+      Future.wait(roomIds.map(_markRead));
+
+  /// The mentions come from the server: a progress while they load, a way to
+  /// ask again when they cannot be read.
+  Widget _mentionsList(
+    BuildContext context,
+    AsyncValue<List<ActivityItem>> mentions,
+    Iterable<ActivityItem> shown,
+    ActivityFilter filter,
+  ) => switch (mentions) {
+    AsyncLoading() => const Center(child: CircularProgressIndicator()),
+    AsyncError() => Center(
+      child: TextButton(
+        onPressed: () => ref.invalidate(activityMentionsProvider),
+        child: Text(L10n.of(context)!.activityTryAgain),
+      ),
+    ),
+    _ => _list(context, shown, filter),
+  };
+
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     final view = ref.watch(activityViewControllerProvider);
     final count = ref.watch(unreadMentionCountProvider).value ?? 0;
     final rooms = ref.watch(activityItemsProvider).value ?? const [];
-    final shown = rooms.where((item) => view.filter.includes(item.kind));
+    final mentions = ref.watch(activityMentionsProvider);
+    final items = [...rooms, ...?mentions.value];
+    final shown = items.where((item) => view.filter.includes(item.kind));
+    final unreadRoomIds = [
+      for (final item in rooms)
+        if (item.kind == ActivityKind.unreadRoom) item.roomId,
+    ];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       bottomNavigationBar: widget.bottomNavigationBar,
@@ -54,6 +81,14 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
             ],
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: unreadRoomIds.isEmpty
+                ? null
+                : () => _markAllRead(unreadRoomIds),
+            child: Text(l10n.activityMarkAllRead),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -63,7 +98,11 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
                 .read(activityViewControllerProvider.notifier)
                 .selectFilter,
           ),
-          Expanded(child: _list(context, shown, view.filter)),
+          Expanded(
+            child: view.filter == ActivityFilter.mentions
+                ? _mentionsList(context, mentions, shown, view.filter)
+                : _list(context, shown, view.filter),
+          ),
         ],
       ),
     );

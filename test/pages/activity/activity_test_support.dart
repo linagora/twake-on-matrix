@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
@@ -18,6 +19,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../providers/fake_active_account.dart';
+import 'activity_mentions_test_support.dart';
 
 /// THR-M-12, slice 1: what the Activity tab reads from the sync data held in
 /// memory (unread rooms, followed threads, unread mentions), as a test sets
@@ -189,10 +191,12 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 /// (pop on a phone, where the item was pushed; back to the tab's location
 /// on a wide screen, where the item replaced it).
 ///
-/// [account] is the active account (`@me:example.org` by default).
+/// The mentions are empty unless [mentions] is given, so no spec reads the
+/// account. [account] is the active account (`@me:example.org` by default).
 Future<void> pumpActivityPage(
   WidgetTester tester, {
   required FakeActivityRepository repository,
+  FakeActivityMentionsRepository? mentions,
   List<Override> overrides = const [],
   bool settle = true,
   bool wide = false,
@@ -241,6 +245,9 @@ Future<void> pumpActivityPage(
           () => _StartingAccount(account ?? accountClient('@me:example.org')),
         ),
         activityRepositoryProvider.overrideWithValue(repository),
+        activityMentionsRepositoryProvider.overrideWithValue(
+          mentions ?? FakeActivityMentionsRepository(),
+        ),
         ...overrides,
       ],
       child: MaterialApp.router(
