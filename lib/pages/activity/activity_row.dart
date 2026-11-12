@@ -127,7 +127,7 @@ class ActivityRow extends StatelessWidget {
     ActivityKind.unreadRoom => l10n.activitySentMessage,
     ActivityKind.mention => l10n.activityMentionedYou,
     ActivityKind.reply => l10n.activityRepliedInThread,
-    ActivityKind.reaction => '',
+    ActivityKind.reaction => l10n.activityReacted(item.emoji ?? ''),
   };
 }
 

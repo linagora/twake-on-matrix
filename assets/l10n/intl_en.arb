@@ -3416,6 +3416,15 @@
     "type": "text",
     "placeholders": {}
   },
+  "activityReacted": "reacted {emoji} to your message",
+  "@activityReacted": {
+    "type": "text",
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
   "activityTryAgain": "Try again",
   "@activityTryAgain": {
     "type": "text",

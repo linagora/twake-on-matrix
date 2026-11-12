@@ -2777,6 +2777,15 @@
     "type": "text",
     "placeholders": {}
   },
+  "activityReacted": "a réagi {emoji} à votre message",
+  "@activityReacted": {
+    "type": "text",
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
   "activityTryAgain": "Réessayer",
   "@activityTryAgain": {
     "type": "text",

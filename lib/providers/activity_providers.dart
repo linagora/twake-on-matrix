@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
+import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 
@@ -19,3 +20,8 @@ Stream<int> unreadMentionCount(Ref ref) =>
 @riverpod
 Future<List<ActivityItem>> activityMentions(Ref ref) =>
     ref.watch(activityMentionsRepositoryProvider).getMentions();
+
+/// The reactions of the others to the messages of the user.
+@riverpod
+Stream<List<ActivityItem>> activityReactions(Ref ref) =>
+    ref.watch(activityReactionsRepositoryProvider).watchReactions();
