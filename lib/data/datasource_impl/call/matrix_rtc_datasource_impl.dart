@@ -368,11 +368,10 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       yield null;
       return;
     }
-    yield* client.onTimelineEvent.stream
-        .where(
-          (event) =>
-              event.roomId == call.id && event.type == EventTypes.Encryption,
-        )
+    // The state block of a limited sync never reaches onTimelineEvent.
+    yield* client.onSync.stream
+        .where((_) => client.getRoomById(call.id)?.encrypted ?? false)
+        .take(1)
         .map((_) {});
   }
 

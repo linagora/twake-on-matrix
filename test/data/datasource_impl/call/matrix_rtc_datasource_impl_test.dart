@@ -56,8 +56,7 @@ class _FakeClient extends Fake implements Client {
   final tokenRequests = <Map<String, Object?>>[];
 
   @override
-  final CachedStreamController<Event> onTimelineEvent =
-      CachedStreamController();
+  final CachedStreamController<SyncUpdate> onSync = CachedStreamController();
 
   @override
   Future<OpenIdCredentials> requestOpenIdToken(
@@ -367,7 +366,7 @@ void main() {
     });
   });
 
-  test('watchRoomEncrypted_whenEncryptionIsTurnedOn_emits', () async {
+  test('watchRoomEncrypted_whenASyncEncryptsTheRoom_emitsOnce', () async {
     final client = _FakeClient();
     final encrypted = <void>[];
     MatrixRtcDatasourceImpl(
@@ -375,17 +374,14 @@ void main() {
     ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
-    client.onTimelineEvent.add(
-      Event(
-        content: {'algorithm': 'm.megolm.v1.aes-sha2'},
-        type: EventTypes.Encryption,
-        eventId: r'$encryption',
-        senderId: '@alice:hs.test',
-        originServerTs: DateTime.now(),
-        stateKey: '',
-        room: client._room,
-      ),
-    );
+    client.onSync.add(SyncUpdate(nextBatch: 'clear'));
+    await pumpEventQueue();
+    expect(encrypted, isEmpty);
+
+    client._room.isEncrypted = true;
+    client.onSync
+      ..add(SyncUpdate(nextBatch: 'limited'))
+      ..add(SyncUpdate(nextBatch: 'next'));
     await pumpEventQueue();
 
     expect(encrypted, hasLength(1));
