@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/spaces/room_list_entry.dart';
 import 'package:twake_chat/domain/spaces/space_models.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_room_list_extension.dart';
 import 'package:twake_chat/utils/stream_extension.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 class SpaceDatasourceImpl implements SpaceDatasource {
   const SpaceDatasourceImpl(this._activeClient);
@@ -44,17 +45,40 @@ class SpaceDatasourceImpl implements SpaceDatasource {
     // An account other than the first reads its rooms after the first frame.
     await client.roomsLoading;
     yield ++tick;
-    yield* client.onSync.stream
-        // What entries read: not a to-device event.
-        .where(
-          (update) =>
-              (update.accountData?.isNotEmpty ?? false) ||
-              (update.rooms?.join?.isNotEmpty ?? false) ||
-              (update.rooms?.invite?.isNotEmpty ?? false) ||
-              (update.rooms?.leave?.isNotEmpty ?? false),
-        )
-        .rateLimit(_changesRate)
-        .map((_) => ++tick);
+    yield* _syncOrThreadCounterChanges(
+      client,
+    ).rateLimit(_changesRate).map((_) => ++tick);
+  }
+
+  /// A sync with what entries read (not a to-device event), or a change of the
+  /// thread counters, which also move between two syncs (follow lookup).
+  Stream<void> _syncOrThreadCounterChanges(Client client) {
+    final controller = StreamController<void>();
+    final store = client.threadUnread;
+    void notify() => controller.add(null);
+    StreamSubscription<SyncUpdate>? syncSubscription;
+    controller
+      ..onListen = () {
+        try {
+          syncSubscription = client.onSync.stream
+              .where(
+                (update) =>
+                    (update.accountData?.isNotEmpty ?? false) ||
+                    (update.rooms?.join?.isNotEmpty ?? false) ||
+                    (update.rooms?.invite?.isNotEmpty ?? false) ||
+                    (update.rooms?.leave?.isNotEmpty ?? false),
+              )
+              .listen((_) => notify(), onError: controller.addError);
+          store?.addListener(notify);
+        } on Object catch (error, stackTrace) {
+          controller.addError(error, stackTrace);
+        }
+      }
+      ..onCancel = () {
+        store?.removeListener(notify);
+        return syncSubscription?.cancel();
+      };
+    return controller.stream;
   }
 
   @override
