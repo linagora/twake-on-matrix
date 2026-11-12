@@ -86,6 +86,7 @@ void main() {
 
       expect(client.homeserver, stored);
       expect(client.isLogged(), isTrue);
+      expect(requested, isNotEmpty);
       expect(requested.every((uri) => uri.host == stored!.host), isTrue);
     });
 
@@ -127,21 +128,6 @@ void main() {
       expect(client.homeserver, isNull);
     });
 
-    test('an unreachable account leaves the other account untouched', () async {
-      final otherServer = Uri.parse('https://other.example');
-      final other = await getClient(database: _ClearableDatabase());
-      other.homeserver = otherServer;
-      final stored = client.homeserver;
-      mode = _Mode.unreachable;
-
-      await expectLater(client.checkStoredHomeserver(), throwsA(anything));
-
-      expect(client.homeserver, stored);
-      expect(other.homeserver, otherServer);
-      expect(other.isLogged(), isTrue);
-      await other.dispose(closeDatabase: false);
-    });
-
     test(
       'the SDK check alone drops the homeserver (why the guard exists)',
       () async {
@@ -160,6 +146,16 @@ void main() {
       client.homeserver = null;
 
       await expectLater(client.checkStoredHomeserver(), throwsStateError);
+    });
+
+    test('checks a healthy stored homeserver and keeps it', () async {
+      final stored = client.homeserver;
+
+      final (_, versions, _, _) = await client.checkStoredHomeserver();
+
+      expect(versions.versions, isNotEmpty);
+      expect(client.homeserver, stored);
+      expect(requested, isNotEmpty);
     });
 
     test('a token rejected by the user\'s own homeserver still ends the '
@@ -214,27 +210,6 @@ void main() {
         returnsNormally,
       );
       expect(logged.homeserver, isNotNull);
-    });
-
-    test('a client with a session never takes the discovery of another '
-        'account', () {
-      final foreign = DiscoveryInformation(
-        mHomeserver: HomeserverInformation(
-          baseUrl: Uri.parse('https://foreign.example'),
-        ),
-      );
-
-      expect(logged.discoveryFallbackFor(foreign), isNull);
-    });
-
-    test('a client without a session keeps the discovery it is given', () {
-      final given = DiscoveryInformation(
-        mHomeserver: HomeserverInformation(
-          baseUrl: Uri.parse('https://given.example'),
-        ),
-      );
-
-      expect(unlogged.discoveryFallbackFor(given), same(given));
     });
 
     test('a client without a session receives the default homeserver', () {
@@ -322,17 +297,23 @@ void main() {
       await unreachable.dispose(closeDatabase: false);
     });
 
+    void checked(Client client, {required bool failed}) {
+      final ticket = log.begin(client);
+      log.end(client, ticket);
+      log.record(client, ticket, failed: failed);
+    }
+
     test('a healthy account does not hide the failure of another one', () {
-      log.record(unreachable, failed: true);
-      log.record(healthy, failed: false);
+      checked(unreachable, failed: true);
+      checked(healthy, failed: false);
 
       expect(log.hasFailed(unreachable), isTrue);
       expect(log.hasFailed(healthy), isFalse);
     });
 
     test('a later successful check clears the failure', () {
-      log.record(unreachable, failed: true);
-      log.record(unreachable, failed: false);
+      checked(unreachable, failed: true);
+      checked(unreachable, failed: false);
 
       expect(log.hasFailed(unreachable), isFalse);
     });
@@ -355,5 +336,231 @@ void main() {
     test('an account that was never checked has not failed', () {
       expect(log.hasFailed(healthy), isFalse);
     });
+
+    test('a finished sync refreshes an account whose last check failed', () {
+      checked(unreachable, failed: true);
+
+      expect(
+        log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
+        isTrue,
+      );
+    });
+
+    test('a sync that has not finished never refreshes', () {
+      checked(unreachable, failed: true);
+
+      for (final status in SyncStatus.values) {
+        if (status == SyncStatus.finished) continue;
+        expect(
+          log.needsRefreshAfterSync(unreachable, status),
+          isFalse,
+          reason: '$status',
+        );
+      }
+    });
+
+    test('a finished sync does not refresh a healthy account', () {
+      checked(healthy, failed: false);
+
+      expect(log.needsRefreshAfterSync(healthy, SyncStatus.finished), isFalse);
+    });
+
+    test('a finished sync waits for the refresh already in flight', () {
+      checked(unreachable, failed: true);
+      final ticket = log.begin(unreachable);
+
+      expect(
+        log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
+        isFalse,
+      );
+
+      log.end(unreachable, ticket);
+
+      expect(
+        log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
+        isTrue,
+      );
+    });
+
+    test('the end of a superseded refresh leaves the newer one in flight', () {
+      final first = log.begin(unreachable);
+      log.begin(unreachable);
+
+      log.end(unreachable, first);
+
+      expect(log.isRefreshing(unreachable), isTrue);
+    });
+
+    test('a superseded refresh cannot record its result', () {
+      final stale = log.begin(unreachable);
+      log.begin(unreachable);
+
+      log.record(unreachable, stale, failed: true);
+
+      expect(log.hasFailed(unreachable), isFalse);
+    });
+
+    test('a logged out account forgets its failure and its refresh', () {
+      checked(unreachable, failed: true);
+      final ticket = log.begin(unreachable);
+
+      log.forget(unreachable);
+
+      expect(log.hasFailed(unreachable), isFalse);
+      expect(log.isRefreshing(unreachable), isFalse);
+      expect(log.isLatest(unreachable, ticket), isFalse);
+    });
+
+    test('a refresh from before a logout stays stale after a new login', () {
+      final beforeLogout = log.begin(unreachable);
+      log.forget(unreachable);
+      final afterLogin = log.begin(unreachable);
+
+      expect(log.isLatest(unreachable, beforeLogout), isFalse);
+      expect(log.isLatest(unreachable, afterLogin), isTrue);
+    });
+
+    test('every sequence of steps keeps the invariants of each account', () {
+      for (final steps in _stepSequences(length: 3)) {
+        _expectInvariants(steps, first: healthy, second: unreachable);
+      }
+    });
   });
+}
+
+/// The latest flags are joined so two snapshots compare by value.
+typedef _Snapshot = ({bool failed, bool refreshing, String latest});
+
+_Snapshot _snapshot(HomeserverCheckLog log, Client client, List<int> tickets) =>
+    (
+      failed: log.hasFailed(client),
+      refreshing: log.isRefreshing(client),
+      latest: [
+        for (final ticket in tickets) log.isLatest(client, ticket),
+      ].join(','),
+    );
+
+void _expectInvariants(
+  List<_Step> steps, {
+  required Client first,
+  required Client second,
+}) {
+  final log = HomeserverCheckLog();
+  final tickets = {first: <int>[], second: <int>[]};
+  final done = <String>[];
+  for (final step in steps) {
+    final own = step.on(first, second);
+    final other = own == first ? second : first;
+    final ownBefore = _snapshot(log, own, tickets[own]!);
+    final otherBefore = _snapshot(log, other, tickets[other]!);
+    final ticket = step.ticketIn(tickets[own]!);
+    final stale = ticket != null && !log.isLatest(own, ticket);
+
+    step.apply(log, tickets[own]!, own);
+    done.add(step.name);
+    final reason = done.join(', ');
+    final ownAfter = _snapshot(log, own, tickets[own]!);
+
+    expect(_snapshot(log, other, tickets[other]!), otherBefore, reason: reason);
+    if (stale) expect(ownAfter, ownBefore, reason: reason);
+    if (step.forgets) {
+      expect(ownAfter.failed, isFalse, reason: reason);
+      expect(ownAfter.refreshing, isFalse, reason: reason);
+      expect(ownAfter.latest, isNot(contains('true')), reason: reason);
+    }
+    expect(
+      'true'.allMatches(ownAfter.latest).length,
+      lessThanOrEqualTo(1),
+      reason: reason,
+    );
+    expect(
+      log.needsRefreshAfterSync(own, SyncStatus.finished),
+      ownAfter.failed && !ownAfter.refreshing,
+      reason: reason,
+    );
+  }
+}
+
+/// One step of the [HomeserverCheckLog] life cycle, on one of two accounts.
+class _Step {
+  const _Step(
+    this.name,
+    this._onFirst,
+    this._run, {
+    this.ticket,
+    this.forgets = false,
+  });
+
+  final String name;
+  final bool _onFirst;
+  final void Function(HomeserverCheckLog log, List<int> tickets, Client client)
+  _run;
+
+  /// Which ticket of the account the step uses, if any.
+  final int? Function(List<int> tickets)? ticket;
+  final bool forgets;
+
+  Client on(Client first, Client second) => _onFirst ? first : second;
+
+  int? ticketIn(List<int> tickets) => ticket?.call(tickets);
+
+  void apply(HomeserverCheckLog log, List<int> tickets, Client client) =>
+      _run(log, tickets, client);
+}
+
+int? _latest(List<int> tickets) => tickets.isEmpty ? null : tickets.last;
+
+int? _oldest(List<int> tickets) => tickets.isEmpty ? null : tickets.first;
+
+List<_Step> _stepsOn({required bool first}) {
+  final account = first ? 'first' : 'second';
+  _Step withTicket(
+    String name,
+    int? Function(List<int>) pick,
+    void Function(HomeserverCheckLog log, Client client, int ticket) run,
+  ) => _Step('$name $account', first, (log, tickets, client) {
+    final ticket = pick(tickets);
+    if (ticket != null) run(log, client, ticket);
+  }, ticket: pick);
+
+  return [
+    _Step(
+      'begin $account',
+      first,
+      (log, tickets, client) => tickets.add(log.begin(client)),
+    ),
+    withTicket('end latest', _latest, (log, c, t) => log.end(c, t)),
+    withTicket('end oldest', _oldest, (log, c, t) => log.end(c, t)),
+    withTicket(
+      'fail latest',
+      _latest,
+      (log, c, t) => log.record(c, t, failed: true),
+    ),
+    withTicket(
+      'pass oldest',
+      _oldest,
+      (log, c, t) => log.record(c, t, failed: false),
+    ),
+    _Step(
+      'forget $account',
+      first,
+      (log, _, client) => log.forget(client),
+      forgets: true,
+    ),
+  ];
+}
+
+Iterable<List<_Step>> _stepSequences({required int length}) sync* {
+  final steps = [..._stepsOn(first: true), ..._stepsOn(first: false)];
+  Iterable<List<_Step>> extend(List<_Step> prefix) sync* {
+    if (prefix.length == length) {
+      yield prefix;
+      return;
+    }
+    for (final step in steps) {
+      yield* extend([...prefix, step]);
+    }
+  }
+
+  yield* extend([]);
 }

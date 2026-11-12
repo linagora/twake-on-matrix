@@ -748,6 +748,15 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _handleSyncStatusUpdate(Client client, SyncStatusUpdate update) {
+    if (client == clientOrNull &&
+        _homeserverCheckLog.needsRefreshAfterSync(client, update.status)) {
+      unawaited(
+        _getHomeserverInformation(client).catchError(
+          (Object e, StackTrace s) =>
+              _report(e, s, 'homeserver refresh after sync'),
+        ),
+      );
+    }
     if (update.status != SyncStatus.error || update.error == null) return;
 
     _captureSyncError(client, update);
@@ -805,6 +814,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
+    if (state != LoginState.loggedIn) _homeserverCheckLog.forget(client);
     if (_quietLogouts.consume(client.clientName, state)) return;
     final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
@@ -1554,24 +1564,31 @@ class MatrixState extends ConsumerState<Matrix>
     );
     final refreshTicket = _homeserverCheckLog.begin(newClient);
     var checkFailed = false;
-    final summary = await newClient.fetchHomeserverSummary(
-      // A login that makes this account active checked its server just before.
-      previous:
-          _loginSessions.homeserverSummaryOf(newClient) ??
-          loginHomeserverSummary,
-      onCheckFailed: () => checkFailed = true,
-    );
+    final HomeserverSummary? summary;
+    try {
+      summary = await newClient.fetchHomeserverSummary(
+        // A login that makes this account active checked its server just
+        // before.
+        previous:
+            _loginSessions.homeserverSummaryOf(newClient) ??
+            loginHomeserverSummary,
+        onCheckFailed: () => checkFailed = true,
+      );
+    } finally {
+      _homeserverCheckLog.end(newClient, refreshTicket);
+    }
 
     // The active client may have changed while awaiting: a late result must
     // not overwrite the newer account's summary. A newer refresh of the same
     // client wins over this one for the same reason.
-    if (!_isCurrent(token) ||
+    if (!mounted ||
+        !_isCurrent(token) ||
         (_switchCoordinator.target ?? clientOrNull) != newClient ||
         !_homeserverCheckLog.isLatest(newClient, refreshTicket)) {
       return;
     }
 
-    _homeserverCheckLog.record(newClient, failed: checkFailed);
+    _homeserverCheckLog.record(newClient, refreshTicket, failed: checkFailed);
     loginHomeserverSummary = summary;
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',

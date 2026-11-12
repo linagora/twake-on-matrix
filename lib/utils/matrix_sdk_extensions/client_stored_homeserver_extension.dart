@@ -8,8 +8,9 @@ extension ClientStoredHomeserverExtension on Client {
   /// homeserver, and a later fallback to a default one would send the session
   /// token to another server, which answers `M_UNKNOWN_TOKEN` and ends the
   /// session (an unknown token without `soft_logout` ends it, see
-  /// https://spec.matrix.org/v1.16/client-server-api/#soft-logout). The stored homeserver is restored when the check throws; the
-  /// error is rethrown.
+  /// https://spec.matrix.org/v1.16/client-server-api/#soft-logout).
+  /// The stored homeserver is restored when the check throws; the error is
+  /// rethrown.
   ///
   /// Throws [StateError] when the client holds no homeserver.
   Future<
@@ -51,15 +52,6 @@ extension ClientStoredHomeserverExtension on Client {
     }
   }
 
-  /// The discovery information to use when the well-known request fails.
-  ///
-  /// A client that holds a session relies on its own cached well-known: the
-  /// [other] information comes from the account or the login picker that wrote
-  /// the shared summary last, and could describe another homeserver. Using it
-  /// would point the ToM base URL of this account at that server.
-  DiscoveryInformation? discoveryFallbackFor(DiscoveryInformation? other) =>
-      isLogged() ? null : other;
-
   /// Whether the homeserver information should be fetched again when the
   /// network returns: the client has no homeserver yet, no summary was
   /// stored, or the last check failed.
@@ -78,19 +70,36 @@ extension ClientStoredHomeserverExtension on Client {
 class HomeserverCheckLog {
   final Set<String> _failedClients = {};
   final Map<String, int> _latestRefresh = {};
+  final Set<String> _refreshing = {};
+
+  /// Unique across accounts and logouts, so a refresh started before a
+  /// logout never matches the ticket of a refresh after the next login.
+  int _lastTicket = 0;
 
   /// Starts a refresh of [client] and returns its ticket.
-  int begin(Client client) => _latestRefresh.update(
-    client.clientName,
-    (ticket) => ticket + 1,
-    ifAbsent: () => 1,
-  );
+  int begin(Client client) {
+    final ticket = ++_lastTicket;
+    _latestRefresh[client.clientName] = ticket;
+    _refreshing.add(client.clientName);
+    return ticket;
+  }
+
+  /// Ends the refresh of [client] that holds [ticket]. A superseded refresh
+  /// leaves the newer one in flight.
+  void end(Client client, int ticket) {
+    if (isLatest(client, ticket)) _refreshing.remove(client.clientName);
+  }
 
   /// Whether [ticket] still belongs to the latest refresh of [client].
   bool isLatest(Client client, int ticket) =>
       _latestRefresh[client.clientName] == ticket;
 
-  void record(Client client, {required bool failed}) {
+  bool isRefreshing(Client client) => _refreshing.contains(client.clientName);
+
+  /// Records the result of the refresh that holds [ticket]. A superseded
+  /// refresh records nothing: a newer one owns the result.
+  void record(Client client, int ticket, {required bool failed}) {
+    if (!isLatest(client, ticket)) return;
     if (failed) {
       _failedClients.add(client.clientName);
     } else {
@@ -99,4 +108,21 @@ class HomeserverCheckLog {
   }
 
   bool hasFailed(Client client) => _failedClients.contains(client.clientName);
+
+  /// Drops what is known about [client] when its session ends: a later
+  /// login under the same client name starts clean.
+  void forget(Client client) {
+    _failedClients.remove(client.clientName);
+    _latestRefresh.remove(client.clientName);
+    _refreshing.remove(client.clientName);
+  }
+
+  /// Whether a sync of [client] that ended with [status] should refresh its
+  /// homeserver information: the homeserver answers again after a failed
+  /// check, with no network change to trigger a reconnect. One refresh at a
+  /// time: syncs that finish while it runs do not start another.
+  bool needsRefreshAfterSync(Client client, SyncStatus status) =>
+      status == SyncStatus.finished &&
+      hasFailed(client) &&
+      !isRefreshing(client);
 }
