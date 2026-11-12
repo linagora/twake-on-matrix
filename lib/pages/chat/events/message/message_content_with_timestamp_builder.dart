@@ -696,7 +696,7 @@ class _MessageContentWithTimestampBuilderState
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
-            child: _reactionsOf(reactionEvents),
+            child: _reactionsOf(context),
           )
         : null;
 
@@ -728,21 +728,13 @@ class _MessageContentWithTimestampBuilderState
       if (event.hasReactionEvent(timeline: widget.timeline)) event,
   ];
 
-  /// One row: each image keeps its own chips, so a tap reacts to that image.
-  Widget _reactionsOf(List<Event> events) {
-    if (events.length == 1) {
-      return MessageReactions(events.single, widget.timeline);
-    }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final event in events) MessageReactions(event, widget.timeline),
-        ],
-      ),
-    );
-  }
+  /// One list for the bubble. An album merges the chips of its images by
+  /// emoji, and a new reaction goes to its first image, as on Telegram.
+  Widget _reactionsOf(BuildContext context) => MessageReactions(
+    widget.event,
+    widget.timeline,
+    albumEvents: context.albumMembersFor(widget.event),
+  );
 
   bool _hideDisplayName(BuildContext context) {
     return widget.event.hideDisplayName(
