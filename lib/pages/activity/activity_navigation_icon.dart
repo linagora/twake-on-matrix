@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/providers/activity_providers.dart';
+import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/widgets/twake_components/twake_navigation_icon/twake_navigation_icon.dart';
 
 /// The icon of the Activity tab, badged with the unread mentions count.

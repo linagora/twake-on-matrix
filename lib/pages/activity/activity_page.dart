@@ -9,7 +9,6 @@ import 'package:twake_chat/pages/activity/activity_filter.dart';
 import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
-import 'package:twake_chat/providers/activity_providers.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {
