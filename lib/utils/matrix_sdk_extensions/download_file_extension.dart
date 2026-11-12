@@ -47,6 +47,7 @@ extension DownloadFileExtension on Event {
     bool getThumbnail = false,
     CancelToken? cancelToken,
     required String filename,
+    bool throwOnError = false,
   }) async {
     final attachment = File(savePath);
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
@@ -99,6 +100,7 @@ extension DownloadFileExtension on Event {
           downloadStreamController?.add(
             Left(DownloadFileFailureState(exception: e)),
           );
+          if (throwOnError) rethrow;
         }
         return null;
       }
@@ -249,6 +251,7 @@ extension DownloadFileExtension on Event {
     StreamController<Either<Failure, Success>>? downloadStreamController,
     ProgressCallback? progressCallback,
     CancelToken? cancelToken,
+    bool throwOnError = false,
   }) async {
     if (!canContainAttachment()) {
       throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
@@ -303,6 +306,7 @@ extension DownloadFileExtension on Event {
       progressCallback: progressCallback,
       cancelToken: cancelToken,
       filename: filename,
+      throwOnError: throwOnError,
     );
   }
 }
