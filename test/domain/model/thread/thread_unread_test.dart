@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/data/thread/models/sync_thread_counts.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 
 /// THR-M-06: per-thread counters from the sync, room badge and the

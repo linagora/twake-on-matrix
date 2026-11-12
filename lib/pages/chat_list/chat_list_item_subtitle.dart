@@ -28,7 +28,8 @@ class ChatListItemSubtitle extends StatelessWidget with ChatListItemMixin {
     this.previewResult,
   });
 
-  /// Rebuilds on a change of the thread counters only, not the whole list.
+  /// Every row listens to the whole store: a change of one room's thread
+  /// counters rebuilds every visible row, not only that room's.
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Listenable.merge([?room.client.threadUnread]),

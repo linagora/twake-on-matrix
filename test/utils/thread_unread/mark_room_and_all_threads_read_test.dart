@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
@@ -16,6 +17,14 @@ import 'thread_fakes.dart';
 /// stays on the newest main timeline event, as before.
 /// https://spec.matrix.org/v1.16/client-server-api/#threaded-read-receipts
 void main() {
+  // This level is gated by the flag (off by default until #3609).
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {

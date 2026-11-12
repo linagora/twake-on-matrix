@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/domain/spaces/room_list_entry.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 /// The prefix of the `m.tag` of a chat picked for a folder.
 const String folderTagPrefix = 'u.';
@@ -109,8 +110,8 @@ RoomListEntry _entryOf(
       room.isSpace && room.canChangeStateEvent(EventTypes.SpaceChild),
   isFavourite: room.isFavourite,
   isMarkedUnread: room.markedUnread || room.membership == Membership.invite,
-  unreadCount: room.notificationCount,
-  mentionCount: room.highlightCount,
+  unreadCount: room.unreadBadgeCount,
+  mentionCount: room.highlightCountWithThreads,
   parentSpaceIds: parentSpaceIds,
   childIds: childIds,
   folders: room.tags.keys
