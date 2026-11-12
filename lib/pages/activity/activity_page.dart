@@ -12,6 +12,7 @@ import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_search.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_appbar_style.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {
@@ -56,9 +57,15 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
   ) => switch (mentions) {
     AsyncLoading() => const Center(child: CircularProgressIndicator()),
     AsyncError() => Center(
-      child: TextButton(
-        onPressed: () => ref.invalidate(activityMentionsProvider),
-        child: Text(L10n.of(context)!.activityTryAgain),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(L10n.of(context)!.activityMentionsLoadFailed),
+          TextButton(
+            onPressed: () => ref.invalidate(activityMentionsProvider),
+            child: Text(L10n.of(context)!.activityTryAgain),
+          ),
+        ],
       ),
     ),
     _ => _list(context, shown, filter),
@@ -74,6 +81,7 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     });
     final count = ref.watch(unreadMentionCountProvider).value ?? 0;
     final rooms = ref.watch(activityItemsProvider).value ?? const [];
+    final isMobile = ContactsAppbarStyle.responsiveUtils.isMobile(context);
     final mentions = ref.watch(activityMentionsProvider);
     final reactions = ref.watch(activityReactionsProvider).value ?? const [];
     final items = [...rooms, ...?mentions.value, ...reactions];
@@ -90,16 +98,22 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
       bottomNavigationBar: widget.bottomNavigationBar,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(l10n.activity, overflow: TextOverflow.ellipsis),
-            ),
-            if (count > 0) ...[
-              const SizedBox(width: 8),
-              _CountBadge(count: count),
+        // As the title of Chats: centred on a phone, 16 px in on a wide screen.
+        centerTitle: isMobile,
+        title: Padding(
+          padding: ContactsAppbarStyle.titlePadding(context),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(l10n.activity, overflow: TextOverflow.ellipsis),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 8),
+                _CountBadge(count: count),
+              ],
             ],
-          ],
+          ),
         ),
         actions: [
           TextButton(

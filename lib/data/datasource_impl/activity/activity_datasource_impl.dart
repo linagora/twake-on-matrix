@@ -8,6 +8,7 @@ import 'package:twake_chat/data/datasource/activity/activity_datasource.dart';
 import 'package:twake_chat/utils/activity/activity_event_extension.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
@@ -100,14 +101,17 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     );
     final threads = client.threadUnread?.followedThreads ?? const [];
     final items = [
-      for (final room in rooms) _unreadRoomItem(room),
+      for (final room in rooms) await _unreadRoomItem(room),
       for (final thread in threads) ?await _threadItem(client, thread),
     ];
     return items..sort((a, b) => b.time.compareTo(a.time));
   }
 
-  ActivityItem _unreadRoomItem(Room room) {
-    final last = room.lastEvent;
+  /// Quotes the newest message of the main timeline: a thread reply shows
+  /// once, as a reply of its thread.
+  Future<ActivityItem> _unreadRoomItem(Room room) async {
+    final preview = await room.lastEventAvailableInPreview();
+    final last = preview is RoomPreviewFound ? preview.event : null;
     final author = last?.senderFromMemoryOrFallback;
     return ActivityItem(
       kind: ActivityKind.unreadRoom,
