@@ -52,7 +52,9 @@ class MatrixRtcMediaKeys {
   }) {
     final hasLeaver = sharedWith.difference(members).isNotEmpty;
     final joiners = members.difference(sharedWith);
-    if (hasLeaver || (joiners.isNotEmpty && keyAge >= _rotationGracePeriod)) {
+    final staleForJoiners =
+        joiners.isNotEmpty && keyAge >= _rotationGracePeriod;
+    if (hasLeaver || staleForJoiners) {
       return (rotates: true, recipients: members);
     }
     return (rotates: false, recipients: joiners);
@@ -65,16 +67,20 @@ class MatrixRtcMediaKeys {
     if (content.tryGet<String>('room_id') != roomId) return null;
     final keys = content.tryGetMap<String, Object?>('keys');
     final member = content.tryGetMap<String, Object?>('member');
-    final index = keys?.tryGet<int>('index');
-    final key = keys?.tryGet<String>('key');
-    final deviceId = member?.tryGet<String>('claimed_device_id');
-    if (index == null || key == null || deviceId == null) return null;
-    return CallMediaKey(
-      participantId:
-          member?.tryGet<String>('id') ?? '${event.senderId}:$deviceId',
-      index: index,
-      key: base64.decode(base64.normalize(key)),
-    );
+    return switch ((
+      keys?.tryGet<int>('index'),
+      keys?.tryGet<String>('key'),
+      member?.tryGet<String>('claimed_device_id'),
+    )) {
+      (final int index, final String key, final String deviceId) =>
+        CallMediaKey(
+          participantId:
+              member?.tryGet<String>('id') ?? '${event.senderId}:$deviceId',
+          index: index,
+          key: base64.decode(base64.normalize(key)),
+        ),
+      _ => null,
+    };
   }
 
   void _start() {
