@@ -163,7 +163,9 @@ class TwakeClient extends Client
     onTimelineEvent.stream.listen(onSeenEvent);
     onHistoryEvent.stream.listen(onSeenEvent);
     onTimelineEvent.stream.listen(activityReactions.see);
-    onHistoryEvent.stream.listen(activityReactions.see);
+    onHistoryEvent.stream.listen(
+      (event) => activityReactions.see(event, live: false),
+    );
 
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
