@@ -22,6 +22,11 @@ void main() {
     isCancelled: isCancelled ?? () => false,
   );
 
+  Future<void> expectJoinTouchesNothing(Matcher error) async {
+    await expectLater(join(), throwsA(error));
+    expect(repository.calls, isEmpty);
+  }
+
   test('execute_always_endsTheStaleOneThenConnectsAndJoins', () async {
     // Act
     final room = await join();
@@ -54,11 +59,7 @@ void main() {
     );
 
     // Act & Assert
-    await expectLater(
-      join(),
-      throwsA(isA<CallEncryptionUnsupportedException>()),
-    );
-    expect(repository.calls, isEmpty);
+    await expectJoinTouchesNothing(isA<CallEncryptionUnsupportedException>());
   });
 
   test('execute_whenTheTokenFails_sendsNoMembership', () async {
@@ -128,7 +129,6 @@ void main() {
     );
 
     // Act & Assert
-    await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
-    expect(repository.calls, isEmpty);
+    await expectJoinTouchesNothing(isA<CallNoPermissionException>());
   });
 }

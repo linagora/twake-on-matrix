@@ -36,6 +36,19 @@ void main() {
 
   CallState state() => container.read(callControllerProvider);
 
+  Future<void> leaveWhileJoining(Completer<void> gate) async {
+    final joining = controller().join('!room', isVideo: false);
+    await pumpEventQueue();
+    await controller().leave();
+    gate.complete();
+    await joining;
+  }
+
+  void expectEndedAs<T extends CallException>() {
+    expect((state() as CallFailed).error, isA<T>());
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+  }
+
   setUp(() {
     repository = FakeCallRepository();
     container = ProviderContainer.test(
@@ -236,14 +249,10 @@ void main() {
 
   test('leave_whileTheMembershipIsSent_leavesOnceJoined', () async {
     // Arrange
-    repository.joinGate = Completer<void>();
-    final joining = controller().join('!room', isVideo: false);
-    await pumpEventQueue();
+    final gate = repository.joinGate = Completer<void>();
 
     // Act
-    await controller().leave();
-    repository.joinGate!.complete();
-    await joining;
+    await leaveWhileJoining(gate);
 
     // Assert
     expect(state(), const CallState.idle());
@@ -284,14 +293,10 @@ void main() {
 
   test('leave_whileTheMediaConnects_sendsNoMembership', () async {
     // Arrange
-    repository.connectGate = Completer<void>();
-    final joining = controller().join('!room', isVideo: false);
-    await pumpEventQueue();
+    final gate = repository.connectGate = Completer<void>();
 
     // Act
-    await controller().leave();
-    repository.connectGate!.complete();
-    await joining;
+    await leaveWhileJoining(gate);
 
     // Assert
     expect(state(), const CallState.idle());
@@ -334,8 +339,7 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
-    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+    expectEndedAs<CallConnectionFailedException>();
   });
 
   test('join_whenThePreviousLeaveNeverEnds_joinsAfterAWhile', () {
@@ -369,11 +373,7 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    expect(
-      (state() as CallFailed).error,
-      isA<CallEncryptionUnsupportedException>(),
-    );
-    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+    expectEndedAs<CallEncryptionUnsupportedException>();
   });
 
   group('accountSwitch', () {
@@ -457,8 +457,7 @@ void main() {
     await pumpEventQueue();
 
     // Assert
-    expect((state() as CallFailed).error, isA<CallRoomNotFoundException>());
-    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
+    expectEndedAs<CallRoomNotFoundException>();
   });
 }
 
