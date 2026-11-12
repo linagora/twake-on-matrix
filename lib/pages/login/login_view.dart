@@ -104,7 +104,9 @@ class LoginView extends StatelessWidget {
                                   : Theme.of(context).colorScheme.onSurface,
                             ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: l10n.pleaseEnterYourUsername,
+                        hintText: controller.usernameError == null
+                            ? l10n.pleaseEnterYourUsername
+                            : null,
                         contentPadding: const EdgeInsets.all(16.0),
                       ),
                     ),
@@ -160,7 +162,9 @@ class LoginView extends StatelessWidget {
                                   : Theme.of(context).colorScheme.onSurface,
                             ),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
-                        hintText: l10n.pleaseEnterYourPassword,
+                        hintText: controller.passwordError == null
+                            ? l10n.pleaseEnterYourPassword
+                            : null,
                         contentPadding: const EdgeInsets.all(16.0),
                         suffixIcon: IconButton(
                           onPressed: controller.toggleShowPassword,

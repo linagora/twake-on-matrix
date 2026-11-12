@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/login/login.dart';
@@ -61,13 +61,15 @@ void main() {
             FakeLoginSessions(loginClient: matrix.getLoginClient),
           ),
         ],
-        child: MaterialApp(
-          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-          localizationsDelegates: L10n.localizationsDelegates,
-          supportedLocales: L10n.supportedLocales,
-          builder: (context, child) =>
-              Provider<MatrixState>.value(value: matrix, child: child),
-          home: const Login(),
+        child: Builder(
+          builder: (context) => MaterialApp(
+            theme: TwakeThemes.buildTheme(context, Brightness.light),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            builder: (context, child) =>
+                Provider<MatrixState>.value(value: matrix, child: child),
+            home: const Login(),
+          ),
         ),
       ),
     );
@@ -88,12 +90,14 @@ void main() {
           find.descendant(of: field, matching: find.byType(EditableText)),
         )
         .style;
+    final hintToken = Theme.of(
+      tester.element(field),
+    ).inputDecorationTheme.hintStyle?.color;
+    final hintColor = tester.widget<Text>(hintFinder).style?.color;
     expect(opacity.opacity, 1);
-    expect(tester.widget<Text>(hintFinder).style?.color, isNotNull);
-    expect(
-      tester.widget<Text>(hintFinder).style?.color,
-      isNot(valueStyle.color),
-    );
+    expect(hintToken, isNotNull);
+    expect(hintColor, hintToken);
+    expect(hintColor, isNot(valueStyle.color));
   }
 
   testWidgets('build_emptyUnfocusedPassword_showsLabelAndDimmedHint', (
@@ -124,5 +128,24 @@ void main() {
       'Matrix Id or username',
       'Please enter your Matrix Id or username',
     );
+  });
+
+  testWidgets('login_emptyFields_showsErrorsWithoutHints', (tester) async {
+    // Arrange
+    await pumpLogin(tester);
+
+    // Act
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Sign in'));
+    await tester.pumpAndSettle();
+
+    // Assert
+    expect(
+      find.text('Please enter your Matrix Id or username'),
+      findsOneWidget,
+    );
+    expect(find.text('Please enter your password'), findsOneWidget);
+    for (final field in tester.widgetList<TextField>(find.byType(TextField))) {
+      expect(field.decoration?.hintText, isNull);
+    }
   });
 }
