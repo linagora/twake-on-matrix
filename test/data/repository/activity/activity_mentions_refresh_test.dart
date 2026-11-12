@@ -79,7 +79,7 @@ DateTime _at(int hour, [int minute = 0]) =>
     DateTime.utc(2026, 11, 12, hour, minute);
 
 Future<void> _settle() =>
-    Future<void>.delayed(const Duration(milliseconds: 300));
+    Future<void>.delayed(const Duration(milliseconds: 1300));
 
 Map<String, Object?> _message(String eventId, String body, DateTime at) => {
   'type': EventTypes.Message,
