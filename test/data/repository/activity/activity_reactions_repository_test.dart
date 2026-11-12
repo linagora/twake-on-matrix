@@ -75,60 +75,74 @@ void main() {
     expect(reaction.threadRootId, isNull);
   });
 
-  test('the reactions of the user are not listed', () async {
-    await _syncTeam([
-      messageEvent((
-        id: r'$mine',
-        sender: threadOwner,
-        body: 'the deck is ready',
-        at: 9.utc,
-      )),
-      reactionEvent((
-        id: r'$r1',
-        sender: threadOwner,
-        target: r'$mine',
-        key: '👍',
-        at: (9, 5).utc,
-      )),
-      reactionEvent((
-        id: r'$r2',
-        sender: _frank,
-        target: r'$mine',
-        key: '🎉',
-        at: (9, 6).utc,
-      )),
-    ]);
+  // Beside each reaction left out, Frank or Grace reacts 🎉 to a message of
+  // the user: the list is not empty for want of a reaction.
+  for (final (name, timeline) in <(String, List<Map<String, Object?>>)>[
+    (
+      'the reactions of the user are not listed',
+      [
+        messageEvent((
+          id: r'$mine',
+          sender: threadOwner,
+          body: 'the deck is ready',
+          at: 9.utc,
+        )),
+        reactionEvent((
+          id: r'$r1',
+          sender: threadOwner,
+          target: r'$mine',
+          key: '👍',
+          at: (9, 5).utc,
+        )),
+        reactionEvent((
+          id: r'$r2',
+          sender: _frank,
+          target: r'$mine',
+          key: '🎉',
+          at: (9, 6).utc,
+        )),
+      ],
+    ),
+    (
+      'a reaction to the message of someone else is not listed',
+      [
+        messageEvent((
+          id: r'$theirs',
+          sender: _frank,
+          body: 'lunch?',
+          at: 9.utc,
+        )),
+        messageEvent((
+          id: r'$mine',
+          sender: threadOwner,
+          body: 'the deck is ready',
+          at: (9, 1).utc,
+        )),
+        reactionEvent((
+          id: r'$r1',
+          sender: _grace,
+          target: r'$theirs',
+          key: '👍',
+          at: (9, 5).utc,
+        )),
+        reactionEvent((
+          id: r'$r2',
+          sender: _grace,
+          target: r'$mine',
+          key: '🎉',
+          at: (9, 6).utc,
+        )),
+      ],
+    ),
+  ]) {
+    test(name, () async {
+      await _syncTeam(timeline);
 
-    expect((await _shown()).map((r) => r.emoji), ['🎉']);
-  });
-
-  test('a reaction to the message of someone else is not listed', () async {
-    await _syncTeam([
-      messageEvent((id: r'$theirs', sender: _frank, body: 'lunch?', at: 9.utc)),
-      messageEvent((
-        id: r'$mine',
-        sender: threadOwner,
-        body: 'the deck is ready',
-        at: (9, 1).utc,
-      )),
-      reactionEvent((
-        id: r'$r1',
-        sender: _grace,
-        target: r'$theirs',
-        key: '👍',
-        at: (9, 5).utc,
-      )),
-      reactionEvent((
-        id: r'$r2',
-        sender: _grace,
-        target: r'$mine',
-        key: '🎉',
-        at: (9, 6).utc,
-      )),
-    ]);
-
-    expect((await _shown()).map((r) => r.eventId), [r'$mine']);
-  });
+      expect((await _shown()).map((r) => (r.eventId, r.emoji)), [
+        (r'$mine', '🎉'),
+      ]);
+    });
+  }
 
   test('a reaction to a thread reply of the user carries its thread', () async {
     await _syncTeam([
