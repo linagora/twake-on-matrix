@@ -45,9 +45,15 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
   ) => switch (mentions) {
     AsyncLoading() => const Center(child: CircularProgressIndicator()),
     AsyncError() => Center(
-      child: TextButton(
-        onPressed: () => ref.invalidate(activityMentionsProvider),
-        child: Text(L10n.of(context)!.activityTryAgain),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(L10n.of(context)!.activityMentionsLoadFailed),
+          TextButton(
+            onPressed: () => ref.invalidate(activityMentionsProvider),
+            child: Text(L10n.of(context)!.activityTryAgain),
+          ),
+        ],
       ),
     ),
     _ => _list(context, shown, filter),
