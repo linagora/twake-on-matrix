@@ -40,7 +40,8 @@ void main() {
     test('builds an encoded matrix.to permalink', () {
       expect(
         policy.build(webAppOrigin: null, roomId: roomId, eventId: eventId),
-        'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org',
+        'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
+        '?via=example.org',
       );
     });
 
@@ -51,6 +52,62 @@ void main() {
 
       expect(parts?.primaryIdentifier, roomId);
       expect(parts?.secondaryIdentifier, eventId);
+    });
+
+    test('names the room server and the user server as via', () {
+      final link = policy.build(
+        webAppOrigin: null,
+        roomId: roomId,
+        eventId: eventId,
+        userId: '@me:other.org',
+      );
+
+      expect(
+        link,
+        'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
+        '?via=example.org&via=other.org',
+      );
+      final parts = link.parseIdentifierIntoParts();
+      expect(parts?.primaryIdentifier, roomId);
+      expect(parts?.secondaryIdentifier, eventId);
+      expect(parts?.via, {'example.org', 'other.org'});
+    });
+
+    test('names a server once when room and user share it', () {
+      expect(
+        policy.build(
+          webAppOrigin: null,
+          roomId: roomId,
+          eventId: eventId,
+          userId: '@me:example.org',
+        ),
+        endsWith('?via=example.org'),
+      );
+    });
+
+    test('names only the user server for a room id without a server', () {
+      // Room version 12 ids carry no server name.
+      expect(
+        policy.build(
+          webAppOrigin: null,
+          roomId: '!opaque',
+          eventId: eventId,
+          userId: '@me:other.org',
+        ),
+        'https://matrix.to/#/!opaque/%24evt_1%3Aexample.org?via=other.org',
+      );
+    });
+
+    test('keeps the web app link free of via', () {
+      expect(
+        policy.build(
+          webAppOrigin: 'https://chat.example.org',
+          roomId: roomId,
+          eventId: eventId,
+          userId: '@me:other.org',
+        ),
+        isNot(contains('via=')),
+      );
     });
   });
 
@@ -66,7 +123,7 @@ void main() {
 
       expect(
         policy.matrixToForWebLink(webLink, webAppOrigin: origin),
-        policy.build(webAppOrigin: null, roomId: roomId, eventId: eventId),
+        'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org',
       );
     });
 

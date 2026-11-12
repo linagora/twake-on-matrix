@@ -4,12 +4,19 @@ part of 'chat.dart';
 class ChatJumpRequest extends Equatable {
   const ChatJumpRequest({
     required this.eventId,
+    String? requestedEventId,
     required this.generation,
     required this.highlight,
     this.allowContextualReload = true,
-  });
+  }) : requestedEventId = requestedEventId ?? eventId;
 
+  /// The row to reveal and tint.
   final String eventId;
+
+  /// The event the caller asked for (the URL `?event=`). It differs from
+  /// [eventId] for a hidden album image, drawn by its leader's row; the URL
+  /// claim and pending-jump bookkeeping key on it.
+  final String requestedEventId;
   final int generation;
   final bool highlight;
 
@@ -23,6 +30,7 @@ class ChatJumpRequest extends Equatable {
   @override
   List<Object?> get props => [
     eventId,
+    requestedEventId,
     generation,
     highlight,
     allowContextualReload,
@@ -622,7 +630,7 @@ extension ChatScrollToEventMixin on ChatController {
     // Claim the URL highlight id up front so didUpdateWidget does not start
     // a second jump while we reload the contextual timeline.
     if (!request.highlight) return;
-    _lastHighlightedEventId = request.eventId;
+    _lastHighlightedEventId = request.requestedEventId;
   }
 
   /// Returns whether the jump brought the target into view.
@@ -679,12 +687,12 @@ extension ChatScrollToEventMixin on ChatController {
   void _releaseUrlHighlightClaimIfFailed(ChatJumpRequest request) {
     if (!request.highlight) return;
     if (request.generation != _scrollGeneration) return;
-    if (_lastHighlightedEventId != request.eventId) return;
+    if (_lastHighlightedEventId != request.requestedEventId) return;
     _lastHighlightedEventId = null;
   }
 
   void _clearPendingUrlJumpIfMatching(ChatJumpRequest request) {
-    if (_pendingUrlJumpEventId == request.eventId) {
+    if (_pendingUrlJumpEventId == request.requestedEventId) {
       _pendingUrlJumpEventId = null;
     }
   }
@@ -733,11 +741,12 @@ extension ChatScrollToEventMixin on ChatController {
     bool highlight = true,
     bool allowContextualReload = true,
   }) async {
-    eventId = _albumRowEventId(eventId);
+    final rowEventId = _albumRowEventId(eventId);
     // Probe without bumping generation — live scroll must not supersede
     // an in-flight search jump.
     final probe = ChatJumpRequest(
-      eventId: eventId,
+      eventId: rowEventId,
+      requestedEventId: eventId,
       generation: _scrollGeneration,
       highlight: highlight,
       allowContextualReload: allowContextualReload,
@@ -754,7 +763,8 @@ extension ChatScrollToEventMixin on ChatController {
 
     await _jumpToEventWithContext(
       ChatJumpRequest(
-        eventId: eventId,
+        eventId: rowEventId,
+        requestedEventId: eventId,
         generation: ++_scrollGeneration,
         highlight: highlight,
         allowContextualReload: allowContextualReload,
