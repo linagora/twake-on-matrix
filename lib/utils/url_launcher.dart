@@ -60,14 +60,15 @@ class UrlLauncher with GoToDraftChatMixin {
       return;
     }
     final container = ProviderScope.containerOf(context, listen: false);
-    final webAppMatrixTo = container
-        .read(messageLinkPolicyProvider)
-        .matrixToForWebLink(
+    final policy = container.read(messageLinkPolicyProvider);
+    final webAppMatrixTo =
+        policy.matrixToForWebLink(
           url!,
           webAppOrigin: container
               .read(loginHomeserverSummaryProvider)
               .webAppOrigin,
-        );
+        ) ??
+        policy.matrixToForRoomsLink(url!, isKnownRoom: _isOpenableRoom);
     if (webAppMatrixTo != null) {
       return openMatrixToUrl(
         customUrl: webAppMatrixTo,
@@ -167,6 +168,15 @@ class UrlLauncher with GoToDraftChatMixin {
     if (!launched && context.mounted) {
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
     }
+  }
+
+  /// A room the user has joined or is invited to, as [openMatrixToUrl]
+  /// opens directly.
+  bool _isOpenableRoom(String roomId) {
+    final membership = Matrix.of(
+      context,
+    ).client.getRoomById(roomId)?.membership;
+    return membership == Membership.join || membership == Membership.invite;
   }
 
   void openMatrixToUrl({
