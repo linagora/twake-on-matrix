@@ -18,7 +18,7 @@ enum ActivityFilter {
 
   String label(L10n l10n) => switch (this) {
     all => l10n.all,
-    unread => l10n.unread,
+    unread => l10n.activityUnread,
     mentions => l10n.activityMentions,
     replies => l10n.activityReplies,
   };
