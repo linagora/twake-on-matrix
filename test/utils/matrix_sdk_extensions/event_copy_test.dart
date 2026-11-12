@@ -80,6 +80,10 @@ void main() {
     'copies the text of a received WebM without downloading it',
     _copiesTextOfReceivedWebmWithoutDownload,
   );
+  testWidgets(
+    'copies the text of a video over 100 MB without downloading it',
+    _copiesTextOfLargeVideoWithoutDownload,
+  );
 }
 
 void _setUpClipboardAndStorage() {
@@ -228,6 +232,16 @@ Future<void> _copiesTextOfReceivedWebmWithoutDownload(
   WidgetTester tester,
 ) async {
   final event = _receivedEvent('received.webm', 'video/webm', 3);
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, isNull);
+  expect(_clipboard.text, isNotNull);
+  expect(find.text('Copy image failed'), findsNothing);
+}
+
+Future<void> _copiesTextOfLargeVideoWithoutDownload(WidgetTester tester) async {
+  final event = _receivedEvent('large.mp4', 'video/mp4', 101 * 1024 * 1024);
 
   await _copy(tester, event);
 

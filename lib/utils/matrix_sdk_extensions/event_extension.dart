@@ -235,6 +235,8 @@ extension LocalizedBody on Event {
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
+  static const _maxCopiedMediaSize = 100 * 1024 * 1024;
+
   Future<void> copy(
     BuildContext context,
     Timeline timeline, {
@@ -246,7 +248,8 @@ extension LocalizedBody on Event {
     }
     final localFile = getMatrixFile();
     final mimeType = localFile?.mimeType ?? attachmentMimetype;
-    if (!TwakeClipboard.canCopyMedia(mimeType)) {
+    final size = localFile?.size ?? infoMap.tryGet<int>('size') ?? 0;
+    if (!TwakeClipboard.canCopyMedia(mimeType) || size > _maxCopiedMediaSize) {
       return copyTextEvent(context, timeline, clipboard: clipboard);
     }
     final l10n = L10n.of(context)!;
@@ -255,8 +258,8 @@ extension LocalizedBody on Event {
       await clipboard.copyMediaAsBytes(bytes, mimeType: mimeType);
       if (!context.mounted) return;
       TwakeSnackBar.show(context, l10n.copiedToClipboard);
-    } catch (e) {
-      Logs().e('copy(): failed to copy the media of $eventId', e);
+    } catch (e, s) {
+      Logs().e('copy(): failed to copy the media of $eventId', e, s);
       if (!context.mounted) return;
       TwakeSnackBar.show(context, l10n.copyImageFailed);
     }
