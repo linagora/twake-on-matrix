@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/call/usecases/join_call_usecase.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 
 import '../fake_call_repository.dart';
@@ -14,12 +15,12 @@ void main() {
 
   Future<CallRoomInfo?> join({
     String? serviceUrl = 'https://rtc.test',
-    bool Function()? isCancelled,
+    CallCancellation? cancellation,
   }) => JoinCallUseCase(repository).execute(
     roomId: '!room',
     serviceUrl: serviceUrl,
     isVideo: true,
-    isCancelled: isCancelled ?? () => false,
+    cancellation: cancellation,
   );
 
   Future<void> expectJoinTouchesNothing(Matcher error) async {
@@ -91,8 +92,11 @@ void main() {
   });
 
   test('execute_whenCancelledBeforeTheMedia_connectsNothing', () async {
+    // Arrange
+    final cancellation = CallCancellation()..cancel();
+
     // Act
-    final room = await join(isCancelled: () => true);
+    final room = await join(cancellation: cancellation);
 
     // Assert
     expect(room, isNull);
@@ -104,13 +108,13 @@ void main() {
 
   test('execute_whenCancelledWhileTheMediaConnects_disconnectsIt', () async {
     // Arrange
-    var isCancelled = false;
+    final cancellation = CallCancellation();
     repository.connectGate = Completer<void>();
-    final joining = join(isCancelled: () => isCancelled);
+    final joining = join(cancellation: cancellation);
     await pumpEventQueue();
 
     // Act
-    isCancelled = true;
+    cancellation.cancel();
     repository.connectGate!.complete();
     final room = await joining;
 
@@ -119,6 +123,28 @@ void main() {
     expect(repository.calls.last, 'disconnect');
     expect(repository.calls, isNot(contains('join !room video=true')));
   });
+
+  test(
+    'execute_whenCancelledWhileTheMembershipIsSent_stopsTheMediaAtOnce',
+    () async {
+      // Arrange
+      final cancellation = CallCancellation();
+      final gate = repository.joinGate = Completer<void>();
+      final joining = join(cancellation: cancellation);
+      await pumpEventQueue();
+
+      // Act
+      cancellation.cancel();
+      await pumpEventQueue();
+      final callsBeforeTheMembershipLands = [...repository.calls];
+      gate.complete();
+      final room = await joining;
+
+      // Assert
+      expect(callsBeforeTheMembershipLands.last, 'disconnect');
+      expect(room, repository.roomInfo);
+    },
+  );
 
   test('execute_withoutTheRightToJoin_touchesNothing', () async {
     // Arrange

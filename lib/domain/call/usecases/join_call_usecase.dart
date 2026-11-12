@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
 
@@ -7,24 +8,23 @@ class JoinCallUseCase {
 
   final CallRepository _repository;
 
-  static bool _never() => false;
-
   /// The membership is sent once the media is up, so that the others never
-  /// see a device that could not connect. Null when [isCancelled] turns true
-  /// before the membership is sent.
+  /// see a device that could not connect. Null when [cancellation] is
+  /// cancelled before the membership is sent.
   Future<CallRoomInfo?> execute({
     required String roomId,
     required String? serviceUrl,
     required bool isVideo,
-    bool Function() isCancelled = _never,
+    CallCancellation? cancellation,
   }) async {
+    final cancel = cancellation ?? CallCancellation();
     final join = _joinOf(roomId, serviceUrl: serviceUrl, isVideo: isVideo);
     final room = _checkRoom(join.room);
     await _repository.endStaleOwnMembership(join.room);
     final server = await _repository.fetchServer(join);
-    if (isCancelled()) return null;
-    if (!await _connect(server, join, isCancelled)) return null;
-    await _sendMembership(join);
+    if (cancel.isCancelled) return null;
+    if (!await _connect(server, join, cancel)) return null;
+    await _sendMembership(join, cancel);
     return room;
   }
 
@@ -56,20 +56,29 @@ class JoinCallUseCase {
   Future<bool> _connect(
     CallServer server,
     CallJoin join,
-    bool Function() isCancelled,
+    CallCancellation cancellation,
   ) async {
     await _repository.connectMedia(
       server,
       CallMediaState(isMicrophoneOn: true, isCameraOn: join.isVideo),
     );
-    if (!isCancelled()) return true;
+    if (!cancellation.isCancelled) return true;
     await _repository.disconnectMedia();
     return false;
   }
 
-  Future<void> _sendMembership(CallJoin join) async {
+  /// Left meanwhile: the microphone stops at once, the membership ends once
+  /// it has been sent.
+  Future<void> _sendMembership(
+    CallJoin join,
+    CallCancellation cancellation,
+  ) async {
+    final sent = _repository.joinMembership(join);
     try {
-      await _repository.joinMembership(join);
+      await Future.any([sent, cancellation.whenCancelled]);
+      if (!cancellation.isCancelled) return;
+      await _repository.disconnectMedia();
+      await sent;
     } on CallException {
       await _repository.disconnectMedia();
       rethrow;

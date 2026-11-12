@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/call/usecases/set_call_media_usecase.provider.
 import 'package:twake_chat/domain/call/usecases/watch_call_participants_usecase.provider.dart';
 import 'package:twake_chat/domain/call/usecases/watch_call_room_encrypted_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
+import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
@@ -30,7 +31,9 @@ class CallController extends _$CallController {
   // Read at join: after an account switch it still holds the joining client.
   LeaveCallUseCase? _leaveCall;
   Future<void>? _cleanup;
-  var _isLeaveRequested = false;
+  var _cancellation = CallCancellation();
+
+  bool get _isLeaveRequested => _cancellation.isCancelled;
 
   @override
   CallState build() {
@@ -57,7 +60,7 @@ class CallController extends _$CallController {
   }
 
   void _start(String roomId) {
-    _isLeaveRequested = false;
+    _cancellation = CallCancellation();
     state = CallState.connecting(roomId: roomId);
     _leaveCall = ref.read(leaveCallUseCaseProvider);
   }
@@ -75,7 +78,7 @@ class CallController extends _$CallController {
       roomId: roomId,
       serviceUrl: serviceUrl,
       isVideo: isVideo,
-      isCancelled: () => _isLeaveRequested,
+      cancellation: _cancellation,
     );
   }
 
@@ -170,7 +173,7 @@ class CallController extends _$CallController {
   Future<void> leave() async {
     final current = state;
     if (current is CallConnecting) {
-      _isLeaveRequested = true;
+      _cancellation.cancel();
       return;
     }
     if (current is! CallConnected) return;
