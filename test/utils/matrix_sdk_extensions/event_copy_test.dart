@@ -84,6 +84,14 @@ void main() {
     'copies the text of a video over 100 MB without downloading it',
     _copiesTextOfLargeVideoWithoutDownload,
   );
+  testWidgets(
+    'copies the text when the file on the device is over 100 MB',
+    _copiesTextOfLargeFileWithoutKnownSize,
+  );
+  testWidgets(
+    'never copies a file that could not be decrypted',
+    _failsWhenDecryptionFails,
+  );
 }
 
 void _setUpClipboardAndStorage() {
@@ -191,25 +199,40 @@ Future<void> _copiesText(WidgetTester tester) async {
   expect(find.text('Text copied to clipboard'), findsOneWidget);
 }
 
-Event _receivedEvent(String name, String mimeType, int size) => _buildEvent({
+Event _receivedEvent(
+  String name,
+  String mimeType,
+  int? size, {
+  Map<String, dynamic>? file,
+}) => _buildEvent({
   'msgtype': MessageTypes.Video,
   'body': name,
-  'url': 'mxc://example.org/$name',
-  'info': {'mimetype': mimeType, 'size': size},
+  if (file == null) 'url': 'mxc://example.org/$name',
+  if (file != null) 'file': file,
+  'info': {'mimetype': mimeType, 'size': ?size},
+});
+
+Future<void> _writeDownloadedFile(
+  WidgetTester tester,
+  Event event,
+  void Function(File file) write,
+) => tester.runAsync(() async {
+  final path = await StorageDirectoryManager.instance.getFilePathInAppDownloads(
+    eventId: event.eventId,
+    fileName: event.body,
+  );
+  final file = File(path)..createSync(recursive: true);
+  write(file);
 });
 
 Future<void> _copiesReceivedFileFromDisk(WidgetTester tester) async {
   final bytes = Uint8List.fromList([0, 0, 0, 0x18, 0x66, 0x74, 0x79, 0x70]);
   final event = _receivedEvent('received.mp4', 'video/mp4', bytes.length);
-  await tester.runAsync(() async {
-    final path = await StorageDirectoryManager.instance
-        .getFilePathInAppDownloads(
-          eventId: event.eventId,
-          fileName: 'received.mp4',
-        );
-    await File(path).create(recursive: true);
-    await File(path).writeAsBytes(bytes);
-  });
+  await _writeDownloadedFile(
+    tester,
+    event,
+    (file) => file.writeAsBytesSync(bytes),
+  );
 
   await _copy(tester, event);
 
@@ -248,4 +271,51 @@ Future<void> _copiesTextOfLargeVideoWithoutDownload(WidgetTester tester) async {
   expect(_clipboard.mediaBytes, isNull);
   expect(_clipboard.text, isNotNull);
   expect(find.text('Copy image failed'), findsNothing);
+}
+
+Future<void> _copiesTextOfLargeFileWithoutKnownSize(WidgetTester tester) async {
+  final event = _receivedEvent('nosize.mp4', 'video/mp4', null);
+  await _writeDownloadedFile(
+    tester,
+    event,
+    (file) => file.openSync(mode: FileMode.write)
+      ..truncateSync(101 * 1024 * 1024)
+      ..closeSync(),
+  );
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, isNull);
+  expect(_clipboard.text, isNotNull);
+}
+
+Future<void> _failsWhenDecryptionFails(WidgetTester tester) async {
+  final event = _receivedEvent(
+    'secret.png',
+    'image/png',
+    null,
+    file: {
+      'url': 'mxc://example.org/secret',
+      'v': 'v2',
+      'iv': 'AAAAAAAAAAAAAAAAAAAAAA',
+      'hashes': {'sha256': 'not-the-hash'},
+      'key': {
+        'kty': 'oct',
+        'alg': 'A256CTR',
+        'ext': true,
+        'key_ops': ['encrypt', 'decrypt'],
+        'k': 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      },
+    },
+  );
+  await _writeDownloadedFile(
+    tester,
+    event,
+    (file) => file.writeAsBytesSync([1, 2, 3, 4]),
+  );
+
+  await _copy(tester, event);
+
+  expect(_clipboard.mediaBytes, isNull);
+  expect(find.text('Copy image failed'), findsOneWidget);
 }

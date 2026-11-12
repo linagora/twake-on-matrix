@@ -13,6 +13,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.d
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/event_info_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -254,7 +255,18 @@ extension LocalizedBody on Event {
     }
     final l10n = L10n.of(context)!;
     try {
-      final bytes = localFile?.bytes ?? await _readAttachmentFile();
+      final Uint8List bytes;
+      if (localFile != null) {
+        bytes = localFile.bytes;
+      } else {
+        final file = await _attachmentFile();
+        if (await file.length() > _maxCopiedMediaSize) {
+          if (!context.mounted) return;
+          await copyTextEvent(context, timeline, clipboard: clipboard);
+          return;
+        }
+        bytes = await file.readAsBytes();
+      }
       await clipboard.copyMediaAsBytes(bytes, mimeType: mimeType);
       if (!context.mounted) return;
       TwakeSnackBar.show(context, l10n.copiedToClipboard);
@@ -265,10 +277,19 @@ extension LocalizedBody on Event {
     }
   }
 
-  Future<Uint8List> _readAttachmentFile() async {
+  // A failed decryption still returns the encrypted download.
+  Future<File> _attachmentFile() async {
     final path = (await getFileInfo())?.filePath;
     if (path == null) throw StateError('No file for $eventId');
-    return File(path).readAsBytes();
+    if (isAttachmentEncrypted &&
+        path !=
+            await StorageDirectoryManager.instance.getDecryptedFilePath(
+              eventId: eventId,
+              fileName: filename,
+            )) {
+      throw StateError('$eventId could not be decrypted');
+    }
+    return File(path);
   }
 
   Future<void> copyTextEvent(
