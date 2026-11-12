@@ -1044,6 +1044,15 @@ class ChatController extends ConsumerState<Chat>
     _clearSelectEvent();
   }
 
+  /// Copies the caption of an album as text, never one of its images.
+  void copyAlbumCaptionAction(Event caption) async {
+    await caption.copyTextEvent(context, timeline!);
+    if (!mounted) return;
+
+    showEmojiPickerNotifier.value = false;
+    _clearSelectEvent();
+  }
+
   /// Reports [event], or every image of an album when [albumEvents] is set.
   void reportEventAction(Event event, {List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
@@ -1512,16 +1521,24 @@ class ChatController extends ConsumerState<Chat>
     return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 
+  /// [albumEvents] are every image of an album: the user's reactions are
+  /// looked up on all of them, a new one goes to [event] (the first image).
   Future<void> toggleReactionAction({
     required String emoji,
     String? emojiId,
     required Event event,
+    List<Event>? albumEvents,
   }) async {
     final timeline = this.timeline;
     final myReactions = timeline == null
         ? <Event>[]
-        : event
-              .aggregatedEvents(timeline, RelationshipTypes.reaction)
+        : [
+                for (final reacted in albumEvents ?? [event])
+                  ...reacted.aggregatedEvents(
+                    timeline,
+                    RelationshipTypes.reaction,
+                  ),
+              ]
               .where(
                 (e) =>
                     e.senderId == e.room.client.userID &&

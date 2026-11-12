@@ -152,7 +152,10 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
         handleDownloadFileDone: handleDownloadFileDone,
       );
     });
-    showDialog(
+    // Completes when the dialog closes (downloaded or cancelled), so a caller
+    // saving several files shows one dialog at a time: the dialog is closed
+    // through the root navigator, which would close another file's dialog.
+    await showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => DownloadingFileDialog(

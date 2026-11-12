@@ -78,6 +78,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(BuildContext, List<Event>)? onDeleteAlbum;
   final void Function(List<Event>)? onReportAlbum;
   final void Function(List<Event>)? onSelectAlbum;
+  final void Function(Event caption)? onCopyAlbumCaption;
+  final Future<void> Function(String emoji, List<Event> album)?
+  onToggleAlbumReaction;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
@@ -124,6 +127,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onDeleteAlbum,
     this.onReportAlbum,
     this.onSelectAlbum,
+    this.onCopyAlbumCaption,
+    this.onToggleAlbumReaction,
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
@@ -419,7 +424,8 @@ class _MessageContentWithTimestampBuilderState
               messageContextMenu: (event) => _messageContextMenu(event, album),
               themeContextMenu: _themeContextMenu,
               iconContextMenu: _iconContextMenu,
-              onToggleEmojiReaction: widget.onToggleEmojiReaction,
+              onToggleEmojiReaction: (emoji, event) =>
+                  _toggleReaction(emoji, event, album),
             ),
           ),
         )
@@ -537,7 +543,7 @@ class _MessageContentWithTimestampBuilderState
       case 'pin':
         widget.onPin?.call(album.first);
       case 'copy':
-        widget.onCopy?.call(album.last);
+        widget.onCopyAlbumCaption?.call(album.last);
       case 'edit':
         widget.onEdit?.call(album.last);
       case 'select':
@@ -747,8 +753,25 @@ class _MessageContentWithTimestampBuilderState
     required String emoji,
     required Event event,
   }) async {
+    final album = MessageContentWithTimestampBuilder.sentAlbumMembersOf(
+      context.albumMembersFor(widget.event),
+    );
     Navigator.of(context).pop();
-    await widget.onToggleEmojiReaction?.call(emoji, event);
+    await _toggleReaction(emoji, event, album);
+  }
+
+  /// An album has one reaction per user, wherever it is: the picker looks
+  /// at every image, as the merged chips do.
+  Future<void> _toggleReaction(
+    String emoji,
+    Event event,
+    List<Event>? album,
+  ) async {
+    final toggleAlbum = widget.onToggleAlbumReaction;
+    if (album == null || toggleAlbum == null) {
+      return widget.onToggleEmojiReaction?.call(emoji, event);
+    }
+    return toggleAlbum(emoji, album);
   }
 
   Widget _menuActionsRowBuilder(

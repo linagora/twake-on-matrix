@@ -42,6 +42,8 @@ mixin DeleteEventMixin {
     BuildContext context,
     List<Event> events,
   ) async {
+    // The bubble may be gone when the menu closes (its image was deleted).
+    if (!context.mounted) return;
     final l10n = L10n.of(context)!;
     final confirmResult = await showConfirmAlertDialog(
       context: context,

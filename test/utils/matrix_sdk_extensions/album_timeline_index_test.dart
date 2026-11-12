@@ -33,6 +33,26 @@ void main() {
     status: EventStatus.synced,
   );
 
+  /// What Matrix keeps of a deleted image of '@a': no content, no batch key.
+  Event deleted(String id, int second) => Event(
+    senderId: '@a:example.com',
+    type: 'm.room.message',
+    room: room,
+    eventId: id,
+    content: const {},
+    unsigned: {
+      'redacted_because': {
+        'type': 'm.room.redaction',
+        'event_id': 'redaction-$id',
+        'sender': '@a:example.com',
+        'origin_server_ts': 0,
+        'content': const <String, Object?>{},
+      },
+    },
+    originServerTs: DateTime.utc(2026, 11, 9, 10, 0, second),
+    status: EventStatus.synced,
+  );
+
   late Event newer, a, b, c, older;
   late AlbumTimelineIndex index;
 
@@ -86,5 +106,25 @@ void main() {
   test('an event that is not in the list has no neighbours', () {
     expect(index.newerNeighbour(text('x', 1)), isNull);
     expect(index.olderNeighbour(text('x', 1)), isNull);
+  });
+
+  test('a deleted image inside an album is hidden and does not split it', () {
+    final gone = deleted('B', 11);
+    final reflowed = AlbumTimelineIndex([newer, a, gone, c, older]);
+
+    expect(reflowed.albumLedBy('C')!.map((e) => e.eventId), ['C', 'A']);
+    expect(reflowed.isHiddenMember('B'), isTrue);
+    expect(reflowed.newerNeighbour(c), same(newer));
+  });
+
+  test('deleting every image leaves one deleted message', () {
+    final all = [deleted('A', 12), deleted('B', 11), deleted('C', 10)];
+    final collapsed = AlbumTimelineIndex([newer, ...all, older]);
+
+    expect(collapsed.isHiddenMember('C'), isFalse);
+    expect(collapsed.isHiddenMember('B'), isTrue);
+    expect(collapsed.isHiddenMember('A'), isTrue);
+    expect(collapsed.albumLedBy('C'), isNull);
+    expect(collapsed.newerNeighbour(all.last), same(newer));
   });
 }

@@ -7,7 +7,12 @@ part 'media_album.freezed.dart';
 abstract class MediaAlbum with _$MediaAlbum {
   const MediaAlbum._();
 
-  const factory MediaAlbum({required List<String> eventIds}) = _MediaAlbum;
+  /// [hiddenEventIds] are deleted images between two of [eventIds]: they
+  /// neither split the album nor show as a message of their own.
+  const factory MediaAlbum({
+    required List<String> eventIds,
+    @Default([]) List<String> hiddenEventIds,
+  }) = _MediaAlbum;
 
   /// The member that draws the album: the oldest one. Its id stays the same
   /// while the other images finish uploading, so their uploads do not rebuild
