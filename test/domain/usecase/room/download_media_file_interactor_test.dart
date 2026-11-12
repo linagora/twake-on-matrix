@@ -223,5 +223,25 @@ void main() {
       expect(await File(path).readAsBytes(), [..._firstHalf, ..._secondHalf]);
       expect(mediaAPI.calls, 1);
     });
+
+    test('waits for a download that starts at the same time', () async {
+      final secondHalf = Completer<void>();
+      downloads([secondHalf, duplicate]);
+
+      var done = false;
+      final both = Future.wait([
+        mediaEvent(MessageTypes.Video, 'clip.mp4').getFileInfo(),
+        run().whenComplete(() => done = true),
+      ]);
+      await pumpEventQueue();
+      expect(done, isFalse);
+
+      secondHalf.complete();
+      final url = (await both).last as String?;
+
+      expect(mediaAPI.calls, 1);
+      final path = Uri.parse(url!).toFilePath();
+      expect(await File(path).readAsBytes(), [..._firstHalf, ..._secondHalf]);
+    });
   });
 }

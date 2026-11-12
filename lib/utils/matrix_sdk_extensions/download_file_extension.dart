@@ -19,16 +19,6 @@ import 'package:matrix/matrix.dart';
 extension DownloadFileExtension on Event {
   static final _downloadsInFlight = <String, Future<void>>{};
 
-  static void _trackDownload(String key, Future<void> download) {
-    final done = download.then<void>((_) {}, onError: (_) {});
-    _downloadsInFlight[key] = done;
-    done.whenComplete(() {
-      if (identical(_downloadsInFlight[key], done)) {
-        _downloadsInFlight.remove(key);
-      }
-    });
-  }
-
   bool canContainAttachment() {
     return [EventTypes.Message, EventTypes.Sticker].contains(type);
   }
@@ -61,11 +51,45 @@ extension DownloadFileExtension on Event {
     required String filename,
     bool throwOnError = false,
   }) async {
-    final attachment = File(savePath);
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
     final downloadKey = downloadLink.toString();
-    final inFlight = _downloadsInFlight[downloadKey];
-    if (throwOnError && inFlight != null) await inFlight;
+    Future<void>? inFlight;
+    while ((inFlight = _downloadsInFlight[downloadKey]) != null) {
+      await inFlight;
+    }
+    final done = Completer<void>();
+    _downloadsInFlight[downloadKey] = done.future;
+    try {
+      return await _downloadOrRetrieve(
+        mxcUrl,
+        downloadLink,
+        savePath,
+        downloadStreamController: downloadStreamController,
+        progressCallback: progressCallback,
+        getThumbnail: getThumbnail,
+        cancelToken: cancelToken,
+        filename: filename,
+        throwOnError: throwOnError,
+      );
+    } finally {
+      _downloadsInFlight.remove(downloadKey);
+      done.complete();
+    }
+  }
+
+  Future<FileInfo?> _downloadOrRetrieve(
+    Uri mxcUrl,
+    Uri downloadLink,
+    String savePath, {
+    required StreamController<Either<Failure, Success>>?
+    downloadStreamController,
+    ProgressCallback? progressCallback,
+    required bool getThumbnail,
+    CancelToken? cancelToken,
+    required String filename,
+    required bool throwOnError,
+  }) async {
+    final attachment = File(savePath);
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
     );
@@ -88,7 +112,7 @@ extension DownloadFileExtension on Event {
     if (needsDownload) {
       try {
         final mediaAPI = getIt<MediaAPI>();
-        final download = mediaAPI.downloadFileInfo(
+        final downloadResponse = await mediaAPI.downloadFileInfo(
           uriPath: downloadLink,
           savePath: savePath,
           onReceiveProgress: (receive, total) {
@@ -99,10 +123,6 @@ extension DownloadFileExtension on Event {
           },
           cancelToken: cancelToken,
         );
-        if (!_downloadsInFlight.containsKey(downloadKey)) {
-          _trackDownload(downloadKey, download);
-        }
-        final downloadResponse = await download;
         final status = downloadResponse.statusCode ?? 0;
         if (status < 200 || status >= 300 || !await File(savePath).exists()) {
           throw Exception(
