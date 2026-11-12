@@ -9,6 +9,10 @@ enum NavigationKeys {
     Key('navigation.roomsDestination'),
     ValueKey('navigation.roomsDestination'),
   ),
+  activityDestination(
+    Key('navigation.activityDestination'),
+    ValueKey('navigation.activityDestination'),
+  ),
   settingsDestination(
     Key('navigation.settingsDestination'),
     ValueKey('navigation.settingsDestination'),

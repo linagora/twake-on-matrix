@@ -73,6 +73,15 @@ class ServerRoute {
 
   final String method;
   final String path;
+
+  /// Same method and path, same route: a later [RecordingHomeserver.answer]
+  /// (or `fail`, `hold`) for it replaces the earlier one.
+  @override
+  bool operator ==(Object other) =>
+      other is ServerRoute && other.method == method && other.path == path;
+
+  @override
+  int get hashCode => Object.hash(method, path);
 }
 
 /// What the homeserver answers when a route fails.
@@ -287,6 +296,10 @@ class _SyncDatabase extends MockDatabase {
 
   @override
   Future<Event?> getEventById(String eventId, Room room) async => null;
+
+  /// A member event of the sync (a display name) changes nothing stored.
+  @override
+  Future<void> markUserProfileAsOutdated(String userId) async {}
 
   @override
   Future<void> storeSyncFilterId(String syncFilterId) async {}
