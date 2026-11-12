@@ -14,11 +14,11 @@ void main() {
   setUp(() {
     repository = FakeActivityRepository(
       items: [
-        unreadRoomItem(
+        UnreadRoomItem(
           roomId: '!design:example.org',
           roomName: 'Design',
-          time: todayAt(10),
-        ),
+          time: 10.today,
+        ).item,
       ],
     );
   });
@@ -27,8 +27,7 @@ void main() {
       '« Marquer comme non lu »', (tester) async {
     await pumpActivityPage(
       tester,
-      repository: repository,
-      locale: const Locale('fr'),
+      ActivityPageSetup(repository: repository, locale: const Locale('fr')),
     );
 
     expect(find.text('Marquer comme non lu'), findsNothing);
@@ -41,8 +40,7 @@ void main() {
       'than « Mentions »', (tester) async {
     await pumpActivityPage(
       tester,
-      repository: repository,
-      locale: const Locale('fr'),
+      ActivityPageSetup(repository: repository, locale: const Locale('fr')),
     );
 
     final labels = find.descendant(
@@ -59,7 +57,7 @@ void main() {
 
   testWidgets('in English, the filter of the unread rooms reads « Unread » '
       'and still shows them', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
     await selectFilter(tester, 'Unread');
 

@@ -5,6 +5,7 @@ import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 
 import '../../data/datasource_impl/thread/thread_account.dart';
+import '../../data/repository/activity/activity_sync_events.dart';
 import 'activity_test_support.dart';
 
 /// THR-M-12, slice 3 (review 2026-11-12): with the threads turned off
@@ -31,9 +32,7 @@ void main() {
       'room on the message', (tester) async {
     await pumpActivityPage(
       tester,
-      repository: null,
-      account: account,
-      settle: false,
+      ActivityPageSetup(repository: null, account: account, settle: false),
     );
     await _letTheAccountAnswer(tester);
 
@@ -68,15 +67,6 @@ const _frank = '@frank:example.org';
 
 final _at = DateTime.now().subtract(const Duration(minutes: 5));
 
-Map<String, Object?> _member(String userId, String name) => {
-  'type': EventTypes.RoomMember,
-  'state_key': userId,
-  'sender': userId,
-  'event_id': '\$member$userId',
-  'origin_server_ts': 0,
-  'content': {'membership': 'join', 'displayname': name},
-};
-
 final Map<String, Object?> _teamRoomWithReaction = {
   'rooms': {
     'join': {
@@ -91,8 +81,8 @@ final Map<String, Object?> _teamRoomWithReaction = {
               'origin_server_ts': 0,
               'content': {'name': 'Team'},
             },
-            _member(threadOwner, 'Me Myself'),
-            _member(_frank, 'Frank Moore'),
+            memberEvent((id: threadOwner, name: 'Me Myself')),
+            memberEvent((id: _frank, name: 'Frank Moore')),
           ],
         },
         'timeline': {

@@ -19,7 +19,7 @@ void main() {
       tester,
     ) async {
       repository = FakeActivityRepository(mentionCount: 7);
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(find.text('Activity'), findsOneWidget);
       expect(find.text('7'), findsOneWidget);
@@ -29,7 +29,7 @@ void main() {
       tester,
     ) async {
       repository = FakeActivityRepository();
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(find.text('Activity'), findsOneWidget);
       expect(find.text('0'), findsNothing);
@@ -37,7 +37,7 @@ void main() {
 
     testWidgets('the count follows the sync without a refresh', (tester) async {
       repository = FakeActivityRepository(mentionCount: 7);
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       repository.setMentionCount(2);
       await tester.pumpAndSettle();
@@ -53,7 +53,7 @@ void main() {
     testWidgets('the filters are All, Unread, Mentions and Replies, in that '
         'order, without « Saved »', (tester) async {
       repository = FakeActivityRepository();
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       final labels = ['All', 'Unread', 'Mentions', 'Replies'];
       for (final label in labels) {
@@ -71,22 +71,22 @@ void main() {
     ) async {
       repository = FakeActivityRepository(
         items: [
-          unreadRoomItem(
+          UnreadRoomItem(
             roomId: '!sales:example.org',
             roomName: 'Sales',
-            time: todayAt(11),
+            time: 11.today,
             lastMessage: 'numbers are in',
-          ),
-          followedThreadItem(
+          ).item,
+          FollowedThreadItem(
             roomId: '!design:example.org',
             roomName: 'Design',
             rootId: r'$release',
-            time: todayAt(10),
+            time: 10.today,
             lastReply: 'Ship it',
-          ),
+          ).item,
         ],
       );
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
       await selectFilter(tester, 'Unread');
       await selectFilter(tester, 'All');
 
@@ -100,22 +100,22 @@ void main() {
     testWidgets('the page opens on « All »', (tester) async {
       repository = FakeActivityRepository(
         items: [
-          unreadRoomItem(
+          UnreadRoomItem(
             roomId: '!sales:example.org',
             roomName: 'Sales',
-            time: todayAt(11),
+            time: 11.today,
             lastMessage: 'numbers are in',
-          ),
-          followedThreadItem(
+          ).item,
+          FollowedThreadItem(
             roomId: '!design:example.org',
             roomName: 'Design',
             rootId: r'$release',
-            time: todayAt(10),
+            time: 10.today,
             lastReply: 'Ship it',
-          ),
+          ).item,
         ],
       );
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(
         find.textContaining('numbers are in', findRichText: true),
@@ -130,32 +130,32 @@ void main() {
       repository = FakeActivityRepository(
         items: [
           // Given out of order: the page sorts.
-          unreadRoomItem(
+          UnreadRoomItem(
             roomId: '!old:example.org',
             roomName: 'Archive',
             time: DateTime(startOfToday.year - 1, 3, 3, 9),
             author: 'Zed Old',
             lastMessage: 'old news',
-          ),
-          unreadRoomItem(
+          ).item,
+          UnreadRoomItem(
             roomId: '!early:example.org',
             roomName: 'Early',
-            time: todayAt(8),
+            time: 8.today,
             lastMessage: 'early bird',
-          ),
-          followedThreadItem(
+          ).item,
+          FollowedThreadItem(
             roomId: '!design:example.org',
             roomName: 'Design',
             rootId: r'$release',
-            time: yesterdayAt(18),
+            time: 18.yesterday,
             lastReply: 'last evening',
-          ),
-          unreadRoomItem(
+          ).item,
+          UnreadRoomItem(
             roomId: '!late:example.org',
             roomName: 'Late',
-            time: todayAt(9),
+            time: 9.today,
             lastMessage: 'later today',
-          ),
+          ).item,
         ],
       );
     });
@@ -167,7 +167,7 @@ void main() {
     testWidgets('the days read Today, Yesterday, then the date', (
       tester,
     ) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(find.text('Today'), findsOneWidget);
       expect(find.text('Yesterday'), findsOneWidget);
@@ -178,7 +178,7 @@ void main() {
     testWidgets('each item sits under its day, the newest first', (
       tester,
     ) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       final order = [
         'Today',
@@ -192,7 +192,7 @@ void main() {
     });
 
     testWidgets('an older day is headed by its date', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       // Whatever the format, a header between yesterday's item and the
       // older one names its day: March 3rd of last year.
@@ -218,27 +218,27 @@ void main() {
     setUp(() {
       repository = FakeActivityRepository(
         items: [
-          followedThreadItem(
+          FollowedThreadItem(
             roomId: '!design:example.org',
             roomName: 'Design',
             rootId: r'$release',
             rootText: 'Release plan for Friday',
-            time: todayAt(10, 42),
+            time: (10, 42).today,
             author: 'Alice Durand',
             lastReply: longQuote,
-          ),
+          ).item,
         ],
       );
     });
 
     testWidgets('has an avatar', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(find.byType(Avatar), findsOneWidget);
     });
 
     testWidgets('shows the author in bold', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       final weight = fontWeightOf(tester, 'Alice Durand');
       expect(weight, isNotNull);
@@ -246,7 +246,7 @@ void main() {
     });
 
     testWidgets('shows the time at the right of the author', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       final time = find.textContaining('10:42', findRichText: true).first;
       final author = find.textContaining('Alice Durand', findRichText: true);
@@ -263,7 +263,7 @@ void main() {
 
     testWidgets('shows the room, with the start of the root of a thread, on '
         'the second line', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       final author = find.textContaining('Alice Durand', findRichText: true);
       final room = find.textContaining('Design', findRichText: true).first;
@@ -280,7 +280,7 @@ void main() {
     });
 
     testWidgets('quotes the message on two lines at most', (tester) async {
-      await pumpActivityPage(tester, repository: repository);
+      await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
 
       expect(linesOf(tester, 'This message is long'), lessThanOrEqualTo(2));
     });

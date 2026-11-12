@@ -30,18 +30,18 @@ void main() {
   });
 
   /// A live reaction of Frank to [target], seen by the store.
-  Future<void> react(String target) async {
+  Future<void> react(_Target target) async {
     final room = account.getRoomById(teamRoomId)!;
     store.see(
       Event.fromJson({
         'type': EventTypes.Reaction,
-        'event_id': '\$reaction${account.server.calls.length}$target',
+        'event_id': '\$reaction${account.server.calls.length}${target.id}',
         'sender': _frank,
         'origin_server_ts': now.millisecondsSinceEpoch,
         'content': {
           'm.relates_to': {
             'rel_type': RelationshipTypes.reaction,
-            'event_id': target,
+            'event_id': target.id,
             'key': '❤️',
           },
         },
@@ -50,13 +50,12 @@ void main() {
     await _settle(account);
   }
 
-  int asked(ThreadAccount account, [String? target]) => account.server
-      .callsTo(target == null ? _anyLookup : _lookupOf(target))
-      .length;
+  int asked(ThreadAccount account, [ServerRoute lookup = _anyLookup]) =>
+      account.server.callsTo(lookup).length;
 
   Future<void> spendTheBudget() async {
     for (var i = 0; i < 20; i++) {
-      await react('\$old$i');
+      await react(_Target('\$old$i'));
     }
     expect(asked(account), 20);
   }
@@ -66,41 +65,41 @@ void main() {
     await spendTheBudget();
 
     now = now.add(const Duration(minutes: 1));
-    await react(r'$late');
+    await react(const _Target(r'$late'));
 
-    expect(asked(account, r'$late'), 0);
+    expect(asked(account, const _Target(r'$late').lookup), 0);
   });
 
   test('ten minutes later, a new message is asked again', () async {
     await spendTheBudget();
 
     now = now.add(const Duration(minutes: 10, seconds: 1));
-    await react(r'$later');
+    await react(const _Target(r'$later'));
 
-    expect(asked(account, r'$later'), 1);
+    expect(asked(account, const _Target(r'$later').lookup), 1);
   });
 
   test('a message not asked for want of budget is asked at its next '
       'reaction once the budget is back', () async {
     await spendTheBudget();
-    await react(r'$waiting');
-    expect(asked(account, r'$waiting'), 0);
+    await react(const _Target(r'$waiting'));
+    expect(asked(account, const _Target(r'$waiting').lookup), 0);
 
     now = now.add(const Duration(minutes: 10, seconds: 1));
-    await react(r'$waiting');
+    await react(const _Target(r'$waiting'));
 
-    expect(asked(account, r'$waiting'), 1);
+    expect(asked(account, const _Target(r'$waiting').lookup), 1);
   });
 
   test('a message the server did not find is not asked again, even once '
       'the budget is back', () async {
-    await react(r'$gone');
-    expect(asked(account, r'$gone'), 1);
+    await react(const _Target(r'$gone'));
+    expect(asked(account, const _Target(r'$gone').lookup), 1);
 
     now = now.add(const Duration(minutes: 30));
-    await react(r'$gone');
+    await react(const _Target(r'$gone'));
 
-    expect(asked(account, r'$gone'), 1);
+    expect(asked(account, const _Target(r'$gone').lookup), 1);
   });
 }
 
@@ -108,8 +107,15 @@ const _frank = '@frank:example.org';
 
 const _anyLookup = ServerRoute.get('rooms/$teamRoomId/event/');
 
-ServerRoute _lookupOf(String eventId) =>
-    ServerRoute.get('rooms/$teamRoomId/event/$eventId');
+/// A message a reaction is made to.
+class _Target {
+  const _Target(this.id);
+
+  final String id;
+
+  /// The request that asks the server for it.
+  ServerRoute get lookup => ServerRoute.get('rooms/$teamRoomId/event/$id');
+}
 
 /// Lets the store handle what it was given: returns once the server got no
 /// new request for 100 ms (2 s at most).

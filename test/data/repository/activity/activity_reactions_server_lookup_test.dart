@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_reactions_repository.dart';
 
+import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
 import '../../datasource_impl/thread/thread_account.dart';
 
@@ -43,14 +43,43 @@ void main() {
 
   test('many live reactions to the same older message ask the server once, '
       'and all are listed', () async {
-    _account.server.answer(_lookupOf(r'$old'), _myOldMessage(r'$old'));
+    _account.server.answer(
+      _lookupOf(r'$old'),
+      _oldMessage((id: r'$old', sender: threadOwner)),
+    );
 
     await _syncTeam([
-      _reaction(r'$r1', _frank, r'$old', '❤️', _at(10)),
-      _reaction(r'$r2', _grace, r'$old', '👍', _at(10, 1)),
-      _reaction(r'$r3', _frank, r'$old', '🎉', _at(10, 2)),
+      reactionEvent((
+        id: r'$r1',
+        sender: _frank,
+        target: r'$old',
+        key: '❤️',
+        at: 10.utc,
+      )),
+      reactionEvent((
+        id: r'$r2',
+        sender: _grace,
+        target: r'$old',
+        key: '👍',
+        at: (10, 1).utc,
+      )),
+      reactionEvent((
+        id: r'$r3',
+        sender: _frank,
+        target: r'$old',
+        key: '🎉',
+        at: (10, 2).utc,
+      )),
     ]);
-    await _syncTeam([_reaction(r'$r4', _grace, r'$old', '🚀', _at(10, 3))]);
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r4',
+        sender: _grace,
+        target: r'$old',
+        key: '🚀',
+        at: (10, 3).utc,
+      )),
+    ]);
 
     expect((await _shown()).map((r) => r.emoji), ['🚀', '🎉', '👍', '❤️']);
     expect(_account.server.callsTo(_lookupOf(r'$old')), hasLength(1));
@@ -58,10 +87,21 @@ void main() {
 
   test('a reaction read in a history page asks nothing of the server and is '
       'not listed', () async {
-    _account.server.answer(_lookupOf(r'$old'), _myOldMessage(r'$old'));
+    _account.server.answer(
+      _lookupOf(r'$old'),
+      _oldMessage((id: r'$old', sender: threadOwner)),
+    );
     await _syncTeam(const []);
 
-    await _loadHistory([_reaction(r'$r1', _frank, r'$old', '❤️', _at(6))]);
+    await _loadHistory([
+      reactionEvent((
+        id: r'$r1',
+        sender: _frank,
+        target: r'$old',
+        key: '❤️',
+        at: 6.utc,
+      )),
+    ]);
 
     expect(await _shown(), isEmpty);
     expect(_account.server.callsTo(_lookupOf(r'$old')), isEmpty);
@@ -70,8 +110,24 @@ void main() {
   test('a message the server does not find is not asked again', () async {
     _account.server.fail(_lookupOf(r'$gone'), ServerError.notFound);
 
-    await _syncTeam([_reaction(r'$r1', _frank, r'$gone', '❤️', _at(10))]);
-    await _syncTeam([_reaction(r'$r2', _grace, r'$gone', '👍', _at(10, 1))]);
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r1',
+        sender: _frank,
+        target: r'$gone',
+        key: '❤️',
+        at: 10.utc,
+      )),
+    ]);
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r2',
+        sender: _grace,
+        target: r'$gone',
+        key: '👍',
+        at: (10, 1).utc,
+      )),
+    ]);
     await _shown();
 
     expect(_account.server.callsTo(_lookupOf(r'$gone')), hasLength(1));
@@ -81,17 +137,33 @@ void main() {
       'reactions read neither the device nor the server', () async {
     _account.server.answer(
       _lookupOf(r'$theirs'),
-      _oldMessageOf(r'$theirs', _grace),
+      _oldMessage((id: r'$theirs', sender: _grace)),
     );
 
-    await _syncTeam([_reaction(r'$r1', _frank, r'$theirs', '❤️', _at(10))]);
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r1',
+        sender: _frank,
+        target: r'$theirs',
+        key: '❤️',
+        at: 10.utc,
+      )),
+    ]);
     await _shown();
     expect(_account.server.callsTo(_lookupOf(r'$theirs')), hasLength(1));
     int deviceReads() =>
         _account.deviceEventReads.where((id) => id == r'$theirs').length;
     final readsBefore = deviceReads();
 
-    await _syncTeam([_reaction(r'$r2', _frank, r'$theirs', '👍', _at(10, 1))]);
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r2',
+        sender: _frank,
+        target: r'$theirs',
+        key: '👍',
+        at: (10, 1).utc,
+      )),
+    ]);
 
     expect(await _shown(), isEmpty);
     expect(_account.server.callsTo(_lookupOf(r'$theirs')), hasLength(1));
@@ -105,14 +177,32 @@ void main() {
 
       await _syncTeam([
         for (var i = 0; i < 20; i++)
-          _reaction('\$r$i', _frank, '\$old$i', '❤️', _at(10, i)),
+          reactionEvent((
+            id: '\$r$i',
+            sender: _frank,
+            target: '\$old$i',
+            key: '❤️',
+            at: (10, i).utc,
+          )),
       ]);
       await _shown();
       expect(_account.server.callsTo(_anyLookup), hasLength(20));
 
       await _syncTeam([
-        _reaction(r'$r20', _frank, r'$old20', '❤️', _at(11)),
-        _reaction(r'$r21', _grace, r'$old21', '👍', _at(11, 1)),
+        reactionEvent((
+          id: r'$r20',
+          sender: _frank,
+          target: r'$old20',
+          key: '❤️',
+          at: 11.utc,
+        )),
+        reactionEvent((
+          id: r'$r21',
+          sender: _grace,
+          target: r'$old21',
+          key: '👍',
+          at: (11, 1).utc,
+        )),
       ]);
       await _shown();
 
@@ -124,7 +214,13 @@ void main() {
     _account.server.fail(_anyLookup, ServerError.notFound);
     await _syncTeam([
       for (var i = 0; i < 20; i++)
-        _reaction('\$r$i', _frank, '\$old$i', '❤️', _at(10, i)),
+        reactionEvent((
+          id: '\$r$i',
+          sender: _frank,
+          target: '\$old$i',
+          key: '❤️',
+          at: (10, i).utc,
+        )),
     ]);
     await _shown();
     expect(_account.server.callsTo(_anyLookup), hasLength(20));
@@ -133,8 +229,19 @@ void main() {
     _account.server.answer(const ServerRoute.get('sync'), {'next_batch': 's3'});
     await _account.logOutThenLogIn(threadOwner);
     await _account.receiveRoomState(const []);
-    _account.server.answer(_lookupOf(r'$after'), _myOldMessage(r'$after'));
-    await _syncTeam([_reaction(r'$r99', _frank, r'$after', '❤️', _at(12))]);
+    _account.server.answer(
+      _lookupOf(r'$after'),
+      _oldMessage((id: r'$after', sender: threadOwner)),
+    );
+    await _syncTeam([
+      reactionEvent((
+        id: r'$r99',
+        sender: _frank,
+        target: r'$after',
+        key: '❤️',
+        at: 12.utc,
+      )),
+    ]);
     await _shown();
 
     expect(_account.server.callsTo(_lookupOf(r'$after')), hasLength(1));
@@ -154,9 +261,6 @@ const _anyLookup = ServerRoute.get('rooms/$teamRoomId/event/');
 ServerRoute _lookupOf(String eventId) =>
     ServerRoute.get('rooms/$teamRoomId/event/$eventId');
 
-DateTime _at(int hour, [int minute = 0]) =>
-    DateTime.utc(2026, 11, 12, hour, minute);
-
 final List<List<ActivityItem>> _seen = [];
 StreamSubscription<List<ActivityItem>>? _subscription;
 
@@ -167,20 +271,6 @@ Future<List<ActivityItem>> _shown() async {
   return _seen.last;
 }
 
-/// A message of the user from last week, as the server gives it.
-Map<String, Object?> _myOldMessage(String eventId) =>
-    _oldMessageOf(eventId, threadOwner);
-
-/// A message of [sender] from last week, as the server gives it.
-Map<String, Object?> _oldMessageOf(String eventId, String sender) => {
-  'type': EventTypes.Message,
-  'event_id': eventId,
-  'sender': sender,
-  'room_id': teamRoomId,
-  'origin_server_ts': DateTime.utc(2026, 11, 5, 9).millisecondsSinceEpoch,
-  'content': {'msgtype': 'm.text', 'body': 'the plan from last week'},
-};
-
 Future<void> _syncTeam(List<Map<String, Object?>> timeline) =>
     _account.receiveSync({
       'rooms': {
@@ -188,10 +278,10 @@ Future<void> _syncTeam(List<Map<String, Object?>> timeline) =>
           teamRoomId: {
             'state': {
               'events': [
-                _state(EventTypes.RoomName, '', {'name': 'Team'}),
-                _member(threadOwner, 'Me Myself'),
-                _member(_frank, 'Frank Moore'),
-                _member(_grace, 'Grace Hall'),
+                teamNameEvent,
+                memberEvent((id: threadOwner, name: 'Me Myself')),
+                memberEvent((id: _frank, name: 'Frank Moore')),
+                memberEvent((id: _grace, name: 'Grace Hall')),
               ],
             },
             'timeline': {'events': timeline, 'limited': false},
@@ -214,45 +304,6 @@ Future<void> _loadHistory(List<Map<String, Object?>> events) async {
   await room.requestHistory();
 }
 
-Map<String, Object?> _state(
-  String type,
-  String stateKey,
-  Map<String, Object?> content,
-) => {
-  'type': type,
-  'state_key': stateKey,
-  'sender': threadOwner,
-  'event_id': '\$$type$stateKey',
-  'origin_server_ts': _at(7).millisecondsSinceEpoch,
-  'content': content,
-};
-
-Map<String, Object?> _member(String userId, String name) => _state(
-  EventTypes.RoomMember,
-  userId,
-  {'membership': 'join', 'displayname': name},
-);
-
-Map<String, Object?> _reaction(
-  String eventId,
-  String sender,
-  String target,
-  String key,
-  DateTime at,
-) => {
-  'type': EventTypes.Reaction,
-  'event_id': eventId,
-  'sender': sender,
-  'origin_server_ts': at.millisecondsSinceEpoch,
-  'content': {
-    'm.relates_to': {
-      'rel_type': RelationshipTypes.reaction,
-      'event_id': target,
-      'key': key,
-    },
-  },
-};
-
 /// Lets the lookups and the streams run: returns once neither [seen] nor
 /// the requests to the server grew for 200 ms (5 s at most).
 Future<void> _settle(List<Object?> seen) async {
@@ -266,3 +317,17 @@ Future<void> _settle(List<Object?> seen) async {
     count = now;
   }
 }
+
+/// A message from last week: its event id and who sent it.
+typedef _Old = ({String id, String sender});
+
+/// [old] as the server gives it.
+Map<String, Object?> _oldMessage(_Old old) => {
+  ...messageEvent((
+    id: old.id,
+    sender: old.sender,
+    body: 'the plan from last week',
+    at: DateTime.utc(2026, 11, 5, 9),
+  )),
+  'room_id': teamRoomId,
+};

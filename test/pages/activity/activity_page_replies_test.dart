@@ -15,23 +15,23 @@ void main() {
   const designId = '!design:example.org';
   const rootId = r'$release';
 
-  final release = followedThreadItem(
+  final release = FollowedThreadItem(
     roomId: designId,
     roomName: 'Design',
     rootId: rootId,
     rootText: 'Release plan for Friday',
-    time: todayAt(10),
+    time: 10.today,
     author: 'Alice Durand',
     lastReply: 'Ship it',
     unreadCount: 2,
     isResolved: true,
-  );
-  final unreadRoom = unreadRoomItem(
+  ).item;
+  final unreadRoom = UnreadRoomItem(
     roomId: '!sales:example.org',
     roomName: 'Sales',
-    time: todayAt(11),
+    time: 11.today,
     lastMessage: 'numbers are in',
-  );
+  ).item;
 
   setUp(() {
     repository = FakeActivityRepository(items: [release, unreadRoom]);
@@ -39,7 +39,7 @@ void main() {
 
   testWidgets('a followed thread shows the author and the text of its last '
       'reply', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(
@@ -52,7 +52,7 @@ void main() {
   testWidgets('a followed thread shows its room and the start of its root', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.textContaining('Design', findRichText: true), findsWidgets);
@@ -63,7 +63,7 @@ void main() {
   });
 
   testWidgets('a followed thread shows its unread count', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.text('2'), findsOneWidget);
@@ -74,15 +74,15 @@ void main() {
   ) async {
     repository = FakeActivityRepository(
       items: [
-        followedThreadItem(
+        FollowedThreadItem(
           roomId: designId,
           roomName: 'Design',
           rootId: rootId,
-          time: todayAt(10),
-        ),
+          time: 10.today,
+        ).item,
       ],
     );
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.text('0'), findsNothing);
@@ -92,7 +92,7 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.bySemanticsLabel('Resolved'), findsOneWidget);
@@ -103,15 +103,15 @@ void main() {
     final semantics = tester.ensureSemantics();
     repository = FakeActivityRepository(
       items: [
-        followedThreadItem(
+        FollowedThreadItem(
           roomId: designId,
           roomName: 'Design',
           rootId: rootId,
-          time: todayAt(10),
-        ),
+          time: 10.today,
+        ).item,
       ],
     );
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.bySemanticsLabel('Resolved'), findsNothing);
@@ -120,7 +120,7 @@ void main() {
 
   testWidgets('« Replies » lists the followed threads only, not the unread '
       'rooms', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(
@@ -133,7 +133,7 @@ void main() {
   testWidgets('with no thread followed, « Replies » says « No thread followed '
       'yet. »', (tester) async {
     repository = FakeActivityRepository(items: [unreadRoom]);
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     expect(find.text('No thread followed yet.'), findsOneWidget);
@@ -141,7 +141,7 @@ void main() {
 
   testWidgets('touching a followed thread opens the thread screen of that '
       'thread', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     await tester.tap(find.textContaining('Ship it', findRichText: true));
@@ -156,18 +156,18 @@ void main() {
 
   testWidgets('a reply sent from another device shows as the last reply '
       'without a refresh', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
 
     repository.emit([
-      followedThreadItem(
+      FollowedThreadItem(
         roomId: designId,
         roomName: 'Design',
         rootId: rootId,
-        time: todayAt(12),
+        time: 12.today,
         author: 'Me Myself',
         lastReply: 'On it',
-      ),
+      ).item,
       unreadRoom,
     ]);
     await tester.pumpAndSettle();
@@ -179,7 +179,7 @@ void main() {
   testWidgets('a thread the user starts to follow elsewhere joins « Replies » '
       'without a refresh', (tester) async {
     repository = FakeActivityRepository(items: [unreadRoom]);
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Replies');
     expect(find.text('No thread followed yet.'), findsOneWidget);
 

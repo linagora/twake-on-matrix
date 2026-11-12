@@ -5,12 +5,12 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_mentions_repository.dart';
 
+import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
 import '../../datasource_impl/thread/thread_account.dart';
 
@@ -34,9 +34,9 @@ void main() {
           teamRoomId: {
             'state': {
               'events': [
-                _state(EventTypes.RoomName, '', {'name': 'Team'}),
-                _member(threadOwner, 'Me Myself'),
-                _member(_dan, 'Dan Brown'),
+                teamNameEvent,
+                memberEvent((id: threadOwner, name: 'Me Myself')),
+                memberEvent((id: _dan, name: 'Dan Brown')),
               ],
             },
           },
@@ -46,12 +46,12 @@ void main() {
     _server.answer(
       ServerRoute.get('rooms/$teamRoomId/event/${lunchThread.rootEventId}'),
       {
-        ..._message(
-          lunchThread.rootEventId,
-          _dan,
-          'Lunch on Friday? Pick a place',
-          _at(7),
-        ),
+        ...messageEvent((
+          id: lunchThread.rootEventId,
+          sender: _dan,
+          body: 'Lunch on Friday? Pick a place',
+          at: 7.utc,
+        )),
         'room_id': teamRoomId,
       },
     );
@@ -68,8 +68,13 @@ void main() {
   test('a mention in a room: who, the room, the message and when', () async {
     _server.notifications = [
       _notification(
-        _message(r'$ask', _dan, '@me can you check?', _at(9)),
-        highlight: true,
+        messageEvent((
+          id: r'$ask',
+          sender: _dan,
+          body: '@me can you check?',
+          at: 9.utc,
+        )),
+        _Seen.mention,
       ),
     ];
 
@@ -81,7 +86,7 @@ void main() {
     expect(mention.authorName, 'Dan Brown');
     expect(mention.quote, '@me can you check?');
     expect(mention.eventId, r'$ask');
-    expect(mention.time, _sameInstant(_at(9)));
+    expect(mention.time, sameInstant(9.utc));
     expect(mention.threadRootId, isNull);
   });
 
@@ -89,14 +94,13 @@ void main() {
       'root', () async {
     _server.notifications = [
       _notification(
-        _threadReply(
-          r'$in_thread',
-          _dan,
-          '@me what do you think?',
-          _at(9, 30),
-          rootId: lunchThread.rootEventId,
-        ),
-        highlight: true,
+        threadReplyEvent((
+          id: r'$in_thread',
+          sender: _dan,
+          body: '@me what do you think?',
+          at: (9, 30).utc,
+        ), lunchThread),
+        _Seen.mention,
       ),
     ];
 
@@ -112,12 +116,22 @@ void main() {
     () async {
       _server.notifications = [
         _notification(
-          _message(r'$plain', _dan, 'lunch is ready', _at(9)),
-          highlight: false,
+          messageEvent((
+            id: r'$plain',
+            sender: _dan,
+            body: 'lunch is ready',
+            at: 9.utc,
+          )),
+          _Seen.plain,
         ),
         _notification(
-          _message(r'$ask', _dan, '@me can you check?', _at(10)),
-          highlight: true,
+          messageEvent((
+            id: r'$ask',
+            sender: _dan,
+            body: '@me can you check?',
+            at: 10.utc,
+          )),
+          _Seen.mention,
         ),
       ];
 
@@ -130,9 +144,13 @@ void main() {
   test('a mention already read is still listed', () async {
     _server.notifications = [
       _notification(
-        _message(r'$ask', _dan, '@me can you check?', _at(9)),
-        highlight: true,
-        read: true,
+        messageEvent((
+          id: r'$ask',
+          sender: _dan,
+          body: '@me can you check?',
+          at: 9.utc,
+        )),
+        _Seen.readMention,
       ),
     ];
 
@@ -158,9 +176,6 @@ late _NotificationsServer _server;
 late ActivityMentionsRepository _repository;
 
 const _dan = '@dan:example.org';
-
-DateTime _at(int hour, [int minute = 0]) =>
-    DateTime.utc(2026, 11, 12, hour, minute);
 
 /// `GET /notifications` answers [notifications], honouring `only=highlight`
 /// as Synapse does; every other route is the [RecordingHomeserver]'s.
@@ -195,77 +210,22 @@ class _NotificationsServer extends RecordingHomeserver {
       );
 }
 
-Map<String, Object?> _notification(
-  Map<String, Object?> event, {
-  required bool highlight,
-  bool read = false,
-}) => {
-  '_highlight': highlight,
-  'actions': [
-    'notify',
-    if (highlight) {'set_tweak': 'highlight'},
-    {'set_tweak': 'sound', 'value': 'default'},
-  ],
-  'event': {...event, 'room_id': teamRoomId},
-  'read': read,
-  'room_id': teamRoomId,
-  'ts': event['origin_server_ts'],
-};
+/// How the server tells a notification: a mention (highlighted), read or
+/// not, or a plain notification.
+enum _Seen { mention, readMention, plain }
 
-Map<String, Object?> _state(
-  String type,
-  String stateKey,
-  Map<String, Object?> content,
-) => {
-  'type': type,
-  'state_key': stateKey,
-  'sender': threadOwner,
-  'event_id': '\$$type$stateKey',
-  'origin_server_ts': _at(8).millisecondsSinceEpoch,
-  'content': content,
-};
-
-Map<String, Object?> _member(String userId, String name) => _state(
-  EventTypes.RoomMember,
-  userId,
-  {'membership': 'join', 'displayname': name},
-);
-
-Map<String, Object?> _message(
-  String eventId,
-  String sender,
-  String body,
-  DateTime at,
-) => {
-  'type': EventTypes.Message,
-  'event_id': eventId,
-  'sender': sender,
-  'origin_server_ts': at.millisecondsSinceEpoch,
-  'content': {'msgtype': 'm.text', 'body': body},
-};
-
-Map<String, Object?> _threadReply(
-  String eventId,
-  String sender,
-  String body,
-  DateTime at, {
-  required String rootId,
-}) => {
-  ..._message(eventId, sender, body, at),
-  'content': {
-    'msgtype': 'm.text',
-    'body': body,
-    'm.relates_to': {
-      'rel_type': RelationshipTypes.thread,
-      'event_id': rootId,
-      'is_falling_back': true,
-      'm.in_reply_to': {'event_id': rootId},
-    },
-  },
-};
-
-/// The same instant, whatever the time zone the SDK gives the date in.
-Matcher _sameInstant(DateTime expected) => predicate<DateTime>(
-  (actual) => actual.isAtSameMomentAs(expected),
-  'the instant $expected',
-);
+Map<String, Object?> _notification(Map<String, Object?> event, _Seen seen) {
+  final highlight = seen != _Seen.plain;
+  return {
+    '_highlight': highlight,
+    'actions': [
+      'notify',
+      if (highlight) {'set_tweak': 'highlight'},
+      {'set_tweak': 'sound', 'value': 'default'},
+    ],
+    'event': {...event, 'room_id': teamRoomId},
+    'read': seen == _Seen.readMention,
+    'room_id': teamRoomId,
+    'ts': event['origin_server_ts'],
+  };
+}

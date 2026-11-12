@@ -16,46 +16,46 @@ void main() {
   setUp(() {
     repository = FakeActivityRepository(
       items: [
-        unreadRoomItem(
+        UnreadRoomItem(
           roomId: '!cafe:example.org',
           roomName: 'Café du coin',
-          time: todayAt(12),
+          time: 12.today,
           author: 'Bob Martin',
           lastMessage: 'numbers are in',
-        ),
-        followedThreadItem(
+        ).item,
+        FollowedThreadItem(
           roomId: '!design:example.org',
           roomName: 'Design',
           rootId: r'$release',
           rootText: 'Release plan for Friday',
-          time: todayAt(10),
+          time: 10.today,
           author: 'Alice Durand',
           lastReply: 'Ship it',
-        ),
+        ).item,
       ],
     );
     mentions = FakeActivityMentionsRepository(
       mentions: [
-        mentionItem(
+        MentionItem(
           roomId: '!sales:example.org',
           roomName: 'Sales',
           eventId: r'$ask',
-          time: todayAt(11),
+          time: 11.today,
           author: 'Dan Brown',
           text: 'le résumé est prêt',
-        ),
+        ).item,
       ],
     );
     reactions = FakeActivityReactionsRepository(
       reactions: [
-        reactionItem(
+        ReactionItem(
           roomId: '!sales:example.org',
           roomName: 'Sales',
           eventId: r'$deck',
-          time: todayAt(9),
+          time: 9.today,
           author: 'Frank Moore',
           message: 'the deck is ready',
-        ),
+        ).item,
       ],
     );
   });
@@ -63,9 +63,11 @@ void main() {
   Future<void> pump(WidgetTester tester) {
     return pumpActivityPage(
       tester,
-      repository: repository,
-      mentions: mentions,
-      reactions: reactions,
+      ActivityPageSetup(
+        repository: repository,
+        mentions: mentions,
+        reactions: reactions,
+      ),
     );
   }
 

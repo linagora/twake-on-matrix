@@ -30,23 +30,36 @@ class FakeActivityMentionsRepository implements ActivityMentionsRepository {
 }
 
 /// [author] mentioned the user in a room, or in the thread of [rootId].
-ActivityItem mentionItem({
-  required String roomId,
-  required String roomName,
-  required String eventId,
-  required DateTime time,
-  String author = 'Dan Brown',
-  String text = '@me can you check?',
-  String? rootId,
-  String? rootText,
-}) => ActivityItem(
-  kind: ActivityKind.mention,
-  roomId: roomId,
-  roomName: roomName,
-  time: time,
-  authorName: author,
-  quote: text,
-  eventId: eventId,
-  threadRootId: rootId,
-  threadTitle: rootText,
-);
+class MentionItem {
+  const MentionItem({
+    required this.roomId,
+    required this.roomName,
+    required this.eventId,
+    required this.time,
+    this.author = 'Dan Brown',
+    this.text = '@me can you check?',
+    this.rootId,
+    this.rootText,
+  });
+
+  final String roomId;
+  final String roomName;
+  final String eventId;
+  final DateTime time;
+  final String author;
+  final String text;
+  final String? rootId;
+  final String? rootText;
+
+  ActivityItem get item => ActivityItem(
+    kind: ActivityKind.mention,
+    roomId: roomId,
+    roomName: roomName,
+    time: time,
+    authorName: author,
+    quote: text,
+    eventId: eventId,
+    threadRootId: rootId,
+    threadTitle: rootText,
+  );
+}

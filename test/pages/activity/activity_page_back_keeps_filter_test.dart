@@ -14,25 +14,25 @@ void main() {
   setUp(() {
     repository = FakeActivityRepository(
       items: [
-        unreadRoomItem(
+        UnreadRoomItem(
           roomId: '!sales:example.org',
           roomName: 'Sales',
-          time: todayAt(11),
+          time: 11.today,
           lastMessage: 'numbers are in',
-        ),
-        unreadRoomItem(
+        ).item,
+        UnreadRoomItem(
           roomId: '!ops:example.org',
           roomName: 'Ops',
-          time: todayAt(10),
+          time: 10.today,
           lastMessage: 'server is down',
-        ),
-        followedThreadItem(
+        ).item,
+        FollowedThreadItem(
           roomId: '!design:example.org',
           roomName: 'Design',
           rootId: r'$release',
-          time: todayAt(9),
+          time: 9.today,
           lastReply: 'Ship it',
-        ),
+        ).item,
       ],
     );
   });
@@ -54,7 +54,10 @@ void main() {
     group(screen, () {
       testWidgets('back from a followed thread, « Replies » is still the '
           'filter', (tester) async {
-        await pumpActivityPage(tester, repository: repository, wide: wide);
+        await pumpActivityPage(
+          tester,
+          ActivityPageSetup(repository: repository, wide: wide),
+        );
         await selectFilter(tester, 'Replies');
 
         await openThenBack(tester, 'Ship it');
@@ -69,7 +72,10 @@ void main() {
 
       testWidgets('back from an unread room, « Unread » and the search typed '
           'are still there', (tester) async {
-        await pumpActivityPage(tester, repository: repository, wide: wide);
+        await pumpActivityPage(
+          tester,
+          ActivityPageSetup(repository: repository, wide: wide),
+        );
         await selectFilter(tester, 'Unread');
         await tester.enterText(find.byType(TextField), 'sales');
         await tester.pumpAndSettle();

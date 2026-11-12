@@ -17,54 +17,54 @@ void main() {
 
   const designId = '!design:example.org';
 
-  final onDeck = reactionItem(
+  final onDeck = ReactionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$deck',
-    time: todayAt(10, 30),
+    time: (10, 30).today,
     author: 'Frank Moore',
     emoji: '🎉',
     message: 'the deck is ready',
-  );
-  final inThread = reactionItem(
+  ).item;
+  final inThread = ReactionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$my_reply',
-    time: todayAt(7),
+    time: 7.today,
     author: 'Grace Hall',
     emoji: '👍',
     message: 'I can take it',
     rootId: r'$release',
     rootText: 'Release plan for Friday',
-  );
+  ).item;
 
   setUp(() {
     repository = FakeActivityRepository(
       items: [
-        unreadRoomItem(
+        UnreadRoomItem(
           roomId: '!sales:example.org',
           roomName: 'Sales',
-          time: todayAt(12),
+          time: 12.today,
           lastMessage: 'numbers are in',
-        ),
-        followedThreadItem(
+        ).item,
+        FollowedThreadItem(
           roomId: designId,
           roomName: 'Design',
           rootId: r'$other',
-          time: todayAt(10),
+          time: 10.today,
           lastReply: 'Ship it',
-        ),
+        ).item,
       ],
     );
     mentions = FakeActivityMentionsRepository(
       mentions: [
-        mentionItem(
+        MentionItem(
           roomId: designId,
           roomName: 'Design',
           eventId: r'$ask',
-          time: todayAt(11),
+          time: 11.today,
           text: '@me can you check?',
-        ),
+        ).item,
       ],
     );
     reactions = FakeActivityReactionsRepository(reactions: [onDeck, inThread]);
@@ -73,9 +73,11 @@ void main() {
   Future<void> pump(WidgetTester tester) {
     return pumpActivityPage(
       tester,
-      repository: repository,
-      mentions: mentions,
-      reactions: reactions,
+      ActivityPageSetup(
+        repository: repository,
+        mentions: mentions,
+        reactions: reactions,
+      ),
     );
   }
 
@@ -172,15 +174,15 @@ void main() {
     await pump(tester);
 
     reactions.emit([
-      reactionItem(
+      ReactionItem(
         roomId: designId,
         roomName: 'Design',
         eventId: r'$late',
-        time: todayAt(13),
+        time: 13.today,
         author: 'Hugo Lane',
         emoji: '❤️',
         message: 'see the new logo',
-      ),
+      ).item,
       inThread,
     ]);
     await tester.pumpAndSettle();

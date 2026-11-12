@@ -13,19 +13,19 @@ void main() {
   setUp(() {
     repository = FakeActivityRepository(
       items: [
-        unreadRoomItem(
+        UnreadRoomItem(
           roomId: '!sales:example.org',
           roomName: 'Sales',
-          time: todayAt(11),
+          time: 11.today,
           lastMessage: 'numbers are in',
-        ),
-        followedThreadItem(
+        ).item,
+        FollowedThreadItem(
           roomId: '!design:example.org',
           roomName: 'Design',
           rootId: r'$release',
-          time: todayAt(9),
+          time: 9.today,
           lastReply: 'Ship it',
-        ),
+        ).item,
       ],
     );
   });
@@ -48,7 +48,7 @@ void main() {
   testWidgets('after a switch of account, the filter is « All » again', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await chooseRepliesAndSearch(tester);
 
     await switchActiveAccount(tester, accountClient('@other:example.org'));
@@ -58,7 +58,7 @@ void main() {
   });
 
   testWidgets('after a switch of account, the search is empty', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await chooseRepliesAndSearch(tester);
 
     await switchActiveAccount(tester, accountClient('@other:example.org'));
@@ -69,7 +69,7 @@ void main() {
   testWidgets('without a switch, the filter and the search stay', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await chooseRepliesAndSearch(tester);
 
     await tester.pumpAndSettle();

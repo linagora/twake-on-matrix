@@ -50,12 +50,10 @@ void main() {
 
     await pumpActivityPage(
       tester,
-      repository: null,
-      account: account,
-      settle: false,
+      ActivityPageSetup(repository: null, account: account, settle: false),
     );
     await _letTheAccountAnswer(tester);
-    await selectFilter(tester, 'Mentions', settle: false);
+    await selectFilterWhileLoading(tester, 'Mentions');
     await _letTheAccountAnswer(tester);
     await tester.tap(find.textContaining('can you check?', findRichText: true));
     await _letTheAccountAnswer(tester);

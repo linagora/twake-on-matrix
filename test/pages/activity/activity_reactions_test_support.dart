@@ -29,25 +29,39 @@ class FakeActivityReactionsRepository implements ActivityReactionsRepository {
 }
 
 /// [author] reacted [emoji] to the message [eventId] of the user.
-ActivityItem reactionItem({
-  required String roomId,
-  required String roomName,
-  required String eventId,
-  required DateTime time,
-  String author = 'Frank Moore',
-  String emoji = '👍',
-  String message = 'the deck is ready',
-  String? rootId,
-  String? rootText,
-}) => ActivityItem(
-  kind: ActivityKind.reaction,
-  roomId: roomId,
-  roomName: roomName,
-  time: time,
-  authorName: author,
-  quote: message,
-  eventId: eventId,
-  emoji: emoji,
-  threadRootId: rootId,
-  threadTitle: rootText,
-);
+class ReactionItem {
+  const ReactionItem({
+    required this.roomId,
+    required this.roomName,
+    required this.eventId,
+    required this.time,
+    this.author = 'Frank Moore',
+    this.emoji = '👍',
+    this.message = 'the deck is ready',
+    this.rootId,
+    this.rootText,
+  });
+
+  final String roomId;
+  final String roomName;
+  final String eventId;
+  final DateTime time;
+  final String author;
+  final String emoji;
+  final String message;
+  final String? rootId;
+  final String? rootText;
+
+  ActivityItem get item => ActivityItem(
+    kind: ActivityKind.reaction,
+    roomId: roomId,
+    roomName: roomName,
+    time: time,
+    authorName: author,
+    quote: message,
+    eventId: eventId,
+    emoji: emoji,
+    threadRootId: rootId,
+    threadTitle: rootText,
+  );
+}
