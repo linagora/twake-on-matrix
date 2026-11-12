@@ -70,12 +70,23 @@ class _CallScreenState extends ConsumerState<CallScreen> {
     super.dispose();
   }
 
+  /// Another route may cover this one when the call ends.
+  void _close() {
+    final navigator = Navigator.of(context);
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) {
+      navigator.pop();
+    } else {
+      navigator.removeRoute(route);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ref.listen(callControllerProvider, (previous, next) {
       if (_wasInThisCall(previous) && next is CallIdle && !_isClosing) {
         _isClosing = true;
-        Navigator.of(context).pop();
+        _close();
       }
     });
     final state = ref.watch(callControllerProvider);

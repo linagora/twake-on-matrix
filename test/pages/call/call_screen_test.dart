@@ -216,4 +216,29 @@ void main() {
     // Assert
     expect(find.byType(CallScreen), findsOneWidget);
   });
+
+  testWidgets('build_whenTheCallEndsUnderAnotherRoute_closesOnlyTheCall', (
+    tester,
+  ) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+    unawaited(
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(MaterialPageRoute<void>(builder: (_) => const Text('above'))),
+    );
+    await tester.pumpAndSettle();
+
+    // Act
+    await tester.runAsync(
+      container.read(callControllerProvider.notifier).leave,
+    );
+    await settle(tester);
+
+    // Assert
+    expect(find.text('above'), findsOneWidget);
+    expect(find.byType(CallScreen, skipOffstage: false), findsNothing);
+    expect(find.text('open', skipOffstage: false), findsOneWidget);
+  });
 }
