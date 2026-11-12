@@ -8,14 +8,11 @@ class _FakeDirectChatRepository implements DirectChatRepository {
 
   final bool usable;
   Object? createError;
-  bool? lastEnableEncryption;
+  String? lastContact;
 
   @override
-  Future<String> createDirectChat({
-    required String contactMxId,
-    required bool enableEncryption,
-  }) async {
-    lastEnableEncryption = enableEncryption;
+  Future<String> createDirectChat({required String contactMxId}) async {
+    lastContact = contactMxId;
     final error = createError;
     if (error != null) throw error;
     return '!room:server';
@@ -31,7 +28,7 @@ class _FakeDirectChatRepository implements DirectChatRepository {
 void main() {
   const contact = '@alice:server';
 
-  test('returns the room id of a usable direct chat, unencrypted', () async {
+  test('returns the room id of a usable direct chat', () async {
     final repository = _FakeDirectChatRepository();
 
     final roomId = await CreateDirectChatUseCase(
@@ -39,7 +36,7 @@ void main() {
     ).execute(contactMxId: contact);
 
     expect(roomId, '!room:server');
-    expect(repository.lastEnableEncryption, isFalse);
+    expect(repository.lastContact, contact);
   });
 
   test('throws a room mismatch when the room is not usable', () async {

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/direct_chat/repositories/ignored_users_repository.dart';
 import 'package:twake_chat/pages/chat_draft/providers/is_user_blocked_provider.dart';
-import 'package:twake_chat/providers/direct_chat_provider.dart';
+import 'package:twake_chat/data/direct_chat/repositories/ignored_users_repository_impl.provider.dart';
 
 class _FakeIgnoredUsersRepository implements IgnoredUsersRepository {
   final controllers = <String, StreamController<bool>>{};

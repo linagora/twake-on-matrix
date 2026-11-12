@@ -11,14 +11,8 @@ class CreateDirectChatUseCase {
   /// Throws [CreateDirectChatRoomMismatchException] when the room is not a
   /// usable direct chat with the contact, and the exceptions of
   /// [DirectChatRepository.createDirectChat] otherwise.
-  Future<String> execute({
-    required String contactMxId,
-    bool enableEncryption = false,
-  }) async {
-    final roomId = await _repository.createDirectChat(
-      contactMxId: contactMxId,
-      enableEncryption: enableEncryption,
-    );
+  Future<String> execute({required String contactMxId}) async {
+    final roomId = await _repository.createDirectChat(contactMxId: contactMxId);
     if (!_repository.isUsableDirectChat(
       roomId: roomId,
       contactMxId: contactMxId,

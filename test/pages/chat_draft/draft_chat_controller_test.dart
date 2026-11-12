@@ -8,15 +8,17 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
+import 'package:twake_chat/data/direct_chat/repositories/direct_chat_repository_impl.provider.dart';
 import 'package:twake_chat/domain/direct_chat/repositories/direct_chat_repository.dart';
 import 'package:twake_chat/domain/usecase/room/unblock_user_interactor.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/providers/direct_chat_provider.dart';
-import 'package:twake_chat/providers/upload_manager_provider.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 class _StubContacts extends ContactsController {
   @override
@@ -44,11 +46,16 @@ class _FakeRoom extends Fake implements Room {
   @override
   String get name => 'room';
 
+  final sentTexts = <String>[];
+
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      invocation.memberName == #sendTextEvent
-      ? Future<String?>.value('event')
-      : super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName != #sendTextEvent) {
+      return super.noSuchMethod(invocation);
+    }
+    sentTexts.add(invocation.positionalArguments.first as String);
+    return Future<String?>.value('event');
+  }
 }
 
 class _FakeClient extends Fake implements Client {
@@ -63,12 +70,10 @@ class _FakeClient extends Fake implements Client {
 /// Each `createDirectChat` call waits on the next completer of [calls].
 class _GatedRepository implements DirectChatRepository {
   final calls = <Completer<String>>[];
+  var usable = true;
 
   @override
-  Future<String> createDirectChat({
-    required String contactMxId,
-    required bool enableEncryption,
-  }) {
+  Future<String> createDirectChat({required String contactMxId}) {
     final call = Completer<String>();
     calls.add(call);
     return call.future;
@@ -78,7 +83,7 @@ class _GatedRepository implements DirectChatRepository {
   bool isUsableDirectChat({
     required String roomId,
     required String contactMxId,
-  }) => true;
+  }) => usable;
 }
 
 class _FakeUnblock extends Fake implements UnblockUserInteractor {}
@@ -94,7 +99,7 @@ class _TestDraft extends DraftChat {
 
 class _TestController extends DraftChatController {
   @override
-  Widget build(BuildContext context) => const SizedBox();
+  Widget build(BuildContext context) => const Scaffold();
 }
 
 class _Harness {
@@ -120,6 +125,7 @@ class _Harness {
 
   Future<void> pump(Client client) async {
     getIt.registerSingleton<UnblockUserInteractor>(_FakeUnblock());
+    getIt.registerSingleton<ResponsiveUtils>(ResponsiveUtils());
     container.read(_activeClient.notifier).set(client);
     final router = GoRouter(
       routes: [
@@ -141,7 +147,11 @@ class _Harness {
     await _tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+        ),
       ),
     );
     controller = _tester.state<DraftChatController>(find.byType(_TestDraft));
@@ -247,29 +257,72 @@ void main() {
     });
   });
 
-  testWidgets('a created room is opened', (tester) async {
-    final harness = await _start(tester, rooms: {'!r:s': _FakeRoom('!r:s')});
+  testWidgets('a created room is opened and receives the message', (
+    tester,
+  ) async {
+    final room = _FakeRoom('!r:s');
+    final harness = await _start(tester, rooms: {'!r:s': room});
+    harness.controller.sendController.text = 'hello';
     await harness.send();
 
     harness.lastCall.complete('!r:s');
     await harness.settle();
 
     expect(harness.visited, ['!r:s']);
+    expect(room.sentTexts, ['hello']);
   });
 
-  testWidgets('a room missing from the client reports the failure', (
+  testWidgets('a room that is not a usable chat with the contact is refused', (
     tester,
   ) async {
+    final room = _FakeRoom('!r:s');
+    final harness = await _start(tester, rooms: {'!r:s': room});
+    harness.repository.usable = false;
+    var failed = false;
+    harness.controller.sendController.text = 'hello';
+    await harness.send(onFailed: () => failed = true);
+    harness.controller.isSendingNotifier.value = true;
+
+    harness.lastCall.complete('!r:s');
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(harness.controller.isSendingNotifier.value, isFalse);
+    expect(failed, isFalse);
+    expect(harness.visited, isEmpty);
+    expect(room.sentTexts, isEmpty);
+  });
+
+  testWidgets('a room the client no longer holds is refused', (tester) async {
     final harness = await _start(tester);
     var failed = false;
     await harness.send(onFailed: () => failed = true);
     harness.controller.isSendingNotifier.value = true;
 
     harness.lastCall.complete('!gone:s');
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsOneWidget);
+    expect(harness.controller.isSendingNotifier.value, isFalse);
+    expect(failed, isFalse);
+    expect(harness.visited, isEmpty);
+  });
+
+  testWidgets('a media request blocks the screen until it ends', (
+    tester,
+  ) async {
+    final harness = await _start(tester);
+
+    unawaited(harness.controller.sendVoiceMessageWeb());
+    await tester.pump();
+
+    expect(harness.controller.isSendingNotifier.value, isTrue);
+
+    harness.lastCall.completeError(const CreateDirectChatForbiddenException());
     await harness.settle();
 
-    expect(failed, isTrue);
     expect(harness.controller.isSendingNotifier.value, isFalse);
-    expect(harness.visited, isEmpty);
   });
 }

@@ -5,10 +5,7 @@ abstract class DirectChatRepository {
   /// Throws [CreateDirectChatForbiddenException] when the server forbids
   /// reading the contact's profile, and [CreateDirectChatFailedException] for
   /// any other failure.
-  Future<String> createDirectChat({
-    required String contactMxId,
-    required bool enableEncryption,
-  });
+  Future<String> createDirectChat({required String contactMxId});
 
   /// Whether the room [roomId] exists and is a direct chat usable with
   /// [contactMxId].

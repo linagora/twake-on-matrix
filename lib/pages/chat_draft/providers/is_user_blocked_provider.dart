@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:twake_chat/providers/direct_chat_provider.dart';
+import 'package:twake_chat/domain/direct_chat/usecases/watch_user_blocked_usecase.provider.dart';
 
 part 'is_user_blocked_provider.g.dart';
 

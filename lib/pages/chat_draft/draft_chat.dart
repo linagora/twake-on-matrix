@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
+import 'package:twake_chat/domain/direct_chat/usecases/create_direct_chat_usecase.provider.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_controller.dart';
 import 'package:twake_chat/presentation/extensions/contact/unified_contact_extension.dart';
@@ -31,6 +32,7 @@ import 'package:twake_chat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/chat_router_input_argument.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
+import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -38,8 +40,6 @@ import 'package:twake_chat/utils/recent_reactions_extension.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/contacts_tab/providers/unified_contact_read_providers.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/providers/direct_chat_provider.dart';
-import 'package:twake_chat/providers/upload_manager_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/drag_drog_file_mixin.dart';
 import 'package:flutter/material.dart';
@@ -373,7 +373,6 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     inputFocus.unfocus();
     final textEvent = await _triggerTagGreetingMessage();
-    isSendingNotifier.value = true;
     _createRoom(
       onRoomCreatedSuccess: (room) => unawaited(
         sendTextMessageInteractor.execute(room: room, text: textEvent),
@@ -386,6 +385,8 @@ class DraftChatController extends ConsumerState<DraftChat>
     OnRoomCreatedSuccess onRoomCreatedSuccess,
     OnRoomCreatedFailed onRoomCreatedFailed,
   }) async {
+    // Every sender (text, media, voice) blocks the screen until it ends.
+    isSendingNotifier.value = true;
     // Only the latest request reports back, as the cancelled stream did.
     final requestId = ++_createRoomRequestId;
     final intendedMxId = presentationContact.matrixId!;
@@ -413,8 +414,7 @@ class DraftChatController extends ConsumerState<DraftChat>
       return;
     }
     if (failure is CreateDirectChatRoomMismatchException) {
-      isSendingNotifier.value = false;
-      TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
+      _refuseRoom();
       return;
     }
     if (failure != null) {
@@ -423,10 +423,10 @@ class DraftChatController extends ConsumerState<DraftChat>
       isSendingNotifier.value = false;
       return;
     }
+    // Only the legacy success callback needs the Room itself.
     final room = client?.getRoomById(roomId!);
     if (room == null) {
-      onRoomCreatedFailed?.call();
-      isSendingNotifier.value = false;
+      _refuseRoom();
       return;
     }
     onRoomCreatedSuccess?.call(room);
@@ -440,6 +440,11 @@ class DraftChatController extends ConsumerState<DraftChat>
             room.name,
       ),
     ).go(context);
+  }
+
+  void _refuseRoom() {
+    isSendingNotifier.value = false;
+    TwakeSnackBar.show(context, L10n.of(context)!.roomCreationFailed);
   }
 
   void onEmojiAction(TapDownDetails details) {
@@ -611,7 +616,6 @@ class DraftChatController extends ConsumerState<DraftChat>
         break;
       case SendMediaWithCaptionStatus.done:
       case SendMediaWithCaptionStatus.emptyRoom:
-        isSendingNotifier.value = true;
         _createRoom(
           onRoomCreatedSuccess: (newRoom) {
             if (matrixFilesList.first is MatrixImageFile) {
