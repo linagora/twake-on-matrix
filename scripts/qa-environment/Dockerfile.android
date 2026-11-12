@@ -16,6 +16,11 @@ RUN git -C "$FLUTTER_ROOT" fetch --depth 1 origin tag "${FLUTTER_VERSION}" && \
     flutter precache --android && \
     flutter --version
 
+# webcrypto builds its native library with CMake and Ninja (native assets)
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-recommends cmake ninja-build && \
+    rm -rf /var/lib/apt/lists/*
+
 # vodozemac (flutter_vodozemac) is built from its Rust sources by cargokit
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
     /root/.cargo/bin/rustup target add x86_64-linux-android
