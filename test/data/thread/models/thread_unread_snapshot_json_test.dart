@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/data/thread/models/thread_unread_snapshot_json.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 
 /// Spec §5 « Compteurs par fil »: the thread counters are saved per account
@@ -25,7 +26,7 @@ const _savedBefore =
     '"replies":{"$_roomId":["\$reply1","\$reply2"]}}';
 
 ThreadUnreadSnapshot _decode(String raw) =>
-    ThreadUnreadSnapshot.fromJson(jsonDecode(raw) as Map<String, Object?>);
+    threadUnreadSnapshotFromJson(jsonDecode(raw) as Map<String, Object?>);
 
 /// Through the JSON text, as the device storage holds it.
 ThreadUnreadSnapshot _saveAndReload(ThreadUnreadSnapshot snapshot) =>
@@ -85,7 +86,7 @@ void _savedCounters() {
   });
 
   test('nothing saved yet restores nothing', () {
-    final restored = ThreadUnreadSnapshot.fromJson(const {});
+    final restored = threadUnreadSnapshotFromJson(const {});
 
     expect(restored.counts, isEmpty);
     expect(restored.followed, isEmpty);
