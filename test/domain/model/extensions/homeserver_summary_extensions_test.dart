@@ -93,6 +93,27 @@ void main() {
         expect(summary.videoCallBaseUrl, 'https://meet.test');
       });
 
+      test('refuses a service url that is not https', () {
+        final summary = summaryWith(
+          foci([
+            {'type': 'livekit', 'livekit_service_url': 'http://rtc.test'},
+            {'type': 'livekit', 'livekit_service_url': 'https://rtc2.test'},
+          ]),
+        );
+
+        expect(summary.callTokenServiceUrl, 'https://rtc2.test');
+      });
+
+      test('accepts http on this machine, for local servers', () {
+        final summary = summaryWith(
+          foci([
+            {'type': 'livekit', 'livekit_service_url': 'http://127.0.0.1:3003'},
+          ]),
+        );
+
+        expect(summary.callTokenServiceUrl, 'http://127.0.0.1:3003');
+      });
+
       test('ignores a focus of another type', () {
         final summary = summaryWith(
           foci([

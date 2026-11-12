@@ -263,7 +263,8 @@ the same call:
   `oldest_membership`, `foci_preferred` the token service of the well-known;
 - the token comes from `POST <token service>/sfu/get` (MSC4195) with an
   OpenID token; the token service is `livekit_service_url` of the
-  `org.matrix.msc4143.rtc_foci` LiveKit focus (D15);
+  `org.matrix.msc4143.rtc_foci` LiveKit focus (D15), over https only
+  (http on this machine, for local servers);
 - the membership lasts 4 hours (`expires`) and grows by 4 hours before it
   lapses; a delayed leave (MSC4140) of 8 seconds, restarted every 5, ends it
   on the server when the app vanishes;

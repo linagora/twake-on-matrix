@@ -79,7 +79,7 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
   /// The token service of in-app calls. A base url alone is a Meet server
   /// (DECISION.md D15).
   String? get callTokenServiceUrl =>
-      _firstLiveKitUrl((focus) => focus.livekitServiceUrl);
+      _firstLiveKitUrl((focus) => focus.livekitServiceUrl.whereSecure);
 
   String? _firstLiveKitUrl(Uri? Function(RtcFocus focus) urlOf) {
     for (final focus in _liveKitFoci) {
@@ -137,4 +137,17 @@ extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
         ) ==
         true;
   }
+}
+
+const _loopbackHosts = {'localhost', '127.0.0.1', '::1'};
+
+extension on Uri? {
+  // The OpenID token goes to this service: http only on this machine.
+  Uri? get whereSecure => switch (this) {
+    final Uri url when url.isScheme('https') => url,
+    final Uri url
+        when url.isScheme('http') && _loopbackHosts.contains(url.host) =>
+      url,
+    _ => null,
+  };
 }
