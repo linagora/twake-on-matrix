@@ -2,19 +2,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/matrix_events/event_visibility_resolver.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 import '../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../utils/thread_unread/thread_fakes.dart';
 
-/// Scope (orchestrator, 11/11): the flag gates the thread UI only; counters, badges, receipts and the sync filter are not gated.
+/// Scope (review of #3608, nqhhdev, 12/11; replaces the orchestrator scope
+/// of 11/11 « UI only »): the flag gates every thread behaviour, counters,
+/// badges, receipts and sync filter included. It is on from #3609.
 ///
-/// `AppConfig.threadsEnabled` off (until the counters/receipts PR sets it
-/// on): a thread reply is an ordinary message of the room, a root has no
-/// card, the message menu has no « Start a thread ». With the flag on, the
-/// thread specs hold.
+/// `AppConfig.threadsEnabled` off: a thread reply is an ordinary message of
+/// the room, a root has no card, the message menu has no « Start a thread »,
+/// the room counters are the server room counters only. Receipts: see
+/// test/utils/matrix_sdk_extensions/threaded_read_receipt_extension_test.dart;
+/// sync filter: test/utils/client_manager_sync_filter_test.dart. With the
+/// flag on, the thread specs hold.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -32,6 +41,8 @@ void main() {
 
   group('a thread reply in the room', _timelineTests);
   group('a thread root', _rootTests);
+  group('the room counters', _roomCounterTests);
+  group('the new messages of the room', _newMessagesTests);
 }
 
 const _roomId = '!room:example.com';
@@ -135,5 +146,107 @@ void _rootTests() {
       ),
       isFalse,
     );
+  });
+}
+
+const _me = '@me:example.com';
+
+DateTime _at(int minute) => DateTime.utc(2026, 11, 11, 10, minute);
+
+RecordingThreadClient _threadClient() {
+  SharedPreferences.setMockInitialValues({});
+  final client = RecordingThreadClient();
+  when(client.clientName).thenReturn('account-a');
+  when(client.userID).thenReturn(_me);
+  when(client.database).thenReturn(StoredEvents(const []));
+  when(
+    client.roomPreviewLastEvents,
+  ).thenReturn({EventTypes.Message, EventTypes.Encrypted});
+  return client;
+}
+
+/// The thread counters the store may hold (a sync of a build with the flag
+/// on, or a saved snapshot): a followed thread with 2 replies, 1 mention.
+void _storeHoldsAFollowedThread(RecordingThreadClient client) {
+  client.threadUnread.markFollowed(const ThreadRef(_roomId, _rootId));
+  client.threadUnread.apply(
+    const SyncThreadUpdate(
+      counts: {
+        _roomId: {_rootId: (notificationCount: 2, highlightCount: 1)},
+      },
+      leftRoomIds: [],
+    ),
+  );
+}
+
+void _roomCounterTests() {
+  late RecordingThreadClient client;
+
+  setUp(() {
+    client = _threadClient();
+    _storeHoldsAFollowedThread(client);
+  });
+
+  test('the room badge is the server notification count', () {
+    final room = Room(id: _roomId, client: client, notificationCount: 1);
+
+    expect(room.unreadBadgeCount, 1);
+  });
+
+  test('the room mentions are the server highlight count', () {
+    final room = Room(id: _roomId, client: client);
+
+    expect(room.highlightCountWithThreads, 0);
+  });
+
+  test('a room with nothing unread on the server is not unread', () {
+    final room = Room(id: _roomId, client: client);
+
+    expect(room.isUnreadWithThreads, isFalse);
+    expect(room.isUnreadOrInvitedWithThreads, isFalse);
+  });
+}
+
+/// Before threads a thread reply was a message of the room: newer than the
+/// read receipt, the room has new messages, followed thread or not.
+void _newMessagesTests() {
+  test('a thread reply newer than the receipt is a new message', () {
+    final client = _threadClient();
+    final read = LatestReceiptStateData(
+      r'$read',
+      _at(1).millisecondsSinceEpoch,
+    );
+    late Room room;
+    room = Room(
+      id: _roomId,
+      client: client,
+      receiptState: LatestReceiptState(
+        global: LatestReceiptStateForTimeline(
+          ownPrivate: null,
+          ownPublic: read,
+          latestOwnReceipt: read,
+          otherUsers: {},
+        ),
+      ),
+    );
+    room.lastEvent = Event(
+      type: EventTypes.Message,
+      content: {
+        'msgtype': 'm.text',
+        'body': 'in the thread',
+        'm.relates_to': {
+          'rel_type': RelationshipTypes.thread,
+          'event_id': _rootId,
+          'is_falling_back': true,
+          'm.in_reply_to': {'event_id': _rootId},
+        },
+      },
+      eventId: r'$reply',
+      senderId: _bob,
+      originServerTs: _at(5),
+      room: room,
+    );
+
+    expect(room.hasNewMessagesWithThreads, isTrue);
   });
 }
