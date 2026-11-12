@@ -14,8 +14,11 @@ import '../../datasource_impl/thread/thread_account.dart';
 /// THR-M-12 (docs/plan/2026-11-06-threads-mobile-spec.md), slice 3: the
 /// reactions of the others to the messages of the user, from the history
 /// the client holds (here: what the sync brought), newest first, 50 at most;
-/// a reaction taken back is dropped (web D58). Nothing is asked of the
-/// server for them.
+/// a reaction taken back is dropped (web D58). The messages reacted to here
+/// are all in what the sync brought: nothing is asked of the server. A live
+/// reaction to a message the app has not seen asks the server for it
+/// (activity_reactions_older_message_test.dart, bounded in
+/// activity_reactions_server_lookup_test.dart).
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 

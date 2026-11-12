@@ -1,21 +1,26 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/utils/activity/activity_event_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 
 /// The reactions of the others to the messages of the user, among the events
 /// the client saw live or in a history page in this session (nothing is kept
 /// across a restart): the newest [maxReactions], a reaction taken back
 /// dropped. The message a reaction is made to is found among the messages seen,
 /// then on the device; for a live reaction only, then on the server: one
-/// request per message (a miss is remembered), [maxServerLookups] per session,
-/// one at a time.
+/// request per message ever (a miss is remembered), [maxServerLookups] per
+/// [_budgetPeriod] (the budget comes back over time), one at a time. A
+/// message found to be someone else's is remembered: its reactions read
+/// neither the device nor the server.
 class ActivityReactionsStore {
-  ActivityReactionsStore(this._client);
+  ActivityReactionsStore(this._client, {DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   final Client _client;
+  final DateTime Function() _now;
 
   static const maxReactions = 50;
 
@@ -23,9 +28,16 @@ class ActivityReactionsStore {
   static const _maxMessages = 500;
 
   static const maxServerLookups = 20;
+  static const _budgetPeriod = Duration(minutes: 10);
 
   /// The messages already asked of the server, found or not.
   final Set<String> _asked = {};
+
+  /// When the server was asked, within [_budgetPeriod].
+  final Queue<DateTime> _lookups = Queue();
+
+  /// The messages found to be someone else's.
+  final Set<String> _foreign = {};
 
   final Map<String, Event> _messages = {};
 
@@ -66,6 +78,8 @@ class ActivityReactionsStore {
   void clear() {
     _messages.clear();
     _asked.clear();
+    _lookups.clear();
+    _foreign.clear();
     _reactions.clear();
     _changes.add(const []);
   }
@@ -80,7 +94,7 @@ class ActivityReactionsStore {
   Future<Event?> _findTarget(Room room, String targetId, bool live) async {
     final stored = await _client.database.getEventById(targetId, room);
     if (stored != null || !live) return stored;
-    if (_asked.length >= maxServerLookups || !_asked.add(targetId)) return null;
+    if (!_mayAsk(targetId)) return null;
     try {
       return await room.getEventById(targetId);
     } catch (e) {
@@ -89,18 +103,50 @@ class ActivityReactionsStore {
     }
   }
 
+  /// Whether the server may be asked for [targetId] now: not asked before,
+  /// and the budget is not spent. A message refused for want of budget is not
+  /// remembered: it is asked at its next reaction.
+  bool _mayAsk(String targetId) {
+    if (_asked.contains(targetId)) return false;
+    final now = _now();
+    _lookups.removeWhere((at) => now.difference(at) >= _budgetPeriod);
+    if (_lookups.length >= maxServerLookups) return false;
+    _lookups.add(now);
+    return _asked.add(targetId);
+  }
+
+  /// The message of the user a reaction is made to; null when it is someone
+  /// else's (remembered) or cannot be found.
+  Future<Event?> _myTarget(Room room, String targetId, bool live) async {
+    final target =
+        _messages[targetId] ?? await _findTarget(room, targetId, live);
+    if (target == null) return null;
+    if (target.senderId == _client.userID) return target;
+    _foreign.add(targetId);
+    return null;
+  }
+
   Future<void> _addReaction(Event reaction, bool live) async {
     final targetId = reaction.relationshipEventId;
     final key = reaction.content
         .tryGetMap<String, Object?>('m.relates_to')
         ?.tryGet<String>('key');
     if (targetId == null || key == null) return;
-    final target =
-        _messages[targetId] ?? await _findTarget(reaction.room, targetId, live);
-    if (target == null || target.senderId != _client.userID) return;
+    if (_foreign.contains(targetId)) return;
+    final target = await _myTarget(reaction.room, targetId, live);
+    if (target == null) return;
     _rememberMessage(target);
+    _reactions[reaction.eventId] = _item(reaction, target, key);
+    final newest = reactions;
+    for (final dropped in newest.skip(maxReactions)) {
+      _reactions.removeWhere((_, item) => item == dropped);
+    }
+    _changes.add(reactions);
+  }
+
+  ActivityItem _item(Event reaction, Event target, String key) {
     final author = reaction.senderFromMemoryOrFallback;
-    _reactions[reaction.eventId] = ActivityItem(
+    return ActivityItem(
       kind: ActivityKind.reaction,
       roomId: reaction.room.id,
       roomName: reaction.room.getLocalizedDisplayname(),
@@ -109,14 +155,9 @@ class ActivityReactionsStore {
       authorAvatarUrl: author.avatarUrl,
       quote: target.activityText,
       eventId: target.eventId,
-      threadRootId: target.threadRootId,
+      threadRootId: ThreadRules.threadRootOf(target),
       emoji: key,
     );
-    final newest = reactions;
-    for (final dropped in newest.skip(maxReactions)) {
-      _reactions.removeWhere((_, item) => item == dropped);
-    }
-    _changes.add(reactions);
   }
 }
 
