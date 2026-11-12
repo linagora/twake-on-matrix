@@ -17,7 +17,7 @@ class _FakeRtc implements MatrixRtcDatasource {
 
   @override
   CallRoomInfo getRoomInfo(CallRoom room) =>
-      const CallRoomInfo(isEncrypted: false, isDirect: true);
+      const CallRoomInfo(isEncrypted: false, isDirect: true, canJoin: true);
 
   @override
   ({String? displayName, Uri? avatarUrl}) memberProfile(

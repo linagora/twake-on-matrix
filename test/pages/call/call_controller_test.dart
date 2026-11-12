@@ -134,6 +134,7 @@ void main() {
       repository.roomInfo = const CallRoomInfo(
         isEncrypted: false,
         isDirect: true,
+        canJoin: true,
       );
       await controller().join('!dm', isVideo: false);
       repository.participants.add([
@@ -217,6 +218,7 @@ void main() {
       repository.roomInfo = const CallRoomInfo(
         isEncrypted: false,
         isDirect: true,
+        canJoin: true,
       );
       await controller().join('!dm', isVideo: false);
       repository.participants.add([

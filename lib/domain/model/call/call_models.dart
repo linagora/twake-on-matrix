@@ -15,7 +15,7 @@ abstract class CallRoomInfo with _$CallRoomInfo {
   const factory CallRoomInfo({
     required bool isEncrypted,
     required bool isDirect,
-    @Default(true) bool canJoin,
+    required bool canJoin,
   }) = _CallRoomInfo;
 }
 

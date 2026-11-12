@@ -49,6 +49,7 @@ void main() {
     repository.roomInfo = const CallRoomInfo(
       isEncrypted: true,
       isDirect: false,
+      canJoin: true,
     );
 
     await expectLater(

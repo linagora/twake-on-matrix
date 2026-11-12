@@ -19,7 +19,11 @@ CallParticipant participant(String id, {bool isLocal = false}) =>
 
 class FakeCallRepository implements CallRepository {
   FakeCallRepository({
-    this.roomInfo = const CallRoomInfo(isEncrypted: false, isDirect: false),
+    this.roomInfo = const CallRoomInfo(
+      isEncrypted: false,
+      isDirect: false,
+      canJoin: true,
+    ),
     this.fetchError,
     this.connectError,
     this.joinError,
