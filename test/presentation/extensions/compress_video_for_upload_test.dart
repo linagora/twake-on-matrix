@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/model/file_info/image_file_info.dart';
 import 'package:twake_chat/domain/model/file_info/video_file_info.dart';
 import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 
@@ -76,5 +77,31 @@ void main() {
 
     expect(result, same(input));
     expect(File('${tempDir.path}/compressed.mp4').existsSync(), isFalse);
+  });
+
+  test('the info sent after the thumbnail sizes a compressed video keeps its '
+      'duration and mime type', () async {
+    mockCompression(compressedSize: 10);
+    final compressed = await compressVideoForUpload(
+      VideoFileInfo(
+        'screen.mov',
+        filePath: original.path,
+        customMimeType: 'video/quicktime',
+        duration: const Duration(seconds: 4),
+      ),
+    );
+
+    final sent = videoInfoWithThumbnailSize(
+      compressed,
+      ImageFileInfo('thumbnail.jpg', width: 640, height: 1422),
+    );
+
+    expect(sent.metadata, {
+      'mimetype': 'video/quicktime',
+      'size': 10,
+      'w': 640,
+      'h': 1422,
+      'duration': 4000,
+    });
   });
 }

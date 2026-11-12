@@ -215,13 +215,7 @@ extension SendFileExtension on Room {
           videoInfo.height == null ||
           videoInfo.width == 0 ||
           videoInfo.height == 0) {
-        fileInfo = VideoFileInfo(
-          videoInfo.fileName,
-          filePath: videoInfo.filePath,
-          bytes: videoInfo.bytes,
-          width: thumbnail?.width,
-          height: thumbnail?.height,
-        );
+        fileInfo = videoInfoWithThumbnailSize(videoInfo, thumbnail);
         fakeImageEvent = await sendFakeFileInfoEvent(
           fileInfo,
           txid: txid,
@@ -877,3 +871,17 @@ Future<VideoFileInfo> compressVideoForUpload(VideoFileInfo fileInfo) async {
   }
   return videoInfo;
 }
+
+@visibleForTesting
+VideoFileInfo videoInfoWithThumbnailSize(
+  VideoFileInfo videoInfo,
+  ImageFileInfo? thumbnail,
+) => VideoFileInfo(
+  videoInfo.fileName,
+  filePath: videoInfo.filePath,
+  bytes: videoInfo.bytes,
+  customMimeType: videoInfo.customMimeType,
+  width: thumbnail?.width,
+  height: thumbnail?.height,
+  duration: videoInfo.duration,
+);
