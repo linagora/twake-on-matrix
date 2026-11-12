@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -9,7 +10,6 @@ import 'package:twake_chat/pages/activity/activity_filter.dart';
 import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
-import 'package:twake_chat/providers/activity_providers.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {

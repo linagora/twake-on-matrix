@@ -2731,55 +2731,5 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
-  },
-  "activity": "Activité",
-  "@activity": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityMentions": "Mentions",
-  "@activityMentions": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityReplies": "Réponses",
-  "@activityReplies": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityMarkAllRead": "Tout marquer comme lu",
-  "@activityMarkAllRead": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityNoThreadFollowed": "Aucun fil suivi pour l'instant.",
-  "@activityNoThreadFollowed": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityNothingToShow": "Rien à afficher.",
-  "@activityNothingToShow": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activitySentMessage": "a envoyé un message",
-  "@activitySentMessage": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityRepliedInThread": "a répondu dans un fil",
-  "@activityRepliedInThread": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityMentionedYou": "vous a mentionné",
-  "@activityMentionedYou": {
-    "type": "text",
-    "placeholders": {}
-  },
-  "activityTryAgain": "Réessayer",
-  "@activityTryAgain": {
-    "type": "text",
-    "placeholders": {}
   }
 }
