@@ -3,6 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
@@ -22,6 +23,14 @@ import '../../fake_client.dart';
 /// THR-M-06 badge rule: a reply of a thread the user does not follow counts
 /// only on its card, unless it mentions the user.
 void main() {
+  // This level is gated by the flag (off by default until #3609).
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {

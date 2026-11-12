@@ -1060,8 +1060,6 @@ class BackgroundPush {
     await _handleInnerNavigation();
   }
 
-  /// A left room keeps the unread count it had when it was left (synced with
-  /// `includeLeave`), so it must not block clearing its notifications.
   Future<void> _handleRedirectRoom(
     Client client,
     String roomId, {

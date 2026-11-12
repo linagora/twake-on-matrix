@@ -1,11 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/models/timeline_chunk.dart';
+// ignore: implementation_imports
+import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../room_status_extension_test.mocks.dart' show MockTimeline;
+import '../thread_unread/thread_fakes.dart';
 
 /// THR-M-06: the mobile sends threaded receipts only, like the web, so its
 /// receipts on the room no longer clear the unread threads read on the web.
@@ -17,17 +23,24 @@ void main() {
 
   late MockRoom room;
   late MockClient client;
+  late bool flagBefore;
 
   Event message(String eventId) => _message(eventId, room);
   ThreadRef thread(String rootEventId) => ThreadRef(roomId, rootEventId);
 
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
     room = MockRoom();
     client = MockClient();
     when(room.id).thenReturn(roomId);
     when(room.client).thenReturn(client);
     when(client.receiptsPublicByDefault).thenReturn(true);
   });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+  group('with threads off', _threadsOffTests);
 
   void verifyNoUnthreadedReceipt() {
     verifyNever(client.postReceipt(any, any, any));
@@ -237,3 +250,82 @@ Event _message(String eventId, Room room) => Event(
   originServerTs: DateTime.utc(2026, 11, 6, 10),
   room: room,
 );
+
+/// Review of #3608 (nqhhdev): `AppConfig.threadsEnabled` gates this level.
+/// Off, the receipts are the ones of before threads: unthreaded (no
+/// `thread_id`), so reading the room also reads its thread replies on the
+/// server, and `m.fully_read` follows the read event.
+void _threadsOffTests() {
+  const roomId = '!room:example.com';
+  const rootId = r'$root';
+
+  late RecordingThreadClient client;
+  late Room room;
+
+  setUp(() {
+    AppConfig.threadsEnabled = false;
+    client = RecordingThreadClient();
+    when(client.receiptsPublicByDefault).thenReturn(true);
+    room = Room(id: roomId, client: client);
+  });
+
+  Event threadReply(String eventId) => Event(
+    type: EventTypes.Message,
+    content: {
+      'msgtype': 'm.text',
+      'body': 'in the thread',
+      'm.relates_to': {
+        'rel_type': RelationshipTypes.thread,
+        'event_id': rootId,
+        'is_falling_back': true,
+        'm.in_reply_to': {'event_id': rootId},
+      },
+    },
+    eventId: eventId,
+    senderId: '@bob:example.com',
+    originServerTs: DateTime.utc(2026, 11, 6, 10, 5),
+    room: room,
+  );
+
+  test('reading the room sends an unthreaded receipt on the event', () async {
+    await room.setMainTimelineReadMarker(_message(r'$last', room));
+
+    expect(client.receipts, [
+      (eventId: r'$last', threadId: null, public: true),
+    ]);
+    expect(client.fullyRead, [r'$last']);
+  });
+
+  test('with private receipts the unthreaded receipt is private', () async {
+    when(client.receiptsPublicByDefault).thenReturn(false);
+
+    await room.setMainTimelineReadMarker(_message(r'$last', room));
+
+    expect(client.receipts, [
+      (eventId: r'$last', threadId: null, public: false),
+    ]);
+  });
+
+  test('reading the room up to a thread reply reads the reply too', () async {
+    // A real timeline: the SDK `Timeline.setReadMarker` of before threads
+    // may serve.
+    when(client.onTimelineEvent).thenReturn(CachedStreamController());
+    when(client.onHistoryEvent).thenReturn(CachedStreamController());
+    when(client.onSync).thenReturn(CachedStreamController());
+    when(client.onCancelSendEvent).thenReturn(CachedStreamController());
+    final timeline = Timeline(
+      room: room,
+      chunk: TimelineChunk(
+        events: [threadReply(r'$reply'), _message(r'$main', room)],
+      ),
+    );
+    addTearDown(timeline.cancelSubscriptions);
+
+    await timeline.setMainTimelineReadMarker();
+
+    expect(client.receipts, [
+      (eventId: r'$reply', threadId: null, public: true),
+    ]);
+    expect(client.fullyRead, [r'$reply']);
+  });
+}
