@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -25,6 +26,26 @@ class _FakeClient extends Fake implements Client {
       });
     }
     invited.add(userId);
+  }
+}
+
+class _CountingClient extends Fake implements Client {
+  final release = Completer<void>();
+  int running = 0;
+  int maxRunning = 0;
+  int started = 0;
+
+  @override
+  Future<void> inviteUser(
+    String roomId,
+    String userId, {
+    String? reason,
+  }) async {
+    started++;
+    running++;
+    maxRunning = max(maxRunning, running);
+    await release.future;
+    running--;
   }
 }
 
@@ -74,6 +95,26 @@ void main() {
           .failedUsers;
       expect(failed.keys, [_fastUser]);
       expect(failed[_fastUser], isA<GenericInviteException>());
+    });
+
+    test('manyInvites_runAtMostFiveAtOnce', () async {
+      final client = _CountingClient();
+      final states = InviteUserInteractor()
+          .execute(
+            matrixClient: client,
+            roomId: _roomId,
+            userIds: List.generate(12, (i) => '@user$i:hs2.localhost'),
+          )
+          .toList();
+
+      await pumpEventQueue();
+      expect(client.started, 5);
+
+      client.release.complete();
+      final result = (await states).last.fold((f) => f, (s) => s);
+      expect(client.started, 12);
+      expect(client.maxRunning, 5);
+      expect(result, isA<InviteUserSuccess>());
     });
   });
 }

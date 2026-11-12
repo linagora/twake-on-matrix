@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dartz/dartz.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
@@ -7,6 +9,7 @@ import 'package:matrix/matrix.dart';
 
 class InviteUserInteractor {
   static const int _maxRetries = 3;
+  static const int _maxConcurrentInvites = 5;
 
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
@@ -18,9 +21,11 @@ class InviteUserInteractor {
 
     final failedUsers = <String, InviteUserException>{};
 
-    // A slow federated invite must not hold the others back.
-    await Future.wait(
-      userIds.map((userId) async {
+    // A slow federated invite must not hold the others back, but a burst trips the rate limit.
+    final pending = userIds.iterator;
+    Future<void> inviteNext() async {
+      while (pending.moveNext()) {
+        final userId = pending.current;
         try {
           await _inviteUserWithRetry(
             matrixClient: matrixClient,
@@ -37,7 +42,14 @@ class InviteUserInteractor {
             exception,
           );
         }
-      }),
+      }
+    }
+
+    await Future.wait(
+      List.generate(
+        min(_maxConcurrentInvites, userIds.length),
+        (_) => inviteNext(),
+      ),
     );
 
     if (failedUsers.isNotEmpty) {
