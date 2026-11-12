@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:matrix/matrix.dart';
 // ignore: implementation_imports
 import 'package:matrix/src/utils/cached_stream_controller.dart';
@@ -254,6 +255,7 @@ void main() {
             EventTypes.RoomAvatar: 80,
             EventTypes.RoomMember: 10,
             EventTypes.RoomTopic: 80,
+            CallEventTypes.callMember: 0,
           },
           'invite': 80,
           'kick': 80,
