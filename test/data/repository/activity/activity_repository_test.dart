@@ -93,12 +93,12 @@ Future<int> _countShown() async {
 }
 
 /// Lets the follow lookups, the root fetches and the streams run: returns
-/// once [seen] got nothing new for 200 ms (5 s at most).
+/// once [seen] got nothing new for 1.2 s, longer than the 1 s rate limit (8 s at most).
 Future<void> _settle(List<Object?> seen) async {
-  final deadline = DateTime.now().add(const Duration(seconds: 5));
+  final deadline = DateTime.now().add(const Duration(seconds: 8));
   var count = -1;
   var quiet = 0;
-  while (quiet < 10 && DateTime.now().isBefore(deadline)) {
+  while (quiet < 60 && DateTime.now().isBefore(deadline)) {
     await Future<void>.delayed(const Duration(milliseconds: 20));
     quiet = seen.length == count ? quiet + 1 : 0;
     count = seen.length;

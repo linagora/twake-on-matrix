@@ -190,10 +190,12 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 /// (pop on a phone, where the item was pushed; back to the tab's location
 /// on a wide screen, where the item replaced it).
 ///
-/// [account] is the active account (`@me:example.org` by default).
+/// [account] is the active account (`@me:example.org` by default). Without
+/// [repository], the page reads the real repositories of [account] (a
+/// `ThreadAccount`).
 Future<void> pumpActivityPage(
   WidgetTester tester, {
-  required FakeActivityRepository repository,
+  required FakeActivityRepository? repository,
   List<Override> overrides = const [],
   bool settle = true,
   bool wide = false,
@@ -232,7 +234,7 @@ Future<void> pumpActivityPage(
     ],
   );
   addTearDown(router.dispose);
-  addTearDown(repository.close);
+  if (repository != null) addTearDown(repository.close);
   await tester.pumpWidget(
     ProviderScope(
       retry: (_, _) => null,
@@ -243,7 +245,8 @@ Future<void> pumpActivityPage(
         fakeActiveAccountProvider.overrideWith(
           () => _StartingAccount(account ?? accountClient('@me:example.org')),
         ),
-        activityRepositoryProvider.overrideWithValue(repository),
+        if (repository != null)
+          activityRepositoryProvider.overrideWithValue(repository),
         ...overrides,
       ],
       child: MaterialApp.router(
