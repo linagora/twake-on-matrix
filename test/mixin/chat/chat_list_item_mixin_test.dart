@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/presentation/mixins/chat_list_item_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +15,14 @@ class ChatListItemMixinTest with ChatListItemMixin {}
 
 @GenerateNiceMocks([MockSpec<BuildContext>(), MockSpec<Room>()])
 void main() {
+  // This level is gated by the flag (off by default until #3609).
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   group('notificationColor Test', () {
     late Room room;
     late BuildContext context;

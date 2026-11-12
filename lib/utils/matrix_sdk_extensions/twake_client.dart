@@ -1,4 +1,5 @@
 import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
+import 'package:twake_chat/data/thread/models/sync_thread_counts.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'dart:async';
 import 'dart:convert';
