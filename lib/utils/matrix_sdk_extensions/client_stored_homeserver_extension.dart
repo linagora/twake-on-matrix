@@ -71,6 +71,7 @@ class HomeserverCheckLog {
   final Set<String> _failedClients = {};
   final Map<String, int> _latestRefresh = {};
   final Set<String> _refreshing = {};
+  final Map<String, Uri?> _homeserverAtBegin = {};
 
   /// Unique across accounts and logouts, so a refresh started before a
   /// logout never matches the ticket of a refresh after the next login.
@@ -81,6 +82,8 @@ class HomeserverCheckLog {
     final ticket = ++_lastTicket;
     _latestRefresh[client.clientName] = ticket;
     _refreshing.add(client.clientName);
+    _homeserverAtBegin[client.clientName] = client.homeserver
+        ?.stripTrailingSlash();
     return ticket;
   }
 
@@ -93,6 +96,15 @@ class HomeserverCheckLog {
   /// Whether [ticket] still belongs to the latest refresh of [client].
   bool isLatest(Client client, int ticket) =>
       _latestRefresh[client.clientName] == ticket;
+
+  /// Whether the result of the refresh that holds [ticket] may be applied:
+  /// it is the latest refresh, and [client] still holds the homeserver it
+  /// started with. The discovery and the check are read at different times;
+  /// a homeserver changed in between would mix two servers in one summary.
+  bool resultApplies(Client client, int ticket) =>
+      isLatest(client, ticket) &&
+      client.homeserver?.stripTrailingSlash() ==
+          _homeserverAtBegin[client.clientName];
 
   bool isRefreshing(Client client) => _refreshing.contains(client.clientName);
 
@@ -115,6 +127,7 @@ class HomeserverCheckLog {
     _failedClients.remove(client.clientName);
     _latestRefresh.remove(client.clientName);
     _refreshing.remove(client.clientName);
+    _homeserverAtBegin.remove(client.clientName);
   }
 
   /// Whether a sync of [client] that ended with [status] should refresh its

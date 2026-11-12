@@ -1580,11 +1580,12 @@ class MatrixState extends ConsumerState<Matrix>
 
     // The active client may have changed while awaiting: a late result must
     // not overwrite the newer account's summary. A newer refresh of the same
-    // client wins over this one for the same reason.
+    // client wins over this one for the same reason, and so does a homeserver
+    // changed during the fetch.
     if (!mounted ||
         !_isCurrent(token) ||
         (_switchCoordinator.target ?? clientOrNull) != newClient ||
-        !_homeserverCheckLog.isLatest(newClient, refreshTicket)) {
+        !_homeserverCheckLog.resultApplies(newClient, refreshTicket)) {
       return;
     }
 

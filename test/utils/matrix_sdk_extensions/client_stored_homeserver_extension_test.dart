@@ -400,6 +400,42 @@ void main() {
       expect(log.hasFailed(unreachable), isFalse);
     });
 
+    test('the latest refresh applies when the homeserver did not change', () {
+      unreachable.homeserver = Uri.parse('https://matrix.example.org');
+      final ticket = log.begin(unreachable);
+
+      expect(log.resultApplies(unreachable, ticket), isTrue);
+    });
+
+    test('a refresh does not apply when the homeserver changed meanwhile', () {
+      unreachable.homeserver = Uri.parse('https://old.example.org');
+      final ticket = log.begin(unreachable);
+
+      unreachable.homeserver = Uri.parse('https://new.example.org');
+
+      expect(log.resultApplies(unreachable, ticket), isFalse);
+      expect(log.isLatest(unreachable, ticket), isTrue);
+    });
+
+    test(
+      'a trailing slash dropped by the check is not a homeserver change',
+      () {
+        unreachable.homeserver = Uri.parse('https://matrix.example.org/');
+        final ticket = log.begin(unreachable);
+
+        unreachable.homeserver = Uri.parse('https://matrix.example.org');
+
+        expect(log.resultApplies(unreachable, ticket), isTrue);
+      },
+    );
+
+    test('a superseded refresh does not apply', () {
+      final stale = log.begin(unreachable);
+      log.begin(unreachable);
+
+      expect(log.resultApplies(unreachable, stale), isFalse);
+    });
+
     test('a logged out account forgets its failure and its refresh', () {
       checked(unreachable, failed: true);
       final ticket = log.begin(unreachable);
