@@ -6,6 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/data/thread/models/thread_unread_snapshot_json.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
@@ -176,7 +178,7 @@ class ThreadUnreadStore extends ChangeNotifier {
       final raw = prefs.getString(_prefsKey);
       if (raw == null) return;
       _restoreFrom(
-        ThreadUnreadSnapshot.fromJson(jsonDecode(raw) as Map<String, Object?>),
+        threadUnreadSnapshotFromJson(jsonDecode(raw) as Map<String, Object?>),
       );
       notifyListeners();
     } catch (e, s) {
@@ -416,6 +418,7 @@ extension ThreadUnreadClientExtension on Client {
 extension ThreadUnreadRoomExtension on Room {
   /// Room badge: main timeline, followed threads and mentions of any thread.
   int get unreadBadgeCount {
+    if (!AppConfig.threadsEnabled) return notificationCount;
     final store = client.threadUnread;
     return notificationCount + (store?.badgeOf(this) ?? 0);
   }
@@ -442,6 +445,7 @@ extension RoomUnreadWithThreads on Room {
 
   /// Mentions of the room and of any of its threads.
   int get highlightCountWithThreads {
+    if (!AppConfig.threadsEnabled) return highlightCount;
     final store = client.threadUnread;
     return highlightCount +
         (store?.threadsOf(this).fold<int>(0, (n, t) => n + t.highlightCount) ??

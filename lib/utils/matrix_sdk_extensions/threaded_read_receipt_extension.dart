@@ -1,19 +1,24 @@
 import 'dart:math' as math;
 
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
-/// Read receipts carrying a `thread_id`: `main` for the room timeline, the
-/// root id for a thread. The SDK's `Room.setReadMarker` sends unthreaded
+/// Read receipts carrying a `thread_id` (MSC3771, spec:
+/// https://spec.matrix.org/v1.16/client-server-api/#threaded-read-receipts):
+/// `main` for the room timeline, the root id for a thread. The SDK's `Room.setReadMarker` sends unthreaded
 /// receipts, which the server applies to every thread of the room.
 extension ThreadedReadReceiptExtension on Room {
   static const String mainThreadId = 'main';
 
   /// Reads the main timeline up to [event]; `m.fully_read` follows it.
   Future<void> setMainTimelineReadMarker(Event event) async {
+    if (!AppConfig.threadsEnabled) {
+      return setReadMarker(event.eventId, mRead: event.eventId);
+    }
     await _postReceipt(event);
     await client.setReadMarker(id, mFullyRead: event.eventId);
   }
@@ -29,6 +34,7 @@ extension ThreadedReadReceiptExtension on Room {
   /// room is also unread when its newest main message (seen live) is newer
   /// than the main or unthreaded receipt.
   bool get hasNewMessagesWithThreads {
+    if (!AppConfig.threadsEnabled) return hasNewMessages;
     final last = lastEvent;
     if (last == null || !client.roomPreviewLastEvents.contains(last.type)) {
       return false;
@@ -90,6 +96,9 @@ extension ThreadedTimelineReadMarkerExtension on Timeline {
   /// Reads the main timeline up to [event], or its last synced event that
   /// is not a thread reply (a main receipt on a thread event is refused).
   Future<void> setMainTimelineReadMarker({Event? event}) async {
+    if (!AppConfig.threadsEnabled) {
+      return setReadMarker(eventId: event?.eventId);
+    }
     event ??= ThreadRules.newestMainTimelineEvent(
       events,
       knownThreadReplyIds:
