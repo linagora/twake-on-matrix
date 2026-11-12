@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/model/media/download_file_response.dart';
 import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
+import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -16,10 +17,13 @@ import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart'
 
 import '../../../fake_client.dart';
 
-class _FailingMediaAPI implements MediaAPI {
-  _FailingMediaAPI(this.error);
+const _inFlightPath = '_matrix/media/v3/download/example.com/gone';
 
-  final Object error;
+class _FakeMediaAPI implements MediaAPI {
+  _FakeMediaAPI(this.outcomes);
+
+  final List<Object?> outcomes;
+  int calls = 0;
 
   @override
   Future<DownloadFileResponse> downloadFileInfo({
@@ -27,7 +31,17 @@ class _FailingMediaAPI implements MediaAPI {
     required String savePath,
     CancelToken? cancelToken,
     ProgressCallback? onReceiveProgress,
-  }) => Future.error(error);
+  }) async {
+    final outcome = outcomes[calls++];
+    if (outcome != null) throw outcome;
+    await File(savePath).create(recursive: true);
+    await File(savePath).writeAsBytes([1, 2, 3]);
+    return DownloadFileResponse(
+      statusCode: 200,
+      requestOptions: RequestOptions(),
+      savePath: savePath,
+    );
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -40,6 +54,8 @@ void main() {
   const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
   late Room room;
   late Directory tempDir;
+  late DownloadFileInterceptor interceptor;
+  late _FakeMediaAPI mediaAPI;
 
   setUpAll(() async {
     final client = await getClient();
@@ -53,75 +69,135 @@ void main() {
           pathProviderChannel,
           (_) async => tempDir.path,
         );
+    interceptor = DownloadFileInterceptor();
+    getIt.registerSingleton<DownloadFileInterceptor>(interceptor);
   });
 
   tearDown(() {
+    getIt.unregister<DownloadFileInterceptor>();
     if (getIt.isRegistered<MediaAPI>()) getIt.unregister<MediaAPI>();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathProviderChannel, null);
     tempDir.deleteSync(recursive: true);
   });
 
-  Event mediaEvent(String msgtype, String body) => Event(
-    type: EventTypes.Message,
-    content: {
-      'msgtype': msgtype,
-      'body': body,
-      'url': 'mxc://example.com/gone',
-    },
-    eventId: '\$media',
-    senderId: '@alice:example.com',
-    originServerTs: DateTime(2026, 11, 12),
-    room: room,
-  );
+  Event mediaEvent(String msgtype, String body, {bool encrypted = false}) =>
+      Event(
+        type: EventTypes.Message,
+        content: {
+          'msgtype': msgtype,
+          'body': body,
+          if (encrypted)
+            'file': {
+              'url': 'mxc://example.com/gone',
+              'key': {
+                'alg': 'A256CTR',
+                'ext': true,
+                'k': 'not-a-key',
+                'key_ops': ['encrypt', 'decrypt'],
+                'kty': 'oct',
+              },
+              'iv': 'not-an-iv',
+              'hashes': {'sha256': 'not-a-hash'},
+              'v': 'v2',
+            }
+          else
+            'url': 'mxc://example.com/gone',
+        },
+        eventId: '\$media',
+        senderId: '@alice:example.com',
+        originServerTs: DateTime(2026, 11, 12),
+        room: room,
+      );
 
-  void downloadFailsWith(Object error) =>
-      getIt.registerSingleton<MediaAPI>(_FailingMediaAPI(error));
+  void downloads(List<Object?> outcomes) {
+    mediaAPI = _FakeMediaAPI(outcomes);
+    getIt.registerSingleton<MediaAPI>(mediaAPI);
+  }
 
   final duplicate = DioDuplicateDownloadException(
-    requestOptions: RequestOptions(),
+    requestOptions: RequestOptions(path: _inFlightPath),
+  );
+
+  void startInFlightDownload() => interceptor.onRequest(
+    RequestOptions(path: _inFlightPath),
+    RequestInterceptorHandler(),
+  );
+
+  void finishInFlightDownload() => interceptor.onResponse(
+    Response(requestOptions: RequestOptions(path: _inFlightPath)),
+    ResponseInterceptorHandler(),
   );
 
   group('DownloadMediaFileInteractor', () {
-    Future<List<Either>> run() => DownloadMediaFileInteractor()
-        .execute(event: mediaEvent(MessageTypes.Image, 'photo.png'))
-        .toList();
+    Future<List<Either>> run({bool encrypted = false}) =>
+        DownloadMediaFileInteractor()
+            .execute(
+              event: mediaEvent(
+                MessageTypes.Image,
+                'photo.png',
+                encrypted: encrypted,
+              ),
+            )
+            .toList();
 
     test('reports a real download error with its exception', () async {
       final error = Exception('404');
-      downloadFailsWith(error);
+      downloads([error]);
 
       expect(await run(), [Left(DownloadMediaFileFailure(exception: error))]);
     });
 
-    test('reports nothing for a duplicate request', () async {
-      downloadFailsWith(duplicate);
+    test('waits for the in-flight download, then returns the file', () async {
+      downloads([duplicate, null]);
+      startInFlightDownload();
+
+      final result = run();
+      await pumpEventQueue();
+      expect(mediaAPI.calls, 1);
+
+      finishInFlightDownload();
+      final states = await result;
+
+      expect(mediaAPI.calls, 2);
+      expect(states.single.isRight(), isTrue);
+    });
+
+    test('reports nothing for a cancelled request', () async {
+      downloads([CancelRequestException()]);
 
       expect(await run(), isEmpty);
     });
 
-    test('reports nothing for a cancelled request', () async {
-      downloadFailsWith(CancelRequestException());
+    test('reports a failed decryption instead of the encrypted file', () async {
+      downloads([null]);
 
-      expect(await run(), isEmpty);
+      final states = await run(encrypted: true);
+
+      expect(states.single.isLeft(), isTrue);
     });
   });
 
   group('HandleVideoDownloadMixin', () {
-    Future<void> run() => _VideoDownloader().handleDownloadVideoEvent(
-      event: mediaEvent(MessageTypes.Video, 'clip.mp4'),
-    );
+    Future<String?> run() async {
+      String? url;
+      await _VideoDownloader().handleDownloadVideoEvent(
+        event: mediaEvent(MessageTypes.Video, 'clip.mp4'),
+        playVideoActionByUrl: (value) => url = value,
+      );
+      return url;
+    }
 
     test('throws on a real download error', () async {
-      downloadFailsWith(Exception('404'));
+      downloads([Exception('404')]);
 
       await expectLater(run(), throwsException);
     });
 
-    test('returns quietly for a duplicate request', () async {
-      downloadFailsWith(duplicate);
+    test('plays the file once the in-flight download ends', () async {
+      downloads([duplicate, null]);
 
-      await expectLater(run(), completes);
+      expect(await run(), endsWith('clip.mp4'));
     });
   });
 }

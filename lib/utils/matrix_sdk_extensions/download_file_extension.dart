@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
+import 'package:twake_chat/data/network/interceptor/download_file_interceptor.dart';
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -95,6 +96,21 @@ extension DownloadFileExtension on Event {
           Logs().i("downloadOrRetrieveAttachment: user cancel the download");
         } else if (e is DioDuplicateDownloadException) {
           Logs().i("downloadOrRetrieveAttachment: duplicate request");
+          if (throwOnError) {
+            await getIt<DownloadFileInterceptor>().whenDone(
+              e.requestOptions.path,
+            );
+            return downloadOrRetrieveAttachment(
+              mxcUrl,
+              savePath,
+              downloadStreamController: downloadStreamController,
+              progressCallback: progressCallback,
+              getThumbnail: getThumbnail,
+              cancelToken: cancelToken,
+              filename: filename,
+              throwOnError: true,
+            );
+          }
         } else {
           Logs().e("downloadOrRetrieveAttachment: $e");
           downloadStreamController?.add(
@@ -115,6 +131,7 @@ extension DownloadFileExtension on Event {
       filename: filename,
       streamController: downloadStreamController,
       getThumbnail: getThumbnail,
+      throwOnError: throwOnError,
     );
 
     return decryptedFileInfo ?? fileInfo;
@@ -127,6 +144,7 @@ extension DownloadFileExtension on Event {
     required FileInfo fileInfo,
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
+    bool throwOnError = false,
   }) async {
     Logs().i('DownloadFileExtension::_handleDownloadFileDone(): $mxcUrl');
     if (isAttachmentEncrypted) {
@@ -137,6 +155,7 @@ extension DownloadFileExtension on Event {
         savePath: savePath,
         filename: filename,
         getThumbnail: getThumbnail,
+        throwOnError: throwOnError,
       );
     } else {
       streamController?.add(
@@ -153,6 +172,7 @@ extension DownloadFileExtension on Event {
     required String filename,
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
+    bool throwOnError = false,
   }) async {
     streamController?.add(const Right(DecryptingFileState()));
     try {
@@ -179,6 +199,7 @@ extension DownloadFileExtension on Event {
     } catch (e) {
       Logs().e('DownloadManager::_handleEncryptedFileEvent(): $e');
       streamController?.add(Left(DownloadFileFailureState(exception: e)));
+      if (throwOnError) rethrow;
       return null;
     }
   }
