@@ -723,8 +723,10 @@ extension ChatScrollToEventMixin on ChatController {
 
   /// A hidden album image is drawn by its leader's row: jump to that row so
   /// the album is centered and tinted. Images outside the loaded timeline
-  /// keep their own id.
+  /// keep their own id, and so does every image in select mode, where each
+  /// one has its own row.
   String _albumRowEventId(String eventId) {
+    if (selectMode) return eventId;
     final visible = [
       for (final event in _sortedTimelineEvents)
         if (event.isVisibleInGui) event,
