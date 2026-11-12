@@ -86,26 +86,34 @@ void main() {
   }
 
   testWidgets('build_beforeTheCall_offersToStartIt', (tester) async {
+    // Act
     await pumpScreen(tester);
 
+    // Assert
     expect(find.text('Team'), findsOneWidget);
     expect(find.byKey(const Key('call-start')), findsOneWidget);
     expect(repository.calls, isEmpty);
   });
 
   testWidgets('startCall_always_joinsTheRoomWithoutVideo', (tester) async {
+    // Arrange
     await pumpScreen(tester);
 
+    // Act
     await join(tester);
 
+    // Assert
     expect(repository.calls, contains('join $_roomId video=false'));
   });
 
   testWidgets('build_inTheCall_showsEachDeviceAndWhoIsMuted', (tester) async {
+    // Arrange
     await pumpScreen(tester);
 
+    // Act
     await join(tester);
 
+    // Assert
     expect(find.text('You'), findsOneWidget);
     expect(find.text('Alice'), findsWidgets);
     expect(find.text('Microphone off'), findsOneWidget);
@@ -113,33 +121,42 @@ void main() {
   });
 
   testWidgets('microphone_inTheCall_turnsTheOwnMicrophoneOff', (tester) async {
+    // Arrange
     await pumpScreen(tester);
     await join(tester);
 
+    // Act
     await tester.tap(find.byKey(const Key('call-microphone')));
     await tester.pump();
 
+    // Assert
     expect(repository.calls, contains('microphone false'));
   });
 
   testWidgets('leave_inTheCall_leavesAndClosesTheScreen', (tester) async {
+    // Arrange
     await pumpScreen(tester);
     await join(tester);
 
+    // Act
     await tester.tap(find.byKey(const Key('call-leave')));
     await settle(tester);
 
+    // Assert
     expect(repository.calls, contains('leave $_roomId'));
     expect(find.byType(CallScreen), findsNothing);
   });
 
   testWidgets('back_inTheCall_leavesTheCall', (tester) async {
+    // Arrange
     await pumpScreen(tester);
     await join(tester);
 
+    // Act
     await tester.binding.handlePopRoute();
     await settle(tester);
 
+    // Assert
     expect(repository.calls, contains('leave $_roomId'));
     expect(find.byType(CallScreen), findsNothing);
   });
@@ -147,12 +164,15 @@ void main() {
   testWidgets('build_whenTheTokenIsRefused_saysWhyAndOffersARetry', (
     tester,
   ) async {
+    // Arrange
     repository.fetchError = const CallTokenFailedException();
     await pumpScreen(tester);
 
+    // Act
     await tester.tap(find.byKey(const Key('call-start')));
     await tester.pump();
 
+    // Assert
     expect(
       find.text('The call server refused the call. Try again in a moment.'),
       findsOneWidget,
@@ -163,9 +183,11 @@ void main() {
   testWidgets('dispose_whenTheRouteIsRemovedWithoutAPop_leavesTheCall', (
     tester,
   ) async {
+    // Arrange
     await pumpScreen(tester);
     await join(tester);
 
+    // Act
     unawaited(
       tester
           .state<NavigatorState>(find.byType(Navigator))
@@ -176,18 +198,22 @@ void main() {
     );
     await settle(tester);
 
+    // Assert
     expect(repository.calls, contains('leave $_roomId'));
   });
 
   testWidgets('build_whenTheCallOfAnotherRoomEnds_staysOpen', (tester) async {
+    // Arrange
     await pumpScreen(tester);
     final calls = container.read(callControllerProvider.notifier);
 
+    // Act
     await tester.runAsync(() => calls.join('!other:hs.test', isVideo: false));
     await tester.pump();
     await tester.runAsync(calls.leave);
     await settle(tester);
 
+    // Assert
     expect(find.byType(CallScreen), findsOneWidget);
   });
 }

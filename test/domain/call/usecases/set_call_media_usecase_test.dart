@@ -5,10 +5,13 @@ import '../fake_call_repository.dart';
 
 void main() {
   test('execute_always_setsTheMicrophone', () async {
+    // Arrange
     final repository = FakeCallRepository();
 
+    // Act
     await SetCallMediaUseCase(repository).execute(isMicrophoneOn: false);
 
+    // Assert
     expect(repository.calls, ['microphone false']);
   });
 }

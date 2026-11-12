@@ -58,9 +58,11 @@ void main() {
         );
   });
 
-  test('joins with the token service of the well-known', () async {
+  test('join_withATokenService_connectsThroughIt', () async {
+    // Act
     await controller().join('!room', isVideo: false);
 
+    // Assert
     expect(
       state(),
       const CallState.connected(roomId: '!room', isDirect: false),
@@ -68,18 +70,23 @@ void main() {
     expect(repository.calls, contains('fetchServer !room https://rtc.test'));
   });
 
-  test('is connecting while it joins', () async {
+  test('join_whileInProgress_isConnecting', () async {
+    // Act
     final joining = controller().join('!room', isVideo: false);
 
+    // Assert
     expect(state(), const CallState.connecting(roomId: '!room'));
     await joining;
   });
 
-  test('a failure is kept in the state with its type', () async {
+  test('join_whenItFails_keepsTheTypedError', () async {
+    // Arrange
     repository.fetchError = const CallTokenFailedException();
 
+    // Act
     await controller().join('!room', isVideo: false);
 
+    // Assert
     expect(
       state(),
       isA<CallFailed>().having(
@@ -91,69 +98,87 @@ void main() {
   });
 
   test('join_whenAProgrammerErrorEscapes_failsAndSurfacesIt', () async {
+    // Arrange
     repository.staleError = StateError('database closed');
 
+    // Act & Assert
     await expectLater(
       controller().join('!room', isVideo: false),
       throwsA(isA<StateError>()),
     );
-
     expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
+  });
+
+  test('join_afterAProgrammerError_canJoinAgain', () async {
+    // Arrange
+    repository.staleError = StateError('database closed');
+    await controller().join('!room', isVideo: false).catchError((_) {});
     repository.staleError = null;
+
+    // Act
     await controller().join('!room', isVideo: false);
+
+    // Assert
     expect(state(), isA<CallConnected>());
   });
 
-  test('without a token service the call fails as unavailable', () async {
+  test('join_withoutATokenService_failsAsUnavailable', () async {
+    // Arrange
     container.read(loginHomeserverSummaryProvider.notifier).set(null);
 
+    // Act
     await controller().join('!room', isVideo: false);
 
+    // Assert
     expect(
       (state() as CallFailed).error,
       isA<CallServiceUnavailableException>(),
     );
   });
 
-  test('shows the participants of the media', () async {
+  test('onParticipants_whileConnected_showsThem', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
     final everyone = [
       participant('@me:hs.test:DEV', isLocal: true),
       participant('@bob:hs.test:BOB'),
     ];
 
+    // Act
     repository.participants.add(everyone);
     await pumpEventQueue();
 
+    // Assert
     expect((state() as CallConnected).participants, everyone);
   });
 
-  test(
-    'a direct call ends when the other one leaves (DECISION.md D14)',
-    () async {
-      repository.roomInfo = const CallRoomInfo(
-        isEncrypted: false,
-        isDirect: true,
-        canJoin: true,
-      );
-      await controller().join('!dm', isVideo: false);
-      repository.participants.add([
-        participant('@me:hs.test:DEV', isLocal: true),
-        participant('@bob:hs.test:BOB'),
-      ]);
-      await pumpEventQueue();
+  test('onParticipants_whenTheOtherLeavesADirectCall_leaves', () async {
+    // Arrange
+    repository.roomInfo = const CallRoomInfo(
+      isEncrypted: false,
+      isDirect: true,
+      canJoin: true,
+    );
+    await controller().join('!dm', isVideo: false);
+    repository.participants.add([
+      participant('@me:hs.test:DEV', isLocal: true),
+      participant('@bob:hs.test:BOB'),
+    ]);
+    await pumpEventQueue();
 
-      repository.participants.add([
-        participant('@me:hs.test:DEV', isLocal: true),
-      ]);
-      await pumpEventQueue();
+    // Act
+    repository.participants.add([
+      participant('@me:hs.test:DEV', isLocal: true),
+    ]);
+    await pumpEventQueue();
 
-      expect(state(), const CallState.idle());
-      expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
-    },
-  );
+    // Assert
+    expect(state(), const CallState.idle());
+    expect(repository.calls, containsAllInOrder(['disconnect', 'leave !dm']));
+  });
 
-  test('a group call goes on alone', () async {
+  test('onParticipants_whenLeftAloneInAGroupCall_staysConnected', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
     repository.participants.add([
       participant('@me:hs.test:DEV', isLocal: true),
@@ -161,50 +186,66 @@ void main() {
     ]);
     await pumpEventQueue();
 
+    // Act
     repository.participants.add([
       participant('@me:hs.test:DEV', isLocal: true),
     ]);
     await pumpEventQueue();
 
+    // Assert
     expect(state(), isA<CallConnected>());
   });
 
-  test('leave goes idle even when the membership cannot be ended', () async {
+  test('leave_whenTheMembershipCannotBeEnded_goesIdle', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
     repository.leaveError = const CallMembershipFailedException();
 
+    // Act
     await controller().leave();
 
+    // Assert
     expect(state(), const CallState.idle());
     expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 
-  test('a refused microphone answers false', () async {
+  test('setMicrophone_whenRefused_answersFalse', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
     repository.mediaError = const CallMediaFailedException();
 
-    expect(await controller().setMicrophone(isOn: true), isFalse);
+    // Act
+    final isOn = await controller().setMicrophone(isOn: true);
+
+    // Assert
+    expect(isOn, isFalse);
   });
 
   test('leave_beforeTheMediaConnects_connectsNoMedia', () async {
+    // Arrange
     final joining = controller().join('!room', isVideo: false);
 
+    // Act
     await controller().leave();
     await joining;
 
+    // Assert
     expect(state(), const CallState.idle());
     expect(repository.calls, isNot(contains('connect mic=true camera=false')));
   });
 
   test('leave_whileTheMembershipIsSent_leavesOnceJoined', () async {
+    // Arrange
     repository.joinGate = Completer<void>();
     final joining = controller().join('!room', isVideo: false);
     await pumpEventQueue();
 
+    // Act
     await controller().leave();
     repository.joinGate!.complete();
     await joining;
 
+    // Assert
     expect(state(), const CallState.idle());
     expect(
       repository.calls,
@@ -215,6 +256,7 @@ void main() {
   test(
     'onParticipants_whenTheOtherLeavesADirectCallWithMyTwoDevices_leaves',
     () async {
+      // Arrange
       repository.roomInfo = const CallRoomInfo(
         isEncrypted: false,
         isDirect: true,
@@ -228,42 +270,51 @@ void main() {
       ]);
       await pumpEventQueue();
 
+      // Act
       repository.participants.add([
         participant('@me:hs.test:DEV', isLocal: true),
         participant('@me:hs.test:TABLET'),
       ]);
       await pumpEventQueue();
 
+      // Assert
       expect(state(), const CallState.idle());
     },
   );
 
   test('leave_whileTheMediaConnects_sendsNoMembership', () async {
+    // Arrange
     repository.connectGate = Completer<void>();
     final joining = controller().join('!room', isVideo: false);
     await pumpEventQueue();
 
+    // Act
     await controller().leave();
     repository.connectGate!.complete();
     await joining;
 
+    // Assert
     expect(state(), const CallState.idle());
     expect(repository.calls.last, 'disconnect');
     expect(repository.calls, isNot(contains('join !room video=false')));
   });
 
   test('join_whileThePreviousCallLeaves_waitsForItsCleanup', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
     repository.leaveGate = Completer<void>();
     final leaving = controller().leave();
 
+    // Act
     final joining = controller().join('!other', isVideo: false);
     await pumpEventQueue();
-    expect(repository.calls, isNot(contains('endStale !other')));
-
+    final callsBeforeTheLeave = [...repository.calls];
     repository.leaveGate!.complete();
     await leaving;
     await joining;
+
+    // Assert
+    expect(callsBeforeTheLeave, isNot(contains('endStale !other')));
     expect(
       repository.calls,
       containsAllInOrder([
@@ -275,39 +326,49 @@ void main() {
   });
 
   test('onParticipants_whenTheMediaIsLost_failsAndEndsTheCall', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
 
+    // Act
     repository.participants.addError(const CallConnectionFailedException());
     await pumpEventQueue();
 
+    // Assert
     expect((state() as CallFailed).error, isA<CallConnectionFailedException>());
     expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 
   test('join_whenThePreviousLeaveNeverEnds_joinsAfterAWhile', () {
     fakeAsync((async) {
+      // Arrange
       controller().join('!room', isVideo: false);
       async.flushMicrotasks();
       repository.leaveGate = Completer<void>();
       controller().leave();
       async.flushMicrotasks();
 
+      // Act
       controller().join('!other', isVideo: false);
       async.elapse(const Duration(seconds: 5));
-      expect(repository.calls, isNot(contains('endStale !other')));
+      final callsAfterFiveSeconds = [...repository.calls];
       async.elapse(const Duration(seconds: 6));
 
+      // Assert
+      expect(callsAfterFiveSeconds, isNot(contains('endStale !other')));
       expect(repository.calls, contains('join !other video=false'));
       expect(state(), isA<CallConnected>());
     });
   });
 
   test('onRoomEncrypted_duringTheCall_endsIt', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
 
+    // Act
     repository.encryptions.add(null);
     await pumpEventQueue();
 
+    // Assert
     expect(
       (state() as CallFailed).error,
       isA<CallEncryptionUnsupportedException>(),
@@ -315,7 +376,7 @@ void main() {
     expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
 
-  group('an account switch', () {
+  group('accountSwitch', () {
     late FakeCallRepository first;
     late FakeCallRepository second;
     late ProviderContainer switching;
@@ -350,30 +411,36 @@ void main() {
     });
 
     test('accountSwitch_whileConnected_leavesWithTheFirstClient', () async {
+      // Arrange
       await switching
           .read(callControllerProvider.notifier)
           .join('!room', isVideo: false);
 
+      // Act
       switching.read(_clientProvider.notifier).set(secondClient);
       await pumpEventQueue();
 
+      // Assert
       expect(switching.read(callControllerProvider), const CallState.idle());
       expect(first.calls, containsAllInOrder(['disconnect', 'leave !room']));
       expect(second.calls, isEmpty);
     });
 
     test('accountSwitch_whileConnecting_sendsNoMembership', () async {
+      // Arrange
       first.connectGate = Completer<void>();
       final joining = switching
           .read(callControllerProvider.notifier)
           .join('!room', isVideo: false);
       await pumpEventQueue();
 
+      // Act
       switching.read(_clientProvider.notifier).set(secondClient);
       await pumpEventQueue();
       first.connectGate!.complete();
       await joining;
 
+      // Assert
       expect(switching.read(callControllerProvider), const CallState.idle());
       expect(first.calls.last, 'disconnect');
       expect(first.calls, isNot(contains('join !room video=false')));
@@ -382,11 +449,14 @@ void main() {
   });
 
   test('onRoomEncrypted_whenTheRoomIsGone_endsTheCallAsRoomNotFound', () async {
+    // Arrange
     await controller().join('!room', isVideo: false);
 
+    // Act
     repository.encryptions.addError(const CallRoomNotFoundException());
     await pumpEventQueue();
 
+    // Assert
     expect((state() as CallFailed).error, isA<CallRoomNotFoundException>());
     expect(repository.calls, containsAllInOrder(['disconnect', 'leave !room']));
   });
