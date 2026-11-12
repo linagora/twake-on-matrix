@@ -1024,7 +1024,8 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void copyEventsAction(Event event) async {
-    await event.copyTextEvent(context, timeline!);
+    await event.copy(context, timeline!);
+    if (!mounted) return;
 
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();

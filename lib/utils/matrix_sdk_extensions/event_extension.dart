@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
@@ -7,13 +9,14 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/presentation/extensions/media_thumbnail_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/event_info_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
+import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_event_fields.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/search/search_engine.dart';
 import 'package:twake_chat/utils/search/search_options.dart';
 import 'package:twake_chat/utils/size_string.dart';
@@ -233,29 +236,71 @@ extension LocalizedBody on Event {
 
   bool get isPinned => room.pinnedEventIds.contains(eventId);
 
-  Future<void> copy(BuildContext context, Timeline timeline) async {
-    if (messageType == MessageTypes.Image && PlatformInfos.isWeb) {
-      final matrixFile =
-          getMatrixFile() ??
-          await downloadAndDecryptAttachment(getThumbnail: true);
-      try {
-        await TwakeClipboard.instance.copyImageAsBytes(
-          matrixFile.bytes,
-          mimeType: mimeType,
-        );
-      } catch (e) {
-        TwakeSnackBar.show(context, L10n.of(context)!.copyImageFailed);
-        Logs().e('copy(): failed to copy file ${matrixFile.name}');
+  static const _maxCopiedMediaSize = 100 * 1024 * 1024;
+
+  Future<void> copy(
+    BuildContext context,
+    Timeline timeline, {
+    TwakeClipboard? clipboard,
+  }) async {
+    clipboard ??= TwakeClipboard.instance;
+    if (!isVideoOrImage) {
+      return copyTextEvent(context, timeline, clipboard: clipboard);
+    }
+    final localFile = getMatrixFile();
+    final mimeType = localFile?.mimeType ?? attachmentMimetype;
+    final size = localFile?.size ?? infoMap.tryGet<int>('size') ?? 0;
+    if (!TwakeClipboard.canCopyMedia(mimeType) || size > _maxCopiedMediaSize) {
+      return copyTextEvent(context, timeline, clipboard: clipboard);
+    }
+    final l10n = L10n.of(context)!;
+    try {
+      final Uint8List bytes;
+      if (localFile != null) {
+        bytes = localFile.bytes;
+      } else {
+        final file = await _attachmentFile();
+        if (await file.length() > _maxCopiedMediaSize) {
+          if (!context.mounted) return;
+          await copyTextEvent(context, timeline, clipboard: clipboard);
+          return;
+        }
+        bytes = await file.readAsBytes();
       }
-    } else {
-      copyTextEvent(context, timeline);
+      await clipboard.copyMediaAsBytes(bytes, mimeType: mimeType);
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, l10n.copiedToClipboard);
+    } catch (e, s) {
+      Logs().e('copy(): failed to copy the media of $eventId', e, s);
+      if (!context.mounted) return;
+      TwakeSnackBar.show(context, l10n.copyImageFailed);
     }
   }
 
-  Future<void> copyTextEvent(BuildContext context, Timeline timeline) async {
-    await TwakeClipboard.instance.copyText(
+  // A failed decryption still returns the encrypted download.
+  Future<File> _attachmentFile() async {
+    final path = (await getFileInfo())?.filePath;
+    if (path == null) throw StateError('No file for $eventId');
+    if (isAttachmentEncrypted &&
+        path !=
+            await StorageDirectoryManager.instance.getDecryptedFilePath(
+              eventId: eventId,
+              fileName: filename,
+            )) {
+      throw StateError('$eventId could not be decrypted');
+    }
+    return File(path);
+  }
+
+  Future<void> copyTextEvent(
+    BuildContext context,
+    Timeline timeline, {
+    TwakeClipboard? clipboard,
+  }) async {
+    await (clipboard ?? TwakeClipboard.instance).copyText(
       getSelectedEventString(context, timeline),
     );
+    if (!context.mounted) return;
     TwakeSnackBar.show(context, L10n.of(context)!.textCopiedToClipboard);
   }
 
