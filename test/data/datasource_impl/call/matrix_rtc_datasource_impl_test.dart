@@ -53,6 +53,8 @@ class _FakeClient extends Fake implements Client {
   var failingMemberships = 0;
   Completer<void>? holdMemberships;
   final timeline = <String>[];
+  Map<String, Object?>? lastMembership;
+  static final serverTime = DateTime.utc(2026, 11, 12, 9);
 
   @override
   final CachedStreamController<SyncUpdate> onSync = CachedStreamController();
@@ -114,10 +116,21 @@ class _FakeClient extends Fake implements Client {
       writes.add('membership failed');
       throw Exception('offline');
     }
+    if (body.isNotEmpty) lastMembership = body;
     writes.add(body.isEmpty ? 'left' : 'membership');
     timeline.add(body.isEmpty ? 'left' : 'membership');
     return r'$event';
   }
+
+  @override
+  Future<MatrixEvent> getOneRoomEvent(String roomId, String eventId) async =>
+      MatrixEvent(
+        type: eventId,
+        content: {},
+        senderId: '@bob:hs.test',
+        eventId: eventId,
+        originServerTs: serverTime,
+      );
 }
 
 void main() {
@@ -164,6 +177,31 @@ void main() {
 
       // Assert
       expect(client.writes, ['membership failed', 'membership']);
+      datasource.dispose();
+    });
+  });
+
+  test('extend_always_countsFromTheServerTimeOfTheFirstMembership', () {
+    fakeAsync((async) {
+      // Arrange
+      final client = _FakeClient();
+      final datasource = MatrixRtcDatasourceImpl(client);
+      datasource.joinMembership(_join);
+      async.flushMicrotasks();
+      async.elapse(const Duration(seconds: 6));
+
+      // Act
+      async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
+
+      // Assert
+      expect(client.lastMembership, containsPair('expires', 8 * 3600 * 1000));
+      expect(
+        client.lastMembership,
+        containsPair(
+          'created_ts',
+          _FakeClient.serverTime.millisecondsSinceEpoch,
+        ),
+      );
       datasource.dispose();
     });
   });

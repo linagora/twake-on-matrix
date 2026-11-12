@@ -128,8 +128,12 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     final slot = _ownSlot(room);
     final device = _device;
     await _scheduleDelayedLeave(slot);
+    final String eventId;
     try {
-      await _write(slot, CallMemberContent.forJoin(device, join).toJson());
+      eventId = await _write(
+        slot,
+        CallMemberContent.forJoin(device, join).toJson(),
+      );
     } on Exception catch (error) {
       _endSession().extended.ignore();
       throw CallMembershipFailedException(cause: error);
@@ -139,7 +143,19 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     _extender = CallMembershipExtender((content) => _write(slot, content))
       ..start(
         (expiry) => CallMemberContent.forJoin(device, join, expiry).toJson(),
+        createdTs: _serverTimeOf(slot.roomId, eventId),
       );
+  }
+
+  /// The others count the expiry from it, not from the clock of this device.
+  Future<int> _serverTimeOf(String roomId, String eventId) async {
+    try {
+      final event = await _client.getOneRoomEvent(roomId, eventId);
+      return event.originServerTs.millisecondsSinceEpoch;
+    } on Exception catch (error, stackTrace) {
+      Logs().w('MatrixRtcDatasource: no server time', error, stackTrace);
+      return DateTime.now().millisecondsSinceEpoch;
+    }
   }
 
   Future<String> _write(_Slot slot, Map<String, Object?> content) =>

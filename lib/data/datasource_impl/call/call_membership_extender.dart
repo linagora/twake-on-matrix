@@ -4,7 +4,8 @@ import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/data/model/call/call_member_content.dart';
 
 /// `expires` of a membership grows by its own length before it lapses, from
-/// the same `created_ts`. One per joined call.
+/// the `created_ts` the others read: the server time of the first event. One
+/// per joined call.
 class CallMembershipExtender {
   CallMembershipExtender(this._write);
 
@@ -14,18 +15,21 @@ class CallMembershipExtender {
   final Future<void> Function(Map<String, Object?> content) _write;
   Timer? _expiryTimer;
   Timer? _retryTimer;
-  Map<String, Object?>? _extension;
+  Map<String, Object?> Function(MembershipExpiry expiry)? _contentFor;
+  Future<int>? _createdTs;
+  int? _count;
   Future<void>? _extending;
   var _isStopped = false;
 
   void start(
-    Map<String, Object?> Function(MembershipExpiry expiry) contentFor,
-  ) {
-    final createdTs = DateTime.now().millisecondsSinceEpoch;
+    Map<String, Object?> Function(MembershipExpiry expiry) contentFor, {
+    required Future<int> createdTs,
+  }) {
+    _contentFor = contentFor;
+    _createdTs = createdTs;
     var count = 1;
     _expiryTimer = Timer.periodic(CallMemberContent.lifetime - _headroom, (_) {
-      count++;
-      _extension = contentFor((count: count, createdTs: createdTs));
+      _count = ++count;
       _queue();
     });
   }
@@ -35,7 +39,7 @@ class CallMembershipExtender {
     _isStopped = true;
     _expiryTimer?.cancel();
     _retryTimer?.cancel();
-    _extension = null;
+    _count = null;
     return _extending ?? Future<void>.value();
   }
 
@@ -46,9 +50,13 @@ class CallMembershipExtender {
   }
 
   Future<void> _extend() async {
-    final content = _extension;
-    if (content == null || _isStopped) return;
+    final count = _count;
+    final contentFor = _contentFor;
+    final createdTs = _createdTs;
+    if (count == null || contentFor == null || createdTs == null) return;
     try {
+      final content = contentFor((count: count, createdTs: await createdTs));
+      if (_isStopped) return;
       await _write(content);
     } on Exception catch (error, stackTrace) {
       Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
