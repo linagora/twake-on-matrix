@@ -20,9 +20,8 @@ Future<List<ActivityItem>> activityMentions(Ref ref) {
   ref.listen(unreadMentionCountProvider, (previous, next) {
     final before = previous?.value;
     final after = next.value;
-    if (before != null && after != null && before != after) {
-      ref.invalidateSelf();
-    }
+    if (before == null || after == null) return;
+    if (before != after) ref.invalidateSelf();
   });
   return ref.watch(activityMentionsRepositoryProvider).getMentions();
 }
