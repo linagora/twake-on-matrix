@@ -15,8 +15,8 @@ class CallMembershipExtender {
   final Future<void> Function(Map<String, Object?> content) _write;
   Timer? _expiryTimer;
   Timer? _retryTimer;
-  Map<String, Object?> Function(MembershipExpiry expiry)? _contentFor;
-  Future<int>? _createdTs;
+  late final Map<String, Object?> Function(MembershipExpiry expiry) _contentFor;
+  late final Future<int> _createdTs;
   int? _count;
   Future<void>? _extending;
   var _isStopped = false;
@@ -50,12 +50,11 @@ class CallMembershipExtender {
   }
 
   Future<void> _extend() async {
+    // Set only by the timer of start(), after the content is known.
     final count = _count;
-    final contentFor = _contentFor;
-    final createdTs = _createdTs;
-    if (count == null || contentFor == null || createdTs == null) return;
+    if (count == null) return;
     try {
-      final content = contentFor((count: count, createdTs: await createdTs));
+      final content = _contentFor((count: count, createdTs: await _createdTs));
       if (_isStopped) return;
       await _write(content);
     } on Exception catch (error, stackTrace) {
