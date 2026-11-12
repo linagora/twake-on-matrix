@@ -39,7 +39,40 @@ void main() {
       'fetchServer !room https://rtc.test',
       'connect mic=true camera=true',
       'join !room video=true',
+      'ring !room video=true membership=$testMembershipEventId',
     ]);
+  });
+
+  test('an audio call rings as an audio call', () async {
+    await JoinCallUseCase(
+      repository,
+    ).execute(roomId: '!room', serviceUrl: 'https://rtc.test', isVideo: false);
+
+    expect(
+      repository.calls.last,
+      'ring !room video=false membership=$testMembershipEventId',
+    );
+  });
+
+  test('joining a call someone is already in rings nobody', () async {
+    repository.othersInCall = true;
+
+    final room = await join();
+
+    expect(room, repository.roomInfo);
+    expect(repository.calls, contains('join !room video=true'));
+    expect(repository.calls.where((call) => call.startsWith('ring')), isEmpty);
+  });
+
+  test('a ring that cannot be sent does not fail the call', () async {
+    repository.ringError = Exception('offline');
+
+    final room = await join();
+
+    expect(room, repository.roomInfo);
+    expect(repository.calls, contains('join !room video=true'));
+    expect(repository.calls, isNot(contains('disconnect')));
+    expect(repository.calls.any((call) => call.startsWith('leave')), isFalse);
   });
 
   test('execute_withoutATokenService_touchesNothing', () async {
@@ -89,6 +122,7 @@ void main() {
     // Act & Assert
     await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
     expect(repository.calls.last, 'disconnect');
+    expect(repository.calls.where((call) => call.startsWith('ring')), isEmpty);
   });
 
   test('execute_whenCancelledBeforeTheMedia_connectsNothing', () async {

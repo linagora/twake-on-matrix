@@ -1,3 +1,4 @@
+import 'package:matrix/matrix.dart' show Logs;
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_cancellation.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
@@ -10,7 +11,8 @@ class JoinCallUseCase {
 
   /// The membership is sent once the media is up, so that the others never
   /// see a device that could not connect. Null when [cancellation] is
-  /// cancelled before the membership is sent.
+  /// cancelled before the membership is sent. The others ring once it is
+  /// sent, unless someone is already in the call.
   Future<CallRoomInfo?> execute({
     required String roomId,
     required String? serviceUrl,
@@ -24,7 +26,11 @@ class JoinCallUseCase {
     final server = await _repository.fetchServer(join);
     if (cancel.isCancelled) return null;
     if (!await _connect(server, join, cancel)) return null;
-    await _sendMembership(join, cancel);
+    final othersInCall = _repository.hasOtherMembers(join.room);
+    final membershipEventId = await _sendMembership(join, cancel);
+    if (membershipEventId != null && !othersInCall) {
+      await _ring(join, membershipEventId);
+    }
     return room;
   }
 
@@ -68,20 +74,30 @@ class JoinCallUseCase {
   }
 
   /// Left meanwhile: the microphone stops at once, the membership ends once
-  /// it has been sent.
-  Future<void> _sendMembership(
+  /// it has been sent. Gives the id of the membership event, null when left.
+  Future<String?> _sendMembership(
     CallJoin join,
     CallCancellation cancellation,
   ) async {
     final sent = _repository.joinMembership(join);
     try {
       await Future.any([sent, cancellation.whenCancelled]);
-      if (!cancellation.isCancelled) return;
+      if (!cancellation.isCancelled) return await sent;
       await _repository.disconnectMedia();
       await sent;
+      return null;
     } on CallException {
       await _repository.disconnectMedia();
       rethrow;
+    }
+  }
+
+  /// A ring that cannot be sent leaves the call going.
+  Future<void> _ring(CallJoin join, String membershipEventId) async {
+    try {
+      await _repository.sendRing(join, membershipEventId: membershipEventId);
+    } on Exception catch (error, stackTrace) {
+      Logs().w('JoinCallUseCase: ring not sent', error, stackTrace);
     }
   }
 }
