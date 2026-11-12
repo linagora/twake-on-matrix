@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/usecase/room/unban_and_invite_users_interactor.dart';
@@ -91,12 +93,14 @@ class InvitationSelectionController
             }
 
             if (state is InviteUserSomeFailed) {
-              showConfirmAlertDialog(
-                context: hostContext,
-                message: state.inviteUserPartialFailureException
-                    .getLocalizedErrorMessage(hostContext),
-                isArrangeActionButtonsVertical: true,
-                okLabel: L10n.of(hostContext)!.gotIt,
+              unawaited(
+                showConfirmAlertDialog(
+                  context: hostContext,
+                  message: state.inviteUserPartialFailureException
+                      .getLocalizedErrorMessage(hostContext),
+                  isArrangeActionButtonsVertical: true,
+                  okLabel: L10n.of(hostContext)!.gotIt,
+                ),
               );
             }
           },
