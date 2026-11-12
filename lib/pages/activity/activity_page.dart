@@ -9,6 +9,7 @@ import 'package:twake_chat/pages/activity/activity_filter.dart';
 import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
+import 'package:twake_chat/pages/contacts_tab/contacts_appbar_style.dart';
 
 /// THR-M-12: the tab that gathers what happened in the rooms of the user.
 class ActivityPage extends ConsumerStatefulWidget {
@@ -36,22 +37,29 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     final view = ref.watch(activityViewControllerProvider);
     final count = ref.watch(unreadMentionCountProvider).value ?? 0;
     final rooms = ref.watch(activityItemsProvider).value ?? const [];
+    final isMobile = ContactsAppbarStyle.responsiveUtils.isMobile(context);
     final shown = rooms.where((item) => view.filter.includes(item.kind));
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       bottomNavigationBar: widget.bottomNavigationBar,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(l10n.activity, overflow: TextOverflow.ellipsis),
-            ),
-            if (count > 0) ...[
-              const SizedBox(width: 8),
-              _CountBadge(count: count),
+        // As the title of Chats: centred on a phone, 16 px in on a wide screen.
+        centerTitle: isMobile,
+        title: Padding(
+          padding: ContactsAppbarStyle.titlePadding(context),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(l10n.activity, overflow: TextOverflow.ellipsis),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 8),
+                _CountBadge(count: count),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       body: Column(

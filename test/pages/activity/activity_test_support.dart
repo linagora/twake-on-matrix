@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
@@ -197,6 +198,8 @@ Future<void> pumpActivityPage(
   bool settle = true,
   bool wide = false,
   Client? account,
+  Locale locale = const Locale('en'),
+  bool appTheme = false,
 }) async {
   // A phone (or a wide screen), tall enough for every row of a test.
   tester.view.physicalSize = wide
@@ -245,7 +248,13 @@ Future<void> pumpActivityPage(
       ],
       child: MaterialApp.router(
         routerConfig: router,
-        locale: const Locale('en'),
+        locale: locale,
+        builder: appTheme
+            ? (context, child) => Theme(
+                data: TwakeThemes.buildTheme(context, Brightness.light),
+                child: child!,
+              )
+            : null,
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
       ),
