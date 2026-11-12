@@ -435,6 +435,24 @@ extension RoomPendingNotification on Room {
           client.threadUnread?.hasPendingFollowLookup(this) != true);
 }
 
+/// One decision for every consumer of the room counters: the server stops
+/// counting thread notifications in the room's own counters.
+extension RoomUnreadWithThreads on Room {
+  bool get isUnreadWithThreads => isUnread || unreadBadgeCount > 0;
+
+  bool get isUnreadOrInvitedWithThreads =>
+      isUnreadOrInvited || unreadBadgeCount > 0;
+
+  /// Mentions of the room and of any of its threads.
+  int get highlightCountWithThreads {
+    if (!AppConfig.threadsEnabled) return highlightCount;
+    final store = client.threadUnread;
+    return highlightCount +
+        (store?.threadsOf(this).fold<int>(0, (n, t) => n + t.highlightCount) ??
+            0);
+  }
+}
+
 extension MarkRoomAndThreadsRead on Room {
   /// Stored events, newest first, paged: the newest ones can all be replies
   /// of a busy thread. It gives up after [_mainEventSearchLimit].

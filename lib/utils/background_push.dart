@@ -17,6 +17,7 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -445,7 +446,9 @@ class BackgroundPush {
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
       final unreadCount = client.joinedOrInvitedRooms
-          .where((room) => room.isUnreadOrInvited && room.id != roomId)
+          .where(
+            (room) => room.isUnreadOrInvitedWithThreads && room.id != roomId,
+          )
           .length;
       if (unreadCount == 0) {
         FlutterAppBadger.removeBadge();
@@ -942,7 +945,7 @@ class BackgroundPush {
           });
           if (!syncErrored) {
             emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
+                .where((r) => r.hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
@@ -964,7 +967,7 @@ class BackgroundPush {
               e,
             );
             emptyRooms = client.rooms
-                .where(_hasNoPendingNotification)
+                .where((r) => r.hasNoPendingNotification)
                 .map((r) => r.id);
           }
         }
@@ -973,7 +976,7 @@ class BackgroundPush {
         _syncedRoomIds.clear();
         emptyRooms = client.rooms
             .where((r) => syncedRoomIds.contains(r.id))
-            .where(_hasNoPendingNotification)
+            .where((r) => r.hasNoPendingNotification)
             .map((r) => r.id);
       }
       await _loadIdMap();
@@ -1052,11 +1055,6 @@ class BackgroundPush {
 
     await _handleInnerNavigation();
   }
-
-  /// A left room keeps the unread count it had when it was left (synced with
-  /// `includeLeave`), so it must not block clearing its notifications.
-  bool _hasNoPendingNotification(Room room) =>
-      room.notificationCount == 0 || room.membership == Membership.leave;
 
   void _handleRedirectRoom(
     String roomId, {

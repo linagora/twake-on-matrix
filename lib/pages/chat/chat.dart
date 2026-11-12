@@ -596,6 +596,12 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
+  /// The thread counters of the account; widgets listen to it themselves.
+  ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
+
+  int threadUnreadCount(String rootId) =>
+      threadUnreadStore?.unreadCount(ThreadRef(roomId!, rootId)) ?? 0;
+
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
   void refreshThreadGrouping() {
