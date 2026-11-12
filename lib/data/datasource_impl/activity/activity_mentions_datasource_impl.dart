@@ -3,7 +3,7 @@ import 'package:twake_chat/data/datasource/activity/activity_mentions_datasource
 import 'package:twake_chat/utils/activity/activity_event_extension.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 /// Reads the mentions from `/notifications`, which also covers the history
@@ -43,7 +43,7 @@ class ActivityMentionsDatasourceImpl implements ActivityMentionsDatasource {
   ) async {
     final threads = {
       for (final event in events)
-        if (event.threadRootId case final rootId?)
+        if (ThreadRules.threadRootOf(event) case final rootId?)
           ThreadRef(event.room.id, rootId),
     };
     final roots = await Future.wait([
@@ -66,7 +66,7 @@ class ActivityMentionsDatasourceImpl implements ActivityMentionsDatasource {
   }
 
   ActivityItem _item(Event event, Map<ThreadRef, String> titles) {
-    final rootId = event.threadRootId;
+    final rootId = ThreadRules.threadRootOf(event);
     final author = event.senderFromMemoryOrFallback;
     return ActivityItem(
       kind: ActivityKind.mention,

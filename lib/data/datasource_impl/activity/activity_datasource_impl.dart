@@ -12,16 +12,19 @@ import 'package:twake_chat/domain/model/room/room_preview_result.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
+import 'package:twake_chat/utils/stream_extension.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 
 /// Reads the Activity tab from the sync data the client holds in memory.
 class ActivityDatasourceImpl implements ActivityDatasource {
   ActivityDatasourceImpl(this._client);
 
+  static const Duration _changesRate = Duration(seconds: 1);
+
   final Client? _client;
 
-  /// The root of each followed thread, once asked: null when it could not be
-  /// read (asked again with the next datasource).
+  /// The root of each followed thread, once read. A root that could not be
+  /// read is not kept: it is asked again at the next change.
   final Map<ThreadRef, Event?> _roots = {};
   final Set<ThreadRef> _fetching = {};
   final StreamController<void> _rootsRead = StreamController.broadcast();
@@ -63,17 +66,31 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     await client.roomsLoading;
   }
 
-  /// Now, then after each sync and each change of the thread counters,
-  /// choices and resolved marks, and when a root has been read.
+  /// Now, then after each sync that changes what the lists read (as the room
+  /// list does) and each change of the thread counters, choices and resolved
+  /// marks, and when a root has been read; at most once a second, the last
+  /// state always following.
   Stream<void> _changes(Client client) {
     final store = client.threadUnread;
     return StreamGroup.merge([
       Stream<void>.value(null),
-      client.onSync.stream,
+      client.onSync.stream.where(_changesLists),
       _rootsRead.stream,
       if (store != null)
         _notifications(Listenable.merge([store, store.resolvedChanges])),
-    ]);
+    ]).rateLimit(_changesRate);
+  }
+
+  /// A sync with account data or rooms, not one with a to-device event only.
+  bool _changesLists(SyncUpdate update) {
+    final rooms = update.rooms;
+    final sizes = [
+      update.accountData?.length,
+      rooms?.join?.length,
+      rooms?.invite?.length,
+      rooms?.leave?.length,
+    ];
+    return sizes.any((size) => (size ?? 0) > 0);
   }
 
   Stream<void> _notifications(Listenable source) {
@@ -93,18 +110,18 @@ class ActivityDatasourceImpl implements ActivityDatasource {
       .fold(0, (count, room) => count + room.highlightCountWithThreads);
 
   Future<List<ActivityItem>> _read(Client client) async {
-    final rooms = client.rooms.where(
-      (room) =>
-          room.membership == Membership.join &&
-          room.isNotSpaceAndStoryRoom() &&
-          room.isUnreadWithThreads,
-    );
+    final rooms = client.rooms.where(_isUnreadRoom);
     final threads = client.threadUnread?.followedThreads ?? const [];
     final items = [
       for (final room in rooms) await _unreadRoomItem(room),
       for (final thread in threads) ?await _threadItem(client, thread),
     ];
     return items..sort((a, b) => b.time.compareTo(a.time));
+  }
+
+  bool _isUnreadRoom(Room room) {
+    if (room.membership != Membership.join) return false;
+    return room.isNotSpaceAndStoryRoom() && room.isUnreadWithThreads;
   }
 
   /// Quotes the newest message of the main timeline: a thread reply shows
@@ -130,7 +147,7 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     final room = client.getRoomById(thread.roomId);
     if (room == null) return null;
     if (!_roots.containsKey(thread)) {
-      _fetchRoot(client, thread);
+      unawaited(_fetchRoot(client, thread));
       return null;
     }
     final root = _roots[thread];
@@ -160,21 +177,21 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     );
   }
 
-  void _fetchRoot(Client client, ThreadRef thread) {
-    if (!_fetching.add(thread)) return;
-    client.threadUnread
-        ?.threadRoot(thread)
-        .then<Event?>(
-          (root) => root,
-          onError: (Object e, StackTrace s) {
-            Logs().w('Unable to read the root of a followed thread', e, s);
-            return null;
-          },
-        )
-        .then((root) {
-          _fetching.remove(thread);
-          _roots[thread] = root;
-          if (!_rootsRead.isClosed) _rootsRead.add(null);
-        });
+  /// Reads the root of the thread; with no reply of the session known, the
+  /// server gives its thread aggregate. A failure is logged and not kept.
+  Future<void> _fetchRoot(Client client, ThreadRef thread) async {
+    final store = client.threadUnread;
+    if (store == null || !_fetching.add(thread)) return;
+    try {
+      _roots[thread] = await store.threadRoot(
+        thread,
+        serverFirst: store.latestReplyOf(thread) == null,
+      );
+      if (!_rootsRead.isClosed) _rootsRead.add(null);
+    } on Object catch (e, s) {
+      Logs().w('Unable to read the root of a followed thread', e, s);
+    } finally {
+      _fetching.remove(thread);
+    }
   }
 }

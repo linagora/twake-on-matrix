@@ -476,25 +476,48 @@ class ThreadUnreadStore extends ChangeNotifier {
   }
 
   /// The root of a thread, for its last reply: the local database first,
-  /// the server when the stored root holds no thread aggregate. Asks the
-  /// server like the follow lookups do, at most [_maxLookupsInFlight] at a
-  /// time. Null when the room is unknown.
-  Future<Event?> threadRoot(ThreadRef thread) async {
+  /// the server when the stored root holds no thread aggregate. With
+  /// [serverFirst] (no reply of the session known, the stored aggregate may
+  /// be old) the server first, the local database when it cannot be reached.
+  /// Asks the server like the follow lookups do, at most
+  /// [_maxLookupsInFlight] at a time. Null when the room is unknown.
+  Future<Event?> threadRoot(
+    ThreadRef thread, {
+    bool serverFirst = false,
+  }) async {
     final room = _client.getRoomById(thread.roomId);
     if (room == null) return null;
     await _acquireLookupSlot();
     try {
-      final stored = await _storedRoot(thread);
-      if (stored != null && _hasThreadAggregate(stored)) return stored;
-      final fresh = await _client.getOneRoomEvent(
-        thread.roomId,
-        thread.rootEventId,
-      );
-      return Event.fromMatrixEvent(fresh, room);
+      return serverFirst
+          ? await _freshOrStoredRoot(thread, room)
+          : await _storedOrFreshRoot(thread, room);
     } finally {
       _releaseLookupSlot();
     }
   }
+
+  Future<Event?> _storedOrFreshRoot(ThreadRef thread, Room room) async {
+    final stored = await _storedRoot(thread);
+    if (stored != null && _hasThreadAggregate(stored)) return stored;
+    return _freshRoot(thread, room);
+  }
+
+  Future<Event?> _freshOrStoredRoot(ThreadRef thread, Room room) async {
+    try {
+      return await _freshRoot(thread, room);
+    } on Object {
+      final stored = await _storedRoot(thread);
+      if (stored == null) rethrow;
+      return stored;
+    }
+  }
+
+  Future<Event> _freshRoot(ThreadRef thread, Room room) async =>
+      Event.fromMatrixEvent(
+        await _client.getOneRoomEvent(thread.roomId, thread.rootEventId),
+        room,
+      );
 
   bool _hasThreadAggregate(MatrixEvent event) =>
       (event.unsigned?['m.relations'] as Map?)?['m.thread'] != null;

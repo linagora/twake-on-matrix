@@ -196,10 +196,11 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 ///
 /// The mentions and the reactions are empty unless [mentions] or
 /// [reactions] are given, so no spec reads the account. [account] is the
-/// active account (`@me:example.org` by default).
+/// active account (`@me:example.org` by default). Without [repository],
+/// the page reads the real repositories of [account] (a `ThreadAccount`).
 Future<void> pumpActivityPage(
   WidgetTester tester, {
-  required FakeActivityRepository repository,
+  required FakeActivityRepository? repository,
   FakeActivityMentionsRepository? mentions,
   FakeActivityReactionsRepository? reactions,
   List<Override> overrides = const [],
@@ -241,7 +242,7 @@ Future<void> pumpActivityPage(
     ],
   );
   addTearDown(router.dispose);
-  addTearDown(repository.close);
+  if (repository != null) addTearDown(repository.close);
   addTearDown(reactionsRepository.close);
   await tester.pumpWidget(
     ProviderScope(
@@ -253,13 +254,15 @@ Future<void> pumpActivityPage(
         fakeActiveAccountProvider.overrideWith(
           () => _StartingAccount(account ?? accountClient('@me:example.org')),
         ),
-        activityRepositoryProvider.overrideWithValue(repository),
-        activityMentionsRepositoryProvider.overrideWithValue(
-          mentions ?? FakeActivityMentionsRepository(),
-        ),
-        activityReactionsRepositoryProvider.overrideWithValue(
-          reactionsRepository,
-        ),
+        if (repository != null) ...[
+          activityRepositoryProvider.overrideWithValue(repository),
+          activityMentionsRepositoryProvider.overrideWithValue(
+            mentions ?? FakeActivityMentionsRepository(),
+          ),
+          activityReactionsRepositoryProvider.overrideWithValue(
+            reactionsRepository,
+          ),
+        ],
         ...overrides,
       ],
       child: MaterialApp.router(
