@@ -1,0 +1,14 @@
+# QA stack started by start.sh: a Synapse homeserver configured as the one of the integration tests
+# (integration_test/synapse/data: server name localhost, SQLite in a tmpfs, open registration, no
+# rate limits), published on the host for the emulator (10.0.2.2). Nothing survives stop.sh.
+services:
+  synapse:
+    image: ${SYNAPSE_IMAGE:-matrixdotorg/synapse:latest}
+    tmpfs:
+      - /data
+    volumes:
+      - ../../integration_test/synapse/data/homeserver.yaml:/data/homeserver.yaml:ro
+      - ../../integration_test/synapse/data/localhost.log.config:/data/localhost.log.config:ro
+      - ../../integration_test/synapse/data/localhost.signing.key:/data/localhost.signing.key:ro
+    ports:
+      - "127.0.0.1:${QA_MATRIX_PORT:?}:80"
