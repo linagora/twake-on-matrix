@@ -50,20 +50,29 @@ class _FakeRoom extends Fake implements lk.Room {
 }
 
 void main() {
-  test('the user of a LiveKit identity drops the device id', () {
-    expect(
-      LiveKitCallMediaDatasourceImpl.userIdOf('@alice:localhost:DEV'),
-      '@alice:localhost',
+  test('userIdOf_withADeviceId_dropsIt', () {
+    // Act
+    final userId = LiveKitCallMediaDatasourceImpl.userIdOf(
+      '@alice:localhost:DEV',
     );
-    expect(
-      LiveKitCallMediaDatasourceImpl.userIdOf('@alice:localhost'),
-      '@alice:localhost',
-    );
+
+    // Assert
+    expect(userId, '@alice:localhost');
+  });
+
+  test('userIdOf_withoutADeviceId_isTheIdentity', () {
+    // Act
+    final userId = LiveKitCallMediaDatasourceImpl.userIdOf('@alice:localhost');
+
+    // Assert
+    expect(userId, '@alice:localhost');
   });
 
   test('watchParticipants_afterLiveKitGaveUp_failsAsLost', () async {
+    // Arrange
     final datasource = LiveKitCallMediaDatasourceImpl()..onLost('gone');
 
+    // Act & Assert
     await expectLater(
       datasource.watchParticipants(),
       emitsError(isA<CallConnectionFailedException>()),
@@ -71,19 +80,24 @@ void main() {
   });
 
   test('watchParticipants_afterADisconnect_forgetsTheLoss', () async {
+    // Arrange
     final datasource = LiveKitCallMediaDatasourceImpl()..onLost('gone');
 
+    // Act
     await datasource.disconnect();
 
+    // Assert
     expect(await datasource.watchParticipants().first, isEmpty);
   });
 
   test(
     'connect_whenTheMicrophoneFailsWithAString_disconnectsAsAMediaFailure',
     () async {
+      // Arrange
       final room = _FakeRoom('Unable to getUserMedia: denied');
       final datasource = LiveKitCallMediaDatasourceImpl(createRoom: () => room);
 
+      // Act & Assert
       await expectLater(
         datasource.connect(_server, const CallMediaState(isMicrophoneOn: true)),
         throwsA(isA<CallMediaFailedException>()),
@@ -93,9 +107,11 @@ void main() {
   );
 
   test('connect_whenTheMicrophoneFailsWithAnError_rethrowsIt', () async {
+    // Arrange
     final room = _FakeRoom(StateError('bug'));
     final datasource = LiveKitCallMediaDatasourceImpl(createRoom: () => room);
 
+    // Act & Assert
     await expectLater(
       datasource.connect(_server, const CallMediaState(isMicrophoneOn: true)),
       throwsStateError,

@@ -1,15 +1,17 @@
+import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
 abstract class MatrixRtcDatasource {
   CallRoomInfo getRoomInfo(CallRoom room);
 
-  ({String? displayName, Uri? avatarUrl}) memberProfile(
+  ({String? displayName, Uri? avatarUrl}) getMemberProfile(
     CallRoom room,
     CallParticipant participant,
   );
 
-  Future<CallServer> fetchServer(CallJoin join);
+  /// What the token service needs to let this device into the call of [room].
+  Future<SfuTokenRequest> createTokenRequest(CallRoom room);
 
   Future<void> endStaleOwnMembership(CallRoom room);
 

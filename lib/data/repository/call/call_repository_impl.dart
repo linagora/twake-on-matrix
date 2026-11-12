@@ -1,4 +1,5 @@
 import 'package:twake_chat/data/datasource/call/call_media_datasource.dart';
+import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
@@ -7,18 +8,24 @@ import 'package:twake_chat/domain/repository/call/call_repository.dart';
 class CallRepositoryImpl implements CallRepository {
   const CallRepositoryImpl({
     required MatrixRtcDatasource rtcDatasource,
+    required CallTokenDatasource tokenDatasource,
     required CallMediaDatasource mediaDatasource,
   }) : _rtc = rtcDatasource,
+       _token = tokenDatasource,
        _media = mediaDatasource;
 
   final MatrixRtcDatasource _rtc;
+  final CallTokenDatasource _token;
   final CallMediaDatasource _media;
 
   @override
   CallRoomInfo getRoomInfo(CallRoom room) => _rtc.getRoomInfo(room);
 
   @override
-  Future<CallServer> fetchServer(CallJoin join) => _rtc.fetchServer(join);
+  Future<CallServer> fetchServer(CallJoin join) async => _token.fetchServer(
+    join.serviceUrl,
+    await _rtc.createTokenRequest(join.room),
+  );
 
   @override
   Future<void> endStaleOwnMembership(CallRoom room) =>
@@ -51,7 +58,7 @@ class CallRepositoryImpl implements CallRepository {
       );
 
   CallParticipant _withProfile(CallRoom room, CallParticipant participant) {
-    final profile = _rtc.memberProfile(room, participant);
+    final profile = _rtc.getMemberProfile(room, participant);
     return participant.copyWith(
       displayName: profile.displayName,
       avatarUrl: profile.avatarUrl,

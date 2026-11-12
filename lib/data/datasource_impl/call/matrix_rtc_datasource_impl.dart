@@ -1,38 +1,27 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart' hide CallParticipant;
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
-import 'package:twake_chat/data/model/call/sfu_token_response.dart';
+import 'package:twake_chat/data/datasource_impl/call/call_membership_extender.dart';
+import 'package:twake_chat/data/model/call/call_member_content.dart';
+import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
-/// How many times the membership lasts its expiry, from when it was sent.
-typedef MembershipExpiry = ({int count, int? createdTs});
-
 /// The own membership event of a call: its room and its state key.
 typedef _Slot = ({String roomId, String stateKey});
-
-typedef _Attempt = ({_Slot slot, int session});
 
 /// MatrixRTC (MSC4143) session memberships with a LiveKit focus: one
 /// `org.matrix.msc3401.call.member` state event per device (DECISION.md D14).
 class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   MatrixRtcDatasourceImpl(this._maybeClient);
 
-  static const MembershipExpiry firstExpiry = (count: 1, createdTs: null);
-
   static const memberEventType = CallEventTypes.callMember;
-  static const _membershipExpiry = Duration(hours: 4);
   static const _delayedLeave = Duration(seconds: 8);
   static const _delayedLeaveRestart = Duration(seconds: 5);
-  static const _expiryHeadroom = Duration(minutes: 1);
-  static const _extendRetry = Duration(seconds: 30);
-  static const _tokenTimeout = Duration(seconds: 20);
   static final _unprefixedRoomVersion = RegExp(
     r'^org\.matrix\.msc(3757|3779)\b',
   );
@@ -43,10 +32,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Future<void>? _restarting;
   var _session = 0;
   Timer? _restartTimer;
-  Timer? _expiryTimer;
-  Timer? _extendRetryTimer;
-  Map<String, Object?>? _extension;
-  Future<void>? _extending;
+  CallMembershipExtender? _extender;
 
   Client get _client => _maybeClient ?? (throw const CallNoClientException());
 
@@ -71,44 +57,6 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     return isUnprefixed ? stateKey : '_$stateKey';
   }
 
-  @visibleForTesting
-  static Map<String, Object?> membershipContent(
-    CallDevice device,
-    CallJoin join, [
-    MembershipExpiry expiry = firstExpiry,
-  ]) => {
-    'application': 'm.call',
-    'call_id': '',
-    'scope': 'm.room',
-    'device_id': device.deviceId,
-    'membershipID': '${device.userId}:${device.deviceId}',
-    'expires': _membershipExpiry.inMilliseconds * expiry.count,
-    'm.call.intent': join.isVideo ? 'video' : 'audio',
-    'focus_active': {'type': 'livekit', 'focus_selection': 'oldest_membership'},
-    'foci_preferred': [
-      {'type': 'livekit', 'livekit_service_url': join.serviceUrl},
-    ],
-    'created_ts': ?expiry.createdTs,
-  };
-
-  @visibleForTesting
-  static CallServer parseServer(http.Response response) {
-    if (response.statusCode ~/ 100 != 2) {
-      throw CallTokenFailedException(cause: 'HTTP ${response.statusCode}');
-    }
-    final json = jsonDecode(response.body);
-    if (json is! Map<String, dynamic>) {
-      throw const CallTokenFailedException(cause: 'Unexpected body');
-    }
-    final token = SfuTokenResponse.fromJson(json);
-    final url = token.url;
-    final jwt = token.jwt;
-    if (url == null || jwt == null) {
-      throw const CallTokenFailedException(cause: 'No url or jwt');
-    }
-    return CallServer(url: url, token: jwt);
-  }
-
   _Slot _ownSlot(Room room) => (
     roomId: room.id,
     stateKey: stateKeyFor(_device, roomVersion: room.roomVersion),
@@ -125,7 +73,7 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  ({String? displayName, Uri? avatarUrl}) memberProfile(
+  ({String? displayName, Uri? avatarUrl}) getMemberProfile(
     CallRoom call,
     CallParticipant participant,
   ) {
@@ -136,26 +84,17 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   }
 
   @override
-  Future<CallServer> fetchServer(CallJoin join) async {
+  Future<SfuTokenRequest> createTokenRequest(CallRoom call) async {
     final client = _client;
-    _room(join.room);
+    _room(call);
     final device = _device;
     try {
       final openIdToken = await client.requestOpenIdToken(device.userId, {});
-      final response = await client.httpClient
-          .post(
-            Uri.parse('${join.serviceUrl}/sfu/get'),
-            headers: {'content-type': 'application/json'},
-            body: jsonEncode({
-              'room': join.room.id,
-              'openid_token': openIdToken.toJson(),
-              'device_id': device.deviceId,
-            }),
-          )
-          .timeout(_tokenTimeout);
-      return parseServer(response);
-    } on CallException {
-      rethrow;
+      return SfuTokenRequest(
+        room: call.id,
+        openidToken: openIdToken.toJson(),
+        deviceId: device.deviceId,
+      );
     } on Exception catch (error) {
       throw CallTokenFailedException(cause: error);
     }
@@ -170,11 +109,9 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
       throw CallMembershipFailedException(cause: error);
     }
     final slot = _ownSlot(room);
-    final deviceId = room
-        .getState(memberEventType, slot.stateKey)
-        ?.content
-        .tryGet<String>('device_id');
-    if (deviceId == null) return;
+    final content = room.getState(memberEventType, slot.stateKey)?.content;
+    if (content == null) return;
+    if (CallMemberContent.fromJson(content).deviceId == null) return;
     try {
       await _write(slot, {});
     } on Exception catch (error, stackTrace) {
@@ -192,16 +129,17 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     final device = _device;
     await _scheduleDelayedLeave(slot);
     try {
-      await _write(slot, membershipContent(device, join));
+      await _write(slot, CallMemberContent.forJoin(device, join).toJson());
     } on Exception catch (error) {
-      _stopTimers();
+      _endSession().extended.ignore();
       throw CallMembershipFailedException(cause: error);
     }
-    _resendMembership = () => _write(slot, membershipContent(device, join));
-    _extendBeforeExpiry(
-      slot,
-      (expiry) => membershipContent(device, join, expiry),
-    );
+    _resendMembership = () =>
+        _write(slot, CallMemberContent.forJoin(device, join).toJson());
+    _extender = CallMembershipExtender((content) => _write(slot, content))
+      ..start(
+        (expiry) => CallMemberContent.forJoin(device, join, expiry).toJson(),
+      );
   }
 
   Future<String> _write(_Slot slot, Map<String, Object?> content) =>
@@ -211,47 +149,6 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         slot.stateKey,
         content,
       );
-
-  /// `expires` grows by its own length before it lapses, from the same
-  /// `created_ts`.
-  void _extendBeforeExpiry(
-    _Slot slot,
-    Map<String, Object?> Function(MembershipExpiry expiry) contentFor,
-  ) {
-    final createdTs = DateTime.now().millisecondsSinceEpoch;
-    var count = 1;
-    _expiryTimer?.cancel();
-    _expiryTimer = Timer.periodic(_membershipExpiry - _expiryHeadroom, (_) {
-      count++;
-      _extension = contentFor((count: count, createdTs: createdTs));
-      _queueExtension(slot);
-    });
-  }
-
-  /// One write at a time, always the newest content: an older one never
-  /// lands last.
-  void _queueExtension(_Slot slot) {
-    final attempt = (slot: slot, session: _session);
-    _extending = (_extending ?? Future<void>.value()).then(
-      (_) => _extend(attempt),
-    );
-  }
-
-  Future<void> _extend(_Attempt attempt) async {
-    final content = _extension;
-    if (content == null || attempt.session != _session) return;
-    try {
-      await _write(attempt.slot, content);
-    } on Exception catch (error, stackTrace) {
-      Logs().w('MatrixRtcDatasource: not extended', error, stackTrace);
-      if (attempt.session != _session) return;
-      _extendRetryTimer?.cancel();
-      _extendRetryTimer = Timer(
-        _extendRetry,
-        () => _queueExtension(attempt.slot),
-      );
-    }
-  }
 
   /// The homeserver ends the membership itself if this device vanishes
   /// (MSC4140); without delayed events the membership expires instead.
@@ -317,29 +214,24 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     }
   }
 
-  String? _stopTimers() {
+  ({String? delayId, Future<void> extended}) _endSession() {
     _session++;
     _resendMembership = null;
-    _expiryTimer?.cancel();
-    _expiryTimer = null;
-    _extendRetryTimer?.cancel();
-    _extendRetryTimer = null;
-    _extension = null;
+    final extended = _extender?.stop() ?? Future<void>.value();
+    _extender = null;
     _restartTimer?.cancel();
     _restartTimer = null;
     final delayId = _delayId;
     _delayId = null;
-    return delayId;
+    return (delayId: delayId, extended: extended);
   }
 
   @override
   Future<void> leaveMembership(CallRoom call) async {
-    final delayId = _stopTimers();
+    final (:delayId, :extended) = _endSession();
     // A write still in flight would otherwise land after the leave.
-    final extending = _extending;
     final restarting = _restarting;
-    _extending = null;
-    await extending;
+    await extended;
     await restarting;
     if (delayId != null) {
       try {
@@ -375,5 +267,5 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
         .map((_) {});
   }
 
-  void dispose() => _stopTimers();
+  void dispose() => _endSession().extended.ignore();
 }

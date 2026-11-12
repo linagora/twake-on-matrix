@@ -109,9 +109,9 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   @override
   Future<void> setMicrophone({required bool isOn}) =>
-      _change((local) => local.setMicrophoneEnabled(isOn));
+      _updateLocalParticipant((local) => local.setMicrophoneEnabled(isOn));
 
-  Future<void> _change(
+  Future<void> _updateLocalParticipant(
     Future<Object?> Function(lk.LocalParticipant local) run,
   ) async {
     final local = _room?.localParticipant;

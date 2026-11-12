@@ -53,7 +53,6 @@ class _FakeClient extends Fake implements Client {
   var failingMemberships = 0;
   Completer<void>? holdMemberships;
   final timeline = <String>[];
-  final tokenRequests = <Map<String, Object?>>[];
 
   @override
   final CachedStreamController<SyncUpdate> onSync = CachedStreamController();
@@ -86,10 +85,6 @@ class _FakeClient extends Fake implements Client {
 
   @override
   late final http.Client httpClient = MockClient((request) async {
-    if (request.url.path.endsWith('/sfu/get')) {
-      tokenRequests.add(jsonDecode(request.body) as Map<String, Object?>);
-      return http.Response('{"url":"wss://lk.test","jwt":"jwt"}', 200);
-    }
     if (request.url.path.contains('delayed_events')) {
       final action = jsonDecode(request.body)['action'];
       delayedActions.add('$action ${request.url.pathSegments.last}');
@@ -126,22 +121,26 @@ class _FakeClient extends Fake implements Client {
 }
 
 void main() {
-  test('a membership the homeserver ended during a pause is sent again', () {
+  test('restart_afterThePauseEndedTheMembership_sendsItAgain', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
-
       datasource.joinMembership(_join);
       async.flushMicrotasks();
-      async.elapse(const Duration(seconds: 6));
 
-      expect(client.writes, [
+      // Act
+      async.elapse(const Duration(seconds: 6));
+      final writes = [...client.writes];
+      async.elapse(const Duration(seconds: 5));
+
+      // Assert
+      expect(writes, [
         'delayed leave',
         'membership',
         'delayed leave',
         'membership',
       ]);
-      async.elapse(const Duration(seconds: 5));
       expect(client.delayedActions.last, 'restart delay-2');
       datasource.dispose();
     });
@@ -149,6 +148,7 @@ void main() {
 
   test('extend_whenTheExtensionFails_triesAgainSoon', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
       datasource.joinMembership(_join);
@@ -158,9 +158,11 @@ void main() {
         ..writes.clear()
         ..failingMemberships = 1;
 
+      // Act
       async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
       async.elapse(const Duration(seconds: 30));
 
+      // Assert
       expect(client.writes, ['membership failed', 'membership']);
       datasource.dispose();
     });
@@ -168,6 +170,7 @@ void main() {
 
   test('leaveMembership_whenTheRoomIsGone_stopsRenewingTheMembership', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
       datasource.joinMembership(_join);
@@ -175,12 +178,14 @@ void main() {
       async.elapse(const Duration(seconds: 6));
       client.isRoomGone = true;
 
+      // Act
       datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       final actions = client.delayedActions.length;
       final writes = client.writes.length;
       async.elapse(const Duration(hours: 5));
 
+      // Assert
       expect(client.delayedActions.last, 'send delay-2');
       expect(client.delayedActions.length, actions);
       expect(client.writes.length, writes);
@@ -190,6 +195,7 @@ void main() {
 
   test('leaveMembership_whileAnExtensionIsSent_leavesAfterIt', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
       datasource.joinMembership(_join);
@@ -198,12 +204,15 @@ void main() {
       final hold = client.holdMemberships = Completer<void>();
       async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
 
+      // Act
       datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
-      expect(client.delayedActions, isNot(contains('send delay-2')));
+      final actionsDuringTheExtension = [...client.delayedActions];
       hold.complete();
       async.flushMicrotasks();
 
+      // Assert
+      expect(actionsDuringTheExtension, isNot(contains('send delay-2')));
       expect(client.writes.last, 'membership');
       expect(client.delayedActions.last, 'send delay-2');
       datasource.dispose();
@@ -212,6 +221,7 @@ void main() {
 
   test('leaveMembership_whileAnExtensionRetryWaits_writesNoMembership', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
       datasource.joinMembership(_join);
@@ -219,107 +229,45 @@ void main() {
       async.elapse(const Duration(seconds: 6));
       client.failingMemberships = 1;
       async.elapse(const Duration(hours: 4) - const Duration(minutes: 1));
-      expect(client.writes.last, 'membership failed');
 
+      // Act
       datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
       async.elapse(const Duration(minutes: 1));
 
+      // Assert
       expect(client.writes.last, 'membership failed');
       datasource.dispose();
     });
   });
 
-  group('stateKeyFor', () {
-    test('prefixes the key with an underscore in a usual room', () {
-      expect(
-        MatrixRtcDatasourceImpl.stateKeyFor(_alice, roomVersion: '10'),
-        '_@alice:localhost_DEV_m.call',
-      );
-    });
-
-    test('does not on the room versions of MSC3757 and MSC3779', () {
-      for (final version in [
-        'org.matrix.msc3757.11',
-        'org.matrix.msc3779.10',
-      ]) {
-        expect(
-          MatrixRtcDatasourceImpl.stateKeyFor(_alice, roomVersion: version),
-          '@alice:localhost_DEV_m.call',
-        );
-      }
-    });
-  });
-
-  test('the membership is an MSC4143 session membership', () {
-    expect(
-      MatrixRtcDatasourceImpl.membershipContent(
-        _alice,
-        const CallJoin(
-          room: _room,
-          serviceUrl: 'http://127.0.0.1:3003',
-          isVideo: true,
-        ),
-      ),
-      {
-        'application': 'm.call',
-        'call_id': '',
-        'scope': 'm.room',
-        'device_id': 'DEV',
-        'membershipID': '@alice:localhost:DEV',
-        'expires': 14400000,
-        'm.call.intent': 'video',
-        'focus_active': {
-          'type': 'livekit',
-          'focus_selection': 'oldest_membership',
-        },
-        'foci_preferred': [
-          {'type': 'livekit', 'livekit_service_url': 'http://127.0.0.1:3003'},
-        ],
-      },
-    );
-  });
-
-  test('an extended membership keeps its created_ts and grows expires', () {
-    final content = MatrixRtcDatasourceImpl.membershipContent(
+  test('stateKeyFor_inAUsualRoom_isPrefixedWithAnUnderscore', () {
+    // Act
+    final stateKey = MatrixRtcDatasourceImpl.stateKeyFor(
       _alice,
-      const CallJoin(room: _room, serviceUrl: 'http://127.0.0.1:3003'),
-      (count: 2, createdTs: 1700000000000),
+      roomVersion: '10',
     );
 
-    expect(content['expires'], 28800000);
-    expect(content['created_ts'], 1700000000000);
+    // Assert
+    expect(stateKey, '_@alice:localhost_DEV_m.call');
   });
 
-  group('parseServer', () {
-    test('reads the LiveKit url and token', () {
-      expect(
-        MatrixRtcDatasourceImpl.parseServer(
-          http.Response('{"url":"ws://127.0.0.1:7880","jwt":"token"}', 200),
-        ),
-        const CallServer(url: 'ws://127.0.0.1:7880', token: 'token'),
+  test('stateKeyFor_onTheRoomVersionsOfMsc3757AndMsc3779_isNotPrefixed', () {
+    for (final version in ['org.matrix.msc3757.11', 'org.matrix.msc3779.10']) {
+      // Act
+      final stateKey = MatrixRtcDatasourceImpl.stateKeyFor(
+        _alice,
+        roomVersion: version,
       );
-    });
 
-    test('an error status is a token failure', () {
-      expect(
-        () => MatrixRtcDatasourceImpl.parseServer(http.Response('{}', 403)),
-        throwsA(isA<CallTokenFailedException>()),
-      );
-    });
-
-    test('a body without url or jwt is a token failure', () {
-      expect(
-        () => MatrixRtcDatasourceImpl.parseServer(
-          http.Response('{"url":"ws://x"}', 200),
-        ),
-        throwsA(isA<CallTokenFailedException>()),
-      );
-    });
+      // Assert
+      expect(stateKey, '@alice:localhost_DEV_m.call');
+    }
   });
 
   test('leaveMembership_whileAMembershipIsSentAgain_leavesAfterIt', () {
     fakeAsync((async) {
+      // Arrange
       final client = _FakeClient();
       final datasource = MatrixRtcDatasourceImpl(client);
       datasource.joinMembership(_join);
@@ -327,12 +275,15 @@ void main() {
       final hold = client.holdMemberships = Completer<void>();
       async.elapse(const Duration(seconds: 6));
 
+      // Act
       datasource.leaveMembership(_room).ignore();
       async.flushMicrotasks();
-      expect(client.timeline, isNot(contains('send delay-2')));
+      final timelineDuringTheResend = [...client.timeline];
       hold.complete();
       async.flushMicrotasks();
 
+      // Assert
+      expect(timelineDuringTheResend, isNot(contains('send delay-2')));
       expect(
         client.timeline,
         containsAllInOrder(['restart delay-1', 'membership', 'send delay-2']),
@@ -343,18 +294,27 @@ void main() {
   });
 
   test('getRoomInfo_withoutTheRightToTheCallEvent_cannotJoin', () {
+    // Arrange
     final client = _FakeClient().._room.canJoin = false;
 
-    expect(MatrixRtcDatasourceImpl(client).getRoomInfo(_room).canJoin, isFalse);
+    // Act
+    final info = MatrixRtcDatasourceImpl(client).getRoomInfo(_room);
+
+    // Assert
+    expect(info.canJoin, isFalse);
   });
 
-  test('fetchServer_always_sendsTheOpenIdTokenOfThisDevice', () async {
+  test('createTokenRequest_always_carriesTheOpenIdTokenOfThisDevice', () async {
+    // Arrange
     final client = _FakeClient();
 
-    final server = await MatrixRtcDatasourceImpl(client).fetchServer(_join);
+    // Act
+    final request = await MatrixRtcDatasourceImpl(
+      client,
+    ).createTokenRequest(_room);
 
-    expect(server, const CallServer(url: 'wss://lk.test', token: 'jwt'));
-    expect(client.tokenRequests.single, {
+    // Assert
+    expect(request.toJson(), {
       'room': '!room:hs.test',
       'openid_token': {
         'access_token': 'openid',
@@ -367,6 +327,7 @@ void main() {
   });
 
   test('watchRoomEncrypted_whenASyncEncryptsTheRoom_emitsOnce', () async {
+    // Arrange
     final client = _FakeClient();
     final encrypted = <void>[];
     MatrixRtcDatasourceImpl(
@@ -374,34 +335,41 @@ void main() {
     ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
+    // Act
     client.onSync.add(SyncUpdate(nextBatch: 'clear'));
     await pumpEventQueue();
-    expect(encrypted, isEmpty);
-
+    final afterAClearSync = encrypted.length;
     client._room.isEncrypted = true;
     client.onSync
       ..add(SyncUpdate(nextBatch: 'limited'))
       ..add(SyncUpdate(nextBatch: 'next'));
     await pumpEventQueue();
 
+    // Assert
+    expect(afterAClearSync, 0);
     expect(encrypted, hasLength(1));
   });
 
   test('watchRoomEncrypted_whenEncryptedBeforeItListens_emitsAtOnce', () async {
+    // Arrange
     final client = _FakeClient().._room.isEncrypted = true;
     final encrypted = <void>[];
 
+    // Act
     MatrixRtcDatasourceImpl(
       client,
     ).watchRoomEncrypted(_room).listen(encrypted.add);
     await pumpEventQueue();
 
+    // Assert
     expect(encrypted, hasLength(1));
   });
 
   test('watchRoomEncrypted_whenTheRoomIsGone_failsAsRoomNotFound', () async {
+    // Arrange
     final client = _FakeClient()..isRoomGone = true;
 
+    // Act & Assert
     await expectLater(
       MatrixRtcDatasourceImpl(client).watchRoomEncrypted(_room),
       emitsError(isA<CallRoomNotFoundException>()),
