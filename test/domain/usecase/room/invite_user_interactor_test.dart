@@ -79,40 +79,31 @@ const _roomId = '!group:hs1.localhost';
 const _slowUser = '@bob:hs2.localhost';
 const _fastUser = '@carol:hs1.localhost';
 
+Future<Object> _invite(Client client, List<String> userIds) =>
+    InviteUserInteractor()
+        .execute(matrixClient: client, roomId: _roomId, userIds: userIds)
+        .last
+        .then((state) => state.fold((f) => f, (s) => s));
+
 void main() {
   group('InviteUserInteractor with a slow federated invite', () {
     test('aFastInvite_isNotHeldByTheSlowOne', () async {
       final client = _FakeClient();
-      final states = InviteUserInteractor()
-          .execute(
-            matrixClient: client,
-            roomId: _roomId,
-            userIds: [_slowUser, _fastUser],
-          )
-          .toList();
+      final result = _invite(client, [_slowUser, _fastUser]);
 
       await pumpEventQueue();
       expect(client.invited, [_fastUser]);
 
       client.slowInvite.complete();
-      final result = (await states).last.fold((f) => f, (s) => s);
+      expect(await result, isA<InviteUserSuccess>());
       expect(client.invited, [_fastUser, _slowUser]);
-      expect(result, isA<InviteUserSuccess>());
     });
 
     test('aFailingInvite_isReportedWhileTheOthersSucceed', () async {
       final client = _FakeClient()..failingUsers.add(_fastUser);
       client.slowInvite.complete();
 
-      final result =
-          (await InviteUserInteractor()
-                  .execute(
-                    matrixClient: client,
-                    roomId: _roomId,
-                    userIds: [_slowUser, _fastUser],
-                  )
-                  .last)
-              .fold((f) => f, (s) => s);
+      final result = await _invite(client, [_slowUser, _fastUser]);
 
       expect(client.invited, [_slowUser]);
       expect(result, isA<InviteUserSomeFailed>());
@@ -125,22 +116,18 @@ void main() {
 
     test('manyInvites_runAtMostFiveAtOnce', () async {
       final client = _CountingClient();
-      final states = InviteUserInteractor()
-          .execute(
-            matrixClient: client,
-            roomId: _roomId,
-            userIds: List.generate(12, (i) => '@user$i:hs2.localhost'),
-          )
-          .toList();
+      final result = _invite(
+        client,
+        List.generate(12, (i) => '@user$i:hs2.localhost'),
+      );
 
       await pumpEventQueue();
       expect(client.started, 5);
 
       client.release.complete();
-      final result = (await states).last.fold((f) => f, (s) => s);
+      expect(await result, isA<InviteUserSuccess>());
       expect(client.started, 12);
       expect(client.maxRunning, 5);
-      expect(result, isA<InviteUserSuccess>());
     });
 
     test('aRateLimitedInvite_retriesAfterTheServerDelayPlusJitter', () {
