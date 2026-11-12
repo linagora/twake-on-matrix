@@ -173,6 +173,8 @@ class _ImageWidget extends StatelessWidget {
             }
           },
         );
+      } else if (controller.downloadFailed) {
+        return const Icon(Icons.broken_image_outlined, color: Colors.white);
       } else {
         return const CupertinoActivityIndicator(
           animating: true,

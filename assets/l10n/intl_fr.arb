@@ -2731,5 +2731,10 @@
   "@messageCannotBeResent": {
     "type": "text",
     "placeholders": {}
+  },
+  "fileDownloadFailed": "Impossible de télécharger le fichier. Il n'est peut-être plus disponible.",
+  "@fileDownloadFailed": {
+    "type": "text",
+    "placeholders": {}
   }
 }

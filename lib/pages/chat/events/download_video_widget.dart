@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/download_video_state.dart';
 import 'package:twake_chat/pages/chat/events/event_video_player.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
@@ -76,6 +77,12 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         },
         cancelToken: cancelToken,
       );
+      if (!mounted) return;
+      if (bytes == null && _videoUrl == null) {
+        _downloadStateNotifier.value = DownloadVideoState.failed;
+        TwakeSnackBar.show(context, L10n.of(context)!.fileDownloadFailed);
+        return;
+      }
       _downloadStateNotifier.value = DownloadVideoState.done;
     } catch (e, s) {
       _downloadStateNotifier.value = DownloadVideoState.failed;
@@ -104,9 +111,9 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black,
-      child: Stack(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
         alignment: Alignment.topLeft,
         children: [
           Stack(
