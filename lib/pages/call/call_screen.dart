@@ -9,7 +9,7 @@ import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_state.dart';
-import 'package:twake_chat/widgets/avatar/avatar.dart';
+import 'package:twake_chat/pages/call/call_tile.dart';
 
 /// The call of a room (DECISION.md D15): before it, in it, or why it failed.
 class CallScreen extends ConsumerStatefulWidget {
@@ -200,7 +200,7 @@ class _CallStage extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 for (final participant in participants)
-                  _CallTile(participant: participant),
+                  CallTile(participant: participant),
               ],
             ),
           ),
@@ -210,7 +210,7 @@ class _CallStage extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _CallControl(
+              CallControl(
                 key: const Key('call-microphone'),
                 label: l10n.callMicrophone,
                 icon: isMicrophoneOn ? Icons.mic : Icons.mic_off,
@@ -223,7 +223,7 @@ class _CallStage extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 24),
-              _CallControl(
+              CallControl(
                 key: const Key('call-leave'),
                 label: l10n.callLeave,
                 icon: Icons.call_end,
@@ -236,100 +236,6 @@ class _CallStage extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _CallTile extends StatelessWidget {
-  const _CallTile({required this.participant});
-
-  static const _width = 160.0;
-  static const _avatarSize = 64.0;
-
-  final CallParticipant participant;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = L10n.of(context)!;
-    final displayName = participant.displayName ?? participant.userId;
-    final name = participant.isLocal ? l10n.you : displayName;
-    final onDark = LinagoraSysColors.material().onPrimary;
-    final textStyle = LinagoraTextStyle.material();
-    return Semantics(
-      label: [
-        name,
-        if (!participant.isMicrophoneOn) l10n.callMicrophoneOff,
-      ].join(', '),
-      excludeSemantics: true,
-      child: Container(
-        width: _width,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: LinagoraRefColors.material().neutral[20],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: participant.isSpeaking
-                ? LinagoraSysColors.material().primary
-                : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Column(
-          children: [
-            Avatar(
-              mxContent: participant.avatarUrl,
-              name: displayName,
-              size: _avatarSize,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: textStyle.bodyMedium.copyWith(color: onDark),
-            ),
-            if (!participant.isMicrophoneOn)
-              Text(
-                l10n.callMicrophoneOff,
-                style: textStyle.bodySmall.copyWith(color: onDark),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CallControl extends StatelessWidget {
-  const _CallControl({
-    required this.label,
-    required this.icon,
-    required this.onPressed,
-    this.color,
-    this.isSelected,
-    super.key,
-  });
-
-  final String label;
-  final IconData icon;
-  final Color? color;
-  final bool? isSelected;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final onDark = LinagoraSysColors.material().onPrimary;
-    return IconButton.filled(
-      tooltip: label,
-      isSelected: isSelected,
-      onPressed: onPressed,
-      iconSize: 28,
-      style: IconButton.styleFrom(
-        backgroundColor: color ?? LinagoraRefColors.material().neutral[30],
-        foregroundColor: onDark,
-        padding: const EdgeInsets.all(16),
-      ),
-      icon: Icon(icon),
     );
   }
 }
