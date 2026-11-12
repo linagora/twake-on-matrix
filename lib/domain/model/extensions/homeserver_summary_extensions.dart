@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
 import 'package:twake_chat/domain/model/app_twake_information.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/rtc_focus.dart';
@@ -105,6 +106,17 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
 extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
   bool get isInvitationEnabled =>
       this?.appTwakeInformation?.isInvitationEnabled ?? false;
+
+  /// Off unless the homeserver turns it on: an OIDC issuer alone does not
+  /// mean its users have a Twake Drive.
+  bool get isTwakeDriveEnabled =>
+      this?.appTwakeInformation?.isTwakeDriveEnabled ?? false;
+
+  /// The Drive of this homeserver: its SSO when it turns Drive on, else off.
+  DriveConfig get twakeDriveConfig => DriveConfig(
+    ssoUrl: (isTwakeDriveEnabled ? this?.ssoIssuer : null) ?? '',
+    ssoClientId: AppConstants.twakeSsoClientId,
+  );
 
   bool get isPublicGroupsEnabled =>
       this?.appTwakeInformation?.publicGroupsInformation?.isEnabled ?? false;

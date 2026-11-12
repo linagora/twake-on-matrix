@@ -193,6 +193,12 @@ dependencies:
   super_clipboard: 0.9.1
   tor_detector_web: ^1.1.0
   tuple: ^2.0.2
+  twake_drive_picker:
+    git:
+      # HTTPS so CI runners work without an SSH key (public repo). A commit, not
+      # a tag: a tag can move.
+      url: https://github.com/linagora/twake_drive_picker.git
+      ref: 5d70891eba606c16743924857c2cf1dc27649d72
   unifiedpush: ^6.0.2
   universal_html: ^2.0.8
   unorm_dart: ^0.2.0
