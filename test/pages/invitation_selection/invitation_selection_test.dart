@@ -168,5 +168,36 @@ void main() {
 
       expect(find.text('Oops, something went wrong…'), findsOneWidget);
     });
+
+    testWidgets('whenTheHostIsGone_aResultIsIgnored', (tester) async {
+      await openInvitationAndSubmit(tester);
+      await tester.pumpWidget(const SizedBox());
+
+      interactor.result.add(
+        Left(
+          InviteUserSomeFailed(
+            inviteUserPartialFailureException:
+                InviteUserPartialFailureException(
+                  failedUsers: const {
+                    _remoteUser: GenericInviteException(userId: _remoteUser),
+                  },
+                ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('whenTheHostIsGone_anErrorIsIgnored', (tester) async {
+      await openInvitationAndSubmit(tester);
+      await tester.pumpWidget(const SizedBox());
+
+      interactor.result.addError(Exception('unban failed'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }
