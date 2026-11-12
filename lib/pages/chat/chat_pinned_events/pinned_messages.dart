@@ -36,6 +36,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -421,7 +422,7 @@ class PinnedMessagesController extends State<PinnedMessages>
     context.goToRoomWithEvent(
       roomId,
       event.eventId,
-      threadRootId: event.threadRootId,
+      threadRootId: widget.threadRootId ?? ThreadRules.threadRootOf(event),
     );
   }
 

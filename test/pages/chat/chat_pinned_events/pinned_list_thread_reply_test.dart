@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/models/timeline_chunk.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -60,10 +61,13 @@ void main() {
     await getIt.reset();
   });
 
+  /// Opens the pinned list of the room, or of the thread [threadRootId] (as
+  /// ThreadPinnedMessagesRoute does), with [pinned] as its pins.
   Future<RecordingRouter> pumpPinnedList(
     WidgetTester tester,
-    List<String> pinned,
-  ) async {
+    List<String> pinned, {
+    String? threadRootId,
+  }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(400, 900);
     addTearDown(tester.view.reset);
@@ -91,12 +95,22 @@ void main() {
             GoRoute(
               path: 'threads/:rootid',
               builder: (_, _) => const Scaffold(body: Text('thread screen')),
+              routes: [
+                GoRoute(
+                  path: 'pinnedmessages',
+                  builder: (_, state) => PinnedMessages(
+                    pinnedEvents: events,
+                    timeline: timeline,
+                    threadRootId: state.pathParameters['rootid'],
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ],
       initialLocation:
-          '/rooms/${Uri.encodeComponent(pinsRoomId)}/pinnedmessages',
+          '${threadRootId == null ? const RoomRoute(roomid: pinsRoomId).location : ThreadRoute(roomid: pinsRoomId, rootid: threadRootId).location}/pinnedmessages',
     );
     addTearDown(router.dispose);
 
@@ -168,5 +182,64 @@ void main() {
       'go ${const RoomRoute(roomid: pinsRoomId, event: pinsRoomMessageId).location}',
     ]);
     expect(find.text('room screen'), findsOneWidget);
+  });
+
+  /// D438: the list of a thread holds its replies and its root; jumping to
+  /// either stays in the thread, on that message.
+  group('the pinned list of a thread', () {
+    testWidgets('« Jump to message » on the pinned root stays in the thread, '
+        'on the root', (tester) async {
+      final router = await pumpPinnedList(tester, [
+        pinsRootId,
+        pinsReplyId,
+      ], threadRootId: pinsRootId);
+
+      await jumpToMessage(tester, 'the root');
+
+      expect(router.navigations, [
+        'go ${const ThreadRoute(roomid: pinsRoomId, rootid: pinsRootId, event: pinsRootId).location}',
+      ]);
+      expect(find.text('thread screen'), findsOneWidget);
+    });
+
+    testWidgets('« Jump to message » on a pinned reply stays in the thread, '
+        'on the reply', (tester) async {
+      final router = await pumpPinnedList(tester, [
+        pinsRootId,
+        pinsReplyId,
+      ], threadRootId: pinsRootId);
+
+      await jumpToMessage(tester, 'the reply');
+
+      expect(router.navigations, [
+        'go ${const ThreadRoute(roomid: pinsRoomId, rootid: pinsRootId, event: pinsReplyId).location}',
+      ]);
+      expect(find.text('thread screen'), findsOneWidget);
+    });
+  });
+
+  /// Flag off (`AppConfig.threadsEnabled`, test/config/threads_disabled_test
+  /// .dart): a thread reply is an ordinary message of the room, as on main.
+  group('threads off', () {
+    late bool flagBefore;
+
+    setUp(() {
+      flagBefore = AppConfig.threadsEnabled;
+      AppConfig.threadsEnabled = false;
+    });
+
+    tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+    testWidgets('« Jump to message » on a pinned thread reply opens the room '
+        'on it', (tester) async {
+      final router = await pumpPinnedList(tester, [pinsReplyId]);
+
+      await jumpToMessage(tester, 'the reply');
+
+      expect(router.navigations, [
+        'go ${const RoomRoute(roomid: pinsRoomId, event: pinsReplyId).location}',
+      ]);
+      expect(find.text('room screen'), findsOneWidget);
+    });
   });
 }

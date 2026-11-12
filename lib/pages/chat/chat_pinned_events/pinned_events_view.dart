@@ -14,7 +14,7 @@ import 'package:matrix_link_text/link_text.dart';
 
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -30,9 +30,8 @@ class PinnedEventsView extends StatelessWidget {
       controller.scrollToThreadEvent(eventId);
       return;
     }
-    final threadRootId = pins
-        .firstWhereOrNull((event) => event?.eventId == eventId)
-        ?.threadRootId;
+    final pin = pins.firstWhereOrNull((event) => event?.eventId == eventId);
+    final threadRootId = pin == null ? null : ThreadRules.threadRootOf(pin);
     if (threadRootId == null) {
       controller.scrollToEventId(eventId, highlight: true);
       return;

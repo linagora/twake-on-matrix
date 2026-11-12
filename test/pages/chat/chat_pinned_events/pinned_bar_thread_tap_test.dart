@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/chat_get_pinned_events_state.dart';
@@ -142,6 +143,34 @@ void main() {
         'go ${const ThreadRoute(roomid: pinsRoomId, rootid: pinsRootId, event: pinsReplyId).location}',
       ]);
       expect(bar.roomScrolls, 1);
+    });
+  });
+
+  /// Flag off (`AppConfig.threadsEnabled`, test/config/threads_disabled_test
+  /// .dart): a thread reply is an ordinary message of the room, as on main.
+  group('threads off, the bar of the room', () {
+    late bool flagBefore;
+
+    setUp(() {
+      flagBefore = AppConfig.threadsEnabled;
+      AppConfig.threadsEnabled = false;
+    });
+
+    tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+    testWidgets('a pinned thread reply scrolls the room to it, without '
+        'opening a thread', (tester) async {
+      final bar = screenWithPins([pinsReplyId]);
+      final router = await pumpPinnedBar(
+        tester,
+        routes: pinnedBarRoutes(roomBar: bar),
+        initialLocation: roomLocation(),
+      );
+
+      await tapPinnedBar(tester, bar, 'the reply');
+
+      expect(bar.roomScrolls, 1);
+      expect(router.navigations, isEmpty);
     });
   });
 
