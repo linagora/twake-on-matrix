@@ -50,10 +50,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     try {
       await room.connect(server.url, server.token);
-    } catch (error) {
+    } catch (error, stackTrace) {
       await listener.dispose();
       await room.dispose();
-      _rethrowErrors(error);
+      _rethrowErrors(error, stackTrace);
       throw CallConnectionFailedException(cause: error);
     }
     _room = room;
@@ -63,9 +63,9 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
       if (media.isCameraOn) await room.localParticipant?.setCameraEnabled(true);
-    } catch (error) {
+    } catch (error, stackTrace) {
       await disconnect();
-      _rethrowErrors(error);
+      _rethrowErrors(error, stackTrace);
       throw CallMediaFailedException(cause: error);
     }
     _emit();
@@ -91,14 +91,14 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     try {
       await run();
     } catch (error, stackTrace) {
-      _rethrowErrors(error);
+      _rethrowErrors(error, stackTrace);
       Logs().w('LiveKitCallMedia: disconnect failed', error, stackTrace);
     }
   }
 
   // flutter_webrtc throws Strings, not Exceptions: only Errors are bugs here.
-  static void _rethrowErrors(Object error) {
-    if (error is Error) throw error;
+  static void _rethrowErrors(Object error, StackTrace stackTrace) {
+    if (error is Error) Error.throwWithStackTrace(error, stackTrace);
   }
 
   @override
@@ -118,8 +118,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     if (local == null) return;
     try {
       await run(local);
-    } catch (error) {
-      _rethrowErrors(error);
+    } catch (error, stackTrace) {
+      _rethrowErrors(error, stackTrace);
       throw CallMediaFailedException(cause: error);
     } finally {
       _emit();
