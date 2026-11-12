@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_state.dart';
+import 'package:twake_chat/pages/call/call_control.dart';
 import 'package:twake_chat/pages/call/call_tile.dart';
 
 /// The call of a room (DECISION.md D15): before it, in it, or why it failed.
