@@ -1059,6 +1059,15 @@ class ChatController extends ConsumerState<Chat>
     await context.copyMessageLink(link);
   }
 
+  /// Copies the caption of an album as text, never one of its images.
+  void copyAlbumCaptionAction(Event caption) async {
+    await caption.copyTextEvent(context, timeline!);
+    if (!mounted) return;
+
+    showEmojiPickerNotifier.value = false;
+    _clearSelectEvent();
+  }
+
   /// Reports [event], or every image of an album when [albumEvents] is set.
   void reportEventAction(Event event, {List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
@@ -1526,22 +1535,18 @@ class ChatController extends ConsumerState<Chat>
     return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 
+  /// [albumEvents] are every image of an album: the user's reactions are
+  /// looked up on all of them, a new one goes to [event] (the first image).
   Future<void> toggleReactionAction({
     required String emoji,
     String? emojiId,
     required Event event,
+    List<Event>? albumEvents,
   }) async {
     final timeline = this.timeline;
     final myReactions = timeline == null
         ? <Event>[]
-        : event
-              .aggregatedEvents(timeline, RelationshipTypes.reaction)
-              .where(
-                (e) =>
-                    e.senderId == e.room.client.userID &&
-                    e.type == EventTypes.Reaction,
-              )
-              .toList();
+        : (albumEvents ?? [event]).myReactionsIn(timeline);
     try {
       await toggleReaction(
         emoji: emoji,
@@ -1638,6 +1643,20 @@ class ChatController extends ConsumerState<Chat>
         (a, b) => a.originServerTs.compareTo(b.originServerTs),
       );
     }
+  }
+
+  /// Adds [events] to the selection at once: one recording check and one
+  /// rebuild, not one per event.
+  void selectEvents(List<Event> events) {
+    if (audioRecordStateNotifier.value != AudioRecordState.initial) {
+      preventActionWhileRecordingMobile(context: context);
+      return;
+    }
+    _addSelectEvent([
+      for (final event in events)
+        if (!event.redacted && !selectedEvents.contains(event)) event,
+    ]);
+    selectedEvents.sort((a, b) => a.originServerTs.compareTo(b.originServerTs));
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
@@ -2811,8 +2830,11 @@ class ChatController extends ConsumerState<Chat>
           selectedEvents.first.isVideoOrImage &&
           !PlatformInfos.isWeb)
         ChatAppBarActions.saveToGallery,
-      ChatAppBarActions.info,
-      ChatAppBarActions.report,
+      // Both act on one message.
+      if (selectedEvents.length == 1) ...[
+        ChatAppBarActions.info,
+        ChatAppBarActions.report,
+      ],
     ];
   }
 

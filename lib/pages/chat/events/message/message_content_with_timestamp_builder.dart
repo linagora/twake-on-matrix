@@ -6,6 +6,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_exten
 import 'package:twake_chat/pages/chat/events/message/display_name_widget.dart';
 import 'package:twake_chat/pages/chat/events/message/message.dart';
 import 'package:twake_chat/pages/chat/events/message/message_content_builder.dart';
+import 'package:twake_chat/pages/chat/events/message/album_menu_targets.dart';
 import 'package:twake_chat/pages/chat/events/message/message_context_menu_action.dart';
 import 'package:twake_chat/pages/chat/events/message/message_reaction_dialog.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
@@ -79,6 +80,9 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(BuildContext, List<Event>)? onDeleteAlbum;
   final void Function(List<Event>)? onReportAlbum;
   final void Function(List<Event>)? onSelectAlbum;
+  final void Function(Event caption)? onCopyAlbumCaption;
+  final Future<void> Function(String emoji, List<Event> album)?
+  onToggleAlbumReaction;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
@@ -126,6 +130,8 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onDeleteAlbum,
     this.onReportAlbum,
     this.onSelectAlbum,
+    this.onCopyAlbumCaption,
+    this.onToggleAlbumReaction,
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
@@ -402,8 +408,9 @@ class _MessageContentWithTimestampBuilderState
     final album = MessageContentWithTimestampBuilder.sentAlbumMembersOf(
       albumMembers,
     );
-    // An album is one message: its menu and reactions belong to the first
-    // image; [event] is the pressed image, kept for Select.
+    // An album is one message: its menu belongs to the first image once
+    // every image is sent, and its reactions to all its images, as on the
+    // chips; [event] is the pressed image, kept for Select.
     final menuEvent = album?.first ?? event;
     await Navigator.of(context)
         .push(
@@ -423,7 +430,9 @@ class _MessageContentWithTimestampBuilderState
               messageContextMenu: (event) => _messageContextMenu(event, album),
               themeContextMenu: _themeContextMenu,
               iconContextMenu: _iconContextMenu,
-              onToggleEmojiReaction: widget.onToggleEmojiReaction,
+              onToggleEmojiReaction: (emoji, event) =>
+                  _toggleReaction(emoji, event, albumMembers),
+              albumEvents: albumMembers,
             ),
           ),
         )
@@ -529,36 +538,46 @@ class _MessageContentWithTimestampBuilderState
     widget.onHideEmojiReaction?.call();
   }
 
-  /// Routes a menu result of an album: reply and pin go to the first image,
-  /// copy and edit to the caption (last image), Select to the [pressed]
-  /// image, and the rest to every image.
+  /// Routes a menu result of an album to the images [AlbumMenuTargets]
+  /// picks for it.
   void _handleAlbumResult(
     BuildContext context,
     String result,
     List<Event> album, {
     required Event pressed,
   }) {
-    switch (result) {
-      case 'reply':
-        widget.onReply?.call(album.first);
-      case 'pin':
-        widget.onPin?.call(album.first);
-      case 'copy':
-        widget.onCopy?.call(album.last);
-      case 'edit':
-        widget.onEdit?.call(album.last);
-      case 'select':
-        widget.onSelect?.call(pressed);
-      case 'selectAll':
-        widget.onSelectAlbum?.call(album);
-      case 'forward':
-        widget.onForwardAlbum?.call(album);
-      case 'report':
-        widget.onReportAlbum?.call(album);
-      case 'saveToGallery':
-        widget.onSaveAlbumToGallery?.call(album);
-      case 'delete':
-        widget.onDeleteAlbum?.call(context, album);
+    final action = MessageContextMenuAction.values.asNameMap()[result];
+    if (action == null) return;
+    final targets = const AlbumMenuTargets().of(
+      action,
+      album,
+      pressed: pressed,
+    );
+    switch (action) {
+      case MessageContextMenuAction.reply:
+        widget.onReply?.call(targets.single);
+      case MessageContextMenuAction.pin:
+        widget.onPin?.call(targets.single);
+      case MessageContextMenuAction.copy:
+        widget.onCopyAlbumCaption?.call(targets.single);
+      case MessageContextMenuAction.edit:
+        widget.onEdit?.call(targets.single);
+      case MessageContextMenuAction.select:
+        widget.onSelect?.call(targets.single);
+      case MessageContextMenuAction.selectAll:
+        widget.onSelectAlbum?.call(targets);
+      case MessageContextMenuAction.forward:
+        widget.onForwardAlbum?.call(targets);
+      case MessageContextMenuAction.report:
+        widget.onReportAlbum?.call(targets);
+      case MessageContextMenuAction.saveToGallery:
+        widget.onSaveAlbumToGallery?.call(targets);
+      case MessageContextMenuAction.delete:
+        widget.onDeleteAlbum?.call(context, targets);
+      case MessageContextMenuAction.copyLink ||
+          MessageContextMenuAction.saveToDownload ||
+          MessageContextMenuAction.trySendAgain:
+        break;
     }
   }
 
@@ -754,8 +773,23 @@ class _MessageContentWithTimestampBuilderState
     required String emoji,
     required Event event,
   }) async {
+    final album = context.albumMembersFor(widget.event);
     Navigator.of(context).pop();
-    await widget.onToggleEmojiReaction?.call(emoji, event);
+    await _toggleReaction(emoji, event, album);
+  }
+
+  /// An album has one reaction per user, wherever it is: the picker looks
+  /// at every image, as the merged chips do.
+  Future<void> _toggleReaction(
+    String emoji,
+    Event event,
+    List<Event>? album,
+  ) async {
+    final toggleAlbum = widget.onToggleAlbumReaction;
+    if (album == null || toggleAlbum == null) {
+      return widget.onToggleEmojiReaction?.call(emoji, event);
+    }
+    return toggleAlbum(emoji, album);
   }
 
   Widget _menuActionsRowBuilder(

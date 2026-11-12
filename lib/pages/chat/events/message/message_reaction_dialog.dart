@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 
 class MessageReactionDialog extends ConsumerWidget {
@@ -33,6 +34,10 @@ class MessageReactionDialog extends ConsumerWidget {
   final Key dialogSafeAreaKey;
   final bool showReactions;
 
+  /// Every image of an album, when [event] leads one: the reaction marked
+  /// as mine may be on any of them.
+  final List<Event>? albumEvents;
+
   const MessageReactionDialog({
     super.key,
     required this.event,
@@ -45,18 +50,14 @@ class MessageReactionDialog extends ConsumerWidget {
     required this.iconContextMenu,
     required this.dialogSafeAreaKey,
     this.onToggleEmojiReaction,
+    this.albumEvents,
     this.showReactions = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final myReaction = event
-        .aggregatedEvents(timeline, RelationshipTypes.reaction)
-        .where(
-          (event) =>
-              event.senderId == event.room.client.userID &&
-              event.type == 'm.reaction',
-        )
+    final myReaction = (albumEvents ?? [event])
+        .myReactionsIn(timeline)
         .firstOrNull;
     final relatesTo =
         (myReaction?.content as Map<String, dynamic>?)?['m.relates_to'];

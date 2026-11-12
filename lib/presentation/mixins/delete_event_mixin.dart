@@ -37,11 +37,15 @@ mixin DeleteEventMixin {
     });
   }
 
-  /// Deletes every image of an album after one confirmation.
+  /// Deletes every image of an album after one confirmation, newest first:
+  /// the oldest image draws the album, so the bubble and [context] stay
+  /// until the last one and an error can still be shown.
   Future<void> deleteAlbumAction(
     BuildContext context,
     List<Event> events,
   ) async {
+    // The bubble may be gone when the menu closes (its image was deleted).
+    if (!context.mounted) return;
     final l10n = L10n.of(context)!;
     final confirmResult = await showConfirmAlertDialog(
       context: context,
@@ -52,7 +56,7 @@ mixin DeleteEventMixin {
     );
     if (confirmResult == ConfirmResult.cancel) return;
     var failureShown = false;
-    for (final event in events) {
+    for (final event in events.reversed) {
       final state = await deleteEventInteractor.execute(event).last;
       state.fold((failure) {
         if (failureShown || !context.mounted) return;

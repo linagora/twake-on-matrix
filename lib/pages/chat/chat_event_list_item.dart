@@ -125,7 +125,13 @@ class ChatEventListItem extends StatelessWidget {
       onDeleteAlbum: controller.deleteAlbumAction,
       onReportAlbum: (events) =>
           controller.reportEventAction(events.first, albumEvents: events),
-      onSelectAlbum: (events) => events.forEach(controller.onSelectMessage),
+      onSelectAlbum: controller.selectEvents,
+      onCopyAlbumCaption: controller.copyAlbumCaptionAction,
+      onToggleAlbumReaction: (emoji, events) => controller.toggleReactionAction(
+        emoji: emoji,
+        event: events.first,
+        albumEvents: events,
+      ),
       onTapMoreButton: controller.handleOnTapMoreButtonOnWeb,
       onEdit: (event) {
         controller.editAction(editEvent: event);

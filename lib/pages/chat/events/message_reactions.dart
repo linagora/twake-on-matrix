@@ -267,7 +267,6 @@ class ReactionsList extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: MessageReactionsBottomSheet(
-                          allReactionEvents: allReactionEvents,
                           reactionList: reactionList,
                           scrollController: ScrollController(),
                         ),
@@ -315,7 +314,6 @@ class ReactionsList extends StatelessWidget {
           expand: false,
           builder: (BuildContext context, ScrollController scrollController) {
             return MessageReactionsBottomSheet(
-              allReactionEvents: allReactionEvents,
               reactionList: reactionList,
               scrollController: scrollController,
             );

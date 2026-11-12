@@ -73,8 +73,7 @@ void _useInteractor(DeleteEventInteractor interactor) {
   getIt.registerSingleton<DeleteEventInteractor>(interactor);
 }
 
-/// Pumps the host, taps it, and returns the strings the dialog uses.
-Future<L10n> _pumpAndTapDelete(WidgetTester tester, List<Event> events) async {
+Future<void> _pumpHost(WidgetTester tester, List<Event> events) async {
   await tester.pumpWidget(
     ThemeBuilder(
       builder: (context, themeMode, primaryColor) => MaterialApp(
@@ -93,6 +92,11 @@ Future<L10n> _pumpAndTapDelete(WidgetTester tester, List<Event> events) async {
     ),
   );
   await tester.pumpAndSettle();
+}
+
+/// Pumps the host, taps it, and returns the strings the dialog uses.
+Future<L10n> _pumpAndTapDelete(WidgetTester tester, List<Event> events) async {
+  await _pumpHost(tester, events);
   final l10n = L10n.of(tester.element(find.byType(_DeleteAlbumHost)))!;
   await tester.tap(find.text('delete-album'));
   await tester.pumpAndSettle();
@@ -107,7 +111,7 @@ void main() {
     }
   });
 
-  testWidgets('one confirmation, then every image is deleted in order', (
+  testWidgets('one confirmation, then every image is deleted newest first', (
     tester,
   ) async {
     final interactor = _FakeDeleteEventInteractor();
@@ -120,7 +124,9 @@ void main() {
     await tester.tap(find.text(l10n.delete));
     await tester.pumpAndSettle();
 
-    expect(interactor.deletedIds, ['image-0', 'image-1', 'image-2']);
+    // The oldest image draws the album: deleting it last keeps the bubble
+    // (and its context for an error) until the end.
+    expect(interactor.deletedIds, ['image-2', 'image-1', 'image-0']);
     expect(find.text(l10n.failedToDeleteMessage), findsNothing);
   });
 
@@ -145,7 +151,24 @@ void main() {
     await tester.tap(find.text(l10n.delete));
     await tester.pumpAndSettle();
 
-    expect(interactor.deletedIds, ['image-0', 'image-1', 'image-2']);
+    expect(interactor.deletedIds, ['image-2', 'image-1', 'image-0']);
     expect(find.text(l10n.failedToDeleteMessage), findsOneWidget);
+  });
+
+  testWidgets('a bubble gone while the menu was open deletes nothing', (
+    tester,
+  ) async {
+    final interactor = _FakeDeleteEventInteractor();
+    _useInteractor(interactor);
+    await _pumpHost(tester, _album(2));
+    final host = tester.state<_DeleteAlbumHostState>(
+      find.byType(_DeleteAlbumHost),
+    );
+    final staleContext = tester.element(find.byType(_DeleteAlbumHost));
+
+    await tester.pumpWidget(const SizedBox());
+    await host.deleteAlbumAction(staleContext, _album(2));
+
+    expect(interactor.deletedIds, isEmpty);
   });
 }

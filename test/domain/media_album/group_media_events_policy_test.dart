@@ -85,10 +85,62 @@ void main() {
     expect(ids([img('1', hasCaption: true), img('2')]), isEmpty);
   });
 
-  test('a failed, redacted or thread image splits the run', () {
+  test('a failed or thread image splits the run', () {
     expect(ids([img('1'), img('2', isFailed: true), img('3')]), isEmpty);
-    expect(ids([img('1'), img('2', isRedacted: true), img('3')]), isEmpty);
     expect(ids([img('1'), img('2', inThread: true), img('3')]), isEmpty);
+  });
+
+  // Matrix strips a deleted event's content: no batch key, not an image.
+  MediaEventSnapshot gone(String id, {String sender = '@a:x', DateTime? ts}) =>
+      MediaEventSnapshot(
+        eventId: id,
+        senderId: sender,
+        originServerTs: ts ?? t0,
+        isRedacted: true,
+      );
+
+  test('a deleted image between two images is hidden in the album', () {
+    final albums = policy.execute([img('1'), gone('2'), img('3')]);
+
+    expect(albums.single.eventIds, ['1', '3']);
+    expect(albums.single.hiddenEventIds, ['2']);
+  });
+
+  test('a deleted event at the end of a run stays on its own', () {
+    final albums = policy.execute([img('1'), img('2'), gone('3')]);
+
+    expect(albums.single.eventIds, ['1', '2']);
+    expect(albums.single.hiddenEventIds, isEmpty);
+  });
+
+  test('a deleted first unread event starts a new run', () {
+    expect(
+      policy.execute([img('1'), gone('2'), img('3')], breakBefore: '2'),
+      isEmpty,
+    );
+  });
+
+  test('deleting the middle image keeps the minute window of its album', () {
+    DateTime at(int seconds) => t0.add(Duration(seconds: seconds));
+    final sent = [img('1'), img('2', ts: at(40)), img('3', ts: at(80))];
+    expect(ids(sent), [
+      ['1', '2', '3'],
+    ]);
+    final albums = policy.execute([sent[0], gone('2', ts: at(40)), sent[2]]);
+    expect(albums.single.eventIds, ['1', '3']);
+    expect(albums.single.hiddenEventIds, ['2']);
+  });
+
+  test('a deleted event more than a minute later is not hidden', () {
+    DateTime at(int seconds) => t0.add(Duration(seconds: seconds));
+    expect(
+      ids([img('1'), gone('2', ts: at(61)), img('3', ts: at(62))]),
+      isEmpty,
+    );
+  });
+
+  test("another sender's deleted event still splits the run", () {
+    expect(ids([img('1'), gone('2', sender: '@b:x'), img('3')]), isEmpty);
   });
 
   test('images on different days do not join', () {

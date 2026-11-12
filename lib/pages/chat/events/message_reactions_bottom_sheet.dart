@@ -7,13 +7,11 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class MessageReactionsBottomSheet extends StatefulWidget {
   final List<ReactionEntry> reactionList;
-  final Set<Event> allReactionEvents;
   final ScrollController scrollController;
 
   const MessageReactionsBottomSheet({
     super.key,
     required this.reactionList,
-    required this.allReactionEvents,
     required this.scrollController,
   });
 
@@ -26,6 +24,11 @@ class _MessageReactionsBottomSheetState
     extends State<MessageReactionsBottomSheet> {
   // 0 is the "All" tab, then one tab per reaction.
   int _selectedIndex = 0;
+
+  /// One per reactor of each emoji, like the rows: an album merges the
+  /// reactions of its images, where one person may react on several.
+  int get _reactorCount =>
+      widget.reactionList.fold(0, (sum, reaction) => sum + reaction.count);
 
   List<ReactionEntry> get _displayedReactions => _selectedIndex == 0
       ? widget.reactionList
@@ -54,8 +57,7 @@ class _MessageReactionsBottomSheetState
         LinagoraReactionTabs(
           tabs: [
             LinagoraReactionTab(
-              label:
-                  '${L10n.of(context)!.all} ${widget.allReactionEvents.length}',
+              label: '${L10n.of(context)!.all} $_reactorCount',
             ),
             ...widget.reactionList.map(_tabFor),
           ],
