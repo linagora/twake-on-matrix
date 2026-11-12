@@ -14,29 +14,29 @@ void main() {
   const designId = '!design:example.org';
   const salesId = '!sales:example.org';
 
-  final design = unreadRoomItem(
+  final design = UnreadRoomItem(
     roomId: designId,
     roomName: 'Design',
-    time: todayAt(11),
+    time: 11.today,
     unreadCount: 3,
     author: 'Bob Martin',
     lastMessage: 'see you there',
-  );
-  final sales = unreadRoomItem(
+  ).item;
+  final sales = UnreadRoomItem(
     roomId: salesId,
     roomName: 'Sales',
-    time: todayAt(9),
+    time: 9.today,
     unreadCount: 5,
     author: 'Carol King',
     lastMessage: 'numbers are in',
-  );
-  final followed = followedThreadItem(
+  ).item;
+  final followed = FollowedThreadItem(
     roomId: designId,
     roomName: 'Design',
     rootId: r'$release',
-    time: todayAt(10),
+    time: 10.today,
     lastReply: 'Ship it',
-  );
+  ).item;
 
   setUp(() {
     repository = FakeActivityRepository(items: [design, sales, followed]);
@@ -44,7 +44,7 @@ void main() {
 
   testWidgets('an unread room shows its name, its unread count and its last '
       'message', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     expect(find.textContaining('Design', findRichText: true), findsWidgets);
@@ -61,7 +61,7 @@ void main() {
 
   testWidgets('« Unread » lists the unread rooms only, not the followed '
       'threads', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     expect(find.textContaining('see you there', findRichText: true), findsOne);
@@ -72,7 +72,7 @@ void main() {
   testWidgets('every unread room has its own « Mark as read » button', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     expect(find.text('Mark as read'), findsNWidgets(2));
@@ -81,7 +81,7 @@ void main() {
   testWidgets('« Mark as read » reads that room and it leaves « Unread »', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     // Newest first: the first row is Design (11:00), then Sales (9:00).
@@ -101,7 +101,7 @@ void main() {
   });
 
   testWidgets('« Mark as read » does not open the room', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     await tester.tap(find.text('Mark as read').first);
@@ -113,7 +113,7 @@ void main() {
   testWidgets('when « Mark as read » fails, the room stays in « Unread » and '
       'can be marked again', (tester) async {
     repository.markReadError = Exception('offline');
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     await tester.tap(find.text('Mark as read').first);
@@ -128,7 +128,7 @@ void main() {
   });
 
   testWidgets('touching an unread room opens the room', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     await tester.tap(find.textContaining('see you there', findRichText: true));
@@ -143,7 +143,7 @@ void main() {
   testWidgets('a room read elsewhere leaves « Unread » without a refresh', (
     tester,
   ) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     repository.emit([sales, followed]);
@@ -158,19 +158,19 @@ void main() {
 
   testWidgets('a room that gets a new message joins « Unread » without a '
       'refresh', (tester) async {
-    await pumpActivityPage(tester, repository: repository);
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
     await selectFilter(tester, 'Unread');
 
     repository.emit([
       design,
       sales,
       followed,
-      unreadRoomItem(
+      UnreadRoomItem(
         roomId: '!ops:example.org',
         roomName: 'Ops',
-        time: todayAt(12),
+        time: 12.today,
         lastMessage: 'server is down',
-      ),
+      ).item,
     ]);
     await tester.pumpAndSettle();
 

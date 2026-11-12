@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
 
+import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
 import '../../datasource_impl/thread/thread_account.dart';
 
@@ -63,14 +63,14 @@ void main() {
 
   test('ten syncs in a burst are not read ten times, and the last one '
       'shows', () async {
-    await _syncTeam(account, 0);
+    await _syncTeam(account, (messages: 0));
     subscription = repository.watchActivity().listen(seen.add);
     await settle();
     final before = seen.length;
 
     final burst = Stopwatch()..start();
     for (var i = 1; i <= 10; i++) {
-      await _syncTeam(account, i);
+      await _syncTeam(account, (messages: i));
     }
     burst.stop();
     await settle();
@@ -92,11 +92,11 @@ void main() {
         ServerRoute.get('rooms/$teamRoomId/event/${thread.rootEventId}');
     for (final thread in threads) {
       account.server
-        ..answer(rootOf(thread), _root(thread.rootEventId))
+        ..answer(rootOf(thread), _root(thread))
         // A slow network: the roots come one after another.
         ..hold(rootOf(thread));
     }
-    await _syncTeam(account, 0);
+    await _syncTeam(account, (messages: 0));
     await account.receiveThreadPrefs([
       for (final thread in threads) prefEntry(thread, WirePref.follow),
     ]);
@@ -122,69 +122,73 @@ void main() {
 
 const _bob = '@bob:example.org';
 
-DateTime _at(int minute) => DateTime.utc(2026, 11, 12, 9, minute);
-
-Map<String, Object?> _message(String eventId, String body, int minute) => {
-  'type': EventTypes.Message,
-  'event_id': eventId,
-  'sender': _bob,
+/// [said] as the server sends it, with its room.
+Map<String, Object?> _bobSays(Said said) => {
+  ...messageEvent(said),
   'room_id': teamRoomId,
-  'origin_server_ts': _at(minute).millisecondsSinceEpoch,
-  'content': {'msgtype': 'm.text', 'body': body},
 };
 
-/// The root [rootId] with one reply of Bob.
-Map<String, Object?> _root(String rootId) => {
-  ..._message(rootId, 'topic $rootId', 0),
-  'unsigned': {
-    'm.relations': {
-      'm.thread': {
-        'count': 1,
-        'current_user_participated': false,
-        'latest_event': {
-          ..._message('${rootId}_reply', 'reply in $rootId', 1),
-          'content': {
-            'msgtype': 'm.text',
-            'body': 'reply in $rootId',
-            'm.relates_to': {'rel_type': 'm.thread', 'event_id': rootId},
+/// The root of [thread] with one reply of Bob.
+Map<String, Object?> _root(ThreadRef thread) {
+  final rootId = thread.rootEventId;
+  return {
+    ..._bobSays((id: rootId, sender: _bob, body: 'topic $rootId', at: 9.utc)),
+    'unsigned': {
+      'm.relations': {
+        'm.thread': {
+          'count': 1,
+          'current_user_participated': false,
+          'latest_event': {
+            ..._bobSays((
+              id: '${rootId}_reply',
+              sender: _bob,
+              body: 'reply in $rootId',
+              at: (9, 1).utc,
+            )),
+            'content': {
+              'msgtype': 'm.text',
+              'body': 'reply in $rootId',
+              'm.relates_to': {'rel_type': 'm.thread', 'event_id': rootId},
+            },
           },
         },
       },
     },
-  },
-};
+  };
+}
 
-/// A sync brings the [index]-th message of Bob, unread with the ones
-/// before (none for 0).
-Future<void> _syncTeam(ThreadAccount account, int index) =>
-    account.receiveSync({
-      'rooms': {
-        'join': {
-          teamRoomId: {
-            'state': {
-              'events': [
-                {
-                  'type': EventTypes.RoomMember,
-                  'state_key': _bob,
-                  'sender': _bob,
-                  'event_id': r'$member_bob',
-                  'origin_server_ts': 0,
-                  'content': {'membership': 'join', 'displayname': 'Bob'},
-                },
-              ],
-            },
-            'timeline': {
-              'events': [
-                if (index > 0)
-                  _message('\$m$index', 'message $index', 10 + index),
-              ],
-              'limited': false,
-            },
-            'unread_notifications': {
-              'notification_count': index,
-              'highlight_count': 0,
-            },
+/// How many messages of Bob the room holds, all unread.
+typedef _Unread = ({int messages});
+
+/// A sync brings the last of [unread] messages of Bob (none for 0), unread
+/// with the ones before.
+Future<void> _syncTeam(ThreadAccount account, _Unread unread) {
+  final index = unread.messages;
+  return account.receiveSync({
+    'rooms': {
+      'join': {
+        teamRoomId: {
+          'state': {
+            'events': [memberEvent((id: _bob, name: 'Bob'))],
+          },
+          'timeline': {
+            'events': [
+              if (index > 0)
+                _bobSays((
+                  id: '\$m$index',
+                  sender: _bob,
+                  body: 'message $index',
+                  at: (9, 10 + index).utc,
+                )),
+            ],
+            'limited': false,
+          },
+          'unread_notifications': {
+            'notification_count': index,
+            'highlight_count': 0,
           },
         },
       },
-    });
+    },
+  });
+}

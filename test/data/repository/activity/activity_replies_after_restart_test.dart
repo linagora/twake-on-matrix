@@ -8,6 +8,7 @@ import 'package:twake_chat/data/repository/activity/activity_repository.provider
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
 
+import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
 import '../../datasource_impl/thread/thread_account.dart';
 
@@ -64,7 +65,7 @@ void main() {
 
     expect(thread.quote, 'Ship it');
     expect(thread.authorName, 'Alice Durand');
-    expect(thread.time, _sameInstant(_at(10)));
+    expect(thread.time, sameInstant(10.utc));
   });
 
   test(
@@ -108,15 +109,12 @@ final _rootRoute = ServerRoute.get(
   'rooms/$teamRoomId/event/${lunchThread.rootEventId}',
 );
 
-DateTime _at(int hour, [int minute = 0]) =>
-    DateTime.utc(2026, 11, 12, hour, minute);
-
 final List<List<ActivityItem>> _seen = [];
 StreamSubscription<List<ActivityItem>>? _subscription;
 
 Future<List<ActivityItem>> _shown() async {
   _subscription ??= _repository.watchActivity().listen(_seen.add);
-  await _settle(_seen);
+  await settle(_seen);
   expect(_seen, isNotEmpty, reason: 'the list emits at once');
   return _seen.last;
 }
@@ -124,41 +122,37 @@ Future<List<ActivityItem>> _shown() async {
 List<ActivityItem> _threads(List<ActivityItem> items) =>
     items.where((item) => item.kind == ActivityKind.reply).toList();
 
-Map<String, Object?> _message(
-  String eventId,
-  String sender,
-  String body,
-  DateTime at,
-) => {
-  'type': EventTypes.Message,
-  'event_id': eventId,
-  'sender': sender,
+final _oldReply = {
+  ...threadReplyEvent((
+    id: r'$old_reply',
+    sender: _alice,
+    body: 'Pizza?',
+    at: (7, 30).utc,
+  ), lunchThread),
   'room_id': teamRoomId,
-  'origin_server_ts': at.millisecondsSinceEpoch,
-  'content': {'msgtype': 'm.text', 'body': body},
 };
-
-Map<String, Object?> _reply(String eventId, String body, DateTime at) => {
-  ..._message(eventId, _alice, body, at),
-  'content': {
-    'msgtype': 'm.text',
-    'body': body,
-    'm.relates_to': {
-      'rel_type': RelationshipTypes.thread,
-      'event_id': lunchThread.rootEventId,
-      'is_falling_back': true,
-      'm.in_reply_to': {'event_id': lunchThread.rootEventId},
-    },
-  },
+final _shipIt = {
+  ...threadReplyEvent((
+    id: r'$ship_it',
+    sender: _alice,
+    body: 'Ship it',
+    at: 10.utc,
+  ), lunchThread),
+  'room_id': teamRoomId,
 };
-
-final _oldReply = _reply(r'$old_reply', 'Pizza?', _at(7, 30));
-final _shipIt = _reply(r'$ship_it', 'Ship it', _at(10));
 
 /// The root of the lunch thread with its thread aggregate: [latest] is its
 /// last reply; none: the aggregate holds no last reply.
 Map<String, Object?> _root({Map<String, Object?>? latest}) => {
-  ..._message(lunchThread.rootEventId, _bob, 'Lunch on Friday?', _at(7)),
+  ...{
+    ...messageEvent((
+      id: lunchThread.rootEventId,
+      sender: _bob,
+      body: 'Lunch on Friday?',
+      at: 7.utc,
+    )),
+    'room_id': teamRoomId,
+  },
   'unsigned': {
     'm.relations': {
       'm.thread': {
@@ -168,15 +162,6 @@ Map<String, Object?> _root({Map<String, Object?>? latest}) => {
       },
     },
   },
-};
-
-Map<String, Object?> _member(String userId, String name) => {
-  'type': EventTypes.RoomMember,
-  'state_key': userId,
-  'sender': userId,
-  'event_id': '\$member$userId',
-  'origin_server_ts': _at(6).millisecondsSinceEpoch,
-  'content': {'membership': 'join', 'displayname': name},
 };
 
 /// A sync brings the team room (« Team », Bob, Alice and the user), nothing
@@ -192,33 +177,15 @@ Future<void> _syncTeam() => _account.receiveSync({
               'state_key': '',
               'sender': threadOwner,
               'event_id': r'$name',
-              'origin_server_ts': _at(6).millisecondsSinceEpoch,
+              'origin_server_ts': 6.utc.millisecondsSinceEpoch,
               'content': {'name': 'Team'},
             },
-            _member(threadOwner, 'Me Myself'),
-            _member(_bob, 'Bob Martin'),
-            _member(_alice, 'Alice Durand'),
+            memberEvent((id: threadOwner, name: 'Me Myself')),
+            memberEvent((id: _bob, name: 'Bob Martin')),
+            memberEvent((id: _alice, name: 'Alice Durand')),
           ],
         },
       },
     },
   },
 });
-
-/// Lets the root reads and the streams run: returns once [seen] got nothing
-/// new for 1.2 s, longer than the 1 s rate limit (8 s at most).
-Future<void> _settle(List<Object?> seen) async {
-  final deadline = DateTime.now().add(const Duration(seconds: 8));
-  var count = -1;
-  var quiet = 0;
-  while (quiet < 60 && DateTime.now().isBefore(deadline)) {
-    await Future<void>.delayed(const Duration(milliseconds: 20));
-    quiet = seen.length == count ? quiet + 1 : 0;
-    count = seen.length;
-  }
-}
-
-Matcher _sameInstant(DateTime expected) => predicate<DateTime>(
-  (actual) => actual.isAtSameMomentAs(expected),
-  'the instant $expected',
-);

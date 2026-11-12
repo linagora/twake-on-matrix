@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
 
+import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
 import '../../datasource_impl/thread/thread_account.dart';
 
@@ -32,7 +32,12 @@ void main() {
     account.server.answer(
       ServerRoute.get('rooms/$teamRoomId/event/${lunchThread.rootEventId}'),
       {
-        ..._message(lunchThread.rootEventId, _bob, 'Lunch on Friday?', 7),
+        ...messageEvent((
+          id: lunchThread.rootEventId,
+          sender: _bob,
+          body: 'Lunch on Friday?',
+          at: 7.utc,
+        )),
         'room_id': teamRoomId,
         'unsigned': {
           'm.relations': {
@@ -40,7 +45,12 @@ void main() {
               'count': 1,
               'current_user_participated': true,
               'latest_event': {
-                ..._reply(r'$ship_it', _bob, 'Ship it', 10),
+                ...threadReplyEvent((
+                  id: r'$ship_it',
+                  sender: _bob,
+                  body: 'Ship it',
+                  at: 10.utc,
+                ), lunchThread),
                 'room_id': teamRoomId,
               },
             },
@@ -90,7 +100,14 @@ void main() {
         'join': {
           teamRoomId: {
             'timeline': {
-              'events': [_reply(r'$mine', threadOwner, 'On it', 11)],
+              'events': [
+                threadReplyEvent((
+                  id: r'$mine',
+                  sender: threadOwner,
+                  body: 'On it',
+                  at: 11.utc,
+                ), lunchThread),
+              ],
               'limited': false,
             },
           },
@@ -105,35 +122,3 @@ void main() {
 }
 
 const _bob = '@bob:example.org';
-
-Map<String, Object?> _message(
-  String eventId,
-  String sender,
-  String body,
-  int hour,
-) => {
-  'type': EventTypes.Message,
-  'event_id': eventId,
-  'sender': sender,
-  'origin_server_ts': DateTime.utc(2026, 11, 12, hour).millisecondsSinceEpoch,
-  'content': {'msgtype': 'm.text', 'body': body},
-};
-
-Map<String, Object?> _reply(
-  String eventId,
-  String sender,
-  String body,
-  int hour,
-) => {
-  ..._message(eventId, sender, body, hour),
-  'content': {
-    'msgtype': 'm.text',
-    'body': body,
-    'm.relates_to': {
-      'rel_type': RelationshipTypes.thread,
-      'event_id': lunchThread.rootEventId,
-      'is_falling_back': true,
-      'm.in_reply_to': {'event_id': lunchThread.rootEventId},
-    },
-  },
-};

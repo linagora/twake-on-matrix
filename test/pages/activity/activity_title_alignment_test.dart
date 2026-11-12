@@ -43,9 +43,11 @@ void main() {
       'title « Chats » starts', (tester) async {
     await pumpActivityPage(
       tester,
-      repository: FakeActivityRepository(),
-      wide: true,
-      appTheme: true,
+      ActivityPageSetup(
+        repository: FakeActivityRepository(),
+        wide: true,
+        appTheme: true,
+      ),
     );
     final activityLeft = tester.getTopLeft(find.text('Activity')).dx;
 
