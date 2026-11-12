@@ -11,6 +11,10 @@ class InviteUserInteractor {
   static const int _maxRetries = 3;
   static const int _maxConcurrentInvites = 5;
 
+  InviteUserInteractor({Random? random}) : _random = random ?? Random();
+
+  final Random _random;
+
   Stream<Either<Failure, Success>> execute({
     required Client matrixClient,
     required String roomId,
@@ -131,7 +135,9 @@ class InviteUserInteractor {
           Logs().d(
             'InviteUserInteractor::_inviteUserWithRetry: Rate limited. Waiting ${retryAfterMs}ms before retry',
           );
-          await Future.delayed(Duration(milliseconds: retryAfterMs));
+          // Invites rejected together would otherwise all retry at the same instant.
+          final jitterMs = (retryAfterMs * 0.25 * _random.nextDouble()).round();
+          await Future.delayed(Duration(milliseconds: retryAfterMs + jitterMs));
         }
       }
     }

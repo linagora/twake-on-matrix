@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
@@ -47,6 +48,31 @@ class _CountingClient extends Fake implements Client {
     await release.future;
     running--;
   }
+}
+
+class _RateLimitedClient extends Fake implements Client {
+  int attempts = 0;
+
+  @override
+  Future<void> inviteUser(
+    String roomId,
+    String userId, {
+    String? reason,
+  }) async {
+    attempts++;
+    if (attempts == 1) {
+      throw MatrixException.fromJson({
+        'errcode': 'M_LIMIT_EXCEEDED',
+        'error': 'Too many requests',
+        'retry_after_ms': 1000,
+      });
+    }
+  }
+}
+
+class _MaxRandom extends Fake implements Random {
+  @override
+  double nextDouble() => 1;
 }
 
 const _roomId = '!group:hs1.localhost';
@@ -115,6 +141,29 @@ void main() {
       expect(client.started, 12);
       expect(client.maxRunning, 5);
       expect(result, isA<InviteUserSuccess>());
+    });
+
+    test('aRateLimitedInvite_retriesAfterTheServerDelayPlusJitter', () {
+      fakeAsync((async) {
+        final client = _RateLimitedClient();
+        Object? result;
+        InviteUserInteractor(random: _MaxRandom())
+            .execute(
+              matrixClient: client,
+              roomId: _roomId,
+              userIds: [_fastUser],
+            )
+            .last
+            .then((state) => result = state.fold((f) => f, (s) => s));
+
+        async.elapse(const Duration(milliseconds: 1249));
+        expect(client.attempts, 1);
+
+        async.elapse(const Duration(milliseconds: 1));
+        expect(client.attempts, 2);
+        async.flushMicrotasks();
+        expect(result, isA<InviteUserSuccess>());
+      });
     });
   });
 }
