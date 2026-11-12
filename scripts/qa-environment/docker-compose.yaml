@@ -1,9 +1,11 @@
 # QA stack started by start.sh: a Synapse homeserver configured as the one of the integration tests
 # (integration_test/synapse/data: server name localhost, SQLite in a tmpfs, open registration, no
-# rate limits), published on the host for the emulator (10.0.2.2). Nothing survives stop.sh.
+# rate limits). Nothing survives stop.sh. Its registration shared secret is in the repository: it is
+# published on the loopback of the host only, which the emulator reaches as 10.0.2.2. A pinned
+# version, for reproducible runs; SYNAPSE_IMAGE overrides it.
 services:
   synapse:
-    image: ${SYNAPSE_IMAGE:-matrixdotorg/synapse:latest}
+    image: ${SYNAPSE_IMAGE:-matrixdotorg/synapse:v1.165.0}
     tmpfs:
       - /data
     volumes:
