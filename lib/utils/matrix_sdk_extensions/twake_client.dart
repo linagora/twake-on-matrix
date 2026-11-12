@@ -71,6 +71,7 @@ class TwakeClient extends Client
 
   /// The reactions of the others to the messages of the user, for the
   /// Activity tab.
+  // TODO: [transitional] #3599
   @override
   late final ActivityReactionsStore activityReactions = ActivityReactionsStore(
     this,
