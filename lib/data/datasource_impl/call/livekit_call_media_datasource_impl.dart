@@ -9,6 +9,16 @@ import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
 class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
+  LiveKitCallMediaDatasourceImpl({
+    @visibleForTesting lk.Room Function() createRoom = _newRoom,
+  }) : _createRoom = createRoom;
+
+  static lk.Room _newRoom() => lk.Room(
+    roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
+  );
+
+  final lk.Room Function() _createRoom;
+
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
   static String userIdOf(String identity) {
@@ -32,9 +42,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> connect(CallServer server, CallMediaState media) async {
     await disconnect();
     _lost = null;
-    final room = lk.Room(
-      roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
-    );
+    final room = _createRoom();
     final listener = room.createListener()
       ..listen((_) => _emit())
       // Our own disconnect disposes the listener first: this one is LiveKit
@@ -42,9 +50,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
       ..on<lk.RoomDisconnectedEvent>((event) => onLost(event.reason));
     try {
       await room.connect(server.url, server.token);
-    } on Exception catch (error) {
+    } catch (error) {
       await listener.dispose();
       await room.dispose();
+      _rethrowErrors(error);
       throw CallConnectionFailedException(cause: error);
     }
     _room = room;
@@ -54,8 +63,9 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
         await room.localParticipant?.setMicrophoneEnabled(true);
       }
       if (media.isCameraOn) await room.localParticipant?.setCameraEnabled(true);
-    } on Exception catch (error) {
+    } catch (error) {
       await disconnect();
+      _rethrowErrors(error);
       throw CallMediaFailedException(cause: error);
     }
     _emit();
@@ -80,9 +90,15 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   Future<void> _logFailure(Future<void> Function() run) async {
     try {
       await run();
-    } on Exception catch (error, stackTrace) {
+    } catch (error, stackTrace) {
+      _rethrowErrors(error);
       Logs().w('LiveKitCallMedia: disconnect failed', error, stackTrace);
     }
+  }
+
+  // flutter_webrtc throws Strings, not Exceptions: only Errors are bugs here.
+  static void _rethrowErrors(Object error) {
+    if (error is Error) throw error;
   }
 
   @override
@@ -102,7 +118,8 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     if (local == null) return;
     try {
       await run(local);
-    } on Exception catch (error) {
+    } catch (error) {
+      _rethrowErrors(error);
       throw CallMediaFailedException(cause: error);
     } finally {
       _emit();
