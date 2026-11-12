@@ -168,4 +168,53 @@ void main() {
       );
     });
   });
+
+  group('MessageLinkPolicy.matrixToForRoomsLink', () {
+    bool known(String id) => id == roomId;
+
+    test('turns a rooms link of a known room into its matrix.to link', () {
+      // A Twake web app whose homeserver does not name it in `web_url`.
+      expect(
+        policy.matrixToForRoomsLink(
+          'https://chat.other.org/rooms/!abc%3Aexample.org'
+          '?event=%24evt_1%3Aexample.org',
+          isKnownRoom: known,
+        ),
+        'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org',
+      );
+      expect(
+        policy.matrixToForRoomsLink(
+          'https://chat.other.org/rooms/!abc%3Aexample.org',
+          isKnownRoom: known,
+        ),
+        'https://matrix.to/#/!abc%3Aexample.org',
+      );
+    });
+
+    test('ignores a room the user does not know', () {
+      expect(
+        policy.matrixToForRoomsLink(
+          'https://chat.other.org/rooms/!unknown%3Aexample.org',
+          isKnownRoom: known,
+        ),
+        isNull,
+      );
+    });
+
+    test('ignores links that are not an https rooms link of a room id', () {
+      for (final link in [
+        'http://chat.other.org/rooms/!abc%3Aexample.org',
+        'https://chat.other.org/rooms/!abc%3Aexample.org/details',
+        'https://chat.other.org/room/!abc%3Aexample.org',
+        'https://chat.other.org/rooms/abc',
+        'https://chat.other.org/rooms/',
+      ]) {
+        expect(
+          policy.matrixToForRoomsLink(link, isKnownRoom: (_) => true),
+          isNull,
+          reason: link,
+        );
+      }
+    });
+  });
 }

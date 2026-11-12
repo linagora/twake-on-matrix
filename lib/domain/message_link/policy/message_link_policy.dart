@@ -47,9 +47,30 @@ class MessageLinkPolicy {
       return null;
     }
     final uri = Uri.tryParse(link);
-    if (uri == null) return null;
+    return uri == null ? null : _matrixToForRoomsPath(uri);
+  }
+
+  /// Returns the matrix.to link of an `https://<any host>/rooms/<roomId>`
+  /// link (optionally `?event=<event>`) when [isKnownRoom] knows its room id:
+  /// the web app of a homeserver that does not name it in `web_url`.
+  /// Otherwise null, so links of other sites keep opening in the browser.
+  String? matrixToForRoomsLink(
+    String link, {
+    required bool Function(String roomId) isKnownRoom,
+  }) {
+    final uri = Uri.tryParse(link);
+    if (uri == null || uri.scheme != 'https') return null;
+    final matrixTo = _matrixToForRoomsPath(uri);
+    if (matrixTo == null) return null;
+    final roomId = uri.pathSegments.last;
+    if (!roomId.startsWith('!') || !isKnownRoom(roomId)) return null;
+    return matrixTo;
+  }
+
+  String? _matrixToForRoomsPath(Uri uri) {
     final segments = uri.pathSegments;
     if (segments.length != 2 || segments.first != 'rooms') return null;
+    if (segments.last.isEmpty) return null;
     final room = Uri.encodeComponent(segments.last);
     final eventId = uri.queryParameters['event'];
     if (eventId == null || eventId.isEmpty) return '$_matrixToPrefix$room';
