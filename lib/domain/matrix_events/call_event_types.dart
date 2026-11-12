@@ -3,6 +3,8 @@ import 'package:matrix/matrix.dart';
 abstract final class CallEventTypes {
   static const String callMember = 'org.matrix.msc3401.call.member';
   static const String callNotify = 'org.matrix.msc4075.call.notify';
+  static const String callDecline = 'org.matrix.msc4310.rtc.decline';
+  static const String callDeclineStable = 'm.rtc.decline';
 
   /// Marks the message that opens the thread of a call, as Twake Space Chat
   /// sends it when a call starts.
