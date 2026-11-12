@@ -5,6 +5,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -698,6 +699,14 @@ class ChatController extends ConsumerState<Chat>
             withRelations: true,
           ),
         );
+        if (!mounted) return (events: page.replies, nextBatch: page.nextBatch);
+        // A reply seen here and deleted later loses its relation: the room
+        // timeline must still know it was in a thread.
+        for (final event in page.replies) {
+          if (event.threadRootId == rootId) {
+            roomClient.threadUnread?.rememberThreadReply(event);
+          }
+        }
         return (events: page.replies, nextBatch: page.nextBatch);
       },
       // Edits and reactions of old replies show on them through the timeline.

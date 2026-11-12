@@ -1,18 +1,27 @@
+import 'package:twake_chat/data/thread/models/sync_thread_counts.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 /// Top-level function for native isolate-based sync response parsing.
 /// Returns a fully constructed [SyncUpdate] since Dart isolates can
-/// transfer complex objects without serialization overhead.
-SyncUpdate _parseSyncResponseNative(Uint8List responseBody) {
+/// transfer complex objects without serialization overhead, with the
+/// per-thread counters the SDK does not parse.
+(SyncUpdate, Map<String, Map<String, ThreadCounts>>) _parseSyncResponseNative(
+  Uint8List responseBody,
+) {
   final responseString = utf8.decode(responseBody);
-  final json = jsonDecode(responseString);
-  return SyncUpdate.fromJson(json as Map<String, Object?>);
+  final json = jsonDecode(responseString) as Map<String, Object?>;
+  return (SyncUpdate.fromJson(json), parseSyncUnreadThreadNotifications(json));
 }
 
 /// Top-level function for web JSON decoding via `compute()`.
@@ -47,7 +56,15 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// compare the generated `Api.sync()` signature and body with this
 /// implementation.
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
-class TwakeClient extends Client {
+class TwakeClient extends Client implements ThreadUnreadStoreOwner {
+  // TODO: [transitional] #3599
+  @override
+  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
+
+  /// Thread counters parsed with a sync, held until the SDK has handled it.
+  final _pendingThreadCounts =
+      Expando<Map<String, Map<String, ThreadCounts>>>();
+
   TwakeClient(
     super.clientName, {
     required super.database,
@@ -75,6 +92,36 @@ class TwakeClient extends Client {
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
   }) {
+    unawaited(threadUnread.restore());
+    // The SDK emits onSync once it has handled the sync: the thread counters
+    // then land with the room counters and receipts, and a failed sync never
+    // applies them.
+    onSync.stream.listen((update) {
+      final counts = _pendingThreadCounts[update];
+      final left = update.rooms?.leave?.keys ?? const <String>[];
+      if (counts != null || left.isNotEmpty) {
+        threadUnread.apply(
+          SyncThreadUpdate(counts: counts ?? const {}, leftRoomIds: left),
+        );
+      }
+    });
+    // Thread replies are remembered (they lose their relation once deleted),
+    // the user's own make the thread followed (in the store); the messages of
+    // the main timeline tell the room has new ones under a thread reply. A
+    // gap filled by requestHistory comes on onHistoryEvent. A local echo
+    // (sending, error) is neither: only the synced event counts.
+    void onSeenEvent(Event event) {
+      if (!event.status.isSynced) return;
+      if (event.threadRootId == null) {
+        threadUnread.rememberMainTimelineEvent(event);
+      } else {
+        threadUnread.rememberThreadReply(event);
+      }
+    }
+
+    onTimelineEvent.stream.listen(onSeenEvent);
+    onHistoryEvent.stream.listen(onSeenEvent);
+
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
     roomPreviewLastEvents.removeWhere(CallEventTypes.isCallEvent);
@@ -94,6 +141,7 @@ class TwakeClient extends Client {
           (e, s) => Logs().w('Unable to log the NSE device out', e, s),
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
+    await threadUnread.clear();
     return super.clear(reason: reason);
   }
 
@@ -131,11 +179,18 @@ class TwakeClient extends Client {
         // On web: run utf8.decode + jsonDecode via compute() (near-native
         // speed on WASM), then call SyncUpdate.fromJson on the main thread.
         final json = await compute(_jsonDecodeSyncResponseWeb, responseBody);
-        return SyncUpdate.fromJson(json);
+        final update = SyncUpdate.fromJson(json);
+        _pendingThreadCounts[update] = parseSyncUnreadThreadNotifications(json);
+        return update;
       }
 
       // On native: offload the entire pipeline to a background isolate.
-      return await compute(_parseSyncResponseNative, responseBody);
+      final (update, threadCounts) = await compute(
+        _parseSyncResponseNative,
+        responseBody,
+      );
+      _pendingThreadCounts[update] = threadCounts;
+      return update;
     } catch (e) {
       // Re-throw parsing errors with context so _innerSync's catch chain
       // can distinguish them from network/connection errors.
