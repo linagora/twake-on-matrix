@@ -35,6 +35,7 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -45,7 +46,15 @@ class PinnedMessages extends StatefulWidget {
 
   final Timeline? timeline;
 
-  const PinnedMessages({super.key, required this.pinnedEvents, this.timeline});
+  /// Lists only the pins of this thread (its root and replies) when set.
+  final String? threadRootId;
+
+  const PinnedMessages({
+    super.key,
+    required this.pinnedEvents,
+    this.timeline,
+    this.threadRootId,
+  });
 
   @override
   State<StatefulWidget> createState() => PinnedMessagesController();
@@ -67,7 +76,9 @@ class PinnedMessagesController extends State<PinnedMessages>
   final updatePinnedMessagesInteractor = getIt
       .get<UpdatePinnedMessagesInteractor>();
 
-  Room? get room => widget.pinnedEvents.first?.room;
+  Room? get room =>
+      widget.pinnedEvents.firstOrNull?.room ??
+      client.getRoomById(GoRouterState.of(context).pathParameters['roomid']!);
 
   Client get client => Matrix.of(context).client;
 
@@ -115,8 +126,13 @@ class PinnedMessagesController extends State<PinnedMessages>
     unpinAllStreamSubcription = updatePinnedMessagesInteractor
         .execute(
           room: room!,
-          eventIds: [],
-          action: PinnedMessagesActionEnum.unpinAll,
+          // In a thread, "unpin all" takes off the pins of that thread only.
+          eventIds: widget.threadRootId == null
+              ? []
+              : eventsNotifier.value.nonNulls.map((e) => e.eventId).toList(),
+          action: widget.threadRootId == null
+              ? PinnedMessagesActionEnum.unpinAll
+              : PinnedMessagesActionEnum.unpin,
         )
         .listen((event) {
           event.fold(
@@ -249,7 +265,12 @@ class PinnedMessagesController extends State<PinnedMessages>
     } else {
       final currentRoomId = GoRouterState.of(context).pathParameters['roomid'];
       if (currentRoomId != null) {
-        RoomRoute(roomid: currentRoomId).go(context);
+        final threadRootId = widget.threadRootId;
+        if (threadRootId == null) {
+          RoomRoute(roomid: currentRoomId).go(context);
+        } else {
+          ThreadRoute(roomid: currentRoomId, rootid: threadRootId).go(context);
+        }
       }
     }
   }
@@ -397,7 +418,11 @@ class PinnedMessagesController extends State<PinnedMessages>
   void jumpToMessage(BuildContext context, Event event) {
     final roomId = event.roomId;
     if (roomId == null) return;
-    RoomRoute(roomid: roomId, event: event.eventId).go(context);
+    context.goToRoomWithEvent(
+      roomId,
+      event.eventId,
+      threadRootId: event.threadRootId,
+    );
   }
 
   void forwardEventAction(Event event) async {
@@ -454,9 +479,12 @@ class PinnedMessagesController extends State<PinnedMessages>
 
   void _handlePinnedMessageCallBack() async {
     try {
-      final result = (await Future.wait(
-        room!.pinnedEventIds.map(room!.getEventById),
-      )).nonNulls.toList();
+      final threadRootId = widget.threadRootId;
+      final result =
+          (await Future.wait(room!.pinnedEventIds.map(room!.getEventById)))
+              .nonNulls
+              .where((e) => threadRootId == null || e.isInThread(threadRootId))
+              .toList();
 
       if (result.isNotEmpty) {
         _updateEventsNotifier(result);

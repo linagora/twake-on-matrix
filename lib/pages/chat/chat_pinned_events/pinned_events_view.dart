@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:twake_chat/domain/app_state/room/chat_get_pinned_events_state.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_argument.dart';
 import 'package:twake_chat/pages/chat/chat_pinned_events/pinned_events_style.dart';
@@ -13,6 +14,7 @@ import 'package:matrix_link_text/link_text.dart';
 
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -20,6 +22,27 @@ class PinnedEventsView extends StatelessWidget {
   final ChatController controller;
 
   const PinnedEventsView(this.controller, {super.key});
+
+  /// In a thread, scrolls within it. In the room, a thread reply opens its
+  /// thread; any other message scrolls the room.
+  void _open(BuildContext context, List<Event?> pins, String eventId) {
+    if (controller.isThread) {
+      controller.scrollToThreadEvent(eventId);
+      return;
+    }
+    final threadRootId = pins
+        .firstWhereOrNull((event) => event?.eventId == eventId)
+        ?.threadRootId;
+    if (threadRootId == null) {
+      controller.scrollToEventId(eventId, highlight: true);
+      return;
+    }
+    context.goToRoomWithEvent(
+      controller.room!.id,
+      eventId,
+      threadRootId: threadRootId,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +66,8 @@ class PinnedEventsView extends StatelessWidget {
                   onTap: () => controller.pinnedEventsController
                       .jumpToPinnedMessageAction(
                         data.pinnedEvents,
-                        scrollToEventId: (eventId) => controller
-                            .scrollToEventId(eventId, highlight: true),
+                        scrollToEventId: (eventId) =>
+                            _open(context, data.pinnedEvents, eventId),
                       ),
                   child: Container(
                     margin: PinnedEventsStyle.marginPinnedEventsWidget,

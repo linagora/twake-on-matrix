@@ -10,4 +10,7 @@ extension ThreadRelationExtension on MatrixEvent {
     }
     return relatesTo?.tryGet<String>('event_id');
   }
+
+  /// True for the root of the thread [rootId] and for its replies.
+  bool isInThread(String rootId) => eventId == rootId || threadRootId == rootId;
 }
