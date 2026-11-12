@@ -77,65 +77,72 @@ MatrixEvent _rootNotParticipated(Invocation call) => MatrixEvent(
   },
 );
 
-MockRoom _room(
-  String id, {
-  int notifications = 0,
-  int highlights = 0,
-  bool isSpace = false,
-  List<String> children = const [],
-}) {
+/// Unread messages and mentions: of the room as the server counts them, or
+/// of its thread.
+typedef _Counts = ({int unread, int mentions});
+
+const _Counts _none = (unread: 0, mentions: 0);
+
+/// The room [_roomId], joined, in no space.
+MockRoom _room([_Counts server = _none]) {
   final room = MockRoom();
-  when(room.id).thenReturn(id);
+  when(room.id).thenReturn(_roomId);
   when(room.client).thenReturn(_client);
   when(room.membership).thenReturn(Membership.join);
-  when(room.isSpace).thenReturn(isSpace);
+  when(room.isSpace).thenReturn(false);
   when(room.tags).thenReturn({});
   when(room.spaceParents).thenReturn([]);
-  when(room.spaceChildren).thenReturn([
-    for (final child in children)
-      SpaceChild.fromState(
-        StrippedStateEvent(
-          type: EventTypes.SpaceChild,
-          senderId: '@a:example.com',
-          stateKey: child,
-          content: {
-            'via': ['example.com'],
-          },
-        ),
-      ),
-  ]);
-  when(room.notificationCount).thenReturn(notifications);
-  when(room.highlightCount).thenReturn(highlights);
+  when(room.spaceChildren).thenReturn([]);
+  when(room.notificationCount).thenReturn(server.unread);
+  when(room.highlightCount).thenReturn(server.mentions);
   return room;
 }
 
-/// The user replied in the thread (P1: participation is following).
-void _followThread(String roomId) =>
-    _store.markFollowed(ThreadRef(roomId, _rootId));
-
-/// What a sync says of the thread of [roomId].
-void _threadCounters(String roomId, {required int replies, int mentions = 0}) =>
-    _store.apply(
-      SyncThreadUpdate(
-        counts: {
-          roomId: {
-            _rootId: (notificationCount: replies, highlightCount: mentions),
-          },
+/// The space [_spaceId], which lists [_roomId].
+MockRoom _space() {
+  final space = _room();
+  when(space.id).thenReturn(_spaceId);
+  when(space.isSpace).thenReturn(true);
+  when(space.spaceChildren).thenReturn([
+    SpaceChild.fromState(
+      StrippedStateEvent(
+        type: EventTypes.SpaceChild,
+        senderId: '@a:example.com',
+        stateKey: _roomId,
+        content: {
+          'via': ['example.com'],
         },
-        leftRoomIds: const [],
       ),
-    );
+    ),
+  ]);
+  return space;
+}
+
+/// The user replied in the thread of [_roomId] (P1: participation is
+/// following).
+void _followThread() => _store.markFollowed(const ThreadRef(_roomId, _rootId));
+
+/// What a sync says of the thread of [_roomId].
+void _threadCounters(_Counts thread) => _store.apply(
+  SyncThreadUpdate(
+    counts: {
+      _roomId: {
+        _rootId: (
+          notificationCount: thread.unread,
+          highlightCount: thread.mentions,
+        ),
+      },
+    },
+    leftRoomIds: const [],
+  ),
+);
 
 /// The thread got replies; the server says the user does not take part.
-Future<void> _notFollowedThread(
-  String roomId, {
-  required int replies,
-  int mentions = 0,
-}) async {
-  _threadCounters(roomId, replies: replies, mentions: mentions);
+Future<void> _notFollowedThread(_Counts thread) async {
+  _threadCounters(thread);
   await pumpEventQueue();
   expect(
-    await _store.followOnceKnown(ThreadRef(roomId, _rootId)),
+    await _store.followOnceKnown(const ThreadRef(_roomId, _rootId)),
     isFalse,
     reason: 'setup: the lookup answered "not participated"',
   );
@@ -146,9 +153,9 @@ RoomListEntry _entryOf(Room room) =>
 
 void _entryCountTests() {
   test('a room whose only unread is a followed thread shows its replies', () {
-    final room = _room(_roomId);
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 2);
+    final room = _room();
+    _followThread();
+    _threadCounters((unread: 2, mentions: 0));
 
     final entry = _entryOf(room);
 
@@ -157,16 +164,16 @@ void _entryCountTests() {
   });
 
   test('main timeline and followed thread unreads add up', () {
-    final room = _room(_roomId, notifications: 1);
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 2);
+    final room = _room((unread: 1, mentions: 0));
+    _followThread();
+    _threadCounters((unread: 2, mentions: 0));
 
     expect(_entryOf(room).unreadCount, 3);
   });
 
   test('a mention in a thread is a mention of the room', () async {
-    final room = _room(_roomId);
-    await _notFollowedThread(_roomId, replies: 1, mentions: 1);
+    final room = _room();
+    await _notFollowedThread((unread: 1, mentions: 1));
 
     final entry = _entryOf(room);
 
@@ -175,9 +182,9 @@ void _entryCountTests() {
   });
 
   test('mentions of the room and of its threads add up', () {
-    final room = _room(_roomId, notifications: 1, highlights: 1);
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 2, mentions: 1);
+    final room = _room((unread: 1, mentions: 1));
+    _followThread();
+    _threadCounters((unread: 2, mentions: 1));
 
     expect(_entryOf(room).mentionCount, 2);
   });
@@ -186,8 +193,8 @@ void _entryCountTests() {
   test(
     'replies of a thread the user does not follow are not counted',
     () async {
-      final room = _room(_roomId);
-      await _notFollowedThread(_roomId, replies: 4);
+      final room = _room();
+      await _notFollowedThread((unread: 4, mentions: 0));
 
       final entry = _entryOf(room);
 
@@ -199,51 +206,44 @@ void _entryCountTests() {
 }
 
 void _unreadFolderTests() {
-  List<RoomListEntry> unreadFolder(List<Room> rooms) => visibleEntries(
-    roomListEntriesOf(rooms, directChats: const {}),
+  /// Ids the Unread folder shows when the account holds the room only.
+  List<String> unreadFolderIds() => visibleEntries(
+    roomListEntriesOf([_room()], directChats: const {}),
     view: const RoomListFilter.builtin(BuiltinFolder.unread),
-  );
+  ).map((entry) => entry.id).toList();
 
   test('keeps a room whose only unread is a followed thread', () {
-    final room = _room(_roomId);
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 1);
+    _followThread();
+    _threadCounters((unread: 1, mentions: 0));
 
-    expect(unreadFolder([room]).map((e) => e.id), [_roomId]);
+    expect(unreadFolderIds(), [_roomId]);
   });
 
   test('keeps a room whose only unread is a thread mention', () async {
-    final room = _room(_roomId);
-    await _notFollowedThread(_roomId, replies: 1, mentions: 1);
+    await _notFollowedThread((unread: 1, mentions: 1));
 
-    expect(unreadFolder([room]).map((e) => e.id), [_roomId]);
+    expect(unreadFolderIds(), [_roomId]);
   });
 }
 
 void _spaceCountTests() {
-  RoomListSpaceRow spaceRow(List<Room> rooms) => buildRoomListRows(
-    roomListEntriesOf(rooms, directChats: const {}),
+  /// The row of the space, folded, holding the room.
+  RoomListSpaceRow foldedSpaceRow() => buildRoomListRows(
+    roomListEntriesOf([_space(), _room()], directChats: const {}),
     foldedSpaceIds: {_spaceId},
   ).whereType<RoomListSpaceRow>().single;
 
-  List<Room> spaceWithRoom() => [
-    _room(_spaceId, isSpace: true, children: [_roomId]),
-    _room(_roomId),
-  ];
-
   test('counts a thread mention of a room it holds', () async {
-    final rooms = spaceWithRoom();
-    await _notFollowedThread(_roomId, replies: 1, mentions: 1);
+    await _notFollowedThread((unread: 1, mentions: 1));
 
-    expect(spaceRow(rooms).mentionCount, 1);
+    expect(foldedSpaceRow().mentionCount, 1);
   });
 
   test('counts the followed thread replies of a room it holds', () {
-    final rooms = spaceWithRoom();
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 3);
+    _followThread();
+    _threadCounters((unread: 3, mentions: 0));
 
-    expect(spaceRow(rooms).unreadCount, 3);
+    expect(foldedSpaceRow().unreadCount, 3);
   });
 }
 
@@ -254,9 +254,9 @@ void _threadsOffTests() {
 
   // Guard: green before the fix too; it must stay green after it.
   test('the room list shows the server room counters only', () {
-    final room = _room(_roomId, notifications: 1);
-    _followThread(_roomId);
-    _threadCounters(_roomId, replies: 2, mentions: 1);
+    final room = _room((unread: 1, mentions: 0));
+    _followThread();
+    _threadCounters((unread: 2, mentions: 1));
 
     final entry = _entryOf(room);
 

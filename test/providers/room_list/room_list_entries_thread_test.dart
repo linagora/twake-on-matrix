@@ -27,86 +27,38 @@ import '../fake_active_account.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const roomId = '!room:example.com';
-  const rootId = r'$root';
-  const me = '@me:example.com';
-
   late bool flagBefore;
-  late RecordingThreadClient client;
-  late Completer<MatrixEvent> lookup;
 
   setUp(() {
     flagBefore = AppConfig.threadsEnabled;
     AppConfig.threadsEnabled = true;
     SharedPreferences.setMockInitialValues({});
-    lookup = Completer<MatrixEvent>();
-    client = RecordingThreadClient();
-    when(client.clientName).thenReturn('account-a');
-    when(client.userID).thenReturn(me);
-    when(client.database).thenReturn(StoredEvents(const []));
-    when(client.roomsLoading).thenAnswer((_) async {});
-    when(client.onSync).thenReturn(CachedStreamController<SyncUpdate>());
-    when(client.directChats).thenReturn({});
-    when(
-      client.getOneRoomEvent(roomId, rootId),
-    ).thenAnswer((_) => lookup.future);
-    final room = MockRoom();
-    when(room.id).thenReturn(roomId);
-    when(room.client).thenReturn(client);
-    when(room.membership).thenReturn(Membership.join);
-    when(room.tags).thenReturn({});
-    when(room.spaceParents).thenReturn([]);
-    when(room.spaceChildren).thenReturn([]);
-    when(room.notificationCount).thenReturn(0);
-    when(room.highlightCount).thenReturn(0);
-    when(client.rooms).thenReturn([room]);
+    _lookup = Completer<MatrixEvent>();
+    _client = _clientWithOneRoom();
   });
 
   tearDown(() => AppConfig.threadsEnabled = flagBefore);
 
   test('the room list shows a followed thread once its follow lookup answers, '
       'with no new sync', () async {
-    final container = ProviderContainer.test(
-      overrides: activeAccountOverrides(client),
-    );
-    final shown = <List<RoomListEntry>>[];
-    container.listen(
-      roomListEntriesProvider,
-      (_, entries) => shown.add(entries),
-      fireImmediately: true,
-    );
-    await pumpEventQueue();
+    final shown = await _listenToRoomList();
 
     // A sync brings two replies in a thread whose follow state is unknown.
-    client.threadUnread.apply(
+    _client.threadUnread.apply(
       const SyncThreadUpdate(
         counts: {
-          roomId: {rootId: (notificationCount: 2, highlightCount: 0)},
+          _roomId: {_rootId: (notificationCount: 2, highlightCount: 0)},
         },
         leftRoomIds: [],
       ),
     );
     await pumpEventQueue();
     // The server says the user replied in it; no sync comes after.
-    lookup.complete(
-      MatrixEvent(
-        type: EventTypes.Message,
-        content: {'msgtype': 'm.text', 'body': 'root'},
-        eventId: rootId,
-        senderId: '@alice:example.com',
-        originServerTs: DateTime.utc(2026, 11, 12),
-        roomId: roomId,
-        unsigned: {
-          'm.relations': {
-            'm.thread': {'count': 2, 'current_user_participated': true},
-          },
-        },
-      ),
-    );
+    _lookup.complete(_rootTheUserRepliedTo());
     // Past the rate limit of the room changes.
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     expect(
-      client.threadUnread.isFollowed(const ThreadRef(roomId, rootId)),
+      _client.threadUnread.isFollowed(const ThreadRef(_roomId, _rootId)),
       isTrue,
       reason: 'setup: the lookup made the thread followed',
     );
@@ -114,3 +66,67 @@ void main() {
     expect(shown.last.single.unreadCount, 2);
   });
 }
+
+const _roomId = '!room:example.com';
+const _rootId = r'$root';
+const _me = '@me:example.com';
+
+late RecordingThreadClient _client;
+
+/// What `GET /rooms/{roomId}/event/{rootId}` will answer.
+late Completer<MatrixEvent> _lookup;
+
+/// An account that keeps the thread counters, with one joined room.
+RecordingThreadClient _clientWithOneRoom() {
+  final client = RecordingThreadClient();
+  when(client.clientName).thenReturn('account-a');
+  when(client.userID).thenReturn(_me);
+  when(client.database).thenReturn(StoredEvents(const []));
+  when(client.roomsLoading).thenAnswer((_) async {});
+  when(client.onSync).thenReturn(CachedStreamController<SyncUpdate>());
+  when(client.directChats).thenReturn({});
+  when(
+    client.getOneRoomEvent(_roomId, _rootId),
+  ).thenAnswer((_) => _lookup.future);
+  final room = MockRoom();
+  when(room.id).thenReturn(_roomId);
+  when(room.client).thenReturn(client);
+  when(room.membership).thenReturn(Membership.join);
+  when(room.tags).thenReturn({});
+  when(room.spaceParents).thenReturn([]);
+  when(room.spaceChildren).thenReturn([]);
+  when(room.notificationCount).thenReturn(0);
+  when(room.highlightCount).thenReturn(0);
+  when(client.rooms).thenReturn([room]);
+  return client;
+}
+
+/// Every list of entries the room list shows, from now on.
+Future<List<List<RoomListEntry>>> _listenToRoomList() async {
+  final container = ProviderContainer.test(
+    overrides: activeAccountOverrides(_client),
+  );
+  final shown = <List<RoomListEntry>>[];
+  container.listen(
+    roomListEntriesProvider,
+    (_, entries) => shown.add(entries),
+    fireImmediately: true,
+  );
+  await pumpEventQueue();
+  return shown;
+}
+
+/// The root as the server returns it: the user replied in its thread.
+MatrixEvent _rootTheUserRepliedTo() => MatrixEvent(
+  type: EventTypes.Message,
+  content: {'msgtype': 'm.text', 'body': 'root'},
+  eventId: _rootId,
+  senderId: '@alice:example.com',
+  originServerTs: DateTime.utc(2026, 11, 12),
+  roomId: _roomId,
+  unsigned: {
+    'm.relations': {
+      'm.thread': {'count': 2, 'current_user_participated': true},
+    },
+  },
+);
