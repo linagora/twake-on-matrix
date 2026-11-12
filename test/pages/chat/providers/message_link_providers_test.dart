@@ -3,6 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/pages/chat/providers/message_link_providers.dart';
+import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
 void main() {
@@ -24,7 +25,12 @@ void main() {
 
   late ProviderContainer container;
 
-  setUp(() => container = ProviderContainer.test(retry: (_, _) => null));
+  ProviderContainer containerFor({String? userId}) => ProviderContainer.test(
+    retry: (_, _) => null,
+    overrides: [activeUserIdProvider.overrideWithValue(userId)],
+  );
+
+  setUp(() => container = containerFor());
 
   test('uses the web app origin named by the homeserver', () {
     container
@@ -45,7 +51,21 @@ void main() {
 
     expect(
       container.read(linkProvider),
-      'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org',
+      'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
+      '?via=example.org',
+    );
+  });
+
+  test('adds the room and user servers as via to matrix.to', () {
+    container = containerFor(userId: '@me:other.org');
+    container
+        .read(loginHomeserverSummaryProvider.notifier)
+        .set(summaryWith({}));
+
+    expect(
+      container.read(linkProvider),
+      'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
+      '?via=example.org&via=other.org',
     );
   });
 
