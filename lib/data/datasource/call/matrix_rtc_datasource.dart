@@ -21,6 +21,7 @@ abstract class MatrixRtcDatasource {
 
   Future<void> leaveMembership(CallRoom room);
 
-  /// Emits when encryption is turned on in [room].
+  /// Emits when encryption is turned on in [room]; fails with
+  /// `CallRoomNotFoundException` once the account is no longer in it.
   Stream<void> watchRoomEncrypted(CallRoom room);
 }

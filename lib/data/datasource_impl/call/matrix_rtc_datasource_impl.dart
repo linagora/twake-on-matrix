@@ -269,18 +269,25 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
   Stream<void> watchRoomEncrypted(CallRoom call) async* {
     final client = _maybeClient;
     if (client == null) return;
-    final room = client.getRoomById(call.id);
-    if (room == null) throw const CallRoomNotFoundException();
     // Encrypted during the join, before this listened.
-    if (room.encrypted) {
+    if (_isEncryptedJoined(client, call)) {
       yield null;
       return;
     }
     // The state block of a limited sync never reaches onTimelineEvent.
     yield* client.onSync.stream
-        .where((_) => client.getRoomById(call.id)?.encrypted ?? false)
+        .where((_) => _isEncryptedJoined(client, call))
         .take(1)
         .map((_) {});
+  }
+
+  /// Throws once this account left the room or was removed from it.
+  static bool _isEncryptedJoined(Client client, CallRoom call) {
+    final room = client.getRoomById(call.id);
+    if (room == null || room.membership != Membership.join) {
+      throw const CallRoomNotFoundException();
+    }
+    return room.encrypted;
   }
 
   void dispose() => _endSession().extended.ignore();

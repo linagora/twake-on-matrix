@@ -31,8 +31,10 @@ class _FakeRoom extends Fake implements Room {
   @override
   bool get isDirectChat => false;
 
+  var currentMembership = Membership.join;
+
   @override
-  Membership get membership => Membership.join;
+  Membership get membership => currentMembership;
 
   @override
   String? get roomVersion => '10';
@@ -413,4 +415,25 @@ void main() {
       emitsError(isA<CallRoomNotFoundException>()),
     );
   });
+
+  test(
+    'watchRoomEncrypted_whenRemovedFromTheRoom_failsAsRoomNotFound',
+    () async {
+      // Arrange
+      final client = _FakeClient();
+      final errors = <Object>[];
+      MatrixRtcDatasourceImpl(
+        client,
+      ).watchRoomEncrypted(_room).listen((_) {}, onError: errors.add);
+      await pumpEventQueue();
+
+      // Act
+      client._room.currentMembership = Membership.leave;
+      client.onSync.add(SyncUpdate(nextBatch: 'kicked'));
+      await pumpEventQueue();
+
+      // Assert
+      expect(errors.single, isA<CallRoomNotFoundException>());
+    },
+  );
 }
