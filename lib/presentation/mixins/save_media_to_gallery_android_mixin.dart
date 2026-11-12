@@ -20,6 +20,27 @@ import 'package:permission_handler/permission_handler.dart';
 
 mixin SaveMediaToGalleryAndroidMixin
     on SaveFileToTwakeAndroidDownloadsFolderMixin {
+  /// Saves every image of an album, one after the other. The permission is
+  /// asked once: a refusal must not ask again for every image.
+  Future<void> saveAlbumToGallery(
+    BuildContext context,
+    List<Event> events,
+  ) async {
+    try {
+      if (PlatformInfos.isAndroid) {
+        await handleAndroidStoragePermission(context);
+      } else if (PlatformInfos.isIOS) {
+        await handlePhotoPermissionIOS(context);
+      }
+    } on StoragePermissionException {
+      return;
+    }
+    for (final event in events) {
+      if (!context.mounted) return;
+      await saveSelectedEventToGallery(context, event);
+    }
+  }
+
   Future<void> saveSelectedEventToGallery(
     BuildContext context,
     Event downloadEvent,

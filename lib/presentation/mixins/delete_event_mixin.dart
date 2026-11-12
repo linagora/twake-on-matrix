@@ -37,6 +37,36 @@ mixin DeleteEventMixin {
     });
   }
 
+  /// Deletes every image of an album after one confirmation.
+  Future<void> deleteAlbumAction(
+    BuildContext context,
+    List<Event> events,
+  ) async {
+    final l10n = L10n.of(context)!;
+    final confirmResult = await showConfirmAlertDialog(
+      context: context,
+      title: l10n.deleteAlbumConfirmationTitle(events.length),
+      okLabel: l10n.delete,
+      cancelLabel: l10n.cancel,
+      showCloseButton: PlatformInfos.isWeb,
+    );
+    if (confirmResult == ConfirmResult.cancel) return;
+    var failureShown = false;
+    for (final event in events) {
+      final state = await deleteEventInteractor.execute(event).last;
+      state.fold((failure) {
+        if (failureShown || !context.mounted) return;
+        failureShown = true;
+        TwakeSnackBar.show(
+          context,
+          failure is NoPermissionToDeleteEvent
+              ? l10n.noDeletePermissionMessage
+              : l10n.failedToDeleteMessage,
+        );
+      }, (success) {});
+    }
+  }
+
   void disposeDeleteEventMixin() {
     _streamSubscription?.cancel();
   }

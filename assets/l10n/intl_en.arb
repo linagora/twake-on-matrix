@@ -3355,5 +3355,19 @@
   "@callErrorMicrophoneChange": {
     "type": "text",
     "placeholders": {}
+  },
+  "selectAllImages": "Select all images",
+  "@selectAllImages": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "deleteAlbumConfirmationTitle": "{count, plural, =1{Delete this image?} other{Delete these {count} images?}}",
+  "@deleteAlbumConfirmationTitle": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

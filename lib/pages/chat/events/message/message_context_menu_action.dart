@@ -13,6 +13,9 @@ enum MessageContextMenuAction {
   edit,
   delete,
   select,
+
+  /// Select mode with every image of an album.
+  selectAll,
   pin,
   saveToDownload,
   saveToGallery,
@@ -34,6 +37,9 @@ enum MessageContextMenuAction {
         break;
       case MessageContextMenuAction.select:
         Navigator.of(context).pop('select');
+        break;
+      case MessageContextMenuAction.selectAll:
+        Navigator.of(context).pop('selectAll');
         break;
       case MessageContextMenuAction.pin:
         Navigator.of(context).pop('pin');
@@ -68,6 +74,8 @@ enum MessageContextMenuAction {
         return L10n.of(context)!.report;
       case MessageContextMenuAction.select:
         return L10n.of(context)!.select;
+      case MessageContextMenuAction.selectAll:
+        return L10n.of(context)!.selectAllImages;
       case MessageContextMenuAction.pin:
         return event.isPinned ? L10n.of(context)!.unpin : L10n.of(context)!.pin;
       case MessageContextMenuAction.saveToDownload:
@@ -102,6 +110,8 @@ enum MessageContextMenuAction {
         return Icons.flag_outlined;
       case MessageContextMenuAction.select:
         return Icons.check_circle_outline_outlined;
+      case MessageContextMenuAction.selectAll:
+        return Icons.library_add_check_outlined;
       case MessageContextMenuAction.pin:
         return event.isPinned ? null : Icons.push_pin_outlined;
       case MessageContextMenuAction.saveToDownload:
@@ -128,6 +138,7 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.copy:
       case MessageContextMenuAction.report:
       case MessageContextMenuAction.select:
+      case MessageContextMenuAction.selectAll:
       case MessageContextMenuAction.saveToDownload:
       case MessageContextMenuAction.saveToGallery:
       case MessageContextMenuAction.delete:

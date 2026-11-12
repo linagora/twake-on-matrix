@@ -115,6 +115,14 @@ class ChatEventListItem extends StatelessWidget {
           controller.saveSelectedEventToDownloadAndroid(context, event),
       onSaveToGallery: (event) =>
           controller.saveSelectedEventToGallery(context, event),
+      onForwardAlbum: (events) =>
+          controller.forwardEventsAction(albumEvents: events),
+      onSaveAlbumToGallery: (events) =>
+          controller.saveAlbumToGallery(context, events),
+      onDeleteAlbum: controller.deleteAlbumAction,
+      onReportAlbum: (events) =>
+          controller.reportEventAction(events.first, albumEvents: events),
+      onSelectAlbum: (events) => events.forEach(controller.onSelectMessage),
       onTapMoreButton: controller.handleOnTapMoreButtonOnWeb,
       onEdit: (event) {
         controller.editAction(editEvent: event);
