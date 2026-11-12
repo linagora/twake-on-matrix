@@ -21,43 +21,43 @@ void main() {
   const salesId = '!sales:example.org';
   const rootId = r'$release';
 
-  final roomMention = mentionItem(
+  final roomMention = MentionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$ask',
-    time: todayAt(11, 30),
+    time: (11, 30).today,
     author: 'Dan Brown',
     text: '@me can you check the mockups?',
-  );
-  final threadMention = mentionItem(
+  ).item;
+  final threadMention = MentionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$in_thread',
-    time: todayAt(9, 30),
+    time: (9, 30).today,
     author: 'Erin Gray',
     text: '@me what do you think?',
     rootId: rootId,
     rootText: 'Release plan for Friday',
-  );
-  final unreadDesign = unreadRoomItem(
+  ).item;
+  final unreadDesign = UnreadRoomItem(
     roomId: designId,
     roomName: 'Design',
-    time: todayAt(12),
+    time: 12.today,
     lastMessage: 'see you there',
-  );
-  final unreadSales = unreadRoomItem(
+  ).item;
+  final unreadSales = UnreadRoomItem(
     roomId: salesId,
     roomName: 'Sales',
-    time: todayAt(8),
+    time: 8.today,
     lastMessage: 'numbers are in',
-  );
-  final followed = followedThreadItem(
+  ).item;
+  final followed = FollowedThreadItem(
     roomId: designId,
     roomName: 'Design',
     rootId: r'$other',
-    time: todayAt(10),
+    time: 10.today,
     lastReply: 'Ship it',
-  );
+  ).item;
 
   setUp(() {
     repository = FakeActivityRepository(
@@ -70,8 +70,10 @@ void main() {
     );
   });
 
-  Future<void> pump(WidgetTester tester) =>
-      pumpActivityPage(tester, repository: repository, mentions: mentions);
+  Future<void> pump(WidgetTester tester) => pumpActivityPage(
+    tester,
+    ActivityPageSetup(repository: repository, mentions: mentions),
+  );
 
   group('« Mentions »', () {
     testWidgets('lists the mentions of the user, in a room and in a thread', (
@@ -166,11 +168,13 @@ void main() {
       mentions.gate = Completer<void>();
       await pumpActivityPage(
         tester,
-        repository: repository,
-        mentions: mentions,
-        settle: false,
+        ActivityPageSetup(
+          repository: repository,
+          mentions: mentions,
+          settle: false,
+        ),
       );
-      await selectFilter(tester, 'Mentions', settle: false);
+      await selectFilterWhileLoading(tester, 'Mentions');
 
       expect(
         find.byWidgetPredicate((widget) => widget is ProgressIndicator),

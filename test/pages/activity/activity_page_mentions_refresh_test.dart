@@ -14,22 +14,22 @@ void main() {
 
   const designId = '!design:example.org';
 
-  final oldMention = mentionItem(
+  final oldMention = MentionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$old',
-    time: todayAt(9),
+    time: 9.today,
     author: 'Dan Brown',
     text: '@me can you check the mockups?',
-  );
-  final newMention = mentionItem(
+  ).item;
+  final newMention = MentionItem(
     roomId: designId,
     roomName: 'Design',
     eventId: r'$new',
-    time: todayAt(11),
+    time: 11.today,
     author: 'Erin Gray',
     text: '@me the budget numbers are in',
-  );
+  ).item;
 
   setUp(() {
     repository = FakeActivityRepository();
@@ -38,7 +38,10 @@ void main() {
 
   /// The list « Mentions » is shown; returns the reads done so far.
   Future<int> showMentions(WidgetTester tester) async {
-    await pumpActivityPage(tester, repository: repository, mentions: mentions);
+    await pumpActivityPage(
+      tester,
+      ActivityPageSetup(repository: repository, mentions: mentions),
+    );
     await selectFilter(tester, 'Mentions');
     expect(
       find.textContaining('can you check the mockups?', findRichText: true),

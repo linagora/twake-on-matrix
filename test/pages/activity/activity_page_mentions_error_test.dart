@@ -20,20 +20,23 @@ void main() {
     repository = FakeActivityRepository();
     mentions = FakeActivityMentionsRepository(
       mentions: [
-        mentionItem(
+        MentionItem(
           roomId: '!design:example.org',
           roomName: 'Design',
           eventId: r'$ask',
-          time: todayAt(11),
+          time: 11.today,
           text: '@me can you check the mockups?',
-        ),
+        ).item,
       ],
     )..error = Exception('offline');
   });
 
   testWidgets('when the mentions cannot be read, a text says so, with « Try '
       'again »', (tester) async {
-    await pumpActivityPage(tester, repository: repository, mentions: mentions);
+    await pumpActivityPage(
+      tester,
+      ActivityPageSetup(repository: repository, mentions: mentions),
+    );
     await selectFilter(tester, 'Mentions');
 
     expect(find.text(failure), findsOneWidget);
@@ -42,7 +45,10 @@ void main() {
 
   testWidgets('once « Try again » reads them, the text leaves with the '
       'error', (tester) async {
-    await pumpActivityPage(tester, repository: repository, mentions: mentions);
+    await pumpActivityPage(
+      tester,
+      ActivityPageSetup(repository: repository, mentions: mentions),
+    );
     await selectFilter(tester, 'Mentions');
 
     mentions.error = null;
