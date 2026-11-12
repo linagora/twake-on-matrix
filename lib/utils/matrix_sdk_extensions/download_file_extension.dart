@@ -57,6 +57,7 @@ extension DownloadFileExtension on Event {
     while ((inFlight = _downloadsInFlight[downloadKey]) != null) {
       await inFlight;
     }
+    if (cancelToken?.isCancelled == true) return null;
     final done = Completer<void>();
     _downloadsInFlight[downloadKey] = done.future;
     try {

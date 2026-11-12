@@ -243,5 +243,24 @@ void main() {
       final path = Uri.parse(url!).toFilePath();
       expect(await File(path).readAsBytes(), [..._firstHalf, ..._secondHalf]);
     });
+
+    test('a request cancelled while waiting returns nothing', () async {
+      final secondHalf = await startSlowDownload(
+        MessageTypes.Video,
+        'clip.mp4',
+      );
+      final cancelToken = CancelToken();
+
+      final result = mediaEvent(
+        MessageTypes.Video,
+        'clip.mp4',
+      ).getFileInfo(cancelToken: cancelToken, throwOnError: true);
+      await pumpEventQueue();
+      cancelToken.cancel();
+      secondHalf.complete();
+
+      expect(await result, isNull);
+      expect(mediaAPI.calls, 1);
+    });
   });
 }
