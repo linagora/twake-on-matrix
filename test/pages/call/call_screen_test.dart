@@ -241,4 +241,22 @@ void main() {
     expect(find.byType(CallScreen, skipOffstage: false), findsNothing);
     expect(find.text('open', skipOffstage: false), findsOneWidget);
   });
+
+  testWidgets('microphone_whenTheDeviceRefuses_saysSo', (tester) async {
+    // Arrange
+    await pumpScreen(tester);
+    await join(tester);
+    repository.mediaError = const CallMediaFailedException();
+
+    // Act
+    await tester.tap(find.byKey(const Key('call-microphone')));
+    await tester.pump();
+    await tester.pump();
+
+    // Assert
+    expect(
+      find.text('The microphone could not be changed. Try again.'),
+      findsOneWidget,
+    );
+  });
 }

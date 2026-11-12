@@ -11,6 +11,7 @@ import 'package:twake_chat/pages/call/call_controller.dart';
 import 'package:twake_chat/pages/call/call_state.dart';
 import 'package:twake_chat/pages/call/call_control.dart';
 import 'package:twake_chat/pages/call/call_tile.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 
 /// The call of a room (DECISION.md D15): before it, in it, or why it failed.
 class CallScreen extends ConsumerStatefulWidget {
@@ -194,6 +195,19 @@ class _CallStage extends ConsumerWidget {
 
   final List<CallParticipant> participants;
 
+  static Future<void> _setMicrophone(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isOn,
+  }) async {
+    final l10n = L10n.of(context)!;
+    final isChanged = await ref
+        .read(callControllerProvider.notifier)
+        .setMicrophone(isOn: isOn);
+    if (isChanged || !context.mounted) return;
+    TwakeSnackBar.show(context, l10n.callErrorMicrophoneChange);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = L10n.of(context)!;
@@ -229,9 +243,7 @@ class _CallStage extends ConsumerWidget {
                 color: isMicrophoneOn ? null : danger,
                 isSelected: isMicrophoneOn,
                 onPressed: () => unawaited(
-                  ref
-                      .read(callControllerProvider.notifier)
-                      .setMicrophone(isOn: !isMicrophoneOn),
+                  _setMicrophone(context, ref, isOn: !isMicrophoneOn),
                 ),
               ),
               const SizedBox(width: 24),

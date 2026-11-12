@@ -3350,5 +3350,10 @@
   "@callErrorMediaFailed": {
     "type": "text",
     "placeholders": {}
+  },
+  "callErrorMicrophoneChange": "The microphone could not be changed. Try again.",
+  "@callErrorMicrophoneChange": {
+    "type": "text",
+    "placeholders": {}
   }
 }
