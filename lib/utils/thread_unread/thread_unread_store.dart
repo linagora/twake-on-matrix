@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -433,6 +434,53 @@ extension RoomPendingNotification on Room {
       (unreadBadgeCount == 0 &&
           client.threadUnread?.hasPendingFollowLookup(this) != true);
 }
+
+extension MarkRoomAndThreadsRead on Room {
+  /// Stored events, newest first, paged: the newest ones can all be replies
+  /// of a busy thread. It gives up after [_mainEventSearchLimit].
+  Future<Event?> _newestMainTimelineEvent() async {
+    const pageSize = 50;
+    for (var start = 0; start < _mainEventSearchLimit; start += pageSize) {
+      final page = await client.database.getEventList(
+        this,
+        start: start,
+        limit: pageSize,
+      );
+      final found = ThreadRules.newestMainTimelineEvent(
+        page,
+        knownThreadReplyIds:
+            client.threadUnread?.knownThreadReplyIds(this) ?? const {},
+      );
+      if (found != null || page.length < pageSize) return found;
+    }
+    return null;
+  }
+
+  /// The newest event the server has: a thread reply counts, a local echo
+  /// still sending does not.
+  Future<Event?> _newestSyncedEvent() async {
+    final page = await client.database.getEventList(this, start: 0, limit: 50);
+    return page.firstWhereOrNull((e) => e.status.isSynced);
+  }
+
+  /// "Mark as read": ONE unthreaded receipt on the newest event of the room
+  /// (MSC3771: it covers the main timeline and every thread up to it);
+  /// `m.fully_read` stays on the newest main timeline event.
+  Future<void> markRoomAndAllThreadsRead() async {
+    final newest = await _newestSyncedEvent();
+    if (newest == null) return;
+    final main = await _newestMainTimelineEvent();
+    final public = client.receiptsPublicByDefault;
+    await client.setReadMarker(
+      id,
+      mFullyRead: main?.eventId,
+      mRead: public ? newest.eventId : null,
+      mReadPrivate: public ? null : newest.eventId,
+    );
+  }
+}
+
+const int _mainEventSearchLimit = 300;
 
 /// A client that keeps the thread counters ([TwakeClient]).
 abstract interface class ThreadUnreadStoreOwner {
