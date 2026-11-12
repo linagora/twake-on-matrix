@@ -81,4 +81,14 @@ void main() {
       throwsA(isA<CallTokenFailedException>()),
     );
   });
+
+  test('parseServer_withAUrlThatIsNotAString_isATokenFailure', () {
+    // Act & Assert
+    expect(
+      () => SfuCallTokenDatasourceImpl.parseServer(
+        http.Response('{"url":42,"jwt":"token"}', 200),
+      ),
+      throwsA(isA<CallTokenFailedException>()),
+    );
+  });
 }
