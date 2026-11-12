@@ -113,7 +113,7 @@ class CallController extends _$CallController {
         .execute(roomId)
         .listen(
           (_) => _endWith(const CallEncryptionUnsupportedException()),
-          onError: (Object error) => _endWith(_typed(error)),
+          onError: _onEncryptionWatchFailed,
         );
     if (_isLeaveRequested) await leave();
   }
@@ -147,6 +147,11 @@ class CallController extends _$CallController {
         then: CallState.failed(roomId: current.roomId, error: error),
       ),
     );
+  }
+
+  void _onEncryptionWatchFailed(Object error, StackTrace stackTrace) {
+    _log('encryption watch failed', error, stackTrace);
+    _endWith(_typed(error));
   }
 
   void _onMediaLost(Object error, StackTrace stackTrace) {
