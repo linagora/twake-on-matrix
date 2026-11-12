@@ -57,33 +57,31 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
         ),
       ),
     );
-    final baseUrl = tokenServiceUrl ?? meetUrl;
     if (room == null ||
-        baseUrl == null ||
-        !widget.controller.canStartVideoCall(baseUrl)) {
+        !widget.controller.canStartVideoCall(tokenServiceUrl ?? meetUrl)) {
       return const SizedBox.shrink();
     }
     final l10n = L10n.of(context)!;
     if (tokenServiceUrl != null) {
-      // DECISION.md D14: no media keys yet, so no call in an encrypted room;
-      // D15: nor for a member who may not write the call membership.
-      if (room.encrypted ||
-          !room.canChangeStateEvent(CallEventTypes.callMember)) {
-        return const SizedBox.shrink();
-      }
-      return TwakeIconButton(
-        icon: Icons.videocam_outlined,
-        tooltip: l10n.startCall,
-        onTap: () => unawaited(
-          CallScreen.open(
-            context,
-            roomId: room.id,
-            title: room.getLocalizedDisplayname(),
+      // DECISION.md D14: no media keys yet, so no call in an encrypted room.
+      if (room.encrypted) return const SizedBox.shrink();
+      if (room.canChangeStateEvent(CallEventTypes.callMember)) {
+        return TwakeIconButton(
+          icon: Icons.videocam_outlined,
+          tooltip: l10n.startCall,
+          onTap: () => unawaited(
+            CallScreen.open(
+              context,
+              roomId: room.id,
+              title: room.getLocalizedDisplayname(),
+            ),
           ),
-        ),
-        preferBelow: false,
-      );
+          preferBelow: false,
+        );
+      }
     }
+    // D15: a member who may not write the call membership keeps the Meet link.
+    if (meetUrl == null) return const SizedBox.shrink();
     if (_isStarting) {
       return const Padding(
         padding: EdgeInsets.all(8),
@@ -96,7 +94,7 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
     return TwakeIconButton(
       icon: Icons.videocam_outlined,
       tooltip: l10n.startVideoCall,
-      onTap: () => unawaited(_start(baseUrl)),
+      onTap: () => unawaited(_start(meetUrl)),
       preferBelow: false,
     );
   }

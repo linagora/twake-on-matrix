@@ -172,20 +172,29 @@ void main() {
       expect(find.byType(TwakeIconButton), findsNothing);
     });
 
-    testWidgets('build_withATokenServiceForAMemberWithoutTheRight_isHidden', (
-      tester,
-    ) async {
-      // Arrange
-      when(
-        mockRoom.canChangeStateEvent(CallEventTypes.callMember),
-      ).thenReturn(false);
+    testWidgets(
+      'onTap_withATokenServiceForAMemberWithoutTheRight_sendsTheMeetLink',
+      (tester) async {
+        // Arrange
+        when(
+          mockRoom.canChangeStateEvent(CallEventTypes.callMember),
+        ).thenReturn(false);
+        await pumpButton(tester, withTokenService: true);
 
-      // Act
-      await pumpButton(tester, withTokenService: true);
+        // Act
+        await tester.tap(find.byType(TwakeIconButton));
+        await tester.pump();
 
-      // Assert
-      expect(find.byType(TwakeIconButton), findsNothing);
-    });
+        // Assert
+        verify(
+          mockUseCase.execute(
+            roomId: testRoomId,
+            baseUrl: 'https://meet.example.com',
+            startedTitle: 'Has started a video call',
+          ),
+        ).called(1);
+      },
+    );
 
     testWidgets('onTap_withoutATokenService_sendsTheMeetLink', (tester) async {
       // Arrange

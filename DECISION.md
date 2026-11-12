@@ -311,7 +311,8 @@ Joining a call writes the state event `org.matrix.msc3401.call.member`
 
 - a group created by Twake Chat gives it to every member (level 0), as Twake
   Space Chat does;
-- in an older room, a member who may not write it sees no in-app call button;
+- in an older room, a member who may not write it sees no in-app call button,
+  only the Meet link when the well-known has one;
 - the join still checks this right before anything goes out.
 
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
