@@ -19,6 +19,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
@@ -68,7 +69,12 @@ class UrlLauncher with GoToDraftChatMixin {
               .read(loginHomeserverSummaryProvider)
               .webAppOrigin,
         ) ??
-        policy.matrixToForRoomsLink(url!, isKnownRoom: _isOpenableRoom);
+        policy.matrixToForRoomsLink(
+          url!,
+          isKnownRoom: (roomId) => _isOpenableRoom(
+            container.read(activeMatrixClientProvider)?.getRoomById(roomId),
+          ),
+        );
     if (webAppMatrixTo != null) {
       return openMatrixToUrl(
         customUrl: webAppMatrixTo,
@@ -172,12 +178,9 @@ class UrlLauncher with GoToDraftChatMixin {
 
   /// A room the user has joined or is invited to, as [openMatrixToUrl]
   /// opens directly.
-  bool _isOpenableRoom(String roomId) {
-    final membership = Matrix.of(
-      context,
-    ).client.getRoomById(roomId)?.membership;
-    return membership == Membership.join || membership == Membership.invite;
-  }
+  bool _isOpenableRoom(Room? room) =>
+      room?.membership == Membership.join ||
+      room?.membership == Membership.invite;
 
   void openMatrixToUrl({
     String? customUrl,
