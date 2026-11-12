@@ -142,6 +142,9 @@ class RecordingHomeserver extends http.BaseClient {
   void fail(ServerRoute route, [ServerError error = ServerError.down]) =>
       _failures[route] = error;
 
+  /// [route] fails no more: it answers as before [fail].
+  void recover(ServerRoute route) => _failures.remove(route);
+
   /// From now on, [route] answers [body].
   void answer(ServerRoute route, Map<String, Object?> body) =>
       _answers[route] = body;
@@ -334,8 +337,12 @@ class _SyncDatabase extends MockDatabase {
     ...accountData ?? (throw StateError('The device storage is unreadable')),
   };
 
+  /// The ids of the events asked of the device, in order.
+  final List<String> eventReads = [];
+
   @override
   Future<Event?> getEventById(String eventId, Room room) async {
+    eventReads.add(eventId);
     final json = _keptEvent(eventId, room);
     return json == null ? null : Event.fromJson(json, room);
   }
@@ -346,6 +353,14 @@ class _SyncDatabase extends MockDatabase {
 
   @override
   Future<void> storeSyncFilterId(String syncFilterId) async {}
+
+  /// A history page read (`Room.requestHistory`) moves the token; not kept.
+  @override
+  Future<void> setRoomPrevBatch(
+    String? prevBatch,
+    String roomId,
+    Client client,
+  ) async {}
 
   @override
   Future<void> storePrevBatch(String prevBatch) async {}
@@ -408,6 +423,9 @@ class ThreadAccount extends TwakeClient {
   static final _homeserver = Uri.parse('https://example.org');
 
   final RecordingHomeserver server;
+
+  /// The ids of the events the app asked of the device, in order.
+  List<String> get deviceEventReads => (database as _SyncDatabase).eventReads;
 
   bool _loggedOut = false;
 

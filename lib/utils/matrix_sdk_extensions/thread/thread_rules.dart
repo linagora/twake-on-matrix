@@ -21,6 +21,11 @@ abstract final class ThreadRules {
       event.status.isSynced &&
       event.threadRootId == null;
 
+  /// The thread [event] belongs to as a reply; null with the threads flag
+  /// off, where a reply is an ordinary message of the room.
+  static String? threadRootOf(Event event) =>
+      AppConfig.threadsEnabled ? event.threadRootId : null;
+
   /// The `?event=` a screen jumps to. go_router gives every route of the
   /// stack the full URI: under a thread route (`/rooms/R/threads/T`) the room
   /// screen must ignore the thread's reply, which is not in its timeline.
