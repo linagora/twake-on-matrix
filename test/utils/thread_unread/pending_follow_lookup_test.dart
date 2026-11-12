@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
@@ -23,6 +24,14 @@ import '../../fake_client.dart' as fake;
 /// While a lookup runs for a room with unread replies, its notifications
 /// stay.
 void main() {
+  // This level is gated by the flag (off by default until #3609).
+  late bool threadsFlagBefore;
+  setUp(() {
+    threadsFlagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+  tearDown(() => AppConfig.threadsEnabled = threadsFlagBefore);
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   setUp(() {

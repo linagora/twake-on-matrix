@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/utils/custom_http_client.dart';
 import 'package:twake_chat/utils/custom_image_resizer.dart';
@@ -141,11 +142,14 @@ abstract class ClientManager {
 
   /// `unread_thread_notifications` makes the server count unread messages per
   /// thread instead of mixing them into the room counters.
-  static final Filter syncFilter = Filter(
+  /// Read when used: it follows [AppConfig.threadsEnabled].
+  static Filter get syncFilter => Filter(
     room: RoomFilter(
       includeLeave: true,
       state: StateFilter(lazyLoadMembers: true),
-      timeline: StateFilter(unreadThreadNotifications: true),
+      timeline: AppConfig.threadsEnabled
+          ? StateFilter(unreadThreadNotifications: true)
+          : null,
     ),
   );
 
@@ -155,11 +159,13 @@ abstract class ClientManager {
       database: await openSqfliteDb(name: clientName),
     );
     await _invalidatePersistedSyncFilterOnce(database, clientName);
-    await _invalidatePersistedSyncFilterOnce(
-      database,
-      clientName,
-      migratedPrefix: _threadCountersFilterMigratedPrefix,
-    );
+    if (AppConfig.threadsEnabled) {
+      await _invalidatePersistedSyncFilterOnce(
+        database,
+        clientName,
+        migratedPrefix: _threadCountersFilterMigratedPrefix,
+      );
+    }
     return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid

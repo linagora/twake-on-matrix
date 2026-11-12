@@ -112,7 +112,7 @@ abstract class AppConfig {
   static bool showDirectChatsInSpaces = true;
   static bool autoplayImages = true;
   static bool experimentalVoip = false;
-  static bool threadsEnabled = true;
+  static bool threadsEnabled = false;
   static bool appGridDashboardAvailable = true;
   static bool enableRightAndLeftMessageAlignmentOnWeb = false;
   static bool gifAutoplay = true;
