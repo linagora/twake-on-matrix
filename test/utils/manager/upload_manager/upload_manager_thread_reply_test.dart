@@ -15,6 +15,7 @@ import 'package:twake_chat/data/model/media/upload_file_json.dart';
 import 'package:twake_chat/data/network/media/media_api.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
 import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
@@ -194,14 +195,29 @@ void main() {
     thread: thread,
   );
 
-  Future<void> uploadMobile(ThreadSendTarget? thread) =>
+  Future<void> uploadFileInfo(FileInfo file, ThreadSendTarget? thread) =>
       manager.uploadFileMobile(
         room: room,
-        fileInfos: [textFileInfo()],
+        fileInfos: [file],
         caption: 'look',
         inReplyTo: replyTarget,
         thread: thread,
       );
+
+  Future<void> uploadMobile(ThreadSendTarget? thread) =>
+      uploadFileInfo(textFileInfo(), thread);
+
+  /// A file picked from Twake Drive: its bubble shows before its bytes come.
+  Future<void> uploadDrive(ThreadSendTarget? thread) async {
+    final drive = PendingFileInfo(
+      'notes.txt',
+      size: 3,
+      resolved: Future.value(textFileInfo()),
+    );
+    await uploadFileInfo(drive, thread);
+    // The bytes come, then the file joins the send queue.
+    await pumpEventQueue();
+  }
 
   Future<void> uploadGallery(ThreadSendTarget? thread) =>
       manager.uploadMediaMobile(
@@ -241,6 +257,7 @@ void main() {
         (name: 'web', upload: uploadWeb),
         (name: 'mobile', upload: uploadMobile),
         (name: 'gallery', upload: uploadGallery),
+        (name: 'drive', upload: uploadDrive),
       ];
   final threadEntryPoints = [
     ...entryPoints,
