@@ -31,8 +31,8 @@ class MatrixRtcMediaKeys {
   }) : _now = now;
 
   static const eventType = 'io.element.call.encryption_keys';
-  // As the Matrix SDK: a slow sync still gets the key before it encrypts.
-  static const useKeyDelay = Duration(seconds: 4);
+  // MSC4143's delay: a slow sync still gets the key before it encrypts.
+  static const useKeyDelay = Duration(seconds: 5);
   static const retryDelay = Duration(seconds: 2);
   static const _maxRetries = 3;
   static const _rotationGracePeriod = Duration(seconds: 10);
