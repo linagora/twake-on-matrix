@@ -300,7 +300,7 @@ class DraftChatView extends StatelessWidget {
                       ],
                     ),
                     child: EmojiPicker(
-                      emojiData: Matrix.of(context).emojiData,
+                      emojiData: controller.emojiData,
                       recentEmoji: controller.getRecentEmoji(),
                       configuration: EmojiPickerConfiguration(
                         showRecentTab: true,

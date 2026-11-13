@@ -115,6 +115,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/dialog/options_dialog.dart';
 import 'package:linagora_design_flutter/images_picker/asset_counter.dart';
@@ -176,6 +177,9 @@ class ChatController extends ConsumerState<Chat>
         RetryTextMessageMixin,
         AudioMixin,
         AutoMarkAsReadMixin {
+  emoji_mart.EmojiData get emojiData =>
+      ref.read(emojiDataProvider).requireValue;
+
   final NetworkConnectionService networkConnectionService = getIt
       .get<NetworkConnectionService>();
 
@@ -1489,8 +1493,7 @@ class ChatController extends ConsumerState<Chat>
           .read(storeRecentReactionsUseCaseProvider)
           .executeOrLog(emojiId: emojiId ?? _recentReactionId(emoji));
 
-  String _recentReactionId(String emoji) =>
-      Matrix.of(context).emojiData.getIdByEmoji(emoji);
+  String _recentReactionId(String emoji) => emojiData.getIdByEmoji(emoji);
 
   Future<bool> _sendEmojiAction({
     required String emoji,
@@ -2286,7 +2289,7 @@ class ChatController extends ConsumerState<Chat>
                                   ],
                                 ),
                                 child: emoji_mart.EmojiPicker(
-                                  emojiData: Matrix.of(context).emojiData,
+                                  emojiData: emojiData,
                                   recentEmoji: getRecentEmoji(),
                                   configuration:
                                       emoji_mart.EmojiPickerConfiguration(
@@ -2971,7 +2974,7 @@ class ChatController extends ConsumerState<Chat>
                                       ],
                                     ),
                                     child: emoji_mart.EmojiPicker(
-                                      emojiData: Matrix.of(context).emojiData,
+                                      emojiData: emojiData,
                                       recentEmoji: getRecentEmoji(),
                                       configuration:
                                           emoji_mart.EmojiPickerConfiguration(

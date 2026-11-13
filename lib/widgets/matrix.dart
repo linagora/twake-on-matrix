@@ -16,7 +16,6 @@ import 'package:twake_chat/presentation/mixins/connectivity_mixin.dart';
 import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logout_body_args.dart';
-import 'package:flutter_emoji_mart/flutter_emoji_mart.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -88,6 +87,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
         ProviderContainer,
         ProviderScope;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/providers/emoji_data_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:image_picker/image_picker.dart';
@@ -155,7 +155,6 @@ class MatrixState extends ConsumerState<Matrix>
   String? loginUsername;
   String? loginType;
   bool? loginRegistrationSupported;
-  late EmojiData emojiData;
 
   bool waitForFirstSync = false;
 
@@ -537,8 +536,7 @@ class MatrixState extends ConsumerState<Matrix>
         FocusManager.instance.addListener(_onFocusManagerChange);
       }
       await initMatrix();
-      final emojiRawData = await EmojiData.builtIn();
-      emojiData = emojiRawData.filterByVersion(13.5);
+      await ref.read(emojiDataProvider.future);
       await tryToGetFederationConfigurations();
       if (PlatformInfos.isWeb) {
         initConfigWeb().then((_) => initSettings());
