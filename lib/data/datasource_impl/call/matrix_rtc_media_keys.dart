@@ -10,15 +10,26 @@ typedef CallMemberDevice = ({String userId, String deviceId, int createdTs});
 
 typedef MediaKeyPlan = ({bool rotates, Set<CallMemberDevice> recipients});
 
+typedef ReceivedMediaKey = ({
+  String userId,
+  String deviceId,
+  int index,
+  List<int> key,
+});
+
 /// The media keys of an encrypted call (DECISION.md D14): each device sends
 /// its own key to the others over Olm, a new one when someone leaves.
 class MatrixRtcMediaKeys {
   MatrixRtcMediaKeys(this._client, this._roomId, this._memberEventType);
 
   static const eventType = 'io.element.call.encryption_keys';
-  static const _useKeyDelay = Duration(seconds: 1);
+  // As the Matrix SDK: a slow sync still gets the key before it encrypts.
+  static const useKeyDelay = Duration(seconds: 4);
+  static const retryDelay = Duration(seconds: 2);
+  static const _maxRetries = 3;
   static const _rotationGracePeriod = Duration(seconds: 10);
   static const _keyringSize = 256;
+  static const _maxPendingKeys = 64;
   static final _random = Random.secure();
 
   final Client _client;
@@ -32,6 +43,11 @@ class MatrixRtcMediaKeys {
   var _key = <int>[];
   var _createdAt = DateTime.now();
   var _rollout = Future<void>.value();
+  Timer? _retry;
+  var _retries = 0;
+
+  /// Keys of devices whose membership has not arrived yet.
+  final _pendingKeys = <String, ReceivedMediaKey>{};
 
   String get _ownId => '${_client.userID}:${_client.deviceID}';
 
@@ -60,8 +76,10 @@ class MatrixRtcMediaKeys {
     return (rotates: false, recipients: joiners);
   }
 
+  /// The sending device is the Olm sender and its claimed device, never an
+  /// id the content names.
   @visibleForTesting
-  static CallMediaKey? parseKey(ToDeviceEvent event, String roomId) {
+  static ReceivedMediaKey? parseKey(ToDeviceEvent event, String roomId) {
     if (event.type != eventType || event.encryptedContent == null) return null;
     final content = event.content;
     if (content.tryGet<String>('room_id') != roomId) return null;
@@ -69,18 +87,24 @@ class MatrixRtcMediaKeys {
     final member = content.tryGetMap<String, Object?>('member');
     return switch ((
       keys?.tryGet<int>('index'),
-      keys?.tryGet<String>('key'),
+      _decodeKey(keys?.tryGet<String>('key')),
       member?.tryGet<String>('claimed_device_id'),
     )) {
-      (final int index, final String key, final String deviceId) =>
-        CallMediaKey(
-          participantId:
-              member?.tryGet<String>('id') ?? '${event.senderId}:$deviceId',
-          index: index,
-          key: base64.decode(base64.normalize(key)),
-        ),
+      (final int index, final List<int> key, final String deviceId)
+          when index >= 0 && index < _keyringSize =>
+        (userId: event.senderId, deviceId: deviceId, index: index, key: key),
       _ => null,
     };
+  }
+
+  static List<int>? _decodeKey(String? key) {
+    if (key == null) return null;
+    try {
+      final bytes = base64.decode(base64.normalize(key));
+      return bytes.isEmpty ? null : bytes;
+    } on FormatException {
+      return null;
+    }
   }
 
   void _start() {
@@ -92,12 +116,7 @@ class MatrixRtcMediaKeys {
           Logs().w('MatrixRtcMediaKeys: room not loaded', error, stackTrace);
         });
     _subscriptions
-      ..add(
-        _client.onToDeviceEvent.stream.listen((event) {
-          final key = parseKey(event, _roomId);
-          if (key != null) _keys.add(key);
-        }),
-      )
+      ..add(_client.onToDeviceEvent.stream.listen(_onToDeviceEvent))
       ..add(
         _client.onRoomState.stream
             .where(
@@ -110,7 +129,44 @@ class MatrixRtcMediaKeys {
     _queueRollout();
   }
 
+  void _onToDeviceEvent(ToDeviceEvent event) {
+    final key = parseKey(event, _roomId);
+    if (key == null || _isOwnDevice(key.userId, key.deviceId)) return;
+    _pendingKeys.remove(_pendingId(key));
+    _pendingKeys[_pendingId(key)] = key;
+    if (_pendingKeys.length > _maxPendingKeys) {
+      _pendingKeys.remove(_pendingKeys.keys.first);
+    }
+    _deliverKeys(_members());
+  }
+
+  static String _pendingId(ReceivedMediaKey key) =>
+      '${key.userId}|${key.deviceId}|${key.index}';
+
+  /// Only a device of the call may set a key, and only its own.
+  void _deliverKeys(Set<CallMemberDevice> members) {
+    final memberIds = {
+      for (final member in members) '${member.userId}|${member.deviceId}',
+    };
+    _pendingKeys.removeWhere((_, key) {
+      if (!memberIds.contains('${key.userId}|${key.deviceId}')) return false;
+      _keys.add(
+        CallMediaKey(
+          participantId: '${key.userId}:${key.deviceId}',
+          index: key.index,
+          key: key.key,
+        ),
+      );
+      return true;
+    });
+  }
+
+  bool _isOwnDevice(String userId, String deviceId) =>
+      userId == _client.userID && deviceId == _client.deviceID;
+
   Future<void> _stop() async {
+    _retry?.cancel();
+    _retry = null;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
@@ -120,32 +176,54 @@ class MatrixRtcMediaKeys {
   void _queueRollout() => _rollout = _rollout.then((_) => _rolloutKey());
 
   Future<void> _rolloutKey() async {
+    if (_subscriptions.isEmpty) return;
     final members = _members();
+    _deliverKeys(members);
     final plan = MatrixRtcMediaKeys.plan(
       sharedWith: _sharedWith,
       members: members,
       keyAge: DateTime.now().difference(_createdAt),
     );
-    if (plan.recipients.isEmpty) {
-      _sharedWith = members;
-      return;
-    }
+    // A leaver gets no later key, even when nobody is left to send it to.
     if (plan.rotates) {
       _index = (_index + 1) % _keyringSize;
       _key = _newKey();
     }
-    try {
-      await _send(plan.recipients);
-    } catch (error, stackTrace) {
-      Logs().w('MatrixRtcMediaKeys: key not sent', error, stackTrace);
+    if (plan.recipients.isEmpty) {
+      _sharedWith = members;
+      if (plan.rotates) _useOwnKey();
       return;
     }
-    _sharedWith = plan.rotates ? members : {..._sharedWith, ...plan.recipients};
-    if (!plan.rotates || _keys.isClosed) return;
+    final Set<CallMemberDevice> sent;
+    try {
+      sent = await _send(plan.recipients);
+    } catch (error, stackTrace) {
+      Logs().w('MatrixRtcMediaKeys: key not sent', error, stackTrace);
+      _retryLater();
+      return;
+    }
+    _sharedWith = plan.rotates ? sent : {..._sharedWith, ...sent};
+    if (sent.length < plan.recipients.length) {
+      _retryLater();
+    } else {
+      _retries = 0;
+    }
+    if (!plan.rotates) return;
     // The others get the key before it encrypts anything.
-    await Future<void>.delayed(_useKeyDelay);
+    await Future<void>.delayed(useKeyDelay);
+    _useOwnKey();
+  }
+
+  void _useOwnKey() {
     if (_subscriptions.isEmpty) return;
     _keys.add(CallMediaKey(participantId: _ownId, index: _index, key: _key));
+  }
+
+  void _retryLater() {
+    if (_retries >= _maxRetries || _subscriptions.isEmpty) return;
+    _retries++;
+    _retry?.cancel();
+    _retry = Timer(retryDelay * _retries, _queueRollout);
   }
 
   List<int> _newKey() {
@@ -167,9 +245,7 @@ class MatrixRtcMediaKeys {
     final content = event.content;
     final deviceId = content.tryGet<String>('device_id');
     if (deviceId == null) return null;
-    if (event.senderId == _client.userID && deviceId == _client.deviceID) {
-      return null;
-    }
+    if (_isOwnDevice(event.senderId, deviceId)) return null;
     if ((content.tryGet<String>('application') ?? 'm.call') != 'm.call') {
       return null;
     }
@@ -182,22 +258,31 @@ class MatrixRtcMediaKeys {
     return (userId: event.senderId, deviceId: deviceId, createdTs: createdTs);
   }
 
-  Future<void> _send(Set<CallMemberDevice> recipients) async {
-    final userIds = {for (final member in recipients) member.userId};
-    if (userIds.any((userId) => !_client.userDeviceKeys.containsKey(userId))) {
-      await _client.updateUserDeviceKeys(additionalUsers: userIds);
-    }
-    final devices = [
+  /// The devices the key went to: a device whose keys are unknown even after
+  /// a refresh is left for a retry.
+  Future<Set<CallMemberDevice>> _send(Set<CallMemberDevice> recipients) async {
+    final missingUsers = {
       for (final member in recipients)
-        ?_client.userDeviceKeys[member.userId]?.deviceKeys[member.deviceId],
-    ];
-    if (devices.isEmpty) return;
-    await _client.sendToDeviceEncrypted(devices, eventType, {
+        if (_deviceKeysOf(member) == null) member.userId,
+    };
+    if (missingUsers.isNotEmpty) {
+      await _client.updateUserDeviceKeys(additionalUsers: missingUsers);
+    }
+    final devices = {
+      for (final member in recipients)
+        if (_deviceKeysOf(member) case final deviceKeys?) member: deviceKeys,
+    };
+    if (devices.isEmpty) return const {};
+    await _client.sendToDeviceEncrypted(devices.values.toList(), eventType, {
       'keys': {'index': _index, 'key': base64.encode(_key)},
       'room_id': _roomId,
       'member': {'claimed_device_id': _client.deviceID, 'id': _ownId},
       'session': {'call_id': '', 'application': 'm.call', 'scope': 'm.room'},
       'sent_ts': DateTime.now().millisecondsSinceEpoch,
     });
+    return devices.keys.toSet();
   }
+
+  DeviceKeys? _deviceKeysOf(CallMemberDevice member) =>
+      _client.userDeviceKeys[member.userId]?.deviceKeys[member.deviceId];
 }
