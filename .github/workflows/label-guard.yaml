@@ -11,7 +11,7 @@ name: Label guard
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.event.label.name }}
-  cancel-in-progress: false
+  queue: max
 
 jobs:
   guard:
@@ -59,11 +59,14 @@ jobs:
                 return;
               }
               const previousName = context.payload.changes?.name?.from;
-              if (!previousName) return;
+              if (!previousName || !allowed.has(previousName.toLowerCase())) return;
+              // The label may have been renamed again since this event: look it up by id.
+              const { node } = await github.graphql('query($id: ID!) { node(id: $id) { ... on Label { name } } }', { id: label.node_id });
+              if (!node || allowed.has(node.name.toLowerCase())) return;
               // Deleting a renamed label would strip it from every issue that carries it.
-              await github.rest.issues.updateLabel({ owner, repo, name: label.name, new_name: previousName });
+              await github.rest.issues.updateLabel({ owner, repo, name: node.name, new_name: previousName });
               await core.summary
-                .addRaw(`Renamed \`${label.name}\` back to \`${previousName}\` after @${actor} renamed it: the new name is not in the [label guide](${guide}).`)
+                .addRaw(`Renamed \`${node.name}\` back to \`${previousName}\` after @${actor} renamed it: the new name is not in the [label guide](${guide}).`)
                 .write();
               return;
             }
