@@ -107,6 +107,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     _room = null;
     _listener = null;
     _lost = null;
+    final keyProvider = _keyProvider;
     _keyProvider = null;
     await _logFailure(() async {
       await listener?.dispose();
@@ -114,6 +115,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
     });
     // A disconnect that times out still has to release the microphone.
     await _logFailure(() async => room?.dispose());
+    await _logFailure(() async => keyProvider?.keyProvider.dispose());
     _emit();
   }
 
@@ -133,15 +135,20 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   @override
   Future<void> setMediaKey(CallMediaKey key) async {
-    await _keyProvider?.setRawKey(
-      Uint8List.fromList(key.key),
-      participantId: key.participantId,
-      keyIndex: key.index,
-    );
-    // Published tracks keep the index they started with otherwise.
-    final room = _room;
-    if (key.participantId == room?.localParticipant?.identity) {
-      await room?.e2eeManager?.setKeyIndex(key.index);
+    try {
+      await _keyProvider?.setRawKey(
+        Uint8List.fromList(key.key),
+        participantId: key.participantId,
+        keyIndex: key.index,
+      );
+      // Published tracks keep the index they started with otherwise.
+      final room = _room;
+      if (key.participantId == room?.localParticipant?.identity) {
+        await room?.e2eeManager?.setKeyIndex(key.index);
+      }
+    } catch (error, stackTrace) {
+      _rethrowErrors(error, stackTrace);
+      Logs().w('LiveKitCallMedia: media key not set', error, stackTrace);
     }
   }
 

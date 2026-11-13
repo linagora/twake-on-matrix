@@ -6,6 +6,7 @@ import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
 import 'package:twake_chat/data/repository/call/call_repository_impl.dart';
+import 'package:twake_chat/domain/exception/call/call_exception.dart';
 import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
@@ -84,9 +85,16 @@ class _FakeMedia implements CallMediaDatasource {
         '${media.isEncrypted}',
       );
 
+  var failingKeys = 0;
+
   @override
-  Future<void> setMediaKey(CallMediaKey key) async =>
-      calls.add('key ${key.participantId} ${key.index}');
+  Future<void> setMediaKey(CallMediaKey key) async {
+    if (failingKeys > 0) {
+      failingKeys--;
+      throw const CallConnectionFailedException();
+    }
+    calls.add('key ${key.participantId} ${key.index}');
+  }
 
   @override
   Future<void> disconnect() async => calls.add('disconnect');
@@ -197,5 +205,20 @@ void main() {
 
     expect(rtc.calls, ['keys !r']);
     expect(media.calls, ['key @b:hs:B 1']);
+  });
+
+  test('startMediaKeys_whenAKeyFailsToApply_appliesTheNextOne', () async {
+    // Arrange
+    media.failingKeys = 1;
+    repository.startMediaKeys(_room);
+
+    // Act
+    rtc.keys
+      ..add(const CallMediaKey(participantId: '@b:hs:B', index: 1, key: [1]))
+      ..add(const CallMediaKey(participantId: '@b:hs:B', index: 2, key: [2]));
+    await pumpEventQueue();
+
+    // Assert
+    expect(media.calls, ['key @b:hs:B 2']);
   });
 }
