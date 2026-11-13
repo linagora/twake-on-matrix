@@ -4,11 +4,53 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class _FakeClient extends Fake implements Client {
+  final joined = <String, Room>{};
+
+  @override
+  Room? getRoomById(String id) => joined[id];
+
+  @override
+  Room? getRoomByAlias(String alias) => null;
+}
+
+class _FakeMatrixState extends Fake implements MatrixState {
+  _FakeMatrixState(this.client);
+
+  @override
+  final Client client;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      '_FakeMatrixState';
+}
+
+HomeserverSummary _summaryWithWebUrl(String webUrl) => HomeserverSummary(
+  discoveryInformation: DiscoveryInformation(
+    additionalProperties: {
+      'app.twake.chat': {'web_url': webUrl},
+    },
+    mHomeserver: HomeserverInformation(
+      baseUrl: Uri.parse('https://matrix.example.org'),
+    ),
+  ),
+  versions: GetVersionsResponse(versions: []),
+  loginFlows: [],
+);
 
 class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   final launches = <(String, PreferredLaunchMode)>[];
@@ -44,22 +86,26 @@ void main() {
   });
 
   Future<void> launch(WidgetTester tester, String url) async {
+    // The app runs under a ProviderScope; UrlLauncher reads the web app
+    // origin from it.
     await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: LocalizationService.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (ctx) {
-              context = ctx;
-              return const SizedBox.shrink();
-            },
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            L10n.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: LocalizationService.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ),
@@ -182,6 +228,95 @@ void main() {
         platform.launches.single.$1,
         'https://www.openstreetmap.org/?mlat=48.85&mlon=2.35#map=16/48.85/2.35',
       );
+    });
+  });
+
+  group('GIVEN a link to a room of the web app\n', () {
+    const webUrl = 'https://chat.example.org';
+    const roomId = '!joined:example.org';
+    const eventId = r'$event';
+    const link = '$webUrl/rooms/$roomId?event=$eventId';
+    late _FakeClient client;
+
+    setUp(() {
+      client = _FakeClient();
+      client.joined[roomId] = Room(
+        id: roomId,
+        client: client,
+        membership: Membership.join,
+      );
+    });
+
+    Future<void> launchInApp(
+      WidgetTester tester,
+      String url, {
+      String? homeserverWebUrl,
+    }) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          GoRoute(
+            path: '/rooms/:roomid',
+            builder: (_, state) => Text(
+              'room ${state.pathParameters['roomid']} '
+              'event ${state.uri.queryParameters['event']}',
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            activeMatrixClientProvider.overrideWithValue(client),
+            loginHomeserverSummaryProvider.overrideWithBuild(
+              (_, _) => homeserverWebUrl == null
+                  ? null
+                  : _summaryWithWebUrl(homeserverWebUrl),
+            ),
+          ],
+          child: provider.Provider<MatrixState>.value(
+            value: _FakeMatrixState(client),
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        ),
+      );
+      UrlLauncher(context, url: url).launchUrl();
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('WHEN the homeserver names that web app\n'
+        'THEN the room opens in the app at the event', (tester) async {
+      await launchInApp(tester, link, homeserverWebUrl: webUrl);
+
+      expect(find.text('room $roomId event $eventId'), findsOneWidget);
+      expect(platform.launches, isEmpty);
+    });
+
+    testWidgets('WHEN the homeserver does not name it and the room is joined\n'
+        'THEN the room still opens in the app', (tester) async {
+      await launchInApp(tester, link);
+
+      expect(find.text('room $roomId event $eventId'), findsOneWidget);
+      expect(platform.launches, isEmpty);
+    });
+
+    testWidgets('WHEN the room is unknown and the host is not the web app\n'
+        'THEN it is opened in an external app', (tester) async {
+      const other = 'https://other.example.com/rooms/!unknown:example.com';
+
+      await launchInApp(tester, other);
+
+      expect(platform.launches, [
+        (other, PreferredLaunchMode.externalApplication),
+      ]);
     });
   });
 }

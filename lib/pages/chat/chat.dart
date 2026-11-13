@@ -43,9 +43,11 @@ import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
+import 'package:twake_chat/pages/chat/providers/message_link_providers.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
+import 'package:twake_chat/presentation/extensions/chat/copy_message_link_extension.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/event_update_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
@@ -88,6 +90,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/room_member_count_reconci
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/clipboard.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/album_timeline_index.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/recent_reactions_extension.dart';
@@ -1042,6 +1045,13 @@ class ChatController extends ConsumerState<Chat>
 
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();
+  }
+
+  Future<void> copyMessageLinkAction(Event event) async {
+    final link = ref.read(
+      messageLinkProvider(roomId: event.room.id, eventId: event.eventId),
+    );
+    await context.copyMessageLink(link);
   }
 
   void reportEventAction(Event event) async {
@@ -2087,6 +2097,8 @@ class ChatController extends ConsumerState<Chat>
       [
         ChatContextMenuActions.forward,
         if (event.isCopyable) ChatContextMenuActions.copyMessage,
+        if (event.showsCopyLink(isMobile: PlatformInfos.isMobile))
+          ChatContextMenuActions.copyLink,
         if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
         if (event.room.canReportContent) ChatContextMenuActions.report,
         if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
@@ -2130,6 +2142,9 @@ class ChatController extends ConsumerState<Chat>
       case ChatContextMenuActions.copyMessage:
         event.copy(context, timeline!);
         break;
+      case ChatContextMenuActions.copyLink:
+        unawaited(copyMessageLinkAction(event));
+        break;
       case ChatContextMenuActions.pinChat:
         pinEventAction(event);
         break;
@@ -2151,7 +2166,7 @@ class ChatController extends ConsumerState<Chat>
       case ChatContextMenuActions.edit:
         editAction(editEvent: event);
         break;
-      default:
+      case ChatContextMenuActions.jumpToMessage:
         break;
     }
   }
@@ -2905,6 +2920,8 @@ class ChatController extends ConsumerState<Chat>
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
+      if (event.showsCopyLink(isMobile: PlatformInfos.isMobile))
+        ChatContextMenuActions.copyLink,
       if (event.room.canReportContent) ChatContextMenuActions.report,
       ChatContextMenuActions.pinChat,
       if (PlatformInfos.isWeb && event.hasAttachment)

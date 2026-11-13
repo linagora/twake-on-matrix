@@ -15,7 +15,13 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
 import 'platform_infos.dart';
@@ -45,6 +51,27 @@ class UrlLauncher with GoToDraftChatMixin {
       // we can't open this thing
       TwakeSnackBar.show(context, L10n.of(context)!.cantOpenUri(url!));
       return;
+    }
+    final container = ProviderScope.containerOf(context, listen: false);
+    final policy = container.read(messageLinkPolicyProvider);
+    final webAppMatrixTo =
+        policy.matrixToForWebLink(
+          url!,
+          webAppOrigin: container
+              .read(loginHomeserverSummaryProvider)
+              .webAppOrigin,
+        ) ??
+        policy.matrixToForRoomsLink(
+          url!,
+          isKnownRoom: (roomId) => _isOpenableRoom(
+            container.read(activeMatrixClientProvider)?.getRoomById(roomId),
+          ),
+        );
+    if (webAppMatrixTo != null) {
+      return openMatrixToUrl(
+        customUrl: webAppMatrixTo,
+        isInvitationLink: isInvitationLink,
+      );
     }
     if (uri.host == AppConstants.appLinkUniversalLinkDomain) {
       final inviteUri = Uri.parse(AppConfig.inviteLinkPrefix);
@@ -141,6 +168,12 @@ class UrlLauncher with GoToDraftChatMixin {
     }
   }
 
+  /// A room the user has joined or is invited to, as [openMatrixToUrl]
+  /// opens directly.
+  bool _isOpenableRoom(Room? room) =>
+      room?.membership == Membership.join ||
+      room?.membership == Membership.invite;
+
   void openMatrixToUrl({
     String? customUrl,
     bool isInvitationLink = false,
@@ -186,6 +219,13 @@ class UrlLauncher with GoToDraftChatMixin {
             eventId: event,
           ),
         );
+        return;
+      }
+      final openChat = context.findAncestorStateOfType<ChatController>();
+      // A link to the open chat scrolls it: navigating to the URL it already
+      // shows would not notify it again.
+      if (event != null && openChat?.roomId == room.id) {
+        await openChat!.scrollToEventIdAndHighlight(event);
         return;
       }
       RoomRoute(roomid: room.id, event: event).go(context);

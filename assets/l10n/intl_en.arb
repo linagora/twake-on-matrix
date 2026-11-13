@@ -3355,5 +3355,17 @@
   "@callErrorMicrophoneChange": {
     "type": "text",
     "placeholders": {}
+  },
+  "linkCopied": "Link copied",
+  "@linkCopied": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "linkToCopy": "Copy this link: {link}",
+  "@linkToCopy": {
+    "type": "text",
+    "placeholders": {
+      "link": {}
+    }
   }
 }

@@ -20,6 +20,7 @@ abstract class AppTwakeInformation with _$AppTwakeInformation {
     @JsonKey(name: 'enable_twake_drive') bool? isTwakeDriveEnabled,
     @JsonKey(name: 'public_groups')
     PublicGroupsInformation? publicGroupsInformation,
+    @JsonKey(name: 'web_url') String? webUrl,
   }) = _AppTwakeInformation;
 
   factory AppTwakeInformation.fromJson(Map<String, dynamic> json) =>

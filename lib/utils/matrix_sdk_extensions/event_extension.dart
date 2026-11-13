@@ -12,6 +12,7 @@ import 'package:twake_chat/utils/date_time_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/event_info_extension.dart';
+import 'package:twake_chat/utils/extension/event_status_custom_extension.dart';
 import 'package:twake_chat/utils/extension/mime_type_extension.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
@@ -91,6 +92,14 @@ extension LocalizedBody on Event {
       [MessageTypes.Image, MessageTypes.Video].contains(messageType);
 
   bool get isCopyable => messageType == MessageTypes.Text;
+
+  /// A link needs the final event id, which a sending or failed event lacks;
+  /// a deleted message takes no action, as in the web app.
+  bool get canCopyLink => status.isAvailable && !redacted;
+
+  /// Whether a message menu offers Copy link: mobile only, as the web app
+  /// has its own.
+  bool showsCopyLink({required bool isMobile}) => isMobile && canCopyLink;
 
   bool isContains(String? searchTerm) => _searchEngine.matchesText(
     searchTerm ?? '',
