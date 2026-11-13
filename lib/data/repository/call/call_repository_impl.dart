@@ -3,6 +3,7 @@ import 'package:twake_chat/data/datasource/call/call_token_datasource.dart';
 import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
+import 'package:twake_chat/domain/model/call/call_ring.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
 
 class CallRepositoryImpl implements CallRepository {
@@ -32,7 +33,26 @@ class CallRepositoryImpl implements CallRepository {
       _rtc.endStaleOwnMembership(room);
 
   @override
-  Future<void> joinMembership(CallJoin join) => _rtc.joinMembership(join);
+  Future<String> joinMembership(CallJoin join) => _rtc.joinMembership(join);
+
+  @override
+  bool hasOtherMembers(CallRoom room) => _rtc.hasOtherMembers(room);
+
+  @override
+  Future<void> sendRing(CallJoin join, {required String membershipEventId}) =>
+      _rtc.sendRing(join, membershipEventId: membershipEventId);
+
+  @override
+  Future<void> declineRing(CallRing ring) => _rtc.declineRing(ring);
+
+  @override
+  Stream<List<CallRing>> watchRings() => _rtc.watchRings();
+
+  @override
+  Stream<MissedCall> watchMissedCalls() => _rtc.watchMissedCalls();
+
+  @override
+  Future<void> ensureCallRingPushRules() => _rtc.ensureCallRingPushRules();
 
   @override
   Future<void> leaveMembership(CallRoom room) => _rtc.leaveMembership(room);
