@@ -84,11 +84,12 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    if (!controller.isThread &&
-                        controller.room!.pinnedEventIds.isNotEmpty)
+                    _withPinnedBar(
+                      controller,
                       const SizedBox(
                         height: ChatViewStyle.pinnedMessageHintHeight,
                       ),
+                    ),
                     Expanded(
                       child: GestureDetector(
                         onTap: controller.clearSingleSelectedEvent,
@@ -232,14 +233,15 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                             .timeline
                             ?.requestKeys(onlineKeyBackupOnly: false),
                       ),
-                    if (!controller.isThread) PinnedEventsView(controller),
-                    if (!controller.isThread &&
-                        controller.room!.pinnedEventIds.isNotEmpty)
+                    PinnedEventsView(controller),
+                    _withPinnedBar(
+                      controller,
                       Divider(
                         height: ChatViewBodyStyle.dividerSize,
                         thickness: ChatViewBodyStyle.dividerSize,
                         color: Theme.of(context).dividerColor,
                       ),
+                    ),
                     ChatAudioPlayerWidget(matrix: controller.matrix),
                     SizedBox(
                       key: controller.stickyTimestampKey,
@@ -360,6 +362,23 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
           ],
         ),
       ),
+    );
+  }
+
+  /// [child] only while the pinned bar of this screen shows: the room's pins
+  /// in the room, the thread's own in a thread.
+  Widget _withPinnedBar(ChatController controller, Widget child) {
+    if (!controller.isThread) {
+      return controller.room!.pinnedEventIds.isNotEmpty
+          ? child
+          : const SizedBox.shrink();
+    }
+    return ValueListenableBuilder(
+      valueListenable:
+          controller.pinnedEventsController.getPinnedMessageNotifier,
+      builder: (_, _, _) => controller.pinnedEventsController.hasPins
+          ? child
+          : const SizedBox.shrink(),
     );
   }
 

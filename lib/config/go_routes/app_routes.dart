@@ -388,7 +388,12 @@ class InvitationLinkWebRoute extends GoRouteData with $InvitationLinkWebRoute {
             TypedGoRoute<EncryptionRoute>(path: 'encryption'),
             TypedGoRoute<InviteRoute>(path: 'invite'),
             TypedGoRoute<PinnedMessagesRoute>(path: 'pinnedmessages'),
-            TypedGoRoute<ThreadRoute>(path: 'threads/:rootid'),
+            TypedGoRoute<ThreadRoute>(
+              path: 'threads/:rootid',
+              routes: [
+                TypedGoRoute<ThreadPinnedMessagesRoute>(path: 'pinnedmessages'),
+              ],
+            ),
           ],
         ),
       ],
@@ -1079,6 +1084,30 @@ class ThreadRoute extends GoRouteData with $ThreadRoute {
     }
     return NoTransitionPage(key: state.pageKey, name: name, child: child);
   }
+}
+
+/// The pins of one thread, opened from the pinned bar of its screen.
+class ThreadPinnedMessagesRoute extends GoRouteData
+    with $ThreadPinnedMessagesRoute {
+  const ThreadPinnedMessagesRoute({
+    required this.roomid,
+    required this.rootid,
+    this.$extra,
+  });
+
+  final String roomid;
+  final String rootid;
+  final PinnedEventsArgument? $extra;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) =>
+      TwakeCupertinoPage(
+        child: PinnedMessages(
+          pinnedEvents: $extra?.pinnedEvents ?? const [],
+          timeline: $extra?.timeline,
+          threadRootId: rootid,
+        ),
+      );
 }
 
 class EncryptionRoute extends GoRouteData with $EncryptionRoute {

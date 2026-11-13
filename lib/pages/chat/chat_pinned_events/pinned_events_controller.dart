@@ -26,6 +26,11 @@ class PinnedEventsController {
 
   StreamSubscription? _pinnedEventsSubscription;
 
+  bool get hasPins => getPinnedMessageNotifier.value.fold(
+    (_) => false,
+    (success) => success is ChatGetPinnedEventsSuccess,
+  );
+
   bool isCurrentPinnedEvent(Event event) {
     return currentPinnedEventNotifier.value?.eventId == event.eventId;
   }
@@ -36,11 +41,17 @@ class PinnedEventsController {
     bool isInitial = false,
     bool isUnpin = false,
     String? eventId,
+    String? threadRootId,
     JumpToPinnedMessageCallback? jumpToPinnedMessageCallback,
   }) async {
     await Future.delayed(_timeDelayGetPinnedMessage);
     _pinnedEventsSubscription = getPinnedMessageInteractor
-        .execute(roomId: roomId, client: client, isInitial: isInitial)
+        .execute(
+          roomId: roomId,
+          client: client,
+          isInitial: isInitial,
+          threadRootId: threadRootId,
+        )
         .listen((event) {
           try {
             getPinnedMessageNotifier.value = event;
@@ -120,7 +131,11 @@ class PinnedEventsController {
     }
   }
 
-  void handlePopBack({required Client client, Object? popResult}) {
+  void handlePopBack({
+    required Client client,
+    Object? popResult,
+    String? threadRootId,
+  }) {
     Logs().d(
       "PinnedEventsController()::handlePopBack(): popResult: $popResult",
     );
@@ -130,7 +145,11 @@ class PinnedEventsController {
       }
       final room = popResult.first?.room;
       if (room != null) {
-        getPinnedMessageAction(roomId: room.id, client: client);
+        getPinnedMessageAction(
+          roomId: room.id,
+          client: client,
+          threadRootId: threadRootId,
+        );
       }
     }
   }
