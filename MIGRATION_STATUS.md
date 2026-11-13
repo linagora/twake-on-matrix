@@ -52,4 +52,5 @@ _Measured on 2026-10-21 by `scripts/migration_status.sh --write`._
 | settings_chat | Consumer widgets, GetIt removed | #3551 |
 | spaces, folders | New code on use cases and controllers, no GetIt in its `lib` code; the chat list around it stays legacy | #3558 |
 | draft_chat | Create direct chat and blocked state on use cases + native providers; `UploadManager` bridged, unblock mixin and the style classes (`ResponsiveUtils`) still on GetIt; the screen is still a `ConsumerState` with `Matrix.of` reads, no Notifier or `@freezed` state yet | #3574 |
+| new_private_chat | Opening a contact on a use case + controller (reuses the draft_chat direct chat providers); the contacts list, the search and the permission banner stay on the shared `ContactsViewControllerMixin`, which still takes the `Client` from `Matrix.of`; `ResponsiveUtils` still on GetIt in `expansion_list.dart` | |
 | Everything else | Legacy | |
