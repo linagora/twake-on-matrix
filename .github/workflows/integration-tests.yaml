@@ -101,7 +101,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -131,8 +131,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -311,7 +311,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -341,8 +341,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -457,7 +457,7 @@ jobs:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           ORG_GRADLE_PROJECT_patrolTestBuildType: profile
         run: |
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
           flutter build apk --config-only
 
           # The secret may hold either base64-encoded content or the raw env
