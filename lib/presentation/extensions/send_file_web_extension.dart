@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 import 'package:dartz/dartz.dart' hide id;
 import 'package:dio/dio.dart';
@@ -22,6 +23,7 @@ extension SendFileWebExtension on Room {
     required SyncUpdate fakeImageEvent,
     required String txid,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     String? editEventId,
     int? shrinkImageMaxDimension,
     MatrixImageFile? thumbnail,
@@ -312,6 +314,8 @@ extension SendFileWebExtension on Room {
       content,
       txid: txid,
       inReplyTo: inReplyTo,
+      threadRootEventId: thread?.rootEventId,
+      threadLastEventId: thread?.lastEventId,
       editEventId: editEventId,
     );
 

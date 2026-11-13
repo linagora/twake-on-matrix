@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -152,6 +153,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     String? caption,
     Room? room,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) {
     sendController.clear();
     return _createRoom(
@@ -161,6 +163,7 @@ class DraftChatController extends ConsumerState<DraftChat>
           room: newRoom,
           caption: caption,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
       },
     );

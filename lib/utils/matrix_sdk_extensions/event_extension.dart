@@ -502,7 +502,9 @@ extension LocalizedBody on Event {
 
   /// Returns true if this event is a reply to another event.
   bool isReplyEvent() {
-    return inReplyToEventId() != null;
+    // A thread reply carries m.in_reply_to only as a fallback for clients
+    // without threads (is_falling_back: true); it is not a quote.
+    return inReplyToEventId(includingFallback: false) != null;
   }
 
   bool isReplyEventWithAudio() {

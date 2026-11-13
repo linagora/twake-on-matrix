@@ -24,6 +24,8 @@ class UploadFileInfo extends UploadInfo {
   final UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
   final String? batchId;
+  String? threadRootEventId;
+  String? threadLastEventId;
   bool isFailed;
   FileInfo? fileInfo;
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -40,6 +42,8 @@ class UploadFileInfo extends UploadInfo {
     this.captionInfo,
     this.inReplyToEventId,
     this.batchId,
+    this.threadRootEventId,
+    this.threadLastEventId,
     this.isFailed = false,
     this.fileInfo,
     this.matrixFile,
