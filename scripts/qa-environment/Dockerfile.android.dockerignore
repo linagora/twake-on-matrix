@@ -1,0 +1,7 @@
+# Build context of Dockerfile.android: the checkout, without the build outputs and caches (the
+# .dockerignore of the repository is the whitelist of the web build)
+.git/
+**/build/
+**/.dart_tool/
+android/.gradle/
+scripts/qa-environment/.generated/

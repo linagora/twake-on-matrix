@@ -1,0 +1,43 @@
+# Debug APK of the Android app for build.sh, at /twake-chat-qa.apk of the image. Debug, because only the
+# debug manifest allows cleartext HTTP (android/app/src/debug/AndroidManifest.xml), which the QA
+# homeserver speaks (http://10.0.2.2:<port>), as in the Patrol integration tests. x86_64 only: the ABI
+# of the emulator, and one Rust build of vodozemac instead of four. The caches survive the builds.
+#
+# cirruslabs/flutter has no 3.47.x image: the stage starts from the newest one (with the Android SDK)
+# and moves its Flutter checkout to FLUTTER_VERSION, as the release Dockerfile does.
+ARG FLUTTER_IMAGE_VERSION=3.44.0
+ARG FLUTTER_VERSION=3.47.8
+
+FROM --platform=amd64 ghcr.io/cirruslabs/flutter:${FLUTTER_IMAGE_VERSION} AS build-env
+ARG FLUTTER_VERSION
+
+RUN git -C "$FLUTTER_ROOT" fetch --depth 1 origin tag "${FLUTTER_VERSION}" && \
+    git -C "$FLUTTER_ROOT" checkout "${FLUTTER_VERSION}" && \
+    flutter precache --android && \
+    flutter --version
+
+# webcrypto builds its native library with CMake and Ninja (native assets)
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-recommends cmake ninja-build && \
+    rm -rf /var/lib/apt/lists/*
+
+# vodozemac (flutter_vodozemac) is built from its Rust sources by cargokit
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal && \
+    /root/.cargo/bin/rustup target add x86_64-linux-android
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /app
+COPY . .
+
+# local.properties and key.properties of a checkout would point at the host's SDK and key
+RUN --mount=type=cache,target=/root/.pub-cache \
+    --mount=type=cache,target=/root/.gradle \
+    --mount=type=cache,target=/root/.cargo/registry \
+    rm -f android/local.properties android/key.properties && \
+    flutter pub get && \
+    dart run build_runner build --delete-conflicting-outputs && \
+    flutter build apk --debug --target-platform android-x64 && \
+    mkdir /out && cp build/app/outputs/flutter-apk/app-debug.apk /out/twake-chat-qa.apk
+
+FROM scratch
+COPY --from=build-env /out/twake-chat-qa.apk /
