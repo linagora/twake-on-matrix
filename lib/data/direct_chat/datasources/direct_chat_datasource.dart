@@ -15,6 +15,6 @@ abstract class DirectChatDatasource {
   });
 
   /// Returns the id of the existing direct chat with [contactMxId], or null
-  /// when there is none or it was abandoned.
+  /// when there is none or it is abandoned or no longer usable with them.
   String? findDirectChat({required String contactMxId});
 }

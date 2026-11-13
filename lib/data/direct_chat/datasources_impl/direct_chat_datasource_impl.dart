@@ -93,7 +93,9 @@ class DirectChatDatasourceImpl implements DirectChatDatasource {
     final client = _requireClient;
     final roomId = client.getDirectChatFromUserId(contactMxId);
     if (roomId == null) return null;
-    if (client.getRoomById(roomId)?.isAbandonedDMRoom == true) return null;
+    final room = client.getRoomById(roomId);
+    if (room == null || room.isAbandonedDMRoom) return null;
+    if (!room.isUsableDirectChatWith(contactMxId)) return null;
     return roomId;
   }
 

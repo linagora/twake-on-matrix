@@ -6,8 +6,10 @@ import 'package:twake_chat/data/direct_chat/datasources_impl/direct_chat_datasou
 import 'package:twake_chat/domain/direct_chat/exceptions/create_direct_chat_exception.dart';
 
 class _FakeSummary extends Fake implements RoomSummary {
+  _FakeSummary(this.mJoinedMemberCount);
+
   @override
-  int? get mJoinedMemberCount => 2;
+  final int? mJoinedMemberCount;
 }
 
 class _FakeRoom extends Fake implements Room {
@@ -17,6 +19,7 @@ class _FakeRoom extends Fake implements Room {
     this.peer = '@alice:server',
     this.abandoned = false,
     this.joinedAfterJoin = true,
+    this.joinedCount = 2,
   });
 
   @override
@@ -26,6 +29,7 @@ class _FakeRoom extends Fake implements Room {
   final String? peer;
   final bool abandoned;
   final bool joinedAfterJoin;
+  final int joinedCount;
   bool joinCalled = false;
 
   @override
@@ -35,7 +39,7 @@ class _FakeRoom extends Fake implements Room {
   @override
   String? get directChatMatrixID => peer;
   @override
-  RoomSummary get summary => _FakeSummary();
+  RoomSummary get summary => _FakeSummary(joinedCount);
   @override
   List<User> getParticipants([List<Membership>? membershipFilter]) => [];
 
@@ -368,6 +372,26 @@ void main() {
       client.knownRooms['!dm:server'] = _FakeRoom(
         id: '!dm:server',
         abandoned: true,
+      );
+
+      expect(find(), isNull);
+    });
+
+    test('is null when the mapped room became a group', () {
+      client.directRoomId = '!dm:server';
+      client.knownRooms['!dm:server'] = _FakeRoom(
+        id: '!dm:server',
+        joinedCount: 3,
+      );
+
+      expect(find(), isNull);
+    });
+
+    test('is null when the mapped room is a DM with another person', () {
+      client.directRoomId = '!dm:server';
+      client.knownRooms['!dm:server'] = _FakeRoom(
+        id: '!dm:server',
+        peer: '@bob:server',
       );
 
       expect(find(), isNull);
