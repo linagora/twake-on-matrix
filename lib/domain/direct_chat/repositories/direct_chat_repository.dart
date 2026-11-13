@@ -13,4 +13,8 @@ abstract class DirectChatRepository {
     required String roomId,
     required String contactMxId,
   });
+
+  /// Returns the id of the existing direct chat with [contactMxId], or null
+  /// when there is none or it was abandoned.
+  String? findDirectChat({required String contactMxId});
 }

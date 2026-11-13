@@ -16,4 +16,8 @@ class DirectChatRepositoryImpl implements DirectChatRepository {
     required String contactMxId,
   }) =>
       _datasource.isUsableDirectChat(roomId: roomId, contactMxId: contactMxId);
+
+  @override
+  String? findDirectChat({required String contactMxId}) =>
+      _datasource.findDirectChat(contactMxId: contactMxId);
 }

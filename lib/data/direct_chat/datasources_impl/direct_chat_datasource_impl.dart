@@ -88,6 +88,15 @@ class DirectChatDatasourceImpl implements DirectChatDatasource {
     return false;
   }
 
+  @override
+  String? findDirectChat({required String contactMxId}) {
+    final client = _requireClient;
+    final roomId = client.getDirectChatFromUserId(contactMxId);
+    if (roomId == null) return null;
+    if (client.getRoomById(roomId)?.isAbandonedDMRoom == true) return null;
+    return roomId;
+  }
+
   /// A forbidden profile stops the creation. Any other Matrix error is logged
   /// and the creation goes on, as the contact may have no profile yet. A
   /// failure that is not a Matrix error (offline, timeout) is a typed failure.

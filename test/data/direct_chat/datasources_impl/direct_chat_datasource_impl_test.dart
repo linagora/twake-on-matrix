@@ -349,6 +349,31 @@ void main() {
     });
   });
 
+  group('findDirectChat', () {
+    String? find() => datasource.findDirectChat(contactMxId: contact);
+
+    test('is null without a direct mapping', () {
+      expect(find(), isNull);
+    });
+
+    test('returns the mapped room', () {
+      client.directRoomId = '!dm:server';
+      client.knownRooms['!dm:server'] = _FakeRoom(id: '!dm:server');
+
+      expect(find(), '!dm:server');
+    });
+
+    test('is null for an abandoned room', () {
+      client.directRoomId = '!dm:server';
+      client.knownRooms['!dm:server'] = _FakeRoom(
+        id: '!dm:server',
+        abandoned: true,
+      );
+
+      expect(find(), isNull);
+    });
+  });
+
   test('without an active client it is a programmer error', () {
     expect(
       () => const DirectChatDatasourceImpl(
