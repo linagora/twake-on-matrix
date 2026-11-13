@@ -131,8 +131,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -341,8 +341,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
