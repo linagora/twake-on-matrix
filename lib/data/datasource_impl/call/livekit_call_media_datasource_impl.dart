@@ -14,7 +14,10 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   LiveKitCallMediaDatasourceImpl({
     @visibleForTesting
     lk.Room Function(lk.E2EEOptions? encryption) createRoom = _newRoom,
-  }) : _createRoom = createRoom;
+    @visibleForTesting
+    Future<lk.BaseKeyProvider> Function() createKeyProvider = _newKeyProvider,
+  }) : _createRoom = createRoom,
+       _createKeyProvider = createKeyProvider;
 
   static lk.Room _newRoom(lk.E2EEOptions? encryption) => lk.Room(
     roomOptions: lk.RoomOptions(
@@ -25,6 +28,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
   );
 
   final lk.Room Function(lk.E2EEOptions? encryption) _createRoom;
+  final Future<lk.BaseKeyProvider> Function() _createKeyProvider;
 
   /// The user of a LiveKit identity: the part before the device id.
   @visibleForTesting
@@ -48,7 +52,7 @@ class LiveKitCallMediaDatasourceImpl implements CallMediaDatasource {
 
   /// One key per device, as MatrixRTC shares them: no ratchet. HKDF, as the
   /// keys of livekit-js (`createKeyMaterialFromBuffer`).
-  static Future<lk.BaseKeyProvider> _createKeyProvider() async {
+  static Future<lk.BaseKeyProvider> _newKeyProvider() async {
     final options = rtc.KeyProviderOptions(
       sharedKey: false,
       ratchetSalt: Uint8List.fromList(lk.defaultRatchetSalt.codeUnits),
