@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -31,6 +32,33 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     }
   }
 
+  Future<void> _markAllRead(List<String> roomIds) =>
+      Future.wait(roomIds.map(_markRead));
+
+  /// The mentions come from the server: a progress while they load, a way to
+  /// ask again when they cannot be read.
+  Widget _mentionsList(
+    BuildContext context,
+    AsyncValue<List<ActivityItem>> mentions,
+    Iterable<ActivityItem> shown,
+    ActivityFilter filter,
+  ) => switch (mentions) {
+    AsyncLoading() => const Center(child: CircularProgressIndicator()),
+    AsyncError() => Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(L10n.of(context)!.activityMentionsLoadFailed),
+          TextButton(
+            onPressed: () => ref.invalidate(activityMentionsProvider),
+            child: Text(L10n.of(context)!.activityTryAgain),
+          ),
+        ],
+      ),
+    ),
+    _ => _list(context, shown, filter),
+  };
+
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
@@ -38,7 +66,13 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     final count = ref.watch(unreadMentionCountProvider).value ?? 0;
     final rooms = ref.watch(activityItemsProvider).value ?? const [];
     final isMobile = ContactsAppbarStyle.responsiveUtils.isMobile(context);
-    final shown = rooms.where((item) => view.filter.includes(item.kind));
+    final mentions = ref.watch(activityMentionsProvider);
+    final items = [...rooms, ...?mentions.value];
+    final shown = items.where((item) => view.filter.includes(item.kind));
+    final unreadRoomIds = [
+      for (final item in rooms)
+        if (item.kind == ActivityKind.unreadRoom) item.roomId,
+    ];
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       bottomNavigationBar: widget.bottomNavigationBar,
@@ -61,6 +95,14 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
             ],
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: unreadRoomIds.isEmpty
+                ? null
+                : () => _markAllRead(unreadRoomIds),
+            child: Text(l10n.activityMarkAllRead),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -70,7 +112,11 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
                 .read(activityViewControllerProvider.notifier)
                 .selectFilter,
           ),
-          Expanded(child: _list(context, shown, view.filter)),
+          Expanded(
+            child: view.filter == ActivityFilter.mentions
+                ? _mentionsList(context, mentions, shown, view.filter)
+                : _list(context, shown, view.filter),
+          ),
         ],
       ),
     );

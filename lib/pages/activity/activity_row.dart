@@ -125,8 +125,9 @@ class ActivityRow extends StatelessWidget {
 
   String _verb(L10n l10n) => switch (item.kind) {
     ActivityKind.unreadRoom => l10n.activitySentMessage,
+    ActivityKind.mention => l10n.activityMentionedYou,
     ActivityKind.reply => l10n.activityRepliedInThread,
-    ActivityKind.mention || ActivityKind.reaction => '',
+    ActivityKind.reaction => '',
   };
 }
 

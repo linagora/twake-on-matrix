@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
@@ -19,6 +20,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../providers/fake_active_account.dart';
+import 'activity_mentions_test_support.dart';
 
 /// THR-M-12, slice 1: what the Activity tab reads from the sync data held in
 /// memory (unread rooms, followed threads, unread mentions), as a test sets
@@ -218,7 +220,9 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 
 /// How a spec opens the Activity page. [account] is the active account
 /// (`@me:example.org` by default). Without [repository], the page reads
-/// the real repositories of [account] (a `ThreadAccount`). [settle] false:
+/// the real repositories of [account] (a `ThreadAccount`); with it, the
+/// mentions are empty unless [mentions] is given, so no spec reads the
+/// account. [settle] false:
 /// something keeps loading (a progress turns), the page is not settled.
 /// [wide]: a wide screen instead of a phone. [locale]: the language of the
 /// app. [appTheme]: the theme of the app ([TwakeThemes.buildTheme]) instead
@@ -226,6 +230,7 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 class ActivityPageSetup {
   const ActivityPageSetup({
     required this.repository,
+    this.mentions,
     this.overrides = const [],
     this.settle = true,
     this.wide = false,
@@ -235,6 +240,7 @@ class ActivityPageSetup {
   });
 
   final FakeActivityRepository? repository;
+  final FakeActivityMentionsRepository? mentions;
   final List<Override> overrides;
   final bool settle;
   final bool wide;
@@ -244,8 +250,12 @@ class ActivityPageSetup {
 
   /// The fakes of the repositories, none without [repository].
   List<Override> get repositoryOverrides => [
-    if (repository case final repository?)
+    if (repository case final repository?) ...[
       activityRepositoryProvider.overrideWithValue(repository),
+      activityMentionsRepositoryProvider.overrideWithValue(
+        mentions ?? FakeActivityMentionsRepository(),
+      ),
+    ],
   ];
 }
 

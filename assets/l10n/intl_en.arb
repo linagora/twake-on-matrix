@@ -3386,6 +3386,11 @@
     "type": "text",
     "placeholders": {}
   },
+  "activityMarkAllRead": "Mark all read",
+  "@activityMarkAllRead": {
+    "type": "text",
+    "placeholders": {}
+  },
   "activityUnread": "Unread",
   "@activityUnread": {
     "type": "text",
@@ -3408,6 +3413,21 @@
   },
   "activityRepliedInThread": "replied in a thread",
   "@activityRepliedInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentionedYou": "mentioned you",
+  "@activityMentionedYou": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentionsLoadFailed": "The mentions could not be loaded.",
+  "@activityMentionsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityTryAgain": "Try again",
+  "@activityTryAgain": {
     "type": "text",
     "placeholders": {}
   }
