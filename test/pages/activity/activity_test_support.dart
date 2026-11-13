@@ -11,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
+import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
@@ -21,6 +22,7 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import '../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../../providers/fake_active_account.dart';
 import 'activity_mentions_test_support.dart';
+import 'activity_reactions_test_support.dart';
 
 /// THR-M-12, slice 1: what the Activity tab reads from the sync data held in
 /// memory (unread rooms, followed threads, unread mentions), as a test sets
@@ -221,8 +223,8 @@ Future<void> switchActiveAccount(WidgetTester tester, Client? client) async {
 /// How a spec opens the Activity page. [account] is the active account
 /// (`@me:example.org` by default). Without [repository], the page reads
 /// the real repositories of [account] (a `ThreadAccount`); with it, the
-/// mentions are empty unless [mentions] is given, so no spec reads the
-/// account. [settle] false:
+/// mentions and the reactions are empty unless [mentions] or [reactions]
+/// are given, so no spec reads the account. [settle] false:
 /// something keeps loading (a progress turns), the page is not settled.
 /// [wide]: a wide screen instead of a phone. [locale]: the language of the
 /// app. [appTheme]: the theme of the app ([TwakeThemes.buildTheme]) instead
@@ -231,6 +233,7 @@ class ActivityPageSetup {
   const ActivityPageSetup({
     required this.repository,
     this.mentions,
+    this.reactions,
     this.overrides = const [],
     this.settle = true,
     this.wide = false,
@@ -241,6 +244,7 @@ class ActivityPageSetup {
 
   final FakeActivityRepository? repository;
   final FakeActivityMentionsRepository? mentions;
+  final FakeActivityReactionsRepository? reactions;
   final List<Override> overrides;
   final bool settle;
   final bool wide;
@@ -255,8 +259,18 @@ class ActivityPageSetup {
       activityMentionsRepositoryProvider.overrideWithValue(
         mentions ?? FakeActivityMentionsRepository(),
       ),
+      activityReactionsRepositoryProvider.overrideWithValue(
+        reactions ?? _emptyReactions(),
+      ),
     ],
   ];
+}
+
+/// No reaction: closed with the test.
+FakeActivityReactionsRepository _emptyReactions() {
+  final reactions = FakeActivityReactionsRepository();
+  addTearDown(reactions.close);
+  return reactions;
 }
 
 /// The Activity page as the tab shows it, in a router that also knows the
@@ -276,6 +290,8 @@ Future<void> pumpActivityPage(
   addTearDown(router.dispose);
   final repository = setup.repository;
   if (repository != null) addTearDown(repository.close);
+  final reactions = setup.reactions;
+  if (reactions != null) addTearDown(reactions.close);
   await tester.pumpWidget(_activityApp(setup, router));
   await _settleUnlessLoading(tester, setup);
 }

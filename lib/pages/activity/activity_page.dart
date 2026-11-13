@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
+import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -9,6 +10,7 @@ import 'package:twake_chat/pages/activity/activity_day_groups.dart';
 import 'package:twake_chat/pages/activity/activity_filter.dart';
 import 'package:twake_chat/pages/activity/activity_open_item.dart';
 import 'package:twake_chat/pages/activity/activity_row.dart';
+import 'package:twake_chat/pages/activity/activity_search.dart';
 import 'package:twake_chat/pages/activity/activity_view_controller.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_appbar_style.dart';
 
@@ -23,6 +25,16 @@ class ActivityPage extends ConsumerStatefulWidget {
 }
 
 class _ActivityPageState extends ConsumerState<ActivityPage> {
+  late final TextEditingController _search = TextEditingController(
+    text: ref.read(activityViewControllerProvider).query,
+  );
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
   Future<void> _markRead(String roomId) async {
     try {
       await ref.read(activityRepositoryProvider).markRoomRead(roomId);
@@ -63,12 +75,20 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
     final view = ref.watch(activityViewControllerProvider);
+    // The search is reset with the account, not by typing.
+    ref.listen(activityViewControllerProvider, (_, next) {
+      if (next.query != _search.text) _search.text = next.query;
+    });
     final count = ref.watch(unreadMentionCountProvider).value ?? 0;
     final rooms = ref.watch(activityItemsProvider).value ?? const [];
     final isMobile = ContactsAppbarStyle.responsiveUtils.isMobile(context);
     final mentions = ref.watch(activityMentionsProvider);
-    final items = [...rooms, ...?mentions.value];
-    final shown = items.where((item) => view.filter.includes(item.kind));
+    final reactions = ref.watch(activityReactionsProvider).value ?? const [];
+    final items = [...rooms, ...?mentions.value, ...reactions];
+    final shown = searchActivity(
+      items.where((item) => view.filter.includes(item.kind)),
+      view.query,
+    );
     final unreadRoomIds = [
       for (final item in rooms)
         if (item.kind == ActivityKind.unreadRoom) item.roomId,
@@ -106,6 +126,20 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: TextField(
+              controller: _search,
+              onChanged: ref
+                  .read(activityViewControllerProvider.notifier)
+                  .search,
+              decoration: InputDecoration(
+                hintText: l10n.search,
+                prefixIcon: const Icon(Icons.search),
+                isDense: true,
+              ),
+            ),
+          ),
           _Filters(
             selected: view.filter,
             onSelected: ref
