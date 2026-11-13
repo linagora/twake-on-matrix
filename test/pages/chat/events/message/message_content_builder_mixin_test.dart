@@ -1032,4 +1032,90 @@ Future<void> main() async {
       });
     });
   });
+  group('[getSizeMessageBubbleWidth] edited space\n', () {
+    Future<MessageMetrics?> measure(
+      WidgetTester tester, {
+      required Event event,
+      required bool isEdited,
+    }) async {
+      MessageMetrics? metrics;
+      await tester.pumpWidget(
+        ThemeBuilder(
+          builder: (context, themeMode, primaryColor) => MaterialApp(
+            locale: const Locale('en'),
+            theme: TwakeThemes.buildTheme(
+              context,
+              Brightness.light,
+              primaryColor,
+            ),
+            localizationsDelegates: const [
+              L10n.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: LocalizationService.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) {
+                  metrics = mockUpMessageContentBuilder
+                      .getSizeMessageBubbleWidth(
+                        context,
+                        event: event,
+                        maxWidth: 400,
+                        ownMessage: true,
+                        isEdited: isEdited,
+                      );
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return metrics;
+    }
+
+    Event textEvent() => Event(
+      content: {'body': 'Edit me', 'msgtype': MessageTypes.Text},
+      type: EventTypes.Message,
+      eventId: '\$edited',
+      senderId: '@example:example.org',
+      originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735824653),
+      room: room,
+    );
+
+    testWidgets('GIVEN an edited message\n'
+        'THEN the bubble reserves space for the edited tag\n', (tester) async {
+      final edited = await measure(tester, event: textEvent(), isEdited: true);
+      final plain = await measure(tester, event: textEvent(), isEdited: false);
+
+      expect(edited!.totalMessageWidth, greaterThan(plain!.totalMessageWidth));
+    });
+
+    testWidgets('GIVEN an edited message that was deleted\n'
+        'THEN the bubble reserves no space for the edited tag\n', (
+      tester,
+    ) async {
+      Event deleted() => textEvent()
+        ..setRedactionEvent(
+          Event(
+            content: {},
+            type: EventTypes.Redaction,
+            eventId: '\$redaction',
+            senderId: '@example:example.org',
+            redacts: '\$edited',
+            originServerTs: DateTime.fromMillisecondsSinceEpoch(1432735830000),
+            room: room,
+          ),
+        );
+
+      final edited = await measure(tester, event: deleted(), isEdited: true);
+      final plain = await measure(tester, event: deleted(), isEdited: false);
+
+      expect(edited!.totalMessageWidth, plain!.totalMessageWidth);
+      expect(edited.isNeedAddNewLine, plain.isNeedAddNewLine);
+    });
+  });
 }
