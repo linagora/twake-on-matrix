@@ -29,6 +29,7 @@ mixin HandleVideoDownloadMixin {
     final videoFile = await event.getFileInfo(
       progressCallback: progressCallback,
       cancelToken: cancelToken,
+      throwOnError: true,
     );
     if (lastSelectedVideoEventId != event.eventId) {
       return null;

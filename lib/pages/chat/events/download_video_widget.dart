@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/download_video_state.dart';
 import 'package:twake_chat/pages/chat/events/event_video_player.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
@@ -8,7 +9,6 @@ import 'package:twake_chat/pages/image_viewer/media_viewer_app_bar.dart';
 import 'package:twake_chat/pages/image_viewer/media_viewer_app_bar_web.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
-import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
@@ -76,10 +76,13 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
         },
         cancelToken: cancelToken,
       );
+      if (!mounted) return;
+      if (bytes == null && _videoUrl == null) return;
       _downloadStateNotifier.value = DownloadVideoState.done;
     } catch (e, s) {
+      if (!mounted) return;
       _downloadStateNotifier.value = DownloadVideoState.failed;
-      TwakeSnackBar.show(context, e.toLocalizedString(context));
+      TwakeSnackBar.show(context, L10n.of(context)!.fileDownloadFailed);
       Logs().e('Error while playing video', e, s);
     }
   }
@@ -104,9 +107,9 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black,
-      child: Stack(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
         alignment: Alignment.topLeft,
         children: [
           Stack(

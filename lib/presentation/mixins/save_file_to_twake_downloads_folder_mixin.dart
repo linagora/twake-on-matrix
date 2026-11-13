@@ -7,6 +7,7 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/dialog/downloading_file_dialog.dart';
+import 'package:twake_chat/utils/exception/downloading_exception.dart';
 import 'package:twake_chat/utils/exception/storage_permission_exception.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_manager.dart';
@@ -181,6 +182,13 @@ mixin SaveFileToTwakeAndroidDownloadsFolderMixin {
           downloadProgressNotifier: downloadProgressNotifier,
           streamSubscription: streamSubscription,
         );
+        if (left is DownloadFileFailureState &&
+            left.exception is CancelDownloadingException) {
+          return;
+        }
+        if (!context.mounted) return;
+        Navigator.of(context, rootNavigator: true).pop();
+        TwakeSnackBar.show(context, L10n.of(context)!.fileDownloadFailed);
       },
       (right) async {
         if (right is DownloadingFileState) {
