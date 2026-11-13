@@ -60,7 +60,8 @@ class MessageTime extends StatelessWidget {
             ),
             const SizedBox(width: 4.0),
           ],
-          if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
+          if (!event.redacted &&
+              event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
             Text(
               '${L10n.of(context)!.edited} ',
               textScaler: const TextScaler.linear(1.0),

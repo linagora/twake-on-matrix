@@ -50,7 +50,7 @@ mixin MessageContentBuilderMixin {
       context,
       event,
       maxWidth,
-      isEdited: isEdited,
+      isEdited: isEdited && !event.redacted,
       timeline: timeline,
     );
 
