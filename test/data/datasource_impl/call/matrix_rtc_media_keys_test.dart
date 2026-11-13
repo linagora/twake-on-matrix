@@ -82,7 +82,9 @@ void main() {
         'room_id': '!room',
         'member': member ?? {'claimed_device_id': 'B', 'id': '@bob:hs:B'},
       },
-      encryptedContent: isEncrypted ? {'algorithm': 'm.olm.v1'} : null,
+      encryptedContent: isEncrypted
+          ? {'algorithm': 'm.olm.v1', 'sender_key': 'curve-B'}
+          : null,
     );
 
     test('parseKey_always_readsTheKeyOfTheSendingDevice', () {
@@ -114,6 +116,19 @@ void main() {
         MatrixRtcMediaKeys.parseKey(keyEvent(isEncrypted: false), '!room'),
         isNull,
       );
+    });
+
+    test('parseKey_withoutTheOlmSenderKey_isIgnored', () {
+      // Arrange
+      final event = ToDeviceEvent(
+        sender: '@bob:hs',
+        type: MatrixRtcMediaKeys.eventType,
+        content: keyEvent().content,
+        encryptedContent: {'algorithm': 'm.olm.v1'},
+      );
+
+      // Act & Assert
+      expect(MatrixRtcMediaKeys.parseKey(event, '!room'), isNull);
     });
 
     test('parseKey_ofAnotherRoom_isIgnored', () {
@@ -152,6 +167,7 @@ void main() {
     late _FakeClient client;
     late List<CallMediaKey> keys;
     late StreamSubscription<CallMediaKey> subscription;
+    late DateTime time;
 
     void start(FakeAsync async) {
       keys = [];
@@ -159,11 +175,75 @@ void main() {
         client,
         '!room',
         _memberType,
+        now: () => time,
       ).run().listen(keys.add);
       async.flushMicrotasks();
     }
 
-    setUp(() => client = _FakeClient());
+    setUp(() {
+      time = DateTime.now();
+      client = _FakeClient()..join('@me:hs', 'ME');
+    });
+
+    test('run_beforeTheOwnMembership_sendsNoKey', () {
+      fakeAsync((async) {
+        // Arrange
+        client = _FakeClient()..addDevice('@bob:hs', 'B');
+        start(async);
+        client.join('@bob:hs', 'B');
+        async.flushMicrotasks();
+        final beforeTheOwnMembership = [...client.sent];
+
+        // Act
+        client.join('@me:hs', 'ME');
+        async.flushMicrotasks();
+
+        // Assert
+        expect(beforeTheOwnMembership, isEmpty);
+        expect(client.sent, ['B@0']);
+      });
+    });
+
+    test('run_withAKeyOverAnotherDeviceSession_ignoresIt', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..addDevice('@bob:hs', 'B2')
+          ..join('@bob:hs', 'B');
+        start(async);
+
+        // Act
+        client.sendKey(sender: '@bob:hs', deviceId: 'B', senderDevice: 'B2');
+        async.flushMicrotasks();
+
+        // Assert
+        expect(keys, hasLength(1));
+      });
+    });
+
+    test('run_whenARotationFailsToSend_retriesItAsARotation', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..addDevice('@carol:hs', 'C')
+          ..join('@bob:hs', 'B');
+        start(async);
+        time = time.add(const Duration(seconds: 11));
+        client.failingSends = 1;
+
+        // Act
+        client.join('@carol:hs', 'C');
+        async.flushMicrotasks();
+        async.elapse(MatrixRtcMediaKeys.retryDelay);
+        async.elapse(MatrixRtcMediaKeys.useKeyDelay);
+
+        // Assert
+        expect(client.sent, ['B@0', 'B@2', 'C@2']);
+        expect(keys.last.index, 2);
+      });
+    });
 
     test('run_always_startsWithTheOwnKey', () {
       fakeAsync((async) {
@@ -361,6 +441,26 @@ void main() {
         expect(client.sent, ['B@0']);
       });
     });
+
+    test('run_whenAMembershipExpires_rotatesTheOwnKey', () async {
+      // Arrange
+      client
+        ..addDevice('@bob:hs', 'B')
+        ..join('@bob:hs', 'B', expires: 200);
+      final keys = <CallMediaKey>[];
+      final subscription = MatrixRtcMediaKeys(
+        client,
+        '!room',
+        _memberType,
+      ).run().listen(keys.add);
+
+      // Act
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      await subscription.cancel();
+
+      // Assert
+      expect(keys.map((key) => key.index), [0, 1]);
+    });
   });
 }
 
@@ -379,6 +479,9 @@ class _FakeDeviceKeys extends Fake implements DeviceKeys {
 
   @override
   final String deviceId;
+
+  @override
+  String get curve25519Key => 'curve-$deviceId';
 }
 
 class _FakeDeviceKeysList extends Fake implements DeviceKeysList {
@@ -452,13 +555,14 @@ class _FakeClient extends Fake implements Client {
       (userDeviceKeys[userId] ??= _FakeDeviceKeysList()).deviceKeys[deviceId] =
           _FakeDeviceKeys(deviceId);
 
-  void join(String userId, String deviceId) => _setMember(userId, deviceId, {
-    'application': 'm.call',
-    'call_id': '',
-    'device_id': deviceId,
-    'created_ts': DateTime.now().millisecondsSinceEpoch,
-    'expires': 14400000,
-  });
+  void join(String userId, String deviceId, {int expires = 14400000}) =>
+      _setMember(userId, deviceId, {
+        'application': 'm.call',
+        'call_id': '',
+        'device_id': deviceId,
+        'created_ts': DateTime.now().millisecondsSinceEpoch,
+        'expires': expires,
+      });
 
   void leave(String userId, String deviceId) =>
       _setMember(userId, deviceId, {});
@@ -482,6 +586,7 @@ class _FakeClient extends Fake implements Client {
     required String sender,
     required String deviceId,
     String? memberId,
+    String? senderDevice,
   }) => onToDeviceEvent.add(
     ToDeviceEvent(
       sender: sender,
@@ -491,7 +596,10 @@ class _FakeClient extends Fake implements Client {
         'room_id': '!room',
         'member': {'claimed_device_id': deviceId, 'id': ?memberId},
       },
-      encryptedContent: {'algorithm': 'm.olm.v1'},
+      encryptedContent: {
+        'algorithm': 'm.olm.v1',
+        'sender_key': 'curve-${senderDevice ?? deviceId}',
+      },
     ),
   );
 }

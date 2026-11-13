@@ -13,14 +13,22 @@ typedef MediaKeyPlan = ({bool rotates, Set<CallMemberDevice> recipients});
 typedef ReceivedMediaKey = ({
   String userId,
   String deviceId,
+  String senderKey,
   int index,
   List<int> key,
 });
 
+typedef _Membership = ({CallMemberDevice device, int? expiresAt});
+
 /// The media keys of an encrypted call (DECISION.md D14): each device sends
 /// its own key to the others over Olm, a new one when someone leaves.
 class MatrixRtcMediaKeys {
-  MatrixRtcMediaKeys(this._client, this._roomId, this._memberEventType);
+  MatrixRtcMediaKeys(
+    this._client,
+    this._roomId,
+    this._memberEventType, {
+    @visibleForTesting DateTime Function() now = DateTime.now,
+  }) : _now = now;
 
   static const eventType = 'io.element.call.encryption_keys';
   // As the Matrix SDK: a slow sync still gets the key before it encrypts.
@@ -35,16 +43,19 @@ class MatrixRtcMediaKeys {
   final Client _client;
   final String _roomId;
   final String _memberEventType;
+  final DateTime Function() _now;
 
   final _keys = StreamController<CallMediaKey>();
   final _subscriptions = <StreamSubscription<Object?>>[];
   var _sharedWith = <CallMemberDevice>{};
   var _index = 0;
   var _key = <int>[];
-  var _createdAt = DateTime.now();
+  late var _createdAt = _now();
   var _rollout = Future<void>.value();
   Timer? _retry;
   var _retries = 0;
+  var _rotationPending = false;
+  Timer? _expiry;
 
   /// Keys of devices whose membership has not arrived yet.
   final _pendingKeys = <String, ReceivedMediaKey>{};
@@ -89,10 +100,22 @@ class MatrixRtcMediaKeys {
       keys?.tryGet<int>('index'),
       _decodeKey(keys?.tryGet<String>('key')),
       member?.tryGet<String>('claimed_device_id'),
+      event.encryptedContent?.tryGet<String>('sender_key'),
     )) {
-      (final int index, final List<int> key, final String deviceId)
+      (
+        final int index,
+        final List<int> key,
+        final String deviceId,
+        final String senderKey,
+      )
           when index >= 0 && index < _keyringSize =>
-        (userId: event.senderId, deviceId: deviceId, index: index, key: key),
+        (
+          userId: event.senderId,
+          deviceId: deviceId,
+          senderKey: senderKey,
+          index: index,
+          key: key,
+        ),
       _ => null,
     };
   }
@@ -143,13 +166,18 @@ class MatrixRtcMediaKeys {
   static String _pendingId(ReceivedMediaKey key) =>
       '${key.userId}|${key.deviceId}|${key.index}';
 
-  /// Only a device of the call may set a key, and only its own.
+  /// Only a device of the call may set a key, and only its own: the Olm
+  /// session it came over must be that device's.
   void _deliverKeys(Set<CallMemberDevice> members) {
     final memberIds = {
       for (final member in members) '${member.userId}|${member.deviceId}',
     };
     _pendingKeys.removeWhere((_, key) {
       if (!memberIds.contains('${key.userId}|${key.deviceId}')) return false;
+      final deviceKeys =
+          _client.userDeviceKeys[key.userId]?.deviceKeys[key.deviceId];
+      if (deviceKeys == null) return false;
+      if (deviceKeys.curve25519Key != key.senderKey) return true;
       _keys.add(
         CallMediaKey(
           participantId: '${key.userId}:${key.deviceId}',
@@ -167,6 +195,8 @@ class MatrixRtcMediaKeys {
   Future<void> _stop() async {
     _retry?.cancel();
     _retry = null;
+    _expiry?.cancel();
+    _expiry = null;
     for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
@@ -177,38 +207,54 @@ class MatrixRtcMediaKeys {
 
   Future<void> _rolloutKey() async {
     if (_subscriptions.isEmpty) return;
-    final members = _members();
+    final memberships = _memberships();
+    final members = {
+      for (final membership in memberships)
+        if (!_isOwnDevice(membership.device.userId, membership.device.deviceId))
+          membership.device,
+    };
     _deliverKeys(members);
+    _watchExpiry(memberships);
+    // The others take a key from this device once they see its membership.
+    if (members.length == memberships.length) return;
     final plan = MatrixRtcMediaKeys.plan(
       sharedWith: _sharedWith,
       members: members,
-      keyAge: DateTime.now().difference(_createdAt),
+      keyAge: _now().difference(_createdAt),
     );
+    // A failed rotation is not retried as a mere join.
+    final rotates = plan.rotates || _rotationPending;
+    final recipients = rotates ? members : plan.recipients;
     // A leaver gets no later key, even when nobody is left to send it to.
-    if (plan.rotates) {
+    if (rotates) {
       _index = (_index + 1) % _keyringSize;
       _key = _newKey();
+      _rotationPending = true;
     }
-    if (plan.recipients.isEmpty) {
+    if (recipients.isEmpty) {
       _sharedWith = members;
-      if (plan.rotates) _useOwnKey();
+      _rotationPending = false;
+      if (rotates) _useOwnKey();
       return;
     }
     final Set<CallMemberDevice> sent;
     try {
-      sent = await _send(plan.recipients);
+      sent = await _send(recipients);
     } catch (error, stackTrace) {
       Logs().w('MatrixRtcMediaKeys: key not sent', error, stackTrace);
       _retryLater();
       return;
     }
-    _sharedWith = plan.rotates ? sent : {..._sharedWith, ...sent};
-    if (sent.length < plan.recipients.length) {
+    _sharedWith = rotates ? sent : {..._sharedWith, ...sent};
+    // The refresh may have brought the device keys a held key waited for.
+    _deliverKeys(members);
+    if (sent.length < recipients.length) {
       _retryLater();
     } else {
       _retries = 0;
+      _rotationPending = false;
     }
-    if (!plan.rotates) return;
+    if (!rotates) return;
     // The others get the key before it encrypts anything.
     await Future<void>.delayed(useKeyDelay);
     _useOwnKey();
@@ -227,25 +273,31 @@ class MatrixRtcMediaKeys {
   }
 
   List<int> _newKey() {
-    _createdAt = DateTime.now();
+    _createdAt = _now();
     return List<int>.generate(16, (_) => _random.nextInt(256));
   }
 
-  Set<CallMemberDevice> _members() {
+  Set<CallMemberDevice> _members() => {
+    for (final membership in _memberships())
+      if (!_isOwnDevice(membership.device.userId, membership.device.deviceId))
+        membership.device,
+  };
+
+  /// The live memberships of the call, this device's included.
+  List<_Membership> _memberships() {
     final room = _client.getRoomById(_roomId);
     final events = room?.states[_memberEventType]?.values ?? const [];
-    final now = DateTime.now().millisecondsSinceEpoch;
-    return {
+    final now = _now().millisecondsSinceEpoch;
+    return [
       for (final event in events)
-        if (_memberOf(event, now) case final member?) member,
-    };
+        if (_membershipOf(event, now) case final membership?) membership,
+    ];
   }
 
-  CallMemberDevice? _memberOf(StrippedStateEvent event, int now) {
+  _Membership? _membershipOf(StrippedStateEvent event, int now) {
     final content = event.content;
     final deviceId = content.tryGet<String>('device_id');
     if (deviceId == null) return null;
-    if (_isOwnDevice(event.senderId, deviceId)) return null;
     if ((content.tryGet<String>('application') ?? 'm.call') != 'm.call') {
       return null;
     }
@@ -254,8 +306,29 @@ class MatrixRtcMediaKeys {
         content.tryGet<int>('created_ts') ??
         (event is Event ? event.originServerTs.millisecondsSinceEpoch : now);
     final expires = content.tryGet<int>('expires') ?? 0;
-    if (expires > 0 && createdTs + expires <= now) return null;
-    return (userId: event.senderId, deviceId: deviceId, createdTs: createdTs);
+    final expiresAt = expires > 0 ? createdTs + expires : null;
+    if (expiresAt != null && expiresAt <= now) return null;
+    return (
+      device: (
+        userId: event.senderId,
+        deviceId: deviceId,
+        createdTs: createdTs,
+      ),
+      expiresAt: expiresAt,
+    );
+  }
+
+  /// A device that vanished without a delayed leave only expires: the key
+  /// changes then too.
+  void _watchExpiry(List<_Membership> memberships) {
+    _expiry?.cancel();
+    final expiries = [
+      for (final membership in memberships)
+        if (membership.expiresAt case final expiresAt?) expiresAt,
+    ];
+    if (expiries.isEmpty) return;
+    final next = DateTime.fromMillisecondsSinceEpoch(expiries.reduce(min));
+    _expiry = Timer(next.difference(_now()), _queueRollout);
   }
 
   /// The devices the key went to: a device whose keys are unknown even after
@@ -278,7 +351,7 @@ class MatrixRtcMediaKeys {
       'room_id': _roomId,
       'member': {'claimed_device_id': _client.deviceID, 'id': _ownId},
       'session': {'call_id': '', 'application': 'm.call', 'scope': 'm.room'},
-      'sent_ts': DateTime.now().millisecondsSinceEpoch,
+      'sent_ts': _now().millisecondsSinceEpoch,
     });
     return devices.keys.toSet();
   }
