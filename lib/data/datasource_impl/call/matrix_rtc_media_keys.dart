@@ -207,16 +207,34 @@ class MatrixRtcMediaKeys {
 
   Future<void> _rolloutKey() async {
     if (_subscriptions.isEmpty) return;
+    final members = _refreshMembers();
+    // The others take a key from this device once they see its membership.
+    if (members == null) return;
+    final (:rotates, :recipients) = _nextShare(members);
+    if (recipients.isEmpty) {
+      _shareWithNobody(members, rotates: rotates);
+      return;
+    }
+    final sent = await _sendOrRetry(recipients);
+    if (sent == null) return;
+    _recordShare(members, recipients, sent, rotates: rotates);
+    if (!rotates) return;
+    // The others get the key before it encrypts anything.
+    await Future<void>.delayed(useKeyDelay);
+    _useOwnKey();
+  }
+
+  /// The other devices of the call, or null while this device's own
+  /// membership is not visible yet.
+  Set<CallMemberDevice>? _refreshMembers() {
     final memberships = _memberships();
-    final members = {
-      for (final membership in memberships)
-        if (!_isOwnDevice(membership.device.userId, membership.device.deviceId))
-          membership.device,
-    };
+    final members = _othersOf(memberships);
     _deliverKeys(members);
     _watchExpiry(memberships);
-    // The others take a key from this device once they see its membership.
-    if (members.length == memberships.length) return;
+    return members.length == memberships.length ? null : members;
+  }
+
+  MediaKeyPlan _nextShare(Set<CallMemberDevice> members) {
     final plan = MatrixRtcMediaKeys.plan(
       sharedWith: _sharedWith,
       members: members,
@@ -224,40 +242,51 @@ class MatrixRtcMediaKeys {
     );
     // A failed rotation is not retried as a mere join.
     final rotates = plan.rotates || _rotationPending;
-    final recipients = rotates ? members : plan.recipients;
     // A leaver gets no later key, even when nobody is left to send it to.
     if (rotates) {
       _index = (_index + 1) % _keyringSize;
       _key = _newKey();
       _rotationPending = true;
     }
-    if (recipients.isEmpty) {
-      _sharedWith = members;
-      _rotationPending = false;
-      if (rotates) _useOwnKey();
-      return;
-    }
-    final Set<CallMemberDevice> sent;
+    return (rotates: rotates, recipients: rotates ? members : plan.recipients);
+  }
+
+  void _shareWithNobody(
+    Set<CallMemberDevice> members, {
+    required bool rotates,
+  }) {
+    _sharedWith = members;
+    _rotationPending = false;
+    if (rotates) _useOwnKey();
+  }
+
+  Future<Set<CallMemberDevice>?> _sendOrRetry(
+    Set<CallMemberDevice> recipients,
+  ) async {
     try {
-      sent = await _send(recipients);
+      return await _send(recipients);
     } catch (error, stackTrace) {
       Logs().w('MatrixRtcMediaKeys: key not sent', error, stackTrace);
       _retryLater();
-      return;
+      return null;
     }
+  }
+
+  void _recordShare(
+    Set<CallMemberDevice> members,
+    Set<CallMemberDevice> recipients,
+    Set<CallMemberDevice> sent, {
+    required bool rotates,
+  }) {
     _sharedWith = rotates ? sent : {..._sharedWith, ...sent};
     // The refresh may have brought the device keys a held key waited for.
     _deliverKeys(members);
     if (sent.length < recipients.length) {
       _retryLater();
-    } else {
-      _retries = 0;
-      _rotationPending = false;
+      return;
     }
-    if (!rotates) return;
-    // The others get the key before it encrypts anything.
-    await Future<void>.delayed(useKeyDelay);
-    _useOwnKey();
+    _retries = 0;
+    _rotationPending = false;
   }
 
   void _useOwnKey() {
@@ -277,8 +306,10 @@ class MatrixRtcMediaKeys {
     return List<int>.generate(16, (_) => _random.nextInt(256));
   }
 
-  Set<CallMemberDevice> _members() => {
-    for (final membership in _memberships())
+  Set<CallMemberDevice> _members() => _othersOf(_memberships());
+
+  Set<CallMemberDevice> _othersOf(List<_Membership> memberships) => {
+    for (final membership in memberships)
       if (!_isOwnDevice(membership.device.userId, membership.device.deviceId))
         membership.device,
   };
