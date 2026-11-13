@@ -101,7 +101,10 @@ void main() {
 
       // Act & Assert
       await expectLater(
-        datasource.connect(_server, const CallMediaState(isMicrophoneOn: true)),
+        datasource.connect(
+          _server,
+          const CallMediaState(isMicrophoneOn: true, isEncrypted: false),
+        ),
         throwsA(isA<CallMediaFailedException>()),
       );
       expect(room.disconnected, isTrue);
@@ -115,7 +118,10 @@ void main() {
 
     // Act & Assert
     await expectLater(
-      datasource.connect(_server, const CallMediaState(isMicrophoneOn: true)),
+      datasource.connect(
+        _server,
+        const CallMediaState(isMicrophoneOn: true, isEncrypted: false),
+      ),
       throwsStateError,
     );
     expect(room.disconnected, isTrue);

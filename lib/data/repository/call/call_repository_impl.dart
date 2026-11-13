@@ -6,6 +6,8 @@ import 'package:twake_chat/data/datasource/call/matrix_rtc_datasource.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 import 'package:twake_chat/domain/repository/call/call_repository.dart';
+import 'package:twake_chat/utils/logging/log_orchestrator.dart';
+import 'package:twake_chat/utils/logging/log_types.dart';
 
 class CallRepositoryImpl implements CallRepository {
   CallRepositoryImpl({
@@ -50,8 +52,19 @@ class CallRepositoryImpl implements CallRepository {
     _mediaKeys = _rtc
         .watchMediaKeys(room)
         .asyncMap(_media.setMediaKey)
-        .listen(null);
+        .listen(null, onError: _onMediaKeyFailed);
   }
+
+  /// The call goes on: the next key of that device replaces this one.
+  static void _onMediaKeyFailed(Object error, StackTrace stackTrace) =>
+      LogOrchestrator().log(
+        LogEntry(
+          message: 'CallRepository: media key not applied',
+          level: LogLevel.warn,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
 
   @override
   Future<void> stopMediaKeys() async {
