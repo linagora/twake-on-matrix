@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/app_state/failure.dart';
+import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/model/media/download_file_response.dart';
 import 'package:twake_chat/data/network/exception/dio_duplicate_download_exception.dart';
 import 'package:twake_chat/data/network/media/cancel_exception.dart';
@@ -14,6 +16,7 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/download/download_file_state.dart';
 import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
 
 import '../../../fake_client.dart';
@@ -269,9 +272,10 @@ void main() {
       ).getFileInfo(cancelToken: cancelToken, throwOnError: true);
       await pumpEventQueue();
       cancelToken.cancel();
-      secondHalf.complete();
 
       expect(await result, isNull);
+      secondHalf.complete();
+      await pumpEventQueue();
       expect(mediaAPI.calls, 1);
     });
 
@@ -294,6 +298,51 @@ void main() {
       expect(paths.first, paths.last);
       expect(await File(paths.last!).readAsBytes(), plain);
     });
+
+    Future<List<Either<Failure, Success>>> waitingStates(Event event) async {
+      final states = <Either<Failure, Success>>[];
+      final controller = StreamController<Either<Failure, Success>>();
+      controller.stream.listen(states.add);
+      await event.getFileInfo(downloadStreamController: controller);
+      await controller.close();
+      return states;
+    }
+
+    test('a waiting request reports the saved file on its stream', () async {
+      final secondHalf = await startSlowDownload(MessageTypes.File, 'a.pdf');
+
+      final states = waitingStates(mediaEvent(MessageTypes.File, 'a.pdf'));
+      await pumpEventQueue();
+      secondHalf.complete();
+
+      final success = (await states).last as Right;
+      expect(success.value, isA<DownloadNativeFileSuccessState>());
+      expect(mediaAPI.calls, 1);
+    });
+
+    test(
+      'a waiting request reports the decrypted file on its stream',
+      () async {
+        final encrypted = await encryptFile(Uint8List.fromList([7, 8, 9, 10]));
+        final secondHalf = Completer<void>();
+        downloads([secondHalf]);
+        mediaAPI.payload = encrypted.data;
+        final event = mediaEvent(MessageTypes.File, 'a.pdf', file: encrypted);
+
+        final first = event.getFileInfo();
+        await pumpEventQueue();
+        final states = waitingStates(event);
+        await pumpEventQueue();
+        secondHalf.complete();
+
+        final decryptedPath = (await first)!.filePath;
+        expect(
+          (await states).single,
+          Right(DownloadNativeFileSuccessState(filePath: decryptedPath!)),
+        );
+        expect(mediaAPI.calls, 1);
+      },
+    );
 
     test('a waiting request downloads itself when the first fails', () async {
       final firstResult = Completer<Object?>();

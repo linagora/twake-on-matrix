@@ -53,9 +53,12 @@ extension DownloadFileExtension on Event {
   }) async {
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
     final downloadKey = downloadLink.toString();
-    Future<void>? inFlight;
-    while ((inFlight = _downloadsInFlight[downloadKey]) != null) {
-      await inFlight;
+    for (
+      var inFlight = _downloadsInFlight[downloadKey];
+      inFlight != null && cancelToken?.isCancelled != true;
+      inFlight = _downloadsInFlight[downloadKey]
+    ) {
+      await Future.any([inFlight, ?cancelToken?.whenCancel]);
     }
     if (cancelToken?.isCancelled == true) return null;
     final done = Completer<void>();
@@ -98,6 +101,9 @@ extension DownloadFileExtension on Event {
       if (await decryptedFile.exists()) {
         final decryptedFileLength = await decryptedFile.length();
         if (decryptedFileLength > 0) {
+          downloadStreamController?.add(
+            Right(DownloadNativeFileSuccessState(filePath: decryptedPath)),
+          );
           return FileInfo(filename, filePath: decryptedPath);
         } else {
           await decryptedFile.delete();
