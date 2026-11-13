@@ -27,12 +27,14 @@ import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/domain/model/extensions/push/push_notification_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/domain/usecase/recovery/get_recovery_words_interactor.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/extensions/go_router_extensions.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:twake_chat/utils/client_logout.dart';
+import 'package:twake_chat/utils/icon_badge/icon_badge_updater.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/notification_location.dart';
 import 'package:twake_chat/utils/push_helper.dart';
@@ -44,7 +46,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
@@ -135,7 +136,32 @@ class BackgroundPush {
     });
   }
 
+  IconBadgeUpdater? _iconBadge;
+  IconBadge _badge = const DeviceIconBadge();
+  bool _badgeOnIos = PlatformInfos.isIOS;
+
+  /// Replaces the icon badge and whether the platform is iOS.
+  @visibleForTesting
+  void useIconBadge(IconBadge badge, {required bool onIos}) {
+    _badge = badge;
+    _badgeOnIos = onIos;
+    _bindIconBadge();
+  }
+
+  /// The updater follows the syncs of [client]; made after the client, it
+  /// listens after the thread store (TwakeClient constructor), so the
+  /// counters are up to date when it counts.
+  void _bindIconBadge() {
+    _iconBadge?.dispose();
+    _iconBadge = IconBadgeUpdater(
+      client: client,
+      badge: _badge,
+      onIos: _badgeOnIos,
+    );
+  }
+
   BackgroundPush._(this.client) {
+    _bindIconBadge();
     // Clear only after a sync: unread counts are stale while sync is paused
     // in background, and a timer would cancel notifications just shown.
     _listenToRoomSync();
@@ -401,6 +427,7 @@ class BackgroundPush {
   /// nobody, and sets push up for it.
   void rebind(Client newClient) {
     client = newClient;
+    _bindIconBadge();
     _listenToRoomSync();
     _forgetSetup();
     if (PlatformInfos.isIOS) _setupKeychainSyncForClient(newClient);
@@ -445,19 +472,7 @@ class BackgroundPush {
     if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
-    if (Platform.isIOS) {
-      final unreadCount = client.joinedOrInvitedRooms
-          .where(
-            (room) => room.isUnreadOrInvitedWithThreads && room.id != roomId,
-          )
-          .length;
-      if (unreadCount == 0) {
-        FlutterAppBadger.removeBadge();
-      } else {
-        FlutterAppBadger.updateBadgeCount(unreadCount);
-      }
-      return;
-    }
+    _iconBadge?.roomOpened(RoomId(roomId));
   }
 
   Future<void> setupPusher({
