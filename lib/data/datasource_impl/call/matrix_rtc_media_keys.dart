@@ -94,17 +94,14 @@ class MatrixRtcMediaKeys {
     if (event.type != eventType || event.encryptedContent == null) return null;
     final content = event.content;
     if (content.tryGet<String>('room_id') != roomId) return null;
-    final keys = content.tryGetMap<String, Object?>('keys');
     final member = content.tryGetMap<String, Object?>('member');
     return switch ((
-      keys?.tryGet<int>('index'),
-      _decodeKey(keys?.tryGet<String>('key')),
+      _mediaKeyOf(content, 'media_key') ?? _mediaKeyOf(content, 'keys'),
       member?.tryGet<String>('claimed_device_id'),
       event.encryptedContent?.tryGet<String>('sender_key'),
     )) {
       (
-        final int index,
-        final List<int> key,
+        (:final index, :final key),
         final String deviceId,
         final String senderKey,
       )
@@ -116,6 +113,21 @@ class MatrixRtcMediaKeys {
           index: index,
           key: key,
         ),
+      _ => null,
+    };
+  }
+
+  // `keys` is deprecated in favour of `media_key`: both carry `{index, key}`.
+  static ({int index, List<int> key})? _mediaKeyOf(
+    Map<String, Object?> content,
+    String field,
+  ) {
+    final mediaKey = content.tryGetMap<String, Object?>(field);
+    return switch ((
+      mediaKey?.tryGet<int>('index'),
+      _decodeKey(mediaKey?.tryGet<String>('key')),
+    )) {
+      (final int index, final List<int> key) => (index: index, key: key),
       _ => null,
     };
   }
@@ -377,9 +389,12 @@ class MatrixRtcMediaKeys {
         if (_deviceKeysOf(member) case final deviceKeys?) member: deviceKeys,
     };
     if (devices.isEmpty) return const {};
+    final mediaKey = {'index': _index, 'key': base64.encode(_key)};
     await _client.sendToDeviceEncrypted(devices.values.toList(), eventType, {
-      'keys': {'index': _index, 'key': base64.encode(_key)},
+      'media_key': mediaKey,
+      'keys': mediaKey,
       'room_id': _roomId,
+      'member_id': _ownId,
       'member': {'claimed_device_id': _client.deviceID, 'id': _ownId},
       'session': {'call_id': '', 'application': 'm.call', 'scope': 'm.room'},
       'sent_ts': _now().millisecondsSinceEpoch,

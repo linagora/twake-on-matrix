@@ -72,13 +72,16 @@ void main() {
   group('parseKey', () {
     ToDeviceEvent keyEvent({
       Map<String, Object?>? keys,
+      Map<String, Object?>? mediaKey,
+      bool withKeys = true,
       Map<String, Object?>? member,
       bool isEncrypted = true,
     }) => ToDeviceEvent(
       sender: '@bob:hs',
       type: MatrixRtcMediaKeys.eventType,
       content: {
-        'keys': keys ?? {'index': 2, 'key': 'AQID'},
+        if (withKeys) 'keys': keys ?? {'index': 2, 'key': 'AQID'},
+        'media_key': ?mediaKey,
         'room_id': '!room',
         'member': member ?? {'claimed_device_id': 'B', 'id': '@bob:hs:B'},
       },
@@ -96,6 +99,50 @@ void main() {
       expect(key?.deviceId, 'B');
       expect(key?.index, 2);
       expect(key?.key, [1, 2, 3]);
+    });
+
+    test('parseKey_withOnlyAMediaKey_readsIt', () {
+      // Act
+      final key = MatrixRtcMediaKeys.parseKey(
+        keyEvent(withKeys: false, mediaKey: {'index': 4, 'key': 'BAU'}),
+        '!room',
+      );
+
+      // Assert
+      expect(key?.index, 4);
+      expect(key?.key, [4, 5]);
+    });
+
+    test('parseKey_withBothFields_prefersTheMediaKey', () {
+      // Act
+      final key = MatrixRtcMediaKeys.parseKey(
+        keyEvent(mediaKey: {'index': 4, 'key': 'BAU'}),
+        '!room',
+      );
+
+      // Assert
+      expect(key?.index, 4);
+      expect(key?.key, [4, 5]);
+    });
+
+    test('parseKey_withAMalformedMediaKey_fallsBackToTheKeys', () {
+      // Act
+      final key = MatrixRtcMediaKeys.parseKey(
+        keyEvent(mediaKey: {'index': 4, 'key': ''}),
+        '!room',
+      );
+
+      // Assert
+      expect(key?.index, 2);
+      expect(key?.key, [1, 2, 3]);
+    });
+
+    test('parseKey_withNoKeyField_isIgnored', () {
+      // Act & Assert
+      expect(
+        MatrixRtcMediaKeys.parseKey(keyEvent(withKeys: false), '!room'),
+        isNull,
+      );
     });
 
     test('parseKey_withTheMemberIdOfAnotherUser_keepsTheSender', () {
@@ -201,6 +248,29 @@ void main() {
         // Assert
         expect(beforeTheOwnMembership, isEmpty);
         expect(client.sent, ['B@0']);
+      });
+    });
+
+    test('run_always_sendsTheKeyAsMediaKeyAndKeys', () {
+      fakeAsync((async) {
+        // Arrange
+        client.addDevice('@bob:hs', 'B');
+        start(async);
+
+        // Act
+        client.join('@bob:hs', 'B');
+        async.flushMicrotasks();
+
+        // Assert
+        final message = client.messages.single;
+        expect(message['media_key'], {'index': 0, 'key': isNotEmpty});
+        expect(message['keys'], message['media_key']);
+        expect(message['member_id'], '@me:hs:ME');
+        expect(message['member'], {
+          'claimed_device_id': 'ME',
+          'id': '@me:hs:ME',
+        });
+        expect(message['room_id'], '!room');
       });
     });
 
@@ -494,6 +564,7 @@ class _FakeClient extends Fake implements Client {
   final _afterRefresh = <(String, String)>[];
   final refreshed = <Set<String>>[];
   final sent = <String>[];
+  final messages = <Map<String, dynamic>>[];
   var failingSends = 0;
 
   @override
@@ -537,6 +608,7 @@ class _FakeClient extends Fake implements Client {
       failingSends--;
       throw Exception('offline');
     }
+    messages.add(message);
     final index = (message['keys'] as Map)['index'];
     for (final device in deviceKeys) {
       sent.add('${device.deviceId}@$index');
