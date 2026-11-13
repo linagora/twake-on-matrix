@@ -13,6 +13,8 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/int_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/providers/drive_config_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,7 +24,7 @@ import 'package:social_media_recorder/audio_encoder_type.dart';
 import 'package:social_media_recorder/screen/social_media_recorder.dart';
 
 import 'chat.dart';
-import 'chat_actions.dart';
+import 'attachment_menu_button.dart';
 import 'input_bar/input_bar.dart';
 import 'input_bar/input_bar_style.dart';
 
@@ -88,34 +90,12 @@ class ChatInputRow extends StatelessWidget {
                               // all live inside its popup menu now.
                               return SizedBox(
                                 height: ChatInputRowStyle.chatInputRowHeight,
-                                child: PopupMenuButton<AttachmentMenuAction>(
-                                  tooltip: L10n.of(context)!.more,
-                                  iconSize:
-                                      ChatInputRowStyle.chatInputRowMoreBtnSize,
-                                  icon: const Icon(Icons.add_circle_outline),
+                                child: AttachmentMenuButton(
                                   onSelected: (action) =>
                                       controller.onAttachmentMenuSelected(
                                         context,
                                         action,
                                       ),
-                                  itemBuilder: (context) => AttachmentMenuAction
-                                      .values
-                                      .map(
-                                        (action) =>
-                                            PopupMenuItem<AttachmentMenuAction>(
-                                              value: action,
-                                              child: Row(
-                                                children: [
-                                                  Icon(action.getIcon()),
-                                                  const SizedBox(width: 12),
-                                                  Text(
-                                                    action.getTitle(context),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                      )
-                                      .toList(),
                                 ),
                               );
                             },
@@ -439,15 +419,27 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  ChatInputRowWeb _buildWebInputRow(BuildContext context) {
-    return ChatInputRowWeb(
-      editEventNotifier: controller.editEventNotifier,
-      onCloseEditAction: controller.cancelEditEventAction,
-      inputBar: Column(
-        children: [ReplyDisplay(controller), _buildInputBar(context)],
+  Widget _buildWebInputRow(BuildContext context) {
+    return Consumer(
+      builder: (context, ref, _) => ChatInputRowWeb(
+        editEventNotifier: controller.editEventNotifier,
+        onCloseEditAction: controller.cancelEditEventAction,
+        inputBar: Column(
+          children: [ReplyDisplay(controller), _buildInputBar(context)],
+        ),
+        onTapMoreBtn: () => controller.onSendFileClick(context),
+        // A tablet keeps its media picker, and gets the phone's menu only to
+        // reach Add from Drive.
+        moreButton:
+            PlatformInfos.isMobile && ref.watch(driveConfigProvider).isEnabled
+            ? AttachmentMenuButton(
+                iconColor: LinagoraSysColors.material().tertiary,
+                onSelected: (action) =>
+                    controller.onAttachmentMenuSelected(context, action),
+              )
+            : null,
+        onEmojiAction: controller.onEmojiAction,
       ),
-      onTapMoreBtn: () => controller.onSendFileClick(context),
-      onEmojiAction: controller.onEmojiAction,
     );
   }
 

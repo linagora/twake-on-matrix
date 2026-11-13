@@ -1,0 +1,33 @@
+appId: app.twake.android.chat
+---
+# Signs in with a password, from the first screen of a fresh install (start.sh): "Use your company
+# server", the QA homeserver, then the password login page Synapse leads to (it has no SSO).
+#   maestro --device <serial> test -e SERVER=http://10.0.2.2:<QA_MATRIX_PORT> -e USERNAME=alice \
+#     -e PASSWORD=alicepassword sign-in.yaml
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: 'Use your company server'
+    timeout: 180000
+- tapOn: 'Use your company server'
+- extendedWaitUntil:
+    visible: '.*Homeserver.*'
+    timeout: 60000
+# prefilled with the default homeserver of the app
+- tapOn: '.*Homeserver.*'
+- eraseText: 100
+- inputText: ${SERVER}
+- hideKeyboard
+- tapOn: 'Continue'
+- extendedWaitUntil:
+    visible: '.*Matrix Id or username.*'
+    timeout: 60000
+- tapOn: '.*Matrix Id or username.*'
+- inputText: ${USERNAME}
+- tapOn: '.*Password.*'
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: 'Sign in'
+- extendedWaitUntil:
+    notVisible: '.*Matrix Id or username.*'
+    timeout: 120000

@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/data/model/federation_server/federation_server_information.dart';
+import 'package:twake_chat/domain/drive/entities/drive_config.dart';
 import 'package:twake_chat/domain/model/app_twake_information.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/domain/model/rtc_focus.dart';
@@ -72,24 +73,31 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
     }
   }
 
-  String? get videoCallBaseUrl {
-    if (discoveryInformation?.additionalProperties == null) {
-      return null;
+  String? get videoCallBaseUrl =>
+      _firstLiveKitUrl((focus) => focus.livekitBaseUrl);
+
+  /// The token service of in-app calls. A base url alone is a Meet server
+  /// (DECISION.md D15).
+  String? get callTokenServiceUrl =>
+      _firstLiveKitUrl((focus) => focus.livekitServiceUrl.whereSecure);
+
+  String? _firstLiveKitUrl(Uri? Function(RtcFocus focus) urlOf) {
+    for (final focus in _liveKitFoci) {
+      final url = urlOf(focus)?.toString() ?? '';
+      if (url.isEmpty) continue;
+      return url.endsWith('/') ? url.substring(0, url.length - 1) : url;
     }
+    return null;
+  }
+
+  Iterable<RtcFocus> get _liveKitFoci sync* {
     final rtcFociJson =
         discoveryInformation?.additionalProperties[RtcFocus.rtcFociKey];
-    if (rtcFociJson is! List) {
-      return null;
-    }
-    for (final focusJson in rtcFociJson) {
-      if (focusJson is! Map) continue;
+    if (rtcFociJson is! List) return;
+    for (final focusJson in rtcFociJson.whereType<Map>()) {
       try {
         final focus = RtcFocus.fromJson(Map<String, dynamic>.from(focusJson));
-        final baseUrl = focus.livekitBaseUrl?.toString();
-        if (!focus.isLiveKit || baseUrl == null || baseUrl.isEmpty) continue;
-        return baseUrl.endsWith('/')
-            ? baseUrl.substring(0, baseUrl.length - 1)
-            : baseUrl;
+        if (focus.isLiveKit) yield focus;
       } catch (e, s) {
         Logs().wtf(
           'Failed to parse ${RtcFocus.rtcFociKey} from homeserver summary',
@@ -98,13 +106,23 @@ extension HomeserverSummaryExtensions on HomeserverSummary {
         );
       }
     }
-    return null;
   }
 }
 
 extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
   bool get isInvitationEnabled =>
       this?.appTwakeInformation?.isInvitationEnabled ?? false;
+
+  /// Off unless the homeserver turns it on: an OIDC issuer alone does not
+  /// mean its users have a Twake Drive.
+  bool get isTwakeDriveEnabled =>
+      this?.appTwakeInformation?.isTwakeDriveEnabled ?? false;
+
+  /// The Drive of this homeserver: its SSO when it turns Drive on, else off.
+  DriveConfig get twakeDriveConfig => DriveConfig(
+    ssoUrl: (isTwakeDriveEnabled ? this?.ssoIssuer : null) ?? '',
+    ssoClientId: AppConstants.twakeSsoClientId,
+  );
 
   bool get isPublicGroupsEnabled =>
       this?.appTwakeInformation?.publicGroupsInformation?.isEnabled ?? false;
@@ -119,4 +137,17 @@ extension NullableHomeserverSummaryExtensions on HomeserverSummary? {
         ) ==
         true;
   }
+}
+
+const _loopbackHosts = {'localhost', '127.0.0.1', '::1'};
+
+extension on Uri? {
+  // The OpenID token goes to this service: http only on this machine.
+  Uri? get whereSecure => switch (this) {
+    final Uri url when url.isScheme('https') => url,
+    final Uri url
+        when url.isScheme('http') && _loopbackHosts.contains(url.host) =>
+      url,
+    _ => null,
+  };
 }

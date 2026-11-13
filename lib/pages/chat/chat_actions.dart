@@ -1,5 +1,7 @@
 import 'package:twake_chat/pages/chat/chat_actions_style.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
@@ -77,7 +79,14 @@ enum PickerType {
 enum AttachmentMenuAction {
   gallery,
   document,
-  camera;
+  camera,
+  drive;
+
+  /// The entries of the menu: Drive only when it is enabled.
+  static List<AttachmentMenuAction> available({required bool driveEnabled}) => [
+    for (final action in values)
+      if (action != drive || driveEnabled) action,
+  ];
 
   String getTitle(BuildContext context) {
     switch (this) {
@@ -87,17 +96,25 @@ enum AttachmentMenuAction {
         return L10n.of(context)!.documents;
       case AttachmentMenuAction.camera:
         return L10n.of(context)!.openCamera;
+      case AttachmentMenuAction.drive:
+        return L10n.of(context)!.addFromTwakeDrive;
     }
   }
 
-  IconData getIcon() {
+  Widget buildIcon() {
     switch (this) {
       case AttachmentMenuAction.gallery:
-        return Icons.image_outlined;
+        return const Icon(Icons.image_outlined);
       case AttachmentMenuAction.document:
-        return Icons.attach_file;
+        return const Icon(Icons.attach_file);
       case AttachmentMenuAction.camera:
-        return Icons.photo_camera_outlined;
+        return const Icon(Icons.photo_camera_outlined);
+      case AttachmentMenuAction.drive:
+        return SvgPicture.asset(
+          Assets.images.icTwakeDrive.path,
+          width: 24,
+          height: 24,
+        );
     }
   }
 }

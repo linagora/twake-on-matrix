@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/invite_user_state.dart';
 import 'package:twake_chat/domain/usecase/room/unban_and_invite_users_interactor.dart';
@@ -65,51 +67,52 @@ class InvitationSelectionController
     final selectedContacts = selectedContactsMapNotifier.contactsList
         .map((contact) => contact.matrixId!)
         .toList();
+    final room = _room;
+    final navigator = Navigator.of(context);
+    // A federated invite can take minutes: leave now, report on the page below.
+    navigator.pop();
 
-    final subscription = getIt
+    getIt
         .get<UnbanAndInviteUsersInteractor>()
-        .execute(room: _room, userIds: selectedContacts)
-        .listen((event) {
-          final state = event.fold((failure) => failure, (success) => success);
-
-          if (state is InviteUserLoading) {
-            TwakeDialog.showLoadingDialog(context);
-            return;
-          }
-
-          if (state is InviteUserSuccess) {
-            TwakeSnackBar.show(
-              context,
-              L10n.of(context)!.contactHasBeenInvitedToTheGroup,
+        .execute(room: room, userIds: selectedContacts)
+        .listen(
+          (event) {
+            if (!navigator.mounted) return;
+            final hostContext = navigator.context;
+            final state = event.fold(
+              (failure) => failure,
+              (success) => success,
             );
-            inviteSuccessAction();
-            return;
-          }
 
-          if (state is InviteUserSomeFailed) {
-            final exception = state.inviteUserPartialFailureException;
-
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await showConfirmAlertDialog(
-                context: context,
-                message: exception.getLocalizedErrorMessage(context),
-                isArrangeActionButtonsVertical: true,
-                okLabel: L10n.of(context)!.gotIt,
+            if (state is InviteUserSuccess) {
+              TwakeSnackBar.show(
+                hostContext,
+                L10n.of(hostContext)!.contactHasBeenInvitedToTheGroup,
               );
-            });
-            inviteSuccessAction();
-            return;
-          }
-        });
+              return;
+            }
 
-    subscription.onDone(() {
-      TwakeDialog.hideLoadingDialog(context);
-      subscription.cancel();
-    });
-  }
-
-  void inviteSuccessAction() {
-    Navigator.of(context).pop();
+            if (state is InviteUserSomeFailed) {
+              unawaited(
+                showConfirmAlertDialog(
+                  context: hostContext,
+                  message: state.inviteUserPartialFailureException
+                      .getLocalizedErrorMessage(hostContext),
+                  isArrangeActionButtonsVertical: true,
+                  okLabel: L10n.of(hostContext)!.gotIt,
+                ),
+              );
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            Logs().e('InvitationSelection::performInvite', error, stackTrace);
+            if (!navigator.mounted) return;
+            TwakeSnackBar.show(
+              navigator.context,
+              L10n.of(navigator.context)!.oopsSomethingWentWrong,
+            );
+          },
+        );
   }
 
   @override

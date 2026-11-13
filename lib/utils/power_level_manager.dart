@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/default_power_level_member.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 class PowerLevelManager {
   static final PowerLevelManager _instance = PowerLevelManager._internal();
@@ -23,6 +24,8 @@ class PowerLevelManager {
       EventTypes.RoomAvatar: getAdminPowerLevel(),
       EventTypes.RoomMember: getUserPowerLevel(),
       EventTypes.RoomTopic: getAdminPowerLevel(),
+      // DECISION.md D15: any member joins the calls of the group.
+      CallEventTypes.callMember: 0,
     };
   }
 }

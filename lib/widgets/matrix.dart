@@ -1706,14 +1706,9 @@ class MatrixState extends ConsumerState<Matrix>
       Logs().e('Matrix::_setupAuthUrl: newAuthUrl - $url');
       _authUrl = url;
     } else {
-      final authData = (summary ?? loginHomeserverSummary)
-          ?.discoveryInformation
-          ?.additionalProperties["m.authentication"];
-      final newAuthUrl = authData is Map<String, dynamic>
-          ? authData["issuer"]
-          : null;
+      final newAuthUrl = (summary ?? loginHomeserverSummary)?.ssoIssuer;
       Logs().e('Matrix::_setupAuthUrl: newAuthUrl - $newAuthUrl');
-      _authUrl = newAuthUrl is String ? newAuthUrl : url;
+      _authUrl = newAuthUrl ?? url;
     }
   }
 

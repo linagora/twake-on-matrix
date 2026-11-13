@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart' show CancelToken;
+import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
 import 'package:twake_chat/utils/exception/upload_exception.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
@@ -1013,5 +1018,63 @@ void main() {
         });
       },
     );
+  });
+
+  group('UploadManager.fileToSend', () {
+    PendingFileInfo pending(Future<FileInfo> resolved) =>
+        PendingFileInfo('a.pdf', size: 3, resolved: resolved);
+
+    test('is the file itself when its bytes are already there', () async {
+      final file = FileInfo('a.pdf', filePath: '/tmp/a.pdf');
+
+      expect(await UploadManager.fileToSend(file, CancelToken()), same(file));
+    });
+
+    test('is the file saved once a pending file resolves', () async {
+      final saved = FileInfo('a.pdf', filePath: '/tmp/saved/a.pdf');
+
+      final ready = await UploadManager.fileToSend(
+        pending(Future.value(saved)),
+        CancelToken(),
+      );
+
+      expect(ready, same(saved));
+    });
+
+    test('throws when a pending file never arrives', () async {
+      await expectLater(
+        UploadManager.fileToSend(
+          pending(Future<FileInfo>.error(Exception('download failed'))),
+          CancelToken(),
+        ),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('is null at once when the user cancels a pending file, without '
+        'waiting for its bytes', () async {
+      final bytes = Completer<FileInfo>();
+      final cancelToken = CancelToken();
+
+      final ready = UploadManager.fileToSend(
+        pending(bytes.future),
+        cancelToken,
+      );
+      cancelToken.cancel();
+
+      expect(await ready, isNull);
+      expect(bytes.isCompleted, isFalse);
+    });
+
+    test('is null when the user cancels and the download then fails', () async {
+      final cancelToken = CancelToken()..cancel();
+
+      final ready = await UploadManager.fileToSend(
+        pending(Future<FileInfo>.error(Exception('late'))),
+        cancelToken,
+      );
+
+      expect(ready, isNull);
+    });
   });
 }
