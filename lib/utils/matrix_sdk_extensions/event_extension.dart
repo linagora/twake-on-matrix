@@ -97,6 +97,10 @@ extension LocalizedBody on Event {
   /// a deleted message takes no action, as in the web app.
   bool get canCopyLink => status.isAvailable && !redacted;
 
+  /// Whether a message menu offers Copy link: mobile only, as the web app
+  /// has its own.
+  bool showsCopyLink({required bool isMobile}) => isMobile && canCopyLink;
+
   bool isContains(String? searchTerm) => _searchEngine.matchesText(
     searchTerm ?? '',
     plaintextBody,

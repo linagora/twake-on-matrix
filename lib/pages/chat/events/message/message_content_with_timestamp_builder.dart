@@ -150,7 +150,7 @@ class _MessageContentWithTimestampBuilderState
     if (event.room.canSendDefaultMessages) ...[MessageContextMenuAction.reply],
     MessageContextMenuAction.forward,
     MessageContextMenuAction.copy,
-    if (PlatformInfos.isMobile && event.canCopyLink)
+    if (event.showsCopyLink(isMobile: PlatformInfos.isMobile))
       MessageContextMenuAction.copyLink,
     if (event.room.canReportContent) MessageContextMenuAction.report,
     if (event.canEditEvents(widget.matrixState)) ...[
