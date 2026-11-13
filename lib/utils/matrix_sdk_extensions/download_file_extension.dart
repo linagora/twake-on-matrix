@@ -90,6 +90,21 @@ extension DownloadFileExtension on Event {
     required String filename,
     required bool throwOnError,
   }) async {
+    if (getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted) {
+      final decryptedPath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: filename);
+      final decryptedFile = File(decryptedPath);
+
+      if (await decryptedFile.exists()) {
+        final decryptedFileLength = await decryptedFile.length();
+        if (decryptedFileLength > 0) {
+          return FileInfo(filename, filePath: decryptedPath);
+        } else {
+          await decryptedFile.delete();
+        }
+      }
+    }
+
     final attachment = File(savePath);
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
@@ -325,21 +340,6 @@ extension DownloadFileExtension on Event {
     }
 
     final filename = getThumbnail ? thumbnailFilename : this.filename;
-    if (isFileEncrypted) {
-      final decryptedPath = await StorageDirectoryManager.instance
-          .getDecryptedFilePath(eventId: eventId, fileName: filename);
-      final decryptedFile = File(decryptedPath);
-
-      if (await decryptedFile.exists()) {
-        final decryptedFileLength = await decryptedFile.length();
-        if (decryptedFileLength > 0) {
-          return FileInfo(filename, filePath: decryptedPath);
-        } else {
-          await decryptedFile.delete();
-        }
-      }
-    }
-
     return downloadOrRetrieveAttachment(
       mxcUrl,
       await StorageDirectoryManager.instance.getFilePathInAppDownloads(

@@ -25,6 +25,7 @@ class _FakeMediaAPI implements MediaAPI {
   _FakeMediaAPI(this.outcomes);
 
   final List<Object?> outcomes;
+  List<int> payload = [..._firstHalf, ..._secondHalf];
   int calls = 0;
 
   @override
@@ -37,10 +38,17 @@ class _FakeMediaAPI implements MediaAPI {
     final outcome = outcomes[calls++];
     if (outcome is! Completer && outcome != null) throw outcome;
     final file = File(savePath);
+    final half = payload.length ~/ 2;
     await file.create(recursive: true);
-    await file.writeAsBytes(_firstHalf);
-    if (outcome is Completer) await outcome.future;
-    await file.writeAsBytes(_secondHalf, mode: FileMode.append);
+    await file.writeAsBytes(payload.sublist(0, half));
+    if (outcome is Completer) {
+      final error = await outcome.future;
+      if (error != null) {
+        await file.delete();
+        throw error;
+      }
+    }
+    await file.writeAsBytes(payload.sublist(half), mode: FileMode.append);
     return DownloadFileResponse(
       statusCode: 200,
       requestOptions: RequestOptions(),
@@ -82,34 +90,38 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
-  Event mediaEvent(String msgtype, String body, {bool encrypted = false}) =>
-      Event(
-        type: EventTypes.Message,
-        content: {
-          'msgtype': msgtype,
-          'body': body,
-          if (encrypted)
-            'file': {
-              'url': 'mxc://example.com/gone',
-              'key': {
-                'alg': 'A256CTR',
-                'ext': true,
-                'k': 'not-a-key',
-                'key_ops': ['encrypt', 'decrypt'],
-                'kty': 'oct',
-              },
-              'iv': 'not-an-iv',
-              'hashes': {'sha256': 'not-a-hash'},
-              'v': 'v2',
-            }
-          else
-            'url': 'mxc://example.com/gone',
-        },
-        eventId: '\$media',
-        senderId: '@alice:example.com',
-        originServerTs: DateTime(2026, 11, 12),
-        room: room,
-      );
+  Event mediaEvent(
+    String msgtype,
+    String body, {
+    bool encrypted = false,
+    EncryptedFile? file,
+  }) => Event(
+    type: EventTypes.Message,
+    content: {
+      'msgtype': msgtype,
+      'body': body,
+      if (encrypted || file != null)
+        'file': {
+          'url': 'mxc://example.com/gone',
+          'key': {
+            'alg': 'A256CTR',
+            'ext': true,
+            'k': file?.k ?? 'not-a-key',
+            'key_ops': ['encrypt', 'decrypt'],
+            'kty': 'oct',
+          },
+          'iv': file?.iv ?? 'not-an-iv',
+          'hashes': {'sha256': file?.sha256 ?? 'not-a-hash'},
+          'v': 'v2',
+        }
+      else
+        'url': 'mxc://example.com/gone',
+    },
+    eventId: '\$media',
+    senderId: '@alice:example.com',
+    originServerTs: DateTime(2026, 11, 12),
+    room: room,
+  );
 
   void downloads(List<Object?> outcomes) {
     mediaAPI = _FakeMediaAPI(outcomes);
@@ -261,6 +273,42 @@ void main() {
 
       expect(await result, isNull);
       expect(mediaAPI.calls, 1);
+    });
+
+    test('an encrypted file is downloaded and decrypted once', () async {
+      final plain = Uint8List.fromList([7, 8, 9, 10]);
+      final encrypted = await encryptFile(plain);
+      final secondHalf = Completer<void>();
+      downloads([secondHalf, duplicate]);
+      mediaAPI.payload = encrypted.data;
+
+      final event = mediaEvent(MessageTypes.Video, 'clip.mp4', file: encrypted);
+      final first = event.getFileInfo();
+      await pumpEventQueue();
+      final second = event.getFileInfo(throwOnError: true);
+      await pumpEventQueue();
+      secondHalf.complete();
+
+      final paths = [(await first)?.filePath, (await second)?.filePath];
+      expect(mediaAPI.calls, 1);
+      expect(paths.first, paths.last);
+      expect(await File(paths.last!).readAsBytes(), plain);
+    });
+
+    test('a waiting request downloads itself when the first fails', () async {
+      final firstResult = Completer<Object?>();
+      downloads([firstResult, null]);
+
+      final first = mediaEvent(MessageTypes.Video, 'clip.mp4').getFileInfo();
+      await pumpEventQueue();
+      final url = run();
+      await pumpEventQueue();
+      firstResult.complete(Exception('404'));
+
+      expect(await first, isNull);
+      final path = Uri.parse((await url)!).toFilePath();
+      expect(await File(path).readAsBytes(), [..._firstHalf, ..._secondHalf]);
+      expect(mediaAPI.calls, 2);
     });
   });
 }
