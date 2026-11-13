@@ -285,12 +285,17 @@ void main() {
     late Client healthy;
     late Client unreachable;
     late HomeserverCheckLog log;
+    late DateTime now;
 
     setUp(() {
       healthy = Client('healthy', database: _ClearableDatabase());
       unreachable = Client('unreachable', database: _ClearableDatabase());
-      log = HomeserverCheckLog();
+      now = DateTime(2026, 11, 13);
+      log = HomeserverCheckLog(now: () => now);
     });
+
+    void waitRetryInterval() =>
+        now = now.add(HomeserverCheckLog.retryAfterSync);
 
     tearDown(() async {
       await healthy.dispose(closeDatabase: false);
@@ -339,6 +344,7 @@ void main() {
 
     test('a finished sync refreshes an account whose last check failed', () {
       checked(unreachable, failed: true);
+      waitRetryInterval();
 
       expect(
         log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
@@ -375,11 +381,58 @@ void main() {
       );
 
       log.end(unreachable, ticket);
+      waitRetryInterval();
 
       expect(
         log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
         isTrue,
       );
+    });
+
+    test('a finished sync waits the retry interval after the last refresh', () {
+      checked(unreachable, failed: true);
+      now = now.add(
+        HomeserverCheckLog.retryAfterSync - const Duration(seconds: 1),
+      );
+
+      expect(
+        log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
+        isFalse,
+      );
+
+      now = now.add(const Duration(seconds: 1));
+
+      expect(
+        log.needsRefreshAfterSync(unreachable, SyncStatus.finished),
+        isTrue,
+      );
+    });
+
+    test('reconnect waits for the refresh already in flight', () {
+      final ticket = log.begin(unreachable);
+
+      expect(
+        log.needsRefreshOnConnect(unreachable, hasSummary: false),
+        isFalse,
+      );
+
+      log.end(unreachable, ticket);
+
+      expect(log.needsRefreshOnConnect(unreachable, hasSummary: false), isTrue);
+    });
+
+    test('reconnect refreshes right away after a failed check', () {
+      unreachable.homeserver = Uri.parse('https://matrix.example.org');
+      checked(unreachable, failed: true);
+
+      expect(log.needsRefreshOnConnect(unreachable, hasSummary: true), isTrue);
+    });
+
+    test('reconnect does nothing for a healthy account with a summary', () {
+      healthy.homeserver = Uri.parse('https://matrix.example.org');
+      checked(healthy, failed: false);
+
+      expect(log.needsRefreshOnConnect(healthy, hasSummary: true), isFalse);
     });
 
     test('the end of a superseded refresh leaves the newer one in flight', () {
@@ -481,7 +534,12 @@ void _expectInvariants(
   required Client first,
   required Client second,
 }) {
-  final log = HomeserverCheckLog();
+  // Every reading of the clock is one retry interval later, so the throttle
+  // never hides a refresh and the invariants stay about tickets and flags.
+  var clock = DateTime(2026, 11, 13);
+  final log = HomeserverCheckLog(
+    now: () => clock = clock.add(HomeserverCheckLog.retryAfterSync),
+  );
   final tickets = {first: <int>[], second: <int>[]};
   final done = <String>[];
   for (final step in steps) {

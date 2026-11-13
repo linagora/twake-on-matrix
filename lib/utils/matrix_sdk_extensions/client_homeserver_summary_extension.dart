@@ -21,7 +21,8 @@ extension ClientHomeserverSummaryExtension on Client {
         ? previous
         : null;
 
-    // Before checkHomeserver, which sets the homeserver to null when it fails.
+    // The check below skips the well-known (checkWellKnown: false), so the
+    // discovery information is read here.
     final discovery = await getWellKnownOrFallback(
       fallback: ownPrevious?.discoveryInformation,
     );

@@ -1848,9 +1848,9 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   Future<void> onConnect() async {
     if (clientOrNull == null) return;
-    if (!client.needsHomeserverInformationRefresh(
+    if (!_homeserverCheckLog.needsRefreshOnConnect(
+      client,
       hasSummary: loginHomeserverSummary != null,
-      lastCheckFailed: _homeserverCheckLog.hasFailed(client),
     )) {
       return;
     }

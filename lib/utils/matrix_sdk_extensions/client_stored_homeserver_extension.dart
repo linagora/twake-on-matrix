@@ -68,10 +68,19 @@ extension ClientStoredHomeserverExtension on Client {
 /// another one after an account switch. Refreshes of the same account can
 /// overlap (the network flaps): only the latest one may write its result.
 class HomeserverCheckLog {
+  HomeserverCheckLog({DateTime Function() now = DateTime.now}) : _now = now;
+
+  /// The least time between two refreshes started by finished syncs. A check
+  /// can keep failing while sync works (a proxy that breaks `/login` only),
+  /// and a sync finishes every few seconds.
+  static const retryAfterSync = Duration(minutes: 1);
+
+  final DateTime Function() _now;
   final Set<String> _failedClients = {};
   final Map<String, int> _latestRefresh = {};
   final Set<String> _refreshing = {};
   final Map<String, Uri?> _homeserverAtBegin = {};
+  final Map<String, DateTime> _startedAt = {};
 
   /// Unique across accounts and logouts, so a refresh started before a
   /// logout never matches the ticket of a refresh after the next login.
@@ -84,6 +93,7 @@ class HomeserverCheckLog {
     _refreshing.add(client.clientName);
     _homeserverAtBegin[client.clientName] = client.homeserver
         ?.stripTrailingSlash();
+    _startedAt[client.clientName] = _now();
     return ticket;
   }
 
@@ -128,14 +138,33 @@ class HomeserverCheckLog {
     _latestRefresh.remove(client.clientName);
     _refreshing.remove(client.clientName);
     _homeserverAtBegin.remove(client.clientName);
+    _startedAt.remove(client.clientName);
   }
 
   /// Whether a sync of [client] that ended with [status] should refresh its
   /// homeserver information: the homeserver answers again after a failed
   /// check, with no network change to trigger a reconnect. One refresh at a
-  /// time: syncs that finish while it runs do not start another.
+  /// time: syncs that finish while it runs do not start another, and the
+  /// next one waits [retryAfterSync] after the last refresh started.
   bool needsRefreshAfterSync(Client client, SyncStatus status) =>
       status == SyncStatus.finished &&
       hasFailed(client) &&
-      !isRefreshing(client);
+      !isRefreshing(client) &&
+      !_startedWithin(client, retryAfterSync);
+
+  /// Whether a reconnect should refresh the homeserver information of
+  /// [client]: none is in flight (at boot the account switch already runs
+  /// one), and [ClientStoredHomeserverExtension.needsHomeserverInformationRefresh]
+  /// says so.
+  bool needsRefreshOnConnect(Client client, {required bool hasSummary}) =>
+      !isRefreshing(client) &&
+      client.needsHomeserverInformationRefresh(
+        hasSummary: hasSummary,
+        lastCheckFailed: hasFailed(client),
+      );
+
+  bool _startedWithin(Client client, Duration interval) {
+    final startedAt = _startedAt[client.clientName];
+    return startedAt != null && _now().difference(startedAt) < interval;
+  }
 }
