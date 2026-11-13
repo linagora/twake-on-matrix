@@ -69,8 +69,8 @@ void main() {
         'endStale !room',
         'fetchServer !room https://rtc.test',
         'connect mic=true camera=true encrypted=true',
-        'join !room video=true',
         'startKeys !room',
+        'join !room video=true',
       ]);
     },
   );
@@ -105,6 +105,27 @@ void main() {
     await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
     expect(repository.calls.last, 'disconnect');
   });
+
+  test(
+    'execute_whenTheMembershipFailsInAnEncryptedRoom_stopsTheKeys',
+    () async {
+      // Arrange
+      repository
+        ..roomInfo = const CallRoomInfo(
+          isEncrypted: true,
+          isDirect: false,
+          canJoin: true,
+        )
+        ..joinError = const CallNoPermissionException();
+
+      // Act & Assert
+      await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
+      expect(repository.calls.sublist(repository.calls.length - 2), [
+        'disconnect',
+        'stopKeys',
+      ]);
+    },
+  );
 
   test('execute_whenCancelledBeforeTheMedia_connectsNothing', () async {
     // Arrange

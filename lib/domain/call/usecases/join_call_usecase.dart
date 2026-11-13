@@ -30,10 +30,9 @@ class JoinCallUseCase {
       isEncrypted: room.isEncrypted,
     );
     if (!await _connect(server, media, cancel)) return null;
-    await _sendMembership(join, cancel);
-    if (room.isEncrypted && !cancel.isCancelled) {
-      _repository.startMediaKeys(join.room);
-    }
+    // Before the membership: the others send their keys once they see it.
+    if (room.isEncrypted) _repository.startMediaKeys(join.room);
+    await _sendMembership(join, cancel, sharesKeys: room.isEncrypted);
     return room;
   }
 
@@ -75,17 +74,23 @@ class JoinCallUseCase {
   /// it has been sent.
   Future<void> _sendMembership(
     CallJoin join,
-    CallCancellation cancellation,
-  ) async {
+    CallCancellation cancellation, {
+    required bool sharesKeys,
+  }) async {
     final sent = _repository.joinMembership(join);
     try {
       await Future.any([sent, cancellation.whenCancelled]);
       if (!cancellation.isCancelled) return;
-      await _repository.disconnectMedia();
+      await _stopMedia(sharesKeys: sharesKeys);
       await sent;
     } on CallException {
-      await _repository.disconnectMedia();
+      await _stopMedia(sharesKeys: sharesKeys);
       rethrow;
     }
+  }
+
+  Future<void> _stopMedia({required bool sharesKeys}) async {
+    await _repository.disconnectMedia();
+    if (sharesKeys) await _repository.stopMediaKeys();
   }
 }
