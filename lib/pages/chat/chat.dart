@@ -1044,7 +1044,17 @@ class ChatController extends ConsumerState<Chat>
     _clearSelectEvent();
   }
 
-  void reportEventAction(Event event) async {
+  /// Copies the caption of an album as text, never one of its images.
+  void copyAlbumCaptionAction(Event caption) async {
+    await caption.copyTextEvent(context, timeline!);
+    if (!mounted) return;
+
+    showEmojiPickerNotifier.value = false;
+    _clearSelectEvent();
+  }
+
+  /// Reports [event], or every image of an album when [albumEvents] is set.
+  void reportEventAction(Event event, {List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1089,7 +1099,7 @@ class ChatController extends ConsumerState<Chat>
         },
       );
       if (isBacked) {
-        reportEventAction(event);
+        reportEventAction(event, albumEvents: albumEvents);
         return;
       }
       if (comment == null) return;
@@ -1097,23 +1107,28 @@ class ChatController extends ConsumerState<Chat>
     }
     final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
-        final state = await getIt
-            .get<ReportContentInteractor>()
-            .execute(
-              client: client,
-              roomId: event.roomId!,
-              eventId: event.eventId,
-              reason: selectedOption.value == MessageReportReason.other
-                  ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
-                  : selectedOption.value.getReason(l10n),
-            )
-            .last;
-        return state.fold((failure) {
-          if (failure is ReportContentFailure) {
-            throw failure.exception;
-          }
-          return failure;
-        }, (success) => success);
+        final reason = selectedOption.value == MessageReportReason.other
+            ? '${selectedOption.value.getReason(l10n)}: $additionalReason'
+            : selectedOption.value.getReason(l10n);
+        Object? result;
+        for (final reported in albumEvents ?? [event]) {
+          final state = await getIt
+              .get<ReportContentInteractor>()
+              .execute(
+                client: client,
+                roomId: reported.roomId!,
+                eventId: reported.eventId,
+                reason: reason,
+              )
+              .last;
+          result = state.fold((failure) {
+            if (failure is ReportContentFailure) {
+              throw failure.exception;
+            }
+            return failure;
+          }, (success) => success);
+        }
+        return result;
       },
     );
     showEmojiPickerNotifier.value = false;
@@ -1192,7 +1207,9 @@ class ChatController extends ConsumerState<Chat>
     );
   }
 
-  void forwardEventsAction({Event? event}) async {
+  /// Forwards the selected events, else [albumEvents] (every image of an
+  /// album), else [event].
+  void forwardEventsAction({Event? event, List<Event>? albumEvents}) async {
     if (audioRecordStateNotifier.value != AudioRecordState.initial) {
       preventActionWhileRecordingMobile(context: context);
       return;
@@ -1200,9 +1217,9 @@ class ChatController extends ConsumerState<Chat>
     if (event != null && !event.status.isAvailable) {
       return;
     }
-    final events = selectedEvents.isEmpty && event != null
-        ? [event]
-        : selectedEvents;
+    final events = selectedEvents.isNotEmpty
+        ? selectedEvents
+        : albumEvents ?? [?event];
     final messages = const MediaBatchStamp().restampForwarded(
       events
           .map(
@@ -1504,16 +1521,24 @@ class ChatController extends ConsumerState<Chat>
     return await sendingRoom.sendReaction(event.eventId, emoji) != null;
   }
 
+  /// [albumEvents] are every image of an album: the user's reactions are
+  /// looked up on all of them, a new one goes to [event] (the first image).
   Future<void> toggleReactionAction({
     required String emoji,
     String? emojiId,
     required Event event,
+    List<Event>? albumEvents,
   }) async {
     final timeline = this.timeline;
     final myReactions = timeline == null
         ? <Event>[]
-        : event
-              .aggregatedEvents(timeline, RelationshipTypes.reaction)
+        : [
+                for (final reacted in albumEvents ?? [event])
+                  ...reacted.aggregatedEvents(
+                    timeline,
+                    RelationshipTypes.reaction,
+                  ),
+              ]
               .where(
                 (e) =>
                     e.senderId == e.room.client.userID &&

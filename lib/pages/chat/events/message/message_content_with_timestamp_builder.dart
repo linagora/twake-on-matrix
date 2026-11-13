@@ -71,6 +71,16 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
   final void Function(Event)? onPin;
   final void Function(Event)? saveToDownload;
   final void Function(Event)? saveToGallery;
+
+  /// Album actions, given every image of the album, oldest first.
+  final void Function(List<Event>)? onForwardAlbum;
+  final void Function(List<Event>)? onSaveAlbumToGallery;
+  final void Function(BuildContext, List<Event>)? onDeleteAlbum;
+  final void Function(List<Event>)? onReportAlbum;
+  final void Function(List<Event>)? onSelectAlbum;
+  final void Function(Event caption)? onCopyAlbumCaption;
+  final Future<void> Function(String emoji, List<Event> album)?
+  onToggleAlbumReaction;
   final void Function(BuildContext context, Event, TapDownDetails, double)?
   onTapMoreButton;
   final Future<Category?>? recentEmojiFuture;
@@ -112,10 +122,52 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
     this.onPin,
     this.saveToDownload,
     this.saveToGallery,
+    this.onForwardAlbum,
+    this.onSaveAlbumToGallery,
+    this.onDeleteAlbum,
+    this.onReportAlbum,
+    this.onSelectAlbum,
+    this.onCopyAlbumCaption,
+    this.onToggleAlbumReaction,
     this.onTapMoreButton,
     this.recentEmojiFuture,
     this.onRetryTextMessage,
   });
+
+  /// [members] when every one of them is sent; else null, so the album menu
+  /// is not offered while an image is still uploading.
+  @visibleForTesting
+  static List<Event>? sentAlbumMembersOf(List<Event>? members) {
+    if (members == null || members.any((member) => !member.status.isSent)) {
+      return null;
+    }
+    return members;
+  }
+
+  /// The menu of an album: it acts on the whole album, as one message. The
+  /// caption sits on the last image, so Copy and Edit need one there.
+  @visibleForTesting
+  static List<MessageContextMenuAction> albumContextMenuOf(
+    List<Event> members, {
+    required bool canReply,
+    required bool canReport,
+    required bool canEditCaption,
+  }) {
+    final hasCaption = members.last.isCaptionModeOrReply();
+    return [
+      if (canReply) MessageContextMenuAction.reply,
+      MessageContextMenuAction.forward,
+      if (hasCaption) MessageContextMenuAction.copy,
+      if (canReport) MessageContextMenuAction.report,
+      if (hasCaption && canEditCaption) MessageContextMenuAction.edit,
+      MessageContextMenuAction.select,
+      MessageContextMenuAction.selectAll,
+      MessageContextMenuAction.pin,
+      if (!PlatformInfos.isWeb) MessageContextMenuAction.saveToGallery,
+      if (members.every((member) => member.canDelete))
+        MessageContextMenuAction.delete,
+    ];
+  }
 
   @override
   State<MessageContentWithTimestampBuilder> createState() =>
@@ -144,7 +196,22 @@ class _MessageContentWithTimestampBuilderState
     ),
   );
 
-  List<MessageContextMenuAction> _messageContextMenu(Event event) => [
+  /// [album]: the sent images of the album this bubble leads, read when the
+  /// menu opens; null for a single message.
+  List<MessageContextMenuAction> _messageContextMenu(
+    Event event,
+    List<Event>? album,
+  ) {
+    if (album == null) return _singleMessageContextMenu(event);
+    return MessageContentWithTimestampBuilder.albumContextMenuOf(
+      album,
+      canReply: event.room.canSendDefaultMessages,
+      canReport: event.room.canReportContent,
+      canEditCaption: album.last.canEditEvents(widget.matrixState),
+    );
+  }
+
+  List<MessageContextMenuAction> _singleMessageContextMenu(Event event) => [
     if (event.room.canSendDefaultMessages) ...[MessageContextMenuAction.reply],
     MessageContextMenuAction.forward,
     MessageContextMenuAction.copy,
@@ -280,7 +347,7 @@ class _MessageContentWithTimestampBuilderState
 
   /// Wraps the message preview for a hero dialog with selection/scroll support.
   Widget _buildHeroPreviewMessage({
-    required BuildContext context,
+    required List<Event>? albumMembers,
     required String keyPrefix,
     required bool timelineText,
   }) {
@@ -291,13 +358,15 @@ class _MessageContentWithTimestampBuilderState
           primary: true,
           physics: const ClampingScrollPhysics(),
           child: _withAlbumScope(
-            context,
-            _messageBuilder(
-              key: ValueKey(
-                '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+            albumMembers,
+            Builder(
+              builder: (context) => _messageBuilder(
+                key: ValueKey(
+                  '$keyPrefix%${DateTime.now().millisecondsSinceEpoch}',
+                ),
+                context: context,
+                timelineText: timelineText,
               ),
-              context: context,
-              timelineText: timelineText,
             ),
           ),
         ),
@@ -305,10 +374,9 @@ class _MessageContentWithTimestampBuilderState
     );
   }
 
-  /// The dialog is outside the album scope of the list: give the preview the
-  /// same members, so it shows the whole album.
-  Widget _withAlbumScope(BuildContext context, Widget preview) {
-    final members = context.albumMembersFor(widget.event);
+  /// The dialog route sits above the album scope of the list, so the preview
+  /// gets the [members] read from the bubble before the route opened.
+  Widget _withAlbumScope(List<Event>? members, Widget preview) {
     if (members == null) return preview;
     return MediaAlbumScope<Event>(
       members: members,
@@ -331,30 +399,38 @@ class _MessageContentWithTimestampBuilderState
     // for chat screen
     widget.onDisplayEmojiReaction?.call();
     _displayEmojiPicker.value = false;
+    final albumMembers = context.albumMembersFor(widget.event);
+    final album = MessageContentWithTimestampBuilder.sentAlbumMembersOf(
+      albumMembers,
+    );
+    // An album is one message: its menu and reactions belong to the first
+    // image; [event] is the pressed image, kept for Select.
+    final menuEvent = album?.first ?? event;
     await Navigator.of(context)
         .push(
           HeroDialogRoute(
             builder: (context) => MessageReactionDialog(
-              event: event,
+              event: menuEvent,
               timeline: widget.timeline,
               displayEmojiPicker: _displayEmojiPicker,
               dialogSafeAreaKey:
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
               messageWidget: _buildHeroPreviewMessage(
-                context: context,
+                albumMembers: albumMembers,
                 keyPrefix: 'PreviewReactionWidgetKey',
                 timelineText: timelineText,
               ),
               emojiPickerBuilder: _emojiPickerBuilder,
-              messageContextMenu: _messageContextMenu,
+              messageContextMenu: (event) => _messageContextMenu(event, album),
               themeContextMenu: _themeContextMenu,
               iconContextMenu: _iconContextMenu,
-              onToggleEmojiReaction: widget.onToggleEmojiReaction,
+              onToggleEmojiReaction: (emoji, event) =>
+                  _toggleReaction(emoji, event, album),
             ),
           ),
         )
         .then((result) {
-          _handleResultFromHeroPage(context, result, event);
+          _handleResultFromHeroPage(context, result, event, album: album);
           widget.onHideEmojiReaction?.call();
         });
   }
@@ -367,6 +443,7 @@ class _MessageContentWithTimestampBuilderState
   }) async {
     widget.onDisplayEmojiReaction?.call();
     _displayEmojiPicker.value = false;
+    final albumMembers = context.albumMembersFor(widget.event);
     await Navigator.of(context)
         .push(
           HeroDialogRoute(
@@ -378,7 +455,7 @@ class _MessageContentWithTimestampBuilderState
                   MessageContentWithTimestampBuilder.dialogSafeAreaKey,
               showReactions: false,
               messageWidget: _buildHeroPreviewMessage(
-                context: context,
+                albumMembers: albumMembers,
                 keyPrefix: 'PreviewErrorWidgetKey',
                 timelineText: timelineText,
               ),
@@ -406,9 +483,12 @@ class _MessageContentWithTimestampBuilderState
   void _handleResultFromHeroPage(
     BuildContext context,
     dynamic result,
-    Event event,
-  ) {
-    if (result is String) {
+    Event event, {
+    List<Event>? album,
+  }) {
+    if (result is String && album != null) {
+      _handleAlbumResult(context, result, album, pressed: event);
+    } else if (result is String) {
       switch (result) {
         case 'reply':
           widget.onReply?.call(event);
@@ -446,6 +526,39 @@ class _MessageContentWithTimestampBuilderState
       }
     }
     widget.onHideEmojiReaction?.call();
+  }
+
+  /// Routes a menu result of an album: reply and pin go to the first image,
+  /// copy and edit to the caption (last image), Select to the [pressed]
+  /// image, and the rest to every image.
+  void _handleAlbumResult(
+    BuildContext context,
+    String result,
+    List<Event> album, {
+    required Event pressed,
+  }) {
+    switch (result) {
+      case 'reply':
+        widget.onReply?.call(album.first);
+      case 'pin':
+        widget.onPin?.call(album.first);
+      case 'copy':
+        widget.onCopyAlbumCaption?.call(album.last);
+      case 'edit':
+        widget.onEdit?.call(album.last);
+      case 'select':
+        widget.onSelect?.call(pressed);
+      case 'selectAll':
+        widget.onSelectAlbum?.call(album);
+      case 'forward':
+        widget.onForwardAlbum?.call(album);
+      case 'report':
+        widget.onReportAlbum?.call(album);
+      case 'saveToGallery':
+        widget.onSaveAlbumToGallery?.call(album);
+      case 'delete':
+        widget.onDeleteAlbum?.call(context, album);
+    }
   }
 
   Widget _emojiPickerBuilder({
@@ -589,7 +702,7 @@ class _MessageContentWithTimestampBuilderState
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(
             isEnabled: PlatformInfos.isWeb,
-            child: _reactionsOf(reactionEvents),
+            child: _reactionsOf(context),
           )
         : null;
 
@@ -621,21 +734,13 @@ class _MessageContentWithTimestampBuilderState
       if (event.hasReactionEvent(timeline: widget.timeline)) event,
   ];
 
-  /// One row: each image keeps its own chips, so a tap reacts to that image.
-  Widget _reactionsOf(List<Event> events) {
-    if (events.length == 1) {
-      return MessageReactions(events.single, widget.timeline);
-    }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (final event in events) MessageReactions(event, widget.timeline),
-        ],
-      ),
-    );
-  }
+  /// One list for the bubble. An album merges the chips of its images by
+  /// emoji, and a new reaction goes to its first image, as on Telegram.
+  Widget _reactionsOf(BuildContext context) => MessageReactions(
+    widget.event,
+    widget.timeline,
+    albumEvents: context.albumMembersFor(widget.event),
+  );
 
   bool _hideDisplayName(BuildContext context) {
     return widget.event.hideDisplayName(
@@ -648,8 +753,25 @@ class _MessageContentWithTimestampBuilderState
     required String emoji,
     required Event event,
   }) async {
+    final album = MessageContentWithTimestampBuilder.sentAlbumMembersOf(
+      context.albumMembersFor(widget.event),
+    );
     Navigator.of(context).pop();
-    await widget.onToggleEmojiReaction?.call(emoji, event);
+    await _toggleReaction(emoji, event, album);
+  }
+
+  /// An album has one reaction per user, wherever it is: the picker looks
+  /// at every image, as the merged chips do.
+  Future<void> _toggleReaction(
+    String emoji,
+    Event event,
+    List<Event>? album,
+  ) async {
+    final toggleAlbum = widget.onToggleAlbumReaction;
+    if (album == null || toggleAlbum == null) {
+      return widget.onToggleEmojiReaction?.call(emoji, event);
+    }
+    return toggleAlbum(emoji, album);
   }
 
   Widget _menuActionsRowBuilder(

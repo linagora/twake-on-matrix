@@ -11,11 +11,14 @@ extension EventToMediaSnapshotExtension on Event {
 
   /// Cheap path for the timeline pass: only an image with a batch key needs
   /// the full snapshot, everything else just ends a run.
+  /// A deleted event has no batch key left; it keeps [redacted] so that it
+  /// can hide inside an album or collapse with the deleted events beside it.
   MediaEventSnapshot toMediaSnapshotIfBatched() => mediaBatchId == null
       ? MediaEventSnapshot(
           eventId: eventId,
           senderId: senderId,
           originServerTs: originServerTs,
+          isRedacted: redacted,
         )
       : toMediaSnapshot();
 
