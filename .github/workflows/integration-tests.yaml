@@ -156,7 +156,8 @@ jobs:
           # evaluated by the shell even inside double quotes.
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -360,7 +361,8 @@ jobs:
       - name: Run Patrol shard on x86_64 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
