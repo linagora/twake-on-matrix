@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
+import 'package:twake_chat/config/go_routes/router_navigation_notification.dart';
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -7,9 +8,11 @@ import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/lock_screen.dart';
 import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -21,9 +24,10 @@ import 'matrix.dart';
 
 class TwakeApp extends StatefulWidget {
   final Widget? testWidget;
+  final bool appLockEnabled;
   static GlobalKey<NavigatorState> routerKey = GlobalKey<NavigatorState>();
 
-  const TwakeApp({super.key, this.testWidget});
+  const TwakeApp({super.key, this.testWidget, this.appLockEnabled = false});
 
   /// getInitialLink may rereturn the value multiple times if this view is
   /// opened multiple times for example if the user logs out after they logged
@@ -113,8 +117,16 @@ class TwakeAppState extends State<TwakeApp> {
               return supportedLocales.first;
             },
             routerConfig: TwakeApp.router,
-            builder: (context, child) =>
-                Matrix(child: NavigationButtonsSafeArea(child: child)),
+            onNavigationNotification: TwakeApp.router.onNavigationNotification,
+            builder: (context, child) => PlatformInfos.isMobile
+                ? AppLock(
+                    builder: (_, _) =>
+                        Matrix(child: NavigationButtonsSafeArea(child: child)),
+                    lockScreenBuilder: (_) => const LockScreen(),
+                    initiallyEnabled: widget.appLockEnabled,
+                    initialBackgroundLockLatency: Duration.zero,
+                  )
+                : Matrix(child: NavigationButtonsSafeArea(child: child)),
           );
         },
       ),
