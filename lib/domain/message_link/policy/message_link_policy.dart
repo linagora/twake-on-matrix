@@ -8,8 +8,9 @@ class MessageLinkPolicy {
   /// Twake Chat web app copies, when [webAppOrigin] is known. Otherwise a
   /// matrix.to permalink, as described in
   /// https://spec.matrix.org/v1.16/appendices/#matrixto-navigation, with the
-  /// room server and the server of [userId] as `via`: a room id alone is not
-  /// routable (https://spec.matrix.org/v1.16/appendices/#routing).
+  /// server of [userId] (the only one sure to be in the room), then the room
+  /// server, as `via`: a room id alone is not routable
+  /// (https://spec.matrix.org/v1.16/appendices/#routing).
   String build({
     required String? webAppOrigin,
     required String roomId,
@@ -24,11 +25,11 @@ class MessageLinkPolicy {
     return '$_matrixToPrefix$room/$event${_viaQuery(roomId, userId)}';
   }
 
-  /// The server of the room id, then the user's: a room v12 id names none.
+  /// The user's server, then the room id's: a room v12 id names none.
   String _viaQuery(String roomId, String? userId) {
     final servers = {
-      ?_serverOf(roomId),
       if (userId != null) ?_serverOf(userId),
+      ?_serverOf(roomId),
     };
     if (servers.isEmpty) return '';
     return '?${servers.map((s) => 'via=${Uri.encodeComponent(s)}').join('&')}';
@@ -67,13 +68,19 @@ class MessageLinkPolicy {
     return matrixTo;
   }
 
+  /// Null when the path or query is not valid percent-encoded UTF-8: such a
+  /// link keeps opening in the browser.
   String? _matrixToForRoomsPath(Uri uri) {
-    final segments = uri.pathSegments;
-    if (segments.length != 2 || segments.first != 'rooms') return null;
-    if (segments.last.isEmpty) return null;
-    final room = Uri.encodeComponent(segments.last);
-    final eventId = uri.queryParameters['event'];
-    if (eventId == null || eventId.isEmpty) return '$_matrixToPrefix$room';
-    return '$_matrixToPrefix$room/${Uri.encodeComponent(eventId)}';
+    try {
+      final segments = uri.pathSegments;
+      if (segments.length != 2 || segments.first != 'rooms') return null;
+      if (segments.last.isEmpty) return null;
+      final room = Uri.encodeComponent(segments.last);
+      final eventId = uri.queryParameters['event'];
+      if (eventId == null || eventId.isEmpty) return '$_matrixToPrefix$room';
+      return '$_matrixToPrefix$room/${Uri.encodeComponent(eventId)}';
+    } on FormatException {
+      return null;
+    }
   }
 }

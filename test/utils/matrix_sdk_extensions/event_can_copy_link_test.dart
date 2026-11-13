@@ -54,4 +54,24 @@ void main() {
     expect(deleted.redacted, isTrue);
     expect(deleted.canCopyLink, isFalse);
   });
+
+  group('showsCopyLink', () {
+    test('shows the entry for a sent message on mobile', () {
+      expect(eventWith(EventStatus.sent).showsCopyLink(isMobile: true), isTrue);
+    });
+
+    test('hides the entry while the message is sending', () {
+      expect(
+        eventWith(EventStatus.sending).showsCopyLink(isMobile: true),
+        isFalse,
+      );
+    });
+
+    test('hides the entry off mobile', () {
+      expect(
+        eventWith(EventStatus.sent).showsCopyLink(isMobile: false),
+        isFalse,
+      );
+    });
+  });
 }

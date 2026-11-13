@@ -56,7 +56,7 @@ void main() {
     );
   });
 
-  test('adds the room and user servers as via to matrix.to', () {
+  test('adds the user server, then the room server, as via to matrix.to', () {
     container = containerFor(userId: '@me:other.org');
     container
         .read(loginHomeserverSummaryProvider.notifier)
@@ -65,7 +65,7 @@ void main() {
     expect(
       container.read(linkProvider),
       'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
-      '?via=example.org&via=other.org',
+      '?via=other.org&via=example.org',
     );
   });
 

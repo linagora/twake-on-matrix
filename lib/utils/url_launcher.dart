@@ -26,14 +26,6 @@ import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
 import 'platform_infos.dart';
 
-/// Whether a message link to [targetRoomId], tapped inside the chat
-/// [openRoomId], scrolls that open chat instead of navigating: navigating to
-/// the URL it already shows would not notify it again.
-bool jumpsInOpenChat({
-  required String? openRoomId,
-  required String targetRoomId,
-}) => openRoomId == targetRoomId;
-
 class UrlLauncher with GoToDraftChatMixin {
   static const _blockedSchemes = {AppConfig.appOpenUrlScheme, 'file'};
 
@@ -230,11 +222,9 @@ class UrlLauncher with GoToDraftChatMixin {
         return;
       }
       final openChat = context.findAncestorStateOfType<ChatController>();
-      if (event != null &&
-          jumpsInOpenChat(
-            openRoomId: openChat?.roomId,
-            targetRoomId: room.id,
-          )) {
+      // A link to the open chat scrolls it: navigating to the URL it already
+      // shows would not notify it again.
+      if (event != null && openChat?.roomId == room.id) {
         await openChat!.scrollToEventIdAndHighlight(event);
         return;
       }

@@ -2097,7 +2097,7 @@ class ChatController extends ConsumerState<Chat>
       [
         ChatContextMenuActions.forward,
         if (event.isCopyable) ChatContextMenuActions.copyMessage,
-        if (PlatformInfos.isMobile && event.canCopyLink)
+        if (event.showsCopyLink(isMobile: PlatformInfos.isMobile))
           ChatContextMenuActions.copyLink,
         if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
         if (event.room.canReportContent) ChatContextMenuActions.report,
@@ -2920,7 +2920,7 @@ class ChatController extends ConsumerState<Chat>
       if (event.status.isAvailable) ChatContextMenuActions.forward,
       if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
       if (event.isCopyable) ChatContextMenuActions.copyMessage,
-      if (PlatformInfos.isMobile && event.canCopyLink)
+      if (event.showsCopyLink(isMobile: PlatformInfos.isMobile))
         ChatContextMenuActions.copyLink,
       if (event.room.canReportContent) ChatContextMenuActions.report,
       ChatContextMenuActions.pinChat,

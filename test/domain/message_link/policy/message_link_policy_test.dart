@@ -54,7 +54,7 @@ void main() {
       expect(parts?.secondaryIdentifier, eventId);
     });
 
-    test('names the room server and the user server as via', () {
+    test('names the user server, then the room server, as via', () {
       final link = policy.build(
         webAppOrigin: null,
         roomId: roomId,
@@ -65,12 +65,12 @@ void main() {
       expect(
         link,
         'https://matrix.to/#/!abc%3Aexample.org/%24evt_1%3Aexample.org'
-        '?via=example.org&via=other.org',
+        '?via=other.org&via=example.org',
       );
       final parts = link.parseIdentifierIntoParts();
       expect(parts?.primaryIdentifier, roomId);
       expect(parts?.secondaryIdentifier, eventId);
-      expect(parts?.via, {'example.org', 'other.org'});
+      expect(parts?.via, {'other.org', 'example.org'});
     });
 
     test('names a server once when room and user share it', () {
@@ -211,6 +211,36 @@ void main() {
       ]) {
         expect(
           policy.matrixToForRoomsLink(link, isKnownRoom: (_) => true),
+          isNull,
+          reason: link,
+        );
+      }
+    });
+  });
+
+  group('MessageLinkPolicy with malformed percent-encoding', () {
+    test('ignores a rooms link whose path or query does not decode', () {
+      for (final link in [
+        'https://example.org/%FF',
+        'https://example.org/rooms/%FF',
+        'https://example.org/rooms/!abc%3Aexample.org?event=%FF',
+      ]) {
+        expect(
+          policy.matrixToForRoomsLink(link, isKnownRoom: (_) => true),
+          isNull,
+          reason: link,
+        );
+      }
+    });
+
+    test('ignores a web app link whose path or query does not decode', () {
+      const origin = 'https://chat.example.org';
+      for (final link in [
+        '$origin/%FF',
+        '$origin/rooms/!abc%3Aexample.org?event=%FF',
+      ]) {
+        expect(
+          policy.matrixToForWebLink(link, webAppOrigin: origin),
           isNull,
           reason: link,
         );
