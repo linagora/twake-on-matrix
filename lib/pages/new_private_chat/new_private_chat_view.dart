@@ -11,7 +11,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class NewPrivateChatView extends StatelessWidget {
-  final NewPrivateChatController controller;
+  final NewPrivateChatScreenState controller;
 
   const NewPrivateChatView(this.controller, {super.key});
 
