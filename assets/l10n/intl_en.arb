@@ -3370,5 +3370,45 @@
   "@threadChangeFailed": {
     "type": "text",
     "placeholders": {}
+  },
+  "activity": "Activity",
+  "@activity": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentions": "Mentions",
+  "@activityMentions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityReplies": "Replies",
+  "@activityReplies": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityUnread": "Unread",
+  "@activityUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNoThreadFollowed": "No thread followed yet.",
+  "@activityNoThreadFollowed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNothingToShow": "Nothing to show.",
+  "@activityNothingToShow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activitySentMessage": "sent a message",
+  "@activitySentMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityRepliedInThread": "replied in a thread",
+  "@activityRepliedInThread": {
+    "type": "text",
+    "placeholders": {}
   }
 }

@@ -1,6 +1,7 @@
 import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/activity/activity_page.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
@@ -216,6 +217,12 @@ class _ColumnPageView extends StatelessWidget {
           activeRoomIdNotifier: activeRoomIdNotifier,
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
+        ),
+        _triggerPageViewBuilder(
+          navigatorBarType: AdaptiveDestinationEnum.activity,
+          navigatorBarWidget: ActivityPage(
+            bottomNavigationBar: _bottomNavigationBarBuilder(context),
+          ),
         ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,

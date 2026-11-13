@@ -73,6 +73,15 @@ class ServerRoute {
 
   final String method;
   final String path;
+
+  /// Same method and path, same route: a later [RecordingHomeserver.answer]
+  /// (or `fail`, `hold`) for it replaces the earlier one.
+  @override
+  bool operator ==(Object other) =>
+      other is ServerRoute && other.method == method && other.path == path;
+
+  @override
+  int get hashCode => Object.hash(method, path);
 }
 
 /// What the homeserver answers when a route fails.
@@ -132,6 +141,9 @@ class RecordingHomeserver extends http.BaseClient {
 
   void fail(ServerRoute route, [ServerError error = ServerError.down]) =>
       _failures[route] = error;
+
+  /// [route] fails no more: it answers as before [fail].
+  void recover(ServerRoute route) => _failures.remove(route);
 
   /// From now on, [route] answers [body].
   void answer(ServerRoute route, Map<String, Object?> body) =>
@@ -205,11 +217,51 @@ class RecordingHomeserver extends http.BaseClient {
 /// Takes what a sync brings and keeps none of it; holds no event, and gives
 /// [accountData] as the account data stored on the device (null: the
 /// device fails to read it), with the session of [threadOwner] synced up to
-/// `s1` the last time the app ran.
+/// `s1` the last time the app ran. With [storedTimeline], it holds these
+/// events of [teamRoomId] and keeps the timeline events of each sync, as
+/// the database of the app does (thread replies with the others).
 class _SyncDatabase extends MockDatabase {
-  _SyncDatabase(this.accountData, this.teamRoomStates);
+  _SyncDatabase(
+    this.accountData,
+    this.teamRoomStates, [
+    List<Map<String, Object?>>? storedTimeline,
+  ]) : _timelines = storedTimeline == null
+           ? null
+           : {
+               teamRoomId: [...storedTimeline],
+             };
 
   final Map<String, BasicEvent>? accountData;
+
+  /// The timeline events by room, oldest first; null: none kept.
+  final Map<String, List<Map<String, Object?>>>? _timelines;
+
+  Map<String, Object?>? _keptEvent(String eventId, Room room) {
+    for (final json in _timelines?[room.id] ?? const []) {
+      if (json['event_id'] == eventId) return json;
+    }
+    return null;
+  }
+
+  /// Newest first, as the database of the app gives them.
+  @override
+  Future<List<Event>> getEventList(
+    Room room, {
+    int start = 0,
+    bool onlySending = false,
+    int? limit,
+  }) async {
+    final timelines = _timelines;
+    if (timelines == null) {
+      throw UnimplementedError('This database keeps no event');
+    }
+    if (onlySending) return [];
+    final newest = (timelines[room.id] ?? const []).reversed.skip(start);
+    return [
+      for (final json in limit == null ? newest : newest.take(limit))
+        Event.fromJson(json, room),
+    ];
+  }
 
   /// The states of [teamRoomId] stored on the device; none: no room stored.
   final List<StrippedStateEvent> teamRoomStates;
@@ -285,11 +337,30 @@ class _SyncDatabase extends MockDatabase {
     ...accountData ?? (throw StateError('The device storage is unreadable')),
   };
 
+  /// The ids of the events asked of the device, in order.
+  final List<String> eventReads = [];
+
   @override
-  Future<Event?> getEventById(String eventId, Room room) async => null;
+  Future<Event?> getEventById(String eventId, Room room) async {
+    eventReads.add(eventId);
+    final json = _keptEvent(eventId, room);
+    return json == null ? null : Event.fromJson(json, room);
+  }
+
+  /// A member event of the sync (a display name) changes nothing stored.
+  @override
+  Future<void> markUserProfileAsOutdated(String userId) async {}
 
   @override
   Future<void> storeSyncFilterId(String syncFilterId) async {}
+
+  /// A history page read (`Room.requestHistory`) moves the token; not kept.
+  @override
+  Future<void> setRoomPrevBatch(
+    String? prevBatch,
+    String roomId,
+    Client client,
+  ) async {}
 
   @override
   Future<void> storePrevBatch(String prevBatch) async {}
@@ -303,7 +374,14 @@ class _SyncDatabase extends MockDatabase {
     StrippedStateEvent event,
     EventUpdateType type,
     Client client,
-  ) async {}
+  ) async {
+    final timelines = _timelines;
+    if (timelines == null || type != EventUpdateType.timeline) return;
+    if (event is! MatrixEvent) return;
+    final timeline = timelines.putIfAbsent(roomId, () => [])
+      ..removeWhere((json) => json['event_id'] == event.eventId);
+    timeline.add(event.toJson());
+  }
 
   @override
   Future<void> storeRoomUpdate(
@@ -317,18 +395,22 @@ class _SyncDatabase extends MockDatabase {
 /// The logged-in account of [threadOwner], talking to [server]. The account
 /// data stored on the device is [storedAccountData], loaded by [start];
 /// with [accountDataUnreadable], reading it fails. [storedTeamRoomStates]:
-/// the device holds [teamRoomId] with these states.
+/// the device holds [teamRoomId] with these states. [storedTimeline]: the
+/// device holds these events of [teamRoomId] (JSON of the spec, oldest
+/// first) and keeps the timeline of each sync; null: it keeps no event.
 class ThreadAccount extends TwakeClient {
   ThreadAccount(
     this.server, {
     Map<String, BasicEvent> storedAccountData = const {},
     bool accountDataUnreadable = false,
     List<StrippedStateEvent> storedTeamRoomStates = const [],
+    List<Map<String, Object?>>? storedTimeline,
   }) : super(
          'thread-account-test',
          database: _SyncDatabase(
            accountDataUnreadable ? null : storedAccountData,
            storedTeamRoomStates,
+           storedTimeline,
          ),
          httpClient: server,
        ) {
@@ -341,6 +423,9 @@ class ThreadAccount extends TwakeClient {
   static final _homeserver = Uri.parse('https://example.org');
 
   final RecordingHomeserver server;
+
+  /// The ids of the events the app asked of the device, in order.
+  List<String> get deviceEventReads => (database as _SyncDatabase).eventReads;
 
   bool _loggedOut = false;
 

@@ -63,6 +63,9 @@ class ThreadUnreadStore extends ChangeNotifier {
   final Map<String, Set<String>> _threadReplyIds = {};
   final Queue<ReplyRef> _threadReplyOrder = Queue();
 
+  /// The newest reply seen live in each thread. Memory only.
+  final Map<ThreadRef, Event> _latestReplies = {};
+
   // A count cap for the account, not a per-room one.
   static const int _maxThreadReplyIds = 4000;
 
@@ -106,6 +109,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _newestMainTs.remove(room.value);
     _threadReplyIds.remove(room.value);
     _threadReplyOrder.removeWhere(room.ownsReply);
+    _latestReplies.removeWhere((thread, _) => room.owns(thread));
     return hadCounts || hadFollow != _followed.length;
   }
 
@@ -195,6 +199,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// the thread followed.
   void rememberThreadReply(Event reply) {
     _followIfOwnReply(reply);
+    _rememberLatestReply(reply);
     if (!_addThreadReplyId(ReplyRef(reply.room.id, reply.eventId))) return;
     while (_threadReplyOrder.length > _maxThreadReplyIds) {
       final oldest = _threadReplyOrder.removeFirst();
@@ -202,6 +207,25 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
     _persist();
   }
+
+  void _rememberLatestReply(Event reply) {
+    final rootId = reply.threadRootId;
+    if (rootId == null || !reply.status.isSynced) return;
+    final thread = ThreadRef(reply.room.id, rootId);
+    final known = _latestReplies[thread];
+    if (known == null || !reply.originServerTs.isBefore(known.originServerTs)) {
+      _latestReplies[thread] = reply;
+    }
+  }
+
+  /// The newest reply of the thread seen live, if any.
+  Event? latestReplyOf(ThreadRef thread) => _latestReplies[thread];
+
+  /// The threads the user follows and did not mute.
+  Iterable<ThreadRef> get followedThreads => {
+    ..._followed,
+    ..._prefs.threads,
+  }.where((thread) => isFollowed(thread) && !isMuted(thread));
 
   void _followIfOwnReply(Event reply) {
     final rootId = reply.threadRootId;
@@ -288,6 +312,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _newestMainTs.clear();
     _threadReplyIds.clear();
     _threadReplyOrder.clear();
+    _latestReplies.clear();
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -449,6 +474,53 @@ class ThreadUnreadStore extends ChangeNotifier {
     if (room == null) return null;
     return _client.database.getEventById(thread.rootEventId, room);
   }
+
+  /// The root of a thread, for its last reply: the local database first,
+  /// the server when the stored root holds no thread aggregate. With
+  /// [serverFirst] (no reply of the session known, the stored aggregate may
+  /// be old) the server first, the local database when it cannot be reached.
+  /// Asks the server like the follow lookups do, at most
+  /// [_maxLookupsInFlight] at a time. Null when the room is unknown.
+  Future<Event?> threadRoot(
+    ThreadRef thread, {
+    bool serverFirst = false,
+  }) async {
+    final room = _client.getRoomById(thread.roomId);
+    if (room == null) return null;
+    await _acquireLookupSlot();
+    try {
+      return serverFirst
+          ? await _freshOrStoredRoot(thread, room)
+          : await _storedOrFreshRoot(thread, room);
+    } finally {
+      _releaseLookupSlot();
+    }
+  }
+
+  Future<Event?> _storedOrFreshRoot(ThreadRef thread, Room room) async {
+    final stored = await _storedRoot(thread);
+    if (stored != null && _hasThreadAggregate(stored)) return stored;
+    return _freshRoot(thread, room);
+  }
+
+  Future<Event?> _freshOrStoredRoot(ThreadRef thread, Room room) async {
+    try {
+      return await _freshRoot(thread, room);
+    } on Object {
+      final stored = await _storedRoot(thread);
+      if (stored == null) rethrow;
+      return stored;
+    }
+  }
+
+  Future<Event> _freshRoot(ThreadRef thread, Room room) async =>
+      Event.fromMatrixEvent(
+        await _client.getOneRoomEvent(thread.roomId, thread.rootEventId),
+        room,
+      );
+
+  bool _hasThreadAggregate(MatrixEvent event) =>
+      (event.unsigned?['m.relations'] as Map?)?['m.thread'] != null;
 
   bool _isParticipant(MatrixEvent event) =>
       event.senderId == _client.userID || _participated(event) == true;
