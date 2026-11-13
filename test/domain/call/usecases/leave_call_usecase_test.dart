@@ -13,7 +13,7 @@ void main() {
     await LeaveCallUseCase(repository).execute('!room');
 
     // Assert
-    expect(repository.calls, ['disconnect', 'leave !room']);
+    expect(repository.calls, ['disconnect', 'stopKeys', 'leave !room']);
   });
 
   test('execute_whenTheLeaveFails_hasDisconnectedTheMedia', () async {
@@ -27,7 +27,7 @@ void main() {
       LeaveCallUseCase(repository).execute('!room'),
       throwsA(isA<CallMembershipFailedException>()),
     );
-    expect(repository.calls, ['disconnect', 'leave !room']);
+    expect(repository.calls, ['disconnect', 'stopKeys', 'leave !room']);
   });
 
   test('execute_whenTheMediaFailsToDisconnect_stillLeaves', () async {
@@ -40,6 +40,6 @@ void main() {
       LeaveCallUseCase(repository).execute('!room'),
       throwsA(isA<CallConnectionFailedException>()),
     );
-    expect(repository.calls, ['disconnect', 'leave !room']);
+    expect(repository.calls, ['disconnect', 'stopKeys', 'leave !room']);
   });
 }

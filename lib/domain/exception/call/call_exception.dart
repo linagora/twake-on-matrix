@@ -37,12 +37,6 @@ class CallServiceUnavailableException extends CallException {
     : super('No MatrixRTC token service in the well-known');
 }
 
-/// Until media keys are exchanged (DECISION.md D14).
-class CallEncryptionUnsupportedException extends CallException {
-  const CallEncryptionUnsupportedException()
-    : super('Calls in encrypted rooms are not supported yet');
-}
-
 class CallConnectionFailedException extends CallException {
   const CallConnectionFailedException({super.cause})
     : super('Failed to connect to LiveKit');
@@ -51,4 +45,11 @@ class CallConnectionFailedException extends CallException {
 class CallMediaFailedException extends CallException {
   const CallMediaFailedException({super.cause})
     : super('Failed to open the microphone or the camera');
+}
+
+/// Encryption was turned on in the room during a call in the clear
+/// (DECISION.md D14): joining again encrypts it.
+class CallEncryptionTurnedOnException extends CallException {
+  const CallEncryptionTurnedOnException()
+    : super('Encryption was turned on during the call');
 }

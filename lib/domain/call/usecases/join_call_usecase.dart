@@ -23,8 +23,16 @@ class JoinCallUseCase {
     await _repository.endStaleOwnMembership(join.room);
     final server = await _repository.fetchServer(join);
     if (cancel.isCancelled) return null;
-    if (!await _connect(server, join, cancel)) return null;
-    await _sendMembership(join, cancel);
+    // DECISION.md D14: a call is encrypted when its room is.
+    final media = CallMediaState(
+      isMicrophoneOn: true,
+      isCameraOn: join.isVideo,
+      isEncrypted: room.isEncrypted,
+    );
+    if (!await _connect(server, media, cancel)) return null;
+    // Before the membership: the others send their keys once they see it.
+    if (room.isEncrypted) _repository.startMediaKeys(join.room);
+    await _sendMembership(join, cancel, sharesKeys: room.isEncrypted);
     return room;
   }
 
@@ -43,8 +51,6 @@ class JoinCallUseCase {
 
   CallRoomInfo _checkRoom(CallRoom room) {
     final info = _repository.getRoomInfo(room);
-    // DECISION.md D14: a call is encrypted when its room is.
-    if (info.isEncrypted) throw const CallEncryptionUnsupportedException();
     // Before the token and the microphone: a member may not hold the state
     // event of the call in a group (power level).
     if (!info.canJoin) throw const CallNoPermissionException();
@@ -55,13 +61,10 @@ class JoinCallUseCase {
   /// again.
   Future<bool> _connect(
     CallServer server,
-    CallJoin join,
+    CallMediaState media,
     CallCancellation cancellation,
   ) async {
-    await _repository.connectMedia(
-      server,
-      CallMediaState(isMicrophoneOn: true, isCameraOn: join.isVideo),
-    );
+    await _repository.connectMedia(server, media);
     if (!cancellation.isCancelled) return true;
     await _repository.disconnectMedia();
     return false;
@@ -71,17 +74,23 @@ class JoinCallUseCase {
   /// it has been sent.
   Future<void> _sendMembership(
     CallJoin join,
-    CallCancellation cancellation,
-  ) async {
+    CallCancellation cancellation, {
+    required bool sharesKeys,
+  }) async {
     final sent = _repository.joinMembership(join);
     try {
       await Future.any([sent, cancellation.whenCancelled]);
       if (!cancellation.isCancelled) return;
-      await _repository.disconnectMedia();
+      await _stopMedia(sharesKeys: sharesKeys);
       await sent;
     } on CallException {
-      await _repository.disconnectMedia();
+      await _stopMedia(sharesKeys: sharesKeys);
       rethrow;
     }
+  }
+
+  Future<void> _stopMedia({required bool sharesKeys}) async {
+    await _repository.disconnectMedia();
+    if (sharesKeys) await _repository.stopMediaKeys();
   }
 }

@@ -37,7 +37,7 @@ void main() {
     expect(repository.calls, [
       'endStale !room',
       'fetchServer !room https://rtc.test',
-      'connect mic=true camera=true',
+      'connect mic=true camera=true encrypted=false',
       'join !room video=true',
     ]);
   });
@@ -51,17 +51,29 @@ void main() {
     expect(repository.calls, isEmpty);
   });
 
-  test('execute_inAnEncryptedRoom_touchesNothing', () async {
-    // Arrange
-    repository.roomInfo = const CallRoomInfo(
-      isEncrypted: true,
-      isDirect: false,
-      canJoin: true,
-    );
+  test(
+    'execute_inAnEncryptedRoom_joinsAnEncryptedCallAndSharesItsKeys',
+    () async {
+      // Arrange
+      repository.roomInfo = const CallRoomInfo(
+        isEncrypted: true,
+        isDirect: false,
+        canJoin: true,
+      );
 
-    // Act & Assert
-    await expectJoinTouchesNothing(isA<CallEncryptionUnsupportedException>());
-  });
+      // Act
+      await join();
+
+      // Assert
+      expect(repository.calls, [
+        'endStale !room',
+        'fetchServer !room https://rtc.test',
+        'connect mic=true camera=true encrypted=true',
+        'startKeys !room',
+        'join !room video=true',
+      ]);
+    },
+  );
 
   test('execute_whenTheTokenFails_sendsNoMembership', () async {
     // Arrange
@@ -79,7 +91,10 @@ void main() {
 
     // Act & Assert
     await expectLater(join(), throwsA(isA<CallMediaFailedException>()));
-    expect(repository.calls.last, 'connect mic=true camera=true');
+    expect(
+      repository.calls.last,
+      'connect mic=true camera=true encrypted=false',
+    );
   });
 
   test('execute_whenTheMembershipFails_disconnectsTheMedia', () async {
@@ -90,6 +105,27 @@ void main() {
     await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
     expect(repository.calls.last, 'disconnect');
   });
+
+  test(
+    'execute_whenTheMembershipFailsInAnEncryptedRoom_stopsTheKeys',
+    () async {
+      // Arrange
+      repository
+        ..roomInfo = const CallRoomInfo(
+          isEncrypted: true,
+          isDirect: false,
+          canJoin: true,
+        )
+        ..joinError = const CallNoPermissionException();
+
+      // Act & Assert
+      await expectLater(join(), throwsA(isA<CallNoPermissionException>()));
+      expect(repository.calls.sublist(repository.calls.length - 2), [
+        'disconnect',
+        'stopKeys',
+      ]);
+    },
+  );
 
   test('execute_whenCancelledBeforeTheMedia_connectsNothing', () async {
     // Arrange

@@ -110,14 +110,14 @@ class CallController extends _$CallController {
         .read(watchCallParticipantsUseCaseProvider)
         .execute(roomId)
         .listen(_onParticipants, onError: _onMediaLost);
-    // DECISION.md D14: the media of this call is in the clear.
+    // DECISION.md D14: a call in the clear ends once its room is encrypted.
     _encryption = ref
         .read(watchCallRoomEncryptedUseCaseProvider)
         .execute(roomId)
-        .listen(
-          (_) => _endWith(const CallEncryptionUnsupportedException()),
-          onError: _onEncryptionWatchFailed,
-        );
+        .listen((_) {
+          if (room.isEncrypted) return;
+          _endWith(const CallEncryptionTurnedOnException());
+        }, onError: _onEncryptionWatchFailed);
     if (_isLeaveRequested) await leave();
   }
 
