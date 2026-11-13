@@ -38,16 +38,16 @@ Every pull request is written by an agent, reviewed by the `zeus` and
 
 ## Step 1 — The Matrix client in Riverpod
 
-- [ ] Contacts migration (#3459) merged; it brings `activeMatrixClientProvider`
-- [ ] The app's `ProviderContainer`, created in `main` with automatic retry
+- [x] Contacts migration (#3459) merged; it brings `activeMatrixClientProvider`
+- [x] The app's `ProviderContainer`, created in `main` with automatic retry
       off ([Automatic retry][retry]) and given to the tree with
       `UncontrolledProviderScope`
-- [ ] `matrixClientProvider`: the active, non-null `Client` for screens
+- [x] `matrixClientProvider`: the active, non-null `Client` for screens
       behind login, read from `activeMatrixClientProvider`, which
       `MatrixState` feeds until the account state moves to Riverpod
       (#3466–#3476). Step 1 does not wait for those pull requests
       (ADR 0037 §3, §4 Q1)
-- [ ] Patrol scenario: log in, add a second account, switch, log out
+- [x] Patrol scenario: log in, add a second account, switch, log out
 
 ## Step 2 — Mechanical sweep
 

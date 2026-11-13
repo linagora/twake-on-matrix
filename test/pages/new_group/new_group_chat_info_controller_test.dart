@@ -55,9 +55,7 @@ void main() {
         ...activeAccountOverrides(mockClient),
         newGroupRepositoryProvider.overrideWithValue(mockRepository),
         createSpaceUseCaseProvider.overrideWithValue(mockCreateSpaceUseCase),
-        createNewFeedInteractorProvider(
-          mockClient,
-        ).overrideWithValue(mockFeedInteractor),
+        createNewFeedInteractorProvider.overrideWithValue(mockFeedInteractor),
       ],
     );
     subscription = container.listen(
