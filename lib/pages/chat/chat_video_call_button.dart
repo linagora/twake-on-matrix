@@ -7,6 +7,7 @@ import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.p
 import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -62,7 +63,8 @@ class _ChatVideoCallButtonState extends ConsumerState<ChatVideoCallButton> {
       return const SizedBox.shrink();
     }
     final l10n = L10n.of(context)!;
-    if (tokenServiceUrl != null) {
+    // The web build does not ship the LiveKit E2EE worker.
+    if (tokenServiceUrl != null && !(room.encrypted && PlatformInfos.isWeb)) {
       if (room.canChangeStateEvent(CallEventTypes.callMember)) {
         return TwakeIconButton(
           icon: Icons.videocam_outlined,
