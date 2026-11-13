@@ -53,14 +53,13 @@ extension ThreadedReadReceiptExtension on Room {
 
   bool _isThreadWatched(ThreadRef thread) {
     final store = client.threadUnread;
-    if (store == null) return false;
-    if (store.isFollowed(thread)) return true;
-    return store
-        .threadsOf(this)
-        .any(
-          (t) => t.rootEventId == thread.rootEventId && t.highlightCount > 0,
-        );
+    if (store == null || store.isMuted(thread)) return false;
+    return store.isFollowed(thread) || _hasMention(store, thread);
   }
+
+  bool _hasMention(ThreadUnreadStore store, ThreadRef thread) => store
+      .threadsOf(this)
+      .any((t) => t.rootEventId == thread.rootEventId && t.highlightCount > 0);
 
   bool get _hasUnreadMainMessage {
     final newest = client.threadUnread?.newestMainMessageTs(this);

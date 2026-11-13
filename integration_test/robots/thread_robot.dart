@@ -6,6 +6,7 @@ import 'package:twake_chat/pages/chat/chat_input_row_send_btn.dart';
 import 'package:twake_chat/pages/chat/events/message_content.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
 import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/thread/thread_resolved_mark.dart';
 import 'package:twake_chat/pages/chat/thread/thread_summary_card.dart';
 
 import '../base/core_robot.dart';
@@ -153,6 +154,67 @@ class ThreadRobot extends CoreRobot {
       everywhere.difference(onCards),
       isEmpty,
       reason: 'A thread reply must not show in the main timeline',
+    );
+  }
+
+  /// The check « Resolved » (THR-M-08), found by its accessible label.
+  Finder get _resolvedMark => find.byType(ResolvedMark);
+
+  PatrolFinder get _threadMenuButton => $(AppBar).$(find.byTooltip('More'));
+
+  /// Opens the « ⋮ » menu of the thread header (THR-M-07, THR-M-08).
+  Future<void> openThreadMenu() async {
+    await $.waitUntilVisible(_threadMenuButton, timeout: _timeout);
+    await _threadMenuButton.tap();
+    await $.pumpAndTrySettle();
+  }
+
+  Future<void> _closeThreadMenu() async {
+    await $.tester.tapAt(Offset.zero);
+    await $.pumpAndTrySettle();
+  }
+
+  /// Opens the « ⋮ » menu until it offers every item of [items]: the items
+  /// are built when the menu opens, and a choice made elsewhere (a sync, the
+  /// web) may land a moment later. Fails after [_timeout].
+  Future<void> _openThreadMenuOffering(List<String> items) async {
+    final deadline = DateTime.now().add(_timeout);
+    while (true) {
+      await openThreadMenu();
+      if (items.every((item) => $(find.text(item)).exists)) return;
+      if (DateTime.now().isAfter(deadline)) {
+        fail('The thread menu must offer $items');
+      }
+      await _closeThreadMenu();
+      await $.pump(const Duration(seconds: 1));
+    }
+  }
+
+  /// Chooses [item] of the « ⋮ » menu, by its English label.
+  Future<void> chooseInThreadMenu(String item) async {
+    await _openThreadMenuOffering([item]);
+    await $(find.text(item)).tap();
+    await $.pumpAndTrySettle();
+  }
+
+  /// The « ⋮ » menu offers every item of [offered], then is closed again.
+  Future<void> expectThreadMenuOffers(List<String> offered) async {
+    await _openThreadMenuOffering(offered);
+    await _closeThreadMenu();
+  }
+
+  Future<void> expectResolvedInHeader() async {
+    await $.waitUntilExists(threadHeader.$(_resolvedMark), timeout: _timeout);
+  }
+
+  Future<void> expectNotResolvedInHeader() async {
+    await waitUntilAbsent($, threadHeader.$(_resolvedMark), timeout: _timeout);
+  }
+
+  Future<void> expectResolvedOnCard({required ThreadText lastReply}) async {
+    await $.waitUntilExists(
+      card(lastReply: lastReply).$(_resolvedMark),
+      timeout: _timeout,
     );
   }
 

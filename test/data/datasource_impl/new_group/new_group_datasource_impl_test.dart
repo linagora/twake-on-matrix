@@ -254,6 +254,7 @@ void main() {
             EventTypes.RoomAvatar: 80,
             EventTypes.RoomMember: 10,
             EventTypes.RoomTopic: 80,
+            'app.twake.chat.thread_resolved': 0,
           },
           'invite': 80,
           'kick': 80,
@@ -304,6 +305,34 @@ void main() {
         );
       },
     );
+
+    // THR-M-08, spec § 4 « Droit de résoudre » (D56): a room the app
+    // creates gives level 0 to the resolved state of a thread, as the web.
+    test('createGroup_always_letsEveryMemberResolveAThread', () async {
+      await datasource.createGroup(
+        const CreateNewGroupChatRequest(groupName: 'Team'),
+      );
+
+      final levels =
+          verify(
+                mockClient.createGroupChat(
+                  groupName: anyNamed('groupName'),
+                  enableEncryption: anyNamed('enableEncryption'),
+                  preset: anyNamed('preset'),
+                  initialState: anyNamed('initialState'),
+                  visibility: anyNamed('visibility'),
+                  federated: anyNamed('federated'),
+                  powerLevelContentOverride: captureAnyNamed(
+                    'powerLevelContentOverride',
+                  ),
+                ),
+              ).captured.single
+              as Map<String, dynamic>;
+      expect(
+        levels['events'],
+        containsPair('app.twake.chat.thread_resolved', 0),
+      );
+    });
 
     test('createGroup_whenPrivate_createsAPrivateRoom', () async {
       // Act

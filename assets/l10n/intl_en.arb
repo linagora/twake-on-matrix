@@ -3330,5 +3330,45 @@
   "@publicGroupsYouCanJoin": {
     "type": "text",
     "placeholders": {}
+  },
+  "threadFollow": "Follow the thread",
+  "@threadFollow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadUnfollow": "Unfollow the thread",
+  "@threadUnfollow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMute": "Mute the thread",
+  "@threadMute": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadUnmute": "Unmute the thread",
+  "@threadUnmute": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadMarkResolved": "Mark as resolved",
+  "@threadMarkResolved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadReopen": "Reopen the thread",
+  "@threadReopen": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadResolved": "Resolved",
+  "@threadResolved": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "threadChangeFailed": "The thread could not be changed.",
+  "@threadChangeFailed": {
+    "type": "text",
+    "placeholders": {}
   }
 }

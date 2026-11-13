@@ -1,5 +1,6 @@
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_summary.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
@@ -77,7 +78,7 @@ class ChatEventListItem extends StatelessWidget {
       inThread: controller.isThread,
       threadCard: threadSummary == null
           ? null
-          : _threadCard(context, threadSummary),
+          : _summaryCard(context, threadSummary),
       onStartThread: canStartThread
           ? (event) => _openThread(context, start: true)
           : null,
@@ -179,9 +180,12 @@ class ChatEventListItem extends StatelessWidget {
     );
   }
 
-  Widget _threadCard(BuildContext context, ThreadSummary summary) =>
+  Widget _summaryCard(BuildContext context, ThreadSummary summary) =>
       ListenableBuilder(
-        listenable: controller.threadUnreadStore ?? Listenable.merge(const []),
+        listenable: Listenable.merge([
+          controller.threadUnreadStore,
+          controller.threadUnreadStore?.resolvedChanges,
+        ]),
         builder: (context, _) => ThreadSummaryCard(
           replyCount: summary.replyCount,
           lastReplyAuthor: summary.lastReply?.senderFromMemoryOrFallback
@@ -189,6 +193,7 @@ class ChatEventListItem extends StatelessWidget {
           lastReplyText: _lastReplyText(context, summary),
           lastReplyTime: summary.lastReply?.originServerTs,
           unreadCount: controller.threadUnreadCount(event.eventId),
+          isResolved: event.room.isThreadResolved(event.eventId),
           onOwnBubble: event.isOwnMessage,
           onTap: () => _openThread(context),
         ),

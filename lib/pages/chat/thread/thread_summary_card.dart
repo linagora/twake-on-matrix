@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/chat/thread/thread_resolved_mark.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 
 /// Card inside the bubble of a thread root: number of messages, then author, text and age of
@@ -15,6 +16,7 @@ class ThreadSummaryCard extends StatelessWidget {
     required this.onTap,
     this.unreadCount = 0,
     this.onOwnBubble = false,
+    this.isResolved = false,
   });
 
   final int replyCount;
@@ -24,6 +26,9 @@ class ThreadSummaryCard extends StatelessWidget {
   final String? lastReplyText;
   final DateTime? lastReplyTime;
   final int unreadCount;
+
+  /// The thread was marked as resolved: the card carries a check.
+  final bool isResolved;
 
   /// The card sits on a bubble of the user (the paper of the theme) rather
   /// than on a received one (a raised surface).
@@ -62,6 +67,7 @@ class ThreadSummaryCard extends StatelessWidget {
       label: [
         count,
         if (unread) l10n.threadUnreadMessagesCount(unreadCount),
+        if (isResolved) l10n.threadResolved,
         ?reply == null ? null : '${reply.toPlainText()}$age',
       ].join(', '),
       onTap: onTap,
@@ -111,6 +117,7 @@ class ThreadSummaryCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    if (isResolved) const ResolvedMark(),
                   ],
                 ),
                 // Only the reply is cut when the line is too long: the age stays whole.
