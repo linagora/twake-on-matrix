@@ -18,9 +18,11 @@ import 'icon_badge_fakes.dart';
 ///
 /// Orchestrator decision (13/11): the extension's badge is applied only in
 /// background (AppDelegate.swift:75 shows no remote notification in front),
-/// so the count written is forgotten once the app goes to the background,
-/// and coming back to the foreground writes it, even unchanged. The thread
-/// counters changing after the sync (a follow lookup) write it too.
+/// so the count written is forgotten once the app goes to the background.
+/// Decision change after review: coming back writes nothing, as the counts
+/// are stale until the catch-up sync (no sync in background on iOS); that
+/// first sync writes the count, even unchanged. The thread counters changing
+/// after the sync (a follow lookup) write it too.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -205,38 +207,25 @@ void _backgroundTests() {
     expect(_badge.writes, [1]);
   });
 
-  test('coming back to the foreground writes the count, even when '
+  test('coming back to the foreground writes nothing', () async {
+    final general = _account.joined(_general)..notificationCount = 1;
+    _onIphone();
+    await _account.syncs(general);
+    await appGoesToBackground();
+    final before = [..._badge.writes];
+
+    await appInForeground();
+
+    expect(_badge.writes, before);
+  });
+
+  test('the first sync after coming back writes the count, even when '
       'unchanged', () async {
     final general = _account.joined(_general)..notificationCount = 1;
     _onIphone();
     await _account.syncs(general);
     await appGoesToBackground();
-    final before = [..._badge.writes];
-
     await appInForeground();
-
-    expect(_badge.writes, [...before, 1]);
-  });
-
-  test('coming back to the foreground writes the count, even when a sync '
-      'in the background just wrote it', () async {
-    final general = _account.joined(_general)..notificationCount = 1;
-    _onIphone();
-    await appGoesToBackground();
-    await _account.syncs(general);
-    final before = [..._badge.writes];
-
-    await appInForeground();
-
-    expect(_badge.writes, [...before, 1]);
-  });
-
-  test('after going to the background, the next sync writes even when the '
-      'count is unchanged', () async {
-    final general = _account.joined(_general)..notificationCount = 1;
-    _onIphone();
-    await _account.syncs(general);
-    await appGoesToBackground();
     final before = [..._badge.writes];
 
     await _account.syncs(general);
