@@ -661,7 +661,32 @@ Future<void> _putMatrixMessage({
   content: {'msgtype': 'm.text', 'body': message},
 );
 
-Future<void> _putMatrixEvent({
+/// Sends one event of [eventType] with [content] as the configured receiver
+/// and returns its event id. Thread scenarios use it to post a root and its
+/// thread replies from "another client", the way the web does.
+Future<String> sendEventAsReceiver({
+  required String roomId,
+  required String eventType,
+  required Map<String, Object?> content,
+}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    return await _putMatrixEvent(
+      client: client,
+      session: session,
+      groupID: roomId,
+      eventType: eventType,
+      content: content,
+    );
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Returns the event id the server gave to the event.
+Future<String> _putMatrixEvent({
   required HttpClient client,
   required _MatrixSession session,
   required String groupID,
@@ -697,13 +722,14 @@ Future<void> _putMatrixEvent({
     ..set('Origin', 'https://${endpoints.chatURL}');
   request.write(jsonEncode(content));
   final response = await request.close();
+  final body = await utf8.decoder.bind(response).join();
   if (response.statusCode < 200 || response.statusCode >= 300) {
-    final body = await utf8.decoder.bind(response).join();
     throw Exception(
       'Receiver send failed [status=${response.statusCode}] '
       'body=${body.substring(0, body.length.clamp(0, 300))}',
     );
   }
+  return (jsonDecode(body) as Map<String, dynamic>)['event_id'] as String;
 }
 
 // ---------------------------------------------------------------------------
