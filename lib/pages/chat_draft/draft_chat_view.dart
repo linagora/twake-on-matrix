@@ -17,6 +17,7 @@ import 'package:twake_chat/pages/chat_draft/draft_chat.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_empty_widget.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_input_row.dart';
 import 'package:twake_chat/pages/chat_draft/draft_chat_view_style.dart';
+import 'package:twake_chat/pages/chat_draft/providers/is_user_blocked_provider.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/add_contact/add_contact_dialog.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/string_extension.dart';
@@ -36,6 +37,16 @@ class DraftChatView extends StatelessWidget {
   const DraftChatView({super.key, required this.controller});
 
   final DraftChatController controller;
+
+  bool _isBlocked(WidgetRef ref) =>
+      ref
+          .watch(
+            isUserBlockedProvider(
+              controller.presentationContact.matrixId ?? '',
+            ),
+          )
+          .value ??
+      false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,10 +127,9 @@ class DraftChatView extends StatelessWidget {
             onDragExited: controller.onDragExited,
             child: Column(
               children: [
-                ValueListenableBuilder(
-                  valueListenable: controller.isBlockedUserNotifier,
-                  builder: (context, isBlockedUser, _) {
-                    if (!isBlockedUser) return const SizedBox.shrink();
+                Consumer(
+                  builder: (context, ref, _) {
+                    if (!_isBlocked(ref)) return const SizedBox.shrink();
                     return Column(
                       children: [
                         TwakeInkWell(
@@ -170,10 +180,9 @@ class DraftChatView extends StatelessWidget {
                     ),
                   ),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: controller.isBlockedUserNotifier,
-                  builder: (context, isBlocked, _) {
-                    if (isBlocked) return const BlockedMessageView();
+                Consumer(
+                  builder: (context, ref, _) {
+                    if (_isBlocked(ref)) return const BlockedMessageView();
                     final sysColors = LinagoraSysColors.material();
                     return Container(
                       decoration:
