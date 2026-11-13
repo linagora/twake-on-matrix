@@ -5,6 +5,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 
+import '../../../providers/fake_active_account.dart';
 import 'new_feed_providers_test.mocks.dart';
 
 @GenerateNiceMocks([MockSpec<Client>(), MockSpec<Room>()])
@@ -12,7 +13,7 @@ void main() {
   const testRoomId = '!feed:example.com';
 
   test(
-    'createNewFeedInteractor_always_createsTheFeedWithTheGivenClient',
+    'createNewFeedInteractor_always_createsTheFeedWithTheActiveClient',
     () async {
       // Arrange
       final mockClient = MockClient();
@@ -27,12 +28,14 @@ void main() {
       ).thenAnswer((_) async => {'room_id': testRoomId});
       when(mockClient.getRoomById(testRoomId)).thenReturn(MockRoom());
 
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+      final container = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: activeAccountOverrides(mockClient),
+      );
 
       // Act
       final roomId = await container
-          .read(createNewFeedInteractorProvider(mockClient))
+          .read(createNewFeedInteractorProvider)
           .execute(feedName: 'My feed');
 
       // Assert

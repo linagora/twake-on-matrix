@@ -6,7 +6,7 @@ import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.d
 
 part 'start_video_call_usecase.provider.g.dart';
 
-// TODO: [transitional] Keyed by Client until matrixClientProvider exists (plan v2, Step 1).
+// TODO: [transitional] Keyed by Client while chat_video_call_button passes room.client.
 @riverpod
 StartVideoCallUseCase startVideoCallUseCase(Ref ref, Client client) =>
     StartVideoCallUseCase(

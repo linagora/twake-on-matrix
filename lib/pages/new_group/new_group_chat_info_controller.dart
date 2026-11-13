@@ -13,7 +13,6 @@ import 'package:twake_chat/pages/new_group/new_group_chat_info_state.dart';
 import 'package:twake_chat/pages/new_group/providers/new_feed_providers.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_form.dart';
 import 'package:twake_chat/pages/new_group/states/new_group_kind.dart';
-import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 
@@ -138,12 +137,7 @@ class NewGroupChatInfoController extends _$NewGroupChatInfoController {
     }
   }
 
-  Future<String> _createFeed(CreateNewGroupChatRequest request) {
-    final client = ref.read(activeMatrixClientProvider);
-    if (client == null) throw StateError('No active Matrix client');
-    // TODO: [transitional] Keyed by Client until matrixClientProvider exists (plan v2, Step 1).
-    return ref
-        .read(createNewFeedInteractorProvider(client))
-        .execute(feedName: request.groupName, avatarUrl: request.urlAvatar);
-  }
+  Future<String> _createFeed(CreateNewGroupChatRequest request) => ref
+      .read(createNewFeedInteractorProvider)
+      .execute(feedName: request.groupName, avatarUrl: request.urlAvatar);
 }

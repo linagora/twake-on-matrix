@@ -7,7 +7,7 @@ import 'package:twake_chat/domain/usecase/recovery/save_recovery_words_interacto
 
 part 'tom_encryption_reset_service.provider.g.dart';
 
-// TODO: [transitional] Keyed by Client until matrixClientProvider exists (plan v2, Step 1).
+// TODO: [transitional] Keyed by Client while BootstrapDialog targets the client it is given.
 @riverpod
 TomEncryptionResetService tomEncryptionResetService(Ref ref, Client client) =>
     TomEncryptionResetService(
