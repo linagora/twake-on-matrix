@@ -30,7 +30,8 @@ class DeviceIconBadge implements IconBadge {
 /// as the room list does) or invited. The notification extension writes the
 /// icon from the push counts; with threads on, the app rewrites it with this
 /// count after a sync or a thread counter change, and when it goes to the
-/// background or comes back. 0 removes the badge.
+/// background. Coming back writes nothing: the counts are stale until the
+/// catch-up sync. 0 removes the badge.
 class IconBadgeUpdater {
   IconBadgeUpdater({
     required this.client,
@@ -51,10 +52,7 @@ class IconBadgeUpdater {
   void _follow() {
     _syncs = client.onSync.stream.listen((_) => _writeIfChanged());
     client.threadUnread?.addListener(_writeIfChanged);
-    _lifecycle = AppLifecycleListener(
-      onPause: _onBackground,
-      onResume: _onForeground,
-    );
+    _lifecycle = AppLifecycleListener(onPause: _onBackground);
   }
 
   /// The count without [room], which the user is opening.
@@ -80,13 +78,11 @@ class IconBadgeUpdater {
   }
 
   /// The extension writes the icon while the app is in the background, so
-  /// what the app wrote is forgotten: the next write is never skipped.
+  /// what the app wrote is forgotten: the first sync after is never skipped.
   void _onBackground() {
     _writeIfChanged();
     _written = null;
   }
-
-  void _onForeground() => _write(_count());
 
   void _write(int count) {
     _written = count;
