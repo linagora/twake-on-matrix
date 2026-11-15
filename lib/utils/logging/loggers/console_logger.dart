@@ -1,8 +1,6 @@
 import '../log_types.dart';
 import '../logger.dart';
-import 'mobile_log_console.dart'
-    if (dart.library.html) 'web_log_console.dart'
-    as console_log;
+import 'mobile_log_console.dart' as console_log;
 
 class ConsoleLogger implements Logger {
   @override

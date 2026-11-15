@@ -31,8 +31,7 @@ import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import '../../utils/localized_exception_extension.dart';
 
-import 'package:twake_chat/utils/tor_stub.dart'
-    if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
+import 'package:twake_chat/utils/tor_stub.dart';
 
 enum HomeserverPickerType { singleAccount, multiAccount }
 
