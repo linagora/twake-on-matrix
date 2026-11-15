@@ -10,5 +10,4 @@
 /// follow-up PR for the setup.
 library;
 
-export 'api_login_helper_io.dart'
-    if (dart.library.js_interop) 'api_login_helper_web.dart';
+export 'api_login_helper_io.dart';

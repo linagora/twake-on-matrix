@@ -4,7 +4,6 @@ import 'package:patrol/patrol.dart';
 import '../factories/robot_factory_provider.dart';
 import 'base_test_scenario.dart';
 import 'test_app_initializer.dart';
-import 'web_benign_error_filter.dart';
 
 typedef TestLogin = ({String serverUrl, String username, String password});
 
@@ -119,7 +118,6 @@ class TestBase {
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
-        installWebBenignErrorFilter();
         await loginAndRun($, login: login);
         final robots = createRobotFactory($);
         await scenarioBuilder($, robots).runTestLogic();
