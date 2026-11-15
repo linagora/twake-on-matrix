@@ -27,23 +27,20 @@ Client _client(BaseTestScenario scenario) => twake.Matrix.of(
 ).client;
 
 /// The content of a plain text message.
-Map<String, Object?> threadText(String body) => {
+Map<String, Object?> threadText(ThreadText message) => {
   'msgtype': 'm.text',
-  'body': body,
+  'body': message.text,
 };
 
-Map<String, Object?> _threadReply({
-  required String rootId,
-  required String lastId,
-  required String body,
-}) => {
+/// A reply to [rootId], which is also the last event of the thread.
+Map<String, Object?> _threadReply(String rootId, ThreadText reply) => {
   'msgtype': 'm.text',
-  'body': body,
+  'body': reply.text,
   'm.relates_to': {
     'rel_type': RelationshipTypes.thread,
     'event_id': rootId,
     'is_falling_back': true,
-    'm.in_reply_to': {'event_id': lastId},
+    'm.in_reply_to': {'event_id': rootId},
   },
 };
 
@@ -56,12 +53,12 @@ Future<({String rootId, String replyId})> receiverThread({
   final rootId = await sendEventAsReceiver(
     roomId: roomId,
     eventType: EventTypes.Message,
-    content: threadText(root.text),
+    content: threadText(root),
   );
   final replyId = await sendEventAsReceiver(
     roomId: roomId,
     eventType: EventTypes.Message,
-    content: _threadReply(rootId: rootId, lastId: rootId, body: reply.text),
+    content: _threadReply(rootId, reply),
   );
   return (rootId: rootId, replyId: replyId);
 }
@@ -95,9 +92,9 @@ Future<void> _waitUntil(
 /// Waits until the client has synced [eventId] of [roomId].
 Future<void> _waitForSyncedEvent(
   BaseTestScenario scenario,
-  String roomId,
-  String eventId,
+  ({String roomId, String eventId}) sent,
 ) async {
+  final (:roomId, :eventId) = sent;
   final room = _client(scenario).getRoomById(roomId)!;
   final timeline = await room.getTimeline();
   try {
@@ -242,7 +239,7 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     final rootId = await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: threadText(root.text),
+      content: threadText(root),
     );
     await waitForThreadMessage(this, root);
 
@@ -259,13 +256,12 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     final laterReplyId = await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: _threadReply(
-        rootId: rootId,
-        lastId: rootId,
-        body: laterReply.text,
-      ),
+      content: _threadReply(rootId, laterReply),
     );
-    await _waitForSyncedEvent(this, fixture.roomId, laterReplyId);
+    await _waitForSyncedEvent(this, (
+      roomId: fixture.roomId,
+      eventId: laterReplyId,
+    ));
 
     // Reopen from the chat list, as a user would: a second search open can
     // hang on the iOS contacts dialog that Patrol cannot answer.
@@ -301,7 +297,7 @@ class ThreadReplyLinkScenario extends BaseTestScenario {
     await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: threadText(link.text),
+      content: threadText(link),
     );
     await waitForThreadMessage(this, link);
 
