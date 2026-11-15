@@ -43,13 +43,79 @@ class _FakeRoom extends Fake implements Room {
   Map<String, Map<String, StrippedStateEvent>> states = {};
 }
 
-class _Sent {
-  _Sent(this.roomId, this.type, this.content);
+typedef _Sent = ({String roomId, String type, Map<String, Object?> content});
 
-  final String roomId;
-  final String type;
-  final Map<String, Object?> content;
+typedef _Who = ({String user, String device});
+
+const _alice = (user: '@alice:hs.test', device: 'DEV');
+const _bobHere = (user: '@bob:hs.test', device: 'DEV');
+const _bobPhone = (user: '@bob:hs.test', device: 'PHONE');
+const _bobThisDevice = (user: '@bob:hs.test', device: 'BOB');
+
+/// An event received from the sync, with the defaults of a ring from Alice.
+class _Incoming {
+  String type = _ringType;
+  Map<String, Object?> content = {};
+  String id = r'$event';
+  String sender = _alice.user;
+  DateTime? at;
+  String? stateKey;
+
+  Event toEvent(Room room) => Event(
+    content: content,
+    type: type,
+    eventId: id,
+    senderId: sender,
+    originServerTs: at ?? DateTime.now(),
+    stateKey: stateKey,
+    room: room,
+  );
 }
+
+class _Ring {
+  String id = r'$ring';
+  String sender = _alice.user;
+  String type = _ringType;
+  DateTime? at;
+  Map<String, Object?> extra = {};
+  String intent = 'video';
+
+  _Incoming get incoming => _Incoming()
+    ..type = type
+    ..id = id
+    ..sender = sender
+    ..at = at
+    ..content = {
+      'slot_id': 'm.call#',
+      if (type == _legacyRingType)
+        'notify_type': 'ring'
+      else
+        'notification_type': 'ring',
+      'm.call.intent': intent,
+      ...extra,
+    };
+}
+
+class _Decline {
+  String ringId = r'$ring';
+  String sender = _bobHere.user;
+  String type = _declineType;
+
+  _Incoming get incoming => _Incoming()
+    ..type = type
+    ..id = r'$decline'
+    ..sender = sender
+    ..content = {
+      'm.relates_to': {'rel_type': 'm.reference', 'event_id': ringId},
+    };
+}
+
+/// A push rule as the tests describe it.
+typedef _RuleSpec = ({
+  String id,
+  List<Object?> actions,
+  List<Map<String, Object?>> conditions,
+});
 
 typedef _PushRule = ({
   PushRuleKind kind,
@@ -87,7 +153,7 @@ class _FakeClient extends Fake implements Client {
     String txnId,
     Map<String, Object?> body,
   ) async {
-    sent.add(_Sent(roomId, eventType, body));
+    sent.add((roomId: roomId, type: eventType, content: body));
     return r'$sent';
   }
 
@@ -112,80 +178,31 @@ class _FakeClient extends Fake implements Client {
     ));
   }
 
-  void receive({
-    required String type,
-    required Map<String, Object?> content,
-    String id = r'$event',
-    String sender = '@alice:hs.test',
-    DateTime? at,
-    String? stateKey,
-  }) => onTimelineEvent.add(
-    Event(
-      content: content,
-      type: type,
-      eventId: id,
-      senderId: sender,
-      originServerTs: at ?? DateTime.now(),
-      stateKey: stateKey,
-      room: room,
-    ),
-  );
+  void receive(_Incoming incoming) =>
+      onTimelineEvent.add(incoming.toEvent(room));
 
-  void ring({
-    String id = r'$ring',
-    String sender = '@alice:hs.test',
-    String type = _ringType,
-    DateTime? at,
-    Map<String, Object?> extra = const {},
-    String intent = 'video',
-  }) => receive(
-    type: type,
-    id: id,
-    sender: sender,
-    at: at,
-    content: {
-      'slot_id': 'm.call#',
-      if (type == _legacyRingType)
-        'notify_type': 'ring'
-      else
-        'notification_type': 'ring',
-      'm.call.intent': intent,
-      ...extra,
-    },
-  );
+  void ring([_Ring? ring]) => receive((ring ?? _Ring()).incoming);
 
-  void decline({
-    String ringId = r'$ring',
-    String sender = '@bob:hs.test',
-    String type = _declineType,
-  }) => receive(
-    type: type,
-    id: r'$decline',
-    sender: sender,
-    content: {
-      'm.relates_to': {'rel_type': 'm.reference', 'event_id': ringId},
-    },
-  );
+  void decline([_Decline? decline]) =>
+      receive((decline ?? _Decline()).incoming);
 
-  void membership(String sender, {bool isInCall = true}) => receive(
-    type: _memberType,
-    id: r'$member',
-    sender: sender,
-    stateKey: '_${sender}_DEV_m.call',
-    content: isInCall ? {'application': 'm.call', 'device_id': 'DEV'} : {},
+  void membership(_Who who) => receive(
+    _Incoming()
+      ..type = _memberType
+      ..id = r'$member'
+      ..sender = who.user
+      ..stateKey = '_${who.user}_${who.device}_m.call'
+      ..content = {'application': 'm.call', 'device_id': who.device},
   );
 }
 
-StrippedStateEvent _member(
-  String userId, {
-  Map<String, Object?>? content,
-  String device = 'DEV',
-}) => StrippedStateEvent(
-  type: _memberType,
-  senderId: userId,
-  stateKey: '_${userId}_${device}_m.call',
-  content: content ?? {'application': 'm.call', 'device_id': device},
-);
+StrippedStateEvent _member(_Who who, {Map<String, Object?>? content}) =>
+    StrippedStateEvent(
+      type: _memberType,
+      senderId: who.user,
+      stateKey: '_${who.user}_${who.device}_m.call',
+      content: content ?? {'application': 'm.call', 'device_id': who.device},
+    );
 
 void main() {
   late _FakeClient client;
@@ -242,7 +259,7 @@ void main() {
   group('hasOtherMembers', () {
     test('someone else in the call of the room', () {
       client.room.states = {
-        _memberType: {'a': _member('@alice:hs.test')},
+        _memberType: {'a': _member(_alice)},
       };
 
       expect(datasource.hasOtherMembers(_room), isTrue);
@@ -252,14 +269,14 @@ void main() {
       expect(datasource.hasOtherMembers(_room), isFalse);
 
       client.room.states = {
-        _memberType: {'a': _member('@bob:hs.test', device: 'PHONE')},
+        _memberType: {'a': _member(_bobPhone)},
       };
       expect(datasource.hasOtherMembers(_room), isFalse);
     });
 
     test('someone who left is not in the call', () {
       client.room.states = {
-        _memberType: {'a': _member('@alice:hs.test', content: {})},
+        _memberType: {'a': _member(_alice, content: {})},
       };
 
       expect(datasource.hasOtherMembers(_room), isFalse);
@@ -272,7 +289,7 @@ void main() {
       client.room.states = {
         _memberType: {
           'a': _member(
-            '@alice:hs.test',
+            _alice,
             content: {
               'application': 'm.call',
               'device_id': 'DEV',
@@ -340,7 +357,7 @@ void main() {
         listen(async);
         final at = DateTime.now();
 
-        client.ring(at: at);
+        client.ring(_Ring()..at = at);
         async.flushMicrotasks();
 
         final ring = lists.last.single;
@@ -360,7 +377,7 @@ void main() {
       fakeAsync((async) {
         listen(async);
 
-        client.ring(intent: 'audio');
+        client.ring(_Ring()..intent = 'audio');
         async.flushMicrotasks();
 
         expect(lists.last.single.isVideo, isFalse);
@@ -371,7 +388,7 @@ void main() {
       fakeAsync((async) {
         listen(async);
 
-        client.ring(sender: '@bob:hs.test');
+        client.ring(_Ring()..sender = _bobHere.user);
         async.flushMicrotasks();
 
         expect(everRung(), isEmpty);
@@ -382,65 +399,56 @@ void main() {
       fakeAsync((async) {
         listen(async);
 
-        client.ring(at: DateTime.now().subtract(const Duration(minutes: 2)));
+        client.ring(
+          _Ring()..at = DateTime.now().subtract(const Duration(minutes: 2)),
+        );
         async.flushMicrotasks();
 
         expect(everRung(), isEmpty);
       });
     });
 
-    test('the lifetime of the sender counts, up to 120 s', () {
-      fakeAsync((async) {
-        listen(async);
-        final at = DateTime.now();
+    final lifetimes = <String, ({Map<String, Object?> extra, int seconds})>{
+      'the lifetime of the sender counts': (
+        extra: {'lifetime': 10000},
+        seconds: 10,
+      ),
+      'the lifetime of the sender counts, up to 120 s': (
+        extra: {'lifetime': 3600000},
+        seconds: 120,
+      ),
+      'a lifetime that is no number is 60 s': (
+        extra: {'lifetime': 'forever'},
+        seconds: 60,
+      ),
+      'a sender_ts to come cannot make a ring last longer': (
+        extra: {
+          'sender_ts': DateTime.now()
+              .add(const Duration(hours: 1))
+              .millisecondsSinceEpoch,
+        },
+        seconds: 60,
+      ),
+    };
 
-        client.ring(id: r'$short', at: at, extra: {'lifetime': 10000});
-        client.ring(id: r'$long', at: at, extra: {'lifetime': 3600000});
-        async.flushMicrotasks();
+    lifetimes.forEach((name, expected) {
+      test(name, () {
+        fakeAsync((async) {
+          listen(async);
+          final at = DateTime.now();
 
-        final byId = {for (final ring in everRung()) ring.eventId: ring};
-        expect(
-          byId[r'$short']!.expiresAt.difference(at),
-          const Duration(seconds: 10),
-        );
-        expect(
-          byId[r'$long']!.expiresAt.difference(at),
-          const Duration(seconds: 120),
-        );
-      });
-    });
+          client.ring(
+            _Ring()
+              ..at = at
+              ..extra = expected.extra,
+          );
+          async.flushMicrotasks();
 
-    test('a lifetime that is no number is 60 s', () {
-      fakeAsync((async) {
-        listen(async);
-        final at = DateTime.now();
-
-        client.ring(at: at, extra: {'lifetime': 'forever'});
-        async.flushMicrotasks();
-
-        expect(
-          lists.last.single.expiresAt.difference(at),
-          const Duration(seconds: 60),
-        );
-      });
-    });
-
-    test('a sender_ts to come cannot make a ring last longer', () {
-      fakeAsync((async) {
-        listen(async);
-        final at = DateTime.now();
-        final inAnHour = at.add(const Duration(hours: 1));
-
-        client.ring(
-          at: at,
-          extra: {'sender_ts': inAnHour.millisecondsSinceEpoch},
-        );
-        async.flushMicrotasks();
-
-        expect(
-          lists.last.single.expiresAt.difference(at),
-          const Duration(seconds: 60),
-        );
+          expect(
+            lists.last.single.expiresAt.difference(at),
+            Duration(seconds: expected.seconds),
+          );
+        });
       });
     });
 
@@ -448,7 +456,7 @@ void main() {
       fakeAsync((async) {
         listen(async);
 
-        client.ring(type: _legacyRingType);
+        client.ring(_Ring()..type = _legacyRingType);
         async.flushMicrotasks();
 
         expect(lists.last.single.eventId, r'$ring');
@@ -460,12 +468,12 @@ void main() {
         listen(async);
 
         client.receive(
-          type: _ringType,
-          content: {'notification_type': 'notification'},
+          _Incoming()..content = {'notification_type': 'notification'},
         );
         client.receive(
-          type: _legacyRingType,
-          content: {'notify_type': 'notify'},
+          _Incoming()
+            ..type = _legacyRingType
+            ..content = {'notify_type': 'notify'},
         );
         async.flushMicrotasks();
 
@@ -480,12 +488,12 @@ void main() {
         datasource.watchRings().listen(lists.add, onError: errors.add);
         async.flushMicrotasks();
 
-        client.receive(type: _ringType, content: {});
-        client.receive(type: _ringType, content: {'notification_type': 5});
+        client.receive(_Incoming());
+        client.receive(_Incoming()..content = {'notification_type': 5});
         client.receive(
-          type: _ringType,
-          content: {'notification_type': 'ring', 'm.call.intent': 7},
-          id: r'$odd',
+          _Incoming()
+            ..id = r'$odd'
+            ..content = {'notification_type': 'ring', 'm.call.intent': 7},
         );
         async.flushMicrotasks();
 
@@ -502,7 +510,7 @@ void main() {
           async.flushMicrotasks();
           expect(lists.last, hasLength(1), reason: type);
 
-          client.decline(type: type);
+          client.decline(_Decline()..type = type);
           async.flushMicrotasks();
 
           expect(lists.last, isEmpty, reason: type);
@@ -516,7 +524,7 @@ void main() {
         client.ring();
         async.flushMicrotasks();
 
-        client.decline(sender: '@carol:hs.test');
+        client.decline(_Decline()..sender = '@carol:hs.test');
         async.flushMicrotasks();
 
         expect(lists.last, hasLength(1));
@@ -529,7 +537,7 @@ void main() {
         client.ring();
         async.flushMicrotasks();
 
-        client.decline(ringId: r'$other');
+        client.decline(_Decline()..ringId = r'$other');
         async.flushMicrotasks();
 
         expect(lists.last, hasLength(1));
@@ -542,7 +550,7 @@ void main() {
         client.ring();
         async.flushMicrotasks();
 
-        client.membership('@bob:hs.test');
+        client.membership(_bobHere);
         async.flushMicrotasks();
 
         expect(lists.last, isEmpty);
@@ -555,7 +563,7 @@ void main() {
         client.ring();
         async.flushMicrotasks();
 
-        client.membership('@alice:hs.test');
+        client.membership(_alice);
         async.flushMicrotasks();
 
         expect(lists.last, hasLength(1));
@@ -565,7 +573,7 @@ void main() {
     test('a call this device is already in does not ring', () {
       fakeAsync((async) {
         client.room.states = {
-          _memberType: {'a': _member('@bob:hs.test', device: 'BOB')},
+          _memberType: {'a': _member(_bobThisDevice)},
         };
         listen(async);
 
@@ -590,7 +598,7 @@ void main() {
       fakeAsync((async) {
         listen(async);
         final at = DateTime.now();
-        client.ring(at: at);
+        client.ring(_Ring()..at = at);
         async.flushMicrotasks();
         expect(missed, isEmpty);
 
@@ -627,7 +635,7 @@ void main() {
         listen(async);
         client.ring();
         async.flushMicrotasks();
-        client.membership('@bob:hs.test');
+        client.membership(_bobHere);
         async.flushMicrotasks();
 
         async.elapse(const Duration(seconds: 61));
@@ -639,7 +647,7 @@ void main() {
     test('the ring of the user is no missed call of the user', () {
       fakeAsync((async) {
         listen(async);
-        client.ring(sender: '@bob:hs.test');
+        client.ring(_Ring()..sender = _bobHere.user);
         async.flushMicrotasks();
 
         async.elapse(const Duration(seconds: 61));
@@ -652,7 +660,9 @@ void main() {
       fakeAsync((async) {
         listen(async);
 
-        client.ring(at: DateTime.now().subtract(const Duration(minutes: 5)));
+        client.ring(
+          _Ring()..at = DateTime.now().subtract(const Duration(minutes: 5)),
+        );
         async.flushMicrotasks();
         async.elapse(const Duration(seconds: 61));
 
@@ -687,16 +697,23 @@ void main() {
       {'set_tweak': 'sound', 'value': 'ring'},
     ];
 
-    PushRule rule(
-      String id,
-      List<Object?> actions,
-      List<Map<String, Object?>> conditions,
-    ) => PushRule(
-      actions: actions,
-      conditions: [for (final c in conditions) PushCondition.fromJson(c)],
+    const ringRule = (
+      id: 'app.twake.chat.call_ring',
+      actions: ringActions,
+      conditions: ringConditions,
+    );
+    const legacyRule = (
+      id: 'app.twake.chat.call_ring_legacy',
+      actions: ringActions,
+      conditions: legacyConditions,
+    );
+
+    PushRule rule(_RuleSpec spec) => PushRule(
+      actions: spec.actions,
+      conditions: [for (final c in spec.conditions) PushCondition.fromJson(c)],
       default$: false,
       enabled: true,
-      ruleId: id,
+      ruleId: spec.id,
     );
 
     test('a session without the rules gets both, as underride rules', () async {
@@ -714,16 +731,12 @@ void main() {
             },
         },
         {
-          'app.twake.chat.call_ring': {
-            'kind': PushRuleKind.underride,
-            'actions': ringActions,
-            'conditions': ringConditions,
-          },
-          'app.twake.chat.call_ring_legacy': {
-            'kind': PushRuleKind.underride,
-            'actions': ringActions,
-            'conditions': legacyConditions,
-          },
+          for (final r in [ringRule, legacyRule])
+            r.id: {
+              'kind': PushRuleKind.underride,
+              'actions': r.actions,
+              'conditions': r.conditions,
+            },
         },
       );
     });
@@ -740,14 +753,7 @@ void main() {
     });
 
     test('rules already there, as they should be, cost no request', () async {
-      client.rules = PushRuleSet(
-        underride: [
-          rule('app.twake.chat.call_ring', ringActions, [...ringConditions]),
-          rule('app.twake.chat.call_ring_legacy', ringActions, [
-            ...legacyConditions,
-          ]),
-        ],
-      );
+      client.rules = PushRuleSet(underride: [rule(ringRule), rule(legacyRule)]);
 
       await datasource.ensureCallRingPushRules();
 
@@ -757,10 +763,12 @@ void main() {
     test('a rule that differs is replaced, the other left alone', () async {
       client.rules = PushRuleSet(
         underride: [
-          rule('app.twake.chat.call_ring', ['notify'], [...ringConditions]),
-          rule('app.twake.chat.call_ring_legacy', ringActions, [
-            ...legacyConditions,
-          ]),
+          rule((
+            id: ringRule.id,
+            actions: ['notify'],
+            conditions: ringConditions,
+          )),
+          rule(legacyRule),
         ],
       );
 
@@ -776,10 +784,12 @@ void main() {
     test('a rule with other conditions is replaced', () async {
       client.rules = PushRuleSet(
         underride: [
-          rule('app.twake.chat.call_ring', ringActions, [ringConditions.first]),
-          rule('app.twake.chat.call_ring_legacy', ringActions, [
-            ...legacyConditions,
-          ]),
+          rule((
+            id: ringRule.id,
+            actions: ringActions,
+            conditions: [ringConditions.first],
+          )),
+          rule(legacyRule),
         ],
       );
 
