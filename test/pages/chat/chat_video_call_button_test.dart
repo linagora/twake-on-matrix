@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 import 'package:get_it/get_it.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
@@ -13,6 +14,7 @@ import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.d
 import 'package:twake_chat/domain/video_call/usecases/start_video_call_usecase.provider.dart';
 import 'package:twake_chat/domain/exception/video_call/video_call_exception.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/pages/call/call_screen.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -47,25 +49,29 @@ void main() {
 
   const testRoomId = '!room:example.com';
 
-  HomeserverSummary summaryOf({required bool withVideoCall}) =>
-      HomeserverSummary(
-        discoveryInformation: DiscoveryInformation(
-          mHomeserver: HomeserverInformation(
-            baseUrl: Uri.parse('https://matrix.example.com'),
-          ),
-          additionalProperties: {
-            if (withVideoCall)
-              RtcFocus.rtcFociKey: [
-                {
-                  'type': RtcFocus.liveKitType,
-                  'livekit_base_url': 'https://meet.example.com/',
-                },
-              ],
-          },
-        ),
-        versions: GetVersionsResponse(versions: ['v1.11']),
-        loginFlows: [],
-      );
+  HomeserverSummary summaryOf({
+    required bool withVideoCall,
+    bool withTokenService = false,
+  }) => HomeserverSummary(
+    discoveryInformation: DiscoveryInformation(
+      mHomeserver: HomeserverInformation(
+        baseUrl: Uri.parse('https://matrix.example.com'),
+      ),
+      additionalProperties: {
+        if (withVideoCall)
+          RtcFocus.rtcFociKey: [
+            {
+              'type': RtcFocus.liveKitType,
+              'livekit_base_url': 'https://meet.example.com/',
+              if (withTokenService)
+                'livekit_service_url': 'https://rtc.example.com',
+            },
+          ],
+      },
+    ),
+    versions: GetVersionsResponse(versions: ['v1.11']),
+    loginFlows: [],
+  );
 
   PostExpectation<Future<void>> whenExecute() => when(
     mockUseCase.execute(
@@ -78,6 +84,7 @@ void main() {
   Future<void> pumpButton(
     WidgetTester tester, {
     bool withVideoCall = true,
+    bool withTokenService = false,
   }) async {
     final container = ProviderContainer.test(
       retry: (_, _) => null,
@@ -89,7 +96,12 @@ void main() {
     );
     container
         .read(loginHomeserverSummaryProvider.notifier)
-        .set(summaryOf(withVideoCall: withVideoCall));
+        .set(
+          summaryOf(
+            withVideoCall: withVideoCall,
+            withTokenService: withTokenService,
+          ),
+        );
 
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -113,6 +125,7 @@ void main() {
     mockRoom = MockRoom();
     when(mockRoom.client).thenReturn(mockClient);
     when(mockRoom.id).thenReturn(testRoomId);
+    when(mockRoom.canChangeStateEvent(any)).thenReturn(true);
   });
 
   tearDown(() => GetIt.instance.reset());
@@ -126,9 +139,64 @@ void main() {
       expect(find.byType(TwakeIconButton), findsNothing);
     });
 
-    testWidgets('onTap_always_startsTheCallOnTheVideoCallBaseUrl', (
+    testWidgets('onTap_withATokenService_opensTheInAppCall', (tester) async {
+      // Arrange
+      when(mockRoom.getLocalizedDisplayname()).thenReturn('Team');
+      await pumpButton(tester, withTokenService: true);
+
+      // Act
+      await tester.tap(find.byTooltip('Start Call'));
+      await tester.pumpAndSettle();
+
+      // Assert
+      expect(find.byType(CallScreen), findsOneWidget);
+      verifyNever(
+        mockUseCase.execute(
+          roomId: anyNamed('roomId'),
+          baseUrl: anyNamed('baseUrl'),
+          startedTitle: anyNamed('startedTitle'),
+        ),
+      );
+    });
+
+    testWidgets('build_withATokenServiceInAnEncryptedRoom_isHidden', (
       tester,
     ) async {
+      // Arrange
+      when(mockRoom.encrypted).thenReturn(true);
+
+      // Act
+      await pumpButton(tester, withTokenService: true);
+
+      // Assert
+      expect(find.byType(TwakeIconButton), findsNothing);
+    });
+
+    testWidgets(
+      'onTap_withATokenServiceForAMemberWithoutTheRight_sendsTheMeetLink',
+      (tester) async {
+        // Arrange
+        when(
+          mockRoom.canChangeStateEvent(CallEventTypes.callMember),
+        ).thenReturn(false);
+        await pumpButton(tester, withTokenService: true);
+
+        // Act
+        await tester.tap(find.byType(TwakeIconButton));
+        await tester.pump();
+
+        // Assert
+        verify(
+          mockUseCase.execute(
+            roomId: testRoomId,
+            baseUrl: 'https://meet.example.com',
+            startedTitle: 'Has started a video call',
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgets('onTap_withoutATokenService_sendsTheMeetLink', (tester) async {
       // Arrange
       await pumpButton(tester);
 

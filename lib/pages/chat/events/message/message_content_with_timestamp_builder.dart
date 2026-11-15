@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/chat/chat_horizontal_action_menu.dart';
@@ -158,7 +159,7 @@ class _MessageContentWithTimestampBuilderState
   );
 
   List<MessageContextMenuAction> _messageContextMenu(Event event) => [
-    if (event.room.canSendDefaultMessages && !widget.inThread) ...[
+    if (ThreadRules.canQuoteReply(event, inThreadScreen: widget.inThread)) ...[
       MessageContextMenuAction.reply,
     ],
     if (widget.onStartThread != null) MessageContextMenuAction.startThread,

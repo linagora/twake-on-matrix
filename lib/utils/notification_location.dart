@@ -1,6 +1,6 @@
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 
 /// Where a tapped notification leads: a thread reply opens its thread screen
 /// on that reply (room beneath), anything else opens the room, on the event
@@ -24,14 +24,25 @@ Future<String> resolveNotificationLocation(
 }) async => notificationLocation(
   roomId: roomId,
   eventId: eventId,
-  threadRootId: eventId == null
-      ? null
-      : (await _loadEvent(client, roomId, eventId))?.threadRootId,
+  threadRootId: await _threadRootOfEvent(client, roomId, eventId),
 );
+
+Future<String?> _threadRootOfEvent(
+  Client client,
+  String roomId,
+  String? eventId,
+) async {
+  if (eventId == null) return null;
+  final event = await _loadEvent(client, roomId, eventId);
+  return event == null ? null : ThreadRules.threadRootOf(event);
+}
 
 Future<Event?> _loadEvent(Client client, String roomId, String eventId) async {
   try {
-    return await client.getRoomById(roomId)?.getEventById(eventId);
+    return await client
+        .getRoomById(roomId)
+        ?.getEventById(eventId)
+        .timeout(const Duration(seconds: 5));
   } catch (e, s) {
     Logs().w('[Push] Unable to load the event of the notification', e, s);
     return null;
