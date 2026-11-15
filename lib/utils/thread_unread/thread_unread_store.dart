@@ -352,6 +352,8 @@ class ThreadUnreadStore extends ChangeNotifier {
     if (_isStale(epoch)) return;
     final follow = await _lookupFollow(thread, epoch);
     if (follow == null || _isStale(epoch)) return;
+    // The room was left meanwhile: nothing of it is recorded again.
+    if (!_counts.containsKey(thread.roomId)) return;
     if (follow) {
       markFollowed(thread);
     } else {

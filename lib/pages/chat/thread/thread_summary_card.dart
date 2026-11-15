@@ -3,6 +3,18 @@ import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/utils/date_time_extension.dart';
 
+class ThreadSummaryCardStyle {
+  static const double radius = LinagoraSpacing.base;
+  static const double barWidth = 3;
+  static const double unreadDotSize = LinagoraSpacing.base;
+  static const EdgeInsets padding = EdgeInsets.symmetric(
+    horizontal: LinagoraSpacing.base * 1.5,
+    vertical: LinagoraSpacing.base,
+  );
+  static const EdgeInsetsDirectional unreadDotMargin =
+      EdgeInsetsDirectional.only(end: LinagoraSpacing.base * 0.75);
+}
+
 /// Card inside the bubble of a thread root: number of messages, then author, text and age of
 /// the last reply. It does not repeat the root text, which is right above.
 class ThreadSummaryCard extends StatelessWidget {
@@ -33,12 +45,11 @@ class ThreadSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = L10n.of(context)!;
-    final colors = LinagoraSysColors.material();
     final textStyle = LinagoraTextStyle.material();
     final count = l10n.threadMessagesCount(replyCount);
     final scheme = Theme.of(context).colorScheme;
     final unread = unreadCount > 0;
-    final secondary = textStyle.bodySmall.copyWith(color: colors.secondary);
+    final secondary = textStyle.bodySmall.copyWith(color: scheme.secondary);
     final reply = lastReplyTime == null
         ? null
         : TextSpan(
@@ -68,20 +79,22 @@ class ThreadSummaryCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(ThreadSummaryCardStyle.radius),
           onTap: onTap,
           child: Container(
             // Takes the width it is given; shrinks if it is unbounded.
             alignment: AlignmentDirectional.centerStart,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: ThreadSummaryCardStyle.padding,
             decoration: BoxDecoration(
               color: onOwnBubble
                   ? scheme.surfaceContainerLowest
                   : scheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(
+                ThreadSummaryCardStyle.radius,
+              ),
               border: _LeftBarBorder(
-                bar: unread ? colors.primary : colors.outline,
-                outline: colors.outline,
+                bar: unread ? scheme.primary : scheme.outline,
+                outline: scheme.outline,
               ),
             ),
             child: Column(
@@ -93,11 +106,11 @@ class ThreadSummaryCard extends StatelessWidget {
                   children: [
                     if (unread)
                       Container(
-                        width: 8,
-                        height: 8,
-                        margin: const EdgeInsetsDirectional.only(end: 6),
+                        width: ThreadSummaryCardStyle.unreadDotSize,
+                        height: ThreadSummaryCardStyle.unreadDotSize,
+                        margin: ThreadSummaryCardStyle.unreadDotMargin,
                         decoration: BoxDecoration(
-                          color: colors.primary,
+                          color: scheme.primary,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -106,7 +119,7 @@ class ThreadSummaryCard extends StatelessWidget {
                       child: Text(
                         '$count ›',
                         style: textStyle.bodySmall.copyWith(
-                          color: colors.primary,
+                          color: scheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -146,7 +159,7 @@ class _LeftBarBorder extends Border {
         top: BorderSide(color: outline),
         right: BorderSide(color: outline),
         bottom: BorderSide(color: outline),
-        left: BorderSide(color: bar, width: 3),
+        left: BorderSide(color: bar, width: ThreadSummaryCardStyle.barWidth),
       );
 
   @override

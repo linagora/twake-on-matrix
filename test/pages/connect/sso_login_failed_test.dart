@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:io' show SocketException;
 
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/data/drive/datasources_impl/twake_sso_source.provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show MethodChannel, PlatformException;
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
@@ -8,7 +11,15 @@ import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
+import 'package:twake_chat/config/app_constants.dart';
+import 'package:twake_chat/data/drive/sources/sso_token_vault.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/domain/drive/entities/drive_id_token.dart';
+import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart';
+import 'package:twake_chat/domain/drive/sources/twake_sso_source.dart';
+import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
+import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/providers/sso_token_vault_provider.dart';
 import 'package:twake_chat/providers/login_sessions_provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/bootstrap/init_client_dialog.dart';
@@ -20,14 +31,19 @@ import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_body_args.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import '../../providers/fake_login_sessions.dart';
+import '../../providers/fake_sso_refresh_token_store.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 
 class _FakeLoginClient extends Fake implements Client {
   int logins = 0;
+  final loginTypes = <String>[];
   Object? loginError;
 
   @override
   Uri? homeserver;
+
+  @override
+  String? userID = '@a:example.com';
 
   /// Whether the server accepted the login: the client holds a token.
   bool logged = false;
@@ -40,6 +56,7 @@ class _FakeLoginClient extends Fake implements Client {
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.memberName != #login) return super.noSuchMethod(invocation);
     logins++;
+    loginTypes.add(invocation.positionalArguments.first as String);
     if (loginError != null) return Future<LoginResponse>.error(loginError!);
     return Future.value(
       LoginResponse(
@@ -70,6 +87,23 @@ class _FakeMatrixState extends Fake implements MatrixState {
 }
 
 class _Host with ConnectPageMixin {}
+
+class _FakeTwakeSso implements TwakeSsoSource {
+  _FakeTwakeSso(this._signIn);
+
+  final Future<DriveIdToken> Function() _signIn;
+  int signIns = 0;
+
+  @override
+  Future<DriveIdToken> signIn() {
+    signIns++;
+    return _signIn();
+  }
+
+  @override
+  Future<DriveIdToken> refresh(String refreshToken) =>
+      throw StateError('no refresh in a login');
+}
 
 void main() {
   late _FakeLoginClient client;
@@ -153,6 +187,35 @@ void main() {
     expect(find.byType(InitClientDialog), findsNothing);
     final l10n = L10n.of(tester.element(find.byType(Scaffold)))!;
     expect(find.text(l10n.oopsSomethingWentWrong), findsOneWidget);
+  });
+
+  testWidgets('logs in with the login type it is given', (tester) async {
+    client.loginError = StateError('stop here');
+    await pumpApp(tester);
+
+    final result = host.loginWithToken(
+      sessions,
+      client,
+      'id-token',
+      type: AppConstants.jwtLoginType,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(seconds: 1));
+    await result;
+
+    expect(client.loginTypes, ['org.matrix.login.jwt']);
+  });
+
+  testWidgets('logs in with the login token type by default', (tester) async {
+    client.loginError = StateError('stop here');
+    await pumpApp(tester);
+
+    final result = host.loginWithToken(sessions, client, 'token');
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(seconds: 1));
+    await result;
+
+    expect(client.loginTypes, [LoginType.mLoginToken]);
   });
 
   testWidgets('the user can start the login again', (tester) async {
@@ -266,6 +329,260 @@ void main() {
     });
   });
 
+  group('ssoLoginActionMobile with a Twake SSO', () {
+    late SsoTokenVault vault;
+    late FakeSsoRefreshTokenStore store;
+
+    HomeserverSummary summary({required bool jwtFlow, int providers = 1}) =>
+        HomeserverSummary(
+          discoveryInformation: DiscoveryInformation.fromJson({
+            'm.homeserver': {'base_url': 'https://matrix.example/'},
+            'm.authentication': {'issuer': 'https://sso.example'},
+            'app.twake.chat': {'enable_twake_drive': true},
+          }),
+          versions: GetVersionsResponse(versions: const ['v1.11']),
+          loginFlows: [
+            LoginFlow.fromJson({
+              'type': AuthenticationTypes.sso,
+              'identity_providers': [
+                for (var i = 0; i < providers; i++)
+                  {'id': 'idp$i', 'name': 'IdP $i'},
+              ],
+            }),
+            LoginFlow(type: LoginType.mLoginToken),
+            if (jwtFlow) LoginFlow(type: AppConstants.jwtLoginType),
+          ],
+        );
+
+    DriveIdToken tokens() => DriveIdToken(
+      value: 'sso-id-token',
+      expiresAt: DateTime.utc(2030),
+      workplaceFqdn: 'alice.twake.example',
+      refreshToken: 'sso-refresh-token',
+    );
+
+    Future<BuildContext> pumpLogin(
+      WidgetTester tester, {
+      required TwakeSsoSource source,
+      bool jwtFlow = true,
+      int providers = 1,
+    }) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 2;
+      addTearDown(tester.view.reset);
+      vault = SsoTokenVault();
+      store = FakeSsoRefreshTokenStore();
+      // The login reads the summary it checked, not the active account's.
+      final checked = summary(jwtFlow: jwtFlow, providers: providers);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            loginSessionsProvider.overrideWithValue(
+              FakeLoginSessions(loginClient: () async => client)
+                ..homeserverSummary = checked,
+            ),
+            twakeSsoSourceProvider(
+              checked.twakeDriveConfig,
+            ).overrideWithValue(source),
+            ssoTokenVaultProvider.overrideWithValue(vault),
+            useSsoRefreshTokenStore(store),
+          ],
+          child: MaterialApp(
+            navigatorKey: TwakeApp.routerKey,
+            theme: ThemeData(
+              extensions: [LinagoraTextThemeExtension.material()],
+            ),
+            localizationsDelegates: L10n.localizationsDelegates,
+            supportedLocales: L10n.supportedLocales,
+            builder: (context, child) =>
+                Provider<MatrixState>.value(value: matrix, child: child),
+            home: const Scaffold(body: SizedBox()),
+          ),
+        ),
+      );
+      return tester.element(find.byType(Scaffold));
+    }
+
+    ClientLoginStateEvent loggedIn() => ClientLoginStateEvent(
+      client: client,
+      loginState: LoginState.loggedIn,
+      multipleAccountLoginType: MultipleAccountLoginType.firstLoggedIn,
+    );
+
+    testWidgets('signs in once: the id token logs in to Matrix and its tokens '
+        'wait for Drive', (tester) async {
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source);
+
+      final result = host.ssoLoginActionMobile(context: context, id: 'sso');
+      await tester.pump(const Duration(milliseconds: 100));
+      matrix.onClientLoginStateChanged.add(loggedIn());
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(await result, SsoLoginState.success);
+      expect(client.loginTypes, [AppConstants.jwtLoginType]);
+      expect(vault.of('@a:example.com')?.value, 'sso-id-token');
+      expect(vault.of('@a:example.com')?.refreshToken, 'sso-refresh-token');
+    });
+
+    testWidgets('keeps the refresh token for the next start', (tester) async {
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source);
+
+      final result = host.ssoLoginActionMobile(context: context, id: 'sso');
+      await tester.pump(const Duration(milliseconds: 100));
+      matrix.onClientLoginStateChanged.add(loggedIn());
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(await result, SsoLoginState.success);
+      expect(store.tokens, {'@a:example.com': 'sso-refresh-token'});
+    });
+
+    testWidgets('a secure store that fails does not fail the login', (
+      tester,
+    ) async {
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source);
+      store.failing = true;
+
+      final result = host.ssoLoginActionMobile(context: context, id: 'sso');
+      await tester.pump(const Duration(milliseconds: 100));
+      matrix.onClientLoginStateChanged.add(loggedIn());
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(await result, SsoLoginState.success);
+      expect(vault.of('@a:example.com')?.value, 'sso-id-token');
+    });
+
+    testWidgets('keeps no tokens when the Matrix login fails', (tester) async {
+      client.loginError = StateError('M_FORBIDDEN');
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source);
+
+      final result = host.ssoLoginActionMobile(context: context, id: 'sso');
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(await result, SsoLoginState.error);
+      expect(vault.of('@a:example.com'), isNull);
+      expect(store.tokens, isEmpty);
+    });
+
+    // What POST /login can answer for the JWT type: a refusal (401
+    // M_FORBIDDEN), a rate limit (429 M_LIMIT_EXCEEDED), a stalled request and
+    // a lost network (https://spec.matrix.org/v1.19/client-server-api/#post_matrixclientv3login).
+    final matrixFailures = <String, Object>{
+      'a refusal (M_FORBIDDEN)': MatrixException.fromJson({
+        'errcode': 'M_FORBIDDEN',
+        'error': 'Invalid token',
+      }),
+      'a rate limit (M_LIMIT_EXCEEDED)': MatrixException.fromJson({
+        'errcode': 'M_LIMIT_EXCEEDED',
+        'error': 'Too many requests',
+        'retry_after_ms': 1000,
+      }),
+      'a timeout': TimeoutException('POST /login'),
+      'a lost network': const SocketException('offline'),
+    };
+    matrixFailures.forEach((name, error) {
+      testWidgets('keeps no tokens when the Matrix login ends in $name', (
+        tester,
+      ) async {
+        client.loginError = error;
+        final source = _FakeTwakeSso(() async => tokens());
+        final context = await pumpLogin(tester, source: source);
+
+        final result = host.ssoLoginActionMobile(context: context, id: 'sso');
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(await result, SsoLoginState.error);
+        expect(client.loginTypes, [AppConstants.jwtLoginType]);
+        expect(vault.of('@a:example.com'), isNull);
+        expect(store.tokens, isEmpty);
+      });
+    });
+
+    testWidgets('a cancelled sign-in is silent and logs nothing in', (
+      tester,
+    ) async {
+      final source = _FakeTwakeSso(
+        () async => throw const DriveSignInCancelled(),
+      );
+      final context = await pumpLogin(tester, source: source);
+
+      final result = await host.ssoLoginActionMobile(context: context, id: 's');
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(result, SsoLoginState.error);
+      expect(client.logins, 0);
+      final l10n = L10n.of(context)!;
+      expect(find.text(l10n.oopsSomethingWentWrong), findsNothing);
+    });
+
+    for (final failure in <DriveException>[
+      const DriveSignInFailed(DriveSignInFailure.tokenEndpoint),
+      const DriveRateLimited(),
+      const DriveTimedOut(),
+      const DriveOffline(),
+    ]) {
+      testWidgets('a sign-in that fails with ${failure.runtimeType} tells the '
+          'user and logs nothing in', (tester) async {
+        final source = _FakeTwakeSso(() async => throw failure);
+        final context = await pumpLogin(tester, source: source);
+
+        final result = await host.ssoLoginActionMobile(
+          context: context,
+          id: 'sso',
+        );
+        await tester.pump(const Duration(seconds: 1));
+
+        expect(result, SsoLoginState.error);
+        expect(client.logins, 0);
+        final l10n = L10n.of(context)!;
+        expect(find.text(l10n.oopsSomethingWentWrong), findsOneWidget);
+      });
+    }
+
+    testWidgets('keeps the provider the user chose when the homeserver offers '
+        'several', (tester) async {
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source, providers: 2);
+      client.homeserver = Uri.parse('https://matrix.example.com');
+      const channel = MethodChannel('flutter_web_auth_2');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async => 'twake://done');
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+
+      final result = await host.ssoLoginActionMobile(context: context, id: 's');
+
+      expect(result, SsoLoginState.tokenEmpty);
+      expect(source.signIns, 0);
+    });
+
+    testWidgets('does not sign in at the Twake SSO when the homeserver does '
+        'not take its id token', (tester) async {
+      final source = _FakeTwakeSso(() async => tokens());
+      final context = await pumpLogin(tester, source: source, jwtFlow: false);
+      client.homeserver = Uri.parse('https://matrix.example.com');
+      const channel = MethodChannel('flutter_web_auth_2');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async => 'twake://done');
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null),
+      );
+
+      final result = await host.ssoLoginActionMobile(context: context, id: 's');
+
+      expect(result, SsoLoginState.tokenEmpty);
+      expect(source.signIns, 0);
+    });
+  });
+
   testWidgets('a callback with no login token tells the user', (tester) async {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 2;
@@ -273,6 +590,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          activeMatrixClientProvider.overrideWithValue(null),
           loginSessionsProvider.overrideWithValue(
             FakeLoginSessions(loginClient: () async => client),
           ),
@@ -316,6 +634,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          activeMatrixClientProvider.overrideWithValue(null),
           loginSessionsProvider.overrideWithValue(
             // The web auth takes the client first; the login then waits for
             // the sessions (their cleanup retries) while the user leaves.
@@ -380,6 +699,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            activeMatrixClientProvider.overrideWithValue(null),
             loginSessionsProvider.overrideWithValue(
               FakeLoginSessions(loginClient: () async => client),
             ),

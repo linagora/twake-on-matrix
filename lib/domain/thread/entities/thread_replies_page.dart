@@ -3,7 +3,8 @@
 class ThreadRepliesPage<T> {
   const ThreadRepliesPage({required this.replies, this.nextBatch});
 
-  /// Oldest first.
+  /// Oldest first. Also holds the edits and reactions of the replies, which
+  /// count in the request limit: the screen keeps loading while [canLoadMore].
   final List<T> replies;
 
   final String? nextBatch;
@@ -11,20 +12,13 @@ class ThreadRepliesPage<T> {
   bool get canLoadMore => nextBatch != null;
 }
 
-/// What to load of a thread.
-///
-/// [withRelations]: the thread screen also needs the edits and reactions of
-/// the replies, so it reads `/relations/<root>?recurse=true` with no
-/// `rel_type` filter (they come in [ThreadRepliesPage.replies] too); without
-/// it, `/relations/<root>/m.thread` gives the replies only.
-/// [decrypt]: false when only ids are read (mark as read).
+/// What to load of a thread: the replies and their edits and reactions, read
+/// from `/relations/<root>?recurse=true`.
 class ThreadRepliesRequest {
   const ThreadRepliesRequest({
     required this.rootEventId,
     this.from,
     this.limit = defaultPageSize,
-    this.withRelations = false,
-    this.decrypt = true,
   });
 
   static const int defaultPageSize = 30;
@@ -32,6 +26,4 @@ class ThreadRepliesRequest {
   final String rootEventId;
   final String? from;
   final int limit;
-  final bool withRelations;
-  final bool decrypt;
 }
