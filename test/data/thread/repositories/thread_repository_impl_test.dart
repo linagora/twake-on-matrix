@@ -212,21 +212,46 @@ void main() {
   });
 
   test(
-    'a server error reaches the caller so the screen can offer a retry',
+    'a server error reaches the caller as a domain exception, not an SDK one',
     () async {
       whenRelations().thenThrow(
         MatrixException.fromJson({'errcode': 'M_UNKNOWN', 'error': 'boom'}),
       );
 
-      expect(
+      await expectLater(
         interactor.getReplies(
           roomId,
           const ThreadRepliesRequest(rootEventId: rootId),
         ),
-        throwsA(isA<MatrixException>()),
+        throwsA(allOf(isA<Exception>(), isNot(isA<MatrixException>()))),
       );
     },
   );
+
+  test('a room the client does not know is an error, not an empty thread '
+      'that reads as "no replies"', () async {
+    when(client.getRoomById(roomId)).thenReturn(null);
+
+    await expectLater(
+      interactor.getReplies(
+        roomId,
+        const ThreadRepliesRequest(rootEventId: rootId),
+      ),
+      throwsA(allOf(isA<Exception>(), isNot(isA<MatrixException>()))),
+    );
+    verifyNever(
+      client.getRelatingEventsWithRelType(
+        any,
+        any,
+        any,
+        from: anyNamed('from'),
+        to: anyNamed('to'),
+        limit: anyNamed('limit'),
+        dir: anyNamed('dir'),
+        recurse: anyNamed('recurse'),
+      ),
+    );
+  });
 
   /// The thread screen also needs the edits and reactions of the replies:
   /// it reads every relation of the root, recursively.
