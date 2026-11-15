@@ -4,12 +4,13 @@ import 'package:mockito/mockito.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
 import 'package:twake_chat/domain/usecase/room/send_text_message_interactor.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 
 import 'send_text_message_interactor_test.mocks.dart';
 
 /// THR-M-05: every text sent from the thread screen (text, mention, emoji,
-/// command) carries the thread relation: `threadRootEventId` = root,
-/// `threadLastEventId` = last event of the thread, and never `inReplyTo`,
+/// command) carries the thread relation: the `ThreadSendTarget` root and
+/// last event of the thread, and never `inReplyTo`,
 /// which would make the SDK prepend a quote to the body.
 void main() {
   const rootId = r'$root';
@@ -57,8 +58,7 @@ void main() {
     await interactor.execute(
       room: room,
       text: 'hello',
-      threadRootEventId: rootId,
-      threadLastEventId: lastId,
+      thread: const ThreadSendTarget(rootEventId: rootId, lastEventId: lastId),
     );
 
     // Omitted named arguments must be null: no inReplyTo.
@@ -83,8 +83,7 @@ void main() {
     await interactor.execute(
       room: room,
       text: text,
-      threadRootEventId: rootId,
-      threadLastEventId: lastId,
+      thread: const ThreadSendTarget(rootEventId: rootId, lastEventId: lastId),
     );
 
     verify(
@@ -106,8 +105,10 @@ void main() {
         room: room,
         text: 'hello',
         inReplyTo: quoted,
-        threadRootEventId: rootId,
-        threadLastEventId: lastId,
+        thread: const ThreadSendTarget(
+          rootEventId: rootId,
+          lastEventId: lastId,
+        ),
       );
 
       verify(
@@ -139,8 +140,10 @@ void main() {
       await interactor.execute(
         room: room,
         text: command,
-        threadRootEventId: rootId,
-        threadLastEventId: lastId,
+        thread: const ThreadSendTarget(
+          rootEventId: rootId,
+          lastEventId: lastId,
+        ),
       );
 
       verify(
@@ -164,8 +167,7 @@ void main() {
     await interactor.execute(
       room: room,
       text: 'abcdefghijkl',
-      threadRootEventId: rootId,
-      threadLastEventId: lastId,
+      thread: const ThreadSendTarget(rootEventId: rootId, lastEventId: lastId),
     );
 
     verifyInOrder([
@@ -210,8 +212,10 @@ void main() {
         room: room,
         text: 'fixed root',
         editEvent: textEvent(rootId),
-        threadRootEventId: rootId,
-        threadLastEventId: lastId,
+        thread: const ThreadSendTarget(
+          rootEventId: rootId,
+          lastEventId: lastId,
+        ),
       );
 
       // Omitted named arguments must be null: no thread ids.
@@ -230,8 +234,10 @@ void main() {
         room: room,
         text: 'fixed reply',
         editEvent: textEvent(r'$reply'),
-        threadRootEventId: rootId,
-        threadLastEventId: lastId,
+        thread: const ThreadSendTarget(
+          rootEventId: rootId,
+          lastEventId: lastId,
+        ),
       );
 
       verify(
