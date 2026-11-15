@@ -14,10 +14,14 @@ class TwakeLocalNotificationPayload {
   @JsonKey(name: 'event_id')
   final String? eventId;
 
+  @JsonKey(name: 'thread_root_id')
+  final String? threadRootId;
+
   const TwakeLocalNotificationPayload({
     this.roomId,
     this.receiverId,
     this.eventId,
+    this.threadRootId,
   });
 
   factory TwakeLocalNotificationPayload.fromJson(Map<String, dynamic> json) =>
