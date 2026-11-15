@@ -122,78 +122,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
                   : LinagoraSysColors.material().onPrimary,
               appBar: controller.isThread && !controller.selectMode
                   ? _threadAppBar(context)
-                  : AppBar(
-                      backgroundColor: controller.responsive.isMobile(context)
-                          ? LinagoraSysColors.material().surface
-                          : LinagoraSysColors.material().onPrimary,
-                      automaticallyImplyLeading: false,
-                      toolbarHeight: ChatViewStyle.appBarHeight(context),
-                      title: Padding(
-                        padding: ChatViewStyle.paddingLeading(context),
-                        child: Row(
-                          children: [
-                            _buildLeading(context),
-                            Expanded(
-                              child: ChatAppBarTitle(
-                                selectedEvents: controller.selectedEvents,
-                                room: controller.room,
-                                isArchived: controller.isArchived,
-                                sendController: controller.sendController,
-                                connectivityResultStream:
-                                    controller.connectivityResultStream,
-                                actions: _appBarActions(context),
-                                onPushDetails: controller.onPushDetails,
-                                roomName: controller.roomName,
-                                cachedPresenceNotifier:
-                                    controller.cachedPresenceNotifier,
-                                cachedPresenceStreamController:
-                                    controller.cachedPresenceStreamController,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: [
-                        if (!controller.selectMode)
-                          Padding(
-                            padding: ChatViewStyle.paddingTrailing(context),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  hoverColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  onPressed: controller.toggleSearch,
-                                  icon: const Icon(Icons.search),
-                                ),
-                                ChatVideoCallButton(controller),
-                                if (controller.hasActionAppBarMenu)
-                                  Builder(
-                                    builder: (context) => TwakeIconButton(
-                                      icon: Icons.more_vert,
-                                      tooltip: L10n.of(context)!.more,
-                                      onTapDown: (tapDownDetails) =>
-                                          controller.handleAppbarMenuAction(
-                                            context,
-                                            tapDownDetails,
-                                          ),
-                                      preferBelow: false,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                      ],
-                      bottom: PreferredSize(
-                        preferredSize: const Size(double.infinity, 1),
-                        child: Container(
-                          color: LinagoraStateLayer(
-                            LinagoraSysColors.material().surfaceTint,
-                          ).opacityLayer1,
-                          height: 1,
-                        ),
-                      ),
-                    ),
+                  : _roomAppBar(context),
               floatingActionButton: ValueListenableBuilder(
                 valueListenable: controller.showScrollDownButtonNotifier,
                 builder: (context, showScrollDownButton, _) {
@@ -257,6 +186,66 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     );
   }
 
+  PreferredSizeWidget _roomAppBar(BuildContext context) => AppBar(
+    backgroundColor: controller.responsive.isMobile(context)
+        ? LinagoraSysColors.material().surface
+        : LinagoraSysColors.material().onPrimary,
+    automaticallyImplyLeading: false,
+    toolbarHeight: ChatViewStyle.appBarHeight(context),
+    title: Padding(
+      padding: ChatViewStyle.paddingLeading(context),
+      child: Row(
+        children: [
+          _buildLeading(context),
+          Expanded(
+            child: ChatAppBarTitle(
+              selectedEvents: controller.selectedEvents,
+              room: controller.room,
+              isArchived: controller.isArchived,
+              sendController: controller.sendController,
+              connectivityResultStream: controller.connectivityResultStream,
+              actions: _appBarActions(context),
+              onPushDetails: controller.onPushDetails,
+              roomName: controller.roomName,
+              cachedPresenceNotifier: controller.cachedPresenceNotifier,
+              cachedPresenceStreamController:
+                  controller.cachedPresenceStreamController,
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      if (!controller.selectMode)
+        Padding(
+          padding: ChatViewStyle.paddingTrailing(context),
+          child: Row(
+            children: [
+              IconButton(
+                hoverColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+                onPressed: controller.toggleSearch,
+                icon: const Icon(Icons.search),
+              ),
+              ChatVideoCallButton(controller),
+              if (controller.hasActionAppBarMenu)
+                Builder(
+                  builder: (context) => TwakeIconButton(
+                    icon: Icons.more_vert,
+                    tooltip: L10n.of(context)!.more,
+                    onTapDown: (tapDownDetails) => controller
+                        .handleAppbarMenuAction(context, tapDownDetails),
+                    preferBelow: false,
+                  ),
+                ),
+            ],
+          ),
+        ),
+    ],
+    bottom: _appBarBottomSeparator(),
+  );
+
   PreferredSizeWidget _threadAppBar(BuildContext context) {
     final thread = ThreadRef(controller.roomId!, controller.threadRootId!);
     return AppBar(
@@ -265,11 +254,7 @@ class ChatView extends StatelessWidget with MessageContentMixin {
           : LinagoraSysColors.material().onPrimary,
       automaticallyImplyLeading: false,
       toolbarHeight: ChatViewStyle.appBarHeight(context),
-      leading: TwakeIconButton(
-        tooltip: L10n.of(context)!.back,
-        icon: Icons.arrow_back_ios,
-        onTap: controller.onBackPress,
-      ),
+      leading: _buildBackButton(context),
       title: Consumer(
         builder: (context, ref, _) {
           final isResolved = ref.watch(
@@ -284,17 +269,19 @@ class ChatView extends StatelessWidget with MessageContentMixin {
         },
       ),
       actions: [ThreadMenuButton(thread: thread)],
-      bottom: PreferredSize(
-        preferredSize: const Size(double.infinity, 1),
-        child: Container(
-          color: LinagoraStateLayer(
-            LinagoraSysColors.material().surfaceTint,
-          ).opacityLayer1,
-          height: 1,
-        ),
-      ),
+      bottom: _appBarBottomSeparator(),
     );
   }
+
+  PreferredSizeWidget _appBarBottomSeparator() => PreferredSize(
+    preferredSize: const Size(double.infinity, 1),
+    child: Container(
+      color: LinagoraStateLayer(
+        LinagoraSysColors.material().surfaceTint,
+      ).opacityLayer1,
+      height: 1,
+    ),
+  );
 
   Widget _buildBody() {
     if (controller.room == null) {

@@ -158,14 +158,7 @@ abstract class ClientManager {
       clientName,
       database: await openSqfliteDb(name: clientName),
     );
-    await _invalidatePersistedSyncFilterOnce(database, clientName);
-    if (AppConfig.threadsEnabled) {
-      await _invalidatePersistedSyncFilterOnce(
-        database,
-        clientName,
-        migratedPrefix: _threadCountersFilterMigratedPrefix,
-      );
-    }
+    await migrateSyncFilter(database, clientName);
     return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid
@@ -203,14 +196,44 @@ abstract class ClientManager {
     );
   }
 
-  static Future<void> _invalidatePersistedSyncFilterOnce(
+  /// The SDK defines a sync filter only when none is saved, so the saved
+  /// filter id is dropped once for the leave rooms, then whenever the threads
+  /// flag differs from the state the saved filter was defined for.
+  static Future<void> migrateSyncFilter(
     DatabaseApi database,
-    String clientName, {
-    String migratedPrefix = _includeLeaveFilterMigratedPrefix,
+    String clientName,
+  ) async {
+    await _migrateOnce(
+      database,
+      clientName,
+      '$_includeLeaveFilterMigratedPrefix.$clientName',
+      migrated: (stored) => stored == '1',
+      marker: '1',
+    );
+    final threads = AppConfig.threadsEnabled ? 'on' : 'off';
+    await _migrateOnce(
+      database,
+      clientName,
+      '$_threadCountersFilterMigratedPrefix.$clientName',
+      // '1' was written when the filter asked for the thread counters.
+      migrated: (stored) => switch (stored) {
+        null => threads == 'off',
+        '1' => threads == 'on',
+        _ => stored == threads,
+      },
+      marker: threads,
+    );
+  }
+
+  static Future<void> _migrateOnce(
+    DatabaseApi database,
+    String clientName,
+    String migratedKey, {
+    required bool Function(String? stored) migrated,
+    required String marker,
   }) async {
     final store = Store();
-    final migratedKey = '$migratedPrefix.$clientName';
-    if (await store.getItem(migratedKey) == '1') return;
+    if (migrated(await store.getItem(migratedKey))) return;
 
     try {
       final account = await database.getClient(clientName);
@@ -234,7 +257,7 @@ abstract class ClientManager {
           account['oidc_client_id'] as String?,
         );
       }
-      await store.setItem(migratedKey, '1');
+      await store.setItem(migratedKey, marker);
     } catch (e, s) {
       Logs().w(
         'Unable to invalidate the persisted sync filter ($migratedKey)',

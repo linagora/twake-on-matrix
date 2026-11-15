@@ -1,6 +1,10 @@
+import 'dart:async';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/notification_location.dart';
 
@@ -12,7 +16,10 @@ import '../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 /// main timeline opens the room on it. The ids go through the typed routes,
 /// so an event id of a v3 room (`+`, `/`) survives the query string.
 void main() {
+  late bool flagBefore;
+
   setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
     _client = MockClient();
     _room = MockRoom();
     when(_room.id).thenReturn(_roomId);
@@ -20,12 +27,15 @@ void main() {
     when(_client.getRoomById(_roomId)).thenReturn(_room);
   });
 
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
   group('the location of a notification', _locationTests);
 
   /// What the tap knows is the room and the event id of the push: the event
   /// tells whether it is a thread reply. When it cannot be loaded, the tap
   /// still opens the room on the event, as before threads.
   group('the location of a tapped notification', _resolveTests);
+  group('the flag and the wait of a tapped notification', _flagAndTimeoutTests);
 }
 
 const _roomId = '!room:example.com';
@@ -160,5 +170,36 @@ void _resolveTests() {
       const RoomRoute(roomid: _roomId).location,
     );
     verifyNever(_room.getEventById(any));
+  });
+}
+
+/// Review 3609 (nqhhdev notification_location.dart:14): with the threads flag
+/// off a reply is an ordinary message of the room, its tap opens the room.
+/// Reviews nqhhdev url_launcher.dart:154 and jbrnzl background_push.dart:1087:
+/// the tap waits for the event, which on a cold start goes to the server: a
+/// short timeout falls back to the room on the event.
+void _flagAndTimeoutTests() {
+  test('threads flag off: a thread reply opens the room on it', () async {
+    AppConfig.threadsEnabled = false;
+    when(
+      _room.getEventById(_replyId),
+    ).thenAnswer((_) async => _event(eventId: _replyId, threadRootId: _rootId));
+
+    expect(await _tapped(), _roomLocation(_replyId));
+  });
+
+  test('an event that never arrives opens the room on it after a short '
+      'wait', () {
+    fakeAsync((async) {
+      when(
+        _room.getEventById(_replyId),
+      ).thenAnswer((_) => Completer<Event?>().future);
+      String? location;
+      _tapped().then((l) => location = l);
+
+      async.elapse(const Duration(seconds: 10));
+
+      expect(location, _roomLocation(_replyId));
+    });
   });
 }

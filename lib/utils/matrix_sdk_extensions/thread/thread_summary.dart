@@ -36,7 +36,10 @@ class ThreadSummary {
     final replies = _liveReplies(root, liveEvents);
     final fresh = replies.where((e) => _isFresh(e, serverLatest));
 
-    final count = (aggregate?.tryGet<int>('count') ?? 0) + fresh.length;
+    // The server count still includes a latest reply deleted live.
+    final serverDeleted = deletedIds.contains(serverLatest?.eventId) ? 1 : 0;
+    final count =
+        (aggregate?.tryGet<int>('count') ?? 0) + fresh.length - serverDeleted;
     if (count == 0) return null;
 
     final last = _sortedCandidates(

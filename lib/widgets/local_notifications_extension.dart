@@ -1,6 +1,5 @@
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/threaded_read_receipt_extension.dart';
 import 'dart:io';
@@ -44,7 +43,7 @@ extension LocalNotificationsExtension on MatrixState {
       return;
     }
     final event = Event.fromJson(eventUpdate.content, room);
-    final threadRootId = event.threadRootId;
+    final threadRootId = ThreadRules.threadRootOf(event);
     // The room on screen is read live, but not its thread replies.
     if (threadRootId == null &&
         activeRoomId == roomId &&
@@ -163,7 +162,7 @@ extension LocalNotificationsExtension on MatrixState {
         );
         switch (action) {
           case DesktopNotificationActions.seen:
-            final threadRootId = event.threadRootId;
+            final threadRootId = ThreadRules.threadRootOf(event);
             if (threadRootId == null) {
               room.setMainTimelineReadMarker(event);
             } else {
