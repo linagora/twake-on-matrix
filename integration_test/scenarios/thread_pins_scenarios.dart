@@ -187,7 +187,7 @@ class ThreadPinnedBarScenario extends BaseTestScenario {
     await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: threadText(roomMessage.text),
+      content: threadText(roomMessage),
     );
     await waitForThreadMessage(this, roomMessage);
 
