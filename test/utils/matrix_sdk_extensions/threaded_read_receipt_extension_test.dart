@@ -240,6 +240,76 @@ void main() {
       verify(client.setReadMarker(roomId, mFullyRead: r'$newer')).called(1);
     });
   });
+
+  /// Review jbrnzl (#3622, chat.dart:762): the thread screen is a new one
+  /// on each opening. A thread whose own receipt is already on its last
+  /// reply is not read again, as for the main timeline.
+  group('opening a thread that is already read', () {
+    late Room realRoom;
+
+    LatestReceiptStateForTimeline own(String eventId) {
+      final data = LatestReceiptStateData(
+        eventId,
+        DateTime.utc(2026, 11, 6, 10, 1).millisecondsSinceEpoch,
+      );
+      return LatestReceiptStateForTimeline(
+        ownPrivate: null,
+        ownPublic: data,
+        latestOwnReceipt: data,
+        otherUsers: {},
+      );
+    }
+
+    setUp(() {
+      final staleGlobal = LatestReceiptStateData(
+        r'$old',
+        DateTime.utc(2026, 10, 30).millisecondsSinceEpoch,
+      );
+      realRoom = Room(
+        id: roomId,
+        client: client,
+        receiptState: LatestReceiptState(
+          global: LatestReceiptStateForTimeline(
+            ownPrivate: null,
+            ownPublic: staleGlobal,
+            latestOwnReceipt: staleGlobal,
+            otherUsers: {},
+          ),
+          byThread: {rootId: own(r'$reply')},
+        ),
+      );
+    });
+
+    test(
+      'its last reply already has the own receipt: nothing is sent',
+      () async {
+        await realRoom.setThreadReadMarker(
+          _message(r'$reply', realRoom),
+          thread(rootId),
+        );
+
+        verifyNever(
+          client.postReceipt(any, any, any, threadId: anyNamed('threadId')),
+        );
+      },
+    );
+
+    test('a newer reply is read', () async {
+      await realRoom.setThreadReadMarker(
+        _message(r'$newer_reply', realRoom),
+        thread(rootId),
+      );
+
+      verify(
+        client.postReceipt(
+          roomId,
+          ReceiptType.mRead,
+          r'$newer_reply',
+          threadId: rootId,
+        ),
+      ).called(1);
+    });
+  });
 }
 
 Event _message(String eventId, Room room) => Event(
