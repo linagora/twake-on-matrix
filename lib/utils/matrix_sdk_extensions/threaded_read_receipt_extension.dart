@@ -23,8 +23,11 @@ extension ThreadedReadReceiptExtension on Room {
     await client.setReadMarker(id, mFullyRead: event.eventId);
   }
 
-  /// Reads the [thread] up to [event]; `m.fully_read` stays.
+  /// Reads the [thread] up to [event]; `m.fully_read` stays. Flag off: unthreaded receipt, as on `main`.
   Future<void> setThreadReadMarker(Event event, ThreadRef thread) async {
+    if (!AppConfig.threadsEnabled) {
+      return setReadMarker(event.eventId, mRead: event.eventId);
+    }
     // Already read there: no receipt, no request.
     if (event.eventId ==
         receiptState.byThread[thread.rootEventId]?.latestOwnReceipt?.eventId) {
