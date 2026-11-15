@@ -3389,6 +3389,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  twake_drive_picker:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "5d70891eba606c16743924857c2cf1dc27649d72"
+      resolved-ref: "5d70891eba606c16743924857c2cf1dc27649d72"
+      url: "https://github.com/linagora/twake_drive_picker.git"
+    source: git
+    version: "0.2.0"
   typed_data:
     dependency: transitive
     description:

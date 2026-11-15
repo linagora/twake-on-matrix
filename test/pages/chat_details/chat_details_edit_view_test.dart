@@ -173,4 +173,61 @@ void main() {
     // Assert
     expect(encryptionSwitch(tester).onChanged, isNull);
   });
+
+  testWidgets('build_emptyDescription_showsLabelAndDimmedHint', (tester) async {
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    final field = tester.widget<TextField>(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is TextField &&
+            widget.decoration?.labelText == 'Description',
+      ),
+    );
+    final hint = tester.widget<Text>(find.text('Add description'));
+    expect(find.text('Description'), findsOneWidget);
+    expect(hint.style?.color, isNotNull);
+    expect(hint.style?.color, isNot(field.style?.color));
+  });
+
+  testWidgets('build_cannotChangeTopic_hidesDescriptionHint', (tester) async {
+    // Arrange
+    when(room.ownPowerLevel).thenReturn(PowerLevel(0));
+
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    expect(find.text('Description'), findsOneWidget);
+    expect(find.text('Add description'), findsNothing);
+  });
+
+  testWidgets('build_emptyGroupName_showsDimmedHint', (tester) async {
+    // Arrange
+    when(
+      controller.groupNameTextEditingController,
+    ).thenReturn(TextEditingController());
+
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    expect(find.text('Enter chat name'), findsOneWidget);
+  });
+
+  testWidgets('build_cannotChangeRoomName_hidesGroupNameHint', (tester) async {
+    // Arrange
+    when(room.ownPowerLevel).thenReturn(PowerLevel(0));
+    when(
+      controller.groupNameTextEditingController,
+    ).thenReturn(TextEditingController());
+
+    // Act
+    await pumpView(tester);
+
+    // Assert
+    expect(find.text('Enter chat name'), findsNothing);
+  });
 }

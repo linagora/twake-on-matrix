@@ -2,6 +2,7 @@ import 'package:twake_chat/utils/power_level_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/config/default_power_level_member.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
 void main() {
   group('PowerLevelManager', () {
@@ -21,6 +22,7 @@ void main() {
       expect(result[EventTypes.RoomAvatar], equals(adminPowerLevel));
       expect(result[EventTypes.RoomMember], equals(userPowerLevel));
       expect(result[EventTypes.RoomTopic], equals(adminPowerLevel));
+      expect(result[CallEventTypes.callMember], 0);
     });
 
     test('should contain all expected event types', () {

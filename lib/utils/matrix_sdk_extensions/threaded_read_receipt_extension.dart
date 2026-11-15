@@ -24,8 +24,14 @@ extension ThreadedReadReceiptExtension on Room {
   }
 
   /// Reads the [thread] up to [event]; `m.fully_read` stays.
-  Future<void> setThreadReadMarker(Event event, ThreadRef thread) =>
-      _postReceipt(event, thread: thread);
+  Future<void> setThreadReadMarker(Event event, ThreadRef thread) async {
+    // Already read there: no receipt, no request.
+    if (event.eventId ==
+        receiptState.byThread[thread.rootEventId]?.latestOwnReceipt?.eventId) {
+      return;
+    }
+    await _postReceipt(event, thread: thread);
+  }
 
   /// SDK `hasNewMessages` reads `receiptState.global` only, which the app
   /// never moves (it sends threaded receipts). The own read position is the
@@ -39,8 +45,10 @@ extension ThreadedReadReceiptExtension on Room {
     if (last == null || !client.roomPreviewLastEvents.contains(last.type)) {
       return false;
     }
-    if (last.senderId == client.userID) return false;
     final rootId = last.threadRootId;
+    if (last.senderId == client.userID) {
+      return rootId != null && _hasUnreadMainMessage;
+    }
     if (rootId == null) return _isNewerThanRead(last);
     return _hasUnreadWatchedReply(last, ThreadRef(id, rootId)) ||
         _hasUnreadMainMessage;
