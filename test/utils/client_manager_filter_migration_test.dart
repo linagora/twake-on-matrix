@@ -74,7 +74,6 @@ void main() {
 
   Future<void> start({required bool threads}) async {
     AppConfig.threadsEnabled = threads;
-    // ignore: undefined_method
     await ClientManager.migrateSyncFilter(database, name);
   }
 
