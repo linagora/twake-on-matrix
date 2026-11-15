@@ -531,7 +531,7 @@ class ChatController extends ConsumerState<Chat>
       events,
       fullyReadEventId: _markerReadLocation,
       ownUserId: client.userID,
-      isVisible: (event) => event.isVisibleInGui,
+      isVisible: (event) => !AppConfig.threadsEnabled || event.isVisibleInGui,
     );
     Logs().d('Chat::getFirstUnreadEvent(): Last unread event $separator');
     return separator;
@@ -590,7 +590,7 @@ class ChatController extends ConsumerState<Chat>
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
   void refreshThreadGrouping() {
-    if (isThread) return;
+    if (isThread || !AppConfig.threadsEnabled) return;
     final replies = <String, List<Event>>{};
     final rootOfReply = <String, String>{};
     final events = timeline?.events ?? const <Event>[];
@@ -784,7 +784,11 @@ class ChatController extends ConsumerState<Chat>
   void _markLatestReadIfAtBottom() {
     if (!_isAtLiveBottom) return;
     // Under a thread screen this timeline stays mounted but is not seen.
-    if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
+    if (mounted &&
+        !isThread &&
+        ThreadRules.isThreadRoute(GoRouterState.of(context).uri)) {
+      return;
+    }
     if (isThread) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
@@ -942,6 +946,7 @@ class ChatController extends ConsumerState<Chat>
   void updateView() {
     if (!mounted) return;
     _syncThreadEvents();
+    refreshThreadGrouping();
     setState(() {});
 
     _markLatestReadIfAtBottom();
@@ -1561,6 +1566,7 @@ class ChatController extends ConsumerState<Chat>
       timeline!.cancelSubscriptions();
     }
     timeline = loaded;
+    refreshThreadGrouping();
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (!isThread && room!.markedUnread) room?.markUnread(false);
 
@@ -3374,6 +3380,8 @@ class ChatController extends ConsumerState<Chat>
     // Depend on GoRouterState so same-room `?event=` navigations notify
     // this State (web previously only read html.window and never rebuilt).
     _scheduleJumpToUrlEventIfNeeded(source: 'didChangeDependencies');
+    // The thread screen above this room may just have closed.
+    _markLatestReadIfAtBottom();
   }
 
   @override
