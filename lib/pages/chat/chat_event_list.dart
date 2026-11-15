@@ -17,7 +17,6 @@ class ChatEventList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    controller.refreshThreadGrouping();
     final events = List<Event>.from(controller.eventsToDisplay);
 
     if (controller.isEmptySupportChat) {

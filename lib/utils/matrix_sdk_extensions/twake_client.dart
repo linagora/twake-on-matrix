@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
@@ -111,7 +112,7 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     // gap filled by requestHistory comes on onHistoryEvent. A local echo
     // (sending, error) is neither: only the synced event counts.
     void onSeenEvent(Event event) {
-      if (!event.status.isSynced) return;
+      if (!AppConfig.threadsEnabled || !event.status.isSynced) return;
       if (event.threadRootId == null) {
         threadUnread.rememberMainTimelineEvent(event);
       } else {

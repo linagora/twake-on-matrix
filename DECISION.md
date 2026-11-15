@@ -251,6 +251,71 @@ the conversation, scrolling included, instead of a strong blue block that
 went away after three seconds. A selected message shows its selection colour
 instead.
 
+## D14. In-app calls use the MatrixRTC format of Twake Space Chat, not the voip of the Dart SDK (proposed by Johann, 2026-11-05)
+
+A call in a room is a MatrixRTC session with a LiveKit focus, written exactly
+as Twake Space Chat (matrix-js-sdk 43) writes it, so that both apps meet in
+the same call:
+
+- one `org.matrix.msc3401.call.member` state event per device, state key
+  `_<user>_<device>_m.call` (no leading `_` on the MSC3757/MSC3779 room
+  versions), `membershipID` `<user>:<device>`, `focus_active` LiveKit
+  `oldest_membership`, `foci_preferred` the token service of the well-known;
+- the token comes from `POST <token service>/sfu/get` (MSC4195) with an
+  OpenID token; the token service is `livekit_service_url` of the
+  `org.matrix.msc4143.rtc_foci` LiveKit focus (D15), over https only
+  (http on this machine, for local servers);
+- the membership lasts 4 hours (`expires`) and grows by 4 hours before it
+  lapses; a delayed leave (MSC4140) of 8 seconds, restarted every 5, ends it
+  on the server when the app vanishes;
+- at join, a membership this device left from an earlier run is ended first;
+- a call is encrypted when its room is;
+- a call in a direct chat ends when the other person leaves it.
+
+The calls of `package:matrix` (`GroupCallSession`, `LiveKitBackend`) are not
+used: they write `com.famedly.call.member`, which Twake Space Chat and Element
+Call do not read (still so in matrix 15.0.0).
+
+A call in an encrypted room needs the exchange of media keys, which comes
+later. Until then the app does not join calls of encrypted rooms, and an
+encrypted room shows no call button at all, not even the Meet link it sent
+before (decided by Johann, 2026-11-10). This trade-off is deliberate: on a
+server whose well-known has a token service, the Meet link disappears from
+encrypted rooms until the exchange of media keys ships. A call ends if
+encryption is turned on in its room during the call, as its media would stay
+in the clear.
+
+## D15. The call button of a chat: in-app call or Meet link (proposed, 2026-11-05)
+
+The call button in the header of a chat starts an in-app call (D14) when the
+`org.matrix.msc4143.rtc_foci` LiveKit focus of the well-known has a
+`livekit_service_url`. Without one, it keeps sending the Meet link of
+`livekit_base_url`, as before. A base url alone is not taken as a token
+service: on `meet.twake.app` (the production well-known on 2026-11-05) it is
+Meet, and `POST /sfu/get` answers 405.
+
+The first call screen is audio only, as the calls of Twake Space Chat start
+with the camera off:
+
+- the button opens the screen before the call; « Start Call » joins it;
+- in the call: one tile per device, with its avatar, its name, « Microphone
+  off » and a ring while it speaks; a microphone button and « Leave the call »;
+- leaving the screen leaves the call: no call keeps running without a screen
+  that shows it.
+
+Not yet: the camera and the videos, the speaker and device choice, a call
+that goes on in a small window, the number of people already in a call on
+the button.
+
+Joining a call writes the state event `org.matrix.msc3401.call.member`
+(decided by Johann, 2026-11-10):
+
+- a group created by Twake Chat gives it to every member (level 0), as Twake
+  Space Chat does;
+- in an older room, a member who may not write it sees no in-app call button,
+  only the Meet link when the well-known has one;
+- the join still checks this right before anything goes out.
+
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
 
 The row shows up to three reactions, the most used first; among equal
@@ -259,3 +324,23 @@ their first reaction, oldest first. Reactions beyond three are summed up in
 `+N`; in a group it opens the full list (a direct chat shows no counts and no
 list, as before). A later reaction from someone else does not push out one
 already shown at the same count; the user's own one does, so their tap shows.
+
+## D17. Copying an image or video copies the file itself (proposed by Johann, 2026-11-10)
+
+Copy on an image or a video message puts the file itself on the clipboard,
+on mobile, ready to paste in another app or in the composer (#962). An
+encrypted file is downloaded and decrypted first. A format the clipboard
+cannot hold (WebM, BMP…) copies the text, as before. This replaces, for one
+selected message, the "image itself on the web" of D11.
+
+## D18. Add members closes at once and invites in the background (proposed by Johann, 2026-11-10)
+
+Inviting a user from another server waits for that server, which can take
+minutes (#3262). The Add members screen now closes as soon as the selection is
+sent, and the invite goes on in the background. The result comes later on the
+page underneath: the usual « Contact has been invited to the chat » snackbar,
+or the « couldn't be added » dialog when it fails.
+
+There is no « Inviting… » feedback while an invite is pending, for now. There
+is no client-side timeout either: the server keeps going after the client
+gives up, so a timeout could report a failure for an invite that still lands.

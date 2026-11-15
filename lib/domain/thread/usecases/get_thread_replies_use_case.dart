@@ -5,8 +5,6 @@ import 'package:twake_chat/domain/thread/repositories/thread_repository.dart';
 final class GetThreadRepliesUseCase<T> {
   const GetThreadRepliesUseCase(this._repository);
 
-  static const int pageSize = ThreadRepliesRequest.defaultPageSize;
-
   final ThreadRepository<T> _repository;
 
   Future<ThreadRepliesPage<T>> execute({
