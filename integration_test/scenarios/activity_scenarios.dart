@@ -119,7 +119,7 @@ class ActivityOpenUnreadRoomScenario extends BaseTestScenario {
     await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: threadText(message),
+      content: threadText(ThreadText(message)),
     );
 
     await activity.open();
