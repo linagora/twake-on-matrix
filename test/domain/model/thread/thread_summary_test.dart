@@ -504,7 +504,7 @@ void main() {
     });
 
     test('a deleted server latest reply with no other reply known shows no '
-        'last reply and keeps the server count', () {
+        'last reply and is not counted any more', () {
       final deleted = reply(eventId: r'$r2', body: 'oops', minute: 2)
         ..setRedactionEvent(
           Event(
@@ -524,9 +524,35 @@ void main() {
       );
 
       expect(summary, isNotNull);
-      expect(summary!.replyCount, 2);
+      expect(summary!.replyCount, 1);
       expect(summary.lastReply, isNull);
       expect(summary.lastReplyText, isNull);
+    });
+
+    test('a deleted server latest reply is not counted: the thread screen '
+        'shows one reply less', () {
+      final deleted = reply(eventId: r'$r2', body: 'oops', minute: 2)
+        ..setRedactionEvent(
+          Event(
+            type: EventTypes.Redaction,
+            content: {},
+            redacts: r'$r2',
+            eventId: r'$redaction',
+            senderId: bob,
+            originServerTs: at(3),
+            room: room,
+          ),
+        );
+
+      final summary = ThreadSummary.fromRoot(
+        root(count: 2, latest: encryptedJson(eventId: r'$r2', minute: 2)),
+        liveEvents: [
+          reply(eventId: r'$r1', body: 'first', minute: 1),
+          deleted,
+        ],
+      )!;
+
+      expect(summary.replyCount, 1);
     });
   });
 }
