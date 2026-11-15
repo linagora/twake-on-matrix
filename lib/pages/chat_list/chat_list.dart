@@ -14,6 +14,7 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:twake_chat/pages/chat_list/chat_custom_slidable_action.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
+import 'package:twake_chat/pages/chat_list/chat_list_select_mode_pop_scope.dart';
 import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/pages/bootstrap/tom_bootstrap_dialog.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view.dart';
@@ -834,11 +835,15 @@ class ChatListController extends State<ChatList>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return ChatListView(
-      controller: this,
-      bottomNavigationBar: widget.bottomNavigationBar,
-      onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
-      onTapBottomNavigation: _onTapBottomNavigation,
+    return ChatListSelectModePopScope(
+      selectModeNotifier: selectModeNotifier,
+      onLeaveSelectMode: toggleSelectMode,
+      child: ChatListView(
+        controller: this,
+        bottomNavigationBar: widget.bottomNavigationBar,
+        onOpenSearchPageInMultipleColumns: onOpenSearchPageInMultipleColumns,
+        onTapBottomNavigation: _onTapBottomNavigation,
+      ),
     );
   }
 
