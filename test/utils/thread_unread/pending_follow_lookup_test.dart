@@ -315,6 +315,8 @@ void _leaveRaceTests() {
       leave();
       await _answer(participated: true);
 
+      // The join starts its own lookup, which the server has not answered.
+      _lookup = Completer<MatrixEvent>();
       _sync(1);
       await pumpEventQueue();
 
