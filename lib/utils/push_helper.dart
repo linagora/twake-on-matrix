@@ -16,7 +16,6 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -113,12 +112,25 @@ Future<void> _tryPushHelper(
       return;
     }
   }
-  final event = await client.getEventByPushNotification(
-    notification,
-    storeInDatabase: isBackgroundMessage,
-  );
+  final Event? fetched;
+  try {
+    fetched = await client.getEventByPushNotification(
+      notification,
+      storeInDatabase: isBackgroundMessage,
+    );
+  } catch (_) {
+    // The room on screen is read live: a failed fetch must not raise the
+    // fallback notification for it.
+    if (!isBackgroundMessage &&
+        activeRoomId != null &&
+        activeRoomId == notification.roomId) {
+      Logs().v('Room is in foreground and the event failed. Stop push helper.');
+      return;
+    }
+    rethrow;
+  }
 
-  if (event == null) {
+  if (fetched == null) {
     Logs().v('Notification is a clearing indicator.');
     if (notification.counts?.unread == 0) {
       if (notification.counts == null || notification.counts?.unread == 0) {
@@ -132,6 +144,7 @@ Future<void> _tryPushHelper(
     }
     return;
   }
+  final event = fetched;
   Logs().v('Push helper got notification event of type ${event.type}.');
 
   // Foreground: the room on screen is read live, except its thread replies
@@ -141,7 +154,7 @@ Future<void> _tryPushHelper(
   // push decides: a muted thread is a server push rule, an unfollowed one
   // is filtered here, in the foreground only.
   if (!isBackgroundMessage && client.syncPresence == null) {
-    final threadRootId = event.threadRootId;
+    final threadRootId = ThreadRules.threadRootOf(event);
     if (threadRootId == null) {
       if (activeRoomId != null && activeRoomId == notification.roomId) {
         Logs().v('Room is in foreground. Stop push helper here.');
@@ -151,7 +164,7 @@ Future<void> _tryPushHelper(
       event,
       pushActions: client.pushruleEvaluator.match(event),
       followed: client.threadUnread?.followOnceKnown(
-        ThreadRef(notification.roomId!, threadRootId),
+        ThreadRef(event.room.id, threadRootId),
       ),
       choice: client.threadUnread?.prefOf(
         ThreadRef(notification.roomId!, threadRootId),
@@ -373,7 +386,13 @@ Future<void> _showNotificationNow(
     event.room.getLocalizedDisplayname(MatrixLocals(l10n)),
     body,
     platformChannelSpecifics,
-    payload: jsonEncode({'room_id': event.roomId, 'receiver_id': receiverId}),
+    payload: jsonEncode({
+      'room_id': event.roomId,
+      'receiver_id': receiverId,
+      'event_id': event.eventId,
+      if (ThreadRules.threadRootOf(event) case final rootId?)
+        'thread_root_id': rootId,
+    }),
   );
 }
 

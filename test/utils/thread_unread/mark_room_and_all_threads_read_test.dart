@@ -43,6 +43,7 @@ void main() {
   group('the newest event is a thread reply', _newestIsReplyTests);
   group('the newest event is a main message', _newestIsMainTests);
   group('with unread threads', _unreadThreadsTests);
+  group('with threads off', _threadsOffTests);
 }
 
 const _roomId = '!room:example.com';
@@ -251,4 +252,41 @@ void _unreadThreadsTests() {
 
     expect(_client.receipts, [_unthreaded(r'$main')]);
   });
+}
+
+/// Review jbrnzl (#3622): `AppConfig.threadsEnabled` off gives back the
+/// "Mark as read" of before threads: `Room.setReadMarker` on the last event
+/// of the room, for the receipt and for `m.fully_read`.
+void _threadsOffTests() {
+  setUp(() => AppConfig.threadsEnabled = false);
+
+  void storeBusyThread() {
+    final main = _mainMessage(r'$main', 50);
+    _store([
+      for (var i = 0; i < 40; i++) _threadReply(i, 100 - i),
+      main,
+    ], lastEvent: main);
+  }
+
+  test('the receipt and m.fully_read both land on the last event of the '
+      'room', () async {
+    storeBusyThread();
+
+    await _room.markRoomAndAllThreadsRead();
+
+    expect(_client.receipts, [_unthreaded(r'$main')]);
+    expect(_client.fullyRead, [r'$main']);
+  });
+
+  test(
+    'with private receipts the receipt is private, on the last event',
+    () async {
+      when(_client.receiptsPublicByDefault).thenReturn(false);
+      storeBusyThread();
+
+      await _room.markRoomAndAllThreadsRead();
+
+      expect(_client.receipts, [_unthreaded(r'$main', public: false)]);
+    },
+  );
 }

@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 
 /// Where a message sent from the thread screen goes: the thread root, and the
 /// last event of the thread (the reply fallback of the relation).
+/// See https://spec.matrix.org/v1.4/client-server-api/#threading
 class ThreadSendTarget {
   const ThreadSendTarget({
     required this.rootEventId,
