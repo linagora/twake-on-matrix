@@ -12,7 +12,9 @@ import '../robots/chat_group_detail_robot.dart';
 import '../robots/thread_robot.dart';
 
 /// Patrol scenarios of threads, P1 "Lire et répondre"
-/// (docs/plan/2026-11-06-threads-mobile-spec.md, THR-M-01 to 06 and 11).
+/// (spec comment on #3589, THR-M-01 to 06 and 11:
+/// https://github.com/linagora/twake-on-matrix/pull/3589#issuecomment-6744797534,
+/// THR-M-06 update: ...#issuecomment-6793337834).
 ///
 /// The receiver account plays "the web": it posts roots and thread replies
 /// through the Client-Server API with the same relation the web writes.
@@ -67,6 +69,39 @@ Future<void> _waitForMessage(BaseTestScenario scenario, ThreadText text) async {
   );
 }
 
+/// Polls until [check] holds, pumping between tries; fails after [timeout].
+Future<void> _waitUntil(
+  BaseTestScenario scenario,
+  bool Function() check, {
+  required String reason,
+  Duration timeout = const Duration(seconds: 30),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (!check()) {
+    if (DateTime.now().isAfter(deadline)) fail('Timed out: $reason');
+    await scenario.$.pump(const Duration(milliseconds: 250));
+  }
+}
+
+/// Waits until the client has synced [eventId] of [roomId].
+Future<void> _waitForSyncedEvent(
+  BaseTestScenario scenario,
+  String roomId,
+  String eventId,
+) async {
+  final room = _client(scenario).getRoomById(roomId)!;
+  final timeline = await room.getTimeline();
+  try {
+    await _waitUntil(
+      scenario,
+      () => timeline.events.any((e) => e.eventId == eventId),
+      reason: 'event $eventId was not synced',
+    );
+  } finally {
+    timeline.cancelSubscriptions();
+  }
+}
+
 /// THR-M-01, 02, 04, 05: a thread written on the web shows as a card under
 /// its root, not in the main timeline; the card opens the thread full
 /// screen; a reply from the mobile lands in the same thread.
@@ -96,6 +131,8 @@ class ReceivedThreadScenario extends BaseTestScenario {
     await threads.expectThreadScreenOn(root);
     await threads.expectMessageInThread(root);
     await threads.expectMessageInThread(webReply);
+    // Focus is requested once the thread has loaded: give it time to arrive.
+    await $.pump(const Duration(seconds: 2));
     expect(
       threads.composerHasFocus,
       isFalse,
@@ -151,10 +188,11 @@ class StartThreadScenario extends BaseTestScenario {
     await threads.startThreadFrom(root);
     await threads.expectThreadScreenOn(root);
     await threads.expectMessageInThread(root);
-    expect(
-      threads.composerHasFocus,
-      isTrue,
+    await _waitUntil(
+      this,
+      () => threads.composerHasFocus,
       reason: '"Start a thread" opens the keyboard',
+      timeout: const Duration(seconds: 5),
     );
 
     await threads.closeThread();
@@ -209,7 +247,7 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     await robots.searchRobot().backToPreviousScreen();
     await $(ChatList).waitUntilVisible();
 
-    await sendEventAsReceiver(
+    final laterReplyId = await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
       content: _threadReply(
@@ -218,7 +256,7 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
         body: laterReply.text,
       ),
     );
-    await $.pump(const Duration(seconds: 5));
+    await _waitForSyncedEvent(this, fixture.roomId, laterReplyId);
 
     // Reopen from the chat list, as a user would: a second search open can
     // hang on the iOS contacts dialog that Patrol cannot answer.
