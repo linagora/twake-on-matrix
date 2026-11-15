@@ -1,7 +1,8 @@
 import '../../base/test_base.dart';
 import '../../scenarios/thread_scenarios.dart';
 
-/// Threads P1 (docs/plan/2026-11-06-threads-mobile-spec.md). Nightly only.
+/// Threads P1 (spec comment on #3589:
+/// https://github.com/linagora/twake-on-matrix/pull/3589#issuecomment-6744797534). Nightly only.
 void main() {
   TestBase().runPatrolTest(
     tags: ['thread_mobile_test01'],

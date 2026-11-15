@@ -137,6 +137,9 @@ class ThreadRobot extends CoreRobot {
   }
 
   /// The reply text may show on the card of its root, nowhere else.
+  ///
+  /// The short pump lets a stray render of [reply] appear before the check;
+  /// it is only safe because callers first wait for the card.
   Future<void> expectNotInMainTimeline(ThreadText reply) async {
     await $.pump(const Duration(seconds: 2));
     final everywhere = find

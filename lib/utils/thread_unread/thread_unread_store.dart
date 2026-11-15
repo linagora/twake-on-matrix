@@ -424,6 +424,8 @@ class ThreadUnreadStore extends ChangeNotifier {
     if (_isStale(epoch)) return;
     final follow = await _lookupFollow(thread, epoch);
     if (follow == null || _isStale(epoch)) return;
+    // The room was left meanwhile: nothing of it is recorded again.
+    if (!_counts.containsKey(thread.roomId)) return;
     if (follow) {
       markFollowed(thread);
     } else {
@@ -557,6 +559,11 @@ extension MarkRoomAndThreadsRead on Room {
   /// (MSC3771: it covers the main timeline and every thread up to it);
   /// `m.fully_read` stays on the newest main timeline event.
   Future<void> markRoomAndAllThreadsRead() async {
+    if (!AppConfig.threadsEnabled) {
+      final last = lastEvent;
+      if (last == null) return;
+      return setReadMarker(last.eventId, mRead: last.eventId);
+    }
     final newest = await _newestSyncedEvent();
     if (newest == null) return;
     final main = await _newestMainTimelineEvent();

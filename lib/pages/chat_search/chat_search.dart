@@ -1,4 +1,4 @@
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'dart:async';
 
@@ -117,7 +117,7 @@ class ChatSearchController extends State<ChatSearch> {
       }
     }
 
-    final threadRootId = event.threadRootId;
+    final threadRootId = ThreadRules.threadRootOf(event);
     if (threadRootId != null) {
       // A thread reply is not in the room timeline: open its thread.
       if (!context.mounted) return;

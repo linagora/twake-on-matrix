@@ -1,4 +1,4 @@
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
@@ -151,7 +151,9 @@ class UrlLauncher with GoToDraftChatMixin {
   ) async {
     Event? target;
     try {
-      target = await room.getEventById(eventId);
+      target = await room
+          .getEventById(eventId)
+          .timeout(const Duration(seconds: 5));
     } catch (e) {
       Logs().w('UrlLauncher: unable to load the linked event', e);
     }
@@ -159,7 +161,7 @@ class UrlLauncher with GoToDraftChatMixin {
     context.goToRoomWithEvent(
       room.id,
       eventId,
-      threadRootId: target?.threadRootId,
+      threadRootId: target == null ? null : ThreadRules.threadRootOf(target),
     );
   }
 
