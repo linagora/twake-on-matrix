@@ -412,4 +412,34 @@ void _threadsOffTests() {
     ]);
     expect(client.fullyRead, [r'$reply']);
   });
+
+  /// Review jbrnzl (#3622): off, reading a thread is the receipt of before
+  /// threads, as for the room: unthreaded, no `thread_id`.
+  test('reading a thread sends an unthreaded receipt on the reply', () async {
+    await room.setThreadReadMarker(
+      threadReply(r'$reply'),
+      const ThreadRef(roomId, rootId),
+    );
+
+    expect(client.receipts, [
+      (eventId: r'$reply', threadId: null, public: true),
+    ]);
+    expect(client.fullyRead, [r'$reply']);
+  });
+
+  test(
+    'with private receipts the unthreaded thread receipt is private',
+    () async {
+      when(client.receiptsPublicByDefault).thenReturn(false);
+
+      await room.setThreadReadMarker(
+        threadReply(r'$reply'),
+        const ThreadRef(roomId, rootId),
+      );
+
+      expect(client.receipts, [
+        (eventId: r'$reply', threadId: null, public: false),
+      ]);
+    },
+  );
 }
