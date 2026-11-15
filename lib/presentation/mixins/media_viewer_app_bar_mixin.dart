@@ -1,4 +1,4 @@
-import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/pages/forward/forward.dart';
@@ -120,7 +120,7 @@ mixin MediaViewerAppBarMixin on SaveMediaToGalleryAndroidMixin {
       context.goToRoomWithEvent(
         event.room.id,
         event.eventId,
-        threadRootId: event.threadRootId,
+        threadRootId: ThreadRules.threadRootOf(event),
       );
     }
   }

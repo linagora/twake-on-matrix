@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 
 import '../../fake_client.dart';
@@ -12,6 +13,7 @@ import '../../fake_client.dart';
 /// genuine reply.
 void main() {
   late Room room;
+  late bool flagBefore;
 
   Event message({Map<String, Object?>? relatesTo}) => Event(
     content: {'body': 'Hello', 'msgtype': 'm.text', 'm.relates_to': ?relatesTo},
@@ -32,6 +34,23 @@ void main() {
   setUpAll(() async {
     final client = await getClient();
     room = Room(id: '!localpart:server.abc', client: client);
+  });
+
+  setUp(() {
+    flagBefore = AppConfig.threadsEnabled;
+    AppConfig.threadsEnabled = true;
+  });
+
+  tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+  group('Event.isReplyEvent with threads off', () {
+    setUp(() => AppConfig.threadsEnabled = false);
+
+    test('a thread reply from another client keeps its quote, as before', () {
+      final event = message(relatesTo: threadRelation(isFallingBack: true));
+
+      expect(event.isReplyEvent(), isTrue);
+    });
   });
 
   group('Event.isReplyEvent', () {
