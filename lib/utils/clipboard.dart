@@ -25,6 +25,20 @@ class TwakeClipboard {
     Formats.svg,
   ];
 
+  static const _mediaFormats = <String, SimpleFileFormat>{
+    'image/png': Formats.png,
+    'image/jpeg': Formats.jpeg,
+    'image/heic': Formats.heic,
+    'image/heif': Formats.heif,
+    'image/gif': Formats.gif,
+    'image/webp': Formats.webp,
+    'video/mp4': Formats.mp4,
+    'video/quicktime': Formats.mov,
+  };
+
+  static bool canCopyMedia(String? mimeType) =>
+      _mediaFormats.containsKey(mimeType);
+
   Future<void> copyText(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
   }
@@ -39,7 +53,7 @@ class TwakeClipboard {
     await SystemClipboard.instance?.write([item]);
   }
 
-  Future<void> copyImageAsBytes(Uint8List data, {String? mimeType}) async {
+  Future<void> copyMediaAsBytes(Uint8List data, {String? mimeType}) async {
     final item = DataWriterItem();
     item.add(getFormatFrom(mimeType)(data));
     await SystemClipboard.instance?.write([item]);
@@ -204,18 +218,6 @@ class TwakeClipboard {
     return null;
   }
 
-  SimpleFileFormat getFormatFrom(String? mimeType) {
-    switch (mimeType) {
-      case 'image/png':
-        return Formats.png;
-      case 'image/jpeg':
-        return Formats.jpeg;
-      case 'image/heic':
-        return Formats.heic;
-      case 'image/heif':
-        return Formats.heif;
-      default:
-        return Formats.plainTextFile;
-    }
-  }
+  SimpleFileFormat getFormatFrom(String? mimeType) =>
+      _mediaFormats[mimeType] ?? Formats.plainTextFile;
 }

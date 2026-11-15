@@ -67,6 +67,11 @@ void main() {
   /// a followed or mentioning thread is unread. A thread reply as last
   /// event of the room must not hide an unread main message.
   group('an unread main message under a thread reply', _mainUnderReplyTests);
+
+  /// Review jbrnzl (#3622, threaded_read_receipt_extension.dart:42): the
+  /// "last event is mine" rule is for main events only. An own thread reply
+  /// as last event must not hide an unread main message of someone else.
+  group('an own thread reply as last event', _ownReplyLastTests);
 }
 
 const _roomId = '!room:example.com';
@@ -420,5 +425,45 @@ void _mainUnderReplyTests() {
     );
 
     expect(room.hasNewMessagesWithThreads, isTrue);
+  });
+}
+
+void _ownReplyLastTests() {
+  Room roomWithOwnReplyLast(LatestReceiptState receipts) {
+    _threadCounters(_rootId, followed: false, notifications: 0);
+    final room = _roomWith(
+      receipts: receipts,
+      lastEvent: (room) => _message(
+        room,
+        eventId: r'$own_reply',
+        sender: _me,
+        relatesTo: _threadRelation(_rootId),
+      ),
+    );
+    _mainMessageAt(room, 3);
+    return room;
+  }
+
+  test('an unread main message of someone else keeps the room unread', () {
+    final room = roomWithOwnReplyLast(_staleAnd(_readBefore));
+
+    expect(room.hasNewMessagesWithThreads, isTrue);
+  });
+
+  test('a main receipt on that main message reads the room', () {
+    final room = roomWithOwnReplyLast(_staleAnd(_receipt(r'$main', 4)));
+
+    expect(room.hasNewMessagesWithThreads, isFalse);
+  });
+
+  test('without any unread main message the room is read', () {
+    _threadCounters(_rootId, followed: false, notifications: 0);
+    final room = _roomWith(
+      receipts: _staleAnd(_readBefore),
+      lastEvent: (room) =>
+          _message(room, sender: _me, relatesTo: _threadRelation(_rootId)),
+    );
+
+    expect(room.hasNewMessagesWithThreads, isFalse);
   });
 }
