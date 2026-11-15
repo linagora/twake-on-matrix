@@ -3,7 +3,7 @@ import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
-import '../room/room_extension_test.mocks.dart';
+import '../../../domain/model/room/room_extension_test.mocks.dart';
 
 /// THR-M-11: the thread of a reply is read from its `m.relates_to`
 /// (`rel_type: m.thread`, `event_id`), so links, search results and the
