@@ -109,6 +109,20 @@ void main() {
   });
 
   group('thread screen', () {
+    setUp(() {
+      // No own receipt yet on any thread.
+      when(room.receiptState).thenReturn(
+        LatestReceiptState(
+          global: LatestReceiptStateForTimeline(
+            ownPrivate: null,
+            ownPublic: null,
+            latestOwnReceipt: null,
+            otherUsers: {},
+          ),
+        ),
+      );
+    });
+
     test(
       'reading a thread sends a receipt with the root as thread id',
       () async {
