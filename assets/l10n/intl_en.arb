@@ -3355,5 +3355,10 @@
   "@callErrorMicrophoneChange": {
     "type": "text",
     "placeholders": {}
+  },
+  "fileDownloadFailed": "Couldn't download the file. It may no longer be available.",
+  "@fileDownloadFailed": {
+    "type": "text",
+    "placeholders": {}
   }
 }
