@@ -101,9 +101,9 @@ void main() {
           newGroupRepositoryProvider.overrideWithValue(mockRepository),
           addableSpacesProvider.overrideWithValue(addableSpaces),
           createSpaceUseCaseProvider.overrideWithValue(createSpaceUseCase),
-          createNewFeedInteractorProvider(
-            mockClient,
-          ).overrideWithValue(mockCreateNewFeedInteractor),
+          createNewFeedInteractorProvider.overrideWithValue(
+            mockCreateNewFeedInteractor,
+          ),
           loginHomeserverSummaryProvider.overrideWithBuild(
             (_, _) => HomeserverSummary(
               discoveryInformation: DiscoveryInformation(
