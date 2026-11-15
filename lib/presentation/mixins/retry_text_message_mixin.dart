@@ -25,15 +25,16 @@ mixin RetryTextMessageMixin {
     String? editEventId;
 
     final threadRootId = event.threadRootId;
-    final threadLastEventId = event.content
-        .tryGetMap<String, Object?>('m.relates_to')
-        ?.tryGetMap<String, Object?>('m.in_reply_to')
-        ?.tryGet<String>('event_id');
+    // A thread reply keeps its relation; its in_reply_to is only the
+    // fallback to the last event of the thread, not a quote.
+    final threadLastEventId = threadRootId == null
+        ? null
+        : event.content
+              .tryGetMap<String, Object?>('m.relates_to')
+              ?.tryGetMap<String, Object?>('m.in_reply_to')
+              ?.tryGet<String>('event_id');
 
-    if (threadRootId != null) {
-      // A thread reply keeps its relation; its in_reply_to is only the
-      // fallback to the last event of the thread, not a quote.
-    } else if (event.inReplyToEventId() != null) {
+    if (threadRootId == null && event.inReplyToEventId() != null) {
       replyEvent = await room.getEventById(event.inReplyToEventId()!);
     } else if (event.relationshipType == RelationshipTypes.edit &&
         event.relationshipEventId != null) {

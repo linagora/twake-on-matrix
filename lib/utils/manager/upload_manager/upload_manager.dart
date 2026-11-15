@@ -147,11 +147,13 @@ class UploadManager {
       }
 
       final caption = uploadInfo.captionInfo?.caption;
-      final thread = uploadInfo.threadRootEventId == null
+      final threadRootId = uploadInfo.threadRootEventId;
+      final threadLastId = uploadInfo.threadLastEventId;
+      final thread = threadRootId == null || threadLastId == null
           ? null
           : ThreadSendTarget(
-              rootEventId: uploadInfo.threadRootEventId!,
-              lastEventId: uploadInfo.threadLastEventId!,
+              rootEventId: threadRootId,
+              lastEventId: threadLastId,
             );
       final inReplyTo = thread != null || uploadInfo.inReplyToEventId == null
           ? null
