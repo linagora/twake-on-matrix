@@ -79,7 +79,7 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-    <string>Record voice message and share them with your contacts on Twake Chat.</string>
+    <string>Record voice messages, and talk in calls on Twake Chat.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

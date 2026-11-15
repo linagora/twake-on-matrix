@@ -1,3 +1,4 @@
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -725,6 +726,45 @@ void main() {
 
       expect(event.bodyWithoutReplyFallback, 'my caption');
     });
+
+    group(
+      'a thread reply (is_falling_back: true) with a quote-prefixed body',
+      () {
+        late bool flagBefore;
+        const threadRelation = {
+          'rel_type': 'm.thread',
+          'event_id': '\$root',
+          'is_falling_back': true,
+          'm.in_reply_to': {'event_id': '\$last'},
+        };
+        const quotePrefixed = '> <@a:example.com> hi\n\nmy caption';
+
+        Event imageThreadReply() => createEvent({
+          'msgtype': 'm.image',
+          'body': quotePrefixed,
+          'filename': 'photo.jpg',
+          'url': 'mxc://example.org/img',
+          'm.relates_to': threadRelation,
+        });
+
+        setUp(() => flagBefore = AppConfig.threadsEnabled);
+        tearDown(() => AppConfig.threadsEnabled = flagBefore);
+
+        test('GIVEN threads off\n'
+            'THEN it is a plain reply: copy strips the quote\n', () {
+          AppConfig.threadsEnabled = false;
+
+          expect(imageThreadReply().bodyWithoutReplyFallback, 'my caption');
+        });
+
+        test('GIVEN threads on\n'
+            'THEN the text the user typed is kept as is\n', () {
+          AppConfig.threadsEnabled = true;
+
+          expect(imageThreadReply().bodyWithoutReplyFallback, quotePrefixed);
+        });
+      },
+    );
   });
 
   group('isCaptionModeOrReply test', () {

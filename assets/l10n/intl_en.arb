@@ -3251,5 +3251,109 @@
   "@publicGroupsYouCanJoin": {
     "type": "text",
     "placeholders": {}
+  },
+  "addFromTwakeDrive": "Add from Drive",
+  "@addFromTwakeDrive": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveCouldNotOpen": "Couldn't open Twake Drive",
+  "@driveCouldNotOpen": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveSignInFailed": "Couldn't sign in to Twake Drive",
+  "@driveSignInFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveChatAppMissing": "Twake Chat isn't installed on your Twake Drive yet. Ask your administrator to install it.",
+  "@driveChatAppMissing": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveDownloadFailed": "Some files couldn't be added from Twake Drive",
+  "@driveDownloadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "driveShortcutsNotSent": "Shortcuts can't be attached, send a link instead",
+  "@driveShortcutsNotSent": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "@startCall": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callConnecting": "Connecting…",
+  "@callConnecting": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callMicrophone": "Microphone",
+  "@callMicrophone": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callMicrophoneOff": "Microphone off",
+  "@callMicrophoneOff": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callLeave": "Leave the call",
+  "@callLeave": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callRetry": "Try again",
+  "@callRetry": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorNoService": "This server offers no calls.",
+  "@callErrorNoService": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorEncrypted": "Calls in encrypted chats are not available yet.",
+  "@callErrorEncrypted": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorNoPermission": "You may not join a call in this conversation.",
+  "@callErrorNoPermission": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorRoomNotFound": "This conversation is not loaded yet.",
+  "@callErrorRoomNotFound": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorTokenFailed": "The call server refused the call. Try again in a moment.",
+  "@callErrorTokenFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorMembershipFailed": "The call could not be joined. Try again in a moment.",
+  "@callErrorMembershipFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorConnectionFailed": "The call server could not be reached.",
+  "@callErrorConnectionFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorMediaFailed": "The microphone could not be opened. Check the permissions of the app.",
+  "@callErrorMediaFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "callErrorMicrophoneChange": "The microphone could not be changed. Try again.",
+  "@callErrorMicrophoneChange": {
+    "type": "text",
+    "placeholders": {}
   }
 }
