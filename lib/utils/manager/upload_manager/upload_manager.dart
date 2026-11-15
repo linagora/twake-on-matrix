@@ -6,6 +6,7 @@ import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/data/network/extensions/file_info_extension.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
+import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_extension.dart';
 import 'package:twake_chat/presentation/extensions/send_file_fake_event_extension.dart';
@@ -14,6 +15,7 @@ import 'package:twake_chat/presentation/model/file/file_asset_entity.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/retry_upload_result.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_caption_info.dart';
 import 'package:twake_chat/utils/manager/upload_manager/models/upload_file_info.dart';
+import 'package:twake_chat/utils/manager/upload_manager/pending_upload_order.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_state.dart';
 import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_worker_queue.dart';
@@ -93,7 +95,11 @@ class UploadManager {
       if (uploadInfo == null) {
         return null;
       }
-      return uploadInfo.matrixFile ?? await uploadInfo.fileInfo?.toMatrixFile();
+      final fileInfo = uploadInfo.fileInfo;
+      // A pending file has no bytes to show yet, and reading a saved one into
+      // memory on every rebuild of the timeline would cost more than it shows.
+      if (fileInfo is PendingFileInfo) return null;
+      return uploadInfo.matrixFile ?? await fileInfo?.toMatrixFile();
     } catch (e) {
       Logs().e('Error getting matrix file for eventid $eventId', e);
       return null;
@@ -463,7 +469,10 @@ class UploadManager {
       final fileIndex = fileInfo.key;
       final fileValue = fileInfo.value;
 
-      final txid = await room.storePlaceholderFileInMem(fileInfo: fileValue);
+      // A file still on its way has no bytes to keep as a placeholder yet.
+      final txid = fileValue is PendingFileInfo
+          ? room.client.generateUniqueTransactionId()
+          : await room.storePlaceholderFileInMem(fileInfo: fileValue);
 
       Logs().d('UploadManager::uploadFileMobile(): txid: $txid');
 
@@ -528,6 +537,42 @@ class UploadManager {
     }
   }
 
+  /// The file the worker sends for [fileInfo]: the file itself, or, for a file
+  /// whose bytes are still on their way, the file once they are saved. Null
+  /// when the user gave it up meanwhile, which frees the queue at once.
+  /// Throws when the file never arrived and nobody cancelled.
+  static Future<FileInfo?> fileToSend(
+    FileInfo fileInfo,
+    CancelToken cancelToken,
+  ) async => fileInfo is PendingFileInfo
+      ? fileInfo.whenReady(
+          cancelled: () => cancelToken.isCancelled,
+          onCancelled: cancelToken.whenCancel,
+        )
+      : fileInfo;
+
+  /// What becomes of the file a pending upload saved, once it is sent. A
+  /// video is sent compressed, so the saved file is not the one that was sent:
+  /// it is deleted. Any other file becomes the sender's copy, so the bubble
+  /// opens with no download. A failed send keeps it for the retry.
+  Future<void> _settleSavedFile(
+    Room room,
+    FileInfo ready,
+    String eventId,
+  ) async {
+    final savedPath = ready.filePath;
+    if (savedPath == null) return;
+    if (ready.msgType == MessageTypes.Video) {
+      await room.deleteSavedFile(savedPath);
+      return;
+    }
+    await room.moveFileToAppDownloadsFolder(
+      eventId: eventId,
+      fileName: ready.fileName,
+      sourcePath: savedPath,
+    );
+  }
+
   void _addFileTaskToWorkerQueueMobile({
     required String txid,
     required SyncUpdate fakeImageEvent,
@@ -543,49 +588,108 @@ class UploadManager {
   }) {
     final info = _eventIdMapUploadFileInfo[txid];
     if (info != null) {
+      // A pending file stays `info.fileInfo`: a retry brings it through it,
+      // and nothing reads its bytes into memory for a preview.
       info.fileInfo = fileInfo;
       info.shrinkImageMaxDimension = shrinkImageMaxDimension;
     }
+    final job = _MobileSendJob(
+      txid: txid,
+      fakeImageEvent: fakeImageEvent,
+      room: room,
+      streamController: streamController,
+      cancelToken: cancelToken,
+      info: info,
+      sentDate: sentDate,
+      shrinkImageMaxDimension: shrinkImageMaxDimension,
+      captionInfo: captionInfo,
+      inReplyTo: inReplyTo,
+      uploadInfo: uploadInfo,
+    );
+    if (fileInfo is PendingFileInfo) {
+      unawaited(_queueWhenReady(job, fileInfo));
+    } else {
+      _queueSend(job, fileInfo, saved: false);
+    }
+  }
 
+  final _pendingOrder = PendingUploadOrder();
+
+  /// A pending file waits for its bytes outside the queue, which is serial
+  /// for the whole app: a slow download holds no other upload. Its bubble is
+  /// shown meanwhile, and it joins the queue once it is on disk, after the
+  /// files of its room shown before it.
+  Future<void> _queueWhenReady(
+    _MobileSendJob job,
+    PendingFileInfo pending,
+  ) async {
+    try {
+      final queued = await _pendingOrder.inTurn(
+        job.room.id,
+        fileToSend(pending, job.cancelToken),
+        (FileInfo? ready) {
+          if (ready == null || job.cancelToken.isCancelled) return false;
+          _queueSend(job, ready, saved: true);
+          return true;
+        },
+      );
+      if (queued) return;
+      // Cancelled while its bytes were on their way: the event is gone, so
+      // nothing is sent and nothing brings it back.
+      job.room.sendingFilePlaceholders.remove(job.txid);
+      await _clearFileTask(job.txid);
+    } catch (e) {
+      _markFailed(job, e);
+      job.room.sendingFilePlaceholders.remove(job.txid);
+    }
+  }
+
+  void _queueSend(_MobileSendJob job, FileInfo ready, {required bool saved}) {
     uploadWorkerQueue.addTask(
       Task(
-        id: txid,
+        id: job.txid,
         runnable: () async {
           try {
-            final eventId = await room.sendFileEventMobile(
-              fileInfo,
-              msgType: fileInfo.msgType,
-              txid: txid,
-              fakeImageEvent: fakeImageEvent,
-              shrinkImageMaxDimension: shrinkImageMaxDimension,
-              uploadStreamController: streamController,
-              cancelToken: cancelToken,
-              sentDate: sentDate,
-              captionInfo: captionInfo,
-              inReplyTo: inReplyTo,
-              uploadInfo: uploadInfo,
-              extraContent: _batchStamp.contentFor(info?.batchId),
+            final eventId = await job.room.sendFileEventMobile(
+              ready,
+              msgType: ready.msgType,
+              txid: job.txid,
+              fakeImageEvent: job.fakeImageEvent,
+              shrinkImageMaxDimension: job.shrinkImageMaxDimension,
+              uploadStreamController: job.streamController,
+              cancelToken: job.cancelToken,
+              sentDate: job.sentDate,
+              captionInfo: job.captionInfo,
+              inReplyTo: job.inReplyTo,
+              uploadInfo: job.uploadInfo,
+              extraContent: _batchStamp.contentFor(job.info?.batchId),
             );
             if (eventId == null) {
               throw Exception('Failed to send file event');
             }
+            if (saved) await _settleSavedFile(job.room, ready, eventId);
           } catch (e) {
-            if (info != null) {
-              info.isFailed = true;
-              _updateEventUploadInfo(room, txid, info);
-            }
-            streamController.add(
-              Left(UploadFileFailedState(exception: e, txid: txid)),
-            );
+            _markFailed(job, e);
           }
         },
         onTaskCompleted: () async {
-          room.sendingFilePlaceholders.remove(txid);
-          if (info?.isFailed != true) {
-            await _clearFileTask(txid);
+          job.room.sendingFilePlaceholders.remove(job.txid);
+          if (job.info?.isFailed != true) {
+            await _clearFileTask(job.txid);
           }
         },
       ),
+    );
+  }
+
+  void _markFailed(_MobileSendJob job, Object error) {
+    final info = job.info;
+    if (info != null) {
+      info.isFailed = true;
+      _updateEventUploadInfo(job.room, job.txid, info);
+    }
+    job.streamController.add(
+      Left(UploadFileFailedState(exception: error, txid: job.txid)),
     );
   }
 
@@ -687,4 +791,33 @@ class UploadManager {
       Logs().e('UploadManager::_updateEventUploadInfo(): $e');
     }
   }
+}
+
+/// What one mobile send carries from the queueing of a file to its send.
+class _MobileSendJob {
+  const _MobileSendJob({
+    required this.txid,
+    required this.fakeImageEvent,
+    required this.room,
+    required this.streamController,
+    required this.cancelToken,
+    required this.info,
+    this.sentDate,
+    this.shrinkImageMaxDimension,
+    this.captionInfo,
+    this.inReplyTo,
+    this.uploadInfo,
+  });
+
+  final String txid;
+  final SyncUpdate fakeImageEvent;
+  final Room room;
+  final StreamController<Either<Failure, Success>> streamController;
+  final CancelToken cancelToken;
+  final UploadFileInfo? info;
+  final DateTime? sentDate;
+  final int? shrinkImageMaxDimension;
+  final String? captionInfo;
+  final Event? inReplyTo;
+  final Map<String, dynamic>? uploadInfo;
 }
