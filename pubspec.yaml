@@ -265,8 +265,6 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/sounds/
-    - assets/js/
-    - assets/js/package/
     - configurations/
     - configurations/icons/
 
