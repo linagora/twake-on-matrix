@@ -33,6 +33,73 @@ void main() {
     expect(client.requestHistoryOnLimitedTimeline, isTrue);
   });
 
+  /// Review of #3621 (jbrnzl): with the flag off, off means off.
+  group('with threads off', () {
+    setUp(() => AppConfig.threadsEnabled = false);
+
+    test('a synced thread reply is not remembered', () async {
+      final client = TwakeClient('testclient', database: MockDatabase());
+      final room = Room(id: '!room:example.org', client: client);
+
+      client.onTimelineEvent.add(
+        Event(
+          type: EventTypes.Message,
+          content: {
+            'msgtype': 'm.text',
+            'body': 'in the thread',
+            'm.relates_to': {
+              'rel_type': RelationshipTypes.thread,
+              'event_id': r'$root',
+              'is_falling_back': true,
+            },
+          },
+          eventId: r'$reply',
+          senderId: '@bob:example.org',
+          originServerTs: DateTime.utc(2026, 11, 8),
+          room: room,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(
+        client.threadUnread.knownThreadReplyIds(room),
+        isNot(contains(r'$reply')),
+      );
+    });
+
+    test('a synced thread reply writes nothing to the preferences', () async {
+      final client = TwakeClient('testclient', database: MockDatabase());
+      final room = Room(id: '!room:example.org', client: client);
+
+      client.onHistoryEvent.add(
+        Event(
+          type: EventTypes.Message,
+          content: {
+            'msgtype': 'm.text',
+            'body': 'older, in the thread',
+            'm.relates_to': {
+              'rel_type': RelationshipTypes.thread,
+              'event_id': r'$root',
+              'is_falling_back': true,
+            },
+          },
+          eventId: r'$old_reply',
+          senderId: '@bob:example.org',
+          originServerTs: DateTime.utc(2026, 11, 1),
+          room: room,
+        ),
+      );
+      await pumpEventQueue(times: 50);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getKeys().where((k) => k.startsWith('thread_unread_')),
+        isEmpty,
+      );
+    });
+  });
+
   /// THR-M-01: once deleted, a reply loses its thread relation; its id must
   /// be known before that, from the live timeline of any sender.
   test('a thread reply of the live timeline is remembered as one', () async {

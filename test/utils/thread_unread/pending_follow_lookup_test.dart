@@ -50,6 +50,7 @@ void main() {
 
   group('a follow lookup pending for a room', _pendingLookupTests);
   group('the notifications of a room may be cleared', _clearRuleTests);
+  group('a follow lookup running when the room is left', _leaveRaceTests);
 
   /// Review 4515562072, maintainer decision of 09/11: a thread reply that
   /// arrives in the foreground while the follow lookup of its thread runs
@@ -287,4 +288,37 @@ class _ThreadClient extends MockClient implements ThreadUnreadStoreOwner {
 class _NoStoredRoot extends fake.MockDatabase {
   @override
   Future<Event?> getEventById(String eventId, Room room) async => null;
+}
+
+/// Review of #3621 (jbrnzl): a lookup still running when the leave lands must
+/// not bring the follow back; a later join starts clean.
+void _leaveRaceTests() {
+  void leave() =>
+      _store.apply(const SyncThreadUpdate(counts: {}, leftRoomIds: [_roomId]));
+
+  test('the answer "participated" after the leave does not follow the '
+      'thread', () async {
+    _sync(1);
+    await pumpEventQueue();
+    leave();
+
+    await _answer(participated: true);
+
+    expect(_store.isFollowed(_thread), isFalse);
+  });
+
+  test(
+    'the thread is not followed when the user joins the room again',
+    () async {
+      _sync(1);
+      await pumpEventQueue();
+      leave();
+      await _answer(participated: true);
+
+      _sync(1);
+      await pumpEventQueue();
+
+      expect(_store.isFollowed(_thread), isFalse);
+    },
+  );
 }
