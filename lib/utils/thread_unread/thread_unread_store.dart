@@ -467,6 +467,11 @@ extension MarkRoomAndThreadsRead on Room {
   /// (MSC3771: it covers the main timeline and every thread up to it);
   /// `m.fully_read` stays on the newest main timeline event.
   Future<void> markRoomAndAllThreadsRead() async {
+    if (!AppConfig.threadsEnabled) {
+      final last = lastEvent;
+      if (last == null) return;
+      return setReadMarker(last.eventId, mRead: last.eventId);
+    }
     final newest = await _newestSyncedEvent();
     if (newest == null) return;
     final main = await _newestMainTimelineEvent();
