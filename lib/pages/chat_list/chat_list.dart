@@ -27,8 +27,7 @@ import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/utils/tor_stub.dart'
-    if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
+import 'package:twake_chat/utils/tor_stub.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/utils/web_push/web_push.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
