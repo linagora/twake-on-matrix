@@ -24,8 +24,8 @@ class UploadFileInfo extends UploadInfo {
   final UploadCaptionInfo? captionInfo;
   String? inReplyToEventId;
   final String? batchId;
-  String? threadRootEventId;
-  String? threadLastEventId;
+  final String? threadRootEventId;
+  final String? threadLastEventId;
   bool isFailed;
   FileInfo? fileInfo;
   @JsonKey(includeToJson: false, includeFromJson: false)

@@ -2,6 +2,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/services/message_splitter.dart';
 import 'package:twake_chat/domain/services/room_send_queue_service.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 
 /// Sends a composer text, split into several messages when it is longer than
 /// [MessageSplitter.maxLength]. Parts are sent one after the other, the reply
@@ -27,8 +28,7 @@ final class SendTextMessageInteractor {
     required String text,
     Event? inReplyTo,
     Event? editEvent,
-    String? threadRootEventId,
-    String? threadLastEventId,
+    ThreadSendTarget? thread,
   }) => sendQueue.enqueue(
     room.id,
     () => _send(
@@ -36,8 +36,7 @@ final class SendTextMessageInteractor {
       text: text,
       inReplyTo: inReplyTo,
       editEvent: editEvent,
-      threadRootEventId: threadRootEventId,
-      threadLastEventId: threadLastEventId,
+      thread: thread,
     ),
   );
 
@@ -46,11 +45,10 @@ final class SendTextMessageInteractor {
     required String text,
     Event? inReplyTo,
     Event? editEvent,
-    String? threadRootEventId,
-    String? threadLastEventId,
+    ThreadSendTarget? thread,
   }) async {
     // A quote in a thread would be prepended to the body by the SDK.
-    if (threadRootEventId != null) inReplyTo = null;
+    inReplyTo = thread.withoutQuote(inReplyTo);
     if (editEvent != null && editEvent.hasAttachment) {
       await room.sendEvent(
         _captionEditContent(room, editEvent, text),
@@ -68,13 +66,14 @@ final class SendTextMessageInteractor {
         parseCommands: isCommand,
         // An edit copies the thread relation into `m.new_content`: it is not
         // a reply.
-        threadRootEventId: editEvent == null ? threadRootEventId : null,
-        threadLastEventId: editEvent == null ? threadLastEventId : null,
+        threadRootEventId: editEvent == null ? thread?.rootEventId : null,
+        threadLastEventId: editEvent == null ? thread?.lastEventId : null,
       );
       return;
     }
 
     final List<String> parts = splitter.split(text);
+    var target = thread;
     for (final (int index, String part) in parts.indexed) {
       try {
         final String? sentId = await room.sendTextEvent(
@@ -82,12 +81,15 @@ final class SendTextMessageInteractor {
           inReplyTo: index == 0 ? inReplyTo : null,
           // A part starting with "/" is not a command.
           parseCommands: false,
-          threadRootEventId: threadRootEventId,
-          threadLastEventId: threadLastEventId,
+          threadRootEventId: target?.rootEventId,
+          threadLastEventId: target?.lastEventId,
         );
         // The next part follows this one in the thread.
-        if (sentId != null && threadRootEventId != null) {
-          threadLastEventId = sentId;
+        if (sentId != null && target != null) {
+          target = ThreadSendTarget(
+            rootEventId: target.rootEventId,
+            lastEventId: sentId,
+          );
         }
       } on Exception catch (error, stackTrace) {
         // The part is already in error in the timeline, keep going.

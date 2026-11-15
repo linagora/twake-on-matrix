@@ -8,6 +8,7 @@ import 'package:twake_chat/domain/thread/entities/thread_replies_page.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'dart:async';
 
+import 'package:twake_chat/data/drive/datasources_impl/drive_upload_limit_source.provider.dart';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
 import 'package:twake_chat/domain/contact/entities/unified_contact.dart';
@@ -22,6 +23,15 @@ import 'package:twake_chat/domain/media_album/policy/media_batch_stamp.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/room/report_content_state.dart';
 import 'package:twake_chat/domain/model/chat/message_report_reason.dart';
+import 'package:twake_chat/domain/model/file_info/pending_file_info.dart';
+import 'package:twake_chat/domain/drive/entities/drive_download_outcome.dart'
+    show DriveDownloadedFile;
+import 'package:twake_chat/domain/drive/exceptions/drive_exception.dart'
+    show DriveException;
+import 'package:twake_chat/pages/drive_picker/states/drive_pending_file.dart';
+import 'package:twake_chat/pages/drive_picker/states/drive_picker_preparation.dart';
+import 'package:twake_chat/pages/drive_picker/states/drive_pick_result.dart'
+    show DrivePickFailure;
 import 'package:twake_chat/domain/model/file_info/file_info.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/domain/reactions/usecases/get_recent_reactions_usecase.dart';
@@ -41,7 +51,7 @@ import 'package:twake_chat/pages/chat/dialog_reject_invite_widget.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:twake_chat/pages/chat/providers/chat_providers.dart';
-import 'package:twake_chat/providers/thread_providers.dart';
+import 'package:twake_chat/domain/thread/usecases/get_thread_replies_use_case.provider.dart';
 import 'package:twake_chat/presentation/enum/chat/right_column_type_enum.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/presentation/enum/chat/send_media_with_caption_status_enum.dart';
@@ -62,12 +72,14 @@ import 'package:twake_chat/presentation/mixins/paste_image_mixin.dart';
 import 'package:twake_chat/presentation/mixins/retry_text_message_mixin.dart';
 import 'package:twake_chat/presentation/mixins/save_file_to_twake_downloads_folder_mixin.dart';
 import 'package:twake_chat/presentation/mixins/save_media_to_gallery_android_mixin.dart';
+import 'package:twake_chat/presentation/mixins/drive_import_mixin.dart';
 import 'package:twake_chat/presentation/mixins/send_files_mixin.dart';
 import 'package:twake_chat/presentation/mixins/send_files_with_caption_web_mixin.dart';
 import 'package:twake_chat/presentation/mixins/unblock_user_mixin.dart';
 import 'package:twake_chat/presentation/model/chat/view_event_list_ui_state.dart';
 import 'package:twake_chat/presentation/model/forward/forward_argument.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/providers/upload_manager_provider.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/basic_event_extension.dart';
@@ -76,7 +88,6 @@ import 'package:twake_chat/utils/extension/global_key_extension.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
-import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
@@ -165,6 +176,7 @@ class ChatController extends ConsumerState<Chat>
         MediaPickerMixin,
         SendFilesWithCaptionWebMixin,
         SendFilesMixin,
+        DriveImportMixin,
         PopupContextMenuActionMixin,
         PopupMenuWidgetMixin,
         DragDrogFileMixin,
@@ -532,7 +544,7 @@ class ChatController extends ConsumerState<Chat>
       events,
       fullyReadEventId: _markerReadLocation,
       ownUserId: client.userID,
-      isVisible: (event) => event.isVisibleInGui,
+      isVisible: (event) => !AppConfig.threadsEnabled || event.isVisibleInGui,
     );
     Logs().d('Chat::getFirstUnreadEvent(): Last unread event $separator');
     return separator;
@@ -591,7 +603,7 @@ class ChatController extends ConsumerState<Chat>
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
   void refreshThreadGrouping() {
-    if (isThread) return;
+    if (isThread || !AppConfig.threadsEnabled) return;
     final replies = <String, List<Event>>{};
     final rootOfReply = <String, String>{};
     final events = timeline?.events ?? const <Event>[];
@@ -693,11 +705,7 @@ class ChatController extends ConsumerState<Chat>
       fetchPage: (from) async {
         final page = await getReplies.execute(
           roomId: roomId,
-          request: ThreadRepliesRequest(
-            rootEventId: rootId,
-            from: from,
-            withRelations: true,
-          ),
+          request: ThreadRepliesRequest(rootEventId: rootId, from: from),
         );
         if (!mounted) return (events: page.replies, nextBatch: page.nextBatch);
         // A reply seen here and deleted later loses its relation: the room
@@ -793,7 +801,11 @@ class ChatController extends ConsumerState<Chat>
   void _markLatestReadIfAtBottom() {
     if (!_isAtLiveBottom) return;
     // Under a thread screen this timeline stays mounted but is not seen.
-    if (mounted && ModalRoute.of(context)?.isCurrent == false) return;
+    if (mounted &&
+        !isThread &&
+        ThreadRules.isThreadRoute(GoRouterState.of(context).uri)) {
+      return;
+    }
     if (isThread) return;
     if (room?.notificationCount == 0 && room?.hasNewMessages != true) return;
     if (_markingLatestRead) return;
@@ -874,13 +886,14 @@ class ChatController extends ConsumerState<Chat>
   void _handleReceivedShareFiles() {
     if (shareFiles != null && room != null) {
       final filesIsNotNull = shareFiles!.whereNotNull();
-      final uploadManger = getIt.get<UploadManager>();
-      uploadManger.uploadFileMobile(
-        room: room!,
-        fileInfos: filesIsNotNull
-            .map((file) => FileInfo.fromMatrixFile(file))
-            .toList(),
-      );
+      ref
+          .read(uploadManagerProvider)
+          .uploadFileMobile(
+            room: room!,
+            fileInfos: filesIsNotNull
+                .map((file) => FileInfo.fromMatrixFile(file))
+                .toList(),
+          );
     }
   }
 
@@ -951,6 +964,7 @@ class ChatController extends ConsumerState<Chat>
   void updateView() {
     if (!mounted) return;
     _syncThreadEvents();
+    refreshThreadGrouping();
     setState(() {});
 
     _markLatestReadIfAtBottom();
@@ -1081,8 +1095,7 @@ class ChatController extends ConsumerState<Chat>
         text: sendController.text.trim(),
         inReplyTo: replyEventNotifier.value,
         editEvent: editEventNotifier.value,
-        threadRootEventId: threadRootId,
-        threadLastEventId: threadRootId == null ? null : threadLastEventId,
+        thread: threadSendTarget,
       ),
     );
     sendController.value = TextEditingValue(
@@ -1266,7 +1279,8 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void copyEventsAction(Event event) async {
-    await event.copyTextEvent(context, timeline!);
+    await event.copy(context, timeline!);
+    if (!mounted) return;
 
     showEmojiPickerNotifier.value = false;
     _clearSelectEvent();
@@ -1570,6 +1584,7 @@ class ChatController extends ConsumerState<Chat>
       timeline!.cancelSubscriptions();
     }
     timeline = loaded;
+    refreshThreadGrouping();
     timeline?.requestKeys(onlineKeyBackupOnly: false);
     if (!isThread && room!.markedUnread) room?.markUnread(false);
 
@@ -2050,7 +2065,108 @@ class ChatController extends ConsumerState<Chat>
       case AttachmentMenuAction.camera:
         _pickFromCameraAndSend(context);
         break;
+      case AttachmentMenuAction.drive:
+        _addFromDrive(context);
+        break;
     }
+  }
+
+  /// The room and the reply are fixed here, when the user taps: a pick that
+  /// ends later can only send to this room.
+  void _addFromDrive(BuildContext context) {
+    final room = this.room;
+    if (room == null) return;
+    final inReplyTo = replyEventNotifier.value;
+    final sendText = ref.read(sendTextMessageInteractorProvider);
+    final uploadLimitSource = ref.read(
+      driveUploadLimitSourceProvider(room.client),
+    );
+    // The flow handles its own failures; a program error still surfaces.
+    unawaited(
+      addFromTwakeDrive(
+        context,
+        ref: ref,
+        actions: DriveImportActions(
+          sendLinks: (text) =>
+              sendText.execute(room: room, text: text, inReplyTo: inReplyTo),
+          onLinksSent: () => _onDriveSent(inReplyTo),
+          onFailure: _logDriveFailure,
+          whileSigningIn: _whileSigningInToDrive,
+          maxAttachmentBytes: uploadLimitSource.read,
+          // As the Documents entry does: the files go straight to the upload
+          // queue, with no preview dialog.
+          sendFiles: (files) =>
+              _queueDriveFiles(room: room, files: files, inReplyTo: inReplyTo),
+        ),
+      ),
+    );
+  }
+
+  /// The same loading dialog the other chat actions use.
+  Future<DrivePickerPreparation?> _whileSigningInToDrive(
+    Future<DrivePickerPreparation?> Function() task,
+  ) async {
+    final dialog = await TwakeDialog.showFutureLoadingDialogFullScreen(
+      future: task,
+    );
+    return dialog.result;
+  }
+
+  /// A pick that ends in [DrivePickFailure], or a [DriveException] (offline,
+  /// a refused link, a slow page, an account switched meanwhile) is an outcome
+  /// the data layer already logged where it happened: a warning here, not a
+  /// second error. Any other step threw.
+  void _logDriveFailure(String step, Object error, StackTrace stackTrace) {
+    final message = 'ChatController::addFromDrive: $step failed';
+    if (error is DrivePickFailure || error is DriveException) {
+      Logs().w(message);
+    } else {
+      // The stack only: the text of an error can hold a Drive link.
+      Logs().e(message, null, stackTrace);
+    }
+  }
+
+  /// Queues [files] like the "Documents" menu entry does
+  /// ([SendFilesMixin.sendFileAction]), with no preview dialog. Each file is
+  /// shown in the chat at once from what Drive announced; the upload starts
+  /// when its bytes are saved.
+  Future<void> _queueDriveFiles({
+    required Room room,
+    required List<DrivePendingFile> files,
+    Event? inReplyTo,
+  }) async {
+    await ref
+        .read(uploadManagerProvider)
+        .uploadFileMobile(
+          room: room,
+          fileInfos: [
+            for (final file in files)
+              PendingFileInfo(
+                file.source.name,
+                size: file.source.size,
+                customMimeType: file.source.mimeType,
+                resolved: file.ready.then(_savedDriveFile),
+                retry: () => file.again().then(_savedDriveFile),
+              ),
+          ],
+          inReplyTo: inReplyTo,
+        );
+    // The chat may be gone once the queue answers: nothing to scroll then.
+    if (mounted) _onDriveSent(inReplyTo);
+  }
+
+  FileInfo _savedDriveFile(DriveDownloadedFile saved) => FileInfo(
+    saved.name,
+    filePath: saved.path,
+    customMimeType: saved.mimeType,
+  );
+
+  /// What a Drive pick (links or files) queued: scrolls to it and drops the
+  /// reply it answered, unless the user chose another meanwhile. The composer
+  /// and its draft are not touched.
+  void _onDriveSent(Event? inReplyTo) {
+    scrollDown();
+    if (replyEventNotifier.value == inReplyTo) replyEventNotifier.value = null;
   }
 
   void _pickFromCameraAndSend(BuildContext context) {
@@ -3383,6 +3499,8 @@ class ChatController extends ConsumerState<Chat>
     // Depend on GoRouterState so same-room `?event=` navigations notify
     // this State (web previously only read html.window and never rebuilt).
     _scheduleJumpToUrlEventIfNeeded(source: 'didChangeDependencies');
+    // The thread screen above this room may just have closed.
+    _markLatestReadIfAtBottom();
   }
 
   @override

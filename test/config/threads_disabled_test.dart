@@ -32,6 +32,8 @@ void main() {
 
   group('a thread reply in the room', _timelineTests);
   group('a thread root', _rootTests);
+  group('an edit in the room list', _editPreviewTests);
+  group('the unread separator', _unreadSeparatorTests);
 }
 
 const _roomId = '!room:example.com';
@@ -135,5 +137,50 @@ void _rootTests() {
       ),
       isFalse,
     );
+  });
+}
+
+Event _edit({required String target}) => _message(
+  eventId: r'$edit',
+  relatesTo: {'rel_type': RelationshipTypes.edit, 'event_id': target},
+);
+
+/// Same as main: the room list keeps the edit as the last message, with no
+/// look-up of the message it edits.
+void _editPreviewTests() {
+  test('is a last message of the room in the quick check', () {
+    expect(
+      EventVisibilityResolver.isEligibleForChatListPreviewSync(
+        _edit(target: r'$message'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('of a message sent in a thread is a last message of the room', () async {
+    when(_room.getEventById(r'$reply')).thenAnswer((_) async => _threadReply());
+
+    expect(
+      await EventVisibilityResolver.isEligibleForChatListPreview(
+        _room,
+        _edit(target: r'$reply'),
+      ),
+      isTrue,
+    );
+  });
+}
+
+/// Same as main: the separator sits above the oldest unread message, a
+/// thread reply being a message of the room like any other.
+void _unreadSeparatorTests() {
+  test('sits on an unread thread reply of the room', () {
+    final separator = ThreadRules.unreadSeparatorEventId(
+      [_threadReply(), _message(eventId: r'$fully_read')],
+      fullyReadEventId: r'$fully_read',
+      ownUserId: '@me:example.com',
+      isVisible: EventVisibilityResolver.isVisibleInTimeline,
+    );
+
+    expect(separator, r'$reply');
   });
 }

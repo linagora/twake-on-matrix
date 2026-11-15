@@ -4,6 +4,7 @@ import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
+import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
@@ -96,6 +97,7 @@ class TwakeAppState extends State<TwakeApp> {
             localizationsDelegates: const [
               LocaleNamesLocalizationsDelegate(),
               L10n.delegate,
+              DrivePickerLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
