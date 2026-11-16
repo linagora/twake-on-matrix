@@ -45,23 +45,20 @@ class ThreadDatasourceImpl implements ThreadDatasource {
     }
   }
 
-  /// Keeps the thread replies and the edits and reactions that target them.
-  /// With `recurse`, the root's own edits and reactions come back too.
+  /// With `recurse`, everything under the root belongs to the thread (replies,
+  /// and the edits and reactions that target them) except the relations that
+  /// target the root itself and are not thread replies.
   /// `m.relates_to` stays in clear in encrypted events.
   List<MatrixEvent> _threadEvents(List<MatrixEvent> chunk, String rootId) {
-    Map<String, Object?>? relatesTo(MatrixEvent e) =>
-        e.content['m.relates_to'] as Map<String, Object?>?;
-    final threadIds = {
-      for (final e in chunk)
-        if (relatesTo(e)?['rel_type'] == RelationshipTypes.thread &&
-            relatesTo(e)?['event_id'] == rootId)
-          e.eventId,
-    };
+    bool targetsRootOutsideThread(MatrixEvent e) {
+      final relatesTo = e.content['m.relates_to'] as Map<String, Object?>?;
+      return relatesTo?['event_id'] == rootId &&
+          relatesTo?['rel_type'] != RelationshipTypes.thread;
+    }
+
     return [
       for (final e in chunk)
-        if (threadIds.contains(e.eventId) ||
-            threadIds.contains(relatesTo(e)?['event_id']))
-          e,
+        if (!targetsRootOutsideThread(e)) e,
     ];
   }
 
