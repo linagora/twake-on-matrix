@@ -9,7 +9,8 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_style.dart';
 
 /// The pen of the app bar: a bare icon, no container. Opens the menu of new
-/// chats on wide layouts, the new direct message on a single column.
+/// chats on wide layouts (below the pen, flipped to its left by MenuAnchor if
+/// it would leave the screen), the new direct message on a single column.
 class ChatListNewChatButton extends StatelessWidget {
   final ChatListController controller;
 
