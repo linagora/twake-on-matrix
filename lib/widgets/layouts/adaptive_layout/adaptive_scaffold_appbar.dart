@@ -39,7 +39,7 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
                   children: [
                     const _LeadingAppBarWidget(),
                     if (AppConfig.appGridDashboardAvailable &&
-                        PlatformInfos.isWeb)
+                        PlatformInfos.isDesktop)
                       const Expanded(child: AppGridDashboard()),
                   ],
                 ),
