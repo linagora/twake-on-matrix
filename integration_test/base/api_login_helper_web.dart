@@ -163,6 +163,31 @@ Future<String> sendEventAsReceiver({
   throw UnsupportedError('sendEventAsReceiver is only used on mobile');
 }
 
+/// Thread scenarios of P2 run on the mobile group fixture only.
+Future<void> putAccountDataAsPrimary({
+  required String type,
+  required Map<String, Object?> content,
+}) async {
+  throw UnsupportedError('putAccountDataAsPrimary is only used on mobile');
+}
+
+Future<Map<String, dynamic>?> fetchAccountDataAsPrimary(String type) async {
+  throw UnsupportedError('fetchAccountDataAsPrimary is only used on mobile');
+}
+
+Future<Map<String, dynamic>?> fetchOverrideRuleAsPrimary(String ruleId) async {
+  throw UnsupportedError('fetchOverrideRuleAsPrimary is only used on mobile');
+}
+
+Future<void> sendStateAsPrimary({
+  required String roomId,
+  required String eventType,
+  required String stateKey,
+  required Map<String, Object?> content,
+}) async {
+  throw UnsupportedError('sendStateAsPrimary is only used on mobile');
+}
+
 /// Mobile group fixtures create rooms on the device client. Web tests use
 /// the pre-provisioned Synapse [GroupID] and never invite the receiver.
 Future<void> ensureReceiverJoined({required String roomId}) async {

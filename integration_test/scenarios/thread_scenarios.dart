@@ -19,13 +19,15 @@ import '../robots/thread_robot.dart';
 /// The receiver account plays "the web": it posts roots and thread replies
 /// through the Client-Server API with the same relation the web writes.
 
-int _uid() => DateTime.now().microsecondsSinceEpoch;
+/// A suffix that keeps the messages of one run apart from the others.
+int threadUid() => DateTime.now().microsecondsSinceEpoch;
 
 Client _client(BaseTestScenario scenario) => twake.Matrix.of(
   scenario.$.tester.element(find.byType(Scaffold).first),
 ).client;
 
-Map<String, Object?> _text(ThreadText message) => {
+/// The content of a plain text message.
+Map<String, Object?> threadText(ThreadText message) => {
   'msgtype': 'm.text',
   'body': message.text,
 };
@@ -43,7 +45,7 @@ Map<String, Object?> _threadReply(String rootId, ThreadText reply) => {
 };
 
 /// Posts a root and one thread reply as the receiver; returns their ids.
-Future<({String rootId, String replyId})> _receiverThread({
+Future<({String rootId, String replyId})> receiverThread({
   required String roomId,
   required ThreadText root,
   required ThreadText reply,
@@ -51,7 +53,7 @@ Future<({String rootId, String replyId})> _receiverThread({
   final rootId = await sendEventAsReceiver(
     roomId: roomId,
     eventType: EventTypes.Message,
-    content: _text(root),
+    content: threadText(root),
   );
   final replyId = await sendEventAsReceiver(
     roomId: roomId,
@@ -61,7 +63,11 @@ Future<({String rootId, String replyId})> _receiverThread({
   return (rootId: rootId, replyId: replyId);
 }
 
-Future<void> _waitForMessage(BaseTestScenario scenario, ThreadText text) async {
+/// Waits until [text] shows on screen.
+Future<void> waitForThreadMessage(
+  BaseTestScenario scenario,
+  ThreadText text,
+) async {
   final message = await ChatGroupDetailRobot(scenario.$).getText(text.text);
   await scenario.$.waitUntilVisible(
     message,
@@ -112,18 +118,18 @@ class ReceivedThreadScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     final fixture = await openMobileGroupFixture(this);
     final threads = ThreadRobot($);
-    final uid = _uid();
+    final uid = threadUid();
     final root = ThreadText('thread-root $uid');
     final webReply = ThreadText('web reply $uid');
     final mobileReply = ThreadText('mobile reply $uid');
 
-    final ids = await _receiverThread(
+    final ids = await receiverThread(
       roomId: fixture.roomId,
       root: root,
       reply: webReply,
     );
 
-    await _waitForMessage(this, root);
+    await waitForThreadMessage(this, root);
     await threads.expectCard(lastReply: webReply, messageCount: 1);
     await threads.expectNotInMainTimeline(webReply);
 
@@ -143,7 +149,7 @@ class ReceivedThreadScenario extends BaseTestScenario {
     await threads.expectMessageInThread(mobileReply);
 
     await threads.closeThread();
-    await _waitForMessage(this, root);
+    await waitForThreadMessage(this, root);
     await threads.expectCard(lastReply: mobileReply, messageCount: 2);
     await threads.expectNotInMainTimeline(mobileReply);
 
@@ -178,12 +184,12 @@ class StartThreadScenario extends BaseTestScenario {
     final fixture = await openMobileGroupFixture(this);
     final chat = ChatGroupDetailRobot($);
     final threads = ThreadRobot($);
-    final uid = _uid();
+    final uid = threadUid();
     final root = ThreadText('start-thread root $uid');
     final firstReply = ThreadText('first reply $uid');
 
     await chat.sendMessage(root.text);
-    await _waitForMessage(this, root);
+    await waitForThreadMessage(this, root);
 
     await threads.startThreadFrom(root);
     await threads.expectThreadScreenOn(root);
@@ -196,7 +202,7 @@ class StartThreadScenario extends BaseTestScenario {
     );
 
     await threads.closeThread();
-    await _waitForMessage(this, root);
+    await waitForThreadMessage(this, root);
     final room = _client(this).getRoomById(fixture.roomId)!;
     expect(
       room.lastEvent?.body,
@@ -225,7 +231,7 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     final fixture = await openMobileGroupFixture(this);
     final chat = ChatGroupDetailRobot($);
     final threads = ThreadRobot($);
-    final uid = _uid();
+    final uid = threadUid();
     final root = ThreadText('banner root $uid');
     final myReply = ThreadText('my banner reply $uid');
     final laterReply = ThreadText('later web reply $uid');
@@ -233,9 +239,9 @@ class UnreadThreadBannerScenario extends BaseTestScenario {
     final rootId = await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: _text(root),
+      content: threadText(root),
     );
-    await _waitForMessage(this, root);
+    await waitForThreadMessage(this, root);
 
     // Replying makes the user follow the thread (P1: participation).
     await threads.startThreadFrom(root);
@@ -275,11 +281,11 @@ class ThreadReplyLinkScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     final fixture = await openMobileGroupFixture(this);
     final threads = ThreadRobot($);
-    final uid = _uid();
+    final uid = threadUid();
     final root = ThreadText('link root $uid');
     final reply = ThreadText('linked reply $uid');
 
-    final ids = await _receiverThread(
+    final ids = await receiverThread(
       roomId: fixture.roomId,
       root: root,
       reply: reply,
@@ -291,9 +297,9 @@ class ThreadReplyLinkScenario extends BaseTestScenario {
     await sendEventAsReceiver(
       roomId: fixture.roomId,
       eventType: EventTypes.Message,
-      content: _text(link),
+      content: threadText(link),
     );
-    await _waitForMessage(this, link);
+    await waitForThreadMessage(this, link);
 
     await ChatGroupDetailRobot($).tapTextInMessage(link.text);
     await $.pumpAndTrySettle();
@@ -302,7 +308,7 @@ class ThreadReplyLinkScenario extends BaseTestScenario {
     await threads.expectMessageInThread(reply);
 
     await threads.closeThread();
-    await _waitForMessage(this, link);
+    await waitForThreadMessage(this, link);
   }
 }
 
@@ -314,12 +320,12 @@ class ThreadReplySearchScenario extends BaseTestScenario {
   Future<void> runTestLogic() async {
     final fixture = await openMobileGroupFixture(this);
     final threads = ThreadRobot($);
-    final uid = _uid();
+    final uid = threadUid();
     final root = ThreadText('search root $uid');
     final reply = ThreadText('searchable reply $uid');
 
-    await _receiverThread(roomId: fixture.roomId, root: root, reply: reply);
-    await _waitForMessage(this, root);
+    await receiverThread(roomId: fixture.roomId, root: root, reply: reply);
+    await waitForThreadMessage(this, root);
 
     await ChatGroupDetailRobot($).getSearchIcon().first.tap();
     final searchView = $(ChatSearchView);
