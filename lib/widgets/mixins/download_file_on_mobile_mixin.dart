@@ -5,12 +5,15 @@ import 'package:dartz/dartz.dart' hide State, OpenFile;
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/extensions/value_notifier_custom.dart';
 import 'package:twake_chat/presentation/model/chat/downloading_state_presentation_model.dart';
+import 'package:twake_chat/utils/exception/downloading_exception.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:twake_chat/utils/manager/download_manager/download_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -96,6 +99,13 @@ mixin DownloadFileOnMobileMixin<T extends StatefulWidget> on State<T> {
         );
         downloadFileStateNotifier.value = const NotDownloadPresentationState();
         streamSubscription?.cancel();
+        if (failure is DownloadFileFailureState &&
+            failure.exception is CancelDownloadingException) {
+          return;
+        }
+        if (mounted) {
+          TwakeSnackBar.show(context, L10n.of(context)!.fileDownloadFailed);
+        }
       },
       (success) {
         if (success is DownloadingFileState) {

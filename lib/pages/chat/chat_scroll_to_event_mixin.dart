@@ -4,12 +4,19 @@ part of 'chat.dart';
 class ChatJumpRequest extends Equatable {
   const ChatJumpRequest({
     required this.eventId,
+    String? requestedEventId,
     required this.generation,
     required this.highlight,
     this.allowContextualReload = true,
-  });
+  }) : requestedEventId = requestedEventId ?? eventId;
 
+  /// The row to reveal and tint.
   final String eventId;
+
+  /// The event the caller asked for (the URL `?event=`). It differs from
+  /// [eventId] for a hidden album image, drawn by its leader's row; the URL
+  /// claim and pending-jump bookkeeping key on it.
+  final String requestedEventId;
   final int generation;
   final bool highlight;
 
@@ -23,6 +30,7 @@ class ChatJumpRequest extends Equatable {
   @override
   List<Object?> get props => [
     eventId,
+    requestedEventId,
     generation,
     highlight,
     allowContextualReload,
@@ -44,6 +52,16 @@ class ChatJumpSeekSession {
 
 enum _SeekPageOutcome { found, stop, continueSeek }
 
+/// The key of the row that shows [eventId]: rows are built with
+/// `GlobalObjectKey(event.eventId)`, and [GlobalObjectKey] compares with
+/// `identical`, so an equal id from elsewhere (a link, a URL query) is swapped
+/// for the timeline's own string. Unknown ids are kept as they are.
+GlobalObjectKey messageRowKey(String eventId, Iterable<Event> events) =>
+    GlobalObjectKey(
+      events.firstWhereOrNull((event) => event.eventId == eventId)?.eventId ??
+          eventId,
+    );
+
 /// Scrolls the chat timeline to a target event and optionally highlights it.
 ///
 /// Center-anchored `_top`/`_bottom` lists break naive `scrollToIndex` /
@@ -59,6 +77,9 @@ enum _SeekPageOutcome { found, stop, continueSeek }
 ///    becomes finite (or we hit a scroll edge), then center.
 /// 5. Highlight only after the row is actually in the viewport.
 extension ChatScrollToEventMixin on ChatController {
+  GlobalObjectKey _rowKey(String eventId) =>
+      messageRowKey(eventId, timeline?.events ?? const []);
+
   static const double _jumpMountCacheExtent = 20000;
   static const int _jumpWindowMaxEvents = 60;
   static const int _maxMountFrames = 90;
@@ -109,7 +130,7 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   bool _isTargetRowBuilt(ChatJumpRequest request) {
-    return GlobalObjectKey(request.eventId).currentContext != null;
+    return _rowKey(request.eventId).currentContext != null;
   }
 
   bool get _isChatEventListReady {
@@ -126,7 +147,7 @@ extension ChatScrollToEventMixin on ChatController {
   }
 
   double? _dyForEventId(String eventId) {
-    final itemContext = GlobalObjectKey(eventId).currentContext;
+    final itemContext = _rowKey(eventId).currentContext;
     if (itemContext == null || !scrollController.hasClients) return null;
 
     final itemBox = itemContext.findRenderObject() as RenderBox?;
@@ -145,7 +166,7 @@ extension ChatScrollToEventMixin on ChatController {
     final dy = _targetDyInScrollViewport(request);
     if (dy == null || !scrollController.hasClients) return false;
 
-    final itemContext = GlobalObjectKey(request.eventId).currentContext!;
+    final itemContext = _rowKey(request.eventId).currentContext!;
     final itemBox = itemContext.findRenderObject() as RenderBox?;
     final scrollBox =
         scrollController.position.context.notificationContext
@@ -361,7 +382,7 @@ extension ChatScrollToEventMixin on ChatController {
 
   /// Center a row that already has a finite viewport position.
   Future<void> _centerFiniteTarget(ChatJumpRequest request) async {
-    final itemContext = GlobalObjectKey(request.eventId).currentContext;
+    final itemContext = _rowKey(request.eventId).currentContext;
     if (itemContext == null || !scrollController.hasClients) return;
 
     final itemBox = itemContext.findRenderObject() as RenderBox?;
@@ -409,7 +430,7 @@ extension ChatScrollToEventMixin on ChatController {
       );
     }
     if (!_isJumpCurrent(session.request)) return;
-    final keyContext = GlobalObjectKey(session.request.eventId).currentContext;
+    final keyContext = _rowKey(session.request.eventId).currentContext;
     if (keyContext == null || !keyContext.mounted) return;
     await Scrollable.ensureVisible(
       keyContext,
@@ -589,7 +610,7 @@ extension ChatScrollToEventMixin on ChatController {
 
     // Row not in tag map yet: one short ensureVisible attempt if the key
     // already mounted; otherwise leave the live timeline alone.
-    final keyContext = GlobalObjectKey(request.eventId).currentContext;
+    final keyContext = _rowKey(request.eventId).currentContext;
     if (keyContext != null && keyContext.mounted) {
       if (!_isJumpCurrent(request)) return;
       await Scrollable.ensureVisible(
@@ -609,7 +630,7 @@ extension ChatScrollToEventMixin on ChatController {
     // Claim the URL highlight id up front so didUpdateWidget does not start
     // a second jump while we reload the contextual timeline.
     if (!request.highlight) return;
-    _lastHighlightedEventId = request.eventId;
+    _lastHighlightedEventId = request.requestedEventId;
   }
 
   /// Returns whether the jump brought the target into view.
@@ -666,12 +687,12 @@ extension ChatScrollToEventMixin on ChatController {
   void _releaseUrlHighlightClaimIfFailed(ChatJumpRequest request) {
     if (!request.highlight) return;
     if (request.generation != _scrollGeneration) return;
-    if (_lastHighlightedEventId != request.eventId) return;
+    if (_lastHighlightedEventId != request.requestedEventId) return;
     _lastHighlightedEventId = null;
   }
 
   void _clearPendingUrlJumpIfMatching(ChatJumpRequest request) {
-    if (_pendingUrlJumpEventId == request.eventId) {
+    if (_pendingUrlJumpEventId == request.requestedEventId) {
       _pendingUrlJumpEventId = null;
     }
   }
@@ -700,15 +721,34 @@ extension ChatScrollToEventMixin on ChatController {
     }
   }
 
+  /// A hidden album image is drawn by its leader's row: jump to that row so
+  /// the album is centered and tinted. Images outside the loaded timeline
+  /// keep their own id, and so does every image in select mode, where each
+  /// one has its own row.
+  String _albumRowEventId(String eventId) {
+    if (selectMode) return eventId;
+    final visible = [
+      for (final event in _sortedTimelineEvents)
+        if (event.isVisibleInGui) event,
+    ];
+    return AlbumTimelineIndex(
+          visible,
+          breakBefore: unreadReceivedMessageLocation,
+        ).albumLeaderOf(eventId) ??
+        eventId;
+  }
+
   Future<void> scrollToEventId(
     String eventId, {
     bool highlight = true,
     bool allowContextualReload = true,
   }) async {
+    final rowEventId = _albumRowEventId(eventId);
     // Probe without bumping generation — live scroll must not supersede
     // an in-flight search jump.
     final probe = ChatJumpRequest(
-      eventId: eventId,
+      eventId: rowEventId,
+      requestedEventId: eventId,
       generation: _scrollGeneration,
       highlight: highlight,
       allowContextualReload: allowContextualReload,
@@ -725,7 +765,8 @@ extension ChatScrollToEventMixin on ChatController {
 
     await _jumpToEventWithContext(
       ChatJumpRequest(
-        eventId: eventId,
+        eventId: rowEventId,
+        requestedEventId: eventId,
         generation: ++_scrollGeneration,
         highlight: highlight,
         allowContextualReload: allowContextualReload,

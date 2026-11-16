@@ -7,6 +7,7 @@ import 'package:twake_chat/pages/chat_details/chat_details_view_style.dart';
 import 'package:twake_chat/presentation/enum/chat/chat_details_screen_enum.dart';
 import 'package:twake_chat/presentation/mixins/chat_details_tab_mixin.dart';
 import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart';
+import 'package:twake_chat/presentation/mixins/leave_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -16,7 +17,6 @@ import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
 import 'package:twake_chat/widgets/twake_cupertino_page.dart';
 import 'package:flutter/material.dart';
-import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
@@ -46,7 +46,8 @@ class ChatDetailsController extends State<ChatDetails>
         PlayVideoActionMixin,
         TickerProviderStateMixin,
         ChatDetailsTabMixin<ChatDetails>,
-        TwakeContextMenuMixin {
+        TwakeContextMenuMixin,
+        LeaveChatMixin {
   final actionsMobileAndTabletKey = ChatKeys.actionsMobileAndTablet.key;
 
   final actionsWebAndDesktopKey = ChatKeys.actionsWebAndDesktop.key;
@@ -130,7 +131,7 @@ class ChatDetailsController extends State<ChatDetails>
         await _reportRoom(context);
         break;
       case 1:
-        await _leaveRoom(context);
+        await leaveChat(context, room);
         break;
       default:
         break;
@@ -147,24 +148,6 @@ class ChatDetailsController extends State<ChatDetails>
       if (result.error != null) throw result.error;
     } catch (e) {
       Logs().e('ChatDetailsController._reportRoom', e);
-      TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
-    }
-  }
-
-  Future<void> _leaveRoom(BuildContext context) async {
-    try {
-      final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-        future: () async {
-          await room?.leave();
-        },
-      );
-      if (result.error != null) throw result.error;
-
-      if (context.mounted) {
-        const RoomsRoute().go(context);
-      }
-    } catch (e) {
-      Logs().e('ChatDetailsController._leaveRoom', e);
       TwakeSnackBar.show(context, L10n.of(context)!.oopsSomethingWentWrong);
     }
   }
