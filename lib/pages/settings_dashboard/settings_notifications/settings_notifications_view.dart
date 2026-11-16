@@ -50,9 +50,7 @@ class SettingsNotificationsView extends StatelessWidget {
                 SwitchListTile.adaptive(
                   value: !Matrix.of(context).client.allPushNotificationsMuted,
                   title: Text(
-                    Matrix.of(context).client.allPushNotificationsMuted
-                        ? L10n.of(context)!.enable_notifications
-                        : L10n.of(context)!.disable_notifications,
+                    L10n.of(context)!.notifications,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
