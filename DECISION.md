@@ -344,3 +344,35 @@ or the « couldn't be added » dialog when it fails.
 There is no « Inviting… » feedback while an invite is pending, for now. There
 is no client-side timeout either: the server keeps going after the client
 gives up, so a timeout could report a failure for an invite that still lands.
+
+## D19. On one column, the title, search and filters of the chat list scroll away with the list (decided by Clément, 2026-11-16)
+
+On one column (a window narrower than 905 px: a phone, and a narrow web or
+desktop window too), scrolling the chat list down hides the whole top block:
+the title bar, the search field and the filter chips (All, Unread, Broadcast,
+Direct…). Scrolling back up, even a little, brings it back at once; it is
+always shown at the top of the list. The block is the first sliver of the list
+(floating, snap), so the viewport keeps its size: an app bar that changed
+height would move the scroll position and could flip the block back and forth.
+
+The block stays pinned while a selection is active, so its actions never
+disappear. Wide layouts, an empty list and the loading skeleton keep the fixed
+app bar as before.
+
+On one column the app bar of the block no longer takes the lavender
+"scrolled under" tint when the list scrolls (it is the same fill at the top, after
+a scroll and in selection); wide layouts keep it.
+
+With the block hidden, a fixed strip as tall as the status bar, in the fill of
+the block, covers the top of the screen: no room row shows behind the clock and
+the battery.
+
+Choices made without Clément: the audio mini-player and the connection status
+bar are part of the block, so they hide with it. A message playing keeps
+playing: its state lives in `MatrixState` (`audioPlayer`), the widget only shows
+it, and the player comes back on the next scroll up.
+
+Not checked on a device: the snap gesture, the real iOS rendering, and the
+audio player appearing while the block is hidden. The layout was checked with
+widget renders at 390 x 844 and a 47 px status bar inset, compared with the
+fixed app bar of before.

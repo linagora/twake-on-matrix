@@ -16,15 +16,13 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
 
-class ChatListView extends StatelessWidget {
+class ChatListView extends StatefulWidget {
   final ChatListController controller;
   final Widget? bottomNavigationBar;
   final VoidCallback? onOpenSearchPageInMultipleColumns;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
-  final responsiveUtils = getIt.get<ResponsiveUtils>();
-
-  ChatListView({
+  const ChatListView({
     super.key,
     required this.controller,
     this.bottomNavigationBar,
@@ -33,28 +31,42 @@ class ChatListView extends StatelessWidget {
   });
 
   @override
+  State<ChatListView> createState() => _ChatListViewState();
+}
+
+class _ChatListViewState extends State<ChatListView> {
+  final responsiveUtils = getIt.get<ResponsiveUtils>();
+  // Keeps the header State when select mode swaps the sliver that wraps it.
+  final _headerKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: controller.matrixState.voiceMessageEvent,
+      valueListenable: widget.controller.matrixState.voiceMessageEvent,
       builder: (context, hasEvent, child) {
+        final headerSize = ChatListViewStyle.preferredSizeAppBar(
+          hasAudioEvent: hasEvent != null && PlatformInfos.isMobile,
+        );
+        final header = ChatListHeader(
+          key: _headerKey,
+          onOpenSearchPageInMultipleColumns:
+              widget.onOpenSearchPageInMultipleColumns,
+          controller: widget.controller,
+        );
+        // One column: the header scrolls away inside the list (ChatListBodyView),
+        // so the viewport never resizes. Wide layouts keep it in the app bar.
+        final collapsing = responsiveUtils.isMobile(context);
         return Scaffold(
           backgroundColor: LinagoraSysColors.material().onPrimary,
-          appBar: PreferredSize(
-            preferredSize: ChatListViewStyle.preferredSizeAppBar(
-              hasAudioEvent: hasEvent != null && PlatformInfos.isMobile,
-            ),
-            child: ChatListHeader(
-              onOpenSearchPageInMultipleColumns:
-                  onOpenSearchPageInMultipleColumns,
-              controller: controller,
-            ),
-          ),
+          appBar: collapsing
+              ? null
+              : PreferredSize(preferredSize: headerSize, child: header),
           bottomNavigationBar: ValueListenableBuilder(
-            valueListenable: controller.conversationSelectionNotifier,
+            valueListenable: widget.controller.conversationSelectionNotifier,
             builder: (context, conversationSelection, __) {
               if (conversationSelection.isNotEmpty) {
                 return ChatListBottomNavigator(
-                  bottomNavigationActionsWidget: controller
+                  bottomNavigationActionsWidget: widget.controller
                       .bottomNavigationActionsWidget(
                         paddingIcon: ChatListBottomNavigatorStyle.paddingIcon,
                         iconSize: ChatListBottomNavigatorStyle.iconSize,
@@ -62,27 +74,51 @@ class ChatListView extends StatelessWidget {
                       ),
                 );
               } else {
-                return bottomNavigationBar ?? const SizedBox();
+                return widget.bottomNavigationBar ?? const SizedBox();
               }
             },
           ),
-          body: StreamBuilder<Client>(
-            stream: controller.clientStream,
-            builder: (context, snapshot) {
-              return ChatListBodyView(controller);
-            },
+          body: Stack(
+            children: [
+              StreamBuilder<Client>(
+                stream: widget.controller.clientStream,
+                builder: (context, snapshot) {
+                  return ChatListBodyView(
+                    widget.controller,
+                    header: collapsing ? header : null,
+                    // Same as Scaffold for a primary appBar: preferred height + status bar.
+                    headerHeight:
+                        headerSize.height + MediaQuery.paddingOf(context).top,
+                  );
+                },
+              ),
+              // Once the header has scrolled away, rows must not show behind
+              // the status bar. Same colour as the header paints there.
+              if (collapsing)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: MediaQuery.paddingOf(context).top,
+                  child: IgnorePointer(
+                    child: ColoredBox(
+                      color: LinagoraSysColors.material().background,
+                    ),
+                  ),
+                ),
+            ],
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
           floatingActionButton: ValueListenableBuilder(
-            valueListenable: controller.selectModeNotifier,
+            valueListenable: widget.controller.selectModeNotifier,
             builder: (context, _, __) {
-              if (controller.isSelectMode) return const SizedBox();
+              if (widget.controller.isSelectMode) return const SizedBox();
               return KeyBoardShortcuts(
                 keysToPress: {
                   LogicalKeyboardKey.controlLeft,
                   LogicalKeyboardKey.keyN,
                 },
-                onKeysPressed: () => controller.goToNewPrivateChat(),
+                onKeysPressed: () => widget.controller.goToNewPrivateChat(),
                 helpLabel: L10n.of(context)!.newChat,
                 child: !responsiveUtils.isSingleColumnLayout(context)
                     ? MenuAnchor(
@@ -95,12 +131,13 @@ class ChatListView extends StatelessWidget {
                                 context,
                               ),
                             ),
-                            onPressed: () => controller.goToNewPrivateChat(),
+                            onPressed: () =>
+                                widget.controller.goToNewPrivateChat(),
                           ),
                           MenuItemButton(
                             leadingIcon: const Icon(Icons.group),
                             onPressed: () =>
-                                controller.goToNewGroupChat(context),
+                                widget.controller.goToNewGroupChat(context),
                             child: Text(
                               L10n.of(context)!.newGroupChat,
                               style: PopupMenuWidgetStyle.defaultItemTextStyle(
@@ -110,7 +147,8 @@ class ChatListView extends StatelessWidget {
                           ),
                           MenuItemButton(
                             leadingIcon: const Icon(Icons.campaign_outlined),
-                            onPressed: () => controller.goToNewFeed(context),
+                            onPressed: () =>
+                                widget.controller.goToNewFeed(context),
                             child: Text(
                               L10n.of(context)!.newFeed,
                               style: PopupMenuWidgetStyle.defaultItemTextStyle(
@@ -120,7 +158,8 @@ class ChatListView extends StatelessWidget {
                           ),
                           MenuItemButton(
                             leadingIcon: const Icon(Icons.view_in_ar),
-                            onPressed: () => controller.goToNewSpace(context),
+                            onPressed: () =>
+                                widget.controller.goToNewSpace(context),
                             child: Text(
                               L10n.of(context)!.newSpace,
                               style: PopupMenuWidgetStyle.defaultItemTextStyle(
@@ -146,7 +185,7 @@ class ChatListView extends StatelessWidget {
                     : TwakeFloatingActionButton(
                         icon: Icons.mode_edit_outline_outlined,
                         size: ChatListViewStyle.editIconSize,
-                        onTap: controller.goToNewPrivateChat,
+                        onTap: widget.controller.goToNewPrivateChat,
                       ),
               );
             },
