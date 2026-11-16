@@ -11,13 +11,8 @@ void main() {
 }
 
 /// A phone with a status bar, one of the three views.
-Future<HeaderHarness> _pumpPhone(WidgetTester tester, {HeaderBranch? branch}) =>
-    HeaderHarness.pump(
-      tester,
-      size: mobileSize,
-      topInset: statusBar,
-      branch: branch,
-    );
+Future<HeaderHarness> _pumpPhone(WidgetTester tester, {HeaderView? branch}) =>
+    HeaderHarness.pump(tester, branch ?? const HeaderView.phoneWithStatusBar());
 
 /// Scrolls down, then back up a little: the header comes back.
 Future<void> _scrollAwayAndBack(WidgetTester tester, double away) async {
@@ -36,7 +31,7 @@ void _blockWithInset() {
   });
 }
 
-void _insetCases(String name, HeaderBranch branch) {
+void _insetCases(String name, HeaderView branch) {
   testWidgets('GIVEN $name on a phone with a status bar\n'
       'THEN nothing overflows', (tester) async {
     await _pumpPhone(tester, branch: branch);
@@ -75,7 +70,10 @@ void _wideScreenBlock() {
       'THEN its appBar block has the height the phone block must have', (
     tester,
   ) async {
-    await HeaderHarness.pump(tester, size: wideSize, topInset: statusBar);
+    await HeaderHarness.pump(
+      tester,
+      const HeaderView.wide(topInset: statusBar),
+    );
 
     expect(tester.getSize(headerFinder).height, headerBlockHeight);
   });
@@ -216,7 +214,10 @@ void _bandOnWideScreen() {
       'THEN the band stays opaque, the app bar still covers it', (
     tester,
   ) async {
-    await HeaderHarness.pump(tester, size: wideSize, topInset: statusBar);
+    await HeaderHarness.pump(
+      tester,
+      const HeaderView.wide(topInset: statusBar),
+    );
 
     await scrollDown(tester, 400);
 

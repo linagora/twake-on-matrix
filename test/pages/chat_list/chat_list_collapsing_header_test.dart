@@ -26,7 +26,7 @@ void _oneColumn() {
 void _showsAtTop() {
   testWidgets('GIVEN the top of the list\n'
       'THEN the header is shown above the first room', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
     expect(headerVisible(tester), isTrue);
     expect(h.scroll.offset, 0);
     expect(find.byType(ChatListHeader), findsOneWidget);
@@ -36,7 +36,7 @@ void _showsAtTop() {
 void _hidesOnScrollDown() {
   testWidgets('GIVEN the list is scrolled down by more than the header\n'
       'THEN the header is hidden', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
 
     await scrollDown(tester, 400);
 
@@ -49,7 +49,7 @@ void _comesBackOnScrollUp() {
   testWidgets('GIVEN the header is hidden\n'
       'WHEN the user scrolls back up a little\n'
       'THEN the header comes back and ends fully visible', (tester) async {
-    await HeaderHarness.pump(tester, size: mobileSize);
+    await HeaderHarness.pump(tester, const HeaderView.phone());
     await scrollDown(tester, 400);
     expect(headerVisible(tester), isFalse);
 
@@ -64,7 +64,7 @@ void _comesBackOnScrollUp() {
 void _returnsToFullHeightAtTop() {
   testWidgets('GIVEN the user scrolls back to the very top\n'
       'THEN the header is shown at its full height', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
     final fullHeight = tester.getSize(headerFinder).height;
     await scrollDown(tester, 400);
 
@@ -79,7 +79,7 @@ void _returnsToFullHeightAtTop() {
 void _selectMode() {
   testWidgets('GIVEN select mode\n'
       'THEN scrolling down never hides the header', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
     h.controller.selectModeNotifier.value = SelectMode.select;
     await tester.pump();
 
@@ -92,7 +92,7 @@ void _selectMode() {
   testWidgets('GIVEN the header is hidden\n'
       'WHEN select mode starts\n'
       'THEN the header is shown again', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
     await scrollDown(tester, 400);
     expect(headerVisible(tester), isFalse);
 
@@ -105,7 +105,7 @@ void _selectMode() {
 void _controllerListener() {
   testWidgets('GIVEN the controller scrolls the list itself\n'
       'THEN the scroll listener of the controller still fires', (tester) async {
-    final h = await HeaderHarness.pump(tester, size: mobileSize);
+    final h = await HeaderHarness.pump(tester, const HeaderView.phone());
     var calls = 0;
     var lastWasTop = true;
     h.scroll.addListener(() {
@@ -126,7 +126,7 @@ void _controllerListener() {
 void _noRoom() {
   testWidgets('GIVEN no room yet\n'
       'THEN the header is shown at the top, without scrolling', (tester) async {
-    await HeaderHarness.pump(tester, size: mobileSize, roomCount: 0);
+    await HeaderHarness.pump(tester, const HeaderView.phone(roomCount: 0));
 
     expect(headerVisible(tester), isTrue);
     expect(find.byType(CustomScrollView), findsNothing);
@@ -138,7 +138,7 @@ void _multiColumn() {
   group('[ChatList] header on a multi column layout', () {
     testWidgets('GIVEN a wide screen\n'
         'THEN the header stays in the app bar and never hides', (tester) async {
-      final h = await HeaderHarness.pump(tester, size: wideSize);
+      final h = await HeaderHarness.pump(tester, const HeaderView.wide());
       expect(headerVisible(tester), isTrue);
       expect(
         find.descendant(

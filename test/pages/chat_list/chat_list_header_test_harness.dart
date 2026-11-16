@@ -64,20 +64,39 @@ final reservedBox = find
     )
     .first;
 
-class HeaderBranch {
-  const HeaderBranch({this.roomCount = 30, this.skeleton = false});
+/// How the header is laid out: window, status bar and what the list holds.
+class HeaderView {
+  const HeaderView({
+    this.size = mobileSize,
+    this.topInset = 0,
+    this.roomCount = 30,
+    this.skeleton = false,
+  });
 
+  const HeaderView.phone({int roomCount = 30, bool skeleton = false})
+    : this(roomCount: roomCount, skeleton: skeleton);
+
+  const HeaderView.phoneWithStatusBar({
+    int roomCount = 30,
+    bool skeleton = false,
+  }) : this(topInset: statusBar, roomCount: roomCount, skeleton: skeleton);
+
+  const HeaderView.wide({double topInset = 0})
+    : this(size: wideSize, topInset: topInset);
+
+  final Size size;
+  final double topInset;
   final int roomCount;
 
   /// No first sync yet: the skeleton is shown.
   final bool skeleton;
 }
 
-/// The three views of the one column layout.
-const headerBranches = <String, HeaderBranch>{
-  'the list': HeaderBranch(),
-  'the empty list': HeaderBranch(roomCount: 0),
-  'the skeleton': HeaderBranch(roomCount: 0, skeleton: true),
+/// The three views of the one column layout, under a status bar.
+const headerBranches = <String, HeaderView>{
+  'the list': HeaderView.phoneWithStatusBar(),
+  'the empty list': HeaderView.phoneWithStatusBar(roomCount: 0),
+  'the skeleton': HeaderView.phoneWithStatusBar(roomCount: 0, skeleton: true),
 };
 
 /// Built and on the screen.
@@ -139,15 +158,12 @@ class HeaderHarness {
   }
 
   static Future<HeaderHarness> pump(
-    WidgetTester tester, {
-    required Size size,
-    int roomCount = 30,
-    double topInset = 0,
-    HeaderBranch? branch,
-  }) async {
-    final rooms = branch?.roomCount ?? roomCount;
-    final skeleton = branch?.skeleton ?? false;
-    _setView(tester, size, topInset);
+    WidgetTester tester,
+    HeaderView view,
+  ) async {
+    final rooms = view.roomCount;
+    final skeleton = view.skeleton;
+    _setView(tester, view);
 
     final client = (await tester.runAsync(
       () => _syncedClient(synced: !skeleton),
@@ -171,8 +187,9 @@ class HeaderHarness {
   }
 }
 
-void _setView(WidgetTester tester, Size size, double topInset) {
-  tester.view.physicalSize = size;
+void _setView(WidgetTester tester, HeaderView view) {
+  final topInset = view.topInset;
+  tester.view.physicalSize = view.size;
   tester.view.devicePixelRatio = 1;
   tester.view.padding = FakeViewPadding(top: topInset);
   tester.view.viewPadding = FakeViewPadding(top: topInset);
