@@ -69,6 +69,7 @@ import 'package:twake_chat/data/account/quiet_logouts.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -747,6 +748,15 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   void _handleSyncStatusUpdate(Client client, SyncStatusUpdate update) {
+    if (client == clientOrNull &&
+        _homeserverCheckLog.needsRefreshAfterSync(client, update.status)) {
+      unawaited(
+        _getHomeserverInformation(client).catchError(
+          (Object e, StackTrace s) =>
+              _report(e, s, 'homeserver refresh after sync'),
+        ),
+      );
+    }
     if (update.status != SyncStatus.error || update.error == null) return;
 
     _captureSyncError(client, update);
@@ -804,6 +814,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _listenLoginStateChanged(LoginState state, Client client) async {
+    if (state != LoginState.loggedIn) _homeserverCheckLog.forget(client);
     if (_quietLogouts.consume(client.clientName, state)) return;
     final loggedInWithMultipleClients = accountClients.length > 1;
     if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
@@ -1542,6 +1553,8 @@ class MatrixState extends ConsumerState<Matrix>
     await LocalizationService.applyLocale(locale);
   }
 
+  final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
+
   Future<void> _getHomeserverInformation(
     Client newClient, [
     SwitchToken? token,
@@ -1549,20 +1562,34 @@ class MatrixState extends ConsumerState<Matrix>
     Logs().d(
       'Matrix::_getHomeserverInformation: client homeserver = ${newClient.homeserver}',
     );
-    final summary = await newClient.fetchHomeserverSummary(
-      // A login that makes this account active checked its server just before.
-      previous:
-          _loginSessions.homeserverSummaryOf(newClient) ??
-          loginHomeserverSummary,
-    );
+    final refreshTicket = _homeserverCheckLog.begin(newClient);
+    var checkFailed = false;
+    final HomeserverSummary? summary;
+    try {
+      summary = await newClient.fetchHomeserverSummary(
+        // A login that makes this account active checked its server just
+        // before.
+        previous:
+            _loginSessions.homeserverSummaryOf(newClient) ??
+            loginHomeserverSummary,
+        onCheckFailed: () => checkFailed = true,
+      );
+    } finally {
+      _homeserverCheckLog.end(newClient, refreshTicket);
+    }
 
     // The active client may have changed while awaiting: a late result must
-    // not overwrite the newer account's summary.
-    if (!_isCurrent(token) ||
-        (_switchCoordinator.target ?? clientOrNull) != newClient) {
+    // not overwrite the newer account's summary. A newer refresh of the same
+    // client wins over this one for the same reason, and so does a homeserver
+    // changed during the fetch.
+    if (!mounted ||
+        !_isCurrent(token) ||
+        (_switchCoordinator.target ?? clientOrNull) != newClient ||
+        !_homeserverCheckLog.resultApplies(newClient, refreshTicket)) {
       return;
     }
 
+    _homeserverCheckLog.record(newClient, refreshTicket, failed: checkFailed);
     loginHomeserverSummary = summary;
     Logs().d(
       'Matrix::_getHomeserverInformation: appTwakeInformation ${loginHomeserverSummary?.appTwakeInformation}',
@@ -1623,7 +1650,7 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   Future<void> _refreshHomeserverInformation(Client client) async {
-    client.homeserver ??= Uri.parse(AppConfig.homeserver);
+    client.applyDefaultHomeserverWithoutSession(AppConfig.homeserver);
     await _getHomeserverInformation(client);
   }
 
@@ -1816,7 +1843,12 @@ class MatrixState extends ConsumerState<Matrix>
   @override
   Future<void> onConnect() async {
     if (clientOrNull == null) return;
-    if (client.homeserver != null) return;
+    if (!_homeserverCheckLog.needsRefreshOnConnect(
+      client,
+      hasSummary: loginHomeserverSummary != null,
+    )) {
+      return;
+    }
     await _refreshHomeserverInformation(client);
   }
 

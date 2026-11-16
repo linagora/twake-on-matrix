@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
-import 'package:twake_chat/presentation/mixins/comparable_presentation_contact_mixin.dart';
 import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.dart';
 import 'package:twake_chat/presentation/mixins/go_to_group_chat_mixin.dart';
 import 'package:twake_chat/presentation/mixins/invite_external_contact_mixin.dart';
+import 'package:twake_chat/pages/new_private_chat/new_private_chat_controller.dart';
+import 'package:twake_chat/pages/new_private_chat/new_private_chat_state.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat_view.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
@@ -15,18 +18,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:matrix/matrix.dart';
 
 class NewPrivateChat extends ConsumerStatefulWidget {
   const NewPrivateChat({super.key});
 
   @override
-  NewPrivateChatController createState() => NewPrivateChatController();
+  NewPrivateChatScreenState createState() => NewPrivateChatScreenState();
 }
 
-class NewPrivateChatController extends ConsumerState<NewPrivateChat>
+class NewPrivateChatScreenState extends ConsumerState<NewPrivateChat>
     with
-        ComparablePresentationContactMixin,
         ContactsViewControllerMixin,
         GoToDraftChatMixin,
         WidgetsBindingObserver,
@@ -71,31 +72,31 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
     // };
   }
 
-  void onContactAction(
-    BuildContext context,
-    PresentationContact contact,
-  ) async {
-    if (contact.matrixId == null || contact.matrixId?.isEmpty == true) {
-      Logs().e('NewPrivateChatController::onContactAction: no MatrixId');
-      return;
-    }
-    final roomId = Matrix.of(
-      context,
-    ).client.getDirectChatFromUserId(contact.matrixId!);
-    final room = roomId != null
-        ? Matrix.of(context).client.getRoomById(roomId)
-        : null;
-    if (roomId == null || room?.isAbandonedDMRoom == true) {
-      goToDraftChat(
-        context: context,
-        path: 'rooms',
-        contactPresentationSearch: ContactPresentationSearch(
-          matrixId: contact.matrixId,
-          displayName: contact.displayName,
-        ),
-      );
-    } else {
-      RoomRoute(roomid: roomId).push(context);
+  void onContactAction(BuildContext context, PresentationContact contact) {
+    final matrixId = contact.matrixId;
+    if (matrixId == null || matrixId.isEmpty) return;
+    unawaited(
+      ref
+          .read(newPrivateChatControllerProvider.notifier)
+          .openContact(matrixId: matrixId, displayName: contact.displayName),
+    );
+  }
+
+  void _onStateChanged(NewPrivateChatState? _, NewPrivateChatState next) {
+    switch (next) {
+      case NewPrivateChatRoom(:final roomId):
+        RoomRoute(roomid: roomId).push(context);
+      case NewPrivateChatDraft(:final matrixId, :final displayName):
+        goToDraftChat(
+          context: context,
+          path: 'rooms',
+          contactPresentationSearch: ContactPresentationSearch(
+            matrixId: matrixId,
+            displayName: displayName,
+          ),
+        );
+      case NewPrivateChatIdle() || NewPrivateChatOpening():
+        break;
     }
   }
 
@@ -127,5 +128,8 @@ class NewPrivateChatController extends ConsumerState<NewPrivateChat>
   }
 
   @override
-  Widget build(BuildContext context) => NewPrivateChatView(this);
+  Widget build(BuildContext context) {
+    ref.listen(newPrivateChatControllerProvider, _onStateChanged);
+    return NewPrivateChatView(this);
+  }
 }

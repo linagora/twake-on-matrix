@@ -54,6 +54,13 @@ void main() {
     expect(index.isHiddenMember('C'), isFalse);
   });
 
+  test('a hidden image leads to the row that draws its album', () {
+    expect(index.albumLeaderOf('A'), 'C');
+    expect(index.albumLeaderOf('B'), 'C');
+    expect(index.albumLeaderOf('C'), isNull);
+    expect(index.albumLeaderOf('newer'), isNull);
+  });
+
   test('the first unread image starts a new album', () {
     final split = AlbumTimelineIndex([newer, a, b, c, older], breakBefore: 'B');
     expect(split.albumLedBy('C'), isNull);

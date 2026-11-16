@@ -4,11 +4,38 @@ import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+
+class _FakeClient extends Fake implements Client {
+  final joined = <String, Room>{};
+
+  @override
+  Room? getRoomById(String id) => joined[id];
+
+  @override
+  Room? getRoomByAlias(String alias) => null;
+}
+
+class _FakeMatrixState extends Fake implements MatrixState {
+  _FakeMatrixState(this.client);
+
+  @override
+  final Client client;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      '_FakeMatrixState';
+}
 
 class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   final launches = <(String, PreferredLaunchMode)>[];
@@ -44,22 +71,26 @@ void main() {
   });
 
   Future<void> launch(WidgetTester tester, String url) async {
+    // The app runs under a ProviderScope; UrlLauncher reads the active
+    // client from it.
     await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('en'),
-        localizationsDelegates: const [
-          L10n.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: LocalizationService.supportedLocales,
-        home: Scaffold(
-          body: Builder(
-            builder: (ctx) {
-              context = ctx;
-              return const SizedBox.shrink();
-            },
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('en'),
+          localizationsDelegates: const [
+            L10n.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: LocalizationService.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ),
@@ -182,6 +213,93 @@ void main() {
         platform.launches.single.$1,
         'https://www.openstreetmap.org/?mlat=48.85&mlon=2.35#map=16/48.85/2.35',
       );
+    });
+  });
+
+  group('GIVEN a link to a room of the web app\n', () {
+    const webUrl = 'https://chat.example.org';
+    const roomId = '!joined:example.org';
+    const invitedRoomId = '!invited:example.org';
+    const eventId = r'$event';
+    late _FakeClient client;
+
+    setUp(() {
+      client = _FakeClient();
+      client.joined[roomId] = Room(
+        id: roomId,
+        client: client,
+        membership: Membership.join,
+      );
+      client.joined[invitedRoomId] = Room(
+        id: invitedRoomId,
+        client: client,
+        membership: Membership.invite,
+      );
+    });
+
+    Future<void> launchInApp(WidgetTester tester, String url) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (_, _) => Builder(
+              builder: (ctx) {
+                context = ctx;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          GoRoute(
+            path: '/rooms/:roomid',
+            builder: (_, state) => Text(
+              'room ${state.pathParameters['roomid']} '
+              'event ${state.uri.queryParameters['event']}',
+            ),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [activeMatrixClientProvider.overrideWithValue(client)],
+          child: provider.Provider<MatrixState>.value(
+            value: _FakeMatrixState(client),
+            child: MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('en'),
+              localizationsDelegates: const [
+                L10n.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: LocalizationService.supportedLocales,
+            ),
+          ),
+        ),
+      );
+      UrlLauncher(context, url: url).launchUrl();
+      await tester.pumpAndSettle();
+    }
+
+    for (final id in [roomId, invitedRoomId]) {
+      testWidgets('WHEN the user is in $id or invited to it\n'
+          'THEN it opens in the app at the event', (tester) async {
+        await launchInApp(tester, '$webUrl/rooms/$id?event=$eventId');
+
+        expect(find.text('room $id event $eventId'), findsOneWidget);
+        expect(platform.launches, isEmpty);
+      });
+    }
+
+    testWidgets('WHEN the user does not know the room\n'
+        'THEN it is opened in an external app', (tester) async {
+      const unknown = '$webUrl/rooms/!unknown:example.org?event=$eventId';
+
+      await launchInApp(tester, unknown);
+
+      expect(platform.launches, [
+        (unknown, PreferredLaunchMode.externalApplication),
+      ]);
     });
   });
 }
