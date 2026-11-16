@@ -238,11 +238,9 @@ class ChatListController extends State<ChatList>
   }
 
   Future<void> _markAsRead(Room room) async {
-    if (room.isUnread || room.hasNewMessages) {
-      await room.setReadMarker(
-        room.lastEvent!.eventId,
-        mRead: room.lastEvent!.eventId,
-      );
+    final lastEventId = room.lastEvent?.eventId;
+    if (lastEventId != null && (room.isUnread || room.hasNewMessages)) {
+      await room.setReadMarker(lastEventId, mRead: lastEventId);
     }
   }
 
@@ -564,10 +562,7 @@ class ChatListController extends State<ChatList>
       future: () async {
         if (room.isUnread) {
           await room.markUnread(false);
-          await room.setReadMarker(
-            room.lastEvent!.eventId,
-            mRead: room.lastEvent!.eventId,
-          );
+          await _markAsRead(room);
         } else {
           await room.markUnread(true);
         }
