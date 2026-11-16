@@ -390,6 +390,45 @@ void _failedWriteTests() {
     });
   }
 
+  /// Review of PR #3611 (thread_prefs_datasource_impl.dart:130, jbrnzl):
+  /// the answer to the list is lost and reading the list back fails too, so
+  /// nothing tells whether the list landed. Putting the old rule back then
+  /// leaves, after muted then unmuted, the list on follow and the thread
+  /// still silenced. The list is read once more; the rule is not put back.
+  for (final (first, then) in [
+    (ThreadPref.mute, ThreadPref.follow),
+    (ThreadPref.follow, ThreadPref.mute),
+  ]) {
+    for (final (unreadable, outcome) in [
+      (1, 'read again'),
+      (2, 'read again, still unreadable'),
+    ]) {
+      test('${first.name}, then ${then.name}, the answer lost and the list '
+          'unreadable $unreadable time(s): the list is $outcome, the rule is '
+          'left as ${then.name} wants it', () async {
+        await _changeLunch(
+          first,
+          then,
+          () => _server
+            ..loseResponses(threadPrefsWrite)
+            // The read the choice starts from arrives; the next ones do not.
+            ..loseResponses(threadPrefsRead, skip: 1, times: unreadable),
+        );
+
+        expect(
+          _afterTheListWrite.where((c) => c.path.startsWith('pushrules/')),
+          isEmpty,
+          reason: 'the rule is not put back',
+        );
+        expect(_server.hasPushRule(lunchThread), then == ThreadPref.mute);
+        expect(
+          _afterTheListWrite.where((c) => c.hits(threadPrefsRead)),
+          hasLength(2),
+        );
+      });
+    }
+  }
+
   test('muted, then unmuted, the server refuses the list: the thread stays '
       'silenced, as its list says', () async {
     await _changeLunch(
@@ -402,3 +441,8 @@ void _failedWriteTests() {
     expect(_server.hasPushRule(lunchThread), isTrue);
   });
 }
+
+/// What the server received after the last write of the list of choices.
+Iterable<ServerCall> get _afterTheListWrite => _server.calls.skip(
+  _server.calls.lastIndexWhere((call) => call.hits(threadPrefsWrite)) + 1,
+);
