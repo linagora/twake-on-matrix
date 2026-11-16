@@ -12,6 +12,33 @@ import 'package:twake_chat/domain/thread/exceptions/thread_exception.dart';
 import '../../../domain/usecase/room/send_text_message_interactor_test.mocks.dart';
 import '../thread_fixtures.dart';
 
+MatrixEvent _edit(String eventId, String target, int minute) => MatrixEvent(
+  type: EventTypes.Message,
+  content: {
+    'msgtype': 'm.text',
+    'body': '* edited',
+    'm.new_content': {'msgtype': 'm.text', 'body': 'edited'},
+    'm.relates_to': {'rel_type': RelationshipTypes.edit, 'event_id': target},
+  },
+  eventId: eventId,
+  senderId: '@bob:example.com',
+  originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
+);
+
+MatrixEvent _reaction(String eventId, String target, int minute) => MatrixEvent(
+  type: EventTypes.Reaction,
+  content: {
+    'm.relates_to': {
+      'rel_type': RelationshipTypes.reaction,
+      'event_id': target,
+      'key': '👍',
+    },
+  },
+  eventId: eventId,
+  senderId: '@alice:example.com',
+  originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
+);
+
 /// THR-M-04: the thread screen loads the replies, and the edits and reactions
 /// of the replies, through `/relations/<root>?recurse=true`, by pages, going
 /// up the history.
@@ -122,41 +149,12 @@ void main() {
 
   test('the page keeps the replies and their edits and reactions, not the '
       'edits and reactions of the root', () async {
-    MatrixEvent edit(String eventId, String target, int minute) => MatrixEvent(
-      type: EventTypes.Message,
-      content: {
-        'msgtype': 'm.text',
-        'body': '* edited',
-        'm.new_content': {'msgtype': 'm.text', 'body': 'edited'},
-        'm.relates_to': {
-          'rel_type': RelationshipTypes.edit,
-          'event_id': target,
-        },
-      },
-      eventId: eventId,
-      senderId: '@bob:example.com',
-      originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
-    );
-    MatrixEvent reaction(String eventId, String target, int minute) =>
-        MatrixEvent(
-          type: EventTypes.Reaction,
-          content: {
-            'm.relates_to': {
-              'rel_type': RelationshipTypes.reaction,
-              'event_id': target,
-              'key': '👍',
-            },
-          },
-          eventId: eventId,
-          senderId: '@alice:example.com',
-          originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
-        );
     // Newest first, as the server answers going backwards.
     answerWith([
-      reaction(r'$rootReaction', threadRootId, 5),
-      edit(r'$rootEdit', threadRootId, 4),
-      reaction(r'$r1Reaction', r'$r1', 3),
-      edit(r'$r1Edit', r'$r1', 2),
+      _reaction(r'$rootReaction', threadRootId, 5),
+      _edit(r'$rootEdit', threadRootId, 4),
+      _reaction(r'$r1Reaction', r'$r1', 3),
+      _edit(r'$r1Edit', r'$r1', 2),
       threadReply(r'$r1', 1),
     ]);
 
@@ -168,6 +166,37 @@ void main() {
       r'$r1Reaction',
     ]);
   });
+
+  test(
+    'an edit or a reaction whose reply sits on the next, older page is '
+    'still kept; the edits and reactions of the root are still left out',
+    () async {
+      // Newest first: the page boundary falls between $r1's edit and reaction
+      // and $r1 itself (PR #3606 review).
+      answerWith([
+        _reaction(r'$rootReaction', threadRootId, 7),
+        _reaction(r'$r1Reaction', r'$r1', 6),
+        _edit(r'$r1Edit', r'$r1', 5),
+        threadReply(r'$r2', 4),
+      ], nextBatch: 'batch-1');
+      answerWith([
+        _edit(r'$rootEdit', threadRootId, 3),
+        threadReply(r'$r1', 2),
+      ], from: 'batch-1');
+
+      final newest = await load();
+      final older = await load(from: newest.nextBatch);
+      final loaded = [
+        ...newest.replies,
+        ...older.replies,
+      ].map((event) => event.eventId);
+
+      expect(
+        loaded,
+        unorderedEquals([r'$r2', r'$r1Edit', r'$r1Reaction', r'$r1']),
+      );
+    },
+  );
 
   test('the last page says there is nothing more to load', () async {
     answerWith([threadReply(r'$r0', 0)], from: 'batch-1');
