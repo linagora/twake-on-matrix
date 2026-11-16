@@ -17,10 +17,8 @@ import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/domain/message_link/policy/message_link_policy.provider.dart';
-import 'package:twake_chat/domain/model/extensions/homeserver_summary_extensions.dart';
 import 'package:twake_chat/domain/model/public_rooms/room_address.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/widgets/profile_bottom_sheet.dart';
@@ -54,19 +52,12 @@ class UrlLauncher with GoToDraftChatMixin {
     }
     final container = ProviderScope.containerOf(context, listen: false);
     final policy = container.read(messageLinkPolicyProvider);
-    final webAppMatrixTo =
-        policy.matrixToForWebLink(
-          url!,
-          webAppOrigin: container
-              .read(loginHomeserverSummaryProvider)
-              .webAppOrigin,
-        ) ??
-        policy.matrixToForRoomsLink(
-          url!,
-          isKnownRoom: (roomId) => _isOpenableRoom(
-            container.read(activeMatrixClientProvider)?.getRoomById(roomId),
-          ),
-        );
+    final webAppMatrixTo = policy.matrixToForRoomsLink(
+      url!,
+      isKnownRoom: (roomId) => _isOpenableRoom(
+        container.read(activeMatrixClientProvider)?.getRoomById(roomId),
+      ),
+    );
     if (webAppMatrixTo != null) {
       return openMatrixToUrl(
         customUrl: webAppMatrixTo,

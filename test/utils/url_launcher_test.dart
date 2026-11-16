@@ -11,10 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:twake_chat/domain/model/homeserver_summary.dart';
-import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
-import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -39,19 +36,6 @@ class _FakeMatrixState extends Fake implements MatrixState {
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
       '_FakeMatrixState';
 }
-
-HomeserverSummary _summaryWithWebUrl(String webUrl) => HomeserverSummary(
-  discoveryInformation: DiscoveryInformation(
-    additionalProperties: {
-      'app.twake.chat': {'web_url': webUrl},
-    },
-    mHomeserver: HomeserverInformation(
-      baseUrl: Uri.parse('https://matrix.example.org'),
-    ),
-  ),
-  versions: GetVersionsResponse(versions: []),
-  loginFlows: [],
-);
 
 class _FakeUrlLauncherPlatform extends UrlLauncherPlatform {
   final launches = <(String, PreferredLaunchMode)>[];
@@ -87,8 +71,8 @@ void main() {
   });
 
   Future<void> launch(WidgetTester tester, String url) async {
-    // The app runs under a ProviderScope; UrlLauncher reads the web app
-    // origin from it.
+    // The app runs under a ProviderScope; UrlLauncher reads the active
+    // client from it.
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
@@ -235,8 +219,8 @@ void main() {
   group('GIVEN a link to a room of the web app\n', () {
     const webUrl = 'https://chat.example.org';
     const roomId = '!joined:example.org';
+    const invitedRoomId = '!invited:example.org';
     const eventId = r'$event';
-    const link = '$webUrl/rooms/$roomId?event=$eventId';
     late _FakeClient client;
 
     setUp(() {
@@ -246,13 +230,14 @@ void main() {
         client: client,
         membership: Membership.join,
       );
+      client.joined[invitedRoomId] = Room(
+        id: invitedRoomId,
+        client: client,
+        membership: Membership.invite,
+      );
     });
 
-    Future<void> launchInApp(
-      WidgetTester tester,
-      String url, {
-      String? homeserverWebUrl,
-    }) async {
+    Future<void> launchInApp(WidgetTester tester, String url) async {
       final router = GoRouter(
         routes: [
           GoRoute(
@@ -275,14 +260,7 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [
-            activeMatrixClientProvider.overrideWithValue(client),
-            loginHomeserverSummaryProvider.overrideWithBuild(
-              (_, _) => homeserverWebUrl == null
-                  ? null
-                  : _summaryWithWebUrl(homeserverWebUrl),
-            ),
-          ],
+          overrides: [activeMatrixClientProvider.overrideWithValue(client)],
           child: provider.Provider<MatrixState>.value(
             value: _FakeMatrixState(client),
             child: MaterialApp.router(
@@ -300,47 +278,27 @@ void main() {
         ),
       );
       UrlLauncher(context, url: url).launchUrl();
-      // Bounded pumps: the preview sheet keeps a spinner running.
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
     }
 
-    testWidgets('WHEN the homeserver names that web app\n'
-        'THEN even a room the user does not know is previewed in the app', (
-      tester,
-    ) async {
-      const unknownRoomId = '!unknown:example.org';
+    for (final id in [roomId, invitedRoomId]) {
+      testWidgets('WHEN the user is in $id or invited to it\n'
+          'THEN it opens in the app at the event', (tester) async {
+        await launchInApp(tester, '$webUrl/rooms/$id?event=$eventId');
 
-      await launchInApp(
-        tester,
-        '$webUrl/rooms/$unknownRoomId?event=$eventId',
-        homeserverWebUrl: webUrl,
-      );
+        expect(find.text('room $id event $eventId'), findsOneWidget);
+        expect(platform.launches, isEmpty);
+      });
+    }
 
-      final sheet = tester.widget<PublicRoomPreviewSheet>(
-        find.byType(PublicRoomPreviewSheet),
-      );
-      expect(sheet.address.roomIdOrAlias, unknownRoomId);
-      expect(sheet.eventId, eventId);
-      expect(platform.launches, isEmpty);
-    });
-
-    testWidgets('WHEN the homeserver does not name it and the room is joined\n'
-        'THEN the room still opens in the app', (tester) async {
-      await launchInApp(tester, link);
-
-      expect(find.text('room $roomId event $eventId'), findsOneWidget);
-      expect(platform.launches, isEmpty);
-    });
-
-    testWidgets('WHEN the room is unknown and the host is not the web app\n'
+    testWidgets('WHEN the user does not know the room\n'
         'THEN it is opened in an external app', (tester) async {
-      const other = 'https://other.example.com/rooms/!unknown:example.com';
+      const unknown = '$webUrl/rooms/!unknown:example.org?event=$eventId';
 
-      await launchInApp(tester, other);
+      await launchInApp(tester, unknown);
 
       expect(platform.launches, [
-        (other, PreferredLaunchMode.externalApplication),
+        (unknown, PreferredLaunchMode.externalApplication),
       ]);
     });
   });
