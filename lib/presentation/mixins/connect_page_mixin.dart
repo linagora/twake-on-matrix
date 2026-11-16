@@ -33,8 +33,6 @@ mixin ConnectPageMixin {
 
   static const windowNameValue = '_self';
 
-  static const redirectPublicPlatformOnWeb = 'post_login_redirect_url';
-
   LoginSessions _sessionsOf(BuildContext context) => ProviderScope.containerOf(
     context,
     listen: false,
@@ -74,15 +72,6 @@ mixin ConnectPageMixin {
         '$normalizedHomeserver/_matrix/client/r0/login/sso/redirect/${Uri.encodeComponent(id)}';
     final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
     return '$ssoRedirectUri?redirectUrl=$redirectUrlEncode';
-  }
-
-  String generatePublicPlatformAuthenticationUrl({
-    required BuildContext context,
-    required String id,
-    required String redirectUrl,
-  }) {
-    final redirectUrlEncode = Uri.encodeQueryComponent(redirectUrl);
-    return '${AppConfig.registrationUrl}?$redirectPublicPlatformOnWeb=$redirectUrlEncode&app=${AppConfig.appParameter}';
   }
 
   String? _getLogoutUrl(BuildContext context) {
@@ -270,29 +259,6 @@ mixin ConnectPageMixin {
       Logs().d('tryLogoutSso::error: $e');
       rethrow;
     }
-  }
-
-  Future<void> registerPublicPlatformAction({
-    required BuildContext context,
-    required String id,
-  }) async {
-    final redirectUrl = _generateRedirectUrl(
-      Matrix.of(context).client.homeserver.toString(),
-    );
-    final url = generatePublicPlatformAuthenticationUrl(
-      context: context,
-      id: id,
-      redirectUrl: redirectUrl,
-    );
-    final urlScheme = _getRedirectUrlScheme(redirectUrl);
-    await FlutterWebAuth2.authenticate(
-      url: url,
-      callbackUrlScheme: urlScheme,
-      options: const FlutterWebAuth2Options(
-        intentFlags: ephemeralIntentFlags,
-        windowName: windowNameValue,
-      ),
-    );
   }
 
   String _generatePostLogoutRedirectUrl() {
