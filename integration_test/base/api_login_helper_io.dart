@@ -225,6 +225,88 @@ Future<PrimaryExtraSession> loginPrimaryExtraSession({
   }
 }
 
+/// Another session of the primary account: "the web" of the same user, for
+/// the thread scenarios of P2 (THR-M-07, THR-M-08). Kept for the run, like
+/// the receiver session.
+({_MatrixSession session, String userId})? _cachedPrimaryWeb;
+
+Future<({_MatrixSession session, String userId})> _primaryWeb() async {
+  final cached = _cachedPrimaryWeb;
+  if (cached != null) return cached;
+  final session = (await loginPrimaryExtraSession(
+    deviceDisplayName: 'Thread scenarios (web)',
+  ))._session;
+  final (status, body) = await _sendAs(session, 'GET', ['account', 'whoami']);
+  if (status != HttpStatus.ok) {
+    throw Exception('whoami failed [status=$status] body=$body');
+  }
+  final userId =
+      (jsonDecode(body) as Map<String, dynamic>)['user_id'] as String;
+  return _cachedPrimaryWeb = (session: session, userId: userId);
+}
+
+/// [method] on [pathSegments] as the primary account on the web; the body
+/// of the answer, or null when the server has nothing there (404).
+Future<Map<String, dynamic>?> _asPrimaryWeb(
+  String method,
+  List<String> Function(String userId) pathSegments, {
+  Map<String, Object?>? body,
+}) async {
+  final web = await _primaryWeb();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final (status, answer) = await _authorizedRequest(
+      client: client,
+      session: web.session,
+      method: method,
+      pathSegments: pathSegments(web.userId),
+      body: body,
+    );
+    if (status == HttpStatus.notFound) return null;
+    if (status < 200 || status >= 300) {
+      throw Exception(
+        '$method as primary failed [status=$status] '
+        'body=${answer.substring(0, answer.length.clamp(0, 300))}',
+      );
+    }
+    return jsonDecode(answer) as Map<String, dynamic>;
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Writes account data of the primary account from the web, as Twake Chat
+/// web does for `app.twake.chat.thread_prefs`.
+Future<void> putAccountDataAsPrimary({
+  required String type,
+  required Map<String, Object?> content,
+}) => _asPrimaryWeb(
+  'PUT',
+  (userId) => ['user', userId, 'account_data', type],
+  body: content,
+);
+
+/// What the server holds in an account data of the primary account.
+Future<Map<String, dynamic>?> fetchAccountDataAsPrimary(String type) =>
+    _asPrimaryWeb('GET', (userId) => ['user', userId, 'account_data', type]);
+
+/// A global override push rule of the primary account, or null when the
+/// server has none of that id.
+Future<Map<String, dynamic>?> fetchOverrideRuleAsPrimary(String ruleId) =>
+    _asPrimaryWeb('GET', (_) => ['pushrules', 'global', 'override', ruleId]);
+
+/// Sets a state event from the web of the primary account.
+Future<void> sendStateAsPrimary({
+  required String roomId,
+  required String eventType,
+  required String stateKey,
+  required Map<String, Object?> content,
+}) => _asPrimaryWeb(
+  'PUT',
+  (_) => ['rooms', roomId, 'state', eventType, stateKey],
+  body: content,
+);
+
 _MatrixSession? _cachedReceiverSession;
 
 Future<_MatrixSession> _receiverSession(
@@ -275,6 +357,7 @@ Future<(int, String)> _authorizedRequest({
   required _MatrixSession session,
   required String method,
   required List<String> pathSegments,
+  Map<String, Object?>? body,
 }) async {
   final uri = _matrixBase(
     session.endpoints.matrixURL,
@@ -284,7 +367,11 @@ Future<(int, String)> _authorizedRequest({
     ..set(HttpHeaders.contentTypeHeader, 'application/json')
     ..set(HttpHeaders.authorizationHeader, 'Bearer ${session.accessToken}')
     ..set(HttpHeaders.userAgentHeader, _userAgent);
-  if (method == 'POST') request.write('{}');
+  if (body != null) {
+    request.write(jsonEncode(body));
+  } else if (method == 'POST') {
+    request.write('{}');
+  }
   final response = await request.close();
   return (response.statusCode, await utf8.decoder.bind(response).join());
 }
@@ -661,7 +748,32 @@ Future<void> _putMatrixMessage({
   content: {'msgtype': 'm.text', 'body': message},
 );
 
-Future<void> _putMatrixEvent({
+/// Sends one event of [eventType] with [content] as the configured receiver
+/// and returns its event id. Thread scenarios use it to post a root and its
+/// thread replies from "another client", the way the web does.
+Future<String> sendEventAsReceiver({
+  required String roomId,
+  required String eventType,
+  required Map<String, Object?> content,
+}) async {
+  const endpoints = _SsoEndpoints.fromEnvironment();
+  final client = HttpClient()..autoUncompress = true;
+  try {
+    final session = await _receiverSession(client, endpoints);
+    return await _putMatrixEvent(
+      client: client,
+      session: session,
+      groupID: roomId,
+      eventType: eventType,
+      content: content,
+    );
+  } finally {
+    client.close(force: true);
+  }
+}
+
+/// Returns the event id the server gave to the event.
+Future<String> _putMatrixEvent({
   required HttpClient client,
   required _MatrixSession session,
   required String groupID,
@@ -697,13 +809,14 @@ Future<void> _putMatrixEvent({
     ..set('Origin', 'https://${endpoints.chatURL}');
   request.write(jsonEncode(content));
   final response = await request.close();
+  final body = await utf8.decoder.bind(response).join();
   if (response.statusCode < 200 || response.statusCode >= 300) {
-    final body = await utf8.decoder.bind(response).join();
     throw Exception(
       'Receiver send failed [status=${response.statusCode}] '
       'body=${body.substring(0, body.length.clamp(0, 300))}',
     );
   }
+  return (jsonDecode(body) as Map<String, dynamic>)['event_id'] as String;
 }
 
 // ---------------------------------------------------------------------------
