@@ -107,12 +107,8 @@ mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
   Future<Uint8List?> _handleDownloadAndPlayVideo(Event event) {
     return handleDownloadVideoEvent(
       event: event,
-      playVideoAction: PlatformInfos.isWeb
-          ? (bytes) => playVideoAction(context, bytes, event: event)
-          : null,
-      playVideoActionByUrl: PlatformInfos.isWeb
-          ? null
-          : (url) => playVideoActionByUrl(context, url, event: event),
+      playVideoActionByUrl: (url) =>
+          playVideoActionByUrl(context, url, event: event),
     );
   }
 

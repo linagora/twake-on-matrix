@@ -63,14 +63,9 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
     try {
       bytes = await handleDownloadVideoEvent(
         event: widget.event,
-        playVideoAction: PlatformInfos.isWeb
-            ? (path) => playVideoAction(context, path, event: widget.event)
-            : null,
-        playVideoActionByUrl: PlatformInfos.isWeb
-            ? null
-            : (url) {
-                _videoUrl = url;
-              },
+        playVideoActionByUrl: (url) {
+          _videoUrl = url;
+        },
         progressCallback: (count, total) {
           downloadProgressNotifier.value = count / total;
         },
@@ -141,9 +136,7 @@ class _DownloadVideoWidgetState extends State<DownloadVideoWidget>
                                       strokeWidth: 2,
                                       color: LinagoraRefColors.material()
                                           .primary[100],
-                                      value: PlatformInfos.isWeb
-                                          ? null
-                                          : progress,
+                                      value: progress,
                                     );
                                   },
                                 ),

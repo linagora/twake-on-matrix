@@ -5,9 +5,6 @@ import 'package:twake_chat/domain/app_state/preview_file/download_file_for_previ
 import 'package:twake_chat/domain/model/preview_file/supported_preview_file_types.dart';
 import 'package:twake_chat/domain/usecase/download_file_for_preview_interactor.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
-import 'package:twake_chat/utils/extension/mime_type_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:twake_chat/utils/permission_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -19,25 +16,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:universal_html/html.dart' as html;
 
 mixin HandleDownloadAndPreviewFileMixin {
-  void onFileTapped({required Event event, required BuildContext context}) {
-    if (PlatformInfos.isWeb) {
-      onFileTappedWeb(event: event, context: context);
-    } else {
-      onFileTappedMobile(event: event, context: context);
-    }
-  }
-
-  Future<void> onFileTappedWeb({
-    required Event event,
-    required BuildContext context,
-  }) async {
-    return await handlePreviewWeb(event: event, context: context);
-  }
-
-  void onFileTappedMobile({
+  void onFileTapped({
     required Event event,
     required BuildContext context,
   }) async {
@@ -95,23 +76,6 @@ mixin HandleDownloadAndPreviewFileMixin {
       case PermissionStatus.provisional:
         break;
     }
-  }
-
-  Future<void> handlePreviewWeb({
-    MatrixFile? matrixFile,
-    required Event event,
-    required BuildContext context,
-  }) async {
-    if (!event.hasAttachment) {
-      TwakeSnackBar.show(context, L10n.of(context)!.errorPreviewingFile);
-      return;
-    }
-
-    if (event.mimeType.isPdfFile()) {
-      return await previewPdfWeb(context, event, matrixFile: matrixFile);
-    }
-
-    await event.saveFile(context, matrixFile: matrixFile);
   }
 
   void _handleDownloadFileForPreviewMobile({
@@ -189,24 +153,5 @@ mixin HandleDownloadAndPreviewFileMixin {
   }) async {
     Logs().d('ChatController:_openDownloadedFileForPreviewIos(): $filePath');
     await OpenFile.open(filePath, type: mimeType);
-  }
-
-  Future<void> previewPdfWeb(
-    BuildContext context,
-    Event event, {
-    MatrixFile? matrixFile,
-  }) async {
-    matrixFile ??= (await event.getFile(context)).result;
-
-    if (matrixFile == null || event.sizeString != matrixFile.sizeString) {
-      TwakeSnackBar.show(context, L10n.of(context)!.errorGettingPdf);
-
-      return;
-    }
-
-    final blob = html.Blob([matrixFile.bytes], 'application/pdf');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.window.open(url, "_blank");
-    html.Url.revokeObjectUrl(url);
   }
 }
