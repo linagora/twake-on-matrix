@@ -23,6 +23,9 @@ class _FakeDirectChatRepository implements DirectChatRepository {
     required String roomId,
     required String contactMxId,
   }) => usable;
+
+  @override
+  String? findDirectChat({required String contactMxId}) => null;
 }
 
 void main() {
