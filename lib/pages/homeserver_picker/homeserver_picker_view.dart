@@ -1,4 +1,3 @@
-import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/context_menu_builder_ios_paste_without_permission.dart';
@@ -37,30 +36,6 @@ class HomeserverPickerView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // display a prominent banner to import session for TOR browser
-            // users. This feature is just some UX sugar as TOR users are
-            // usually forced to logout as TOR browser is non-persistent
-            AnimatedContainer(
-              height: controller.isTorBrowser ? 64 : 0,
-              duration: TwakeThemes.animationDuration,
-              curve: TwakeThemes.animationCurve,
-              clipBehavior: Clip.hardEdge,
-              decoration: const BoxDecoration(),
-              child: Material(
-                clipBehavior: Clip.hardEdge,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(8),
-                ),
-                color: Theme.of(context).colorScheme.surface,
-                child: ListTile(
-                  leading: const Icon(Icons.vpn_key),
-                  title: Text(l10n.hydrateTor),
-                  subtitle: Text(l10n.hydrateTorLong),
-                  trailing: const Icon(Icons.chevron_right_outlined),
-                  onTap: controller.restoreBackup,
-                ),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.only(bottom: 48),
               child: Text(

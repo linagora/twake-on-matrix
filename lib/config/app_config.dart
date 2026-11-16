@@ -129,10 +129,7 @@ abstract class AppConfig {
   static const String pushNotificationsChannelName = 'Twake Chat push channel';
   static const String pushNotificationsChannelDescription =
       'Push notifications for Twake Chat';
-  // kIsWeb must be the outer ternary: Platform.isIOS throws on web.
-  static String pushNotificationsAppId = kIsWeb
-      ? "app.twake.web.chat"
-      : Platform.isIOS
+  static String pushNotificationsAppId = Platform.isIOS
       ? kReleaseMode
             ? "app.twake.ios.chat"
             : "app.twake.ios.chat.sandbox"

@@ -1,11 +1,8 @@
-import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
-import 'package:twake_chat/utils/web_push/web_push.dart';
 import 'package:twake_chat/widgets/matrix.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -96,13 +93,7 @@ class SettingsNotifications extends StatefulWidget {
 }
 
 class SettingsNotificationsController extends State<SettingsNotifications> {
-  /// Web Push on this browser. null while loading; web-only.
-  bool? webPushActive;
-  bool webPushPermissionDenied = false;
-
   Client get _client => Matrix.of(context).client;
-
-  bool get showWebPushTile => kIsWeb && AppConfig.webPushEnabled;
 
   /// Encrypted previews on iOS: the notification extension gets its own
   /// device through a second SSO login. null while loading or unsupported.
@@ -119,7 +110,6 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   @override
   void initState() {
     super.initState();
-    if (showWebPushTile) _loadWebPushStatus();
     if (PlatformInfos.isIOS) _loadEncryptedPreviewsStatus();
   }
 
@@ -170,24 +160,6 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     }
     if (!mounted) return;
     await _loadEncryptedPreviewsStatus();
-  }
-
-  Future<void> _loadWebPushStatus() async {
-    final active = await isWebPushActive();
-    if (!mounted) return;
-    setState(() {
-      webPushActive = active;
-      webPushPermissionDenied = isWebPushPermissionDenied();
-    });
-  }
-
-  /// Single place to enable/disable Web Push: persists the choice (so a disabled
-  /// pusher stays gone) and (re)subscribes or tears down accordingly.
-  Future<void> toggleWebPush(bool enabled) async {
-    await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => setWebPushEnabled(_client, enabled),
-    );
-    await _loadWebPushStatus();
   }
 
   bool? getNotificationSetting(NotificationSettingsItem item) {
