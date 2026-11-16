@@ -46,8 +46,7 @@ class HiveCollectionToMDatabase {
     Logs().d('Open Hive for ToM...');
     HiveAesCipher? hiverCipher;
     try {
-      // Workaround for secure storage is calling Platform.operatingSystem on web
-      if (kIsWeb || PlatformInfos.isIOS) {
+      if (PlatformInfos.isIOS) {
         // ignore: unawaited_futures
         throw MissingPluginException();
       }
@@ -107,29 +106,28 @@ class HiveCollectionToMDatabase {
   }
 
   static Future<String> _findDatabasePath({String? path = 'tom_db'}) async {
-    if (!kIsWeb) {
-      Directory directory;
-      try {
-        if (Platform.isLinux) {
-          directory = await getApplicationSupportDirectory();
-        } else {
-          directory = await getApplicationDocumentsDirectory();
-        }
-      } catch (_) {
-        try {
-          directory = await getLibraryDirectory();
-        } catch (_) {
-          directory = Directory.current;
-        }
+    Directory directory;
+    try {
+      if (Platform.isLinux) {
+        directory = await getApplicationSupportDirectory();
+      } else {
+        directory = await getApplicationDocumentsDirectory();
       }
-      // do not destroy your stable FluffyChat in debug mode
-      directory = Directory(
-        directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
-      );
-      directory.create(recursive: true);
-      path = directory.path;
+    } catch (_) {
+      try {
+        directory = await getLibraryDirectory();
+      } catch (_) {
+        directory = Directory.current;
+      }
     }
-    return path!;
+    // do not destroy your stable FluffyChat in debug mode
+    directory = Directory(
+      directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
+    );
+    directory.create(recursive: true);
+    path = directory.path;
+
+    return path;
   }
 
   Future<void> open() async {

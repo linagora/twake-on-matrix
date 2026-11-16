@@ -130,7 +130,6 @@ import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
-import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
 import 'sticker_picker_dialog.dart';
@@ -2498,28 +2497,6 @@ class ChatController extends ConsumerState<Chat>
     }
   }
 
-  void _resetLocationPath() {
-    // Hover must not strip `?event=` while a jump is in flight, or while
-    // the URL points at a different event than the one we last claimed —
-    // otherwise rapid same-room search clicks lose their target.
-    if (_isProgrammaticScrolling) return;
-
-    final currentLocation = html.window.location.href;
-
-    final event = Uri.tryParse(
-      Uri.tryParse(currentLocation)?.fragment ?? '',
-    )?.queryParameters['event'];
-    if (event == null) return;
-    if (event != _lastHighlightedEventId) return;
-    Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
-    final queryIndex = currentLocation.indexOf('?');
-    final newLocation = queryIndex != -1
-        ? currentLocation.substring(0, queryIndex)
-        : currentLocation;
-    Logs().d("Chat::_resetLocationPath: New - $newLocation");
-    html.window.history.replaceState(null, '', newLocation);
-  }
-
   void handlePopBackFromPinnedScreen(Object? popResult) async {
     Logs().d(
       "PinnedEventsController()::handlePopBack(): popResult: $popResult",
@@ -3406,12 +3383,7 @@ class ChatController extends ConsumerState<Chat>
   String? _eventIdFromLocation() {
     final fromRouter = GoRouterState.of(context).uri.queryParameters['event'];
     if (fromRouter != null && fromRouter.isNotEmpty) return fromRouter;
-
-    // Fallback for hash-URL edge cases before GoRouter has settled.
-    if (!PlatformInfos.isWeb) return null;
-    return Uri.tryParse(
-      Uri.tryParse(html.window.location.href)?.fragment ?? '',
-    )?.queryParameters['event'];
+    return null;
   }
 
   @override
@@ -3491,10 +3463,7 @@ class ChatController extends ConsumerState<Chat>
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (_) => _resetLocationPath(),
-      child: ChatView(this),
-    );
+    return ChatView(this);
   }
 }
 
