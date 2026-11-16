@@ -143,8 +143,12 @@ class RecordingHomeserver extends http.BaseClient {
   void fail(ServerRoute route, [ServerError error = ServerError.down]) =>
       _failures[route] = error;
 
-  /// [route] fails no more: it answers as before [fail].
-  void recover(ServerRoute route) => _failures.remove(route);
+  /// [route] fails no more: it answers as before [fail], and its answers
+  /// reach the app again ([loseResponses]).
+  void recover(ServerRoute route) {
+    _failures.remove(route);
+    _lost.remove(route);
+  }
 
   /// From now on, [route] answers [body].
   void answer(ServerRoute route, Map<String, Object?> body) =>

@@ -63,6 +63,10 @@ void main() {
   group('« Replies »', _followedThreadTests);
   group('« Replies »: a room the user left', _leftRoomTests);
   group('« Replies »: a root that cannot be read', _unreadableRootTests);
+  group(
+    '« Replies »: a root that fails for a passing reason',
+    _passingRootFailureTests,
+  );
   group('the unread mentions count', _mentionCountTests);
   group('« Mark as read »', _markReadTests);
 }
@@ -532,6 +536,56 @@ void _unreadableRootTests() {
         _account.server.callsTo(lunchRootLookup),
         hasLength(lessThanOrEqualTo(maxRequests)),
       );
+    });
+  }
+}
+
+/// Review of PR #3624 (activity_datasource_impl.dart:155, jbrnzl): a root
+/// that fails for a passing reason (the server down, a request that times
+/// out) is asked again later, unlike a root gone or forbidden: once the
+/// server is back, the followed thread shows in « Replies ».
+void _passingRootFailureTests() {
+  Future<void> newsSync(int change) async {
+    await _TeamSync(
+      timeline: [
+        messageEvent((
+          id: '\$news$change',
+          sender: _bob,
+          body: 'news $change',
+          at: (9, change).utc,
+        )),
+      ],
+    ).send();
+    await _shown();
+  }
+
+  for (final (what, breakRoot) in [
+    (
+      'the server answers 500',
+      () => _account.server.fail(lunchRootLookup, ServerError.down),
+    ),
+    (
+      'the request times out',
+      () => _account.server.loseResponses(lunchRootLookup),
+    ),
+  ]) {
+    test('$what across 4 changes, then the server recovers: after 4 more '
+        'changes the followed thread shows in « Replies »', () async {
+      breakRoot();
+      await const _TeamSync().send();
+      await _choose(lunchThread, WirePref.follow);
+      await _shown();
+      for (var change = 1; change <= 4; change++) {
+        await newsSync(change);
+      }
+      expect(_threads(await _shown()), isEmpty, reason: 'the root fails');
+
+      _account.server.recover(lunchRootLookup);
+      for (var change = 5; change <= 8; change++) {
+        await newsSync(change);
+      }
+
+      expect(_threads(await _shown()), hasLength(1));
     });
   }
 }
