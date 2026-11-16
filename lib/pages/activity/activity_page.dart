@@ -40,9 +40,15 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     super.dispose();
   }
 
-  Future<void> _markRead(String roomId) async {
+  Future<void> _markRead(String roomId) =>
+      _markReadWith(ref.read(markRoomReadUseCaseProvider).execute, roomId);
+
+  Future<void> _markReadWith(
+    Future<void> Function(String roomId) markRead,
+    String roomId,
+  ) async {
     try {
-      await ref.read(markRoomReadUseCaseProvider).execute(roomId);
+      await markRead(roomId);
     } on Exception catch (e, s) {
       // The room stays in the list: the button can be pressed again.
       Logs().w('Unable to mark the room as read', e, s);
@@ -51,10 +57,12 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
 
   /// At most 3 receipts at a time: a long list must not hit the rate limit.
   Future<void> _markAllRead(List<String> roomIds) {
+    // Read once, before the workers: leaving the page mid-run must not touch ref.
+    final markRead = ref.read(markRoomReadUseCaseProvider).execute;
     final pending = roomIds.iterator;
     Future<void> markNext() async {
       while (pending.moveNext()) {
-        await _markRead(pending.current);
+        await _markReadWith(markRead, pending.current);
       }
     }
 

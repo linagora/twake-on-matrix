@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:twake_chat/pages/activity/activity_page.dart';
 
 import 'activity_test_support.dart';
 
@@ -56,6 +58,26 @@ void main() {
 
     expect(repository.markedRead, unorderedEquals(roomIds));
     expect(find.text('Mark as read'), findsNothing);
+  });
+
+  /// Review of #3625 (activity_page.dart:41, jbrnzl): the user leaves the
+  /// tab while the receipts are on their way; the rooms not asked yet must
+  /// still be read.
+  testWidgets('leaving the Activity tab while « Mark all read » runs still '
+      'reads every room', (tester) async {
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+
+    await tester.tap(find.text('Mark all read'));
+    await tester.pump();
+    GoRouter.of(
+      tester.element(find.byType(ActivityPage)),
+    ).go('/rooms/!elsewhere:example.org');
+    await tester.pumpAndSettle();
+    expect(find.byType(ActivityPage), findsNothing, reason: 'the tab is left');
+
+    await repository.answerAll(tester);
+
+    expect(repository.markedRead, unorderedEquals(roomIds));
   });
 
   testWidgets('when one room cannot be read, « Mark all read » still reads '
