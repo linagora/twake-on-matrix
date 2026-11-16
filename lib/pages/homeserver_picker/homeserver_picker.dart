@@ -14,14 +14,11 @@ import 'package:twake_chat/pages/homeserver_picker/homeserver_state.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix_homeserver_recommendations/matrix_homeserver_recommendations.dart';
 import 'package:twake_chat/config/app_config.dart';
@@ -30,8 +27,6 @@ import 'package:twake_chat/pages/homeserver_picker/homeserver_picker_view.dart';
 import 'package:twake_chat/utils/adaptive_bottom_sheet.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import '../../utils/localized_exception_extension.dart';
-
-import 'package:twake_chat/utils/tor_stub.dart';
 
 enum HomeserverPickerType { singleAccount, multiAccount }
 
@@ -64,25 +59,6 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
   bool get loadingHomeservers =>
       AppConfig.allowOtherHomeservers && benchmarkResults == null;
   String searchTerm = '';
-
-  bool isTorBrowser = false;
-
-  Future<void> _checkTorBrowser() async {
-    if (!kIsWeb) return;
-
-    Hive.openBox('test').then((value) => null).catchError((e, s) async {
-      await showOkAlertDialog(
-        context: context,
-        title: L10n.of(context)!.indexedDbErrorTitle,
-        message: L10n.of(context)!.indexedDbErrorLong,
-        onWillPop: () async => false,
-      );
-      _checkTorBrowser();
-    });
-
-    final isTor = await TorBrowserDetector.isTorBrowser;
-    isTorBrowser = isTor;
-  }
 
   void _updateFocus() {
     if (benchmarkResults == null) loadHomeserverList();
@@ -290,7 +266,6 @@ class HomeserverPickerController extends ConsumerState<HomeserverPicker>
   void initState() {
     _sessions = ref.read(loginSessionsProvider);
     homeserverFocusNode.addListener(_updateFocus);
-    _checkTorBrowser();
     super.initState();
   }
 

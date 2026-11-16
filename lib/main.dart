@@ -19,7 +19,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker_android/image_picker_android.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
-import 'package:linagora_design_flutter/cozy_config_manager/cozy_config_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -106,12 +105,6 @@ Future<void> initializeApp() async {
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
     return;
-  }
-
-  if (PlatformInfos.isWeb) {
-    CozyConfigManager()
-        .injectCozyScript(AppConfig.cozyExternalBridgeVersion)
-        .then((value) => CozyConfigManager().initialize());
   }
 
   // Started in foreground mode.

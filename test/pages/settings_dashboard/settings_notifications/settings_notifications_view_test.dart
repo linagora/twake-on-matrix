@@ -31,9 +31,6 @@ class _FakeClient extends Fake implements Client {
 
 class _FakeController extends Fake implements SettingsNotificationsController {
   @override
-  bool get showWebPushTile => false;
-
-  @override
   bool get showEncryptedPreviewsTile => false;
 
   @override

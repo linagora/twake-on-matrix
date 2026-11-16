@@ -1,5 +1,4 @@
 import 'package:animations/animations.dart';
-import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_body_view_style.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_skeletonizer_widget.dart';
@@ -153,27 +152,6 @@ class ChatListBodyView extends StatelessWidget {
                           ),
                         ),
                       ),
-                    SliverToBoxAdapter(
-                      child: AnimatedContainer(
-                        height: ChatListBodyViewStyle.heightIsTorBrowser(
-                          controller.isTorBrowser,
-                        ),
-                        duration: TwakeThemes.animationDuration,
-                        curve: TwakeThemes.animationCurve,
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(),
-                        child: Material(
-                          color: Theme.of(context).colorScheme.surface,
-                          child: ListTile(
-                            leading: const Icon(Icons.vpn_key),
-                            title: Text(L10n.of(context)!.dehydrateTor),
-                            subtitle: Text(L10n.of(context)!.dehydrateTorLong),
-                            trailing: const Icon(Icons.chevron_right_outlined),
-                            onTap: controller.dehydrate,
-                          ),
-                        ),
-                      ),
-                    ),
                     ChatListViewBuilder(controller: controller, rooms: rooms),
                   ],
                 );

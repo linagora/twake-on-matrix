@@ -3,7 +3,6 @@ import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
 import 'package:twake_chat/presentation/widget_keys/link_preview_keys.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/utils/string_extension.dart';
-import 'package:twake_chat/widgets/native_link_span.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_preview_item.dart';
 import 'package:twake_chat/widgets/twake_components/twake_preview_link/twake_link_view.dart';
 import 'package:flutter/material.dart';
@@ -65,21 +64,11 @@ class TwakeLinkPreview extends StatelessWidget with LinkifyMixin {
                 if (url == null) return null;
                 // Returning null would still style the span as a link.
                 return filenameLinkAsPlainText(
-                      url: url,
-                      childrenSpan: TextSpan(text: url),
-                      linkStyle: richTextStyle,
-                      textStyle: richTextStyle,
-                    ) ??
-                    buildNativeLinkSpan(
-                      url: url,
-                      childrenSpan: TextSpan(text: url, style: style),
-                      linkStyle: style,
-                      onTapDown: (details) => handleOnTappedLinkHtml(
-                        context: context,
-                        details: details,
-                        link: link,
-                      ),
-                    );
+                  url: url,
+                  childrenSpan: TextSpan(text: url),
+                  linkStyle: richTextStyle,
+                  textStyle: richTextStyle,
+                );
               },
             ),
       previewItemWidget: TwakeLinkPreviewItem(

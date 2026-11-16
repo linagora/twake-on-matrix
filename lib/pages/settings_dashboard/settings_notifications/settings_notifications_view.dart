@@ -67,30 +67,6 @@ class SettingsNotificationsView extends ConsumerWidget {
                         },
                       ),
                 ),
-                if (controller.showWebPushTile) ...{
-                  const Divider(thickness: 1),
-                  SwitchListTile.adaptive(
-                    value: controller.webPushActive ?? false,
-                    title: Text(
-                      L10n.of(context)!.webPushOnThisBrowser,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    subtitle: controller.webPushPermissionDenied
-                        ? Text(
-                            L10n.of(context)!.webPushPermissionDeniedHint,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                          )
-                        : null,
-                    onChanged: controller.webPushPermissionDenied
-                        ? null
-                        : (enabled) => controller.toggleWebPush(enabled),
-                  ),
-                },
                 if (controller.showEncryptedPreviewsTile) ...{
                   const Divider(thickness: 1),
                   SwitchListTile.adaptive(
