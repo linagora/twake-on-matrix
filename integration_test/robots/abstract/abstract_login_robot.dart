@@ -12,6 +12,6 @@ abstract class AbstractLoginRobot {
   });
 
   /// Grants the OS notification permission after login. Mobile drives the
-  /// native dialog; web is a no-op (handled in `CoreRobot`, `kIsWeb` guard).
+  /// native dialog.
   Future<void> grantNotificationPermission();
 }

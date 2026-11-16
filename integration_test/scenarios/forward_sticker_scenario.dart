@@ -10,13 +10,6 @@ import '../base/api_login_helper.dart';
 import '../base/base_test_scenario.dart';
 import '../base/mobile_group_fixture.dart';
 
-const _webSourceRoom = String.fromEnvironment(
-  'SearchByTitle',
-  defaultValue: 'My Default Group',
-);
-
-const _webSourceRoomId = String.fromEnvironment('GroupID');
-
 const _receiver = String.fromEnvironment(
   'ForwardReceiver1Name',
   defaultValue: 'Receiver Alpha',
@@ -128,12 +121,4 @@ class ForwardStickerMobileScenario extends ForwardStickerScenario {
     await prepareMobileRoomFixture(this, _receiver);
     return (id: fixture.roomId, title: fixture.title);
   }
-}
-
-class ForwardStickerWebScenario extends ForwardStickerScenario {
-  ForwardStickerWebScenario(super.$, super.robots);
-
-  @override
-  Future<({String id, String title})> prepareSourceRoom() async =>
-      (id: _webSourceRoomId, title: _webSourceRoom);
 }

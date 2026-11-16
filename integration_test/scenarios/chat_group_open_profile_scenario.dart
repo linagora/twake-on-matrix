@@ -1,30 +1,15 @@
-import 'package:flutter/foundation.dart';
-
 import '../base/base_test_scenario.dart';
 import '../base/mobile_group_fixture.dart';
 
 /// Cross-platform scenario: open a group member's profile and verify the
 /// displayed identity fields.
 ///
-/// On web it searches the group named by `SearchByTitle` and drills into the
-/// member identified by `MemberMatrixID`. On mobile the staged `SearchByTitle`
-/// room does not exist — the app runs against a shared account — so it opens
-/// the in-app group fixture and its invited receiver instead.
+/// Opens the in-app group fixture and drills into its invited receiver.
 ///
 /// Drives the UI exclusively through the abstract robots exposed by the
 /// `RobotFactory`.
 class ChatGroupOpenProfileScenario extends BaseTestScenario {
   ChatGroupOpenProfileScenario(super.$, super.robots);
-
-  static const _webSearchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
-
-  static const _webMemberMatrixId = String.fromEnvironment(
-    'MemberMatrixID',
-    defaultValue: '@member:localhost',
-  );
 
   @override
   Future<void> runTestLogic() async {
@@ -39,17 +24,9 @@ class ChatGroupOpenProfileScenario extends BaseTestScenario {
   }
 
   Future<String> _openMemberRoom() async {
-    final String title;
-    final String memberMatrixId;
-
-    if (kIsWeb) {
-      title = _webSearchPhrase;
-      memberMatrixId = _webMemberMatrixId;
-    } else {
-      final fixture = await prepareMobileGroupFixture(this);
-      title = fixture.title;
-      memberMatrixId = fixture.memberMatrixId;
-    }
+    final fixture = await prepareMobileGroupFixture(this);
+    final title = fixture.title;
+    final memberMatrixId = fixture.memberMatrixId;
 
     await robots.chatListRobot().openSearchScreen();
     final opened = await robots.searchViewRobot().searchAndOpenRoom(title);

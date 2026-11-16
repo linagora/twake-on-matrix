@@ -7,8 +7,7 @@ import 'chat_scenario.dart';
 
 /// Mobile-only: verify the long-press message context menu (`PullDownMenu`)
 /// wraps its content in a scrollable `SafeArea`. The dialog and its internals
-/// only exist on mobile (web uses a hover action bar), so the test is
-/// registered with `mobileOnly: true` and skipped on web. Drives the concrete
+/// only exist on mobile (web uses a hover action bar). Drives the concrete
 /// mobile robots directly.
 class MessageContextMenuSafeAreaScenario extends BaseTestScenario {
   MessageContextMenuSafeAreaScenario(super.$, super.robots);

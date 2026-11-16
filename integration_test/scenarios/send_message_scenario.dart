@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../base/api_login_helper.dart';
@@ -11,40 +10,22 @@ import '../base/mobile_group_fixture.dart';
 /// through the UI and one as the receiver through the API, then asserts both
 /// render in the timeline.
 ///
-/// On web the fixture is the isolated room named by `SearchByTitle`; on mobile
-/// it is the in-app group fixture, because the shared staging account has no
-/// `SearchByTitle` room.
-///
 /// Drives the UI exclusively through the abstract robots exposed by the
-/// `RobotFactory`, so the same scenario runs on mobile and web.
+/// `RobotFactory`.
 class SendMessageScenario extends BaseTestScenario {
   SendMessageScenario(super.$, super.robots);
 
-  static const _webSearchPhrase = String.fromEnvironment(
-    'SearchByTitle',
-    defaultValue: 'My Default Group',
-  );
-
   @override
   Future<void> runTestLogic() async {
-    String? roomId;
-
-    if (!kIsWeb) {
-      final fixture = await prepareMobileGroupFixture(this);
-      await robots.chatListRobot().openSearchScreen();
-      final opened = await robots.searchViewRobot().searchAndOpenRoom(
-        fixture.title,
-      );
-      if (!opened) {
-        throw Exception('Test failed: Room "${fixture.title}" was not found.');
-      }
-      roomId = fixture.roomId;
-    } else {
-      await robots.homeRobot().gotoChatListScreen();
-      await robots.searchRobot().enterSearchText(_webSearchPhrase);
-      await $.pump();
-      await robots.chatListRobot().openChatGroupByIndex(0);
+    final fixture = await prepareMobileGroupFixture(this);
+    await robots.chatListRobot().openSearchScreen();
+    final opened = await robots.searchViewRobot().searchAndOpenRoom(
+      fixture.title,
+    );
+    if (!opened) {
+      throw Exception('Test failed: Room "${fixture.title}" was not found.');
     }
+    final roomId = fixture.roomId;
 
     final now = DateTime.now();
     final stamp = '${now.year}${now.month}${now.day}${now.hour}${now.minute}';

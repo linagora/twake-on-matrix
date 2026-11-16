@@ -62,7 +62,7 @@ class SettingsRecoveryKeyRobot extends HomeRobot {
     final context = $.tester.element(find.byType(Scaffold).first);
     final l10n = L10n.of(context)!;
 
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
       final copyButton = $(
         AlertDialog,
       ).$(TextButton).containing(find.text(l10n.copy.toUpperCase()));
