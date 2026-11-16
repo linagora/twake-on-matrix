@@ -10,8 +10,6 @@ import 'package:twake_chat/utils/manager/download_manager/download_file_info.dar
 import 'package:twake_chat/utils/manager/download_manager/download_file_state.dart';
 import 'package:twake_chat/utils/manager/download_manager/downloading_worker_queue.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_extension.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/download_file_web_extension.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/task_queue/task.dart';
 import 'package:matrix/matrix.dart';
 
@@ -119,16 +117,6 @@ class DownloadManager {
     required CancelToken cancelToken,
     bool isFirstPriority = false,
   }) {
-    if (PlatformInfos.isWeb) {
-      _addTaskToWorkerQueueWeb(
-        event: event,
-        streamController: streamController,
-        cancelToken: cancelToken,
-        isFirstPriority: isFirstPriority,
-      );
-      return;
-    }
-
     _addTaskToWorkerQueueNative(
       event,
       getThumbnail,
@@ -152,32 +140,6 @@ class DownloadManager {
           try {
             await event.getFileInfo(
               getThumbnail: getThumbnail,
-              downloadStreamController: streamController,
-              cancelToken: cancelToken,
-            );
-          } catch (e) {
-            Logs().e('DownloadManager::download(): $e');
-            streamController.add(Left(DownloadFileFailureState(exception: e)));
-          }
-        },
-        onTaskCompleted: () => clear(event.eventId),
-      ),
-      isFirstPriority: isFirstPriority,
-    );
-  }
-
-  void _addTaskToWorkerQueueWeb({
-    required Event event,
-    required StreamController<Either<Failure, Success>> streamController,
-    required CancelToken cancelToken,
-    bool isFirstPriority = false,
-  }) {
-    workingQueue.addTask(
-      Task(
-        id: event.eventId,
-        runnable: () async {
-          try {
-            await event.downloadFileWeb(
               downloadStreamController: streamController,
               cancelToken: cancelToken,
             );

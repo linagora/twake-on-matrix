@@ -4,10 +4,8 @@ import 'package:twake_chat/pages/chat/events/formatted_text_widget.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/message_content_image_builder.dart';
 import 'package:twake_chat/pages/chat/events/message/message_style.dart';
 import 'package:twake_chat/pages/chat/events/message_content_style.dart';
-import 'package:twake_chat/pages/chat/events/message_download_content_web.dart';
 import 'package:twake_chat/pages/chat/events/message_upload_content.dart';
 import 'package:twake_chat/pages/chat/events/message_video_download_content.dart';
-import 'package:twake_chat/pages/chat/events/message_video_download_content_web.dart';
 import 'package:twake_chat/pages/chat/events/message_video_upload_content.dart';
 import 'package:twake_chat/pages/chat/events/sending_video_widget.dart';
 import 'package:twake_chat/pages/chat/events/unknown_content.dart';
@@ -236,20 +234,10 @@ class MessageContent extends StatelessWidget
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        if (!PlatformInfos.isWeb) ...[
-                          Align(
-                            alignment: Alignment.center,
-                            child: MessageDownloadContent(event),
-                          ),
-                        ] else ...[
-                          OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: MessageDownloadContentWeb(event),
-                            ),
-                          ),
-                        ],
+                        Align(
+                          alignment: Alignment.center,
+                          child: MessageDownloadContent(event),
+                        ),
                         Padding(
                           padding: MessageContentStyle.endOfBubbleWidgetPadding,
                           child: OptionalSelectionContainerDisabled(
@@ -297,14 +285,7 @@ class MessageContent extends StatelessWidget
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (!PlatformInfos.isWeb) ...[
-                    MessageDownloadContent(event),
-                  ] else ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
-                      child: MessageDownloadContentWeb(event),
-                    ),
-                  ],
+                  MessageDownloadContent(event),
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
@@ -323,33 +304,13 @@ class MessageContent extends StatelessWidget
                   : CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (!PlatformInfos.isWeb) ...[
-                  if (event.isSending() ||
-                      event.status == EventStatus.error) ...[
-                    MessageUploadingContent(
-                      event: event,
-                      style: const MessageFileTileStyle(),
-                    ),
-                  ] else
-                    MessageDownloadContent(event),
-                ] else ...[
-                  if (event.isSending() ||
-                      event.status == EventStatus.error) ...[
-                    OptionalSelectionContainerDisabled(
-                      isEnabled:
-                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
-                      child: MessageUploadingContent(
-                        event: event,
-                        style: const MessageFileTileStyle(),
-                      ),
-                    ),
-                  ] else
-                    OptionalSelectionContainerDisabled(
-                      isEnabled:
-                          PlatformInfos.isWeb && !event.isCaptionModeOrReply(),
-                      child: MessageDownloadContentWeb(event),
-                    ),
-                ],
+                if (event.isSending() || event.status == EventStatus.error) ...[
+                  MessageUploadingContent(
+                    event: event,
+                    style: const MessageFileTileStyle(),
+                  ),
+                ] else
+                  MessageDownloadContent(event),
                 if (!event.isCaptionModeOrReply())
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
@@ -512,14 +473,6 @@ class _MessageVideoBuilder extends StatelessWidget {
       );
     }
 
-    if (PlatformInfos.isWeb) {
-      return MessageVideoDownloadContentWeb(
-        event: event,
-        width: displayImageInfo.size.width,
-        height: displayImageInfo.size.height,
-        bubbleWidth: textWidth,
-      );
-    }
     return MessageVideoDownloadContent(
       event: event,
       width: displayImageInfo.size.width,

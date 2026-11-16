@@ -163,29 +163,6 @@ class MediaAPI {
     );
   }
 
-  Future<Stream<List<int>>> downloadFileWeb({
-    required Uri uri,
-    CancelToken? cancelToken,
-    ProgressCallback? onReceiveProgress,
-  }) async {
-    final response = await _client
-        .get(
-          uri.path,
-          onReceiveProgress: onReceiveProgress,
-          cancelToken: cancelToken,
-          options: Options(responseType: ResponseType.stream),
-        )
-        .onError((error, stackTrace) {
-          if (error is DioException && error.type == DioExceptionType.cancel) {
-            throw CancelRequestException();
-          } else {
-            throw Exception(error);
-          }
-        });
-
-    return response.stream;
-  }
-
   Future<UrlPreviewResponse> getUrlPreview({
     required Uri uri,
     int? preferredPreviewTime,
