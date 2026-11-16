@@ -53,54 +53,67 @@ void main() {
 
   tearDown(() => GetIt.instance.reset());
 
-  Future<void> pumpView(WidgetTester tester, {required bool muted}) {
-    return tester.pumpWidget(
+  Future<void> pumpView(
+    WidgetTester tester, {
+    required bool muted,
+    Locale locale = const Locale('en'),
+  }) async {
+    await tester.pumpWidget(
       Provider<MatrixState>.value(
         value: _FakeMatrix(_FakeClient(allPushNotificationsMuted: muted)),
         child: MaterialApp(
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
-          locale: const Locale('en'),
+          locale: locale,
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
           home: SettingsNotificationsView(_FakeController()),
         ),
       ),
     );
+    await tester.pump();
   }
 
-  SwitchListTile masterSwitch(WidgetTester tester) =>
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile).first);
+  Finder masterSwitchFinder() => find.byType(SwitchListTile).first;
 
-  testWidgets('notifications on: the switch is on and reads enabled', (
+  SwitchListTile masterSwitch(WidgetTester tester) =>
+      tester.widget<SwitchListTile>(masterSwitchFinder());
+
+  Finder textInMasterSwitch(String text) =>
+      find.descendant(of: masterSwitchFinder(), matching: find.text(text));
+
+  testWidgets('notifications on: the switch is on, labelled Notifications', (
     tester,
   ) async {
     await pumpView(tester, muted: false);
-    await tester.pump();
 
     expect(masterSwitch(tester).value, isTrue);
     expect(
-      find.descendant(
-        of: find.byType(SwitchListTile).first,
-        matching: find.text('Notifications enabled'),
-      ),
+      textInMasterSwitch(lookupL10n(const Locale('en')).notifications),
       findsOneWidget,
     );
   });
 
-  testWidgets('notifications muted: the switch is off and reads disabled', (
+  testWidgets(
+    'notifications muted: the switch is off, the label does not change',
+    (tester) async {
+      await pumpView(tester, muted: true);
+
+      expect(masterSwitch(tester).value, isFalse);
+      expect(
+        textInMasterSwitch(lookupL10n(const Locale('en')).notifications),
+        findsOneWidget,
+      );
+      expect(find.byType(SwitchListTile), findsOneWidget);
+    },
+  );
+
+  testWidgets('in Spanish, the switch is labelled with the translated key', (
     tester,
   ) async {
-    await pumpView(tester, muted: true);
-    await tester.pump();
+    const es = Locale('es');
+    await pumpView(tester, muted: false, locale: es);
 
-    expect(masterSwitch(tester).value, isFalse);
-    expect(
-      find.descendant(
-        of: find.byType(SwitchListTile).first,
-        matching: find.text('Notifications disabled'),
-      ),
-      findsOneWidget,
-    );
-    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(masterSwitch(tester).value, isTrue);
+    expect(textInMasterSwitch(lookupL10n(es).notifications), findsOneWidget);
   });
 }
