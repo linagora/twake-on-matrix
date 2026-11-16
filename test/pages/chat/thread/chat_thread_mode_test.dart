@@ -377,6 +377,11 @@ void main() {
     await openThread(tester);
     await tester.pump(const Duration(seconds: 1));
     expect(room.rootAsked, isTrue, reason: 'the root is loading');
+    expect(
+      client.onTimelineEvent.listeners,
+      greaterThan(0),
+      reason: 'the screen listens to the room',
+    );
 
     await closeThread(tester);
     room.rootLoad.complete(_event(room, _rootId, 0, inThread: false));
