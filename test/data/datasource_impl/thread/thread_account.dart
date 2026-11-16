@@ -121,7 +121,7 @@ class RecordingHomeserver extends http.BaseClient {
   final Map<ServerRoute, ServerError> _failures = {};
   final Map<ServerRoute, Map<String, Object?>> _answers = {};
   final Map<ServerRoute, Completer<void>> _holds = {};
-  final Set<ServerRoute> _lost = {};
+  final Map<ServerRoute, _Loss> _lost = {};
   final Map<String, Object?> _kept = {};
 
   /// The web (or another device) wrote these thread choices for [user];
@@ -162,8 +162,11 @@ class RecordingHomeserver extends http.BaseClient {
   void release(ServerRoute route) => _holds.remove(route)?.complete();
 
   /// A flaky network: the server handles the requests to [route] (a PUT is
-  /// stored), but the answer never reaches the app, which times out.
-  void loseResponses(ServerRoute route) => _lost.add(route);
+  /// stored), but the answer never reaches the app, which times out. The
+  /// first [skip] answers still arrive, then [times] are lost (every one
+  /// when null).
+  void loseResponses(ServerRoute route, {int skip = 0, int? times}) =>
+      _lost[route] = _Loss(skip, times);
 
   Iterable<ServerCall> callsTo(ServerRoute route) =>
       calls.where((call) => call.hits(route));
@@ -183,7 +186,7 @@ class RecordingHomeserver extends http.BaseClient {
     final (status, answer) = error != null
         ? (error.status, error.body)
         : _answerOf(call);
-    if (_lost.any(call.hits)) {
+    if (_matching(call, _lost)?.loses() ?? false) {
       throw TimeoutException('The answer to $call was lost');
     }
     return http.StreamedResponse(
@@ -216,6 +219,27 @@ class RecordingHomeserver extends http.BaseClient {
         return (ServerError.notFound.status, ServerError.notFound.body);
     }
     return (200, <String, Object?>{});
+  }
+}
+
+/// The answers of a route a flaky network loses: after [_skip] that arrive,
+/// [_times] lost (all, when null).
+class _Loss {
+  _Loss(this._skip, this._times);
+
+  int _skip;
+  int? _times;
+
+  bool loses() {
+    if (_skip > 0) {
+      _skip--;
+      return false;
+    }
+    final times = _times;
+    if (times == null) return true;
+    if (times == 0) return false;
+    _times = times - 1;
+    return true;
   }
 }
 

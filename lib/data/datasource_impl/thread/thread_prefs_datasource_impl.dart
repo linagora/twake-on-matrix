@@ -127,10 +127,25 @@ class ThreadPrefsDatasourceImpl implements ThreadPrefsDatasource {
     } on MatrixException {
       rethrow;
     } on Exception {
-      final now = await _readServerPrefs(client);
+      final now = await _rereadList(client);
       if (now.of(thread) == list.of(thread)) return;
       await _restoreRule(client, thread, now.of(thread));
       throw const _RuleSettled();
+    }
+  }
+
+  /// Reads the list back, once more when the first read fails. Still
+  /// unreadable: nothing tells what landed, so the rule stays as the choice
+  /// wants it (the next sync tells the truth) instead of going back.
+  Future<ThreadPrefs> _rereadList(Client client) async {
+    try {
+      return await _readServerPrefs(client);
+    } on Exception {
+      try {
+        return await _readServerPrefs(client);
+      } on Exception {
+        throw const _RuleSettled();
+      }
     }
   }
 
