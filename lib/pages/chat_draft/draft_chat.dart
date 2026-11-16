@@ -219,7 +219,7 @@ class DraftChatController extends ConsumerState<DraftChat>
     );
     scrollController.addListener(_updateScrollController);
     keyboardVisibilityController.onChange.listen(_keyboardListener);
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       initAudioRecorderWeb();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -277,12 +277,11 @@ class DraftChatController extends ConsumerState<DraftChat>
       onRoomCreatedSuccess: (room) async {
         final duration = Duration(seconds: recordDurationWebNotifier.value);
         final path = await stopRecordWeb();
-        final file = await recordToFileOnWeb(blobUrl: path);
 
-        if (file == null) return;
+        if (path == null) return;
 
-        final matrixFile = await createMatrixAudioFileFromWebFile(
-          file: file,
+        final matrixFile = await createMatrixAudioFileFromPath(
+          path: path,
           duration: duration,
         );
 
@@ -501,7 +500,7 @@ class DraftChatController extends ConsumerState<DraftChat>
         TextPosition(offset: sendController.text.length),
       );
 
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       inputFocus.requestFocus();
     }
   }
@@ -520,7 +519,7 @@ class DraftChatController extends ConsumerState<DraftChat>
   }
 
   void onSendFileClick(BuildContext context) async {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       sendFileOnWebAction(context);
     } else {
       _showMediaPicker(context);
