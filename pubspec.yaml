@@ -90,6 +90,7 @@ dependencies:
   heic_to_png_jpg: 0.0.5
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  html: ^0.15.4
   html_unescape: 2.0.0
   http: ^0.13.4
   image: ^4.0.15
@@ -213,7 +214,6 @@ dev_dependencies:
     sdk: flutter
   freezed: ^4.0.1
   go_router_builder: 4.3.1
-  html: ^0.15.4
   import_sorter: ^4.6.0
   integration_test:
     sdk: flutter
