@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:twake_chat/config/localizations/localization_service.dart';
+import 'package:twake_chat/data/memory/mxc_image_cache_manager.dart';
 import 'package:twake_chat/config/feed_config.dart';
 import 'package:twake_chat/config/themes.dart';
 import 'package:twake_chat/domain/model/room/room_preview_result.dart';
@@ -229,6 +233,70 @@ void main() {
 
         // Assert
         expect(shownBadge(tester), badge);
+      });
+    }
+  });
+
+  group('pictured avatar', () {
+    const avatarUri = 'mxc://server.tld/avatar';
+
+    // A real 200x100 PNG: a picture wider than tall, as users upload them.
+    Future<Uint8List> landscapePng(WidgetTester tester) async {
+      final bytes = await tester.runAsync(() async {
+        final recorder = ui.PictureRecorder();
+        Canvas(recorder).drawRect(
+          const Rect.fromLTWH(0, 0, 200, 100),
+          Paint()..color = const Color(0xFF3366CC),
+        );
+        final image = await recorder.endRecording().toImage(200, 100);
+        final data = await image.toByteData(format: ui.ImageByteFormat.png);
+        return data!.buffer.asUint8List();
+      });
+      return bytes!;
+    }
+
+    tearDown(MxcImageCacheManager.instance.clear);
+
+    for (final (description, isSpace, depth) in [
+      ('a space', true, 0),
+      ('a space inside a space', true, 1),
+      ('a group', false, 0),
+    ]) {
+      testWidgets('the picture of $description is drawn in a circle', (
+        tester,
+      ) async {
+        // Arrange
+        final room = buildRoom(name: 'Team');
+        when(room.isDirectChat).thenReturn(false);
+        when(room.isSpace).thenReturn(isSpace);
+        when(room.avatar).thenReturn(Uri.parse(avatarUri));
+        MxcImageCacheManager.instance.cacheImage(
+          avatarUri,
+          await landscapePng(tester),
+        );
+
+        // Act
+        await tester.pumpWidget(
+          wrap(
+            ChatListItem(
+              room,
+              depth: depth,
+              space: isSpace ? spaceData() : null,
+            ),
+          ),
+        );
+        await tester.pump();
+
+        // Assert: the picture fills a square box, so its round clip is a
+        // circle; a box taller or wider than it is clips it to an oval.
+        final avatar = find.byType(AvatarWithKindBadge);
+        final pictureBox = tester.getSize(
+          find.descendant(of: avatar, matching: find.byType(Image)),
+        );
+        expect(
+          pictureBox,
+          Size.square(tester.widget<AvatarWithKindBadge>(avatar).size),
+        );
       });
     }
   });
