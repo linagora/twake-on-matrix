@@ -127,7 +127,8 @@ class TwakeAppState extends State<TwakeApp> {
                         child: NavigationButtonsSafeArea(child: child),
                       ),
                     ),
-                    lockScreenBuilder: (_) => const LockScreen(),
+                    lockScreenBuilder: (_) =>
+                        const AppLockScreenBackButton(child: LockScreen()),
                     initiallyEnabled: widget.appLockEnabled,
                     initialBackgroundLockLatency: Duration.zero,
                   )

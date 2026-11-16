@@ -9,11 +9,13 @@ import 'package:twake_chat/widgets/app_lock_back_button.dart';
 void main() {
   group('RouterNavigationNotification', () {
     late List<bool> frameworkHandlesBack;
+    late int systemPops;
     late GlobalKey<NavigatorState> rootKey;
     late GlobalKey<NavigatorState> shellKey;
 
     setUp(() {
       frameworkHandlesBack = [];
+      systemPops = 0;
       rootKey = GlobalKey<NavigatorState>();
       shellKey = GlobalKey<NavigatorState>();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -21,6 +23,7 @@ void main() {
             if (call.method == 'SystemNavigator.setFrameworkHandlesBack') {
               frameworkHandlesBack.add(call.arguments as bool);
             }
+            if (call.method == 'SystemNavigator.pop') systemPops++;
             return null;
           });
     });
@@ -30,7 +33,7 @@ void main() {
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
 
-    Future<GoRouter> openApp(WidgetTester tester) async {
+    Future<GoRouter> openApp(WidgetTester tester, {bool locked = false}) async {
       final router = GoRouter(
         navigatorKey: rootKey,
         initialLocation: '/rooms',
@@ -61,8 +64,9 @@ void main() {
               dispatcher: router.backButtonDispatcher,
               child: child!,
             ),
-            lockScreenBuilder: (_) => const Text('locked'),
-            initiallyEnabled: false,
+            lockScreenBuilder: (_) =>
+                const AppLockScreenBackButton(child: Text('locked')),
+            initiallyEnabled: locked,
             initialBackgroundLockLatency: Duration.zero,
           ),
         ),
@@ -130,6 +134,19 @@ void main() {
       appLock.didUnlock();
       await tester.pumpAndSettle();
       expect(find.text('info'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('whenBackIsPressedOnTheLockScreenAtLaunch_staysOnIt', (
+      tester,
+    ) async {
+      await openApp(tester, locked: true);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('locked'), findsOneWidget);
+      expect(systemPops, 0);
+      expect(frameworkHandlesBack.last, isTrue);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('whenADialogClosesOnARoute_backPopsTheRoute', (tester) async {

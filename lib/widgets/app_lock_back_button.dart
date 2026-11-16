@@ -40,3 +40,35 @@ class _AppLockBackButtonState extends State<AppLockBackButton> {
   @override
   Widget build(BuildContext context) => widget.child;
 }
+
+class AppLockScreenBackButton extends StatefulWidget {
+  final Widget child;
+
+  const AppLockScreenBackButton({super.key, required this.child});
+
+  @override
+  State<AppLockScreenBackButton> createState() =>
+      _AppLockScreenBackButtonState();
+}
+
+// At launch the router is not built yet, so nothing else answers Back.
+class _AppLockScreenBackButtonState extends State<AppLockScreenBackButton>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  Future<bool> didPopRoute() async => true;
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
