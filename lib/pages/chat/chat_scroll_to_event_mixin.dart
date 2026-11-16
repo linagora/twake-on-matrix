@@ -62,6 +62,21 @@ GlobalObjectKey messageRowKey(String eventId, Iterable<Event> events) =>
           eventId,
     );
 
+/// The scroll offset that centers [item]. Taken from the layout: while the
+/// item's sliver is wholly off screen, `localToGlobal` stays pinned to the
+/// viewport edge whatever the scroll offset.
+double offsetToCenter(RenderBox item, ScrollPosition position) {
+  final viewport = RenderAbstractViewport.of(item);
+  // getOffsetToReveal leaves out the anchor of a center-anchored viewport.
+  final anchorShift = viewport is RenderViewport
+      ? viewport.anchor * position.viewportDimension
+      : 0.0;
+  return (viewport.getOffsetToReveal(item, 0.5).offset + anchorShift).clamp(
+    position.minScrollExtent,
+    position.maxScrollExtent,
+  );
+}
+
 /// Scrolls the chat timeline to a target event and optionally highlights it.
 ///
 /// Center-anchored `_top`/`_bottom` lists break naive `scrollToIndex` /
@@ -382,31 +397,12 @@ extension ChatScrollToEventMixin on ChatController {
 
   /// Center a row that already has a finite viewport position.
   Future<void> _centerFiniteTarget(ChatJumpRequest request) async {
-    final itemContext = _rowKey(request.eventId).currentContext;
-    if (itemContext == null || !scrollController.hasClients) return;
-
-    final itemBox = itemContext.findRenderObject() as RenderBox?;
-    final scrollBox =
-        scrollController.position.context.notificationContext
-                ?.findRenderObject()
+    final itemBox =
+        _rowKey(request.eventId).currentContext?.findRenderObject()
             as RenderBox?;
-    if (itemBox == null || scrollBox == null) return;
+    if (itemBox == null || !scrollController.hasClients) return;
 
-    final itemPosition = itemBox.localToGlobal(
-      Offset.zero,
-      ancestor: scrollBox,
-    );
-    if (!itemPosition.dy.isFinite) return;
-
-    final viewportHeight = scrollBox.size.height;
-    final itemHeight = itemBox.size.height;
-    final scrollAdjustment =
-        itemPosition.dy - (viewportHeight / 2) + (itemHeight / 2);
-    final targetOffset = (scrollController.offset + scrollAdjustment).clamp(
-      scrollController.position.minScrollExtent,
-      scrollController.position.maxScrollExtent,
-    );
-
+    final targetOffset = offsetToCenter(itemBox, scrollController.position);
     if ((targetOffset - scrollController.offset).abs() < 1) return;
 
     await scrollController.animateTo(
