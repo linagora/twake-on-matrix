@@ -32,7 +32,7 @@ import 'package:future_loading_dialog/future_loading_dialog.dart';
 import 'package:linagora_design_flutter/colors/linagora_ref_colors.dart';
 import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:html/parser.dart' as html_parser;
 
 import 'matrix_file_extension.dart';
 
@@ -137,8 +137,7 @@ extension LocalizedBody on Event {
         MessageTypes.Sticker,
         MessageTypes.Video,
       ].contains(messageType) &&
-      (kIsWeb ||
-          isAttachmentSmallEnough ||
+      (isAttachmentSmallEnough ||
           isThumbnailSmallEnough ||
           (content['url'] is String));
 
@@ -649,10 +648,7 @@ extension LocalizedBody on Event {
     if (formattedBody == null || formattedBody.isEmpty) return false;
 
     try {
-      final document = html.DomParser().parseFromString(
-        formattedBody,
-        'text/html',
-      );
+      final document = html_parser.parse(formattedBody);
       final anchors = document.querySelectorAll('a');
 
       for (final anchor in anchors) {
