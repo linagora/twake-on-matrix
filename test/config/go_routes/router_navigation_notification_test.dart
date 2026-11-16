@@ -4,7 +4,10 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:twake_chat/config/go_routes/router_navigation_notification.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/app_lock_back_button.dart';
+import 'package:twake_chat/widgets/lock_screen.dart';
 
 void main() {
   group('RouterNavigationNotification', () {
@@ -14,6 +17,7 @@ void main() {
     late GlobalKey<NavigatorState> shellKey;
 
     setUp(() {
+      getIt.registerSingleton<ResponsiveUtils>(ResponsiveUtils());
       frameworkHandlesBack = [];
       systemPops = 0;
       rootKey = GlobalKey<NavigatorState>();
@@ -28,7 +32,8 @@ void main() {
           });
     });
 
-    tearDown(() {
+    tearDown(() async {
+      await getIt.reset();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(SystemChannels.platform, null);
     });
@@ -65,7 +70,7 @@ void main() {
               child: child!,
             ),
             lockScreenBuilder: (_) =>
-                const AppLockScreenBackButton(child: Text('locked')),
+                const AppLockScreenBackButton(child: LockScreen()),
             initiallyEnabled: locked,
             initialBackgroundLockLatency: Duration.zero,
           ),
@@ -130,7 +135,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(find.text('locked'), findsOneWidget);
+      expect(find.byType(LockScreen), findsOneWidget);
       appLock.didUnlock();
       await tester.pumpAndSettle();
       expect(find.text('info'), findsOneWidget);
@@ -144,7 +149,7 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
-      expect(find.text('locked'), findsOneWidget);
+      expect(find.byType(LockScreen), findsOneWidget);
       expect(systemPops, 0);
       expect(frameworkHandlesBack.last, isTrue);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
