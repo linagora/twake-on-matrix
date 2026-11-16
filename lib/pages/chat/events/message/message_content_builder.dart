@@ -86,7 +86,7 @@ class MessageContentBuilder extends ConsumerWidget
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (event.inReplyToEventId() != null)
+                if (event.isReplyEvent())
                   ReplyContentWidget(
                     event: event,
                     timeline: timeline,

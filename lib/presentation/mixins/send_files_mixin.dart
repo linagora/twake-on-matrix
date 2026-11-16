@@ -1,3 +1,4 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_send_target.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/model/extensions/xfile/xfile_extension.dart';
@@ -51,6 +52,7 @@ mixin SendFilesMixin {
     Room? room,
     String? caption,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     VoidCallback? onSendCallback,
   }) async {
     if (room == null) return;
@@ -92,6 +94,7 @@ mixin SendFilesMixin {
       fileInfos: result.files,
       caption: result.caption,
       inReplyTo: inReplyTo,
+      thread: thread,
     );
     onSendCallback?.call();
   }
@@ -122,6 +125,7 @@ mixin SendFilesMixin {
     String? caption,
     Room? room,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     if (room == null) {
       return;
@@ -135,6 +139,7 @@ mixin SendFilesMixin {
       }).toList(),
       caption: caption,
       inReplyTo: inReplyTo,
+      thread: thread,
     );
   }
 
@@ -144,6 +149,7 @@ mixin SendFilesMixin {
     List<FileInfo>? fileInfos,
     VoidCallback? onSendFileCallback,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
     bool popContext = true,
   }) async {
     if (room == null) return;
@@ -168,6 +174,7 @@ mixin SendFilesMixin {
       room: room,
       fileInfos: fileInfos,
       inReplyTo: inReplyTo,
+      thread: thread,
     );
     onSendFileCallback?.call();
   }
@@ -190,6 +197,7 @@ mixin SendFilesMixin {
     required PickerType type,
     VoidCallback? onSendFileCallback,
     Event? inReplyTo,
+    ThreadSendTarget? thread,
   }) async {
     switch (type) {
       case PickerType.gallery:
@@ -200,6 +208,7 @@ mixin SendFilesMixin {
           room: room,
           onSendFileCallback: onSendFileCallback,
           inReplyTo: inReplyTo,
+          thread: thread,
         );
         break;
       case PickerType.location:
