@@ -81,7 +81,7 @@ Event _undecryptable() => _event(
 
 /// Whether "Start a thread" is offered on [event], which has no thread.
 bool _offered(Event event) =>
-    ThreadRules.canStartThread(event, hasThread: false);
+    ThreadRules.canStartThread(event, hasThread: false, inThreadScreen: false);
 
 /// With `AppConfig.threadsEnabled` on; off, see threads_disabled_test.dart.
 void _startThreadTests() {
@@ -107,7 +107,14 @@ void _startThreadTests() {
 
   test('is not offered on a message that already has a thread', () {
     // Only the card opens an existing thread.
-    expect(ThreadRules.canStartThread(_message(), hasThread: true), isFalse);
+    expect(
+      ThreadRules.canStartThread(
+        _message(),
+        hasThread: true,
+        inThreadScreen: false,
+      ),
+      isFalse,
+    );
   });
 
   test('is not offered on an undecryptable message', () {
