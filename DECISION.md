@@ -315,6 +315,9 @@ Joining a call writes the state event `org.matrix.msc3401.call.member`
   only the Meet link when the well-known has one;
 - the join still checks this right before anything goes out.
 
+On web an encrypted room keeps the Meet link: the web build does not ship the
+LiveKit E2EE worker, and the Flutter web client is retired.
+
 ## D16. Reactions under a message: most used first, then oldest first (proposed by Johann, 2026-11-09)
 
 The row shows up to three reactions, the most used first; among equal
