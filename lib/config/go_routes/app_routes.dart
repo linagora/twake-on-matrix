@@ -857,15 +857,21 @@ class EmotesRoute extends GoRouteData with $EmotesRoute {
 class AddAccountRoute extends GoRouteData with $AddAccountRoute {
   const AddAccountRoute({this.$extra});
 
-  final TwakeWelcomeArg? $extra;
+  /// Shared with the child routes: the login route carries a [LoginClientOwner].
+  final Object? $extra;
 
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) =>
       _loggedOutRedirect(context, state);
 
   @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) =>
-      _defaultPage(context, TwakeWelcome(arg: $extra));
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    final extra = $extra;
+    return _defaultPage(
+      context,
+      TwakeWelcome(arg: extra is TwakeWelcomeArg ? extra : null),
+    );
+  }
 }
 
 class AddAccountLoginRoute extends GoRouteData
