@@ -5,16 +5,17 @@ import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/user_info/get_user_info_state.dart';
 import 'package:twake_chat/domain/model/user_info/user_info.dart';
 import 'package:twake_chat/pages/profile_info/profile_info_body/profile_info_body_view_style.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/presence_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/avatar/avatar.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 
-class ProfileInfoHeader extends StatefulWidget {
+class ProfileInfoHeader extends ConsumerStatefulWidget {
   const ProfileInfoHeader({
     required this.user,
     required this.userInfoNotifier,
@@ -29,10 +30,10 @@ class ProfileInfoHeader extends StatefulWidget {
   final VoidCallback onAvatarInfoTap;
 
   @override
-  State<ProfileInfoHeader> createState() => _ProfileInfoHeaderState();
+  ConsumerState<ProfileInfoHeader> createState() => _ProfileInfoHeaderState();
 }
 
-class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
+class _ProfileInfoHeaderState extends ConsumerState<ProfileInfoHeader> {
   bool isTextSelected = false;
 
   final responsive = getIt.get<ResponsiveUtils>();
@@ -46,7 +47,7 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
   }
 
   Widget _buildMobileHeader(BuildContext context) {
-    final client = Matrix.of(context).client;
+    final client = ref.watch(matrixClientProvider);
     final presence = client.presences[widget.user.id];
     final sysColors = LinagoraSysColors.material();
 
@@ -138,7 +139,7 @@ class _ProfileInfoHeaderState extends State<ProfileInfoHeader> {
   }
 
   Widget _buildNonMobileHeader(BuildContext context) {
-    final client = Matrix.of(context).client;
+    final client = ref.watch(matrixClientProvider);
     final presence = client.presences[widget.user.id];
 
     return ValueListenableBuilder(
