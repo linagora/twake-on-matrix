@@ -7,6 +7,8 @@ void main() {
         'Copy recovery key and verify clipboard contains the actual key',
     // Mobile-only: reads the system clipboard via concrete robots.
     mobileOnly: true,
+    // The recovery key is served by TOM's /_twake/recoveryWords.
+    requiresBackend: true,
     scenarioBuilder: ($, robots) => SettingsRecoveryKeyScenario($, robots),
   );
 }

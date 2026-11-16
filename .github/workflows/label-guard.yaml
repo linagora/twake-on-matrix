@@ -1,0 +1,89 @@
+on:
+  label:
+    types: [created, edited]
+  issues:
+    types: [labeled]
+  # Never check out the pull request: this event runs with a write token, even for forks.
+  pull_request_target:
+    types: [labeled]
+
+name: Label guard
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.event.label.name }}
+  queue: max
+
+jobs:
+  guard:
+    name: Only documented labels
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Remove labels outside .github/labels.yml
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const ref = context.payload.repository.default_branch;
+            const { data } = await github.rest.repos.getContent({ owner, repo, path: '.github/labels.yml', ref });
+            const allowed = new Set(
+              Buffer.from(data.content, 'base64').toString()
+                .split('\n')
+                .map((line) => line.match(/^-\s*"([^"]+)"\s*$/))
+                .filter(Boolean)
+                .map((match) => match[1].toLowerCase()),
+            );
+            if (allowed.size === 0) {
+              core.setFailed('No label found in .github/labels.yml');
+              return;
+            }
+
+            const label = context.payload.label;
+            if (allowed.has(label.name.toLowerCase())) return;
+
+            const actor = context.payload.sender.login;
+            const guide = `${context.serverUrl}/${owner}/${repo}/blob/${ref}/CONTRIBUTING.md#labels`;
+            const ignoreNotFound = (error) => {
+              if (error.status !== 404) throw error;
+            };
+
+            if (context.eventName === 'label') {
+              if (context.payload.action === 'created') {
+                await github.rest.issues.deleteLabel({ owner, repo, name: label.name }).catch(ignoreNotFound);
+                await core.summary
+                  .addRaw(`Deleted the label \`${label.name}\` created by @${actor}: it is not in the [label guide](${guide}).`)
+                  .write();
+                return;
+              }
+              const previousName = context.payload.changes?.name?.from;
+              if (!previousName || !allowed.has(previousName.toLowerCase())) return;
+              // The label may have been renamed again since this event: look it up by id.
+              const { node } = await github.graphql('query($id: ID!) { node(id: $id) { ... on Label { name } } }', { id: label.node_id });
+              if (!node || allowed.has(node.name.toLowerCase())) return;
+              // Deleting a renamed label would strip it from every issue that carries it.
+              await github.rest.issues.updateLabel({ owner, repo, name: node.name, new_name: previousName });
+              await core.summary
+                .addRaw(`Renamed \`${node.name}\` back to \`${previousName}\` after @${actor} renamed it: the new name is not in the [label guide](${guide}).`)
+                .write();
+              return;
+            }
+
+            const issue_number = (context.payload.issue ?? context.payload.pull_request).number;
+            await github.rest.issues.removeLabel({ owner, repo, issue_number, name: label.name }).catch(ignoreNotFound);
+
+            const marker = '<!-- label-guard -->';
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            if (!comments.some((comment) => comment.body?.includes(marker))) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `${marker}\n@${actor}, \`${label.name}\` was removed because it is not one of our labels. See the [label guide](${guide}); a new label is proposed by a pull request on \`.github/labels.yml\`.`,
+              });
+            }
+            await core.summary
+              .addRaw(`Removed \`${label.name}\`, added by @${actor}, from #${issue_number}: it is not in the [label guide](${guide}).`)
+              .write();

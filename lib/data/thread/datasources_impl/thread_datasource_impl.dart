@@ -28,7 +28,10 @@ class ThreadDatasourceImpl implements ThreadDatasource {
         recurse: true,
       );
       final replies = [
-        for (final event in response.chunk.reversed)
+        for (final event in _threadEvents(
+          response.chunk,
+          request.rootEventId,
+        ).reversed)
           Event.fromMatrixEvent(event, room),
       ];
       // /relations returns the events as stored: decrypt them.
@@ -40,6 +43,26 @@ class ThreadDatasourceImpl implements ThreadDatasource {
       Logs().e('ThreadDatasourceImpl::getReplies() failed', e, s);
       throw ThreadLoadFailedException(roomId);
     }
+  }
+
+  /// Keeps the thread replies and the edits and reactions that target them.
+  /// With `recurse`, the root's own edits and reactions come back too.
+  /// `m.relates_to` stays in clear in encrypted events.
+  List<MatrixEvent> _threadEvents(List<MatrixEvent> chunk, String rootId) {
+    Map<String, Object?>? relatesTo(MatrixEvent e) =>
+        e.content['m.relates_to'] as Map<String, Object?>?;
+    final threadIds = {
+      for (final e in chunk)
+        if (relatesTo(e)?['rel_type'] == RelationshipTypes.thread &&
+            relatesTo(e)?['event_id'] == rootId)
+          e.eventId,
+    };
+    return [
+      for (final e in chunk)
+        if (threadIds.contains(e.eventId) ||
+            threadIds.contains(relatesTo(e)?['event_id']))
+          e,
+    ];
   }
 
   Future<void> _decryptInPlace(List<Event> replies) async {

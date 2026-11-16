@@ -101,7 +101,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -131,8 +131,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -156,7 +156,8 @@ jobs:
           # evaluated by the shell even inside double quotes.
           PATROL_TEST_TARGET: ${{ inputs.patrol_test_target }}
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -312,7 +313,7 @@ jobs:
         run: |
           flutter pub get
           flutter pub run build_runner build --delete-conflicting-outputs
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
 
       - name: Start Synapse (Docker)
         run: ./scripts/integration-server-synapse.sh
@@ -342,8 +343,8 @@ jobs:
           echo "GroupTest=$(grep '^SearchByTitle=' .env.cicd | cut -d= -f2-)" >> .env.cicd
           echo "TestUserServer=localhost" >> .env.cicd
           echo "TestNonExistentUserServer=nonexistent.invalid" >> .env.cicd
-          # Tests needing the staging TOM backend or real hardware are not
-          # registered against this local harness (see TestBase.runPatrolTest).
+          # Tests needing the staging TOM backend or real hardware are
+          # reported as skipped against this local harness (see TestBase.runPatrolTest).
           echo "LOCAL_HARNESS=true" >> .env.cicd
           cut -d= -f1 .env.cicd
 
@@ -361,7 +362,8 @@ jobs:
       - name: Run Patrol shard on x86_64 emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          # The API 34 image kills the next test process 1 s after `pm clear`; Android 15 fixed it.
+          api-level: 35
           target: google_apis
           arch: x86_64
           profile: pixel_6
@@ -458,7 +460,7 @@ jobs:
           INTEGRATION_TEST_ENV_BASE64: ${{ secrets.INTEGRATION_TEST_ENV_BASE64 }}
           ORG_GRADLE_PROJECT_patrolTestBuildType: profile
         run: |
-          dart pub global activate patrol_cli 4.3.1
+          dart pub global activate patrol_cli 4.7.0
           flutter build apk --config-only
 
           # The secret may hold either base64-encoded content or the raw env
