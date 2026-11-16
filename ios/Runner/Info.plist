@@ -72,6 +72,8 @@
 	<string>Used by Twake Chat to find existed Twake account, who you can connect directly in Twake Chat or who you can send invitation.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Twake Chat uses an app lock for an additional security level</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Twake Chat does not access your location. This entry is required by the photo and video picker library bundled with the app.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save photos/videos to device on Twake Chat.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
