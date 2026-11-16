@@ -20,7 +20,6 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   ActivityDatasourceImpl(this._client);
 
   static const Duration _changesRate = Duration(seconds: 1);
-  static const int _maxAttempts = 3;
 
   final Client? _client;
 
@@ -29,9 +28,12 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   final Map<ThreadRef, Event?> _roots = {};
   final Set<ThreadRef> _fetching = {};
 
-  /// The reads of a root that failed in a row: a root that keeps failing
-  /// (deleted, forbidden) is given up after [_maxAttempts].
+  /// The reads of a root that failed in a row, and the changes still to wait
+  /// before the next read: 0, 1, 3, 7... after the n-th failure (reads at
+  /// changes 1, 2, 4, 8...). A root gone or forbidden is given up.
   final Map<ThreadRef, int> _failures = {};
+  final Map<ThreadRef, int> _waits = {};
+  final Set<ThreadRef> _givenUp = {};
   final StreamController<void> _rootsRead = StreamController.broadcast();
 
   void dispose() => unawaited(_rootsRead.close());
@@ -152,9 +154,7 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     final room = client.getRoomById(thread.roomId);
     if (room == null || room.membership != Membership.join) return null;
     if (!_roots.containsKey(thread)) {
-      if ((_failures[thread] ?? 0) < _maxAttempts) {
-        unawaited(_fetchRoot(client, thread));
-      }
+      _readRootOrWait(client, thread);
       return null;
     }
     final root = _roots[thread];
@@ -184,8 +184,26 @@ class ActivityDatasourceImpl implements ActivityDatasource {
     );
   }
 
+  void _readRootOrWait(Client client, ThreadRef thread) {
+    if (_givenUp.contains(thread)) return;
+    final wait = _waits[thread] ?? 0;
+    if (wait > 0) {
+      _waits[thread] = wait - 1;
+    } else {
+      unawaited(_fetchRoot(client, thread));
+    }
+  }
+
+  /// Gone (404) or forbidden (403): asking again changes nothing.
+  bool _isFinal(Object error) =>
+      error is MatrixException &&
+      (error.error == MatrixError.M_NOT_FOUND ||
+          error.error == MatrixError.M_FORBIDDEN ||
+          error.response?.statusCode == 404 ||
+          error.response?.statusCode == 403);
+
   /// Reads the root of the thread; with no reply of the session known, the
-  /// server gives its thread aggregate. A failure is logged and not kept: it is asked again at the next change, at most [_maxAttempts] times in a row.
+  /// server gives its thread aggregate. A failure is logged and not kept: it is asked again after a backoff counted in changes, unless it is final.
   Future<void> _fetchRoot(Client client, ThreadRef thread) async {
     final store = client.threadUnread;
     if (store == null || !_fetching.add(thread)) return;
@@ -195,9 +213,13 @@ class ActivityDatasourceImpl implements ActivityDatasource {
         serverFirst: store.latestReplyOf(thread) == null,
       );
       _failures.remove(thread);
+      _waits.remove(thread);
       if (!_rootsRead.isClosed) _rootsRead.add(null);
     } on Object catch (e, s) {
-      _failures[thread] = (_failures[thread] ?? 0) + 1;
+      final failures = (_failures[thread] ?? 0) + 1;
+      _failures[thread] = failures;
+      _waits[thread] = (1 << (failures - 1)) - 1;
+      if (_isFinal(e)) _givenUp.add(thread);
       Logs().w('Unable to read the root of a followed thread', e, s);
     } finally {
       _fetching.remove(thread);
