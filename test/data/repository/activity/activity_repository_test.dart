@@ -11,6 +11,7 @@ import 'package:twake_chat/data/repository/activity/activity_repository.provider
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/repository/activity/activity_repository.dart';
+import 'package:twake_chat/utils/client_manager.dart';
 
 import 'activity_sync_events.dart';
 import '../../../providers/fake_active_account.dart';
@@ -31,7 +32,11 @@ void main() {
 
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
-    _account = ThreadAccount(RecordingHomeserver());
+    // The sync filter of the app: left rooms stay in `client.rooms`.
+    _account = ThreadAccount(
+      RecordingHomeserver(),
+      syncFilter: ClientManager.syncFilter,
+    );
     // The room open on screen: all its states (the members) held.
     await _account.receiveRoomState(const []);
     _container = ProviderContainer.test(
@@ -56,6 +61,8 @@ void main() {
 
   group('« Unread »', _unreadRoomTests);
   group('« Replies »', _followedThreadTests);
+  group('« Replies »: a room the user left', _leftRoomTests);
+  group('« Replies »: a root that cannot be read', _unreadableRootTests);
   group('the unread mentions count', _mentionCountTests);
   group('« Mark as read »', _markReadTests);
 }
@@ -469,6 +476,65 @@ Map<String, Object?> _resolved(ThreadRef thread, bool resolved) => {
   'origin_server_ts': (8, resolved ? 1 : 2).utc.millisecondsSinceEpoch,
   'content': {'resolved': resolved},
 };
+
+/// Review of PR #3624 (activity_datasource_impl.dart:148): the app syncs
+/// with `includeLeave`, so a room the user left stays in the rooms of the
+/// client. « Replies » shows the threads of the rooms the user is in only,
+/// as « Unread » does.
+void _leftRoomTests() {
+  test('a thread followed by choice in a room the user left is not in '
+      '« Replies »', () async {
+    await const _TeamSync().send();
+    await _choose(lunchThread, WirePref.follow);
+    expect(_threads(await _shown()), hasLength(1), reason: 'joined: shown');
+
+    await _account.receiveSync({
+      'rooms': {
+        'leave': {teamRoomId: <String, Object?>{}},
+      },
+    });
+
+    expect(_threads(await _shown()), isEmpty);
+  });
+}
+
+/// Review of PR #3624 (activity_datasource_impl.dart:186-195): the root of
+/// a followed thread that cannot be read (gone, forbidden, server down) is
+/// not asked again at every change of the lists: a bounded number of
+/// requests, whatever the number of changes.
+void _unreadableRootTests() {
+  const changes = 6;
+  const maxRequests = 3;
+
+  for (final error in ServerError.values) {
+    test('a followed thread whose root fails (${error.status}) is asked a '
+        'bounded number of times across $changes changes', () async {
+      _account.server.fail(lunchRootLookup, error);
+      await const _TeamSync().send();
+      await _choose(lunchThread, WirePref.follow);
+      await _shown();
+
+      for (var change = 1; change <= changes; change++) {
+        await _TeamSync(
+          timeline: [
+            messageEvent((
+              id: '\$news$change',
+              sender: _bob,
+              body: 'news $change',
+              at: (9, change).utc,
+            )),
+          ],
+        ).send();
+        await _shown();
+      }
+
+      expect(
+        _account.server.callsTo(lunchRootLookup),
+        hasLength(lessThanOrEqualTo(maxRequests)),
+      );
+    });
+  }
+}
 
 void _mentionCountTests() {
   test('the count is the unread mentions of the rooms and of their threads, '

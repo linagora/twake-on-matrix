@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
-import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
+import 'package:twake_chat/domain/activity/usecases/watch_unread_mention_count_use_case.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 
 import 'activity_sync_events.dart';

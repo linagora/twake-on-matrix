@@ -79,6 +79,9 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                         activeNavigationBarNotifier,
                                     onDestinationSelected:
                                         onDestinationSelected,
+                                    selectedIndex: destinations.indexOf(
+                                      navigatorBar,
+                                    ),
                                     destinations: getNavigationDestinations(
                                       context,
                                     ),
@@ -218,12 +221,13 @@ class _ColumnPageView extends StatelessWidget {
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
         ),
-        _triggerPageViewBuilder(
-          navigatorBarType: AdaptiveDestinationEnum.activity,
-          navigatorBarWidget: ActivityPage(
-            bottomNavigationBar: _bottomNavigationBarBuilder(context),
+        if (destinations.contains(AdaptiveDestinationEnum.activity))
+          _triggerPageViewBuilder(
+            navigatorBarType: AdaptiveDestinationEnum.activity,
+            navigatorBarWidget: ActivityPage(
+              bottomNavigationBar: _bottomNavigationBarBuilder(context),
+            ),
           ),
-        ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,
           navigatorBarWidget: Settings(
@@ -324,10 +328,13 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
 
   final OnDestinationSelected onDestinationSelected;
 
+  final int selectedIndex;
+
   final List<NavigationDestination> destinations;
 
   const _PrimaryNavigationBarBuilder({
     required this.activeNavigationBar,
+    required this.selectedIndex,
     required this.onDestinationSelected,
     required this.destinations,
   });
@@ -335,7 +342,7 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffoldPrimaryNavigation(
-      selectedIndex: activeNavigationBar.value.index,
+      selectedIndex: selectedIndex,
       getNavigationRailDestinations: destinations
           .map((destination) => AdaptiveScaffold.toRailDestination(destination))
           .toList(),

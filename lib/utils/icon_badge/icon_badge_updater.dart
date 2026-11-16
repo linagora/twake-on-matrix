@@ -77,10 +77,10 @@ class IconBadgeUpdater {
     if (count != _written) _write(count);
   }
 
-  /// The extension writes the icon while the app is in the background, so
-  /// what the app wrote is forgotten: the first sync after is never skipped.
+  /// Always writes: clearAll zeroes the iOS icon on each lifecycle change, and
+  /// the extension writes it in the background, so the first sync after is never skipped.
   void _onBackground() {
-    _writeIfChanged();
+    _write(_count());
     _written = null;
   }
 

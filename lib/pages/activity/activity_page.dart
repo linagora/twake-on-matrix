@@ -3,8 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
-import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
+import 'package:twake_chat/domain/activity/usecases/mark_room_read_use_case.provider.dart';
+import 'package:twake_chat/domain/activity/usecases/watch_activity_use_case.provider.dart';
+import 'package:twake_chat/domain/activity/usecases/watch_unread_mention_count_use_case.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/activity/activity_day_groups.dart';
@@ -27,10 +30,10 @@ class ActivityPage extends ConsumerStatefulWidget {
 class _ActivityPageState extends ConsumerState<ActivityPage> {
   Future<void> _markRead(String roomId) async {
     try {
-      await ref.read(activityRepositoryProvider).markRoomRead(roomId);
-    } catch (e) {
+      await ref.read(markRoomReadUseCaseProvider).execute(roomId);
+    } on Exception catch (e, s) {
       // The room stays in the list: the button can be pressed again.
-      debugPrint('Unable to mark the room as read: $e');
+      Logs().w('Unable to mark the room as read', e, s);
     }
   }
 
