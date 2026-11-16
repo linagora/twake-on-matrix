@@ -98,6 +98,7 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     // then land with the room counters and receipts, and a failed sync never
     // applies them.
     onSync.stream.listen((update) {
+      if (!AppConfig.threadsEnabled) return;
       final counts = _pendingThreadCounts[update];
       final left = update.rooms?.leave?.keys ?? const <String>[];
       if (counts != null || left.isNotEmpty) {

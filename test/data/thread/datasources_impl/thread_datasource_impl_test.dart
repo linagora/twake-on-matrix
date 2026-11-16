@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:mockito/mockito.dart';
 import 'package:twake_chat/data/thread/datasources_impl/thread_datasource_impl.dart';
@@ -210,5 +214,37 @@ void main() {
         ),
       ),
     );
+  });
+
+  group('a network failure reaches the caller as a thread exception, '
+      'not a raw transport one', () {
+    final failures = <String, Exception>{
+      'the request times out': TimeoutException('relations'),
+      'the connection is lost': http.ClientException('connection lost'),
+      'the socket fails': const SocketException('no route to host'),
+    };
+
+    failures.forEach((name, failure) {
+      test(name, () async {
+        whenRelations().thenThrow(failure);
+
+        await expectLater(
+          load(),
+          throwsA(
+            isA<ThreadLoadFailedException>().having(
+              (e) => e.roomId,
+              'roomId',
+              threadRoomId,
+            ),
+          ),
+        );
+      });
+    });
+  });
+
+  test('a programming error is not hidden behind a thread exception', () async {
+    whenRelations().thenThrow(StateError('bug'));
+
+    await expectLater(load(), throwsA(isA<StateError>()));
   });
 }
