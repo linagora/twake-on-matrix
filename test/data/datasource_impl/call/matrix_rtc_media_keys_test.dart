@@ -433,6 +433,49 @@ void main() {
       });
     });
 
+    test('run_whenAMemberIsNoLongerInTheRoom_rotatesWithoutThem', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..addDevice('@carol:hs', 'C')
+          ..join('@bob:hs', 'B')
+          ..join('@carol:hs', 'C')
+          ..setRoomMembership('@carol:hs', 'join');
+        start(async);
+
+        // Act
+        client.setRoomMembership('@carol:hs', 'leave');
+        async.flushMicrotasks();
+        async.elapse(MatrixRtcMediaKeys.useKeyDelay);
+
+        // Assert
+        expect(client.sent, containsAll(['B@0', 'C@0', 'B@1']));
+        expect(client.sent, isNot(contains('C@1')));
+        expect(keys.last.index, 1);
+      });
+    });
+
+    test('run_withALegacyMembershipWithoutExpiry_expiresItAfter4Hours', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..join(
+            '@bob:hs',
+            'B',
+            expires: null,
+            createdAt: time.subtract(const Duration(hours: 5)),
+          );
+
+        // Act
+        start(async);
+
+        // Assert
+        expect(client.sent, isEmpty);
+      });
+    });
+
     test('run_whenStoppedDuringTheDelay_keepsTheNewKeyUnused', () {
       fakeAsync((async) {
         // Arrange
@@ -627,14 +670,29 @@ class _FakeClient extends Fake implements Client {
       (userDeviceKeys[userId] ??= _FakeDeviceKeysList()).deviceKeys[deviceId] =
           _FakeDeviceKeys(deviceId);
 
-  void join(String userId, String deviceId, {int expires = 14400000}) =>
-      _setMember(userId, deviceId, {
-        'application': 'm.call',
-        'call_id': '',
-        'device_id': deviceId,
-        'created_ts': DateTime.now().millisecondsSinceEpoch,
-        'expires': expires,
-      });
+  void join(
+    String userId,
+    String deviceId, {
+    int? expires = 14400000,
+    DateTime? createdAt,
+  }) => _setMember(userId, deviceId, {
+    'application': 'm.call',
+    'call_id': '',
+    'device_id': deviceId,
+    'created_ts': (createdAt ?? DateTime.now()).millisecondsSinceEpoch,
+    'expires': ?expires,
+  });
+
+  void setRoomMembership(String userId, String membership) {
+    final event = StrippedStateEvent(
+      type: EventTypes.RoomMember,
+      content: {'membership': membership},
+      senderId: userId,
+      stateKey: userId,
+    );
+    (_room.states[EventTypes.RoomMember] ??= {})[userId] = event;
+    onRoomState.add((roomId: '!room', state: event));
+  }
 
   void leave(String userId, String deviceId) =>
       _setMember(userId, deviceId, {});

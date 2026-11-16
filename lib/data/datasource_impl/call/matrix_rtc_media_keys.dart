@@ -18,7 +18,7 @@ typedef ReceivedMediaKey = ({
   List<int> key,
 });
 
-typedef _Membership = ({CallMemberDevice device, int? expiresAt});
+typedef _Membership = ({CallMemberDevice device, int expiresAt});
 
 /// The media keys of an encrypted call (DECISION.md D14): each device sends
 /// its own key to the others over Olm, a new one when someone leaves.
@@ -34,6 +34,8 @@ class MatrixRtcMediaKeys {
   // MSC4143's delay: a slow sync still gets the key before it encrypts.
   static const useKeyDelay = Duration(seconds: 5);
   static const retryDelay = Duration(seconds: 2);
+  // A membership without `expires` lasts 4 h, as other MatrixRTC clients assume.
+  static const _defaultExpiry = 4 * 60 * 60 * 1000;
   static const _maxRetries = 3;
   static const _rotationGracePeriod = Duration(seconds: 10);
   static const _keyringSize = 256;
@@ -157,7 +159,8 @@ class MatrixRtcMediaKeys {
             .where(
               (update) =>
                   update.roomId == _roomId &&
-                  update.state.type == _memberEventType,
+                  (update.state.type == _memberEventType ||
+                      update.state.type == EventTypes.RoomMember),
             )
             .listen((_) => _queueRollout()),
       );
@@ -333,8 +336,16 @@ class MatrixRtcMediaKeys {
     final now = _now().millisecondsSinceEpoch;
     return [
       for (final event in events)
-        if (_membershipOf(event, now) case final membership?) membership,
+        if (!_hasLeft(room, event.senderId))
+          if (_membershipOf(event, now) case final membership?) membership,
     ];
+  }
+
+  // Members are lazy loaded: only a known membership other than join excludes.
+  static bool _hasLeft(Room? room, String userId) {
+    final membership = room?.states[EventTypes.RoomMember]?[userId]?.content
+        .tryGet<String>('membership');
+    return membership != null && membership != Membership.join.name;
   }
 
   _Membership? _membershipOf(StrippedStateEvent event, int now) {
@@ -348,9 +359,9 @@ class MatrixRtcMediaKeys {
     final createdTs =
         content.tryGet<int>('created_ts') ??
         (event is Event ? event.originServerTs.millisecondsSinceEpoch : now);
-    final expires = content.tryGet<int>('expires') ?? 0;
-    final expiresAt = expires > 0 ? createdTs + expires : null;
-    if (expiresAt != null && expiresAt <= now) return null;
+    final expiresAt =
+        createdTs + (content.tryGet<int>('expires') ?? _defaultExpiry);
+    if (expiresAt <= now) return null;
     return (
       device: (
         userId: event.senderId,
@@ -366,8 +377,7 @@ class MatrixRtcMediaKeys {
   void _watchExpiry(List<_Membership> memberships) {
     _expiry?.cancel();
     final expiries = [
-      for (final membership in memberships)
-        if (membership.expiresAt case final expiresAt?) expiresAt,
+      for (final membership in memberships) membership.expiresAt,
     ];
     if (expiries.isEmpty) return;
     final next = DateTime.fromMillisecondsSinceEpoch(expiries.reduce(min));
