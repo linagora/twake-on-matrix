@@ -43,9 +43,9 @@ class AppAdaptiveScaffold extends StatelessWidget {
                           builder: (_) => secondaryBody != null
                               ? _secondaryBodyWidget(
                                   context,
-                                  isWebAndDesktop: false,
+                                  isDesktopLayout: false,
                                 )
-                              : _bodyWidget(context, isWebAndDesktop: false),
+                              : _bodyWidget(context, isDesktopLayout: false),
                         ),
                         const WidthPlatformBreakpoint(
                           begin: ResponsiveUtils.minTabletWidth,
@@ -86,12 +86,12 @@ class AppAdaptiveScaffold extends StatelessWidget {
 
   Widget _secondaryBodyWidget(
     BuildContext context, {
-    bool isWebAndDesktop = true,
+    bool isDesktopLayout = true,
   }) {
     return Padding(
       padding: AdaptiveScaffoldRouteStyle.secondaryBodyWidgetPadding(
         context,
-        isWebAndDesktop,
+        isDesktopLayout,
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -107,11 +107,11 @@ class AppAdaptiveScaffold extends StatelessWidget {
     );
   }
 
-  Widget _bodyWidget(BuildContext context, {bool isWebAndDesktop = true}) {
+  Widget _bodyWidget(BuildContext context, {bool isDesktopLayout = true}) {
     return Padding(
       padding: AdaptiveScaffoldRouteStyle.bodyWidgetPadding(
         context,
-        isWebAndDesktop,
+        isDesktopLayout,
       ),
       child: body,
     );
