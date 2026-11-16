@@ -223,6 +223,58 @@ void main() {
     expect(await _shown(), isEmpty);
   });
 
+  // Review of #3626 (activity_reactions_store.dart:69): from room version 11
+  // the redacted event is named in the content only; older rooms name it at
+  // the top level of the redaction.
+  for (final (name, redaction) in <(String, Map<String, Object?>)>[
+    (
+      'a reaction taken back in a room of version 11 (redacted id in the '
+          'content only) leaves the list',
+      {
+        'type': EventTypes.Redaction,
+        'event_id': r'$undo',
+        'sender': _frank,
+        'origin_server_ts': (9, 6).utc.millisecondsSinceEpoch,
+        'content': {'redacts': r'$r1'},
+      },
+    ),
+    (
+      'a reaction taken back in an older room (redacted id at the top level '
+          'only) leaves the list',
+      {
+        'type': EventTypes.Redaction,
+        'event_id': r'$undo',
+        'sender': _frank,
+        'redacts': r'$r1',
+        'origin_server_ts': (9, 6).utc.millisecondsSinceEpoch,
+        'content': <String, Object?>{},
+      },
+    ),
+  ]) {
+    test(name, () async {
+      await _syncTeam([
+        messageEvent((
+          id: r'$mine',
+          sender: threadOwner,
+          body: 'the deck is ready',
+          at: 9.utc,
+        )),
+        reactionEvent((
+          id: r'$r1',
+          sender: _frank,
+          target: r'$mine',
+          key: '🎉',
+          at: (9, 5).utc,
+        )),
+      ]);
+      expect(await _shown(), hasLength(1));
+
+      await _syncTeam([redaction]);
+
+      expect(await _shown(), isEmpty);
+    });
+  }
+
   test('the newest first, 50 at most', () async {
     await _syncTeam([
       messageEvent((

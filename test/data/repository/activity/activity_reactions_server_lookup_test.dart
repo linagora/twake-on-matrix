@@ -246,6 +246,92 @@ void main() {
 
     expect(_account.server.callsTo(_lookupOf(r'$after')), hasLength(1));
   });
+
+  // Review of #3626 (activity_reactions_store.dart:79): a logout or an
+  // account switch forgets the reactions; a lookup still waiting for the
+  // server then brings nothing back.
+  group('a lookup still waiting for the server at the logout', () {
+    setUp(() async {
+      _account.server
+        ..answer(
+          _lookupOf(r'$old'),
+          _oldMessage((id: r'$old', sender: threadOwner)),
+        )
+        ..hold(_lookupOf(r'$old'));
+      addTearDown(() => _account.server.release(_lookupOf(r'$old')));
+      await _syncTeam([
+        reactionEvent((
+          id: r'$r1',
+          sender: _frank,
+          target: r'$old',
+          key: '❤️',
+          at: 10.utc,
+        )),
+      ]);
+      await _shown();
+      expect(_account.server.callsTo(_lookupOf(r'$old')), hasLength(1));
+
+      // The same user logs in again: its message is still « mine », so only
+      // the logout can keep the late answer out.
+      _account.server.answer(const ServerRoute.get('sync'), {
+        'next_batch': 's3',
+      });
+      await _account.logOutThenLogIn(threadOwner);
+      await _account.receiveRoomState(const []);
+    });
+
+    test('adds nothing when the server answers after the logout', () async {
+      _account.server.release(_lookupOf(r'$old'));
+
+      expect(await _shown(), isEmpty);
+    });
+
+    test('a reaction after the login is looked up and listed alone', () async {
+      _account.server.release(_lookupOf(r'$old'));
+      await _shown();
+      _account.server.answer(
+        _lookupOf(r'$after'),
+        _oldMessage((id: r'$after', sender: threadOwner)),
+      );
+
+      await _syncTeam([
+        reactionEvent((
+          id: r'$r2',
+          sender: _grace,
+          target: r'$after',
+          key: '👍',
+          at: 12.utc,
+        )),
+      ]);
+
+      expect((await _shown()).map((r) => (r.eventId, r.emoji)), [
+        (r'$after', '👍'),
+      ]);
+      expect(_account.server.callsTo(_lookupOf(r'$after')), hasLength(1));
+    });
+
+    test('does not hold back the reactions after the login while it '
+        'waits', () async {
+      _account.server.answer(
+        _lookupOf(r'$after'),
+        _oldMessage((id: r'$after', sender: threadOwner)),
+      );
+
+      await _syncTeam([
+        reactionEvent((
+          id: r'$r2',
+          sender: _grace,
+          target: r'$after',
+          key: '👍',
+          at: 12.utc,
+        )),
+      ]);
+
+      expect((await _shown()).map((r) => (r.eventId, r.emoji)), [
+        (r'$after', '👍'),
+      ]);
+    });
+  });
 }
 
 late ThreadAccount _account;
