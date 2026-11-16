@@ -561,8 +561,8 @@ class ChatListController extends State<ChatList>
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         if (room.isUnread) {
-          await room.markUnread(false);
           await _markAsRead(room);
+          await room.markUnread(false);
         } else {
           await room.markUnread(true);
         }

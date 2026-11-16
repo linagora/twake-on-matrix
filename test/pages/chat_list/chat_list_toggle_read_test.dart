@@ -85,4 +85,28 @@ void main() {
     verify(room.markUnread(false)).called(1);
     verify(room.setReadMarker(r'$last', mRead: r'$last')).called(1);
   });
+
+  testWidgets(
+    'toggleRead_onManuallyUnreadRoomWithOwnLastEvent_stillSendsReceipt',
+    (tester) async {
+      // Arrange
+      final event = MockEvent();
+      when(event.eventId).thenReturn(r'$own');
+      when(room.lastEvent).thenReturn(event);
+      when(room.hasNewMessages).thenReturn(false);
+      var markedUnread = true;
+      when(room.isUnread).thenAnswer((_) => markedUnread);
+      when(room.markUnread(false)).thenAnswer((_) async {
+        markedUnread = false;
+      });
+      await pumpApp(tester);
+
+      // Act
+      await toggleRead(tester);
+
+      // Assert
+      verify(room.markUnread(false)).called(1);
+      verify(room.setReadMarker(r'$own', mRead: r'$own')).called(1);
+    },
+  );
 }
