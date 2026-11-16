@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 
@@ -125,6 +127,26 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Mark as read'), findsNWidgets(2));
+  });
+
+  // Review of PR #3624 (activity_page.dart:30): a failure (an Exception) is
+  // handled as above; a bug (an Error) is not swallowed. The button does
+  // not wait for « Mark as read »: what escapes it is collected here.
+  testWidgets('when « Mark as read » hits a bug, the error is not '
+      'swallowed', (tester) async {
+    final bug = StateError('bug');
+    repository.markReadError = bug;
+    await pumpActivityPage(tester, ActivityPageSetup(repository: repository));
+    await selectFilter(tester, 'Unread');
+
+    final escaped = <Object>[];
+    await runZonedGuarded(() async {
+      await tester.tap(find.text('Mark as read').first);
+      await tester.pumpAndSettle();
+    }, (error, _) => escaped.add(error));
+    await tester.pumpAndSettle();
+
+    expect(escaped, [same(bug)]);
   });
 
   testWidgets('touching an unread room opens the room', (tester) async {

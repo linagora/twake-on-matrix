@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/event/twake_inapp_event_types.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_action_enum.dart';
@@ -58,7 +59,7 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   List<AdaptiveDestinationEnum> get destinations => [
     AdaptiveDestinationEnum.contacts,
     AdaptiveDestinationEnum.rooms,
-    AdaptiveDestinationEnum.activity,
+    if (AppConfig.threadsEnabled) AdaptiveDestinationEnum.activity,
     AdaptiveDestinationEnum.settings,
   ];
 
@@ -100,7 +101,9 @@ class AppAdaptiveScaffoldBodyController extends State<AppAdaptiveScaffoldBody>
   }
 
   void _jumpToPageByIndex() {
-    pageController.jumpToPage(activeNavigationBarNotifier.value.index);
+    pageController.jumpToPage(
+      destinations.indexOf(activeNavigationBarNotifier.value),
+    );
   }
 
   void _onPopInvoked(_) {

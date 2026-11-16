@@ -87,6 +87,7 @@ class ServerRoute {
 /// What the homeserver answers when a route fails.
 enum ServerError {
   notFound(404, 'M_NOT_FOUND'),
+  forbidden(403, 'M_FORBIDDEN'),
   down(500, 'M_UNKNOWN');
 
   const ServerError(this.status, this.errcode);
@@ -405,6 +406,7 @@ class ThreadAccount extends TwakeClient {
     bool accountDataUnreadable = false,
     List<StrippedStateEvent> storedTeamRoomStates = const [],
     List<Map<String, Object?>>? storedTimeline,
+    super.syncFilter,
   }) : super(
          'thread-account-test',
          database: _SyncDatabase(

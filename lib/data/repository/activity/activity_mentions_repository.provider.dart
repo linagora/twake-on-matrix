@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/data/datasource_impl/activity/activity_mentions_datasource.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository_impl.dart';
-import 'package:twake_chat/data/repository/activity/activity_repository.provider.dart';
+import 'package:twake_chat/domain/activity/usecases/watch_unread_mention_count_use_case.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_mentions_repository.dart';
 
