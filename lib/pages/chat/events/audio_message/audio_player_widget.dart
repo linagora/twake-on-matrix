@@ -19,7 +19,6 @@ import 'package:twake_chat/widgets/file_widget/file_tile_widget.dart';
 import 'package:twake_chat/widgets/file_widget/message_file_tile_style.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
@@ -120,26 +119,23 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     matrix.voiceMessageEvent.value = widget.event;
     await matrix.audioPlayer.stop();
     await matrix.audioPlayer.dispose();
-    File? file;
+    late File file;
     MatrixFile? matrixFile;
 
     matrix.currentAudioStatus.value = AudioPlayerStatus.downloading;
     try {
       matrixFile = await widget.event.downloadAndDecryptAttachment();
 
-      if (!kIsWeb) {
-        final tempDir = await getTemporaryDirectory();
-        final fileName = Uri.encodeComponent(
-          widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
-        );
-        file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
+      final tempDir = await getTemporaryDirectory();
+      final fileName = Uri.encodeComponent(
+        widget.event.attachmentOrThumbnailMxcUrl()!.pathSegments.last,
+      );
+      file = File('${tempDir.path}/${fileName}_${matrixFile.name}');
 
-        await file.writeAsBytes(matrixFile.bytes);
+      await file.writeAsBytes(matrixFile.bytes);
 
-        if (Platform.isIOS &&
-            matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await handleOggAudioFileIniOS(file);
-        }
+      if (Platform.isIOS && matrixFile.mimeType.toLowerCase() == 'audio/ogg') {
+        file = await handleOggAudioFileIniOS(file);
       }
 
       matrix.currentAudioStatus.value = AudioPlayerStatus.downloaded;
@@ -154,13 +150,7 @@ class AudioPlayerState extends State<AudioPlayerWidget>
     matrix.audioPlayer = AudioPlayer();
     matrix.voiceMessageEvent.value = widget.event;
 
-    if (file != null) {
-      matrix.audioPlayer.setFilePath(file.path);
-    } else {
-      await matrix.audioPlayer.setAudioSource(
-        audioSourceFromMatrixFile(matrixFile),
-      );
-    }
+    matrix.audioPlayer.setFilePath(file.path);
 
     // Set up auto-dispose listener managed globally in MatrixState
     matrix.setupAudioPlayerAutoDispose();

@@ -9,7 +9,6 @@ import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/widgets/twake_components/twake_icon_button.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -168,7 +167,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
   }
 
   Future<void> _handlePlayAudioAgain(BuildContext context) async {
-    File? file;
+    late File file;
     MatrixFile? matrixFile;
     await matrix?.audioPlayer.stop();
     await matrix?.audioPlayer.dispose();
@@ -180,23 +179,20 @@ class ChatAudioPlayerWidget extends StatelessWidget {
     try {
       matrixFile = await currentEvent?.downloadAndDecryptAttachment();
 
-      if (!kIsWeb) {
-        final tempDir = await getTemporaryDirectory();
-        final mxcUrl = currentEvent?.attachmentOrThumbnailMxcUrl();
-        final fileName = Uri.encodeComponent(mxcUrl?.pathSegments.last ?? '');
-        file = File('${tempDir.path}/${fileName}_${matrixFile?.name}');
+      final tempDir = await getTemporaryDirectory();
+      final mxcUrl = currentEvent?.attachmentOrThumbnailMxcUrl();
+      final fileName = Uri.encodeComponent(mxcUrl?.pathSegments.last ?? '');
+      file = File('${tempDir.path}/${fileName}_${matrixFile?.name}');
 
-        final bytes = matrixFile?.bytes;
+      final bytes = matrixFile?.bytes;
 
-        if (bytes == null || bytes.isEmpty) {
-          throw Exception('Downloaded file has no content');
-        }
-        await file.writeAsBytes(bytes);
+      if (bytes == null || bytes.isEmpty) {
+        throw Exception('Downloaded file has no content');
+      }
+      await file.writeAsBytes(bytes);
 
-        if (Platform.isIOS &&
-            matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
-          file = await _handleOggAudioFileIniOS(file);
-        }
+      if (Platform.isIOS && matrixFile?.mimeType.toLowerCase() == 'audio/ogg') {
+        file = await _handleOggAudioFileIniOS(file);
       }
 
       matrix?.currentAudioStatus.value = AudioPlayerStatus.downloaded;
@@ -218,18 +214,7 @@ class ChatAudioPlayerWidget extends StatelessWidget {
 
     matrix!.audioPlayer = AudioPlayer();
 
-    if (file != null) {
-      await matrix?.audioPlayer.setFilePath(file.path);
-    } else if (matrixFile != null) {
-      await matrix?.audioPlayer.setAudioSource(
-        audioSourceFromMatrixFile(matrixFile),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context)!.couldNotPlayAudioFile)),
-      );
-      return;
-    }
+    await matrix?.audioPlayer.setFilePath(file.path);
 
     // Set up auto-dispose listener managed globally in MatrixState
     matrix?.setupAudioPlayerAutoDispose();

@@ -169,9 +169,8 @@ abstract class ClientManager {
   static Future<void> _syncKeychainForClient(Client client) =>
       KeychainSharingManager.removeAppSession(client);
 
-  static NativeImplementations get nativeImplementations => kIsWeb
-      ? const NativeImplementationsDummy()
-      : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
+  static NativeImplementations get nativeImplementations =>
+      NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
   static Future<Client> createClient(String clientName) async {
     final database = await MatrixSdkDatabase.init(

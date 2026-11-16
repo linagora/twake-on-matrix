@@ -15,28 +15,11 @@ SyncUpdate _parseSyncResponseNative(Uint8List responseBody) {
   return SyncUpdate.fromJson(json as Map<String, Object?>);
 }
 
-/// Top-level function for web JSON decoding via `compute()`.
-/// Returns only the raw [Map] because structured clone (used by web workers)
-/// transfers Maps/Lists/primitives efficiently, whereas custom Dart class
-/// instances like [SyncUpdate] do not. [SyncUpdate.fromJson] is therefore
-/// called on the main thread after the transfer.
-Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
-  final responseString = utf8.decode(responseBody);
-  return jsonDecode(responseString) as Map<String, Object?>;
-}
-
 /// A [Client] subclass that offloads the heavy JSON parsing of `/sync`
-/// responses to a background isolate / web worker.
+/// responses to a background isolate.
 ///
-/// On **native** platforms (iOS, Android, macOS, Linux), the entire parsing
-/// pipeline (`utf8.decode` + `jsonDecode` + `SyncUpdate.fromJson`) runs in
-/// a background isolate via `compute()`.
-///
-/// On **web**, only `utf8.decode` + `jsonDecode` (~80% of parsing time) runs
-/// via `compute()`. On Flutter Web with WASM, this executes at near-native
-/// speed (not in a separate thread). `SyncUpdate.fromJson` remains on the
-/// main thread because structured clone cannot transfer custom Dart class
-/// instances — only Maps/Lists/primitives pass without overhead.
+/// The entire parsing pipeline (`utf8.decode` + `jsonDecode` +
+/// `SyncUpdate.fromJson`) runs in a background isolate via `compute()`.
 ///
 /// ## Maintenance notice
 ///
@@ -127,14 +110,7 @@ class TwakeClient extends Client {
     }
 
     try {
-      if (kIsWeb) {
-        // On web: run utf8.decode + jsonDecode via compute() (near-native
-        // speed on WASM), then call SyncUpdate.fromJson on the main thread.
-        final json = await compute(_jsonDecodeSyncResponseWeb, responseBody);
-        return SyncUpdate.fromJson(json);
-      }
-
-      // On native: offload the entire pipeline to a background isolate.
+      // Offload the entire pipeline to a background isolate.
       return await compute(_parseSyncResponseNative, responseBody);
     } catch (e) {
       // Re-throw parsing errors with context so _innerSync's catch chain
