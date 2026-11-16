@@ -1,3 +1,5 @@
+import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
+import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/config/app_constants.dart';
 import 'package:twake_chat/presentation/mixins/go_to_direct_chat_mixin.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
@@ -159,6 +161,34 @@ class UrlLauncher with GoToDraftChatMixin {
     }
   }
 
+  /// A link to a thread reply opens the thread screen on it, the room beneath.
+  Future<void> _openEvent(
+    BuildContext context,
+    Room room,
+    String eventId,
+  ) async {
+    Event? target;
+    try {
+      target = await room
+          .getEventById(eventId)
+          .timeout(const Duration(seconds: 5));
+    } catch (e) {
+      Logs().w('UrlLauncher: unable to load the linked event', e);
+    }
+    if (!context.mounted) return;
+    final openChat = context.findAncestorStateOfType<ChatController>();
+    // A link to the open chat scrolls it: navigating to the URL it already
+    // shows would not notify it again. A thread reply opens its thread instead.
+    final threadRootId = target == null
+        ? null
+        : ThreadRules.threadRootOf(target);
+    if (threadRootId == null && openChat?.roomId == room.id) {
+      await openChat!.scrollToEventIdAndHighlight(eventId);
+      return;
+    }
+    context.goToRoomWithEvent(room.id, eventId, threadRootId: threadRootId);
+  }
+
   /// A room the user has joined or is invited to, as [openMatrixToUrl]
   /// opens directly.
   bool _isOpenableRoom(Room? room) =>
@@ -212,14 +242,11 @@ class UrlLauncher with GoToDraftChatMixin {
         );
         return;
       }
-      final openChat = context.findAncestorStateOfType<ChatController>();
-      // A link to the open chat scrolls it: navigating to the URL it already
-      // shows would not notify it again.
-      if (event != null && openChat?.roomId == room.id) {
-        await openChat!.scrollToEventIdAndHighlight(event);
-        return;
+      if (event != null) {
+        await _openEvent(context, room, event);
+      } else {
+        RoomRoute(roomid: room.id).go(context);
       }
-      RoomRoute(roomid: room.id, event: event).go(context);
     } else if (identityParts.primaryIdentifier.sigil == '@') {
       if (room?.isDirectChat == true) {
         await showAdaptiveBottomSheet(

@@ -611,6 +611,12 @@ class ChatController extends ConsumerState<Chat>
 
   Map<String, List<Event>> _threadEventsByRoot = const {};
 
+  /// The thread counters of the account; widgets listen to it themselves.
+  ThreadUnreadStore? get threadUnreadStore => client.threadUnread;
+
+  int threadUnreadCount(String rootId) =>
+      threadUnreadStore?.unreadCount(ThreadRef(roomId!, rootId)) ?? 0;
+
   /// Groups the thread replies (and their edits) of the live timeline by root,
   /// so each card does not scan the whole timeline.
   void refreshThreadGrouping() {
@@ -2770,6 +2776,7 @@ class ChatController extends ConsumerState<Chat>
       pinnedEventsController.handlePopBack(
         popResult: popResult,
         client: client,
+        threadRootId: threadRootId,
       );
     }
   }
@@ -2792,6 +2799,7 @@ class ChatController extends ConsumerState<Chat>
       isInitial: isInitial,
       isUnpin: isUnpin,
       eventId: eventId,
+      threadRootId: threadRootId,
     );
   }
 
@@ -3500,8 +3508,7 @@ class ChatController extends ConsumerState<Chat>
   void initState() {
     super.initState();
     _getRecentReactions = ref.read(getRecentReactionsUseCaseProvider);
-    // The pinned events header is not shown on the thread screen.
-    if (!isThread) _initializePinnedEvents();
+    _initializePinnedEvents();
     _listenOnJumpToEventFromSearch();
     registerPasteShortcutListeners();
     keyboardVisibilitySubscription = keyboardVisibilityController.onChange

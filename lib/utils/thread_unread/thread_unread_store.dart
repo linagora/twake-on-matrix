@@ -6,13 +6,20 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/thread/models/thread_unread_snapshot_json.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/utils/thread_unread/thread_prefs_local_writes.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
+
+/// A [ChangeNotifier] that its owner tells from outside.
+class _Signal extends ChangeNotifier {
+  void notify() => notifyListeners();
+}
 
 /// Marks the generation of the store: [ThreadUnreadStore.clear] starts a new
 /// one, so a lookup started before it must not bring a follow back.
@@ -23,9 +30,17 @@ class _LookupEpoch {}
 /// start (or a web reload) shows them before the next sync carries them.
 // TODO: [transitional] #3599
 class ThreadUnreadStore extends ChangeNotifier {
-  ThreadUnreadStore({required Client client}) : _client = client;
+  ThreadUnreadStore({required Client client, ThreadPrefsLocalWrites? writes})
+    : _client = client,
+      localWrites = writes ?? ThreadPrefsLocalWrites() {
+    // What the user just chose here applies at once, without a sync.
+    localWrites.changes.listen((_) => _prefsChanged());
+  }
 
   final Client _client;
+
+  /// The choices this client wrote, until the sync echoes them.
+  final ThreadPrefsLocalWrites localWrites;
 
   final Map<String, Map<String, ThreadCounts>> _counts = {};
   final Set<ThreadRef> _followed = {};
@@ -47,6 +62,9 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// loses its `m.relates_to` and only this tells it was in a thread.
   final Map<String, Set<String>> _threadReplyIds = {};
   final Queue<ReplyRef> _threadReplyOrder = Queue();
+
+  /// The newest reply seen live in each thread. Memory only.
+  final Map<ThreadRef, Event> _latestReplies = {};
 
   // A count cap for the account, not a per-room one.
   static const int _maxThreadReplyIds = 4000;
@@ -91,6 +109,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _newestMainTs.remove(room.value);
     _threadReplyIds.remove(room.value);
     _threadReplyOrder.removeWhere(room.ownsReply);
+    _latestReplies.removeWhere((thread, _) => room.owns(thread));
     return hadCounts || hadFollow != _followed.length;
   }
 
@@ -119,7 +138,60 @@ class ThreadUnreadStore extends ChangeNotifier {
     _persist();
   }
 
-  bool isFollowed(ThreadRef thread) => _followed.contains(thread);
+  /// The one rule: an explicit choice wins over taking part; a muted thread
+  /// stays followed.
+  ThreadFollow followOf(ThreadRef thread) => ThreadFollow.resolve(
+    participated: _followed.contains(thread),
+    pref: prefOf(thread),
+  );
+
+  bool isFollowed(ThreadRef thread) => followOf(thread).isFollowing;
+
+  bool isMuted(ThreadRef thread) => followOf(thread).isMuted;
+
+  /// The explicit choice of the user about the thread, if any.
+  ThreadPref? prefOf(ThreadRef thread) => _prefs.of(thread);
+
+  /// What the user chose here and the sync did not echo yet, else the
+  /// choices of `app.twake.chat.thread_prefs` read from the account data of
+  /// the client; parsed again only when its content was replaced.
+  ThreadPrefs get _prefs => localWrites.latest ?? _syncedPrefs;
+
+  ThreadPrefs get _syncedPrefs {
+    final content = _client.accountData[threadPrefsAccountDataType]?.content;
+    if (!identical(content, _prefsContent)) {
+      _prefsContent = content;
+      _parsedPrefs = ThreadPrefs.fromAccountData(content);
+    }
+    return _parsedPrefs;
+  }
+
+  Map<String, Object?>? _prefsContent;
+  ThreadPrefs _parsedPrefs = const ThreadPrefs.empty();
+
+  /// What a sync may have changed: when the choices were replaced, the
+  /// badges are computed again and the listeners told.
+  void refreshPrefs() {
+    final content = _client.accountData[threadPrefsAccountDataType]?.content;
+    if (identical(content, _announcedPrefsContent)) return;
+    _announcedPrefsContent = content;
+    _prefsChanged();
+  }
+
+  void _prefsChanged() {
+    _counts.keys.map(RoomId.new).forEach(_refreshBadge);
+    notifyListeners();
+  }
+
+  Map<String, Object?>? _announcedPrefsContent;
+
+  final _Signal _resolvedChanges = _Signal();
+
+  /// Told when the resolved state of a thread changed: only the cards redraw,
+  /// no badge depends on it.
+  Listenable get resolvedChanges => _resolvedChanges;
+
+  void refreshResolved() => _resolvedChanges.notify();
 
   /// A thread reply of the live timeline (any sender); the oldest ids go
   /// when the account holds more than [_maxThreadReplyIds].
@@ -127,6 +199,7 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// the thread followed.
   void rememberThreadReply(Event reply) {
     _followIfOwnReply(reply);
+    _rememberLatestReply(reply);
     if (!_addThreadReplyId(ReplyRef(reply.room.id, reply.eventId))) return;
     while (_threadReplyOrder.length > _maxThreadReplyIds) {
       final oldest = _threadReplyOrder.removeFirst();
@@ -134,6 +207,25 @@ class ThreadUnreadStore extends ChangeNotifier {
     }
     _persist();
   }
+
+  void _rememberLatestReply(Event reply) {
+    final rootId = reply.threadRootId;
+    if (rootId == null || !reply.status.isSynced) return;
+    final thread = ThreadRef(reply.room.id, rootId);
+    final known = _latestReplies[thread];
+    if (known == null || !reply.originServerTs.isBefore(known.originServerTs)) {
+      _latestReplies[thread] = reply;
+    }
+  }
+
+  /// The newest reply of the thread seen live, if any.
+  Event? latestReplyOf(ThreadRef thread) => _latestReplies[thread];
+
+  /// The threads the user follows and did not mute.
+  Iterable<ThreadRef> get followedThreads => {
+    ..._followed,
+    ..._prefs.threads,
+  }.where((thread) => isFollowed(thread) && !isMuted(thread));
 
   void _followIfOwnReply(Event reply) {
     final rootId = reply.threadRootId;
@@ -220,6 +312,7 @@ class ThreadUnreadStore extends ChangeNotifier {
     _newestMainTs.clear();
     _threadReplyIds.clear();
     _threadReplyOrder.clear();
+    _latestReplies.clear();
     notifyListeners();
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -283,8 +376,10 @@ class ThreadUnreadStore extends ChangeNotifier {
   /// Badge of the threads of the room (without its main timeline).
   int badgeOf(Room room) => _badges[room.id] ?? 0;
 
-  int unreadCount(ThreadRef thread) =>
-      _counts[thread.roomId]?[thread.rootEventId]?.notificationCount ?? 0;
+  /// Like the web: a muted thread has none.
+  int unreadCount(ThreadRef thread) => isMuted(thread)
+      ? 0
+      : _counts[thread.roomId]?[thread.rootEventId]?.notificationCount ?? 0;
 
   List<ThreadUnread> threadsOf(Room room) => _threadsIn(RoomId(room.id));
 
@@ -298,12 +393,13 @@ class ThreadUnreadStore extends ChangeNotifier {
     rootEventId: thread.rootEventId,
     notificationCount: counts.notificationCount,
     highlightCount: counts.highlightCount,
-    followed: _followed.contains(thread),
+    followed: isFollowed(thread),
+    muted: isMuted(thread),
     lastActivity: _activity[thread],
   );
 
   /// Participation as the server tells it: the user wrote the root or
-  /// replied (P1; the explicit follow choice comes with P2). The root stored
+  /// replied (the explicit follow choice applies on top, see [isFollowed]). The root stored
   /// in the database keeps the aggregate of the day it was stored, so unless
   /// it already says "participated" the server is asked. A "no" is kept (the
   /// user's own event turns it into a follow); a failed call is asked again
@@ -311,7 +407,8 @@ class ThreadUnreadStore extends ChangeNotifier {
   Future<void> _resolveFollowed(ThreadRef thread) {
     final running = _resolving[thread];
     if (running != null) return running;
-    if (_isSettled(thread)) return Future.value();
+    // The choice of the user decides alone: nothing to ask the server.
+    if (prefOf(thread) != null || _isSettled(thread)) return Future.value();
     return _resolving[thread] = _runLookup(thread);
   }
 
@@ -380,6 +477,53 @@ class ThreadUnreadStore extends ChangeNotifier {
     return _client.database.getEventById(thread.rootEventId, room);
   }
 
+  /// The root of a thread, for its last reply: the local database first,
+  /// the server when the stored root holds no thread aggregate. With
+  /// [serverFirst] (no reply of the session known, the stored aggregate may
+  /// be old) the server first, the local database when it cannot be reached.
+  /// Asks the server like the follow lookups do, at most
+  /// [_maxLookupsInFlight] at a time. Null when the room is unknown.
+  Future<Event?> threadRoot(
+    ThreadRef thread, {
+    bool serverFirst = false,
+  }) async {
+    final room = _client.getRoomById(thread.roomId);
+    if (room == null) return null;
+    await _acquireLookupSlot();
+    try {
+      return serverFirst
+          ? await _freshOrStoredRoot(thread, room)
+          : await _storedOrFreshRoot(thread, room);
+    } finally {
+      _releaseLookupSlot();
+    }
+  }
+
+  Future<Event?> _storedOrFreshRoot(ThreadRef thread, Room room) async {
+    final stored = await _storedRoot(thread);
+    if (stored != null && _hasThreadAggregate(stored)) return stored;
+    return _freshRoot(thread, room);
+  }
+
+  Future<Event?> _freshOrStoredRoot(ThreadRef thread, Room room) async {
+    try {
+      return await _freshRoot(thread, room);
+    } on Object {
+      final stored = await _storedRoot(thread);
+      if (stored == null) rethrow;
+      return stored;
+    }
+  }
+
+  Future<Event> _freshRoot(ThreadRef thread, Room room) async =>
+      Event.fromMatrixEvent(
+        await _client.getOneRoomEvent(thread.roomId, thread.rootEventId),
+        room,
+      );
+
+  bool _hasThreadAggregate(MatrixEvent event) =>
+      (event.unsigned?['m.relations'] as Map?)?['m.thread'] != null;
+
   bool _isParticipant(MatrixEvent event) =>
       event.senderId == _client.userID || _participated(event) == true;
 
@@ -435,6 +579,24 @@ extension RoomPendingNotification on Room {
       membership == Membership.leave ||
       (unreadBadgeCount == 0 &&
           client.threadUnread?.hasPendingFollowLookup(this) != true);
+}
+
+/// One decision for every consumer of the room counters: the server stops
+/// counting thread notifications in the room's own counters.
+extension RoomUnreadWithThreads on Room {
+  bool get isUnreadWithThreads => isUnread || unreadBadgeCount > 0;
+
+  bool get isUnreadOrInvitedWithThreads =>
+      isUnreadOrInvited || unreadBadgeCount > 0;
+
+  /// Mentions of the room and of any of its threads.
+  int get highlightCountWithThreads {
+    if (!AppConfig.threadsEnabled) return highlightCount;
+    final store = client.threadUnread;
+    return highlightCount +
+        (store?.threadsOf(this).fold<int>(0, (n, t) => n + t.mentionCount) ??
+            0);
+  }
 }
 
 extension MarkRoomAndThreadsRead on Room {
