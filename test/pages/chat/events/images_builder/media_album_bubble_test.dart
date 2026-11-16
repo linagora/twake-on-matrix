@@ -6,6 +6,8 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/image_bubble.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_bubble.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
+import 'package:twake_chat/pages/chat/events/message_content_style.dart';
+import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.provider.dart';
 import 'package:twake_chat/utils/manager/upload_manager/upload_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
@@ -107,8 +109,15 @@ class _Harness {
     final e = events(List.filled(2, EventStatus.sending));
     await pumpAlbum(tester, e);
 
-    expect(tileSize(tester, e[0]).width * 2 + 2, 256);
-    expect(tester.getSize(find.byType(MediaAlbumBubble<Event>)).width, 256);
+    // Platform.isXxx cannot be faked, so the expected width follows the host.
+    final imageWidth = PlatformInfos.isDesktop
+        ? MessageContentStyle.imageBubbleWidthForWeb * 0.8
+        : MessageContentStyle.imageBubbleWidthForMobileAndTablet;
+    expect(tileSize(tester, e[0]).width * 2 + 2, imageWidth);
+    expect(
+      tester.getSize(find.byType(MediaAlbumBubble<Event>)).width,
+      imageWidth,
+    );
   }
 
   /// A long-press menu opens for the image under the finger.
