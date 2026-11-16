@@ -10,6 +10,7 @@ enum MessageContextMenuAction {
   startThread,
   forward,
   copy,
+  copyLink,
   report,
   edit,
   delete,
@@ -32,6 +33,9 @@ enum MessageContextMenuAction {
         break;
       case MessageContextMenuAction.copy:
         Navigator.of(context).pop('copy');
+        break;
+      case MessageContextMenuAction.copyLink:
+        Navigator.of(context).pop('copyLink');
         break;
       case MessageContextMenuAction.report:
         Navigator.of(context).pop('report');
@@ -70,6 +74,8 @@ enum MessageContextMenuAction {
         return L10n.of(context)!.forward;
       case MessageContextMenuAction.copy:
         return L10n.of(context)!.copy;
+      case MessageContextMenuAction.copyLink:
+        return L10n.of(context)!.copyLink;
       case MessageContextMenuAction.report:
         return L10n.of(context)!.report;
       case MessageContextMenuAction.select:
@@ -106,6 +112,8 @@ enum MessageContextMenuAction {
         return Icons.shortcut;
       case MessageContextMenuAction.copy:
         return Icons.content_copy;
+      case MessageContextMenuAction.copyLink:
+        return Icons.link;
       case MessageContextMenuAction.report:
         return Icons.flag_outlined;
       case MessageContextMenuAction.select:
@@ -135,6 +143,7 @@ enum MessageContextMenuAction {
       case MessageContextMenuAction.forward:
       case MessageContextMenuAction.edit:
       case MessageContextMenuAction.copy:
+      case MessageContextMenuAction.copyLink:
       case MessageContextMenuAction.report:
       case MessageContextMenuAction.select:
       case MessageContextMenuAction.saveToDownload:

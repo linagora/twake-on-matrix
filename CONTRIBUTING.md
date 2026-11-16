@@ -22,6 +22,8 @@ Exactly one per issue. It is set by the issue template.
 
 Labels are grouped in families. The family is the prefix before `::`.
 
+Any label outside this list is removed automatically. A new label is added through a pull request, see [Adding a label](#adding-a-label).
+
 <details open>
 <summary>Severity (bugs only)</summary>
 
@@ -98,13 +100,14 @@ What the issue is waiting for before someone can work on it.
 
 ### What is not a label
 
+- Bug, Feature and Task are [issue types](#issue-type), not labels.
 - Duplicates and issues we will not fix are closed with the matching close reason.
 - Work in progress is shown by the assignee and the linked pull request.
 - Large features are tracked with sub-issues, not with an "epic" label.
 
 ### Adding a label
 
-Open a pull request on this file. A new area needs at least five issues to justify it.
+Open a pull request on this file and on [`.github/labels.yml`](.github/labels.yml). A new area needs at least five issues to justify it.
 
 ## Git workflow
 

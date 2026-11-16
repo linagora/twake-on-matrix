@@ -20,6 +20,10 @@ class _RecordingDatasource implements DirectChatDatasource {
     checked.add((roomId: roomId, contactMxId: contactMxId));
     return false;
   }
+
+  @override
+  String? findDirectChat({required String contactMxId}) =>
+      contactMxId == '@a:s' ? '!dm:s' : null;
 }
 
 void main() {
@@ -37,5 +41,12 @@ void main() {
     );
     expect(datasource.created, ['@a:s']);
     expect(datasource.checked, [(roomId: '!r:s', contactMxId: '@a:s')]);
+  });
+
+  test('hands the lookup to the datasource', () {
+    final repository = DirectChatRepositoryImpl(_RecordingDatasource());
+
+    expect(repository.findDirectChat(contactMxId: '@a:s'), '!dm:s');
+    expect(repository.findDirectChat(contactMxId: '@b:s'), isNull);
   });
 }
