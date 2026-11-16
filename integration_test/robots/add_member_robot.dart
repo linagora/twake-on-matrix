@@ -34,9 +34,8 @@ class AddMemberRobot extends CoreRobot {
   }
 
   PatrolFinder getAgreeInviteMemberBtn() {
-    // `adaptive_dialog` renders Material on Android and Web, Cupertino on
-    // iOS/macOS.
-    if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
+    // `adaptive_dialog` renders Material on Android, Cupertino on iOS/macOS.
+    if (defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('YES'));
     } else {
       return $(
@@ -46,7 +45,7 @@ class AddMemberRobot extends CoreRobot {
   }
 
   PatrolFinder getCancelnviteMemberBtn() {
-    if (kIsWeb || defaultTargetPlatform == TargetPlatform.android) {
+    if (defaultTargetPlatform == TargetPlatform.android) {
       return $(AlertDialog).$(TextButton).containing(find.text('CANCEL'));
     } else {
       return $(

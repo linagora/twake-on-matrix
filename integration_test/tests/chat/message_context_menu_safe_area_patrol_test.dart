@@ -7,7 +7,6 @@ void main() {
     // Mobile-only: the long-press `PullDownMenu` dialog only exists on mobile
     // (web uses a hover action bar), so its SafeArea internals can't be tested
     // on web.
-    mobileOnly: true,
     scenarioBuilder: ($, robots) =>
         MessageContextMenuSafeAreaScenario($, robots),
   );

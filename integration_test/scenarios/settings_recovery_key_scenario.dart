@@ -8,7 +8,7 @@ import '../robots/setting/settings_recovery_key_robot.dart';
 
 /// Mobile-only: copy the recovery key and verify the system clipboard contains
 /// the real key (not the masked bullets). Reads the clipboard via concrete
-/// robots, so this is registered with `mobileOnly: true`.
+/// robots.
 class SettingsRecoveryKeyScenario extends BaseTestScenario {
   SettingsRecoveryKeyScenario(super.$, super.robots);
 

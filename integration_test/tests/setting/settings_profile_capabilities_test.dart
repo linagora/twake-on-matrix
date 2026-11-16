@@ -7,7 +7,6 @@ void main() {
     description:
         'Profile settings hide the edit controls when the server disables '
         'display name and avatar changes',
-    mobileOnly: true,
     login: const (
       serverUrl: String.fromEnvironment('CAPS_DISABLED_SERVER_URL'),
       username: String.fromEnvironment('CAPS_DISABLED_USERNAME'),

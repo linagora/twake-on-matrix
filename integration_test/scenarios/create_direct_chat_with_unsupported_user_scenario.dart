@@ -6,7 +6,7 @@ import '../base/base_test_scenario.dart';
 ///
 /// Searches the chat list for an address on an unreachable homeserver. The two
 /// platforms surface this differently, so the scenario branches on the observed
-/// result state (never on `kIsWeb`):
+/// result state:
 ///
 /// - Mobile offers an external draft tile; opening it and trying to send must
 ///   not persist a room.

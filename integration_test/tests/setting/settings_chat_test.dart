@@ -5,7 +5,6 @@ void main() {
   TestBase().runPatrolTest(
     description:
         'Toggle a chat setting and verify it persists after reopening Settings > Chat',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => SettingsChatToggleScenario($, robots),
   );
 }

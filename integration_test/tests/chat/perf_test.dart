@@ -35,7 +35,6 @@ void main() {
   // `PerfCollector` reads metrics from logcat, so it is skipped on web.
   TestBase().runPatrolTest(
     description: 'Performance: navigation cycles, scroll, chat list',
-    mobileOnly: true,
     scenarioBuilder: ($, robots) => PerfScenario($, robots),
   );
 }
