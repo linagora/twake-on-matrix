@@ -476,6 +476,52 @@ void main() {
       });
     });
 
+    test('run_withARecentLegacyMembershipWithoutExpiry_sendsItTheKey', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..join(
+            '@bob:hs',
+            'B',
+            expires: null,
+            createdAt: time.subtract(const Duration(hours: 3)),
+          );
+
+        // Act
+        start(async);
+
+        // Assert
+        expect(client.sent, ['B@0']);
+      });
+    });
+
+    test('run_withAKickedMemberNotLoadedYet_loadsThemOnceAndSkipsThem', () {
+      fakeAsync((async) {
+        // Arrange
+        client
+          ..addDevice('@bob:hs', 'B')
+          ..addDevice('@carol:hs', 'C')
+          ..addDevice('@dave:hs', 'D')
+          ..serverMemberships['@carol:hs'] = 'leave'
+          ..join('@bob:hs', 'B')
+          ..join('@carol:hs', 'C');
+        start(async);
+
+        // Act
+        client.join('@dave:hs', 'D');
+        async.flushMicrotasks();
+
+        // Assert
+        expect(client.sent, containsAll(['B@0', 'D@0']));
+        expect(client.sent, isNot(contains('C@0')));
+        expect(
+          client.requestedUsers,
+          unorderedEquals(['@bob:hs', '@carol:hs', '@dave:hs']),
+        );
+      });
+    });
+
     test('run_whenStoppedDuringTheDelay_keepsTheNewKeyUnused', () {
       fakeAsync((async) {
         // Arrange
@@ -580,11 +626,28 @@ void main() {
 const _memberType = 'org.matrix.msc3401.call.member';
 
 class _FakeRoom extends Fake implements Room {
+  _FakeRoom(this._client);
+
+  final _FakeClient _client;
+
   @override
   Map<String, Map<String, StrippedStateEvent>> states = {};
 
   @override
   Future<void> postLoad() async {}
+
+  @override
+  Future<User?> requestUser(
+    String mxID, {
+    bool ignoreErrors = false,
+    bool requestState = true,
+    bool? requestProfile,
+  }) async {
+    _client.requestedUsers.add(mxID);
+    final membership = _client.serverMemberships[mxID];
+    if (membership != null) _client.setRoomMembership(mxID, membership);
+    return null;
+  }
 }
 
 class _FakeDeviceKeys extends Fake implements DeviceKeys {
@@ -603,7 +666,9 @@ class _FakeDeviceKeysList extends Fake implements DeviceKeysList {
 }
 
 class _FakeClient extends Fake implements Client {
-  final _room = _FakeRoom();
+  late final _room = _FakeRoom(this);
+  final serverMemberships = <String, String>{};
+  final requestedUsers = <String>[];
   final _afterRefresh = <(String, String)>[];
   final refreshed = <Set<String>>[];
   final sent = <String>[];

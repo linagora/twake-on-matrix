@@ -61,6 +61,7 @@ class MatrixRtcMediaKeys {
 
   /// Keys of devices whose membership has not arrived yet.
   final _pendingKeys = <String, ReceivedMediaKey>{};
+  final _requestedMembers = <String>{};
 
   String get _ownId => '${_client.userID}:${_client.deviceID}';
 
@@ -222,6 +223,8 @@ class MatrixRtcMediaKeys {
 
   Future<void> _rolloutKey() async {
     if (_subscriptions.isEmpty) return;
+    await _loadUnknownMembers();
+    if (_subscriptions.isEmpty) return;
     final members = _refreshMembers();
     // The others take a key from this device once they see its membership.
     if (members == null) return;
@@ -237,6 +240,30 @@ class MatrixRtcMediaKeys {
     // The others get the key before it encrypts anything.
     await Future<void>.delayed(useKeyDelay);
     _useOwnKey();
+  }
+
+  /// Room members are lazy loaded: someone who left before this device
+  /// loaded the room is fetched once, so that they get no key.
+  Future<void> _loadUnknownMembers() async {
+    final room = _client.getRoomById(_roomId);
+    if (room == null) return;
+    final unknown = <String>{
+      for (final event
+          in room.states[_memberEventType]?.values ??
+              const <StrippedStateEvent>[])
+        if (event.senderId != _client.userID &&
+            room.states[EventTypes.RoomMember]?[event.senderId] == null)
+          event.senderId,
+    }.difference(_requestedMembers);
+    _requestedMembers.addAll(unknown);
+    try {
+      await Future.wait([
+        for (final userId in unknown)
+          room.requestUser(userId, ignoreErrors: true, requestProfile: false),
+      ]);
+    } catch (error, stackTrace) {
+      Logs().w('MatrixRtcMediaKeys: member not loaded', error, stackTrace);
+    }
   }
 
   /// The other devices of the call, or null while this device's own
