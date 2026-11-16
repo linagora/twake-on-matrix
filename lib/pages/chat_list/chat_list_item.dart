@@ -99,9 +99,14 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
     }
   }
 
+  double get _avatarSize {
+    if (depth > 0) return ChatListItemStyle.childAvatarSize;
+    if (space != null) return ChatListItemStyle.spaceAvatarSize;
+    return AvatarStyle.defaultSize;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isChild = depth > 0;
     return Padding(
       padding: ChatListItemStyle.padding,
       child: TwakeInkWell(
@@ -134,9 +139,7 @@ class ChatListItem extends StatelessWidget with ChatListItemMixin {
                       child: _ChatListAvatar(
                         room: room,
                         name: displayName,
-                        size: isChild
-                            ? ChatListItemStyle.childAvatarSize
-                            : AvatarStyle.defaultSize,
+                        size: _avatarSize,
                         onTap: onTapAvatar,
                       ),
                     ),

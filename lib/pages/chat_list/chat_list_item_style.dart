@@ -19,6 +19,9 @@ class ChatListItemStyle {
 
   static const double childAvatarSize = 32;
 
+  /// Fits spaceItemHeight minus paddingBody.
+  static const double spaceAvatarSize = 48;
+
   static double unreadBadgeSize(
     bool unread,
     bool hasNewMessages,
