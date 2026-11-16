@@ -84,6 +84,9 @@ class _GatedRepository implements DirectChatRepository {
     required String roomId,
     required String contactMxId,
   }) => usable;
+
+  @override
+  String? findDirectChat({required String contactMxId}) => null;
 }
 
 class _FakeUnblock extends Fake implements UnblockUserInteractor {}

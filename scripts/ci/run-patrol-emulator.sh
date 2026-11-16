@@ -82,6 +82,17 @@ if [[ "$status" -ne 0 ]]; then
   "$ADB" -s "$DEVICE" shell dumpsys activity exit-info "$APP_PACKAGE" \
     > "$diagnostics_dir/exit-info.txt" 2>&1 || true
   cp -R build/app/outputs/androidTest-results "$diagnostics_dir/" 2>/dev/null || true
+  # upload-artifact rejects these characters, and file names carry test names.
+  find "$diagnostics_dir" -depth -name '*[<>:"|?*]*' | while IFS= read -r path; do
+    target="$(dirname "$path")/$(basename "$path" | tr '<>:"|?*' '_')"
+    candidate="$target"
+    n=1
+    while [[ -e "$candidate" ]]; do
+      candidate="$target.$n"
+      n=$((n + 1))
+    done
+    mv "$path" "$candidate"
+  done
 fi
 
 exit "$status"
