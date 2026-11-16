@@ -286,6 +286,32 @@ void main() {
       expect(await _shown(), isEmpty);
     });
 
+    test('off: a live reaction to a message of the user seen in the same '
+        'sync is not kept', () async {
+      AppConfig.threadsEnabled = false;
+
+      await _syncTeam([
+        messageEvent((
+          id: r'$mine',
+          sender: threadOwner,
+          body: 'Lunch?',
+          at: 9.utc,
+        )),
+        reactionEvent((
+          id: r'$r1',
+          sender: _frank,
+          target: r'$mine',
+          key: '❤️',
+          at: 10.utc,
+        )),
+      ]);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      AppConfig.threadsEnabled = true;
+
+      expect(await _shown(), isEmpty);
+      expect(_account.server.callsTo(_anyLookup), isEmpty);
+    });
+
     test('on: a live reaction to a message the app has not seen asks the '
         'server once and is listed', () async {
       AppConfig.threadsEnabled = true;
