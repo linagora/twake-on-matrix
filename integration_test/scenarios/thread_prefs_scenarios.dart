@@ -194,7 +194,6 @@ class WebChoiceAppliesScenario extends BaseTestScenario {
     await threads.expectThreadMenuOffers([_follow]);
 
     await thread.mutedOnTheWeb();
-    await $.pump(const Duration(seconds: 5));
     await threads.expectThreadMenuOffers([_unfollow, _unmute]);
 
     await thread.resolvedOnTheWeb();

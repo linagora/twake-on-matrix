@@ -195,6 +195,8 @@ class ThreadPrefsDatasourceImpl implements ThreadPrefsDatasource {
   }
 
   /// Override rule without any action, for the replies of this thread.
+  /// Needs Matrix v1.7+: `event_property_is` and an empty `actions` list, see
+  /// https://spec.matrix.org/v1.16/client-server-api/#push-rules
   Future<void> _addRule(Client client, ThreadRef thread) => client.setPushRule(
     PushRuleKind.override,
     _ruleId(thread),

@@ -122,6 +122,7 @@ Future<void> _tryPushHelper(
     // The room on screen is read live: a failed fetch must not raise the
     // fallback notification for it.
     if (!isBackgroundMessage &&
+        client.syncPresence == null &&
         activeRoomId != null &&
         activeRoomId == notification.roomId) {
       Logs().v('Room is in foreground and the event failed. Stop push helper.');
@@ -167,7 +168,7 @@ Future<void> _tryPushHelper(
         ThreadRef(event.room.id, threadRootId),
       ),
       choice: client.threadUnread?.prefOf(
-        ThreadRef(notification.roomId!, threadRootId),
+        ThreadRef(event.room.id, threadRootId),
       ),
       activeThread: activeThread,
     )) {
