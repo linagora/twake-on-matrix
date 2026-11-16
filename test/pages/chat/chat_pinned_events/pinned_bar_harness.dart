@@ -39,6 +39,12 @@ class FakePinsChatController extends Fake implements ChatController {
   @override
   Timeline? get timeline => null;
 
+  @override
+  bool get selectMode => false;
+
+  @override
+  String? get unreadReceivedMessageLocation => null;
+
   /// How many times the room conversation was asked to scroll: see
   /// [tapPinnedBar]. Must stay 0 for a thread reply.
   int roomScrolls = 0;
