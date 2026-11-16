@@ -167,7 +167,7 @@ Future<void> _tryPushHelper(
         ThreadRef(event.room.id, threadRootId),
       ),
       choice: client.threadUnread?.prefOf(
-        ThreadRef(notification.roomId!, threadRootId),
+        ThreadRef(event.room.id, threadRootId),
       ),
       activeThread: activeThread,
     )) {
