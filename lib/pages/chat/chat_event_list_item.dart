@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/pages/chat/chat.dart';
 import 'package:twake_chat/pages/chat/events/images_builder/media_album_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/media_album_context_extension.dart';
@@ -108,6 +110,7 @@ class ChatEventListItem extends StatelessWidget {
         controller.replyAction(replyTo: event);
       },
       onCopy: controller.copyEventsAction,
+      onCopyLink: (event) => unawaited(controller.copyMessageLinkAction(event)),
       onPin: (event) {
         controller.pinEventAction(event);
       },
