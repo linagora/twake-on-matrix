@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
+import 'package:twake_chat/pages/public_rooms/preview/public_room_preview_sheet.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -284,19 +285,43 @@ void main() {
           ],
           child: provider.Provider<MatrixState>.value(
             value: _FakeMatrixState(client),
-            child: MaterialApp.router(routerConfig: router),
+            child: MaterialApp.router(
+              routerConfig: router,
+              locale: const Locale('en'),
+              localizationsDelegates: const [
+                L10n.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: LocalizationService.supportedLocales,
+            ),
           ),
         ),
       );
       UrlLauncher(context, url: url).launchUrl();
-      await tester.pumpAndSettle();
+      // Bounded pumps: the preview sheet keeps a spinner running.
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
     }
 
     testWidgets('WHEN the homeserver names that web app\n'
-        'THEN the room opens in the app at the event', (tester) async {
-      await launchInApp(tester, link, homeserverWebUrl: webUrl);
+        'THEN even a room the user does not know is previewed in the app', (
+      tester,
+    ) async {
+      const unknownRoomId = '!unknown:example.org';
 
-      expect(find.text('room $roomId event $eventId'), findsOneWidget);
+      await launchInApp(
+        tester,
+        '$webUrl/rooms/$unknownRoomId?event=$eventId',
+        homeserverWebUrl: webUrl,
+      );
+
+      final sheet = tester.widget<PublicRoomPreviewSheet>(
+        find.byType(PublicRoomPreviewSheet),
+      );
+      expect(sheet.address.roomIdOrAlias, unknownRoomId);
+      expect(sheet.eventId, eventId);
       expect(platform.launches, isEmpty);
     });
 
