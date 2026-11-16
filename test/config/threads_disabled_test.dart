@@ -145,6 +145,7 @@ void _rootTests() {
       ThreadRules.canStartThread(
         _message(eventId: r'$message'),
         hasThread: false,
+        inThreadScreen: false,
       ),
       isFalse,
     );

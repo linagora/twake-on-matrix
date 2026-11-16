@@ -10,7 +10,7 @@ abstract final class ThreadRules {
   static bool canStartThread(
     Event event, {
     required bool hasThread,
-    bool inThreadScreen = false,
+    required bool inThreadScreen,
   }) =>
       AppConfig.threadsEnabled &&
       !hasThread &&
