@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/manager/storage_directory_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -12,9 +11,6 @@ Future<File> createMockFile(String filePath) async {
 const folderTestName = 'generated';
 
 void main() async {
-  if (PlatformInfos.isWeb) {
-    return;
-  }
   test(
     """WHEN exist only one file in the folder,
           THEN the function should create another file with format fileName (1)

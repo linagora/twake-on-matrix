@@ -29,7 +29,7 @@ class MediaPageViewWidget extends StatelessWidget {
 
         return InkWell(
           onTap: () {
-            Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+            Navigator.of(context, rootNavigator: PlatformInfos.isDesktop).push(
               HeroPageRoute(
                 builder: (context) {
                   return DismissibleMediaView(

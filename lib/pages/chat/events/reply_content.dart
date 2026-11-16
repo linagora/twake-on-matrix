@@ -110,7 +110,7 @@ class ReplyContent extends StatelessWidget {
             if (displayEvent.hasAttachment)
               Center(
                 child: OptionalSelectionContainerDisabled(
-                  isEnabled: PlatformInfos.isWeb,
+                  isEnabled: PlatformInfos.isDesktop,
                   child: ReplyPreviewIconBuilder(event: displayEvent),
                 ),
               ),

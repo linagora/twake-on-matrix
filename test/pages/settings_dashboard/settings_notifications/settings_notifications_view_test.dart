@@ -35,9 +35,6 @@ class _FakeMatrix extends Fake implements MatrixState {
 
 class _FakeController extends Fake implements SettingsNotificationsController {
   @override
-  bool get showWebPushTile => false;
-
-  @override
   bool get showEncryptedPreviewsTile => false;
 
   @override

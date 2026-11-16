@@ -452,7 +452,7 @@ class _AvatarBuilder extends StatelessWidget {
             }
           }
 
-          if (PlatformInfos.isWeb) {
+          if (PlatformInfos.isDesktop) {
             if (success is GetAvatarOnWebUIStateSuccess) {
               if (success.matrixFile == null) {
                 return child!;

@@ -33,7 +33,7 @@ class SliverContactsWithMatrixId extends StatelessWidget {
             if (controller.presentationRecentContactNotifier.value.isNotEmpty) {
               return empty;
             }
-            if (!PlatformInfos.isWeb) {
+            if (!PlatformInfos.isDesktop) {
               if (controller.phoneBookFilterSuccess) {
                 return empty;
               }

@@ -50,9 +50,7 @@ mixin ConnectPageMixin {
       false;
 
   bool supportsSso(BuildContext context) =>
-      (PlatformInfos.isMobile ||
-          PlatformInfos.isWeb ||
-          PlatformInfos.isMacOS) &&
+      (PlatformInfos.isMobile || PlatformInfos.isMacOS) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
@@ -135,19 +133,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    if (PlatformInfos.isWeb) {
-      return ssoLoginActionWeb(context: context, id: id);
-    } else {
-      return ssoLoginActionMobile(context: context, id: id);
-    }
-  }
-
-  Future<SsoLoginState> ssoLoginActionWeb({
-    required BuildContext context,
-    required String id,
-  }) async {
-    await authenticateWithWebAuth(context: context, id: id);
-    return SsoLoginState.success;
+    return ssoLoginActionMobile(context: context, id: id);
   }
 
   Future<SsoLoginState> ssoLoginActionMobile({

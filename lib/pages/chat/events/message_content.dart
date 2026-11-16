@@ -84,7 +84,7 @@ class MessageContent extends StatelessWidget
 
   Widget _buildAlbum(BuildContext context, List<Event> members) {
     final album = OptionalSelectionContainerDisabled(
-      isEnabled: PlatformInfos.isWeb,
+      isEnabled: PlatformInfos.isDesktop,
       child: MediaAlbumBubble<Event>(
         members: members,
         keyOf: (member) => member.transactionId ?? member.eventId,
@@ -174,7 +174,7 @@ class MessageContent extends StatelessWidget
               );
             }
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: MessageImageBuilder(
                 event: event,
                 onTapPreview: onTapPreview,
@@ -184,21 +184,19 @@ class MessageContent extends StatelessWidget
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: Sticker(event),
             );
           case CuteEventContent.eventType:
             return CuteContent(event);
           case MessageTypes.Audio:
-            if (PlatformInfos.isMobile ||
-                PlatformInfos.isMacOS ||
-                PlatformInfos.isWeb
+            if (PlatformInfos.isMobile || PlatformInfos.isMacOS
             // Disabled until https://github.com/bleonard252/just_audio_mpv/issues/3
             // is fixed
             //   || PlatformInfos.isLinux
             ) {
               return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: AudioPlayerWidget(
                   event,
                   color: textColor,
@@ -207,7 +205,7 @@ class MessageContent extends StatelessWidget
               );
             }
             return OptionalSelectionContainerDisabled(
-              isEnabled: PlatformInfos.isWeb,
+              isEnabled: PlatformInfos.isDesktop,
               child: MessageDownloadContent(event),
             );
 
@@ -219,7 +217,7 @@ class MessageContent extends StatelessWidget
                 children: [
                   if (event.isVideoAvailable) ...[
                     OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Align(
                         alignment: Alignment.center,
                         child: _MessageVideoBuilder(
@@ -241,7 +239,7 @@ class MessageContent extends StatelessWidget
                         Padding(
                           padding: MessageContentStyle.endOfBubbleWidgetPadding,
                           child: OptionalSelectionContainerDisabled(
-                            isEnabled: PlatformInfos.isWeb,
+                            isEnabled: PlatformInfos.isDesktop,
                             child: Text.rich(
                               WidgetSpan(child: endOfBubbleWidget),
                             ),
@@ -274,7 +272,7 @@ class MessageContent extends StatelessWidget
             }
             if (event.isVideoAvailable) {
               return OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: _MessageVideoBuilder(
                   event: event,
                   onFileTapped: (event) =>
@@ -289,7 +287,7 @@ class MessageContent extends StatelessWidget
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
@@ -315,7 +313,7 @@ class MessageContent extends StatelessWidget
                   Padding(
                     padding: MessageContentStyle.endOfBubbleWidgetPadding,
                     child: OptionalSelectionContainerDisabled(
-                      isEnabled: PlatformInfos.isWeb,
+                      isEnabled: PlatformInfos.isDesktop,
                       child: Text.rich(WidgetSpan(child: endOfBubbleWidget)),
                     ),
                   ),
@@ -423,7 +421,7 @@ class MessageContent extends StatelessWidget
         }
       default:
         return OptionalSelectionContainerDisabled(
-          isEnabled: PlatformInfos.isWeb,
+          isEnabled: PlatformInfos.isDesktop,
           child: UnknownContent(event: event),
         );
     }

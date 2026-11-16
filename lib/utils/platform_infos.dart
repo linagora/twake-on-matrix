@@ -11,11 +11,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../config/app_config.dart';
 
 abstract class PlatformInfos {
-  @visibleForTesting
-  static bool isTestingForWeb = false;
-
-  static bool get isWeb => kIsWeb || isTestingForWeb;
-
   static bool get isLinux => Platform.isLinux;
 
   static bool get isWindows => Platform.isWindows;

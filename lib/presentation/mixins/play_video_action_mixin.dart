@@ -54,10 +54,13 @@ mixin PlayVideoActionMixin {
     if (isReplacement) {
       Navigator.of(
         context,
-        rootNavigator: PlatformInfos.isWeb,
+        rootNavigator: PlatformInfos.isDesktop,
       ).pushReplacement(pageRoute);
     } else {
-      Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(pageRoute);
+      Navigator.of(
+        context,
+        rootNavigator: PlatformInfos.isDesktop,
+      ).push(pageRoute);
     }
   }
 }

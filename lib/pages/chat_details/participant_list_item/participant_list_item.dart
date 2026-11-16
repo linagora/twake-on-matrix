@@ -217,7 +217,7 @@ class _ParticipantListItemState extends State<ParticipantListItem>
       );
     }
 
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       child = GestureDetector(
         onSecondaryTapDown: (_) async => await _handleRightClick(context),
         child: child,

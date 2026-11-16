@@ -22,7 +22,7 @@ mixin SendFilesWithCaptionWebMixin {
         matrixFilesList.isNotEmpty) {
       final result = await showDialog(
         context: context,
-        useRootNavigator: PlatformInfos.isWeb,
+        useRootNavigator: PlatformInfos.isDesktop,
         builder: (context) {
           return SendFileDialog(
             room: room,

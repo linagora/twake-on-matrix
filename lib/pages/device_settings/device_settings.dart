@@ -253,7 +253,7 @@ Future<void> removeDevicesAction(
     cancelLabel: l10n.cancel,
     okLabelButtonColor: LinagoraSysColors.material().error,
     okTextColor: LinagoraSysColors.material().onError,
-    showCloseButton: PlatformInfos.isWeb,
+    showCloseButton: PlatformInfos.isDesktop,
   );
   if (confirmResult != ConfirmResult.ok || !context.mounted) {
     return;

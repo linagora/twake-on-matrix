@@ -77,7 +77,7 @@ class ImageViewerView extends StatelessWidget {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            if (PlatformInfos.isWeb) {
+            if (PlatformInfos.isDesktop) {
               Navigator.of(context).pop();
             } else if (controller.widget.showAppBar) {
               controller.showAppbarPreview.toggle();

@@ -122,7 +122,7 @@ class MessageContentBuilder extends ConsumerWidget
                       end: 8,
                       bottom: 4.0,
                       child: OptionalSelectionContainerDisabled(
-                        isEnabled: PlatformInfos.isWeb,
+                        isEnabled: PlatformInfos.isDesktop,
                         child: Text.rich(
                           WidgetSpan(
                             child: MessageTime(
@@ -145,7 +145,7 @@ class MessageContentBuilder extends ConsumerWidget
                         isContainsTagName(event) ||
                         isContainsSpecialHTMLTag(event)))
                   OptionalSelectionContainerDisabled(
-                    isEnabled: PlatformInfos.isWeb,
+                    isEnabled: PlatformInfos.isDesktop,
                     child: Visibility(
                       visible: false,
                       maintainSize: true,

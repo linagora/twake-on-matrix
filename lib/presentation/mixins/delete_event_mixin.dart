@@ -20,7 +20,7 @@ mixin DeleteEventMixin {
       title: L10n.of(context)!.deleteMessageConfirmationTitle,
       okLabel: L10n.of(context)!.delete,
       cancelLabel: L10n.of(context)!.cancel,
-      showCloseButton: PlatformInfos.isWeb,
+      showCloseButton: PlatformInfos.isDesktop,
     );
     if (confirmResult == ConfirmResult.cancel) return;
     _streamSubscription = deleteEventInteractor.execute(event).listen((state) {
@@ -52,7 +52,7 @@ mixin DeleteEventMixin {
       title: l10n.deleteAlbumConfirmationTitle(events.length),
       okLabel: l10n.delete,
       cancelLabel: l10n.cancel,
-      showCloseButton: PlatformInfos.isWeb,
+      showCloseButton: PlatformInfos.isDesktop,
     );
     if (confirmResult == ConfirmResult.cancel) return;
     var failureShown = false;
