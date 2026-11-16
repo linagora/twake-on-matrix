@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_new_chat_button.dart';
-import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 
 // The pen of the Discussions app bar: ChatListNewChatButton(controller:),
 // with Key('new_chat_pen') on the icon button.
@@ -37,15 +35,14 @@ const _pen = Key('new_chat_pen');
 
 void main() {
   setUp(() {
-    GetIt.instance.registerSingleton(ResponsiveUtils());
     // KeyBoardShortcuts uses a VisibilityDetector, whose timer would stay pending.
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
-  tearDown(() => GetIt.instance.reset());
 
   late _FakeController controller;
 
   Future<void> pumpPen(WidgetTester tester, {required double width}) async {
+    final singleColumn = width < 905;
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -57,7 +54,12 @@ void main() {
         supportedLocales: L10n.supportedLocales,
         home: Scaffold(
           appBar: AppBar(
-            actions: [ChatListNewChatButton(controller: controller)],
+            actions: [
+              ChatListNewChatButton(
+                controller: controller,
+                isSingleColumn: singleColumn,
+              ),
+            ],
           ),
         ),
       ),
@@ -111,6 +113,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.calls, isEmpty);
+      expect(
+        tester.getRect(find.byType(MenuItemButton).first).top,
+        greaterThanOrEqualTo(tester.getRect(find.byKey(_pen)).bottom),
+        reason: 'the menu opens under the pen, not over it',
+      );
       expect(find.text('New direct message'), findsOneWidget);
       expect(find.text('New Group Chat'), findsOneWidget);
       expect(find.text('New Feed'), findsOneWidget);

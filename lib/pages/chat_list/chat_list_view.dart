@@ -1,4 +1,3 @@
-import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_body_view.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator.dart';
@@ -6,7 +5,6 @@ import 'package:twake_chat/pages/chat_list/chat_list_bottom_navigator_style.dart
 import 'package:twake_chat/pages/chat_list/chat_list_header.dart';
 import 'package:twake_chat/pages/chat_list/chat_list_view_style.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 import 'package:matrix/matrix.dart';
@@ -17,9 +15,7 @@ class ChatListView extends StatelessWidget {
   final VoidCallback? onOpenSearchPageInMultipleColumns;
   final ChatListBottomNavigatorBarIcon onTapBottomNavigation;
 
-  final responsiveUtils = getIt.get<ResponsiveUtils>();
-
-  ChatListView({
+  const ChatListView({
     super.key,
     required this.controller,
     this.bottomNavigationBar,

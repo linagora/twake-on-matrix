@@ -37,7 +37,12 @@ class ChatListHeader extends StatelessWidget {
               controller.conversationSelectionNotifier,
           onClickAvatar: controller.onClickAvatar,
           connectionStatusHeaderWidget: const ConnectionStatusHeader(),
-          actions: [ChatListNewChatButton(controller: controller)],
+          actions: [
+            ChatListNewChatButton(
+              controller: controller,
+              isSingleColumn: ChatListHeaderStyle.responsive.isMobile(context),
+            ),
+          ],
         ),
         Container(
           color: ChatListHeaderStyle.responsive.isMobile(context)

@@ -35,68 +35,69 @@ class _FakeMatrix extends Fake implements MatrixState {
 
 const _pen = Key('new_chat_pen');
 
-void main() {
-  setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
-  tearDown(() => GetIt.instance.reset());
+class _Harness {
+  _Harness(SelectMode mode) : selectMode = ValueNotifier(mode);
 
-  late List<String> calls;
-  late ValueNotifier<SelectMode> selectMode;
+  final calls = <String>[];
+  final ValueNotifier<SelectMode> selectMode;
+}
 
-  Future<void> pumpHeader(
-    WidgetTester tester, {
-    required double width,
-    SelectMode mode = SelectMode.normal,
-  }) async {
-    tester.view.physicalSize = Size(width, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    calls = [];
-    selectMode = ValueNotifier(mode);
-    addTearDown(selectMode.dispose);
-    final selection = ValueNotifier<List<ConversationSelectionPresentation>>(
-      const [],
-    );
-    addTearDown(selection.dispose);
-    final client = _FakeClient();
-    await tester.pumpWidget(
-      ProviderScope(
-        child: Provider<MatrixState>.value(
-          value: _FakeMatrix(client),
-          child: MaterialApp(
-            theme: ThemeData(
-              extensions: [LinagoraTextThemeExtension.material()],
-            ),
-            locale: const Locale('en'),
-            localizationsDelegates: L10n.localizationsDelegates,
-            supportedLocales: L10n.supportedLocales,
-            home: Scaffold(
-              appBar: TwakeHeader(
-                onClearSelection: () {},
-                client: client,
-                selectModeNotifier: selectMode,
-                conversationSelectionNotifier: selection,
-                onClickAvatar: () {},
-                actions: [
-                  IconButton(
-                    key: _pen,
-                    icon: const Icon(Icons.mode_edit_outline_outlined),
-                    onPressed: () => calls.add('direct'),
-                  ),
-                ],
-              ),
+Future<_Harness> _pumpHeader(
+  WidgetTester tester, {
+  required double width,
+  SelectMode mode = SelectMode.normal,
+}) async {
+  tester.view.physicalSize = Size(width, 900);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+  final harness = _Harness(mode);
+  addTearDown(harness.selectMode.dispose);
+  final selection = ValueNotifier<List<ConversationSelectionPresentation>>(
+    const [],
+  );
+  addTearDown(selection.dispose);
+  final client = _FakeClient();
+  await tester.pumpWidget(
+    ProviderScope(
+      child: Provider<MatrixState>.value(
+        value: _FakeMatrix(client),
+        child: MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+          locale: const Locale('en'),
+          localizationsDelegates: L10n.localizationsDelegates,
+          supportedLocales: L10n.supportedLocales,
+          home: Scaffold(
+            appBar: TwakeHeader(
+              onClearSelection: () {},
+              client: client,
+              selectModeNotifier: harness.selectMode,
+              conversationSelectionNotifier: selection,
+              onClickAvatar: () {},
+              actions: [
+                IconButton(
+                  key: _pen,
+                  icon: const Icon(Icons.mode_edit_outline_outlined),
+                  onPressed: () => harness.calls.add('direct'),
+                ),
+              ],
             ),
           ),
         ),
       ),
-    );
-    await tester.pump();
-  }
+    ),
+  );
+  await tester.pump();
+  return harness;
+}
 
+void main() {
+  setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
+  tearDown(() => GetIt.instance.reset());
   group('new chat pen in the Discussions app bar', () {
     testWidgets('is in the app bar, next to the title, as a bare icon', (
       tester,
     ) async {
-      await pumpHeader(tester, width: 400);
+      await _pumpHeader(tester, width: 400);
 
       final inBar = find.descendant(
         of: find.byType(AppBar),
@@ -120,16 +121,16 @@ void main() {
     });
 
     testWidgets('is hidden in select mode', (tester) async {
-      await pumpHeader(tester, width: 400, mode: SelectMode.select);
+      await _pumpHeader(tester, width: 400, mode: SelectMode.select);
 
       expect(find.byKey(_pen), findsNothing);
       expect(find.byIcon(Icons.mode_edit_outline_outlined), findsNothing);
     });
 
     testWidgets('comes back when select mode ends', (tester) async {
-      await pumpHeader(tester, width: 400, mode: SelectMode.select);
+      final h = await _pumpHeader(tester, width: 400, mode: SelectMode.select);
 
-      selectMode.value = SelectMode.normal;
+      h.selectMode.value = SelectMode.normal;
       await tester.pump();
 
       expect(find.byKey(_pen), findsOneWidget);

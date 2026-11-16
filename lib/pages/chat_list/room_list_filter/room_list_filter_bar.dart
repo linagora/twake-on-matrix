@@ -23,13 +23,6 @@ class RoomListFilterBar extends ConsumerStatefulWidget {
 }
 
 class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
-  final _scrollController = ScrollController();
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   void _select(RoomListFilter view) =>
       ref.read(roomListFilterControllerProvider.notifier).select(view);
 
@@ -47,7 +40,6 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
             child: Semantics(
               label: l10n.roomListFilters,
               child: ListView(
-                controller: _scrollController,
                 scrollDirection: Axis.horizontal,
                 children: [
                   _FilterChip(
