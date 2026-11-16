@@ -1,3 +1,4 @@
+import 'package:twake_chat/pages/activity/activity_navigation_icon.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:twake_chat/widgets/avatar/bottom_navigation_avatar.dart';
@@ -11,6 +12,7 @@ import 'package:matrix/matrix.dart';
 enum AdaptiveDestinationEnum {
   contacts,
   rooms,
+  activity,
   settings;
 
   NavigationDestination getNavigationDestination(
@@ -43,6 +45,15 @@ enum AdaptiveDestinationEnum {
             isSelected: true,
           ),
           label: L10n.of(context)!.chats,
+        );
+      case AdaptiveDestinationEnum.activity:
+        return NavigationDestination(
+          key: NavigationKeys.activityDestination.key,
+          icon: ActivityNavigationIcon(
+            color: LinagoraSysColors.material().onBackground,
+          ),
+          selectedIcon: const ActivityNavigationIcon(isSelected: true),
+          label: L10n.of(context)!.activity,
         );
       case AdaptiveDestinationEnum.settings:
         return NavigationDestination(
@@ -88,6 +99,15 @@ enum AdaptiveDestinationEnum {
             isSelected: true,
           ),
           label: L10n.of(context)!.chats,
+        );
+      case AdaptiveDestinationEnum.activity:
+        return BottomNavigationBarItem(
+          icon: ActivityNavigationIcon(
+            key: NavigationKeys.activityDestination.key,
+            color: LinagoraSysColors.material().tertiary,
+          ),
+          activeIcon: const ActivityNavigationIcon(isSelected: true),
+          label: L10n.of(context)!.activity,
         );
       case AdaptiveDestinationEnum.settings:
         return BottomNavigationBarItem(
