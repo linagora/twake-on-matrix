@@ -20,6 +20,7 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   ActivityDatasourceImpl(this._client);
 
   static const Duration _changesRate = Duration(seconds: 1);
+  static const int _maxAttempts = 3;
 
   final Client? _client;
 
@@ -27,6 +28,10 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   /// read is not kept: it is asked again at the next change.
   final Map<ThreadRef, Event?> _roots = {};
   final Set<ThreadRef> _fetching = {};
+
+  /// The reads of a root that failed in a row: a root that keeps failing
+  /// (deleted, forbidden) is given up after [_maxAttempts].
+  final Map<ThreadRef, int> _failures = {};
   final StreamController<void> _rootsRead = StreamController.broadcast();
 
   void dispose() => unawaited(_rootsRead.close());
@@ -145,9 +150,11 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   /// Null while the root of the thread is being read.
   Future<ActivityItem?> _threadItem(Client client, ThreadRef thread) async {
     final room = client.getRoomById(thread.roomId);
-    if (room == null) return null;
+    if (room == null || room.membership != Membership.join) return null;
     if (!_roots.containsKey(thread)) {
-      unawaited(_fetchRoot(client, thread));
+      if ((_failures[thread] ?? 0) < _maxAttempts) {
+        unawaited(_fetchRoot(client, thread));
+      }
       return null;
     }
     final root = _roots[thread];
@@ -178,7 +185,7 @@ class ActivityDatasourceImpl implements ActivityDatasource {
   }
 
   /// Reads the root of the thread; with no reply of the session known, the
-  /// server gives its thread aggregate. A failure is logged and not kept.
+  /// server gives its thread aggregate. A failure is logged and not kept: it is asked again at the next change, at most [_maxAttempts] times in a row.
   Future<void> _fetchRoot(Client client, ThreadRef thread) async {
     final store = client.threadUnread;
     if (store == null || !_fetching.add(thread)) return;
@@ -187,8 +194,10 @@ class ActivityDatasourceImpl implements ActivityDatasource {
         thread,
         serverFirst: store.latestReplyOf(thread) == null,
       );
+      _failures.remove(thread);
       if (!_rootsRead.isClosed) _rootsRead.add(null);
     } on Object catch (e, s) {
+      _failures[thread] = (_failures[thread] ?? 0) + 1;
       Logs().w('Unable to read the root of a followed thread', e, s);
     } finally {
       _fetching.remove(thread);
