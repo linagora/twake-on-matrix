@@ -48,7 +48,6 @@ mixin ConnectPageMixin {
       false;
 
   bool supportsSso(BuildContext context) =>
-      (PlatformInfos.isMobile || PlatformInfos.isMacOS) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
