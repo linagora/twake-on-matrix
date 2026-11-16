@@ -50,16 +50,7 @@ class _AdaptiveScaffoldAppBarState extends State<AdaptiveScaffoldAppBar> {
       },
     );
 
-    if (!PlatformInfos.isWeb) return child;
-
-    return FutureBuilder(
-      future: CozyConfigManager().isInsideCozy,
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!) return child;
-
-        return const SizedBox();
-      },
-    );
+    return child;
   }
 }
 
