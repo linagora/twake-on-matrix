@@ -163,6 +163,44 @@ void main() {
     expect(await _repository.getMentions(), isEmpty);
   });
 
+  // Review of #3625 (activity_mentions_datasource_impl.dart:62): a root that
+  // cannot be read leaves the mention without the start of its root; a bug
+  // (an `Error`) while reading it is not hidden.
+  test('when the root of its thread cannot be read, a mention in a thread is '
+      'still listed, without the start of the root', () async {
+    _server.fail(
+      ServerRoute.get('rooms/$teamRoomId/event/${lunchThread.rootEventId}'),
+    );
+    _server.notifications = [_threadMention()];
+
+    final mention = (await _repository.getMentions()).single;
+
+    expect(mention.eventId, r'$in_thread');
+    expect(mention.threadRootId, lunchThread.rootEventId);
+    expect(mention.threadTitle, isNull);
+  });
+
+  test('a bug while reading the root of a thread is not hidden: reading the '
+      'mentions fails', () async {
+    // The root comes back without its event id: reading it throws an Error
+    // (a TypeError), not an Exception.
+    _server.answer(
+      ServerRoute.get('rooms/$teamRoomId/event/${lunchThread.rootEventId}'),
+      {
+        ...messageEvent((
+          id: lunchThread.rootEventId,
+          sender: _dan,
+          body: 'Lunch on Friday? Pick a place',
+          at: 7.utc,
+        )),
+        'room_id': teamRoomId,
+      }..remove('event_id'),
+    );
+    _server.notifications = [_threadMention()];
+
+    await expectLater(_repository.getMentions(), throwsA(isA<Error>()));
+  });
+
   test('when the server cannot be reached, reading the mentions fails, so '
       'the screen can say so', () async {
     _server.failNotifications = true;
@@ -209,6 +247,17 @@ class _NotificationsServer extends RecordingHomeserver {
         headers: {'content-type': 'application/json'},
       );
 }
+
+/// Dan mentions the user in the lunch thread.
+Map<String, Object?> _threadMention() => _notification(
+  threadReplyEvent((
+    id: r'$in_thread',
+    sender: _dan,
+    body: '@me what do you think?',
+    at: (9, 30).utc,
+  ), lunchThread),
+  _Seen.mention,
+);
 
 /// How the server tells a notification: a mention (highlighted), read or
 /// not, or a plain notification.
