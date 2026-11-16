@@ -152,7 +152,8 @@ Future<void> _tryPushHelper(
   // (they sit in another screen); a thread reply follows the thread rule,
   // which also skips the thread on screen. The thread is known from the
   // event (m.relates_to stays in clear). Outside the foreground the server
-  // push decides until P2 (thread push rule): this rule does not apply there.
+  // push decides: a muted thread is a server push rule, an unfollowed one
+  // is filtered here, in the foreground only.
   if (!isBackgroundMessage && client.syncPresence == null) {
     final threadRootId = ThreadRules.threadRootOf(event);
     if (threadRootId == null) {
@@ -164,6 +165,9 @@ Future<void> _tryPushHelper(
       event,
       pushActions: client.pushruleEvaluator.match(event),
       followed: client.threadUnread?.followOnceKnown(
+        ThreadRef(event.room.id, threadRootId),
+      ),
+      choice: client.threadUnread?.prefOf(
         ThreadRef(event.room.id, threadRootId),
       ),
       activeThread: activeThread,
