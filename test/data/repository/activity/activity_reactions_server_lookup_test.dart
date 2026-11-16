@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/domain/model/activity/activity_item.dart';
 import 'package:twake_chat/domain/repository/activity/activity_reactions_repository.dart';
@@ -245,6 +246,55 @@ void main() {
     await _shown();
 
     expect(_account.server.callsTo(_lookupOf(r'$after')), hasLength(1));
+  });
+
+  // Review of #3626 (twake_client.dart:167, jbrnzl): the reactions of the
+  // Activity are part of the threads; with the threads turned off
+  // (`AppConfig.threadsEnabled`), as for the thread replies, a live reaction
+  // asks nothing of the server and nothing is kept.
+  group('the threads flag', () {
+    setUp(() {
+      final enabled = AppConfig.threadsEnabled;
+      addTearDown(() => AppConfig.threadsEnabled = enabled);
+      _account.server.answer(
+        _lookupOf(r'$old'),
+        _oldMessage((id: r'$old', sender: threadOwner)),
+      );
+    });
+
+    Future<void> reactToOldMessage() => _syncTeam([
+      reactionEvent((
+        id: r'$r1',
+        sender: _frank,
+        target: r'$old',
+        key: '❤️',
+        at: 10.utc,
+      )),
+    ]);
+
+    test('off: a live reaction to a message the app has not seen asks '
+        'nothing of the server and is not kept', () async {
+      AppConfig.threadsEnabled = false;
+
+      await reactToOldMessage();
+      // A lookup would have been sent by now.
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      // Turned on again: what the reaction left behind shows.
+      AppConfig.threadsEnabled = true;
+
+      expect(_account.server.callsTo(_lookupOf(r'$old')), isEmpty);
+      expect(await _shown(), isEmpty);
+    });
+
+    test('on: a live reaction to a message the app has not seen asks the '
+        'server once and is listed', () async {
+      AppConfig.threadsEnabled = true;
+
+      await reactToOldMessage();
+
+      expect((await _shown()).map((r) => r.emoji), ['❤️']);
+      expect(_account.server.callsTo(_lookupOf(r'$old')), hasLength(1));
+    });
   });
 
   // Review of #3626 (activity_reactions_store.dart:79): a logout or an
