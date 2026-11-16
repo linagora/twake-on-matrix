@@ -8,6 +8,7 @@ import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/app_lock_back_button.dart';
 import 'package:twake_chat/widgets/lock_screen.dart';
 import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
@@ -120,8 +121,12 @@ class TwakeAppState extends State<TwakeApp> {
             onNavigationNotification: TwakeApp.router.onNavigationNotification,
             builder: (context, child) => PlatformInfos.isMobile
                 ? AppLock(
-                    builder: (_, _) =>
-                        Matrix(child: NavigationButtonsSafeArea(child: child)),
+                    builder: (_, _) => AppLockBackButton(
+                      dispatcher: TwakeApp.router.backButtonDispatcher,
+                      child: Matrix(
+                        child: NavigationButtonsSafeArea(child: child),
+                      ),
+                    ),
                     lockScreenBuilder: (_) => const LockScreen(),
                     initiallyEnabled: widget.appLockEnabled,
                     initialBackgroundLockLatency: Duration.zero,

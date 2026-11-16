@@ -4,6 +4,7 @@ import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:twake_chat/config/go_routes/router_navigation_notification.dart';
+import 'package:twake_chat/widgets/app_lock_back_button.dart';
 
 void main() {
   group('RouterNavigationNotification', () {
@@ -56,7 +57,10 @@ void main() {
           routerConfig: router,
           onNavigationNotification: router.onNavigationNotification,
           builder: (_, child) => AppLock(
-            builder: (_, _) => child!,
+            builder: (_, _) => AppLockBackButton(
+              dispatcher: router.backButtonDispatcher,
+              child: child!,
+            ),
             lockScreenBuilder: (_) => const Text('locked'),
             initiallyEnabled: false,
             initialBackgroundLockLatency: Duration.zero,
@@ -88,6 +92,45 @@ void main() {
       expect(find.text('rooms'), findsOneWidget);
       expect(frameworkHandlesBack.last, isFalse);
     }
+
+    testWidgets('whenBackIsPressedWithADialogOpen_closesItAndKeepsThePage', (
+      tester,
+    ) async {
+      final router = await openApp(tester);
+      router.push('/rooms/info');
+      await tester.pumpAndSettle();
+      showDialog<void>(
+        context: rootKey.currentContext!,
+        builder: (_) => const Text('dialog'),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('dialog'), findsNothing);
+      expect(find.text('info'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('whenBackIsPressedOnTheLockScreen_keepsThePageBehindIt', (
+      tester,
+    ) async {
+      final router = await openApp(tester);
+      router.push('/rooms/info');
+      await tester.pumpAndSettle();
+      final appLock = tester.state<AppLockState>(find.byType(AppLock));
+      appLock.enable();
+      appLock.showLockScreen();
+      await tester.pumpAndSettle();
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('locked'), findsOneWidget);
+      appLock.didUnlock();
+      await tester.pumpAndSettle();
+      expect(find.text('info'), findsOneWidget);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('whenADialogClosesOnARoute_backPopsTheRoute', (tester) async {
       final router = await openApp(tester);
