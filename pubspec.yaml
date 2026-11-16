@@ -357,3 +357,8 @@ sentry:
   ignore_missing: true
   release:
   dist:
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlcipher
