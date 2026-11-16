@@ -48,3 +48,8 @@ class SwitchSupersededException extends AccountException {
 
   final String accountId;
 }
+
+/// A screen behind login read the Matrix client while no account is active.
+class NoActiveClientException extends AccountException {
+  const NoActiveClientException();
+}

@@ -1,0 +1,40 @@
+# Labels from CONTRIBUTING.md#labels. The label-guard workflow removes any other label.
+
+- "severity::critical"
+- "severity::major"
+- "severity::medium"
+- "severity::minor"
+
+- "priority::urgent"
+- "priority::high"
+- "priority::low"
+
+- "platform::web"
+- "platform::android"
+- "platform::ios"
+- "platform::desktop"
+
+- "area::auth"
+- "area::rooms"
+- "area::timeline"
+- "area::composer"
+- "area::media"
+- "area::search"
+- "area::contacts"
+- "area::notifications"
+- "area::e2ee"
+- "area::perf"
+- "area::tests"
+- "area::build"
+
+- "needs::triage"
+- "needs::info"
+- "needs::repro"
+- "needs::design"
+- "needs::decision"
+
+- "regression"
+- "qa-failed"
+- "security"
+- "blocked-externally"
+- "good first issue"

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/domain/app_state/download/download_file_state.dart';
 import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/forward/forward.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer_view.dart';
 import 'package:twake_chat/widgets/media_viewer_web_overlay.dart';
@@ -13,6 +14,7 @@ import 'package:twake_chat/pages/image_viewer/image_viewer_style.dart';
 import 'package:twake_chat/utils/image_zoom_scope.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
@@ -54,6 +56,8 @@ class ImageViewerController extends State<ImageViewer> {
   Uint8List? bytes;
 
   Uint8List? thumbnailBytes;
+
+  bool downloadFailed = false;
 
   final downloadMediaFileInteractor = getIt.get<DownloadMediaFileInteractor>();
 
@@ -118,6 +122,14 @@ class ImageViewerController extends State<ImageViewer> {
                 if (failure is DownloadMediaFileFailure) {
                   Logs().e('Error downloading file', failure.exception);
                 }
+                if (!mounted) return;
+                setState(() {
+                  downloadFailed = true;
+                });
+                TwakeSnackBar.show(
+                  context,
+                  L10n.of(context)!.fileDownloadFailed,
+                );
               },
               (success) {
                 if (success is DownloadMediaFileSuccess) {

@@ -7,7 +7,7 @@ import 'package:twake_chat/domain/repository/video_call/video_call_repository.da
 
 part 'video_call_repository.provider.g.dart';
 
-// TODO: [transitional] Keyed by Client until matrixClientProvider exists (plan v2, Step 1).
+// TODO: [transitional] Keyed by Client while chat_video_call_button passes room.client.
 @riverpod
 VideoCallRepository videoCallRepository(Ref ref, Client client) =>
     VideoCallRepositoryImpl(
