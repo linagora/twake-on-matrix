@@ -59,7 +59,7 @@ class ChatInputRow extends StatelessWidget {
                             valueListenable:
                                 controller.audioRecordStateNotifier,
                             builder: (context, audioState, _) {
-                              if (PlatformInfos.isWeb &&
+                              if (PlatformInfos.isDesktop &&
                                   audioState != AudioRecordState.initial) {
                                 return const SizedBox.shrink();
                               }
@@ -103,7 +103,7 @@ class ChatInputRow extends StatelessWidget {
                         ValueListenableBuilder(
                           valueListenable: controller.audioRecordStateNotifier,
                           builder: (context, audioState, _) {
-                            if (PlatformInfos.isWeb &&
+                            if (PlatformInfos.isDesktop &&
                                 audioState != AudioRecordState.initial) {
                               return Expanded(
                                 child: ConstrainedBox(
@@ -148,7 +148,7 @@ class ChatInputRow extends StatelessWidget {
                               controller.onTapRecorderWeb(context: context),
                           audioRecordStateNotifier:
                               controller.audioRecordStateNotifier,
-                          onDeleteRecorderWeb: controller.stopRecordWeb,
+                          onDeleteRecorderWeb: controller.discardRecordWeb,
                           onFinishRecorderWeb: controller.sendVoiceMessageWeb,
                         ),
                       ],

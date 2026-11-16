@@ -937,15 +937,14 @@ class ChatController extends ConsumerState<Chat>
   Future<void> sendVoiceMessageWeb() async {
     final duration = Duration(seconds: recordDurationWebNotifier.value);
     final path = await stopRecordWeb();
-    final file = await recordToFileOnWeb(blobUrl: path);
 
-    if (file == null) {
+    if (path == null) {
       TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
       return;
     }
 
-    final matrixFile = await createMatrixAudioFileFromWebFile(
-      file: file,
+    final matrixFile = await createMatrixAudioFileFromPath(
+      path: path,
       duration: duration,
     );
 
@@ -2168,7 +2167,7 @@ class ChatController extends ConsumerState<Chat>
         if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
         if (event.room.canReportContent) ChatContextMenuActions.report,
         if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
-        if (PlatformInfos.isWeb && event.hasAttachment)
+        if (PlatformInfos.isDesktop && event.hasAttachment)
           ChatContextMenuActions.downloadFile,
         ChatContextMenuActions.select,
         if (event.canDelete) ChatContextMenuActions.delete,
@@ -2455,7 +2454,7 @@ class ChatController extends ConsumerState<Chat>
 
   void onHideKeyboardAndEmoji() {
     hideKeyboardChatScreen();
-    if (!PlatformInfos.isWeb) {
+    if (!PlatformInfos.isDesktop) {
       showEmojiPickerNotifier.value = false;
     }
   }
@@ -2508,7 +2507,7 @@ class ChatController extends ConsumerState<Chat>
   void onRejectInvitation(BuildContext context) async {
     final result = await showDialog<DialogRejectInviteResult>(
       context: TwakeApp.routerKey.currentContext ?? context,
-      useRootNavigator: PlatformInfos.isWeb,
+      useRootNavigator: PlatformInfos.isDesktop,
       builder: (c) => const DialogRejectInviteWidget(),
     );
 
@@ -2846,7 +2845,7 @@ class ChatController extends ConsumerState<Chat>
       ],
       if (selectedEvents.length == 1 &&
           selectedEvents.first.isVideoOrImage &&
-          !PlatformInfos.isWeb)
+          PlatformInfos.isMobile)
         ChatAppBarActions.saveToGallery,
       // Both act on one message.
       if (selectedEvents.length == 1) ...[
@@ -2976,7 +2975,7 @@ class ChatController extends ConsumerState<Chat>
         ChatContextMenuActions.copyLink,
       if (event.room.canReportContent) ChatContextMenuActions.report,
       ChatContextMenuActions.pinChat,
-      if (PlatformInfos.isWeb && event.hasAttachment)
+      if (PlatformInfos.isDesktop && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
       if (event.canRedact) ChatContextMenuActions.delete,
     ];
@@ -3281,7 +3280,7 @@ class ChatController extends ConsumerState<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       initAudioRecorderWeb();
     }
     SchedulerBinding.instance.addPostFrameCallback((_) async {

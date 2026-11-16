@@ -1,17 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
+import 'package:path_provider/path_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 import 'package:record/record.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
-import 'package:universal_html/html.dart' as html;
 
 enum AudioRecordState { initial, recording, recorded, playing, paused }
 
@@ -23,7 +22,7 @@ mixin AudioMixin {
 
   Timer? _timerWeb;
 
-  /// Web-only mic recorder. Created in [initAudioRecorderWeb], cleared in
+  /// Desktop mic recorder. Created in [initAudioRecorderWeb], cleared in
   /// [disposeAudioMixin]. Independent of [MatrixState.audioPlayer] playback.
   AudioRecorder? _audioRecorder;
 
@@ -74,12 +73,12 @@ mixin AudioMixin {
     audioRecordStateNotifier.value = AudioRecordState.initial;
   }
 
-  /// Web mic recorder for this Chat/DraftChat only. Call from `initState`
+  /// Desktop mic recorder for this Chat/DraftChat only. Call from `initState`
   /// (not post-frame): it does not need [BuildContext]/Matrix, and deferring
   /// races with dispose on fast navigation. Playback uses
   /// [MatrixState.audioPlayer] and is intentionally separate.
   void initAudioRecorderWeb() {
-    if (!PlatformInfos.isWeb) return;
+    if (!PlatformInfos.isDesktop) return;
     if (_audioRecorder != null) return;
 
     final recorder = AudioRecorder();
@@ -145,8 +144,11 @@ mixin AudioMixin {
 
         const config = RecordConfig(encoder: encoder, numChannels: 1);
 
-        // Record to file
-        await recordFile(recorder, config);
+        // Record to a temporary file, read back by [createMatrixAudioFileFromPath]
+        final directory = await getTemporaryDirectory();
+        final path =
+            '${directory.path}/voice_message_${DateTime.now().millisecondsSinceEpoch}.wav';
+        await recordFile(recorder, config, path);
 
         recordDurationWebNotifier.value = 0;
 
@@ -169,8 +171,12 @@ mixin AudioMixin {
     }
   }
 
-  Future<void> recordFile(AudioRecorder recorder, RecordConfig config) {
-    return recorder.start(config, path: '');
+  Future<void> recordFile(
+    AudioRecorder recorder,
+    RecordConfig config,
+    String path,
+  ) {
+    return recorder.start(config, path: path);
   }
 
   Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
@@ -208,141 +214,45 @@ mixin AudioMixin {
     return null;
   }
 
-  Stream<Uint8List> readWebFileAsStream(
-    html.File file, {
-    int chunkSize = 64 * 1024,
-  }) async* {
-    if (file.size <= 0) {
-      throw Exception('File size must be greater than 0');
-    }
-
-    final reader = html.FileReader();
-    var offset = 0;
-
-    while (offset < file.size) {
-      final end = (offset + chunkSize) > file.size
-          ? file.size
-          : offset + chunkSize;
-      final blob = file.slice(offset, end);
-
-      final completer = Completer<Uint8List>();
-
-      reader.onLoad.listen((_) {
-        final result = reader.result;
-        if (result is Uint8List) {
-          completer.complete(result);
-        } else if (result is ByteBuffer) {
-          completer.complete(result.asUint8List());
-        } else {
-          completer.completeError('Unexpected result type');
-        }
-      });
-
-      reader.onError.listen((event) {
-        completer.completeError('FileReader failed: ${reader.error}');
-      });
-
-      reader.readAsArrayBuffer(blob);
-
-      yield await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Chunk reading timed out'),
-      );
-
-      offset = end;
-    }
-  }
-
-  Future<html.File?> recordToFileOnWeb({String? blobUrl}) async {
+  /// Stops the recorder and drops the recorded file.
+  Future<void> discardRecordWeb() async {
+    final path = await stopRecordWeb();
+    if (path == null) return;
     try {
-      if (blobUrl != null) {
-        Logs().d(
-          'AudioMixin::recordToFileOnWeb: Processing blob URL: $blobUrl',
-        );
-
-        // Fetch the actual blob data with timeout
-        final response = await html.window
-            .fetch(blobUrl)
-            .timeout(const Duration(seconds: 10));
-
-        final blob = await response.blob();
-
-        // Create File with correct type
-        final file = html.File([blob], 'Voice Message');
-
-        // Clean up the blob URL
-        html.Url.revokeObjectUrl(blobUrl);
-
-        Logs().d(
-          'AudioMixin::recordToFileOnWeb: ✅ Created file: ${file.name} with type: ${file.type}, size: ${file.size} bytes',
-        );
-        return file;
-      } else {
-        Logs().w('AudioMixin::recordToFileOnWeb: No blob URL provided');
-      }
-    } catch (e, stackTrace) {
-      Logs().e('AudioMixin::recordToFileOnWeb: Recording failed: $e');
-      Logs().e('AudioMixin::recordToFileOnWeb: Stack trace: $stackTrace');
-
-      // Clean up blob URL on error if it exists
-      if (blobUrl != null) {
-        try {
-          html.Url.revokeObjectUrl(blobUrl);
-        } catch (_) {
-          // Ignore cleanup errors
-        }
-      }
+      await File(path).delete();
+    } catch (_) {
+      // Ignore cleanup errors
     }
-
-    return null;
   }
 
-  // Optional: Helper function to create MatrixAudioFile from the web file
-  Future<TwakeAudioFile?> createMatrixAudioFileFromWebFile({
-    required html.File file,
+  /// Reads the recorded file, deletes it, and wraps it as a voice message.
+  Future<TwakeAudioFile?> createMatrixAudioFileFromPath({
+    required String path,
     required Duration duration,
   }) async {
+    final file = File(path);
     try {
-      Logs().d(
-        'AudioMixin::createMatrixAudioFileFromWebFile: Processing ${file.name}',
-      );
-
       final formatDate = DateFormat("yyyy-MM-dd-HHmmss").format(DateTime.now());
-
-      final reader = html.FileReader();
-      final completer = Completer<void>();
-
-      final loadListener = reader.onLoad.listen((_) => completer.complete());
-      final errorListener = reader.onError.listen(
-        (event) =>
-            completer.completeError('FileReader failed: ${reader.error}'),
-      );
-
-      reader.readAsArrayBuffer(file);
-      await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('File reading timed out'),
-      );
-
-      loadListener.cancel();
-      errorListener.cancel();
-
       return TwakeAudioFile(
         name: 'voice_message_$formatDate.wav',
-        bytes: reader.result is Uint8List
-            ? reader.result as Uint8List
-            : (reader.result as ByteBuffer).asUint8List(),
+        bytes: await file.readAsBytes(),
         mimeType: 'audio/wav',
         duration: duration.inMilliseconds,
       );
     } catch (e, stackTrace) {
       Logs().e(
-        'AudioMixin::createMatrixAudioFileFromWebFile: Failed to create MatrixAudioFile: $e',
+        'AudioMixin::createMatrixAudioFileFromPath: Failed to read $path: $e',
       );
       Logs().e(
-        'AudioMixin::createMatrixAudioFileFromWebFile: Stack trace: $stackTrace',
+        'AudioMixin::createMatrixAudioFileFromPath: Stack trace: $stackTrace',
       );
-      rethrow;
+      return null;
+    } finally {
+      try {
+        await file.delete();
+      } catch (_) {
+        // Ignore cleanup errors
+      }
     }
   }
 
