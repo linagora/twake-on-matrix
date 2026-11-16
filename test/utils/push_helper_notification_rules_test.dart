@@ -94,6 +94,7 @@ void main() {
 
   tearDown(() {
     AppConfig.threadsEnabled = flagBefore;
+    client.syncPresence = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
@@ -151,6 +152,18 @@ void main() {
       await push(activeRoomId: roomId);
 
       expect(shown, isEmpty);
+    });
+
+    /// Review of #3609 (nqhhdev push_helper.dart:124): in the background
+    /// the presence is unavailable and the router still holds the last room;
+    /// that room is not read live, its failed fetch shows the fallback.
+    test('the last room on screen, with the app in the background, keeps '
+        'the fallback notification', () async {
+      client.syncPresence = PresenceType.unavailable;
+
+      await push(activeRoomId: roomId);
+
+      expect(shown, hasLength(1));
     });
 
     test('another room than the one on screen keeps the fallback '

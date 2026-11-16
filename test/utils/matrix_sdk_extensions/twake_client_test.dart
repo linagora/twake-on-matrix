@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http_testing;
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
@@ -27,6 +31,51 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  const roomId = '!room:example.org';
+  const thread = ThreadRef(roomId, r'$root');
+
+  /// A client whose server answers /sync with [body].
+  TwakeClient serverAnswering(Map<String, Object?> body) {
+    final client = TwakeClient(
+      'testclient',
+      database: MockDatabase(),
+      httpClient: http_testing.MockClient(
+        (_) async => http.Response(jsonEncode(body), 200),
+      ),
+    );
+    client.baseUri = Uri.parse('https://example.org');
+    client.bearerToken = 'token';
+    return client;
+  }
+
+  /// One sync, handled: the SDK emits onSync once it applied the update.
+  Future<void> syncOnce(TwakeClient client) async {
+    client.onSync.add(await client.sync());
+    await pumpEventQueue(times: 50);
+  }
+
+  const threeUnreadRepliesSync = {
+    'next_batch': 's1',
+    'rooms': {
+      'join': {
+        roomId: {
+          'unread_thread_notifications': {
+            r'$root': {'notification_count': 3, 'highlight_count': 1},
+          },
+        },
+      },
+    },
+  };
+
+  test('with threads on, the thread counters of a sync reach the '
+      'thread store', () async {
+    final client = serverAnswering(threeUnreadRepliesSync);
+
+    await syncOnce(client);
+
+    expect(client.threadUnread.unreadCount(thread), 3);
+  });
+
   test('enables limited timeline history backfill before initialization', () {
     final client = TwakeClient('testclient', database: MockDatabase());
 
@@ -36,6 +85,45 @@ void main() {
   /// Review of #3621 (jbrnzl): with the flag off, off means off.
   group('with threads off', () {
     setUp(() => AppConfig.threadsEnabled = false);
+
+    /// Review of #3621 (nqhhdev): the onSync listener applied the sync to
+    /// the store whatever the flag.
+    test(
+      'the thread counters of a sync never reach the thread store',
+      () async {
+        final client = serverAnswering(threeUnreadRepliesSync);
+        var storeChanges = 0;
+        client.threadUnread.addListener(() => storeChanges++);
+
+        await syncOnce(client);
+
+        expect(client.threadUnread.unreadCount(thread), 0);
+        expect(storeChanges, 0);
+      },
+    );
+
+    test('a room left in a sync does not rewrite the saved thread '
+        'state', () async {
+      const saved =
+          '{"counts":{"$roomId":{"\$root":[3,1]}},'
+          '"followed":["$roomId|\$root"],"replies":{}}';
+      SharedPreferences.setMockInitialValues({
+        'thread_unread_testclient': saved,
+      });
+      final client = serverAnswering({
+        'next_batch': 's2',
+        'rooms': {
+          'leave': {roomId: <String, Object?>{}},
+        },
+      });
+      await client.threadUnread.restore();
+
+      await syncOnce(client);
+      await Future<void>.delayed(const Duration(seconds: 2));
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('thread_unread_testclient'), saved);
+    });
 
     test('a synced thread reply is not remembered', () async {
       final client = TwakeClient('testclient', database: MockDatabase());
