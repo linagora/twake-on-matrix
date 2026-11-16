@@ -207,6 +207,21 @@ void _backgroundTests() {
     expect(_badge.writes, [1]);
   });
 
+  // Review of #3650 (jbrnzl): on iOS, each lifecycle change clears the icon
+  // (MatrixState.didChangeAppLifecycleState, AppDelegate.swift:41) before
+  // the app reaches the background, so the count must be written again
+  // there even when it is the one written last.
+  test('a sync writes 1, then going to the background writes 1 '
+      'again', () async {
+    final general = _account.joined(_general)..notificationCount = 1;
+    _onIphone();
+    await _account.syncs(general);
+
+    await appGoesToBackground();
+
+    expect(_badge.writes, [1, 1]);
+  });
+
   test('coming back to the foreground writes nothing', () async {
     final general = _account.joined(_general)..notificationCount = 1;
     _onIphone();
