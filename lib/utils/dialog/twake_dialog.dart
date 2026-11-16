@@ -34,7 +34,7 @@ class TwakeDialog {
       DialogKeys.showConfirmAlertDialog.key;
 
   static void hideLoadingDialog(BuildContext context) {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       if (TwakeApp.routerKey.currentContext != null) {
         Navigator.pop(TwakeApp.routerKey.currentContext!);
       } else {
@@ -69,7 +69,7 @@ class TwakeDialog {
   static void showLoadingDialog(BuildContext context) {
     showGeneralDialog(
       barrierColor: LinagoraSysColors.material().onPrimary.withOpacity(0.75),
-      useRootNavigator: PlatformInfos.isWeb,
+      useRootNavigator: PlatformInfos.isDesktop,
       transitionDuration: const Duration(milliseconds: 700),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
@@ -77,7 +77,7 @@ class TwakeDialog {
           child: PopScope(
             canPop: false,
             child: ProgressDialog(
-              lottieSize: PlatformInfos.isWeb
+              lottieSize: PlatformInfos.isDesktop
                   ? lottieSizeWeb
                   : lottieSizeMobile,
             ),
@@ -105,7 +105,7 @@ class TwakeDialog {
       );
     }
 
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       return _dialogFullScreenWeb(future: future, context: twakeContext);
     } else {
       return _dialogFullScreenMobile(future: future, context: twakeContext);
@@ -253,7 +253,7 @@ class ProgressDialog extends StatelessWidget {
           const SizedBox(height: 24),
           Text(
             L10n.of(context)!.loading,
-            style: PlatformInfos.isWeb
+            style: PlatformInfos.isDesktop
                 ? Theme.of(context).textTheme.titleLarge
                 : Theme.of(context).textTheme.titleMedium,
             overflow: TextOverflow.ellipsis,

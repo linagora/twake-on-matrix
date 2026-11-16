@@ -14,7 +14,7 @@ class EncryptedContent extends StatelessWidget with EncryptedMixin {
   @override
   Widget build(BuildContext context) {
     return OptionalSelectionContainerDisabled(
-      isEnabled: PlatformInfos.isWeb,
+      isEnabled: PlatformInfos.isDesktop,
       child: ButtonContent(
         onTap: () => verifyOrRequestKey(context, event),
         icon: Icons.lock,

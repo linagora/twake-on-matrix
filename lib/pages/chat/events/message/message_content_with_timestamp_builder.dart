@@ -166,7 +166,7 @@ class MessageContentWithTimestampBuilder extends StatefulWidget {
       MessageContextMenuAction.select,
       MessageContextMenuAction.selectAll,
       MessageContextMenuAction.pin,
-      if (!PlatformInfos.isWeb) MessageContextMenuAction.saveToGallery,
+      MessageContextMenuAction.saveToGallery,
       if (members.every((member) => member.canDelete))
         MessageContextMenuAction.delete,
     ];
@@ -230,7 +230,7 @@ class _MessageContentWithTimestampBuilderState
       if (event.hasAttachment && !event.isVideoOrImage)
         MessageContextMenuAction.saveToDownload,
     ],
-    if (event.isVideoOrImage && !PlatformInfos.isWeb)
+    if (event.isVideoOrImage && PlatformInfos.isMobile)
       MessageContextMenuAction.saveToGallery,
     if (event.canDelete) MessageContextMenuAction.delete,
   ];
@@ -681,7 +681,7 @@ class _MessageContentWithTimestampBuilderState
       children: [
         if (showDisplayName)
           OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isWeb,
+            isEnabled: PlatformInfos.isDesktop,
             child: DisplayNameWidget(event: widget.event),
           ),
         OptionalStack(
@@ -699,7 +699,7 @@ class _MessageContentWithTimestampBuilderState
             ),
             if (!widget.event.isReplyEventWithAudio())
               OptionalSelectionContainerDisabled(
-                isEnabled: PlatformInfos.isWeb,
+                isEnabled: PlatformInfos.isDesktop,
                 child: Padding(
                   padding: MessageStyle.paddingMessageTime,
                   child: Text.rich(
@@ -725,7 +725,7 @@ class _MessageContentWithTimestampBuilderState
 
     final reactions = hasReactionEvent
         ? OptionalSelectionContainerDisabled(
-            isEnabled: PlatformInfos.isWeb,
+            isEnabled: PlatformInfos.isDesktop,
             child: _reactionsOf(context),
           )
         : null;

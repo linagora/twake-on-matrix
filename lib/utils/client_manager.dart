@@ -185,7 +185,7 @@ abstract class ClientManager {
           : null,
       verificationMethods: {
         KeyVerificationMethod.numbers,
-        if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isLinux)
+        if (PlatformInfos.isMobile || PlatformInfos.isLinux)
           KeyVerificationMethod.emoji,
       },
       importantStateEvents: <String>{
@@ -210,9 +210,7 @@ abstract class ClientManager {
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
-        if (PlatformInfos.isMobile ||
-            PlatformInfos.isWeb ||
-            PlatformInfos.isMacOS)
+        if (PlatformInfos.isMobile || PlatformInfos.isMacOS)
           AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,

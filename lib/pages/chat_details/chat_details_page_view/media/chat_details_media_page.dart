@@ -127,7 +127,10 @@ class _VideoItem extends StatelessWidget {
 
   Future<void> _onTapVideo(BuildContext context) async {
     final result =
-        await Navigator.of(context, rootNavigator: PlatformInfos.isWeb).push(
+        await Navigator.of(
+          context,
+          rootNavigator: PlatformInfos.isDesktop,
+        ).push(
           HeroPageRoute(
             builder: (context) {
               return DismissibleMediaView(

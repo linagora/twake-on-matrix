@@ -426,7 +426,7 @@ mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
 
     if (role != null) {
       _setPermission(user, role);
-    } else if (PlatformInfos.isWeb) {
+    } else if (PlatformInfos.isDesktop) {
       _openAssignRolesPageForWeb(user);
     } else {
       _openAssignRolesPageForMobile(user);

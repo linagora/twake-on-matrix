@@ -121,8 +121,7 @@ class EmotesSettingsView extends ConsumerWidget {
                         final image = controller.pack!.images[imageCode]!;
                         final textEditingController = TextEditingController();
                         textEditingController.text = imageCode;
-                        final useShortCuts =
-                            (PlatformInfos.isWeb || PlatformInfos.isDesktop);
+                        final useShortCuts = PlatformInfos.isDesktop;
                         return ListTile(
                           leading: Container(
                             width: 180.0,

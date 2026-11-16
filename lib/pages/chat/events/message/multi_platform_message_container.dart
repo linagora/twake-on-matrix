@@ -18,7 +18,7 @@ class MultiPlatformsMessageContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       return MouseRegion(
         child: child,
         onHover: (event) {
