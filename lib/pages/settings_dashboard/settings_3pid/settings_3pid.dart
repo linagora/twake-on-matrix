@@ -1,15 +1,16 @@
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'settings_3pid_view.dart';
 
-class Settings3Pid extends StatefulWidget {
+class Settings3Pid extends ConsumerStatefulWidget {
   static int sendAttempt = 0;
 
   const Settings3Pid({super.key});
@@ -18,7 +19,7 @@ class Settings3Pid extends StatefulWidget {
   Settings3PidController createState() => Settings3PidController();
 }
 
-class Settings3PidController extends State<Settings3Pid> {
+class Settings3PidController extends ConsumerState<Settings3Pid> {
   void add3PidAction() async {
     final input = await showTextInputDialog(
       useRootNavigator: false,
@@ -36,11 +37,13 @@ class Settings3PidController extends State<Settings3Pid> {
     if (input == null) return;
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
     final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.requestTokenToRegisterEmail(
-        clientSecret,
-        input.single,
-        Settings3Pid.sendAttempt++,
-      ),
+      future: () => ref
+          .read(matrixClientProvider)
+          .requestTokenToRegisterEmail(
+            clientSecret,
+            input.single,
+            Settings3Pid.sendAttempt++,
+          ),
     );
     if (response.error != null) return;
     final ok = await showOkAlertDialog(
@@ -52,11 +55,13 @@ class Settings3PidController extends State<Settings3Pid> {
     );
     if (ok != OkCancelResult.ok) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.uiaRequestBackground(
-        (auth) => Matrix.of(
-          context,
-        ).client.add3PID(clientSecret, response.result!.sid, auth: auth),
-      ),
+      future: () => ref
+          .read(matrixClientProvider)
+          .uiaRequestBackground(
+            (auth) => ref
+                .read(matrixClientProvider)
+                .add3PID(clientSecret, response.result!.sid, auth: auth),
+          ),
     );
     if (success.error != null) return;
     setState(() => request = null);
@@ -76,9 +81,9 @@ class Settings3PidController extends State<Settings3Pid> {
       return;
     }
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(
-        context,
-      ).client.delete3pidFromAccount(identifier.address, identifier.medium),
+      future: () => ref
+          .read(matrixClientProvider)
+          .delete3pidFromAccount(identifier.address, identifier.medium),
     );
     if (success.error != null) return;
     setState(() => request = null);

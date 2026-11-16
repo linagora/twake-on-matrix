@@ -1,8 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -12,18 +13,19 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/utils/client_manager.dart';
 import 'settings_emotes_view.dart';
 
-class EmotesSettings extends StatefulWidget {
+class EmotesSettings extends ConsumerStatefulWidget {
   const EmotesSettings({super.key});
 
   @override
   EmotesSettingsController createState() => EmotesSettingsController();
 }
 
-class EmotesSettingsController extends State<EmotesSettings> {
+class EmotesSettingsController extends ConsumerState<EmotesSettings> {
   String? get roomId => GoRouterState.of(context).pathParameters['roomid'];
 
-  Room? get room =>
-      roomId != null ? Matrix.of(context).client.getRoomById(roomId!) : null;
+  Room? get room => roomId != null
+      ? ref.read(matrixClientProvider).getRoomById(roomId!)
+      : null;
 
   String? get stateKey => GoRouterState.of(context).pathParameters['state_key'];
 
@@ -33,7 +35,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
       ValueNotifier<ImagePackImageContent?>(null);
 
   ImagePackContent _getPack() {
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     final event =
         (room != null
             ? room!.getState('im.ponies.room_emotes', stateKey ?? '')
@@ -57,7 +59,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     if (readonly) {
       return;
     }
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     if (room != null) {
       await TwakeDialog.showFutureLoadingDialogFullScreen(
         future: () => client.setRoomStateWithKey(
@@ -82,7 +84,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     if (room == null) {
       return;
     }
-    final client = Matrix.of(context).client;
+    final client = ref.read(matrixClientProvider);
     final content =
         client.accountData['im.ponies.emote_rooms']?.content ??
         <String, dynamic>{};
@@ -232,11 +234,13 @@ class EmotesSettingsController extends State<EmotesSettings> {
       Logs().w('Unable to create thumbnail', e, s);
     }
     final uploadResp = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(context).client.uploadContent(
-        file.bytes,
-        filename: file.name,
-        contentType: file.mimeType,
-      ),
+      future: () => ref
+          .read(matrixClientProvider)
+          .uploadContent(
+            file.bytes,
+            filename: file.name,
+            contentType: file.mimeType,
+          ),
     );
     if (uploadResp.error == null) {
       setState(() {

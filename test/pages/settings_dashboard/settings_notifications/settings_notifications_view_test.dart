@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
-import 'package:provider/provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 
 class _FakeClient extends Fake implements Client {
   _FakeClient({required this.allPushNotificationsMuted});
@@ -20,17 +20,6 @@ class _FakeClient extends Fake implements Client {
   @override
   final CachedStreamController<BasicEvent> onAccountData =
       CachedStreamController();
-}
-
-class _FakeMatrix extends Fake implements MatrixState {
-  _FakeMatrix(this.client);
-
-  @override
-  final Client client;
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
-      '_FakeMatrix';
 }
 
 class _FakeController extends Fake implements SettingsNotificationsController {
@@ -59,8 +48,13 @@ void main() {
     Locale locale = const Locale('en'),
   }) async {
     await tester.pumpWidget(
-      Provider<MatrixState>.value(
-        value: _FakeMatrix(_FakeClient(allPushNotificationsMuted: muted)),
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          matrixClientProvider.overrideWithValue(
+            _FakeClient(allPushNotificationsMuted: muted),
+          ),
+        ],
         child: MaterialApp(
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           locale: locale,

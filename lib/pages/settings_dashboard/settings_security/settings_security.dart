@@ -5,6 +5,7 @@ import 'package:twake_chat/domain/recovery/exceptions/recovery_words_exception.d
 import 'package:twake_chat/domain/recovery/usecases/get_recovery_words_usecase.provider.dart';
 import 'package:twake_chat/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/beautify_string_extension.dart';
 import 'package:twake_chat/utils/clipboard.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
@@ -39,7 +40,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   ValueNotifier<List<String>> ignoredUsersNotifier =
       ValueNotifier<List<String>>([]);
 
-  Client get client => Matrix.read(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   /// Future that fetches the recovery key, created once in [initState]
   /// and consumed by a [FutureBuilder] in the view.
@@ -125,9 +126,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
     );
     if (!mounted || input == null) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => Matrix.of(
-        context,
-      ).client.changePassword(input.last, oldPassword: input.first),
+      future: () => client.changePassword(input.last, oldPassword: input.first),
     );
     if (!mounted) return;
     if (success.error == null) {
@@ -181,7 +180,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   }
 
   void showBootstrapDialog(BuildContext context) async {
-    await BootstrapDialog(client: Matrix.of(context).client).show();
+    await BootstrapDialog(client: client).show();
   }
 
   Future<void> dehydrateAction() => dehydrateDevice(context);
@@ -216,9 +215,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
   }
 
   Future<void> copyPublicKey() async {
-    TwakeClipboard.instance.copyText(
-      Matrix.of(context).client.fingerprintKey.beautified,
-    );
+    TwakeClipboard.instance.copyText(client.fingerprintKey.beautified);
     TwakeSnackBar.show(context, L10n.of(context)!.copiedPublicKeyToClipboard);
   }
 

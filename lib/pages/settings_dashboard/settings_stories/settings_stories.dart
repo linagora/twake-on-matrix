@@ -1,19 +1,20 @@
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_stories/settings_stories_view.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
-class SettingsStories extends StatefulWidget {
+class SettingsStories extends ConsumerStatefulWidget {
   const SettingsStories({super.key});
 
   @override
   SettingsStoriesController createState() => SettingsStoriesController();
 }
 
-class SettingsStoriesController extends State<SettingsStories> {
+class SettingsStoriesController extends ConsumerState<SettingsStories> {
   final Map<User, bool> users = {};
 
   Room? _storiesRoom;
@@ -58,18 +59,19 @@ class SettingsStoriesController extends State<SettingsStories> {
   }
 
   Future<void> _loadUsers() async {
-    final room = _storiesRoom = await Matrix.of(
-      context,
-    ).client.getStoriesRoom(context);
+    final room = _storiesRoom = await ref
+        .read(matrixClientProvider)
+        .getStoriesRoom(context);
     if (room == null) {
       noStoriesRoom = true;
       return;
     }
     final users = await room.requestParticipants();
     users.removeWhere((u) => u.id == room.client.userID);
-    final contacts = Matrix.of(
-      context,
-    ).client.contacts.where((contact) => !users.any((u) => u.id == contact.id));
+    final contacts = ref
+        .read(matrixClientProvider)
+        .contacts
+        .where((contact) => !users.any((u) => u.id == contact.id));
     for (final user in contacts) {
       this.users[user] = false;
     }
