@@ -1,3 +1,4 @@
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/data/thread/models/sync_thread_counts.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'dart:async';
@@ -9,7 +10,10 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_resolved.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
+import 'package:twake_chat/utils/thread_unread/thread_prefs_local_writes.dart';
+import 'package:twake_chat/utils/activity/activity_reactions_store.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
@@ -57,10 +61,25 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// compare the generated `Api.sync()` signature and body with this
 /// implementation.
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
-class TwakeClient extends Client implements ThreadUnreadStoreOwner {
+class TwakeClient extends Client
+    implements ThreadUnreadStoreOwner, ActivityReactionsStoreOwner {
   // TODO: [transitional] #3599
   @override
-  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(client: this);
+  late final ThreadUnreadStore threadUnread = ThreadUnreadStore(
+    client: this,
+    writes: threadPrefsWrites,
+  );
+
+  /// The reactions of the others to the messages of the user, for the
+  /// Activity tab.
+  // TODO: [transitional] #3599
+  @override
+  late final ActivityReactionsStore activityReactions = ActivityReactionsStore(
+    this,
+  );
+
+  /// The thread choices written here, until the sync echoes them.
+  final threadPrefsWrites = ThreadPrefsLocalWrites();
 
   /// Thread counters parsed with a sync, held until the SDK has handled it.
   final _pendingThreadCounts =
@@ -93,6 +112,8 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
     super.typingIndicatorTimeout,
     super.convertLinebreaksInFormatting,
   }) {
+    // Kept for a partial room: a thread resolved elsewhere shows at startup.
+    importantStateEvents.add(threadResolvedStateType);
     unawaited(threadUnread.restore());
     // The SDK emits onSync once it has handled the sync: the thread counters
     // then land with the room counters and receipts, and a failed sync never
@@ -106,7 +127,27 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
           SyncThreadUpdate(counts: counts ?? const {}, leftRoomIds: left),
         );
       }
+      if (_hasThreadPrefs(update)) {
+        threadPrefsWrites.supersededBy(
+          accountData[threadPrefsAccountDataType]?.content,
+        );
+        threadUnread.refreshPrefs();
+      }
     });
+    // The choices stored on the device apply before the first sync.
+    onLoginStateChanged.stream
+        .where((state) => state == LoginState.loggedIn)
+        .listen((_) {
+          // Loaded already when the app waited for it; else when it ends.
+          threadUnread.refreshPrefs();
+          super.accountDataLoading
+              ?.then((_) => threadUnread.refreshPrefs())
+              .ignore();
+        });
+    // A thread resolved elsewhere redraws its card, in any section of a sync.
+    onRoomState.stream
+        .where((update) => update.state.type == threadResolvedStateType)
+        .listen((_) => threadUnread.refreshResolved());
     // Thread replies are remembered (they lose their relation once deleted),
     // the user's own make the thread followed (in the store); the messages of
     // the main timeline tell the room has new ones under a thread reply. A
@@ -123,11 +164,23 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
 
     onTimelineEvent.stream.listen(onSeenEvent);
     onHistoryEvent.stream.listen(onSeenEvent);
+    onTimelineEvent.stream.listen((event) {
+      if (AppConfig.threadsEnabled) activityReactions.see(event);
+    });
+    onHistoryEvent.stream.listen((event) {
+      if (AppConfig.threadsEnabled) activityReactions.see(event, live: false);
+    });
 
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
     roomPreviewLastEvents.removeWhere(CallEventTypes.isCallEvent);
   }
+
+  static bool _hasThreadPrefs(SyncUpdate update) =>
+      update.accountData?.any(
+        (data) => data.type == threadPrefsAccountDataType,
+      ) ??
+      false;
 
   /// Logs this account's notification device out and removes its recovery
   /// key first: the SDK forgets the user in `clear`, also when the server
@@ -143,6 +196,8 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
           (e, s) => Logs().w('Unable to log the NSE device out', e, s),
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
+    threadPrefsWrites.clear();
+    activityReactions.clear();
     await threadUnread.clear();
     return super.clear(reason: reason);
   }

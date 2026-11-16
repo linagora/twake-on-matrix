@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 import 'package:twake_chat/config/app_config.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_extension.dart';
 
 abstract final class ThreadRules {
@@ -16,6 +20,11 @@ abstract final class ThreadRules {
       event.type == EventTypes.Message &&
       event.status.isSynced &&
       event.threadRootId == null;
+
+  /// The thread [event] belongs to as a reply; null with the threads flag
+  /// off, where a reply is an ordinary message of the room.
+  static String? threadRootOf(Event event) =>
+      AppConfig.threadsEnabled ? event.threadRootId : null;
 
   /// Whether [uri] is a thread screen (`/rooms/R/threads/T`).
   static bool isThreadRoute(Uri uri) {
@@ -72,5 +81,97 @@ abstract final class ThreadRules {
         .getRange(0, readIndex)
         .lastWhereOrNull((e) => e.senderId != ownUserId && isVisible(e))
         ?.eventId;
+  }
+
+  /// Whether a main-timeline message raises a local notification: the room
+  /// counters, which the push rules fill (the ones without threads). A muted
+  /// room: mention only.
+  static bool shouldNotifyMainTimelineEvent(Room room) =>
+      room.notificationCount > 0 && (!room.isMuted || room.highlightCount > 0);
+
+  /// Whether a thread reply raises a local notification. The push rules
+  /// ([pushActions], `client.pushruleEvaluator.match(event)`) decide first,
+  /// then the thread filter: followed, or highlighted. The room counters
+  /// leave thread messages out and the thread counters land after the event.
+  static bool shouldNotifyThreadEvent(
+    Event event, {
+    required bool followed,
+    required EvaluatedPushRuleAction pushActions,
+    String? rootSenderId,
+    ({String roomId, String threadRootId})? activeThread,
+  }) {
+    final me = event.room.client.userID;
+    if (event.senderId == me) return false;
+    if (_readByOwnReceipt(event)) return false;
+    if (activeThread != null &&
+        activeThread.roomId == event.room.id &&
+        activeThread.threadRootId == event.threadRootId) {
+      return false;
+    }
+    if (!pushActions.notify) return false;
+    return followed || rootSenderId == me || pushActions.highlight;
+  }
+
+  /// [shouldNotifyThreadEvent] for a reply, with what it needs found only
+  /// when nothing else decided: the filters (own message, read, thread on
+  /// screen, push rules) and a mention come first, without waiting. Then
+  /// [followed] (may still be looked up), then the sender of the root, which
+  /// a lookup that told nothing leaves as the last word. A root that cannot
+  /// be loaded counts as unknown; nothing is thrown. An explicit [choice]
+  /// of the user decides before all that: muted, never; followed, as if
+  /// followed; unfollowed, a mention only.
+  static Future<bool> shouldNotifyThreadReply(
+    Event event, {
+    required FutureOr<bool?> followed,
+    required EvaluatedPushRuleAction pushActions,
+    ThreadPref? choice,
+    ({String roomId, String threadRootId})? activeThread,
+  }) async {
+    bool decide(bool isFollowed, String? rootSenderId) =>
+        shouldNotifyThreadEvent(
+          event,
+          followed: isFollowed,
+          pushActions: pushActions,
+          rootSenderId: rootSenderId,
+          activeThread: activeThread,
+        );
+    if (choice == ThreadPref.mute || !decide(true, null)) return false;
+    if (choice != null) return decide(choice == ThreadPref.follow, null);
+    if (decide(false, null)) return true;
+    if (await _followOrNull(followed) == true) return true;
+    return decide(false, await _rootSenderOrNull(event));
+  }
+
+  static Future<bool?> _followOrNull(FutureOr<bool?> followed) async {
+    try {
+      return await followed;
+    } catch (e, s) {
+      Logs().w('Unable to tell if the thread is followed', e, s);
+      return null;
+    }
+  }
+
+  static Future<String?> _rootSenderOrNull(Event event) async {
+    final rootId = event.threadRootId;
+    if (rootId == null) return null;
+    try {
+      return (await event.room.getEventById(rootId))?.senderId;
+    } catch (e, s) {
+      Logs().w('Unable to load the root of the thread', e, s);
+      return null;
+    }
+  }
+
+  /// MSC3771: only the receipt of the thread or an unthreaded one reads a
+  /// thread reply; a `main` receipt covers the main timeline only.
+  static bool _readByOwnReceipt(Event event) {
+    final receipts = event.room.receiptState;
+    final readAt = [
+      receipts.global.latestOwnReceipt?.ts,
+      receipts.byThread[event.threadRootId]?.latestOwnReceipt?.ts,
+    ].nonNulls;
+    return readAt.any(
+      (ts) => event.originServerTs.millisecondsSinceEpoch <= ts,
+    );
   }
 }

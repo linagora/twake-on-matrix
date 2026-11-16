@@ -8,6 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/data/datasource_impl/spaces/room_list_entry_mapper.dart';
+import 'package:twake_chat/domain/model/thread/thread_prefs.dart';
 import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread_state.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
@@ -50,6 +51,8 @@ void main() {
   group('the Unread folder', _unreadFolderTests);
   group('a folded space', _spaceCountTests);
   group('with threads off', _threadsOffTests);
+  group('a muted thread', _mutedTests);
+  group('an explicit follow choice', _followChoiceTests);
 }
 
 const _roomId = '!room:example.com';
@@ -205,45 +208,45 @@ void _entryCountTests() {
   );
 }
 
-void _unreadFolderTests() {
-  /// Ids the Unread folder shows when the account holds the room only.
-  List<String> unreadFolderIds() => visibleEntries(
-    roomListEntriesOf([_room()], directChats: const {}),
-    view: const RoomListFilter.builtin(BuiltinFolder.unread),
-  ).map((entry) => entry.id).toList();
+/// Ids the Unread folder shows when the account holds the room only.
+List<String> _unreadFolderIds() => visibleEntries(
+  roomListEntriesOf([_room()], directChats: const {}),
+  view: const RoomListFilter.builtin(BuiltinFolder.unread),
+).map((entry) => entry.id).toList();
 
+/// The row of the space, folded, holding the room.
+RoomListSpaceRow _foldedSpaceRow() => buildRoomListRows(
+  roomListEntriesOf([_space(), _room()], directChats: const {}),
+  foldedSpaceIds: {_spaceId},
+).whereType<RoomListSpaceRow>().single;
+
+void _unreadFolderTests() {
   test('keeps a room whose only unread is a followed thread', () {
     _followThread();
     _threadCounters((unread: 1, mentions: 0));
 
-    expect(unreadFolderIds(), [_roomId]);
+    expect(_unreadFolderIds(), [_roomId]);
   });
 
   test('keeps a room whose only unread is a thread mention', () async {
     await _notFollowedThread((unread: 1, mentions: 1));
 
-    expect(unreadFolderIds(), [_roomId]);
+    expect(_unreadFolderIds(), [_roomId]);
   });
 }
 
 void _spaceCountTests() {
-  /// The row of the space, folded, holding the room.
-  RoomListSpaceRow foldedSpaceRow() => buildRoomListRows(
-    roomListEntriesOf([_space(), _room()], directChats: const {}),
-    foldedSpaceIds: {_spaceId},
-  ).whereType<RoomListSpaceRow>().single;
-
   test('counts a thread mention of a room it holds', () async {
     await _notFollowedThread((unread: 1, mentions: 1));
 
-    expect(foldedSpaceRow().mentionCount, 1);
+    expect(_foldedSpaceRow().mentionCount, 1);
   });
 
   test('counts the followed thread replies of a room it holds', () {
     _followThread();
     _threadCounters((unread: 3, mentions: 0));
 
-    expect(foldedSpaceRow().unreadCount, 3);
+    expect(_foldedSpaceRow().unreadCount, 3);
   });
 }
 
@@ -262,5 +265,108 @@ void _threadsOffTests() {
 
     expect(entry.unreadCount, 1);
     expect(entry.mentionCount, 0);
+  });
+}
+
+/// The sync brings the choice of the user about the thread of [_roomId] in
+/// `app.twake.chat.thread_prefs` (written here or on the web), as it brings
+/// any account data.
+void _choose(ThreadPref pref) {
+  when(_client.accountData).thenReturn({
+    threadPrefsAccountDataType: BasicEvent(
+      type: threadPrefsAccountDataType,
+      content: {
+        'threads': [
+          {'roomId': _roomId, 'threadId': _rootId, 'pref': pref.name},
+        ],
+      },
+    ),
+  });
+  _store.refreshPrefs();
+}
+
+/// The user took part in the thread of [_roomId], it got replies and a
+/// mention, then the user muted it.
+void _mutedThreadWithUnread() {
+  _followThread();
+  _threadCounters((unread: 3, mentions: 1));
+  _choose(ThreadPref.mute);
+}
+
+/// P2: a muted thread stays followed but counts nothing, mentions included.
+void _mutedTests() {
+  test('adds nothing to the counters of its room, even when the user took '
+      'part in it', () {
+    final room = _room();
+    _mutedThreadWithUnread();
+
+    final entry = _entryOf(room);
+
+    expect(entry.unreadCount, 0);
+    expect(entry.mentionCount, 0);
+    expect(entry.isUnread, isFalse);
+  });
+
+  test('leaves the unread messages of the main timeline as they are', () {
+    final room = _room((unread: 1, mentions: 1));
+    _mutedThreadWithUnread();
+
+    final entry = _entryOf(room);
+
+    expect(entry.unreadCount, 1);
+    expect(entry.mentionCount, 1);
+  });
+
+  test('a room whose only unread is a muted thread is not in the Unread '
+      'folder', () {
+    _mutedThreadWithUnread();
+
+    expect(_unreadFolderIds(), isEmpty);
+  });
+
+  test('a folded space holding a room whose only unread is a muted thread '
+      'counts 0', () {
+    _mutedThreadWithUnread();
+
+    final row = _foldedSpaceRow();
+
+    expect(row.unreadCount, 0);
+    expect(row.mentionCount, 0);
+  });
+}
+
+/// P2: the explicit choice wins over taking part.
+void _followChoiceTests() {
+  test('the replies of a thread the user took part in, then unfollowed, '
+      'are not counted', () {
+    final room = _room();
+    _followThread();
+    _threadCounters((unread: 4, mentions: 0));
+    _choose(ThreadPref.unfollow);
+
+    final entry = _entryOf(room);
+
+    expect(entry.unreadCount, 0);
+    expect(entry.isUnread, isFalse);
+  });
+
+  test('the replies of a thread the user followed without replying are '
+      'counted', () async {
+    final room = _room();
+    await _notFollowedThread((unread: 2, mentions: 0));
+    _choose(ThreadPref.follow);
+
+    final entry = _entryOf(room);
+
+    expect(entry.unreadCount, 2);
+    expect(entry.isUnread, isTrue);
+  });
+
+  test('a room whose only unread is a thread the user followed without '
+      'replying is in the Unread folder', () async {
+    await _notFollowedThread((unread: 1, mentions: 0));
+    _choose(ThreadPref.follow);
+
+    expect(_unreadFolderIds(), [_roomId]);
   });
 }

@@ -5,7 +5,11 @@ import 'package:twake_chat/pages/chat/chat_invitation_body.dart';
 import 'package:twake_chat/pages/chat/chat_video_call_button.dart';
 import 'package:twake_chat/pages/chat/chat_view_body.dart';
 import 'package:twake_chat/pages/chat/chat_view_style.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:twake_chat/domain/model/thread/thread_ref.dart';
 import 'package:twake_chat/pages/chat/thread/thread_app_bar_title.dart';
+import 'package:twake_chat/pages/chat/thread/thread_menu_button.dart';
+import 'package:twake_chat/pages/chat/thread/thread_menu_controller.dart';
 import 'package:twake_chat/pages/chat/events/message_content_mixin.dart';
 import 'package:twake_chat/presentation/mixins/audio_mixin.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
@@ -242,16 +246,32 @@ class ChatView extends StatelessWidget with MessageContentMixin {
     bottom: _appBarBottomSeparator(),
   );
 
-  PreferredSizeWidget _threadAppBar(BuildContext context) => AppBar(
-    backgroundColor: controller.responsive.isMobile(context)
-        ? LinagoraSysColors.material().surface
-        : LinagoraSysColors.material().onPrimary,
-    automaticallyImplyLeading: false,
-    toolbarHeight: ChatViewStyle.appBarHeight(context),
-    leading: _buildBackButton(context),
-    title: ThreadAppBarTitle(rootText: controller.threadRootText),
-    bottom: _appBarBottomSeparator(),
-  );
+  PreferredSizeWidget _threadAppBar(BuildContext context) {
+    final thread = ThreadRef(controller.roomId!, controller.threadRootId!);
+    return AppBar(
+      backgroundColor: controller.responsive.isMobile(context)
+          ? LinagoraSysColors.material().surface
+          : LinagoraSysColors.material().onPrimary,
+      automaticallyImplyLeading: false,
+      toolbarHeight: ChatViewStyle.appBarHeight(context),
+      leading: _buildBackButton(context),
+      title: Consumer(
+        builder: (context, ref, _) {
+          final isResolved = ref.watch(
+            threadMenuControllerProvider(
+              thread,
+            ).select((s) => s.status?.isResolved),
+          );
+          return ThreadAppBarTitle(
+            rootText: controller.threadRootText,
+            isResolved: isResolved ?? false,
+          );
+        },
+      ),
+      actions: [ThreadMenuButton(thread: thread)],
+      bottom: _appBarBottomSeparator(),
+    );
+  }
 
   PreferredSizeWidget _appBarBottomSeparator() => PreferredSize(
     preferredSize: const Size(double.infinity, 1),
