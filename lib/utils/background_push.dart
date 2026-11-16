@@ -802,6 +802,8 @@ class BackgroundPush {
       payload.roomId,
       eventId: eventId ?? payload.eventId,
       threadRootId: payload.threadRootId,
+      // Our payload says whether it is a thread reply: no event fetch.
+      threadRootKnown: payload.eventId != null,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,
@@ -812,6 +814,7 @@ class BackgroundPush {
     String? roomId, {
     String? eventId,
     String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
   }) async {
     try {
@@ -841,6 +844,7 @@ class BackgroundPush {
         roomId,
         eventId: eventId,
         threadRootId: threadRootId,
+        threadRootKnown: threadRootKnown,
         switchedClient: switchedClient,
       );
     } catch (e, s) {
@@ -1087,12 +1091,13 @@ class BackgroundPush {
     String roomId, {
     String? eventId,
     String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
   }) async {
     final extra = switchedClient != null
         ? SwitchActiveAccountBodyArgs(newActiveClient: switchedClient)
         : null;
-    final location = threadRootId != null
+    final location = threadRootId != null || threadRootKnown
         ? notificationLocation(
             roomId: roomId,
             eventId: eventId,

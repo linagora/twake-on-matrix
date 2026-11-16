@@ -36,7 +36,7 @@ class ThreadDatasourceImpl implements ThreadDatasource {
         await _decryptInPlace(replies);
       }
       return ThreadRepliesPage(replies: replies, nextBatch: response.nextBatch);
-    } on MatrixException catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().e('ThreadDatasourceImpl::getReplies() failed', e, s);
       throw ThreadLoadFailedException(roomId);
     }
