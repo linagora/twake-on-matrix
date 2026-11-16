@@ -59,7 +59,7 @@ class ActivityMentionsDatasourceImpl implements ActivityMentionsDatasource {
     try {
       final root = await client.threadUnread?.threadRoot(thread);
       return (await root?.decryptedBy(client))?.activityText;
-    } catch (e, s) {
+    } on Exception catch (e, s) {
       Logs().w('Unable to read the root of a thread with a mention', e, s);
       return null;
     }

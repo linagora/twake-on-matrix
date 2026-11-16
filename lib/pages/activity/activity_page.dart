@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -32,8 +34,19 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     }
   }
 
-  Future<void> _markAllRead(List<String> roomIds) =>
-      Future.wait(roomIds.map(_markRead));
+  /// At most 3 receipts at a time: a long list must not hit the rate limit.
+  Future<void> _markAllRead(List<String> roomIds) {
+    final pending = roomIds.iterator;
+    Future<void> markNext() async {
+      while (pending.moveNext()) {
+        await _markRead(pending.current);
+      }
+    }
+
+    return Future.wait(
+      List.generate(min(3, roomIds.length), (_) => markNext()),
+    );
+  }
 
   /// The mentions come from the server: a progress while they load, a way to
   /// ask again when they cannot be read.
