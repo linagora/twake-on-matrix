@@ -47,6 +47,9 @@ class ActivityReactionsStore {
       StreamController.broadcast();
   Future<void> _queue = Future.value();
 
+  /// Bumped by [clear]: what started before it adds nothing after it.
+  int _generation = 0;
+
   /// Newest first.
   List<ActivityItem> get reactions =>
       _reactions.values.toList()..sort((a, b) => b.time.compareTo(a.time));
@@ -56,8 +59,9 @@ class ActivityReactionsStore {
   /// Takes an event of the live timeline or of a history page ([live] false),
   /// in order.
   void see(Event event, {bool live = true}) {
+    final generation = _generation;
     _queue = _queue
-        .then((_) => _handle(event, live))
+        .then((_) => generation == _generation ? _handle(event, live) : null)
         .catchError(
           (Object e, StackTrace s) =>
               Logs().w('Unable to read a reaction for the Activity', e, s),
@@ -66,7 +70,9 @@ class ActivityReactionsStore {
 
   Future<void> _handle(Event event, bool live) async {
     if (event.type == EventTypes.Redaction) {
-      if (_reactions.remove(event.redacts) != null) _changes.add(reactions);
+      if (_reactions.remove(_redactedId(event)) != null) {
+        _changes.add(reactions);
+      }
     } else if (event.senderId == _client.userID) {
       if (event.type != EventTypes.Reaction) _rememberMessage(event);
     } else if (event.type == EventTypes.Reaction && !event.redacted) {
@@ -74,8 +80,16 @@ class ActivityReactionsStore {
     }
   }
 
-  /// Logout: forgets everything.
+  /// The event a redaction takes back: top-level since room v11 moved it to
+  /// the content.
+  String? _redactedId(Event redaction) =>
+      redaction.redacts ?? redaction.content.tryGet<String>('redacts');
+
+  /// Logout: forgets everything, and the lookups still waiting are not held
+  /// in front of the next account.
   void clear() {
+    _generation++;
+    _queue = Future.value();
     _messages.clear();
     _asked.clear();
     _lookups.clear();
@@ -133,8 +147,9 @@ class ActivityReactionsStore {
         ?.tryGet<String>('key');
     if (targetId == null || key == null) return;
     if (_foreign.contains(targetId)) return;
+    final generation = _generation;
     final target = await _myTarget(reaction.room, targetId, live);
-    if (target == null) return;
+    if (target == null || generation != _generation) return;
     _rememberMessage(target);
     _reactions[reaction.eventId] = _item(reaction, target, key);
     final newest = reactions;
