@@ -13,6 +13,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_relation_ex
 import 'package:twake_chat/domain/model/thread/thread_resolved.dart';
 import 'package:twake_chat/domain/model/thread/thread_unread.dart';
 import 'package:twake_chat/utils/thread_unread/thread_prefs_local_writes.dart';
+import 'package:twake_chat/utils/activity/activity_reactions_store.dart';
 import 'package:twake_chat/utils/thread_unread/thread_unread_store.dart';
 import 'package:twake_chat/domain/matrix_events/call_event_types.dart';
 
@@ -60,12 +61,21 @@ Map<String, Object?> _jsonDecodeSyncResponseWeb(Uint8List responseBody) {
 /// compare the generated `Api.sync()` signature and body with this
 /// implementation.
 // Validated against matrix SDK 13.0.0 (Api.sync signature unchanged)
-class TwakeClient extends Client implements ThreadUnreadStoreOwner {
+class TwakeClient extends Client
+    implements ThreadUnreadStoreOwner, ActivityReactionsStoreOwner {
   // TODO: [transitional] #3599
   @override
   late final ThreadUnreadStore threadUnread = ThreadUnreadStore(
     client: this,
     writes: threadPrefsWrites,
+  );
+
+  /// The reactions of the others to the messages of the user, for the
+  /// Activity tab.
+  // TODO: [transitional] #3599
+  @override
+  late final ActivityReactionsStore activityReactions = ActivityReactionsStore(
+    this,
   );
 
   /// The thread choices written here, until the sync echoes them.
@@ -154,6 +164,12 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
 
     onTimelineEvent.stream.listen(onSeenEvent);
     onHistoryEvent.stream.listen(onSeenEvent);
+    onTimelineEvent.stream.listen((event) {
+      if (AppConfig.threadsEnabled) activityReactions.see(event);
+    });
+    onHistoryEvent.stream.listen((event) {
+      if (AppConfig.threadsEnabled) activityReactions.see(event, live: false);
+    });
 
     // The SDK adds call events after the given set: a call would mark the
     // room unread.
@@ -181,6 +197,7 @@ class TwakeClient extends Client implements ThreadUnreadStoreOwner {
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
     threadPrefsWrites.clear();
+    activityReactions.clear();
     await threadUnread.clear();
     return super.clear(reason: reason);
   }

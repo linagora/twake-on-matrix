@@ -69,6 +69,9 @@ class ThreadPrefs {
 
   ThreadPref? of(ThreadRef thread) => _choices[thread];
 
+  /// The threads the user made a choice about.
+  Iterable<ThreadRef> get threads => _choices.keys;
+
   /// The choice comes first; the oldest ones go past the cap.
   ThreadPrefs withChoice(ThreadRef thread, ThreadPref pref) => ThreadPrefs._(
     Map.fromEntries(
