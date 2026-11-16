@@ -1,20 +1,40 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app_lock/flutter_app_lock.dart';
+import 'package:twake_chat/widgets/lock_screen.dart';
 
-class AppLockBackButton extends StatefulWidget {
+class TwakeAppLock extends StatelessWidget {
   final BackButtonDispatcher dispatcher;
+  final bool initiallyEnabled;
   final Widget child;
 
-  const AppLockBackButton({
+  const TwakeAppLock({
     super.key,
     required this.dispatcher,
+    required this.initiallyEnabled,
     required this.child,
   });
 
   @override
-  State<AppLockBackButton> createState() => _AppLockBackButtonState();
+  Widget build(BuildContext context) => AppLock(
+    builder: (_, _) => _AppLockBackButton(dispatcher: dispatcher, child: child),
+    lockScreenBuilder: (_) =>
+        const _AppLockScreenBackButton(child: LockScreen()),
+    initiallyEnabled: initiallyEnabled,
+    initialBackgroundLockLatency: Duration.zero,
+  );
 }
 
-class _AppLockBackButtonState extends State<AppLockBackButton> {
+class _AppLockBackButton extends StatefulWidget {
+  final BackButtonDispatcher dispatcher;
+  final Widget child;
+
+  const _AppLockBackButton({required this.dispatcher, required this.child});
+
+  @override
+  State<_AppLockBackButton> createState() => _AppLockBackButtonState();
+}
+
+class _AppLockBackButtonState extends State<_AppLockBackButton> {
   ChildBackButtonDispatcher? _dispatcher;
 
   @override
@@ -41,18 +61,18 @@ class _AppLockBackButtonState extends State<AppLockBackButton> {
   Widget build(BuildContext context) => widget.child;
 }
 
-class AppLockScreenBackButton extends StatefulWidget {
+class _AppLockScreenBackButton extends StatefulWidget {
   final Widget child;
 
-  const AppLockScreenBackButton({super.key, required this.child});
+  const _AppLockScreenBackButton({required this.child});
 
   @override
-  State<AppLockScreenBackButton> createState() =>
+  State<_AppLockScreenBackButton> createState() =>
       _AppLockScreenBackButtonState();
 }
 
 // At launch the router is not built yet, so nothing else answers Back.
-class _AppLockScreenBackButtonState extends State<AppLockScreenBackButton>
+class _AppLockScreenBackButtonState extends State<_AppLockScreenBackButton>
     with WidgetsBindingObserver {
   @override
   void initState() {

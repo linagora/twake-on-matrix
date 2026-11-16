@@ -8,12 +8,10 @@ import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/widgets/app_lock_back_button.dart';
-import 'package:twake_chat/widgets/lock_screen.dart';
+import 'package:twake_chat/widgets/twake_app_lock.dart';
 import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_lock/flutter_app_lock.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -120,17 +118,12 @@ class TwakeAppState extends State<TwakeApp> {
             routerConfig: TwakeApp.router,
             onNavigationNotification: TwakeApp.router.onNavigationNotification,
             builder: (context, child) => PlatformInfos.isMobile
-                ? AppLock(
-                    builder: (_, _) => AppLockBackButton(
-                      dispatcher: TwakeApp.router.backButtonDispatcher,
-                      child: Matrix(
-                        child: NavigationButtonsSafeArea(child: child),
-                      ),
-                    ),
-                    lockScreenBuilder: (_) =>
-                        const AppLockScreenBackButton(child: LockScreen()),
+                ? TwakeAppLock(
+                    dispatcher: TwakeApp.router.backButtonDispatcher,
                     initiallyEnabled: widget.appLockEnabled,
-                    initialBackgroundLockLatency: Duration.zero,
+                    child: Matrix(
+                      child: NavigationButtonsSafeArea(child: child),
+                    ),
                   )
                 : Matrix(child: NavigationButtonsSafeArea(child: child)),
           );

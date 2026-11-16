@@ -6,8 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:twake_chat/config/go_routes/router_navigation_notification.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/widgets/app_lock_back_button.dart';
 import 'package:twake_chat/widgets/lock_screen.dart';
+import 'package:twake_chat/widgets/twake_app_lock.dart';
 
 void main() {
   group('RouterNavigationNotification', () {
@@ -64,15 +64,10 @@ void main() {
         MaterialApp.router(
           routerConfig: router,
           onNavigationNotification: router.onNavigationNotification,
-          builder: (_, child) => AppLock(
-            builder: (_, _) => AppLockBackButton(
-              dispatcher: router.backButtonDispatcher,
-              child: child!,
-            ),
-            lockScreenBuilder: (_) =>
-                const AppLockScreenBackButton(child: LockScreen()),
+          builder: (_, child) => TwakeAppLock(
+            dispatcher: router.backButtonDispatcher,
             initiallyEnabled: locked,
-            initialBackgroundLockLatency: Duration.zero,
+            child: child!,
           ),
         ),
       );
