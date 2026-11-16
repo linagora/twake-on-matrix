@@ -3380,5 +3380,10 @@
         "type": "int"
       }
     }
+  },
+  "cannotJoinRoomEveryoneLeft": "This chat can no longer be joined because everyone in it has left. The invitation was removed.",
+  "@cannotJoinRoomEveryoneLeft": {
+    "type": "text",
+    "placeholders": {}
   }
 }

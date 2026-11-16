@@ -80,6 +80,7 @@ import 'package:twake_chat/utils/extension/event_status_custom_extension.dart';
 import 'package:twake_chat/utils/extension/global_key_extension.dart';
 import 'package:twake_chat/utils/extension/value_notifier_extension.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
+import 'package:twake_chat/utils/join_invitation_error_extension.dart';
 import 'package:twake_chat/utils/logging/sentry_tracked_events.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_list_extension.dart';
@@ -2453,13 +2454,18 @@ class ChatController extends ConsumerState<Chat>
   }
 
   void onAcceptInvitation() async {
+    final l10n = L10n.of(context)!;
     await TwakeDialog.showFutureLoadingDialogFullScreen(
       future: () async {
         final waitForRoom = room?.client.waitForRoomInSync(
           room!.id,
           join: true,
         );
-        await room?.join();
+        try {
+          await room?.join();
+        } on MatrixException catch (e, s) {
+          Error.throwWithStackTrace(e.toJoinInvitationError(l10n), s);
+        }
         await waitForRoom;
       },
     ).then((_) => _tryLoadTimeline());
