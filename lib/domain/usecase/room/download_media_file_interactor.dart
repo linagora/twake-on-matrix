@@ -13,13 +13,11 @@ class DownloadMediaFileInteractor {
     bool getThumbnail = false,
   }) async* {
     try {
-      final fileInfo = await event.getFileInfo(getThumbnail: getThumbnail);
-      if (fileInfo == null) {
-        yield const Left(
-          DownloadMediaFileFailure(exception: 'FileInfo is null'),
-        );
-        return;
-      }
+      final fileInfo = await event.getFileInfo(
+        getThumbnail: getThumbnail,
+        throwOnError: true,
+      );
+      if (fileInfo == null) return;
       yield Right(DownloadMediaFileSuccess(fileInfo: fileInfo));
     } catch (error) {
       Logs().e('DownloadMediaFileInteractor: execute(): $error');

@@ -17,6 +17,8 @@ import 'package:twake_chat/domain/model/room/room_extension.dart';
 import 'package:matrix/matrix.dart';
 
 extension DownloadFileExtension on Event {
+  static final _downloadsInFlight = <String, Future<void>>{};
+
   bool canContainAttachment() {
     return [EventTypes.Message, EventTypes.Sticker].contains(type);
   }
@@ -47,9 +49,69 @@ extension DownloadFileExtension on Event {
     bool getThumbnail = false,
     CancelToken? cancelToken,
     required String filename,
+    bool throwOnError = false,
   }) async {
-    final attachment = File(savePath);
     final downloadLink = await mxcUrl.getDownloadUri(room.client);
+    final downloadKey = downloadLink.toString();
+    for (
+      var inFlight = _downloadsInFlight[downloadKey];
+      inFlight != null && cancelToken?.isCancelled != true;
+      inFlight = _downloadsInFlight[downloadKey]
+    ) {
+      await Future.any([inFlight, ?cancelToken?.whenCancel]);
+    }
+    if (cancelToken?.isCancelled == true) return null;
+    final done = Completer<void>();
+    _downloadsInFlight[downloadKey] = done.future;
+    try {
+      return await _downloadOrRetrieve(
+        mxcUrl,
+        downloadLink,
+        savePath,
+        downloadStreamController: downloadStreamController,
+        progressCallback: progressCallback,
+        getThumbnail: getThumbnail,
+        cancelToken: cancelToken,
+        filename: filename,
+        throwOnError: throwOnError,
+      );
+    } finally {
+      _downloadsInFlight.remove(downloadKey);
+      done.complete();
+    }
+  }
+
+  Future<FileInfo?> _downloadOrRetrieve(
+    Uri mxcUrl,
+    Uri downloadLink,
+    String savePath, {
+    required StreamController<Either<Failure, Success>>?
+    downloadStreamController,
+    ProgressCallback? progressCallback,
+    required bool getThumbnail,
+    CancelToken? cancelToken,
+    required String filename,
+    required bool throwOnError,
+  }) async {
+    if (getThumbnail ? isThumbnailEncrypted : isAttachmentEncrypted) {
+      final decryptedPath = await StorageDirectoryManager.instance
+          .getDecryptedFilePath(eventId: eventId, fileName: filename);
+      final decryptedFile = File(decryptedPath);
+
+      if (await decryptedFile.exists()) {
+        final decryptedFileLength = await decryptedFile.length();
+        if (decryptedFileLength > 0) {
+          downloadStreamController?.add(
+            Right(DownloadNativeFileSuccessState(filePath: decryptedPath)),
+          );
+          return FileInfo(filename, filePath: decryptedPath);
+        } else {
+          await decryptedFile.delete();
+        }
+      }
+    }
+
+    final attachment = File(savePath);
     Logs().d(
       'DownloadFileExtension::downloadOrRetrieveAttachment(): downloadLink = $downloadLink',
     );
@@ -99,6 +161,7 @@ extension DownloadFileExtension on Event {
           downloadStreamController?.add(
             Left(DownloadFileFailureState(exception: e)),
           );
+          if (throwOnError) rethrow;
         }
         return null;
       }
@@ -113,6 +176,7 @@ extension DownloadFileExtension on Event {
       filename: filename,
       streamController: downloadStreamController,
       getThumbnail: getThumbnail,
+      throwOnError: throwOnError,
     );
 
     return decryptedFileInfo ?? fileInfo;
@@ -125,6 +189,7 @@ extension DownloadFileExtension on Event {
     required FileInfo fileInfo,
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
+    bool throwOnError = false,
   }) async {
     Logs().i('DownloadFileExtension::_handleDownloadFileDone(): $mxcUrl');
     if (isAttachmentEncrypted) {
@@ -135,6 +200,7 @@ extension DownloadFileExtension on Event {
         savePath: savePath,
         filename: filename,
         getThumbnail: getThumbnail,
+        throwOnError: throwOnError,
       );
     } else {
       streamController?.add(
@@ -151,6 +217,7 @@ extension DownloadFileExtension on Event {
     required String filename,
     bool getThumbnail = false,
     StreamController<Either<Failure, Success>>? streamController,
+    bool throwOnError = false,
   }) async {
     streamController?.add(const Right(DecryptingFileState()));
     try {
@@ -177,6 +244,7 @@ extension DownloadFileExtension on Event {
     } catch (e) {
       Logs().e('DownloadManager::_handleEncryptedFileEvent(): $e');
       streamController?.add(Left(DownloadFileFailureState(exception: e)));
+      if (throwOnError) rethrow;
       return null;
     }
   }
@@ -249,6 +317,7 @@ extension DownloadFileExtension on Event {
     StreamController<Either<Failure, Success>>? downloadStreamController,
     ProgressCallback? progressCallback,
     CancelToken? cancelToken,
+    bool throwOnError = false,
   }) async {
     if (!canContainAttachment()) {
       throw ("getFileInfo: This event has the type '$type' and so it can't contain an attachment.");
@@ -277,21 +346,6 @@ extension DownloadFileExtension on Event {
     }
 
     final filename = getThumbnail ? thumbnailFilename : this.filename;
-    if (isFileEncrypted) {
-      final decryptedPath = await StorageDirectoryManager.instance
-          .getDecryptedFilePath(eventId: eventId, fileName: filename);
-      final decryptedFile = File(decryptedPath);
-
-      if (await decryptedFile.exists()) {
-        final decryptedFileLength = await decryptedFile.length();
-        if (decryptedFileLength > 0) {
-          return FileInfo(filename, filePath: decryptedPath);
-        } else {
-          await decryptedFile.delete();
-        }
-      }
-    }
-
     return downloadOrRetrieveAttachment(
       mxcUrl,
       await StorageDirectoryManager.instance.getFilePathInAppDownloads(
@@ -303,6 +357,7 @@ extension DownloadFileExtension on Event {
       progressCallback: progressCallback,
       cancelToken: cancelToken,
       filename: filename,
+      throwOnError: throwOnError,
     );
   }
 }

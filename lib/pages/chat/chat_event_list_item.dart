@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_rules.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/thread/thread_resolved.dart';
@@ -138,6 +140,7 @@ class ChatEventListItem extends StatelessWidget {
         controller.replyAction(replyTo: event);
       },
       onCopy: controller.copyEventsAction,
+      onCopyLink: (event) => unawaited(controller.copyMessageLinkAction(event)),
       onPin: (event) {
         controller.pinEventAction(event);
       },
