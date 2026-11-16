@@ -1840,7 +1840,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "previous": "Anterior",
   "separateChatTypes": "Separar conversaciones directas y grupos",
   "@separateChatTypes": {
     "type": "text",

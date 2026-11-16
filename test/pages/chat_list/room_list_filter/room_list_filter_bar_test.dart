@@ -90,20 +90,14 @@ void _roomListFilterBarTests() {
       expect(find.text('Edit folder'), findsOneWidget);
       expect(find.text('Delete folder'), findsOneWidget);
     });
-
-    testWidgets('whenNothingOverflows_hasNoArrow', (tester) async {
-      await _pump(tester, const [Folder.user('Work')]);
-      await tester.pump();
-
-      expect(find.byTooltip('Previous'), findsNothing);
-      expect(find.byTooltip('Next'), findsNothing);
-    });
   });
 }
 
 void _roomListFilterBarOverflowTests() {
   group('RoomListFilterBar', () {
-    testWidgets('whenTheRowOverflows_showsLabelledArrows', (tester) async {
+    testWidgets('whenTheRowOverflows_hasNoArrowAndScrollsByDrag', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -113,8 +107,18 @@ void _roomListFilterBarOverflowTests() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.byTooltip('Previous'), findsOneWidget);
-      expect(find.byTooltip('Next'), findsOneWidget);
+      expect(find.byTooltip('Previous'), findsNothing);
+      expect(find.byTooltip('Next'), findsNothing);
+      expect(find.byIcon(Icons.chevron_left), findsNothing);
+      expect(find.byIcon(Icons.chevron_right), findsNothing);
+
+      final lastChip = find.byType(FilterChip).last;
+      final before = tester.getTopLeft(lastChip).dx;
+      await tester.drag(find.byType(ListView), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(lastChip).dx, lessThan(before));
+      expect(find.byTooltip('Previous'), findsNothing);
+      expect(find.byTooltip('Next'), findsNothing);
     });
 
     testWidgets('whenNameIsVeryLong_capsTheChipWidth', (tester) async {

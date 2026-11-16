@@ -24,33 +24,10 @@ class RoomListFilterBar extends ConsumerStatefulWidget {
 
 class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   final _scrollController = ScrollController();
-  bool _overflows = false;
-
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollBy(double delta) {
-    if (!_scrollController.hasClients) return;
-    final position = _scrollController.position;
-    _scrollController.animateTo(
-      (position.pixels + delta).clamp(0, position.maxScrollExtent),
-      duration: RoomListFilterStyle.scrollDuration,
-      curve: Curves.easeOut,
-    );
-  }
-
-  bool _onMetrics(ScrollMetricsNotification notification) {
-    final overflows = notification.metrics.maxScrollExtent > 0;
-    if (overflows != _overflows) {
-      // The notification comes from layout: wait for the frame to end.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _overflows = overflows);
-      });
-    }
-    return false;
   }
 
   void _select(RoomListFilter view) =>
@@ -65,84 +42,47 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
       height: RoomListFilterStyle.height,
       child: Row(
         children: [
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_left,
-              tooltip: l10n.previous,
-              onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
-            ),
           Expanded(
-            // The arrows come and go: the list must not be rebuilt with them.
             key: const ValueKey('room_list_filter_chips'),
             child: Semantics(
               label: l10n.roomListFilters,
-              child: NotificationListener<ScrollMetricsNotification>(
-                onNotification: _onMetrics,
-                child: ListView(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  children: [
+              child: ListView(
+                controller: _scrollController,
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _FilterChip(
+                    label: l10n.all,
+                    isSelected: selected is RoomListFilterAll,
+                    onSelected: widget.enabled
+                        ? () => _select(const RoomListFilter.all())
+                        : null,
+                  ),
+                  for (final folder in folders)
                     _FilterChip(
-                      label: l10n.all,
-                      isSelected: selected is RoomListFilterAll,
+                      label: folder.label(l10n),
+                      emoji: folder.emoji,
+                      color: folder.color,
+                      isSelected: selected == RoomListFilter.of(folder),
                       onSelected: widget.enabled
-                          ? () => _select(const RoomListFilter.all())
+                          ? () => _select(RoomListFilter.of(folder))
+                          : null,
+                      onMenu: widget.enabled
+                          ? (context, position) => showFolderMenu(
+                              context,
+                              ref,
+                              folder: folder,
+                              position: position,
+                            )
                           : null,
                     ),
-                    for (final folder in folders)
-                      _FilterChip(
-                        label: folder.label(l10n),
-                        emoji: folder.emoji,
-                        color: folder.color,
-                        isSelected: selected == RoomListFilter.of(folder),
-                        onSelected: widget.enabled
-                            ? () => _select(RoomListFilter.of(folder))
-                            : null,
-                        onMenu: widget.enabled
-                            ? (context, position) => showFolderMenu(
-                                context,
-                                ref,
-                                folder: folder,
-                                position: position,
-                              )
-                            : null,
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
-          if (_overflows)
-            _ScrollArrow(
-              icon: Icons.chevron_right,
-              tooltip: l10n.next,
-              onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
-            ),
         ],
       ),
     );
   }
-}
-
-class _ScrollArrow extends StatelessWidget {
-  const _ScrollArrow({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => LinagoraIconButton(
-    icon: icon,
-    iconSize: RoomListFilterStyle.arrowSize,
-    padding: EdgeInsets.zero,
-    tooltip: tooltip,
-    onPressed: onPressed,
-  );
 }
 
 /// The chip of the design system, with what a folder adds around it: its

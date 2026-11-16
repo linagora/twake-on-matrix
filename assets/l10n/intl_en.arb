@@ -1173,7 +1173,6 @@
     "type": "text",
     "placeholders": {}
   },
-  "previous": "Previous",
   "next": "Next",
   "@next": {
     "type": "text",

@@ -23,6 +23,7 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
   final VoidCallback onClickAvatar;
   final Client client;
   final Widget? connectionStatusHeaderWidget;
+  final List<Widget>? actions;
 
   const TwakeHeader({
     super.key,
@@ -32,6 +33,7 @@ class TwakeHeader extends StatefulWidget implements PreferredSizeWidget {
     required this.conversationSelectionNotifier,
     required this.onClickAvatar,
     this.connectionStatusHeaderWidget,
+    this.actions,
   });
 
   @override
@@ -112,6 +114,7 @@ class _TwakeHeaderState extends State<TwakeHeader>
                 context: context,
                 connectionStatusHeaderWidget:
                     widget.connectionStatusHeaderWidget,
+                actions: widget.actions,
               )
             : AppBar(
                 backgroundColor: responsive.isMobile(context)
