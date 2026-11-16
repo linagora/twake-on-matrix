@@ -135,5 +135,33 @@ void main() {
 
       expect(summary!.isInvitationEnabled, isTrue);
     });
+
+    test('keeps the homeserver and the session of an account whose '
+        'homeserver check fails', () async {
+      FakeMatrixApi.currentApi!.api['GET']!.remove(versionsPath);
+      final stored = client.homeserver;
+      var checkFailed = false;
+
+      await client.fetchHomeserverSummary(
+        onCheckFailed: () => checkFailed = true,
+      );
+
+      expect(checkFailed, isTrue);
+      expect(client.homeserver, stored);
+      expect(client.isLogged(), isTrue);
+    });
+
+    test(
+      'does not report a failure when the homeserver check passes',
+      () async {
+        var checkFailed = false;
+
+        await client.fetchHomeserverSummary(
+          onCheckFailed: () => checkFailed = true,
+        );
+
+        expect(checkFailed, isFalse);
+      },
+    );
   });
 }

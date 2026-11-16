@@ -120,6 +120,55 @@ void main() {
     );
   });
 
+  test('the page keeps the replies and their edits and reactions, not the '
+      'edits and reactions of the root', () async {
+    MatrixEvent edit(String eventId, String target, int minute) => MatrixEvent(
+      type: EventTypes.Message,
+      content: {
+        'msgtype': 'm.text',
+        'body': '* edited',
+        'm.new_content': {'msgtype': 'm.text', 'body': 'edited'},
+        'm.relates_to': {
+          'rel_type': RelationshipTypes.edit,
+          'event_id': target,
+        },
+      },
+      eventId: eventId,
+      senderId: '@bob:example.com',
+      originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
+    );
+    MatrixEvent reaction(String eventId, String target, int minute) =>
+        MatrixEvent(
+          type: EventTypes.Reaction,
+          content: {
+            'm.relates_to': {
+              'rel_type': RelationshipTypes.reaction,
+              'event_id': target,
+              'key': '👍',
+            },
+          },
+          eventId: eventId,
+          senderId: '@alice:example.com',
+          originServerTs: DateTime.utc(2026, 11, 6, 10, minute),
+        );
+    // Newest first, as the server answers going backwards.
+    answerWith([
+      reaction(r'$rootReaction', threadRootId, 5),
+      edit(r'$rootEdit', threadRootId, 4),
+      reaction(r'$r1Reaction', r'$r1', 3),
+      edit(r'$r1Edit', r'$r1', 2),
+      threadReply(r'$r1', 1),
+    ]);
+
+    final page = await load();
+
+    expect(page.replies.map((event) => event.eventId), [
+      r'$r1',
+      r'$r1Edit',
+      r'$r1Reaction',
+    ]);
+  });
+
   test('the last page says there is nothing more to load', () async {
     answerWith([threadReply(r'$r0', 0)], from: 'batch-1');
 
