@@ -36,6 +36,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/client_stories_extension.
 import 'package:twake_chat/utils/client_logout.dart';
 import 'package:twake_chat/utils/icon_badge/icon_badge_updater.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
+import 'package:twake_chat/utils/notification_location.dart';
 import 'package:twake_chat/utils/push_helper.dart';
 import 'package:twake_chat/widgets/layouts/agruments/receive_content_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/switch_active_account_body_args.dart';
@@ -712,7 +713,8 @@ class BackgroundPush {
   Future<void> iOSUserSelectedNoti(dynamic noti) async {
     // roomId is payload if noti is local
     String? roomId = noti['room_id'];
-    final eventId = noti['event_id'];
+    var eventId = noti['event_id'] as String?;
+    String? threadRootId;
     String? receiverId = noti['receiver_id'] as String?;
 
     // Remote APN notifications nest the routing data inside 'payload'.
@@ -723,6 +725,8 @@ class BackgroundPush {
           final parsed = TwakeLocalNotificationPayload.fromJson(rawPayload);
           if (parsed.roomId != null) roomId = parsed.roomId;
           if (parsed.receiverId != null) receiverId = parsed.receiverId;
+          eventId ??= parsed.eventId;
+          threadRootId = parsed.threadRootId;
         }
       } catch (e) {
         Logs().w('[Push] iOSUserSelectedNoti: failed to parse payload', e);
@@ -734,6 +738,7 @@ class BackgroundPush {
     await goToRoom(
       roomId,
       eventId: eventId,
+      threadRootId: threadRootId,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,
@@ -769,6 +774,7 @@ class BackgroundPush {
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
       onSelectNotification: (data) =>
           onSelectNotification(data, eventId: notification.eventId),
     );
@@ -794,7 +800,10 @@ class BackgroundPush {
     if (outcome is NotificationAccountFailed) return;
     await goToRoom(
       payload.roomId,
-      eventId: eventId,
+      eventId: eventId ?? payload.eventId,
+      threadRootId: payload.threadRootId,
+      // Our payload says whether it is a thread reply: no event fetch.
+      threadRootKnown: payload.eventId != null,
       switchedClient: outcome is NotificationAccountSwitched
           ? outcome.client
           : null,
@@ -804,6 +813,8 @@ class BackgroundPush {
   Future<void> goToRoom(
     String? roomId, {
     String? eventId,
+    String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
   }) async {
     try {
@@ -828,9 +839,12 @@ class BackgroundPush {
         Logs().v('[Push] Room $roomId not found, syncing...');
         await activeClient.waitForRoomInSync(roomId);
       }
-      _handleRedirectRoom(
+      await _handleRedirectRoom(
+        activeClient,
         roomId,
         eventId: eventId,
+        threadRootId: threadRootId,
+        threadRootKnown: threadRootKnown,
         switchedClient: switchedClient,
       );
     } catch (e, s) {
@@ -911,6 +925,7 @@ class BackgroundPush {
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
+      activeThread: _matrixState?.activeThread,
     );
   }
 
@@ -1071,18 +1086,24 @@ class BackgroundPush {
     await _handleInnerNavigation();
   }
 
-  void _handleRedirectRoom(
+  Future<void> _handleRedirectRoom(
+    Client client,
     String roomId, {
     String? eventId,
+    String? threadRootId,
+    bool threadRootKnown = false,
     Client? switchedClient,
-  }) {
+  }) async {
     final extra = switchedClient != null
         ? SwitchActiveAccountBodyArgs(newActiveClient: switchedClient)
         : null;
-    if (eventId != null) {
-      TwakeApp.router.go('/rooms/$roomId?event=$eventId', extra: extra);
-      return;
-    }
-    TwakeApp.router.go('/rooms/$roomId', extra: extra);
+    final location = threadRootId != null || threadRootKnown
+        ? notificationLocation(
+            roomId: roomId,
+            eventId: eventId,
+            threadRootId: threadRootId,
+          )
+        : await resolveNotificationLocation(client, roomId, eventId: eventId);
+    TwakeApp.router.go(location, extra: extra);
   }
 }
