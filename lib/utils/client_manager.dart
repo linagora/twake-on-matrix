@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_manager.dart';
 import 'package:twake_chat/utils/custom_http_client.dart';
 import 'package:twake_chat/utils/custom_image_resizer.dart';
@@ -27,6 +28,11 @@ abstract class ClientManager {
   /// the filter with includeLeave (SDK skips defineFilter when an ID exists).
   static const String _includeLeaveFilterMigratedPrefix =
       'im.twake.store.sync_filter_include_leave_v1';
+
+  /// Same invalidation once more so existing installs ask the server for
+  /// per-thread counters (`unread_thread_notifications`).
+  static const String _threadCountersFilterMigratedPrefix =
+      'im.twake.store.sync_filter_thread_counters_v1';
 
   static Future<List<Client>> getClients({bool initialize = true}) async {
     final clientNames = <String>{};
@@ -134,12 +140,25 @@ abstract class ClientManager {
       ? const NativeImplementationsDummy()
       : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
+  /// `unread_thread_notifications` makes the server count unread messages per
+  /// thread instead of mixing them into the room counters.
+  /// Read when used: it follows [AppConfig.threadsEnabled].
+  static Filter get syncFilter => Filter(
+    room: RoomFilter(
+      includeLeave: true,
+      state: StateFilter(lazyLoadMembers: true),
+      timeline: AppConfig.threadsEnabled
+          ? StateFilter(unreadThreadNotifications: true)
+          : null,
+    ),
+  );
+
   static Future<Client> createClient(String clientName) async {
     final database = await MatrixSdkDatabase.init(
       clientName,
       database: await openSqfliteDb(name: clientName),
     );
-    await _invalidatePersistedSyncFilterForIncludeLeave(database, clientName);
+    await migrateSyncFilter(database, clientName);
     return TwakeClient(
       clientName,
       httpClient: PlatformInfos.isAndroid
@@ -161,12 +180,7 @@ abstract class ClientManager {
       },
       // Matrix 12+ no longer caches loadArchive() results for getRoomById().
       // Persist left rooms via sync; keep SDK default member lazy-loading.
-      syncFilter: Filter(
-        room: RoomFilter(
-          includeLeave: true,
-          state: StateFilter(lazyLoadMembers: true),
-        ),
-      ),
+      syncFilter: syncFilter,
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       database: database,
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
@@ -182,13 +196,44 @@ abstract class ClientManager {
     );
   }
 
-  static Future<void> _invalidatePersistedSyncFilterForIncludeLeave(
+  /// The SDK defines a sync filter only when none is saved, so the saved
+  /// filter id is dropped once for the leave rooms, then whenever the threads
+  /// flag differs from the state the saved filter was defined for.
+  static Future<void> migrateSyncFilter(
     DatabaseApi database,
     String clientName,
   ) async {
+    await _migrateOnce(
+      database,
+      clientName,
+      '$_includeLeaveFilterMigratedPrefix.$clientName',
+      migrated: (stored) => stored == '1',
+      marker: '1',
+    );
+    final threads = AppConfig.threadsEnabled ? 'on' : 'off';
+    await _migrateOnce(
+      database,
+      clientName,
+      '$_threadCountersFilterMigratedPrefix.$clientName',
+      // '1' was written when the filter asked for the thread counters.
+      migrated: (stored) => switch (stored) {
+        null => threads == 'off',
+        '1' => threads == 'on',
+        _ => stored == threads,
+      },
+      marker: threads,
+    );
+  }
+
+  static Future<void> _migrateOnce(
+    DatabaseApi database,
+    String clientName,
+    String migratedKey, {
+    required bool Function(String? stored) migrated,
+    required String marker,
+  }) async {
     final store = Store();
-    final migratedKey = '$_includeLeaveFilterMigratedPrefix.$clientName';
-    if (await store.getItem(migratedKey) == '1') return;
+    if (migrated(await store.getItem(migratedKey))) return;
 
     try {
       final account = await database.getClient(clientName);
@@ -212,10 +257,10 @@ abstract class ClientManager {
           account['oidc_client_id'] as String?,
         );
       }
-      await store.setItem(migratedKey, '1');
+      await store.setItem(migratedKey, marker);
     } catch (e, s) {
       Logs().w(
-        'Unable to invalidate sync filter for includeLeave migration',
+        'Unable to invalidate the persisted sync filter ($migratedKey)',
         e,
         s,
       );
