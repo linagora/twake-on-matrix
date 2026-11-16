@@ -54,8 +54,8 @@ extension MatrixFileExtension on MatrixFile {
   }
 
   Future<String?> downloadFile(BuildContext context) async {
-    if (PlatformInfos.isWeb) {
-      return await downloadFileInWeb(context);
+    if (PlatformInfos.isDesktop) {
+      return await downloadFileOnDesktop(context);
     }
 
     if (PlatformInfos.isMobile) {
@@ -76,8 +76,10 @@ extension MatrixFileExtension on MatrixFile {
     return;
   }
 
-  Future<String?> downloadFileInWeb(BuildContext context) async {
-    Logs().d("MatrixFileExtension()::downloadFileInWeb()::download on Web");
+  Future<String?> downloadFileOnDesktop(BuildContext context) async {
+    Logs().d(
+      "MatrixFileExtension()::downloadFileOnDesktop()::download on Desktop",
+    );
     try {
       final fileExt = extensionFromMime(mimeType);
       // Strip the dot + extension from `name` if already present to avoid
@@ -98,7 +100,7 @@ extension MatrixFileExtension on MatrixFile {
       final savedName = fileExt.isNotEmpty ? '$baseName.$fileExt' : baseName;
       return '$directory/$savedName';
     } catch (e) {
-      Logs().e("MatrixFileExtension()::downloadFileInWeb()::Error: $e");
+      Logs().e("MatrixFileExtension()::downloadFileOnDesktop()::Error: $e");
     }
     return null;
   }
@@ -154,12 +156,8 @@ extension MatrixFileExtension on MatrixFile {
 
   bool isFileHaveError(double maxSize) => size > maxSize;
 
-  bool isSendingImageInWeb() {
+  bool isSendingImage() {
     return this is MatrixImageFile;
-  }
-
-  bool isSendingImageInMobile() {
-    return this is MatrixImageFile && !PlatformInfos.isWeb;
   }
 }
 
