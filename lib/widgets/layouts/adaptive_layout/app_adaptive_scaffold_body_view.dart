@@ -1,6 +1,7 @@
 import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/presentation/widget_keys/widget_keys.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
+import 'package:twake_chat/pages/activity/activity_page.dart';
 import 'package:twake_chat/pages/chat_list/chat_list.dart';
 import 'package:twake_chat/pages/contacts_tab/contacts_tab.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
@@ -78,6 +79,9 @@ class AppAdaptiveScaffoldBodyView extends StatelessWidget {
                                         activeNavigationBarNotifier,
                                     onDestinationSelected:
                                         onDestinationSelected,
+                                    selectedIndex: destinations.indexOf(
+                                      navigatorBar,
+                                    ),
                                     destinations: getNavigationDestinations(
                                       context,
                                     ),
@@ -217,6 +221,13 @@ class _ColumnPageView extends StatelessWidget {
           onOpenSettings: onOpenSettings,
           adaptiveScaffoldBodyArgs: adaptiveScaffoldBodyArgs,
         ),
+        if (destinations.contains(AdaptiveDestinationEnum.activity))
+          _triggerPageViewBuilder(
+            navigatorBarType: AdaptiveDestinationEnum.activity,
+            navigatorBarWidget: ActivityPage(
+              bottomNavigationBar: _bottomNavigationBarBuilder(context),
+            ),
+          ),
         _triggerPageViewBuilder(
           navigatorBarType: AdaptiveDestinationEnum.settings,
           navigatorBarWidget: Settings(
@@ -317,10 +328,13 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
 
   final OnDestinationSelected onDestinationSelected;
 
+  final int selectedIndex;
+
   final List<NavigationDestination> destinations;
 
   const _PrimaryNavigationBarBuilder({
     required this.activeNavigationBar,
+    required this.selectedIndex,
     required this.onDestinationSelected,
     required this.destinations,
   });
@@ -328,7 +342,7 @@ class _PrimaryNavigationBarBuilder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffoldPrimaryNavigation(
-      selectedIndex: activeNavigationBar.value.index,
+      selectedIndex: selectedIndex,
       getNavigationRailDestinations: destinations
           .map((destination) => AdaptiveScaffold.toRailDestination(destination))
           .toList(),

@@ -3371,6 +3371,75 @@
     "type": "text",
     "placeholders": {}
   },
+  "activity": "Activity",
+  "@activity": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentions": "Mentions",
+  "@activityMentions": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityReplies": "Replies",
+  "@activityReplies": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMarkAllRead": "Mark all read",
+  "@activityMarkAllRead": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityUnread": "Unread",
+  "@activityUnread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNoThreadFollowed": "No thread followed yet.",
+  "@activityNoThreadFollowed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityNothingToShow": "Nothing to show.",
+  "@activityNothingToShow": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activitySentMessage": "sent a message",
+  "@activitySentMessage": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityRepliedInThread": "replied in a thread",
+  "@activityRepliedInThread": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityMentionedYou": "mentioned you",
+  "@activityMentionedYou": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityReacted": "reacted {emoji} to your message",
+  "@activityReacted": {
+    "type": "text",
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
+  "activityMentionsLoadFailed": "The mentions could not be loaded.",
+  "@activityMentionsLoadFailed": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "activityTryAgain": "Try again",
+  "@activityTryAgain": {
+    "type": "text",
+    "placeholders": {}
+  },
   "addFromTwakeDrive": "Add from Drive",
   "@addFromTwakeDrive": {
     "type": "text",
