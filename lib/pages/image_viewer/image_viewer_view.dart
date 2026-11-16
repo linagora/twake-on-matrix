@@ -118,75 +118,43 @@ class _ImageWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfos.isWeb) {
+    if (controller.bytes != null) {
       if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
-        return AvifImage.network(
-          event
-              .attachmentOrThumbnailMxcUrl()!
-              .getDownloadLink(event.room.client)
-              .toString(),
+        return AvifImage.memory(
+          controller.bytes!,
           height: height,
           width: width,
           fit: BoxFit.cover,
         );
       }
-      return FutureBuilder(
-        future: controller.webAttachmentFuture(event),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Icon(Icons.broken_image_outlined, color: Colors.white);
+      return Image.memory(
+        controller.bytes!,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.none,
+        errorBuilder: (context, error, stackTrace) {
+          if (controller.thumbnailBytes != null) {
+            return Image.memory(
+              controller.thumbnailBytes!,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.none,
+            );
+          } else {
+            return const SizedBox();
           }
-          if (snapshot.data == null || snapshot.data!.bytes.isEmpty != false) {
-            return const CircularProgressIndicator();
-          }
-          return Image.memory(
-            snapshot.data!.bytes,
-            fit: BoxFit.contain,
-            cacheWidth: width != null
-                ? (width! * MediaQuery.devicePixelRatioOf(context)).toInt()
-                : null,
-          );
         },
       );
+    } else if (controller.downloadFailed) {
+      return IconButton(
+        onPressed: controller.retryDownload,
+        tooltip: L10n.of(context)!.tapToRetry,
+        color: Colors.white,
+        icon: const Icon(Icons.broken_image_outlined),
+      );
     } else {
-      if (controller.bytes != null) {
-        if (event.mimeType == TwakeMimeTypeExtension.avifMimeType) {
-          return AvifImage.memory(
-            controller.bytes!,
-            height: height,
-            width: width,
-            fit: BoxFit.cover,
-          );
-        }
-        return Image.memory(
-          controller.bytes!,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.none,
-          errorBuilder: (context, error, stackTrace) {
-            if (controller.thumbnailBytes != null) {
-              return Image.memory(
-                controller.thumbnailBytes!,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.none,
-              );
-            } else {
-              return const SizedBox();
-            }
-          },
-        );
-      } else if (controller.downloadFailed) {
-        return IconButton(
-          onPressed: controller.retryDownload,
-          tooltip: L10n.of(context)!.tapToRetry,
-          color: Colors.white,
-          icon: const Icon(Icons.broken_image_outlined),
-        );
-      } else {
-        return const CupertinoActivityIndicator(
-          animating: true,
-          color: Colors.white,
-        );
-      }
+      return const CupertinoActivityIndicator(
+        animating: true,
+        color: Colors.white,
+      );
     }
   }
 }
