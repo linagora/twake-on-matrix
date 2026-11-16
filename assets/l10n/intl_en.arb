@@ -3421,6 +3421,15 @@
     "type": "text",
     "placeholders": {}
   },
+  "activityReacted": "reacted {emoji} to your message",
+  "@activityReacted": {
+    "type": "text",
+    "placeholders": {
+      "emoji": {
+        "type": "String"
+      }
+    }
+  },
   "activityMentionsLoadFailed": "The mentions could not be loaded.",
   "@activityMentionsLoadFailed": {
     "type": "text",

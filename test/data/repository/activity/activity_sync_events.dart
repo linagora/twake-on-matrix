@@ -20,6 +20,16 @@ extension TestDayTime on (int, int) {
 /// A message: its event id, who sent it, what it says and when.
 typedef Said = ({String id, String sender, String body, DateTime at});
 
+/// A reaction: its event id, who reacted, to which event, with which key,
+/// and when.
+typedef Reacted = ({
+  String id,
+  String sender,
+  String target,
+  String key,
+  DateTime at,
+});
+
 /// A member of the room and the name it shows.
 typedef Person = ({String id, String name});
 
@@ -42,6 +52,20 @@ Map<String, Object?> threadReplyEvent(Said said, ThreadRef thread) => {
       'event_id': thread.rootEventId,
       'is_falling_back': true,
       'm.in_reply_to': {'event_id': thread.rootEventId},
+    },
+  },
+};
+
+Map<String, Object?> reactionEvent(Reacted reacted) => {
+  'type': EventTypes.Reaction,
+  'event_id': reacted.id,
+  'sender': reacted.sender,
+  'origin_server_ts': reacted.at.millisecondsSinceEpoch,
+  'content': {
+    'm.relates_to': {
+      'rel_type': RelationshipTypes.reaction,
+      'event_id': reacted.target,
+      'key': reacted.key,
     },
   },
 };
