@@ -3280,9 +3280,6 @@ class ChatController extends ConsumerState<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
-    if (PlatformInfos.isDesktop) {
-      initAudioRecorderWeb();
-    }
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {

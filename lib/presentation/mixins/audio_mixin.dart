@@ -22,7 +22,7 @@ mixin AudioMixin {
 
   Timer? _timerWeb;
 
-  /// Desktop mic recorder. Created in [initAudioRecorderWeb], cleared in
+  /// Desktop mic recorder. Created on first use, cleared in
   /// [disposeAudioMixin]. Independent of [MatrixState.audioPlayer] playback.
   AudioRecorder? _audioRecorder;
 
@@ -37,7 +37,7 @@ mixin AudioMixin {
 
   /// Tears down Chat-scoped **recording** only (not Matrix playback).
   ///
-  /// Safe if [initAudioRecorderWeb] was never called. Always dispose both
+  /// Safe if the recorder was never used. Always dispose both
   /// notifiers. Do not couple this to [MatrixState.audioPlayer], which may
   /// keep playing after the chat is closed on mobile.
   void disposeAudioMixin() {
@@ -73,13 +73,12 @@ mixin AudioMixin {
     audioRecordStateNotifier.value = AudioRecordState.initial;
   }
 
-  /// Desktop mic recorder for this Chat/DraftChat only. Call from `initState`
-  /// (not post-frame): it does not need [BuildContext]/Matrix, and deferring
-  /// races with dispose on fast navigation. Playback uses
+  /// Creates the desktop mic recorder for this Chat/DraftChat on first use, so
+  /// that opening a chat does not start the recorder plugin. Playback uses
   /// [MatrixState.audioPlayer] and is intentionally separate.
-  void initAudioRecorderWeb() {
-    if (!PlatformInfos.isDesktop) return;
-    if (_audioRecorder != null) return;
+  AudioRecorder _ensureAudioRecorder() {
+    final existing = _audioRecorder;
+    if (existing != null) return existing;
 
     final recorder = AudioRecorder();
     _audioRecorder = recorder;
@@ -93,6 +92,7 @@ mixin AudioMixin {
           value = value < 1 ? 1 : value;
           _amplitudeTimelineWeb.add(value);
         });
+    return recorder;
   }
 
   void _updateRecordStateWeb(RecordState recordState) {
@@ -127,8 +127,8 @@ mixin AudioMixin {
   }
 
   Future<void> onTapRecorderWeb({required BuildContext context}) async {
-    final recorder = _audioRecorder;
-    if (recorder == null) return;
+    if (!PlatformInfos.isDesktop) return;
+    final recorder = _ensureAudioRecorder();
     try {
       if (await recorder.hasPermission()) {
         const encoder = AudioEncoder.wav;
