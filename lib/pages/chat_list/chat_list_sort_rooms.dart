@@ -178,8 +178,10 @@ class _ChatListSortRoomsState extends State<ChatListSortRooms> {
           _sortCache = snapshot.data!;
         }
 
+        final sortedRooms = _sortCache.isEmpty ? widget.rooms : _sortCache;
+        // A logout clears the client before the list moves to the next account.
         return widget.builder(
-          _sortCache.isEmpty ? widget.rooms : _sortCache,
+          sortedRooms.where((room) => room.client.isLogged()).toList(),
           _previewByRoomId,
         );
       },
