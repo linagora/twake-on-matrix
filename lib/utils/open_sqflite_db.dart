@@ -32,6 +32,13 @@ Future<Database> _openEncrypted(String dbName, String dbPath) async {
   try {
     return await _openWithKey(dbPath, key);
   } catch (e) {
+    if (await _isPlainTextOrMissing(dbPath)) {
+      // Migration failed on an intact plaintext file: it is the only copy.
+      Logs().e('Cannot encrypt $dbName, keeping it untouched: $e');
+      final partial = File('$dbPath.encrypted');
+      if (await partial.exists()) await partial.delete();
+      rethrow;
+    }
     Logs().w('Cannot open encrypted $dbName, recreating it: $e');
     await _deleteFiles(dbPath);
     await keyStore.delete(dbName);
@@ -57,6 +64,18 @@ Future<Database> _openWithKey(String dbPath, String key) async {
     rethrow;
   }
   return db;
+}
+
+Future<bool> _isPlainTextOrMissing(String dbPath) async {
+  final file = File(dbPath);
+  if (!await file.exists()) return true;
+  final raf = await file.open();
+  try {
+    final head = await raf.read(16);
+    return String.fromCharCodes(head) == 'SQLite format 3\u0000';
+  } finally {
+    await raf.close();
+  }
 }
 
 Future<void> _deleteFiles(String dbPath) async {
