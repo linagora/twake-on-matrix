@@ -161,7 +161,7 @@ class ImageViewerController extends State<ImageViewer> {
   /// Starts the main download again after a failure.
   void retryDownload() {
     final event = widget.event;
-    if (event == null || !downloadFailed) return;
+    if (event == null) return;
     setState(() {
       downloadFailed = false;
     });
