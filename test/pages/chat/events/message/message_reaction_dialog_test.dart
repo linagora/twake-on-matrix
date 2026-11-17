@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:twake_chat/pages/chat/events/message/message_reaction_dialog.dart';
 
@@ -52,33 +53,35 @@ void main() {
     ).thenReturn({myReaction});
   });
 
-  Future<void> pumpDialog(WidgetTester tester) => tester.pumpWidget(
-    MaterialApp(
-      home: Scaffold(
-        body: MessageReactionDialog(
-          event: event,
-          timeline: timeline,
-          displayEmojiPicker: ValueNotifier(false),
-          messageWidget: const SizedBox(),
-          emojiPickerBuilder:
-              ({
-                required emojiData,
-                required myReaction,
-                required event,
-                required relatesTo,
-              }) => const SizedBox(),
-          messageContextMenu: (_) => [],
-          themeContextMenu: (_) => const PullDownMenuItemTheme(),
-          iconContextMenu: (_, _) => null,
-          dialogSafeAreaKey: GlobalKey(),
-          onToggleEmojiReaction: (emoji, targetEvent) async {
-            expect(targetEvent, same(event));
-            calls.add('toggle $emoji');
-          },
+  Future<void> pumpDialog(WidgetTester tester, {List<Event>? albumEvents}) =>
+      tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MessageReactionDialog(
+              event: event,
+              timeline: timeline,
+              displayEmojiPicker: ValueNotifier(false),
+              messageWidget: const SizedBox(),
+              emojiPickerBuilder:
+                  ({
+                    required emojiData,
+                    required myReaction,
+                    required event,
+                    required relatesTo,
+                  }) => const SizedBox(),
+              messageContextMenu: (_) => [],
+              themeContextMenu: (_) => const PullDownMenuItemTheme(),
+              iconContextMenu: (_, _) => null,
+              dialogSafeAreaKey: GlobalKey(),
+              albumEvents: albumEvents,
+              onToggleEmojiReaction: (emoji, targetEvent) async {
+                expect(targetEvent, same(event));
+                calls.add('toggle $emoji');
+              },
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   testWidgets('hands another reaction to the toggle callback', (tester) async {
     await pumpDialog(tester);
@@ -98,5 +101,22 @@ void main() {
     await tester.pump();
 
     expect(calls, ['toggle 👍']);
+  });
+
+  testWidgets('marks my reaction on any image of an album', (tester) async {
+    final second = MockEvent();
+    when(
+      event.aggregatedEvents(timeline, RelationshipTypes.reaction),
+    ).thenReturn({});
+    when(
+      second.aggregatedEvents(timeline, RelationshipTypes.reaction),
+    ).thenReturn({myReaction});
+
+    await pumpDialog(tester, albumEvents: [event, second]);
+
+    final row = tester.widget<ReactionsDialogWidget>(
+      find.byType(ReactionsDialogWidget),
+    );
+    expect(row.myEmojiReacted, '👍');
   });
 }
