@@ -1745,6 +1745,47 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
+  /// The replaced screens read the client that the last logout drops.
+  Future<void> _leaveLoggedInScreens(String location, {Object? extra}) async {
+    TwakeApp.router.go(location, extra: extra);
+    try {
+      await _coveredRoutesUnmounted().timeout(_leaveScreensTimeout);
+    } on TimeoutException {
+      Logs().w(
+        'MatrixState::_leaveLoggedInScreens: still covered after '
+        '$_leaveScreensTimeout',
+      );
+    }
+  }
+
+  static const _leaveScreensTimeout = Duration(seconds: 2);
+
+  Future<void> _coveredRoutesUnmounted() async {
+    await SchedulerBinding.instance.endOfFrame;
+    Route<dynamic>? top;
+    TwakeApp.routerKey.currentState?.popUntil((route) {
+      top = route;
+      return true;
+    });
+    final entering = top;
+    final animation = entering is TransitionRoute ? entering.animation : null;
+    if (animation != null && !animation.isCompleted) {
+      final settled = Completer<void>();
+      void onStatus(AnimationStatus status) {
+        if (!status.isAnimating && !settled.isCompleted) settled.complete();
+      }
+
+      animation.addStatusListener(onStatus);
+      try {
+        await settled.future;
+      } finally {
+        animation.removeStatusListener(onStatus);
+      }
+    }
+    // Covered routes unmount on the frame after the entering one turns opaque.
+    await SchedulerBinding.instance.endOfFrame;
+  }
+
   Future<void> _handleLastLogout({required Client loggedOut}) async {
     waitForFirstSync = false;
     // Clear first: the last logout rebuilds the contact services, and the wipe
@@ -1759,6 +1800,17 @@ class MatrixState extends ConsumerState<Matrix>
         _report(e, s, 'keychain sync cancel of ${loggedOut.clientName}');
       }
     }
+    Sentry.configureScope((scope) => scope.setUser(null));
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
+    } else {
+      if (kIsWeb) await removeWebPush(loggedOut);
+      await _leaveLoggedInScreens(
+        const HomeRoute($extra: true).location,
+        extra: true,
+      );
+    }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
       // A switch or a removal can change the state between the check and the
@@ -1768,14 +1820,6 @@ class MatrixState extends ConsumerState<Matrix>
       } catch (e, s) {
         _report(e, s, 'last logout of ${loggedOut.clientName}');
       }
-    }
-    Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
-    } else {
-      if (kIsWeb) await removeWebPush(loggedOut);
-      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
     }
     await _deleteAllTomConfigurations();
   }

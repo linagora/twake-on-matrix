@@ -448,8 +448,21 @@ Future<void> _logoutAndWait(
   bool Function() complete,
 ) async {
   loggedOut.onLoginStateChanged.add(LoginState.loggedOut);
-  await harness.settle();
-  await harness.tester.runAsync(() => _until(complete));
+  await _pumpUntil(harness, complete);
+}
+
+/// The last logout waits for frames.
+Future<void> _pumpUntil(
+  _Harness harness,
+  bool Function() done, {
+  Duration frame = Duration.zero,
+}) async {
+  for (var i = 0; i < 100 && !done(); i++) {
+    await harness.tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await harness.tester.pump(frame);
+  }
 }
 
 /// The active account `a` and the one that replaces it, with the contacts
@@ -1501,6 +1514,77 @@ void main() {
       expect(harness.container.read(activeMatrixClientProvider), isNull);
       expect(coordinator.isAppliedTo(last), isFalse);
       expect(effects.applied, isEmpty);
+    });
+    testWidgets('the last logout leaves the screens behind login before the '
+        'accounts drop its client', (tester) async {
+      final last = _BootClient('a', userID: '@a:s');
+      final harness = _handoverHarness(tester, [last]);
+      final locationsWhenDropped = <String>[];
+      final entering = MaterialPageRoute<void>(
+        builder: (_) => const SizedBox(),
+      );
+      late AccountsState whileEntering;
+
+      await harness.run(() async {
+        await _recordedSwitch(harness);
+        harness.container.listen(accountsProvider, (_, next) {
+          if (next is! Active) {
+            locationsWhenDropped.add(
+              TwakeApp.router.routeInformationProvider.value.uri.path,
+            );
+          }
+        });
+        unawaited(TwakeApp.routerKey.currentState!.push(entering));
+
+        last.onLoginStateChanged.add(LoginState.loggedOut);
+        await _pumpUntil(
+          harness,
+          () => TwakeApp.router.routeInformationProvider.value.uri.path
+              .startsWith('/home'),
+        );
+        for (var i = 0; i < 5; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump();
+        }
+        whileEntering = harness.container.read(accountsProvider);
+        await _pumpUntil(
+          harness,
+          () => harness.container.read(accountsProvider) is! Active,
+          frame: const Duration(milliseconds: 100),
+        );
+      });
+
+      expect(whileEntering, isA<Active>());
+      expect(entering.animation!.isCompleted, isTrue);
+      expect(locationsWhenDropped, [startsWith('/home')]);
+      expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
+    });
+
+    testWidgets('the last logout stops waiting for the screens behind login '
+        'after a while', (tester) async {
+      final last = _BootClient('a', userID: '@a:s');
+      final harness = _handoverHarness(tester, [last]);
+      final endless = PageRouteBuilder<void>(
+        transitionDuration: const Duration(hours: 1),
+        pageBuilder: (_, _, _) => const SizedBox(),
+      );
+
+      await harness.run(() async {
+        await _recordedSwitch(harness);
+        unawaited(TwakeApp.routerKey.currentState!.push(endless));
+
+        last.onLoginStateChanged.add(LoginState.loggedOut);
+        await _pumpUntil(
+          harness,
+          () => harness.container.read(accountsProvider) is! Active,
+          frame: const Duration(milliseconds: 500),
+        );
+      });
+
+      expect(endless.animation!.isCompleted, isFalse);
+      expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
     });
   });
 
