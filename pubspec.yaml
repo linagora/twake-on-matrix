@@ -51,7 +51,7 @@ dependencies:
     git:
       url: https://github.com/bitsydarel/flutter_app_badger.git
       ref: master
-  flutter_app_lock: ^3.0.0
+  flutter_app_lock: ^4.3.0
   flutter_avif: 3.1.0
   flutter_blurhash: ^0.8.2
   flutter_cache_manager: ^3.3.0
