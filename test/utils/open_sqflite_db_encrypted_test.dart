@@ -227,6 +227,64 @@ void main() {
     });
   });
 
+  group('recovery only destroys what is really unrecoverable', () {
+    test('keeps the plaintext database when it cannot be encrypted', () async {
+      final dir = p.dirname(dbPath('legacy'));
+      await Directory(dir).create(recursive: true);
+      final plain = await databaseFactoryFfi.openDatabase(dbPath('legacy'));
+      await plain.execute('CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT)');
+      await plain.insert('t', {'id': 1, 'v': 'only-copy'});
+      await plain.close();
+      final before = File(dbPath('legacy')).readAsBytesSync();
+
+      // The '.encrypted' export file cannot be created: a directory already
+      // has that name. (chmod 555 on the directory does not reproduce the
+      // loss: the recovery's own delete then fails and the file survives.)
+      Directory('${dbPath('legacy')}.encrypted').createSync();
+
+      Object? failure;
+      try {
+        db = await openSqfliteDb(name: 'legacy');
+      } catch (e) {
+        failure = e;
+      }
+      await db?.close();
+      db = null;
+
+      expect(File(dbPath('legacy')).existsSync(), isTrue);
+      expect(File(dbPath('legacy')).readAsBytesSync(), equals(before));
+      expect(
+        failure,
+        isNotNull,
+        reason: 'must surface the failure, not return a fresh empty database',
+      );
+      final check = await databaseFactoryFfi.openDatabase(dbPath('legacy'));
+      expect(await check.query('t'), [
+        {'id': 1, 'v': 'only-copy'},
+      ]);
+      await check.close();
+    });
+
+    test('a file that is neither plaintext nor decryptable is recreated '
+        'empty', () async {
+      final dir = p.dirname(dbPath('junk'));
+      await Directory(dir).create(recursive: true);
+      File(
+        dbPath('junk'),
+      ).writeAsBytesSync(List<int>.generate(4096, (i) => (i * 37 + 11) % 256));
+
+      db = await openSqfliteDb(name: 'junk');
+
+      final tables = await db!.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table'",
+      );
+      expect(tables, isEmpty);
+      await db!.execute('CREATE TABLE u (id INTEGER PRIMARY KEY)');
+      await db!.insert('u', {'id': 1});
+      expect(await db!.query('u'), hasLength(1));
+    });
+  });
+
   test('deleteSqfliteDb still deletes a database from its path', () async {
     db = await openSqfliteDb(name: 'gone');
     final path = db!.path;
