@@ -48,6 +48,7 @@ import 'package:twake_chat/data/account/repositories/account_repository_impl.pro
 import 'package:twake_chat/data/account/datasources_impl/client_manager_account_data_source.provider.dart';
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
@@ -509,6 +510,30 @@ void _expectActive(
   expect(harness.container.read(activeMatrixClientProvider), same(next));
   expect(harness.container.read(accountClientsProvider), [next]);
   expect(effects.applied, [name]);
+}
+
+/// A screen behind login: it watches the active client.
+class _ClientReader extends ConsumerStatefulWidget {
+  const _ClientReader({required this.onDispose});
+
+  final VoidCallback onDispose;
+
+  @override
+  ConsumerState<_ClientReader> createState() => _ClientReaderState();
+}
+
+class _ClientReaderState extends ConsumerState<_ClientReader> {
+  @override
+  Widget build(BuildContext context) {
+    ref.watch(matrixClientProvider);
+    return const SizedBox();
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
 }
 
 /// `setActiveClient` stops the contacts lookup of the account being left.
@@ -1515,10 +1540,11 @@ void main() {
       expect(coordinator.isAppliedTo(last), isFalse);
       expect(effects.applied, isEmpty);
     });
-    testWidgets('the last logout leaves the screens behind login before the '
-        'accounts drop its client', (tester) async {
+    testWidgets('the last logout unmounts the screens reading the client '
+        'before the accounts drop it', (tester) async {
       final last = _BootClient('a', userID: '@a:s');
       final harness = _handoverHarness(tester, [last]);
+      final events = <String>[];
       final locationsWhenDropped = <String>[];
       final entering = MaterialPageRoute<void>(
         builder: (_) => const SizedBox(),
@@ -1529,12 +1555,33 @@ void main() {
         await _recordedSwitch(harness);
         harness.container.listen(accountsProvider, (_, next) {
           if (next is! Active) {
+            events.add('client dropped');
             locationsWhenDropped.add(
               TwakeApp.router.routeInformationProvider.value.uri.path,
             );
           }
         });
-        unawaited(TwakeApp.routerKey.currentState!.push(entering));
+        final navigator = TwakeApp.routerKey.currentState!;
+        unawaited(
+          navigator.push(
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  _ClientReader(onDispose: () => events.add('reader disposed')),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        // The harness does not render `TwakeApp.router`: replace the screens
+        // the way its navigation would.
+        final location = TwakeApp.router.routeInformationProvider;
+        void replaceScreens() {
+          if (location.value.uri.path.startsWith('/home')) {
+            unawaited(navigator.pushAndRemoveUntil(entering, (r) => r.isFirst));
+          }
+        }
+
+        location.addListener(replaceScreens);
+        addTearDown(() => location.removeListener(replaceScreens));
 
         last.onLoginStateChanged.add(LoginState.loggedOut);
         await _pumpUntil(
@@ -1558,6 +1605,7 @@ void main() {
 
       expect(whileEntering, isA<Active>());
       expect(entering.animation!.isCompleted, isTrue);
+      expect(events, ['reader disposed', 'client dropped']);
       expect(locationsWhenDropped, [startsWith('/home')]);
       expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
     });
