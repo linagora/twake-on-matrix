@@ -743,12 +743,29 @@ class BackgroundPush {
     _matrixState?.currentClients.whereType<Client>() ?? const [],
   );
 
+  /// The client of the account the push names: the NSE sets `receiver_id`
+  /// and the pusher sends `pusher_notification_client_identifier` (iOS only).
+  /// Without them, [_pushClient] serves the push.
+  Client _receivingClient(dynamic message) {
+    String? field(String key) {
+      final value = message is Map ? message[key] : null;
+      return value is String ? value : null;
+    }
+
+    final receiver = ClientManager.receiving(
+      _matrixState?.currentClients.whereType<Client>() ?? const [],
+      userId: field('receiver_id'),
+      pusherIdentifier: field('pusher_notification_client_identifier'),
+    );
+    return receiver ?? _pushClient;
+  }
+
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
     pushHelper(
       notification,
-      client: _pushClient,
+      client: _receivingClient(message),
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
       onSelectNotification: (data) =>

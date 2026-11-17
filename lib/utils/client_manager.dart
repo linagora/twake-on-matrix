@@ -7,6 +7,7 @@ import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:twake_chat/utils/open_sqflite_db.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
@@ -94,6 +95,22 @@ abstract class ClientManager {
       preferred.isLogged()
       ? preferred
       : loggedIn(held).firstOrNull ?? preferred;
+
+  /// The logged-in client of the account a push was sent to, named by its
+  /// Matrix id or by its pusher identifier (the SHA-256 of that id). Several
+  /// accounts can share the room of the push, so another account's client
+  /// would read the event as that account.
+  static Client? receiving(
+    Iterable<Client> held, {
+    String? userId,
+    String? pusherIdentifier,
+  }) {
+    if (userId == null && pusherIdentifier == null) return null;
+    return loggedIn(held).where((client) {
+      final id = client.userID;
+      return id != null && (id == userId || id.sha256Hash == pusherIdentifier);
+    }).firstOrNull;
+  }
 
   /// Deletes what a client stored: its database and, for the SQLite one, the
   /// file.
