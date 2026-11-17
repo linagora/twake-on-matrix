@@ -1,4 +1,5 @@
 import 'package:twake_chat/data/model/call/sfu_token_request.dart';
+import 'package:twake_chat/domain/model/call/call_media_key.dart';
 import 'package:twake_chat/domain/model/call/call_models.dart';
 import 'package:twake_chat/domain/model/call/call_participant.dart';
 
@@ -21,7 +22,10 @@ abstract class MatrixRtcDatasource {
 
   Future<void> leaveMembership(CallRoom room);
 
-  /// Emits when encryption is turned on in [room]; fails with
+  /// Emits once [room] is encrypted, at once if it already is; fails with
   /// `CallRoomNotFoundException` once the account is no longer in it.
   Stream<void> watchRoomEncrypted(CallRoom room);
+
+  /// The own media keys and those of the other devices, while listened to.
+  Stream<CallMediaKey> watchMediaKeys(CallRoom room);
 }
