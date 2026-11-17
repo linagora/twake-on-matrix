@@ -6,13 +6,13 @@ import 'package:twake_chat/presentation/mixins/contacts_view_controller_mixin.da
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:twake_chat/widgets/matrix.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -35,7 +35,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
         AutomaticKeepAliveClientMixin {
   final responsive = getIt.get<ResponsiveUtils>();
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   /// The Contacts page reflects the ToM Address Book only; DMs found by the
   /// SDK must not be listed here (issue #3097).
@@ -67,7 +67,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
       if (mounted) {
         synchronizeContactsOnContactTab(
           context: context,
-          client: Matrix.of(context).client,
+          client: client,
           matrixLocalizations: MatrixLocals(L10n.of(context)!),
         );
       }
@@ -96,12 +96,8 @@ class ContactsTabController extends ConsumerState<ContactsTab>
       goToSettingsProfile();
       return;
     }
-    final roomId = Matrix.of(
-      context,
-    ).client.getDirectChatFromUserId(contact.matrixId!);
-    final room = roomId != null
-        ? Matrix.of(context).client.getRoomById(roomId)
-        : null;
+    final roomId = client.getDirectChatFromUserId(contact.matrixId!);
+    final room = roomId != null ? client.getRoomById(roomId) : null;
     if (roomId == null || room?.isAbandonedDMRoom == true) {
       goToDraftChat(context: context, path: path, contact: contact);
     } else {
@@ -118,7 +114,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
     required String path,
     required PresentationContact contact,
   }) {
-    if (contact.matrixId != Matrix.of(context).client.userID) {
+    if (contact.matrixId != client.userID) {
       Router.neglect(
         context,
         () => context.go(
@@ -140,7 +136,7 @@ class ContactsTabController extends ConsumerState<ContactsTab>
 
     await retrySynchronizeContactsOnContactTab(
       context: context,
-      client: Matrix.of(context).client,
+      client: client,
       matrixLocalizations: MatrixLocals(L10n.of(context)!),
     );
   }
