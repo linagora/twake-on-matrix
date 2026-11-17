@@ -19,7 +19,7 @@ const _noServerLeftInRoomMessages = {
 
 extension JoinInvitationErrorExtension on MatrixException {
   Exception toJoinInvitationError(L10n l10n) =>
-      error == MatrixError.M_UNKNOWN &&
+      errcode == 'M_UNKNOWN' &&
           _noServerLeftInRoomMessages.contains(errorMessage)
       ? RoomNoLongerJoinableException(l10n.cannotJoinRoomEveryoneLeft)
       : this;

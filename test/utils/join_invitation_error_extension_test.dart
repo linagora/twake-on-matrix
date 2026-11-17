@@ -39,6 +39,15 @@ void main() {
     expect(exception.toJoinInvitationError(l10n), same(exception));
   });
 
+  test('keeps the original exception for an errcode the SDK does not know', () {
+    final exception = _matrixException(
+      'M_UNABLE_TO_AUTHORISE_JOIN',
+      'No known servers',
+    );
+
+    expect(exception.toJoinInvitationError(l10n), same(exception));
+  });
+
   test('keeps the original exception for another errcode', () {
     final exception = _matrixException('M_FORBIDDEN', 'You are banned');
 
