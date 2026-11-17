@@ -41,8 +41,10 @@ class Settings extends ConsumerStatefulWidget {
 }
 
 class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
-  final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
-  final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
+  // Null until the profile is loaded: the view then falls back to the
+  // localpart of the active account instead of an empty name.
+  final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> displayNameNotifier = ValueNotifier(null);
 
   static String generateEmailSubject(String? matrixId) =>
       'Request for Deletion of Twake Chat Account${matrixId != null ? ' - $matrixId' : ''}';
@@ -358,13 +360,8 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   @override
   void dispose() {
     onAccountDataSubscription?.cancel();
-    if (avatarUriNotifier.value != null) {
-      avatarUriNotifier.dispose();
-    }
-
-    if (displayNameNotifier.value != null) {
-      displayNameNotifier.dispose();
-    }
+    avatarUriNotifier.dispose();
+    displayNameNotifier.dispose();
     super.dispose();
   }
 

@@ -60,9 +60,16 @@ class SettingsView extends StatelessWidget {
                     padding: SettingsViewStyle.itemBuilderPadding,
                     child: Row(
                       children: [
-                        ValueListenableBuilder(
-                          valueListenable: controller.avatarUriNotifier,
-                          builder: (context, avatarUrl, __) {
+                        // The initials come from the display name, so the
+                        // avatar follows both notifiers.
+                        ListenableBuilder(
+                          listenable: Listenable.merge([
+                            controller.avatarUriNotifier,
+                            controller.displayNameNotifier,
+                          ]),
+                          builder: (context, _) {
+                            final avatarUrl =
+                                controller.avatarUriNotifier.value;
                             return Padding(
                               padding: SettingsViewStyle.avatarPadding,
                               child: Material(
@@ -144,7 +151,9 @@ class SettingsView extends StatelessWidget {
             if (!controller.matrix.twakeSupported)
               ValueListenableBuilder(
                 valueListenable: controller.showChatBackupSwitch,
-                builder: (_, backUpAvailable, _) {
+                builder: (_, backUpAvailable, child) {
+                  // Not known yet: show the loading tile, not an off switch.
+                  if (backUpAvailable == null) return child!;
                   return SwitchListTile(
                     controlAffinity: .trailing,
                     contentPadding: SettingsViewStyle.backupSwitchPadding,
