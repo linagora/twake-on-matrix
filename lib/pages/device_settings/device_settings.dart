@@ -20,6 +20,7 @@ import 'package:twake_chat/pages/key_verification/key_verification_dialog.dart';
 import 'package:twake_chat/presentation/enum/key_verification/key_verification_code_enum.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/device_extension.dart';
+import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:twake_chat/widgets/layouts/max_width_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
@@ -293,11 +294,15 @@ Future<void> verifyDeviceAction(
   Device device,
 ) async {
   final client = Matrix.of(context).client;
+  // A device that never uploaded device keys has no entry to verify against.
+  final deviceKeys =
+      client.userDeviceKeys[client.userID]?.deviceKeys[device.deviceId];
+  if (deviceKeys == null) {
+    TwakeSnackBar.show(context, L10n.of(context)!.deviceHasNoEncryptionKeys);
+    return;
+  }
   // Keep a handle so a dismissed loading dialog cannot orphan the request.
-  final verificationFuture = client
-      .userDeviceKeys[client.userID!]!
-      .deviceKeys[device.deviceId]!
-      .startVerification();
+  final verificationFuture = deviceKeys.startVerification();
   // Block the list while the request is set up so Verify can't be re-tapped.
   final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
     future: () => verificationFuture,
