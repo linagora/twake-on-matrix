@@ -10,6 +10,7 @@ import 'package:twake_chat/pages/contacts_tab/widgets/sliver_phonebook_contacts_
 import 'package:twake_chat/pages/contacts_tab/widgets/sliver_phonebook_contacts_without_matrix_id.dart';
 import 'package:twake_chat/pages/contacts_tab/widgets/sliver_warning_banner.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,13 +27,14 @@ class ContactsTabBodyView extends ConsumerWidget {
         (summary) => summary.isInvitationEnabled,
       ),
     );
+    final userId = ref.watch(matrixClientProvider).userID;
     return RefreshIndicator(
       onRefresh: controller.retrySynchronizeContacts,
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          if (isInvitationEnabled && controller.client.userID != null)
-            SliverInviteFriendButton(userId: controller.client.userID!),
+          if (isInvitationEnabled && userId != null)
+            SliverInviteFriendButton(userId: userId),
           SliverWarningBanner(controller: controller),
           SliverLoadingContacts(controller: controller),
           SliverContactsWithMatrixId(controller: controller),
