@@ -222,7 +222,7 @@ class ComputeMedianTest(unittest.TestCase):
                 expected_samples=3,
             )
 
-    def test_expected_samples_allows_excluded_metric_in_fewer_samples(self) -> None:
+    def test_expected_samples_drops_excluded_metric_in_fewer_samples(self) -> None:
         for index, path in enumerate(self.logs, start=1):
             metrics = "rss_bytes=100"
             if index == 1:
@@ -246,8 +246,29 @@ class ComputeMedianTest(unittest.TestCase):
         checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
         self.assertEqual(checkpoint["sample_count"], 3)
         self.assertEqual(checkpoint["rss_bytes"], 100.0)
-        self.assertEqual(checkpoint["build_p50_us"], 727.0)
-        self.assertEqual(checkpoint["build_p50_us_sample_count"], 1)
+        self.assertNotIn("build_p50_us", checkpoint)
+        self.assertNotIn("build_p50_us_sample_count", checkpoint)
+
+    def test_expected_samples_keeps_excluded_metric_in_every_sample(self) -> None:
+        for path in self.logs:
+            Path(path).write_text(
+                "PERF_METRIC | scroll_room1 | scroll_settled"
+                " | rss_bytes=100 | build_p50_us=727\n",
+                encoding="utf-8",
+            )
+
+        output = self.directory / "median.json"
+        compute_median(
+            self.logs,
+            str(output),
+            expected_samples=3,
+            requirements={
+                ("scroll_room1", "scroll_settled"): {"rss_bytes"},
+            },
+        )
+
+        checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
+        self.assertEqual(checkpoint["build_p50_us_sample_count"], 3)
 
     def test_expected_samples_rejects_incomplete_required_metric(self) -> None:
         for index, path in enumerate(self.logs, start=1):
