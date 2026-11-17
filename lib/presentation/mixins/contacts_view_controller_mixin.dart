@@ -32,7 +32,7 @@ import 'package:twake_chat/utils/extension/presentation_search_extension.dart';
 import 'package:twake_chat/utils/permission_dialog.dart';
 import 'package:twake_chat/utils/permission_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -244,7 +244,10 @@ mixin class ContactsViewControllerMixin {
               Navigator.of(dialogContext).pop();
               await _handleRequestContactsPermission(
                 context: context,
-                client: Matrix.of(context).client,
+                client: ProviderScope.containerOf(
+                  context,
+                  listen: false,
+                ).read(matrixClientProvider),
               );
             },
           );
