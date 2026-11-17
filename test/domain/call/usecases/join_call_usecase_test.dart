@@ -64,6 +64,16 @@ void main() {
     expect(repository.calls.where((call) => call.startsWith('ring')), isEmpty);
   });
 
+  test('a room lost after the media connected disconnects the media', () async {
+    repository.othersError = const CallRoomNotFoundException();
+
+    await expectLater(join(), throwsA(isA<CallRoomNotFoundException>()));
+
+    expect(repository.calls, contains('connect mic=true camera=true'));
+    expect(repository.calls.last, 'disconnect');
+    expect(repository.calls.any((call) => call.startsWith('join')), isFalse);
+  });
+
   test('a ring that cannot be sent does not fail the call', () async {
     repository.ringError = Exception('offline');
 

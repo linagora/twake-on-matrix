@@ -10,6 +10,7 @@ import 'package:twake_chat/domain/model/call/call_ring.dart';
 class CallRingTracker {
   CallRingTracker(Client client) : _client = client {
     _subscription = client.onTimelineEvent.stream.listen(_onEvent);
+    _syncSubscription = client.onSync.stream.listen((_) => _onSync());
   }
 
   static const defaultLifetime = Duration(seconds: 60);
@@ -17,6 +18,7 @@ class CallRingTracker {
 
   final Client _client;
   late final StreamSubscription<Event> _subscription;
+  late final StreamSubscription<SyncUpdate> _syncSubscription;
   final _rings = <String, CallRing>{};
   final _timers = <String, Timer>{};
   final _changes = StreamController<List<CallRing>>.broadcast();
@@ -39,6 +41,7 @@ class CallRingTracker {
       timer.cancel();
     }
     _subscription.cancel().ignore();
+    _syncSubscription.cancel().ignore();
     _changes.close().ignore();
     _missed.close().ignore();
   }
@@ -64,6 +67,25 @@ class CallRingTracker {
     inRoom.forEach(_remove);
   }
 
+  /// A join can come with a limited sync only as room state.
+  void _onSync() {
+    final joined = [
+      for (final ring in _rings.values)
+        if (_client
+                .getRoomById(ring.room.id)
+                ?.states[CallEventTypes.callMember]
+                ?.values
+                .any(
+                  (member) =>
+                      member.senderId == _client.userID &&
+                      isLiveMembership(member),
+                ) ??
+            false)
+          ring.eventId,
+    ];
+    joined.forEach(_remove);
+  }
+
   void _onDecline(Event event) {
     if (event.senderId != _client.userID) return;
     final relates = event.content['m.relates_to'];
@@ -87,11 +109,23 @@ class CallRingTracker {
     _emit();
   }
 
-  bool _isForUs(Event event) =>
-      event.senderId != _client.userID &&
-      !_rings.containsKey(event.eventId) &&
-      _isRing(event) &&
-      !_isInCallHere(event.room);
+  bool _isForUs(Event event) {
+    final userId = _client.userID;
+    final senderTs = event.content['sender_ts'];
+    if (userId == null ||
+        senderTs is! int ||
+        event.senderId == userId ||
+        _rings.containsKey(event.eventId) ||
+        !_isRing(event) ||
+        _isInCallHere(event.room)) {
+      return false;
+    }
+    return RtcNotificationContent(
+      senderTs: DateTime.fromMillisecondsSinceEpoch(senderTs),
+      notificationType: RtcNotificationType.ring,
+      lifetime: _lifetimeOf(event),
+    ).shouldNotifyUser(event: event, currentUserId: userId);
+  }
 
   static bool _isRing(Event event) {
     final key = event.type == CallEventTypes.callNotify
@@ -113,9 +147,24 @@ class CallRingTracker {
       room.states[CallEventTypes.callMember]?.values.any(
         (member) =>
             member.senderId == _client.userID &&
-            member.content['device_id'] == _client.deviceID,
+            member.content['device_id'] == _client.deviceID &&
+            isLiveMembership(member),
       ) ??
       false;
+
+  /// A membership of someone in the call, not left nor expired. Without
+  /// `created_ts` it expires from the server time of its event.
+  static bool isLiveMembership(StrippedStateEvent member) {
+    final content = member.content;
+    if (content['device_id'] is! String) return false;
+    final expires = content['expires'];
+    final createdTs =
+        content['created_ts'] ??
+        (member is Event ? member.originServerTs.millisecondsSinceEpoch : null);
+    return expires is! int ||
+        createdTs is! int ||
+        createdTs + expires >= DateTime.now().millisecondsSinceEpoch;
+  }
 
   void _lapse(CallRing ring, Event event) {
     _remove(ring.eventId);

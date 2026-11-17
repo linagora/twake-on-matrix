@@ -314,34 +314,33 @@ class MatrixRtcDatasourceImpl implements MatrixRtcDatasource {
     final members = _room(call).states[memberEventType]?.values ?? const [];
     return members.any(
       (member) =>
-          member.senderId != _client.userID &&
-          member.content['device_id'] is String &&
-          !_isExpired(member.content),
+          !(member.senderId == _client.userID &&
+              member.content['device_id'] == _client.deviceID) &&
+          CallRingTracker.isLiveMembership(member),
     );
   }
 
-  static bool _isExpired(Map<String, Object?> content) {
-    final createdTs = content['created_ts'];
-    final expires = content['expires'];
-    return createdTs is int &&
-        expires is int &&
-        createdTs + expires < DateTime.now().millisecondsSinceEpoch;
-  }
-
+  /// A direct chat rings the other user. A group, or any room that is not a
+  /// direct chat of two, only notifies: nobody is rung by `room: true`.
   @override
-  Future<void> sendRing(CallJoin join, {required String membershipEventId}) =>
-      _send(join.room, RtcNotificationContent.eventType, {
-        'slot_id': 'm.call#',
-        'notification_type': 'ring',
-        'sender_ts': DateTime.now().millisecondsSinceEpoch,
-        'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
-        'm.mentions': {'user_ids': <String>[], 'room': true},
-        'm.relates_to': {
-          'rel_type': 'm.reference',
-          'event_id': membershipEventId,
-        },
-        'm.call.intent': join.isVideo ? 'video' : 'audio',
-      });
+  Future<void> sendRing(CallJoin join, {required String membershipEventId}) {
+    final room = _room(join.room);
+    final callee = room.isDirectChat ? room.directChatMatrixID : null;
+    return _send(join.room, RtcNotificationContent.eventType, {
+      'slot_id': 'm.call#',
+      'notification_type': callee != null ? 'ring' : 'notification',
+      'sender_ts': DateTime.now().millisecondsSinceEpoch,
+      'lifetime': CallRingTracker.defaultLifetime.inMilliseconds,
+      'm.mentions': {
+        'user_ids': <String>[?callee],
+      },
+      'm.relates_to': {
+        'rel_type': 'm.reference',
+        'event_id': membershipEventId,
+      },
+      'm.call.intent': join.isVideo ? 'video' : 'audio',
+    });
+  }
 
   @override
   Future<void> declineRing(CallRing ring) async {

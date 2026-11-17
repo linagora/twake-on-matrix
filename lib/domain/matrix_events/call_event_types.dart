@@ -17,5 +17,7 @@ abstract final class CallEventTypes {
       type == callMember ||
       type == RtcNotificationContent.eventType ||
       type == callNotify ||
+      type == callDecline ||
+      type == callDeclineStable ||
       _prefixes.any(type.startsWith);
 }

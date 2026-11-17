@@ -30,8 +30,21 @@ class _FakeRoom extends Fake implements Room {
   @override
   bool get encrypted => isEncrypted;
 
+  /// The other user of a direct chat, null for a group.
+  String? dmUser;
+
+  /// What the server says of the room: the members who joined.
+  var joinedCount = 3;
+
   @override
-  bool get isDirectChat => false;
+  String? get directChatMatrixID => dmUser;
+
+  @override
+  bool get isDirectChat => dmUser != null;
+
+  @override
+  RoomSummary get summary =>
+      RoomSummary.fromJson({'m.joined_member_count': joinedCount});
 
   @override
   Membership get membership => Membership.join;
@@ -92,6 +105,10 @@ class _Ring {
       else
         'notification_type': 'ring',
       'm.call.intent': intent,
+      'm.mentions': {
+        'user_ids': [_bobHere.user],
+      },
+      'sender_ts': (at ?? DateTime.now()).millisecondsSinceEpoch,
       ...extra,
     };
 }
@@ -133,6 +150,9 @@ class _FakeClient extends Fake implements Client {
   @override
   final CachedStreamController<Event> onTimelineEvent =
       CachedStreamController();
+
+  @override
+  final CachedStreamController<SyncUpdate> onSync = CachedStreamController();
 
   @override
   String? get userID => '@bob:hs.test';
@@ -204,6 +224,21 @@ StrippedStateEvent _member(_Who who, {Map<String, Object?>? content}) =>
       content: content ?? {'application': 'm.call', 'device_id': who.device},
     );
 
+/// A membership as the room state holds it once synced, with its server time.
+Event _memberEvent(
+  _Who who, {
+  required DateTime at,
+  Map<String, Object?>? content,
+}) => Event(
+  content: content ?? {'application': 'm.call', 'device_id': who.device},
+  type: _memberType,
+  eventId: r'$state',
+  senderId: who.user,
+  originServerTs: at,
+  stateKey: '_${who.user}_${who.device}_m.call',
+  room: _FakeRoom(),
+);
+
 void main() {
   late _FakeClient client;
   late MatrixRtcDatasourceImpl datasource;
@@ -215,8 +250,11 @@ void main() {
 
   group('sendRing', () {
     test(
-      'the ring is an MSC4075 notification with a ring type, in the room',
+      'in a direct chat the ring names the other user, not the room',
       () async {
+        client.room
+          ..dmUser = _alice.user
+          ..joinedCount = 2;
         final before = DateTime.now().millisecondsSinceEpoch;
 
         await datasource.sendRing(_videoJoin, membershipEventId: r'$member');
@@ -228,14 +266,38 @@ void main() {
         final senderTs = sent.content['sender_ts'];
         expect(senderTs, isA<int>());
         expect(senderTs as int, inInclusiveRange(before, after));
-        expect({...sent.content}..remove('sender_ts'), {
-          'slot_id': 'm.call#',
-          'notification_type': 'ring',
-          'lifetime': 60000,
-          'm.mentions': {'user_ids': <String>[], 'room': true},
-          'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
-          'm.call.intent': 'video',
-        });
+        final mentions = sent.content['m.mentions']! as Map;
+        expect(mentions['user_ids'], [_alice.user]);
+        expect(mentions['room'], isNot(true));
+        expect(
+          {...sent.content}
+            ..remove('sender_ts')
+            ..remove('m.mentions'),
+          {
+            'slot_id': 'm.call#',
+            'notification_type': 'ring',
+            'lifetime': 60000,
+            'm.relates_to': {'rel_type': 'm.reference', 'event_id': r'$member'},
+            'm.call.intent': 'video',
+          },
+        );
+      },
+    );
+
+    test(
+      'in a group of more than two the room is notified, not rung',
+      () async {
+        client.room
+          ..dmUser = null
+          ..joinedCount = 3;
+
+        await datasource.sendRing(_join, membershipEventId: r'$member');
+
+        final sent = client.sent.single;
+        expect(sent.type, 'org.matrix.msc4075.rtc.notification');
+        expect(sent.content['notification_type'], 'notification');
+        final mentions = sent.content['m.mentions'] as Map?;
+        expect(mentions?['room'], isNot(true));
       },
     );
 
@@ -265,13 +327,66 @@ void main() {
       expect(datasource.hasOtherMembers(_room), isTrue);
     });
 
-    test('nobody, or only the user on another device', () {
+    test('nobody, or only this device, is nobody else', () {
       expect(datasource.hasOtherMembers(_room), isFalse);
 
       client.room.states = {
-        _memberType: {'a': _member(_bobPhone)},
+        _memberType: {'a': _member(_bobThisDevice)},
       };
       expect(datasource.hasOtherMembers(_room), isFalse);
+    });
+
+    test('the user on another device is already in the call', () {
+      client.room.states = {
+        _memberType: {'a': _member(_bobPhone)},
+      };
+
+      expect(datasource.hasOtherMembers(_room), isTrue);
+    });
+
+    test('another user on a device with the id of this one counts', () {
+      client.room.states = {
+        _memberType: {'a': _member((user: _alice.user, device: 'BOB'))},
+      };
+
+      expect(datasource.hasOtherMembers(_room), isTrue);
+    });
+
+    test('a membership without created_ts expires from its server time', () {
+      final longAgo = DateTime.now().subtract(const Duration(hours: 5));
+      client.room.states = {
+        _memberType: {
+          'a': _memberEvent(
+            _alice,
+            at: longAgo,
+            content: {
+              'application': 'm.call',
+              'device_id': 'DEV',
+              'expires': 14400000,
+            },
+          ),
+        },
+      };
+
+      expect(datasource.hasOtherMembers(_room), isFalse);
+    });
+
+    test('a recent membership without created_ts is in the call', () {
+      client.room.states = {
+        _memberType: {
+          'a': _memberEvent(
+            _alice,
+            at: DateTime.now(),
+            content: {
+              'application': 'm.call',
+              'device_id': 'DEV',
+              'expires': 14400000,
+            },
+          ),
+        },
+      };
+
+      expect(datasource.hasOtherMembers(_room), isTrue);
     });
 
     test('someone who left is not in the call', () {
@@ -569,6 +684,98 @@ void main() {
         expect(lists.last, hasLength(1));
       });
     });
+
+    test('a ring that mentions only others does not ring', () {
+      fakeAsync((async) {
+        listen(async);
+
+        client.ring(
+          _Ring()
+            ..extra = {
+              'm.mentions': {
+                'user_ids': ['@carol:hs.test'],
+              },
+            },
+        );
+        async.flushMicrotasks();
+
+        expect(everRung(), isEmpty);
+      });
+    });
+
+    test('a ring that mentions the room rings', () {
+      fakeAsync((async) {
+        listen(async);
+
+        client.ring(
+          _Ring()
+            ..extra = {
+              'm.mentions': {'user_ids': <String>[], 'room': true},
+            },
+        );
+        async.flushMicrotasks();
+
+        expect(lists.last.single.eventId, r'$ring');
+      });
+    });
+
+    test('a ring that mentions nobody does not ring', () {
+      fakeAsync((async) {
+        listen(async);
+
+        client.ring(_Ring()..extra = {'m.mentions': <String, Object?>{}});
+        async.flushMicrotasks();
+
+        expect(everRung(), isEmpty);
+      });
+    });
+
+    test('an expired membership of this device does not silence a ring', () {
+      fakeAsync((async) {
+        final longAgo = DateTime.now()
+            .subtract(const Duration(hours: 5))
+            .millisecondsSinceEpoch;
+        client.room.states = {
+          _memberType: {
+            'a': _member(
+              _bobThisDevice,
+              content: {
+                'application': 'm.call',
+                'device_id': 'BOB',
+                'created_ts': longAgo,
+                'expires': 14400000,
+              },
+            ),
+          },
+        };
+        listen(async);
+
+        client.ring();
+        async.flushMicrotasks();
+
+        expect(lists.last.single.eventId, r'$ring');
+      });
+    });
+
+    test(
+      'joining seen only in the room state (limited sync) ends the ring',
+      () {
+        fakeAsync((async) {
+          listen(async);
+          client.ring();
+          async.flushMicrotasks();
+          expect(lists.last, hasLength(1));
+
+          client.room.states = {
+            _memberType: {'a': _member(_bobPhone)},
+          };
+          client.onSync.add(SyncUpdate(nextBatch: 'next'));
+          async.flushMicrotasks();
+
+          expect(lists.last, isEmpty);
+        });
+      },
+    );
 
     test('a call this device is already in does not ring', () {
       fakeAsync((async) {

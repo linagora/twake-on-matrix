@@ -26,7 +26,13 @@ class JoinCallUseCase {
     final server = await _repository.fetchServer(join);
     if (cancel.isCancelled) return null;
     if (!await _connect(server, join, cancel)) return null;
-    final othersInCall = _repository.hasOtherMembers(join.room);
+    final bool othersInCall;
+    try {
+      othersInCall = _repository.hasOtherMembers(join.room);
+    } on CallException {
+      await _repository.disconnectMedia();
+      rethrow;
+    }
     final membershipEventId = await _sendMembership(join, cancel);
     if (membershipEventId != null && !othersInCall) {
       await _ring(join, membershipEventId);

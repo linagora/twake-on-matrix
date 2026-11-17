@@ -47,6 +47,9 @@ class FakeCallRepository implements CallRepository {
 
   /// What `hasOtherMembers` answers.
   bool othersInCall = false;
+
+  /// What `hasOtherMembers` throws instead, when set.
+  Object? othersError;
   CallException? disconnectError;
   Completer<void>? connectGate;
   Completer<void>? leaveGate;
@@ -86,7 +89,10 @@ class FakeCallRepository implements CallRepository {
   }
 
   @override
-  bool hasOtherMembers(CallRoom room) => othersInCall;
+  bool hasOtherMembers(CallRoom room) {
+    if (othersError case final error?) throw error;
+    return othersInCall;
+  }
 
   @override
   Future<void> sendRing(
