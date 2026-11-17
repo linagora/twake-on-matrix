@@ -110,6 +110,7 @@ import 'package:twake_chat/widgets/mixins/twake_context_menu_style.dart';
 import 'package:twake_chat/widgets/mxc_image.dart';
 import 'package:twake_chat/widgets/twake_app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_emoji_mart/flutter_emoji_mart.dart' as emoji_mart;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
