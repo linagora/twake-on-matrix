@@ -18,6 +18,12 @@ class SliverInviteFriendButton extends StatelessWidget {
 
   final String userId;
 
+  /// The share sheet anchor: iPad and recent iOS refuse to open without it.
+  @visibleForTesting
+  static Rect? shareOriginOf(RenderBox? box) => box != null && box.hasSize
+      ? box.localToGlobal(Offset.zero) & box.size
+      : null;
+
   @override
   Widget build(BuildContext context) {
     return SliverPersistentHeader(
@@ -64,13 +70,11 @@ class _InviteFriendButton extends ConsumerWidget {
           final url = ref.read(matrixClientProvider).personalInviteUrl;
           try {
             if (PlatformInfos.isMobile) {
-              // iPad and recent iOS need the share sheet anchor rect.
-              final box = context.findRenderObject() as RenderBox?;
               await Share.share(
                 url,
-                sharePositionOrigin: box != null && box.hasSize
-                    ? box.localToGlobal(Offset.zero) & box.size
-                    : null,
+                sharePositionOrigin: SliverInviteFriendButton.shareOriginOf(
+                  context.findRenderObject() as RenderBox?,
+                ),
               );
             } else if (PlatformInfos.isWeb) {
               await Clipboard.setData(ClipboardData(text: url));
