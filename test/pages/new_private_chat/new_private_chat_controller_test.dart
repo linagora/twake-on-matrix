@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/data/direct_chat/repositories/direct_chat_repository_impl.provider.dart';
 import 'package:twake_chat/domain/direct_chat/repositories/direct_chat_repository.dart';
+import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.dart';
+import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.provider.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat_controller.dart';
 import 'package:twake_chat/pages/new_private_chat/new_private_chat_state.dart';
 
@@ -14,6 +18,18 @@ class _FakeDirectChatRepository extends Fake implements DirectChatRepository {
     final failure = error;
     if (failure != null) throw failure;
     return rooms[contactMxId];
+  }
+}
+
+class _PendingFindDirectChatUseCase extends Fake
+    implements FindDirectChatUseCase {
+  final lookups = <Completer<String?>>[];
+
+  @override
+  Future<String?> execute({required String contactMxId}) {
+    final lookup = Completer<String?>();
+    lookups.add(lookup);
+    return lookup.future;
   }
 }
 
@@ -99,5 +115,68 @@ void main() {
       container.read(newPrivateChatControllerProvider),
       const NewPrivateChatState.idle(),
     );
+  });
+
+  group('with a pending lookup', () {
+    late _PendingFindDirectChatUseCase useCase;
+    late ProviderContainer pendingContainer;
+
+    setUp(() {
+      useCase = _PendingFindDirectChatUseCase();
+      pendingContainer = ProviderContainer.test(
+        retry: (_, _) => null,
+        overrides: [findDirectChatUseCaseProvider.overrideWithValue(useCase)],
+      );
+    });
+
+    test('openContact_whileAlreadyOpening_runsASingleLookup', () async {
+      // Arrange
+      final pendingStates = <NewPrivateChatState>[];
+      pendingContainer.listen(
+        newPrivateChatControllerProvider,
+        (_, next) => pendingStates.add(next),
+      );
+      final notifier = pendingContainer.read(
+        newPrivateChatControllerProvider.notifier,
+      );
+
+      // Act
+      final first = notifier.openContact(matrixId: contact);
+      final second = notifier.openContact(matrixId: '@bob:server');
+      useCase.lookups.single.complete('!dm:server');
+      await Future.wait([first, second]);
+
+      // Assert
+      expect(useCase.lookups, hasLength(1));
+      expect(pendingStates, const [
+        NewPrivateChatState.opening(),
+        NewPrivateChatState.room('!dm:server'),
+      ]);
+    });
+
+    test('openContact_disposedDuringTheLookup_leavesTheStateAlone', () async {
+      // Arrange
+      final pendingStates = <NewPrivateChatState>[];
+      final subscription = pendingContainer.listen(
+        newPrivateChatControllerProvider,
+        (_, next) => pendingStates.add(next),
+      );
+      final opening = pendingContainer
+          .read(newPrivateChatControllerProvider.notifier)
+          .openContact(matrixId: contact);
+      subscription.close();
+      await pendingContainer.pump();
+      expect(
+        pendingContainer.exists(newPrivateChatControllerProvider),
+        isFalse,
+      );
+
+      // Act
+      useCase.lookups.single.complete('!dm:server');
+      await opening;
+
+      // Assert
+      expect(pendingStates, const [NewPrivateChatState.opening()]);
+    });
   });
 }
