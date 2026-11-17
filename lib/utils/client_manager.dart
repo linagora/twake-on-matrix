@@ -6,6 +6,8 @@ import 'package:twake_chat/utils/custom_image_resizer.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/flutter_hive_collections_database.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/twake_client.dart';
 import 'package:twake_chat/utils/open_sqflite_db.dart';
+import 'package:twake_chat/utils/sqlite_key_store.dart';
+import 'package:path/path.dart' show basenameWithoutExtension;
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
@@ -101,7 +103,12 @@ abstract class ClientManager {
     await database.delete();
     if (database is MatrixSdkDatabase) {
       final path = database.database?.path;
-      if (path != null) await deleteSqfliteDb(path);
+      if (path != null) {
+        await deleteSqfliteDb(path);
+        await SqliteKeyStore()
+            .delete(basenameWithoutExtension(path))
+            .catchError((_) {});
+      }
     }
   }
 
