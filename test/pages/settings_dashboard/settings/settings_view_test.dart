@@ -44,6 +44,9 @@ class _FakeController extends Fake implements SettingsController {
   final ValueNotifier<bool?> showChatBackupSwitch = ValueNotifier(null);
 
   @override
+  final ValueNotifier<bool> backupStateLoading = ValueNotifier(true);
+
+  @override
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
 
   @override
@@ -101,6 +104,21 @@ void main() {
 
     expect(find.byType(SwitchListTile), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('backup check ended without a result: the switch is off', (
+    tester,
+  ) async {
+    await pumpView(tester);
+
+    controller.backupStateLoading.value = false;
+    await tester.pump();
+
+    expect(
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
+      isFalse,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('backup state known: the switch replaces the loading tile', (

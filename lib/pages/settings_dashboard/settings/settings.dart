@@ -69,6 +69,10 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
 
   final ValueNotifier<bool?> showChatBackupSwitch = ValueNotifier(null);
 
+  // True while [checkBootstrap] runs. The check can end without a result
+  // (encryption disabled, an error): the view then shows the switch again.
+  final ValueNotifier<bool> backupStateLoading = ValueNotifier(true);
+
   MatrixState get matrix => Matrix.of(context);
 
   String get displayName =>
@@ -179,6 +183,15 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   }
 
   void checkBootstrap() async {
+    backupStateLoading.value = true;
+    try {
+      await _loadBackupState();
+    } finally {
+      if (mounted) backupStateLoading.value = false;
+    }
+  }
+
+  Future<void> _loadBackupState() async {
     if (!client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
@@ -362,6 +375,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     onAccountDataSubscription?.cancel();
     avatarUriNotifier.dispose();
     displayNameNotifier.dispose();
+    backupStateLoading.dispose();
     super.dispose();
   }
 

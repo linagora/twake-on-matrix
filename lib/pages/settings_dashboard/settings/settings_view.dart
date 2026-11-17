@@ -149,11 +149,18 @@ class SettingsView extends StatelessWidget {
               ),
             ),
             if (!controller.matrix.twakeSupported)
-              ValueListenableBuilder(
-                valueListenable: controller.showChatBackupSwitch,
-                builder: (_, backUpAvailable, child) {
-                  // Not known yet: show the loading tile, not an off switch.
-                  if (backUpAvailable == null) return child!;
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  controller.showChatBackupSwitch,
+                  controller.backupStateLoading,
+                ]),
+                builder: (_, child) {
+                  final backUpAvailable = controller.showChatBackupSwitch.value;
+                  // Still checking: show the loading tile, not an off switch.
+                  if (backUpAvailable == null &&
+                      controller.backupStateLoading.value) {
+                    return child!;
+                  }
                   return SwitchListTile(
                     controlAffinity: .trailing,
                     contentPadding: SettingsViewStyle.backupSwitchPadding,
