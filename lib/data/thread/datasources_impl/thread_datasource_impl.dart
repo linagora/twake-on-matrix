@@ -51,7 +51,7 @@ class ThreadDatasourceImpl implements ThreadDatasource {
   /// `m.relates_to` stays in clear in encrypted events.
   List<MatrixEvent> _threadEvents(List<MatrixEvent> chunk, String rootId) {
     bool targetsRootOutsideThread(MatrixEvent e) {
-      final relatesTo = e.content['m.relates_to'] as Map<String, Object?>?;
+      final relatesTo = e.content.tryGetMap<String, Object?>('m.relates_to');
       return relatesTo?['event_id'] == rootId &&
           relatesTo?['rel_type'] != RelationshipTypes.thread;
     }

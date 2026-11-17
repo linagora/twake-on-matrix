@@ -325,4 +325,27 @@ void main() {
 
     await expectLater(load(), throwsA(isA<StateError>()));
   });
+
+  test('an event whose m.relates_to is not a map does not fail the load, '
+      'and the replies around it are still shown', () async {
+    final malformed = MatrixEvent(
+      type: EventTypes.Message,
+      content: const {
+        'msgtype': 'm.text',
+        'body': 'odd',
+        'm.relates_to': 'oops',
+      },
+      eventId: r'$odd',
+      senderId: '@bob:example.com',
+      originServerTs: DateTime.utc(2026, 11, 6, 10, 2),
+    );
+    answerWith([threadReply(r'$r3', 3), malformed, threadReply(r'$r1', 1)]);
+
+    final page = await load();
+
+    expect(
+      page.replies.map((event) => event.eventId),
+      containsAll([r'$r1', r'$r3']),
+    );
+  });
 }

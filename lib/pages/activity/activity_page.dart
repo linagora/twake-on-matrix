@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
-import 'package:matrix/matrix.dart';
 import 'package:twake_chat/data/repository/activity/activity_mentions_repository.provider.dart';
 import 'package:twake_chat/data/repository/activity/activity_reactions_repository.provider.dart';
 import 'package:twake_chat/domain/activity/usecases/mark_room_read_use_case.provider.dart';
@@ -49,9 +48,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
   ) async {
     try {
       await markRead(roomId);
-    } on Exception catch (e, s) {
-      // The room stays in the list: the button can be pressed again.
-      Logs().w('Unable to mark the room as read', e, s);
+    } on Exception {
+      // Logged by the use case. The room stays in the list: the button can be pressed again.
     }
   }
 
