@@ -33,6 +33,12 @@ void main() {
     );
   });
 
+  test('keeps the original exception for an unrelated M_UNKNOWN', () {
+    final exception = _matrixException('M_UNKNOWN', 'Internal server error');
+
+    expect(exception.toJoinInvitationError(l10n), same(exception));
+  });
+
   test('keeps the original exception for another errcode', () {
     final exception = _matrixException('M_FORBIDDEN', 'You are banned');
 
