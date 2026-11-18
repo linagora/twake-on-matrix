@@ -219,6 +219,7 @@ class EmotesSettingsController extends ConsumerState<EmotesSettings> {
   void imagePickerAction(
     ValueNotifier<ImagePackImageContent?> controller,
   ) async {
+    final client = ref.read(matrixClientProvider);
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       withData: true,
@@ -234,13 +235,11 @@ class EmotesSettingsController extends ConsumerState<EmotesSettings> {
       Logs().w('Unable to create thumbnail', e, s);
     }
     final uploadResp = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => ref
-          .read(matrixClientProvider)
-          .uploadContent(
-            file.bytes,
-            filename: file.name,
-            contentType: file.mimeType,
-          ),
+      future: () => client.uploadContent(
+        file.bytes,
+        filename: file.name,
+        contentType: file.mimeType,
+      ),
     );
     if (uploadResp.error == null) {
       setState(() {

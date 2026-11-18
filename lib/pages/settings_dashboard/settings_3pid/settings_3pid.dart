@@ -66,6 +66,7 @@ class Settings3PidController extends ConsumerState<Settings3Pid> {
   Future<List<ThirdPartyIdentifier>?>? request;
 
   void delete3Pid(ThirdPartyIdentifier identifier) async {
+    final client = ref.read(matrixClientProvider);
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
@@ -77,9 +78,8 @@ class Settings3PidController extends ConsumerState<Settings3Pid> {
       return;
     }
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => ref
-          .read(matrixClientProvider)
-          .delete3pidFromAccount(identifier.address, identifier.medium),
+      future: () =>
+          client.delete3pidFromAccount(identifier.address, identifier.medium),
     );
     if (success.error != null) return;
     setState(() => request = null);
