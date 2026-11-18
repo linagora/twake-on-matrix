@@ -589,13 +589,11 @@ class SettingsProfileController extends State<SettingsProfile>
           }
         },
         (success) {
-          switch (success.runtimeType) {
-            case const (GetAvatarOnMobileUIStateSuccess):
-              final uiState = success as GetAvatarOnMobileUIStateSuccess;
+          switch (success) {
+            case final GetAvatarOnMobileUIStateSuccess uiState:
               assetEntity = uiState.assetEntity;
               break;
-            case const (GetAvatarOnWebUIStateSuccess):
-              final uiState = success as GetAvatarOnWebUIStateSuccess;
+            case final GetAvatarOnWebUIStateSuccess uiState:
               matrixFile = uiState.matrixFile;
               _refreshEditedState();
               break;
