@@ -1686,9 +1686,8 @@ void main() {
     }
   });
 
-  testWidgets('a login during the wait of the last logout keeps the ToM data', (
-    tester,
-  ) async {
+  testWidgets('a login during the wait of the last logout removes the account '
+      'that logged out and keeps the ToM data', (tester) async {
     final last = _BootClient('a', userID: '@a:s');
     final tom = _CountingToMDatabase();
     getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
@@ -1723,7 +1722,10 @@ void main() {
       );
     });
 
-    expect(harness.container.read(accountsProvider), isA<Active>());
+    final accounts = harness.container.read(accountsProvider);
+    expect(accounts, isA<Active>());
+    expect(accounts.accounts.map((a) => a.id), ['b']);
+    expect((accounts as Active).activeId, 'b');
     expect(tom.clears, 0);
   });
 

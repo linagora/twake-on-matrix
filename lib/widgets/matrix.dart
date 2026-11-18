@@ -1830,6 +1830,14 @@ class MatrixState extends ConsumerState<Matrix>
       } catch (e, s) {
         _report(e, s, 'last logout of ${loggedOut.clientName}');
       }
+    } else if ((accounts is Active || accounts is Switching) &&
+        accounts.accounts.any((a) => a.id == loggedOut.clientName)) {
+      // Another account logged in during the wait: leave as one of several.
+      await _removeLoggedOutAccount(
+        LoginState.loggedOut,
+        loggedOut,
+        announce: false,
+      );
     }
     // An account that logged in during the wait owns the ToM data now.
     if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
