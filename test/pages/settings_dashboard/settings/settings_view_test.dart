@@ -93,8 +93,20 @@ class _SettingsViewScreen {
 
   String? get avatarName => tester.widget<Avatar>(find.byType(Avatar)).name;
 
-  bool get backupSwitchValue =>
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value;
+  SwitchListTile get _backupSwitch =>
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+
+  /// Check ended without a result: shown off, and a tap does nothing.
+  void expectUnknownBackupSwitch() {
+    expect(_backupSwitch.value, isFalse);
+    expect(_backupSwitch.onChanged, isNull);
+  }
+
+  /// Backup known to be enabled: shown on, and a tap has an action.
+  void expectBackupSwitchOn() {
+    expect(_backupSwitch.value, isTrue);
+    expect(_backupSwitch.onChanged, isNotNull);
+  }
 }
 
 void main() {
@@ -124,7 +136,7 @@ void main() {
     controller.backupStateLoading.value = false;
     await tester.pump();
 
-    expect(_SettingsViewScreen(tester, controller).backupSwitchValue, isFalse);
+    _SettingsViewScreen(tester, controller).expectUnknownBackupSwitch();
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
@@ -136,7 +148,7 @@ void main() {
     controller.showChatBackupSwitch.value = false;
     await tester.pump();
 
-    expect(_SettingsViewScreen(tester, controller).backupSwitchValue, isTrue);
+    _SettingsViewScreen(tester, controller).expectBackupSwitchOn();
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 

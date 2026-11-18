@@ -187,19 +187,35 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   }
 
   void checkBootstrap() async {
+    // Also called after the bootstrap dialog, when the screen may be gone.
+    if (!mounted) return;
     backupStateLoading.value = true;
+    final check = _loadBackupState();
     try {
-      await _loadBackupState().timeout(backupCheckTimeout);
+      await check.timeout(backupCheckTimeout);
     } on TimeoutException {
       // Offline or a first sync that does not end: the switch is shown again.
-      // A result that arrives later still updates it.
+      // A result that arrives later still updates it; a late error is logged,
+      // because the timeout no longer forwards it.
       Logs().w('SettingsController::checkBootstrap() - timed out');
+      unawaited(
+        check.onError<Object>(
+          (error, stackTrace) => Logs().e(
+            'SettingsController::checkBootstrap() - failed after the timeout',
+            error,
+            stackTrace,
+          ),
+        ),
+      );
     } finally {
       if (mounted) backupStateLoading.value = false;
     }
   }
 
   Future<void> _loadBackupState() async {
+    // Read once: the screen can close while the check runs, and `context` is
+    // gone by then.
+    final client = this.client;
     if (!client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
@@ -222,6 +238,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     Logs().d(
       "SettingsController::checkBootstrap() - isUnknownSession: $isUnknownSession",
     );
+    if (!mounted) return;
     showChatBackupSwitch.value = needsBootstrap || isUnknownSession;
     Logs().d(
       "SettingsController::checkBootstrap() - showChatBackupSwitch: ${showChatBackupSwitch.value}",

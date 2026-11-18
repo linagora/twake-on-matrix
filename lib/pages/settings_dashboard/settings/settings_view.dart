@@ -167,7 +167,11 @@ class SettingsView extends StatelessWidget {
                     value: backUpAvailable == false,
                     secondary: const Icon(Icons.backup_outlined),
                     title: Text(l10n.chatBackup),
-                    onChanged: controller.firstRunBootstrapAction,
+                    // Unknown state: no action, a tap must not confirm that
+                    // the backup is enabled.
+                    onChanged: backUpAvailable == null
+                        ? null
+                        : controller.firstRunBootstrapAction,
                   );
                 },
                 child: ListTile(

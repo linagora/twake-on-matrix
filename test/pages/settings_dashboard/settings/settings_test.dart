@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,20 @@ class _FakeClient extends Fake implements Client {
 
   @override
   String? get userID => null;
+
+  // What the check reads once [accountDataLoading] completes: a synced client
+  // with no keys, on a session nobody verified.
+  @override
+  Future<void>? get userDeviceKeysLoading => null;
+
+  @override
+  String? get prevBatch => 'batch';
+
+  @override
+  Encryption? get encryption => null;
+
+  @override
+  bool get isUnknownSession => true;
 
   @override
   final CachedStreamController<BasicEvent> onAccountData =
@@ -94,11 +109,34 @@ class _SettingsScreen {
   }
 
   void expectSwitchOffAndNoLoadingTile() {
-    expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
-      isFalse,
-    );
+    final tile = tester.widget<SwitchListTile>(find.byType(SwitchListTile));
+    expect(tile.value, isFalse);
+    expect(tile.onChanged, isNull, reason: 'unknown state: no tap action');
     expect(find.byType(CircularProgressIndicator), findsNothing);
+  }
+
+  /// Closes the screen while a check is held, then ends the check, with
+  /// [error] when given. Returns what the check threw.
+  Future<List<Object>> closeDuringCheck([Object? error]) async {
+    final check = await startHeldCheck();
+    await tester.pumpWidget(const SizedBox());
+    error == null
+        ? check.accountData.complete()
+        : check.accountData.completeError(error);
+    await tester.pump();
+    return check.errors;
+  }
+
+  /// Starts a check on a screen that is already closed. Returns what it threw.
+  Future<List<Object>> checkAfterClose() async {
+    await pump(_FakeClient());
+    final controller = tester.state<SettingsController>(find.byType(Settings));
+    await tester.pumpWidget(const SizedBox());
+
+    final errors = <Object>[];
+    runZonedGuarded(controller.checkBootstrap, (e, _) => errors.add(e));
+    await tester.pump();
+    return errors;
   }
 }
 
@@ -107,9 +145,7 @@ void main() {
 
   tearDown(() => GetIt.instance.reset());
 
-  testWidgets('the loading tile shows until the backup check has run', (
-    tester,
-  ) async {
+  testWidgets('the loading tile shows while the check runs', (tester) async {
     await _SettingsScreen(tester).pump(_FakeClient());
 
     expect(find.byType(SwitchListTile), findsNothing);
@@ -118,9 +154,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('encryption disabled: the check ends, the switch is off', (
-    tester,
-  ) async {
+  testWidgets('encryption disabled: the switch is off', (tester) async {
     await _SettingsScreen(tester).pump(_FakeClient());
     await tester.pump();
     await tester.pump();
@@ -128,9 +162,7 @@ void main() {
     _SettingsScreen(tester).expectSwitchOffAndNoLoadingTile();
   });
 
-  testWidgets('the check fails: the error surfaces, the switch is off', (
-    tester,
-  ) async {
+  testWidgets('a failed check: an error, the switch is off', (tester) async {
     final error = StateError('account data');
     final check = await _SettingsScreen(tester).startHeldCheck();
 
@@ -141,9 +173,7 @@ void main() {
     _SettingsScreen(tester).expectSwitchOffAndNoLoadingTile();
   });
 
-  testWidgets('the check never ends: the switch is off after the timeout', (
-    tester,
-  ) async {
+  testWidgets('a check that never ends: the switch is off', (tester) async {
     final screen = _SettingsScreen(tester);
     final check = await screen.startHeldCheck();
 
@@ -154,15 +184,16 @@ void main() {
     screen.expectSwitchOffAndNoLoadingTile();
   });
 
-  testWidgets('the screen is disposed during the check: only the error of '
-      'the check surfaces', (tester) async {
+  testWidgets('disposed during a check: only its error', (tester) async {
     final error = StateError('account data');
-    final check = await _SettingsScreen(tester).startHeldCheck();
+    expect(await _SettingsScreen(tester).closeDuringCheck(error), [error]);
+  });
 
-    await tester.pumpWidget(const SizedBox());
-    check.accountData.completeError(error);
-    await tester.pump();
+  testWidgets('disposed during a check that ends: no error', (tester) async {
+    expect(await _SettingsScreen(tester).closeDuringCheck(), isEmpty);
+  });
 
-    expect(check.errors, [error]);
+  testWidgets('a check started after dispose does nothing', (tester) async {
+    expect(await _SettingsScreen(tester).checkAfterClose(), isEmpty);
   });
 }
