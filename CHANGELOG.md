@@ -1,3 +1,27 @@
+## [2.27.1] - 2026-11-17
+### Added
+- #3620: In-app MatrixRTC calls in encrypted rooms
+- #3605: Send messages, files and drafts to a thread
+- #3604: Copy a link to a message
+- #3613: TW-3612: Album acts as one message (mobile)
+
+### Changed
+- #3667: Scroll the chat list header away with the list on one column
+- #3560, #3664: Move emoji data and profile screens to Riverpod
+- #3512, #3652: Remove VoIP leftovers and unused Android call permissions
+- #3653: Cancel superseded Docker image builds on main
+
+### Fixed
+- #3670: Declare the location purpose string DKCamera requires under SPM
+- #3668: Open the room when an iOS notification is tapped
+- #3659: Center a search result whose part of the list is off screen
+- #3642: Keep Android Back on the page after a dialog closes
+- #3660: Mark an empty chat as read without a null check error
+- #3663: Give the notification switch a fixed label
+
+### Tests
+- #3655, #3662: Cover new private chat guards, retry the contacts permission
+
 ## [2.27.0] - 2026-11-16
 ### Added
 - #3593: In-app MatrixRTC calls in unencrypted rooms
