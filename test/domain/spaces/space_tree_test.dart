@@ -5,8 +5,11 @@ import 'package:twake_chat/domain/spaces/space_tree.dart';
 RoomListEntry _space(String id, {List<String> parents = const []}) =>
     RoomListEntry(id: id, kind: RoomKind.space, parentSpaceIds: parents);
 
-RoomListEntry _room(String id, {List<String> parents = const []}) =>
-    RoomListEntry(id: id, parentSpaceIds: parents);
+RoomListEntry _room(
+  String id, {
+  List<String> parents = const [],
+  bool isFavourite = false,
+}) => RoomListEntry(id: id, parentSpaceIds: parents, isFavourite: isFavourite);
 
 List<String> _ids(List<SpaceNode> nodes) =>
     nodes.map((node) => node.entry.id).toList();
@@ -36,6 +39,69 @@ void main() {
       final sub = arranged.spaces.single.children.single;
       expect(sub.entry.id, '!sub');
       expect(_ids(sub.children), ['!c']);
+    });
+
+    test('whenALaterChildIsPinned_putsItFirstUnderItsSpace', () {
+      final arranged = arrangeRooms([
+        _space('!s'),
+        _room('!a', parents: ['!s']),
+        _room('!b', parents: ['!s']),
+        _room('!pin', parents: ['!s'], isFavourite: true),
+      ]);
+
+      expect(_ids(arranged.spaces.single.children), ['!pin', '!a', '!b']);
+    });
+
+    test('whenSeveralChildrenArePinned_keepsOrderInsideEachGroup', () {
+      final arranged = arrangeRooms([
+        _space('!s'),
+        _room('!a', parents: ['!s']),
+        _room('!p1', parents: ['!s'], isFavourite: true),
+        _room('!b', parents: ['!s']),
+        _room('!p2', parents: ['!s'], isFavourite: true),
+        _room('!c', parents: ['!s']),
+      ]);
+
+      expect(_ids(arranged.spaces.single.children), [
+        '!p1',
+        '!p2',
+        '!a',
+        '!b',
+        '!c',
+      ]);
+    });
+
+    test('whenNoChildIsPinned_keepsTheListOrder', () {
+      final arranged = arrangeRooms([
+        _space('!s'),
+        _room('!b', parents: ['!s']),
+        _room('!a', parents: ['!s']),
+        _room('!c', parents: ['!s']),
+      ]);
+
+      expect(_ids(arranged.spaces.single.children), ['!b', '!a', '!c']);
+    });
+
+    test('whenChildOfASubSpaceIsPinned_putsItFirstInThatSubSpace', () {
+      final arranged = arrangeRooms([
+        _space('!s'),
+        _space('!sub', parents: ['!s']),
+        _room('!a', parents: ['!sub']),
+        _room('!pin', parents: ['!sub'], isFavourite: true),
+      ]);
+
+      final sub = arranged.spaces.single.children.single;
+      expect(_ids(sub.children), ['!pin', '!a']);
+    });
+
+    test('whenPinnedChildIsAfterASubSpace_putsItBeforeTheSubSpace', () {
+      final arranged = arrangeRooms([
+        _space('!s'),
+        _space('!sub', parents: ['!s']),
+        _room('!pin', parents: ['!s'], isFavourite: true),
+      ]);
+
+      expect(_ids(arranged.spaces.single.children), ['!pin', '!sub']);
     });
 
     test('whenSpaceIsNotInList_leavesRoomOnItsOwn', () {

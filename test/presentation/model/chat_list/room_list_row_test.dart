@@ -131,6 +131,16 @@ void _buildRoomListRowsPinnedTests() {
       expect(rows.map((row) => row.key).toSet(), hasLength(3));
     });
 
+    test('whenChannelIsPinned_alsoComesFirstUnderItsSpace', () {
+      final rows = buildRoomListRows([
+        _space('!s'),
+        _room('!a', parents: ['!s']),
+        _room('!pin', parents: ['!s'], isFavourite: true),
+      ]);
+
+      expect(_shape(rows), '0:!pin 0:!s 1:!pin 1:!a');
+    });
+
     test('whenPinnedChannelHasNoSpace_showsOnce', () {
       final rows = buildRoomListRows([_room('!c', isFavourite: true)]);
 

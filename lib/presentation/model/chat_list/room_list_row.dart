@@ -51,8 +51,8 @@ class RoomListJoinableRow extends RoomListRow {
 }
 
 /// The list as it shows: the pinned rooms, then every room by its place in
-/// [visible], each space with its rooms under it, at the place of its most
-/// recent room.
+/// [visible], each space with its rooms under it (pinned ones first), at the
+/// place of its most recent room.
 List<RoomListRow> buildRoomListRows(
   List<RoomListEntry> visible, {
   Set<String> foldedSpaceIds = const {},

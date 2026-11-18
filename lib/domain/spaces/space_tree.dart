@@ -38,7 +38,8 @@ RoomListEntry? parentSpaceOf(
     .firstWhereOrNull((parent) => parent?.isSpace == true);
 
 /// Each channel and sub-space under its space, what has no space of the list
-/// on its own. The order of [entries] is kept at every level.
+/// on its own. The order of [entries] is kept at every level, except that the
+/// pinned children of a space come before the others.
 ArrangedRooms arrangeRooms(List<RoomListEntry> entries) {
   final byId = {for (final entry in entries) entry.id: entry};
 
@@ -61,7 +62,13 @@ Map<String, List<RoomListEntry>> _childrenBySpace(
   Map<String, RoomListEntry> byId,
 ) => entries
     .where((entry) => !entry.isDirect && parentSpaceOf(entry, byId) != null)
-    .groupListsBy((entry) => parentSpaceOf(entry, byId)!.id);
+    .groupListsBy((entry) => parentSpaceOf(entry, byId)!.id)
+    .map(
+      (id, children) => MapEntry(id, [
+        ...children.where((child) => child.isFavourite),
+        ...children.where((child) => !child.isFavourite),
+      ]),
+    );
 
 List<SpaceNode> _growSpaces(
   Iterable<RoomListEntry> spaces,
