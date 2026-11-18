@@ -16,7 +16,7 @@ import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
 
 class SearchView extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   const SearchView(this.searchController, {super.key});
 
@@ -208,7 +208,7 @@ class SearchView extends StatelessWidget {
 class _RecentChatAndContactsHeader extends StatelessWidget {
   const _RecentChatAndContactsHeader({required this.searchController});
 
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +241,7 @@ class _RecentChatAndContactsHeader extends StatelessWidget {
 class _SearchHeader extends StatelessWidget {
   final String header;
 
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   final bool needShowMore;
 

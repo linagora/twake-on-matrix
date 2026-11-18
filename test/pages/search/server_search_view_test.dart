@@ -24,13 +24,13 @@ import 'package:mockito/mockito.dart';
 import 'server_search_view_test.mocks.dart';
 
 @GenerateNiceMocks([
-  MockSpec<SearchController>(),
+  MockSpec<SearchScreenState>(),
   MockSpec<ServerSearchController>(),
   MockSpec<TextEditingController>(),
   MockSpec<SearchContactsAndChatsController>(),
 ])
 void main() {
-  late final SearchController mockSearchController;
+  late final SearchScreenState mockSearchController;
   late final ServerSearchController mockServerSearchController;
   late final TextEditingController mockTextEditingController;
   late final SearchContactsAndChatsController
@@ -39,7 +39,7 @@ void main() {
   setUpAll(() {
     final getIt = GetIt.instance;
     getIt.registerSingleton(ResponsiveUtils());
-    mockSearchController = MockSearchController();
+    mockSearchController = MockSearchScreenState();
     mockServerSearchController = MockServerSearchController();
     mockTextEditingController = MockTextEditingController();
     mockSearchContactAndRecentChatController =

@@ -14,7 +14,7 @@ import 'package:flutter/material.dart' hide SearchController;
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 
 class ServerSearchMessagesList extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
 
   const ServerSearchMessagesList({super.key, required this.searchController});
 

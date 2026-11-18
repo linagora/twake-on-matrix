@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:twake_chat/app_state/failure.dart';
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -6,16 +9,17 @@ import 'package:twake_chat/domain/app_state/search/search_state.dart';
 import 'package:twake_chat/domain/usecase/search/pre_search_recent_contacts_interactor.dart';
 import 'package:twake_chat/pages/search/public_groups_search_term.dart';
 import 'package:twake_chat/pages/search/search_contacts_and_chats_controller.dart';
+import 'package:twake_chat/pages/search/search_controller.dart';
+import 'package:twake_chat/pages/search/search_state.dart';
 import 'package:twake_chat/pages/search/search_view.dart';
 import 'package:twake_chat/pages/search/server_search_controller.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact_constant.dart';
 import 'package:twake_chat/presentation/model/search/presentation_search.dart';
-import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/scroll_controller_extension.dart';
 import 'package:twake_chat/utils/string_extension.dart';
-import 'package:twake_chat/widgets/matrix.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
@@ -24,16 +28,17 @@ import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-class Search extends StatefulWidget {
+class Search extends ConsumerStatefulWidget {
   final VoidCallback? onCloseSearchPage;
 
   const Search({super.key, this.onCloseSearchPage});
 
   @override
-  State<Search> createState() => SearchController();
+  SearchScreenState createState() => SearchScreenState();
 }
 
-class SearchController extends State<Search> with WidgetsBindingObserver {
+class SearchScreenState extends ConsumerState<Search>
+    with WidgetsBindingObserver {
   static const int limitPrefetchedRecentChats = 3;
   static const int limitPrefetchedRecentContacts = 5;
   static const _prefixLengthHighlight = 20;
@@ -55,7 +60,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
 
   final scrollController = ScrollController();
 
-  Client get client => Matrix.of(context).client;
+  Client get client => ref.read(matrixClientProvider);
 
   bool get isShowMore =>
       textEditingController.value.text.isNotEmpty &&
@@ -89,7 +94,7 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   void fetchPreSearchRecentContacts() {
     _preSearchRecentContactsInteractor
         .execute(
-          allRooms: Matrix.of(context).client.joinedOrInvitedRooms,
+          allRooms: client.joinedOrInvitedRooms,
           limit: limitPrefetchedRecentContacts,
         )
         .listen((value) {
@@ -97,73 +102,41 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
         });
   }
 
-  void onSearchItemTap(PresentationSearch presentationSearch) async {
+  void onSearchItemTap(PresentationSearch presentationSearch) {
     if (presentationSearch is ContactPresentationSearch) {
-      if (presentationSearch.matrixId?.isCurrentMatrixId(context) == true) {
-        goToSettingsProfile();
-        return;
-      }
-      onContactTap(presentationSearch);
+      final matrixId = presentationSearch.matrixId;
+      if (matrixId == null || matrixId.isEmpty) return;
+      unawaited(
+        ref
+            .read(searchControllerProvider.notifier)
+            .openContact(
+              matrixId: matrixId,
+              displayName: presentationSearch.displayName,
+            ),
+      );
     } else if (presentationSearch is RecentChatPresentationSearch) {
-      onRecentChatTap(presentationSearch);
+      RoomRoute(roomid: presentationSearch.id).go(context);
     }
   }
 
-  void goToSettingsProfile() {
-    const ProfileRoute().go(context);
-  }
-
-  void onContactTap(ContactPresentationSearch contactPresentationSearch) {
-    final roomId = Matrix.of(
-      context,
-    ).client.getDirectChatFromUserId(contactPresentationSearch.matrixId!);
-    if (roomId == null) {
-      goToDraftChat(
-        context: context,
-        contactPresentationSearch: contactPresentationSearch,
-      );
-    } else {
-      RoomRoute(roomid: roomId).go(context);
+  void _onStateChanged(SearchState? _, SearchState next) {
+    switch (next) {
+      case SearchOwnProfile():
+        const ProfileRoute().go(context);
+      case SearchRoom(:final roomId):
+        RoomRoute(roomid: roomId).go(context);
+      case SearchDraft(:final matrixId, :final displayName):
+        context.go(
+          '/rooms/draftChat',
+          extra: {
+            PresentationContactConstant.receiverId: matrixId,
+            PresentationContactConstant.displayName: displayName ?? '',
+            PresentationContactConstant.status: '',
+          },
+        );
+      case SearchIdle() || SearchOpening():
+        break;
     }
-  }
-
-  void onRecentChatTap(
-    RecentChatPresentationSearch recentChatPresentationSearch,
-  ) {
-    Logs().d(
-      'SearchController::onRecentChatTap() - MatrixID: ${recentChatPresentationSearch.id}',
-    );
-    RoomRoute(roomid: recentChatPresentationSearch.id).go(context);
-  }
-
-  void goToDraftChat({
-    required BuildContext context,
-    required ContactPresentationSearch contactPresentationSearch,
-  }) {
-    if (contactPresentationSearch.matrixId !=
-        Matrix.of(context).client.userID) {
-      context.go(
-        '/rooms/draftChat',
-        extra: {
-          PresentationContactConstant.receiverId:
-              contactPresentationSearch.matrixId ?? '',
-          PresentationContactConstant.displayName:
-              contactPresentationSearch.displayName ?? '',
-          PresentationContactConstant.status: '',
-        },
-      );
-    }
-  }
-
-  void goToChatScreenFormRecentChat(User user) async {
-    Logs().d(
-      'SearchController::getContactAndRecentChatStream() - event: $user',
-    );
-    final roomIdResult = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => user.startDirectChat(),
-    );
-    if (roomIdResult.error != null) return;
-    RoomRoute(roomid: roomIdResult.result!).go(context);
   }
 
   @override
@@ -232,5 +205,8 @@ class SearchController extends State<Search> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) => SearchView(this);
+  Widget build(BuildContext context) {
+    ref.listen(searchControllerProvider, _onStateChanged);
+    return SearchView(this);
+  }
 }

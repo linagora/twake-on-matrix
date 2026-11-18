@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:twake_chat/config/localizations/localization_service.dart';
 import 'package:twake_chat/config/themes.dart';
+import 'package:twake_chat/data/contact/datasources/matrix_profile_datasource.dart';
+import 'package:twake_chat/pages/contacts_tab/providers/matrix_profile_providers.dart';
 import 'package:twake_chat/domain/usecase/contacts/delete_third_party_contact_box_interactor.dart';
 import 'package:twake_chat/domain/usecase/contacts/post_address_book_interactor.dart';
 import 'package:twake_chat/domain/usecase/invitation/get_invitation_status_interactor.dart';
@@ -19,6 +21,7 @@ import 'package:twake_chat/widgets/theme_builder.dart';
 import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading_indicator.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
@@ -45,9 +48,24 @@ class FakeMatrixState extends Fake implements MatrixState {
       'FakeMatrixState';
 }
 
+class _FakeMatrixProfileDatasource extends Fake
+    implements MatrixProfileDatasource {
+  Completer<MatrixUserProfile?> lookup = Completer();
+  final freshLookups = <String>[];
+
+  @override
+  Future<MatrixUserProfile?> fetchProfile(
+    String matrixId, {
+    bool fresh = false,
+  }) {
+    if (fresh) freshLookups.add(matrixId);
+    return lookup.future;
+  }
+}
+
 @GenerateNiceMocks([
   MockSpec<Client>(),
-  MockSpec<SearchController>(),
+  MockSpec<SearchScreenState>(),
   MockSpec<TextEditingController>(),
   MockSpec<HiveGetInvitationStatusInteractor>(),
   MockSpec<GetInvitationStatusInteractor>(),
@@ -57,8 +75,9 @@ class FakeMatrixState extends Fake implements MatrixState {
 ])
 void main() {
   late MockClient mockClient;
-  late MockSearchController mockSearchController;
+  late MockSearchScreenState mockSearchController;
   late MockTextEditingController mockTextEditingController;
+  late _FakeMatrixProfileDatasource profileDatasource;
 
   setUpAll(() {
     final getIt = GetIt.instance;
@@ -69,8 +88,9 @@ void main() {
     final getIt = GetIt.instance;
 
     mockClient = MockClient();
-    mockSearchController = MockSearchController();
+    mockSearchController = MockSearchScreenState();
     mockTextEditingController = MockTextEditingController();
+    profileDatasource = _FakeMatrixProfileDatasource();
 
     when(mockClient.userID).thenReturn('@me:server.com');
     when(
@@ -112,31 +132,35 @@ void main() {
     required String keyword,
   }) async {
     await tester.pumpWidget(
-      ThemeBuilder(
-        builder: (context, themeMode, primaryColor) => MaterialApp(
-          locale: const Locale('en'),
-          scrollBehavior: CustomScrollBehavior(),
-          localizationsDelegates: const [
-            LocaleNamesLocalizationsDelegate(),
-            L10n.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: LocalizationService.supportedLocales,
-          theme: TwakeThemes.buildTheme(
-            context,
-            Brightness.light,
-            primaryColor,
-          ),
-          home: Provider<MatrixState>.value(
-            value: FakeMatrixState(mockClient),
-            child: Scaffold(
-              backgroundColor: LinagoraSysColors.material().onPrimary,
-              body: SearchExternalContactWidget(
-                keyword: keyword,
-                searchController: mockSearchController,
-                clientForTesting: mockClient,
+      ProviderScope(
+        overrides: [
+          matrixProfileDatasourceProvider.overrideWithValue(profileDatasource),
+        ],
+        child: ThemeBuilder(
+          builder: (context, themeMode, primaryColor) => MaterialApp(
+            locale: const Locale('en'),
+            scrollBehavior: CustomScrollBehavior(),
+            localizationsDelegates: const [
+              LocaleNamesLocalizationsDelegate(),
+              L10n.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: LocalizationService.supportedLocales,
+            theme: TwakeThemes.buildTheme(
+              context,
+              Brightness.light,
+              primaryColor,
+            ),
+            home: Provider<MatrixState>.value(
+              value: FakeMatrixState(mockClient),
+              child: Scaffold(
+                backgroundColor: LinagoraSysColors.material().onPrimary,
+                body: SearchExternalContactWidget(
+                  keyword: keyword,
+                  searchController: mockSearchController,
+                ),
               ),
             ),
           ),
@@ -146,72 +170,53 @@ void main() {
   }
 
   group('[SearchExternalContactWidget] TEST', () {
-    testWidgets('GIVEN getUserProfile is still loading\n'
+    testWidgets('GIVEN the profile lookup is still loading\n'
         'THEN should display CenterLoadingIndicator', (
       WidgetTester tester,
     ) async {
-      // getUserProfile returns a Future that never completes → loading state
-      final completer = Completer<CachedProfileInformation>();
-      when(
-        mockClient.getUserProfile(any, maxCacheAge: anyNamed('maxCacheAge')),
-      ).thenAnswer((_) => completer.future);
+      profileDatasource.lookup = Completer<MatrixUserProfile?>();
 
       await buildWidget(tester, keyword: '@test:server.com');
-      // Only pump once — do NOT pumpAndSettle, the future is still pending
       await tester.pump();
 
       expect(find.byType(CenterLoadingIndicator), findsOneWidget);
       expect(find.byType(EmptySearchWidget), findsNothing);
     });
 
-    testWidgets('GIVEN getUserProfile throws an error\n'
+    testWidgets('GIVEN the profile cannot be resolved\n'
         'WHEN searching for @nonexistent:server.com\n'
         'THEN should display EmptySearchWidget (No Results)', (
       WidgetTester tester,
     ) async {
-      // thenAnswer with an async error so the exception lands in the Future,
-      // not thrown synchronously during _fetchProfileIfNeeded.
-      when(
-        mockClient.getUserProfile(any, maxCacheAge: anyNamed('maxCacheAge')),
-      ).thenAnswer(
-        (_) => Future<CachedProfileInformation>.error(
-          MatrixException.fromJson({
-            'errcode': 'M_NOT_FOUND',
-            'error': 'Profile not found',
-          }),
-        ),
-      );
+      profileDatasource.lookup = Completer<MatrixUserProfile?>()..complete();
 
       await buildWidget(tester, keyword: '@nonexistent:server.com');
       await tester.pumpAndSettle();
 
       expect(find.byType(EmptySearchWidget), findsOneWidget);
       expect(find.byType(CenterLoadingIndicator), findsNothing);
+      expect(profileDatasource.freshLookups, ['@nonexistent:server.com']);
     });
 
-    testWidgets('GIVEN getUserProfile returns a valid profile\n'
+    testWidgets('GIVEN the profile resolves\n'
         'WHEN searching for @validuser:server.com\n'
         'THEN should display the contact tile with profile info', (
       WidgetTester tester,
     ) async {
-      when(
-        mockClient.getUserProfile(any, maxCacheAge: anyNamed('maxCacheAge')),
-      ).thenAnswer(
-        (_) async => CachedProfileInformation.fromProfile(
-          ProfileInformation(avatarUrl: null, displayname: 'Valid User'),
-          outdated: false,
-          updated: DateTime.now(),
-        ),
-      );
+      profileDatasource.lookup = Completer<MatrixUserProfile?>()
+        ..complete(
+          const MatrixUserProfile(
+            matrixId: '@validuser:server.com',
+            displayName: 'Valid User',
+          ),
+        );
 
       await buildWidget(tester, keyword: '@validuser:server.com');
       await tester.pumpAndSettle();
 
       expect(find.byType(EmptySearchWidget), findsNothing);
       expect(find.byType(CenterLoadingIndicator), findsNothing);
-      // Should render the ExpansionContactListTile with the fetched profile
       expect(find.byType(ExpansionContactListTile), findsOneWidget);
-      // Should show the displayName from the server profile
       expect(find.textContaining('Valid User'), findsOneWidget);
     });
   });

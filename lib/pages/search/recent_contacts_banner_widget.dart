@@ -9,7 +9,7 @@ import 'package:matrix/matrix.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class PreSearchRecentContactsContainer extends StatelessWidget {
-  final SearchController searchController;
+  final SearchScreenState searchController;
   final List<Room> recentRooms;
   const PreSearchRecentContactsContainer({
     super.key,
