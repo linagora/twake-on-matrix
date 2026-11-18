@@ -1750,11 +1750,16 @@ class MatrixState extends ConsumerState<Matrix>
     TwakeApp.router.go(location, extra: extra);
     try {
       await _coveredRoutesUnmounted().timeout(_leaveScreensTimeout);
-    } on TimeoutException {
-      Logs().w(
-        'MatrixState::_leaveLoggedInScreens: still covered after '
-        '$_leaveScreensTimeout',
-      );
+    } on TimeoutException catch (e, s) {
+      // Without frames (app in the background) the wait is expected to expire.
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        _report(e, s, 'screens behind login still mounted at the last logout');
+      } else {
+        Logs().w(
+          'MatrixState::_leaveLoggedInScreens: still covered after '
+          '$_leaveScreensTimeout',
+        );
+      }
     }
   }
 

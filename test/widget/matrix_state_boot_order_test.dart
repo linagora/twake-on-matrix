@@ -90,6 +90,12 @@ class _BootClient extends FakeAccountClient {
   final _httpClient = http.Client();
 
   @override
+  set backgroundSync(bool _) {}
+
+  @override
+  set syncPresence(PresenceType? _) {}
+
+  @override
   CachedStreamController<SyncUpdate> get onSync => _onSync;
 
   @override
@@ -482,14 +488,18 @@ Future<void> _pumpUntil(
 
 /// Accounts with the contacts lookup stopped, the way a logout and a
 /// rolled-back login both hand the active account over.
-_Harness _handoverHarness(WidgetTester tester, List<Client> clients) =>
-    _Harness(
-      tester,
-      clients,
-      overrides: [
-        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
-      ],
-    );
+_Harness _handoverHarness(
+  WidgetTester tester,
+  List<Client> clients, {
+  ReportFailure? report,
+}) => _Harness(
+  tester,
+  clients,
+  overrides: [
+    phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+    if (report != null) reportFailureProvider.overrideWithValue(report),
+  ],
+);
 
 Future<({AccountSwitchCoordinator coordinator, _RecordingEffects effects})>
 _recordedSwitch(_Harness harness) async {
@@ -1610,30 +1620,51 @@ void main() {
       expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
     });
 
-    testWidgets('the last logout stops waiting for the screens behind login '
-        'after a while', (tester) async {
-      final last = _BootClient('a', userID: '@a:s');
-      final harness = _handoverHarness(tester, [last]);
-      final endless = PageRouteBuilder<void>(
-        transitionDuration: const Duration(hours: 1),
-        pageBuilder: (_, _, _) => const SizedBox(),
-      );
+    for (final (lifecycle, reported) in [
+      (AppLifecycleState.resumed, true),
+      (AppLifecycleState.paused, false),
+    ]) {
+      testWidgets('the last logout stops waiting for the screens behind login '
+          'after a while (${lifecycle.name})', (tester) async {
+        final last = _BootClient('a', userID: '@a:s');
+        final reports = <String>[];
+        final harness = _handoverHarness(tester, [
+          last,
+        ], report: (error, stackTrace, what) => reports.add(what));
+        final endless = PageRouteBuilder<void>(
+          transitionDuration: const Duration(hours: 1),
+          pageBuilder: (_, _, _) => const SizedBox(),
+        );
 
-      await harness.run(() async {
-        await _recordedSwitch(harness);
-        unawaited(TwakeApp.routerKey.currentState!.push(endless));
+        await harness.run(() async {
+          await _recordedSwitch(harness);
+          unawaited(TwakeApp.routerKey.currentState!.push(endless));
+          tester.binding.handleAppLifecycleStateChanged(lifecycle);
+          addTearDown(
+            () => tester.binding.handleAppLifecycleStateChanged(
+              AppLifecycleState.resumed,
+            ),
+          );
 
-        last.onLoginStateChanged.add(LoginState.loggedOut);
-        await _pumpUntil(
-          harness,
-          () => harness.container.read(accountsProvider) is! Active,
-          frame: const Duration(milliseconds: 500),
+          last.onLoginStateChanged.add(LoginState.loggedOut);
+          await _pumpUntil(
+            harness,
+            () => harness.container.read(accountsProvider) is! Active,
+            frame: const Duration(milliseconds: 500),
+          );
+        });
+
+        expect(endless.animation!.isCompleted, isFalse);
+        expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
+        expect(
+          reports.contains(
+            'MatrixState: screens behind login still mounted at the last '
+            'logout',
+          ),
+          reported,
         );
       });
-
-      expect(endless.animation!.isCompleted, isFalse);
-      expect(harness.container.read(accountsProvider), isA<LastLoggedOut>());
-    });
+    }
   });
 
   group('the login host of MatrixState', () {
