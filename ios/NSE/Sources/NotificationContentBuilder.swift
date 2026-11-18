@@ -38,6 +38,8 @@ struct NotificationContentBuilder {
                 switch content {
                 case .roomMessage(messageType: let messageType, inReplyToEventId: _):
                     return try await processRoomMessage(notificationItem: notificationItem, messageType: messageType, mediaProvider: mediaProvider)
+                case .roomEncrypted:
+                    return processEmpty(notificationItem: notificationItem, body: encryptedBody)
                 default:
                     return processEmpty(notificationItem: notificationItem)
                 }
@@ -47,7 +49,24 @@ struct NotificationContentBuilder {
         }
     }
 
+    /// Same as `content(for:mediaProvider:)` for an item fetched over HTTP.
+    func content(for item: HTTPNotificationItem, mediaProvider: MediaProviderProtocol?) async throws -> UNMutableNotificationContent {
+        if item.isInvite {
+            return try await processInvited(notificationItem: item, mediaProvider: mediaProvider)
+        }
+        guard let body = item.body else {
+            return processEmpty(notificationItem: item, body: encryptedBody)
+        }
+        let notification = try await processCommonRoomMessage(notificationItem: item, mediaProvider: mediaProvider)
+        notification.body = body
+        return notification
+    }
+
     // MARK: - Private
+
+    private var encryptedBody: String {
+        L10n.tr("Localizable", "newEncryptedMessageInTwake")
+    }
     
     func baseMutableContent(for notificationItem: NotificationItemProxyProtocol) -> UNMutableNotificationContent {
         let notification = UNMutableNotificationContent()
@@ -61,10 +80,10 @@ struct NotificationContentBuilder {
         return notification
     }
     
-    private func processEmpty(notificationItem: NotificationItemProxyProtocol) -> UNMutableNotificationContent {
+    private func processEmpty(notificationItem: NotificationItemProxyProtocol, body: String = L10n.notification) -> UNMutableNotificationContent {
         let notification = baseMutableContent(for: notificationItem)
         notification.title = InfoPlistReader(bundle: .app).bundleDisplayName
-        notification.body = L10n.notification
+        notification.body = body
         notification.categoryIdentifier = NotificationConstants.Category.message
         return notification
     }

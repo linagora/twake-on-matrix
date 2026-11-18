@@ -32,8 +32,13 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         guard !DataProtectionManager.isDeviceLockedAfterReboot(containerURL: URL.appGroupContainerDirectory),
               let roomId = request.roomId,
               let eventId = request.eventId,
-              let clientID = request.pusherNotificationClientIdentifier,
-              let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.dedicated == true && $0.restorationToken.pusherNotificationClientIdentifier == clientID }) else {
+              let clientID = request.pusherNotificationClientIdentifier else {
+            return contentHandler(request.content)
+        }
+
+        let credentials = keychainController.restorationTokens().first(where: { $0.restorationToken.dedicated == true && $0.restorationToken.pusherNotificationClientIdentifier == clientID })
+        let httpCredentials = keychainController.httpCredentials(forClientID: clientID)
+        guard credentials != nil || httpCredentials != nil else {
             // We cannot process this notification, it might be due to one of these:
             // - Device rebooted and locked
             // - Not a Matrix notification
@@ -53,10 +58,21 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         MXLog.info("\(tag) Payload came: \(request.content.userInfo)")
 
         Task {
-            await run(with: credentials,
-                      roomId: roomId,
-                      eventId: eventId,
-                      unreadCount: request.unreadCount)
+            if let credentials,
+               await run(with: credentials,
+                         roomId: roomId,
+                         eventId: eventId,
+                         unreadCount: request.unreadCount) {
+                return
+            }
+            // The Rust path could not build the notification: try plain HTTP before giving up.
+            guard let httpCredentials else {
+                return discard()
+            }
+            await runHTTP(with: httpCredentials,
+                          roomId: roomId,
+                          eventId: eventId,
+                          unreadCount: request.unreadCount)
         }
     }
     
@@ -70,7 +86,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
     private func run(with credentials: KeychainCredentials,
                      roomId: String,
                      eventId: String,
-                     unreadCount: Int?) async {
+                     unreadCount: Int?) async -> Bool {
         MXLog.info("\(tag) run with roomId: \(roomId), eventId: \(eventId)")
 
         do {
@@ -82,8 +98,8 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
             }
             
             guard let itemProxy = await userSession.notificationItemProxy(roomID: roomId, eventID: eventId) else {
-                MXLog.info("\(tag) no notification for the event, discard")
-                return discard()
+                MXLog.info("\(tag) no notification for the event")
+                return false
             }
             
             // After the first processing, update the modified content
@@ -93,7 +109,8 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
                 MXLog.info("\(tag) no media needed")
 
                 // We've processed the item and no media operations needed, so no need to go further
-                return notify()
+                notify()
+                return true
             }
 
             MXLog.info("\(tag) process with media")
@@ -110,10 +127,41 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
                 modifiedContent?.badge = NSNumber(value: unreadCount)
             }
             
-            return notify()
+            notify()
+            return true
         } catch {
             MXLog.error("NSE run error: \(error)")
+            return false
+        }
+    }
+
+    /// Always ends with `notify()` or `discard()`; a failure leaves the neutral payload text.
+    private func runHTTP(with credentials: HTTPCredentials,
+                         roomId: String,
+                         eventId: String,
+                         unreadCount: Int?) async {
+        MXLog.info("\(tag) runHTTP with roomId: \(roomId), eventId: \(eventId)")
+
+        let session = NSEHTTPSession(credentials: credentials)
+        guard let item = await session.notificationItem(roomID: roomId, eventID: eventId) else {
+            MXLog.info("\(tag) no HTTP notification for the event, discard")
             return discard()
+        }
+
+        do {
+            // Keep the text before loading the avatar, so that an expiration still delivers the preview.
+            modifiedContent = try await notificationContentBuilder.content(for: item, mediaProvider: nil)
+            modifiedContent?.badge = unreadCount.map { NSNumber(value: $0) }
+
+            if item.hasMedia,
+               let latestContent = try? await notificationContentBuilder.content(for: item, mediaProvider: session) {
+                modifiedContent = latestContent
+                modifiedContent?.badge = unreadCount.map { NSNumber(value: $0) }
+            }
+            notify()
+        } catch {
+            MXLog.error("NSE runHTTP error: \(error)")
+            discard()
         }
     }
     

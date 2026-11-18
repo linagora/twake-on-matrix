@@ -1,4 +1,5 @@
 "newMessageInTwake" = "Vous avez un nouveau message";
+"newEncryptedMessageInTwake" = "Vous avez un message chiffré";
 "Notification" = "Notification";
 "a11y_delete" = "Supprimer";
 "a11y_hide_password" = "Masquer le mot de passe";
