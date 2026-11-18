@@ -9,6 +9,7 @@ import 'package:twake_chat/pages/contacts_tab/contacts_invitation_view_model.dar
 import 'package:twake_chat/pages/contacts_tab/contacts_invitation_page.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -162,7 +163,10 @@ class _ContactsInvitationScreenState extends ConsumerState<ContactsInvitation> {
 
   Future<void> _shareInvitationLink(Uri link) async {
     try {
-      await Share.shareUri(link);
+      await Share.shareUri(
+        link,
+        sharePositionOrigin: mounted ? context.sharePositionOrigin : null,
+      );
     } catch (error) {
       Logs().e('ContactsInvitation::_shareInvitationLink', error);
       if (mounted) {
