@@ -31,6 +31,7 @@ import 'package:twake_chat/data/account/logout_removals.dart';
 import 'package:twake_chat/data/network/interceptor/authorization_interceptor.dart';
 import 'package:twake_chat/data/network/interceptor/dynamic_url_interceptor.dart';
 import 'package:twake_chat/di/global/network_di.dart';
+import 'package:twake_chat/data/hive/hive_collection_tom_database.dart';
 import 'package:twake_chat/domain/account/entities/account_boot_snapshot.dart';
 import 'package:twake_chat/domain/model/homeserver_summary.dart';
 import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
@@ -49,6 +50,7 @@ import 'package:twake_chat/data/account/datasources_impl/client_manager_account_
 import 'package:twake_chat/providers/boot_clients_provider.dart';
 import 'package:twake_chat/providers/active_matrix_client_provider.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
+import 'package:twake_chat/data/account/sources/account_client_registry.provider.dart';
 import 'package:twake_chat/providers/accounts_provider.dart';
 import 'package:twake_chat/data/model/federation_server/federation_configuration.dart';
 import 'package:twake_chat/domain/account/entities/account_id.dart';
@@ -77,6 +79,16 @@ class _WatchedController<T> extends CachedStreamController<T> {
 }
 
 /// A client with the streams and the http client `MatrixState` opens at boot.
+class _CountingToMDatabase implements HiveCollectionToMDatabase {
+  int clears = 0;
+
+  @override
+  Future<void> clear() async => clears++;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class _BootClient extends FakeAccountClient {
   _BootClient(super.clientName, {super.userID});
 
@@ -1672,6 +1684,47 @@ void main() {
         );
       });
     }
+  });
+
+  testWidgets('a login during the wait of the last logout keeps the ToM data', (
+    tester,
+  ) async {
+    final last = _BootClient('a', userID: '@a:s');
+    final tom = _CountingToMDatabase();
+    getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
+    final harness = _handoverHarness(tester, [last]);
+    final endless = PageRouteBuilder<void>(
+      transitionDuration: const Duration(hours: 1),
+      pageBuilder: (_, _, _) => const SizedBox(),
+    );
+
+    await harness.run(() async {
+      await _recordedSwitch(harness);
+      unawaited(TwakeApp.routerKey.currentState!.push(endless));
+
+      last.onLoginStateChanged.add(LoginState.loggedOut);
+      await _pumpUntil(
+        harness,
+        () => TwakeApp.router.routeInformationProvider.value.uri.path
+            .startsWith('/home'),
+      );
+      harness.container
+          .read(accountClientRegistryProvider)
+          .add(_BootClient('b', userID: '@b:s'));
+      await harness.tester.runAsync(
+        () => harness.container
+            .read(accountsProvider.notifier)
+            .addAccount(const AccountId('b')),
+      );
+      await _pumpUntil(
+        harness,
+        () => false,
+        frame: const Duration(milliseconds: 500),
+      );
+    });
+
+    expect(harness.container.read(accountsProvider), isA<Active>());
+    expect(tom.clears, 0);
   });
 
   group('the login host of MatrixState', () {

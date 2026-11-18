@@ -1831,7 +1831,10 @@ class MatrixState extends ConsumerState<Matrix>
         _report(e, s, 'last logout of ${loggedOut.clientName}');
       }
     }
-    await _deleteAllTomConfigurations();
+    // An account that logged in during the wait owns the ToM data now.
+    if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
+      await _deleteAllTomConfigurations();
+    }
   }
 
   /// Stops the phonebook lookup in progress (logout, account switch): its
