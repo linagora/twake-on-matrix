@@ -166,6 +166,7 @@ extension MatrixFileExtension on MatrixFile {
   }
 }
 
+@immutable
 class TwakeAudioFile extends MatrixFile {
   final int? duration;
 
