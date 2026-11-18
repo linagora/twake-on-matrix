@@ -9,6 +9,7 @@ import 'package:twake_chat/utils/custom_scroll_behaviour.dart';
 import 'package:twake_drive_picker/ui.dart' show DrivePickerLocalizations;
 import 'package:twake_chat/utils/network_connection_service.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
+import 'package:twake_chat/widgets/default_touch_slop.dart';
 import 'package:twake_chat/widgets/twake_app_lock.dart';
 import 'package:twake_chat/widgets/navigation_buttons_safe_area.dart';
 import 'package:twake_chat/widgets/theme_builder.dart';
@@ -125,13 +126,15 @@ class TwakeAppState extends State<TwakeApp> {
                   child: NavigationButtonsSafeArea(child: child),
                 ),
               );
-              return PlatformInfos.isMobile
-                  ? TwakeAppLock(
-                      dispatcher: TwakeApp.router.backButtonDispatcher,
-                      initiallyEnabled: widget.appLockEnabled,
-                      child: app,
-                    )
-                  : app;
+              return DefaultTouchSlop(
+                child: PlatformInfos.isMobile
+                    ? TwakeAppLock(
+                        dispatcher: TwakeApp.router.backButtonDispatcher,
+                        initiallyEnabled: widget.appLockEnabled,
+                        child: app,
+                      )
+                    : app,
+              );
             },
           );
         },
