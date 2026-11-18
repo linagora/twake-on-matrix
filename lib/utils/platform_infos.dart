@@ -23,7 +23,10 @@ abstract class PlatformInfos {
 
   static bool get isMacOS => !kIsWeb && Platform.isMacOS;
 
-  static bool get isIOS => !kIsWeb && Platform.isIOS;
+  @visibleForTesting
+  static bool isTestingForIOS = false;
+
+  static bool get isIOS => isTestingForIOS || (!kIsWeb && Platform.isIOS);
 
   static bool get isAndroid => !kIsWeb && Platform.isAndroid;
 

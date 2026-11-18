@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_restore_token.dart';
 import 'package:twake_chat/domain/keychain_sharing/keychain_sharing_session.dart';
+import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
@@ -43,6 +44,46 @@ class KeychainSharingManager {
       Logs().d('[KeychainSharing] Deleted SSSS recovery key for $userId');
     } catch (e, s) {
       Logs().wtf('[KeychainSharing] Unable to delete SSSS recovery key', e, s);
+    }
+  }
+
+  static const String _httpSessionPrefix = 'http_';
+
+  /// The app's own token for a notification extension that only does HTTP.
+  /// It has no `session` field and its own key, so [read] never returns it
+  /// and [removeAppSession] never purges it.
+  static Future<void> saveHttpSession(Client client) async {
+    final userId = client.userID;
+    final accessToken = client.accessToken;
+    final homeserver = client.homeserver;
+    if (!PlatformInfos.isIOS ||
+        userId == null ||
+        accessToken == null ||
+        homeserver == null) {
+      return;
+    }
+    try {
+      await _secureStorage.write(
+        key: '$_httpSessionPrefix$userId',
+        value: jsonEncode({
+          'accessToken': accessToken,
+          'userId': userId,
+          'homeserverUrl': homeserver.toString(),
+          'pusherNotificationClientIdentifier':
+              client.pusherNotificationClientIdentifier,
+        }),
+      );
+    } catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to save HTTP session', e, s);
+    }
+  }
+
+  static Future<void> deleteHttpSession(String userId) async {
+    if (!PlatformInfos.isIOS) return;
+    try {
+      await _secureStorage.delete(key: '$_httpSessionPrefix$userId');
+    } catch (e, s) {
+      Logs().wtf('[KeychainSharing] Unable to delete HTTP session', e, s);
     }
   }
 

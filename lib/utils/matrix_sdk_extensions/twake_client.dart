@@ -94,6 +94,9 @@ class TwakeClient extends Client {
           (e, s) => Logs().w('Unable to log the NSE device out', e, s),
         );
     await KeychainSharingManager.deleteRecoveryKey(userId: userID);
+    if (userID case final id?) {
+      await KeychainSharingManager.deleteHttpSession(id);
+    }
     return super.clear(reason: reason);
   }
 

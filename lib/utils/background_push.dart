@@ -220,6 +220,7 @@ class BackgroundPush {
       if (accessToken != lastAccessToken) {
         lastAccessToken = accessToken;
         await KeychainSharingManager.removeAppSession(targetClient);
+        await KeychainSharingManager.saveHttpSession(targetClient);
         if (await KeychainSharingManager.isDeviceIdentityOverwritten(
           targetClient,
         )) {
