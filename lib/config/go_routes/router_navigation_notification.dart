@@ -10,9 +10,32 @@ extension RouterNavigationNotification on GoRouter {
         lifecycleState == AppLifecycleState.detached) {
       return true;
     }
-    SystemNavigator.setFrameworkHandlesBack(
-      notification.canHandlePop || canPop(),
-    );
+    final canHandlePop = notification.canHandlePop || canPop();
+    final innermostNavigatorContext = _innermostNavigator?.overlay?.context;
+    if (canHandlePop ||
+        notification is _InnermostNavigatorCheck ||
+        innermostNavigatorContext == null) {
+      SystemNavigator.setFrameworkHandlesBack(canHandlePop);
+      return true;
+    }
+    // Each navigator on the way up answers again, a page whose PopScope keeps Back included.
+    const _InnermostNavigatorCheck().dispatch(innermostNavigatorContext);
     return true;
   }
+
+  NavigatorState? get _innermostNavigator {
+    var navigatorKey = routerDelegate.navigatorKey;
+    final matches = routerDelegate.currentConfiguration.matches;
+    if (matches.isEmpty) return navigatorKey.currentState;
+    var walker = matches.last;
+    while (walker is ShellRouteMatch) {
+      navigatorKey = walker.navigatorKey;
+      walker = walker.matches.last;
+    }
+    return navigatorKey.currentState;
+  }
+}
+
+class _InnermostNavigatorCheck extends NavigationNotification {
+  const _InnermostNavigatorCheck() : super(canHandlePop: false);
 }

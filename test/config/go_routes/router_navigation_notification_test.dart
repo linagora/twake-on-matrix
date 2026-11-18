@@ -54,6 +54,7 @@ void main() {
                   GoRoute(path: 'info', builder: (_, _) => const Text('info')),
                 ],
               ),
+              GoRoute(path: '/tabs', builder: (_, _) => const _TabsPage()),
             ],
           ),
         ],
@@ -172,5 +173,67 @@ void main() {
 
       await expectBackReturnsToRooms(tester);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+    Future<void> openSecondTab(WidgetTester tester, GoRouter router) async {
+      router.go('/tabs');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('tab 0'));
+      await tester.pumpAndSettle();
+      expect(find.text('tab 1'), findsOneWidget);
+    }
+
+    Future<void> expectBackReturnsToFirstTab(WidgetTester tester) async {
+      expect(frameworkHandlesBack.last, isTrue);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text('tab 0'), findsOneWidget);
+      expect(systemPops, 0);
+      expect(frameworkHandlesBack.last, isFalse);
+    }
+
+    testWidgets('whenBackIsPressedOnASecondTab_returnsToTheFirstTab', (
+      tester,
+    ) async {
+      final router = await openApp(tester);
+      await openSecondTab(tester, router);
+
+      await expectBackReturnsToFirstTab(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+
+    testWidgets('whenADialogClosesOnASecondTab_backReturnsToTheFirstTab', (
+      tester,
+    ) async {
+      final router = await openApp(tester);
+      await openSecondTab(tester, router);
+
+      await openAndCloseDialog(tester);
+
+      await expectBackReturnsToFirstTab(tester);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
   });
+}
+
+// A page that keeps Back while it shows another tab than the first one.
+class _TabsPage extends StatefulWidget {
+  const _TabsPage();
+
+  @override
+  State<_TabsPage> createState() => _TabsPageState();
+}
+
+class _TabsPageState extends State<_TabsPage> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: _tab == 0,
+    onPopInvokedWithResult: (didPop, _) {
+      if (!didPop) setState(() => _tab = 0);
+    },
+    child: GestureDetector(
+      onTap: () => setState(() => _tab = 1),
+      child: Text('tab $_tab'),
+    ),
+  );
 }
