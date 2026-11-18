@@ -502,6 +502,7 @@ class MatrixState extends ConsumerState<Matrix>
       _dockBadge.update([
         for (final c in clients)
           for (final r in c.rooms)
+            // switch to unreadBadgeCount once threads land
             DockBadgeRoom(
               notificationCount: r.notificationCount,
               highlightCount: r.highlightCount,
