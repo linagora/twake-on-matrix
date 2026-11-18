@@ -112,7 +112,7 @@ void main() {
     test('a signed-out account (no own user id) still notifies', () {
       expect(
         shouldNotifyMessage(
-          MessageNotificationCandidate(
+          const MessageNotificationCandidate(
             roomId: '!r:example.com',
             senderId: '@alice:example.com',
             ownUserId: null,
