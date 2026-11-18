@@ -1977,7 +1977,7 @@ class MatrixState extends ConsumerState<Matrix>
   Future<void> initSettings() async {
     try {
       await Future.wait([
-        store.getItem(SettingKeys.wallpaper).then((final path) async {
+        store.getItem(SettingKeys.wallpaper).then((path) async {
           if (path == null) return;
           final file = File(path);
           if (await file.exists()) {
