@@ -379,7 +379,7 @@ audio player appearing while the block is hidden. The layout was checked with
 widget renders at 390 x 844 and a 47 px status bar inset, compared with the
 fixed app bar of before.
 
-## D20. The folder screens follow one layout (decided by Johann, 2026-11-18)
+## D20. The folder screens follow one layout (proposed by Johann, 2026-11-18)
 
 Status: proposed, pending the designer's review.
 
