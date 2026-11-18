@@ -435,6 +435,11 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
     ]);
   }
 
+  // An open box, even empty, makes flutter_typeahead move focus to it on Arrow Up.
+  void _closeEmptySuggestions() {
+    widget.suggestionsController?.close(retainFocus: true);
+  }
+
   void _handleSuggestionsCallbackMobile() {
     if (widget.showEmojiPickerNotifier?.value == false) {
       widget.typeAheadFocusNode?.requestFocus();
@@ -516,8 +521,12 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             // In a draft chat the room does not exist yet, so there are no
             // members to suggest. Guard the null room (web opens DMs as a draft
             // and fires this callback, which would otherwise crash on `room!`).
-            if (widget.room?.isDirectChat ?? true) return [];
+            if (widget.room?.isDirectChat ?? true) {
+              _closeEmptySuggestions();
+              return [];
+            }
             final suggestions = getSuggestions(text);
+            if (suggestions.isEmpty) _closeEmptySuggestions();
             if (PlatformInfos.isMobile) {
               _handleSuggestionsCallbackMobile();
             }
