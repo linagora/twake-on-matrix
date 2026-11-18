@@ -119,9 +119,21 @@ void _foldersScreenTests() {
       verifyNever(_repository.saveFolders(any, changes: anyNamed('changes')));
     });
 
+    testWidgets('whenThereIsNoFolder_showsNoFoldersHeader', (tester) async {
+      await _pump(tester, const []);
+
+      expect(find.text('YOUR FOLDERS'), findsNothing);
+    });
+
+    testWidgets('whenThereAreFolders_headsThemYourFolders', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      expect(find.text('YOUR FOLDERS'), findsOneWidget);
+    });
+
     testWidgets('whenABuiltinIsMissing_offersToAddItBack', (tester) async {
       await _pump(tester, const [Folder.user('Work')]);
-      expect(find.text('Recommended'), findsOneWidget);
+      expect(find.text('RECOMMENDED'), findsOneWidget);
 
       await tester.tap(find.text('Add').first);
       await tester.pump();

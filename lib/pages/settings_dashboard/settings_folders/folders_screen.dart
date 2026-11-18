@@ -39,15 +39,24 @@ class FoldersScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: SettingsFoldersStyle.padding,
-              child: Text(l10n.foldersIntro),
+              padding: SettingsFoldersStyle.introPadding,
+              child: Text(
+                l10n.foldersIntro,
+                style: SettingsFoldersStyle.helpText,
+              ),
             ),
             LinagoraSettingItem(
               key: const ValueKey('folder_new'),
               leadingIcon: Icons.create_new_folder_outlined,
+              iconColor: LinagoraSysColors.material().primary,
+              titleColor: LinagoraSysColors.material().primary,
               title: l10n.folderNew,
+              padding: SettingsFoldersStyle.rowPadding,
+              trailing: const SizedBox.shrink(),
               onTap: () => const FolderEditRoute().push<void>(context),
             ),
+            if (folders.isNotEmpty)
+              LinagoraSectionHeader(label: l10n.foldersYours.toUpperCase()),
           ],
         ),
         footer: const _RecommendedFolders(),
@@ -59,22 +68,18 @@ class FoldersScreen extends ConsumerWidget {
           for (final folder in folders)
             LinagoraSettingItem(
               key: ValueKey(RoomListFilter.of(folder)),
-              leading: Text(
-                folder.emoji ?? SettingsFoldersStyle.defaultFolderEmoji,
-              ),
+              leading: _FolderLeading(folder: folder),
+              padding: SettingsFoldersStyle.rowPadding,
               title: folder.label(l10n),
               subtitle: switch (folder) {
                 BuiltinFolderEntry(:final kind) => kind.rule(l10n),
                 UserFolder() => null,
               },
               onTap: () => folder.pushEdit(context),
-              trailing: Padding(
-                padding: SettingsFoldersStyle.trailingPadding,
-                child: LinagoraIconButton(
-                  icon: Icons.delete_outline,
-                  tooltip: l10n.folderDelete,
-                  onPressed: () => confirmAndRemoveFolder(context, ref, folder),
-                ),
+              trailing: LinagoraIconButton(
+                icon: Icons.delete_outline,
+                tooltip: l10n.folderDelete,
+                onPressed: () => confirmAndRemoveFolder(context, ref, folder),
               ),
             ),
         ],
@@ -99,9 +104,10 @@ class _RecommendedFolders extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        LinagoraSectionHeader(label: l10n.foldersRecommended),
+        LinagoraSectionHeader(label: l10n.foldersRecommended.toUpperCase()),
         for (final kind in hidden)
           LinagoraSettingItem(
+            padding: SettingsFoldersStyle.rowPadding,
             title: kind.label(l10n),
             subtitle: kind.rule(l10n),
             trailing: LinagoraButton(
@@ -117,6 +123,34 @@ class _RecommendedFolders extends ConsumerWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The emoji of the folder over its colour, or a plain folder.
+class _FolderLeading extends StatelessWidget {
+  const _FolderLeading({required this.folder});
+
+  final Folder folder;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = folder.color;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color == null
+            ? null
+            : Color(
+                color.argb,
+              ).withValues(alpha: SettingsFoldersStyle.tintAlpha),
+      ),
+      child: Center(
+        child: Text(
+          folder.emoji ?? SettingsFoldersStyle.defaultFolderEmoji,
+          style: LinagoraTextStyle.material().titleMedium,
+        ),
+      ),
     );
   }
 }
