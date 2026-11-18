@@ -204,6 +204,32 @@ def _validate_expected_samples(
         )
 
 
+def _drop_partial_excluded_metrics(
+    groups: dict[tuple, dict[tuple[int, str], float]],
+    expected_samples: int,
+    requirements: dict[tuple[str, str], set[str]] | None,
+) -> dict[tuple, dict[tuple[int, str], float]]:
+    """Omit partial excluded metrics: update_history.py requires one sample per run."""
+    if requirements is None:
+        return groups
+    kept = {}
+    dropped: dict[tuple[str, str, int], list[str]] = defaultdict(list)
+    for (scenario, label, metric), samples in groups.items():
+        if len(samples) >= expected_samples or metric in requirements.get(
+            (scenario, label), {metric}
+        ):
+            kept[(scenario, label, metric)] = samples
+        else:
+            dropped[(scenario, label, len(samples))].append(metric)
+    for (scenario, label, count), metrics in dropped.items():
+        print(
+            f"WARNING: dropped excluded metrics at {scenario}/{label}"
+            f" ({count}/{expected_samples} samples): {', '.join(metrics)}",
+            file=sys.stderr,
+        )
+    return kept
+
+
 def _validate_sample_count(
     location: str,
     sample_kind: str,
@@ -283,6 +309,7 @@ def compute_median(
             expected_samples,
             requirements,
         )
+        groups = _drop_partial_excluded_metrics(groups, expected_samples, requirements)
     output = _build_checkpoints(
         groups,
         checkpoint_samples,
