@@ -71,8 +71,7 @@ class SettingsSecurityController extends ConsumerState<SettingsSecurity> {
     try {
       final words = await getRecoveryWords.execute();
       if (!mounted) return null;
-      _recoveryKey = words.words;
-      return _recoveryKey;
+      return _recoveryKey = words.words;
     } on GetRecoveryWordsException {
       return null;
     }

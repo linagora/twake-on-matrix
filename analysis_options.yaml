@@ -24,6 +24,7 @@ linter:
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_final_parameters
     - combinators_ordering
+    - join_return_with_assignment
 
 analyzer:
   errors:
