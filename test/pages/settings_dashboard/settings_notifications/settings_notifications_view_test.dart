@@ -10,6 +10,7 @@ import 'package:twake_chat/pages/settings_dashboard/settings_notifications/setti
 import 'package:twake_chat/pages/settings_dashboard/settings_notifications/settings_notifications_view.dart';
 import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
+import 'package:twake_chat/widgets/twake_app.dart';
 
 class _FakeClient extends Fake implements Client {
   _FakeClient({required this.allPushNotificationsMuted});
@@ -20,6 +21,12 @@ class _FakeClient extends Fake implements Client {
   @override
   final CachedStreamController<BasicEvent> onAccountData =
       CachedStreamController();
+
+  final List<bool> muteCalls = [];
+
+  @override
+  Future<void> setMuteAllPushNotifications(bool muted) async =>
+      muteCalls.add(muted);
 }
 
 class _FakeController extends Fake implements SettingsNotificationsController {
@@ -42,20 +49,18 @@ void main() {
 
   tearDown(() => GetIt.instance.reset());
 
-  Future<void> pumpView(
+  Future<_FakeClient> pumpView(
     WidgetTester tester, {
     required bool muted,
     Locale locale = const Locale('en'),
   }) async {
+    final client = _FakeClient(allPushNotificationsMuted: muted);
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
-        overrides: [
-          matrixClientProvider.overrideWithValue(
-            _FakeClient(allPushNotificationsMuted: muted),
-          ),
-        ],
+        overrides: [matrixClientProvider.overrideWithValue(client)],
         child: MaterialApp(
+          navigatorKey: TwakeApp.routerKey = GlobalKey<NavigatorState>(),
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           locale: locale,
           localizationsDelegates: L10n.localizationsDelegates,
@@ -65,6 +70,7 @@ void main() {
       ),
     );
     await tester.pump();
+    return client;
   }
 
   Finder masterSwitchFinder() => find.byType(SwitchListTile).first;
@@ -110,4 +116,15 @@ void main() {
     expect(masterSwitch(tester).value, isTrue);
     expect(textInMasterSwitch(lookupL10n(es).notifications), findsOneWidget);
   });
+
+  for (final muted in [false, true]) {
+    testWidgets('tapping the switch sets mute to ${!muted}', (tester) async {
+      final client = await pumpView(tester, muted: muted);
+
+      await tester.tap(masterSwitchFinder());
+      await tester.pumpAndSettle();
+
+      expect(client.muteCalls, [!muted]);
+    });
+  }
 }
