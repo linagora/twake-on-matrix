@@ -37,6 +37,8 @@ struct HTTPNotificationItem: NotificationItemProxyProtocol {
     var roomCanonicalAlias: String? { nil }
     // ponytail: no push rules evaluated over HTTP, always play the sound
     var isNoisy: Bool { true }
+    /// Encrypted events carry no body: `body == nil` is handled by the builder.
+    var isRoomEncrypted: Bool { false }
     // ponytail: a direct room is assumed to have 2 members
     var roomJoinedMembers: Int { isRoomDirect ? 2 : 0 }
 }

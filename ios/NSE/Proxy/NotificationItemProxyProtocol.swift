@@ -44,6 +44,9 @@ protocol NotificationItemProxyProtocol {
     var isRoomDirect: Bool { get }
 
     var isNoisy: Bool { get }
+
+    /// The room is end-to-end encrypted: its notifications never show message content.
+    var isRoomEncrypted: Bool { get }
 }
 
 extension NotificationItemProxyProtocol {

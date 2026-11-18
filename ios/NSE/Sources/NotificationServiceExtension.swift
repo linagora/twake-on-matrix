@@ -58,6 +58,14 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         MXLog.info("\(tag) Payload came: \(request.content.userInfo)")
 
         Task {
+            // HTTP first: it needs no crypto, and an encrypted event always reads as encrypted.
+            if let httpCredentials,
+               await runHTTP(with: httpCredentials,
+                             roomId: roomId,
+                             eventId: eventId,
+                             unreadCount: request.unreadCount) {
+                return
+            }
             if let credentials,
                await run(with: credentials,
                          roomId: roomId,
@@ -65,14 +73,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
                          unreadCount: request.unreadCount) {
                 return
             }
-            // The Rust path could not build the notification: try plain HTTP before giving up.
-            guard let httpCredentials else {
-                return discard()
-            }
-            await runHTTP(with: httpCredentials,
-                          roomId: roomId,
-                          eventId: eventId,
-                          unreadCount: request.unreadCount)
+            discard()
         }
     }
     
@@ -135,17 +136,17 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         }
     }
 
-    /// Always ends with `notify()` or `discard()`; a failure leaves the neutral payload text.
+    /// Returns false when the event could not be fetched, so that the caller can try another way.
     private func runHTTP(with credentials: HTTPCredentials,
                          roomId: String,
                          eventId: String,
-                         unreadCount: Int?) async {
+                         unreadCount: Int?) async -> Bool {
         MXLog.info("\(tag) runHTTP with roomId: \(roomId), eventId: \(eventId)")
 
         let session = NSEHTTPSession(credentials: credentials)
         guard let item = await session.notificationItem(roomID: roomId, eventID: eventId) else {
-            MXLog.info("\(tag) no HTTP notification for the event, discard")
-            return discard()
+            MXLog.info("\(tag) no HTTP notification for the event")
+            return false
         }
 
         do {
@@ -159,9 +160,10 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
                 modifiedContent?.badge = unreadCount.map { NSNumber(value: $0) }
             }
             notify()
+            return true
         } catch {
             MXLog.error("NSE runHTTP error: \(error)")
-            discard()
+            return false
         }
     }
     

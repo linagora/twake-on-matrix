@@ -33,6 +33,10 @@ struct NotificationContentBuilder {
         case .invite:
             return try await processInvited(notificationItem: notificationItem, mediaProvider: mediaProvider)
         case .timeline(let event):
+            // Encrypted rooms never show content, even when the extension could decrypt it.
+            if notificationItem.isRoomEncrypted {
+                return processEmpty(notificationItem: notificationItem, body: encryptedBody)
+            }
             switch try? event.content() {
             case .messageLike(content: let content):
                 switch content {

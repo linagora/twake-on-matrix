@@ -49,6 +49,10 @@ struct NotificationItemProxy: NotificationItemProxyProtocol {
         notificationItem.roomInfo.canonicalAlias
     }
 
+    var isRoomEncrypted: Bool {
+        notificationItem.roomInfo.isEncrypted == true
+    }
+
     var isRoomDirect: Bool {
         notificationItem.roomInfo.isDirect
     }
@@ -81,6 +85,8 @@ struct NotificationItemProxy: NotificationItemProxyProtocol {
 struct EmptyNotificationItemProxy: NotificationItemProxyProtocol {
     let eventID: String
 
+    var isRoomEncrypted: Bool { false }
+
     var event: NotificationEvent? {
         nil
     }
@@ -104,8 +110,6 @@ struct EmptyNotificationItemProxy: NotificationItemProxyProtocol {
     var isNoisy: Bool { false }
 
     var isRoomDirect: Bool { false }
-
-    var isRoomEncrypted: Bool? { nil }
 
     var senderAvatarMediaSource: MediaSourceProxy? { nil }
 
