@@ -1565,6 +1565,8 @@ void main() {
     testWidgets('the last logout unmounts the screens reading the client '
         'before the accounts drop it', (tester) async {
       final last = _BootClient('a', userID: '@a:s');
+      final tom = _CountingToMDatabase();
+      getIt.registerSingleton<HiveCollectionToMDatabase>(tom);
       final harness = _handoverHarness(tester, [last]);
       final events = <String>[];
       final locationsWhenDropped = <String>[];
@@ -1623,8 +1625,11 @@ void main() {
           () => harness.container.read(accountsProvider) is! Active,
           frame: const Duration(milliseconds: 100),
         );
+        await _pumpUntil(harness, () => tom.clears > 0);
+        await _pumpUntil(harness, () => false);
       });
 
+      expect(tom.clears, 1);
       expect(whileEntering, isA<Active>());
       expect(entering.animation!.isCompleted, isTrue);
       expect(events, ['reader disposed', 'client dropped']);
