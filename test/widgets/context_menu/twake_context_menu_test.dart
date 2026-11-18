@@ -23,6 +23,7 @@ Future<Rect> _openMenuAt(
   Size screen = _phone,
   double leftInset = 0,
   List<ContextMenuAction> actions = _folderActions,
+  bool respectLeftPosition = false,
 }) async {
   tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
@@ -41,6 +42,7 @@ Future<Rect> _openMenuAt(
                 dialogContext: dialogContext,
                 position: position,
                 listActions: actions,
+                respectLeftPosition: respectLeftPosition,
               ),
             ),
             child: const Text('open'),
@@ -103,6 +105,30 @@ void main() {
       );
 
       expect(rect.left, 100);
+    });
+
+    testWidgets('keeps a left-anchored menu at the tap when it fits', (
+      tester,
+    ) async {
+      final rect = await _openMenuAt(
+        tester,
+        const Offset(40, 200),
+        respectLeftPosition: true,
+      );
+
+      expect(rect.left, 40);
+    });
+
+    testWidgets('keeps a left-anchored menu inside the right edge', (
+      tester,
+    ) async {
+      final rect = await _openMenuAt(
+        tester,
+        const Offset(350, 200),
+        respectLeftPosition: true,
+      );
+
+      expect(rect.right, lessThanOrEqualTo(_phone.width - 8));
     });
 
     testWidgets('stays inside the safe area in landscape', (tester) async {
