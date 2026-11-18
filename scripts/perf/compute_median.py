@@ -213,17 +213,20 @@ def _drop_partial_excluded_metrics(
     if requirements is None:
         return groups
     kept = {}
+    dropped: dict[tuple[str, str, int], list[str]] = defaultdict(list)
     for (scenario, label, metric), samples in groups.items():
         if len(samples) >= expected_samples or metric in requirements.get(
             (scenario, label), {metric}
         ):
             kept[(scenario, label, metric)] = samples
         else:
-            print(
-                f"WARNING: dropped excluded metric {scenario}/{label}/{metric}"
-                f" ({len(samples)}/{expected_samples} samples)",
-                file=sys.stderr,
-            )
+            dropped[(scenario, label, len(samples))].append(metric)
+    for (scenario, label, count), metrics in dropped.items():
+        print(
+            f"WARNING: dropped excluded metrics at {scenario}/{label}"
+            f" ({count}/{expected_samples} samples): {', '.join(metrics)}",
+            file=sys.stderr,
+        )
     return kept
 
 

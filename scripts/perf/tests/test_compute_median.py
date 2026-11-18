@@ -226,7 +226,7 @@ class ComputeMedianTest(unittest.TestCase):
         for index, path in enumerate(self.logs, start=1):
             metrics = "rss_bytes=100"
             if index == 1:
-                metrics += " | build_p50_us=727"
+                metrics += " | build_p50_us=727 | fps=90"
             Path(path).write_text(
                 "PERF_METRIC | scroll_room1 | scroll_settled"
                 f" | {metrics}\n",
@@ -251,10 +251,11 @@ class ComputeMedianTest(unittest.TestCase):
         self.assertNotIn("build_p50_us", checkpoint)
         self.assertNotIn("build_p50_us_sample_count", checkpoint)
         self.assertIn(
-            "WARNING: dropped excluded metric"
-            " scroll_room1/scroll_settled/build_p50_us (1/3 samples)",
+            "WARNING: dropped excluded metrics at scroll_room1/scroll_settled"
+            " (1/3 samples): build_p50_us, fps\n",
             stderr.getvalue(),
         )
+        self.assertEqual(stderr.getvalue().count("dropped excluded metrics"), 1)
 
     def test_expected_samples_keeps_excluded_metric_in_every_sample(self) -> None:
         for path in self.logs:
