@@ -759,6 +759,7 @@ class BackgroundPush {
       Logs().w('[Push] Push for an account not signed in here: not shown');
       return;
     }
+    _clearReadRooms(notification);
     pushHelper(
       notification,
       client: receiving,
@@ -901,8 +902,10 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    final notification = PushNotification.fromJson(data);
+    _clearReadRooms(notification);
     await pushHelper(
-      PushNotification.fromJson(data),
+      notification,
       client: _pushClient,
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
@@ -923,6 +926,12 @@ class BackgroundPush {
   }
 
   bool _clearingPushLock = false;
+
+  // Sent when unread counts change, e.g. a room read on another device: the
+  // push names no room, a sync tells which ones were read.
+  void _clearReadRooms(PushNotification notification) {
+    if (notification.eventId == null) unawaited(_onClearingPush());
+  }
 
   /// Rooms refreshed by a sync and not checked yet: only their unread
   /// counts are fresh enough to clear their notification.
