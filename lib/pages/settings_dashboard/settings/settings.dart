@@ -41,8 +41,10 @@ class Settings extends ConsumerStatefulWidget {
 }
 
 class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
-  final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(Uri());
-  final ValueNotifier<String?> displayNameNotifier = ValueNotifier('');
+  // Null until the profile is loaded: the view then falls back to the
+  // localpart of the active account instead of an empty name.
+  final ValueNotifier<Uri?> avatarUriNotifier = ValueNotifier(null);
+  final ValueNotifier<String?> displayNameNotifier = ValueNotifier(null);
 
   static String generateEmailSubject(String? matrixId) =>
       'Request for Deletion of Twake Chat Account${matrixId != null ? ' - $matrixId' : ''}';
@@ -66,6 +68,14 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   final ValueNotifier<SettingEnum?> optionsSelectNotifier = ValueNotifier(null);
 
   final ValueNotifier<bool?> showChatBackupSwitch = ValueNotifier(null);
+
+  // True while [checkBootstrap] runs. The check can end without a result
+  // (encryption disabled, an error): the view then shows the switch again.
+  final ValueNotifier<bool> backupStateLoading = ValueNotifier(true);
+
+  /// How long the backup row waits for [checkBootstrap] before it shows the
+  /// switch again.
+  static const backupCheckTimeout = Duration(seconds: 10);
 
   MatrixState get matrix => Matrix.of(context);
 
@@ -177,6 +187,35 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   }
 
   void checkBootstrap() async {
+    // Also called after the bootstrap dialog, when the screen may be gone.
+    if (!mounted) return;
+    backupStateLoading.value = true;
+    final check = _loadBackupState();
+    try {
+      await check.timeout(backupCheckTimeout);
+    } on TimeoutException {
+      // Offline or a first sync that does not end: the switch is shown again.
+      // A result that arrives later still updates it; a late error is logged,
+      // because the timeout no longer forwards it.
+      Logs().w('SettingsController::checkBootstrap() - timed out');
+      unawaited(
+        check.onError<Object>(
+          (error, stackTrace) => Logs().e(
+            'SettingsController::checkBootstrap() - failed after the timeout',
+            error,
+            stackTrace,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) backupStateLoading.value = false;
+    }
+  }
+
+  Future<void> _loadBackupState() async {
+    // Read once: the screen can close while the check runs, and `context` is
+    // gone by then.
+    final client = this.client;
     if (!client.encryptionEnabled) return;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;
@@ -199,6 +238,7 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
     Logs().d(
       "SettingsController::checkBootstrap() - isUnknownSession: $isUnknownSession",
     );
+    if (!mounted) return;
     showChatBackupSwitch.value = needsBootstrap || isUnknownSession;
     Logs().d(
       "SettingsController::checkBootstrap() - showChatBackupSwitch: ${showChatBackupSwitch.value}",
@@ -358,13 +398,9 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   @override
   void dispose() {
     onAccountDataSubscription?.cancel();
-    if (avatarUriNotifier.value != null) {
-      avatarUriNotifier.dispose();
-    }
-
-    if (displayNameNotifier.value != null) {
-      displayNameNotifier.dispose();
-    }
+    avatarUriNotifier.dispose();
+    displayNameNotifier.dispose();
+    backupStateLoading.dispose();
     super.dispose();
   }
 
