@@ -3,10 +3,48 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:linagora_design_flutter/linagora_design_flutter.dart';
+import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
+import 'package:twake_chat/di/global/get_it_initializer.dart';
 import 'package:twake_chat/pages/chat/input_bar/focus_suggestion_controller.dart';
 import 'package:twake_chat/pages/chat/input_bar/input_bar.dart';
+import 'package:twake_chat/utils/search/search_engine.dart';
+import 'package:twake_chat/widgets/matrix.dart';
 
 const _draft = 'one\ntwo\nthree';
+
+class _FakeClient extends Fake implements Client {
+  @override
+  String? get userID => '@me:example.org';
+}
+
+class _FakeGroupRoom extends Fake implements Room {
+  @override
+  final Client client = _FakeClient();
+
+  @override
+  bool get isDirectChat => false;
+
+  @override
+  List<User> getParticipants([
+    List<Membership> membershipFilter = const [
+      Membership.join,
+      Membership.invite,
+      Membership.knock,
+    ],
+  ]) => [User('@bob:example.org', displayName: 'bob', room: this)];
+}
+
+class _FakeMatrixState extends Fake implements MatrixState {
+  _FakeMatrixState(this.client);
+
+  @override
+  final Client client;
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      'FakeMatrixState';
+}
 
 Future<(TextEditingController, FocusNode)> _pumpDraft(
   WidgetTester tester, {
@@ -99,5 +137,55 @@ void main() {
 
     expect(suggestionsController.isOpen, isFalse);
     await _expectArrowUpMovesCaret(tester, controller, focusNode);
+  });
+
+  testWidgets('typing @ after a word shows the members right away', (
+    tester,
+  ) async {
+    if (!getIt.isRegistered<SearchEngine>()) {
+      getIt.registerSingleton(const SearchEngine());
+    }
+    final room = _FakeGroupRoom();
+    final controller = TextEditingController();
+    final suggestionsController = SuggestionsController<Map<String, String?>>();
+    final focusSuggestionController = FocusSuggestionController();
+    addTearDown(() {
+      controller.dispose();
+      suggestionsController.dispose();
+    });
+    await tester.pumpWidget(
+      Provider<MatrixState>.value(
+        value: _FakeMatrixState(room.client),
+        child: MaterialApp(
+          theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.bottomCenter,
+              child: InputBar(
+                room: room,
+                controller: controller,
+                suggestionsController: suggestionsController,
+                focusSuggestionController: focusSuggestionController,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.enterText(find.byType(TextField), 'hello');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(suggestionsController.isOpen, isFalse);
+
+    await tester.enterText(find.byType(TextField), 'hello ');
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.enterText(find.byType(TextField), 'hello @');
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(suggestionsController.isOpen, isTrue);
+    expect(suggestionsController.suggestions, [
+      containsPair('mxid', '@bob:example.org'),
+    ]);
   });
 }
