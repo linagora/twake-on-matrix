@@ -69,6 +69,7 @@ import 'package:twake_chat/providers/login_homeserver_summary_provider.dart';
 import 'package:twake_chat/utils/localized_exception_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_homeserver_summary_extension.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/client_stored_homeserver_extension.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/client_well_known_extension.dart';
 import 'package:twake_chat/utils/notification_account_switch.dart';
 import 'package:twake_chat/utils/offline_failure.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -264,6 +265,10 @@ class MatrixState extends ConsumerState<Matrix>
 
   // The switch side effects: the coordinator decides when and in which order,
   // these are the bodies that need this state's context and interceptors.
+  @override
+  Future<void> loadCachedHomeserverInfo(Client client, SwitchToken token) =>
+      _loadCachedHomeserverInformation(client, token);
+
   @override
   Future<void> setUpToM(Client client, SwitchToken token) =>
       _setUpToMServicesWhenChangingActiveClient(client, token);
@@ -1553,6 +1558,25 @@ class MatrixState extends ConsumerState<Matrix>
   }
 
   final HomeserverCheckLog _homeserverCheckLog = HomeserverCheckLog();
+
+  /// A summary already held for this homeserver is newer than the cache.
+  Future<void> _loadCachedHomeserverInformation(
+    Client newClient,
+    SwitchToken token,
+  ) async {
+    final discovery = await newClient.getCachedWellKnown();
+    if (discovery == null ||
+        !mounted ||
+        !_isCurrent(token) ||
+        (loginHomeserverSummary?.describes(newClient.homeserver) ?? false)) {
+      return;
+    }
+    loginHomeserverSummary = HomeserverSummary(
+      discoveryInformation: discovery,
+      versions: GetVersionsResponse(versions: []),
+      loginFlows: [],
+    );
+  }
 
   Future<void> _getHomeserverInformation(
     Client newClient, [
