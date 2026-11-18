@@ -1072,6 +1072,42 @@ void main() {
     expect(authorization.accessToken, 'token-b');
   });
 
+  testWidgets('a switch does not write the access token to the logs', (
+    tester,
+  ) async {
+    final left = _ToMClient('a', userID: '@a:s');
+    final target = _ToMClient('b', userID: '@b:s');
+    final authorization = AuthorizationInterceptor();
+    _registerToM(
+      _FakeToMConfigurationsRepository({}),
+      authorization: authorization,
+    );
+    final harness = _Harness(
+      tester,
+      [left, target],
+      overrides: [
+        phonebookResolverProvider.overrideWithValue(_NoopPhonebookResolver()),
+      ],
+    );
+
+    await harness.run(() async {
+      await harness.mount();
+      await harness.settle();
+      harness.container
+          .read(accountSwitchEffectsHolderProvider.notifier)
+          .set(_ToMOnlyEffects(harness.matrix));
+      Logs().outputEvents.clear();
+
+      await tester.runAsync(() => harness.matrix.setActiveClient(target));
+    });
+
+    expect(authorization.accessToken, 'token-b');
+    expect(
+      Logs().outputEvents.map((event) => event.title),
+      everyElement(isNot(contains('token-b'))),
+    );
+  });
+
   group('a switch to an account whose homeserver cannot be reached', () {
     // Nothing can be fetched in the harness: `checkHomeserver` and the
     // well-known of the fake clients both fail, as they do offline.

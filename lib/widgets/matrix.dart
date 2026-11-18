@@ -1420,7 +1420,8 @@ class MatrixState extends ConsumerState<Matrix>
   void setUpAuthorization(Client client) {
     final authorizationInterceptor = ref.read(authorizationInterceptorProvider);
     Logs().d(
-      'MatrixState::setUpAuthorization: accessToken ${client.accessToken}',
+      'MatrixState::setUpAuthorization: accessToken '
+      '${client.accessToken == null ? 'cleared' : 'set'}',
     );
     authorizationInterceptor.accessToken = client.accessToken;
   }
