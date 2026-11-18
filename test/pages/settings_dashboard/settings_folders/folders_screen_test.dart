@@ -131,6 +131,45 @@ void _foldersScreenTests() {
       expect(find.text('YOUR FOLDERS'), findsOneWidget);
     });
 
+    testWidgets('always_centresBadgeAndDeleteOnTheRow', (tester) async {
+      await _pump(
+        tester,
+        const [],
+        builtinsShown: {BuiltinFolder.values.first},
+      );
+
+      final row = find.ancestor(
+        of: find.byType(FolderBadge),
+        matching: find.byType(InkWell),
+      );
+      final rowCenter = tester.getCenter(row.first).dy;
+      expect(tester.getSize(find.byType(FolderBadge)), const Size(40, 40));
+      expect(tester.getCenter(find.byType(FolderBadge)).dy, rowCenter);
+      expect(
+        tester.getCenter(find.byKey(const ValueKey('folder_delete'))).dy,
+        rowCenter,
+      );
+    });
+
+    testWidgets('always_centresTheEmojiOnItsBadge', (tester) async {
+      await _pump(tester, const [Folder.user('Work', emoji: '💼')]);
+
+      expect(
+        tester.getCenter(find.text('💼')),
+        tester.getCenter(find.byType(FolderBadge)),
+      );
+    });
+
+    testWidgets('always_endsTheDeleteIconOnTheRightEdge', (tester) async {
+      await _pump(tester, const [Folder.user('Work')]);
+
+      final icon = find.descendant(
+        of: find.byKey(const ValueKey('folder_delete')),
+        matching: find.byIcon(Icons.delete_outline),
+      );
+      expect(tester.getTopRight(icon).dx, tester.view.physicalSize.width - 16);
+    });
+
     testWidgets('whenABuiltinIsMissing_offersToAddItBack', (tester) async {
       await _pump(tester, const [Folder.user('Work')]);
       expect(find.text('RECOMMENDED'), findsOneWidget);
