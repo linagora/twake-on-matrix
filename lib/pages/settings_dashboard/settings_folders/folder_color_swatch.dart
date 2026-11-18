@@ -50,15 +50,15 @@ class FolderColorSwatch extends StatelessWidget {
                       : null,
                 ),
                 child: switch ((color, isSelected)) {
+                  (null, _) => Icon(
+                    Icons.format_color_reset_outlined,
+                    size: SettingsFoldersStyle.swatchIconSize,
+                    color: isSelected ? colors.primary : colors.tertiary,
+                  ),
                   (_, true) => Icon(
                     Icons.check,
                     size: SettingsFoldersStyle.swatchIconSize,
-                    color: color == null ? colors.primary : colors.onPrimary,
-                  ),
-                  (null, false) => Icon(
-                    Icons.format_color_reset_outlined,
-                    size: SettingsFoldersStyle.swatchIconSize,
-                    color: colors.tertiary,
+                    color: colors.onPrimary,
                   ),
                   _ => null,
                 },
