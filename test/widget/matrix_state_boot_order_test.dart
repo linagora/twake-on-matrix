@@ -72,6 +72,14 @@ import 'package:twake_chat/widgets/set_active_client_state.dart';
 
 import '../data/account/fakes.dart';
 
+/// The channels `MatrixState` talks to on a macOS host: notifications, window
+/// lifecycle and Dock badge.
+const _macosChannels = [
+  'dexterous.com/flutter/local_notifications',
+  'app.twake/lifecycle',
+  'g123k/flutter_app_badger',
+];
+
 /// Remembers that something listened to its stream.
 class _WatchedController<T> extends CachedStreamController<T> {
   bool listened = false;
@@ -114,6 +122,10 @@ class _BootClient extends FakeAccountClient {
 
   @override
   CachedStreamController<SyncUpdate> get onSync => _onSync;
+
+  /// The Dock badge counts the rooms of every client.
+  @override
+  List<Room> get rooms => const [];
 
   @override
   CachedStreamController<RoomKeyRequest> get onRoomKeyRequest =>
@@ -659,15 +671,14 @@ class _Harness {
     final unexpected = <Object>[];
     // On a macOS host `MatrixState` builds the macOS notifications port, and
     // the plugin reads the target platform, which `flutter test` sets to
-    // Android: it is set to macOS, with the plugin channel answered.
+    // Android: it is set to macOS, with the plugin channels answered.
     final onMacOS = Platform.isMacOS;
     if (onMacOS) {
       debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-          .setMockMethodCallHandler(
-            const MethodChannel('dexterous.com/flutter/local_notifications'),
-            (_) async => true,
-          );
+      for (final name in _macosChannels) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(MethodChannel(name), (_) async => true);
+      }
     }
     runZonedGuarded(
       () async {
@@ -687,11 +698,10 @@ class _Harness {
     } finally {
       if (onMacOS) {
         debugDefaultTargetPlatformOverride = null;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(
-              const MethodChannel('dexterous.com/flutter/local_notifications'),
-              null,
-            );
+        for (final name in _macosChannels) {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(MethodChannel(name), null);
+        }
       }
     }
     expect(unexpected, isEmpty, reason: 'errors outside of the app wiring');
