@@ -17,7 +17,8 @@ class Settings3PidView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    controller.request ??= ref.watch(matrixClientProvider).getAccount3PIDs();
+    final client = ref.watch(matrixClientProvider);
+    controller.request ??= client.getAccount3PIDs();
     return Scaffold(
       backgroundColor: LinagoraSysColors.material().onPrimary,
       appBar: TwakeAppBar(

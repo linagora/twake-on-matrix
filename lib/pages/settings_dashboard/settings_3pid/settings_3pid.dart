@@ -35,15 +35,14 @@ class Settings3PidController extends ConsumerState<Settings3Pid> {
       ],
     );
     if (input == null) return;
+    final client = ref.read(matrixClientProvider);
     final clientSecret = DateTime.now().millisecondsSinceEpoch.toString();
     final response = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => ref
-          .read(matrixClientProvider)
-          .requestTokenToRegisterEmail(
-            clientSecret,
-            input.single,
-            Settings3Pid.sendAttempt++,
-          ),
+      future: () => client.requestTokenToRegisterEmail(
+        clientSecret,
+        input.single,
+        Settings3Pid.sendAttempt++,
+      ),
     );
     if (response.error != null) return;
     final ok = await showOkAlertDialog(
@@ -55,13 +54,10 @@ class Settings3PidController extends ConsumerState<Settings3Pid> {
     );
     if (ok != OkCancelResult.ok) return;
     final success = await TwakeDialog.showFutureLoadingDialogFullScreen(
-      future: () => ref
-          .read(matrixClientProvider)
-          .uiaRequestBackground(
-            (auth) => ref
-                .read(matrixClientProvider)
-                .add3PID(clientSecret, response.result!.sid, auth: auth),
-          ),
+      future: () => client.uiaRequestBackground(
+        (auth) =>
+            client.add3PID(clientSecret, response.result!.sid, auth: auth),
+      ),
     );
     if (success.error != null) return;
     setState(() => request = null);
