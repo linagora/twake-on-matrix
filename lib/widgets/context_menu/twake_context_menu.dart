@@ -82,6 +82,18 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   final GlobalKey _menuKey = GlobalKey();
   double? _menuWidth;
 
+  // showDialog wraps the menu in a SafeArea, so the Stack starts after it.
+  EdgeInsets get _safePadding =>
+      MediaQueryData.fromView(View.of(context)).padding;
+
+  double get _stackWidth =>
+      MediaQuery.sizeOf(context).width - _safePadding.horizontal;
+
+  double get _maxMenuWidth => min(
+    TwakeContextMenuStyle.menuMaxWidth,
+    _stackWidth - 2 * TwakeContextMenuStyle.menuScreenMargin,
+  );
+
   @override
   Widget build(BuildContext context) {
     final contextMenuPosition = _calculatePosition(widget.listActions);
@@ -143,9 +155,12 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                       child: Material(
                         color: TwakeContextMenuStyle.defaultMenuColor(context),
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: TwakeContextMenuStyle.menuMinWidth,
-                            maxWidth: TwakeContextMenuStyle.menuMaxWidth,
+                          constraints: BoxConstraints(
+                            minWidth: min(
+                              TwakeContextMenuStyle.menuMinWidth,
+                              _maxMenuWidth,
+                            ),
+                            maxWidth: _maxMenuWidth,
                           ),
                           child: IntrinsicWidth(
                             child: Padding(
@@ -233,15 +248,15 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
       positionBottom = 0;
     }
 
-    final double positionLeftTap = widget.position.dx;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double positionLeftTap = widget.position.dx - _safePadding.left;
+    final double screenWidth = _stackWidth;
     final double availableRightSpace = screenWidth - positionLeftTap;
     double? positionLeft;
     double? positionRight;
     Alignment alignment = Alignment.topLeft;
 
     const margin = TwakeContextMenuStyle.menuScreenMargin;
-    final menuWidth = _menuWidth ?? TwakeContextMenuStyle.menuMaxWidth;
+    final menuWidth = _menuWidth ?? _maxMenuWidth;
     final maxOffset = max(margin, screenWidth - menuWidth - margin);
 
     if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth &&
