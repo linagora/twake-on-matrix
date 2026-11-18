@@ -38,6 +38,9 @@ Future<void> _pump(
   );
 }
 
+// A hidden arrow keeps its place: only a visible one takes a tap.
+Finder _arrow(String tooltip) => find.byTooltip(tooltip).hitTestable();
+
 RoomListFilter _selected() => _container.read(roomListFilterControllerProvider);
 
 void _roomListFilterBarTests() {
@@ -103,7 +106,9 @@ void _roomListFilterBarTests() {
 
 void _roomListFilterBarOverflowTests() {
   group('RoomListFilterBar', () {
-    testWidgets('whenTheRowOverflows_showsLabelledArrows', (tester) async {
+    testWidgets('whenTheRowOverflows_showsOnlyTheNextArrowAtTheStart', (
+      tester,
+    ) async {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
@@ -113,8 +118,52 @@ void _roomListFilterBarOverflowTests() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.byTooltip('Previous'), findsOneWidget);
-      expect(find.byTooltip('Next'), findsOneWidget);
+      expect(_arrow('Previous'), findsNothing);
+      expect(_arrow('Next'), findsOneWidget);
+    });
+
+    testWidgets('whenScrolled_showsOnlyTheArrowsThatCanStillScroll', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, [
+        for (var i = 0; i < 8; i++) Folder.user('Folder number $i'),
+      ]);
+      await tester.pump();
+      await tester.pump();
+      final chipsLeft = tester.getTopLeft(
+        find.byKey(const ValueKey('room_list_filter_chips')),
+      );
+
+      await tester.tap(_arrow('Next'));
+      await tester.pumpAndSettle();
+
+      expect(_arrow('Previous'), findsOneWidget);
+      expect(_arrow('Next'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('room_list_filter_chips'))),
+        chipsLeft,
+      );
+
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+      // The lazy list finds its true end while it lays the chips out.
+      while (position.pixels < position.maxScrollExtent) {
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+      }
+
+      expect(_arrow('Previous'), findsOneWidget);
+      expect(_arrow('Next'), findsNothing);
+
+      position.jumpTo(0);
+      await tester.pumpAndSettle();
+
+      expect(_arrow('Previous'), findsNothing);
+      expect(_arrow('Next'), findsOneWidget);
     });
 
     testWidgets('whenNameIsVeryLong_capsTheChipWidth', (tester) async {

@@ -25,6 +25,8 @@ class RoomListFilterBar extends ConsumerStatefulWidget {
 class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   final _scrollController = ScrollController();
   bool _overflows = false;
+  bool _canScrollBack = false;
+  bool _canScrollForward = false;
 
   @override
   void dispose() {
@@ -42,12 +44,27 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
     );
   }
 
-  bool _onMetrics(ScrollMetricsNotification notification) {
-    final overflows = notification.metrics.maxScrollExtent > 0;
-    if (overflows != _overflows) {
-      // The notification comes from layout: wait for the frame to end.
+  bool _onScroll(Notification notification) {
+    final metrics = switch (notification) {
+      ScrollMetricsNotification(:final metrics) => metrics,
+      ScrollNotification(:final metrics) => metrics,
+      _ => null,
+    };
+    if (metrics == null) return false;
+    final overflows = metrics.maxScrollExtent > metrics.minScrollExtent;
+    final canScrollBack = metrics.pixels > metrics.minScrollExtent;
+    final canScrollForward = metrics.pixels < metrics.maxScrollExtent;
+    if (overflows != _overflows ||
+        canScrollBack != _canScrollBack ||
+        canScrollForward != _canScrollForward) {
+      // The notification may come from layout: wait for the frame to end.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) setState(() => _overflows = overflows);
+        if (!mounted) return;
+        setState(() {
+          _overflows = overflows;
+          _canScrollBack = canScrollBack;
+          _canScrollForward = canScrollForward;
+        });
       });
     }
     return false;
@@ -69,6 +86,7 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
             _ScrollArrow(
               icon: Icons.chevron_left,
               tooltip: l10n.previous,
+              visible: _canScrollBack,
               onPressed: () => _scrollBy(-RoomListFilterStyle.scrollStep),
             ),
           Expanded(
@@ -76,8 +94,8 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
             key: const ValueKey('room_list_filter_chips'),
             child: Semantics(
               label: l10n.roomListFilters,
-              child: NotificationListener<ScrollMetricsNotification>(
-                onNotification: _onMetrics,
+              child: NotificationListener<Notification>(
+                onNotification: _onScroll,
                 child: ListView(
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
@@ -116,6 +134,7 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
             _ScrollArrow(
               icon: Icons.chevron_right,
               tooltip: l10n.next,
+              visible: _canScrollForward,
               onPressed: () => _scrollBy(RoomListFilterStyle.scrollStep),
             ),
         ],
@@ -128,20 +147,29 @@ class _ScrollArrow extends StatelessWidget {
   const _ScrollArrow({
     required this.icon,
     required this.tooltip,
+    required this.visible,
     required this.onPressed,
   });
 
   final IconData icon;
   final String tooltip;
+  final bool visible;
   final VoidCallback onPressed;
 
+  // A hidden arrow keeps its place: the chips must not shift under the finger.
   @override
-  Widget build(BuildContext context) => LinagoraIconButton(
-    icon: icon,
-    iconSize: RoomListFilterStyle.arrowSize,
-    padding: EdgeInsets.zero,
-    tooltip: tooltip,
-    onPressed: onPressed,
+  Widget build(BuildContext context) => Visibility(
+    visible: visible,
+    maintainState: true,
+    maintainAnimation: true,
+    maintainSize: true,
+    child: LinagoraIconButton(
+      icon: icon,
+      iconSize: RoomListFilterStyle.arrowSize,
+      padding: EdgeInsets.zero,
+      tooltip: tooltip,
+      onPressed: onPressed,
+    ),
   );
 }
 
