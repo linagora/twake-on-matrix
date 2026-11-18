@@ -45,12 +45,13 @@ class _FakeMatrix extends Fake implements MatrixState {
       '_FakeMatrix';
 }
 
-void main() {
-  setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
+/// Drives the real [Settings] screen on top of the fakes above.
+class _SettingsScreen {
+  const _SettingsScreen(this.tester);
 
-  tearDown(() => GetIt.instance.reset());
+  final WidgetTester tester;
 
-  Future<void> pumpSettings(WidgetTester tester, Client client) async {
+  Future<void> pump(Client client) async {
     await tester.pumpWidget(
       ProviderScope(
         child: Provider<MatrixState>.value(
@@ -73,11 +74,10 @@ void main() {
   /// The check is an `async void`: its error reaches the zone that starts it,
   /// so that zone records what it throws. The completer is created in the same
   /// zone, because an error does not cross into another error zone.
-  Future<({Completer<void> accountData, List<Object> errors})> startHeldCheck(
-    WidgetTester tester,
-  ) async {
+  Future<({Completer<void> accountData, List<Object> errors})>
+  startHeldCheck() async {
     final client = _FakeClient();
-    await pumpSettings(tester, client);
+    await pump(client);
     await tester.pump();
 
     late final Completer<void> accountData;
@@ -90,18 +90,24 @@ void main() {
     return (accountData: accountData, errors: errors);
   }
 
-  void expectSwitchOffAndNoLoadingTile(WidgetTester tester) {
+  void expectSwitchOffAndNoLoadingTile() {
     expect(
       tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
       isFalse,
     );
     expect(find.byType(CircularProgressIndicator), findsNothing);
   }
+}
+
+void main() {
+  setUp(() => GetIt.instance.registerSingleton(ResponsiveUtils()));
+
+  tearDown(() => GetIt.instance.reset());
 
   testWidgets('the loading tile shows until the backup check has run', (
     tester,
   ) async {
-    await pumpSettings(tester, _FakeClient());
+    await _SettingsScreen(tester).pump(_FakeClient());
 
     expect(find.byType(SwitchListTile), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -112,18 +118,18 @@ void main() {
   testWidgets('encryption disabled: the check ends, the switch is off', (
     tester,
   ) async {
-    await pumpSettings(tester, _FakeClient());
+    await _SettingsScreen(tester).pump(_FakeClient());
     await tester.pump();
     await tester.pump();
 
-    expectSwitchOffAndNoLoadingTile(tester);
+    _SettingsScreen(tester).expectSwitchOffAndNoLoadingTile();
   });
 
   testWidgets('the check fails: the error surfaces, the switch is off', (
     tester,
   ) async {
     final error = StateError('account data');
-    final check = await startHeldCheck(tester);
+    final check = await _SettingsScreen(tester).startHeldCheck();
     await tester.pump();
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
@@ -131,13 +137,13 @@ void main() {
     await tester.pump();
 
     expect(check.errors, [error]);
-    expectSwitchOffAndNoLoadingTile(tester);
+    _SettingsScreen(tester).expectSwitchOffAndNoLoadingTile();
   });
 
   testWidgets('the screen is disposed during the check: only the error of '
       'the check surfaces', (tester) async {
     final error = StateError('account data');
-    final check = await startHeldCheck(tester);
+    final check = await _SettingsScreen(tester).startHeldCheck();
 
     await tester.pumpWidget(const SizedBox());
     check.accountData.completeError(error);

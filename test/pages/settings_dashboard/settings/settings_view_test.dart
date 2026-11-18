@@ -69,17 +69,14 @@ class _FakeController extends Fake implements SettingsController {
       '_FakeController';
 }
 
-void main() {
-  late _FakeController controller;
+/// Pumps [SettingsView] over a fake controller and reads what it shows.
+class _SettingsViewScreen {
+  const _SettingsViewScreen(this.tester, this.controller);
 
-  setUp(() {
-    GetIt.instance.registerSingleton(ResponsiveUtils());
-    controller = _FakeController();
-  });
+  final WidgetTester tester;
+  final _FakeController controller;
 
-  tearDown(() => GetIt.instance.reset());
-
-  Future<void> pumpView(WidgetTester tester) async {
+  Future<void> pump() async {
     await tester.pumpWidget(
       Provider<MatrixState>.value(
         value: controller.matrix,
@@ -94,13 +91,26 @@ void main() {
     await tester.pump();
   }
 
-  String? avatarName(WidgetTester tester) =>
-      tester.widget<Avatar>(find.byType(Avatar)).name;
+  String? get avatarName => tester.widget<Avatar>(find.byType(Avatar)).name;
+
+  bool get backupSwitchValue =>
+      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value;
+}
+
+void main() {
+  late _FakeController controller;
+
+  setUp(() {
+    GetIt.instance.registerSingleton(ResponsiveUtils());
+    controller = _FakeController();
+  });
+
+  tearDown(() => GetIt.instance.reset());
 
   testWidgets('backup state not known yet: a loading tile, no switch', (
     tester,
   ) async {
-    await pumpView(tester);
+    await _SettingsViewScreen(tester, controller).pump();
 
     expect(find.byType(SwitchListTile), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -109,50 +119,44 @@ void main() {
   testWidgets('backup check ended without a result: the switch is off', (
     tester,
   ) async {
-    await pumpView(tester);
+    await _SettingsViewScreen(tester, controller).pump();
 
     controller.backupStateLoading.value = false;
     await tester.pump();
 
-    expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
-      isFalse,
-    );
+    expect(_SettingsViewScreen(tester, controller).backupSwitchValue, isFalse);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('backup state known: the switch replaces the loading tile', (
     tester,
   ) async {
-    await pumpView(tester);
+    await _SettingsViewScreen(tester, controller).pump();
 
     controller.showChatBackupSwitch.value = false;
     await tester.pump();
 
-    expect(
-      tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value,
-      isTrue,
-    );
+    expect(_SettingsViewScreen(tester, controller).backupSwitchValue, isTrue);
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('profile not loaded yet: the avatar uses the fallback name', (
     tester,
   ) async {
-    await pumpView(tester);
+    await _SettingsViewScreen(tester, controller).pump();
 
-    expect(avatarName(tester), 'alice');
+    expect(_SettingsViewScreen(tester, controller).avatarName, 'alice');
   });
 
   testWidgets('display name loaded without a picture: the avatar follows it', (
     tester,
   ) async {
-    await pumpView(tester);
+    await _SettingsViewScreen(tester, controller).pump();
 
     controller.displayNameNotifier.value = 'Alice Martin';
     await tester.pump();
 
-    expect(avatarName(tester), 'Alice Martin');
+    expect(_SettingsViewScreen(tester, controller).avatarName, 'Alice Martin');
     expect(find.text('Alice Martin'), findsOneWidget);
   });
 }
