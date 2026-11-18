@@ -1762,12 +1762,7 @@ class MatrixState extends ConsumerState<Matrix>
 
   Future<void> _coveredRoutesUnmounted() async {
     await SchedulerBinding.instance.endOfFrame;
-    Route<dynamic>? top;
-    TwakeApp.routerKey.currentState?.popUntil((route) {
-      top = route;
-      return true;
-    });
-    final entering = top;
+    final entering = _topRoute();
     final animation = entering is TransitionRoute ? entering.animation : null;
     if (animation != null && !animation.isCompleted) {
       final settled = Completer<void>();
@@ -1784,6 +1779,16 @@ class MatrixState extends ConsumerState<Matrix>
     }
     // Covered routes unmount on the frame after the entering one turns opaque.
     await SchedulerBinding.instance.endOfFrame;
+  }
+
+  /// `popUntil` with a predicate that is true at once pops nothing.
+  Route<dynamic>? _topRoute() {
+    Route<dynamic>? top;
+    TwakeApp.routerKey.currentState?.popUntil((route) {
+      top = route;
+      return true;
+    });
+    return top;
   }
 
   Future<void> _handleLastLogout({required Client loggedOut}) async {
