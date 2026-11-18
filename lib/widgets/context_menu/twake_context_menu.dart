@@ -1,4 +1,6 @@
 // reference to: https://pub.dev/packages/contextmenu
+import 'dart:math';
+
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action_item_widget.dart';
@@ -65,6 +67,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _animationController.forward();
+      final width = _menuKey.currentContext?.size?.width;
+      if (mounted && width != null) setState(() => _menuWidth = width);
     });
   }
 
@@ -75,6 +79,8 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
   }
 
   final Map<ValueKey, double> _heights = {};
+  final GlobalKey _menuKey = GlobalKey();
+  double? _menuWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +128,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
                     );
                   },
                   child: Card(
+                    key: _menuKey,
                     elevation: TwakeContextMenuStyle.menuElevation,
                     margin: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
@@ -233,12 +240,16 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     double? positionRight;
     Alignment alignment = Alignment.topLeft;
 
+    const margin = TwakeContextMenuStyle.menuScreenMargin;
+    final menuWidth = _menuWidth ?? TwakeContextMenuStyle.menuMaxWidth;
+    final maxOffset = max(margin, screenWidth - menuWidth - margin);
+
     if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth &&
         !widget.respectLeftPosition) {
-      positionRight = screenWidth - positionLeftTap;
+      positionRight = (screenWidth - positionLeftTap).clamp(margin, maxOffset);
       alignment = Alignment.topRight;
     } else {
-      positionLeft = positionLeftTap;
+      positionLeft = positionLeftTap.clamp(margin, maxOffset);
     }
 
     return ContextMenuPosition(
