@@ -12,6 +12,12 @@ class SettingsFoldersStyle {
   static const double swatchRingWidth = 2;
   static const double swatchIconSize = 18;
   static const double tintAlpha = 0.3;
+  static const double badgeSize = 40;
+  static const double deleteIconSize = 20;
+  static const double deleteTapSize = 40;
+  static const EdgeInsets deletePadding = EdgeInsets.all(
+    (deleteTapSize - deleteIconSize) / 2,
+  );
 
   /// What React caps a folder name at.
   static const int maxNameLength = 60;
@@ -33,6 +39,11 @@ class SettingsFoldersStyle {
   static const EdgeInsets checkRowPadding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base * 2,
     vertical: LinagoraSpacing.base * 1.5,
+  );
+
+  /// The delete icon, not its tap target, ends on the right edge.
+  static EdgeInsets get folderRowPadding => checkRowPadding.copyWith(
+    right: checkRowPadding.right - deletePadding.right,
   );
   static const EdgeInsets blockPadding = EdgeInsets.symmetric(
     horizontal: LinagoraSpacing.base * 2,
