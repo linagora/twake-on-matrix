@@ -113,8 +113,12 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
   /// self-signing key in cache.
   bool encryptedPreviewsLocked = false;
 
+  /// Encrypted rooms never show content in notifications anymore: the tile
+  /// only lets users who already have a dedicated device remove it.
   bool get showEncryptedPreviewsTile =>
-      PlatformInfos.isIOS && _ssoProviderId != null;
+      PlatformInfos.isIOS &&
+      _ssoProviderId != null &&
+      encryptedPreviewsActive == true;
 
   @override
   void initState() {
