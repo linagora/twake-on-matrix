@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twake_chat/domain/spaces/folders.dart';
@@ -40,6 +41,9 @@ Future<void> _pump(
 
 // A hidden arrow keeps its place: only a visible one takes a tap.
 Finder _arrow(String tooltip) => find.byTooltip(tooltip).hitTestable();
+
+FinderBase<SemanticsNode> _arrowSemantics(String tooltip) =>
+    find.semantics.byPredicate((node) => node.tooltip == tooltip);
 
 RoomListFilter _selected() => _container.read(roomListFilterControllerProvider);
 
@@ -112,6 +116,7 @@ void _roomListFilterBarOverflowTests() {
       tester.view.physicalSize = const Size(360, 800);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
+      final semantics = tester.ensureSemantics();
       await _pump(tester, [
         for (var i = 0; i < 8; i++) Folder.user('Folder number $i'),
       ]);
@@ -120,6 +125,9 @@ void _roomListFilterBarOverflowTests() {
 
       expect(_arrow('Previous'), findsNothing);
       expect(_arrow('Next'), findsOneWidget);
+      expect(_arrowSemantics('Previous'), findsNothing);
+      expect(_arrowSemantics('Next'), findsOneWidget);
+      semantics.dispose();
     });
 
     testWidgets('whenScrolled_showsOnlyTheArrowsThatCanStillScroll', (
@@ -159,6 +167,29 @@ void _roomListFilterBarOverflowTests() {
       expect(_arrow('Previous'), findsOneWidget);
       expect(_arrow('Next'), findsNothing);
 
+      position.jumpTo(0);
+      await tester.pumpAndSettle();
+
+      expect(_arrow('Previous'), findsNothing);
+      expect(_arrow('Next'), findsOneWidget);
+    });
+
+    testWidgets('whenScrolledAndBackInOneFrame_keepsPreviousHidden', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await _pump(tester, [
+        for (var i = 0; i < 8; i++) Folder.user('Folder number $i'),
+      ]);
+      await tester.pump();
+      await tester.pump();
+      final position = tester
+          .state<ScrollableState>(find.byType(Scrollable))
+          .position;
+
+      position.jumpTo(20);
       position.jumpTo(0);
       await tester.pumpAndSettle();
 

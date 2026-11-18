@@ -27,6 +27,7 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   bool _overflows = false;
   bool _canScrollBack = false;
   bool _canScrollForward = false;
+  bool _arrowsUpdatePending = false;
 
   @override
   void dispose() {
@@ -45,29 +46,36 @@ class _RoomListFilterBarState extends ConsumerState<RoomListFilterBar> {
   }
 
   bool _onScroll(Notification notification) {
-    final metrics = switch (notification) {
-      ScrollMetricsNotification(:final metrics) => metrics,
-      ScrollNotification(:final metrics) => metrics,
-      _ => null,
-    };
-    if (metrics == null) return false;
-    final overflows = metrics.maxScrollExtent > metrics.minScrollExtent;
-    final canScrollBack = metrics.pixels > metrics.minScrollExtent;
-    final canScrollForward = metrics.pixels < metrics.maxScrollExtent;
-    if (overflows != _overflows ||
-        canScrollBack != _canScrollBack ||
-        canScrollForward != _canScrollForward) {
-      // The notification may come from layout: wait for the frame to end.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        setState(() {
-          _overflows = overflows;
-          _canScrollBack = canScrollBack;
-          _canScrollForward = canScrollForward;
-        });
-      });
+    if (notification is! ScrollMetricsNotification &&
+        notification is! ScrollNotification) {
+      return false;
     }
+    if (_arrowsUpdatePending) return false;
+    _arrowsUpdatePending = true;
+    // The notification may come from layout: read the position once it ends.
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) => _updateArrows())
+      ..ensureVisualUpdate();
     return false;
+  }
+
+  void _updateArrows() {
+    _arrowsUpdatePending = false;
+    if (!mounted || !_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    final overflows = position.maxScrollExtent > position.minScrollExtent;
+    final canScrollBack = position.pixels > position.minScrollExtent;
+    final canScrollForward = position.pixels < position.maxScrollExtent;
+    if (overflows == _overflows &&
+        canScrollBack == _canScrollBack &&
+        canScrollForward == _canScrollForward) {
+      return;
+    }
+    setState(() {
+      _overflows = overflows;
+      _canScrollBack = canScrollBack;
+      _canScrollForward = canScrollForward;
+    });
   }
 
   void _select(RoomListFilter view) =>
