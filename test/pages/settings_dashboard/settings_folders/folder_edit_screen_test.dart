@@ -216,7 +216,39 @@ void _folderEditScreenChatsTests() {
       await tester.pump();
       await _loadFolders(tester, const []);
 
-      expect(find.byType(Checkbox).evaluate().length, lessThan(100));
+      final chatRows = find.byWidgetPredicate(
+        (widget) => '${widget.key}'.contains('folder_chat_!r'),
+      );
+      expect(find.byKey(const ValueKey('folder_chat_!r0')), findsOneWidget);
+      expect(chatRows.evaluate().length, lessThan(100));
+    });
+
+    testWidgets('whenTheKeyboardIsOpen_keepsSaveAboveIt', (tester) async {
+      await _pump(tester, const FolderEditScreen());
+      await tester.pump();
+      await _loadFolders(tester, const []);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 600);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pump();
+
+      expect(
+        tester.getBottomLeft(find.byKey(const ValueKey('folder_save'))).dy,
+        lessThanOrEqualTo(1400 - 600),
+      );
+    });
+
+    testWidgets('whenNoColourIsSelected_keepsItsCross', (tester) async {
+      await _pump(tester, const FolderEditScreen());
+      await tester.pump();
+      await _loadFolders(tester, const []);
+
+      expect(
+        find.descendant(
+          of: find.byTooltip('No colour'),
+          matching: find.byIcon(Icons.format_color_reset_outlined),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('whenThereAreManyChats_keepsSaveOnScreen', (tester) async {

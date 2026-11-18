@@ -52,7 +52,7 @@ class FolderCheckRow extends StatelessWidget {
                       Text(
                         subtitle,
                         style: SettingsFoldersStyle.helpText,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                   ],
@@ -60,11 +60,14 @@ class FolderCheckRow extends StatelessWidget {
               ),
               SizedBox.square(
                 dimension: SettingsFoldersStyle.checkboxSize,
-                child: Checkbox(
-                  value: isChecked,
-                  onChanged: (isOn) => onChanged(isOn ?? false),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
+                // The row takes the focus, so Tab stops once per row.
+                child: ExcludeFocus(
+                  child: Checkbox(
+                    value: isChecked,
+                    onChanged: (isOn) => onChanged(isOn ?? false),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ),
             ],

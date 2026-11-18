@@ -301,30 +301,38 @@ class _FormScaffoldState extends State<_FormScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _formAppBar(context, widget.title),
-      body: CustomScrollView(
-        slivers: [
-          SliverList.list(children: widget.children),
-          if (widget.rowBuilder case final rowBuilder?)
-            SliverList.builder(
-              itemCount: widget.rowCount,
-              itemBuilder: rowBuilder,
+      // Save sits in the body, so it stays above the keyboard and is
+      // reachable however many chats the list holds.
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverList.list(children: widget.children),
+                if (widget.rowBuilder case final rowBuilder?)
+                  SliverList.builder(
+                    itemCount: widget.rowCount,
+                    itemBuilder: rowBuilder,
+                  ),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: SettingsFoldersStyle.sectionGap),
+                ),
+              ],
             ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: SettingsFoldersStyle.sectionGap),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: SettingsFoldersStyle.rowPadding,
+              child: LinagoraButton(
+                key: const ValueKey('folder_save'),
+                label: L10n.of(context)!.save,
+                width: double.infinity,
+                onPressed: _isSaving ? null : _save,
+              ),
+            ),
           ),
         ],
-      ),
-      // Reachable however many chats the list holds.
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: SettingsFoldersStyle.rowPadding,
-          child: LinagoraButton(
-            key: const ValueKey('folder_save'),
-            label: L10n.of(context)!.save,
-            width: double.infinity,
-            onPressed: _isSaving ? null : _save,
-          ),
-        ),
       ),
     );
   }
@@ -393,9 +401,11 @@ class _LooksFields extends StatelessWidget {
           ),
         ),
         LinagoraSectionHeader(label: l10n.folderColor.toUpperCase()),
-        Padding(
+        // One row; it scrolls on a phone too narrow for the nine swatches.
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           padding: SettingsFoldersStyle.blockPadding,
-          child: Wrap(
+          child: Row(
             children: [
               FolderColorSwatch(
                 tooltip: l10n.folderNoColor,

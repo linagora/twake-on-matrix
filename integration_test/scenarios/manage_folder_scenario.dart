@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:linagora_design_flutter/linagora_design_flutter.dart';
 import 'package:twake_chat/pages/chat_list/room_list_filter/room_list_filter_bar.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings_folders/folders_screen.dart';
 import 'package:twake_chat/presentation/enum/settings/settings_enum.dart';
@@ -68,11 +67,10 @@ class ManageFolderScenario extends BaseTestScenario {
     await _scrollToFolder(name);
     await $(
       find.descendant(
-        of: find.ancestor(
-          of: find.text(name),
-          matching: find.byType(LinagoraSettingItem),
-        ),
-        matching: find.byTooltip('Delete folder'),
+        of: find
+            .ancestor(of: find.text(name), matching: find.byType(InkWell))
+            .first,
+        matching: find.byKey(const ValueKey('folder_delete')),
       ),
     ).tap();
     await $('Delete').tap();
