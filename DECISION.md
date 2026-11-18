@@ -485,7 +485,7 @@ These three components are local to the app, built from the design system
 tokens: the design runs ahead of the design system, and they are specific to
 Chat. They move to linagora-design-flutter once the designers adopt them.
 
-## D28. The folder screens follow one layout (decided by Johann, 2026-11-18)
+## D28. The folder screens follow one layout (proposed by Johann, 2026-11-18)
 
 Status: proposed, pending the designer's review.
 
