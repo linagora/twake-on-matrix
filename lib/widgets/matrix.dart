@@ -318,15 +318,14 @@ class MatrixState extends ConsumerState<Matrix>
     _cancelSupportChat();
     Object createSupportChatState = CreateSupportChatInitial();
     supportChatRoomId = null;
+    // Read now: another account's switch may replace the summary before the first sync.
+    final discovery = loginHomeserverSummary?.discoveryInformation;
     _supportChatSyncSubscription = client.onSync.stream.listen((_) {
       if (createSupportChatState is! CreateSupportChatInitial) return;
       createSupportChatState = CreatingSupportChat();
       _supportChatSubscription = getIt
           .get<CreateSupportChatInteractor>()
-          .execute(
-            client,
-            cachedDiscovery: loginHomeserverSummary?.discoveryInformation,
-          )
+          .execute(client, cachedDiscovery: discovery)
           .listen((state) {
             createSupportChatState = state.fold(
               (failure) => failure,
