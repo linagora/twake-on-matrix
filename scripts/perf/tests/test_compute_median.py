@@ -234,20 +234,27 @@ class ComputeMedianTest(unittest.TestCase):
             )
 
         output = self.directory / "median.json"
-        compute_median(
-            self.logs,
-            str(output),
-            expected_samples=3,
-            requirements={
-                ("scroll_room1", "scroll_settled"): {"rss_bytes"},
-            },
-        )
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            compute_median(
+                self.logs,
+                str(output),
+                expected_samples=3,
+                requirements={
+                    ("scroll_room1", "scroll_settled"): {"rss_bytes"},
+                },
+            )
 
         checkpoint = json.loads(output.read_text(encoding="utf-8"))[0]
         self.assertEqual(checkpoint["sample_count"], 3)
         self.assertEqual(checkpoint["rss_bytes"], 100.0)
         self.assertNotIn("build_p50_us", checkpoint)
         self.assertNotIn("build_p50_us_sample_count", checkpoint)
+        self.assertIn(
+            "WARNING: dropped excluded metric"
+            " scroll_room1/scroll_settled/build_p50_us (1/3 samples)",
+            stderr.getvalue(),
+        )
 
     def test_expected_samples_keeps_excluded_metric_in_every_sample(self) -> None:
         for path in self.logs:

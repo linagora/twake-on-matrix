@@ -212,12 +212,19 @@ def _drop_partial_excluded_metrics(
     """Omit partial excluded metrics: update_history.py requires one sample per run."""
     if requirements is None:
         return groups
-    return {
-        (scenario, label, metric): samples
-        for (scenario, label, metric), samples in groups.items()
-        if len(samples) >= expected_samples
-        or metric in requirements.get((scenario, label), {metric})
-    }
+    kept = {}
+    for (scenario, label, metric), samples in groups.items():
+        if len(samples) >= expected_samples or metric in requirements.get(
+            (scenario, label), {metric}
+        ):
+            kept[(scenario, label, metric)] = samples
+        else:
+            print(
+                f"WARNING: dropped excluded metric {scenario}/{label}/{metric}"
+                f" ({len(samples)}/{expected_samples} samples)",
+                file=sys.stderr,
+            )
+    return kept
 
 
 def _validate_sample_count(
