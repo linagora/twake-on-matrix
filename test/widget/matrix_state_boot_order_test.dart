@@ -78,7 +78,6 @@ class _WatchedController<T> extends CachedStreamController<T> {
   }
 }
 
-/// A client with the streams and the http client `MatrixState` opens at boot.
 class _CountingToMDatabase implements HiveCollectionToMDatabase {
   int clears = 0;
 
@@ -89,6 +88,7 @@ class _CountingToMDatabase implements HiveCollectionToMDatabase {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// A client with the streams and the http client `MatrixState` opens at boot.
 class _BootClient extends FakeAccountClient {
   _BootClient(super.clientName, {super.userID});
 
