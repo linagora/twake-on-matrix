@@ -99,6 +99,79 @@ void main() {
     });
   });
 
+  group('ClientManager.receivingFromPush', () {
+    final sender = FakeAccountClient('sender', userID: '@sender:s');
+    final receiver = FakeAccountClient('receiver', userID: '@receiver:s');
+    final held = [sender, receiver];
+
+    test('a push holding receiver_id names its account', () {
+      final push = <Object?, Object?>{
+        'room_id': '!room:s',
+        'event_id': r'$event',
+        'receiver_id': '@receiver:s',
+      };
+
+      expect(ClientManager.receivingFromPush(held, push), same(receiver));
+    });
+
+    test('a push holding only the pusher identifier names its account', () {
+      final push = <Object?, Object?>{
+        'room_id': '!room:s',
+        'event_id': r'$event',
+        'pusher_notification_client_identifier': '@receiver:s'.sha256Hash,
+      };
+
+      expect(ClientManager.receivingFromPush(held, push), same(receiver));
+    });
+
+    test('a push naming no held account: nothing is returned', () {
+      final push = <Object?, Object?>{
+        'room_id': '!room:s',
+        'receiver_id': '@other:s',
+        'pusher_notification_client_identifier': '@other:s'.sha256Hash,
+      };
+
+      expect(ClientManager.receivingFromPush(held, push), isNull);
+      expect(
+        ClientManager.receivingFromPush(held, {'room_id': '!room:s'}),
+        isNull,
+      );
+    });
+
+    test('a message that is no map names no account', () {
+      expect(ClientManager.receivingFromPush(held, 'payload'), isNull);
+      expect(ClientManager.receivingFromPush(held, null), isNull);
+    });
+
+    test('a key that is no string names no account', () {
+      final push = <Object?, Object?>{'receiver_id': 42};
+
+      expect(ClientManager.receivingFromPush(held, push), isNull);
+    });
+  });
+
+  group('ClientManager.accountLabel', () {
+    final sender = FakeAccountClient('sender', userID: '@sender:s');
+    final receiver = FakeAccountClient('receiver', userID: '@receiver:s');
+
+    test('a single account shows no label', () {
+      expect(ClientManager.accountLabel(receiver, [receiver]), isNull);
+    });
+
+    test('several accounts show the receiving one', () {
+      expect(
+        ClientManager.accountLabel(receiver, [sender, receiver]),
+        '@receiver:s',
+      );
+    });
+
+    test('a logged-out account does not count', () {
+      final gone = FakeAccountClient('gone', userID: '@gone:s', logged: false);
+
+      expect(ClientManager.accountLabel(receiver, [gone, receiver]), isNull);
+    });
+  });
+
   group('ClientManager.firstLoggedIn', () {
     test('skips a logged-out client and returns the logged-in one', () async {
       final loggedIn = await getClient();

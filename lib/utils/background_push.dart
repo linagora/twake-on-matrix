@@ -436,11 +436,15 @@ class BackgroundPush {
     return instance;
   }
 
-  Future<void> cancelNotification(String roomId) async {
+  /// Cancels the notification of [roomId] for the account [userId] (the
+  /// push client's when null); another account's one for the room stays.
+  Future<void> cancelNotification(String roomId, {String? userId}) async {
     Logs().v('Cancel notification for room', roomId);
     await _loadIdMap();
-    final id = idMap[roomId];
-    if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
+    for (final key in notificationIdKeys(userId ?? client.userID, roomId)) {
+      final id = idMap[key];
+      if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
+    }
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -743,29 +747,26 @@ class BackgroundPush {
     _matrixState?.currentClients.whereType<Client>() ?? const [],
   );
 
-  /// The client of the account the push names: the NSE sets `receiver_id`
-  /// and the pusher sends `pusher_notification_client_identifier` (iOS only).
-  /// Without them, [_pushClient] serves the push.
-  Client _receivingClient(dynamic message) {
-    String? field(String key) {
-      final value = message is Map ? message[key] : null;
-      return value is String ? value : null;
-    }
-
-    final receiver = ClientManager.receiving(
-      _matrixState?.currentClients.whereType<Client>() ?? const [],
-      userId: field('receiver_id'),
-      pusherIdentifier: field('pusher_notification_client_identifier'),
-    );
-    return receiver ?? _pushClient;
-  }
+  /// The client of the account the push names; without one, [_pushClient]
+  /// serves the push.
+  Client _receivingClient(dynamic message) =>
+      ClientManager.receivingFromPush(
+        _matrixState?.currentClients.whereType<Client>() ?? const [],
+        message,
+      ) ??
+      _pushClient;
 
   void onReceiveNotification(dynamic message) {
     Logs().d('BackgroundPush::onReceiveNotification(): Message $message}');
     final notification = _parseMessagePayload(message);
+    final receiving = _receivingClient(message);
     pushHelper(
       notification,
-      client: _receivingClient(message),
+      client: receiving,
+      accountLabel: ClientManager.accountLabel(
+        receiving,
+        _matrixState?.currentClients.whereType<Client>() ?? const [],
+      ),
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
       onSelectNotification: (data) =>
@@ -994,18 +995,19 @@ class BackgroundPush {
             .map((r) => r.id);
       }
       await _loadIdMap();
-      final clearedRoomIds = <String>{};
+      final clearedKeys = <String>{};
       for (final roomId in emptyRooms) {
-        final id = idMap[roomId];
-        if (id != null) {
-          clearedRoomIds.add(roomId);
+        for (final key in notificationIdKeys(client.userID, roomId)) {
+          final id = idMap[key];
+          if (id == null) continue;
+          clearedKeys.add(key);
           await _flutterLocalNotificationsPlugin.cancel(id);
         }
       }
-      if (clearedRoomIds.isNotEmpty) {
+      if (clearedKeys.isNotEmpty) {
         // Reload: a notification may have mapped a new room while cancelling.
         await _loadIdMap();
-        idMap.removeWhere((roomId, _) => clearedRoomIds.contains(roomId));
+        idMap.removeWhere((key, _) => clearedKeys.contains(key));
         await store.setItem(
           SettingKeys.notificationCurrentIds,
           json.encode(idMap),

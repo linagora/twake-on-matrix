@@ -91,6 +91,7 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
             
             guard itemProxy.hasMedia else {
                 MXLog.info("\(tag) no media needed")
+                labelAccount(userID: credentials.userID)
 
                 // We've processed the item and no media operations needed, so no need to go further
                 return notify()
@@ -109,7 +110,8 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
             if let unreadCount {
                 modifiedContent?.badge = NSNumber(value: unreadCount)
             }
-            
+            labelAccount(userID: credentials.userID)
+
             return notify()
         } catch {
             MXLog.error("NSE run error: \(error)")
@@ -117,6 +119,15 @@ class NotificationServiceExtension: UNNotificationServiceExtension {
         }
     }
     
+    /// With several accounts signed in, names the account the notification is for.
+    private func labelAccount(userID: String) {
+        guard let modifiedContent,
+              keychainController.restorationTokens().filter({ $0.restorationToken.dedicated == true }).count > 1 else {
+            return
+        }
+        modifiedContent.subtitle = modifiedContent.subtitle.isEmpty ? userID : "\(modifiedContent.subtitle) · \(userID)"
+    }
+
     private func notify() {
         MXLog.info("\(tag) notify")
 

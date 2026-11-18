@@ -112,6 +112,28 @@ abstract class ClientManager {
     }).firstOrNull;
   }
 
+  /// [receiving] for a raw push message: the iOS NSE sets `receiver_id` and
+  /// the iOS pusher sends `pusher_notification_client_identifier`. A message
+  /// that is no map, or holds neither key as a string, names no account.
+  static Client? receivingFromPush(Iterable<Client> held, Object? message) {
+    if (message is! Map) return null;
+    String? field(String key) {
+      final value = message[key];
+      return value is String ? value : null;
+    }
+
+    return receiving(
+      held,
+      userId: field('receiver_id'),
+      pusherIdentifier: field('pusher_notification_client_identifier'),
+    );
+  }
+
+  /// The account a notification is for, shown only while several accounts
+  /// are signed in.
+  static String? accountLabel(Client receiving, Iterable<Client> held) =>
+      loggedIn(held).length > 1 ? receiving.userID : null;
+
   /// Deletes what a client stored: its database and, for the SQLite one, the
   /// file.
   static Future<void> deleteClientStorage(DatabaseApi database) async {
