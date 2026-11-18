@@ -21,7 +21,9 @@ D17, D42, D170, D237, D286, D348, D354, D483, D542):
 - A space is no conversation: its row opens a card. A new one comes with an
   unencrypted `General` channel; a channel of a space is `restricted` to its members and
   goes away if the space refuses its `m.space.child`.
-- The list keeps its own order, a space at the place of its most recent room.
+- The list keeps its own order, a space at the place of its most recent room;
+  inside a space, pinned rooms come first (the spec lets a room list override
+  the order of children).
   The hierarchy of the card follows the spec's order of children.
 - Folders are the `app.twake.chat.folders` account data and `u.<name>` tags.
 
