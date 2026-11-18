@@ -93,6 +93,18 @@ void main() {
       expect(rect.right, 230);
     });
 
+    testWidgets('opens a narrow menu to the right of the tap when it fits', (
+      tester,
+    ) async {
+      final rect = await _openMenuAt(
+        tester,
+        const Offset(100, 200),
+        actions: const [ContextMenuAction(name: 'Edit')],
+      );
+
+      expect(rect.left, 100);
+    });
+
     testWidgets('stays inside the safe area in landscape', (tester) async {
       final rect = await _openMenuAt(
         tester,

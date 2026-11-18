@@ -259,7 +259,7 @@ class TwakeContextMenuState extends State<TwakeContextMenu>
     final menuWidth = _menuWidth ?? _maxMenuWidth;
     final maxOffset = max(margin, screenWidth - menuWidth - margin);
 
-    if (availableRightSpace < TwakeContextMenuStyle.menuMaxWidth &&
+    if (availableRightSpace < menuWidth + margin &&
         !widget.respectLeftPosition) {
       positionRight = (screenWidth - positionLeftTap).clamp(margin, maxOffset);
       alignment = Alignment.topRight;
