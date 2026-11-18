@@ -24,12 +24,13 @@ class SearchExternalContactWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(freshMatrixUserProfileProvider(keyword));
     return switch (profile) {
-      AsyncData(value: final profile?) => _buildContact(
-        PresentationContact(
+      AsyncData(value: final profile?) => _ExternalContactTile(
+        contact: PresentationContact(
           matrixId: keyword,
           displayName: profile.displayName ?? keyword.substring(1),
           type: ContactType.external,
         ),
+        searchController: searchController,
       ),
       AsyncLoading() => const Padding(
         padding: EdgeInsets.only(top: 48),
@@ -38,8 +39,19 @@ class SearchExternalContactWidget extends ConsumerWidget {
       _ => const EmptySearchWidget(),
     };
   }
+}
 
-  Widget _buildContact(PresentationContact contact) {
+class _ExternalContactTile extends StatelessWidget {
+  const _ExternalContactTile({
+    required this.contact,
+    required this.searchController,
+  });
+
+  final PresentationContact contact;
+  final SearchScreenState searchController;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: SearchExternalContactStyle.contentPadding,
       child: InkWell(

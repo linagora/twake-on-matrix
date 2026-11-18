@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.provider.dart';
 import 'package:twake_chat/pages/search/search_state.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
+import 'package:twake_chat/providers/report_failure_provider.dart';
 
 part 'search_controller.g.dart';
 
@@ -30,6 +31,13 @@ class SearchController extends _$SearchController {
       state = roomId == null
           ? SearchState.draft(matrixId: matrixId, displayName: displayName)
           : SearchState.room(roomId);
+    } catch (error, stackTrace) {
+      if (!ref.mounted) return;
+      ref.read(reportFailureProvider)(
+        error,
+        stackTrace,
+        'SearchController::openContact',
+      );
     } finally {
       if (ref.mounted && state is SearchOpening) {
         state = const SearchState.idle();

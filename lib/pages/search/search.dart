@@ -25,7 +25,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 import 'package:twake_chat/config/go_routes/app_routes.dart';
-import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 class Search extends ConsumerStatefulWidget {
@@ -126,14 +125,13 @@ class SearchScreenState extends ConsumerState<Search>
       case SearchRoom(:final roomId):
         RoomRoute(roomid: roomId).go(context);
       case SearchDraft(:final matrixId, :final displayName):
-        context.go(
-          '/rooms/draftChat',
-          extra: {
+        DraftChatRoute(
+          $extra: {
             PresentationContactConstant.receiverId: matrixId,
             PresentationContactConstant.displayName: displayName ?? '',
             PresentationContactConstant.status: '',
           },
-        );
+        ).go(context);
       case SearchIdle() || SearchOpening():
         break;
     }
@@ -207,6 +205,6 @@ class SearchScreenState extends ConsumerState<Search>
   @override
   Widget build(BuildContext context) {
     ref.listen(searchControllerProvider, _onStateChanged);
-    return SearchView(this);
+    return SearchView(this, client: ref.watch(matrixClientProvider));
   }
 }

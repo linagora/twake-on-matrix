@@ -133,6 +133,7 @@ void main() {
   }) async {
     await tester.pumpWidget(
       ProviderScope(
+        retry: (_, _) => null,
         overrides: [
           matrixProfileDatasourceProvider.overrideWithValue(profileDatasource),
         ],
@@ -170,39 +171,41 @@ void main() {
   }
 
   group('[SearchExternalContactWidget] TEST', () {
-    testWidgets('GIVEN the profile lookup is still loading\n'
-        'THEN should display CenterLoadingIndicator', (
+    testWidgets('build_whileTheProfileLoads_showsTheLoadingIndicator', (
       WidgetTester tester,
     ) async {
+      // Arrange
       profileDatasource.lookup = Completer<MatrixUserProfile?>();
 
+      // Act
       await buildWidget(tester, keyword: '@test:server.com');
       await tester.pump();
 
+      // Assert
       expect(find.byType(CenterLoadingIndicator), findsOneWidget);
       expect(find.byType(EmptySearchWidget), findsNothing);
     });
 
-    testWidgets('GIVEN the profile cannot be resolved\n'
-        'WHEN searching for @nonexistent:server.com\n'
-        'THEN should display EmptySearchWidget (No Results)', (
+    testWidgets('build_withAnUnknownMatrixId_showsNoResults', (
       WidgetTester tester,
     ) async {
+      // Arrange
       profileDatasource.lookup = Completer<MatrixUserProfile?>()..complete();
 
+      // Act
       await buildWidget(tester, keyword: '@nonexistent:server.com');
       await tester.pumpAndSettle();
 
+      // Assert
       expect(find.byType(EmptySearchWidget), findsOneWidget);
       expect(find.byType(CenterLoadingIndicator), findsNothing);
       expect(profileDatasource.freshLookups, ['@nonexistent:server.com']);
     });
 
-    testWidgets('GIVEN the profile resolves\n'
-        'WHEN searching for @validuser:server.com\n'
-        'THEN should display the contact tile with profile info', (
+    testWidgets('build_withAKnownMatrixId_showsTheContactTile', (
       WidgetTester tester,
     ) async {
+      // Arrange
       profileDatasource.lookup = Completer<MatrixUserProfile?>()
         ..complete(
           const MatrixUserProfile(
@@ -211,9 +214,11 @@ void main() {
           ),
         );
 
+      // Act
       await buildWidget(tester, keyword: '@validuser:server.com');
       await tester.pumpAndSettle();
 
+      // Assert
       expect(find.byType(EmptySearchWidget), findsNothing);
       expect(find.byType(CenterLoadingIndicator), findsNothing);
       expect(find.byType(ExpansionContactListTile), findsOneWidget);

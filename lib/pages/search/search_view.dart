@@ -14,11 +14,13 @@ import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
+import 'package:matrix/matrix.dart' show Client;
 
 class SearchView extends StatelessWidget {
   final SearchScreenState searchController;
+  final Client client;
 
-  const SearchView(this.searchController, {super.key});
+  const SearchView(this.searchController, {super.key, required this.client});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +156,7 @@ class SearchView extends StatelessWidget {
                     highlightKeyword:
                         searchController.textEditingController.text,
                     presentationSearch: contacts[index],
-                    client: searchController.client,
+                    client: client,
                     key: Key('chat_recent_${contacts[index].id}'),
                     onTap: () {
                       searchController.onSearchItemTap(contacts[index]);

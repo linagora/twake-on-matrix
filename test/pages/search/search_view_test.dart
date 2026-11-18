@@ -19,12 +19,15 @@ import 'package:twake_chat/presentation/model/search/presentation_search.dart';
 import 'package:twake_chat/presentation/model/search/presentation_server_side_empty_search.dart';
 import 'package:twake_chat/presentation/model/search/presentation_server_side_state.dart';
 
+import 'package:matrix/matrix.dart' show Client;
+
 import 'search_view_test.mocks.dart';
 
 @GenerateNiceMocks([
   MockSpec<SearchScreenState>(),
   MockSpec<ServerSearchController>(),
   MockSpec<SearchContactsAndChatsController>(),
+  MockSpec<Client>(),
 ])
 void main() {
   testWidgets('build_always_putsPublicGroupsBeforeTheMessages', (tester) async {
@@ -74,7 +77,7 @@ void main() {
           locale: const Locale('en'),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: SearchView(searchController),
+          home: SearchView(searchController, client: MockClient()),
         ),
       ),
     );

@@ -9,6 +9,7 @@ import 'package:twake_chat/domain/direct_chat/usecases/find_direct_chat_usecase.
 import 'package:twake_chat/pages/search/search_controller.dart';
 import 'package:twake_chat/pages/search/search_state.dart';
 import 'package:twake_chat/providers/active_user_id_provider.dart';
+import 'package:twake_chat/providers/report_failure_provider.dart';
 
 class _FakeDirectChatRepository extends Fake implements DirectChatRepository {
   final rooms = <String, String>{};
@@ -43,14 +44,19 @@ void main() {
   late _FakeDirectChatRepository repository;
   late ProviderContainer container;
   late List<SearchState> states;
+  late List<Object> reported;
 
   setUp(() {
     repository = _FakeDirectChatRepository();
+    reported = [];
     container = ProviderContainer.test(
       retry: (_, _) => null,
       overrides: [
         directChatRepositoryProvider.overrideWithValue(repository),
         activeUserIdProvider.overrideWithValue(me),
+        reportFailureProvider.overrideWithValue(
+          (error, _, _) => reported.add(error),
+        ),
       ],
     );
     states = [];
@@ -108,17 +114,16 @@ void main() {
     expect(states.whereType<SearchOwnProfile>(), hasLength(2));
   });
 
-  test('openContact_whenTheLookupFails_backToIdle', () async {
+  test('openContact_whenTheLookupFails_reportsAndBackToIdle', () async {
     // Arrange
     repository.error = StateError('No active Matrix client');
 
-    // Act + Assert
-    await expectLater(
-      controller().openContact(matrixId: contact),
-      throwsStateError,
-    );
+    // Act
+    await controller().openContact(matrixId: contact);
 
+    // Assert
     expect(container.read(searchControllerProvider), const SearchState.idle());
+    expect(reported, [isA<StateError>()]);
   });
 
   group('with a pending lookup', () {
@@ -171,13 +176,13 @@ void main() {
           .openContact(matrixId: contact);
       subscription.close();
       await pendingContainer.pump();
-      expect(pendingContainer.exists(searchControllerProvider), isFalse);
 
       // Act
       useCase.lookups.single.complete('!dm:server');
       await opening;
 
       // Assert
+      expect(pendingContainer.exists(searchControllerProvider), isFalse);
       expect(pendingStates, const [SearchState.opening()]);
     });
   });
