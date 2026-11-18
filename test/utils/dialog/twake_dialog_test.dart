@@ -4,9 +4,12 @@ import 'package:linagora_design_flutter/style/linagora_text_theme.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 
 class _ConfirmDialogRobot {
-  const _ConfirmDialogRobot(this.tester);
+  _ConfirmDialogRobot(this.tester);
 
   final WidgetTester tester;
+
+  Future<ConfirmResult>? result;
+  int onCloseCalls = 0;
 
   Finder get closeButton => find.descendant(
     of: find.byKey(TwakeDialog.showConfirmAlertDialogKey),
@@ -19,13 +22,14 @@ class _ConfirmDialogRobot {
         theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
         home: Builder(
           builder: (context) => TextButton(
-            onPressed: () => showConfirmAlertDialog(
+            onPressed: () => result = showConfirmAlertDialog(
               context: context,
               title: 'Delete message',
               message: 'Are you sure?',
               okLabel: 'Delete',
               cancelLabel: 'Cancel',
               showCloseButton: showCloseButton,
+              onClose: () => onCloseCalls++,
             ),
             child: const Text('open'),
           ),
@@ -48,7 +52,7 @@ void main() {
       expect(robot.closeButton, findsNothing);
     });
 
-    testWidgets('is shown and dismisses the dialog when showCloseButton is '
+    testWidgets('is shown and cancels the dialog when showCloseButton is '
         'true', (tester) async {
       final robot = _ConfirmDialogRobot(tester);
 
@@ -59,6 +63,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Delete message'), findsNothing);
+      expect(await robot.result, ConfirmResult.cancel);
+      expect(robot.onCloseCalls, 1);
     });
   });
 }
