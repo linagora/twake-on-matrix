@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dartz/dartz.dart' hide State;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override, ProviderException;
 import 'package:flutter_test/flutter_test.dart';
@@ -542,6 +545,18 @@ class _Harness {
   Future<void> run(Future<void> Function() body) async {
     final done = Completer<void>();
     final unexpected = <Object>[];
+    // On a macOS host `MatrixState` builds the macOS notifications port, and
+    // the plugin reads the target platform, which `flutter test` sets to
+    // Android: it is set to macOS, with the plugin channel answered.
+    final onMacOS = Platform.isMacOS;
+    if (onMacOS) {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('dexterous.com/flutter/local_notifications'),
+            (_) async => true,
+          );
+    }
     runZonedGuarded(
       () async {
         try {
@@ -555,7 +570,18 @@ class _Harness {
         if (!_isMissingWiring(e)) unexpected.add(e);
       },
     );
-    await done.future;
+    try {
+      await done.future;
+    } finally {
+      if (onMacOS) {
+        debugDefaultTargetPlatformOverride = null;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('dexterous.com/flutter/local_notifications'),
+              null,
+            );
+      }
+    }
     expect(unexpected, isEmpty, reason: 'errors outside of the app wiring');
   }
 
