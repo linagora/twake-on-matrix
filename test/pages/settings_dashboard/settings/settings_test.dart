@@ -69,7 +69,8 @@ class _SettingsScreen {
     );
   }
 
-  /// Starts a second backup check that waits on the returned completer.
+  /// Starts a second backup check that waits on the returned completer, and
+  /// expects the loading tile while it runs.
   ///
   /// The check is an `async void`: its error reaches the zone that starts it,
   /// so that zone records what it throws. The completer is created in the same
@@ -87,6 +88,8 @@ class _SettingsScreen {
       client.accountDataLoading = accountData.future;
       tester.state<SettingsController>(find.byType(Settings)).checkBootstrap();
     }, (error, _) => errors.add(error));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
     return (accountData: accountData, errors: errors);
   }
 
@@ -130,14 +133,25 @@ void main() {
   ) async {
     final error = StateError('account data');
     final check = await _SettingsScreen(tester).startHeldCheck();
-    await tester.pump();
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
     check.accountData.completeError(error);
     await tester.pump();
 
     expect(check.errors, [error]);
     _SettingsScreen(tester).expectSwitchOffAndNoLoadingTile();
+  });
+
+  testWidgets('the check never ends: the switch is off after the timeout', (
+    tester,
+  ) async {
+    final screen = _SettingsScreen(tester);
+    final check = await screen.startHeldCheck();
+
+    await tester.pump(SettingsController.backupCheckTimeout);
+    await tester.pump();
+
+    expect(check.errors, isEmpty);
+    screen.expectSwitchOffAndNoLoadingTile();
   });
 
   testWidgets('the screen is disposed during the check: only the error of '

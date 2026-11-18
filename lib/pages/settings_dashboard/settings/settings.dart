@@ -73,6 +73,10 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   // (encryption disabled, an error): the view then shows the switch again.
   final ValueNotifier<bool> backupStateLoading = ValueNotifier(true);
 
+  /// How long the backup row waits for [checkBootstrap] before it shows the
+  /// switch again.
+  static const backupCheckTimeout = Duration(seconds: 10);
+
   MatrixState get matrix => Matrix.of(context);
 
   String get displayName =>
@@ -185,7 +189,11 @@ class SettingsController extends ConsumerState<Settings> with ConnectPageMixin {
   void checkBootstrap() async {
     backupStateLoading.value = true;
     try {
-      await _loadBackupState();
+      await _loadBackupState().timeout(backupCheckTimeout);
+    } on TimeoutException {
+      // Offline or a first sync that does not end: the switch is shown again.
+      // A result that arrives later still updates it.
+      Logs().w('SettingsController::checkBootstrap() - timed out');
     } finally {
       if (mounted) backupStateLoading.value = false;
     }
