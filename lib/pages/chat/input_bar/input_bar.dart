@@ -81,10 +81,16 @@ class InputBar extends StatefulWidget {
 
 class _InputBarState extends State<InputBar> with PasteImageMixin {
   final textFieldScrollController = ScrollController();
+  final _ownSuggestionsController =
+      SuggestionsController<Map<String, String?>>();
+
+  SuggestionsController<Map<String, String?>> get _suggestionsController =>
+      widget.suggestionsController ?? _ownSuggestionsController;
 
   @override
   void dispose() {
     textFieldScrollController.dispose();
+    _ownSuggestionsController.dispose();
     super.dispose();
   }
 
@@ -396,9 +402,9 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
 
   void _handleSuggestionsCallbackWeb(List<Map<String, String?>> suggestions) {
     if (suggestions.isNotEmpty) {
-      widget.suggestionsController?.open();
+      _suggestionsController.open();
     } else {
-      widget.suggestionsController?.close();
+      _suggestionsController.close();
       if (PlatformInfos.isWeb ||
           widget.showEmojiPickerNotifier?.value == false) {
         widget.typeAheadFocusNode?.requestFocus();
@@ -436,8 +442,10 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
   }
 
   // An open box, even empty, makes flutter_typeahead move focus to it on Arrow Up.
-  void _closeEmptySuggestions() {
-    widget.suggestionsController?.close(retainFocus: true);
+  // Returning null, not [], makes the box search again when a tap reopens it.
+  List<Map<String, String?>>? _closeEmptySuggestions() {
+    _suggestionsController.close(retainFocus: true);
+    return null;
   }
 
   void _handleSuggestionsCallbackMobile() {
@@ -468,7 +476,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
           debounceDuration: InputBar.debounceDuration,
           autoFlipDirection: true,
           scrollController: widget.suggestionScrollController,
-          suggestionsController: widget.suggestionsController,
+          suggestionsController: _suggestionsController,
           controller: widget.controller,
           focusNode: widget.typeAheadFocusNode,
           builder: (context, controller, focusNode) => RightClickFocus(
@@ -485,7 +493,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               decoration: widget.decoration,
               focusNode: focusNode,
               onChanged: (text) {
-                widget.suggestionsController?.open();
+                _suggestionsController.open();
                 widget.onChanged?.call(text);
               },
               contextMenuBuilder: PlatformInfos.isWeb
@@ -522,8 +530,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
             // members to suggest. Guard the null room (web opens DMs as a draft
             // and fires this callback, which would otherwise crash on `room!`).
             if (widget.room?.isDirectChat ?? true) {
-              _closeEmptySuggestions();
-              return [];
+              return _closeEmptySuggestions();
             }
             final suggestions = getSuggestions(text);
             if (suggestions.isEmpty) _closeEmptySuggestions();
@@ -535,7 +542,7 @@ class _InputBarState extends State<InputBar> with PasteImageMixin {
               _handleSuggestionsCallbackWeb(suggestions);
             }
             widget.focusSuggestionController.suggestions = suggestions;
-            return suggestions;
+            return suggestions.isEmpty ? null : suggestions;
           },
           itemBuilder: (context, suggestion) => SuggestionTile(
             suggestion: suggestion,
