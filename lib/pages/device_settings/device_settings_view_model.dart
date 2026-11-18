@@ -196,4 +196,16 @@ class DevicesSettingsViewModel extends _$DevicesSettingsViewModel {
     if (_devices == null) return;
     _transition(keysRevision: _keysRevision + 1);
   }
+
+  /// Device keys may be outdated locally when the list is drawn: refetch them,
+  /// then rebuild the rows.
+  Future<void> syncDeviceKeys(Client client) async {
+    try {
+      await client.updateUserDeviceKeys();
+    } catch (e, s) {
+      Logs().w('Unable to refresh the device keys', e, s);
+      return;
+    }
+    if (ref.mounted) refreshDeviceKeys();
+  }
 }

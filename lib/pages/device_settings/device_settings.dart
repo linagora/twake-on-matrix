@@ -35,9 +35,14 @@ class DevicesSettings extends ConsumerStatefulWidget {
 }
 
 class _DevicesSettingsState extends ConsumerState<DevicesSettings> {
-  late final Future<void> _loadDevicesFuture = ref
-      .read(devicesSettingsViewModelProvider.notifier)
-      .loadUserDevices(Matrix.of(context).client);
+  late final Future<void> _loadDevicesFuture = _loadDevices();
+
+  Future<void> _loadDevices() async {
+    final client = Matrix.of(context).client;
+    final notifier = ref.read(devicesSettingsViewModelProvider.notifier);
+    await notifier.loadUserDevices(client);
+    unawaited(notifier.syncDeviceKeys(client));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -294,26 +299,23 @@ Future<void> verifyDeviceAction(
   Device device,
 ) async {
   final client = Matrix.of(context).client;
-  // A device that never uploaded device keys has no entry to verify against.
-  final deviceKeys =
-      client.userDeviceKeys[client.userID]?.deviceKeys[device.deviceId];
-  if (deviceKeys == null) {
-    TwakeSnackBar.show(context, L10n.of(context)!.deviceHasNoEncryptionKeys);
-    return;
-  }
   // Keep a handle so a dismissed loading dialog cannot orphan the request.
-  final verificationFuture = deviceKeys.startVerification();
+  final verificationFuture = _startDeviceVerification(client, device);
   // Block the list while the request is set up so Verify can't be re-tapped.
   final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
     future: () => verificationFuture,
   );
   final req = result.result;
   if (req == null) {
+    // A null result without an error means the device has no device keys.
+    if (result.error == null && context.mounted) {
+      TwakeSnackBar.show(context, L10n.of(context)!.deviceHasNoEncryptionKeys);
+    }
     // System back (or other pop) can dismiss while startVerification is still
     // in flight; cancel when it completes so KeyVerification is not orphaned.
     unawaited(
       verificationFuture.then(
-        (pending) => pending.cancel(KeyVerificationCodeEnum.user.code),
+        (pending) => pending?.cancel(KeyVerificationCodeEnum.user.code),
         onError: (_, __) {},
       ),
     );
@@ -329,4 +331,20 @@ Future<void> verifyDeviceAction(
     }
   };
   await KeyVerificationDialog(request: req).show(context);
+}
+
+/// Null when the device has no device keys, even after refreshing them: keys
+/// missing locally may only be outdated, not absent on the server.
+Future<KeyVerification?> _startDeviceVerification(
+  Client client,
+  Device device,
+) async {
+  DeviceKeys? lookUpKeys() =>
+      client.userDeviceKeys[client.userID]?.deviceKeys[device.deviceId];
+  var deviceKeys = lookUpKeys();
+  if (deviceKeys == null) {
+    await client.updateUserDeviceKeys();
+    deviceKeys = lookUpKeys();
+  }
+  return deviceKeys?.startVerification();
 }
