@@ -1,6 +1,7 @@
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/presentation/extensions/client_extension.dart';
 import 'package:twake_chat/generated/assets.gen.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
@@ -17,12 +18,6 @@ class SliverInviteFriendButton extends StatelessWidget {
   const SliverInviteFriendButton({super.key, required this.userId});
 
   final String userId;
-
-  /// The share sheet anchor: iPad and recent iOS refuse to open without it.
-  @visibleForTesting
-  static Rect? shareOriginOf(RenderBox? box) => box != null && box.hasSize
-      ? box.localToGlobal(Offset.zero) & box.size
-      : null;
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +67,7 @@ class _InviteFriendButton extends ConsumerWidget {
             if (PlatformInfos.isMobile) {
               await Share.share(
                 url,
-                sharePositionOrigin: SliverInviteFriendButton.shareOriginOf(
-                  context.findRenderObject() as RenderBox?,
-                ),
+                sharePositionOrigin: context.sharePositionOrigin,
               );
             } else if (PlatformInfos.isWeb) {
               await Clipboard.setData(ClipboardData(text: url));

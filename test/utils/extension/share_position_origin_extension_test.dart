@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:twake_chat/pages/contacts_tab/widgets/sliver_invite_friend_button.dart';
+import 'package:twake_chat/utils/extension/share_position_origin_extension.dart';
 
 void main() {
-  group('SliverInviteFriendButton.shareOriginOf', () {
+  group('SharePositionOriginExtension.shareOriginOf', () {
     test('returns null without a render box', () {
-      expect(SliverInviteFriendButton.shareOriginOf(null), isNull);
+      expect(SharePositionOriginExtension.shareOriginOf(null), isNull);
     });
 
     test('returns null for a box that has no size yet', () {
@@ -18,7 +18,7 @@ void main() {
       );
 
       expect(box.hasSize, isFalse);
-      expect(SliverInviteFriendButton.shareOriginOf(box), isNull);
+      expect(SharePositionOriginExtension.shareOriginOf(box), isNull);
     });
 
     testWidgets('returns the global rect of a laid out box', (tester) async {
@@ -31,7 +31,7 @@ void main() {
       );
 
       final box = tester.renderObject<RenderBox>(find.byKey(key));
-      final origin = SliverInviteFriendButton.shareOriginOf(box);
+      final origin = SharePositionOriginExtension.shareOriginOf(box);
 
       expect(origin, tester.getRect(find.byKey(key)));
       expect(origin!.size, const Size(120, 40));
