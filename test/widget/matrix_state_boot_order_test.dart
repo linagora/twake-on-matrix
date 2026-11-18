@@ -1649,8 +1649,15 @@ void main() {
           last.onLoginStateChanged.add(LoginState.loggedOut);
           await _pumpUntil(
             harness,
+            () => TwakeApp.router.routeInformationProvider.value.uri.path
+                .startsWith('/home'),
+          );
+          await tester.pump(const Duration(milliseconds: 1900));
+          expect(harness.container.read(accountsProvider), isA<Active>());
+          await tester.pump(const Duration(milliseconds: 200));
+          await _pumpUntil(
+            harness,
             () => harness.container.read(accountsProvider) is! Active,
-            frame: const Duration(milliseconds: 500),
           );
         });
 
