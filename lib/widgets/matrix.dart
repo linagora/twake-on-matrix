@@ -104,6 +104,7 @@ import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/background_push.dart';
 import '../utils/famedlysdk_store.dart';
 import 'local_notifications_extension.dart';
+import 'package:twake_chat/utils/flutter_local_notifications_port.dart';
 
 class Matrix extends ConsumerStatefulWidget {
   final Widget? child;
@@ -479,6 +480,9 @@ class MatrixState extends ConsumerState<Matrix>
       ? NotificationsClient()
       : null;
   final Map<String, int> linuxNotificationIds = {};
+  final macosNotifications = PlatformInfos.isMacOS
+      ? FlutterLocalNotificationsPort()
+      : null;
 
   late final _loginHost = _MatrixLoginHost(this);
   late final LoginSessions _loginSessions;
@@ -493,6 +497,16 @@ class MatrixState extends ConsumerState<Matrix>
     // The boot clients and the persisted state are overridden by `main` when
     // the container is made; the account state adopts them on its first read.
     _subscriptions = ref.read(clientSubscriptionsProvider);
+    // The macOS permission is asked here, at start. A tap reuses the mobile
+    // push routing (account switch, then the room).
+    unawaited(
+      macosNotifications?.init(
+        (r) => (backgroundPush ??= BackgroundPush(
+          this,
+          client,
+        )).onSelectNotification(r),
+      ),
+    );
     _quietLogouts = ref.read(quietLogoutsProvider);
     _logoutRemovals = ref.read(logoutRemovalsProvider);
     _candidateRemovals = ref.read(candidateRemovalsProvider);
@@ -655,8 +669,8 @@ class MatrixState extends ConsumerState<Matrix>
         }
       }).cancel,
     );
-    if (PlatformInfos.isLinux) {
-      Future<void> initLinuxNotifications() async {
+    if (PlatformInfos.isLinux || PlatformInfos.isMacOS) {
+      Future<void> initDesktopNotifications() async {
         // Cancelled (a rollback, a logout) before this ran: set nothing up.
         if (!_subscriptions.isOpen(name)) return;
         // `keep` starts nothing for a name that was closed meanwhile.
@@ -672,7 +686,11 @@ class MatrixState extends ConsumerState<Matrix>
                     ) &&
                     e.content['sender'] != currentClient.userID,
               )
-              .listen(showLocalNotification)
+              .listen(
+                PlatformInfos.isMacOS
+                    ? showMacosNotification
+                    : showLocalNotification,
+              )
               .cancel,
         );
       }
@@ -682,7 +700,7 @@ class MatrixState extends ConsumerState<Matrix>
       // notification setup would silently be skipped. Run immediately if
       // already synced.
       if (currentClient.prevBatch != null) {
-        await initLinuxNotifications();
+        await initDesktopNotifications();
       } else {
         // Waits for a sync that may never come: the wait is cancelled with the
         // other subscriptions of the client.
@@ -690,7 +708,7 @@ class MatrixState extends ConsumerState<Matrix>
           name,
           'firstSync',
           currentClient.onSync.stream,
-          () => initLinuxNotifications().catchError(
+          () => initDesktopNotifications().catchError(
             (Object e, StackTrace s) => _report(e, s, 'notifications of $name'),
           ),
         );
