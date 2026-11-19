@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:matrix/matrix.dart';
+import 'package:twake_chat/domain/model/room/room_extension.dart';
+import 'package:twake_chat/generated/l10n/app_localizations.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/data/model/push/twake_local_notification_payload.dart';
 import 'package:twake_chat/utils/message_notification_decision.dart';
 
@@ -12,6 +15,18 @@ abstract class LocalNotificationsPort {
     required String body,
     required String payload,
   });
+
+  Future<void> cancel(int id);
+}
+
+/// Stable id of the notification of [roomId] (FNV-1a, 31 bits): the same for
+/// show and cancel, so a new message replaces the previous one of the room.
+int macosNotificationId(String roomId) {
+  var h = 0x811c9dc5;
+  for (final c in roomId.codeUnits) {
+    h = ((h ^ c) * 0x01000193) & 0xffffffff;
+  }
+  return h & 0x7fffffff;
 }
 
 class MessageNotificationContent {
@@ -30,7 +45,8 @@ class MessageNotificationContent {
   final bool isDirectChat;
 }
 
-/// Shows one local notification per incoming message on macOS.
+/// Shows the local notification of a room on macOS: a new message replaces
+/// the previous one of the same room.
 class MacosMessageNotifier {
   MacosMessageNotifier(
     this._port, {
@@ -56,8 +72,7 @@ class MacosMessageNotifier {
         : '${content.senderName}: ${content.body}';
     try {
       await _port.show(
-        // Stable per room, so a new message replaces the previous one.
-        id: candidate.roomId.hashCode & 0x7fffffff,
+        id: macosNotificationId(candidate.roomId),
         title: content.roomTitle,
         body: body,
         payload: jsonEncode(
@@ -74,4 +89,76 @@ class MacosMessageNotifier {
       return false;
     }
   }
+
+  /// Removes the notification of [roomId] (read elsewhere). Never throws.
+  Future<void> cancelRoom(String roomId) async {
+    try {
+      await _port.cancel(macosNotificationId(roomId));
+    } catch (e, s) {
+      Logs().w('[Notifications] macOS notification cancel failed', e, s);
+    }
+  }
 }
+
+/// Notifies the user of [eventUpdate], read on the [client] it came from (the
+/// event account, not the active one). Returns whether one was shown.
+Future<bool> notifyMacosMessage({
+  required LocalNotificationsPort port,
+  required Client client,
+  required EventUpdate eventUpdate,
+  required L10n l10n,
+  String? activeRoomId,
+  required bool appInForeground,
+  required bool showPreview,
+}) async {
+  final room = client.getRoomById(eventUpdate.roomID);
+  if (room == null) return false;
+  final candidate = MessageNotificationCandidate(
+    roomId: room.id,
+    senderId: eventUpdate.content['sender'] as String? ?? '',
+    ownUserId: client.userID,
+    eventType: eventUpdate.content['type'] as String? ?? '',
+    notificationCount: room.notificationCount,
+    highlightCount: room.highlightCount,
+    isRoomMuted: room.isMuted,
+    activeRoomId: activeRoomId,
+    appInForeground: appInForeground,
+  );
+  if (!shouldNotifyMessage(candidate)) return false;
+  final locals = MatrixLocals(l10n);
+  final event = Event.fromJson(eventUpdate.content, room);
+  // The text is read only when it may be shown: never for an encrypted room.
+  final withText = showPreview && !room.encrypted;
+  final body = withText
+      ? await event.calcLocalizedBody(
+          locals,
+          withSenderNamePrefix: false,
+          plaintextBody: true,
+          hideReply: true,
+          hideEdit: true,
+          removeMarkdown: true,
+        )
+      : '';
+  return MacosMessageNotifier(
+    port,
+    receiverId: client.userID ?? '',
+    genericBody: l10n.newMessage,
+  ).notify(
+    candidate,
+    MessageNotificationContent(
+      roomTitle: room.getLocalizedDisplayname(locals),
+      senderName: withText ? _senderName(room, event) : '',
+      body: body,
+      eventId: event.eventId,
+      isDirectChat: room.isDirectChat,
+    ),
+    showPreview: withText,
+  );
+}
+
+/// From the member state in memory: no request, nothing awaited.
+String _senderName(Room room, Event event) =>
+    room.getState(EventTypes.RoomMember, event.senderId)?.content['displayname']
+        as String? ??
+    event.senderId.localpart ??
+    event.senderId;
