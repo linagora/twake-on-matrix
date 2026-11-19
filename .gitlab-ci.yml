@@ -140,18 +140,6 @@ release_mode_launches:
     - docker
     - famedly
 
-build_web:
-  stage: build
-  before_script:
-    [sudo apt update && sudo apt install curl -y, ./scripts/prepare-web.sh]
-  script: [./scripts/build-web.sh]
-  artifacts:
-    paths:
-      - build/web/
-  tags:
-    - docker
-    - famedly
-
 # yes, we *do* build a Windows DLL on Linux. More reliable.
 build_olm_windows:
   image: archlinux:latest

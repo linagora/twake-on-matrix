@@ -97,9 +97,6 @@ ios/Runner.xcworkspace/xcshareddata/swiftpm/
 .codegraph
 .vodozemac
 
-# Fetched by scripts/fetch-web-vendor.sh, pinned and integrity checked there.
-web/vendor/dotlottie/
-
 # Hive boxes written by tests
 /test/**/*.hive
 /test/**/*.lock

@@ -81,7 +81,6 @@ Pushing a tag that matches `v*.*.*` triggers **both** automated workflows (see �
 | Workflow file | Trigger | What it does |
 |---|---|---|
 | `.github/workflows/release.yaml` | `push: tags: v*.*.*` | Builds signed Android APK + AAB → Play Store internal track; builds iOS IPA → TestFlight; creates GitHub Release with artifacts and SHA256 checksums |
-| `.github/workflows/image.yaml` | `push: tags: v*.*.*` | Builds multi-arch Docker image (`linux/amd64`, `linux/arm64`), pushes to Docker Hub (`linagora/twake-web`) and GHCR (`ghcr.io/linagora/twake-web`) tagged with the version and `release` |
 
 The `release.yaml` job runs mobile builds in parallel (Android on `ubuntu-latest`, iOS on `macos-26`) and creates the GitHub Release only after both succeed.
 
