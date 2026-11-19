@@ -139,6 +139,27 @@ void main() {
     verify(room.loadHeroUsers()).called(2);
   });
 
+  testWidgets('loads the peer when the display name adds it to empty heroes', (
+    tester,
+  ) async {
+    final room = buildRoom(name: '');
+    final summary = RoomSummary.fromJson({'m.heroes': <String>[]});
+    when(room.summary).thenReturn(summary);
+    // As the SDK does: an empty hero list gets the DM peer added in place.
+    when(room.getLocalizedDisplayname(any)).thenAnswer((_) {
+      final heroes = summary.mHeroes!;
+      if (heroes.isEmpty) heroes.add('@peer:server.tld');
+      return 'Peer';
+    });
+
+    await tester.pumpWidget(wrap(ChatListItem(room)));
+    await tester.pump();
+    await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
+    await tester.pump();
+
+    verify(room.loadHeroUsers()).called(2);
+  });
+
   SpaceRowData spaceData({int mentionCount = 0}) => SpaceRowData(
     fold: SpaceFold.none,
     unreadCount: 0,

@@ -240,7 +240,8 @@ class _HeroUsersLoaderState extends State<_HeroUsersLoader> {
     _loadedRoomId = room.id;
     _loadedNameless = nameless;
     _loadedMembership = room.membership;
-    _loadedHeroes = nameless ? room.summary.mHeroes : null;
+    // A copy: the display name adds the DM peer to empty heroes in place.
+    _loadedHeroes = nameless ? room.summary.mHeroes?.toList() : null;
     _heroUsers = nameless ? room.loadHeroUsers() : null;
   }
 
