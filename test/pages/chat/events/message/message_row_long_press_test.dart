@@ -171,4 +171,16 @@ void main() {
       expect(longPressed, isEmpty);
     },
   );
+
+  testWidgets('long press on the bubble in select mode still opens its menu', (
+    tester,
+  ) async {
+    final event = textEvent(senderId: '@bob:example.org');
+    final longPressed = await pumpRow(tester, event, selectMode: true);
+
+    await tester.longPress(find.text('Hi'));
+    await tester.pumpAndSettle();
+
+    expect(longPressed, [event]);
+  });
 }
