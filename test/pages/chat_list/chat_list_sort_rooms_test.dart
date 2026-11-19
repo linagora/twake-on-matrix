@@ -16,6 +16,12 @@ class _Client extends Fake implements Client {
 
   @override
   bool isLogged() => logged;
+
+  @override
+  bool get pinInvitedRooms => false;
+
+  @override
+  bool get pinUnreadRooms => false;
 }
 
 class _MatrixState extends Mock implements MatrixState {
@@ -85,5 +91,31 @@ void main() {
     await tester.pumpWidget(withMatrix());
 
     expect(built, isEmpty);
+  });
+
+  testWidgets('drops a room that left the list before the new sort ends', (
+    tester,
+  ) async {
+    final other = Room(id: '!other:example.com', client: client);
+    Widget withRooms(List<Room> rooms) => provider.Provider<MatrixState>.value(
+      value: _MatrixState(client),
+      child: ChatListSortRooms(
+        rooms: rooms,
+        sortingRoomsNotifier: sortingRoomsNotifier,
+        builder: (sortedRooms, _) {
+          built = sortedRooms;
+          return const SizedBox();
+        },
+      ),
+    );
+
+    await tester.pumpWidget(withRooms([room, other]));
+    await tester.pumpAndSettle();
+    expect(built, unorderedEquals([room, other]));
+
+    // A sync moved [other] out of this list (unpinned on another client).
+    await tester.pumpWidget(withRooms([room]));
+
+    expect(built, [room]);
   });
 }
