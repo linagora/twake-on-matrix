@@ -1409,6 +1409,11 @@ class ChatController extends ConsumerState<Chat>
     }
     timeline = loaded;
     timeline?.requestKeys(onlineKeyBackupOnly: false);
+    if (loaded != null) {
+      unawaited(
+        ref.read(uploadManagerProvider).failInterruptedUploads(loaded.events),
+      );
+    }
     if (room!.markedUnread) room?.markUnread(false);
 
     // Debug: log if room's lastEvent is absent from the freshly loaded timeline

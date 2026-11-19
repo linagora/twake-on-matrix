@@ -107,6 +107,7 @@ void main() {
   late File pickedFile;
   late PathProviderPlatform originalPathProvider;
   final placeholders = <MatrixEvent>[];
+  final statusUpdates = <String, int?>{};
 
   setUpAll(() async {
     queue = _RecordingQueue();
@@ -131,6 +132,8 @@ void main() {
         if (event.unsigned?['transaction_id'] == event.eventId) {
           placeholders.add(event);
         }
+        statusUpdates[event.eventId] =
+            event.unsigned?[messageSendingStatusKey] as int?;
       }
     });
     manager = UploadManager();
@@ -145,6 +148,7 @@ void main() {
   setUp(() {
     queue.added.clear();
     placeholders.clear();
+    statusUpdates.clear();
     database.events.clear();
     FakeMatrixApi.calledEndpoints.clear();
   });
@@ -167,7 +171,10 @@ void main() {
 
   /// The local event as the app finds it in its database after a restart:
   /// the placeholder written before the upload began, which never finished.
-  Event eventAfterRestart(String eventId) {
+  Event eventAfterRestart(
+    String eventId, {
+    EventStatus status = EventStatus.error,
+  }) {
     final placeholder = placeholders.last;
     final event = Event(
       senderId: room.client.userID!,
@@ -176,7 +183,7 @@ void main() {
       eventId: eventId,
       content: placeholder.content,
       unsigned: {...?placeholder.unsigned, 'transaction_id': eventId},
-      status: EventStatus.error,
+      status: status,
       originServerTs: DateTime.now(),
     );
     database.events[eventId] = event;
@@ -218,6 +225,25 @@ void main() {
       expect(queue.added, hasLength(1));
       await runQueuedSends();
       expect(sentMessages(), isNotEmpty);
+    });
+
+    test('${entry.name}: an upload cut by a process kill shows as failed when '
+        'its chat opens again, while a live one keeps sending', () async {
+      await entry.upload();
+      await pumpEventQueue();
+      final live = placeholders.last;
+      final liveEvent = Event.fromMatrixEvent(live, room);
+      final interrupted = eventAfterRestart(
+        'restarted-${entry.name}',
+        status: EventStatus.sending,
+      );
+      statusUpdates.clear();
+
+      await manager.failInterruptedUploads([liveEvent, interrupted]);
+      await pumpEventQueue();
+
+      expect(statusUpdates[interrupted.eventId], EventStatus.error.intValue);
+      expect(statusUpdates, isNot(contains(live.eventId)));
     });
   }
 

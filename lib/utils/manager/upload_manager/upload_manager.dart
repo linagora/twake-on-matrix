@@ -81,6 +81,34 @@ class UploadManager {
     return null;
   }
 
+  // The SDK only fails a stale "sending" event after a minute; a restart cut these.
+  Future<void> failInterruptedUploads(Iterable<Event> events) async {
+    for (final event in events) {
+      if (!event.status.isSending) continue;
+      if (event.unsigned?['upload_info'] is! Map) continue;
+      if (_eventIdMapUploadFileInfo[event.eventId]?.isFailed == false) continue;
+      Logs().i(
+        'UploadManager::failInterruptedUploads(): ${event.eventId} was cut '
+        'by a restart',
+      );
+      final json = event.toJson();
+      (json['unsigned'] as Map<String, dynamic>)[messageSendingStatusKey] =
+          EventStatus.error.intValue;
+      await event.room.client.handleSync(
+        SyncUpdate(
+          nextBatch: '',
+          rooms: RoomsUpdate(
+            join: {
+              event.room.id: JoinedRoomUpdate(
+                timeline: TimelineUpdate(events: [MatrixEvent.fromJson(json)]),
+              ),
+            },
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> cancelUpload(Event event) async {
     final cancelToken = _eventIdMapUploadFileInfo[event.eventId]?.cancelToken;
     if (cancelToken != null) {
