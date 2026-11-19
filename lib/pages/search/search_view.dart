@@ -37,9 +37,8 @@ class SearchView extends StatelessWidget {
             valueListenable: searchController.preSearchRecentContactsNotifier,
             builder: (context, value, emptyChild) =>
                 value.fold((failure) => emptyChild!, (success) {
-                  switch (success.runtimeType) {
-                    case const (PreSearchRecentContactsSuccess):
-                      final data = success as PreSearchRecentContactsSuccess;
+                  switch (success) {
+                    case final PreSearchRecentContactsSuccess data:
                       return ValueListenableBuilder(
                         valueListenable: searchController.textEditingController,
                         builder: (context, textEditingValue, child) {
