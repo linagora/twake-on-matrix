@@ -1746,6 +1746,57 @@ class MatrixState extends ConsumerState<Matrix>
     );
   }
 
+  /// The replaced screens read the client that the last logout drops.
+  Future<void> _leaveLoggedInScreens(String location, {Object? extra}) async {
+    TwakeApp.router.go(location, extra: extra);
+    try {
+      await _coveredRoutesUnmounted().timeout(_leaveScreensTimeout);
+    } on TimeoutException catch (e, s) {
+      // Without frames (app in the background) the wait is expected to expire.
+      if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        _report(e, s, 'screens behind login still mounted at the last logout');
+      } else {
+        Logs().w(
+          'MatrixState::_leaveLoggedInScreens: still covered after '
+          '$_leaveScreensTimeout',
+        );
+      }
+    }
+  }
+
+  static const _leaveScreensTimeout = Duration(seconds: 2);
+
+  Future<void> _coveredRoutesUnmounted() async {
+    await SchedulerBinding.instance.endOfFrame;
+    final entering = _topRoute();
+    final animation = entering is TransitionRoute ? entering.animation : null;
+    if (animation != null && !animation.isCompleted) {
+      final settled = Completer<void>();
+      void onStatus(AnimationStatus status) {
+        if (!status.isAnimating && !settled.isCompleted) settled.complete();
+      }
+
+      animation.addStatusListener(onStatus);
+      try {
+        await settled.future;
+      } finally {
+        animation.removeStatusListener(onStatus);
+      }
+    }
+    // Covered routes unmount on the frame after the entering one turns opaque.
+    await SchedulerBinding.instance.endOfFrame;
+  }
+
+  /// `popUntil` with a predicate that is true at once pops nothing.
+  Route<dynamic>? _topRoute() {
+    Route<dynamic>? top;
+    TwakeApp.routerKey.currentState?.popUntil((route) {
+      top = route;
+      return true;
+    });
+    return top;
+  }
+
   Future<void> _handleLastLogout({required Client loggedOut}) async {
     waitForFirstSync = false;
     // Clear first: the last logout rebuilds the contact services, and the wipe
@@ -1760,6 +1811,17 @@ class MatrixState extends ConsumerState<Matrix>
         _report(e, s, 'keychain sync cancel of ${loggedOut.clientName}');
       }
     }
+    Sentry.configureScope((scope) => scope.setUser(null));
+    if (PlatformInfos.isMobile) {
+      await _deletePersistActiveAccount();
+      await _leaveLoggedInScreens(const HomeTwakeWelcomeRoute().location);
+    } else {
+      if (kIsWeb) await removeWebPush(loggedOut);
+      await _leaveLoggedInScreens(
+        const HomeRoute($extra: true).location,
+        extra: true,
+      );
+    }
     final accounts = ref.read(accountsProvider);
     if (accounts is Active && accounts.accounts.length == 1) {
       // A switch or a removal can change the state between the check and the
@@ -1769,16 +1831,19 @@ class MatrixState extends ConsumerState<Matrix>
       } catch (e, s) {
         _report(e, s, 'last logout of ${loggedOut.clientName}');
       }
+    } else if ((accounts is Active || accounts is Switching) &&
+        accounts.accounts.any((a) => a.id == loggedOut.clientName)) {
+      // Another account logged in during the wait: leave as one of several.
+      await _removeLoggedOutAccount(
+        LoginState.loggedOut,
+        loggedOut,
+        announce: false,
+      );
     }
-    Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
-    } else {
-      if (kIsWeb) await removeWebPush(loggedOut);
-      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
+    // An account that logged in during the wait owns the ToM data now.
+    if (ref.read(accountsProvider) case LastLoggedOut() || NoAccount()) {
+      await _deleteAllTomConfigurations();
     }
-    await _deleteAllTomConfigurations();
   }
 
   /// Stops the phonebook lookup in progress (logout, account switch): its
