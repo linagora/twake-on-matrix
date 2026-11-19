@@ -126,7 +126,8 @@ void main() {
 
     await tester.pumpWidget(wrap(ChatListItem(room)));
     await tester.pump();
-    summary.mHeroes = ['@bob:server.tld'];
+    // In place: the row must compare against its own copy of the old heroes.
+    summary.mHeroes![0] = '@bob:server.tld';
     await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
     await tester.pump();
 
