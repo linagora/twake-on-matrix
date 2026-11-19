@@ -118,12 +118,10 @@ Tag push triggers both CI workflows automatically.
 | File | Trigger | Effect |
 |---|---|---|
 | `.github/workflows/release.yaml` | tag `v*.*.*` | Android APK→Play Store internal; iOS IPA→TestFlight; GitHub Release |
-| `.github/workflows/image.yaml` | tag `v*.*.*` | Docker image→Docker Hub + GHCR tagged `vx.y.z` + `release` |
 
 Check status:
 ```bash
 gh run list --workflow=release.yaml --limit 5
-gh run list --workflow=image.yaml --limit 5
 ```
 
 ### Step 6 — Post-CI deployment
