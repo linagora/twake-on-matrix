@@ -136,5 +136,52 @@ void main() {
       expect(taps, 1);
       expect(find.byKey(_viewerKey), findsOneWidget);
     });
+
+    testWidgets(
+      'dismissOverChildDrags does not close when a second finger joins',
+      (tester) async {
+        await _openViewer(
+          tester,
+          child: _childClaimingVerticalDrags(),
+          dismissOverChildDrags: true,
+        );
+        final center = tester.getCenter(find.byKey(_viewerKey));
+
+        final first = await tester.startGesture(center);
+        for (var i = 0; i < 10; i++) {
+          await first.moveBy(const Offset(0, 30));
+          await tester.pump();
+        }
+        final second = await tester.startGesture(center + const Offset(80, 0));
+        await tester.pump();
+        await first.up();
+        await second.up();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(_viewerKey), findsOneWidget);
+      },
+    );
+
+    testWidgets('dismissOverChildDrags does not close on a cancelled pointer', (
+      tester,
+    ) async {
+      await _openViewer(
+        tester,
+        child: _childClaimingVerticalDrags(),
+        dismissOverChildDrags: true,
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(_viewerKey)),
+      );
+      for (var i = 0; i < 10; i++) {
+        await gesture.moveBy(const Offset(0, 30));
+        await tester.pump();
+      }
+      await gesture.cancel();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(_viewerKey), findsOneWidget);
+    });
   });
 }

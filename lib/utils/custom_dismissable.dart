@@ -56,6 +56,14 @@ class _CustomDismissibleState extends State<CustomDismissible>
   }
 
   @override
+  void didUpdateWidget(covariant CustomDismissible oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.dismissOverChildDrags && oldWidget.enabled && !widget.enabled) {
+      _cancelPointerDrag();
+    }
+  }
+
+  @override
   void dispose() {
     _animateController.dispose();
 
@@ -166,10 +174,22 @@ class _CustomDismissibleState extends State<CustomDismissible>
     );
   }
 
-  void _handlePointerEnd(PointerEvent event) {
+  void _handlePointerUp(PointerUpEvent event) {
     if (event.pointer != _pointer) return;
     _pointer = null;
     if (_dragUnderway) _handleDragEnd(DragEndDetails());
+  }
+
+  void _handlePointerCancel(PointerCancelEvent event) {
+    if (event.pointer != _pointer) return;
+    _cancelPointerDrag();
+  }
+
+  void _cancelPointerDrag() {
+    _pointer = null;
+    if (!_dragUnderway) return;
+    _dragUnderway = false;
+    _animateController.reverse();
   }
 
   @override
@@ -187,8 +207,8 @@ class _CustomDismissibleState extends State<CustomDismissible>
         behavior: HitTestBehavior.translucent,
         onPointerDown: widget.enabled ? _handlePointerDown : null,
         onPointerMove: widget.enabled ? _handlePointerMove : null,
-        onPointerUp: _handlePointerEnd,
-        onPointerCancel: _handlePointerEnd,
+        onPointerUp: _handlePointerUp,
+        onPointerCancel: _handlePointerCancel,
         child: content,
       );
     }
