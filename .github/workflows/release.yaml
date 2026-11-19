@@ -29,6 +29,8 @@ jobs:
             runner: ubuntu-latest
           - os: ios
             runner: macos-26
+          - os: macos
+            runner: macos-26
       fail-fast: false
 
     steps:
@@ -76,7 +78,7 @@ jobs:
           java-version: "17"
 
       - name: Select Xcode version
-        if: matrix.os == 'ios'
+        if: matrix.os == 'ios' || matrix.os == 'macos'
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: ${{ env.XCODE_VERSION }}
@@ -95,6 +97,10 @@ jobs:
       - name: Prepare iOS release
         if: matrix.os == 'ios'
         run: ./scripts/prepare-ios.sh
+
+      - name: Prepare macOS release
+        if: matrix.os == 'macos'
+        run: ./scripts/prepare-macos.sh
 
       - name: Compute Sentry release version
         id: sentry_version
@@ -120,6 +126,19 @@ jobs:
           # than fastlane's default 3 + 6 + 12 + 24 s retries on the runner.
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
         run: ../scripts/release-ios-testflight.sh
+        working-directory: ${{ matrix.os }}
+
+      - name: Release on TestFlight (macOS)
+        if: matrix.os == 'macos'
+        env:
+          APPLE_CERTIFICATES_SSH_KEY: ${{ secrets.APPLE_CERTIFICATES_SSH_KEY }}
+          APPLE_KEY_ID: ${{ secrets.APPLE_KEY_ID }}
+          APPLE_ISSUER_ID: ${{ secrets.APPLE_ISSUER_ID }}
+          APPLE_KEY_CONTENT: ${{ secrets.APPLE_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          SENTRY_RELEASE: ${{ steps.sentry_version.outputs.release }}
+          FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
+        run: ../scripts/release-macos-testflight.sh
         working-directory: ${{ matrix.os }}
 
       - name: Build Android APK
