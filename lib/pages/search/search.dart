@@ -205,6 +205,6 @@ class SearchScreenState extends ConsumerState<Search>
   @override
   Widget build(BuildContext context) {
     ref.listen(searchControllerProvider, _onStateChanged);
-    return SearchView(this, client: ref.watch(matrixClientProvider));
+    return SearchView(this);
   }
 }

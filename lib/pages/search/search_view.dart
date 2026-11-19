@@ -14,13 +14,13 @@ import 'package:twake_chat/widgets/twake_components/twake_loading/center_loading
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:linagora_design_flutter/colors/linagora_sys_colors.dart';
-import 'package:matrix/matrix.dart' show Client;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show Consumer;
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 
 class SearchView extends StatelessWidget {
   final SearchScreenState searchController;
-  final Client client;
 
-  const SearchView(this.searchController, {super.key, required this.client});
+  const SearchView(this.searchController, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -146,20 +146,25 @@ class SearchView extends StatelessWidget {
                 return const SizedBox.shrink();
               }
 
-              return ListView.builder(
-                padding: SearchViewStyle.paddingRecentChats,
-                shrinkWrap: true,
-                physics: const ClampingScrollPhysics(),
-                itemCount: contacts.length,
-                itemBuilder: (context, index) {
-                  return RecentItemWidget(
-                    highlightKeyword:
-                        searchController.textEditingController.text,
-                    presentationSearch: contacts[index],
-                    client: client,
-                    key: Key('chat_recent_${contacts[index].id}'),
-                    onTap: () {
-                      searchController.onSearchItemTap(contacts[index]);
+              return Consumer(
+                builder: (context, ref, _) {
+                  final client = ref.watch(matrixClientProvider);
+                  return ListView.builder(
+                    padding: SearchViewStyle.paddingRecentChats,
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    itemCount: contacts.length,
+                    itemBuilder: (context, index) {
+                      return RecentItemWidget(
+                        highlightKeyword:
+                            searchController.textEditingController.text,
+                        presentationSearch: contacts[index],
+                        client: client,
+                        key: Key('chat_recent_${contacts[index].id}'),
+                        onTap: () {
+                          searchController.onSearchItemTap(contacts[index]);
+                        },
+                      );
                     },
                   );
                 },
