@@ -53,12 +53,6 @@ class _FakeController extends Fake implements SettingsController {
   final List<SettingEnum> getListSettingItem = [SettingEnum.chatSettings];
 
   @override
-  Client get client => matrix.client;
-
-  @override
-  String get displayName => displayNameNotifier.value ?? 'alice';
-
-  @override
   bool optionSelected(SettingEnum settingEnum) => false;
 
   @override
@@ -84,7 +78,11 @@ class _SettingsViewScreen {
           theme: ThemeData(extensions: [LinagoraTextThemeExtension.material()]),
           localizationsDelegates: L10n.localizationsDelegates,
           supportedLocales: L10n.supportedLocales,
-          home: SettingsView(controller),
+          home: SettingsView(
+            controller,
+            mxid: '@alice:example.org',
+            fallbackDisplayName: 'alice',
+          ),
         ),
       ),
     );

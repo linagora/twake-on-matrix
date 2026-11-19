@@ -13,6 +13,7 @@ import 'package:matrix/src/utils/cached_stream_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/settings_dashboard/settings/settings.dart';
+import 'package:twake_chat/providers/matrix_client_provider.dart';
 import 'package:twake_chat/providers/report_failure_provider.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
 import 'package:twake_chat/widgets/matrix.dart';
@@ -79,6 +80,7 @@ class _SettingsScreen {
   Future<void> pump(Client client) async {
     await tester.pumpWidget(
       ProviderScope(
+        overrides: [matrixClientProvider.overrideWithValue(client)],
         child: Provider<MatrixState>.value(
           value: _FakeMatrix(client),
           child: MaterialApp(
