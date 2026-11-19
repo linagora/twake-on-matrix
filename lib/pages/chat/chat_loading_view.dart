@@ -162,7 +162,7 @@ class ChatLoadingView extends StatelessWidget {
       return CrossAxisAlignment.end;
     }
     if (responsive.enableRightAndLeftMessageAlignment(context)) {
-      return index % 2 == 0 ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+      return index.isEven ? CrossAxisAlignment.end : CrossAxisAlignment.start;
     }
 
     return CrossAxisAlignment.end;
@@ -177,7 +177,7 @@ class ChatLoadingView extends StatelessWidget {
       return true;
     }
     if (responsive.enableRightAndLeftMessageAlignment(context)) {
-      return index % 2 == 0 ? true : false;
+      return index.isEven;
     }
 
     return true;
