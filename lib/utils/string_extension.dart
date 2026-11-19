@@ -362,10 +362,10 @@ extension StringCasingExtension on String {
     final separatorRegExp = RegExp(r'\b[^ ]{0,100}://');
     final standAloneSeparatorRegExp = RegExp(r' {0,10}:// {0,10}');
 
-    var replacedText = replaceAll(separatorRegExp, '');
-    replacedText = replacedText.replaceAll(standAloneSeparatorRegExp, ' ');
-
-    return replacedText;
+    return replaceAll(
+      separatorRegExp,
+      '',
+    ).replaceAll(standAloneSeparatorRegExp, ' ');
   }
 
   bool isContainsATag() {

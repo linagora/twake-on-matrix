@@ -101,8 +101,7 @@ mixin ChatDetailsTabMixin<T extends ConsumerStatefulWidget>
   static const _filesPageKey = PageStorageKey('files');
 
   Future<Timeline?> _getTimeline() async {
-    _timeline ??= await room?.getTimeline();
-    return _timeline;
+    return _timeline ??= await room?.getTimeline();
   }
 
   Future<Uint8List?> _handleDownloadAndPlayVideo(Event event) {
