@@ -186,14 +186,17 @@ void main() {
       await entry.upload();
       await pumpEventQueue();
       expect(placeholders, isNotEmpty);
+      // The kill dropped the queued upload: only the retry may send.
+      queue.added.clear();
 
       final result = await manager.retryUpload(
         eventAfterRestart('restarted-${entry.name}'),
       );
       await pumpEventQueue();
-      await runQueuedSends();
 
       expect(result, RetryUploadResult.started);
+      expect(queue.added, hasLength(1));
+      await runQueuedSends();
       expect(sentMessages(), isNotEmpty);
     });
   }
