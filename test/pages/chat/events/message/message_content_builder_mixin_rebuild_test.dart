@@ -71,6 +71,8 @@ void main() {
         ),
       ),
     );
+    // Lets the sender lookup the bubble starts reach FakeMatrixApi and finish.
+    await tester.pumpAndSettle();
     return mediaQuery;
   }
 
