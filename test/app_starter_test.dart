@@ -97,4 +97,14 @@ void main() {
     expect(await _syncCallsDuring(window), isPositive);
     expect(guiStarts, 1);
   });
+
+  test('a paused change starts the GUI and keeps the sync stopped', () async {
+    starter.stopBackgroundSync();
+    await _syncCallsDuring(window);
+
+    starter.didChangeAppLifecycleState(AppLifecycleState.paused);
+
+    expect(await _syncCallsDuring(window), 0);
+    expect(guiStarts, 1);
+  });
 }

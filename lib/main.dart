@@ -187,9 +187,11 @@ class AppStarter with WidgetsBindingObserver {
       '${AppConfig.applicationName} switches from the detached background-fetch mode to ${state.name} mode. Rendering GUI...',
     );
     // MatrixState sets the sync only on the lifecycle changes it sees once it
-    // exists, so it misses this one: turn the sync back on here.
-    for (final client in clients) {
-      client.backgroundSync = true;
+    // exists, so it misses this one: turn the sync back on here, by its rule.
+    if (state != AppLifecycleState.paused) {
+      for (final client in clients) {
+        client.backgroundSync = true;
+      }
     }
     unawaited(startGui());
     // We must make sure that the GUI is only started once.
