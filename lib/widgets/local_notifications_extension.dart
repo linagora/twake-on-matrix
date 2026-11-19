@@ -39,40 +39,47 @@ extension LocalNotificationsExtension on MatrixState {
     appInForeground: _appInForeground,
   );
 
-  /// macOS: one local notification per message; the text stays out of the
-  /// notification centre unless the user opted in ([showPreview]).
-  Future<void> showMacosNotification(EventUpdate eventUpdate) async {
+  /// macOS: the text stays out of the notification centre unless the user
+  /// opted in. [client] is the account the event came from.
+  Future<void> showMacosNotification(
+    Client client,
+    EventUpdate eventUpdate,
+  ) async {
     final port = macosNotifications;
-    final room = client.getRoomById(eventUpdate.roomID);
-    if (port == null || room == null) return;
-    final candidate = _notificationCandidate(eventUpdate, room);
-    if (!shouldNotifyMessage(candidate)) return;
-    final event = Event.fromJson(eventUpdate.content, room);
-    final locals = MatrixLocals(L10n.of(context)!);
-    final body = await event.calcLocalizedBody(
-      locals,
-      withSenderNamePrefix: false,
-      plaintextBody: true,
-      hideReply: true,
-      hideEdit: true,
-      removeMarkdown: true,
-    );
-    await MacosMessageNotifier(
-      port,
-      receiverId: client.userID ?? '',
-      genericBody: L10n.of(context)!.newMessage,
-    ).notify(
-      candidate,
-      MessageNotificationContent(
-        roomTitle: room.getLocalizedDisplayname(locals),
-        senderName: event.senderFromMemoryOrFallback.calcDisplayname(),
-        body: body,
-        eventId: event.eventId,
-        isDirectChat: room.isDirectChat,
-      ),
+    if (port == null || !mounted) return;
+    final shown = await notifyMacosMessage(
+      port: port,
+      client: client,
+      eventUpdate: eventUpdate,
+      l10n: L10n.of(context)!,
+      activeRoomId: activeRoomId,
+      appInForeground: _appInForeground,
       // The opt-in setting is not built yet: generic by default.
       showPreview: false,
     );
+    if (shown && client.userID != null) {
+      macosNotifiedRooms[eventUpdate.roomID] = client.userID!;
+    }
+  }
+
+  /// macOS: removes the notification of the rooms [client] has read.
+  Future<void> clearReadMacosNotifications(Client client) async {
+    final port = macosNotifications;
+    if (port == null) return;
+    final read = [
+      for (final e in macosNotifiedRooms.entries)
+        if (e.value == client.userID &&
+            (client.getRoomById(e.key)?.notificationCount ?? 0) == 0)
+          e.key,
+    ];
+    for (final roomId in read) {
+      macosNotifiedRooms.remove(roomId);
+      await MacosMessageNotifier(
+        port,
+        receiverId: client.userID ?? '',
+        genericBody: '',
+      ).cancelRoom(roomId);
+    }
   }
 
   void showLocalNotification(EventUpdate eventUpdate) async {

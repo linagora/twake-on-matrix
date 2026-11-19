@@ -29,6 +29,9 @@ class _FakePlugin implements LocalNotificationsPort {
     if (f != null) throw f;
     shown.add(_Shown(id, title, body, payload));
   }
+
+  @override
+  Future<void> cancel(int id) async {}
 }
 
 MessageNotificationCandidate candidate({
