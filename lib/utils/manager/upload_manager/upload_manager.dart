@@ -59,7 +59,8 @@ class UploadManager {
       final uploadInfoMap = event.unsigned?['upload_info'];
       if (uploadInfoMap is Map<String, dynamic>) {
         try {
-          final info = UploadFileInfo.fromJson(uploadInfoMap);
+          // Nothing uploads it since the app restarted: it can only be retried.
+          final info = UploadFileInfo.fromJson(uploadInfoMap)..isFailed = true;
           if (info.fileInfo != null || info.matrixFile != null) {
             _eventIdMapUploadFileInfo[eventId] = info;
           }
@@ -264,6 +265,7 @@ class UploadManager {
     Event? inReplyTo,
     String? batchId,
     ThreadSendTarget? thread,
+    FileInfo? fileInfo,
   }) {
     final uploadController = BehaviorSubject<Either<Failure, Success>>();
 
@@ -282,6 +284,9 @@ class UploadManager {
       batchId: batchId,
       threadRootEventId: thread?.rootEventId,
       threadLastEventId: thread?.lastEventId,
+      fileInfo: fileInfo is PendingFileInfo || fileInfo?.filePath == null
+          ? null
+          : fileInfo,
     );
   }
 
@@ -328,6 +333,7 @@ class UploadManager {
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
         thread: thread,
+        fileInfo: fakeSendingFileInfo.fileInfo,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txidKey]?.createdAt;
@@ -515,6 +521,7 @@ class UploadManager {
         inReplyTo: isFirstFile ? inReplyTo : null,
         batchId: batchId,
         thread: thread,
+        fileInfo: fileValue,
       );
 
       final sentDate = _eventIdMapUploadFileInfo[txid]?.createdAt;
