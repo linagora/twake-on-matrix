@@ -240,8 +240,7 @@ class _HeroUsersLoaderState extends State<_HeroUsersLoader> {
     _loadedRoomId = room.id;
     _loadedNameless = nameless;
     _loadedMembership = room.membership;
-    // A copy: the SDK updates the summary in place.
-    _loadedHeroes = nameless ? room.summary.mHeroes?.toList() : null;
+    _loadedHeroes = nameless ? room.summary.mHeroes : null;
     _heroUsers = nameless ? room.loadHeroUsers() : null;
   }
 

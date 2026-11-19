@@ -119,15 +119,20 @@ void main() {
     tester,
   ) async {
     final room = buildRoom(name: '');
-    final summary = RoomSummary.fromJson({
-      'm.heroes': ['@alice:server.tld'],
-    });
-    when(room.summary).thenReturn(summary);
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@alice:server.tld'],
+      }),
+    );
 
     await tester.pumpWidget(wrap(ChatListItem(room)));
     await tester.pump();
-    // In place: the row must compare against its own copy of the old heroes.
-    summary.mHeroes![0] = '@bob:server.tld';
+    // A sync replaces the summary of the room with a new one.
+    when(room.summary).thenReturn(
+      RoomSummary.fromJson({
+        'm.heroes': ['@bob:server.tld'],
+      }),
+    );
     await tester.pumpWidget(wrap(ChatListItem(room, activeChat: true)));
     await tester.pump();
 
