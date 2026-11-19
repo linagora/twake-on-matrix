@@ -1643,12 +1643,8 @@ class MatrixState extends ConsumerState<Matrix>
       }
     }
     Sentry.configureScope((scope) => scope.setUser(null));
-    if (PlatformInfos.isMobile) {
-      await _deletePersistActiveAccount();
-      TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
-    } else {
-      TwakeApp.router.go(const HomeRoute($extra: true).location, extra: true);
-    }
+    await _deletePersistActiveAccount();
+    TwakeApp.router.go(const HomeTwakeWelcomeRoute().location);
     await _deleteAllTomConfigurations();
   }
 
