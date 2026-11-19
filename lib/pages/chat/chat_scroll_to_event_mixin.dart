@@ -65,16 +65,34 @@ GlobalObjectKey messageRowKey(String eventId, Iterable<Event> events) =>
 /// The scroll offset that centers [item]. Taken from the layout: while the
 /// item's sliver is wholly off screen, `localToGlobal` stays pinned to the
 /// viewport edge whatever the scroll offset.
-double offsetToCenter(RenderBox item, ScrollPosition position) {
+double offsetToCenter(RenderBox item, ScrollPosition position) =>
+    _offsetToReveal(item, position, 0.5);
+
+double offsetToTop(RenderBox item, ScrollPosition position) =>
+    _offsetToReveal(item, position, 0);
+
+double _offsetToReveal(
+  RenderBox item,
+  ScrollPosition position,
+  double alignment,
+) {
   final viewport = RenderAbstractViewport.of(item);
   // getOffsetToReveal leaves out the anchor of a center-anchored viewport.
   final anchorShift = viewport is RenderViewport
       ? viewport.anchor * position.viewportDimension
       : 0.0;
-  return (viewport.getOffsetToReveal(item, 0.5).offset + anchorShift).clamp(
-    position.minScrollExtent,
-    position.maxScrollExtent,
-  );
+  return (viewport.getOffsetToReveal(item, alignment).offset + anchorShift)
+      .clamp(position.minScrollExtent, position.maxScrollExtent);
+}
+
+/// Puts the row of [rowContext] at the top of the viewport, without animation.
+bool jumpToRowTop(ScrollController controller, BuildContext? rowContext) {
+  final item = rowContext?.findRenderObject();
+  if (item is! RenderBox || !item.hasSize || !controller.hasClients) {
+    return false;
+  }
+  controller.jumpTo(offsetToTop(item, controller.position));
+  return true;
 }
 
 /// `animateTo` completes before its last frame is laid out: wait for it.
@@ -579,54 +597,20 @@ extension ChatScrollToEventMixin on ChatController {
     return succeeded;
   }
 
-  /// Lightweight scroll used when opening an unread room (`fullyRead`).
+  /// Opens an unread room on its first unread row (#2720).
   ///
-  /// Must not raise [jumpListCacheExtent] or hold `_isProgrammaticScrolling`
-  /// for a multi-page seek — that races "scroll to live bottom → mark read"
-  /// (see Patrol `UnreadBadgeClearsScenario`).
-  Future<void> _scrollToEventInLiveTimeline(ChatJumpRequest request) async {
-    final index = _visibleTimelineIndex(request);
-    if (index == null || !scrollController.hasClients) {
-      Logs().d(
-        'Chat::_scrollToEventInLiveTimeline(): skip '
-        '(index=$index hasClients=${scrollController.hasClients})',
-      );
-      return;
-    }
-
-    final displayIndex = getDisplayEventIndex(index);
+  /// Must not hold `_isProgrammaticScrolling` or run a multi-page seek: that
+  /// races "scroll to live bottom → mark read" (Patrol
+  /// `UnreadBadgeClearsScenario`).
+  void _scrollToEventInLiveTimeline(ChatJumpRequest request) {
+    final jumped = jumpToRowTop(
+      scrollController,
+      _rowKey(request.eventId).currentContext,
+    );
     Logs().d(
       'Chat::_scrollToEventInLiveTimeline(): eventId=${request.eventId} '
-      'displayIndex=$displayIndex',
+      'jumped=$jumped',
     );
-
-    if (scrollController.isIndexStateInLayoutRange(displayIndex)) {
-      await scrollController.scrollToIndex(
-        displayIndex,
-        preferPosition: AutoScrollPosition.middle,
-        duration: const Duration(milliseconds: 300),
-      );
-      await SchedulerBinding.instance.endOfFrame;
-      return;
-    }
-
-    // A contextual jump may have started while the scroll above awaited —
-    // do not let this lightweight scroll move the controller out from
-    // under it.
-    if (!_isJumpCurrent(request)) return;
-
-    // Row not in tag map yet: one short ensureVisible attempt if the key
-    // already mounted; otherwise leave the live timeline alone.
-    final keyContext = _rowKey(request.eventId).currentContext;
-    if (keyContext != null && keyContext.mounted) {
-      if (!_isJumpCurrent(request)) return;
-      await Scrollable.ensureVisible(
-        keyContext,
-        alignment: 0.5,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
   }
 
   bool _shouldUseLiveTimelineScroll(ChatJumpRequest request) {
@@ -766,7 +750,7 @@ extension ChatScrollToEventMixin on ChatController {
     // Skip physical scroll while a contextual/URL jump owns the controller.
     if (_shouldUseLiveTimelineScroll(probe)) {
       if (_isProgrammaticScrolling) return;
-      await _scrollToEventInLiveTimeline(probe);
+      _scrollToEventInLiveTimeline(probe);
       return;
     }
 

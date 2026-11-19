@@ -239,6 +239,8 @@ class ChatController extends ConsumerState<Chat>
 
   static const int _defaultEventCountDisplay = 30;
 
+  static const int _maxUnreadHistoryRequests = 3;
+
   static const double defaultMaxWidthReactionPicker = 326;
 
   static const double defaultMaxHeightReactionPicker = 360;
@@ -280,6 +282,9 @@ class ChatController extends ConsumerState<Chat>
   String _markerReadLocation = '';
 
   String? unreadReceivedMessageLocation;
+
+  /// Hides the first frame of the list, drawn at the bottom before the jump.
+  bool isOpeningOnUnread = false;
 
   List<MatrixFile?>? get shareFiles => widget.shareFiles;
 
@@ -694,9 +699,39 @@ class ChatController extends ConsumerState<Chat>
   void _initUnreadLocation(String fullyRead) {
     _markerReadLocation = fullyRead;
     unreadReceivedMessageLocation = _findUnreadReceivedMessageLocation();
-    // Stay on the live timeline so returning to the bottom can still mark
-    // the room read (`allowNewEvent` must remain true).
-    scrollToEventId(fullyRead, highlight: false, allowContextualReload: false);
+    final firstUnread = unreadReceivedMessageLocation ?? fullyRead;
+    // The list mounts on the next frame: build it up to the first unread row.
+    final cacheExtent = jumpListCacheExtent;
+    jumpListCacheExtent = ChatScrollToEventMixin._jumpMountCacheExtent;
+    isOpeningOnUnread = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      // Stay on the live timeline so returning to the bottom can still mark
+      // the room read (`allowNewEvent` must remain true).
+      scrollToEventId(
+        firstUnread,
+        highlight: false,
+        allowContextualReload: false,
+      );
+      isOpeningOnUnread = false;
+      if (!_isProgrammaticScrolling) jumpListCacheExtent = cacheExtent;
+      rebuildChatForJump();
+    });
+  }
+
+  Future<void> _requestHistoryUntil(String eventId) async {
+    for (var i = 0; i < _maxUnreadHistoryRequests; i++) {
+      final timeline = this.timeline;
+      if (!mounted || timeline == null || _isProgrammaticScrolling) return;
+      if (timeline.events.any((event) => event.eventId == eventId)) return;
+      if (!timeline.canRequestHistory) return;
+      try {
+        await requestHistory();
+      } catch (e) {
+        Logs().e('Chat::_requestHistoryUntil(): $e');
+        return;
+      }
+    }
   }
 
   void _tryLoadTimeline() async {
@@ -704,14 +739,18 @@ class ChatController extends ConsumerState<Chat>
     loadTimelineFuture = _getTimeline();
     try {
       await loadTimelineFuture;
+      final fullyRead = room?.fullyRead;
+      final opensOnUnread =
+          fullyRead != null &&
+          fullyRead.isNotEmpty &&
+          room?.hasNewMessages == true;
+      if (opensOnUnread) await _requestHistoryUntil(fullyRead);
+      if (!mounted) return;
       // URL `?event=` jumps are scheduled from didChangeDependencies /
       // didUpdateWidget via `_scheduleJumpToUrlEventIfNeeded` — do not
       // start a second jump here (overlapping cacheExtent / scroll).
       await _tryRequestHistory();
-      final fullyRead = room?.fullyRead;
-      if (fullyRead != null &&
-          fullyRead.isNotEmpty &&
-          room?.hasNewMessages == true) {
+      if (opensOnUnread) {
         // Log only when lastEvent is absent — scrolling to fullyRead may push it out of view.
         final lastEventId = room?.lastEvent?.eventId;
         final lastEventInTimeline =

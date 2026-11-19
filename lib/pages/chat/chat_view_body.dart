@@ -88,16 +88,30 @@ class ChatViewBody extends StatelessWidget with MessageContentMixin {
                           valueListenable:
                               controller.openingChatViewStateNotifier,
                           builder: (context, viewState, __) {
-                            if (viewState is ViewEventListLoading ||
-                                controller.timeline == null) {
-                              return const ChatLoadingView();
-                            }
-
-                            if (viewState is ViewEventListSuccess) {
-                              return ChatEventList(controller: controller);
-                            }
-
-                            return const SizedBox.shrink();
+                            final isLoading =
+                                viewState is ViewEventListLoading ||
+                                controller.timeline == null;
+                            final showsList =
+                                !isLoading && viewState is ViewEventListSuccess;
+                            // Keeps the same skeleton up while the list lays out hidden.
+                            return Stack(
+                              children: [
+                                if (showsList)
+                                  Opacity(
+                                    opacity: controller.isOpeningOnUnread
+                                        ? 0
+                                        : 1,
+                                    child: ChatEventList(
+                                      controller: controller,
+                                    ),
+                                  ),
+                                if (isLoading ||
+                                    (showsList && controller.isOpeningOnUnread))
+                                  const ChatLoadingView(
+                                    key: ValueKey('chat_loading_view'),
+                                  ),
+                              ],
+                            );
                           },
                         ),
                       ),
