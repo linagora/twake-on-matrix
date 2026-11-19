@@ -26,6 +26,7 @@ linter:
     - combinators_ordering
     - join_return_with_assignment
     - use_is_even_rather_than_modulo
+    - switch_on_type
 
 analyzer:
   errors:
