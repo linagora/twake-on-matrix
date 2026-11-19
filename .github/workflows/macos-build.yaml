@@ -2,9 +2,12 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - "macos/**"
       - "lib/**"
-      - "pubspec.*"
+      - "macos/**"
+      - "assets/**"
+      - "pubspec.yaml"
+      - "pubspec.lock"
+      - ".fvmrc"
       - ".github/workflows/macos-build.yaml"
 
 name: macOS build
@@ -24,6 +27,9 @@ jobs:
   build_debug_macos:
     name: Build debug version for macOS
     runs-on: macos-26
+    timeout-minutes: 45
+    # secrets (SSH_KEY) are empty on fork PRs
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -55,4 +61,8 @@ jobs:
           flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Build debug macOS app
+        # no certificate on the runner: build unsigned
+        env:
+          FLUTTER_XCODE_CODE_SIGNING_ALLOWED: "NO"
+          FLUTTER_XCODE_CODE_SIGN_IDENTITY: "-"
         run: flutter build macos --debug
