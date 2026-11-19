@@ -8,7 +8,9 @@
 PRODUCT_NAME = Twake
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = app.twake.macos.chat
+// Same bundle id as the iOS app: the Mac app joins the existing App Store record
+// (universal purchase).
+PRODUCT_BUNDLE_IDENTIFIER = app.twake.ios.chat
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 Linagora. All rights reserved.
