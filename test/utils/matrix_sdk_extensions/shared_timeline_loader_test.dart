@@ -62,6 +62,27 @@ void main() {
     },
   );
 
+  test('get after dispose fails without starting a load', () async {
+    loader.dispose();
+
+    await expectLater(loader.get(), throwsStateError);
+    expect(loadCount, 0);
+  });
+
+  test(
+    'get after a failed load and dispose fails without a new load',
+    () async {
+      final failed = loader.get();
+      pendingLoad.completeError(Exception('db'));
+      await expectLater(failed, throwsException);
+
+      loader.dispose();
+
+      await expectLater(loader.get(), throwsStateError);
+      expect(loadCount, 1);
+    },
+  );
+
   test('dispose without any load does nothing', () async {
     loader.dispose();
     await pumpEventQueue();

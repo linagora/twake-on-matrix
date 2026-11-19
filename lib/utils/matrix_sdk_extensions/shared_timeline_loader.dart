@@ -18,8 +18,16 @@ class SharedTimelineLoader {
   bool _disposed = false;
 
   /// Starts the load on the first call; later calls share it. A failed load
-  /// is forgotten so the next call retries.
-  Future<Timeline> get() => _timeline ??= _loadOnce();
+  /// is forgotten so the next call retries. Fails after [dispose], since
+  /// nothing would cancel a timeline loaded then.
+  Future<Timeline> get() {
+    if (_disposed) {
+      return Future.error(
+        StateError('SharedTimelineLoader used after dispose'),
+      );
+    }
+    return _timeline ??= _loadOnce();
+  }
 
   Future<Timeline> _loadOnce() async {
     try {
