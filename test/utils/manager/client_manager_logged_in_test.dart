@@ -150,28 +150,6 @@ void main() {
     });
   });
 
-  group('ClientManager.accountLabel', () {
-    final sender = FakeAccountClient('sender', userID: '@sender:s');
-    final receiver = FakeAccountClient('receiver', userID: '@receiver:s');
-
-    test('a single account shows no label', () {
-      expect(ClientManager.accountLabel(receiver, [receiver]), isNull);
-    });
-
-    test('several accounts show the receiving one', () {
-      expect(
-        ClientManager.accountLabel(receiver, [sender, receiver]),
-        '@receiver:s',
-      );
-    });
-
-    test('a logged-out account does not count', () {
-      final gone = FakeAccountClient('gone', userID: '@gone:s', logged: false);
-
-      expect(ClientManager.accountLabel(receiver, [gone, receiver]), isNull);
-    });
-  });
-
   group('ClientManager.firstLoggedIn', () {
     test('skips a logged-out client and returns the logged-in one', () async {
       final loggedIn = await getClient();

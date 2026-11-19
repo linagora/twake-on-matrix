@@ -129,11 +129,6 @@ abstract class ClientManager {
     );
   }
 
-  /// The account a notification is for, shown only while several accounts
-  /// are signed in.
-  static String? accountLabel(Client receiving, Iterable<Client> held) =>
-      loggedIn(held).length > 1 ? receiving.userID : null;
-
   /// Deletes what a client stored: its database and, for the SQLite one, the
   /// file.
   static Future<void> deleteClientStorage(DatabaseApi database) async {

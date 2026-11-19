@@ -436,15 +436,11 @@ class BackgroundPush {
     return instance;
   }
 
-  /// Cancels the notification of [roomId] for the account [userId] (the
-  /// push client's when null); another account's one for the room stays.
-  Future<void> cancelNotification(String roomId, {String? userId}) async {
+  Future<void> cancelNotification(String roomId) async {
     Logs().v('Cancel notification for room', roomId);
     await _loadIdMap();
-    for (final key in notificationIdKeys(userId ?? client.userID, roomId)) {
-      final id = idMap[key];
-      if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
-    }
+    final id = idMap[roomId];
+    if (id != null) await FlutterLocalNotificationsPlugin().cancel(id);
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -763,10 +759,6 @@ class BackgroundPush {
     pushHelper(
       notification,
       client: receiving,
-      accountLabel: ClientManager.accountLabel(
-        receiving,
-        _matrixState?.currentClients.whereType<Client>() ?? const [],
-      ),
       l10n: l10n,
       activeRoomId: _matrixState?.activeRoomId,
       onSelectNotification: (data) =>
@@ -995,19 +987,18 @@ class BackgroundPush {
             .map((r) => r.id);
       }
       await _loadIdMap();
-      final clearedKeys = <String>{};
+      final clearedRoomIds = <String>{};
       for (final roomId in emptyRooms) {
-        for (final key in notificationIdKeys(client.userID, roomId)) {
-          final id = idMap[key];
-          if (id == null) continue;
-          clearedKeys.add(key);
+        final id = idMap[roomId];
+        if (id != null) {
+          clearedRoomIds.add(roomId);
           await _flutterLocalNotificationsPlugin.cancel(id);
         }
       }
-      if (clearedKeys.isNotEmpty) {
+      if (clearedRoomIds.isNotEmpty) {
         // Reload: a notification may have mapped a new room while cancelling.
         await _loadIdMap();
-        idMap.removeWhere((key, _) => clearedKeys.contains(key));
+        idMap.removeWhere((roomId, _) => clearedRoomIds.contains(roomId));
         await store.setItem(
           SettingKeys.notificationCurrentIds,
           json.encode(idMap),

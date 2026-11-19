@@ -22,7 +22,6 @@ Future<void> pushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
-  String? accountLabel,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   try {
@@ -32,7 +31,6 @@ Future<void> pushHelper(
       client: client,
       l10n: l10n,
       activeRoomId: activeRoomId,
-      accountLabel: accountLabel,
       onSelectNotification: onSelectNotification,
     );
   } catch (e, s) {
@@ -76,7 +74,6 @@ Future<void> _tryPushHelper(
   Client? client,
   L10n? l10n,
   String? activeRoomId,
-  String? accountLabel,
   void Function(NotificationResponse?)? onSelectNotification,
 }) async {
   final isBackgroundMessage = client == null;
@@ -161,7 +158,6 @@ Future<void> _tryPushHelper(
     event,
     notification,
     l10n,
-    accountLabel: accountLabel,
   );
 
   final sessionId = event.content.tryGet<String>('session_id');
@@ -206,7 +202,6 @@ Future<void> _tryPushHelper(
           notification,
           l10n,
           replace: true,
-          accountLabel: accountLabel,
         );
       }
     } catch (e, s) {
@@ -226,7 +221,6 @@ Future<void> _showNotification(
   PushNotification notification,
   L10n l10n, {
   bool replace = false,
-  String? accountLabel,
 }) {
   final shown = _showQueue.then(
     (_) => _showNotificationNow(
@@ -235,7 +229,6 @@ Future<void> _showNotification(
       notification,
       l10n,
       replace: replace,
-      accountLabel: accountLabel,
     ),
   );
   _showQueue = shown.catchError((_) {});
@@ -248,7 +241,6 @@ Future<void> _showNotificationNow(
   PushNotification notification,
   L10n l10n, {
   bool replace = false,
-  String? accountLabel,
 }) async {
   final client = event.room.client;
   final matrixLocals = MatrixLocals(l10n);
@@ -278,8 +270,7 @@ Future<void> _showNotificationNow(
     Logs().e('Unable to get avatar picture', e, s);
   }
 
-  final key = notificationIdKey(client.userID, event.room.id);
-  final id = await mapRoomIdToInt(key);
+  final id = await mapRoomIdToInt(event.room.id);
 
   // Show notification
   final newMessage = Message(
@@ -334,12 +325,10 @@ Future<void> _showNotificationNow(
     importance: Importance.max,
     priority: Priority.high,
     onlyAlertOnce: replace,
-    groupKey: key,
-    subText: accountLabel,
+    groupKey: event.room.id,
   );
   final iOSPlatformChannelSpecifics = DarwinNotificationDetails(
     presentSound: !replace,
-    subtitle: accountLabel,
   );
   final platformChannelSpecifics = NotificationDetails(
     android: androidPlatformChannelSpecifics,
@@ -356,18 +345,6 @@ Future<void> _showNotificationNow(
     payload: jsonEncode({'room_id': event.roomId, 'receiver_id': receiverId}),
   );
 }
-
-/// The key of one account's notification for a room: a room shared by two
-/// accounts shows one notification per account.
-String notificationIdKey(String? userId, String roomId) =>
-    userId == null ? roomId : '$userId|$roomId';
-
-/// The keys a room's notification for [userId] may be stored under: its own
-/// and the room id alone, stored before notifications were per account.
-Set<String> notificationIdKeys(String? userId, String roomId) => {
-  notificationIdKey(userId, roomId),
-  roomId,
-};
 
 /// Workaround for the problem that local notification IDs must be int but we
 /// sort by [roomId] which is a String. To make sure that we don't have duplicated

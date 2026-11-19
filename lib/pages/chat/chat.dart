@@ -816,10 +816,7 @@ class ChatController extends ConsumerState<Chat>
       if (!mounted) return;
       if (currentEventId == null ||
           currentEventId == timeline.room.lastEvent?.eventId) {
-        Matrix.of(context).backgroundPush?.cancelNotification(
-          roomId!,
-          userId: timeline.room.client.userID,
-        );
+        Matrix.of(context).backgroundPush?.cancelNotification(roomId!);
       }
 
       // If no new request arrived while we awaited, we're done.
