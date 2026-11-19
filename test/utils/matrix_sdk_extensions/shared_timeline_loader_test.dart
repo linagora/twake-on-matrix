@@ -79,4 +79,21 @@ void main() {
     expect(await loader.get(), same(timeline));
     expect(loadCount, 2);
   });
+
+  test(
+    'a load that throws synchronously is retried by the next call',
+    () async {
+      var calls = 0;
+      final syncThrowLoader = SharedTimelineLoader(() {
+        calls++;
+        if (calls == 1) throw StateError('no room');
+        return Future.value(timeline);
+      });
+
+      await expectLater(syncThrowLoader.get(), throwsStateError);
+
+      expect(await syncThrowLoader.get(), same(timeline));
+      expect(calls, 2);
+    },
+  );
 }

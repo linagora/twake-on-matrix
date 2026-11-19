@@ -23,7 +23,9 @@ class SharedTimelineLoader {
 
   Future<Timeline> _loadOnce() async {
     try {
-      return await _load();
+      // Future.sync turns a synchronous throw into a failed future, so the
+      // reset below runs after get() has stored it.
+      return await Future<Timeline>.sync(_load);
     } catch (_) {
       if (!_disposed) _timeline = null;
       rethrow;

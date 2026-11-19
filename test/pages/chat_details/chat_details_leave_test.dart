@@ -32,6 +32,7 @@ class _FakeMatrixState extends Fake implements MatrixState {
 @GenerateNiceMocks([
   MockSpec<Client>(),
   MockSpec<Room>(),
+  MockSpec<Timeline>(),
   MockSpec<BanUserInteractor>(),
   MockSpec<TimelineSearchEventInteractor>(),
 ])
@@ -71,6 +72,7 @@ void main() {
     when(room.summary).thenReturn(RoomSummary.fromJson({}));
     when(room.getLocalizedDisplayname(any)).thenReturn('Group');
     when(room.leave()).thenAnswer((_) async {});
+    when(room.getTimeline()).thenAnswer((_) async => MockTimeline());
   });
 
   tearDown(() => GetIt.instance.reset());
