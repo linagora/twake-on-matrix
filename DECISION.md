@@ -378,3 +378,20 @@ Not checked on a device: the snap gesture, the real iOS rendering, and the
 audio player appearing while the block is hidden. The layout was checked with
 widget renders at 390 x 844 and a 47 px status bar inset, compared with the
 fixed app bar of before.
+
+## D21. A chat with unread messages opens on the first unread one, without scrolling (proposed by Johann, 2026-11-19)
+
+Opening a chat with unread messages shows the "Unread messages" divider at the
+top of the screen, with the first unread message right under it, from the first
+frame: no scroll animation (#2720, as the designer asked in
+https://github.com/linagora/twake-on-matrix/issues/2720#issuecomment-3579815019).
+When all the unread messages fit on the screen, the chat opens at the bottom,
+as before.
+
+When the read marker is older than the loaded messages, the chat loads more
+history first (up to three pages of 100 events), behind the loading skeleton.
+If the marker is still not found, the chat opens at the bottom.
+
+Opening the chat only marks as read the messages shown on the screen. The
+unread count drops to the messages below, and the room is read once the user
+reaches the bottom, as before.
