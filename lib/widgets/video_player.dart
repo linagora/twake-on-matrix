@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/widgets/media_viewer_web_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:media_kit/media_kit.dart';
@@ -35,7 +33,6 @@ class VideoPlayer extends StatefulWidget {
 class _VideoPlayerState extends State<VideoPlayer> {
   late Player player;
   late VideoController videoController;
-  final _webOverlay = MediaViewerWebOverlay.video();
 
   /// Creates a [Player] with explicit log level so decoder selection warnings
   /// (e.g. silent HW → SW fallback on Android) are captured in logs.
@@ -84,11 +81,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     unawaited(
       _openMedia(targetPlayer: player, url: widget.url, bytes: widget.bytes),
     );
-    if (PlatformInfos.isWeb &&
-        widget.bytes != null &&
-        widget.mimeType != null) {
-      _webOverlay.attach(bytes: widget.bytes!, mimeType: widget.mimeType!);
-    }
   }
 
   @override
@@ -97,14 +89,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
     final urlChanged = widget.url != oldWidget.url && widget.url != null;
     final bytesChanged =
         widget.bytes != oldWidget.bytes && widget.bytes != null;
-    final mimeChanged = widget.mimeType != oldWidget.mimeType;
-
-    if (PlatformInfos.isWeb && (urlChanged || bytesChanged || mimeChanged)) {
-      _webOverlay.dispose();
-      if (widget.bytes != null && widget.mimeType != null) {
-        _webOverlay.attach(bytes: widget.bytes!, mimeType: widget.mimeType!);
-      }
-    }
 
     if (!urlChanged && !bytesChanged) return;
 
@@ -120,7 +104,6 @@ class _VideoPlayerState extends State<VideoPlayer> {
 
   @override
   void dispose() {
-    _webOverlay.dispose();
     player.dispose();
     super.dispose();
   }

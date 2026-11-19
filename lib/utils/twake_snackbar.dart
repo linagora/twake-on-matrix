@@ -13,7 +13,7 @@ class TwakeSnackBarStyle {
       EdgeInsetsDirectional.symmetric(horizontal: 16, vertical: 14);
 
   static double? widthSnackBar(BuildContext context) {
-    if (responsiveUtils.isWebDesktop(context)) {
+    if (responsiveUtils.isDesktopPlatformWide(context)) {
       return 334;
     } else {
       return null;

@@ -361,14 +361,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
-  chewie:
-    dependency: "direct main"
-    description:
-      name: chewie
-      sha256: "56b6641693ddd72f0cd54ddfedf4f3e9390e6d7b7b22dc2503b7e6ad91476f7f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.17.2"
   ci:
     dependency: transitive
     description:
@@ -506,7 +498,7 @@ packages:
     source: hosted
     version: "0.17.3"
   cupertino_icons:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: cupertino_icons
       sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
@@ -681,14 +673,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.4"
-  emoji_proposal:
-    dependency: "direct main"
-    description:
-      name: emoji_proposal
-      sha256: e931bc42b54a65397b3df7915bb58ee7dcbd3ed81c3b8c256b9a5b210e94ea63
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.1"
   emojis:
     dependency: "direct main"
     description:
@@ -778,32 +762,8 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.14"
-  file_selector:
-    dependency: "direct overridden"
-    description:
-      name: file_selector
-      sha256: "1d2fde93dddf634a9c3c0faa748169d7ac0d83757135555707e52f02c017ad4f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.5"
-  file_selector_android:
-    dependency: transitive
-    description:
-      name: file_selector_android
-      sha256: d670cd0ce77a2e785b18d8b4d0a8d6a222d6a813ec9b7ddf2790a1b4fb6fa92c
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.2+11"
-  file_selector_ios:
-    dependency: transitive
-    description:
-      name: file_selector_ios
-      sha256: "97269e5307a0ab813b1fa2430bada0a96e0afb74848417f8676f64ba5de0051c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.5.3+6"
   file_selector_linux:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: file_selector_linux
       sha256: da76400e7872ce7637ffdce12749ec24169c25f6195c28372208e65a24bcd2ab
@@ -826,14 +786,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.7.0"
-  file_selector_web:
-    dependency: transitive
-    description:
-      name: file_selector_web
-      sha256: "73181fbc5257776d8ecaa6a94ab3c8e920ad143b9132a6d984a9271dfc6928d3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.9.5"
   file_selector_windows:
     dependency: transitive
     description:
@@ -1278,15 +1230,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.8"
-  flutter_openssl_crypto:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: main
-      resolved-ref: "4aef210624adbccf350cbd6343b7a20e3b1c000c"
-      url: "https://github.com/linagora/flutter_openssl_crypto.git"
-    source: git
-    version: "0.5.0"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1441,14 +1384,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.3"
-  fluttertoast:
-    dependency: "direct main"
-    description:
-      name: fluttertoast
-      sha256: "7903c9d5339173497bfecbc23bc4212f5a87e0edfac2e1693fb74465ea67da7e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.1.0"
   freezed:
     dependency: "direct dev"
     description:
@@ -1551,14 +1486,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-  handy_window:
-    dependency: "direct main"
-    description:
-      name: handy_window
-      sha256: "57fb3c5623cf6e750135235fd44116bf9517f2d6a3043bbb8d9581917bcb08ab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.9"
   hashcodes:
     dependency: transitive
     description:
@@ -1616,7 +1543,7 @@ packages:
     source: hosted
     version: "1.0.3"
   html:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: html
       sha256: "3a7812d5bcd2894edf53dfaf8cd640876cf6cef50a8f238745c8b8120ea74d3a"
@@ -2822,14 +2749,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.7"
-  remove_emoji:
-    dependency: transitive
-    description:
-      name: remove_emoji
-      sha256: ed9e8463e8c9ca05b86fcddd4c0dbd2c2605a50d267f4ffa05496607924809e3
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.10"
   riverpod:
     dependency: transitive
     description:
@@ -2950,14 +2869,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  sentiment_dart:
-    dependency: transitive
-    description:
-      name: sentiment_dart
-      sha256: ddac8742cf5141f531eb1510b074ce715b9958cb02a763a4cc0a918768e4a0c8
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.5"
   sentry:
     dependency: transitive
     description:
@@ -3117,7 +3028,7 @@ packages:
     source: hosted
     version: "0.2.12"
   slugify:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: slugify
       sha256: b272501565cb28050cac2d96b7bf28a2d24c8dae359280361d124f3093d337c3
@@ -3365,14 +3276,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
-  tor_detector_web:
-    dependency: "direct main"
-    description:
-      name: tor_detector_web
-      sha256: c4acbd6c0fecd2cd0e8fe00b1a37332422e041021a42488dfddcb3e7ec809b3f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.0"
   translations_cleaner:
     dependency: "direct dev"
     description:
@@ -3382,7 +3285,7 @@ packages:
     source: hosted
     version: "0.0.5"
   tuple:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: tuple
       sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
@@ -3455,7 +3358,7 @@ packages:
     source: hosted
     version: "1.0.0"
   universal_html:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: universal_html
       sha256: "56536254004e24d9d8cfdb7dbbf09b74cf8df96729f38a2f5c238163e3d58971"
@@ -3730,7 +3633,7 @@ packages:
     source: hosted
     version: "0.8.0"
   wakelock_plus:
-    dependency: "direct main"
+    dependency: "direct overridden"
     description:
       name: wakelock_plus
       sha256: a474e314c3e8fb5adef1f9ae2d247e57467ad557fa7483a2b895bc1b421c5678
@@ -3754,7 +3657,7 @@ packages:
     source: hosted
     version: "1.2.1"
   web:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: web
       sha256: "868d88a33d8a87b18ffc05f9f030ba328ffefba92d6c127917a2ba740f9cfe4a"

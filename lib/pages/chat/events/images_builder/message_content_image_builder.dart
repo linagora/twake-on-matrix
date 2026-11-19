@@ -67,7 +67,7 @@ class _MessageImageBuilderState extends ConsumerState<MessageImageBuilder> {
             .getOriginalResolution()
             ?.getDisplayImageInfo(context);
 
-        if (matrixFile != null && matrixFile.isSendingImageInMobile()) {
+        if (matrixFile != null && matrixFile.isSendingImage()) {
           final file = matrixFile as MatrixImageFile;
           displayImageInfo = Size(
             file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
@@ -89,21 +89,6 @@ class _MessageImageBuilderState extends ConsumerState<MessageImageBuilder> {
           ),
           hasBlur: true,
         );
-        if (matrixFile != null && matrixFile.isSendingImageInWeb()) {
-          final file = matrixFile as MatrixImageFile;
-          displayImageInfo = Size(
-            file.width?.toDouble() ?? MessageContentStyle.imageWidth(context),
-            file.height?.toDouble() ?? MessageContentStyle.imageHeight(context),
-          ).getDisplayImageInfo(context);
-          return SendingImageInfoWidget(
-            key: ValueKey(widget.event.eventId),
-            matrixFile: file,
-            event: widget.event,
-            onTapPreview: widget.onTapPreview,
-            displayImageInfo: displayImageInfo,
-            bubbleWidth: widget.maxWidth,
-          );
-        }
         // Keep the placeholder bubble
         if (!widget.event.status.isSent) {
           return SendingImageInfoWidget(

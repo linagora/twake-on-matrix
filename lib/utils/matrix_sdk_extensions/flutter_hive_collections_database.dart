@@ -31,8 +31,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     Logs().d('Open Hive...');
     HiveAesCipher? hiverCipher;
     try {
-      // Workaround for secure storage is calling Platform.operatingSystem on web
-      if (kIsWeb || PlatformInfos.isIOS) {
+      if (PlatformInfos.isIOS) {
         // ignore: unawaited_futures
         throw MissingPluginException();
       }
@@ -74,9 +73,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
     } catch (e, s) {
       Logs().w('Unable to open Hive. Delete database and storage key...', e, s);
       secureStorage.delete(key: cipherStorageKey);
-      await db
-          .clear(supportDeleteCollections: !PlatformInfos.isWeb)
-          .catchError((_) {});
+      await db.clear(supportDeleteCollections: true).catchError((_) {});
       await Hive.deleteFromDisk();
       rethrow;
     }
@@ -86,28 +83,27 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
 
   static Future<String> _findDatabasePath(Client client) async {
     String path = client.clientName;
-    if (!kIsWeb) {
-      Directory directory;
-      try {
-        if (Platform.isLinux) {
-          directory = await getApplicationSupportDirectory();
-        } else {
-          directory = await getApplicationDocumentsDirectory();
-        }
-      } catch (_) {
-        try {
-          directory = await getLibraryDirectory();
-        } catch (_) {
-          directory = Directory.current;
-        }
+    Directory directory;
+    try {
+      if (Platform.isLinux) {
+        directory = await getApplicationSupportDirectory();
+      } else {
+        directory = await getApplicationDocumentsDirectory();
       }
-      // do not destroy your stable FluffyChat in debug mode
-      directory = Directory(
-        directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
-      );
-      directory.create(recursive: true);
-      path = directory.path;
+    } catch (_) {
+      try {
+        directory = await getLibraryDirectory();
+      } catch (_) {
+        directory = Directory.current;
+      }
     }
+    // do not destroy your stable FluffyChat in debug mode
+    directory = Directory(
+      directory.uri.resolve(kDebugMode ? 'hive_debug' : 'hive').toFilePath(),
+    );
+    directory.create(recursive: true);
+    path = directory.path;
+
     return path;
   }
 
@@ -115,7 +111,7 @@ class FlutterHiveCollectionsDatabase extends HiveCollectionsDatabase {
   int get maxFileSize => supportsFileStoring ? 100 * 1024 * 1024 : 0;
 
   @override
-  bool get supportsFileStoring => !kIsWeb;
+  bool get supportsFileStoring => true;
 
   static void _onStartMigrating(int currentVersion, int newVersion) async {
     Logs().d(

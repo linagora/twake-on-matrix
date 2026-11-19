@@ -69,7 +69,7 @@ class _InviteFriendButton extends ConsumerWidget {
                 url,
                 sharePositionOrigin: context.sharePositionOrigin,
               );
-            } else if (PlatformInfos.isWeb) {
+            } else if (PlatformInfos.isDesktop) {
               await Clipboard.setData(ClipboardData(text: url));
               TwakeSnackBar.show(
                 context,

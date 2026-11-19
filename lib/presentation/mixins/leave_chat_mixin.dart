@@ -24,7 +24,7 @@ mixin LeaveChatMixin {
         message: L10n.of(context)!.leaveChatDescription,
         okLabel: L10n.of(context)!.leave,
         cancelLabel: L10n.of(context)!.cancel,
-        showCloseButton: PlatformInfos.isWeb,
+        showCloseButton: PlatformInfos.isDesktop,
       );
       if (confirmResult == ConfirmResult.cancel) return;
 

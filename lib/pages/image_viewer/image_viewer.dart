@@ -8,11 +8,9 @@ import 'package:twake_chat/domain/usecase/room/download_media_file_interactor.da
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:twake_chat/pages/forward/forward.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer_view.dart';
-import 'package:twake_chat/widgets/media_viewer_web_overlay.dart';
 import 'package:twake_chat/presentation/model/pop_result_from_forward.dart';
 import 'package:twake_chat/pages/image_viewer/image_viewer_style.dart';
 import 'package:twake_chat/utils/image_zoom_scope.dart';
-import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -65,53 +63,15 @@ class ImageViewerController extends State<ImageViewer> {
 
   StreamSubscription? _thumbnailSubscription;
 
-  final _webOverlay = MediaViewerWebOverlay.image();
-  String? _webAttachmentEventId;
-  Future<MatrixFile>? _webAttachmentFuture;
-
   @override
   void initState() {
     super.initState();
     showAppbarPreview = ValueNotifier(widget.showAppBar);
     transformationController.addListener(_handleZoomChanged);
-    if (PlatformInfos.isWeb && widget.event != null) {
-      _injectWebImageOverlay(widget.event!);
-    }
-    if (!PlatformInfos.isWeb && widget.event != null) {
+    if (widget.event != null) {
       handleDownloadFile(widget.event!);
       handleDownloadThumbnailFile(widget.event!);
     }
-  }
-
-  /// Downloads the image bytes and injects a transparent `<img>` overlay into
-  /// the DOM so the browser's native "Save Image As" context menu works.
-  Future<void> _injectWebImageOverlay(Event event) async {
-    try {
-      final matrixFile = await webAttachmentFuture(event);
-      if (!mounted) return;
-      final mimeType = event.mimeType ?? 'image/jpeg';
-      _webOverlay.attach(
-        bytes: matrixFile.bytes,
-        mimeType: mimeType,
-        appBarHeight: ImageViewerStyle.appBarHeight ?? 56,
-      );
-    } catch (e) {
-      Logs().e('ImageViewerController: failed to inject web overlay', e);
-    }
-  }
-
-  Future<MatrixFile> webAttachmentFuture(Event event) {
-    if (_webAttachmentEventId != event.eventId) {
-      _webAttachmentEventId = event.eventId;
-      _webAttachmentFuture = event.downloadAndDecryptAttachment().catchError((
-        e,
-      ) {
-        _webAttachmentEventId = null;
-        _webAttachmentFuture = null;
-        throw e;
-      });
-    }
-    return _webAttachmentFuture!;
   }
 
   Future<void> handleDownloadFile(Event event) async {
@@ -212,7 +172,6 @@ class ImageViewerController extends State<ImageViewer> {
 
   @override
   void dispose() {
-    _webOverlay.dispose();
     _downloadSubscription?.cancel();
     _thumbnailSubscription?.cancel();
     transformationController.removeListener(_handleZoomChanged);

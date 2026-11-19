@@ -7,7 +7,6 @@ import 'package:twake_chat/presentation/mixins/linkify_mixin.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/utils/url_launcher.dart';
-import 'package:twake_chat/widgets/native_link_span.dart';
 import 'package:twake_chat/widgets/mentioned_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,20 +83,12 @@ class HtmlMessage extends StatelessWidget with LinkifyMixin {
         details: tapDownDetails,
         link: link,
       ),
-      linkBuilder: (url, childrenSpan, linkStyle) =>
-          filenameLinkAsPlainText(
-            url: url,
-            childrenSpan: childrenSpan,
-            linkStyle: linkStyle,
-            textStyle: effectiveDefaultTextStyle,
-          ) ??
-          buildNativeLinkSpan(
-            url: url,
-            childrenSpan: childrenSpan,
-            linkStyle: linkStyle,
-            onTapDown: (_) =>
-                UrlLauncher(context, url: url, room: room).launchUrl(),
-          ),
+      linkBuilder: (url, childrenSpan, linkStyle) => filenameLinkAsPlainText(
+        url: url,
+        childrenSpan: childrenSpan,
+        linkStyle: linkStyle,
+        textStyle: effectiveDefaultTextStyle,
+      ),
       onPillTap: !room.isDirectChat
           ? (url) {
               UrlLauncher(context, url: url, room: room).launchUrl();

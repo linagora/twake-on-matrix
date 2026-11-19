@@ -255,7 +255,7 @@ class NewGroupChatInfoScreenState extends ConsumerState<NewGroupChatInfo>
     if (isCreatingRoom) {
       return;
     }
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       pickAvatarImageOnWeb();
       return;
     }

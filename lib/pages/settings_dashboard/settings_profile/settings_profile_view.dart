@@ -249,7 +249,7 @@ class SettingsProfileView extends StatelessWidget {
     if (PlatformInfos.isMobile) {
       return Theme.of(context).colorScheme.surface;
     } else {
-      return responsive.isWebDesktop(context)
+      return responsive.isDesktopPlatformWide(context)
           ? Theme.of(context).colorScheme.surface
           : LinagoraSysColors.material().onPrimary;
     }

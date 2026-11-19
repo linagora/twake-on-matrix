@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:collection/collection.dart';
-import 'package:twake_chat/config/app_config.dart';
 import 'package:twake_chat/config/first_column_inner_routes.dart';
 import 'package:twake_chat/di/global/dio_cache_interceptor_for_client.dart';
 import 'package:twake_chat/di/global/get_it_initializer.dart';
@@ -27,10 +26,7 @@ import 'package:twake_chat/generated/assets.gen.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/extension/build_context_extension.dart';
 import 'package:twake_chat/utils/responsive/responsive_utils.dart';
-import 'package:twake_chat/utils/tor_stub.dart'
-    if (dart.library.html) 'package:tor_detector_web/tor_detector_web.dart';
 import 'package:twake_chat/utils/twake_snackbar.dart';
-import 'package:twake_chat/utils/web_push/web_push.dart';
 import 'package:twake_chat/widgets/context_menu/context_menu_action.dart';
 import 'package:twake_chat/widgets/layouts/agruments/app_adaptive_scaffold_body_args.dart';
 import 'package:twake_chat/widgets/layouts/agruments/logged_in_body_args.dart';
@@ -38,14 +34,12 @@ import 'package:twake_chat/widgets/layouts/agruments/logged_in_other_account_bod
 import 'package:twake_chat/widgets/mixins/popup_context_menu_action_mixin.dart';
 import 'package:twake_chat/widgets/mixins/popup_menu_widget_mixin.dart';
 import 'package:twake_chat/widgets/mixins/twake_context_menu_mixin.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/generated/l10n/app_localizations.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
 
 import '../../widgets/matrix.dart';
 
@@ -81,7 +75,6 @@ class ChatListController extends State<ChatList>
         GoToGroupChatMixin,
         TwakeContextMenuMixin {
   final responsive = getIt.get<ResponsiveUtils>();
-  bool _webPushPermissionSoftAskShown = false;
 
   final ValueNotifier<bool> sortingRoomsNotifier = ValueNotifier(true);
 
@@ -105,8 +98,6 @@ class ChatListController extends State<ChatList>
   SearchUserDirectoryResponse? userSearchResult;
 
   QueryPublicRoomsResponse? roomSearchResult;
-
-  bool isTorBrowser = false;
 
   bool scrolledToTop = true;
 
@@ -362,7 +353,6 @@ class ChatListController extends State<ChatList>
 
       // Process cached sharing intents after first sync
       await matrixState.processCachedSharingIntents();
-      await _maybeShowWebPushPermissionSoftAsk();
     });
   }
 
@@ -380,7 +370,6 @@ class ChatListController extends State<ChatList>
 
     // Process cached sharing intents after first sync
     await matrixState.processCachedSharingIntents();
-    await _maybeShowWebPushPermissionSoftAsk();
     await _maybeSuggestNotificationPreviews();
   }
 
@@ -416,56 +405,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  Future<void> _maybeShowWebPushPermissionSoftAsk() async {
-    if (!kIsWeb || _webPushPermissionSoftAskShown) return;
-    _webPushPermissionSoftAskShown = true;
-
-    await AppConfig.initConfigCompleter.future;
-    if (!mounted ||
-        !AppConfig.webPushEnabled ||
-        AppConfig.vapidPublicKey.isEmpty ||
-        await isWebPushDisabledByUser()) {
-      return;
-    }
-
-    if (html.Notification.permission == 'granted') {
-      await setupWebPush(activeClient);
-      return;
-    }
-    if (html.Notification.permission != 'default') return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!mounted || html.Notification.permission != 'default') return;
-      final granted = await showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog(
-          icon: const Icon(Icons.notifications_active_outlined),
-          title: Text(L10n.of(dialogContext)!.notifications),
-          content: Text(L10n.of(dialogContext)!.enableNotificationsExplanation),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(L10n.of(dialogContext)!.deny),
-            ),
-            TextButton(
-              onPressed: () async {
-                final permission = await html.Notification.requestPermission();
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop(permission == 'granted');
-                }
-              },
-              child: Text(L10n.of(dialogContext)!.allow),
-            ),
-          ],
-        ),
-      );
-      if (granted == true && mounted) {
-        await setWebPushEnabled(activeClient, true);
-      }
-    });
-  }
-
   void _onTapBottomNavigation(
     ChatListSelectionActions chatListBottomNavigatorBar,
   ) async {
@@ -492,7 +431,6 @@ class ChatListController extends State<ChatList>
     Room room,
     TapDownDetails details,
   ) async {
-    disableRightClick();
     final offset = details.globalPosition;
     final listPopupActions = _popupMenuActions(room);
     final listContextActions = _mapPopupMenuActionsToContextMenuActions(
@@ -505,7 +443,6 @@ class ChatListController extends State<ChatList>
       context: context,
       listActions: listContextActions,
     );
-    enableRightClick();
     if (selectedActionIndex != null && selectedActionIndex is int) {
       _handleClickOnContextMenuItem(
         listPopupActions[selectedActionIndex],
@@ -662,12 +599,6 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  Future<void> _checkTorBrowser() async {
-    if (!kIsWeb) return;
-    final isTor = await TorBrowserDetector.isTorBrowser;
-    isTorBrowser = isTor;
-  }
-
   Future<void> dehydrate() =>
       SettingsSecurityController.dehydrateDevice(context);
 
@@ -738,7 +669,6 @@ class ChatListController extends State<ChatList>
         Matrix.of(context).backgroundPush?.setupPush();
       }
     });
-    _checkTorBrowser();
     super.initState();
   }
 

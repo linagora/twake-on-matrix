@@ -18,15 +18,12 @@ import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/presentation/model/client_login_state_event.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
-import 'package:twake_chat/utils/string_extension.dart';
 import 'package:twake_chat/widgets/matrix.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 import 'package:matrix/matrix.dart';
-import 'package:universal_html/html.dart' as html;
 
 typedef OnSAASRegistrationTimeoutCallback = void Function();
 typedef OnSAASRegistrationErrorCallback = void Function(Object?);
@@ -53,25 +50,11 @@ mixin ConnectPageMixin {
       false;
 
   bool supportsSso(BuildContext context) =>
-      (PlatformInfos.isMobile ||
-          PlatformInfos.isWeb ||
-          PlatformInfos.isMacOS) &&
+      (PlatformInfos.isMobile || PlatformInfos.isMacOS) &&
       supportsFlow(context: context, flowType: 'm.login.sso');
 
   bool supportsLogin(BuildContext context) =>
       supportsFlow(context: context, flowType: 'm.login.password');
-
-  String? getQueryParameter(String key) {
-    final questionMarkIndex = html.window.location.href.indexOf('?');
-    if (questionMarkIndex == -1) {
-      return null;
-    }
-    final queryParams = Uri.parse(
-      html.window.location.href,
-      questionMarkIndex,
-    ).queryParameters;
-    return queryParams[key];
-  }
 
   bool get homeserverIsConfigured =>
       AppConfig.homeserver != AppConfig.sampleValue ||
@@ -150,19 +133,7 @@ mixin ConnectPageMixin {
     required BuildContext context,
     required String id,
   }) async {
-    if (PlatformInfos.isWeb) {
-      return ssoLoginActionWeb(context: context, id: id);
-    } else {
-      return ssoLoginActionMobile(context: context, id: id);
-    }
-  }
-
-  Future<SsoLoginState> ssoLoginActionWeb({
-    required BuildContext context,
-    required String id,
-  }) async {
-    await authenticateWithWebAuth(context: context, id: id);
-    return SsoLoginState.success;
+    return ssoLoginActionMobile(context: context, id: id);
   }
 
   Future<SsoLoginState> ssoLoginActionMobile({
@@ -325,33 +296,10 @@ mixin ConnectPageMixin {
   }
 
   String _generatePostLogoutRedirectUrl() {
-    if (kIsWeb) {
-      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.location.href.getBaseUrlBeforeHash()}auth.html';
-      }
-      return html.window.location.href
-          .getBaseUrlBeforeHash()
-          .generateLogoutAuthPath(isDevMode: AppConfig.devMode);
-    }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://redirect';
   }
 
   static String _generateRedirectUrl(String homeserver) {
-    if (kIsWeb) {
-      String? homeserverParam = '';
-      if (homeserver.isNotEmpty) {
-        homeserverParam = '?homeserver=$homeserver';
-      }
-      if (AppConfig.issueId != null && AppConfig.issueId!.isNotEmpty) {
-        return '${html.window.location.href.getBaseUrlBeforeHash()}auth.html$homeserverParam';
-      }
-      return html.window.location.href
-          .getBaseUrlBeforeHash()
-          .generateLoginAuthPath(
-            homeserverParams: homeserverParam,
-            isDevMode: AppConfig.devMode,
-          );
-    }
     return '${AppConfig.appOpenUrlScheme.toLowerCase()}://login';
   }
 
@@ -443,15 +391,5 @@ mixin ConnectPageMixin {
       showLoginFailedSnackBar(e);
       return SsoLoginState.error;
     }
-  }
-
-  void resetLocationPathWithLoginToken({String? route}) {
-    final loginTokenExisted = getQueryParameter('loginToken') != null;
-    if (!loginTokenExisted) return;
-    html.window.history.replaceState(
-      {},
-      '',
-      '${html.window.location.href.getBaseUrlBeforeHash()}#/${route ?? 'rooms'}',
-    );
   }
 }

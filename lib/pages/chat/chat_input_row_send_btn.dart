@@ -33,7 +33,7 @@ class ChatInputRowSendBtn extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: inputText,
       builder: (context, textInput, child) {
-        if (PlatformInfos.isWeb && textInput.isEmpty) {
+        if (PlatformInfos.isDesktop && textInput.isEmpty) {
           return ValueListenableBuilder(
             valueListenable: audioRecordStateNotifier,
             builder: (context, audioState, _) {

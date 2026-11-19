@@ -130,9 +130,8 @@ abstract class ClientManager {
   static Future<void> _syncKeychainForClient(Client client) =>
       KeychainSharingManager.removeAppSession(client);
 
-  static NativeImplementations get nativeImplementations => kIsWeb
-      ? const NativeImplementationsDummy()
-      : NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
+  static NativeImplementations get nativeImplementations =>
+      NativeImplementationsIsolate(compute, vodozemacInit: () => vod.init());
 
   static Future<Client> createClient(String clientName) async {
     final database = await MatrixSdkDatabase.init(
@@ -147,7 +146,7 @@ abstract class ClientManager {
           : null,
       verificationMethods: {
         KeyVerificationMethod.numbers,
-        if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isLinux)
+        if (PlatformInfos.isMobile || PlatformInfos.isLinux)
           KeyVerificationMethod.emoji,
       },
       importantStateEvents: <String>{
@@ -172,9 +171,7 @@ abstract class ClientManager {
       legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
-        if (PlatformInfos.isMobile ||
-            PlatformInfos.isWeb ||
-            PlatformInfos.isMacOS)
+        if (PlatformInfos.isMobile || PlatformInfos.isMacOS)
           AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,

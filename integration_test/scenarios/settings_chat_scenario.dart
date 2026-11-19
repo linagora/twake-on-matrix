@@ -13,8 +13,7 @@ import '../robots/setting/settings_chat_robot.dart';
 /// it again and verify the value was persisted, then toggle it back through
 /// the switch so the account keeps its original setting.
 ///
-/// Drives the concrete settings robots directly, so this is registered with
-/// `mobileOnly: true`.
+/// Drives the concrete settings robots directly.
 class SettingsChatToggleScenario extends BaseTestScenario {
   SettingsChatToggleScenario(super.$, super.robots);
 

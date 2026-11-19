@@ -1,11 +1,9 @@
 import 'package:twake_chat/app_state/success.dart';
 import 'package:twake_chat/domain/app_state/room/timeline_search_event_state.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item/chat_details_files_item.dart';
-import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_item_web/chat_details_files_item_web.dart';
 import 'package:twake_chat/pages/chat_details/chat_details_page_view/files/chat_details_files_page_style.dart';
 import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_builder.dart';
 import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 class ChatDetailsFilesPage extends StatelessWidget {
@@ -28,10 +26,7 @@ class ChatDetailsFilesPage extends StatelessWidget {
           return SliverList.builder(
             itemCount: events.length,
             itemBuilder: (context, index) {
-              if (!PlatformInfos.isWeb) {
-                return ChatDetailsFileItem(event: events[index]);
-              }
-              return ChatDetailsFileItemWeb(event: events[index]);
+              return ChatDetailsFileItem(event: events[index]);
             },
           );
         },

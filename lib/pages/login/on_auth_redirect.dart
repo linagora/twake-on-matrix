@@ -122,14 +122,9 @@ class _OnAuthRedirectState extends ConsumerState<OnAuthRedirect>
     final String? loginToken;
     final String? homeserverFromRoute;
 
-    if (PlatformInfos.isWeb) {
-      loginToken = getQueryParameter('loginToken');
-      homeserverFromRoute = null;
-    } else {
-      final routeParams = GoRouterState.of(context).uri.queryParameters;
-      loginToken = routeParams['loginToken'];
-      homeserverFromRoute = routeParams['homeserver'];
-    }
+    final routeParams = GoRouterState.of(context).uri.queryParameters;
+    loginToken = routeParams['loginToken'];
+    homeserverFromRoute = routeParams['homeserver'];
 
     if (loginToken == null || loginToken.isEmpty) {
       _handleLoginError(

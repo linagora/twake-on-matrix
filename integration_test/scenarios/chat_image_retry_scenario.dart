@@ -10,8 +10,7 @@ import 'chat_scenario.dart';
 
 /// Mobile-only: send an image while offline, then retry once connectivity is
 /// restored. Toggling Wi-Fi / cellular goes through `$.native.*`, which the web
-/// target cannot reach — the test is registered with `mobileOnly: true` and
-/// skipped on web. It drives the UI through the concrete mobile robots since it
+/// target cannot reach. It drives the UI through the concrete mobile robots since it
 /// never runs cross-platform.
 class ChatImageRetryScenario extends BaseTestScenario {
   ChatImageRetryScenario(super.$, super.robots);

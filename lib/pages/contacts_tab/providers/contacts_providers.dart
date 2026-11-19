@@ -150,7 +150,7 @@ PhonebookResolver phonebookResolver(Ref ref) {
       accessToken: () =>
           getIt.get<AuthorizationInterceptor>().accessToken ?? '',
     ),
-    uploadsAddressBook: !PlatformInfos.isWeb,
+    uploadsAddressBook: !PlatformInfos.isDesktop,
     onPartialFailure: showContactLookupFailedSnackBar,
     onAddressBookUploaded: broadcaster.notifyOtherDevices,
   );

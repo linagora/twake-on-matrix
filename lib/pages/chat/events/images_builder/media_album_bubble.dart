@@ -33,7 +33,7 @@ class MediaAlbumBubble<T> extends StatelessWidget {
   static const double _gap = 2;
 
   /// Width of the grid, so that a caption below it lines up with it.
-  static double widthFor() => PlatformInfos.isWeb
+  static double widthFor() => PlatformInfos.isDesktop
       ? MessageContentStyle.imageBubbleWidthForWeb * 0.8
       : MessageContentStyle.imageBubbleWidthForMobileAndTablet;
 

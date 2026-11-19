@@ -130,7 +130,6 @@ import 'package:linagora_design_flutter/reaction/reaction_picker.dart';
 import 'package:matrix/matrix.dart' hide Contact;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:super_clipboard/super_clipboard.dart' show ClipboardReader;
-import 'package:universal_html/html.dart' as html;
 
 import 'events/audio_message/audio_player_widget.dart';
 import 'sticker_picker_dialog.dart';
@@ -907,15 +906,14 @@ class ChatController extends ConsumerState<Chat>
   Future<void> sendVoiceMessageWeb() async {
     final duration = Duration(seconds: recordDurationWebNotifier.value);
     final path = await stopRecordWeb();
-    final file = await recordToFileOnWeb(blobUrl: path);
 
-    if (file == null) {
+    if (path == null) {
       TwakeSnackBar.show(context, L10n.of(context)!.audioMessageFailedToSend);
       return;
     }
 
-    final matrixFile = await createMatrixAudioFileFromWebFile(
-      file: file,
+    final matrixFile = await createMatrixAudioFileFromPath(
+      path: path,
       duration: duration,
     );
 
@@ -2134,7 +2132,7 @@ class ChatController extends ConsumerState<Chat>
         if (event.canEditEvents(matrix)) ChatContextMenuActions.edit,
         if (event.room.canReportContent) ChatContextMenuActions.report,
         if (event.room.canPinMessage) ChatContextMenuActions.pinChat,
-        if (PlatformInfos.isWeb && event.hasAttachment)
+        if (PlatformInfos.isDesktop && event.hasAttachment)
           ChatContextMenuActions.downloadFile,
         ChatContextMenuActions.select,
         if (event.canDelete) ChatContextMenuActions.delete,
@@ -2421,7 +2419,7 @@ class ChatController extends ConsumerState<Chat>
 
   void onHideKeyboardAndEmoji() {
     hideKeyboardChatScreen();
-    if (!PlatformInfos.isWeb) {
+    if (!PlatformInfos.isDesktop) {
       showEmojiPickerNotifier.value = false;
     }
   }
@@ -2474,7 +2472,7 @@ class ChatController extends ConsumerState<Chat>
   void onRejectInvitation(BuildContext context) async {
     final result = await showDialog<DialogRejectInviteResult>(
       context: TwakeApp.routerKey.currentContext ?? context,
-      useRootNavigator: PlatformInfos.isWeb,
+      useRootNavigator: PlatformInfos.isDesktop,
       builder: (c) => const DialogRejectInviteWidget(),
     );
 
@@ -2496,28 +2494,6 @@ class ChatController extends ConsumerState<Chat>
       return room!.lastEvent?.senderFromMemoryOrFallback.displayName ??
           room!.getLocalizedDisplayname();
     }
-  }
-
-  void _resetLocationPath() {
-    // Hover must not strip `?event=` while a jump is in flight, or while
-    // the URL points at a different event than the one we last claimed —
-    // otherwise rapid same-room search clicks lose their target.
-    if (_isProgrammaticScrolling) return;
-
-    final currentLocation = html.window.location.href;
-
-    final event = Uri.tryParse(
-      Uri.tryParse(currentLocation)?.fragment ?? '',
-    )?.queryParameters['event'];
-    if (event == null) return;
-    if (event != _lastHighlightedEventId) return;
-    Logs().d("Chat::_resetLocationPath: CurrentLocation - $currentLocation");
-    final queryIndex = currentLocation.indexOf('?');
-    final newLocation = queryIndex != -1
-        ? currentLocation.substring(0, queryIndex)
-        : currentLocation;
-    Logs().d("Chat::_resetLocationPath: New - $newLocation");
-    html.window.history.replaceState(null, '', newLocation);
   }
 
   void handlePopBackFromPinnedScreen(Object? popResult) async {
@@ -2834,7 +2810,7 @@ class ChatController extends ConsumerState<Chat>
       ],
       if (selectedEvents.length == 1 &&
           selectedEvents.first.isVideoOrImage &&
-          !PlatformInfos.isWeb)
+          PlatformInfos.isMobile)
         ChatAppBarActions.saveToGallery,
       // Both act on one message.
       if (selectedEvents.length == 1) ...[
@@ -2964,7 +2940,7 @@ class ChatController extends ConsumerState<Chat>
         ChatContextMenuActions.copyLink,
       if (event.room.canReportContent) ChatContextMenuActions.report,
       ChatContextMenuActions.pinChat,
-      if (PlatformInfos.isWeb && event.hasAttachment)
+      if (PlatformInfos.isDesktop && event.hasAttachment)
         ChatContextMenuActions.downloadFile,
       if (event.canRedact) ChatContextMenuActions.delete,
     ];
@@ -3269,9 +3245,6 @@ class ChatController extends ConsumerState<Chat>
     _tryLoadTimeline();
     sendController.addListener(updateInputTextNotifier);
     initAutoMarkAsReadMixin();
-    if (PlatformInfos.isWeb) {
-      initAudioRecorderWeb();
-    }
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (room == null) {
@@ -3406,12 +3379,7 @@ class ChatController extends ConsumerState<Chat>
   String? _eventIdFromLocation() {
     final fromRouter = GoRouterState.of(context).uri.queryParameters['event'];
     if (fromRouter != null && fromRouter.isNotEmpty) return fromRouter;
-
-    // Fallback for hash-URL edge cases before GoRouter has settled.
-    if (!PlatformInfos.isWeb) return null;
-    return Uri.tryParse(
-      Uri.tryParse(html.window.location.href)?.fragment ?? '',
-    )?.queryParameters['event'];
+    return null;
   }
 
   @override
@@ -3491,10 +3459,7 @@ class ChatController extends ConsumerState<Chat>
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (_) => _resetLocationPath(),
-      child: ChatView(this),
-    );
+    return ChatView(this);
   }
 }
 

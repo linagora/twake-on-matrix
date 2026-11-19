@@ -9,14 +9,11 @@ import 'package:twake_chat/pages/auto_homeserver_picker/auto_homeserver_picker_v
 import 'package:twake_chat/pages/connect/sso_login_state.dart';
 import 'package:twake_chat/presentation/mixins/connect_page_mixin.dart';
 import 'package:twake_chat/presentation/mixins/init_config_mixin.dart';
-import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/exception/homeserver_exception.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:twake_chat/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:twake_chat/config/go_routes/app_routes.dart';
 import 'package:matrix/matrix.dart';
-import 'package:twake_chat/generated/l10n/app_localizations.dart';
 
 class AutoHomeserverPicker extends StatefulWidget {
   final bool? loggedOut;
@@ -198,29 +195,6 @@ class AutoHomeserverPickerController extends State<AutoHomeserverPicker>
       Logs().d(
         "AutoHomeserverPickerController::_setupAutoHomeserverPicker: PlatForm ${AppConfig.platform}",
       );
-      final loginToken = getQueryParameter('loginToken');
-      if (loginToken != null || loginToken?.isNotEmpty == true) {
-        matrix.loginType = LoginType.mLoginToken;
-        final sessions = _sessions;
-        final client = await matrix.getLoginClient();
-        await sessions.checkHomeserver(client, Uri.parse(AppConfig.homeserver));
-        final result = await TwakeDialog.showFutureLoadingDialogFullScreen(
-          future: () async => client.login(
-            LoginType.mLoginToken,
-            token: loginToken,
-            initialDeviceDisplayName: PlatformInfos.clientName,
-          ),
-        );
-        if (result.error != null) {
-          autoHomeserverPickerUIState.value = AutoHomeServerPickerFailureState(
-            error: L10n.of(context)!.invalidLoginToken,
-          );
-          resetLocationPathWithLoginToken(route: 'home');
-        } else {
-          resetLocationPathWithLoginToken();
-        }
-        return;
-      }
       if (_isSaasPlatform) {
         _autoConnectSaas();
       } else {

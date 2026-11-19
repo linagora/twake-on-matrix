@@ -72,7 +72,7 @@ class ExpansionList extends StatelessWidget {
         return state.fold(
           (failure) {
             final textControllerIsEmpty = textEditingController.text.isEmpty;
-            if (PlatformInfos.isWeb) {
+            if (PlatformInfos.isDesktop) {
               if (failure is GetPresentationContactsFailure ||
                   failure is GetPresentationContactsEmpty) {
                 return Column(
@@ -115,7 +115,7 @@ class ExpansionList extends StatelessWidget {
             }
 
             if (success is PresentationExternalContactSuccess) {
-              if (!PlatformInfos.isWeb) {
+              if (!PlatformInfos.isDesktop) {
                 if (phoneBookFilterSuccess) {
                   return child!;
                 }

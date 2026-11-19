@@ -11,7 +11,6 @@ import 'package:twake_chat/domain/usecase/invitation/hive_delete_invitation_stat
 import 'package:twake_chat/domain/usecase/invitation/hive_get_invitation_status_interactor.dart';
 import 'package:twake_chat/presentation/mixins/invitation_status_mixin.dart';
 import 'package:twake_chat/presentation/model/contact/presentation_contact.dart';
-import 'package:twake_chat/utils/platform_infos.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/annotations.dart';
@@ -174,25 +173,7 @@ void main() {
   });
 
   group('getInvitationStatus', () {
-    test('should not execute on web platform', () {
-      PlatformInfos.isTestingForWeb = true;
-
-      mixinTest.getInvitationStatus(
-        userId: testUserId,
-        contactId: testContactId,
-        contact: testContact,
-      );
-
-      verifyNever(
-        mockHiveGetInvitationStatusInteractor.execute(
-          userId: testUserId,
-          contactId: testContactId,
-        ),
-      );
-    });
-
     test('should not execute if not in initial state', () {
-      PlatformInfos.isTestingForWeb = false;
       mixinTest.getInvitationStatusNotifier.value = const Right(
         GetInvitationStatusLoadingState(),
       );
@@ -210,8 +191,6 @@ void main() {
     });
 
     test('should execute and handle success state', () async {
-      PlatformInfos.isTestingForWeb = false;
-
       mixinTest.getInvitationStatus(
         userId: testUserId,
         contactId: testContactId,

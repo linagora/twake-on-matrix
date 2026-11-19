@@ -25,7 +25,7 @@ mixin PopupContextMenuActionMixin {
         ),
       ),
       items: popupMenuItems,
-      useRootNavigator: PlatformInfos.isWeb,
+      useRootNavigator: PlatformInfos.isDesktop,
     ).then((value) {
       onClose?.call();
     });

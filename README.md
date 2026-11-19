@@ -65,22 +65,6 @@ You can at any moment verify your flutter installation using:
 flutter doctor -v
 ```
 
-#### Web
-
-For web development, install:
-
-- [Google Chrome](https://www.google.com/chrome/)
-- Rust using [rustup](https://rustup.rs/)
-- [yq](https://github.com/mikefarah/yq)
-
-The web target uses `flutter_vodozemac` for end-to-end encryption. Before running or building the application for the first time, generate the required web package:
-
-```bash
-./scripts/prepare-web.sh
-```
-
-Run this command again after updating the `flutter_vodozemac` dependency.
-
 #### Android
 
 - [ ] An implementation of JDK 17 _(tested with openjdk-17.0.13+11)_
@@ -251,13 +235,6 @@ Weblate update/pull, open a PR from `l10n` into `main`) is documented in
 
 Please use the helper script corresponding to your target in order to build:
 
-### Web
-
-```bash
-./scripts/prepare-web.sh
-./scripts/build-web.sh
-```
-
 ### Linux
 
 ```bash
@@ -330,81 +307,6 @@ Every now and then, manually scroll through the app using your mouse to make sur
 | Jank (frames > 16.7ms) | < 20%    | Percentage of frames that miss the 60fps deadline             |
 | Long tasks (> 50ms)    | Minimize | Tasks that block the main thread and cause visible stuttering |
 | JS Heap                | Monitor  | Memory pressure indicator — high values increase GC frequency |
-
-## Deployment
-
-### Web version using Docker
-
-#### Build web Docker image
-
-The image is built without SSH. The `web-builder` stage is pinned to
-`$BUILDPLATFORM`: it runs once, natively on the build host, and the final nginx
-stage carries platform-neutral web assets. CI builds and pushes
-`linux/amd64` and `linux/arm64` variants (see
-[`.github/workflows/image.yaml`](.github/workflows/image.yaml)).
-
-Build requirements (all Sentry values are injected from build args — nothing is
-hardcoded in the image):
-
-| Argument / secret        | Required | Default |
-|--------------------------|----------|---------|
-| `--build-arg SENTRY_PROJECT`   | yes   | — |
-| `--build-arg SENTRY_ORG`       | yes   | — |
-| `--build-arg SENTRY_RELEASE`   | no    | version from `pubspec.yaml` |
-| `--build-arg SENTRY_DIST`      | no    | build number from `pubspec.yaml` |
-| `--build-arg SENTRY_DSN`       | no    | empty |
-| `--build-arg SENTRY_ENVIRONMENT` | no  | empty |
-| `--secret id=sentry_auth_token,src=<file>` | no | source maps not uploaded |
-
-Example local build:
-
-```bash
-docker build \
-  --secret id=sentry_auth_token,src=<token-file> \
-  --build-arg SENTRY_PROJECT=twake-chat \
-  --build-arg SENTRY_ORG=datcorp \
-  --build-arg SENTRY_ENVIRONMENT=prod \
-  -t linagora/twake-web:<tag> .
-```
-
-#### Run the web image
-
-- Create a config file `config.json` in the root of the project with the following
-  [docs](https://github.com/linagora/twake-on-matrix/blob/main/docs/configurations/config_web_app_for_public_platform.md)
-
-- Run the image using the following command:
-
-```
-docker run -d -p <host port>:<host port> -e TWAKECHAT_LISTEN_PORT=<host port> --name <container name> -v <host path>:/usr/share/nginx/html/web/config.json linagora/twake-web:<tag>
-```
-
-- Open the browser and go to `http://localhost:<hostport>`
-
-### Sample to run Twake Chat web client with `matrix.org`
-
-- Create a config file `config.json` with `matrix.org`
-
-```json
-{
-  "app_grid_dashboard_available": true,
-  "application_name": "Twake Chat",
-  "application_welcome_message": "Welcome to Twake Chat!",
-  "default_homeserver": "matrix.org",
-  "hide_unknown_events": false,
-  "homeserver": "https://matrix.org/",
-  "issue_id": "",
-  "privacy_url": "https://twake.app/en/privacy/",
-  "render_html": true
-}
-```
-
-- Run the image using the following command with my port is `6868`:
-
-```
-docker run -d -p 6868:6868 -e TWAKECHAT_LISTEN_PORT=6868 --name twake-web -v /path/to/config.json:/usr/share/nginx/html/web/config.json linagora/twake-web:v2.19.7
-```
-
-- Open the browser and go to `http://localhost:6868`
 
 # Special thanks
 

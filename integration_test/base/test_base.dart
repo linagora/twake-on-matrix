@@ -1,10 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patrol/patrol.dart';
 import '../factories/robot_factory_provider.dart';
 import 'base_test_scenario.dart';
 import 'test_app_initializer.dart';
-import 'web_benign_error_filter.dart';
 
 typedef TestLogin = ({String serverUrl, String username, String password});
 
@@ -22,16 +20,6 @@ class TestBase {
     required String description,
     required ScenarioBuilder scenarioBuilder,
     dynamic tags = const [],
-    // Marks a test that is intentionally mobile-only — it exercises a
-    // capability the web target cannot reach locally (system clipboard,
-    // `$.native.*`, a non-resolvable account, or a backend the local web
-    // harness lacks). Such tests are skipped on web instead of failing the
-    // suite, and run unchanged on mobile.
-    bool mobileOnly = false,
-    // Marks a test that is intentionally web-only. It is not registered on
-    // mobile, which prevents dedicated browser benchmarks from accidentally
-    // entering Android or iOS suites.
-    bool webOnly = false,
     // Marks a test that needs the staging TOM REST backend (served at
     // `/_twake`) — e.g. the contacts-visibility setting.
     bool requiresBackend = false,
@@ -43,18 +31,6 @@ class TestBase {
     // Logs in to another account than the default SERVER_URL/USERNAME one.
     TestLogin? login,
   }) {
-    // On web a `mobileOnly` test must not be REGISTERED at all (not merely
-    // skipped). Patrol web's Playwright runner boots the Flutter app
-    // (`page.goto("/")` + `initialise`) for every registered test *before*
-    // evaluating `patrolTest.skip(...)`, so a skipped test still pays a full
-    // app-boot cycle. A file that leads with — or consists only of — skipped
-    // tests then stalls the runner before the first real test starts (the
-    // observed 20-min job hang). Returning here removes the test from
-    // `__patrol__getTests()`, so Playwright never boots a page for it.
-    // Mobile is unaffected (`kIsWeb` is false), so coverage is preserved.
-    if (kIsWeb && mobileOnly) return;
-    if (!kIsWeb && webOnly) return;
-
     // LOCAL_HARNESS: throwaway Synapse, no TOM backend or real hardware.
     const localHarness = bool.fromEnvironment('LOCAL_HARNESS');
     final skipReason = switch ((
@@ -119,7 +95,6 @@ class TestBase {
       framePolicy: LiveTestWidgetsFlutterBindingFramePolicy.fullyLive,
       ($) async {
         await initTwakeChat();
-        installWebBenignErrorFilter();
         await loginAndRun($, login: login);
         final robots = createRobotFactory($);
         await scenarioBuilder($, robots).runTestLogic();

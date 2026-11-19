@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
@@ -54,9 +53,6 @@ Future<MobileGroupFixture> prepareMobileRoomFixture(
   BaseTestScenario scenario,
   String title,
 ) {
-  if (kIsWeb) {
-    throw UnsupportedError('The web suite provisions its own Matrix fixture.');
-  }
   return _fixtures.putIfAbsent(
     title,
     () => _prepareMobileRoomFixture(scenario, title),
@@ -159,8 +155,6 @@ Future<void> prepareMobileReceiverMessages(
   BaseTestScenario scenario,
   MobileGroupFixture fixture,
 ) async {
-  if (kIsWeb) return;
-
   final context = scenario.$.tester.element(find.byType(Scaffold).first);
   final client = twake.Matrix.of(context).client;
   final room = client.getRoomById(fixture.roomId);

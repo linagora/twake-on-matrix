@@ -3,8 +3,6 @@ import 'package:flutter/cupertino.dart';
 class ChatListBodyViewStyle {
   static const double sizeIconExpand = 24;
 
-  static double heightIsTorBrowser(bool isTorBrowser) => isTorBrowser ? 64 : 0;
-
   static const EdgeInsetsDirectional paddingIconSkeletons =
       EdgeInsetsDirectional.only(top: 64);
 

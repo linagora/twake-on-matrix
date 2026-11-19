@@ -84,7 +84,7 @@ class ChatEventList extends StatelessWidget {
       ),
     );
 
-    if (PlatformInfos.isWeb) {
+    if (PlatformInfos.isDesktop) {
       return ChatWebScrollbar(
         controller: chatController.scrollController,
         child: ScrollConfiguration(

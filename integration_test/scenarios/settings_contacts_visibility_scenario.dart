@@ -8,8 +8,7 @@ import '../robots/setting/settings_privacy_and_security_robot.dart';
 /// Mobile-only: select the "everyone" contacts-visibility option and verify
 /// the email/phone visibility toggles are offered. Since TW-2778 the toggles
 /// stay available for the "everyone" option — they are hidden only for
-/// "nobody" (private). Drives the concrete settings robots directly, so this
-/// is registered with `mobileOnly: true`.
+/// "nobody" (private). Drives the concrete settings robots directly.
 class SettingsContactsVisibilityEveryoneScenario extends BaseTestScenario {
   SettingsContactsVisibilityEveryoneScenario(super.$, super.robots);
 
@@ -42,7 +41,7 @@ class SettingsContactsVisibilityEveryoneScenario extends BaseTestScenario {
 
 /// Mobile-only: select the "my contacts" contacts-visibility option and verify
 /// the email/phone fields become visible. Drives the concrete settings robots
-/// directly, so this is registered with `mobileOnly: true`.
+/// directly.
 class SettingsContactsVisibilityContactsScenario extends BaseTestScenario {
   SettingsContactsVisibilityContactsScenario(super.$, super.robots);
 
@@ -74,8 +73,7 @@ class SettingsContactsVisibilityContactsScenario extends BaseTestScenario {
 }
 
 /// Mobile-only: select the "nobody" contacts-visibility option and verify the
-/// email/phone fields are hidden. Drives the concrete settings robots directly,
-/// so this is registered with `mobileOnly: true`.
+/// email/phone fields are hidden. Drives the concrete settings robots directly.
 class SettingsContactsVisibilityNobodyScenario extends BaseTestScenario {
   SettingsContactsVisibilityNobodyScenario(super.$, super.robots);
 

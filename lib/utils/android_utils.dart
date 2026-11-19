@@ -7,8 +7,7 @@ class AndroidUtils {
   static bool isNavigationButtonsEnabled({
     required EdgeInsets systemGestureInsets,
   }) {
-    return !kIsWeb &&
-        defaultTargetPlatform == TargetPlatform.android &&
+    return defaultTargetPlatform == TargetPlatform.android &&
         systemGestureInsets.left == 0;
   }
 }
