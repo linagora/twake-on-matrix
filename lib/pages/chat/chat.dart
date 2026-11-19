@@ -1322,6 +1322,10 @@ class ChatController extends ConsumerState<Chat>
         context,
       ).showSnackBar(SnackBar(content: Text((err).toLocalizedString(context))));
       rethrow;
+    } finally {
+      // The SDK clears isRequestingFuture after its last onUpdate, so nothing
+      // else rebuilds the list to hide the top loader.
+      if (mounted) setState(() {});
     }
   }
 
