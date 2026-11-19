@@ -30,6 +30,7 @@ import 'package:twake_chat/presentation/mixins/handle_video_download_mixin.dart'
 import 'package:twake_chat/presentation/mixins/play_video_action_mixin.dart';
 import 'package:twake_chat/presentation/model/chat_details/chat_details_page_model.dart';
 import 'package:twake_chat/presentation/same_type_events_builder/same_type_events_controller.dart';
+import 'package:twake_chat/utils/matrix_sdk_extensions/shared_timeline_loader.dart';
 import 'package:twake_chat/utils/dialog/twake_dialog.dart';
 import 'package:twake_chat/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:twake_chat/utils/platform_infos.dart';
@@ -83,7 +84,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   SameTypeEventsBuilderController? _filesListController;
   TabController? tabController;
 
-  Timeline? _timeline;
+  late final _timelineLoader = SharedTimelineLoader(() => room!.getTimeline());
 
   StreamSubscription? _onRoomEventChangedSubscription;
 
@@ -99,8 +100,8 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   static const _filesPageKey = PageStorageKey('files');
 
   Future<Timeline?> _getTimeline() async {
-    _timeline ??= await room?.getTimeline();
-    return _timeline;
+    if (room == null) return null;
+    return _timelineLoader.get();
   }
 
   Future<Uint8List?> _handleDownloadAndPlayVideo(Event event) {
@@ -560,6 +561,7 @@ mixin ChatDetailsTabMixin<T extends StatefulWidget>
   @override
   void dispose() {
     _disposeControllers();
+    _timelineLoader.dispose();
     _membersNotifier.dispose();
     _displayMembersNotifier.dispose();
     _onRoomEventChangedSubscription?.cancel();
